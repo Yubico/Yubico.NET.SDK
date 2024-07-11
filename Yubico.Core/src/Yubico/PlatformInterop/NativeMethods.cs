@@ -37,7 +37,8 @@ namespace Yubico.PlatformInterop
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         public static extern bool FreeLibrary(IntPtr hModule);
 
-        [DllImport(Kernel32Dll, CharSet = CharSet.Ansi, BestFitMapping = false, SetLastError = true, ExactSpelling = true)]
+        [DllImport(
+            Kernel32Dll, CharSet = CharSet.Ansi, BestFitMapping = false, SetLastError = true, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         public static extern IntPtr GetProcAddress(SafeLibraryHandle hModule, string methodName);
 
@@ -54,12 +55,16 @@ namespace Yubico.PlatformInterop
             NoDelete = 0x1000,
         }
 
-        [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments", Justification = "macOS uses UTF-8 which is modeled as ANSI by the marshaler")]
+        [SuppressMessage(
+            "Globalization", "CA2101:Specify marshaling for P/Invoke string arguments",
+            Justification = "macOS uses UTF-8 which is modeled as ANSI by the marshaler")]
         [DllImport(MacDlLib, CharSet = CharSet.Ansi, EntryPoint = "dlopen")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern SafeMacOSLibraryHandle mac_dlopen(string fileName, DlOpenFlags flag);
 
-        [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments", Justification = "macOS uses UTF-8 which is modeled as ANSI by the marshaler")]
+        [SuppressMessage(
+            "Globalization", "CA2101:Specify marshaling for P/Invoke string arguments",
+            Justification = "macOS uses UTF-8 which is modeled as ANSI by the marshaler")]
         [DllImport(MacDlLib, EntryPoint = "dlsym")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr mac_dlsym(SafeLibraryHandle handle, string symbol);
@@ -68,12 +73,16 @@ namespace Yubico.PlatformInterop
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int mac_dlclose(IntPtr handle);
 
-        [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments", Justification = "Linux uses UTF-8 which is modeled as ANSI by the marshaler")]
+        [SuppressMessage(
+            "Globalization", "CA2101:Specify marshaling for P/Invoke string arguments",
+            Justification = "Linux uses UTF-8 which is modeled as ANSI by the marshaler")]
         [DllImport(LinuxDlLib, CharSet = CharSet.Ansi, EntryPoint = "dlopen")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern SafeLinuxLibraryHandle linux_dlopen(string fileName, DlOpenFlags flag);
 
-        [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments", Justification = "Linux uses UTF-8 which is modeled as ANSI by the marshaler")]
+        [SuppressMessage(
+            "Globalization", "CA2101:Specify marshaling for P/Invoke string arguments",
+            Justification = "Linux uses UTF-8 which is modeled as ANSI by the marshaler")]
         [DllImport(LinuxDlLib, EntryPoint = "dlsym")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr linux_dlsym(SafeLibraryHandle handle, string symbol);

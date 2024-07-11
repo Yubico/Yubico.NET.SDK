@@ -107,7 +107,6 @@ namespace Yubico.Core.Iso7816
         /// </summary>
         public CommandApdu()
         {
-
         }
 
         /// <summary>
@@ -242,7 +241,7 @@ namespace Yubico.Core.Iso7816
 
             if (Nc > 0)
             {
-                int lcValue = Nc;   // The encoded value, derived from Nc
+                int lcValue = Nc; // The encoded value, derived from Nc
 
                 if (apduEncoding == ApduEncoding.ExtendedLength)
                 {
@@ -294,7 +293,9 @@ namespace Yubico.Core.Iso7816
 
             if (Ne > 0)
             {
-                int leValue = Ne == int.MaxValue ? 0 : Ne;   // The encoded value, derived from Ne
+                int leValue = Ne == int.MaxValue
+                    ? 0
+                    : Ne; // The encoded value, derived from Ne
 
                 if (apduEncoding == ApduEncoding.ExtendedLength)
                 {
@@ -317,7 +318,6 @@ namespace Yubico.Core.Iso7816
                 }
                 else
                 {
-
                     if (Ne == maximumSizeShortEncoding)
                     {
                         leValue = 0;

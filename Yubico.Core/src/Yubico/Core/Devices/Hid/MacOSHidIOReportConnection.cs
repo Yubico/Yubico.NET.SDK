@@ -278,8 +278,7 @@ namespace Yubico.Core.Devices.Hid
         /// <param name="sender">
         /// Ignore.
         /// </param>
-        private static void RemovalCallback(IntPtr context, int result, IntPtr sender) =>
-            CFRunLoopStop(context);
+        private static void RemovalCallback(IntPtr context, int result, IntPtr sender) => CFRunLoopStop(context);
 
         /// <summary>
         /// Sends a buffer to the device.

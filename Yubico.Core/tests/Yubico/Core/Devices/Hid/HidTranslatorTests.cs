@@ -192,6 +192,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                     keyboardState[0x10] = (byte)(keyboardState[0x10] & ~0x80);
                     keyboardState[0xA0] = (byte)(keyboardState[0x10] & ~0x80);
                 }
+
                 // The actual HID code doesn't use 0x80 for shift.
                 uint scanCode = _scanCodeByHid[(byte)(code & ~0x80)];
 
@@ -205,15 +206,19 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                 {
                     string error = result switch
                     {
-                        -1 => $"ToAscii returned -1 converting scan code to a char, which means that it is a dead key (https://bit.ly/3tZOIi0).",
-                        0 => $"ToAscii returned 0 converting scan code to a char, which means that there is no mapping for the current code.",
-                        2 => $"ToAscii returned 2, which means that a dead key (https://bit.ly/3tZOIi0) had state in the keyboard state buffer. Should never happen here.",
+                        -1 =>
+                            $"ToAscii returned -1 converting scan code to a char, which means that it is a dead key (https://bit.ly/3tZOIi0).",
+                        0 =>
+                            $"ToAscii returned 0 converting scan code to a char, which means that there is no mapping for the current code.",
+                        2 =>
+                            $"ToAscii returned 2, which means that a dead key (https://bit.ly/3tZOIi0) had state in the keyboard state buffer. Should never happen here.",
                         _ => $"ToAscii returned {result}. This is not a documented return value for ToAscii."
                     };
                     string message = error + Environment.NewLine +
-                        $"HID Usage Code[{code.ToString("x2")}], PS/2 Scan Code[{scanCode.ToString("x2")}], VKey[{vkey.ToString("x2")}]";
+                                     $"HID Usage Code[{code.ToString("x2")}], PS/2 Scan Code[{scanCode.ToString("x2")}], VKey[{vkey.ToString("x2")}]";
                     throw new InvalidOperationException(message);
                 }
+
                 // Windows returns \r for the enter key, so we'll just swap.
                 output[0] = output[0] == '\r' ? '\n' : output[0];
                 cases.Add((output[0], code));
@@ -288,7 +293,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                 // We'll use the en_US layout for ModHex.
                 KeyboardLayout.ModHex => NativeMethods.LoadKeyboardLayout("00000409", 0),
                 _ => throw new NotSupportedException($"Layout [{layout}] not implemented."
-                    + Environment.NewLine + "Did you implement a new layout without adding it here?")
+                                                     + Environment.NewLine +
+                                                     "Did you implement a new layout without adding it here?")
             };
 
         private static class NativeMethods

@@ -29,7 +29,6 @@ namespace Yubico.PlatformInterop
         public SCardCardHandle() :
             base(true)
         {
-
         }
 
         public SCardCardHandle(IntPtr handle) :

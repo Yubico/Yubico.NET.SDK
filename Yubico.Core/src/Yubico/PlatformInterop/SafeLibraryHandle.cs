@@ -20,7 +20,6 @@ namespace Yubico.PlatformInterop
     {
         protected SafeLibraryHandle() : base(true)
         {
-
         }
     }
 
@@ -31,7 +30,6 @@ namespace Yubico.PlatformInterop
         // 'System.Runtime.InteropServices.SafeHandle'
         public SafeWindowsLibraryHandle() : base()
         {
-
         }
 
         protected override bool ReleaseHandle() => NativeMethods.FreeLibrary(handle);
@@ -44,7 +42,6 @@ namespace Yubico.PlatformInterop
         // 'System.Runtime.InteropServices.SafeHandle'
         public SafeMacOSLibraryHandle() : base()
         {
-
         }
 
         protected override bool ReleaseHandle() => NativeMethods.mac_dlclose(handle) == 0;
@@ -57,7 +54,6 @@ namespace Yubico.PlatformInterop
         // 'System.Runtime.InteropServices.SafeHandle'
         public SafeLinuxLibraryHandle() : base()
         {
-
         }
 
         protected override bool ReleaseHandle() => NativeMethods.linux_dlclose(handle) == 0;

@@ -53,13 +53,14 @@ namespace Yubico.Core.Devices.SmartCard
         /// Returns the set of smart card reader devices available to the system.
         /// </summary>
         /// <returns>A read-only list of <see cref="SmartCardDevice"/> objects.</returns>
-        public static IReadOnlyList<ISmartCardDevice> GetSmartCardDevices() => SdkPlatformInfo.OperatingSystem switch
-        {
-            SdkPlatform.Windows => DesktopSmartCardDevice.GetList(),
-            SdkPlatform.MacOS => DesktopSmartCardDevice.GetList(),
-            SdkPlatform.Linux => DesktopSmartCardDevice.GetList(),
-            _ => throw new PlatformNotSupportedException()
-        };
+        public static IReadOnlyList<ISmartCardDevice> GetSmartCardDevices() =>
+            SdkPlatformInfo.OperatingSystem switch
+            {
+                SdkPlatform.Windows => DesktopSmartCardDevice.GetList(),
+                SdkPlatform.MacOS => DesktopSmartCardDevice.GetList(),
+                SdkPlatform.Linux => DesktopSmartCardDevice.GetList(),
+                _ => throw new PlatformNotSupportedException()
+            };
 
         /// <summary>
         /// Creates a new smart card device object.
@@ -67,13 +68,14 @@ namespace Yubico.Core.Devices.SmartCard
         /// <param name="readerName">Device reader name.</param>
         /// <param name="atr">The optional <see cref="AnswerToReset"/> identifier for the smart card device.</param>
         /// <returns>A <see cref="SmartCardDevice"/> object.</returns>
-        public static ISmartCardDevice Create(string readerName, AnswerToReset? atr) => SdkPlatformInfo.OperatingSystem switch
-        {
-            SdkPlatform.Windows => new DesktopSmartCardDevice(readerName, atr),
-            SdkPlatform.MacOS => new DesktopSmartCardDevice(readerName, atr),
-            SdkPlatform.Linux => new DesktopSmartCardDevice(readerName, atr),
-            _ => throw new PlatformNotSupportedException()
-        };
+        public static ISmartCardDevice Create(string readerName, AnswerToReset? atr) =>
+            SdkPlatformInfo.OperatingSystem switch
+            {
+                SdkPlatform.Windows => new DesktopSmartCardDevice(readerName, atr),
+                SdkPlatform.MacOS => new DesktopSmartCardDevice(readerName, atr),
+                SdkPlatform.Linux => new DesktopSmartCardDevice(readerName, atr),
+                _ => throw new PlatformNotSupportedException()
+            };
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDevice"/> with the specified properties.

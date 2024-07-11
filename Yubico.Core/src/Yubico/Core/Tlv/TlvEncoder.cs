@@ -33,7 +33,9 @@ namespace Yubico.Core.Tlv
     internal abstract class TlvEncoder
     {
         private const int MaximumTag = 0x0000FFFF;
+
         private const int MaximumLength = 0x00FFFFFF;
+
         // The longest TL we support would be a two-byte tag with a length that
         // requires 4 bytes (83 plus three bytes). Something like this:
         //   5F 50 83 01 00 01
@@ -83,6 +85,7 @@ namespace Yubico.Core.Tlv
                 encoding[index] = unchecked((byte)(tag >> 8));
                 index++;
             }
+
             encoding[index] = (byte)tag;
             index++;
 

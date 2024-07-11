@@ -19,7 +19,6 @@ using System.Linq;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
-
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.SmartCard
@@ -196,8 +195,8 @@ namespace Yubico.Core.Devices.SmartCard
         public void LogDeviceAccessTime()
         {
             LastAccessed = DateTime.Now;
-            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
+            _log.LogInformation(
+                "Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
         }
-
     }
 }

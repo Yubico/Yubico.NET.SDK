@@ -18,7 +18,6 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
-
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.Hid
@@ -66,7 +65,9 @@ namespace Yubico.Core.Devices.Hid
 
                 _marshalableThisPtr = GCHandle.Alloc(this);
                 _callbackDelegate = OnEventReceived;
-                CmErrorCode errorCode = CM_Register_Notification(pFilter, GCHandle.ToIntPtr(_marshalableThisPtr.Value), _callbackDelegate, out _notificationContext);
+                CmErrorCode errorCode = CM_Register_Notification(
+                    pFilter, GCHandle.ToIntPtr(_marshalableThisPtr.Value), _callbackDelegate, out _notificationContext);
+
                 _log.LogInformation("Registered callback with ConfigMgr32.");
                 ThrowIfFailed(errorCode);
             }
@@ -103,7 +104,12 @@ namespace Yubico.Core.Devices.Hid
             }
         }
 
-        private static int OnEventReceived(IntPtr hNotify, IntPtr context, CM_NOTIFY_ACTION action, IntPtr eventDataPtr, int eventDataSize)
+        private static int OnEventReceived(
+            IntPtr hNotify,
+            IntPtr context,
+            CM_NOTIFY_ACTION action,
+            IntPtr eventDataPtr,
+            int eventDataSize)
         {
             GCHandle thisPtr = GCHandle.FromIntPtr(context);
             var thisObj = thisPtr.Target as WindowsHidDeviceListener;

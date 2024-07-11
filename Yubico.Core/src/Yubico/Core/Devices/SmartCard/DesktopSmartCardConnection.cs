@@ -16,7 +16,6 @@ using System;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
-
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.SmartCard
@@ -178,6 +177,7 @@ namespace Yubico.Core.Devices.SmartCard
                 SCARD_PROTOCOL.T1,
                 SCARD_DISPOSITION.RESET_CARD,
                 out SCARD_PROTOCOL updatedActiveProtocol);
+
             _log.SCardApiCall(nameof(SCardReconnect), result);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
@@ -189,6 +189,7 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         #region IDisposable Support
+
         private bool _disposed;
 
         /// <inheritdoc />
@@ -213,6 +214,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             _disposed = true;
         }
+
         #endregion
     }
 }

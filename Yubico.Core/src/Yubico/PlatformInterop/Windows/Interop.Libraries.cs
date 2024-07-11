@@ -18,7 +18,9 @@ namespace Yubico.PlatformInterop
     {
         internal const string CfgMgr = "Cfgmgr32.dll";
         internal const string Hid = "Hid.dll";
+
         internal const string Kernel32 = "Kernel32.dll";
+
         //internal const string WinSCard = "Winscard.dll";
     }
 }

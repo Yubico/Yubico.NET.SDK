@@ -116,6 +116,7 @@ namespace Yubico.Core.Devices.Hid
                     {
                         outputBuffer = outputBuffer.Skip(bytesReturned - YubiKeyFeatureReportSize).ToArray();
                     }
+
                     return outputBuffer;
                 }
             }

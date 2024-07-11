@@ -23,13 +23,11 @@ namespace Yubico.PlatformInterop
     {
         public SCardException()
         {
-
         }
 
         public SCardException(string message) :
             base(message)
         {
-
         }
 
         [CLSCompliant(false)]
@@ -42,13 +40,11 @@ namespace Yubico.PlatformInterop
         public SCardException(string message, Exception innerException) :
             base(message, innerException)
         {
-
         }
 
         protected SCardException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
             base(serializationInfo, streamingContext)
         {
-
         }
 
         internal static string GetErrorString(uint errorCode) =>

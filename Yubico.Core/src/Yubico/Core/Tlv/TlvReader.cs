@@ -1226,6 +1226,7 @@ namespace Yubico.Core.Tlv
                 _currentTag <<= 8;
                 _currentTag += (int)_encoding.Span[_currentOffset + index];
             }
+
             _currentTagLength = tagLength;
 
             return ValidEncoding;
@@ -1267,6 +1268,7 @@ namespace Yubico.Core.Tlv
             {
                 return UnsupportedLength;
             }
+
             if (_currentOffset + _currentTagLength + count + 1 > _encoding.Length)
             {
                 return UnexpectedEnd;
@@ -1305,6 +1307,7 @@ namespace Yubico.Core.Tlv
                     {
                         return UnexpectedEncoding;
                     }
+
                     break;
             }
 

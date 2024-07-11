@@ -55,6 +55,7 @@ namespace Yubico.Core.Buffers
         protected virtual bool DefaultLowerCase => false;
 
         #region ITextEncoding Version
+
         /// <inheritdoc/>
         public void Encode(ReadOnlySpan<byte> data, Span<char> encoded)
         {
@@ -64,10 +65,12 @@ namespace Yubico.Core.Buffers
                     nameof(encoded),
                     ExceptionMessages.EncodingOverflow);
             }
+
             for (int i = 0; i < data.Length; ++i)
             {
                 int highestDigit = CharacterSet.Length - 1;
                 int digit1 = data[i] >> 4;
+
                 // Checking these so that BCD encode throws the right exception.
                 if (digit1 > highestDigit)
                 {
@@ -79,6 +82,7 @@ namespace Yubico.Core.Buffers
                             _characterSet.Span[highestDigit]),
                         nameof(data));
                 }
+
                 encoded[i * 2] = CharacterSet[digit1];
 
                 int digit2 = data[i] & 0x0f;
@@ -92,6 +96,7 @@ namespace Yubico.Core.Buffers
                             _characterSet.Span[highestDigit]),
                         nameof(data));
                 }
+
                 encoded[(i * 2) + 1] = CharacterSet[digit2];
             }
         }
@@ -111,6 +116,7 @@ namespace Yubico.Core.Buffers
             {
                 throw new ArgumentException(ExceptionMessages.HexNotEvenLength);
             }
+
             if (data.Length < encoded.Length / 2)
             {
                 throw new ArgumentException(ExceptionMessages.DecodingOverflow);
@@ -125,8 +131,12 @@ namespace Yubico.Core.Buffers
             // in cases where the norm is upper or lower.
             char HandleCase(char c) =>
                 DefaultLowerCase
-                ? (char)((c - 0x40) * (0x5b - c) > 0 ? c + 0x20 : c)
-                : (char)((c - 0x60) * (0x7b - c) > 0 ? c - 0x20 : c);
+                    ? (char)((c - 0x40) * (0x5b - c) > 0
+                        ? c + 0x20
+                        : c)
+                    : (char)((c - 0x60) * (0x7b - c) > 0
+                        ? c - 0x20
+                        : c);
 
             int GetNibble(char c)
             {
@@ -139,6 +149,7 @@ namespace Yubico.Core.Buffers
                             ExceptionMessages.IllegalCharacter,
                             c));
                 }
+
                 return n;
             }
         }
@@ -150,28 +161,30 @@ namespace Yubico.Core.Buffers
             {
                 throw new ArgumentNullException(nameof(encoded));
             }
+
             byte[] bytes = new byte[encoded.Length / 2];
             Decode(encoded.AsSpan(), bytes);
             return bytes;
         }
+
         #endregion
 
         #region Static Version
+
         /// <inheritdoc cref="Encode(ReadOnlySpan{byte}, Span{char})"/>
         public static void EncodeBytes(ReadOnlySpan<byte> data, Span<char> encoded) =>
             new Base16().Encode(data, encoded);
 
         /// <inheritdoc cref="Encode(ReadOnlySpan{byte})"/>
-        public static string EncodeBytes(ReadOnlySpan<byte> data) =>
-            new Base16().Encode(data);
+        public static string EncodeBytes(ReadOnlySpan<byte> data) => new Base16().Encode(data);
 
         /// <inheritdoc cref="Decode(ReadOnlySpan{char}, Span{byte})"/>
         public static void DecodeText(ReadOnlySpan<char> encoded, Span<byte> data) =>
             new Base16().Decode(encoded, data);
 
         /// <inheritdoc cref="Decode(string)"/>
-        public static byte[] DecodeText(string encoded) =>
-            new Base16().Decode(encoded);
+        public static byte[] DecodeText(string encoded) => new Base16().Decode(encoded);
+
         #endregion
     }
 }

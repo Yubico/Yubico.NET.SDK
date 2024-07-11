@@ -131,8 +131,8 @@ namespace Yubico.Core.Devices.Hid
                 _deviceHandle,
                 IOKitHidConstants.kIOHidReportTypeFeature,
                 0,
-               buffer,
-               ref bufferSize);
+                buffer,
+                ref bufferSize);
 
             _device.LogDeviceAccessTime();
 

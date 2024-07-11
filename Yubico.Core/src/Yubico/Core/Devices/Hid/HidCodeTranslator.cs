@@ -26,6 +26,7 @@ namespace Yubico.Core.Devices.Hid
     public sealed partial class HidCodeTranslator
     {
         #region Constructors (static and instance)
+
         // For now, this is private. I can't think of a reason anyone should be
         // instantiating these outside of this class.
         private HidCodeTranslator(
@@ -37,25 +38,31 @@ namespace Yubico.Core.Devices.Hid
             _byCode = byCode;
             Layout = keyboardLayout;
         }
+
         #endregion
 
         #region Private fields
-        private static readonly Dictionary<KeyboardLayout, HidCodeTranslator> _lookup = new Dictionary<KeyboardLayout, HidCodeTranslator>
-        {
-            [KeyboardLayout.en_US] = GetEN_US(),
-            [KeyboardLayout.en_UK] = GetEN_UK(),
-            [KeyboardLayout.de_DE] = GetDE_DE(),
-            [KeyboardLayout.fr_FR] = GetFR_FR(),
-            [KeyboardLayout.it_IT] = GetIT_IT(),
-            [KeyboardLayout.es_US] = GetES_US(),
-            [KeyboardLayout.sv_SE] = GetSV_SE(),
-            [KeyboardLayout.ModHex] = GetModHex()
-        };
+
+        private static readonly Dictionary<KeyboardLayout, HidCodeTranslator> _lookup =
+            new Dictionary<KeyboardLayout, HidCodeTranslator>
+            {
+                [KeyboardLayout.en_US] = GetEN_US(),
+                [KeyboardLayout.en_UK] = GetEN_UK(),
+                [KeyboardLayout.de_DE] = GetDE_DE(),
+                [KeyboardLayout.fr_FR] = GetFR_FR(),
+                [KeyboardLayout.it_IT] = GetIT_IT(),
+                [KeyboardLayout.es_US] = GetES_US(),
+                [KeyboardLayout.sv_SE] = GetSV_SE(),
+                [KeyboardLayout.ModHex] = GetModHex()
+            };
+
         private readonly Dictionary<char, byte> _byChar;
         private readonly Dictionary<byte, char> _byCode;
+
         #endregion
 
         #region Index operators for chars and HID codes
+
         /// <summary>
         /// Gets the HID code that corresponds to the given HID code.
         /// </summary>
@@ -66,7 +73,7 @@ namespace Yubico.Core.Devices.Hid
         /// <exception cref="ArgumentOutOfRangeException">
         /// A HID code was requested that is not in this <see cref="HidCodeTranslator"/>.
         /// </exception>
-#pragma warning disable CA1043 // Justification: In this case, use char argument for indexers 
+        #pragma warning disable CA1043 // Justification: In this case, use char argument for indexers 
         public byte this[char ch]
         {
             get
@@ -75,6 +82,7 @@ namespace Yubico.Core.Devices.Hid
                 {
                     return value;
                 }
+
                 throw new ArgumentOutOfRangeException(
                     string.Format(
                         CultureInfo.CurrentCulture,
@@ -101,6 +109,7 @@ namespace Yubico.Core.Devices.Hid
                 {
                     return value;
                 }
+
                 throw new ArgumentOutOfRangeException(
                     string.Format(
                         CultureInfo.CurrentCulture,
@@ -109,7 +118,8 @@ namespace Yubico.Core.Devices.Hid
                         hidCode.ToString("x2", CultureInfo.InvariantCulture)));
             }
         }
-#pragma warning restore CA1043
+        #pragma warning restore CA1043
+
         #endregion
 
         // HID doesn't distinguish upper and lower case letters. The way the OS
@@ -122,6 +132,7 @@ namespace Yubico.Core.Devices.Hid
         private const byte _shift = 0x80;
 
         #region Instance Properties
+
         /// <summary>
         /// Gets a <see cref="KeyboardLayout"/> specific instance of this class.
         /// </summary>
@@ -151,12 +162,14 @@ namespace Yubico.Core.Devices.Hid
         /// An array of bytes representing all of the HID codes supported
         /// by this <see cref="HidCodeTranslator"/> instance.
         /// </summary>
-#pragma warning disable CA1819 // Justification: SupportedHidCodes should be a byte array
+        #pragma warning disable CA1819 // Justification: SupportedHidCodes should be a byte array
         public byte[] SupportedHidCodes => _byCode.Keys.ToArray();
-#pragma warning restore CA1819
+        #pragma warning restore CA1819
+
         #endregion
 
         #region Instance Methods
+
         /// <summary>
         /// Given a collection of HID codes, returns the string that it would produce.
         /// </summary>
@@ -172,8 +185,7 @@ namespace Yubico.Core.Devices.Hid
         /// At least one of the HID codes was not mapped in this <see cref="HidCodeTranslator"/>
         /// instance.
         /// </exception>
-        public string GetString(byte[] hidCodes)
-            => new string(hidCodes.Select(b => this[b]).ToArray());
+        public string GetString(byte[] hidCodes) => new string(hidCodes.Select(b => this[b]).ToArray());
 
         /// <summary>
         /// Given a collection of HID codes, returns an <see cref="IList{T}"/> of characters
@@ -187,8 +199,7 @@ namespace Yubico.Core.Devices.Hid
         /// At least one of the HID codes was not mapped in this <see cref="HidCodeTranslator"/>
         /// instance.
         /// </exception>
-        public IEnumerable<char> GetCharacters(byte[] hidCodes)
-            => new List<char>(hidCodes.Select(b => this[b]));
+        public IEnumerable<char> GetCharacters(byte[] hidCodes) => new List<char>(hidCodes.Select(b => this[b]));
 
         /// <summary>
         /// Given a collection of characters, returns the corresponding HID codes
@@ -200,8 +211,7 @@ namespace Yubico.Core.Devices.Hid
         /// At least one of the characters in the collection is not in the map
         /// for this <see cref="HidCodeTranslator"/> instance.
         /// </exception>
-        public byte[] GetHidCodes(IEnumerable<char> characters)
-            => characters.Select(c => this[c]).ToArray();
+        public byte[] GetHidCodes(IEnumerable<char> characters) => characters.Select(c => this[c]).ToArray();
 
         /// <summary>
         /// Given a string, returns the corresponding HID codes for the individual
@@ -222,6 +232,7 @@ namespace Yubico.Core.Devices.Hid
 
             return GetHidCodes(value.ToCharArray());
         }
+
         #endregion
     }
 }

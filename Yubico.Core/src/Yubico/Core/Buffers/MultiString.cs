@@ -79,6 +79,7 @@ namespace Yubico.Core.Buffers
                 multiString.AddRange(encoding.GetBytes(str));
                 multiString.AddRange(nullBytes);
             }
+
             multiString.AddRange(nullBytes);
 
             return multiString.ToArray();

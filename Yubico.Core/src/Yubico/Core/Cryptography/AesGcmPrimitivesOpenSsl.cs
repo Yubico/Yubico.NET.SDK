@@ -62,15 +62,18 @@ namespace Yubico.Core.Cryptography
                     status = NativeMethods.EvpUpdate(
                         ctx, null, out outputLength, associatedData.ToArray(), associatedData.Length);
                 }
+
                 if (status != 0)
                 {
                     status = NativeMethods.EvpUpdate(
                         ctx, encryptedData, out outputLength, dataToEncrypt, dataToEncrypt.Length);
+
                     if (outputLength != dataToEncrypt.Length)
                     {
                         status = 0;
                     }
                 }
+
                 if (status != 0)
                 {
                     encryptedData.CopyTo(ciphertext);
@@ -82,9 +85,11 @@ namespace Yubico.Core.Cryptography
                         status = 0;
                     }
                 }
+
                 if (status != 0)
                 {
-                    status = NativeMethods.EvpCipherCtxCtrl(ctx, NativeMethods.CtrlFlag.GetTag, AuthTagLength, tagBytes);
+                    status = NativeMethods.EvpCipherCtxCtrl(
+                        ctx, NativeMethods.CtrlFlag.GetTag, AuthTagLength, tagBytes);
                 }
 
                 if (status == 0)
@@ -136,23 +141,28 @@ namespace Yubico.Core.Cryptography
                     status = NativeMethods.EvpUpdate(
                         ctx, null, out outputLength, associatedData.ToArray(), associatedData.Length);
                 }
+
                 if (status != 0)
                 {
                     status = NativeMethods.EvpUpdate(
                         ctx, decryptedData, out outputLength, ciphertext.ToArray(), ciphertext.Length);
+
                     if (outputLength != ciphertext.Length)
                     {
                         status = 0;
                     }
                 }
+
                 if (status != 0)
                 {
                     decryptedData.CopyTo(plaintext);
 
                     // Set the expected tag, the Final call will compute from the
                     // decryption and AAD, then compare to the input.
-                    status = NativeMethods.EvpCipherCtxCtrl(ctx, NativeMethods.CtrlFlag.SetTag, AuthTagLength, tagBytes);
+                    status = NativeMethods.EvpCipherCtxCtrl(
+                        ctx, NativeMethods.CtrlFlag.SetTag, AuthTagLength, tagBytes);
                 }
+
                 if (status != 0)
                 {
                     // This will check the tag. If the tag verifies, it will

@@ -33,6 +33,7 @@ namespace Yubico.Core.Devices.Hid
                 ['u'] = 0x18, ['U'] = 0x18 | _shift, ['v'] = 0x19, ['V'] = 0x19 | _shift,
                 ['\n'] = 0x28, ['\t'] = 0x2b,
             };
+
             var byCode = new Dictionary<byte, char>
             {
                 [0x05] = 'b', [0x05 | _shift] = 'B', [0x06] = 'c', [0x06 | _shift] = 'C',

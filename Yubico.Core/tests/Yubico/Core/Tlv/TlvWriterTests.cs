@@ -161,7 +161,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void AddInt16_TryEncode_ReturnsCorrect()
         {
-            byte[] expected = new byte[] {
+            byte[] expected = new byte[]
+            {
                 0x81, 0x02, 0xF1, 0xF2
             };
             var writer = new TlvWriter();
@@ -181,7 +182,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void AddInt16Endian_Encode_ReturnsCorrect()
         {
-            byte[] expected = new byte[] {
+            byte[] expected = new byte[]
+            {
                 0x7A, 0x02, 0x82, 0x00
             };
             var writer = new TlvWriter();
@@ -197,7 +199,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void AddUInt16_TryEncode_ReturnsCorrect()
         {
-            byte[] expected = new byte[] {
+            byte[] expected = new byte[]
+            {
                 0x81, 0x02, 0xF1, 0xF2
             };
             var writer = new TlvWriter();
@@ -216,7 +219,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void AddUInt16Endian_Encode_ReturnsCorrect()
         {
-            byte[] expected = new byte[] {
+            byte[] expected = new byte[]
+            {
                 0x7A, 0x02, 0x82, 0x00
             };
             var writer = new TlvWriter();
@@ -232,7 +236,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void AddInt32_TryEncode_ReturnsCorrect()
         {
-            byte[] expected = new byte[] {
+            byte[] expected = new byte[]
+            {
                 0x11, 0x04, 0xF1, 0xF2, 0xF3, 0xF4
             };
             var writer = new TlvWriter();
@@ -252,7 +257,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void AddInt32Endian_Encode_ReturnsCorrect()
         {
-            byte[] expected = new byte[] {
+            byte[] expected = new byte[]
+            {
                 0x22, 0x04, 0xFF, 0x00, 0x00, 0x00
             };
             var writer = new TlvWriter();
@@ -268,7 +274,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ASCIIString_Encode_ReturnsCorrect()
         {
-            byte[] expected = new byte[] {
+            byte[] expected = new byte[]
+            {
                 0xA2, 0x04, 0x41, 0x42, 0x43, 0x44
             };
             string value = "ABCD";
@@ -286,7 +293,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void UTF8String_Encode_ReturnsCorrect()
         {
-            byte[] expected = new byte[] {
+            byte[] expected = new byte[]
+            {
                 0xA3, 0x04, 0x41, 0xC2, 0xB1, 0x42
             };
             string value = "A\u00B1B";
@@ -304,7 +312,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void SimpleNested_Encode_ReturnsCorrect()
         {
-            byte[] expected = new byte[] {
+            byte[] expected = new byte[]
+            {
                 0xA1, 0x0C, 0x11, 0x05, 0x01, 0x02, 0x03, 0x04, 0x05, 0x22, 0x03, 0x90, 0xC4, 0x5B
             };
 
@@ -328,14 +337,15 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void NestedInNested_TryEncode_ReturnsCorrect()
         {
-            byte[] expected = new byte[] {
+            byte[] expected = new byte[]
+            {
                 0x04, 0x1A,
-                      0x5F, 0x21, 0x03, 0x01, 0x02, 0x03,
-                      0x02, 0x0C,
-                            0x30, 0x04, 0x11, 0x22, 0x33, 0x44,
-                            0x31, 0x00,
-                            0x32, 0x02, 0x7f, 0xff,
-                      0x5F, 0x22, 0x03, 0x04, 0x05, 0x06
+                0x5F, 0x21, 0x03, 0x01, 0x02, 0x03,
+                0x02, 0x0C,
+                0x30, 0x04, 0x11, 0x22, 0x33, 0x44,
+                0x31, 0x00,
+                0x32, 0x02, 0x7f, 0xff,
+                0x5F, 0x22, 0x03, 0x04, 0x05, 0x06
             };
 
             var writer = new TlvWriter();
@@ -349,6 +359,7 @@ namespace Yubico.Core.Tlv.UnitTests
                     writer.WriteValue(0x31, null);
                     writer.WriteInt16(0x32, 0x7FFF);
                 }
+
                 byte[] element2 = new byte[] { 0x04, 0x05, 0x06 };
                 writer.WriteValue(0x5F22, element2);
             }

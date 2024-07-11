@@ -14,7 +14,8 @@
 
 namespace Yubico.Core.Devices.Hid
 {
-#pragma warning disable CA1707 // Justification: Cannot use
+    #pragma warning disable CA1707 // Justification: Cannot use
+
     // underscore (_) character for variable name
     public enum KeyboardLayout
     {
@@ -26,6 +27,6 @@ namespace Yubico.Core.Devices.Hid
         it_IT = 5,
         es_US = 6,
         sv_SE = 7
-#pragma warning restore CA1707
+        #pragma warning restore CA1707
     }
 }

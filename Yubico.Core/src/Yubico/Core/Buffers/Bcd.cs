@@ -37,21 +37,21 @@ namespace Yubico.Core.Buffers
         protected override Span<char> CharacterSet => _characterSet.Span;
 
         #region Static Version
+
         /// <inheritdoc />
         public static new void EncodeBytes(ReadOnlySpan<byte> data, Span<char> encoded) =>
             new Bcd().Encode(data, encoded);
 
         /// <inheritdoc />
-        public static new string EncodeBytes(ReadOnlySpan<byte> data) =>
-            new Bcd().Encode(data);
+        public static new string EncodeBytes(ReadOnlySpan<byte> data) => new Bcd().Encode(data);
 
         /// <inheritdoc />
         public static new void DecodeText(ReadOnlySpan<char> encoded, Span<byte> data) =>
             new Bcd().Decode(encoded, data);
 
         /// <inheritdoc />
-        public static new byte[] DecodeText(string encoded) =>
-            new Bcd().Decode(encoded);
+        public static new byte[] DecodeText(string encoded) => new Bcd().Decode(encoded);
+
         #endregion
     }
 }

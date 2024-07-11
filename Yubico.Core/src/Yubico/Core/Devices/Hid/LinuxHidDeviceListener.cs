@@ -84,7 +84,8 @@ namespace Yubico.Core.Devices.Hid
         /// </remarks>
         private void StartListening()
         {
-            _ = ThrowIfFailedNegative(udev_monitor_filter_add_match_subsystem_devtype(
+            _ = ThrowIfFailedNegative(
+                udev_monitor_filter_add_match_subsystem_devtype(
                     _monitorObject, UdevSubsystemName, null));
 
             _ = ThrowIfFailedNegative(udev_monitor_enable_receiving(_monitorObject));
@@ -102,6 +103,7 @@ namespace Yubico.Core.Devices.Hid
                 {
                     IsBackground = true
                 };
+
                 _isListening = true;
                 _listenerThread.Start();
             }

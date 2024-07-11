@@ -23,7 +23,9 @@ namespace Yubico.PlatformInterop
         #region Enumerations and flags
 
         [Flags]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "Keeping interop as close to original C headers as possible")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Design", "CA1069:Enums values should not be duplicated",
+            Justification = "Keeping interop as close to original C headers as possible")]
         internal enum DESIRED_ACCESS : int
         {
             NONE = 0x0,
@@ -69,8 +71,11 @@ namespace Yubico.PlatformInterop
 
             SPECIFIC_RIGHTS_ALL = 0x0000_FFFF,
 
-            FILE_GENERIC_READ = STANDARD_RIGHTS_READ | FILE_READ_DATA | FILE_READ_ATTRIBUTES | FILE_READ_EA | SYNCHRONIZE,
-            FILE_GENERIC_WRITE = STANDARD_RIGHTS_WRITE | FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES | FILE_WRITE_EA | FILE_APPEND_DATA | SYNCHRONIZE,
+            FILE_GENERIC_READ = STANDARD_RIGHTS_READ | FILE_READ_DATA | FILE_READ_ATTRIBUTES | FILE_READ_EA |
+                SYNCHRONIZE,
+
+            FILE_GENERIC_WRITE = STANDARD_RIGHTS_WRITE | FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES | FILE_WRITE_EA |
+                FILE_APPEND_DATA | SYNCHRONIZE,
             FILE_GENERIC_EXECUTE = STANDARD_RIGHTS_EXECUTE | FILE_READ_ATTRIBUTES | FILE_EXECUTE | SYNCHRONIZE,
 
             GENERIC_READ = unchecked((int)0x8000_0000),
@@ -101,7 +106,9 @@ namespace Yubico.PlatformInterop
         }
 
         [Flags]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "Keeping interop as close to original C headers as possible")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Design", "CA1069:Enums values should not be duplicated",
+            Justification = "Keeping interop as close to original C headers as possible")]
         internal enum FILE_FLAG : int
         {
             // Attributes
@@ -164,8 +171,7 @@ namespace Yubico.PlatformInterop
             IntPtr lpSecurityAttributes,
             CREATION_DISPOSITION dwCreationDisposition,
             FILE_FLAG dwFlagsAndAttributes,
-            IntPtr hTemplateFile
-            );
+            IntPtr hTemplateFile);
 
         [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, EntryPoint = "WriteFile", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
@@ -174,8 +180,7 @@ namespace Yubico.PlatformInterop
             byte[] lpBuffer,
             int numBytesToWrite,
             out int numBytesWritten,
-            IntPtr mustBeZero
-            );
+            IntPtr mustBeZero);
 
         [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, EntryPoint = "ReadFile", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
@@ -184,10 +189,7 @@ namespace Yubico.PlatformInterop
             byte[] lpBuffer,
             int numBytesToRead,
             out int numBytesRead,
-            IntPtr mustBeZero
-            );
-
-
+            IntPtr mustBeZero);
 
         #endregion
     }

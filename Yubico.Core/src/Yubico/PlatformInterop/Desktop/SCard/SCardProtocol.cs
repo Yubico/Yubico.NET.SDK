@@ -18,7 +18,9 @@ using System.Diagnostics.CodeAnalysis;
 namespace Yubico.PlatformInterop
 {
     [Flags]
-    [SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "Keeping interop as close to original C headers as possible")]
+    [SuppressMessage(
+        "Design", "CA1069:Enums values should not be duplicated",
+        Justification = "Keeping interop as close to original C headers as possible")]
     internal enum SCARD_PROTOCOL
     {
         Undefined = 0x00000000,

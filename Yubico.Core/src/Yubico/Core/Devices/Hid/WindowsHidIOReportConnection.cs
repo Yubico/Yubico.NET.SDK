@@ -21,6 +21,7 @@ namespace Yubico.Core.Devices.Hid
     {
         // The SDK device instance that created this connection instance.
         private readonly WindowsHidDevice _device;
+
         // The underlying Windows HID device used for communication.
         private IHidDDevice HidDDevice { get; set; }
 
@@ -57,6 +58,7 @@ namespace Yubico.Core.Devices.Hid
         }
 
         #region IDisposable Support
+
         private bool disposedValue; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
@@ -85,6 +87,7 @@ namespace Yubico.Core.Devices.Hid
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         #endregion
     }
 }

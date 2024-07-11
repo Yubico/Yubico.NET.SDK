@@ -17,7 +17,6 @@ using Xunit;
 
 namespace Yubico.Core.Devices.Hid.UnitTests
 {
-
 #if false
     public class HidDeviceTests
     {

@@ -24,7 +24,6 @@ namespace Yubico.PlatformInterop
         public MacOSUnmanagedDynamicLibrary(string fileName) :
             base(OpenLibrary(fileName))
         {
-
         }
 
         private static SafeLibraryHandle OpenLibrary(string fileName)
@@ -38,6 +37,7 @@ namespace Yubico.PlatformInterop
                         ExceptionMessages.LibraryLoadFailed,
                         fileName));
             }
+
             return handle;
         }
 

@@ -22,7 +22,6 @@ namespace Yubico.PlatformInterop
         public WindowsUnmanagedDynamicLibrary(string fileName) :
             base(OpenLibrary(fileName))
         {
-
         }
 
         private static SafeLibraryHandle OpenLibrary(string fileName)
@@ -33,6 +32,7 @@ namespace Yubico.PlatformInterop
                 int hr = Marshal.GetHRForLastWin32Error();
                 Marshal.ThrowExceptionForHR(hr);
             }
+
             return handle;
         }
 
@@ -42,6 +42,7 @@ namespace Yubico.PlatformInterop
             {
                 return TryGetFunctionInternal(functionName + "W", out d);
             }
+
             return true;
         }
 

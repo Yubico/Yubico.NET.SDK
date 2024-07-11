@@ -25,11 +25,9 @@ namespace Yubico.Core.Buffers
     public class Hex : Base16
     {
         /// <inheritdoc cref="Base16.EncodeBytes(ReadOnlySpan{byte})"/>
-        public static string BytesToHex(ReadOnlySpan<byte> bytes) =>
-            EncodeBytes(bytes);
+        public static string BytesToHex(ReadOnlySpan<byte> bytes) => EncodeBytes(bytes);
 
         /// <inheritdoc cref="Base16.DecodeText(string)"/>
-        public static byte[] HexToBytes(string encoded) =>
-            DecodeText(encoded);
+        public static byte[] HexToBytes(string encoded) => DecodeText(encoded);
     }
 }

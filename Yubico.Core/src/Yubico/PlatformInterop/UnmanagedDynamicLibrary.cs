@@ -24,13 +24,14 @@ namespace Yubico.PlatformInterop
         private bool disposedValue;
         protected readonly SafeLibraryHandle _handle;
 
-        public static UnmanagedDynamicLibrary Open(string fileName) => SdkPlatformInfo.OperatingSystem switch
-        {
-            SdkPlatform.Windows => new WindowsUnmanagedDynamicLibrary(fileName),
-            SdkPlatform.MacOS => new MacOSUnmanagedDynamicLibrary(fileName),
-            SdkPlatform.Linux => new LinuxUnmanagedDynamicLibrary(fileName),
-            _ => throw new PlatformNotSupportedException()
-        };
+        public static UnmanagedDynamicLibrary Open(string fileName) =>
+            SdkPlatformInfo.OperatingSystem switch
+            {
+                SdkPlatform.Windows => new WindowsUnmanagedDynamicLibrary(fileName),
+                SdkPlatform.MacOS => new MacOSUnmanagedDynamicLibrary(fileName),
+                SdkPlatform.Linux => new LinuxUnmanagedDynamicLibrary(fileName),
+                _ => throw new PlatformNotSupportedException()
+            };
 
         protected UnmanagedDynamicLibrary(SafeLibraryHandle handle)
         {
@@ -51,6 +52,7 @@ namespace Yubico.PlatformInterop
             Debug.Assert(temp is TDelegate);
             d = temp!;
         }
+
         public abstract bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class;
 
         private void Dispose(bool disposing)

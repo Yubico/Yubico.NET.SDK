@@ -108,7 +108,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadValue_Simple_ReturnsCorrect()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x01, 0x02, 0x11, 0x22
             };
             byte[] expected = new byte[] { 0x11, 0x22 };
@@ -125,7 +126,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadValue_Multiple_ReturnsCorrect()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x01, 0x02, 0x11, 0x22, 0x02, 0x03, 0x31, 0x32, 0x33, 0x03, 0x00
             };
             byte[] expected = new byte[] { 0x31, 0x32, 0x33 };
@@ -144,7 +146,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadNestedTlv_Simple_ReturnsCorrect()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x5F, 0x7C, 0x09, 0x01, 0x02, 0x11, 0x22, 0x02, 0x03, 0x31, 0x32, 0x33
             };
             byte[] expected = new byte[] { 0x11, 0x22 };
@@ -162,7 +165,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadNestedTlv_Complex_ReturnsCorrect()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x7C, 0x14, 0x01, 0x02, 0x05, 0x05, 0x7A, 0x09,
                 0x51, 0x02, 0x23, 0x24, 0x5F, 0x52, 0x02, 0x33,
                 0x34, 0x02, 0x01, 0x00, 0x03, 0x00
@@ -317,7 +321,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadASCII_ReturnsCorrect()
         {
-            byte[] encoding =  {
+            byte[] encoding =
+            {
                 0xA2, 0x04, 0x41, 0x42, 0x43, 0x44
             };
             string expectedValue = "ABCD";
@@ -332,7 +337,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadUTF8_ReturnsCorrect()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0xA3, 0x04, 0x41, 0xC2, 0xB1, 0x42
             };
             string expectedValue = "A\u00B1B";
@@ -347,7 +353,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void HasData_ReturnsCorrect()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x81, 0x02, 0x11, 0x22, 0x82, 0x03, 0x31, 0x32, 0x33
             };
 
@@ -366,10 +373,12 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadEncoded_Simple_ReturnsCorrect()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x01, 0x02, 0x11, 0x22
             };
-            byte[] expected = new byte[] {
+            byte[] expected = new byte[]
+            {
                 0x01, 0x02, 0x11, 0x22
             };
 
@@ -385,7 +394,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadEncoded_Multiple_ReturnsCorrect()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x01, 0x02, 0x11, 0x22, 0x02, 0x03, 0x31, 0x32, 0x33, 0x03, 0x00
             };
             byte[] expected = new byte[] { 0x02, 0x03, 0x31, 0x32, 0x33 };
@@ -488,7 +498,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [InlineData(3)]
         public void ReadInt16_InvalidLength_ThrowsException(int length)
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x90, (byte)length, 0x04, 0x03, 0x02, 0x01, 0x00
             };
 
@@ -506,7 +517,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [InlineData(3)]
         public void ReadUInt16_InvalidLength_ThrowsException(int length)
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x90, (byte)length, 0x04, 0x03, 0x02, 0x01, 0x00
             };
 
@@ -524,7 +536,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [InlineData(5)]
         public void ReadInt32_InvalidLength_ThrowsException(int length)
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x91, (byte)length, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00
             };
 
@@ -539,7 +552,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadValue_NotEnoughData_ThrowsException()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x71, 0x04, 0x01, 0x02, 0x03
             };
 
@@ -554,7 +568,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadEncoded_NotEnoughData_ThrowsException()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x71, 0x04, 0x01, 0x02, 0x03
             };
 
@@ -569,7 +584,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadEncoded_InvalidLength_ThrowsException()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x30, 0x0a, 0x71, 0x80, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
 
@@ -585,7 +601,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ReadString_NullEncoding_ThrowsExcpetion()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x71, 0x04, 0x01, 0x02, 0x03
             };
 
@@ -603,7 +620,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [InlineData(-1)]
         public void PeekTag_InvalidTagLength_ThrowsException(int tagLength)
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x90, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00
             };
 
@@ -643,7 +661,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [InlineData(-1)]
         public void PeekLength_InvalidTagLength_ThrowsException(int tagLength)
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x90, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00
             };
 
@@ -667,7 +686,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [InlineData(0xF3)]
         public void PeekLength_InvalidFirstByte_ThrowsException(byte firstByte)
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x91, firstByte, 0x04, 0x02, 0x02, 0x01
             };
 

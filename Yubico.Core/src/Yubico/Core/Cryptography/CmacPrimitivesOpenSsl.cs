@@ -61,10 +61,10 @@ namespace Yubico.Core.Cryptography
             try
             {
                 if (NativeMethods.CmacEvpMacInit(
-                    _cmacCtx,
-                    (int)_cmacCtx.BlockCipherAlgorithm,
-                    keyBytes,
-                    keyBytes.Length) == 0)
+                        _cmacCtx,
+                        (int)_cmacCtx.BlockCipherAlgorithm,
+                        keyBytes,
+                        keyBytes.Length) == 0)
                 {
                     throw new SecurityException(ExceptionMessages.CmacFailed);
                 }
@@ -100,6 +100,7 @@ namespace Yubico.Core.Cryptography
             {
                 throw new ArgumentException(ExceptionMessages.InvalidCmacInput);
             }
+
             byte[] outputBuffer = new byte[macBuffer.Length];
 
             if (NativeMethods.CmacEvpMacFinal(_cmacCtx, outputBuffer, outputBuffer.Length, out int outputLength) == 0)
@@ -127,4 +128,3 @@ namespace Yubico.Core.Cryptography
         }
     }
 }
-

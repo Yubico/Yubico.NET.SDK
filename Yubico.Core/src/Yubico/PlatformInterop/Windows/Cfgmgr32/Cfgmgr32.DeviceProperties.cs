@@ -33,7 +33,19 @@ namespace Yubico.PlatformInterop
                 this.pid = pid;
             }
 
-            public DEVPROPKEY(uint a, ushort b, ushort c, byte d, byte e, byte f, byte g, byte h, byte i, byte j, byte k, int pid)
+            public DEVPROPKEY(
+                uint a,
+                ushort b,
+                ushort c,
+                byte d,
+                byte e,
+                byte f,
+                byte g,
+                byte h,
+                byte i,
+                byte j,
+                byte k,
+                int pid)
             {
                 guid = new Guid(a, b, c, d, e, f, g, h, i, j, k);
                 this.pid = pid;
@@ -82,40 +94,91 @@ namespace Yubico.PlatformInterop
         //
         // These DEVPKEYs corespond to the SetupAPI SPDRP_XXX device properties
         //
-        internal static readonly DEVPROPKEY DEVPKEY_Device_DeviceDesc = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 2); // DEVPROP_TYPE.STRING
-        internal static readonly DEVPROPKEY DEVPKEY_Device_HardwareIds = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 3); // DEVPROP_TYPE.STRING_LIST
-        internal static readonly DEVPROPKEY DEVPKEY_Device_CompatibleIds = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 4); // DEVPROP_TYPE.STRING_LIST
-        internal static readonly DEVPROPKEY DEVPKEY_Device_Service = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 6); // DEVPROP_TYPE.STRING
-        internal static readonly DEVPROPKEY DEVPKEY_Device_Class = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 9); // DEVPROP_TYPE.STRING
-        internal static readonly DEVPROPKEY DEVPKEY_Device_ClassGuid = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 10); // DEVPROP_TYPE.GUID
-        internal static readonly DEVPROPKEY DEVPKEY_Device_Driver = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 11); // DEVPROP_TYPE.STRING
-        internal static readonly DEVPROPKEY DEVPKEY_Device_Manufacturer = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 13); // DEVPROP_TYPE.STRING
-        internal static readonly DEVPROPKEY DEVPKEY_Device_FriendlyName = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 14); // DEVPROP_TYPE.STRING
-        internal static readonly DEVPROPKEY DEVPKEY_Device_LocationInfo = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 15); // DEVPROP_TYPE.STRING
-        internal static readonly DEVPROPKEY DEVPKEY_Device_PDOName = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 16); // DEVPROP_TYPE.STRING
-        internal static readonly DEVPROPKEY DEVPKEY_Device_LocationPaths = new DEVPROPKEY(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 37); // DEVPROP_TYPE.STRING_LIST
-        internal static readonly DEVPROPKEY DEVPKEY_Device_InstanceId = new DEVPROPKEY(0x78c34fc8, 0x104a, 0x4aca, 0x9e, 0xa4, 0x52, 0x4d, 0x52, 0x99, 0x6e, 0x57, 256); // DEVPROP_TYPE.STRING
+        internal static readonly DEVPROPKEY DEVPKEY_Device_DeviceDesc = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 2); // DEVPROP_TYPE.STRING
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_HardwareIds = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 3); // DEVPROP_TYPE.STRING_LIST
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_CompatibleIds = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 4); // DEVPROP_TYPE.STRING_LIST
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_Service = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 6); // DEVPROP_TYPE.STRING
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_Class = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 9); // DEVPROP_TYPE.STRING
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_ClassGuid = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 10); // DEVPROP_TYPE.GUID
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_Driver = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 11); // DEVPROP_TYPE.STRING
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_Manufacturer = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 13); // DEVPROP_TYPE.STRING
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_FriendlyName = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 14); // DEVPROP_TYPE.STRING
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_LocationInfo = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 15); // DEVPROP_TYPE.STRING
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_PDOName = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 16); // DEVPROP_TYPE.STRING
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_LocationPaths = new DEVPROPKEY(
+            0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 37); // DEVPROP_TYPE.STRING_LIST
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_InstanceId = new DEVPROPKEY(
+            0x78c34fc8, 0x104a, 0x4aca, 0x9e, 0xa4, 0x52, 0x4d, 0x52, 0x99, 0x6e, 0x57, 256); // DEVPROP_TYPE.STRING
 
         //
         // Device properties
         //
-        internal static readonly DEVPROPKEY DEVPKEY_Device_DevNodeStatus = new DEVPROPKEY(0x4340a6c5, 0x93fa, 0x4706, 0x97, 0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 2); // DEVPROP_TYPE.UINT32
-        internal static readonly DEVPROPKEY DEVPKEY_Device_ProblemCode = new DEVPROPKEY(0x4340a6c5, 0x93fa, 0x4706, 0x97, 0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 3); // DEVPROP_TYPE.UINT32
-        internal static readonly DEVPROPKEY DEVPKEY_Device_Parent = new DEVPROPKEY(0x4340a6c5, 0x93fa, 0x4706, 0x97, 0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 8); // DEVPROP_TYPE.STRING
-        internal static readonly DEVPROPKEY DEVPKEY_Device_Children = new DEVPROPKEY(0x4340a6c5, 0x93fa, 0x4706, 0x97, 0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 9); // DEVPROP_TYPE.STRING_LIST
-        internal static readonly DEVPROPKEY DEVPKEY_Device_Siblings = new DEVPROPKEY(0x4340a6c5, 0x93fa, 0x4706, 0x97, 0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 10); // DEVPROP_TYPE.STRING_LIST
-        internal static readonly DEVPROPKEY DEVPKEY_Device_Model = new DEVPROPKEY(0x78c34fc8, 0x104a, 0x4aca, 0x9e, 0xa4, 0x52, 0x4d, 0x52, 0x99, 0x6e, 0x57, 39); // DEVPROP_TYPE.STRING
-        internal static readonly DEVPROPKEY DEVPKEY_Device_ContainerId = new DEVPROPKEY(0x8c7ed206, 0x3f8a, 0x4827, 0xb3, 0xab, 0xae, 0x9e, 0x1f, 0xae, 0xfc, 0x6c, 2);     // DEVPROP_TYPE_GUID
+        internal static readonly DEVPROPKEY DEVPKEY_Device_DevNodeStatus = new DEVPROPKEY(
+            0x4340a6c5, 0x93fa, 0x4706, 0x97, 0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 2); // DEVPROP_TYPE.UINT32
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_ProblemCode = new DEVPROPKEY(
+            0x4340a6c5, 0x93fa, 0x4706, 0x97, 0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 3); // DEVPROP_TYPE.UINT32
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_Parent = new DEVPROPKEY(
+            0x4340a6c5, 0x93fa, 0x4706, 0x97, 0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 8); // DEVPROP_TYPE.STRING
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_Children = new DEVPROPKEY(
+            0x4340a6c5, 0x93fa, 0x4706, 0x97, 0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 9); // DEVPROP_TYPE.STRING_LIST
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_Siblings = new DEVPROPKEY(
+            0x4340a6c5, 0x93fa, 0x4706, 0x97, 0x2c, 0x7b, 0x64, 0x80, 0x08, 0xa5, 0xa7, 10); // DEVPROP_TYPE.STRING_LIST
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_Model = new DEVPROPKEY(
+            0x78c34fc8, 0x104a, 0x4aca, 0x9e, 0xa4, 0x52, 0x4d, 0x52, 0x99, 0x6e, 0x57, 39); // DEVPROP_TYPE.STRING
+
+        internal static readonly DEVPROPKEY DEVPKEY_Device_ContainerId = new DEVPROPKEY(
+            0x8c7ed206, 0x3f8a, 0x4827, 0xb3, 0xab, 0xae, 0x9e, 0x1f, 0xae, 0xfc, 0x6c, 2); // DEVPROP_TYPE_GUID
 
         //
         // HID specific
         //
-        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_UsagePage = new DEVPROPKEY(0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 2); // DEVPROP_TYPE.UINT16
-        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_UsageId = new DEVPROPKEY(0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 3); // DEVPROP_TYPE.UINT16
-        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_IsReadOnly = new DEVPROPKEY(0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 4); // DEVPROP_TYPE.BOOLEAN
-        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_VendorId = new DEVPROPKEY(0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 5); // DEVPROP_TYPE.UINT16
-        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_ProductId = new DEVPROPKEY(0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 6); // DEVPROP_TYPE.UINT16
-        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_VersionNumber = new DEVPROPKEY(0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 7); // DEVPROP_TYPE.UINT16
-        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_BackgroundAccess = new DEVPROPKEY(0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 8); // DEVPROP_TYPE.BOOLEAN
+        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_UsagePage = new DEVPROPKEY(
+            0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 2); // DEVPROP_TYPE.UINT16
+
+        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_UsageId = new DEVPROPKEY(
+            0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 3); // DEVPROP_TYPE.UINT16
+
+        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_IsReadOnly = new DEVPROPKEY(
+            0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 4); // DEVPROP_TYPE.BOOLEAN
+
+        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_VendorId = new DEVPROPKEY(
+            0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 5); // DEVPROP_TYPE.UINT16
+
+        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_ProductId = new DEVPROPKEY(
+            0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 6); // DEVPROP_TYPE.UINT16
+
+        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_VersionNumber = new DEVPROPKEY(
+            0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 7); // DEVPROP_TYPE.UINT16
+
+        internal static readonly DEVPROPKEY DEVPKEY_DeviceInterface_HID_BackgroundAccess = new DEVPROPKEY(
+            0xcbf38310, 0x4a17, 0x4310, 0xa1, 0xeb, 0x24, 0x7f, 0xb, 0x67, 0x59, 0x3b, 8); // DEVPROP_TYPE.BOOLEAN
     }
 }

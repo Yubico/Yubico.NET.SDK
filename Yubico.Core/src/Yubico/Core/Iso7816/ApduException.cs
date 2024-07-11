@@ -70,7 +70,6 @@ namespace Yubico.Core.Iso7816
         public ApduException() :
             base(ExceptionMessages.UnknownApduError)
         {
-
         }
 
         /// <summary>
@@ -81,7 +80,6 @@ namespace Yubico.Core.Iso7816
         public ApduException(string message) :
             base(message)
         {
-
         }
 
         /// <summary>
@@ -95,14 +93,12 @@ namespace Yubico.Core.Iso7816
         public ApduException(string message, Exception innerException) :
             base(message, innerException)
         {
-
         }
 
         /// <inheritdoc />
         protected ApduException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
             base(serializationInfo, streamingContext)
         {
-
         }
     }
 }

@@ -26,7 +26,6 @@ namespace Yubico.PlatformInterop
         public SCardContext() :
             base(true)
         {
-
         }
 
         public SCardContext(IntPtr handle) :

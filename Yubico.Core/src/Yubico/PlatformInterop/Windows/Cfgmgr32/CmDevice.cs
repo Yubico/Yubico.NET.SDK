@@ -40,7 +40,9 @@ namespace Yubico.PlatformInterop
         public CmDevice(string devicePath)
         {
             InterfacePath = devicePath;
-            InstanceId = (string?)CmPropertyAccessHelper.TryGetProperty(CM_Get_Device_Interface_Property, devicePath, DEVPKEY_Device_InstanceId)!;
+            InstanceId = (string?)CmPropertyAccessHelper.TryGetProperty(
+                CM_Get_Device_Interface_Property, devicePath, DEVPKEY_Device_InstanceId)!;
+
             Instance = LocateDevNode();
             Class = GetProperty<string>(CmDeviceProperty.Class);
             ClassGuid = GetProperty<Guid>(CmDeviceProperty.ClassGuid);
@@ -109,6 +111,7 @@ namespace Yubico.PlatformInterop
             {
                 return (T)value!;
             }
+
             throw new KeyNotFoundException();
         }
 
@@ -183,11 +186,13 @@ namespace Yubico.PlatformInterop
         [SuppressMessage("Performance", "CA1846:Prefer \'AsSpan\' over \'Substring\'")]
         private static short GetHexShort(string s, int offset, int length)
         {
-#pragma warning disable CA1846 // Prefer 'AsSpan' over 'Substring'
+            #pragma warning disable CA1846 // Prefer 'AsSpan' over 'Substring'
+
             // The overload required by this preference is not available
             // for our .NETStandard 2.0 targets.
-            ushort temp = ushort.Parse(s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-#pragma warning restore CA1846 // Prefer 'AsSpan' over 'Substring'
+            ushort temp = ushort.Parse(
+                s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            #pragma warning restore CA1846 // Prefer 'AsSpan' over 'Substring'
             return unchecked((short)temp);
         }
 

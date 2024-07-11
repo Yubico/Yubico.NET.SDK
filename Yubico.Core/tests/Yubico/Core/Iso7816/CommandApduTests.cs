@@ -385,7 +385,8 @@ namespace Yubico.Core.Iso7816.UnitTests
         [InlineData(1, new byte[] { 0x01 }, 1, new byte[] { 0x01 })]
         [InlineData(0x12, new byte[] { 0x12 }, 0x12, new byte[] { 0x12 })]
         [InlineData(_MaximumSizeShortEncoding, new byte[] { 0x00 }, _MaximumSizeShortEncoding, new byte[] { 0x00 })]
-        public void AsByteArray_HeaderSetDataSetNeSet_EmitsCorrectApduShort(int nc, byte[] expectedLc, int ne, byte[] expectedLe)
+        public void AsByteArray_HeaderSetDataSetNeSet_EmitsCorrectApduShort(
+            int nc, byte[] expectedLc, int ne, byte[] expectedLe)
         {
             byte[] data = GenerateRandBytes(nc);
 
@@ -413,12 +414,15 @@ namespace Yubico.Core.Iso7816.UnitTests
         // Case 4E - matching, APDU = [Header][extended Lc][Data][extended (2 byte) Le]
         // Case 4E - mixed, APDU = [Header][extended Lc][Data][extended (2 byte) Le]
         [Theory]
-        [InlineData(_MaximumSizeShortEncoding + 1, new byte[] { 0x00, 0x01, 0x01 }, _MaximumSizeShortEncoding + 1, new byte[] { 0x01, 0x01 })]
+        [InlineData(_MaximumSizeShortEncoding + 1, new byte[] { 0x00, 0x01, 0x01 }, _MaximumSizeShortEncoding + 1,
+            new byte[] { 0x01, 0x01 })]
         [InlineData(0x1234, new byte[] { 0x00, 0x12, 0x34 }, 0x1234, new byte[] { 0x12, 0x34 })]
-        [InlineData(_MaximumSizeExtendedEncoding, new byte[] { 0x00, 0x00, 0x00 }, _MaximumSizeExtendedEncoding, new byte[] { 0x00, 0x00 })]
+        [InlineData(_MaximumSizeExtendedEncoding, new byte[] { 0x00, 0x00, 0x00 }, _MaximumSizeExtendedEncoding,
+            new byte[] { 0x00, 0x00 })]
         [InlineData(1, new byte[] { 0x00, 0x00, 0x01 }, _MaximumSizeShortEncoding + 1, new byte[] { 0x01, 0x01 })]
         [InlineData(_MaximumSizeShortEncoding + 1, new byte[] { 0x00, 0x01, 0x01 }, 1, new byte[] { 0x00, 0x01 })]
-        public void AsByteArray_HeaderSetDataSetNeSet_EmitsCorrectApduExtended(int nc, byte[] expectedLc, int ne, byte[] expectedLe)
+        public void AsByteArray_HeaderSetDataSetNeSet_EmitsCorrectApduExtended(
+            int nc, byte[] expectedLc, int ne, byte[] expectedLe)
         {
             byte[] data = GenerateRandBytes(nc);
 
@@ -580,7 +584,7 @@ namespace Yubico.Core.Iso7816.UnitTests
             {
                 ApduEncoding.ShortLength => new byte[] { 0x00 },
                 ApduEncoding.ExtendedLength => new byte[] { 0x00, 0x00, 0x00 },
-                _ => Array.Empty<byte>(),   // Shouldn't be reached
+                _ => Array.Empty<byte>(), // Shouldn't be reached
             };
 
             var expectedByteArray = new List<byte>();

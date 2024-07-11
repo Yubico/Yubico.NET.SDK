@@ -60,7 +60,9 @@ namespace Yubico.Core.Iso7816
 
             if (data.Length < 2)
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, ExceptionMessages.ResponseApduNotEnoughBytes, data.Length));
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture, ExceptionMessages.ResponseApduNotEnoughBytes, data.Length));
             }
 
             SW1 = data[^2];

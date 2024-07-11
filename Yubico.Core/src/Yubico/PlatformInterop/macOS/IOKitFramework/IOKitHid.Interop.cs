@@ -215,7 +215,12 @@ namespace Yubico.PlatformInterop
         */
         [DllImport(Libraries.IOKitFramework)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        internal static extern int IOHIDDeviceGetReport(IntPtr device, int reportType, long reportID, byte[] report, ref long pReportLength); /* OS >= 10.5 */
+        internal static extern int IOHIDDeviceGetReport(
+            IntPtr device,
+            int reportType,
+            long reportID,
+            byte[] report,
+            ref long pReportLength); /* OS >= 10.5 */
 
         /*! @function   IOHIDDeviceSetReport
             @abstract   Sends a report to the device.
@@ -233,7 +238,12 @@ namespace Yubico.PlatformInterop
         */
         [DllImport(Libraries.IOKitFramework)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        internal static extern int IOHIDDeviceSetReport(IntPtr device, int reportType, long reportID, byte[] report, long reportLength); /* OS >= 10.5 */
+        internal static extern int IOHIDDeviceSetReport(
+            IntPtr device,
+            int reportType,
+            long reportID,
+            byte[] report,
+            long reportLength); /* OS >= 10.5 */
 
         /*!
             @function   IOHIDDeviceGetService
@@ -285,12 +295,12 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.IOKitFramework)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern void IOHIDDeviceRegisterInputReportCallback(
-            IntPtr device,          // IOHIDDeviceRef
-            byte[] report,          // uint8_t*
-            long reportLength,      // CFIndex (size_t)
-            IntPtr callback,        // IOHIDReportCallback (void*, IOReturn, void*, IOHIDReportType, uint32_t, uint8_t*, CFIndex) -> void
-            IntPtr context);        // void* (optional)
-
+            IntPtr device, // IOHIDDeviceRef
+            byte[] report, // uint8_t*
+            long reportLength, // CFIndex (size_t)
+            IntPtr
+                callback, // IOHIDReportCallback (void*, IOReturn, void*, IOHIDReportType, uint32_t, uint8_t*, CFIndex) -> void
+            IntPtr context); // void* (optional)
 
         /*! @function   IOHIDDeviceScheduleWithRunLoop
             @abstract   Schedules HID device with run loop.
@@ -306,9 +316,9 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.IOKitFramework)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern void IOHIDDeviceScheduleWithRunLoop(
-            IntPtr device,          // IOHIDDeviceRef
-            IntPtr runLoop,         // CFRunLoopRef (struct *)
-            IntPtr runLoopMode);    // CFStringRef (struct *)
+            IntPtr device, // IOHIDDeviceRef
+            IntPtr runLoop, // CFRunLoopRef (struct *)
+            IntPtr runLoopMode); // CFStringRef (struct *)
 
         /*! @function   IOHIDDeviceUnscheduleFromRunLoop
             @abstract   Unschedules HID device with run loop.
@@ -339,8 +349,8 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.IOKitFramework)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern void IOHIDDeviceRegisterRemovalCallback(
-            IntPtr device,          // IOHIDDeviceRef
-            IntPtr callback,        // IOHIDCallback (void*, IOResult, void*) -> void
-            IntPtr context);        // void* (optional)
+            IntPtr device, // IOHIDDeviceRef
+            IntPtr callback, // IOHIDCallback (void*, IOResult, void*) -> void
+            IntPtr context); // void* (optional)
     }
 }

@@ -639,7 +639,7 @@ namespace Yubico.Core.Tlv
         // method and allow the using construction. Hence, there is no need to
         // compare instances. We could have made this a Class instead of a
         // Struct, but we are following the AsnWriter pattern.
-#pragma warning disable CA1034, CA1815 // see comments above
+        #pragma warning disable CA1034, CA1815 // see comments above
         public struct TlvScope : IDisposable
         {
             private TlvWriter? _writer;
@@ -680,6 +680,6 @@ namespace Yubico.Core.Tlv
                 }
             }
         }
-#pragma warning restore CA1034, CA1815
+        #pragma warning restore CA1034, CA1815
     }
 }

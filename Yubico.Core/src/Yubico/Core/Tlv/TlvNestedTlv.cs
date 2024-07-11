@@ -121,6 +121,7 @@ namespace Yubico.Core.Tlv
             {
                 _tagAndLength = BuildTagAndLength(_tag, _subElementLength);
             }
+
             _encodedLength = _tagAndLength.Length + _subElementLength;
         }
 
@@ -147,6 +148,7 @@ namespace Yubico.Core.Tlv
                 {
                     return false;
                 }
+
                 offset += encodingLength;
             }
 

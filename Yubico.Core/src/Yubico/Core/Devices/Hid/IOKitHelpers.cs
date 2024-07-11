@@ -16,7 +16,6 @@ using System;
 using System.Globalization;
 using System.Text;
 using Yubico.PlatformInterop;
-
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.Hid
@@ -51,9 +50,9 @@ namespace Yubico.Core.Devices.Hid
             // We want to rely on Nullable<T>'s null checking and subsequent exception.
             // Rather than duplicate the messaging and exception ourselves, let's just
             // use theirs.
-#pragma warning disable CS8629
+            #pragma warning disable CS8629
             return propertyValue.Value;
-#pragma warning restore CS8629
+            #pragma warning restore CS8629
         }
 
         /// <summary>

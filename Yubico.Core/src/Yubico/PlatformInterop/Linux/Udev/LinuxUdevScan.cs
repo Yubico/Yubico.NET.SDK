@@ -96,6 +96,7 @@ namespace Yubico.PlatformInterop
                 // Get a Device object based on the path.
                 using LinuxUdevDeviceSafeHandle currentDevice =
                     NativeMethods.udev_device_new_from_syspath(_udevObject, Marshal.PtrToStringAnsi(namePtr));
+
                 _ = ThrowIfFailedNull(currentDevice);
 
                 var linuxHid = new LinuxHidDevice(currentDevice);

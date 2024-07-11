@@ -127,13 +127,14 @@ namespace Yubico.Core.Devices.Hid
         /// <exception cref="PlatformNotSupportedException">
         /// Support for this operating system platform has not been added to the SDK yet.
         /// </exception>
-        public static IEnumerable<HidDevice> GetHidDevices() => SdkPlatformInfo.OperatingSystem switch
-        {
-            SdkPlatform.Windows => WindowsHidDevice.GetList(),
-            SdkPlatform.MacOS => MacOSHidDevice.GetList(),
-            SdkPlatform.Linux => LinuxHidDevice.GetList(),
-            _ => throw new PlatformNotSupportedException()
-        };
+        public static IEnumerable<HidDevice> GetHidDevices() =>
+            SdkPlatformInfo.OperatingSystem switch
+            {
+                SdkPlatform.Windows => WindowsHidDevice.GetList(),
+                SdkPlatform.MacOS => MacOSHidDevice.GetList(),
+                SdkPlatform.Linux => LinuxHidDevice.GetList(),
+                _ => throw new PlatformNotSupportedException()
+            };
 
         /// <summary>
         /// Constructs a <see cref="HidDevice"/>.

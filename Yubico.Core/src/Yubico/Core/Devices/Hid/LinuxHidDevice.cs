@@ -163,6 +163,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 _log.LogWarning("IOCTL failed. {error}", LibcHelpers.GetErrnoString());
             }
+
             Marshal.FreeHGlobal(descriptorStructData);
         }
 
@@ -205,7 +206,9 @@ namespace Yubico.Core.Devices.Hid
 
             while (currentOffset < descriptorLength)
             {
-                currentOffset = ReadTagAndLength(descriptor, currentOffset, descriptorLength, out int tag, out int length);
+                currentOffset = ReadTagAndLength(
+                    descriptor, currentOffset, descriptorLength, out int tag, out int length);
+
                 currentOffset = ReadValue(descriptor, currentOffset, descriptorLength, length, out int value);
 
                 // If the tag is 4, the value is the USAGE PAGE. If we already
@@ -215,6 +218,7 @@ namespace Yubico.Core.Devices.Hid
                     usagePageValue = value;
                     usagePageFound = true;
                 }
+
                 // If the tag is 8, the value is the USAGE. Go ahead and set the
                 // Usage property in this object. If we already have a USAGE,
                 // ignore this one.
@@ -254,7 +258,12 @@ namespace Yubico.Core.Devices.Hid
         // If this is long form, the method will read the next two bytes (the
         // actual tag and length), but will verify there are two bytes to read.
         // If not, it will return an offset beyond the tag and length octets.
-        private static int ReadTagAndLength(byte[] descriptor, int offset, int descriptorLength, out int tag, out int length)
+        private static int ReadTagAndLength(
+            byte[] descriptor,
+            int offset,
+            int descriptorLength,
+            out int tag,
+            out int length)
         {
             int newOffset = offset + 1;
 
@@ -307,7 +316,6 @@ namespace Yubico.Core.Devices.Hid
             return newOffset;
         }
 
-
         /// <summary>
         /// Return an implementation of IHidConnection that will already have a
         /// connection to the Linux HID device, and will be able to Get and Set Feature Reports.
@@ -330,7 +338,8 @@ namespace Yubico.Core.Devices.Hid
         public void LogDeviceAccessTime()
         {
             LastAccessed = DateTime.Now;
-            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
+            _log.LogInformation(
+                "Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
         }
     }
 }

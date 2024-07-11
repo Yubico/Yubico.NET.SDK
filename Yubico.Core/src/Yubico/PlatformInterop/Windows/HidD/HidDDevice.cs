@@ -50,6 +50,7 @@ namespace Yubico.PlatformInterop
             _handle.Dispose();
             _handle = OpenHandleWithAccess(DESIRED_ACCESS.GENERIC_READ | DESIRED_ACCESS.GENERIC_WRITE);
         }
+
         public void OpenFeatureConnection()
         {
             _handle.Dispose();
@@ -185,6 +186,7 @@ namespace Yubico.PlatformInterop
         }
 
         #region IDisposable Support
+
         private bool disposedValue; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
@@ -201,9 +203,8 @@ namespace Yubico.PlatformInterop
         }
 
         // This code added to correctly implement the disposable pattern.
-        public void Dispose() =>
-            Dispose(true);
-        #endregion
+        public void Dispose() => Dispose(true);
 
+        #endregion
     }
 }

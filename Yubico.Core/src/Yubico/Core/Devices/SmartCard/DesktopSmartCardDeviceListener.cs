@@ -19,7 +19,6 @@ using System.Linq;
 using System.Threading;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
-
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.SmartCard
@@ -59,7 +58,9 @@ namespace Yubico.Core.Devices.SmartCard
                 _context = new SCardContext(IntPtr.Zero);
                 _readerStates = Array.Empty<SCARD_READER_STATE>();
                 Status = DeviceListenerStatus.Error;
-                _log.LogWarning("SmartCardDeviceListener dormant as SDK was unable to establish a context to the PCSC service.");
+                _log.LogWarning(
+                    "SmartCardDeviceListener dormant as SDK was unable to establish a context to the PCSC service.");
+
                 return;
             }
 
@@ -80,6 +81,7 @@ namespace Yubico.Core.Devices.SmartCard
                 {
                     IsBackground = true
                 };
+
                 _isListening = true;
                 Status = DeviceListenerStatus.Started;
                 _listenerThread.Start();
@@ -93,13 +95,13 @@ namespace Yubico.Core.Devices.SmartCard
         // will terminate the thread.
         private void ListenForReaderChanges()
         {
-            _log.LogInformation("Smart card listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
+            _log.LogInformation(
+                "Smart card listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
             bool usePnpWorkaround = UsePnpWorkaround();
 
             while (_isListening && CheckForUpdates(-1, usePnpWorkaround))
             {
-
             }
         }
 
@@ -121,6 +123,7 @@ namespace Yubico.Core.Devices.SmartCard
                     _context.Dispose();
                     StopListening();
                 }
+
                 _disposedValue = true;
             }
         }
@@ -188,8 +191,11 @@ namespace Yubico.Core.Devices.SmartCard
             while (ReaderListChangeDetected(ref newStates, usePnpWorkaround))
             {
                 SCARD_READER_STATE[] eventStateList = GetReaderStateList();
-                SCARD_READER_STATE[] addedReaderStates = eventStateList.Except(newStates, new ReaderStateComparer()).ToArray();
-                SCARD_READER_STATE[] removedReaderStates = newStates.Except(eventStateList, new ReaderStateComparer()).ToArray();
+                SCARD_READER_STATE[] addedReaderStates =
+                    eventStateList.Except(newStates, new ReaderStateComparer()).ToArray();
+
+                SCARD_READER_STATE[] removedReaderStates =
+                    newStates.Except(eventStateList, new ReaderStateComparer()).ToArray();
 
                 // Don't get status changes if there are no updates in state list.
                 if (!addedReaderStates.Any() && !removedReaderStates.Any())
@@ -200,7 +206,8 @@ namespace Yubico.Core.Devices.SmartCard
                 var readerStateList = newStates.ToList();
                 readerStateList.AddRange(addedReaderStates);
 
-                SCARD_READER_STATE[] updatedStates = readerStateList.Except(removedReaderStates, new ReaderStateComparer()).ToArray();
+                SCARD_READER_STATE[] updatedStates =
+                    readerStateList.Except(removedReaderStates, new ReaderStateComparer()).ToArray();
 
                 // Special handle readers with cards in them
                 if (sendEvents)
@@ -216,7 +223,9 @@ namespace Yubico.Core.Devices.SmartCard
                 // have been dealt with.
                 if (addedReaderStates.Any())
                 {
-                    _log.LogInformation("Additional smart card readers were found. Calling GetStatusChange for more information.");
+                    _log.LogInformation(
+                        "Additional smart card readers were found. Calling GetStatusChange for more information.");
+
                     getStatusChangeResult = SCardGetStatusChange(_context, 0, updatedStates, updatedStates.Length);
 
                     if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
@@ -227,7 +236,9 @@ namespace Yubico.Core.Devices.SmartCard
 
                     if (UpdateContextIfNonCritical(getStatusChangeResult))
                     {
-                        _log.LogInformation("GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
+                        _log.LogInformation(
+                            "GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
+
                         return true;
                     }
 
@@ -249,7 +260,9 @@ namespace Yubico.Core.Devices.SmartCard
 
                 if (UpdateContextIfNonCritical(getStatusChangeResult))
                 {
-                    _log.LogInformation("GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
+                    _log.LogInformation(
+                        "GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
+
                     return true;
                 }
 
@@ -280,7 +293,9 @@ namespace Yubico.Core.Devices.SmartCard
         // us of the change.
         private bool UsePnpWorkaround()
         {
-            SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(new[] { "\\\\?\\Pnp\\Notifications" });
+            SCARD_READER_STATE[] testState =
+                SCARD_READER_STATE.CreateFromReaderNames(new[] { "\\\\?\\Pnp\\Notifications" });
+
             _ = SCardGetStatusChange(_context, 0, testState, testState.Length);
             bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
             return usePnpWorkaround;
@@ -328,6 +343,7 @@ namespace Yubico.Core.Devices.SmartCard
                 {
                     return true;
                 }
+
                 if (diffState.HasFlag(SCARD_STATE.PRESENT) && newStates[i].EventState.HasFlag(SCARD_STATE.PRESENT))
                 {
                     return true;
@@ -344,7 +360,11 @@ namespace Yubico.Core.Devices.SmartCard
         /// <param name="newStates">State list to check for changes.</param>
         /// <param name="arrivedDevices">List where new arrived devices will be added.</param>
         /// <param name="removedDevices">List where new removed devices will be added.</param>
-        private static void DetectRelevantChanges(SCARD_READER_STATE[] originalStates, SCARD_READER_STATE[] newStates, List<ISmartCardDevice> arrivedDevices, List<ISmartCardDevice> removedDevices)
+        private static void DetectRelevantChanges(
+            SCARD_READER_STATE[] originalStates,
+            SCARD_READER_STATE[] newStates,
+            List<ISmartCardDevice> arrivedDevices,
+            List<ISmartCardDevice> removedDevices)
         {
             foreach (SCARD_READER_STATE entry in newStates)
             {
@@ -352,15 +372,19 @@ namespace Yubico.Core.Devices.SmartCard
 
                 if (diffState.HasFlag(SCARD_STATE.PRESENT) && entry.CurrentState.HasFlag(SCARD_STATE.PRESENT))
                 {
-                    IEnumerable<SCARD_READER_STATE> states = originalStates.Where(e => e.ReaderName == entry.ReaderName);
+                    IEnumerable<SCARD_READER_STATE>
+                        states = originalStates.Where(e => e.ReaderName == entry.ReaderName);
+
                     ISmartCardDevice smartCardDevice =
                         SmartCardDevice.Create(entry.ReaderName, states.FirstOrDefault().Atr);
+
                     removedDevices.Add(smartCardDevice);
                 }
                 else if (diffState.HasFlag(SCARD_STATE.PRESENT) && entry.EventState.HasFlag(SCARD_STATE.PRESENT))
                 {
                     ISmartCardDevice smartCardDevice =
                         SmartCardDevice.Create(entry.ReaderName, entry.Atr);
+
                     arrivedDevices.Add(smartCardDevice);
                 }
             }
@@ -454,7 +478,9 @@ namespace Yubico.Core.Devices.SmartCard
         {
             public bool Equals(SCARD_READER_STATE x, SCARD_READER_STATE y) => x.ReaderName == y.ReaderName;
 
-            [SuppressMessage("Globalization", "CA1307:Specify StringComparison for clarity", Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
+            [SuppressMessage(
+                "Globalization", "CA1307:Specify StringComparison for clarity",
+                Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
             public int GetHashCode(SCARD_READER_STATE obj) => obj.ReaderName.GetHashCode();
         }
     }

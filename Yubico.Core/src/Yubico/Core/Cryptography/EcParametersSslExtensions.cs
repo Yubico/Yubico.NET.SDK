@@ -57,6 +57,7 @@ namespace Yubico.Core.Cryptography
         /// <exception cref="NotSupportedException">
         /// This function only supports the NIST P256, P384, and P512 curves as of version 1.5.0.
         /// </exception>
+
         // Curve IDs from include/openssl/obj_mac.h
         public static int ToSslCurveId(this ECCurve curve) =>
             curve switch

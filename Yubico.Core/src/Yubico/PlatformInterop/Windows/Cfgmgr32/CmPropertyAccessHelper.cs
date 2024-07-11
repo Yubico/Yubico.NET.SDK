@@ -21,7 +21,6 @@ using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.PlatformInterop
 {
-
     internal class CmPropertyAccessHelper
     {
         internal delegate CmErrorCode GetObjectProperty<T>(
@@ -29,10 +28,12 @@ namespace Yubico.PlatformInterop
             in DEVPROPKEY propertyKey,
             out DEVPROP_TYPE propertyType,
             byte[]? propertyBuffer,
-            ref IntPtr propertyBufferSize
-            );
+            ref IntPtr propertyBufferSize);
 
-        internal static object? TryGetProperty<T>(GetObjectProperty<T> getObjectProperty, T objectId, DEVPROPKEY propertyKey)
+        internal static object? TryGetProperty<T>(
+            GetObjectProperty<T> getObjectProperty,
+            T objectId,
+            DEVPROPKEY propertyKey)
         {
             CmErrorCode errorCode;
 

@@ -21,13 +21,11 @@ namespace Yubico.PlatformInterop
     {
         public SafeEcGroup() : base(IntPtr.Zero, true)
         {
-
         }
 
         /// <inheritdoc />
         public SafeEcGroup(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
         {
-
         }
 
         /// <inheritdoc />

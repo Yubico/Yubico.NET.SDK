@@ -50,6 +50,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 IsBackground = true
             };
+
             _listenerThread.Start();
         }
 
@@ -70,7 +71,8 @@ namespace Yubico.Core.Devices.Hid
             const int runLoopTimeout = 10; // 10 seconds is arbitrary, pulled from Apple sample code
             using IDisposable? logScope = _log.BeginScope("MacOSHidDeviceListener.StartListening()");
 
-            _log.LogInformation("HID listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
+            _log.LogInformation(
+                "HID listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
             IntPtr manager = IntPtr.Zero;
             IntPtr runLoopMode = IntPtr.Zero;
@@ -109,6 +111,7 @@ namespace Yubico.Core.Devices.Hid
                 {
                     runLoopResult = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, true);
                 }
+
                 _log.LogInformation("Run loop exited.");
 
                 if (runLoopResult != kCFRunLoopRunStopped)
@@ -138,7 +141,6 @@ namespace Yubico.Core.Devices.Hid
         private void ArrivedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) =>
             OnArrived(new MacOSHidDevice(MacOSHidDevice.GetEntryId(device)));
 
-        private void RemovedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) =>
-            OnRemoved(null);
+        private void RemovedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) => OnRemoved(null);
     }
 }

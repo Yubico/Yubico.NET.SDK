@@ -21,7 +21,6 @@ using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid.UnitTests
 {
-
 #if false
     public class HidConnectionTests
     {

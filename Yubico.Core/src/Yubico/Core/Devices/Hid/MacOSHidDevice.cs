@@ -18,7 +18,6 @@ using System.Globalization;
 using System.Linq;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
-
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.Hid
@@ -70,14 +69,21 @@ namespace Yubico.Core.Devices.Hid
                 CFSetGetValues(deviceSet, devices);
 
                 return devices
-                    .Select(device => new MacOSHidDevice(GetEntryId(device))
-                    {
-                        VendorId = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyVendorId) ?? 0),
-                        ProductId = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyProductId) ?? 0),
-                        Usage = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsage) ?? 0),
-                        UsagePage = (HidUsagePage?)IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsagePage) ?? HidUsagePage.Unknown,
-                        ParentDeviceId = IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyLocationId)?.ToString(CultureInfo.InvariantCulture)
-                    })
+                    .Select(
+                        device => new MacOSHidDevice(GetEntryId(device))
+                        {
+                            VendorId = (short)(IOKitHelpers.GetNullableIntPropertyValue(
+                                device, IOKitHidConstants.DevicePropertyVendorId) ?? 0),
+                            ProductId = (short)(IOKitHelpers.GetNullableIntPropertyValue(
+                                device, IOKitHidConstants.DevicePropertyProductId) ?? 0),
+                            Usage = (short)(IOKitHelpers.GetNullableIntPropertyValue(
+                                device, IOKitHidConstants.DevicePropertyPrimaryUsage) ?? 0),
+                            UsagePage = (HidUsagePage?)IOKitHelpers.GetNullableIntPropertyValue(
+                                device, IOKitHidConstants.DevicePropertyPrimaryUsagePage) ?? HidUsagePage.Unknown,
+                            ParentDeviceId = IOKitHelpers
+                                .GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyLocationId)
+                                ?.ToString(CultureInfo.InvariantCulture)
+                        })
                     .ToList();
             }
             finally
@@ -102,8 +108,7 @@ namespace Yubico.Core.Devices.Hid
         /// <returns>
         /// An active connection object.
         /// </returns>
-        public override IHidConnection ConnectToFeatureReports() =>
-            new MacOSHidFeatureReportConnection(this, _entryId);
+        public override IHidConnection ConnectToFeatureReports() => new MacOSHidFeatureReportConnection(this, _entryId);
 
         /// <summary>
         /// Establishes a connection capable of transmitting IO reports to a FIDO device.
@@ -111,8 +116,7 @@ namespace Yubico.Core.Devices.Hid
         /// <returns>
         /// An active connection object.
         /// </returns>
-        public override IHidConnection ConnectToIOReports() =>
-            new MacOSHidIOReportConnection(this, _entryId);
+        public override IHidConnection ConnectToIOReports() => new MacOSHidIOReportConnection(this, _entryId);
 
         internal static long GetEntryId(IntPtr device)
         {
@@ -136,7 +140,8 @@ namespace Yubico.Core.Devices.Hid
         public void LogDeviceAccessTime()
         {
             LastAccessed = DateTime.Now;
-            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
+            _log.LogInformation(
+                "Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
         }
     }
 }

@@ -26,23 +26,25 @@ namespace Yubico.Core.Iso7816
             _bytes = bytes.ToArray();
         }
 
-        public override bool Equals(object? obj) => obj switch
-        {
-            AnswerToReset atr => this == atr,
-            _ => false
-        };
+        public override bool Equals(object? obj) =>
+            obj switch
+            {
+                AnswerToReset atr => this == atr,
+                _ => false
+            };
 
         public override int GetHashCode() => _bytes.GetHashCode();
 
         public override string ToString() => BitConverter.ToString(_bytes.ToArray());
 
-        public static bool operator ==(AnswerToReset l, AnswerToReset r) => (l, r) switch
-        {
-            (AnswerToReset _, null) => false,
-            (null, AnswerToReset _) => false,
-            (AnswerToReset left, AnswerToReset right) => left._bytes.AsSpan().SequenceEqual(right._bytes.AsSpan()),
-            _ => false
-        };
+        public static bool operator ==(AnswerToReset l, AnswerToReset r) =>
+            (l, r) switch
+            {
+                (AnswerToReset _, null) => false,
+                (null, AnswerToReset _) => false,
+                (AnswerToReset left, AnswerToReset right) => left._bytes.AsSpan().SequenceEqual(right._bytes.AsSpan()),
+                _ => false
+            };
 
         public static bool operator !=(AnswerToReset l, AnswerToReset r) => !(l == r);
     }

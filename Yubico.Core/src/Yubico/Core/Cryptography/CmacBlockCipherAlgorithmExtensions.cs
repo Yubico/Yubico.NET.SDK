@@ -32,13 +32,14 @@ namespace Yubico.Core.Cryptography
         /// An int, the length, in bytes, of the key for the specified block
         /// cipher algorithm.
         /// </returns>
-        public static int KeyLength(this CmacBlockCipherAlgorithm algorithm) => algorithm switch
-        {
-            CmacBlockCipherAlgorithm.Aes128 => 16,
-            CmacBlockCipherAlgorithm.Aes192 => 24,
-            CmacBlockCipherAlgorithm.Aes256 => 32,
-            _ => throw new ArgumentOutOfRangeException(ExceptionMessages.InvalidCmacInput),
-        };
+        public static int KeyLength(this CmacBlockCipherAlgorithm algorithm) =>
+            algorithm switch
+            {
+                CmacBlockCipherAlgorithm.Aes128 => 16,
+                CmacBlockCipherAlgorithm.Aes192 => 24,
+                CmacBlockCipherAlgorithm.Aes256 => 32,
+                _ => throw new ArgumentOutOfRangeException(ExceptionMessages.InvalidCmacInput),
+            };
 
         /// <summary>
         /// Returns the size, in bytes, of the resulting CMAC given the specified
@@ -51,12 +52,13 @@ namespace Yubico.Core.Cryptography
         /// An int, the size, in bytes, of the CMAC result for the specified
         /// block cipher algorithm.
         /// </returns>
-        public static int MacLength(this CmacBlockCipherAlgorithm algorithm) => algorithm switch
-        {
-            CmacBlockCipherAlgorithm.Aes128 => 16,
-            CmacBlockCipherAlgorithm.Aes192 => 16,
-            CmacBlockCipherAlgorithm.Aes256 => 16,
-            _ => throw new ArgumentOutOfRangeException(ExceptionMessages.InvalidCmacInput),
-        };
+        public static int MacLength(this CmacBlockCipherAlgorithm algorithm) =>
+            algorithm switch
+            {
+                CmacBlockCipherAlgorithm.Aes128 => 16,
+                CmacBlockCipherAlgorithm.Aes192 => 16,
+                CmacBlockCipherAlgorithm.Aes256 => 16,
+                _ => throw new ArgumentOutOfRangeException(ExceptionMessages.InvalidCmacInput),
+            };
     }
 }

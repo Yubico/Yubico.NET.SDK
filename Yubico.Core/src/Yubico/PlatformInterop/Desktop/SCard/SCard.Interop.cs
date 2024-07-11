@@ -21,15 +21,19 @@ namespace Yubico.PlatformInterop
 {
     internal static partial class NativeMethods
     {
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardBeginTransaction", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_SCardBeginTransaction", ExactSpelling = true,
+            CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardBeginTransaction(SCardCardHandle cardHandle);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardCancel", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_SCardCancel", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardCancel(SCardContext context);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardConnect", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_SCardConnect", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardConnect(
             SCardContext context,
@@ -37,48 +41,50 @@ namespace Yubico.PlatformInterop
             SCARD_SHARE shareMode,
             SCARD_PROTOCOL preferredProtocols,
             out SCardCardHandle cardHandle,
-            out SCARD_PROTOCOL activeProtocol
-            );
+            out SCARD_PROTOCOL activeProtocol);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardDisconnect", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_SCardDisconnect", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardDisconnect(
             IntPtr cardHandle,
-            SCARD_DISPOSITION disposition
-            );
+            SCARD_DISPOSITION disposition);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardEndTransaction", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_SCardEndTransaction", ExactSpelling = true,
+            CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardEndTransaction(
             SCardCardHandle cardHandle,
-            SCARD_DISPOSITION disposition
-            );
+            SCARD_DISPOSITION disposition);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardEstablishContext", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_SCardEstablishContext", ExactSpelling = true,
+            CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardEstablishContext(
             SCARD_SCOPE scope,
-            out SCardContext context
-            );
+            out SCardContext context);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardGetStatusChange", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_SCardGetStatusChange", ExactSpelling = true,
+            CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardGetStatusChange(
             SCardContext context,
             int timeout,
             [In, Out] SCARD_READER_STATE[] readerStates,
-            int readerStatesCount
-            );
+            int readerStatesCount);
 
-
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardListReaders", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_SCardListReaders", ExactSpelling = true,
+            CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern uint SCardListReaders(
             SCardContext context,
             byte[]? groups,
             byte[]? readerNames,
-            ref int readerNamesLength
-            );
+            ref int readerNamesLength);
 
         public static uint SCardListReaders(
             SCardContext context,
@@ -123,21 +129,24 @@ namespace Yubico.PlatformInterop
             return result;
         }
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardReconnect", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_SCardReconnect", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardReconnect(
             SCardCardHandle cardHandle,
             SCARD_SHARE shareMode,
             SCARD_PROTOCOL preferredProtocols,
             SCARD_DISPOSITION initialization,
-            out SCARD_PROTOCOL activeProtocol
-            );
+            out SCARD_PROTOCOL activeProtocol);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardReleaseContext", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_SCardReleaseContext", ExactSpelling = true,
+            CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardReleaseContext(IntPtr context);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardTransmit", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_SCardTransmit", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern uint SCardTransmit(
             SCardCardHandle cardHandle,
@@ -146,8 +155,7 @@ namespace Yubico.PlatformInterop
             int sendLength,
             IntPtr ioRecvPci,
             IntPtr recvBuffer,
-            ref int recvLength
-            );
+            ref int recvLength);
 
         public static unsafe uint SCardTransmit(
             SCardCardHandle card,
@@ -155,8 +163,7 @@ namespace Yubico.PlatformInterop
             ReadOnlySpan<byte> sendBuffer,
             IntPtr ioRecvPci,
             Span<byte> recvBuffer,
-            out int bytesReceived
-            )
+            out int bytesReceived)
         {
             fixed (byte* sendBufferPtr = sendBuffer)
             fixed (byte* recvBufferPtr = recvBuffer)

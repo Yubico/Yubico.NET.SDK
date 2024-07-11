@@ -19,6 +19,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class TagTests
     {
         [Theory]
@@ -38,7 +39,7 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.AuthenticateManagementKey();
 
-                    byte[] arbitraryData = new byte[] {
+                    byte[] arbitraryData = {
                         0x53, 0x02, 0x04, 0x00
                     };
 
@@ -54,7 +55,7 @@ namespace Yubico.YubiKey.Piv
 
                     ReadOnlyMemory<byte> theData = getRsp.GetData();
 
-                    bool isValid = MemoryExtensions.SequenceEqual<byte>(arbitraryData, theData.Span);
+                    bool isValid = MemoryExtensions.SequenceEqual(arbitraryData, theData.Span);
                     Assert.True(isValid);
                 }
                 finally
@@ -81,7 +82,7 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.AuthenticateManagementKey();
 
-                    byte[] arbitraryData = new byte[] {
+                    byte[] arbitraryData = {
                         0x53, 0x02, 0x04, 0x00
                     };
 

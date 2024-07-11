@@ -7,7 +7,7 @@ typedef void* Native_EVP_MAC_CTX;
 
 Native_EVP_MAC_CTX
 NATIVEAPI
-Native_CMAC_EVP_MAC_CTX_new()
+Native_CMAC_EVP_MAC_CTX_new(void)
 {
     EVP_MAC *mac = NULL;
     EVP_MAC_CTX *macCtx = NULL;

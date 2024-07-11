@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Fido2
             GetInfoResponse getInfoRsp = connection.SendCommand(getInfoCmd);
             Assert.Equal(ResponseStatus.Success, getInfoRsp.Status);
             AuthenticatorInfo authInfo = getInfoRsp.GetData();
-            Assert.Equal(32, authInfo.MaximumCredentialBlobLength);
+            Assert.Equal(32, authInfo.MaximumCredentialBlobLength); /* Assert.Equal() Failure: Values differExpected: 32 Actual: null */
 
             int maxCredBlobLength = authInfo.MaximumCredentialBlobLength ?? 0;
             Assert.NotNull(authInfo.Extensions);
@@ -57,18 +57,14 @@ namespace Yubico.YubiKey.Fido2
                 Assert.True(isValid);
 
                 isValid = SupportsLargeBlobs(fido2Session.AuthenticatorInfo);
-                Assert.True(isValid);
+                Assert.True(isValid); /*Xunit.Sdk.TrueException
+Assert.True() Failure
+Expected: True
+Actual:   False*/
 
                 isValid = GetParams(fido2Session, out MakeCredentialParameters makeParams);
                 Assert.True(isValid);
             }
-
-            //            var cmd = new MakeCredentialCommand(makeParams);
-            //            MakeCredentialResponse rsp = connection.SendCommand(cmd);
-            //            Assert.Equal(ResponseStatus.Success, rsp.Status);
-            //            MakeCredentialData cData = rsp.GetData();
-            //            isValid = cData.VerifyAttestation(makeParams.ClientDataHash);
-            //            Assert.True(isValid);
         }
 
         private bool SupportsLargeBlobs(AuthenticatorInfo authenticatorInfo)
@@ -88,11 +84,13 @@ namespace Yubico.YubiKey.Fido2
             Fido2Session fido2Session,
             out MakeCredentialParameters makeParams)
         {
-            byte[] clientDataHash = new byte[] {
+            byte[] clientDataHash =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };
-            byte[] arbitraryData = new byte[] {
+            byte[] arbitraryData =
+            {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A
             };
 
@@ -100,7 +98,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 Name = "SomeRpName",
             };
-            byte[] userId = new byte[] { 0x11, 0x22, 0x33, 0x44 };
+            byte[] userId = { 0x11, 0x22, 0x33, 0x44 };
             var user = new UserEntity(new ReadOnlyMemory<byte>(userId))
             {
                 Name = "SomeUserName",
@@ -113,7 +111,8 @@ namespace Yubico.YubiKey.Fido2
             {
                 return false;
             }
-            ReadOnlyMemory<byte> token = (ReadOnlyMemory<byte>)fido2Session.AuthToken;
+
+            var token = (ReadOnlyMemory<byte>)fido2Session.AuthToken;
             byte[] pinUvAuthParam = fido2Session.AuthProtocol.AuthenticateUsingPinToken(
                 token.ToArray(), clientDataHash);
 

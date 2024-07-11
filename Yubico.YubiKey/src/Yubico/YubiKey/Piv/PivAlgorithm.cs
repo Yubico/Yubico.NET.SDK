@@ -62,6 +62,18 @@ namespace Yubico.YubiKey.Piv
         Rsa2048 = 0x07,
 
         /// <summary>
+        /// Indicates that the algorithm is RSA and the key size (modulus size) is
+        /// 3072 bits.
+        /// </summary>
+        Rsa3072 = 0x05,
+
+        /// <summary>
+        /// Indicates that the algorithm is RSA and the key size (modulus size) is
+        /// 4096 bits.
+        /// </summary>
+        Rsa4096 = 0x16,
+
+        /// <summary>
         /// Indicates that the algorithm is ECC and the parameters are P-256,
         /// specified in FIPS 186-4 (moving to NIST SP 800-186).
         /// </summary>

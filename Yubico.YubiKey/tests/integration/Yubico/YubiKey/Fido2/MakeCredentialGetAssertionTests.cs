@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -29,11 +30,14 @@ namespace Yubico.YubiKey.Fido2
 
         static readonly RelyingParty _rp = new RelyingParty("relyingparty1");
 
-        [Fact]
+        // This test requires user to touch the device.
+        [Fact, Trait("Category", "RequiresTouch")]
         public void MakeCredential_NonDiscoverable_GetAssertion_Succeeds()
         {
-            // Test assumptions: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
             IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
+
+            bool isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
+            Assert.True(isValid);
 
             using (var fido2 = new Fido2Session(yubiKeyDevice))
             {
@@ -68,14 +72,26 @@ namespace Yubico.YubiKey.Fido2
 
                 GetAssertionData assertion = Assert.Single(assertions);
                 Assert.Equal(1, assertion.NumberOfCredentials);
+                // Assert.Equal() Failure: Values differ
+                // Expected: 1
+                // Actual:   null
+
+                // assertion.NumberOfCredentials
+                // The total number of credentials found on the YubiKey for the relying
+                // party. This is optional and can be null. If null, then there is only
+                // one credential.
+                //
             }
         }
 
-        [Fact]
+        // This test requires user to touch the device.
+        [Fact, Trait("Category", "RequiresTouch")]
         public void MakeCredential_NoName_GetAssertion_Succeeds()
         {
-            // Test assumptions: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
             IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
+
+            bool isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
+            Assert.True(isValid);
 
             using (var fido2 = new Fido2Session(yubiKeyDevice))
             {
@@ -107,20 +123,23 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        [Fact]
+        // This test requires user to touch the device.
+        [Fact, Trait("Category", "RequiresTouch")]
         public void MakeCredential_MultipleCredentials_GetAssertion_ReturnsMultipleAssertions()
         {
-            // Test assumptions: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
             IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
+
+            bool isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
+            Assert.True(isValid);
 
             using (var fido2 = new Fido2Session(yubiKeyDevice))
             {
                 // Set up a key collector
                 fido2.KeyCollector = KeyCollector;
-                int startCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!;
+                int startCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!; //RemainingDiscoverableCredentials is NULL on my two keys I tried with (USBA 5.4.3 Keychain and Nano)
 
                 // Verify the PIN
-                fido2.VerifyPin();
+                fido2.VerifyPin(); //Never completes on my 5.7 
 
                 // Call MakeCredential
                 var user1 = new UserEntity(new byte[] { 1, 2, 3, 4 })

@@ -52,6 +52,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         [InlineData(PivAlgorithm.EccP256)]
         [InlineData(PivAlgorithm.EccP384)]
         public void GetData_InvalidKeyData_ThrowsException(PivAlgorithm algorithm)
@@ -92,6 +94,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         [InlineData(PivAlgorithm.EccP256)]
         [InlineData(PivAlgorithm.EccP384)]
         public void Constructor_SetsAlgorithmCorrectly(PivAlgorithm algorithm)
@@ -122,6 +126,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         [InlineData(PivAlgorithm.EccP256)]
         [InlineData(PivAlgorithm.EccP384)]
         public void GetData_FailResponse_ThrowsException(PivAlgorithm algorithm)
@@ -135,6 +141,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         [InlineData(PivAlgorithm.EccP256)]
         [InlineData(PivAlgorithm.EccP384)]
         public void GetData_AuthenticationRequiredResponse_ThrowsException(PivAlgorithm algorithm)
@@ -148,6 +156,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         [InlineData(PivAlgorithm.EccP256)]
         [InlineData(PivAlgorithm.EccP384)]
         public void GetData_ReturnsCorrectData(PivAlgorithm algorithm)

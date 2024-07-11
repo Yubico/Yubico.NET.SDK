@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Official SDK Documentation and User Manual
+    url: https://docs.yubico.com/yesdk/
+    about: Find your answer in our documentation.
+  - name: The Yubico Blog
+    url: https://www.yubico.com/blog/
+    about: Stay up to date on company and partner news, product tips, and industry trends.

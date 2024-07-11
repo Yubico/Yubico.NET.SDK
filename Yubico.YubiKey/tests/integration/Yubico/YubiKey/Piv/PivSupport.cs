@@ -95,12 +95,10 @@ namespace Yubico.YubiKey.Piv
             int retriesRemaining;
             do
             {
-                byte[] currentValue = new byte[]
-                {
+                byte[] currentValue = {
                     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
                 };
-                byte[] newValue = new byte[]
-                {
+                byte[] newValue = {
                     0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22
                 };
                 var changeCommand = new ChangeReferenceDataCommand(slotNumber, currentValue, newValue);

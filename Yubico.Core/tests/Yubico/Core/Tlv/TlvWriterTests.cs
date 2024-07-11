@@ -17,11 +17,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Yubico.Core.Tlv.UnitTests
 {
     public class TlvWriterTests
     {
+        private readonly ITestOutputHelper _testOutputHelper;
+
+        public TlvWriterTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
+
         [Theory]
         [InlineData(0x9B)]
         [InlineData(0x5F11)]
@@ -450,6 +458,43 @@ namespace Yubico.Core.Tlv.UnitTests
                 Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
             }
+        }
+
+        [Fact]
+        public void EncodeTag_Has_Correct_LengthAndOffset()
+        {
+            _testOutputHelper.WriteLine("Output: ");
+            int bytesSize = 128;
+            while (bytesSize < 150000)
+            {
+                var writer = new TlvWriter();
+                var data = new byte[bytesSize];
+
+                // My visible data
+                data[0] = 0xFF;
+
+                writer.WriteValue(0x1, data);
+                var encoding = writer.Encode();
+                var reader = new TlvReader(encoding);
+                Assert.Equal(bytesSize, reader.PeekLength());
+
+                var bytesAsHex = encoding[..9].Select(b => b.ToString("X2"));
+                PrettyPrint(bytesSize, bytesAsHex);
+
+                // Increase for next round
+                bytesSize *= 2;
+            }
+        }
+
+        private void PrettyPrint(int number, IEnumerable<string> bytesAsHex)
+        {
+            // Print the contents 
+            int numDigits = number.ToString().Length;
+            int spacesNeeded = Math.Max(5 - numDigits, 0);
+            string padding = new string(' ', spacesNeeded);
+            _testOutputHelper.WriteLine(
+                $"{padding + number}: {string.Join(",", bytesAsHex)}"
+            );
         }
     }
 }

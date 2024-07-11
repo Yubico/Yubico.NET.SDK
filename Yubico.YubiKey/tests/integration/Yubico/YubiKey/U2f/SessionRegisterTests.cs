@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using Yubico.Core.Devices.Hid;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
 
@@ -52,11 +51,11 @@ namespace Yubico.YubiKey.U2f
             {
                 u2fSession.KeyCollector = keyCollector.SimpleU2fKeyCollectorDelegate;
 
-                var cmd = new GetDeviceInfoCommand();
-                GetDeviceInfoResponse rsp = u2fSession.Connection.SendCommand(cmd);
+                var cmd = new GetPagedDeviceInfoCommand();
+                GetPagedDeviceInfoResponse rsp = u2fSession.Connection.SendCommand(cmd);
                 Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-                YubiKeyDeviceInfo getData = rsp.GetData();
+                var getData = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
                 if (!getData.IsFipsSeries)
                 {
                     return;
@@ -84,7 +83,7 @@ namespace Yubico.YubiKey.U2f
                     return;
                 }
 
-                var regData = (RegistrationData)regDataQ;
+                RegistrationData regData = regDataQ;
 
                 bool isVerified = regData.VerifySignature(appId, clientDataHash);
                 Assert.True(isVerified);

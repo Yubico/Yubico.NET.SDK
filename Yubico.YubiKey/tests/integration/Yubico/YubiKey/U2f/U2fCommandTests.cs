@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.PlatformInterop;
@@ -56,12 +55,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void RegisterAndAuth_Succeeds()
         {
-            if (_fidoConnection is null)
-            {
-                return;
-            }
-
-            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            byte[] pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
             var vfyPinCmd = new VerifyPinCommand(pin);
             VerifyPinResponse vfyPinRsp = _fidoConnection.SendCommand(vfyPinCmd);
             Assert.Equal(ResponseStatus.Success, vfyPinRsp.Status);

@@ -30,59 +30,59 @@ namespace Yubico.YubiKey.Piv
         private const int AdminDataDataTag = 0x005FFF00;
 
         /// <summary>
-        /// Return an enum indicating the PIN-only mode, if any, for which the
-        /// YubiKey PIV application is configured.
+        ///     Return an enum indicating the PIN-only mode, if any, for which the
+        ///     YubiKey PIV application is configured.
         /// </summary>
         /// <remarks>
-        /// PIN-only mode means that the application does not need to enter the
-        /// management key in order to perform PIV operations that normally
-        /// require it, only the PIN is needed.
-        /// <para>
-        /// See the User's Manual entry on
-        /// <xref href="UsersManualPivPinOnlyMode"> PIV PIN-only mode</xref> for
-        /// a deeper discussion of this feature.
-        /// </para>
-        /// <para>
-        /// This returns a result based on the contents of ADMIN DATA. That
-        /// storage location contains information about PIN-protected and
-        /// PIN-derived. It is possible for a different application to overwrite
-        /// the data to make it inaccurate. That is unlikely, however, if all
-        /// applications follow good programming practices outlined by the SDK
-        /// documentation. This method will not actually verify the management
-        /// key in order to ensure the return value is correct.
-        /// </para>
-        /// <para>
-        /// If the ADMIN DATA is overwritten, it is possible to call
-        /// <see cref="TryRecoverPinOnlyMode()"/> to restore the YubiKey to a
-        /// proper PIN-only state.
-        /// </para>
-        /// <para>
-        /// Note also that it is possible that the ADMIN DATA says the YubiKey is
-        /// PIN-protected, but some app has overwritten the data in PRINTED. In
-        /// that case, this method will return a result indicating
-        /// <c>PinProtected</c>, when in reality PIN-protected is unavailable.
-        /// That is because this returns a value based only on the contents of
-        /// ADMIN DATA. The method <c>TryRecoverPinOnlyMode</c> will check more
-        /// than ADMIN DATA.
-        /// </para>
-        /// <para>
-        /// Note that the return is a bit field and the return can be one or more
-        /// of the bits set. There are bits that indicate a YubiKey is
-        /// unavailable for PIN-protected or PIN-derived. Call this method before
-        /// trying to set a YubiKey to PIN-only to make sure it is not already
-        /// set, and if not, it can be set.
-        /// </para>
-        /// <para>
-        /// Note that this returns the PIN-only mode for the PIV application on
-        /// the YubiKey, it has nothing to do with OATH, FIDO, or OpenPGP.
-        /// </para>
+        ///     PIN-only mode means that the application does not need to enter the
+        ///     management key in order to perform PIV operations that normally
+        ///     require it, only the PIN is needed.
+        ///     <para>
+        ///         See the User's Manual entry on
+        ///         <xref href="UsersManualPivPinOnlyMode"> PIV PIN-only mode</xref> for
+        ///         a deeper discussion of this feature.
+        ///     </para>
+        ///     <para>
+        ///         This returns a result based on the contents of ADMIN DATA. That
+        ///         storage location contains information about PIN-protected and
+        ///         PIN-derived. It is possible for a different application to overwrite
+        ///         the data to make it inaccurate. That is unlikely, however, if all
+        ///         applications follow good programming practices outlined by the SDK
+        ///         documentation. This method will not actually verify the management
+        ///         key in order to ensure the return value is correct.
+        ///     </para>
+        ///     <para>
+        ///         If the ADMIN DATA is overwritten, it is possible to call
+        ///         <see cref="TryRecoverPinOnlyMode()" /> to restore the YubiKey to a
+        ///         proper PIN-only state.
+        ///     </para>
+        ///     <para>
+        ///         Note also that it is possible that the ADMIN DATA says the YubiKey is
+        ///         PIN-protected, but some app has overwritten the data in PRINTED. In
+        ///         that case, this method will return a result indicating
+        ///         <c>PinProtected</c>, when in reality PIN-protected is unavailable.
+        ///         That is because this returns a value based only on the contents of
+        ///         ADMIN DATA. The method <c>TryRecoverPinOnlyMode</c> will check more
+        ///         than ADMIN DATA.
+        ///     </para>
+        ///     <para>
+        ///         Note that the return is a bit field and the return can be one or more
+        ///         of the bits set. There are bits that indicate a YubiKey is
+        ///         unavailable for PIN-protected or PIN-derived. Call this method before
+        ///         trying to set a YubiKey to PIN-only to make sure it is not already
+        ///         set, and if not, it can be set.
+        ///     </para>
+        ///     <para>
+        ///         Note that this returns the PIN-only mode for the PIV application on
+        ///         the YubiKey, it has nothing to do with OATH, FIDO, or OpenPGP.
+        ///     </para>
         /// </remarks>
         /// <returns>
-        /// A <c>PivPinOnlyMode</c>, which is an enum indicating the mode or
-        /// modes.
+        ///     A <c>PivPinOnlyMode</c>, which is an enum indicating the mode or
+        ///     modes.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// The YubiKey is not able to return the ADMIN DATA.
+        ///     The YubiKey is not able to return the ADMIN DATA.
         /// </exception>
         public PivPinOnlyMode GetPinOnlyMode()
         {
@@ -90,7 +90,7 @@ namespace Yubico.YubiKey.Piv
 
             PivPinOnlyMode returnValue = PivPinOnlyMode.PinProtectedUnavailable | PivPinOnlyMode.PinDerivedUnavailable;
 
-            if (TryReadObject<AdminData>(out AdminData adminData))
+            if (TryReadObject(out AdminData adminData))
             {
                 returnValue = PivPinOnlyMode.None;
 
@@ -111,81 +111,81 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Try to recover the PIN-only state. If successful, this will
-        /// authenticate the management key and reset the ADMIN DATA and or
-        /// PRINTED storage locations.
-        /// &gt; [!WARNING]
-        /// &gt; This can overwrite the contents of ADMIN DATA and/or PRINTED. If
-        /// &gt; some other application relies on that data it will be lost.
+        ///     Try to recover the PIN-only state. If successful, this will
+        ///     authenticate the management key and reset the ADMIN DATA and or
+        ///     PRINTED storage locations.
+        ///     &gt; [!WARNING]
+        ///     &gt; This can overwrite the contents of ADMIN DATA and/or PRINTED. If
+        ///     &gt; some other application relies on that data it will be lost.
         /// </summary>
         /// <remarks>
-        /// See the User's Manual entry on
-        /// <xref href="UsersManualPivPinOnlyMode"> PIV PIN-only mode</xref> for
-        /// a deeper discussion of this operation.
-        /// <para>
-        /// The ADMIN DATA contains information about PIN-only. The PIN-protected
-        /// management key is stored in PRINTED. Applications should never store
-        /// information in those locations, only Yubico-supplied products should
-        /// use them. However, it is possible for an application to overwrite the
-        /// contents of one or both of these storage locations, making the
-        /// PIN-only data inaccurate.
-        /// </para>
-        /// <para>
-        /// This method will obtain the data stored in the two storage locations,
-        /// and determine if they contain PIN-only data that can be used to
-        /// authenticate the management key. If it can't, it will return
-        /// <c>PivPinOnlyMode.None</c> or <c>Unavailable</c>. If it can, it will
-        /// authenticate and set the ADMIN DATA and PRINTED to contain data
-        /// compatible with correct PIN-only modes. It will return a
-        /// <c>PivPinOnlyMode</c> value indicating which mode is set.
-        /// </para>
-        /// <para>
-        /// For example, suppose the data in both is correct, and it indicates
-        /// the management key is PIN-protected. After calling this method, the
-        /// management key will be authenticated, the storage locations will not
-        /// be changed, and the return will be <c>PivPinOnlyMode.PinProtected</c>.
-        /// </para>
-        /// <para>
-        /// Another possibility is the ADMIN DATA was overwritten by some
-        /// application so it is inaccurate, but the PIN-protected data is still
-        /// in PRINTED. This method will be able to authenticate the management
-        /// key using that data. It will replace the contents of ADMIN DATA with
-        /// correct PIN-only information and return
-        /// <c>PivPinOnlyMode.PinProtected</c>.
-        /// </para>
-        /// <para>
-        /// If ADMIN DATA and PRINTED contain no data, or if ADMIN DATA contains
-        /// correct information that indicates the YubiKey is not set to PIN-only
-        /// mode, then this method will not authenticate the management key, it
-        /// will not put any data into the storage locations, and it will return
-        /// <c>PivPinOnlyMode.None</c>.
-        /// </para>
-        /// <para>
-        /// It is possible this method is not able to recover. For example,
-        /// suppose the ADMIN DATA is correct and indicates the YubiKey is
-        /// PIN-protected, but not PIN-derived (there is no salt to use to derive
-        /// a key), but the data in PRINTED is not correct. In this case, the
-        /// method will not be able to authenticate the management key as
-        /// PIN-protected. It will try to authenticate using the default
-        /// management key, and if that does not work, it will call on the
-        /// <c>KeyCollector</c> to obtain the it. If that does succeeds, it will
-        /// set ADMIN DATA to indicate the YubiKey is not PIN-protected, it will
-        /// clear the contents of PRINTED, and it will return
-        /// <c>PivPinOnlyMode.None</c>. If the <c>KeyCollector</c> is not able to
-        /// provide the management key, this method will not be able to reset the
-        /// ADMIN DATA nor PRINTED (management key authentication is necessary to
-        /// set a storage location), and will return <c>Unavailable</c>.
-        /// </para>
-        /// <para>
-        /// This method will require the PIN to be verified. It is possible that
-        /// the PIN has already been verified and this method will verify it
-        /// again. If it needs to verify the PIN, it will call on the
-        /// <c>KeyCollector</c> to obtain it.
-        /// </para>
+        ///     See the User's Manual entry on
+        ///     <xref href="UsersManualPivPinOnlyMode"> PIV PIN-only mode</xref> for
+        ///     a deeper discussion of this operation.
+        ///     <para>
+        ///         The ADMIN DATA contains information about PIN-only. The PIN-protected
+        ///         management key is stored in PRINTED. Applications should never store
+        ///         information in those locations, only Yubico-supplied products should
+        ///         use them. However, it is possible for an application to overwrite the
+        ///         contents of one or both of these storage locations, making the
+        ///         PIN-only data inaccurate.
+        ///     </para>
+        ///     <para>
+        ///         This method will obtain the data stored in the two storage locations,
+        ///         and determine if they contain PIN-only data that can be used to
+        ///         authenticate the management key. If it can't, it will return
+        ///         <c>PivPinOnlyMode.None</c> or <c>Unavailable</c>. If it can, it will
+        ///         authenticate and set the ADMIN DATA and PRINTED to contain data
+        ///         compatible with correct PIN-only modes. It will return a
+        ///         <c>PivPinOnlyMode</c> value indicating which mode is set.
+        ///     </para>
+        ///     <para>
+        ///         For example, suppose the data in both is correct, and it indicates
+        ///         the management key is PIN-protected. After calling this method, the
+        ///         management key will be authenticated, the storage locations will not
+        ///         be changed, and the return will be <c>PivPinOnlyMode.PinProtected</c>.
+        ///     </para>
+        ///     <para>
+        ///         Another possibility is the ADMIN DATA was overwritten by some
+        ///         application so it is inaccurate, but the PIN-protected data is still
+        ///         in PRINTED. This method will be able to authenticate the management
+        ///         key using that data. It will replace the contents of ADMIN DATA with
+        ///         correct PIN-only information and return
+        ///         <c>PivPinOnlyMode.PinProtected</c>.
+        ///     </para>
+        ///     <para>
+        ///         If ADMIN DATA and PRINTED contain no data, or if ADMIN DATA contains
+        ///         correct information that indicates the YubiKey is not set to PIN-only
+        ///         mode, then this method will not authenticate the management key, it
+        ///         will not put any data into the storage locations, and it will return
+        ///         <c>PivPinOnlyMode.None</c>.
+        ///     </para>
+        ///     <para>
+        ///         It is possible this method is not able to recover. For example,
+        ///         suppose the ADMIN DATA is correct and indicates the YubiKey is
+        ///         PIN-protected, but not PIN-derived (there is no salt to use to derive
+        ///         a key), but the data in PRINTED is not correct. In this case, the
+        ///         method will not be able to authenticate the management key as
+        ///         PIN-protected. It will try to authenticate using the default
+        ///         management key, and if that does not work, it will call on the
+        ///         <c>KeyCollector</c> to obtain the it. If that does succeeds, it will
+        ///         set ADMIN DATA to indicate the YubiKey is not PIN-protected, it will
+        ///         clear the contents of PRINTED, and it will return
+        ///         <c>PivPinOnlyMode.None</c>. If the <c>KeyCollector</c> is not able to
+        ///         provide the management key, this method will not be able to reset the
+        ///         ADMIN DATA nor PRINTED (management key authentication is necessary to
+        ///         set a storage location), and will return <c>Unavailable</c>.
+        ///     </para>
+        ///     <para>
+        ///         This method will require the PIN to be verified. It is possible that
+        ///         the PIN has already been verified and this method will verify it
+        ///         again. If it needs to verify the PIN, it will call on the
+        ///         <c>KeyCollector</c> to obtain it.
+        ///     </para>
         /// </remarks>
         /// <returns>
-        /// A <c>PivPinOnlyMode</c>, which is an enum indicating the mode or
-        /// modes the YubiKey is in.
+        ///     A <c>PivPinOnlyMode</c>, which is an enum indicating the mode or
+        ///     modes the YubiKey is in.
         /// </returns>
         public PivPinOnlyMode TryRecoverPinOnlyMode()
         {
@@ -266,13 +266,13 @@ namespace Yubico.YubiKey.Piv
             // means the mgmt key is not authenticated.
             // If we can authenticate the mgmt key, then set ADMIN DATA and
             // PRINTED.
-            Func<KeyEntryData, bool>? UserKeyCollector = KeyCollector;
+            Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;
             using var specialKeyCollector = new SpecialKeyCollector();
 
             try
             {
                 KeyCollector = specialKeyCollector.KeyCollectorSpecial;
-                specialKeyCollector.AuthMgmtKeyAndSave(this, UserKeyCollector);
+                specialKeyCollector.AuthMgmtKeyAndSave(this, userKeyCollector);
 
                 // If the PinDerivedUnavailable bit is not set, that means either
                 // there was no ADMIN DATA, or it was "correct". If it was
@@ -314,7 +314,7 @@ namespace Yubico.YubiKey.Piv
             }
             finally
             {
-                KeyCollector = UserKeyCollector;
+                KeyCollector = userKeyCollector;
             }
         }
 
@@ -349,7 +349,7 @@ namespace Yubico.YubiKey.Piv
                 tryPinDerived = returnValue.HasFlag(PivPinOnlyMode.PinDerived);
             }
 
-            Func<KeyEntryData, bool>? UserKeyCollector = KeyCollector;
+            Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;
             using var specialKeyCollector = new SpecialKeyCollector();
 
             try
@@ -358,7 +358,7 @@ namespace Yubico.YubiKey.Piv
 
                 if (tryPinProtected)
                 {
-                    returnValue = GetPrintedPinProtectedStatus(specialKeyCollector, UserKeyCollector);
+                    returnValue = GetPrintedPinProtectedStatus(specialKeyCollector, userKeyCollector);
 
                     if (trustAdminData && returnValue.HasFlag(PivPinOnlyMode.PinProtected))
                     {
@@ -372,14 +372,14 @@ namespace Yubico.YubiKey.Piv
 
                     returnValue |= GetPinDerivedStatus(
                         adminData, returnValue.HasFlag(PivPinOnlyMode.PinProtected), specialKeyCollector,
-                        UserKeyCollector);
+                        userKeyCollector);
                 }
 
                 return returnValue;
             }
             finally
             {
-                KeyCollector = UserKeyCollector;
+                KeyCollector = userKeyCollector;
             }
         }
 
@@ -392,8 +392,9 @@ namespace Yubico.YubiKey.Piv
         // authenticates, return PinProtected. If not, return Unavailable.
         // If there is data but it is not PinProtectedData, the pinProtect object
         // will be empty and return Unavailable.
-        private PivPinOnlyMode GetPrintedPinProtectedStatus(SpecialKeyCollector specialKeyCollector,
-                                                            Func<KeyEntryData, bool>? UserKeyCollector)
+        private PivPinOnlyMode GetPrintedPinProtectedStatus(
+            SpecialKeyCollector specialKeyCollector,
+            Func<KeyEntryData, bool>? userKeyCollector)
         {
             // We could call the ReadObject method, but if the PIN is not
             // verified, ReadObject won't collect and save it.
@@ -404,7 +405,7 @@ namespace Yubico.YubiKey.Piv
 
             if (getDataResponse.Status == ResponseStatus.AuthenticationRequired)
             {
-                specialKeyCollector.VerifyPinAndSave(this, UserKeyCollector);
+                specialKeyCollector.VerifyPinAndSave(this, userKeyCollector);
                 getDataResponse = Connection.SendCommand(getDataCommand);
             }
 
@@ -429,7 +430,7 @@ namespace Yubico.YubiKey.Piv
                         specialKeyCollector.SetKeyData(
                             SpecialKeyCollector.SetKeyDataBuffer,
                             (ReadOnlyMemory<byte>)pinProtect.ManagementKey,
-                            false,
+                            isNewKey: false,
                             ManagementKeyAlgorithm);
 
                         return PivPinOnlyMode.PinProtected;
@@ -455,10 +456,11 @@ namespace Yubico.YubiKey.Piv
         // This will update the adminData object passed in with the contents of
         // the ADMIN DATA storage location. This method expects the adminData to
         // be empty.
-        private PivPinOnlyMode GetPinDerivedStatus(AdminData adminData,
-                                                   bool isPinProtected,
-                                                   SpecialKeyCollector specialKeyCollector,
-                                                   Func<KeyEntryData, bool>? UserKeyCollector)
+        private PivPinOnlyMode GetPinDerivedStatus(
+            AdminData adminData,
+            bool isPinProtected,
+            SpecialKeyCollector specialKeyCollector,
+            Func<KeyEntryData, bool>? userKeyCollector)
         {
             // We could use the TryReadObject to get the admin data, but that
             // returns a new object. We need to fill the incoming object with the
@@ -482,7 +484,7 @@ namespace Yubico.YubiKey.Piv
 
                     // If we have already collected the PIN, this call will do
                     // nothing (it won't collect it again).
-                    specialKeyCollector.VerifyPinAndSave(this, UserKeyCollector);
+                    specialKeyCollector.VerifyPinAndSave(this, userKeyCollector);
 
                     // If we're already PIN-protected, then the current mgmt key
                     // is the PIN-protected value. So put the derived key into
@@ -493,9 +495,8 @@ namespace Yubico.YubiKey.Piv
 
                     if (isPinProtected)
                     {
-                        if (MemoryExtensions.SequenceEqual(
-                                specialKeyCollector.GetCurrentMgmtKey().Span,
-                                specialKeyCollector.GetNewMgmtKey().Span))
+                        if (specialKeyCollector.GetCurrentMgmtKey().Span
+                            .SequenceEqual(specialKeyCollector.GetNewMgmtKey().Span))
                         {
                             return PivPinOnlyMode.PinDerived;
                         }
@@ -514,254 +515,255 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Set the YubiKey's PIV application to be PIN-only with a PIN-derived
-        /// and/or PIN-Protected Triple-DES management key . This sets the
-        /// YubiKey to either
-        /// <code>
+        ///     Set the YubiKey's PIV application to be PIN-only with a PIN-derived
+        ///     and/or PIN-Protected Triple-DES management key . This sets the
+        ///     YubiKey to either
+        ///     <code>
         ///   PivPinOnlyMode.PinProtected
         ///   PivPinOnlyMode.PinDerived
         ///   PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived
         ///   PivPinOnlyMode.None
         /// </code>
-        /// If the YubiKey is set to PinProtected, PinDerived, or both, the PUK
-        /// will also be blocked.
-        /// &gt; [!WARNING]
-        /// &gt; You should not set a YubiKey for PIN-derived, this feature is
-        /// &gt; provided only for backwards compatibility.
+        ///     If the YubiKey is set to PinProtected, PinDerived, or both, the PUK
+        ///     will also be blocked.
+        ///     &gt; [!WARNING]
+        ///     &gt; You should not set a YubiKey for PIN-derived, this feature is
+        ///     &gt; provided only for backwards compatibility.
         /// </summary>
         /// <remarks>
-        /// PIN-only mode means that the application does not need to enter the
-        /// management key in order to perform PIV operations that normally
-        /// require it, only the PIN is needed.
-        /// <para>
-        /// See the documentation for
-        /// <see cref="SetPinOnlyMode(PivPinOnlyMode, PivAlgorithm)"/> and the
-        /// User's Manual entry on
-        /// <xref href="UsersManualPivPinOnlyMode"> PIV PIN-only mode</xref> for
-        /// a deeper discussion of this feature.
-        /// </para>
-        /// <para>
-        /// Note that this sets the PIV application on the specific YubiKey to a
-        /// PIN-only mode, it has nothing to do with OATH, FIDO, or OpenPGP.
-        /// </para>
-        /// <para>
-        /// Note also that this will make sure that the management key algorithm
-        /// will be Triple-DES, even if the current management key is a different
-        /// algorithm. This behavior matches how this method operated in previous
-        /// versions of the SDK.
-        /// </para>
+        ///     PIN-only mode means that the application does not need to enter the
+        ///     management key in order to perform PIV operations that normally
+        ///     require it, only the PIN is needed.
+        ///     <para>
+        ///         See the documentation for
+        ///         <see cref="SetPinOnlyMode(PivPinOnlyMode, PivAlgorithm)" /> and the
+        ///         User's Manual entry on
+        ///         <xref href="UsersManualPivPinOnlyMode"> PIV PIN-only mode</xref> for
+        ///         a deeper discussion of this feature.
+        ///     </para>
+        ///     <para>
+        ///         Note that this sets the PIV application on the specific YubiKey to a
+        ///         PIN-only mode, it has nothing to do with OATH, FIDO, or OpenPGP.
+        ///     </para>
+        ///     <para>
+        ///         Note also that this will make sure that the management key algorithm
+        ///         will be Triple-DES, even if the current management key is a different
+        ///         algorithm. This behavior matches how this method operated in previous
+        ///         versions of the SDK.
+        ///     </para>
         /// </remarks>
         /// <param name="pinOnlyMode">
-        /// The mode to which the YubiKey is to be set.
+        ///     The mode to which the YubiKey is to be set.
         /// </param>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded, one of the keys provided was
-        /// not a valid Triple-DES key, the data stored on the YubiKey is
-        /// incompatible with PIN-only, or the YubiKey had some other error, such
-        /// as unreliable connection.
+        ///     There is no <c>KeyCollector</c> loaded, one of the keys provided was
+        ///     not a valid Triple-DES key, the data stored on the YubiKey is
+        ///     incompatible with PIN-only, or the YubiKey had some other error, such
+        ///     as unreliable connection.
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        /// The user canceled management key or PIN collection.
+        ///     The user canceled management key or PIN collection.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Mutual authentication was performed and the YubiKey was not
-        /// authenticated, or the remaining retries count indicates the PIN is
-        /// blocked.
+        ///     Mutual authentication was performed and the YubiKey was not
+        ///     authenticated, or the remaining retries count indicates the PIN is
+        ///     blocked.
         /// </exception>
         public void SetPinOnlyMode(PivPinOnlyMode pinOnlyMode) => SetPinOnlyMode(pinOnlyMode, PivAlgorithm.TripleDes);
 
         /// <summary>
-        /// Set the YubiKey's PIV application to be PIN-only with a PIN-derived
-        /// and/or PIN-Protected management key of the specified algorithm. This
-        /// sets the YubiKey to either
-        /// <code>
+        ///     Set the YubiKey's PIV application to be PIN-only with a PIN-derived
+        ///     and/or PIN-Protected management key of the specified algorithm. This
+        ///     sets the YubiKey to either
+        ///     <code>
         ///   PivPinOnlyMode.PinProtected
         ///   PivPinOnlyMode.PinDerived
         ///   PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived
         ///   PivPinOnlyMode.None
         /// </code>
-        /// If the YubiKey is set to PinProtected, PinDerived, or both, the PUK
-        /// will also be blocked.
-        /// &gt; [!WARNING]
-        /// &gt; You should not set a YubiKey for PIN-derived, this feature is
-        /// &gt; provided only for backwards compatibility.
+        ///     If the YubiKey is set to PinProtected, PinDerived, or both, the PUK
+        ///     will also be blocked.
+        ///     &gt; [!WARNING]
+        ///     &gt; You should not set a YubiKey for PIN-derived, this feature is
+        ///     &gt; provided only for backwards compatibility.
         /// </summary>
         /// <remarks>
-        /// PIN-only mode means that the application does not need to enter the
-        /// management key in order to perform PIV operations that normally
-        /// require it, only the PIN is needed.
-        /// <para>
-        /// See the User's Manual entry on
-        /// <xref href="UsersManualPivPinOnlyMode"> PIV PIN-only mode</xref> for
-        /// a deeper discussion of this feature.
-        /// </para>
-        /// <para>
-        /// Note that this sets the PIV application on the specific YubiKey to a
-        /// PIN-only mode, it has nothing to do with OATH, FIDO, or OpenPGP.
-        /// </para>
-        /// <para>
-        /// Upon successful completion of this method, the PUK will be blocked.
-        /// </para>
-        /// <para>
-        /// The management key derived and/or stored in PRINTED will be for the
-        /// specified algorithm. For all YubiKeys, <c>TripleDes</c> is a valid
-        /// algorithm. For YubiKeys 5.4.2 and later, it is possible to set the
-        /// management key to an AES key. Before setting the
-        /// <c>mgmtKeyAlgorithm</c> arg to an AES algorithm, make sure it is
-        /// allowed on the YubiKey. You can use the <c>HasFeature</c> call. For
-        /// example,
-        /// <code language="csharp">
+        ///     PIN-only mode means that the application does not need to enter the
+        ///     management key in order to perform PIV operations that normally
+        ///     require it, only the PIN is needed.
+        ///     <para>
+        ///         See the User's Manual entry on
+        ///         <xref href="UsersManualPivPinOnlyMode"> PIV PIN-only mode</xref> for
+        ///         a deeper discussion of this feature.
+        ///     </para>
+        ///     <para>
+        ///         Note that this sets the PIV application on the specific YubiKey to a
+        ///         PIN-only mode, it has nothing to do with OATH, FIDO, or OpenPGP.
+        ///     </para>
+        ///     <para>
+        ///         Upon successful completion of this method, the PUK will be blocked.
+        ///     </para>
+        ///     <para>
+        ///         The management key derived and/or stored in PRINTED will be for the
+        ///         specified algorithm. For all YubiKeys, <c>TripleDes</c> is a valid
+        ///         algorithm. For YubiKeys 5.4.2 and later, it is possible to set the
+        ///         management key to an AES key. Before setting the
+        ///         <c>mgmtKeyAlgorithm</c> arg to an AES algorithm, make sure it is
+        ///         allowed on the YubiKey. You can use the <c>HasFeature</c> call. For
+        ///         example,
+        ///         <code language="csharp">
         ///   PivAlgorithm mgmtKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey) ?
         ///       PivAlgorithm.Aes128 : PivAlgorithm.TripleDes;
         ///   pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected, mgmtKeyAlgorithm);
         /// </code>
-        /// If the algorithm is not supported by the YubiKey, this method will
-        /// throw an exception. It will not change the YubiKey, it will not set
-        /// it to PIN-only.
-        /// </para>
-        /// <para>
-        /// If the YubiKey is already set to the specified PIN-protected mode and
-        /// algorithm, this will not reset the YubiKey, but will simply
-        /// authenticate the management key.
-        /// </para>
-        /// <para>
-        /// If the YubiKey is already set to PIN-only, but not the specified
-        /// mode, this method will make sure the YubiKey is set to both PIN-only
-        /// modes.
-        /// </para>
-        /// <para>
-        /// If the YubiKey is already set to PIN-only, but not the specified
-        /// algorithm, this method will change to a new management key of the
-        /// specified algorithm.
-        /// </para>
-        /// <para>
-        /// If the requested <c>pinOnlyMode</c> is both, then this will make sure
-        /// the YubiKey is both PIN-protected and PIN-derived.
-        /// </para>
-        /// <para>
-        /// If the input <c>pinOnlyMode</c> is <c>None</c>, and the YubiKey is
-        /// currently set to PIN-only (and neither PinProtected nor PinDerived is
-        /// Unavailable), this method will remove the contents of the storage
-        /// locations ADMIN DATA and PRINTED, and reset the management key to the
-        /// default:
-        /// <code>
+        ///         If the algorithm is not supported by the YubiKey, this method will
+        ///         throw an exception. It will not change the YubiKey, it will not set
+        ///         it to PIN-only.
+        ///     </para>
+        ///     <para>
+        ///         If the YubiKey is already set to the specified PIN-protected mode and
+        ///         algorithm, this will not reset the YubiKey, but will simply
+        ///         authenticate the management key.
+        ///     </para>
+        ///     <para>
+        ///         If the YubiKey is already set to PIN-only, but not the specified
+        ///         mode, this method will make sure the YubiKey is set to both PIN-only
+        ///         modes.
+        ///     </para>
+        ///     <para>
+        ///         If the YubiKey is already set to PIN-only, but not the specified
+        ///         algorithm, this method will change to a new management key of the
+        ///         specified algorithm.
+        ///     </para>
+        ///     <para>
+        ///         If the requested <c>pinOnlyMode</c> is both, then this will make sure
+        ///         the YubiKey is both PIN-protected and PIN-derived.
+        ///     </para>
+        ///     <para>
+        ///         If the input <c>pinOnlyMode</c> is <c>None</c>, and the YubiKey is
+        ///         currently set to PIN-only (and neither PinProtected nor PinDerived is
+        ///         Unavailable), this method will remove the contents of the storage
+        ///         locations ADMIN DATA and PRINTED, and reset the management key to the
+        ///         default:
+        ///         <code>
         ///   Triple-DES
         ///   0x01 02 03 04 05 06 07 08
         ///     01 02 03 04 05 06 07 08
         ///     01 02 03 04 05 06 07 08
         /// </code>
-        /// In this case, the <c>mgmtKeyAlgorithm</c> arg will be ignored, the
-        /// management key's algorithm after removing PIN-only status will be
-        /// Triple-DES. The touch policy of the management key will also be set
-        /// to the default (Never). Note that the management key must be
-        /// authenticated and the PIN verified in order to perform this task.
-        /// This method will authenticate the management key using the PIN-only
-        /// mode to which the YubiKey is currently set, then clear the contents.
-        /// It will then change the management key to the default value. Hence,
-        /// after setting the YubiKey out of PIN-only mode, you should change the
-        /// management key. Note also that the PUK will still be blocked. The
-        /// only way to unblock the PUK is to reset the retry counts. This will
-        /// set both the PIN and PUK to their default values. Resetting the retry
-        /// counts requires management key authentication.
-        /// </para>
-        /// <para>
-        /// If the input <c>pinOnlyMode</c> is <c>None</c>, and the YubiKey is
-        /// currently set to one PIN-only mode, but the other is Unavailable,
-        /// this method will clear the one that is set but leave the one that is
-        /// Unavailable as is. For example, suppose the current mode is
-        /// <c>PinProtected | PinDerivedUnavailable</c>, then after setting to
-        /// None, the PRINTED storage area will be empty and the ADMIN DATA
-        /// storage area will be left as is.
-        /// </para>
-        /// <para>
-        /// If the input <c>pinOnlyMode</c> is <c>None</c>, and the YubiKey is
-        /// currently NOT set to either PIN-only modes, this method will do
-        /// nothing. It will not remove anything from ADMIN DATA or PRINTED, it
-        /// will not try to authenticate the management key, nor will it try to
-        /// verify the PIN. It will not change the management to the default. It
-        /// will ignore the <c>mgmtKeyAlgorithm</c> argument.
-        /// </para>
-        /// <para>
-        /// If a YubiKey is currently set to both modes, and you call this
-        /// method with only one of the modes, this method will NOT "remove" the
-        /// other mode.
-        /// </para>
-        /// <para>
-        /// If a YubiKey is currently set to both PIN-only modes and you want to
-        /// "remove" one of them, call this method and set the YubiKey to
-        /// <c>None</c>, then call this method a second time and set the YubiKey
-        /// to the desired mode.
-        /// </para>
-        /// <para>
-        /// In order to set the YubiKey to be PIN-only, this method must
-        /// authenticate the management key. Even if the management key is already
-        /// authenticated, this method will authenticate. It will try to
-        /// authenticate using the PIN-only techniques, and if that does not
-        /// work, it will try to authenticate using the default management key. If
-        /// either of those techniques works, the user will not have to enter the
-        /// management key. But if the YubiKey is not PIN-only, and the default
-        /// management key does not authenticate, the method will call on the
-        /// <c>KeyCollector</c> to obtain the correct value.
-        /// </para>
-        /// <para>
-        /// If the mode to set is PIN-protected, then this method will use the
-        /// existing mgmt key, unless it is the default. In that case, this
-        /// method will generate a new, random mgmt key, set the YubiKey with
-        /// this new value, and PIN-protect the new key.
-        /// </para>
-        /// <para>
-        /// This method also requires the PIN to be verified. If setting to
-        /// PIN-derived, even if the PIN is already verified, this method will
-        /// call on the <c>KeyCollector</c> to obtain the PIN. If setting to
-        /// PIN-protected, this method will verify the PIN only if it has not yet
-        /// been verified.
-        /// </para>
-        /// <para>
-        /// Note that this method will throw an exception if the current contents
-        /// of ADMIN DATA and/or PRINTED are not compatible with PIN-only mode.
-        /// If there are no current contents, then this method will set one or
-        /// both of those storage locations with appropriate data. But if there
-        /// is already something in one or both, and it is not PIN-only
-        /// information, then this method will not replace that data, it will
-        /// throw an exception.
-        /// </para>
+        ///         In this case, the <c>mgmtKeyAlgorithm</c> arg will be ignored, the
+        ///         management key's algorithm after removing PIN-only status will be
+        ///         Triple-DES. The touch policy of the management key will also be set
+        ///         to the default (Never). Note that the management key must be
+        ///         authenticated and the PIN verified in order to perform this task.
+        ///         This method will authenticate the management key using the PIN-only
+        ///         mode to which the YubiKey is currently set, then clear the contents.
+        ///         It will then change the management key to the default value. Hence,
+        ///         after setting the YubiKey out of PIN-only mode, you should change the
+        ///         management key. Note also that the PUK will still be blocked. The
+        ///         only way to unblock the PUK is to reset the retry counts. This will
+        ///         set both the PIN and PUK to their default values. Resetting the retry
+        ///         counts requires management key authentication.
+        ///     </para>
+        ///     <para>
+        ///         If the input <c>pinOnlyMode</c> is <c>None</c>, and the YubiKey is
+        ///         currently set to one PIN-only mode, but the other is Unavailable,
+        ///         this method will clear the one that is set but leave the one that is
+        ///         Unavailable as is. For example, suppose the current mode is
+        ///         <c>PinProtected | PinDerivedUnavailable</c>, then after setting to
+        ///         None, the PRINTED storage area will be empty and the ADMIN DATA
+        ///         storage area will be left as is.
+        ///     </para>
+        ///     <para>
+        ///         If the input <c>pinOnlyMode</c> is <c>None</c>, and the YubiKey is
+        ///         currently NOT set to either PIN-only modes, this method will do
+        ///         nothing. It will not remove anything from ADMIN DATA or PRINTED, it
+        ///         will not try to authenticate the management key, nor will it try to
+        ///         verify the PIN. It will not change the management to the default. It
+        ///         will ignore the <c>mgmtKeyAlgorithm</c> argument.
+        ///     </para>
+        ///     <para>
+        ///         If a YubiKey is currently set to both modes, and you call this
+        ///         method with only one of the modes, this method will NOT "remove" the
+        ///         other mode.
+        ///     </para>
+        ///     <para>
+        ///         If a YubiKey is currently set to both PIN-only modes and you want to
+        ///         "remove" one of them, call this method and set the YubiKey to
+        ///         <c>None</c>, then call this method a second time and set the YubiKey
+        ///         to the desired mode.
+        ///     </para>
+        ///     <para>
+        ///         In order to set the YubiKey to be PIN-only, this method must
+        ///         authenticate the management key. Even if the management key is already
+        ///         authenticated, this method will authenticate. It will try to
+        ///         authenticate using the PIN-only techniques, and if that does not
+        ///         work, it will try to authenticate using the default management key. If
+        ///         either of those techniques works, the user will not have to enter the
+        ///         management key. But if the YubiKey is not PIN-only, and the default
+        ///         management key does not authenticate, the method will call on the
+        ///         <c>KeyCollector</c> to obtain the correct value.
+        ///     </para>
+        ///     <para>
+        ///         If the mode to set is PIN-protected, then this method will use the
+        ///         existing mgmt key, unless it is the default. In that case, this
+        ///         method will generate a new, random mgmt key, set the YubiKey with
+        ///         this new value, and PIN-protect the new key.
+        ///     </para>
+        ///     <para>
+        ///         This method also requires the PIN to be verified. If setting to
+        ///         PIN-derived, even if the PIN is already verified, this method will
+        ///         call on the <c>KeyCollector</c> to obtain the PIN. If setting to
+        ///         PIN-protected, this method will verify the PIN only if it has not yet
+        ///         been verified.
+        ///     </para>
+        ///     <para>
+        ///         Note that this method will throw an exception if the current contents
+        ///         of ADMIN DATA and/or PRINTED are not compatible with PIN-only mode.
+        ///         If there are no current contents, then this method will set one or
+        ///         both of those storage locations with appropriate data. But if there
+        ///         is already something in one or both, and it is not PIN-only
+        ///         information, then this method will not replace that data, it will
+        ///         throw an exception.
+        ///     </para>
         /// </remarks>
         /// <param name="pinOnlyMode">
-        /// The mode to which the YubiKey is to be set.
+        ///     The mode to which the YubiKey is to be set.
         /// </param>
         /// <param name="mgmtKeyAlgorithm">
-        /// The algorithm to which the management key will be set.
+        ///     The algorithm to which the management key will be set.
         /// </param>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded, one of the keys provided was
-        /// not a valid Triple-DES key, the data stored on the YubiKey is
-        /// incompatible with PIN-only, or the YubiKey had some other error, such
-        /// as unreliable connection.
+        ///     There is no <c>KeyCollector</c> loaded, one of the keys provided was
+        ///     not a valid Triple-DES key, the data stored on the YubiKey is
+        ///     incompatible with PIN-only, or the YubiKey had some other error, such
+        ///     as unreliable connection.
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        /// The user canceled management key or PIN collection.
+        ///     The user canceled management key or PIN collection.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Mutual authentication was performed and the YubiKey was not
-        /// authenticated, or the remaining retries count indicates the PIN is
-        /// blocked.
+        ///     Mutual authentication was performed and the YubiKey was not
+        ///     authenticated, or the remaining retries count indicates the PIN is
+        ///     blocked.
         /// </exception>
         public void SetPinOnlyMode(PivPinOnlyMode pinOnlyMode, PivAlgorithm mgmtKeyAlgorithm)
         {
-            _log.LogInformation("Set a YubiKey to PIV PIN-only mode: {0}, mgmt key alg = {1}.",
+            _log.LogInformation(
+                "Set a YubiKey to PIV PIN-only mode: {0}, mgmt key alg = {1}.",
                 pinOnlyMode.ToString(), mgmtKeyAlgorithm.ToString());
 
-            Func<KeyEntryData, bool>? UserKeyCollector = KeyCollector;
+            Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;
             using var specialKeyCollector = new SpecialKeyCollector();
 
             try
             {
                 KeyCollector = specialKeyCollector.KeyCollectorSpecial;
-                SetPinOnlyMode(specialKeyCollector, UserKeyCollector, pinOnlyMode, mgmtKeyAlgorithm);
+                SetPinOnlyMode(specialKeyCollector, userKeyCollector, pinOnlyMode, mgmtKeyAlgorithm);
             }
             finally
             {
-                KeyCollector = UserKeyCollector;
+                KeyCollector = userKeyCollector;
             }
         }
 
@@ -778,7 +780,7 @@ namespace Yubico.YubiKey.Piv
                 pinToUse = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
             }
 
-            Func<KeyEntryData, bool>? UserKeyCollector = KeyCollector;
+            Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;
             using var specialKeyCollector = new SpecialKeyCollector();
 
             try
@@ -787,12 +789,12 @@ namespace Yubico.YubiKey.Piv
 
                 if (specialKeyCollector.TrySetPin(this, pinToUse, out retriesRemaining))
                 {
-                    SetPinOnlyMode(specialKeyCollector, UserKeyCollector, pinOnlyMode, ManagementKeyAlgorithm);
+                    SetPinOnlyMode(specialKeyCollector, userKeyCollector, pinOnlyMode, ManagementKeyAlgorithm);
                 }
             }
             finally
             {
-                KeyCollector = UserKeyCollector;
+                KeyCollector = userKeyCollector;
             }
         }
 
@@ -802,10 +804,11 @@ namespace Yubico.YubiKey.Piv
         // KeyCollector to obtain it.
         // This method assumes that the caller has set this PivSession's
         // KeyCollector to the special, and will reset it to the User's when done.
-        private void SetPinOnlyMode(SpecialKeyCollector specialKeyCollector,
-                                    Func<KeyEntryData, bool>? UserKeyCollector,
-                                    PivPinOnlyMode pinOnlyMode,
-                                    PivAlgorithm mgmtKeyAlgorithm)
+        private void SetPinOnlyMode(
+            SpecialKeyCollector specialKeyCollector,
+            Func<KeyEntryData, bool>? userKeyCollector,
+            PivPinOnlyMode pinOnlyMode,
+            PivAlgorithm mgmtKeyAlgorithm)
         {
             if (pinOnlyMode.HasFlag(PivPinOnlyMode.PinProtectedUnavailable)
                 || pinOnlyMode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable))
@@ -818,7 +821,7 @@ namespace Yubico.YubiKey.Piv
 
             // If the YubiKey does not allow AES, but the caller specified AES,
             // throw an exception.
-            CheckManagementKeyAlgorithm(mgmtKeyAlgorithm, false);
+            CheckManagementKeyAlgorithm(mgmtKeyAlgorithm, checkMode: false);
 
             // Determine if we are using a new algorithm for this Set.
             // Later on, we'll use this to determine if we need to Clear the
@@ -836,7 +839,7 @@ namespace Yubico.YubiKey.Piv
             // Or some other reason.
             PivPinOnlyMode newMode = PivPinOnlyMode.None;
 
-            PivPinOnlyMode currentMode = GetPrintedPinProtectedStatus(specialKeyCollector, UserKeyCollector);
+            PivPinOnlyMode currentMode = GetPrintedPinProtectedStatus(specialKeyCollector, userKeyCollector);
 
             PinOnlyCheck pinOnlyCheck = CheckPinOnlyStatus(
                 currentMode, pinOnlyMode, PivPinOnlyMode.PinProtected, PivPinOnlyMode.PinProtectedUnavailable,
@@ -847,7 +850,7 @@ namespace Yubico.YubiKey.Piv
             if (pinOnlyCheck == PinOnlyCheck.CanContinue)
             {
                 currentMode |= GetPinDerivedStatus(
-                    adminData, currentMode.HasFlag(PivPinOnlyMode.PinProtected), specialKeyCollector, UserKeyCollector);
+                    adminData, currentMode.HasFlag(PivPinOnlyMode.PinProtected), specialKeyCollector, userKeyCollector);
 
                 pinOnlyCheck = CheckPinOnlyStatus(
                     currentMode, pinOnlyMode, PivPinOnlyMode.PinDerived, PivPinOnlyMode.PinDerivedUnavailable,
@@ -887,7 +890,7 @@ namespace Yubico.YubiKey.Piv
 
                 // This will either return with the mgmt key authenticated,
                 // or it will throw an exception.
-                specialKeyCollector.AuthMgmtKeyAndSave(this, UserKeyCollector);
+                specialKeyCollector.AuthMgmtKeyAndSave(this, userKeyCollector);
 
                 // If we reach this code, we can also set newAlgorithm to false.
                 // If this is true, we're going to later on Clear the YubiKey of
@@ -934,7 +937,7 @@ namespace Yubico.YubiKey.Piv
                 // mode is Derived. We need to set Derived, but then reset
                 // Protected to the Derived value.
                 SetYubiKeyPinDerived(
-                    adminData, currentMode, mgmtKeyAlgorithm, specialKeyCollector, UserKeyCollector, ref newMode);
+                    adminData, currentMode, mgmtKeyAlgorithm, specialKeyCollector, userKeyCollector, ref newMode);
             }
 
             if (newMode.HasFlag(PivPinOnlyMode.PinProtected))
@@ -956,12 +959,13 @@ namespace Yubico.YubiKey.Piv
         // testedUnavailable.
         // Set newMode and return a value based on the results of the comparison
         // The tested arg is what we're testing for, PinProtected or PinDerived.
-        private static PinOnlyCheck CheckPinOnlyStatus(PivPinOnlyMode currentMode,
-                                                       PivPinOnlyMode pinOnlyMode,
-                                                       PivPinOnlyMode tested,
-                                                       PivPinOnlyMode testedUnavailable,
-                                                       bool newAlgorithm,
-                                                       ref PivPinOnlyMode newMode)
+        private static PinOnlyCheck CheckPinOnlyStatus(
+            PivPinOnlyMode currentMode,
+            PivPinOnlyMode pinOnlyMode,
+            PivPinOnlyMode tested,
+            PivPinOnlyMode testedUnavailable,
+            bool newAlgorithm,
+            ref PivPinOnlyMode newMode)
         {
             // Look at PinProtected.
             // At this point, if the requested mode is PinProtected, and the
@@ -1030,14 +1034,15 @@ namespace Yubico.YubiKey.Piv
             }
 
             specialKeyCollector.SetKeyData(
-                SpecialKeyCollector.SetKeyDataDefault, ReadOnlyMemory<byte>.Empty, true, PivAlgorithm.TripleDes);
+                SpecialKeyCollector.SetKeyDataDefault, ReadOnlyMemory<byte>.Empty, isNewKey: true,
+                PivAlgorithm.TripleDes);
 
             specialKeyCollector.ChangeManagementKey(this, PivAlgorithm.TripleDes);
         }
 
         private void PutEmptyData(int dataTag)
         {
-            byte[] emptyObject = new byte[] { 0x53, 0x00 };
+            byte[] emptyObject = { 0x53, 0x00 };
 
             var putCmd = new PutDataCommand(dataTag, emptyObject);
             PutDataResponse putRsp = Connection.SendCommand(putCmd);
@@ -1058,17 +1063,18 @@ namespace Yubico.YubiKey.Piv
         // PIN-protected. If that's the case, authMode will be set to
         // PinProtected. Set the ref arg setPinProtected to true in this case.
         // Otherwise, leave that arg alone.
-        private void SetYubiKeyPinDerived(AdminData adminData,
-                                          PivPinOnlyMode currentMode,
-                                          PivAlgorithm mgmtKeyAlgorithm,
-                                          SpecialKeyCollector specialKeyCollector,
-                                          Func<KeyEntryData, bool>? UserKeyCollector,
-                                          ref PivPinOnlyMode newMode)
+        private void SetYubiKeyPinDerived(
+            AdminData adminData,
+            PivPinOnlyMode currentMode,
+            PivAlgorithm mgmtKeyAlgorithm,
+            SpecialKeyCollector specialKeyCollector,
+            Func<KeyEntryData, bool>? userKeyCollector,
+            ref PivPinOnlyMode newMode)
         {
             // We need the actual PIN in order to derive the mgmt key, so even if
             // the PIN has already been verified, collect it.
             // This method will do nothing if the PIN has already been collected.
-            specialKeyCollector.VerifyPinAndSave(this, UserKeyCollector);
+            specialKeyCollector.VerifyPinAndSave(this, userKeyCollector);
 
             // If the currentMode says the mgmt key had been authenticated using
             // PinProtected, we're going to "delete" that management key and set
@@ -1081,7 +1087,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             ReadOnlyMemory<byte> salt = specialKeyCollector.DeriveKeyData
-                (ReadOnlyMemory<byte>.Empty, mgmtKeyAlgorithm, true);
+                (ReadOnlyMemory<byte>.Empty, mgmtKeyAlgorithm, isNewKey: true);
 
             // Call this method instead of the PivSession.Change method directly,
             // because this method will update the current key with the new key.
@@ -1099,14 +1105,15 @@ namespace Yubico.YubiKey.Piv
         // If the current key in specialKeyCollector is not the default, use that
         // key data. That data is either the "pre-existing" mgmt key data, or it
         // is the PIN-derived data.
-        private void SetYubiKeyPinProtected(AdminData adminData,
-                                            PivAlgorithm mgmtKeyAlgorithm,
-                                            SpecialKeyCollector specialKeyCollector)
+        private void SetYubiKeyPinProtected(
+            AdminData adminData,
+            PivAlgorithm mgmtKeyAlgorithm,
+            SpecialKeyCollector specialKeyCollector)
         {
             if (specialKeyCollector.IsCurrentKeyDefault())
             {
                 specialKeyCollector.SetKeyData(
-                    SpecialKeyCollector.SetKeyDataRandom, ReadOnlyMemory<byte>.Empty, true, mgmtKeyAlgorithm);
+                    SpecialKeyCollector.SetKeyDataRandom, ReadOnlyMemory<byte>.Empty, isNewKey: true, mgmtKeyAlgorithm);
 
                 specialKeyCollector.ChangeManagementKey(this, mgmtKeyAlgorithm);
             }
@@ -1147,10 +1154,10 @@ namespace Yubico.YubiKey.Piv
 
             mode = PivPinOnlyMode.None;
 
-            Func<KeyEntryData, bool>? UserKeyCollector = KeyCollector;
+            Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;
             using var specialKeyCollector = new SpecialKeyCollector();
 
-            bool isValid = TryReadObject<AdminData>(out AdminData adminData);
+            bool isValid = TryReadObject(out AdminData adminData);
 
             try
             {
@@ -1164,8 +1171,8 @@ namespace Yubico.YubiKey.Piv
                 // In order to do that we need to verify the PIN.
                 isValid = pin.Length switch
                 {
-                    0 => specialKeyCollector.TryVerifyPinAndSave(this, UserKeyCollector, out retriesRemaining),
-                    _ => specialKeyCollector.TrySetPin(this, pin, out retriesRemaining),
+                    0 => specialKeyCollector.TryVerifyPinAndSave(this, userKeyCollector, out retriesRemaining),
+                    _ => specialKeyCollector.TrySetPin(this, pin, out retriesRemaining)
                 };
 
                 if (!isValid)
@@ -1175,10 +1182,11 @@ namespace Yubico.YubiKey.Piv
 
                 var salt = (ReadOnlyMemory<byte>)adminData.Salt;
 
-                _ = specialKeyCollector.DeriveKeyData(salt, ManagementKeyAlgorithm, false);
+                _ = specialKeyCollector.DeriveKeyData(salt, ManagementKeyAlgorithm, isNewKey: false);
 
                 specialKeyCollector.SetKeyData(
-                    SpecialKeyCollector.SetKeyDataDefault, ReadOnlyMemory<byte>.Empty, true, PivAlgorithm.TripleDes);
+                    SpecialKeyCollector.SetKeyDataDefault, ReadOnlyMemory<byte>.Empty, isNewKey: true,
+                    PivAlgorithm.TripleDes);
 
                 // If this fails, then the mgmt key is not PIN-derived from the
                 // PIN and salt, so we'll say it is not PIN-derived.
@@ -1198,7 +1206,7 @@ namespace Yubico.YubiKey.Piv
                 // Will we need to set the YubiKey to PIN-protected as well?
                 // If there is data in PRINTED, and it contains the same mgmt key
                 // that was derived from the PIN and Salt, then yes.
-                isValid = TryReadObject<PinProtectedData>(out PinProtectedData pinProtect);
+                isValid = TryReadObject(out PinProtectedData pinProtect);
 
                 using (pinProtect)
                 {
@@ -1206,9 +1214,7 @@ namespace Yubico.YubiKey.Piv
                     {
                         var mgmtKey = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
 
-                        if (MemoryExtensions.SequenceEqual(
-                                specialKeyCollector.GetCurrentMgmtKey().Span,
-                                mgmtKey.Span))
+                        if (specialKeyCollector.GetCurrentMgmtKey().Span.SequenceEqual(mgmtKey.Span))
                         {
                             mode |= PivPinOnlyMode.PinProtected;
                         }
@@ -1229,7 +1235,7 @@ namespace Yubico.YubiKey.Piv
             finally
             {
                 adminData.Dispose();
-                KeyCollector = UserKeyCollector;
+                KeyCollector = userKeyCollector;
             }
 
             return true;
@@ -1239,7 +1245,7 @@ namespace Yubico.YubiKey.Piv
         {
             Unavailable = 0,
             Complete = 1,
-            CanContinue = 2,
+            CanContinue = 2
         }
 
         // This class keeps track of the key data and its length.
@@ -1286,7 +1292,7 @@ namespace Yubico.YubiKey.Piv
                 {
                     PivAlgorithm.Aes128 => 16,
                     PivAlgorithm.Aes256 => 32,
-                    _ => 24,
+                    _ => 24
                 };
 
                 if (!newData.IsEmpty)
@@ -1299,12 +1305,12 @@ namespace Yubico.YubiKey.Piv
 
                     do
                     {
-                        randomObject.GetBytes(_keyBuffer, 0, newLength);
+                        randomObject.GetBytes(_keyBuffer, offset: 0, newLength);
                     }
                     while (IsKeyDataWeak(algorithm));
                 }
 
-                KeyData = _keyData.Slice(0, newLength);
+                KeyData = _keyData.Slice(start: 0, newLength);
             }
 
             // Derive a key of the appropriate length (based on algorithm), using
@@ -1312,8 +1318,10 @@ namespace Yubico.YubiKey.Piv
             // Return the salt.
             // It is the responsibility of the caller to make sure the pin is the
             // correct length.
-            public ReadOnlyMemory<byte> DeriveKeyData(ReadOnlyMemory<byte> pin, ReadOnlyMemory<byte> salt,
-                                                      PivAlgorithm algorithm)
+            public ReadOnlyMemory<byte> DeriveKeyData(
+                ReadOnlyMemory<byte> pin,
+                ReadOnlyMemory<byte> salt,
+                PivAlgorithm algorithm)
             {
                 ReadOnlyMemory<byte> returnValue = salt;
 
@@ -1325,7 +1333,7 @@ namespace Yubico.YubiKey.Piv
 
                     do
                     {
-                        randomObject.GetBytes(saltData, 0, PinDerivedSaltLength);
+                        randomObject.GetBytes(saltData, offset: 0, PinDerivedSaltLength);
                         PerformKeyDerive(pin, saltData, algorithm);
                     }
                     while (IsKeyDataWeak(algorithm));
@@ -1347,7 +1355,7 @@ namespace Yubico.YubiKey.Piv
                 {
                     PivAlgorithm.Aes128 => 16,
                     PivAlgorithm.Aes256 => 32,
-                    _ => 24,
+                    _ => 24
                 };
 
                 byte[] result = Array.Empty<byte>();
@@ -1357,11 +1365,11 @@ namespace Yubico.YubiKey.Piv
                 {
                     // This will use PBKDF2, with the PRF of HMAC with SHA-1.
 #pragma warning disable CA5379, CA5387 // These warnings complain about SHA-1 and <100,000 iterations, but we use it to be backwards-compatible.
-                    using var kdf = new Rfc2898DeriveBytes(pinData, saltData, 10000);
+                    using var kdf = new Rfc2898DeriveBytes(pinData, saltData, iterations: 10000);
                     result = kdf.GetBytes(newLength);
 #pragma warning restore CA5379, CA5387
                     Array.Copy(result, _keyBuffer, newLength);
-                    KeyData = _keyData.Slice(0, newLength);
+                    KeyData = _keyData.Slice(start: 0, newLength);
                 }
                 finally
                 {
@@ -1379,8 +1387,9 @@ namespace Yubico.YubiKey.Piv
             {
                 if (algorithm == PivAlgorithm.TripleDes)
                 {
-                    if (MemoryExtensions.SequenceEqual(_keyData.Span.Slice(0, 8), _keyData.Span.Slice(8, 8))
-                        || MemoryExtensions.SequenceEqual(_keyData.Span.Slice(8, 8), _keyData.Span.Slice(16, 8)))
+                    if (_keyData.Span.Slice(start: 0, length: 8).SequenceEqual(_keyData.Span.Slice(start: 8, length: 8))
+                        || _keyData.Span.Slice(start: 8, length: 8)
+                            .SequenceEqual(_keyData.Span.Slice(start: 16, length: 8)))
                     {
                         return true;
                     }
@@ -1408,12 +1417,13 @@ namespace Yubico.YubiKey.Piv
 
             public SpecialKeyCollector()
             {
-                _defaultKey = new Memory<byte>(new byte[]
-                {
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-                });
+                _defaultKey = new Memory<byte>(
+                    new byte[]
+                    {
+                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+                    });
 
                 _currentKey = new MgmtKeyHolder();
                 _newKey = new MgmtKeyHolder();
@@ -1451,8 +1461,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Check to see if the data is the default mgmt key.
-            public bool IsCurrentKeyDefault() =>
-                MemoryExtensions.SequenceEqual(_defaultKey.Span, _currentKey.KeyData.Span);
+            public bool IsCurrentKeyDefault() => _defaultKey.Span.SequenceEqual(_currentKey.KeyData.Span);
 
             // Set either the current or new mgmt key.
             // Set to either the data in the buffer, new random data, or the
@@ -1511,7 +1520,7 @@ namespace Yubico.YubiKey.Piv
             {
                 MgmtKeyHolder dest = isNewKey ? _newKey : _currentKey;
 
-                return dest.DeriveKeyData(_pinMemory.Slice(0, _pinLength), salt, algorithm);
+                return dest.DeriveKeyData(_pinMemory.Slice(start: 0, _pinLength), salt, algorithm);
             }
 
             // Change the management key from what is in current to what is in
@@ -1520,14 +1529,14 @@ namespace Yubico.YubiKey.Piv
             public void ChangeManagementKey(PivSession pivSession, PivAlgorithm algorithm)
             {
                 pivSession.ChangeManagementKey(PivTouchPolicy.Never, algorithm);
-                SetKeyData(SetKeyDataBuffer, _newKey.KeyData, false, algorithm);
+                SetKeyData(SetKeyDataBuffer, _newKey.KeyData, isNewKey: false, algorithm);
             }
 
             // Obtain the mgmt key and authenticate it, make sure the mgmt key is set
             // in the SpecialKeyCollector.
             // This method assumes the special key collector is in a state just after
             // instantiation.
-            // If the user cancels (the UserKeyCollector returns false), this method
+            // If the user cancels (the userKeyCollector returns false), this method
             // will throw an exception.
             // This method assumes the special key collector is in the PivSession's
             // KeyCollector and it expects the default mgmt key is the current key.
@@ -1538,8 +1547,9 @@ namespace Yubico.YubiKey.Piv
             // exception.
             // Upon completion of this method, the correct mgmt key is in the current
             // key.
-            public void AuthMgmtKeyAndSave(PivSession pivSession,
-                                           Func<KeyEntryData, bool>? UserKeyCollector)
+            public void AuthMgmtKeyAndSave(
+                PivSession pivSession,
+                Func<KeyEntryData, bool>? userKeyCollector)
             {
                 // First, try the default key. If it works, we're done.
                 // If we reach this point, the special key collector has just been
@@ -1551,7 +1561,7 @@ namespace Yubico.YubiKey.Piv
 
                 // If the default did not authenticate, use the caller-supplied
                 // KeyCollector to obtain the key.
-                if (UserKeyCollector is null)
+                if (userKeyCollector is null)
                 {
                     throw new InvalidOperationException(
                         string.Format(
@@ -1559,16 +1569,17 @@ namespace Yubico.YubiKey.Piv
                             ExceptionMessages.MissingKeyCollector));
                 }
 
-                var keyEntryData = new KeyEntryData()
+                var keyEntryData = new KeyEntryData
                 {
-                    Request = KeyEntryRequest.AuthenticatePivManagementKey,
+                    Request = KeyEntryRequest.AuthenticatePivManagementKey
                 };
 
                 try
                 {
-                    while (UserKeyCollector(keyEntryData))
+                    while (userKeyCollector(keyEntryData))
                     {
-                        SetKeyData(SetKeyDataBuffer, keyEntryData.GetCurrentValue(), false,
+                        SetKeyData(
+                            SetKeyDataBuffer, keyEntryData.GetCurrentValue(), isNewKey: false,
                             pivSession.ManagementKeyAlgorithm);
 
                         if (pivSession.TryAuthenticateWithKeyCollector(true))
@@ -1584,7 +1595,7 @@ namespace Yubico.YubiKey.Piv
                     keyEntryData.Clear();
 
                     keyEntryData.Request = KeyEntryRequest.Release;
-                    _ = UserKeyCollector(keyEntryData);
+                    _ = userKeyCollector(keyEntryData);
                 }
 
                 // If the user cancels, throw the canceled exception.
@@ -1603,12 +1614,13 @@ namespace Yubico.YubiKey.Piv
             // If the PIN is already collected, do nothing.
             // If not, obtain the PIN and verify it, set the PinCollected
             // property.
-            // If the If the user cancels (the UserKeyCollector returns false),
+            // If the If the user cancels (the userKeyCollector returns false),
             // this method will throw an exception.
-            public void VerifyPinAndSave(PivSession pivSession,
-                                         Func<KeyEntryData, bool>? UserKeyCollector)
+            public void VerifyPinAndSave(
+                PivSession pivSession,
+                Func<KeyEntryData, bool>? userKeyCollector)
             {
-                if (!TryVerifyPinAndSave(pivSession, UserKeyCollector, out _))
+                if (!TryVerifyPinAndSave(pivSession, userKeyCollector, out _))
                 {
                     // If the user cancels, throw the canceled exception.
                     throw new OperationCanceledException(
@@ -1620,9 +1632,10 @@ namespace Yubico.YubiKey.Piv
 
             // Verify the PIN and save it in this.
             // If the user cancels, return false.
-            public bool TryVerifyPinAndSave(PivSession pivSession,
-                                            Func<KeyEntryData, bool>? UserKeyCollector,
-                                            out int? retriesRemaining)
+            public bool TryVerifyPinAndSave(
+                PivSession pivSession,
+                Func<KeyEntryData, bool>? userKeyCollector,
+                out int? retriesRemaining)
             {
                 retriesRemaining = null;
 
@@ -1631,7 +1644,7 @@ namespace Yubico.YubiKey.Piv
                     return true;
                 }
 
-                if (UserKeyCollector is null)
+                if (userKeyCollector is null)
                 {
                     throw new InvalidOperationException(
                         string.Format(
@@ -1639,14 +1652,14 @@ namespace Yubico.YubiKey.Piv
                             ExceptionMessages.MissingKeyCollector));
                 }
 
-                var keyEntryData = new KeyEntryData()
+                var keyEntryData = new KeyEntryData
                 {
-                    Request = KeyEntryRequest.VerifyPivPin,
+                    Request = KeyEntryRequest.VerifyPivPin
                 };
 
                 try
                 {
-                    while (UserKeyCollector(keyEntryData))
+                    while (userKeyCollector(keyEntryData))
                     {
                         if (TrySetPin(pivSession, keyEntryData.GetCurrentValue(), out retriesRemaining))
                         {
@@ -1662,7 +1675,7 @@ namespace Yubico.YubiKey.Piv
                     keyEntryData.Clear();
 
                     keyEntryData.Request = KeyEntryRequest.Release;
-                    _ = UserKeyCollector(keyEntryData);
+                    _ = userKeyCollector(keyEntryData);
                 }
 
                 // We reach this point if the user cancels.
@@ -1713,7 +1726,7 @@ namespace Yubico.YubiKey.Piv
                         return true;
 
                     case KeyEntryRequest.VerifyPivPin:
-                        keyEntryData.SubmitValue(_pinMemory.Slice(0, _pinLength).Span);
+                        keyEntryData.SubmitValue(_pinMemory.Slice(start: 0, _pinLength).Span);
 
                         return true;
                 }

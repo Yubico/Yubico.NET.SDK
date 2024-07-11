@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -29,7 +28,9 @@ namespace Yubico.YubiKey.U2f.Commands
         private const byte AutoEjectTimeoutTag = 0x06;
         private const byte ChallengeResponseTimeoutTag = 0x07;
         private const byte DeviceFlagsTag = 0x08;
+
         private const byte ConfigurationLockPresentTag = 0x0a;
+
         //private const byte ConfigurationUnlockTag = 0x0b;
         //private const byte ResetTag = 0x0c;
         private const byte NfcPrePersCapabilitiesTag = 0x0d;
@@ -39,7 +40,7 @@ namespace Yubico.YubiKey.U2f.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void action() => _ = new GetDeviceInfoResponse(null);
+            static void action() => _ = new GetPagedDeviceInfoResponse(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(action);
@@ -52,7 +53,7 @@ namespace Yubico.YubiKey.U2f.Commands
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
-            var deviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var deviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
             Assert.Equal(SWConstants.Success, deviceInfoResponse.StatusWord);
         }
@@ -64,7 +65,7 @@ namespace Yubico.YubiKey.U2f.Commands
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
-            var deviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var deviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
             Assert.Equal(ResponseStatus.Success, deviceInfoResponse.Status);
         }
@@ -76,7 +77,7 @@ namespace Yubico.YubiKey.U2f.Commands
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
-            var deviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var deviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() => deviceInfoResponse.GetData());
         }
 
@@ -86,7 +87,7 @@ namespace Yubico.YubiKey.U2f.Commands
             byte sw1 = unchecked((byte)(SWConstants.ExecutionError >> 8));
             byte sw2 = unchecked((byte)SWConstants.ExecutionError);
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
             void action() => _ = getDeviceInfoResponse.GetData();
 
@@ -96,10 +97,12 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_UsbPrePersCapabilitiesTagPresentAsShort_SetsPropertyCorrectly()
         {
-            var responseApdu = new ResponseApdu(new byte[] { 0x04, UsbPrePersCapabilitiesTag, 0x02, 0x03, 0x3F, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var responseApdu = new ResponseApdu(new byte[]
+                { 0x04, UsbPrePersCapabilitiesTag, 0x02, 0x03, 0x3F, 0x90, 0x00 });
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal(YubiKeyCapabilities.All, deviceInfo.AvailableUsbCapabilities);
         }
@@ -108,9 +111,10 @@ namespace Yubico.YubiKey.U2f.Commands
         public void GetData_UsbPrePersCapabilitiesTagPresentAsByte_SetsPropertyCorrectly()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x03, UsbPrePersCapabilitiesTag, 0x01, 0x3F, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal((YubiKeyCapabilities)0x3F, deviceInfo.AvailableUsbCapabilities);
         }
@@ -118,10 +122,12 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_SerialNumberTagPresent_SetsPropertyCorrectly()
         {
-            var responseApdu = new ResponseApdu(new byte[] { 0x06, SerialNumberTag, 0x04, 0x01, 0x02, 0x03, 0x04, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var responseApdu = new ResponseApdu(new byte[]
+                { 0x06, SerialNumberTag, 0x04, 0x01, 0x02, 0x03, 0x04, 0x90, 0x00 });
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal(0x01020304, deviceInfo.SerialNumber);
         }
@@ -129,10 +135,12 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_UsbEnabledCapabilitiesTagPresentAsShort_SetsPropertyCorrectly()
         {
-            var responseApdu = new ResponseApdu(new byte[] { 0x04, UsbEnabledCapabilitiesTag, 0x02, 0x03, 0x3F, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var responseApdu = new ResponseApdu(new byte[]
+                { 0x04, UsbEnabledCapabilitiesTag, 0x02, 0x03, 0x3F, 0x90, 0x00 });
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal(YubiKeyCapabilities.All, deviceInfo.EnabledUsbCapabilities);
         }
@@ -141,9 +149,10 @@ namespace Yubico.YubiKey.U2f.Commands
         public void GetData_UsbEnabledCapabilitiesTagPresentAsByte_SetsPropertyCorrectly()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x03, UsbEnabledCapabilitiesTag, 0x01, 0x3F, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal((YubiKeyCapabilities)0x3F, deviceInfo.EnabledUsbCapabilities);
         }
@@ -152,10 +161,12 @@ namespace Yubico.YubiKey.U2f.Commands
         public void GetData_FormFactorTagPresent_SetsPropertyCorrectly()
         {
             FormFactor expectedFormFactor = FormFactor.UsbCLightning;
-            var responseApdu = new ResponseApdu(new byte[] { 0x03, FormFactorTag, 0x01, (byte)expectedFormFactor, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var responseApdu = new ResponseApdu(new byte[]
+                { 0x03, FormFactorTag, 0x01, (byte)expectedFormFactor, 0x90, 0x00 });
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal(expectedFormFactor, deviceInfo.FormFactor);
         }
@@ -164,10 +175,15 @@ namespace Yubico.YubiKey.U2f.Commands
         public void GetData_FirmwareVersionTagPresent_SetsPropertyCorrectly()
         {
             var expectedVersion = new FirmwareVersion() { Major = 0x01, Minor = 0x02, Patch = 0x03 };
-            var responseApdu = new ResponseApdu(new byte[] { 0x05, FirmwareVersionTag, 0x03, expectedVersion.Major, expectedVersion.Minor, expectedVersion.Patch, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var responseApdu = new ResponseApdu(new byte[]
+            {
+                0x05, FirmwareVersionTag, 0x03, expectedVersion.Major, expectedVersion.Minor, expectedVersion.Patch,
+                0x90, 0x00
+            });
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal(expectedVersion, deviceInfo.FirmwareVersion);
         }
@@ -177,9 +193,10 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             short expectedTimeout = 0x1234;
             var responseApdu = new ResponseApdu(new byte[] { 0x04, AutoEjectTimeoutTag, 0x02, 0x12, 0x34, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal(expectedTimeout, deviceInfo.AutoEjectTimeout);
         }
@@ -188,10 +205,12 @@ namespace Yubico.YubiKey.U2f.Commands
         public void GetData_ChallengeResponseTimeoutTagPresent_SetsPropertyCorrectly()
         {
             byte expectedTimeout = 0x12;
-            var responseApdu = new ResponseApdu(new byte[] { 0x03, ChallengeResponseTimeoutTag, 0x01, expectedTimeout, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var responseApdu = new ResponseApdu(new byte[]
+                { 0x03, ChallengeResponseTimeoutTag, 0x01, expectedTimeout, 0x90, 0x00 });
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal(expectedTimeout, deviceInfo.ChallengeResponseTimeout);
         }
@@ -200,10 +219,12 @@ namespace Yubico.YubiKey.U2f.Commands
         public void GetData_DeviceFlagsTagPresent_SetsPropertyCorrectly()
         {
             DeviceFlags deviceFlags = DeviceFlags.RemoteWakeup | DeviceFlags.TouchEject;
-            var responseApdu = new ResponseApdu(new byte[] { 0x03, DeviceFlagsTag, 0x01, (byte)deviceFlags, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var responseApdu =
+                new ResponseApdu(new byte[] { 0x03, DeviceFlagsTag, 0x01, (byte)deviceFlags, 0x90, 0x00 });
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal(deviceFlags, deviceInfo.DeviceFlags);
         }
@@ -212,10 +233,12 @@ namespace Yubico.YubiKey.U2f.Commands
         public void GetData_ConfigurationLockPresentTagPresent_SetsPropertyCorrectly()
         {
             bool expectedValue = true;
-            var responseApdu = new ResponseApdu(new byte[] { 0x03, ConfigurationLockPresentTag, 0x01, 0x01, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var responseApdu =
+                new ResponseApdu(new byte[] { 0x03, ConfigurationLockPresentTag, 0x01, 0x01, 0x90, 0x00 });
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal(expectedValue, deviceInfo.ConfigurationLocked);
         }
@@ -223,10 +246,12 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_NfcPrePersCapabilitiesTagPresentAsShort_SetsPropertyCorrectly()
         {
-            var responseApdu = new ResponseApdu(new byte[] { 0x04, NfcPrePersCapabilitiesTag, 0x02, 0x03, 0x3F, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var responseApdu = new ResponseApdu(new byte[]
+                { 0x04, NfcPrePersCapabilitiesTag, 0x02, 0x03, 0x3F, 0x90, 0x00 });
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal(YubiKeyCapabilities.All, deviceInfo.AvailableNfcCapabilities);
         }
@@ -235,9 +260,10 @@ namespace Yubico.YubiKey.U2f.Commands
         public void GetData_NfcPrePersCapabilitiesTagPresentAsByte_SetsPropertyCorrectly()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x03, NfcPrePersCapabilitiesTag, 0x01, 0x3F, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal((YubiKeyCapabilities)0x3F, deviceInfo.AvailableNfcCapabilities);
         }
@@ -245,10 +271,12 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_NfcEnabledCapabilitiesTagPresentAsShort_SetsPropertyCorrectly()
         {
-            var responseApdu = new ResponseApdu(new byte[] { 0x04, NfcEnabledCapabilitiesTag, 0x02, 0x03, 0x3F, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var responseApdu = new ResponseApdu(new byte[]
+                { 0x04, NfcEnabledCapabilitiesTag, 0x02, 0x03, 0x3F, 0x90, 0x00 });
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal(YubiKeyCapabilities.All, deviceInfo.EnabledNfcCapabilities);
         }
@@ -257,9 +285,10 @@ namespace Yubico.YubiKey.U2f.Commands
         public void GetData_NfcEnabledCapabilitiesTagPresentAsByte_SetsPropertyCorrectly()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x03, NfcEnabledCapabilitiesTag, 0x01, 0x3F, 0x90, 0x00 });
-            var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
+            var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            YubiKeyDeviceInfo deviceInfo = getDeviceInfoResponse.GetData();
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
+
 
             Assert.Equal((YubiKeyCapabilities)0x3F, deviceInfo.EnabledNfcCapabilities);
         }

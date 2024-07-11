@@ -15,10 +15,12 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
+using Yubico.YubiKey.Management.Commands;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey
 {
+    [Trait("Category", "RequiresStepDebug")] // Timing issues, may need to step with debugger
     public class YubiKeyDeviceTests
     {
         private static readonly byte[] LockCodeAllZero = new byte[16];
@@ -158,7 +160,7 @@ namespace Yubico.YubiKey
             return false;
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetEnabledNfcCapabilities_DisableFido2_OnlyFido2Disabled(
@@ -177,7 +179,7 @@ namespace Yubico.YubiKey
             Assert.Equal(desiredCapabilities, testDevice.EnabledNfcCapabilities);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetEnabledUsbCapabilities_EnableFido2OverOtp_Fido2AndOtpEnabled(
@@ -202,7 +204,7 @@ namespace Yubico.YubiKey
             Assert.Equal(desiredCapabilities, testDevice.EnabledUsbCapabilities);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetEnabledUsbCapabilities_DisableFido2_OnlyFido2Disabled(
@@ -221,7 +223,7 @@ namespace Yubico.YubiKey
             Assert.Equal(desiredCapabilities, testDevice.EnabledUsbCapabilities);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetChallengeResponseTimeout_255seconds_ValueSetTo255(
@@ -238,7 +240,7 @@ namespace Yubico.YubiKey
             Assert.Equal(expectedTimeout, testDevice.ChallengeResponseTimeout);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetChallengeResponseTimeout_ZeroSeconds_DefaultValueSet(
@@ -256,7 +258,7 @@ namespace Yubico.YubiKey
             Assert.Equal(expectedTimeout, testDevice.ChallengeResponseTimeout);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5, ushort.MinValue)]
         [InlineData(StandardTestDevice.Fw5, ushort.MaxValue)]
         [InlineData(StandardTestDevice.Fw5Fips, ushort.MinValue)]
@@ -279,7 +281,7 @@ namespace Yubico.YubiKey
             Assert.Equal(expectedTimeout, testDevice.AutoEjectTimeout);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetDeviceFlags_RemoteWakeupAndTouchEject_BothFlagsSet(
@@ -296,7 +298,7 @@ namespace Yubico.YubiKey
             Assert.Equal(expectedDeviceFlags, testDevice.DeviceFlags);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void LockConfiguration_ValidLockCode_DeviceIsLocked(StandardTestDevice testDeviceType)
@@ -311,7 +313,7 @@ namespace Yubico.YubiKey
             Assert.True(testDevice.ConfigurationLocked);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void LockConfiguration_SetLockCodeOnLockedDevice_ThrowsException(
@@ -332,7 +334,7 @@ namespace Yubico.YubiKey
                 () => testDevice.LockConfiguration(TestLockCode));
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void UnlockConfiguration_CorrectLockCode_DeviceNotLocked(
@@ -354,7 +356,7 @@ namespace Yubico.YubiKey
             Assert.False(testDevice.ConfigurationLocked);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void UnlockConfiguration_IncorrectLockCode_ThrowsException(
@@ -374,7 +376,7 @@ namespace Yubico.YubiKey
                 () => testDevice.UnlockConfiguration(LockCodeAllZero));
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void UnlockConfiguration_AllZeroLockCodeOnUnlockedDevice_CommandSuccessful(
@@ -387,7 +389,7 @@ namespace Yubico.YubiKey
             testDevice.UnlockConfiguration(LockCodeAllZero);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void UnlockConfiguration_NonZeroLockCodeOnUnlockedDevice_ThrowsException(
@@ -466,7 +468,7 @@ namespace Yubico.YubiKey
 
             if (testDevice.FirmwareVersion.Major >= 5)
             {
-                var baseCommand = new Management.Commands.SetDeviceInfoCommand
+                var baseCommand = new SetDeviceInfoCommand
                 {
                     EnabledNfcCapabilities = YubiKeyCapabilities.All,
                     EnabledUsbCapabilities = YubiKeyCapabilities.All,
@@ -488,7 +490,7 @@ namespace Yubico.YubiKey
             }
             else
             {
-                var baseCommand = new Management.Commands.SetLegacyDeviceConfigCommand(
+                var baseCommand = new SetLegacyDeviceConfigCommand(
                     YubiKeyCapabilities.All,
                     0,
                     false,
@@ -509,13 +511,13 @@ namespace Yubico.YubiKey
 
         private static IYubiKeyResponse SendConfiguration(
             IYubiKeyDevice yubiKey,
-            Management.Commands.SetDeviceInfoBaseCommand baseCommand)
+            SetDeviceInfoBaseCommand baseCommand)
         {
             IYubiKeyCommand<IYubiKeyResponse> command;
 
             if (yubiKey.TryConnect(YubiKeyApplication.Management, out IYubiKeyConnection? connection))
             {
-                command = new Management.Commands.SetDeviceInfoCommand(baseCommand);
+                command = new SetDeviceInfoCommand(baseCommand);
             }
             else if (yubiKey.TryConnect(YubiKeyApplication.Otp, out connection))
             {
@@ -534,13 +536,13 @@ namespace Yubico.YubiKey
 
         private static IYubiKeyResponse SendConfiguration(
             IYubiKeyDevice yubiKey,
-            Management.Commands.SetLegacyDeviceConfigBase baseCommand)
+            SetLegacyDeviceConfigBase baseCommand)
         {
             IYubiKeyCommand<IYubiKeyResponse> command;
 
             if (yubiKey.TryConnect(YubiKeyApplication.Management, out IYubiKeyConnection? connection))
             {
-                command = new Management.Commands.SetLegacyDeviceConfigCommand(baseCommand);
+                command = new SetLegacyDeviceConfigCommand(baseCommand);
             }
             else if (yubiKey.TryConnect(YubiKeyApplication.Otp, out connection))
             {

@@ -164,7 +164,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Readability, avoiding nested conditionals.")]
         public int? GetData()
         {
-            if (Status != ResponseStatus.Success && Status != ResponseStatus.AuthenticationRequired)
+            if (Status != ResponseStatus.Success &&
+                Status != ResponseStatus.AuthenticationRequired &&
+                Status != ResponseStatus.ConditionsNotSatisfied)
             {
                 throw new InvalidOperationException(StatusMessage);
             }

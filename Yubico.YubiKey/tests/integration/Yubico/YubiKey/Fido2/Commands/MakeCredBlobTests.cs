@@ -14,20 +14,20 @@
 
 using System;
 using Xunit;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
+    [Trait("Category", "RequiresBio")]
     public class MakeCredBlobTests : NeedPinToken
     {
-        private readonly byte[] _clientDataHash = new byte[] {
+        private readonly byte[] _clientDataHash = {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
         };
 
-        private readonly byte[] _credBlobValue = new byte[] {
+        private readonly byte[] _credBlobValue = {
             0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
             0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, 0x50,
             0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
@@ -46,11 +46,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         };
 
         public MakeCredBlobTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
         {
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void MakeCredentialBlob_Succeeds()
         {
             var protocol = new PinUvAuthProtocolTwo();

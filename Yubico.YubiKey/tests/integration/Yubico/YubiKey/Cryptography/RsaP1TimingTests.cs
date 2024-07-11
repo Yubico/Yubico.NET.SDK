@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,6 +21,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {
+    [Trait("Category", "Simple")]
     public class RsaP1TimingTests
     {
         private const int IterationCount1024 = 10000000;
@@ -40,7 +42,7 @@ namespace Yubico.YubiKey.Cryptography
         public void CorrectPad_Time(int keySizeBits)
         {
             bool isValid = false;
-            int[] dataLength = new int[] { 16, 24, 32, 48 };
+            int[] dataLength = { 16, 24, 32, 48 };
 
             for (int index = 0; index < dataLength.Length; index++)
             {
@@ -62,7 +64,7 @@ namespace Yubico.YubiKey.Cryptography
         public void FirstByteWrong_Time(int keySizeBits)
         {
             bool isValid = false;
-            int[] dataLength = new int[] { 16, 24, 32, 48 };
+            int[] dataLength = { 16, 24, 32, 48 };
 
             for (int index = 0; index < dataLength.Length; index++)
             {
@@ -85,7 +87,7 @@ namespace Yubico.YubiKey.Cryptography
         public void SecondByteWrong_Time(int keySizeBits)
         {
             bool isValid = false;
-            int[] dataLength = new int[] { 16, 24, 32, 48 };
+            int[] dataLength = { 16, 24, 32, 48 };
 
             for (int index = 0; index < dataLength.Length; index++)
             {
@@ -108,7 +110,7 @@ namespace Yubico.YubiKey.Cryptography
         public void NotEnoughPad_Time(int keySizeBits)
         {
             bool isValid = false;
-            int[] dataLength = new int[] { 16, 24, 32, 48 };
+            int[] dataLength = { 16, 24, 32, 48 };
 
             for (int index = 0; index < dataLength.Length; index++)
             {
@@ -131,7 +133,7 @@ namespace Yubico.YubiKey.Cryptography
         public void MultipleErrors_Time(int keySizeBits)
         {
             bool isValid = false;
-            int[] dataLength = new int[] { 16, 24, 32, 48 };
+            int[] dataLength = { 16, 24, 32, 48 };
 
             for (int index = 0; index < dataLength.Length; index++)
             {
@@ -185,7 +187,7 @@ namespace Yubico.YubiKey.Cryptography
             }
 
             byte[] outputData = Array.Empty<byte>();
-            var timer = System.Diagnostics.Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
             for (int index = 0; index < iterationCount; index++)
             {
                 isValid = RsaFormat.TryParsePkcs1Decrypt(formattedData, out outputData);

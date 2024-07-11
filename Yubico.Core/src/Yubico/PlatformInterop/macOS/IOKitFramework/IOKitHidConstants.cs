@@ -24,6 +24,7 @@ namespace Yubico.PlatformInterop
         public const string MaxInputReportSize = "MaxInputReportSize";
         public const string MaxOutputReportSize = "MaxOutputReportSize";
 
+        public const int kIOHidReportTypeInput = 0;
         public const int kIOHidReportTypeOutput = 1;
         public const int kIOHidReportTypeFeature = 2;
     }

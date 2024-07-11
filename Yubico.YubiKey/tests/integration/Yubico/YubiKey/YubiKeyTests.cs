@@ -21,6 +21,7 @@ using Xunit.Abstractions;
 
 namespace Yubico.YubiKey
 {
+    [Trait("Category", "RequiresSetup")]
     public class YubiKeyTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
@@ -39,7 +40,7 @@ namespace Yubico.YubiKey
         [Fact]
         public void GetYubiKeys_ExplicitAllTransports_MoreThanOneConnectedKey()
         {
-            var keys = YubiKeyDevice.FindByTransport(Transport.All).ToList();
+            var keys = YubiKeyDevice.FindByTransport().ToList();
 
             foreach (IYubiKeyDevice key in keys)
             {
@@ -55,7 +56,7 @@ namespace Yubico.YubiKey
         // Good test for checking matching logic.
         public void GetYubiKeys_ExplicitAllTransports_OneConnectedKey()
         {
-            var keys = YubiKeyDevice.FindByTransport(Transport.All).ToList();
+            var keys = YubiKeyDevice.FindByTransport().ToList();
 
             foreach (IYubiKeyDevice key in keys)
             {
@@ -194,8 +195,8 @@ namespace Yubico.YubiKey
             int numberOfRounds = 40;
 
             var rand = new Random();
-            var transportValues =
-                new Transport[] { /*Transport.HidFido,*/ Transport.HidKeyboard, Transport.SmartCard };
+            Transport[] transportValues =
+                new[] { /*Transport.HidFido,*/ Transport.HidKeyboard, Transport.SmartCard };
 
             var transportTestValues = new Transport[numberOfRounds];
             for (int i = 0; i < transportTestValues.Length; i++)

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,6 +21,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {
+    [Trait("Category", "Simple")]
     public class RsaOaepTimingTests
     {
         private const int IterationCount1024 = 200000;
@@ -27,6 +29,7 @@ namespace Yubico.YubiKey.Cryptography
 
         private readonly ITestOutputHelper _output;
         private readonly RandomNumberGenerator _random;
+
 
         public RsaOaepTimingTests(ITestOutputHelper output)
         {
@@ -286,7 +289,7 @@ namespace Yubico.YubiKey.Cryptography
             }
 
             byte[] outputData = Array.Empty<byte>();
-            var timer = System.Diagnostics.Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
             for (int index = 0; index < iterationCount; index++)
             {
                 isValid = RsaFormat.TryParsePkcs1Oaep(formattedData, digestFlag, out outputData);

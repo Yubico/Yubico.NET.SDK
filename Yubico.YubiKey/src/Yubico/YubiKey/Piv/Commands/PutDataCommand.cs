@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// not need to use this command. For example, if you want to put a
     /// certificate onto a YubiKey, use <see cref="PivSession.ImportCertificate"/>.
     /// Or if you want to store/retrieve Key History, use
-    /// <see cref="PivSession.ReadObject()"/> and <see cref="PivSession.WriteObject"/>
+    /// <see cref="PivSession.ReadObject{T}()"/> and <see cref="PivSession.WriteObject"/>
     /// along with the <see cref="Piv.Objects.KeyHistory"/> class. Under the
     /// covers, these APIs will ultimately call this command. But the application
     /// that uses the SDK can simply make the specific API calls, rather than use

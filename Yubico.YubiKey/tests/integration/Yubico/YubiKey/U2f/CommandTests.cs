@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.PlatformInterop;
@@ -57,29 +56,20 @@ namespace Yubico.YubiKey.U2f
         }
 
         [Fact]
+        [Trait("Category", "Simple")]
         public void RunGetDeviceInfo()
         {
-            if (_fidoConnection is null)
-            {
-                return;
-            }
-
-            var cmd = new GetDeviceInfoCommand();
-            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            var cmd = new GetPagedDeviceInfoCommand();
+            GetPagedDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            YubiKeyDeviceInfo getData = rsp.GetData();
-            Assert.False(getData.IsFipsSeries);
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
+            Assert.False(deviceInfo.IsFipsSeries);
         }
 
         [Fact]
         public void RunSetDeviceInfo()
         {
-            if (_fidoConnection is null)
-            {
-                return;
-            }
-
             var cmd = new SetDeviceInfoCommand();
             Assert.Null(cmd.DeviceFlags);
             //            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
@@ -92,11 +82,6 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void VerifyFipsMode()
         {
-            if (_fidoConnection is null)
-            {
-                return;
-            }
-
             var cmd = new VerifyFipsModeCommand();
             VerifyFipsModeResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);

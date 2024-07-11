@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.U2f
 
             using (var u2fSession = new U2fSession(testDevice))
             {
-                u2fSession.KeyCollector = (k) => k.Request switch
+                u2fSession.KeyCollector = k => k.Request switch
                 {
                     KeyEntryRequest.TouchRequest => true,
                     _ => throw new NotSupportedException("Test requested a key that is not supported by this test case.")

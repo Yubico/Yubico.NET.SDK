@@ -228,14 +228,14 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <exception cref="ArgumentException">
         ///     Thrown when a management key has an invalid length.
         /// </exception>
-        public bool TryChangeManagementKey(ReadOnlyMemory<byte> currentManagementKey,
-                                           ReadOnlyMemory<byte> newManagementKey,
-                                           [NotNullWhen(false)] out int? retriesRemaining)
+        public bool TryChangeManagementKey(
+            ReadOnlyMemory<byte> currentManagementKey,
+            ReadOnlyMemory<byte> newManagementKey,
+            [NotNullWhen(false)] out int? retriesRemaining)
         {
             retriesRemaining = null;
 
-            var changeMgmtKeyCmd =
-                new ChangeManagementKeyCommand(currentManagementKey, newManagementKey);
+            var changeMgmtKeyCmd = new ChangeManagementKeyCommand(currentManagementKey, newManagementKey);
 
             ChangeManagementKeyResponse changeMgmtKeyRsp =
                 Connection.SendCommand(changeMgmtKeyCmd);

@@ -23,14 +23,12 @@ namespace Yubico.YubiKey.Cryptography
     public class RsaFormatNegativeTests
     {
         [Theory]
-        [InlineData(1, 3072)]
-        [InlineData(1, 4096)]
+        [InlineData(1, 3077)]
+        [InlineData(1, 4099)]
         [InlineData(2, 1023)]
         [InlineData(2, 2047)]
         [InlineData(3, 1025)]
         [InlineData(3, 2049)]
-        [InlineData(4, 3072)]
-        [InlineData(4, 4096)]
         public void Format_WrongKeySize_Exception(int format, int keySize)
         {
             byte[] digest = new byte[] {

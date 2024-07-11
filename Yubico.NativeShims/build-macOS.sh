@@ -7,13 +7,13 @@ git pull
 vcpkg x-update-baseline
 popd
 
-\cmake \
+cmake \
     -S . \
     -B ./build64 \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake \
-    -DVCPKG_TARGET_TRIPLET=x64-osx
-
+    -DVCPKG_TARGET_TRIPLET=x64-osx \
+    -DCMAKE_OSX_ARCHITECTURES=x86_64
 
 cmake --build ./build64
 mkdir osx-x64

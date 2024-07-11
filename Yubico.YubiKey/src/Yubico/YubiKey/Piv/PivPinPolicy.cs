@@ -45,6 +45,18 @@ namespace Yubico.YubiKey.Piv
         Always = 3,
 
         /// <summary>
+        /// Biometric verification succeeds or the PIN is checked for only
+        /// the first operation in a session using the key in the given slot.
+        /// </summary>
+        MatchOnce = 4,
+
+        /// <summary>
+        /// Biometric verification succeeds or the PIN is verified before every
+        /// operation that uses the key in the given slot.
+        /// </summary>
+        MatchAlways = 5,
+
+        /// <summary>
         /// The PIN policy is the default for the YubiKey.
         /// </summary>
         Default = 32,

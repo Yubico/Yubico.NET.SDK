@@ -223,8 +223,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 throw new InvalidCastException(null, overflowException);
             }
-
-            throw new InvalidCastException();
         }
 
         /// <summary>
@@ -247,7 +245,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 throw new InvalidCastException(null, overflowException);
             }
 
-            throw new InvalidCastException();
         }
 
         /// <summary>
@@ -265,8 +262,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 throw new InvalidCastException(null, overflowException);
             }
-
-            throw new InvalidCastException();
         }
 
         /// <summary>
@@ -288,8 +283,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 throw new InvalidCastException(null, overflowException);
             }
-
-            throw new InvalidCastException();
         }
 
         /// <summary>

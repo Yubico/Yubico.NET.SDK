@@ -49,6 +49,16 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Initializes a new instance of the <see cref="Fido2Exception"/> class.
         /// </summary>
+        /// <param name="status">The CTAP error.</param>
+        /// <param name="message">The message that describes the error.</param>
+        public Fido2Exception(CtapStatus status, string message) : base(message)
+        {
+            Status = status;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Fido2Exception"/> class.
+        /// </summary>
         /// <param name="message">The error message that explains the reason for the exception.</param>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
         public Fido2Exception(string message, Exception innerException) : base(message, innerException)

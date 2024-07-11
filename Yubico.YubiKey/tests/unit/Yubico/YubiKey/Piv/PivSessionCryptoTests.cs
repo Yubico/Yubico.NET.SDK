@@ -113,7 +113,7 @@ namespace Yubico.YubiKey.Piv
         {
             var yubiKey = new HollowYubiKeyDevice();
 
-            SampleKeyPairs.GetPemKeyPair(PivAlgorithm.Rsa1024, out string publicKeyPem, out _);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out string publicKeyPem, out _);
             var publicKey = new KeyConverter(publicKeyPem.ToCharArray());
             PivPublicKey pivPublicKey = publicKey.GetPivPublicKey();
 

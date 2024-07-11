@@ -41,6 +41,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             CtapStatus.NoCredentials => new ResponseStatusPair(ResponseStatus.NoData, ResponseStatusMessages.Fido2NoCredentials),
             CtapStatus.NotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2NotAllowed),
             CtapStatus.PinRequired => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinNotVerified),
+            CtapStatus.PinPolicyViolation => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2PinComplexityViolation),
             CtapStatus.PinNotSet => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinNotSet),
             CtapStatus.PinInvalid => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2PinNotVerified),
             CtapStatus.PinBlocked => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinBlocked),

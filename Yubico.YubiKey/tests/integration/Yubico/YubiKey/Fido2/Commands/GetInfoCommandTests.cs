@@ -13,17 +13,13 @@
 // limitations under the License.
 
 using Xunit;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     public class GetInfoCommandTests : SimpleIntegrationTestConnection
     {
-        public GetInfoCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
-        {
-        }
+        public GetInfoCommandTests() : base(YubiKeyApplication.Fido2) { }
 
         [Fact]
         public void GetInfoCommand_Succeeds()

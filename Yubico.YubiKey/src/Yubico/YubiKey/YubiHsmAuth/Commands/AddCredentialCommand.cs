@@ -93,7 +93,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when <paramref name="managementKey"/> has an invalid length.
         /// </exception>
-        public AddCredentialCommand(ReadOnlyMemory<byte> managementKey,
+        public AddCredentialCommand(
+            ReadOnlyMemory<byte> managementKey,
             CredentialWithSecrets credentialWithSecrets)
         {
             _managementKey = managementKey.Length == ValidManagementKeyLength

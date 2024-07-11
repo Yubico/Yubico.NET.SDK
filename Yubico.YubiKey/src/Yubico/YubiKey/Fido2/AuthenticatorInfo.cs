@@ -329,7 +329,7 @@ namespace Yubico.YubiKey.Fido2
                 Aaguid = new ReadOnlyMemory<byte>(_aaguid);
                 if (cborMap.Contains(KeyExtensions))
                 {
-                    Extensions = (IReadOnlyList<string>)cborMap.ReadArray<string>(KeyExtensions);
+                    Extensions = cborMap.ReadArray<string>(KeyExtensions);
                 }
                 if (cborMap.Contains(KeyOptions))
                 {

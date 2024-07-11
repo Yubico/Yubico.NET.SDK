@@ -13,12 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Security.Cryptography;
 using Yubico.Core.Iso7816;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -96,6 +92,8 @@ namespace Yubico.YubiKey.Piv.Commands
 
         private const int Rsa1024DigestDataLength = 128;
         private const int Rsa2048DigestDataLength = 256;
+        private const int Rsa3072DigestDataLength = 384;
+        private const int Rsa4096DigestDataLength = 512;
         private const int EccP256DigestDataLength = 32;
         private const int EccP384DigestDataLength = 48;
 
@@ -168,14 +166,16 @@ namespace Yubico.YubiKey.Piv.Commands
             SlotNumber = slotNumber;
 
             // Determine the algorithm based on the length of the digest data.
-            // Currently the length of the data must be 128 (RSA-1024), 256
-            // (RSA-2048), 32 (ECC-P256), or 48 (ECC-P384).
+            // Currently, the length of the data must be 128 (RSA-1024), 256
+            // (RSA-2048), 384 (RSA-3072), 512 (RSA-4096), 32 (ECC-P256), or 48 (ECC-P384).
             // Return the PivAlgorithm, or if the length is not supported, throw an
             // exception.
             Algorithm = digestData.Length switch
             {
                 Rsa1024DigestDataLength => PivAlgorithm.Rsa1024,
                 Rsa2048DigestDataLength => PivAlgorithm.Rsa2048,
+                Rsa3072DigestDataLength => PivAlgorithm.Rsa3072,
+                Rsa4096DigestDataLength => PivAlgorithm.Rsa4096,
                 EccP256DigestDataLength => PivAlgorithm.EccP256,
                 EccP384DigestDataLength => PivAlgorithm.EccP384,
                 _ => throw new ArgumentException(

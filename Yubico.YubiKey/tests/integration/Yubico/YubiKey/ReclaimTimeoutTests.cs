@@ -24,6 +24,7 @@ using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.TestUtilities;
+using Log = Yubico.Core.Logging.Log;
 
 namespace Yubico.YubiKey
 {
@@ -41,19 +42,22 @@ namespace Yubico.YubiKey
         [Fact]
         public void SwitchingBetweenTransports_ForcesThreeSecondWait()
         {
+            // Force the old behavior even for newer YubiKeys.
+            AppContext.SetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, true);
+
             using Logger? log = new LoggerConfiguration()
                 .Enrich.With(new ThreadIdEnricher())
                 .WriteTo.Console(
                     outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
-            Core.Logging.Log.LoggerFactory = LoggerFactory.Create(
+            Log.LoggerFactory = LoggerFactory.Create(
                 builder => builder
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
 
             // TEST ASSUMPTION: This test requires FIDO. On Windows, that means this test case must run elevated (admin).
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Fips);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
 
             // Ensure all interfaces are active
             if (testDevice.EnabledUsbCapabilities != YubiKeyCapabilities.All)

@@ -21,6 +21,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
+    [Trait("Category", "RequiresBio")]
     public class BioEnrollTests : SimpleIntegrationTestConnection
     {
         // Set to 0 meaning don't cancel.
@@ -30,14 +31,14 @@ namespace Yubico.YubiKey.Fido2
         // (cancel before any fingerprints are sampled).
         // If the call is touch or verify fingerprint, then any non-zero
         // _callCancelCount value means cancel when the request comes in.
-        private int _callCancelCount = 0;
+        private int _callCancelCount;
 
         public BioEnrollTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
         {
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void GetModality_Succeeds()
         {
             using (var fido2Session = new Fido2Session(Device))
@@ -48,7 +49,7 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void GetSensorInfo_Succeeds()
         {
             using (var fido2Session = new Fido2Session(Device))
@@ -61,7 +62,7 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void EnrollFingerprint_Succeeds()
         {
             string firstName = "SomeName";
@@ -86,8 +87,7 @@ namespace Yubico.YubiKey.Fido2
                 {
                     if (info.FriendlyName.Equals(secondName))
                     {
-                        isValid = MemoryExtensions.SequenceEqual<byte>(
-                            info.TemplateId.Span, templateInfo.TemplateId.Span);
+                        isValid = info.TemplateId.Span.SequenceEqual(templateInfo.TemplateId.Span);
 
                         if (isValid)
                         {
@@ -107,8 +107,7 @@ namespace Yubico.YubiKey.Fido2
                 // is still there, it failed, so set it to false.
                 foreach (TemplateInfo info in fpList)
                 {
-                    if (MemoryExtensions.SequenceEqual<byte>(
-                        info.TemplateId.Span, templateInfo.TemplateId.Span))
+                    if (info.TemplateId.Span.SequenceEqual(templateInfo.TemplateId.Span))
                     {
                         isValid = false;
                         break;
@@ -119,7 +118,7 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(4)]
         [InlineData(-1)]
         public void EnrollFingerprint_Cancel_ThrowsCorrect(int cancelCount)

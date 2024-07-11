@@ -20,6 +20,7 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Oath
 {
     [TestCaseOrderer(PriorityOrderer.TypeName, PriorityOrderer.AssembyName)]
+    [Trait("Category", "Simple")]
     public sealed class OathSessionCredentialTests : IClassFixture<CredentialFixture>
     {
         // Shared object instance across tests.
@@ -330,11 +331,11 @@ namespace Yubico.YubiKey.Oath
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
+                //Why should this fail?
                 _ = Assert.Throws<InvalidOperationException>(() => oathSession.AddCredential(
                     "GitHub",
                     "test@gmail.com",
-                    CredentialType.Hotp,
-                    CredentialPeriod.Period30));
+                    CredentialType.Hotp));
             }
         }
 

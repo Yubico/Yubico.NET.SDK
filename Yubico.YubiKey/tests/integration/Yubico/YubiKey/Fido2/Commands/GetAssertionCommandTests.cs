@@ -12,22 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
+    [Trait("Category", "RequiresBio")]
     public class GetAssertionCommandTests : NeedPinToken
     {
         public GetAssertionCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
         {
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void GetAssertionCommand_Succeeds()
         {
             var protocol = new PinUvAuthProtocolTwo();
@@ -57,7 +56,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             PinUvAuthProtocolBase protocol,
             out GetAssertionParameters assertionParams)
         {
-            byte[] clientDataHash = new byte[] {
+            byte[] clientDataHash = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };

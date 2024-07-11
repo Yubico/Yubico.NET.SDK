@@ -18,9 +18,10 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Management
 {
+    [Trait("Category", "Simple")]
     public class SetDeviceInfoCommandTests
     {
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetDeviceInfo_NoData_ResponseStatusSuccess(StandardTestDevice testDeviceType)
@@ -35,7 +36,7 @@ namespace Yubico.YubiKey.Management
             Assert.Equal(ResponseStatus.Success, setDeviceInfoResponse.Status);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetDeviceInfo_NoChanges_DeviceInfoNotChanged(StandardTestDevice testDeviceType)
@@ -58,7 +59,7 @@ namespace Yubico.YubiKey.Management
             AssertDeviceInfoValueEquals(beginningTestDevice, endingTestDevice);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetDeviceInfo_SameAsCurrentDeviceInfo_NoChange(StandardTestDevice testDeviceType)

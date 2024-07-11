@@ -13,12 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using Xunit;
-using Yubico.Core.Devices.Hid;
-using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 
@@ -26,9 +20,9 @@ namespace Yubico.YubiKey.Fido2.Commands
 {
     public class NeedPinToken : SimpleIntegrationTestConnection
     {
-        private readonly byte[] _pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+        private readonly byte[] _pin;
 
-        public NeedPinToken(YubiKeyApplication application, StandardTestDevice device, byte[]? pin)
+        protected NeedPinToken(YubiKeyApplication application, StandardTestDevice device, byte[]? pin)
             : base(application, device)
         {
             if (pin is null)
@@ -42,7 +36,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             }
         }
 
-        public bool GetPinToken(
+        protected bool GetPinToken(
             PinUvAuthProtocolBase protocol,
             PinUvAuthTokenPermissions permissions,
             out byte[] pinToken)
@@ -69,7 +63,6 @@ namespace Yubico.YubiKey.Fido2.Commands
                 else
                 {
                     var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, _pin, permissions, null);
-                    //var getTokenCmd = new GetPinUvAuthTokenUsingUvCommand(protocol, permissions, null);
                     getTokenRsp = Connection.SendCommand(getTokenCmd);
                 }
 

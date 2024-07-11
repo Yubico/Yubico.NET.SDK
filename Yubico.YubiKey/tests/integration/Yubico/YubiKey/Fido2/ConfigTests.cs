@@ -20,10 +20,11 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
+    [Trait("Category", "Simple")]
     public class ConfigTests : SimpleIntegrationTestConnection
     {
         public ConfigTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
+            : base(YubiKeyApplication.Fido2)
         {
         }
 
@@ -35,16 +36,18 @@ namespace Yubico.YubiKey.Fido2
                 fido2Session.KeyCollector = LocalKeyCollector;
 
                 OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("ep");
-
-                bool expectedResult = false;
-                if (optionValue == OptionValue.True || optionValue == OptionValue.False)
-                {
-                    expectedResult = true;
-                }
-
                 bool isSet = fido2Session.TryEnableEnterpriseAttestation();
 
-                Assert.Equal(expectedResult, isSet);
+                bool shouldSupportEnterpriseAttestation = optionValue == OptionValue.True || optionValue == OptionValue.False;
+                if (shouldSupportEnterpriseAttestation)
+                {
+                    Assert.True(isSet);
+                }
+                else
+                {
+                    Assert.False(isSet);
+                }
+
             }
         }
 
@@ -89,7 +92,7 @@ namespace Yubico.YubiKey.Fido2
 
                 bool expectedResult = optionValue == OptionValue.True;
 
-                bool isSet = fido2Session.TrySetPinConfig(6, null, null);
+                bool isSet = fido2Session.TrySetPinConfig(6);
                 Assert.Equal(expectedResult, isSet);
                 if (isSet)
                 {
@@ -106,7 +109,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
 
-                _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
+                _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange); // Does not work on my USBAKeychain 5.4.3 (Assert.NotNull() Failure: Value of type 'Nullable<bool>' does not have a value)
                 Assert.False(fido2Session.AuthenticatorInfo.ForcePinChange!);
 
                 OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
@@ -139,7 +142,7 @@ namespace Yubico.YubiKey.Fido2
                 {
                     "rpidOne"
                 };
-                bool isSet = fido2Session.TrySetPinConfig(null, rpList, null);
+                bool isSet = fido2Session.TrySetPinConfig(null, rpList);
                 Assert.Equal(expectedResult, isSet);
 
                 if (isSet)

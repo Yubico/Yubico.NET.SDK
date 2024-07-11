@@ -19,6 +19,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class AdminIntegrationTests
     {
         [Theory]
@@ -44,7 +45,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteAdminData_Read_NotEmpty(StandardTestDevice testDeviceType)
         {
-            byte[] salt = new byte[] {
+            byte[] salt = {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
@@ -81,7 +82,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteAdminData_Read_Correct(StandardTestDevice testDeviceType)
         {
-            byte[] salt = new byte[] {
+            byte[] salt = {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
@@ -112,7 +113,7 @@ namespace Yubico.YubiKey.Piv
                     {
                         var cmpObj = (ReadOnlyMemory<byte>)adminCopy.Salt;
                         var expected = new Span<byte>(salt);
-                        bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, cmpObj.Span);
+                        bool isValid = expected.SequenceEqual(cmpObj.Span);
                         Assert.True(isValid);
                     }
 

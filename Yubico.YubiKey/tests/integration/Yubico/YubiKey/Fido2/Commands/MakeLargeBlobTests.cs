@@ -13,25 +13,23 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using Xunit;
-using Yubico.Core.Devices.Hid;
 using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
+    [Trait("Category", "RequiresBio")]
     public class MakeLargeBlobTests : NeedPinToken
     {
         public MakeLargeBlobTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
         {
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void InitialLargeBlob_Succeeds()
         {
             var getInfoCmd = new GetInfoCommand();
@@ -55,10 +53,10 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.NotEmpty(blobData.ToArray());
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void SetLargeBlob_Succeeds()
         {
-            byte[] dataToStore = new byte[] {
+            byte[] dataToStore = {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, 0x50,
                 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
             };

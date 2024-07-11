@@ -216,6 +216,14 @@ namespace Yubico.YubiKey
 
             Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivRsa1024));
             Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivRsa2048));
+
+            yubiKey.FirmwareVersion.Major = 5;
+            yubiKey.FirmwareVersion.Minor = 7;
+            Assert.True(yubiKey.HasFeature(YubiKeyFeature.ManagementNfcRestricted));
+
+            yubiKey.FirmwareVersion.Major = 5;
+            yubiKey.FirmwareVersion.Minor = 6;
+            Assert.False(yubiKey.HasFeature(YubiKeyFeature.ManagementNfcRestricted));
         }
         [Fact]
         public void CheckOtpFeatures()

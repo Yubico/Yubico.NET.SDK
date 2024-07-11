@@ -242,7 +242,6 @@ namespace Yubico.YubiKey.Piv
                 $"Try to authenticate the management key: {(mutualAuthentication ? "mutual" : "single")} auth.");
 
             PivPinOnlyMode currentMode = TryAuthenticatePinOnly(true);
-
             if (currentMode.HasFlag(PivPinOnlyMode.PinProtected) || currentMode.HasFlag(PivPinOnlyMode.PinDerived))
             {
                 return true;
@@ -1005,8 +1004,10 @@ namespace Yubico.YubiKey.Piv
 
             while (KeyCollector(keyEntryData))
             {
-                if (ManagementKeyAuthenticated = TryAuthenticateManagementKey(
-                        mutualAuthentication, keyEntryData.GetCurrentValue().Span, ManagementKeyAlgorithm))
+                ManagementKeyAuthenticated = TryAuthenticateManagementKey(
+                    mutualAuthentication, keyEntryData.GetCurrentValue().Span, ManagementKeyAlgorithm);
+
+                if (ManagementKeyAuthenticated)
                 {
                     return true;
                 }

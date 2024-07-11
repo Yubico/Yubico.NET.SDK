@@ -37,11 +37,12 @@ namespace Yubico.YubiKey.Fido2
         };
 
         public MinPinLenTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
+            : base(YubiKeyApplication.Fido2)
         {
         }
 
         [Fact]
+        [Trait("Category", "Simple")]
         public void GetMinPinFromCredential_Succeeds()
         {
             using (var fido2Session = new Fido2Session(Device))
@@ -78,7 +79,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 _rp.Id
             };
-            bool isSet = fido2Session.TrySetPinConfig(null, rpList, null);
+            bool isSet = fido2Session.TrySetPinConfig(null, rpList);
             if (!isSet)
             {
                 return false;

@@ -19,6 +19,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class CccIntegrationTests
     {
         [Theory]
@@ -69,7 +70,7 @@ namespace Yubico.YubiKey.Piv
                     ccc = pivSession.ReadObject<CardCapabilityContainer>();
                     Assert.False(ccc.IsEmpty);
 
-                    bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, ccc.CardIdentifier.Span);
+                    bool isValid = expected.SequenceEqual(ccc.CardIdentifier.Span);
                     Assert.True(isValid);
                 }
             }
@@ -112,7 +113,7 @@ namespace Yubico.YubiKey.Piv
                     ccc = pivSession.ReadObject<CardCapabilityContainer>(0x5F1110);
                     Assert.False(ccc.IsEmpty);
 
-                    bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, ccc.CardIdentifier.Span);
+                    bool isValid = expected.SequenceEqual(ccc.CardIdentifier.Span);
                     Assert.True(isValid);
                 }
             }
@@ -161,7 +162,7 @@ namespace Yubico.YubiKey.Piv
                     // Make sure that worked.
                     ccc = pivSession.ReadObject<CardCapabilityContainer>();
                     Assert.False(ccc.IsEmpty);
-                    bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, ccc.CardIdentifier.Span);
+                    bool isValid = expected.SequenceEqual(ccc.CardIdentifier.Span);
                     Assert.True(isValid);
 
                     // Now write an empty object.

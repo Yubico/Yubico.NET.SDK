@@ -13,10 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands
@@ -90,6 +87,8 @@ namespace Yubico.YubiKey.Piv.Commands
 
         private const int Rsa1024BlockSize = 128;
         private const int Rsa2048BlockSize = 256;
+        private const int Rsa3072BlockSize = 384;
+        private const int Rsa4096BlockSize = 512;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -133,6 +132,8 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 Rsa1024BlockSize => PivAlgorithm.Rsa1024,
                 Rsa2048BlockSize => PivAlgorithm.Rsa2048,
+                Rsa3072BlockSize => PivAlgorithm.Rsa3072,
+                Rsa4096BlockSize => PivAlgorithm.Rsa4096,
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,

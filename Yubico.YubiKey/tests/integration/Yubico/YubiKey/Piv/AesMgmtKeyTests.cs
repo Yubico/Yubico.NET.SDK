@@ -19,13 +19,14 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class AesMgmtKeyTests : IDisposable
     {
         private readonly Memory<byte> _currentKey;
         private readonly byte[] _currentKeyBytes;
         private readonly Memory<byte> _newKey;
         private readonly byte[] _newKeyBytes;
-        private readonly bool _runTest = false;
+        private readonly bool _runTest;
         private readonly IYubiKeyDevice _yubiKey;
         private int _currentKeyLength;
         private int _newKeyLength;

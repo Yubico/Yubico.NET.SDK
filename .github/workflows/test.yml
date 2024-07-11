@@ -77,7 +77,7 @@ jobs:
 
   build-coverage-report:
     name: Build coverage report
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [ test-windows ] # No need to gather coverage on all platforms
 
     if: inputs.build-coverage-report == true
@@ -116,7 +116,7 @@ jobs:
 
   pr-comment-coverage-results:
     name: "Add PR Comment: Coverage Results"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: build-coverage-report
     
     if: github.event_name == 'pull_request'
@@ -134,7 +134,7 @@ jobs:
 
   pr-comment-test-results:
     name: "Add PR Comment: Test Results"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [ test-windows, test-ubuntu, test-macos ]
     
     if: github.event_name == 'pull_request'

@@ -29,7 +29,7 @@ env:
 
 jobs:
   upload_docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       # Checkout the local repository as we need the Dockerfile and other things even for this step.
       - uses: actions/checkout@v4

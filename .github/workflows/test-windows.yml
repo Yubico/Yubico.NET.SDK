@@ -21,7 +21,7 @@ on:
 jobs:
   test:
     name: Windows
-    runs-on: windows-latest
+    runs-on: windows-2019
     permissions:
       packages: read
       contents: read

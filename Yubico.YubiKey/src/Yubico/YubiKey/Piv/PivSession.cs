@@ -460,6 +460,9 @@ namespace Yubico.YubiKey.Piv
         ///         blocked. This method will take steps necessary to block the PIN and
         ///         PUK, then call on the YubiKey to reset.
         ///     </para>
+        ///     <para>
+        ///         ResetApplication is not compatible with YubiKey Bio Multi-protocol Edition keys. To reset a Bio Multi-protocol key, see <see cref="IYubiKeyDevice.DeviceReset"/>.
+        ///     </para>
         /// </remarks>
         /// <exception cref="SecurityException">
         ///     The application could not be reset because of some error such as

@@ -33,27 +33,27 @@ The data bytes vary:
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 #### Response APDU for VERIFY (success with temporary PIN)
 
 Total Length: 18\
 Data Length: 16
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-temporary PIN | 90 | 00
+|     Data      | SW1 | SW2 |
+|:-------------:|:---:|:---:|
+| temporary PIN | 90  | 00  |
 
 #### Response APDU for VERIFY (Invalid biometric match)
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 63 | C0 - C2
+|   Data    | SW1 |   SW2   |
+|:---------:|:---:|:-------:|
+| (no data) | 63  | C0 - C2 |
 
 If the biometric match failed, the error is `63 CX` where *X* is the number of
-retries remaining. In the case of `C0`, the biometric verification becomes blocked.
+retries remaining. In the case of `C0`, the biometric verification becomes blocked, and [PIV PIN verification](xref:PivApduVerifyPIN) must be used.

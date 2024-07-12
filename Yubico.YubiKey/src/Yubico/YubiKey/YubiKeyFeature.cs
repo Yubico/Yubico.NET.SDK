@@ -75,7 +75,7 @@ namespace Yubico.YubiKey
         TemporaryTouchThreshold,
 
         /// <summary>
-        ///     The YubiKey supports proprietary reset.
+        ///     Support for device-wide factory reset of YubiKey Bio Multi-protocol Edition keys.
         /// </summary>
         DeviceReset,
 

@@ -1,3 +1,7 @@
+---
+uid: PivApduVerifyPIN
+---
+
 <!-- Copyright 2021 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +20,9 @@ limitations under the License. -->
 
 ### Command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 20 | 00 | 80 | 08 | *PIN* | (absent)
+| CLA | INS | P1 | P2 | Lc | Data  |    Le    | 
+|:---:|:---:|:--:|:--:|:--:|:-----:|:--------:|
+| 00  | 20  | 00 | 80 | 08 | *PIN* | (absent) |
 
 ### Response APDU info
 

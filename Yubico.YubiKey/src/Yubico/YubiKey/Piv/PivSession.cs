@@ -461,7 +461,7 @@ namespace Yubico.YubiKey.Piv
         ///         PUK, then call on the YubiKey to reset.
         ///     </para>
         ///     <para>
-        ///         ResetApplication is not compatible with YubiKey Bio Multi-protocol Edition keys. To reset a Bio Multi-protocol key, see <see cref="IYubiKeyDevice.DeviceReset"/>.
+        ///         Before attempting to reset a YubiKey Bio Multi-protocol Edition key with ResetApplication(), verify that the PIV application is not blocked from using this method by checking the <see cref="IYubiKeyDeviceInfo.ResetBlocked"/> property. If the application is blocked, use <see cref="IYubiKeyDevice.DeviceReset"/>.
         ///     </para>
         /// </remarks>
         /// <exception cref="SecurityException">

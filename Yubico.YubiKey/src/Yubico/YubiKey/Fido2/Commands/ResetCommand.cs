@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// application and remove the PIN.
     /// </para>
     /// <para>
-    /// ResetCommand is not compatible with YubiKey Bio Multi-protocol Edition keys. To reset a Bio Multi-protocol key, see <see cref="IYubiKeyDevice.DeviceReset"/>.
+    /// Before attempting to reset a YubiKey Bio Multi-protocol Edition key with ResetCommand(), verify that the FIDO2 application is not blocked from using this method by checking the <see cref="IYubiKeyDeviceInfo.ResetBlocked"/> property. If the application is blocked, use <see cref="IYubiKeyDevice.DeviceReset"/>.
     /// </para>
     /// </remarks>
     public class ResetCommand : IYubiKeyCommand<ResetResponse>
@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// application and remove the PIN.
         /// </para>
         /// <para>
-        /// ResetCommand is not compatible with YubiKey Bio Multi-protocol Edition keys. To reset a Bio Multi-protocol key, see <see cref="IYubiKeyDevice.DeviceReset"/>.
+        /// Before attempting to reset a YubiKey Bio Multi-protocol Edition key with ResetCommand(), verify that the FIDO2 application is not blocked from using this method by checking the <see cref="IYubiKeyDeviceInfo.ResetBlocked"/> property. If the application is blocked, use <see cref="IYubiKeyDevice.DeviceReset"/>.
         /// </para>
         /// </remarks>
         public ResetCommand()

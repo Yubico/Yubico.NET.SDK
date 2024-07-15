@@ -311,6 +311,8 @@
       href: application-fido2/pin-uv-auth-protocols.md
   - name: FIDO2 authenticator configuration
     href: application-fido2/fido2-authenticator-config.md
+  - name: FIDO2 Reset
+    href: application-fido2/fido2-reset.md
   - name: FIDO2 Blobs
     href: application-fido2/fido2-blobs.md
     items:
@@ -354,6 +356,10 @@
         href: application-fido2/apdu/get-large-blob.md
       - name: Set large blob
         href: application-fido2/apdu/set-large-blob.md
+      - name: Enumerate RPs begin
+        href: application-fido2/apdu/enum-rps-begin.md
+      - name: Enumerate RPs next
+        href: application-fido2/apdu/enum-rps-next.md
       - name: Reset
         href: application-fido2/apdu/reset.md
 

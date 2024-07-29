@@ -199,7 +199,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{BA394A0D-B
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\import-asym.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\import-asym.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\metadata.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\metadata.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-data.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-vendor-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-vendor-data.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-piv.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-piv.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-retry.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-retry.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\serial.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\serial.md

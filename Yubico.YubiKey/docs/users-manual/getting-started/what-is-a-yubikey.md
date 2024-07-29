@@ -18,16 +18,16 @@ The YubiKey is a multi-application, multi-protocol personal security device aime
 individual's online identity. YubiKeys currently support the following:
 
 - One-time password generation
-  - Yubico OTP
-  - OATH-HOTP
-  - OATH-TOTP
+    - Yubico OTP
+    - OATH-HOTP
+    - OATH-TOTP
 - Smart cards
-  - Personal Identity Verification (PIV) card
-  - OpenPGP card
-  - YubiHSM Auth
+    - Personal Identity Verification (PIV) card
+    - OpenPGP card
+    - YubiHSM Auth
 - FIDO / WebAuthn
-  - FIDO Universal 2nd Factor (U2F)
-  - FIDO2
+    - FIDO Universal 2nd Factor (U2F)
+    - FIDO2
 
 ## The YubiKey 5 Series
 

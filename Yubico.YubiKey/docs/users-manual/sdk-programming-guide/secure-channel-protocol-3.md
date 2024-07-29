@@ -160,8 +160,8 @@ is, after the default key set has been removed, you can add a new key set to an 
 without removing any existing key set.
 
 For example, if there is a key set for KVN=2, and only KVN=2, and you add a key set to
-KVN=3, the YubiKey's state will be this: 
- 
+KVN=3, the YubiKey's state will be this:
+
 ```txt
    slot 1:   --empty--
    slot 2: KVN=2  ENC       MAC       DEK

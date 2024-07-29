@@ -28,26 +28,26 @@ different elements. For example, an RSA public key consists of two integers:
 while an "Fp" Elliptic Curve (EC) public key consists of
 
 * curve
-  * prime
-  * order
-  * coefficients
-    * a
-    * b
-    * c
-  * base point
+    * prime
+    * order
+    * coefficients
+        * a
+        * b
+        * c
+    * base point
+        * x-coordinate
+        * y-coordinate
+* public point
     * x-coordinate
     * y-coordinate
-* public point
-  * x-coordinate
-  * y-coordinate
 
 If the curve is a standard one (such as NIST P-256), then it can be represented by an
 object identifier (OID).
 
 * OID
 * public point
-  * x-coordinate
-  * y-coordinate
+    * x-coordinate
+    * y-coordinate
 
 There are standards that have defined ways to represent public keys, but unfortunately
 there are more than one. The most common definitions are in X.509 (the certificate

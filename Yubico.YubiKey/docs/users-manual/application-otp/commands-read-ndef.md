@@ -29,24 +29,24 @@ YubiKey firmware 3.x and 5.x
 
 ## Command APDU info
 
-| Command Sequence |  CLA  |  INS  |  P1   |  P2   |    Lc    |   Data    |    Le    |
-| :--------------- | :---: | :---: | :---: | :---: | :------: | :-------: | :------: |
-| 1 (Select File)  | 0x00  | 0xA4  | 0x00  | 0x0C  |   0x02   | 0xE1 0x04 | (absent) |
-| 2 (Read Data)    | 0x00  | 0xB0  | 0x00  | 0x00  | (absent) | (absent)  |   0x00   |
+| Command Sequence | CLA  | INS  |  P1  |  P2  |    Lc    |   Data    |    Le    |
+|:-----------------|:----:|:----:|:----:|:----:|:--------:|:---------:|:--------:|
+| 1 (Select File)  | 0x00 | 0xA4 | 0x00 | 0x0C |   0x02   | 0xE1 0x04 | (absent) |
+| 2 (Read Data)    | 0x00 | 0xB0 | 0x00 | 0x00 | (absent) | (absent)  |   0x00   |
 
 ## Response APDU info
 
 Only the "Read Data" APDU returns data:
 
-|    Lr    |    Data     |  SW1  |  SW2  |
-| :------: | :---------: | :---: | :---: |
-| (varies) | (see below) | 0x90  | 0x00  |
+|    Lr    |    Data     | SW1  | SW2  |
+|:--------:|:-----------:|:----:|:----:|
+| (varies) | (see below) | 0x90 | 0x00 |
 
 The response data is an NFC Data Exchange Format (NDEF) record as defined by the NFC Forum's technical
 specification of the same name. It is as follows:
 
 | Field                 |   Size   | Description                                                                             |
-| :-------------------- | :------: | :-------------------------------------------------------------------------------------- |
+|:----------------------|:--------:|:----------------------------------------------------------------------------------------|
 | Tag                   |    1     | Always `0`                                                                              |
 | Length                |    1     | Length of the NDEF record                                                               |
 | NDEF Header           |    1     | Always `0xD1`: Message Begin+End, Short Record, Type Name Format = NFC Forum well known |

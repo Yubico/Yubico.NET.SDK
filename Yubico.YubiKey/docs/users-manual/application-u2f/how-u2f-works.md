@@ -384,7 +384,6 @@ is willing to support.
   (the signature in the resgistration response message)
 ```
 
-
 It is possible to create an attestation statement for the FIDO U2F private keys generated
 on a YubiKey. Such a statement simply offers evidence that a private key was generated on
 a YubiKey. It does not say anything about who owns the YubiKey, or who signed some data

@@ -168,7 +168,7 @@ What this all means is that if you have a version 4 FIPS series YubiKey,
 * to put it into FIPS mode, set the PIN
 * it is possible to change the PIN
 * once it is in FIPS mode with a PIN, it is not possible to remove the PIN or take it out
-of FIPS mode, except by resetting the entire application
+  of FIPS mode, except by resetting the entire application
 * upon reset, all registrations using that YubiKey will be lost
 * once the U2F application has been reset, it is no longer in FIPS mode and can no longer
-be put into FIPS mode
+  be put into FIPS mode

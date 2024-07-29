@@ -68,7 +68,8 @@ To get the command line version, the easiest method is to use Chocolatey on Wind
 
 ## Create the Project
 
-There is DocFX documentation at [https://dotnet.github.io/docfx/](https://dotnet.github.io/docfx/tutorial/docfx_getting_started.html).
+There is DocFX documentation
+at [https://dotnet.github.io/docfx/](https://dotnet.github.io/docfx/tutorial/docfx_getting_started.html).
 However, this section provides a brief description of what you need to know to set up a project. It
 includes information not in or not easily found in the official documentation.
 
@@ -137,7 +138,6 @@ Edit it to indicate where the `src` directory is and point it to the project fil
     }
   ],
 ```
-
 
 The `"src": "../"` says to look up one directory from the current one (the `docfx.json` file is in
 `docs`) to find where to look for project files. The project file is in `..\src"`). Changing the

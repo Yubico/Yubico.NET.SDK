@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Inner command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 06 | 00 | 00 | 8 | *data* | (absent)
+| CLA | INS | P1 | P2 | Lc |  Data  |    Le    |
+|:---:|:---:|:--:|:--:|:--:|:------:|:--------:| 
+| 00  | 06  | 00 | 00 | 8  | *data* | (absent) |
 
 The data is 8 random bytes.
 
@@ -27,6 +27,6 @@ The data is 8 random bytes.
 Total Length: 5\
 Data Length: 3
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-*major, minor, patch* | 90 | 00
+|         Data          | SW1 | SW2 | 
+|:---------------------:|:---:|:---:|
+| *major, minor, patch* | 90  | 00  |

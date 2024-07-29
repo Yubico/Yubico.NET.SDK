@@ -18,7 +18,8 @@ limitations under the License. -->
 
 # How to swap slot configurations
 
-Because swapping [slot](xref:OtpSlots) settings requires zero configuration, this operation is not designed as a Fluent Builder operation. It’s as simple as calling the [SwapSlots](xref:Yubico.YubiKey.Otp.OtpSession.SwapSlots) method:
+Because swapping [slot](xref:OtpSlots) settings requires zero configuration, this operation is not designed as a Fluent
+Builder operation. It’s as simple as calling the [SwapSlots](xref:Yubico.YubiKey.Otp.OtpSession.SwapSlots) method:
 
 ```C#
 using (OtpSession otp = new OtpSession(yKey))
@@ -28,4 +29,5 @@ using (OtpSession otp = new OtpSession(yKey))
 ```
 
 > [!NOTE]
-> This method will fail if at least one of the slots is not currently configured. Also, if one or both of the slots is protected with an access code, this method will fail.
+> This method will fail if at least one of the slots is not currently configured. Also, if one or both of the slots is
+> protected with an access code, this method will fail.

@@ -12,23 +12,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Get the firmware version number
 
 ### Command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | FD | 00 | 00 | (absent) | (absent) | (absent)
+| CLA | INS | P1 | P2 |    Lc    |   Data   |    Le    |
+|:---:|:---:|:--:|:--:|:--------:|:--------:|:--------:| 
+| 00  | FD  | 00 | 00 | (absent) | (absent) | (absent) |
 
 ### Response APDU info
 
 Total Length: 5\
 Data Length: 3
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-*major, minor, patch* | 90 | 00
+|         Data          | SW1 | SW2 |
+|:---------------------:|:---:|:---:|
+| *major, minor, patch* | 90  | 00  |
 
 ### Opensc-tool Example
 

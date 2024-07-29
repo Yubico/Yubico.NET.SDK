@@ -26,7 +26,7 @@ Many of the FIDO U2F commands have an APDU that is actually an inner and outer A
 each of these commands, there is an inner APDU to describe the command, which is "wrapped"
 in a CTAP1 message command.
 
-The CTAP1 message command is 
+The CTAP1 message command is
 
 ```txt
   00 03 00 00 len innerCommand
@@ -66,6 +66,7 @@ documentation specifies the APDU as "Full command APDU".
 * [Reset](#reset)
 
 ___
+
 ## Echo
 
 Sends data to the YubiKey which immediately echoes the same data back. This command is
@@ -95,6 +96,7 @@ The data that had been originally input.
 
 [Technical APDU Details](apdu/echo-cmd.md)
 ___
+
 ## Get device info
 
 Reads configuration and metadata information about the YubiKey (including data not related
@@ -118,6 +120,7 @@ All YubiKeys with the FIDO U2F application.
 None.
 
 <a name="deviceinfooutput"></a>
+
 ### Output
 
 A byte array that contains the device info. The first byte is the length. The following
@@ -154,28 +157,31 @@ bytes are TLVs. For example,
   0f 01
      00
 ```
+
 <a name="deviceinfoelements"></a>
 
 #### Table 1: List of DeviceInfo Elements
-|    Tag    |                  Meaning                   |          Data               |     Comments     |
-| :-------: | :----------------------------------------: | :-------------------------: | :--------------: |
-|    01     |   Pre-personalization USB capabilities     |   capabilities bit field    | see [YubiKeyCapabilities](xref:Yubico.YubiKey.YubiKeyCapabilities) |
-|    02     |             Serial number                  |  32-bit big-endian integer  | |
-|    03     |        Enabled USB capabilities            |   capabilities bit field    | see [YubiKeyCapabilities](xref:Yubico.YubiKey.YubiKeyCapabilities) |
-|    04     |              Form factor                   |      form factor byte       | see [FormFactor](xref:Yubico.YubiKey.FormFactor) |
-|    05     |            Firmware version                |       3-byte version        | major, minor, patch |
-|    06     |           Auto-eject timeout               |       16-bit integer        | if 0, no auto-eject, otherwise seconds to auto-eject |
-|    07     |        Challenge-response timeout          |           one byte          | if 0, default, otherwise seconds to timeout |
-|    08     |               Device flags                 |           one byte          | see [DeviceFlags](xref:Yubico.YubiKey.DeviceFlags) |
-|    0A     |        Configuration lock present          |      one byte, boolean      | 0x00 false, 0x01 true |
-|    0D     |   Pre-personalization NFC capabilities     |   capabilities bit field    | see [YubiKeyCapabilities](xref:Yubico.YubiKey.YubiKeyCapabilities) |
-|    0E     |        Enabled NFC capabilities            |   capabilities bit field    | see [YubiKeyCapabilities](xref:Yubico.YubiKey.YubiKeyCapabilities) |
-|    0F     |              iAP Detection                 |           one byte          | currently ignored |
+
+| Tag |               Meaning                |           Data            |                              Comments                              |
+|:---:|:------------------------------------:|:-------------------------:|:------------------------------------------------------------------:|
+| 01  | Pre-personalization USB capabilities |  capabilities bit field   | see [YubiKeyCapabilities](xref:Yubico.YubiKey.YubiKeyCapabilities) |
+| 02  |            Serial number             | 32-bit big-endian integer |                                                                    |
+| 03  |       Enabled USB capabilities       |  capabilities bit field   | see [YubiKeyCapabilities](xref:Yubico.YubiKey.YubiKeyCapabilities) |
+| 04  |             Form factor              |     form factor byte      |          see [FormFactor](xref:Yubico.YubiKey.FormFactor)          |
+| 05  |           Firmware version           |      3-byte version       |                        major, minor, patch                         |
+| 06  |          Auto-eject timeout          |      16-bit integer       |        if 0, no auto-eject, otherwise seconds to auto-eject        |
+| 07  |      Challenge-response timeout      |         one byte          |            if 0, default, otherwise seconds to timeout             |
+| 08  |             Device flags             |         one byte          |         see [DeviceFlags](xref:Yubico.YubiKey.DeviceFlags)         |
+| 0A  |      Configuration lock present      |     one byte, boolean     |                       0x00 false, 0x01 true                        |
+| 0D  | Pre-personalization NFC capabilities |  capabilities bit field   | see [YubiKeyCapabilities](xref:Yubico.YubiKey.YubiKeyCapabilities) |
+| 0E  |       Enabled NFC capabilities       |  capabilities bit field   | see [YubiKeyCapabilities](xref:Yubico.YubiKey.YubiKeyCapabilities) |
+| 0F  |            iAP Detection             |         one byte          |                         currently ignored                          |
 
 ### APDU
 
 [Technical APDU Details](apdu/get-device-info.md)
 ___
+
 ## Set device info
 
 Sets configuration and metadata information about the YubiKey (including data not related
@@ -220,6 +226,7 @@ None.
 
 [Technical APDU Details](apdu/set-device-info.md)
 ___
+
 ## Set legacy device config
 
 Sets configuration and metadata information about the YubiKey (including data not related
@@ -289,6 +296,7 @@ A string describing the version.
 
 [Technical APDU Details](apdu/get-protocol-version.md)
 ___
+
 ## Verify FIPS mode
 
 Determine if a FIPS YubiKey is in U2F FIPS mode.
@@ -329,6 +337,7 @@ True if the YubiKey is a FIPS device in FIPS mode, false otherwise.
 
 [Technical APDU Details](apdu/verify-fips.md)
 ___
+
 ## Set PIN
 
 Sets the new PIN. The PIN is binary and its length must be 6 to 32 bytes.
@@ -364,6 +373,7 @@ If the command succeeds, the `Status` will be `ResponseStatus.Success`.
 
 [Technical APDU Details](apdu/set-pin.md)
 ___
+
 ## Verify PIN
 
 Verify the PIN for the session. Some documentation calls for "unlocking" the U2F
@@ -397,6 +407,7 @@ If the command succeeds, the `Status` will be `ResponseStatus.Success`.
 
 [Technical APDU Details](apdu/verify-pin.md)
 ___
+
 ## Register
 
 Register the YubiKey with a new account. This is the command that will build the response
@@ -445,6 +456,7 @@ as the following DER/BER.
 
 [Technical APDU Details](apdu/register.md)
 ___
+
 ## Authenticate
 
 Authenticate the YubiKey to the relying party. This is the command that will build the
@@ -488,6 +500,7 @@ signature formatted as the following DER/BER.
 
 [Technical APDU Details](apdu/authenticate.md)
 ___
+
 ## Reset
 
 Reset the U2F application. This will replace the master key meaning any previous key

@@ -12,14 +12,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Set management key
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | FF | FF | *touch policy* | 1B | *new key data* | (absent)
+| CLA | INS | P1 |       P2       | Lc |      Data      |    Le    |
+|:---:|:---:|:--:|:--------------:|:--:|:--------------:|:--------:| 
+| 00  | FF  | FF | *touch policy* | 1B | *new key data* | (absent) |
 
 The touch policy is either `FF` (no touch required) or `FE` (touch
 required) or `FD` for cached.
@@ -41,18 +40,18 @@ The new key data is formatted as follows
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 #### Response APDU for SET MANAGEMENT KEY (authentication failed)
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 82
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 82  |
 
 ### Examples
 

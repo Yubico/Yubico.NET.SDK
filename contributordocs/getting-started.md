@@ -66,6 +66,7 @@ also run successfully. To get set up with VSCode:
 Other plugins of interest include AsciiDoc, EditorConfig, Markdown All in One (Yu Zhang) and IntelliCode.
 
 ## Loading the projects
+
 Visual Studio uses "Solution Files" (\*.sln) as their top level project file. A solution can contain
 one or more 'Project File' (\*.csproj, \*.cxproj, etc.) that represents a single binary (\*.exe,
 \*.dll, \*.so, etc.) output. In .NET, an output binary is often called an 'assembly'.
@@ -109,7 +110,8 @@ These documents will help to disambiguate ".NET Standard", ".NET Framework", and
 
 C# is similar in many respects to Java, however there are plenty of differences. Microsoft has put
 together an excellent set of material, including side-by-side examples of Java / C# in this
-[Moving to C# and the .NET Framework, for Java Developers](https://www.microsoft.com/en-us/download/details.aspx?id=6073) package.
+[Moving to C# and the .NET Framework, for Java Developers](https://www.microsoft.com/en-us/download/details.aspx?id=6073)
+package.
 
 #### Python
 

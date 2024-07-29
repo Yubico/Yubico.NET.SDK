@@ -17,6 +17,7 @@ See LICENSE.txt in project root for full license.
 source: https://github.com/dotnet/runtime/blob/71f9191846292b61a93de54a18bdcac389d90988/docs/README.md -->
 
 # Documents Index
+
 This repo includes several documents relevant to contributors, including coding guidelines, workflow, design docs,
 and helpful resources.
 
@@ -25,11 +26,11 @@ For information about using the SDK, please refer to the [User's Manual](../Yubi
 - [Getting started](./getting-started.md)
 - [Useful links](./useful-links.md)
 - [Coding standards](./coding-guidelines/README.md)
-  - [Exception usage](./coding-guidelines/exception-usage.md)
+    - [Exception usage](./coding-guidelines/exception-usage.md)
 - [Documentation system](./documentation-system/README.md)
-  - [Setup](./documentation-system/setup.md)
-  - [Comments in the code](./documentation-system/comments-in-code.md)
-  - [Building the docs and running](./documentation-system/building-docs-and-running.md)
+    - [Setup](./documentation-system/setup.md)
+    - [Comments in the code](./documentation-system/comments-in-code.md)
+    - [Building the docs and running](./documentation-system/building-docs-and-running.md)
 - [Code flow and pull requests](./code-flow-and-pull-requests.md)
 - [Versioning](./versioning.md)
 - [Polyfills](./polyfills.md)

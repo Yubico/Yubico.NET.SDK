@@ -12,14 +12,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Get data
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | CB | 3F | FF | 3, 4, or 5 | *TLV with T of 5C and V of data object tag* | (absent)
+| CLA | INS | P1 | P2 |     Lc     |                    Data                     |    Le    |
+|:---:|:---:|:--:|:--:|:----------:|:-------------------------------------------:|:--------:| 
+| 00  | CB  | 3F | FF | 3, 4, or 5 | *TLV with T of 5C and V of data object tag* | (absent) |
 
 Note that there are other standards and applications that use the GET DATA APDU, and they
 sometimes use different values for INS, P1, and P2. They sometimes use the same values as
@@ -31,9 +30,9 @@ specifies only this combination of INS, P1, and P2.
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-*data object* | 90 | 00
+|     Data      | SW1 | SW2 |
+|:-------------:|:---:|:---:|
+| *data object* | 90  | 00  |
 
 The data object will be a TLV with a tag of `7E` or `53`. If the Get Data command
 requested "Discovery" (data tag of `7E`), then the TLV will be `73 L V`. Otherwise it will
@@ -44,18 +43,18 @@ be `53 L V`.
 Total Length: *2*\
 Data Length: *0*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 6A | 82
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 6A  | 82  |
 
 ### Response APDU info: security status not satisfied
 
 Total Length: *2*\
 Data Length: *0*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 82
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 82  |
 
 ### Examples
 

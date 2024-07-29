@@ -97,13 +97,13 @@ For example:
 * To generate a key pair, the caller must authenticate the management key.
 * To sign using a private key, the caller must authenticate the PIN.
 * To set the PIN retry count, the caller must authenticate both the management key and the
-PIN.
+  PIN.
 
 How does one provide this authentication? There are two ways to verify the PIN:
 
 * Supply the PIN or PUK as part of the command
 * Verify the PIN using the [Verify PIN](commands.md#verify) command, and all commands
-executed in the current session that need the PIN verified will work.
+  executed in the current session that need the PIN verified will work.
 
 Note that how you verify the PIN is not your choice. Some commands include the PIN and/or
 PUK in the command data, and others do not. If the command data includes the PIN or PUK,
@@ -127,9 +127,9 @@ still must be successfully completed in order to perform the Key Agreement opera
 There is only one way to authenticate the management key:
 
 * Authenticate using the [Authenticate: management key](commands.md#authenticate-management-key)
-commands (there are two, both of which need to be successful for the management key to be
-authenticated), and all commands executed in the current session that need the management
-key authenticated will work.
+  commands (there are two, both of which need to be successful for the management key to be
+  authenticated), and all commands executed in the current session that need the management
+  key authenticated will work.
 
 What is a session? That is, how do you know your code is operating in the same session for
 which the PIN or management key was authenticated? If it is operating in the same session,
@@ -162,9 +162,9 @@ The [Reset retry](commands.md#reset-retry-recover-the-pin) command is an example
 this method of authenticating. This command resets the PIN using the PUK. You supply the
 PUK and the new PIN. The command's data includes both the PIN and PUK.
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 2C | 00 | 80 | 10 | *current PUK and new PIN* | (absent)
+| CLA | INS | P1 | P2 | Lc |           Data            |    Le    |
+|:---:|:---:|:--:|:--:|:--:|:-------------------------:|:--------:| 
+| 00  | 2C  | 00 | 80 | 10 | *current PUK and new PIN* | (absent) |
 
 ```txt
  00 2C 00 80 10 31 32 33 34 35 36 37 38 31 32 33 34 35 36 37 ff

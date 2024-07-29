@@ -18,7 +18,8 @@ limitations under the License. -->
 
 # Building a basic authenticator
 
-The most popular use case for the OATH applications is to utilize it by building a time-based OTP authenticator app. Below are some basic steps in order to implement one.
+The most popular use case for the OATH applications is to utilize it by building a time-based OTP authenticator app.
+Below are some basic steps in order to implement one.
 
 1. Find the connected Yubikey:
 
@@ -42,7 +43,9 @@ This will connect to the OATH application on the chosen YubiKey.
 IList<Credential> credentials = oathSession.GetCredentials();
 ```
 
-You would probably want to find if there any HOTP credentials and credentials that require touch to generate OTPs. This way you don't show the values for those credentials until it is requested by tapping "Generate code" button, for example.
+You would probably want to find if there any HOTP credentials and credentials that require touch to generate OTPs. This
+way you don't show the values for those credentials until it is requested by tapping "Generate code" button, for
+example.
 
 Also, you will need to track TOTP credentials that have non-default periods, like 15 and 60 seconds.
 
@@ -52,12 +55,14 @@ Also, you will need to track TOTP credentials that have non-default periods, lik
 IDictionary<Credential, Code> credentialCodes = oathSession.CalculateAllCredentials();
 ```
 
-When HOTP credentials or credentials that require touch are requested, calculate them by using CalculateCredential() method:
+When HOTP credentials or credentials that require touch are requested, calculate them by using CalculateCredential()
+method:
 
 ```csharp
 Code otpCode = CalculateCredential(Credential);
 ```
-Also, any credentials with a non-default period should be recalculated in their respective interval. 
+
+Also, any credentials with a non-default period should be recalculated in their respective interval.
 
 5. Add new credentials.
 
@@ -101,4 +106,5 @@ var credentialTotp = new Credential
 oathSession.RemoveCredential(credentialTotp);
 ```
 
-Read more about [OathSession](./oath-session.md) methods and [OathPassword](./oath-password.md) implementation on the YubiKey.
+Read more about [OathSession](./oath-session.md) methods and [OathPassword](./oath-password.md) implementation on the
+YubiKey.

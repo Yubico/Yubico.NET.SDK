@@ -12,15 +12,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Change reference data
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 24 | 00 | 80 | 10 | *current PIN and new PIN* | (absent)
-00 | 24 | 00 | 81 | 10 | *current PUK and new PUK* | (absent)
+| CLA | INS | P1 | P2 | Lc |           Data            |    Le    |
+|:---:|:---:|:--:|:--:|:--:|:-------------------------:|:--------:| 
+| 00  | 24  | 00 | 80 | 10 | *current PIN and new PIN* | (absent) |
+| 00  | 24  | 00 | 81 | 10 | *current PUK and new PUK* | (absent) |
 
 Which element to change is given in the P2 field of the APDU and the current and new
 data (old and new PIN or PUK) are given in the data field. The data is simply the two
@@ -40,18 +39,18 @@ value (possibly padded).
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 #### Response APDU for CHANGE REFERENCE DATA (invalid current PIN or PUK)
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 63 | C2
+|   Data    | SW1 | SW2 | 
+|:---------:|:---:|:---:|
+| (no data) | 63  | C2  |
 
 If the PIN entered is incorrect, then the error is `63 CX` where *X* is the number of
 retries remaining. In the above, there are 2 retries remaining.
@@ -61,9 +60,9 @@ retries remaining. In the above, there are 2 retries remaining.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 83
+|   Data    | SW1 | SW2 | 
+|:---------:|:---:|:---:|
+| (no data) | 69  | 83  |
 
 The PIN or PUK entered might or might not be correct, however, authentication was denied
 because the number of retries have been exhausted.

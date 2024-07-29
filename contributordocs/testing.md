@@ -24,24 +24,29 @@ Project: `Yubico.YubiKey.IntegrationTests`
 
 ### Standard Test Devices
 
-To make integration testing easier across the team, we have standardized the set of YubiKeys used in integration testing. These devices are enumerated in `Yubico.YubiKey.TestUtilities.StandardTestDevice`. As of April 26, 2021, these test devices are:
+To make integration testing easier across the team, we have standardized the set of YubiKeys used in integration
+testing. These devices are enumerated in `Yubico.YubiKey.TestUtilities.StandardTestDevice`. As of April 26, 2021, these
+test devices are:
 
 - Fw3
-  - Major version 3, USB A keychain, not FIPS
+    - Major version 3, USB A keychain, not FIPS
 - Fw4Fips
-  - Major version 4, USB A keychain, FIPS
+    - Major version 4, USB A keychain, FIPS
 - Fw5
-  - Major version 5, USB A keychain, not FIPS
+    - Major version 5, USB A keychain, not FIPS
 - Fw5Fips
-  - Major version 5, USB A keychain, FIPS
+    - Major version 5, USB A keychain, FIPS
 - Fw5ci
-  - Major version 5, USB C Lightning, not FIPS
+    - Major version 5, USB C Lightning, not FIPS
 
 ### Selecting Test Devices
 
-The set of all available test devices can be retrieved using `Yubico.YubiKey.TestUtilities.IntegrationTestDeviceEnumeration`
+The set of all available test devices can be retrieved
+using `Yubico.YubiKey.TestUtilities.IntegrationTestDeviceEnumeration`
 
-To run a test against a specific test device, you can use `Yubico.YubiKey.TestUtilities.TestDeviceSelection` For example, `SelectRequiredTestDevice(StandardTestDevice)` will find the first valid device in a set of `IYubiKey` objects. If it cannot find a valid device, it throws an exception.
+To run a test against a specific test device, you can use `Yubico.YubiKey.TestUtilities.TestDeviceSelection` For
+example, `SelectRequiredTestDevice(StandardTestDevice)` will find the first valid device in a set of `IYubiKey` objects.
+If it cannot find a valid device, it throws an exception.
 
 ```csharp
 [Theory]

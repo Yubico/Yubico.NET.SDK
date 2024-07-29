@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | FD | 00 | 00 | (absent) | (absent) | (absent)
+| CLA | INS | P1 | P2 |    Lc    |   Data   |    Le    |
+|:---:|:---:|:--:|:--:|:--------:|:--------:|:--------:| 
+| 00  | FD  | 00 | 00 | (absent) | (absent) | (absent) |
 
 ### Response APDU info
 

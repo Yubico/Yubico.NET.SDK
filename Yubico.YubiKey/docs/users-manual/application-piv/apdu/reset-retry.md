@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 2C | 00 | 80 | 10 | *current PUK and new PIN* | (absent)
+| CLA | INS | P1 | P2 | Lc |           Data            |    Le    |
+|:---:|:---:|:--:|:--:|:--:|:-------------------------:|:--------:| 
+| 00  | 2C  | 00 | 80 | 10 | *current PUK and new PIN* | (absent) |
 
 The data will be 16 bytes long. The PUK is given in the first 8 bytes of the data,
 and the new PIN is the next 8 bytes. If the PUK or new PIN is not 8 bytes, it is padded

@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 10 | 00 | 00 | 06 | 06 A2 01 02 02 02 | (absent)
+| CLA | INS | P1 | P2 | Lc |       Data        |    Le    |
+|:---:|:---:|:--:|:--:|:--:|:-----------------:|:--------:| 
+| 00  | 10  | 00 | 00 | 06 | 06 A2 01 02 02 02 | (absent) |
 
 The Ins byte (instruction) is 10, which is the byte for CTAPHID_CBOR.
 That means the command information is in a CBOR encoded structure in the
@@ -44,9 +44,9 @@ the following:
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data           | SW1 | SW2
-:-------------:| :-: | :---:
-*encoded info* | 90  | 00
+|      Data      | SW1 | SW2 |
+|:--------------:|:---:|:---:|
+| *encoded info* | 90  | 00  |
 
 The info returned is CBOR encoded. It has a structure similar to the
 following.
@@ -74,15 +74,15 @@ response will be 80 bytes.
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 6F  | 14  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 6F  | 14  |
 
 #### Response APDU when an unsupported protocol is specified
 
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 6F  | 33  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 6F  | 33  |

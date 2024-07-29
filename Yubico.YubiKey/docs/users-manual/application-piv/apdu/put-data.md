@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | DB | 3F | FF | *data length* | *data element tag followed by data to put* | (absent)
+| CLA | INS | P1 | P2 |      Lc       |                    Data                    |    Le    |
+|:---:|:---:|:--:|:--:|:-------------:|:------------------------------------------:|:--------:| 
+| 00  | DB  | 3F | FF | *data length* | *data element tag followed by data to put* | (absent) |
 
 ### Response APDU info: success
 

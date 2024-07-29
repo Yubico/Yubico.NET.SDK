@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU Info
 
- CLA | INS |     P1      |      P2       |     Lc     |                                                   Data                                                   |    Le    
-:---:|:---:|:-----------:|:-------------:|:----------:|:--------------------------------------------------------------------------------------------------------:|:--------:
- 00  | FE  | *algorithm* | *slot number* | *data len* | *set of TLV containing key elements* <br />\[AA 01 *\<pin policy\>*\] <br />\[AB 01 *\<touch policy\>*\] | (absent) 
+| CLA | INS |     P1      |      P2       |     Lc     |                                                   Data                                                   |    Le    |
+|:---:|:---:|:-----------:|:-------------:|:----------:|:--------------------------------------------------------------------------------------------------------:|:--------:|
+| 00  | FE  | *algorithm* | *slot number* | *data len* | *set of TLV containing key elements* <br />\[AA 01 *\<pin policy\>*\] <br />\[AB 01 *\<touch policy\>*\] | (absent) |
 
 The slot number can be one of the following (hex values):
 

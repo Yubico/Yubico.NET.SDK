@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | CB | 3F | FF | 3, 4, or 5 | *TLV with T of 5C and V of data object tag* | (absent)
+| CLA | INS | P1 | P2 |     Lc     |                    Data                     |    Le    |
+|:---:|:---:|:--:|:--:|:----------:|:-------------------------------------------:|:--------:| 
+| 00  | CB  | 3F | FF | 3, 4, or 5 | *TLV with T of 5C and V of data object tag* | (absent) |
 
 Note that there are other standards and applications that use the GET DATA APDU, and they
 sometimes use different values for INS, P1, and P2. They sometimes use the same values as

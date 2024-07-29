@@ -162,9 +162,9 @@ The [Reset retry](commands.md#reset-retry-recover-the-pin) command is an example
 this method of authenticating. This command resets the PIN using the PUK. You supply the
 PUK and the new PIN. The command's data includes both the PIN and PUK.
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 2C | 00 | 80 | 10 | *current PUK and new PIN* | (absent)
+| CLA | INS | P1 | P2 | Lc |           Data            |    Le    |
+|:---:|:---:|:--:|:--:|:--:|:-------------------------:|:--------:| 
+| 00  | 2C  | 00 | 80 | 10 | *current PUK and new PIN* | (absent) |
 
 ```txt
  00 2C 00 80 10 31 32 33 34 35 36 37 38 31 32 33 34 35 36 37 ff

@@ -16,10 +16,10 @@ limitations under the License. -->
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 24 | 00 | 80 | 10 | *current PIN and new PIN* | (absent)
-00 | 24 | 00 | 81 | 10 | *current PUK and new PUK* | (absent)
+| CLA | INS | P1 | P2 | Lc |           Data            |    Le    |
+|:---:|:---:|:--:|:--:|:--:|:-------------------------:|:--------:| 
+| 00  | 24  | 00 | 80 | 10 | *current PIN and new PIN* | (absent) |
+| 00  | 24  | 00 | 81 | 10 | *current PUK and new PUK* | (absent) |
 
 Which element to change is given in the P2 field of the APDU and the current and new
 data (old and new PIN or PUK) are given in the data field. The data is simply the two

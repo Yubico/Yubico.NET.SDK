@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 20 | 00 | 96 | 12 | 01 10 *temporary PIN* | (absent)
+| CLA | INS | P1 | P2 | Lc |         Data          |    Le    |
+|:---:|:---:|:--:|:--:|:--:|:---------------------:|:--------:| 
+| 00  | 20  | 00 | 96 | 12 | 01 10 *temporary PIN* | (absent) |
 
 ### Response APDU info
 

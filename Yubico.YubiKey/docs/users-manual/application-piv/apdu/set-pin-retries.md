@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | FA | *PIN retries* | *PUK retries* | (absent) | (absent) | (absent)
+| CLA | INS |      P1       |      P2       |    Lc    |   Data   |    Le    |
+|:---:|:---:|:-------------:|:-------------:|:--------:|:--------:|:--------:| 
+| 00  | FA  | *PIN retries* | *PUK retries* | (absent) | (absent) | (absent) |
 
 ### Response APDU Info
 

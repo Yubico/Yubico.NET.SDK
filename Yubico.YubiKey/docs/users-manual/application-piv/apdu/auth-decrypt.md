@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU Info
 
-| CLA | INS | P1 | P2 | Lc | Data | Le |
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 87 | *algorithm* | *slot number* | *data len* | *encoded data to decrypt* | (absent)
+| CLA | INS |     P1      |      P2       |     Lc     |           Data            |    Le    |
+|:---:|:---:|:-----------:|:-------------:|:----------:|:-------------------------:|:--------:| 
+| 00  | 87  | *algorithm* | *slot number* | *data len* | *encoded data to decrypt* | (absent) |
 
 The *algorithm* is either `06` (RSA-1048) or `07` (RSA-2048). Note that it is not possible
 to decrypt using ECC.

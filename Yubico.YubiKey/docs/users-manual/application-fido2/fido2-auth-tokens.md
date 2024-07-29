@@ -220,7 +220,7 @@ commands or several calls to the same command.
 
 On a FIDO2 version 2.1 YubiKey, the PinToken can only be used to perform MakeCredential
 and GetAssertion. Furthermore, it can be expired, and in fact, it can be used to build an
-AuthParam that will authenticate only only call to one command.
+AuthParam that will authenticate only call to one command.
 
 ### PinUvAuthToken
 

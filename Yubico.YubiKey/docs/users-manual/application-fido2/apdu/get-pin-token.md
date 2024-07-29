@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 10 | 00 | 00 | *data length* | 06 *encoded info* | (absent)
+| CLA | INS | P1 | P2 |      Lc       |       Data        |    Le    |
+|:---:|:---:|:--:|:--:|:-------------:|:-----------------:|:--------:| 
+| 00  | 10  | 00 | 00 | *data length* | 06 *encoded info* | (absent) |
 
 The Ins byte (instruction) is 10, which is the byte for CTAPHID_CBOR.
 That means the command information is in a CBOR encoded structure in the

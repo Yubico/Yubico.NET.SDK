@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU Info
 
-| CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 87 | *algorithm* | *slot number* | *data len* | *other party's public key* | (absent)
+| CLA | INS |     P1      |      P2       |     Lc     |            Data            |    Le    |
+|:---:|:---:|:-----------:|:-------------:|:----------:|:--------------------------:|:--------:| 
+| 00  | 87  | *algorithm* | *slot number* | *data len* | *other party's public key* | (absent) |
 
 The *algorithm* is either `11` (ECC-P256) or `14` (ECC-P384). Note that is is not possible
 to perform key agreement using RSA.

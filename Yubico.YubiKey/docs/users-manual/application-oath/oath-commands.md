@@ -77,9 +77,9 @@ Lists configured credentials.
 
 ### Command APDU info
 
- CLA  | INS  |  P1  |  P2  |    Lc    |   Data   |
-:----:|:----:|:----:|:----:|:--------:|:--------:|
- 0x00 | 0xa1 | 0x00 | 0x00 | (absent) | (absent) |
+| CLA  | INS  |  P1  |  P2  |    Lc    |   Data   |
+|:----:|:----:|:----:|:----:|:--------:|:--------:|
+| 0x00 | 0xa1 | 0x00 | 0x00 | (absent) | (absent) |
 
 ### Response APDU info
 
@@ -129,9 +129,9 @@ Adds a new (or overwrites) OATH credential.
 
 ### Command APDU info
 
- CLA  | INS  |  P1  |  P2  |       Lc       |    Data     |
-:----:|:----:|:----:|:----:|:--------------:|:-----------:|
- 0x00 | 0x01 | 0x00 | 0x00 | Length of Data | (See below) |
+| CLA  | INS  |  P1  |  P2  |       Lc       |    Data     |
+|:----:|:----:|:----:|:----:|:--------------:|:-----------:|
+| 0x00 | 0x01 | 0x00 | 0x00 | Length of Data | (See below) |
 
 #### Data
 
@@ -206,9 +206,9 @@ Renames an existing OATH credential on the YubiKey.
 
 ### Command APDU info
 
- CLA  | INS  |  P1  |  P2  |       Lc       |    Data     |
-:----:|:----:|:----:|:----:|:--------------:|:-----------:|
- 0x00 | 0x05 | 0x00 | 0x00 | Length of Data | (See below) |
+| CLA  | INS  |  P1  |  P2  |       Lc       |    Data     |
+|:----:|:----:|:----:|:----:|:--------------:|:-----------:|
+| 0x00 | 0x05 | 0x00 | 0x00 | Length of Data | (See below) |
 
 #### Data
 
@@ -271,9 +271,9 @@ Deletes an existing credential.
 
 ### Command APDU info
 
- CLA  | INS  |  P1  |  P2  |        Lc        |    Data     |
-:----:|:----:|:----:|:----:|:----------------:|:-----------:|
- 0x00 | 0x02 | 0x00 | 0x00 | (Length of Data) | (See below) |
+| CLA  | INS  |  P1  |  P2  |        Lc        |    Data     |
+|:----:|:----:|:----:|:----:|:----------------:|:-----------:|
+| 0x00 | 0x02 | 0x00 | 0x00 | (Length of Data) | (See below) |
 
 #### Data
 
@@ -348,9 +348,9 @@ same response for that key.
 
 ### Command APDU info
 
- CLA  | INS  |  P1  |  P2  |       Lc       |    Data     |
-:----:|:----:|:----:|:----:|:--------------:|:-----------:|
- 0x00 | 0x03 | 0x00 | 0x00 | Length of Data | (See below) |
+| CLA  | INS  |  P1  |  P2  |       Lc       |    Data     |
+|:----:|:----:|:----:|:----:|:--------------:|:-----------:|
+| 0x00 | 0x03 | 0x00 | 0x00 | Length of Data | (See below) |
 
 #### Data
 
@@ -403,9 +403,9 @@ software can verify.
 
 ### Command APDU info
 
- CLA  | INS  |  P1  |  P2  |       Lc       |    Data     |
-:----:|:----:|:----:|:----:|:--------------:|:-----------:|
- 0x00 | 0xa3 | 0x00 | 0x00 | Length of Data | (See below) |
+| CLA  | INS  |  P1  |  P2  |       Lc       |    Data     |
+|:----:|:----:|:----:|:----:|:--------------:|:-----------:|
+| 0x00 | 0xa3 | 0x00 | 0x00 | Length of Data | (See below) |
 
 #### Data
 
@@ -449,9 +449,9 @@ Performs CALCULATE for one named credential. Gets an OTP (one-time password) val
 
 ### Command APDU info
 
- CLA  | INS  |  P1  |     P2      |       Lc       |    Data     |
-:----:|:----:|:----:|:-----------:|:--------------:|:-----------:|
- 0x00 | 0xa2 | 0x00 | (See below) | Length of Data | (See below) |
+| CLA  | INS  |  P1  |     P2      |       Lc       |    Data     |
+|:----:|:----:|:----:|:-----------:|:--------------:|:-----------:|
+| 0x00 | 0xa2 | 0x00 | (See below) | Length of Data | (See below) |
 
 #### P2
 
@@ -520,9 +520,9 @@ separetely if needed by using CALCULATE command.
 
 ### Command APDU info
 
- CLA  | INS  |  P1  |     P2      |       Lc       |    Data     |
-:----:|:----:|:----:|:-----------:|:--------------:|:-----------:|
- 0x00 | 0xa4 | 0x00 | (See below) | Length of Data | (See below) |
+| CLA  | INS  |  P1  |     P2      |       Lc       |    Data     |
+|:----:|:----:|:----:|:-----------:|:--------------:|:-----------:|
+| 0x00 | 0xa4 | 0x00 | (See below) | Length of Data | (See below) |
 
 #### P2
 

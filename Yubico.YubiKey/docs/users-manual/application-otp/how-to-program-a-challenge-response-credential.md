@@ -82,8 +82,7 @@ your ``ConfigureChallengeResponse()`` operation.
 > [!NOTE]
 > If a YubiKey has been configured to require a button touch, you must make sure to alert the user of this requirement
 > during a challenge-response operation. This can be accomplished by calling
->
-the [UseTouchNotifier()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTouchNotifier(System.Action))
+> the [UseTouchNotifier()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTouchNotifier(System.Action))
 > method when sending a challenge to a YubiKey via ``CalculateChallengeResponse()``.
 
 ## ConfigureChallengeResponse examples

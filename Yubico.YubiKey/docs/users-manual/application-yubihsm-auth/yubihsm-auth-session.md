@@ -52,24 +52,12 @@ using (var YubiHsmAuthSession = new YubiHsmAuthSession(yubiKeyToUse))
 Clicking on the method will bring you to the API documentation where more information can be found.
 
 | Method | Description | Try-Parse version |
-| -- | -- |
-| [Add credential](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.AddCredential(System.ReadOnlyMemory{System.Byte},Yubico.YubiKey.YubiHsmAuth.CredentialWithSecrets)) |
-Add a
-credential. | [Try add credential](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryAddCredential(System.ReadOnlyMemory{System.Byte},Yubico.YubiKey.YubiHsmAuth.CredentialWithSecrets,System.Nullable{System.Int32}@)) |
-| [Change management key](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryChangeManagementKey(System.ReadOnlyMemory{System.Byte},System.ReadOnlyMemory{System.Byte},System.Nullable{System.Int32}@)) |
-Change the management
-key. | [Try change management key](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryChangeManagementKey(System.ReadOnlyMemory{System.Byte},System.ReadOnlyMemory{System.Byte},System.Nullable{System.Int32}@)) |
-| [Delete credential](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.DeleteCredential(System.ReadOnlyMemory{System.Byte},System.String)) |
-Delete a
-credential. | [Try delete credential](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryDeleteCredential(System.ReadOnlyMemory{System.Byte},System.String,System.Nullable{System.Int32}@)) |
-| [Get AES-128 session keys](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.GetAes128SessionKeys(System.String,System.ReadOnlyMemory{System.Byte},System.ReadOnlyMemory{System.Byte},System.ReadOnlyMemory{System.Byte})) |
-Calculate session keys from an AES-128 credential. These session keys are used to establish a secure session with a
-YubiHSM 2 device. | n/a |
-| [Get application version](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.GetApplicationVersion) | Get the version
-of the YubiHSM Auth application returned as a major, minor, and patch value. | n/a |
-| [Get management key retries](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.GetManagementKeyRetries) | Get the
-number of retries remaining for the management key. | n/a |
-| [List credentials](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.ListCredentials) | Get the public properties of
-all credentials in the YubiHSM Auth application, along with the number of retries remaining for each. | n/a |
-| [Reset application](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.ResetApplication) | Reset the YubiHSM Auth
-application, which will delete all credentials and set the management key to its default value (all zeros). | n/a |
+| :--: | :--: | :--: |
+| [Add credential](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.AddCredential(System.ReadOnlyMemory{System.Byte},Yubico.YubiKey.YubiHsmAuth.CredentialWithSecrets)) | Add a credential. | [Try add credential](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryAddCredential(System.ReadOnlyMemory{System.Byte},Yubico.YubiKey.YubiHsmAuth.CredentialWithSecrets,System.Nullable{System.Int32}@)) |
+| [Change management key](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryChangeManagementKey(System.ReadOnlyMemory{System.Byte},System.ReadOnlyMemory{System.Byte},System.Nullable{System.Int32}@)) | Change the management key. | [Try change management key](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryChangeManagementKey(System.ReadOnlyMemory{System.Byte},System.ReadOnlyMemory{System.Byte},System.Nullable{System.Int32}@)) |
+| [Delete credential](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.DeleteCredential(System.ReadOnlyMemory{System.Byte},System.String)) | Delete a credential. | [Try delete credential](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryDeleteCredential(System.ReadOnlyMemory{System.Byte},System.String,System.Nullable{System.Int32}@)) |
+| [Get AES-128 session keys](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.GetAes128SessionKeys(System.String,System.ReadOnlyMemory{System.Byte},System.ReadOnlyMemory{System.Byte},System.ReadOnlyMemory{System.Byte})) | Calculate session keys from an AES-128 credential. These session keys are used to establish a secure session with a YubiHSM 2 device. | n/a |
+| [Get application version](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.GetApplicationVersion) | Get the version of the YubiHSM Auth application returned as a major, minor, and patch value. | n/a |
+| [Get management key retries](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.GetManagementKeyRetries) | Get the number of retries remaining for the management key. | n/a |
+| [List credentials](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.ListCredentials) | Get the public properties of all credentials in the YubiHSM Auth application, along with the number of retries remaining for each. | n/a |
+| [Reset application](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.ResetApplication) | Reset the YubiHSM Auth application, which will delete all credentials and set the management key to its default value (all zeros). | n/a |

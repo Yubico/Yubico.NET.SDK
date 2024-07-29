@@ -194,9 +194,7 @@ To enable the manual update feature, you must:
 
 1. set the [static ticket flag](xref:Yubico.YubiKey.Otp.ConfigurationFlags.StaticTicket), then
 
-1.
-
-set [AllowManualUpdate()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AllowManualUpdate%28System.Boolean%29)
+1. set [AllowManualUpdate()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AllowManualUpdate%28System.Boolean%29)
 to ``true`` when calling ``ConfigureStaticPassword()``.
 
 If the static ticket flag is not set, an exception will be thrown when calling ``AllowManualUpdate()``. At this time,

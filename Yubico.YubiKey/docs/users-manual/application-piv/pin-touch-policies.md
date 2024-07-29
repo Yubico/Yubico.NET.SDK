@@ -16,16 +16,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# PIV PIN and touch policies
+# PIV PIN, touch and bio policies
 
 Suppose you want to use one of the PIV keys to sign or decrypt. The application running on
 your host device will call one or more commands to perform the operation. Do you need to
 enter the PIN to perform the operation? Do you need to touch the YubiKey?
 
 Suppose you want to to generate a new key pair, you need to authenticate the management
-key to perform that operation. But do you need to touch the YubiKey as well?
+key to perform that operation. But do you need to touch the YubiKey as well? What about fingerprints?
 
-The PIN and touch policies answer those questions.
+This article answers those questions.
 
 ## Related articles
 
@@ -45,11 +45,13 @@ The PIN and touch policies answer those questions.
 
 * Never: a touch is never needed
 * Always: a touch is needed for every use
-
-For YubiKeys 4.3 and later, there is one more possible policy
-
 * Cached: a touch is not needed if the YubiKey had been touched in the last 15 seconds,
-  otherwise a touch is needed
+otherwise a touch is needed (Only available for YubiKey versions 4.3 and greater)
+
+#### Biometric policies
+For **YubiKey Bio** versions 5.7 and greater, there are two more possible policies
+* Match Once: A biometric or PIN verification is required for each session
+* Match Always: A biometric or PIN verification is required on every object access
 
 > [!WARNING]
 > It is important to point out that setting the PIN policy to "never" reduces security

@@ -33,38 +33,33 @@ This guide addresses the challenges of handling sensitive data like PINs, passwo
 
 ## Best Practices
 
-1. **Use Byte Arrays over Strings**:
+1. **Use Byte Arrays over Strings**: 
    Prefer `byte[]` over strings for sensitive data. Byte arrays allow direct memory manipulation and can be securely overwritten.
 
    Strings in C# are immutable, meaning any operation on a string creates a new string object, potentially leaving copies of sensitive data in memory.
-
-2. **Overwrite Buffers**:
-   Use `CryptographicOperations.ZeroMemory()` to clear data after use.
+2. **Overwrite Buffers**: 
+   Use [`CryptographicOperations.ZeroMemory()`](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.cryptographicoperations.zeromemory) to clear data after use.
 
    Simply setting a reference to null doesn't clear the actual data from memory. Overwriting ensures the sensitive data is actually removed.
-
-3. **Minimize Data Lifespan**:
+3. **Minimize Data Lifespan**: 
    Collect sensitive data just before use and clear immediately after.
 
    The longer sensitive data remains in memory, the higher the risk of exposure. Minimizing its lifespan reduces this risk.
-
-4. **Control Buffer Sizes**:
+4. **Control Buffer Sizes**: 
    Pre-allocate maximum-sized buffers to avoid resizing risks.
 
    Resizing operations can create copies of data in memory. By pre-allocating the maximum size, you avoid these copies and maintain better control over where your sensitive data resides.
-
-5. **Pin Memory**:
+5. **Pin Memory**: 
    Use techniques like [`stackalloc`](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/stackalloc), [`GC.AllocateArray()`](https://learn.microsoft.com/en-us/dotnet/api/system.gc.allocatearray), [`fixed` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/fixed), or [`GCHandle.Alloc()`](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.gchandle.alloc) to prevent unintended copies.
 
    These techniques prevent the garbage collector from moving your sensitive data around in memory, reducing the risk of leaving copies in various memory locations.
 
 ### Avoid Using:
 
-- **Strings**:
+- **Strings**: 
   Cannot be securely wiped without risking runtime crashes.
   Strings are immutable and internally optimized by the runtime, making it impossible to guarantee that all copies of the string have been securely erased.
-
-- **SecureString**:
+- **SecureString**: 
   No longer recommended by Microsoft for new development.
   SecureString was designed to mitigate some risks, but its implementation is platform-specific and doesn't provide significant advantages over properly managed byte arrays.
 

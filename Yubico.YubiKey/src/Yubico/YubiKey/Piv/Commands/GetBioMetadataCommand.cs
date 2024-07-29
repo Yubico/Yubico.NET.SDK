@@ -19,10 +19,10 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// Get information about Bio multi-protocol key.
+    /// Get information about a YubiKey Bio multi-protocol key.
     /// </summary>
     /// <remarks>
-    /// The Get Bio Metadata command is available on YubiKey Bio multi-protocol.
+    /// The GetBioMetadataCommand is available on YubiKey Bio multi-protocol keys.
     /// <para>
     /// The partner Response class is <see cref="GetBioMetadataResponse"/>.
     /// </para>

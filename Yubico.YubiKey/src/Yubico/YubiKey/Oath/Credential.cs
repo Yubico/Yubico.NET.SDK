@@ -589,11 +589,15 @@ namespace Yubico.YubiKey.Oath
         /// </returns>
         private static (string? issuer, string account) ParseUriPath(string path, string? defaultIssuer)
         {
-            string tempPath = path.StartsWith("/", true, CultureInfo.InvariantCulture) ? path.Substring(1) : path;
+            #pragma warning disable CA1865
+            string tempPath = path.StartsWith("/", ignoreCase: true, CultureInfo.InvariantCulture)
+                ? path[1..]
+                : path;
+            #pragma warning restore CA1865
 
             if (tempPath.Length > MaximumUrlLength)
             {
-                tempPath = tempPath.Substring(0, MaximumUrlLength);
+                tempPath = tempPath[..MaximumUrlLength];
             }
 
             string[]? parsedPath = tempPath.Split(':');

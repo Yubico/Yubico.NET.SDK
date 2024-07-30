@@ -30,15 +30,16 @@ namespace Yubico.Core.Devices.SmartCard
     internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener, IDisposable
     {
         private readonly Logger _log = Log.GetLogger();
-
+        
         // The resource manager context.
         private SCardContext _context;
-
+        
         // The active smart card readers.
         private SCARD_READER_STATE[] _readerStates;
-
-        private bool _isListening;
         private Thread? _listenerThread;
+        private bool _isListening;
+        private bool _disposedValue; // To detect redundant calls
+        private static readonly string[] _readerNames = ["\\\\?\\Pnp\\Notifications"];
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDeviceListener"/>.
@@ -74,16 +75,19 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void StartListening()
         {
-            if (!_isListening)
+            if (_isListening)
             {
-                _listenerThread = new Thread(ListenForReaderChanges)
-                {
-                    IsBackground = true
-                };
-                _isListening = true;
-                Status = DeviceListenerStatus.Started;
-                _listenerThread.Start();
+                return;
             }
+
+            _listenerThread = new Thread(ListenForReaderChanges)
+            {
+                IsBackground = true
+            };
+
+            _isListening = true;
+            Status = DeviceListenerStatus.Started;
+            _listenerThread.Start();
         }
 
         // This method is the delegate sent to the new Thread.
@@ -104,25 +108,26 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         #region IDisposable Support
-
-        private bool _disposedValue; // To detect redundant calls
-
+        
         /// <summary>
         /// Disposes the objects.
         /// </summary>
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (_disposedValue)
             {
-                if (disposing)
-                {
-                    uint _ = SCardCancel(_context);
-                    _context.Dispose();
-                    StopListening();
-                }
-                _disposedValue = true;
+                return;
             }
+
+            if (disposing)
+            {
+                uint _ = SCardCancel(_context);
+                _context.Dispose();
+                StopListening();
+            }
+
+            _disposedValue = true;
         }
 
         ~DesktopSmartCardDeviceListener()
@@ -192,7 +197,7 @@ namespace Yubico.Core.Devices.SmartCard
                 SCARD_READER_STATE[] removedReaderStates = newStates.Except(eventStateList, new ReaderStateComparer()).ToArray();
 
                 // Don't get status changes if there are no updates in state list.
-                if (!addedReaderStates.Any() && !removedReaderStates.Any())
+                if (addedReaderStates.Length == 0 && removedReaderStates.Length == 0)
                 {
                     break;
                 }
@@ -214,7 +219,7 @@ namespace Yubico.Core.Devices.SmartCard
                 // Only call get status change if a new reader was added. If nothing was added,
                 // we would otherwise hang / timeout here because all changes (in SCard's mind)
                 // have been dealt with.
-                if (addedReaderStates.Any())
+                if (addedReaderStates.Length != 0)
                 {
                     _log.LogInformation("Additional smart card readers were found. Calling GetStatusChange for more information.");
                     getStatusChangeResult = SCardGetStatusChange(_context, 0, updatedStates, updatedStates.Length);
@@ -280,7 +285,7 @@ namespace Yubico.Core.Devices.SmartCard
         // us of the change.
         private bool UsePnpWorkaround()
         {
-            SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(new[] { "\\\\?\\Pnp\\Notifications" });
+            SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(_readerNames);
             _ = SCardGetStatusChange(_context, 0, testState, testState.Length);
             bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
             return usePnpWorkaround;

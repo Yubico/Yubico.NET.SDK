@@ -107,7 +107,9 @@ namespace Yubico.YubiKey.Sample.SharedCode
             for (int index = 0; index < yubiKeyArray.Length; index++)
             {
                 string versionNumber = yubiKeyArray[index].FirmwareVersion.ToString();
+#pragma warning disable CA1305
                 string serialNumber = yubiKeyArray[index].SerialNumber.ToString() ?? "No serial number";
+#pragma warning restore CA1305
                 choices[index] = versionNumber + " : " + serialNumber;
             }
 

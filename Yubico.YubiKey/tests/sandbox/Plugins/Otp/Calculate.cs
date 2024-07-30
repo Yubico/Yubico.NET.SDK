@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 exceptions.Add(new ArgumentException("The response must be either six (6) or eight (8) digits."));
             }
-            if (!_challenge.Any() && !_generateTotp)
+            if (_challenge.Length == 0 && !_generateTotp)
             {
                 exceptions.Add(new ArgumentException("You much choose either TOTP or provide a challenge."));
             }

@@ -22,7 +22,7 @@ namespace Yubico.YubiKey
 {
     internal static class GetDeviceInfoResponseHelper
     {
-        private static readonly Logger Logger = Log.GetLogger();
+        private static readonly Logger _logger = Log.GetLogger();
 
         /// <summary>
         /// Attempts to create a dictionary from a TLV-encoded byte array by parsing and extracting tag-value pairs.
@@ -34,7 +34,7 @@ namespace Yubico.YubiKey
         {
             if (tlvData.IsEmpty)
             {
-                Logger.LogWarning("ResponseAPDU data was empty!");
+                _logger.LogWarning("ResponseAPDU data was empty!");
                 return null;
             }
 
@@ -44,7 +44,7 @@ namespace Yubico.YubiKey
             int tlvDataLength = tlvData.Span[0];
             if (tlvDataLength == 0 || 1 + tlvDataLength > tlvData.Length)
             {
-                Logger.LogWarning("TLV Data length was out of expected ranges. {Length}", tlvDataLength);
+                _logger.LogWarning("TLV Data length was out of expected ranges. {Length}", tlvDataLength);
                 return null;
             }
 

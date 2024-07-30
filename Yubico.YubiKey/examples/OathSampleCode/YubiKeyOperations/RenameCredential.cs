@@ -34,10 +34,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             string newIssuer,
             string newAccount)
         {
-            if (credential is null)
-            {
-                throw new ArgumentNullException(nameof(credential));
-            }
+            ArgumentNullException.ThrowIfNull(credential, nameof(credential));
 
             using var oathSession = new OathSession(yubiKey);
             {

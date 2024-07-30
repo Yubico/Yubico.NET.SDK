@@ -1,4 +1,4 @@
-// global using Coordinates = (double Latitude, double Longitude);
+global using Coordinates = (double Latitude, double Longitude);
 
 using System;
 using System.Collections.Generic;
@@ -20,15 +20,15 @@ public abstract class CSharpLangFeaturesExamples
         InitExample();
         WithKeywordExample();
         _ = ExceptionNUllThrowExample1(null);
-        _ = ExceptionNotNullThrowExample2("hellow");
+        _ = ExceptionNotNullThrowExample2("a string");
         RawStringLiteralExample();
         SequencePatternMatchingExample();
 
         // C12 Features
         // PrimaryConstructorExample();
-        // AnyTypeUsingExample();
-        // CollectionInitExample();
-        // SpreadElementExample();
+        AnyTypeUsingExample();
+        CollectionInitExample();
+        SpreadElementExample();
 
         await AsyncEnumerableExample().ConfigureAwait(false);
 
@@ -36,45 +36,46 @@ public abstract class CSharpLangFeaturesExamples
         Console.WriteLine("Finished");
     }
 
-    // private static void AnyTypeUsingExample()
-    // {
-    //     Console.WriteLine(MethodBase.GetCurrentMethod().Name);
-    //     new Coordinates(1.0, 2.0);
-    // }
-    //
-    // private static void CollectionInitExample()
-    // {
-    //     Console.WriteLine(MethodBase.GetCurrentMethod().Name);
-    //     int[] numbers1 = new int[3] { 1, 2, 3 };
-    //     int[] numbers2 = { 1, 2, 3 };
-    //     int[] numbers3 = { 1, 2, 3 };
-    //
-    //     int[] numbers4 = { 1, 2, 3 }; // New
-    //     int[] emptyCollection = []; // New
-    // }
-    //
-    // private static void SpreadElementExample()
-    // {
-    //     Console.WriteLine(MethodBase.GetCurrentMethod().Name);
-    //     int[] oneTwoThree = [1, 2, 3];
-    //     int[] fourFiveSix = [4, 5, 6];
-    //
-    //     int[] all = [.. fourFiveSix, 100, .. oneTwoThree];
-    //
-    //     Console.WriteLine(string.Join(", ", all));
-    //     Console.WriteLine($"Length: {all.Length}");
-    //
-    //     // Outputs:
-    //     //   4, 5, 6, 100, 1, 2, 3
-    //     //   Length: 7
-    // }
+    private static void AnyTypeUsingExample()
+    {
+        Console.WriteLine(MethodBase.GetCurrentMethod().Name);
+        _ = new Coordinates(item1: 1.0, item2: 2.0);
+    }
 
-    // private static void PrimaryConstructorExample()
-    // {
-    //     Console.WriteLine(MethodBase.GetCurrentMethod().Name);
-    //     var p = new PrimaryConstructor("myName");
-    //     p.PrintPrivateMember();
-    // }
+    [SuppressMessage("ReSharper", "UnusedVariable")]
+    [SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value")]
+    private static void CollectionInitExample()
+    {
+        Console.WriteLine(MethodBase.GetCurrentMethod().Name);
+        int[] numbers1 = new int[3] { 1, 2, 3 };
+        int[] numbers2 = { 1, 2, 3 };
+
+        int[] numbers3 = [1, 2, 3]; // New
+        int[] emptyCollection = []; // New
+    }
+
+    private static void SpreadElementExample()
+    {
+        Console.WriteLine(MethodBase.GetCurrentMethod().Name);
+        int[] oneTwoThree = [1, 2, 3];
+        int[] fourFiveSix = [4, 5, 6];
+
+        int[] all = [.. fourFiveSix, 100, .. oneTwoThree];
+
+        Console.WriteLine(string.Join(", ", all));
+        Console.WriteLine($"Length: {all.Length}");
+
+        // Outputs:
+        //   4, 5, 6, 100, 1, 2, 3
+        //   Length: 7
+    }
+
+    private static void PrimaryConstructorExample()
+    {
+        Console.WriteLine(MethodBase.GetCurrentMethod().Name);
+        var p = new PrimaryConstructor("myName");
+        p.PrintPrivateMember();
+    }
 
     private static void SequencePatternMatchingExample()
     {
@@ -273,9 +274,9 @@ internal struct Parent
 {
 }
 
-// internal class PrimaryConstructor(string name)
-// {
-//     public void PrintPrivateMember() => Console.WriteLine(name);
-// }
+internal class PrimaryConstructor(string name)
+{
+    public void PrintPrivateMember() => Console.WriteLine(name);
+}
 
 public record NamedPoint(string Name, int X, int Y);

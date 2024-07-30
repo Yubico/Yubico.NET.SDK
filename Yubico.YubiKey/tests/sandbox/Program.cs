@@ -215,7 +215,7 @@ namespace Yubico.YubiKey.TestApp
                     // If there is a plug-in selected, show all of its parameters
                     // and their descriptions, but no description for the plug-in.
                     paramUsage.Add(($"{plugin.Name} Parameters", string.Empty));
-                    if (plugin.Parameters.Values.Any())
+                    if (plugin.Parameters.Values.Count != 0)
                     {
                         foreach (Parameter parameter in plugin.Parameters.Values)
                         {

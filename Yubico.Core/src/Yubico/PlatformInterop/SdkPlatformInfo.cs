@@ -49,18 +49,19 @@ namespace Yubico.PlatformInterop
                 {
                     return SdkPlatform.Windows;
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
+                    RuntimeInformation.IsOSPlatform(OSPlatform.Create("MACCATALYST")))
                 {
                     return SdkPlatform.MacOS;
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     return SdkPlatform.Linux;
                 }
-                else
-                {
-                    return SdkPlatform.Unknown;
-                }
+
+                return SdkPlatform.Unknown;
             }
         }
 

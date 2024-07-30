@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cose;
+using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
 
 namespace Yubico.YubiKey.Fido2.PinProtocols
 {
@@ -136,7 +137,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// exception.
         /// </para>
         /// </remarks>
-        /// <param new="authenticatorPublicKey">
+        /// <param name="authenticatorPublicKey">
         /// The YubiKey's public key obtained by calling the
         /// <see cref="Yubico.YubiKey.Fido2.Commands.GetKeyAgreementCommand"/>.
         /// </param>
@@ -150,7 +151,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <exception cref="InvalidOperationException">
         /// The object is not available for <c>Encapsulate</c> because it still
         /// contains data from a previous operation. It is necessary to call
-        /// <c>Initialize</c> before reusing an Protocol object.
+        /// <c>Initialize</c> before reusing a Protocol object.
         /// </exception>
         public virtual void Encapsulate(CoseKey authenticatorPublicKey)
         {

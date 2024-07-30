@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {

@@ -14,7 +14,7 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography;
+using Yubico.Core.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.PinProtocols;
 

@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.DotNetPolyfills", "Yubico.DotNetPolyfills\src\Yubico.DotNetPolyfills.csproj", "{469432E1-A0C7-4E16-9DE5-56E46312F542}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.Core", "Yubico.Core\src\Yubico.Core.csproj", "{E7157F16-ACD9-427D-A0D3-568B4EF91E7C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.Core.UnitTests", "Yubico.Core\tests\Yubico.Core.UnitTests.csproj", "{C580309E-4712-434A-BAFB-5BF1932860EE}"
@@ -67,12 +65,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User Manual", "User Manual"
 	ProjectSection(SolutionItems) = preProject
 		Yubico.YubiKey\docs\users-manual\intro.md = Yubico.YubiKey\docs\users-manual\intro.md
 		Yubico.YubiKey\docs\users-manual\toc.yml = Yubico.YubiKey\docs\users-manual\toc.yml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.DotNetPolyfills", "Yubico.DotNetPolyfills", "{911992B7-10DE-4433-85A2-8FED53C305BE}"
-	ProjectSection(SolutionItems) = preProject
-		Yubico.DotNetPolyfills\Directory.Build.props = Yubico.DotNetPolyfills\Directory.Build.props
-		Yubico.DotNetPolyfills\Directory.Build.targets = Yubico.DotNetPolyfills\Directory.Build.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{778EE2C1-34B3-4CAB-B89A-7F2E37BCE4CA}"
@@ -370,12 +362,6 @@ Global
 		ReleaseWithDocs|Any CPU = ReleaseWithDocs|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{469432E1-A0C7-4E16-9DE5-56E46312F542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{469432E1-A0C7-4E16-9DE5-56E46312F542}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{469432E1-A0C7-4E16-9DE5-56E46312F542}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{469432E1-A0C7-4E16-9DE5-56E46312F542}.Release|Any CPU.Build.0 = Release|Any CPU
-		{469432E1-A0C7-4E16-9DE5-56E46312F542}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
-		{469432E1-A0C7-4E16-9DE5-56E46312F542}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
 		{E7157F16-ACD9-427D-A0D3-568B4EF91E7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E7157F16-ACD9-427D-A0D3-568B4EF91E7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7157F16-ACD9-427D-A0D3-568B4EF91E7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -386,32 +372,22 @@ Global
 		{C580309E-4712-434A-BAFB-5BF1932860EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C580309E-4712-434A-BAFB-5BF1932860EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C580309E-4712-434A-BAFB-5BF1932860EE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C580309E-4712-434A-BAFB-5BF1932860EE}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
-		{C580309E-4712-434A-BAFB-5BF1932860EE}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
 		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
-		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
 		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
-		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
 		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
-		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
 		{A69022BB-4582-4373-AAC7-62712923559B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A69022BB-4582-4373-AAC7-62712923559B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A69022BB-4582-4373-AAC7-62712923559B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A69022BB-4582-4373-AAC7-62712923559B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A69022BB-4582-4373-AAC7-62712923559B}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
-		{A69022BB-4582-4373-AAC7-62712923559B}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
 		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -453,7 +429,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{469432E1-A0C7-4E16-9DE5-56E46312F542} = {911992B7-10DE-4433-85A2-8FED53C305BE}
 		{E7157F16-ACD9-427D-A0D3-568B4EF91E7C} = {45D2A3BE-5111-4890-8898-2D43DB658A40}
 		{C580309E-4712-434A-BAFB-5BF1932860EE} = {45D2A3BE-5111-4890-8898-2D43DB658A40}
 		{8FFE6A2D-4DC1-4CC0-8B96-E6CE11F29B3E} = {A487E6E9-6E7D-47CF-B1D2-70B558DFC4F7}

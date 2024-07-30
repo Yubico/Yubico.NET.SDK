@@ -20,6 +20,7 @@ using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
+using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
 
 namespace Yubico.YubiKey.Piv
 {

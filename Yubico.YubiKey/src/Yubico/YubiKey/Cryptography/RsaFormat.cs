@@ -17,6 +17,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Yubico.Core.Tlv;
+using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
 
 namespace Yubico.YubiKey.Cryptography
 {

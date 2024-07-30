@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -22,8 +20,13 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// Instruct the YubiKey to reset the FIDO2 application.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// This will delete all credentials and associated information from the FIDO2
     /// application and remove the PIN.
+    /// </para>
+    /// <para>
+    /// Before attempting to reset a YubiKey Bio Multi-protocol Edition key with ResetCommand(), verify that the FIDO2 application is not blocked from using this method by checking the <see cref="IYubiKeyDeviceInfo.ResetBlocked"/> property. If the application is blocked, use <see cref="IYubiKeyDevice.DeviceReset"/>.
+    /// </para>
     /// </remarks>
     public class ResetCommand : IYubiKeyCommand<ResetResponse>
     {
@@ -36,8 +39,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// Constructs an instance of the <see cref="ResetCommand"/>.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// This will delete all credentials and associated information from the FIDO2
         /// application and remove the PIN.
+        /// </para>
+        /// <para>
+        /// Before attempting to reset a YubiKey Bio Multi-protocol Edition key with ResetCommand(), verify that the FIDO2 application is not blocked from using this method by checking the <see cref="IYubiKeyDeviceInfo.ResetBlocked"/> property. If the application is blocked, use <see cref="IYubiKeyDevice.DeviceReset"/>.
+        /// </para>
         /// </remarks>
         public ResetCommand()
         {

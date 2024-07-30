@@ -16,18 +16,18 @@ limitations under the License. -->
 
 ### Inner command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 03 | 00 | 00 | (absent) | (absent) | (absent)
+| CLA | INS | P1 | P2 |    Lc    |   Data   |    Le    |
+|:---:|:---:|:--:|:--:|:--------:|:--------:|:--------:|
+| 00  | 03  | 00 | 00 | (absent) | (absent) | (absent) |
 
 ### Response APDU info
 
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-*data* | 90 | 00
+|  Data  | SW1 | SW2 |
+|:------:|:---:|:---:|
+| *data* | 90  | 00  |
 
 The data is a byte array, where each byte is an ASCII character. Together they form a
 string describing the version. This is not NULL-terminated. For example, the return data

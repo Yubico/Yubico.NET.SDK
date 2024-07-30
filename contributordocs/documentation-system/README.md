@@ -32,12 +32,12 @@ what they mean, what the return value is.
 For the .NET SDK project, we will strive to have four types of documents:
 
 - User's manual:
-  - **Conceptual documentation**: What is this thing? Why would I use it?
-  - **Tutorials**: How do I use the SDK? Show me, from the ground up, how to do common tasks in the SDK.
-  - **How-To articles**: How do I accomplish this very specific task, with example code?
+    - **Conceptual documentation**: What is this thing? Why would I use it?
+    - **Tutorials**: How do I use the SDK? Show me, from the ground up, how to do common tasks in the SDK.
+    - **How-To articles**: How do I accomplish this very specific task, with example code?
 - Reference manual:
-  - **API reference**: What are all of the types, methods, properties, and parameters, and what
-    specifically do they do?
+    - **API reference**: What are all of the types, methods, properties, and parameters, and what
+      specifically do they do?
 
 ## DocFX: API reference generator
 
@@ -54,6 +54,7 @@ so we will use DocFX here as well, unless a better tool / system presents itself
 ### Source Code Comments and DocFX
 
 There are specific documents describing each step:
+
 1. [Setup](./setup.md)
 2. [Comments in the code](./comments-in-code.md)
 3. [Building the docs and running](./building-docs-and-running.md)

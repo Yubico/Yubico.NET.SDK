@@ -31,12 +31,12 @@ In order to perform authentication in your application, there are two main optio
 calling on the SDK to perform FIDO2 operations:
 
 * Use only the [Fido2Session](xref:Yubico.YubiKey.Fido2.Fido2Session) APIs, supply a
-[KeyCollector](../sdk-programming-guide/key-collector.md), and let the SDK handle both
-authentication logic and making calls to the appropriate PIN or fingerprint verification
-methods when needed.
+  [KeyCollector](../sdk-programming-guide/key-collector.md), and let the SDK handle both
+  authentication logic and making calls to the appropriate PIN or fingerprint verification
+  methods when needed.
 * Learn the rules of FIDO2 authentication and make sure your code calls the appropriate
-`TryVerify` methods (or the appropriate commands, e.g. `GetPinUvAuthTokenUsingPinCommand`)
-before performing the relevant operations.
+  `TryVerify` methods (or the appropriate commands, e.g. `GetPinUvAuthTokenUsingPinCommand`)
+  before performing the relevant operations.
 
 If you choose the first option (automatic auth by the SDK), then you must build a
 KeyCollector. See the articles ([here](../sdk-programming-guide/key-collector.md) and

@@ -12,23 +12,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Get the serial number
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | F8 | 00 | 00 | (absent) | (absent) | (absent)
+| CLA | INS | P1 | P2 |    Lc    |   Data   |    Le    |
+|:---:|:---:|:--:|:--:|:--------:|:--------:|:--------:| 
+| 00  | F8  | 00 | 00 | (absent) | (absent) | (absent) |
 
 ### Response APDU Info
 
 Total Length: 6\
 Data Length: 4
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-*big endian bytes of the 32-bit serial number* | 90 | 00
+|                      Data                      | SW1 | SW2 |
+|:----------------------------------------------:|:---:|:---:|
+| *big endian bytes of the 32-bit serial number* | 90  | 00  |
 
 ### Examples
 

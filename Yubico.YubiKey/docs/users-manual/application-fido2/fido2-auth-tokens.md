@@ -58,16 +58,16 @@ shared secret + PIN [+ permissions] --> AuthToken --> AuthParam, where AuthParam
 
 Here's another way to look at it.
 
-* [Shared Secret] perform ECDH shared secret protocol between client and YubiKey 
-* [AuthToken] the client retrieves the AuthToken from the YubiKey using one of the following methods 
-  * PIN + shared secret => PinToken
-  * PIN + shared secret + permissions => AuthToken
-  * UV (fingerprint) + shared secret + permissions => AuthToken
+* [Shared Secret] perform ECDH shared secret protocol between client and YubiKey
+* [AuthToken] the client retrieves the AuthToken from the YubiKey using one of the following methods
+    * PIN + shared secret => PinToken
+    * PIN + shared secret + permissions => AuthToken
+    * UV (fingerprint) + shared secret + permissions => AuthToken
 * [AuthParam] the client builds the AuthParam
-  * PinToken + message => AuthParam
-  * AuthToken + message => AuthParam
+    * PinToken + message => AuthParam
+    * AuthToken + message => AuthParam
 * The client sends a command to the YubiKey
-  * var cmd = new SomeCommand(info, AuthParam)
+    * var cmd = new SomeCommand(info, AuthParam)
 
 With the SDK, either all of this work is performed automatically (there is nothing you
 have to do other than supply a KeyCollector), or you make one or two calls if you want
@@ -82,28 +82,28 @@ In the SDK, an AuthToken is retrieved by calling one of the `Verify` methods, su
 
 * Perform ECDH to obtain a shared secret key
 * Perform either PIN only, PIN with permissions, or UV with permissions
-  * PIN only
-    * If the PIN is not provided, call the KeyCollector
-    * Digest the PIN
-    * Encrypt the digest of the PIN using the shared secret key
-    * Send a command to the YubiKey containing the encrypted "PinHash" and other info
-    * If the PIN was correct, the YubiKey verifies the "PinHash"
-    * The YubiKey returns a PinToken, which is the AuthToken to use
-  * PIN with permissions
-    * The caller supplies the permissions
-    * If the PIN is not provided, call the KeyCollector
-    * Digest the PIN
-    * Encrypt the digest of the PIN using the shared secret key
-    * Send a command to the YubiKey containing the encrypted "PinHash", permissions, and other info
-    * If the PIN was correct, the YubiKey verifies the "PinHash"
-    * The YubiKey returns a PinUvAuthToken (with permissions attached), which is the AuthToken to use
-  * PIN with permissions
-    * The caller supplies the permissions
-    * Send a command to the YubiKey containing permissions, and other info
-    * Upon receiving the command, the YubiKey will wait for the user to verify the fingerprint
-      * The SDK sends a message to the KeyCollector announcing the YubiKey is waiting for the fingerprint
-    * If the fingerprint is provided and it is correct, the YubiKey verifies it
-    * The YubiKey returns a PinUvAuthToken, which is the AuthToken to use
+    * PIN only
+        * If the PIN is not provided, call the KeyCollector
+        * Digest the PIN
+        * Encrypt the digest of the PIN using the shared secret key
+        * Send a command to the YubiKey containing the encrypted "PinHash" and other info
+        * If the PIN was correct, the YubiKey verifies the "PinHash"
+        * The YubiKey returns a PinToken, which is the AuthToken to use
+    * PIN with permissions
+        * The caller supplies the permissions
+        * If the PIN is not provided, call the KeyCollector
+        * Digest the PIN
+        * Encrypt the digest of the PIN using the shared secret key
+        * Send a command to the YubiKey containing the encrypted "PinHash", permissions, and other info
+        * If the PIN was correct, the YubiKey verifies the "PinHash"
+        * The YubiKey returns a PinUvAuthToken (with permissions attached), which is the AuthToken to use
+    * PIN with permissions
+        * The caller supplies the permissions
+        * Send a command to the YubiKey containing permissions, and other info
+        * Upon receiving the command, the YubiKey will wait for the user to verify the fingerprint
+            * The SDK sends a message to the KeyCollector announcing the YubiKey is waiting for the fingerprint
+        * If the fingerprint is provided and it is correct, the YubiKey verifies it
+        * The YubiKey returns a PinUvAuthToken, which is the AuthToken to use
 
 In the SDK, if you call a `Verify` method, the result will be an AuthToken. The
 `Fido2Session` class contains a property for the most recent AuthToken retrieved. For
@@ -220,7 +220,7 @@ commands or several calls to the same command.
 
 On a FIDO2 version 2.1 YubiKey, the PinToken can only be used to perform MakeCredential
 and GetAssertion. Furthermore, it can be expired, and in fact, it can be used to build an
-AuthParam that will authenticate only only call to one command.
+AuthParam that will authenticate only call to one command.
 
 ### PinUvAuthToken
 
@@ -406,7 +406,7 @@ The standard lists a number of ways the YubiKey can expire an AuthToken. See sec
 
 The most common way to expire a PinUvAuthToken is by "user presence" (touch). Once a
 command that requires user presence has been completed (including the touch), the
-AuthToken is expired (or partially expired, see below). 
+AuthToken is expired (or partially expired, see below).
 
 For example, get a PinUvAuthToken with multiple permissions: Credential Management and
 Get Assertion. Now use that AuthToken to enumerate the credentials on the YubiKey (one of
@@ -566,7 +566,7 @@ call.
 Or you could write your code to call verify right before each SDK call that will perform
 some FIDO2 operation that requires authentication.
 
-Or you could simply build a KeyCollector and let the SDK perform automatic AuthToken 
+Or you could simply build a KeyCollector and let the SDK perform automatic AuthToken
 retrieval. Although it is not necessarily secure, your KeyCollector could collect the PIN
 once, store it locally, and return it each time. In this way, the user does not need to
 enter the PIN several times during a session.

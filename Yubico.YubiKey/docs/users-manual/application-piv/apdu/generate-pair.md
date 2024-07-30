@@ -12,14 +12,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Generate asymmetric key pair
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---: | :---:
-00 | 47 | 00 | *Slot number* | *data len* | [AC *\<remaining bytes\>* 80 01 *\<alg\>*] <br />\[AA 01 *\<pin policy\>*\] <br />\[AB 01 *\<touch policy\>*\] | (absent)
+| CLA | INS | P1 |      P2       |     Lc     |                                                      Data                                                      |    Le    |
+|:---:|:---:|:--:|:-------------:|:----------:|:--------------------------------------------------------------------------------------------------------------:|:--------:|
+| 00  | 47  | 00 | *Slot number* | *data len* | [AC *\<remaining bytes\>* 80 01 *\<alg\>*] <br />\[AA 01 *\<pin policy\>*\] <br />\[AB 01 *\<touch policy\>*\] | (absent) |
 
 The slot number can be one of the following (hex values):
 
@@ -33,7 +32,8 @@ F9
 Note that SP 800-73-4 declares that another possible value for the slot number is `04`.
 However, the YubiKey does not support that slot.
 
-The value for the "remaining bytes" field must be equal to the number of bytes that come after it. For example, if three bytes come after the "remaining bytes" field, the field's value must be 03.
+The value for the "remaining bytes" field must be equal to the number of bytes that come after it. For example, if three
+bytes come after the "remaining bytes" field, the field's value must be 03.
 
 There are only four choices for "alg" (algorithm and size): RSA-1024 (06),
 RSA-2048 (07), ECC-P-256 (11), and ECC-P-384 (14).
@@ -64,18 +64,18 @@ the following:
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 82
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 82  |
 
 ### Response APDU Info: Success
 
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-*public key* | 90 | 00
+|     Data     | SW1 | SW2 |
+|:------------:|:---:|:---:|
+| *public key* | 90  | 00  |
 
 The public key is in the form of a set of TLVs. If the key is ECC, there is one TLV, where
 the value (the V) is the public point. If the key is RSA, there are two TLVs, where the

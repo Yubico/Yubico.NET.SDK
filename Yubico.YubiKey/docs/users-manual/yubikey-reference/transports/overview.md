@@ -21,7 +21,6 @@ limitations under the License. -->
 Physical interfaces are the ways that a computer, phone, or other device can connect
 with the YubiKey in order to communicate with it.
 
-
 ## USB Transports
 
 All of the models in the YubiKey 5 Series provide a USB 2.0 interface, regardless of
@@ -37,15 +36,15 @@ Each device serves one or more applications on the YubiKey, with the smart card 
 being the most versatile. Below is a list of applications available on the YubiKey 5 and
 which USB transport they are available on:
 
-| Application | HID Keyboard | Smart Card   | HID FIDO    | 
-| :---------- | :----------: | :----------: | :---------: |
-| Management  | Partial [1]  | Yes          | Partial [1] |
-| OTP         | Yes          | Partial [2]  | No          |
-| OATH        | No           | Yes          | No          |
-| PIV         | No           | Yes          | No          |
-| OpenPGP     | No           | Yes          | No          |
-| FIDO U2F    | No           | No [3]       | Yes         |
-| FIDO2       | No           | No           | Yes         |
+| Application | HID Keyboard | Smart Card  |  HID FIDO   | 
+|:------------|:------------:|:-----------:|:-----------:|
+| Management  | Partial [1]  |     Yes     | Partial [1] |
+| OTP         |     Yes      | Partial [2] |     No      |
+| OATH        |      No      |     Yes     |     No      |
+| PIV         |      No      |     Yes     |     No      |
+| OpenPGP     |      No      |     Yes     |     No      |
+| FIDO U2F    |      No      |   No [3]    |     Yes     |
+| FIDO2       |      No      |     No      |     Yes     |
 
 [1]: The GetDeviceInfo and SetDeviceInfo commands are available over all transports.
 
@@ -58,15 +57,15 @@ The USB product ID (PID) and product string will change depending on which of th
 interfaces are enabled as described in the table below. Yubico's vendor ID (VID)
 is `0x1050`.
 
-| USB interfaces      | PID     | Product string        |
-| :-----------------: | :-----: | :-------------------: |
-| OTP                 | 0x0401  | YubiKey OTP           |
-| FIDO                | 0x0402  | YubiKey FIDO          |
-| CCID                | 0x0404  | YubiKey CCID          |
-| OTP, FIDO           | 0x0403  | YubiKey OTP+FIDO      |
-| OTP, CCID           | 0x0405  | YubiKey OTP+CCID      |
-| FIDO, CCID          | 0x0406  | YubiKey FIDO+CCID     |
-| OTP, FIDO, CCID     | 0x0407  | YubiKey OTP+FIDO+CCID |
+| USB interfaces  |  PID   |    Product string     |
+|:---------------:|:------:|:---------------------:|
+|       OTP       | 0x0401 |      YubiKey OTP      |
+|      FIDO       | 0x0402 |     YubiKey FIDO      |
+|      CCID       | 0x0404 |     YubiKey CCID      |
+|    OTP, FIDO    | 0x0403 |   YubiKey OTP+FIDO    |
+|    OTP, CCID    | 0x0405 |   YubiKey OTP+CCID    |
+|   FIDO, CCID    | 0x0406 |   YubiKey FIDO+CCID   |
+| OTP, FIDO, CCID | 0x0407 | YubiKey OTP+FIDO+CCID |
 
 An interface is enabled so long as there is a single application enabled which uses that
 interface. For example, the OTP (HID Keyboard) is enabled when the OTP application is enabled

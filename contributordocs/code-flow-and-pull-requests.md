@@ -20,7 +20,7 @@ branch.
 ## Gitflow
 
 **Gitflow** defines a strict branching model designed around the project release. We configured our
-repository to use **Gitflow** because it is suited best for projects with a scheduled release cycle. 
+repository to use **Gitflow** because it is suited best for projects with a scheduled release cycle.
 
 Also, it assigns very specific roles to different branches and defines how and when they should interact.
 It uses individual branches for preparing, maintaining, and recording releases.
@@ -75,11 +75,17 @@ not (ab)use this power unless it is to immediately unblock the team or a build f
 
 Branches should be used for all work. The following names are a suggestion for how branches should be named:
 
-- The branch is addressing a new feature: Use the form `feature/<issue-ID>-short-description`. For example: `feature/issue-123-implement-turbo-encabulators`.
-- The branch is addressing an issue: Use the form `bugfix/<issue-ID>-short-description`. For example: `bugfix/issue-321-fix-exception-warning`.
+- The branch is addressing a new feature: Use the form `feature/<issue-ID>-short-description`. For
+  example: `feature/issue-123-implement-turbo-encabulators`.
+- The branch is addressing an issue: Use the form `bugfix/<issue-ID>-short-description`. For
+  example: `bugfix/issue-321-fix-exception-warning`.
 - The branch is not addressing a pre-existing issue: well, why isn’t an issue added yet?
-    - This is purely exploratory work. OK, then use the form `feature/<name>/short-description`. For example: `feature/greg/demo-app-concepts`.
-    - A large feature is being collaborated on and I’m working with someone. Then the parent branch should follow the naming conventions above, and then you should use `feature/<name>/parent-branch-name`. For example: `feature/issue-123-advanced-feature` is the main branch, you can create `feature/greg/issue-123-advanced-feature` for your own private working branches.
+    - This is purely exploratory work. OK, then use the form `feature/<name>/short-description`. For
+      example: `feature/greg/demo-app-concepts`.
+    - A large feature is being collaborated on and I’m working with someone. Then the parent branch should follow the
+      naming conventions above, and then you should use `feature/<name>/parent-branch-name`. For
+      example: `feature/issue-123-advanced-feature` is the main branch, you can
+      create `feature/greg/issue-123-advanced-feature` for your own private working branches.
 
 ✅ **DO** use branches to get work done. Use `feature` and `bugfix` branches for regular work.
 
@@ -153,7 +159,8 @@ an actionable solution - smaller functions.
 
 Some examples:
 
-Instead of “this code needs a lot of work” say “If we made a structural change like X, we could improve maintainability.”
+Instead of “this code needs a lot of work” say “If we made a structural change like X, we could improve
+maintainability.”
 
 Instead of “the performance of this method is going to suck”, say “This function will result in 10 allocations
 per loop. Can we try and reduce this to improve memory performance?”

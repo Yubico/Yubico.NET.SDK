@@ -23,7 +23,7 @@ The CTAP 2.1 standard, in section 6.11, defines "authenticatorConfig" operations
 * Enable enterprise attestation
 * Toggle "always UV"
 * Set minimum PIN length
-* Vendor prototype 
+* Vendor prototype
 
 The SDK supports the first three, but no YubiKey currently supports "vendorPrototype", so
 for now the SDK does not support it either.
@@ -34,9 +34,9 @@ Not all YubiKeys support authenticatorConfig operations. There are two ways to k
 desired operation is supported:
 
 * Call the appropriate Fido2Session `Try` method, if it returns `true`, it is supported
-and the operation was successfully performed
+  and the operation was successfully performed
 * Check the `Options` in the
-[AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.Fido2Session.AuthenticatorInfo).
+  [AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.Fido2Session.AuthenticatorInfo).
 
 For example, suppose you want to set the minimum PIN length. Just try to set it.
 

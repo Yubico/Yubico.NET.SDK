@@ -18,31 +18,38 @@ limitations under the License. -->
 
 # How to update slot settings
 
-Some [slot](xref:OtpSlots) settings can be updated via [UpdateSlot](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot) without completely reconfiguring an OTP application slot. These settings involve behaviors not related to encryption or other sensitive information.
+Some [slot](xref:OtpSlots) settings can be updated via [UpdateSlot](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot)
+without completely reconfiguring an OTP application slot. These settings involve behaviors not related to encryption or
+other sensitive information.
 
 The slot settings that can be updated include the following:
 
-| Settings |          |
-|----------|----------|
-| [```SetAllowUpdate()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAllowUpdate*) | [```SetAppendDelayToFixed()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendDelayToFixed*) |
-| [```SetSerialNumberApiVisible()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSerialNumberApiVisible*) | [```SetUse10msPacing()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetUse10msPacing*) |
-| [```SetUseNumericKeypad()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetUseNumericKeypad*) | [```SetUse20msPacing()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetUse20msPacing*) |
-| [```SetAppendTabToOtp()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendTabToOtp*) | [```SetInvertLed()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetInvertLed*) |
-| [```SetAppendCarriageReturn()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendCarriageReturn*) | [```SetSerialNumberUsbVisible()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSerialNumberUsbVisible*) |
-| [```SetSendTabFirst()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSendTabFirst*) | [```SetAppendTabToFixed()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendTabToFixed*) |
-| [```SetFastTrigger()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetFastTrigger*) | [```SetAppendDelayToOtp()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendDelayToOtp*) |
-| [```SetSerialNumberButtonVisible()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSerialNumberButtonVisible*) | [```ProtectLongPressSlot()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.ProtectLongPressSlot*) |
-| [```SetDormant()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetDormant*) | |
+| Settings                                                                                                            |                                                                                                               |
+|---------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| [```SetAllowUpdate()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAllowUpdate*)                             | [```SetAppendDelayToFixed()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendDelayToFixed*)         |
+| [```SetSerialNumberApiVisible()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSerialNumberApiVisible*)       | [```SetUse10msPacing()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetUse10msPacing*)                   |
+| [```SetUseNumericKeypad()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetUseNumericKeypad*)                   | [```SetUse20msPacing()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetUse20msPacing*)                   |
+| [```SetAppendTabToOtp()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendTabToOtp*)                       | [```SetInvertLed()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetInvertLed*)                           |
+| [```SetAppendCarriageReturn()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendCarriageReturn*)           | [```SetSerialNumberUsbVisible()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSerialNumberUsbVisible*) |
+| [```SetSendTabFirst()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSendTabFirst*)                           | [```SetAppendTabToFixed()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendTabToFixed*)             |
+| [```SetFastTrigger()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetFastTrigger*)                             | [```SetAppendDelayToOtp()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendDelayToOtp*)             |
+| [```SetSerialNumberButtonVisible()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSerialNumberButtonVisible*) | [```ProtectLongPressSlot()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.ProtectLongPressSlot*)           |
+| [```SetDormant()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetDormant*)                                     |                                                                                                               |
 
-
-There is no way to retrieve the settings of an OTP slot configuration. Therefore, when you use ```UpdateSlot```, you’re resetting every updatable setting. For example, if you intend to add a carriage return to the slot configuration and only call ```SetAppendCarriageReturn()```, all other settings will revert to their default states.
+There is no way to retrieve the settings of an OTP slot configuration. Therefore, when you use ```UpdateSlot```, you’re
+resetting every updatable setting. For example, if you intend to add a carriage return to the slot configuration and
+only call ```SetAppendCarriageReturn()```, all other settings will revert to their default states.
 
 > [!NOTE]
-> If you call `UpdateSlot` and turn on/off serial number visibility on the USB device descriptor (via `SetSerialNumberUsbVisible()`), you must reboot the YubiKey before the changes will take effect. This is most easily accomplished by unplugging the key and plugging it back in.
+> If you call `UpdateSlot` and turn on/off serial number visibility on the USB device descriptor (
+> via `SetSerialNumberUsbVisible()`), you must reboot the YubiKey before the changes will take effect. This is most
+> easily
+> accomplished by unplugging the key and plugging it back in.
 
 ## UpdateSlot example
 
-The following is an example of how to update the settings of a slot with ```UpdateSlot```. We’ll assume that the boolean variables are set elsewhere.
+The following is an example of how to update the settings of a slot with ```UpdateSlot```. We’ll assume that the boolean
+variables are set elsewhere.
 
 ```C#
 using (OtpSession otp = new OtpSession(_yubiKey))
@@ -73,8 +80,11 @@ using (OtpSession otp = new OtpSession(_yubiKey))
 
 ## Slot reconfiguration and access codes
 
-If a slot is protected by an access code and you wish to reconfigure slot settings, you must provide that access code with ``UseCurrentAccessCode()`` during the ``UpdateSlot()`` operation. Otherwise, the operation will fail and throw the following exception:
+If a slot is protected by an access code and you wish to reconfigure slot settings, you must provide that access code
+with ``UseCurrentAccessCode()`` during the ``UpdateSlot()`` operation. Otherwise, the operation will fail and throw the
+following exception:
 
 ```System.InvalidOperationException has been thrown. YubiKey Operation Failed. [Warning, state of non-volatile memory is unchanged.]```
 
-For more information on slot access codes, please see [How to set, reset, remove, and use slot access codes](xref:OtpSlotAccessCodes).
+For more information on slot access codes, please
+see [How to set, reset, remove, and use slot access codes](xref:OtpSlotAccessCodes).

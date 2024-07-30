@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Inner command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 43 | 00 | 00 | *data len* | *data* | (absent)
+| CLA | INS | P1 | P2 |     Lc     |  Data  |    Le    |
+|:---:|:---:|:--:|:--:|:----------:|:------:|:--------:|
+| 00  | 43  | 00 | 00 | *data len* | *data* | (absent) |
 
 The data is the PIN itself, there is no further encoding.
 
@@ -29,15 +29,15 @@ The data is the PIN itself, there is no further encoding.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 #### Response APDU for an incorrect PIN
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 63 | C0
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 63  | C0  |

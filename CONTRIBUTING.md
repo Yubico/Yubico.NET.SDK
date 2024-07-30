@@ -84,7 +84,8 @@ We use and recommend the following workflow:
 5. Make and commit your changes to your branch.
     - [Code Flow and PRs](./contributordocs/code-flow-and-pull-requests.md#getting-your-code-ready-for-review)
       explains how to build and test.
-    - Your commits must be [signed](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits).
+    - Your commits must
+      be [signed](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits).
     - Please follow our [Commit Messages](#commit-messages) guidance.
 6. [Build the repository](./contributordocs/code-flow-and-pull-requests.md#getting-your-code-ready-for-review)
    with your changes.
@@ -94,14 +95,16 @@ We use and recommend the following workflow:
     - State in the description what issue or improvement suggestion your change is addressing.
     - Check if all the Continuous Integration checks are passing.
 8. Wait for feedback or approval of your changes from the necessary project maintainers.
-    - Details about the [pull request procedure here](./contributordocs/code-flow-and-pull-requests.md#merging-into-develop).
+    - Details about
+      the [pull request procedure here](./contributordocs/code-flow-and-pull-requests.md#merging-into-develop).
 9. When the necessary project maintainers have signed off, and all checks are green, your PR will be merged.
     - The schedule of official releases will be determined by project maintainers.
     - You can delete the branch you used for making the change.
 
 ## Commit Messages
 
-Please format commit messages as follows (based on [Go Contribution Guide](https://golang.org/doc/contribute#commit_messages)):
+Please format commit messages as follows (based
+on [Go Contribution Guide](https://golang.org/doc/contribute#commit_messages)):
 
 ```
 The first line is a short one-line summary of the change
@@ -127,7 +130,8 @@ commit, and not too small with the same small change applied N times in N differ
 ## Contributions Licensing
 
 Contributions to this repository are subject to the GitHub Terms of Service. The licensing of
-contributions is covered by section [D.6 "Contributions Under Repository License"](https://docs.github.com/en/github/site-policy/github-terms-of-service#6-contributions-under-repository-license):
+contributions is covered by
+section [D.6 "Contributions Under Repository License"](https://docs.github.com/en/github/site-policy/github-terms-of-service#6-contributions-under-repository-license):
 
 > Whenever you add Content to a repository containing notice of a license, you license that Content
 > under the same terms, and you agree that you have the right to license that Content under those
@@ -197,11 +201,11 @@ these works:
 The following rules must be followed for PRs that include files from another project:
 
 - The license of the file is compatible with Apache License 2.0, such as
-  - Apache License 2.0
-  - Apache Software License 1.1
-  - BSD (without advertising clause)
-  - MIT/X11
-  - [Full list here](https://www.apache.org/legal/resolved.html#category-a)
+    - Apache License 2.0
+    - Apache Software License 1.1
+    - BSD (without advertising clause)
+    - MIT/X11
+    - [Full list here](https://www.apache.org/legal/resolved.html#category-a)
 - The license of the file is left in-tact.
 - The contribution is correctly attributed, as needed (generally in LICENSE.txt or NOTICE.txt in
   project root).

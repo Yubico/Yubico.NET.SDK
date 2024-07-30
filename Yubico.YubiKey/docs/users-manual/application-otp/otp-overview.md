@@ -18,20 +18,24 @@ limitations under the License. -->
 
 # OTP application overview
 
+The OTP application on the YubiKey allows developers to program the device with a variety of configurations through
+two "[slots](xref:OtpSlots)." Each slot may be programmed with a single configuration — no data is shared between slots,
+and each slot may be protected with an [access code](xref:OtpSlotAccessCodes) to prevent modification.
 
-The OTP application on the YubiKey allows developers to program the device with a variety of configurations through two "[slots](xref:OtpSlots)." Each slot may be programmed with a single configuration — no data is shared between slots, and each slot may be protected with an [access code](xref:OtpSlotAccessCodes) to prevent modification.
-
-"OTP application" is a bit of a misnomer. While OTP (one-time password) functionality is the focus of the application, the slots may be programmed with other configurations. Supported configurations include:
+"OTP application" is a bit of a misnomer. While OTP (one-time password) functionality is the focus of the application,
+the slots may be programmed with other configurations. Supported configurations include:
 
 - [Yubico OTP](xref:OtpYubicoOtp)
 - [Initiative for Open Authentication HMAC-based OTP (OATH HOTP)](xref:OtpHotp)
 - [Static password](xref:OtpStaticPassword)
 - [Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)](xref:OtpChallengeResponse)
 
-YubiKeys that support NFC also include a configurable [NDEF](xref:OtpNdef) (NFC Data Exchange Format) tag. This tag can be configured to point to a slot that is programmed with a Yubico OTP or an OATH HOTP in order to make the OTP easily readable in NFC authentication scenarios.
+YubiKeys that support NFC also include a configurable [NDEF](xref:OtpNdef) (NFC Data Exchange Format) tag. This tag can
+be configured to point to a slot that is programmed with a Yubico OTP or an OATH HOTP in order to make the OTP easily
+readable in NFC authentication scenarios.
 
-Off-the-shelf YubiKeys come with the first slot preconfigured with a Yubico OTP (registered with the [YubiCloud validation service](https://www.yubico.com/products/yubicloud/)) and the second slot empty.
-
+Off-the-shelf YubiKeys come with the first slot preconfigured with a Yubico OTP (registered with
+the [YubiCloud validation service](https://www.yubico.com/products/yubicloud/)) and the second slot empty.
 
 ## .NET SDK functionality
 

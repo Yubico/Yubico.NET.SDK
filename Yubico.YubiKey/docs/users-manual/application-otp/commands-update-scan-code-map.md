@@ -26,9 +26,9 @@ YubiKey firmware 3.0 and later.
 
 ## Command APDU info
 
-|  CLA  |  INS  |  P1   |  P2   |  Lc   |    Data     |
-| :---: | :---: | :---: | :---: | :---: | :---------: |
-| 0x00  | 0x01  | 0x12  | 0x00  | 0x2D  | (see below) |
+| CLA  | INS  |  P1  |  P2  |  Lc  |    Data     |
+|:----:|:----:|:----:|:----:|:----:|:-----------:|
+| 0x00 | 0x01 | 0x12 | 0x00 | 0x2D | (see below) |
 
 The data field is a simple 45-byte array that holds keyboard scan-codes for use during OTP keyboard
 operations. The default set of characters is:
@@ -48,9 +48,9 @@ This is represented by the following array of bytes:
 
 ## Response APDU info
 
-|  Lr   |                 Data                  |  SW1  |  SW1  |
-| :---: | :-----------------------------------: | :---: | :---: |
-| 0x06  | [Status structure](xref:OtpCommands#status-structure) | 0x90  | 0x00  |
+|  Lr  |                         Data                          | SW1  | SW1  |
+|:----:|:-----------------------------------------------------:|:----:|:----:|
+| 0x06 | [Status structure](xref:OtpCommands#status-structure) | 0x90 | 0x00 |
 
 ## Examples
 

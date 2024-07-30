@@ -21,9 +21,9 @@ limitations under the License. -->
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | F7 | 00 | 96 | (absent) | (absent) | (absent)
+| CLA | INS | P1 | P2 |    Lc    |   Data   |    Le    |
+|:---:|:---:|:--:|:--:|:--------:|:--------:|:--------:| 
+| 00  | F7  | 00 | 96 | (absent) | (absent) | (absent) |
 
 ### Response APDU Info
 
@@ -42,6 +42,6 @@ described in the table below.
 Tag | Name | Meaning | Data
 :---: | :---: | :---: | :---:
 07 | IsConfigured| state of biometric verification configuration<br/> (ie. fingerprints are enrolled) | 01 (configured)<br/> 00 (not configured)
-06 | RetriesRemaining| indicates how many biometric match retries are left| 00-03<br/>value 00 while IsConfigured is 01 indicates that biometric verification is blocked
+06 | RetriesRemaining| indicates how many biometric match retries are left| 00-03<br/>(when IsConfigured is 01, value 00 indicates that biometric verification is blocked)
 08 | HasTemporaryPin| indicates if a temporary PIN has been generated in the YubiKey | 01 (generated)<br/>00 (not generated)
 

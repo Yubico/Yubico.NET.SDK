@@ -129,20 +129,20 @@ When an attestation statement is built, the private key in the attestable slot i
 attestation statement.
 
 * Slot 9A, 9C, 9D, 9E, 82 - 95:
-  * public and private key pair
-  * private key is the attested key
-  * attestation statement:
-    * an X.509 certificate
-    * subject key is the public key partner to the attested key
-    * signed by the attestation key
-    * chains to the attestation cert
+    * public and private key pair
+    * private key is the attested key
+    * attestation statement:
+        * an X.509 certificate
+        * subject key is the public key partner to the attested key
+        * signed by the attestation key
+        * chains to the attestation cert
 * Slot F9:
-  * public and private key pair
-  * private key is the attestation key
-  * attestation certificate:
-    * an X.509 certificate
-    * subject key is the public key partner to private key in F9
-    * chains to a root
+    * public and private key pair
+    * private key is the attestation key
+    * attestation certificate:
+        * an X.509 certificate
+        * subject key is the public key partner to private key in F9
+        * chains to a root
 
 ## Replacing the attestation key and cert
 

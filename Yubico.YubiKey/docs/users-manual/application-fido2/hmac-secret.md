@@ -89,7 +89,7 @@ parse and decrypt the value returned.
     }
 ```
 
-The result will be an array 32 bytes long. 
+The result will be an array 32 bytes long.
 
 ## Decrypting the value returned
 

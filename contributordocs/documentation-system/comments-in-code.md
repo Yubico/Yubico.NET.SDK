@@ -132,11 +132,12 @@ sections for detailed descriptions of the input arguments and return value.
 There are many possible documentation tags to use. Not all may be necessary. For a recommended subset, see
 [Recommended Tags for Documentation Comments](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/xmldoc/recommended-tags-for-documentation-comments).
 
-In the example earlier, notice in the `code` section, before the `DigestPrng = new` line, there is a line that is `<br/>`.
-This is because the DocFX software, at the time of this writing, does not handle blank lines in `code` sections contained
+In the example earlier, notice in the `code` section, before the `DigestPrng = new` line, there is a line that
+is `<br/>`.
+This is because the DocFX software, at the time of this writing, does not handle blank lines in `code` sections
+contained
 within the remarks. It does handle it as expected if the `code` section is contained within an `examples` tag. If you
 have a blank line, the resulting html will not be quite right. So you may need to replace blank lines with a `/// <b/>`.
-
 
 Notice also that each of the opening and closing tags are on separate lines. That is not necessary. You can write
 
@@ -154,7 +155,8 @@ in the namespace.
 Suppose you want to supply a description of a namespace in general. You could put some comments into a source file,
 but DocFX will not capture comments about a namespace.
 
-Go to the `docs` directory, it is a peer of the `src` directory where the `docfx.json` file is located. In that directory
+Go to the `docs` directory, it is a peer of the `src` directory where the `docfx.json` file is located. In that
+directory
 should be a subdirectory called `namespaces`.
 
 Look in the `docfx.json` file, there should be a section with the key `"overwrite"`. Make sure under `"files"` there is
@@ -175,7 +177,8 @@ Look in the `docfx.json` file, there should be a section with the key `"overwrit
     ],
 ```
 
-For each namespace to document, add an `md` file. Give it the name of the namespace itself. For example, if the namespace
+For each namespace to document, add an `md` file. Give it the name of the namespace itself. For example, if the
+namespace
 is `Random`, create the file `Random.md`. The file contains the following.
 
 ```markdown

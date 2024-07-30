@@ -12,14 +12,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Reset retry (recover the PIN)
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 2C | 00 | 80 | 10 | *current PUK and new PIN* | (absent)
+| CLA | INS | P1 | P2 | Lc |           Data            |    Le    |
+|:---:|:---:|:--:|:--:|:--:|:-------------------------:|:--------:| 
+| 00  | 2C  | 00 | 80 | 10 | *current PUK and new PIN* | (absent) |
 
 The data will be 16 bytes long. The PUK is given in the first 8 bytes of the data,
 and the new PIN is the next 8 bytes. If the PUK or new PIN is not 8 bytes, it is padded
@@ -32,18 +31,18 @@ with FF bytes.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 #### Response APDU for RESET RETRY (Invalid PUK)
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 63 | C4
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 63  | C4  |
 
 If the PUK entered is incorrect, then the error is `63 CX` where *X* is the number of
 retries remaining. In the above, there are 4 retries remaining.
@@ -53,9 +52,9 @@ retries remaining. In the above, there are 4 retries remaining.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 83
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 83  |
 
 The PUK entered might or might not be correct, however, authentication was denied
 because the number of retries have been exhausted.

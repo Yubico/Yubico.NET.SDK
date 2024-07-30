@@ -45,38 +45,40 @@ The following table lists the numbers the PIV standard defines as DataTags (see 
 [table of PIV tags](commands.md#getdatatable) in the article on PIV commands).
 
 #### Table 1A: PIV standard-defined DataTags
-|  Number  |  Name  |  PIN required for read  |
-| :------: | :----: | :---------------------: |
-| 0x0000007E | DISCOVERY | No |
-| 0x00007F61 | BITGT | No |
-| 0x005FC101 | Card Auth (cert) | No |
-| 0x005FC102 | CHUID | No |
-| 0x005FC103 | Fingerprints | Yes |
-| 0x005FC104 | -unused- | No |
-| 0x005FC105 | Auth (cert) | No |
-| 0x005FC106 | Security | No |
-| 0x005FC107 | CCC | No |
-| 0x005FC108 | Facial Image | Yes |
-| 0x005FC109 | Printed | Yes |
-| 0x005FC10A | Signature (cert) | No |
-| 0x005FC10B | Key Mgmt (cert) | No |
-| 0x005FC10C | Key History | No |
-| 0x005FC10D - 0x005FC120 | Retired (certs) | No |
-| 0x005FC121 | Iris | Yes |
-| 0x005FC122 | SM Signer (cert) | No |
-| 0x005FC123 | PC Ref Data | No |
+
+|         Number          |       Name       | PIN required for read |
+|:-----------------------:|:----------------:|:---------------------:|
+|       0x0000007E        |    DISCOVERY     |          No           |
+|       0x00007F61        |      BITGT       |          No           |
+|       0x005FC101        | Card Auth (cert) |          No           |
+|       0x005FC102        |      CHUID       |          No           |
+|       0x005FC103        |   Fingerprints   |          Yes          |
+|       0x005FC104        |     -unused-     |          No           |
+|       0x005FC105        |   Auth (cert)    |          No           |
+|       0x005FC106        |     Security     |          No           |
+|       0x005FC107        |       CCC        |          No           |
+|       0x005FC108        |   Facial Image   |          Yes          |
+|       0x005FC109        |     Printed      |          Yes          |
+|       0x005FC10A        | Signature (cert) |          No           |
+|       0x005FC10B        | Key Mgmt (cert)  |          No           |
+|       0x005FC10C        |   Key History    |          No           |
+| 0x005FC10D - 0x005FC120 | Retired (certs)  |          No           |
+|       0x005FC121        |       Iris       |          Yes          |
+|       0x005FC122        | SM Signer (cert) |          No           |
+|       0x005FC123        |   PC Ref Data    |          No           |
 
 <a name="datatagtable2"></a>
 This next table lists the numbers Yubico defines as DataTags (see also the
 [table of Yubico tags](commands.md#getvendordatatable) in the article on PIV commands).
 
 #### Table 1B: Yubico-defined DataTags
-|  Number  |  Name  |  PIN required for read  |
-| :------: | :----: | :---------------------: |
-| 0x005FFF00 | Admin Data | No |
-| 0x005FFF01 | Attestation Cert | No |
-| 0x005FFF10 | MSCMAP | No |
-| 0x005FFF11 - 0x005FFF15 | MSROOTS | No |
+
+|         Number          |       Name       | PIN required for read |
+|:-----------------------:|:----------------:|:---------------------:|
+|       0x005FFF00        |    Admin Data    |          No           |
+|       0x005FFF01        | Attestation Cert |          No           |
+|       0x005FFF10        |      MSCMAP      |          No           |
+| 0x005FFF11 - 0x005FFF15 |     MSROOTS      |          No           |
 
 <a name="datatagtable3"></a>
 Finally, these are the numbers a YubiKey will accept as a DataTag, but currently have no
@@ -84,12 +86,13 @@ specific meaning or data assigned to them. None of them require PIN verification
 to read the contents.
 
 #### Table 1C: Undefined DataTags
-|  Number range  |  Count  |  PIN required for read  |
-| :------------: | :-----: | :---------------------: |
-| 0x005F0000 - 0x005FC100 | over 6 million possible numbers | No |
-| 0x005FC124 - 0x005FFEFF | over 6 million possible numbers | No |
-| 0x005FFF02 - 0x005FFF0F | 14 numbers | No |
-| 0x005FFF16 - 0x005FFFFF | 223 numbers | No |
+
+|      Number range       |              Count              | PIN required for read |
+|:-----------------------:|:-------------------------------:|:---------------------:|
+| 0x005F0000 - 0x005FC100 | over 6 million possible numbers |          No           |
+| 0x005FC124 - 0x005FFEFF | over 6 million possible numbers |          No           |
+| 0x005FFF02 - 0x005FFF0F |           14 numbers            |          No           |
+| 0x005FFF16 - 0x005FFFFF |           223 numbers           |          No           |
 
 It is possible for an application to store whatever information it wants on a YubiKey
 under an undefined DataTag. However, there are space limitations. It is possible to store
@@ -101,7 +104,7 @@ on a YubiKey for all storage is about 51,000 bytes.
 Associated with each DataTag is a specified set of elements that make up the data, along
 with a definition of its encoding. The encoding is a TLV structure. TLV stands for
 "tag-length-value". So there is a DataTag for the data itself, specifying where, in the
-YubiKey, the object will be stored. Then there are tags used to encode the data itself. 
+YubiKey, the object will be stored. Then there are tags used to encode the data itself.
 
 The YubiKey itself will enforce only one part of the encoding, the initial tag and length.
 Most elements are encoded as
@@ -175,6 +178,7 @@ object containing that data. For example,
         DisplayResults(
             history.OnCardCertificates, history.OffCardCertificates, history.OffCardCertificateUrl);
 ```
+
 ```csharp
     using (var pivSession = new PivSession(yubiKey))
     {
@@ -351,7 +355,7 @@ Note that it can be dangerous to store data under an alternate DataTag, because 
 require the PIN to read and others do not. For example, if you store some sensitive data
 in the PRINTED storage area, PIN verification is required to retrieve it. But suppose you
 store that data under an alternate tag, one that is currently undefined (such as
-`0x005F0010`).  That storage area does not require the PIN to retrieve the data.
+`0x005F0010`). That storage area does not require the PIN to retrieve the data.
 
 The tables above include a column indicating whether a DataTag requires the PIN for
 reading or not.

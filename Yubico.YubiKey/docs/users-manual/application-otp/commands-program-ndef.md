@@ -26,33 +26,33 @@ YubiKey firmware 3.x, and 5.x and later
 
 ## Command APDU info
 
-|  CLA  |  INS  |     P1      |  P2   |    Lc    |    Data     |
-| :---: | :---: | :---------: | :---: | :------: | :---------: |
-| 0x00  | 0x01  | (See below) | 0x00  | (Varies) | (See below) |
+| CLA  | INS  |     P1      |  P2  |    Lc    |    Data     |
+|:----:|:----:|:-----------:|:----:|:--------:|:-----------:|
+| 0x00 | 0x01 | (See below) | 0x00 | (Varies) | (See below) |
 
 ### P1: Slot
 
 P1 determines which slot to program. It can have one of the following values:
 
 | Option                | Value |
-| :-------------------- | :---: |
+|:----------------------|:-----:|
 | NDEF Slot 1 (Primary) | 0x08  |
 | NDEF Slot 2           | 0x09  |
 
 ### Data: NDEF configuration structure
 
-| Field       | Size  | Description                                                   |
-| :---------- | :---: | :------------------------------------------------------------ |
-| Length      |   1   | Number of valid bytes in the data field.                      |
-| Type        |   1   | Leave this set to `55`                                        |
-| Data        |  54   | The NDEF payload. It does not need to fill the entire buffer. |
-| Access Code |   6   | The current access code for the slot, if any.                 |
+| Field       | Size | Description                                                   |
+|:------------|:----:|:--------------------------------------------------------------|
+| Length      |  1   | Number of valid bytes in the data field.                      |
+| Type        |  1   | Leave this set to `55`                                        |
+| Data        |  54  | The NDEF payload. It does not need to fill the entire buffer. |
+| Access Code |  6   | The current access code for the slot, if any.                 |
 
 ## Response APDU info
 
-|  Lr   |                 Data                  |  SW1  |  SW1  |
-| :---: | :-----------------------------------: | :---: | :---: |
-| 0x06  | [Status structure](xref:OtpCommands#status-structure) | 0x90  | 0x00  |
+|  Lr  |                         Data                          | SW1  | SW1  |
+|:----:|:-----------------------------------------------------:|:----:|:----:|
+| 0x06 | [Status structure](xref:OtpCommands#status-structure) | 0x90 | 0x00 |
 
 ## Examples
 

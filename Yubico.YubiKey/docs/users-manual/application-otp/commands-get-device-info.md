@@ -28,32 +28,32 @@ YubiKey firmware 4.1 and later.
 
 ## Command APDU info
 
-|  CLA  |  INS  |  P1   |  P2   |    Lc    |   Data   |
-| :---: | :---: | :---: | :---: | :------: | :------: |
-| 0x00  | 0x01  | 0x13  | 0x00  | (absent) | (absent) |
+| CLA  | INS  |  P1  |  P2  |    Lc    |   Data   |
+|:----:|:----:|:----:|:----:|:--------:|:--------:|
+| 0x00 | 0x01 | 0x13 | 0x00 | (absent) | (absent) |
 
 ## Response APDU info
 
-|    Lr    |    Data     |  SW1  |  SW2  |
-| :------: | :---------: | :---: | :---: |
-| (Varies) | (See Below) | 0x90  | 0x00  |
+|    Lr    |    Data     | SW1  | SW2  |
+|:--------:|:-----------:|:----:|:----:|
+| (Varies) | (See Below) | 0x90 | 0x00 |
 
 The device information is encoded in Tag-Length-Value (TLV) format. The following table describes the
 possible entries (tags).
 
-| Name                         | Value | Description                                                                                           |
-| :--------------------------- | :---: | :---------------------------------------------------------------------------------------------------- |
-| Available capabilities (USB) | 0x01  | USB Applications and capabilities that are available for use on this YubiKey.                         |
-| Serial number                | 0x02  | Returns the serial number of the YubiKey (if present and visible).                                    |
-| Enabled capabilities (USB)   | 0x03  | Applications that are currently enabled over USB on this YubiKey.                                     |
-| Form factor                  | 0x04  | Specifies the form factor of the YubiKey (USB-A, USB-C, Nano, etc.)                                   |
-| Firmware version             | 0x05  | The Major.Minor.Patch version number of the firmware running on the YubiKey.                          |
-| Auto-eject timeout           | 0x06  | Timeout in (ms?) before the YubiKey automatically "ejects" itself.                                    |
-| Challenge-response timeout   | 0x07  | The period of time (in seconds) after which the OTP challenge-response command should timeout.        |
-| Device flags                 | 0x08  | Device flags that can control device-global behavior.                                                 |
-| Configuration lock           | 0x0A  | Indicates whether or not the YubiKey's configuration has been locked by the user.                     |
-| Available capabilities (NFC) | 0x0D  | NFC Applications and capabilities that are available for use on this YubiKey.                         |
-| Enabled capabilities (NFC)   | 0x0E  | Applications that are currently enabled over USB on this YubiKey.                                     |
+| Name                         | Value | Description                                                                                    |
+|:-----------------------------|:-----:|:-----------------------------------------------------------------------------------------------|
+| Available capabilities (USB) | 0x01  | USB Applications and capabilities that are available for use on this YubiKey.                  |
+| Serial number                | 0x02  | Returns the serial number of the YubiKey (if present and visible).                             |
+| Enabled capabilities (USB)   | 0x03  | Applications that are currently enabled over USB on this YubiKey.                              |
+| Form factor                  | 0x04  | Specifies the form factor of the YubiKey (USB-A, USB-C, Nano, etc.)                            |
+| Firmware version             | 0x05  | The Major.Minor.Patch version number of the firmware running on the YubiKey.                   |
+| Auto-eject timeout           | 0x06  | Timeout in (ms?) before the YubiKey automatically "ejects" itself.                             |
+| Challenge-response timeout   | 0x07  | The period of time (in seconds) after which the OTP challenge-response command should timeout. |
+| Device flags                 | 0x08  | Device flags that can control device-global behavior.                                          |
+| Configuration lock           | 0x0A  | Indicates whether or not the YubiKey's configuration has been locked by the user.              |
+| Available capabilities (NFC) | 0x0D  | NFC Applications and capabilities that are available for use on this YubiKey.                  |
+| Enabled capabilities (NFC)   | 0x0E  | Applications that are currently enabled over USB on this YubiKey.                              |
 
 ## Examples
 

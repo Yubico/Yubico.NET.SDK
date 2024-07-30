@@ -23,7 +23,7 @@ limitations under the License. -->
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Exe</OutputType>
 
-    <AnalysisMode>Minimum</AnalysisMode>
+    <AnalysisMode>AllDisabledByDefault</AnalysisMode>
 
     <!-- StrongName signing -->
     <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must

@@ -25,6 +25,9 @@ file_header_template = Copyright 2024 Yubico AB\n\nLicensed under the Apache Lic
 # C# files
 [*.cs]
 
+# Use concrete types when possible for improved performance
+dotnet_diagnostic.CA1859.severity = suggestion
+
 #### Core EditorConfig Options ####
 
 # We can't do this until C# 9.

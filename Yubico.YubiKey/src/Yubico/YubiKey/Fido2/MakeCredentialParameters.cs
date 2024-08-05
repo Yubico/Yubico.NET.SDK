@@ -631,16 +631,22 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="authenticatorInfo">
         /// The FIDO2 <c>AuthenticatorInfo</c> for the YubiKey being used.
         /// </param>
+        /// <param name="enforceCredProtectPolicy">
+        /// Determines the behavior taken when the authenticator does not support the
+        /// requested credProtect extension. Throws NotSupportedException when true, returns
+        /// silently without adding the extension when false.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <c>authenticatorInfo</c> arg is null.
         /// </exception>
-        /// <exception cref="ArgumentException">
+        /// <exception cref="NotSupportedException">
         /// The YubiKey does not support this extension, or the input values were
         /// not correct.
         /// </exception>
         public void AddCredProtectExtension(
             CredProtectPolicy credProtectPolicy,
-            AuthenticatorInfo authenticatorInfo)
+            AuthenticatorInfo authenticatorInfo,
+            bool enforceCredProtectPolicy = true)
         {
             if (credProtectPolicy == CredProtectPolicy.None)
             {
@@ -652,7 +658,12 @@ namespace Yubico.YubiKey.Fido2
             }
             if (!authenticatorInfo.Extensions.Contains<string>(KeyCredProtect))
             {
-                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+                if (enforceCredProtectPolicy)
+                {
+                    throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+                }
+
+                return;
             }
 
             // The encoding is key/value where the key is "credProtect" and the

@@ -279,8 +279,8 @@ namespace Yubico.YubiKey.Fido2
                 {
                     mcParams.AddCredProtectExtension(
                         credProtectPolicy,
-                        fido2Session.AuthenticatorInfo!,
-                        enforceCredProtectPolicy);
+                        enforceCredProtectPolicy,
+                        fido2Session.AuthenticatorInfo!);
                 }
                 catch (NotSupportedException)
                 {

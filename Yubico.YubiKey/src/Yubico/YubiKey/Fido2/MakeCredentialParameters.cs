@@ -645,8 +645,8 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void AddCredProtectExtension(
             CredProtectPolicy credProtectPolicy,
-            AuthenticatorInfo authenticatorInfo,
-            bool enforceCredProtectPolicy = true)
+            bool enforceCredProtectPolicy,
+            AuthenticatorInfo authenticatorInfo)
         {
             if (credProtectPolicy == CredProtectPolicy.None)
             {
@@ -671,6 +671,11 @@ namespace Yubico.YubiKey.Fido2
             // values are 1, 2, or 3, so the encoding is simply 0x01, 02,or 03.
             AddExtension(KeyCredProtect, new byte[] { (byte)credProtectPolicy });
         }
+
+        /// <inheritdoc cref="AddCredProtectExtension(CredProtectPolicy,bool,AuthenticatorInfo)"/>
+        public void AddCredProtectExtension(CredProtectPolicy credProtectPolicy,
+                                            AuthenticatorInfo authenticatorInfo) =>
+            AddCredProtectExtension(credProtectPolicy, true, authenticatorInfo);
 
         /// <summary>
         /// Add an entry to the list of options.

@@ -30,9 +30,9 @@ namespace Yubico.YubiKey.Piv.Commands
     /// starts out as a default value as well: "12345678", which in ASCII is the
     /// 8-byte sequence <c>0x31 32 33 34 35 36 37 38</c>. Generally, the first
     /// thing done when a YubiKey is initialized for PIV is to change the PIN and
-    /// PUK (along with the management key). The PUK must be 6 to 8 bytes.
-    /// Ultimately the bytes that make up the PIN or PUK can be any binary value,
-    /// but are generally input from a keyboard, so are usually made up of ASCII
+    /// PUK (along with the management key). 
+    /// The PIN is allowed to be 6 to 8 ASCII characters (6 to 8 bytes in length). The PUK must be 8 characters. For YubiKeys with firmware versions prior to 5.7, the PUK is allowed to be any character in the <c>0x00</c> - <c>0xFF</c> range for a total length of 8 bytes. For YubiKeys with firmware version 5.7 and above, the the PUK is allowed to be any character in the <c>0x00</c> - <c>0x7F</c> range for a total length of 8 Unicode code points.
+    /// Since the PIN and PUK are generally input from a keyboard, they are usually made up of ASCII
     /// characters.
     /// </para>
     /// <para>
@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// or PUK after calling <c>connection.SendCommand</c>.
         /// </para>
         /// <para>
-        /// Both the PIN and PUK are 6 to 8 bytes long.
+        /// The PIN is allowed to be 6 to 8 ASCII characters (6 to 8 bytes in length). The PUK must be 8 characters. For YubiKeys with firmware versions prior to 5.7, the PUK is allowed to be any character in the <c>0x00</c> - <c>0xFF</c> range for a total length of 8 bytes. For YubiKeys with firmware version 5.7 and above, the PUK is allowed to be any character in the <c>0x00</c> - <c>0x7F</c> range for a total length of 8 Unicode code points.
         /// </para>
         /// </remarks>
         /// <param name="slotNumber">

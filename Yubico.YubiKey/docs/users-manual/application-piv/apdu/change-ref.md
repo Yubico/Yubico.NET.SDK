@@ -25,9 +25,13 @@ Which element to change is given in the P2 field of the APDU and the current and
 data (old and new PIN or PUK) are given in the data field. The data is simply the two
 values concatenated.
 
-Both the PIN and PUK are allowed to be 6 to 8 characters, but if one is less than 8, it
-will be padded with 0xff. For example, the default PIN is "123456", but on the device,
+The PIN is allowed to be 6 to 8 ASCII characters. If it is less than 8, it
+will be padded with 0xff to reach 8 bytes in length. For example, the default PIN is "123456", but on the device,
 it is represented as `31 32 33 34 34 36 FF FF`.
+
+The PUK is allowed to be 8 characters. For YubiKeys with firmware versions prior to 5.7, the key will accept any value in the `0x00` -
+`0xFF` range for a total length of 8 bytes. For YubiKeys with firmware version 5.7 and above, the key will only accept values in the `0x00` -
+`0x7F` range for a total length of 8 Unicode code points.
 
 The data is therefore 16 bytes, current value (possibly padded) followed by the new
 value (possibly padded).

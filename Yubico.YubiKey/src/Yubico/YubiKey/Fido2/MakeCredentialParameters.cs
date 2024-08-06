@@ -658,7 +658,7 @@ namespace Yubico.YubiKey.Fido2
             }
             if (!authenticatorInfo.Extensions.Contains<string>(KeyCredProtect))
             {
-                if (enforceCredProtectPolicy)
+                if (enforceCredProtectPolicy && credProtectPolicy != CredProtectPolicy.UserVerificationOptional)
                 {
                     throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
                 }

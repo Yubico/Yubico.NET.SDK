@@ -27,9 +27,9 @@ namespace Yubico.YubiKey
     /// Tests device that it will not accept PINs or PUKs which violate PIN complexity
     /// Before running the tests, reset the FIDO2/PIV application on the device
     /// </summary>
+    [Trait(TraitTypes.Category, TestCategories.RequiresFips)]
     public class PinComplexityTests
     {
-
         private readonly ReadOnlyMemory<byte> _defaultPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("123456"));
         private readonly ReadOnlyMemory<byte> _complexPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("11234567"));
         private readonly ReadOnlyMemory<byte> _invalidPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("33333333"));

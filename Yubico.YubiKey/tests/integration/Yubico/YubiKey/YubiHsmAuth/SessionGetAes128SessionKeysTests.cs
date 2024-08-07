@@ -25,12 +25,12 @@ namespace Yubico.YubiKey.YubiHsmAuth
         #region NonKeyCollector
 
         #region password
-        [SkipIfDeviceNotFoundFact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         [Trait(TraitTypes.Category, TestCategories.Simple)]
         public void GetAes128SessionKeys_TouchNotRequired_ReturnsTrueAndSessionKeys()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice(StandardTestDevice.Fw5);
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
 
             // "default" credential does not require touch
             YhaTestUtilities.AddDefaultAes128Credential(testDevice);
@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void GetAes128SessionKeys_WrongCredPassword_ThrowsSecurityException()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice(StandardTestDevice.Fw5);
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
             YhaTestUtilities.AddDefaultAes128Credential(testDevice);
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))

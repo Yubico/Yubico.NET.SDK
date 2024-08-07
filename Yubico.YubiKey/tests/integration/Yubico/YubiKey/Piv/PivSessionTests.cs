@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [SkipIfDeviceNotFoundTheory]
+        [Theory]
         [InlineData(StandardTestDevice.Fw5)]
         public void Auth_ThenWrongKey(StandardTestDevice testDeviceType)
         {

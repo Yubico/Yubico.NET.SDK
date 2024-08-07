@@ -25,9 +25,13 @@ Which element to change is given in the P2 field of the APDU and the current and
 data (old and new PIN or PUK) are given in the data field. The data is simply the two
 values concatenated.
 
-Both the PIN and PUK are allowed to be 6 to 8 characters, but if one is less than 8, it
-will be padded with 0xff. For example, the default PIN is "123456", but on the device,
+Both the PIN and the PUK are allowed to be 6 to 8 characters. If one is less than 8, it
+will be padded with 0xff to reach 8 characters/bytes in length. For example, the default PIN is "123456", but on the device,
 it is represented as `31 32 33 34 34 36 FF FF`.
+
+The PIN can be composed of any ASCII character, but PUK composition depends on the key's firmware. For YubiKeys with firmware versions prior to 5.7, the key will accept any value in the `0x00` -
+`0xFF` range for the PUK. For YubiKeys with firmware version 5.7 and above, the key will only accept values in the `0x00` -
+`0x7F` range (not including the padding).
 
 The data is therefore 16 bytes, current value (possibly padded) followed by the new
 value (possibly padded).
@@ -66,6 +70,39 @@ Data Length: 0
 
 The PIN or PUK entered might or might not be correct, however, authentication was denied
 because the number of retries have been exhausted.
+
+#### Response APDU for CHANGE REFERENCE DATA (PIN or PUK failed length and/or complexity requirements)
+
+Total Length: 2\
+Data Length: 0
+
+|   Data    | SW1 | SW2 | 
+|:---------:|:---:|:---:|
+| (no data) | 69  | 85  |
+
+The new PIN or PUK did not meet the specified length requirements, an invalid character/byte was used, and/or the PIN/PUK violated the key's [PIN complexity policy](xref:UsersManualPinComplexityPolicy).
+
+#### Response APDU for CHANGE REFERENCE DATA (input data failed the length requirement)
+
+Total Length: 2\
+Data Length: 0
+
+|   Data    | SW1 | SW2 | 
+|:---------:|:---:|:---:|
+| (no data) | 6a  | 80  |
+
+The total data length did not match the 16-byte requirement.
+
+#### Response APDU for CHANGE REFERENCE DATA (invalid P1 and/or P2)
+
+Total Length: 2\
+Data Length: 0
+
+|   Data    | SW1 | SW2 | 
+|:---------:|:---:|:---:|
+| (no data) | 6a  | 88  |
+
+The P1 or P2 parameter was not valid given the instruction code.
 
 ### Examples
 

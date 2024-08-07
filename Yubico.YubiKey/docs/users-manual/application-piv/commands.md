@@ -581,7 +581,9 @@ All YubiKeys with the PIV application.
 Which reference data element to change (PIN or PUK), the current reference value, and
 the new value.
 
-Both the PIN and PUK are allowed to be 6 to 8 characters.
+Both the PIN and the PUK are allowed to be 6 to 8 characters. The PIN can be composed of any ASCII character, but PUK composition depends on the key's firmware. For YubiKeys with firmware versions prior to 5.7, the PUK is allowed to be any character in the `0x00` -
+`0xFF` range. For YubiKeys with firmware version 5.7 and above, the PUK is allowed to be any character in the `0x00` -
+`0x7F` range.
 
 ### Output
 

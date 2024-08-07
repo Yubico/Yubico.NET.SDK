@@ -32,11 +32,17 @@ is a 6- to 8-byte value, each of the bytes an ASCII number ('0' to '9', which in
 (upper- and lower-case), and even non-alphanumeric characters such as !, %, or # (among
 others).
 
-The PUK is used to unblock the PIN (see the section below on Blocking). The standard
-specifies that it is to be an 8-byte value, each of the bytes any binary value (`0x00` -
-`0xFF`). If your application uses the keyboard to insert the PUK, you might limit the user
-to ASCII characters, but the YubiKey will accept any byte value in the PUK. In addition,
-the YubiKey will allow the PUK to be 6, 7, or 8 bytes long.
+The PUK is used to unblock the PIN (see the section below on [blocking](#blocking)). The standard
+specifies that the PUK is to be an 8-byte value, with each of the bytes any binary value from `0x00` to
+`0xFF`. The YubiKey, however, will accept a PUK of 6 to 8 characters. For YubiKeys with firmware versions prior to 5.7, the key will accept any value in the `0x00` -
+`0xFF` range in the PUK. For YubiKeys with firmware version 5.7 and above, the key will only accept values in the `0x00` -
+`0x7F` range. Values from `0x80` - `0xFF` will be considered invalid by the key, and any attempt to change the PUK to a byte array containing one of these values will fail. 
+
+These restrictions are due to the YubiKey's PUK length requirements: for firmware versions prior to 5.7, the YubiKey simply requires a PUK length of 6-8 bytes, but for firmware version 5.7 and above, that requirement has changed to 6-8 *Unicode code points* in length. This is an important change because the byte representation (UTF-8 encoding) of a single code point can be 1-4 bytes in length, which means that a 6-byte PUK may be less than 6 code points. In order to accommodate keys of varying firmware versions, the SDK maintains a 6-8 byte length requirement when calling [PivSession.TryChangePuk](xref:Yubico.YubiKey.Piv.PivSession.TryChangePuk) or [Piv.Commands.ChangeReferenceDataCommand](xref:Yubico.YubiKey.Piv.Commands.ChangeReferenceDataCommand). However, keys with firmware 5.7 and above will only accept values that represent single-byte code points, hence the restricted range of `0x00` - `0x7F` (the range of `0x80` - `0xFF` represents code points of two bytes in length). For additional information on Unicode, UTF-8, and the SDK, see the [FIDO2 documentation](xref:TheFido2Pin).
+
+> [!NOTE]
+> If your application uses the keyboard to insert the PUK, you might limit the user
+to ASCII characters, regardless of a key's firmware version.
 
 The management key is used to authenticate the entity allowed to perform many YubiKey
 management operations, such as generating a key pair. On YubiKeys before version 5.4.2, it

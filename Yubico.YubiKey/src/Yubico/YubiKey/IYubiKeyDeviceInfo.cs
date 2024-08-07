@@ -56,6 +56,7 @@ namespace Yubico.YubiKey
 
         /// <summary>
         /// The serial number of the YubiKey, if one is present.
+        /// <remarks>Security Keys don't have serial numbers</remarks>
         /// </summary>
         public int? SerialNumber { get; }
 

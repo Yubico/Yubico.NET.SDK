@@ -834,7 +834,7 @@ namespace Yubico.YubiKey.Piv
         /// during the initial YubiKey setup to change from the default PUK, or
         /// later, to change it again.
         /// <para>
-        /// The PUK must be 8 characters. For YubiKeys with firmware versions prior to 5.7, the PUK is allowed to be any character in the <c>0x00</c> - <c>0xFF</c> range for a total length of 8 bytes. For YubiKeys with firmware version 5.7 and above, the PUK is allowed to be any character in the <c>0x00</c> - <c>0x7F</c> range for a total length of 8 Unicode code points. The
+        /// The PUK must be 6-8 characters. For YubiKeys with firmware versions prior to 5.7, the PUK is allowed to be any character in the <c>0x00</c> - <c>0xFF</c> range for a total length of 6-8 bytes. For YubiKeys with firmware version 5.7 and above, the PUK is allowed to be any character in the <c>0x00</c> - <c>0x7F</c> range for a total length of 6-8 Unicode code points. The
         /// default PUK is the ASCII string <c>"12345678"</c>, which is the byte array
         /// <code>
         ///   0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38

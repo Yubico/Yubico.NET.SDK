@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
 

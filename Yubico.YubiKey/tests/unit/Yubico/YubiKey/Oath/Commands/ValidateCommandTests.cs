@@ -13,11 +13,9 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using System.Text;
 using Xunit;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath.Commands

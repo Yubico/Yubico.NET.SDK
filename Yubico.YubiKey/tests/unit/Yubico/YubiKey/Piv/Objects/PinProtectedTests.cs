@@ -14,7 +14,6 @@
 
 using System;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Objects
 {

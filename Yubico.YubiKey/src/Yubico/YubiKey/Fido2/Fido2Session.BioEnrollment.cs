@@ -15,8 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Security;
-using System.Threading;
-using System.Threading.Tasks;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 

@@ -19,7 +19,6 @@ using System.Globalization;
 using System.Security.Cryptography;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2
 {

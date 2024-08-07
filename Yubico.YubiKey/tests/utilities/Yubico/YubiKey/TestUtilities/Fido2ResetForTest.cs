@@ -335,6 +335,11 @@ namespace Yubico.YubiKey.TestUtilities
             return false;
         }
 
+        /// <summary>
+        /// Requires you to remove and reinsert the Yubikey, read the console log for timely instructions
+        /// </summary>
+        /// <param name="serialNum"></param>
+        /// <returns></returns>
         public static bool DoReset(int? serialNum)
         {
             var fido2Reset = new Fido2ResetForTest(serialNum);

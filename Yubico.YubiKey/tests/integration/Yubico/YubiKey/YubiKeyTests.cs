@@ -18,10 +18,11 @@ using System.Diagnostics;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey
 {
-    [Trait("Category", "RequiresSetup")]
+    [Trait(TraitTypes.Category, TestCategories.RequiresSetup)]
     public class YubiKeyTests
     {
         private readonly ITestOutputHelper _testOutputHelper;

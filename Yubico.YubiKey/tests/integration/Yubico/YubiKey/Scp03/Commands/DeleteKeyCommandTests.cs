@@ -17,7 +17,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Scp03.Commands
 {
-    [Trait("Category", "Simple")]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class DeleteKeyCommandTests
     {
         [SkippableTheory(typeof(DeviceNotFoundException))]

@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x86)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x87)]
@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 1)]
@@ -309,7 +309,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]

@@ -15,19 +15,22 @@
 using System;
 using System.Security;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
+
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {
     public class SessionGetAes128SessionKeysTests
     {
         #region NonKeyCollector
+
         #region password
-        [Fact]
-        [Trait("Category", "FirmwareOrHardwareMissmatch")]
+        [SkipIfDeviceNotFoundFact]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         public void GetAes128SessionKeys_TouchNotRequired_ReturnsTrueAndSessionKeys()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice(StandardTestDevice.Fw5);
 
             // "default" credential does not require touch
             YhaTestUtilities.AddDefaultAes128Credential(testDevice);
@@ -48,12 +51,12 @@ namespace Yubico.YubiKey.YubiHsmAuth
             Assert.NotNull(keys);
         }
 
-        [Fact]
-        [Trait("Category", "Flaky")]
+        [SkippableFact(typeof(DeviceNotFoundException))]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         public void GetAes128SessionKeys_WrongCredPassword_ThrowsSecurityException()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice(StandardTestDevice.Fw5);
             YhaTestUtilities.AddDefaultAes128Credential(testDevice);
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
@@ -68,15 +71,17 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<SecurityException>(getSessionKeys);
             }
         }
+
         #endregion
 
         #region touch
+
         // When touch is required, the user should touch the YubiKey.
         //
         // It's recommended to use a debug break point in either the
         // key collector or GetAes128SessionKeys(...) so that you're
         // aware of when touch is about to be expected.
-        [Trait("Category", "RequiresStepDebug")]
+        [Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
         [Fact(Skip = "Requires user interaction")]
         public void GetAes128SessionKeys_TouchRequired_ReturnsSessionKeys()
         {
@@ -123,6 +128,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<TimeoutException>(getSessionKeys);
             }
         }
+
         #endregion
 
         [Fact]
@@ -147,10 +153,13 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<InvalidOperationException>(getSessionKeys);
             }
         }
+
         #endregion
 
         #region KeyCollector
+
         #region password
+
         [Fact]
         public void TryGetAes128SessionKeys_TouchNotRequired_ReturnsTrueAndSessionKeys()
         {
@@ -267,9 +276,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<SecurityException>(tryGetSessionKeys);
             }
         }
+
         #endregion
 
         #region touch
+
         // When touch is requested, the user should touch the YubiKey.
         //
         // It's recommended to use a debug break point in either the
@@ -326,6 +337,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<TimeoutException>(tryGetSessionKeys);
             }
         }
+
         #endregion
 
         [Fact]
@@ -372,6 +384,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<InvalidOperationException>(tryGetSessionKeys);
             }
         }
+
         #endregion KeyCollector
     }
 }

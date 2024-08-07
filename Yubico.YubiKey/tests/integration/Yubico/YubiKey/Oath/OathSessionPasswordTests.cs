@@ -18,7 +18,7 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Oath
 {
     [TestCaseOrderer(PriorityOrderer.TypeName, PriorityOrderer.AssembyName)]
-    [Trait("Category", "Simple")]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public sealed class OathSessionPasswordTests
     {
         [Theory, TestPriority(0)]

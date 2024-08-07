@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Fido2
     public class NoSerialNumberTests
     {
         [Fact]
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         public void GetTestDevice_NoSerialNumber_Succeeds()
         {
             IYubiKeyDevice device = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5, false);

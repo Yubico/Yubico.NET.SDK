@@ -21,7 +21,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
-    [Trait("Category", "Simple")]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class PivSessionTests
     {
         [Theory]
@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
+        [SkipIfDeviceNotFoundTheory]
         [InlineData(StandardTestDevice.Fw5)]
         public void Auth_ThenWrongKey(StandardTestDevice testDeviceType)
         {

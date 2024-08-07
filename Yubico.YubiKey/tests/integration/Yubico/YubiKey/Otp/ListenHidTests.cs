@@ -15,10 +15,11 @@
 using Xunit;
 using Xunit.Abstractions;
 using Yubico.Core.Devices.Hid;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.PlatformInterop
 {
-    [Trait("Category", "Simple")]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class ListenHidTests
     {
         private int _counter;

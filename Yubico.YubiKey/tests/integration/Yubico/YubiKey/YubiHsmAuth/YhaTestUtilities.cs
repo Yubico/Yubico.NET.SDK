@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Collections.Generic;
-using System.Linq;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.YubiHsmAuth
@@ -25,8 +23,6 @@ namespace Yubico.YubiKey.YubiHsmAuth
     /// <seealso cref="SimpleKeyCollector"/>
     public class YhaTestUtilities
     {
-        private static readonly FirmwareVersion MinimumFirmwareVersion = new FirmwareVersion(5, 4, 3);
-
         #region default
         public static readonly byte[] DefaultMgmtKey =
             new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -90,27 +86,13 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 AlternateCredTouchRequired);
 
         /// <summary>
-        /// Finds a device with the minimum firmware version (see <see cref="MinimumFirmwareVersion"/>),
-        /// and puts the device into a known "control" state for performing integration
-        /// tests with the YubiHSM Auth application.
-        /// </summary>
-        public static IYubiKeyDevice GetCleanDevice() => GetCleanDevice(MinimumFirmwareVersion);
-
-        /// <summary>
-        /// Finds a device with the matching FirmwareVersion, and puts the device
+        /// Finds a standard device and puts the device
         /// into a known "control" state for performing integration
         /// tests with the YubiHSM Auth application.
         /// </summary>
-        private static IYubiKeyDevice GetCleanDevice(FirmwareVersion fwVersion)
+        public static IYubiKeyDevice GetCleanDevice()
         {
-            IList<IYubiKeyDevice>? testDevices = IntegrationTestDeviceEnumeration.GetTestDevices();
-            IYubiKeyDevice testDevice = testDevices
-                .First(d =>
-                    d.FirmwareVersion >= fwVersion &&
-                    d.SerialNumber.HasValue);
-
-            testDevice = DeviceReset.EnableAllCapabilities(testDevice);
-
+            var testDevice = DeviceReset.EnableAllCapabilities(IntegrationTestDeviceEnumeration.GetTestDevice());
             return DeviceReset.ResetYubiHsmAuth(testDevice);
         }
 

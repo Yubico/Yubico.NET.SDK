@@ -13,11 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Security.Cryptography;
 using Xunit;
-using Yubico.Core.Buffers;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Threading;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 

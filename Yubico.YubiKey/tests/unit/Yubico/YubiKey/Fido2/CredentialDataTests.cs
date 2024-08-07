@@ -12,15 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
-using Yubico.Core.Tlv;
-using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Fido2.Commands;
-using Yubico.YubiKey.Fido2.Cose;
-using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Fido2
 {

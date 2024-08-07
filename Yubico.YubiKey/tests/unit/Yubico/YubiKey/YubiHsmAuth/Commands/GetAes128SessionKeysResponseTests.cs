@@ -15,7 +15,6 @@
 using System;
 using Xunit;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {

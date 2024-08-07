@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.YubiKey.Sample.SharedCode
 {
     // When calling SampleMenu.WriteMessage, pass in one of these enum values as

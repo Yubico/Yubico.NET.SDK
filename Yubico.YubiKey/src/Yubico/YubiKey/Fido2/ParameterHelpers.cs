@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
-using System.Globalization;
 using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2

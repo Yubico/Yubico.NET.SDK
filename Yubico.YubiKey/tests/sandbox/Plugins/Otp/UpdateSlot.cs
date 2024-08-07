@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Yubico.YubiKey.Otp;
 
 namespace Yubico.YubiKey.TestApp.Plugins.Otp

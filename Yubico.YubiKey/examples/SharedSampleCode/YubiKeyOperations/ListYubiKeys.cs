@@ -15,7 +15,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Yubico.YubiKey;
 
 namespace Yubico.YubiKey.Sample.SharedCode
 {

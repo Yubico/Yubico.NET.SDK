@@ -18,7 +18,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Pipelines

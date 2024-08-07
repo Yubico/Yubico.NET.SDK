@@ -14,7 +14,6 @@
 
 using System;
 using System.Globalization;
-using System.IO;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 

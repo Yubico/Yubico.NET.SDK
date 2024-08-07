@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.TestUtilities
     /// Instructions for setting up the allow-list file:
     ///
     /// The user needs to add their Yubikeys serial numbers to the allow-list file which is located at
-    /// C:\Users\&lt;username&gt;\AppData\Local\Yubico\YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt for Windows users
+    /// %LOCALAPPDATA%\Yubico\YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt for Windows users
     /// and /Users/&lt;username&gt;/.local/share/Yubico/YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt for macOS users.
     /// The SDK attempts to create the file if it doesn't already exist.
     ///
@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.TestUtilities
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Yubico");
             var allowListFilePath = Path.Combine(configDirectory ?? defaultDirectory, _allowlistFileName);
 
-            CreateIfMissing(allowListFilePath);
+            CreateAllowListFileIfMissing(allowListFilePath);
 
             AllowedSerialNumbers = File.Exists(allowListFilePath)
                 ? new HashSet<string>(File.ReadLines(allowListFilePath))
@@ -65,7 +65,7 @@ namespace Yubico.YubiKey.TestUtilities
             var allowedKeys = Environment.GetEnvironmentVariable(YubikeyIntegrationtestAllowedKeysName)
                 ?.Split(':') ?? Array.Empty<string>();
 
-            foreach (string allowedKey in allowedKeys)
+            foreach (var allowedKey in allowedKeys)
             {
                 _ = AllowedSerialNumbers.Add(allowedKey);
             }
@@ -84,18 +84,13 @@ namespace Yubico.YubiKey.TestUtilities
                 string.Join(",", AllowedSerialNumbers));
         }
 
-        private static void CreateIfMissing(string allowListFilePath)
-        {
-            if (File.Exists(allowListFilePath))
-            {
-                return;
-            }
-
-            _ = Directory.CreateDirectory(Path.GetDirectoryName(allowListFilePath)!);
-
-            var file = File.Create(allowListFilePath);
-            file.Close();
-        }
+        /// <summary>
+        /// Gets a Yubikey device by its serial number
+        /// </summary>
+        /// <param name="serialNumber"></param>
+        /// <returns></returns>
+        public static IYubiKeyDevice GetBySerial(int serialNumber) 
+            => GetTestDevices().Single(d => d.SerialNumber == serialNumber);
 
         /// <summary>
         /// Enumerates all YubiKey test devices on a system.
@@ -105,7 +100,8 @@ namespace Yubico.YubiKey.TestUtilities
         {
             return YubiKeyDevice
                 .FindByTransport(transport)
-                .Where(IsAllowedKey).ToList();
+                .Where(IsAllowedKey)
+                .ToList();
 
             static bool IsAllowedKey(IYubiKeyDevice key)
                 => key.SerialNumber == null ||
@@ -116,26 +112,13 @@ namespace Yubico.YubiKey.TestUtilities
         /// Get YubiKey test device of specified type available on a system.
         /// </summary>
         /// <param name="testDeviceType">The type of the device.</param>
-        /// <param name="requireSerialNumber">A boolean indicating if the caller
-        /// wants to require finding YubiKeys with serial numbers only. If
-        /// <c>true</c> the method will only examine YubiKeys have a visible
-        /// serial number. This is the default, if no <c>requireSerialNumber</c>
-        /// arg is given, then this method will require serial numbers. If
-        /// <c>false</c>, the method will examine all YubiKeys, whether the
-        /// serial number is visible or not.</param>
+        /// <param name="transport">The transport the device must support.</param>
         /// <returns>The allow-list filtered YubiKey that was found.</returns>
         public static IYubiKeyDevice GetTestDevice(
-            StandardTestDevice testDeviceType,
-            bool requireSerialNumber = true)
-        {
-            var devices = GetTestDevices();
-            if (requireSerialNumber)
-            {
-                devices = devices.Where(d => d.SerialNumber.HasValue).ToList();
-            }
-
-            return devices.SelectRequiredTestDevice(testDeviceType);
-        }
+            StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
+            Transport transport = Transport.All) 
+            => GetTestDevices(transport)
+                .SelectByStandardTestDevice(testDeviceType);
 
         /// <summary>
         /// Get YubiKey test device of specified transport and for which the
@@ -146,17 +129,21 @@ namespace Yubico.YubiKey.TestUtilities
         /// caller is willing to accept.</param>
         /// <returns>The allow-list filtered YubiKey that was found.</returns>
         public static IYubiKeyDevice GetTestDevice(Transport transport, FirmwareVersion minimumFirmwareVersion)
+            => GetTestDevices(transport)
+                .SelectByMinimumVersion(minimumFirmwareVersion);
+
+        
+        private static void CreateAllowListFileIfMissing(string allowListFilePath)
         {
-            IList<IYubiKeyDevice> deviceList = GetTestDevices(transport);
-            foreach (IYubiKeyDevice currentDevice in deviceList)
+            if (File.Exists(allowListFilePath))
             {
-                if (currentDevice.FirmwareVersion >= minimumFirmwareVersion)
-                {
-                    return currentDevice;
-                }
+                return;
             }
 
-            throw new InvalidOperationException("No matching YubiKey found.");
+            _ = Directory.CreateDirectory(Path.GetDirectoryName(allowListFilePath)!);
+
+            var file = File.Create(allowListFilePath);
+            file.Close();
         }
     }
 }

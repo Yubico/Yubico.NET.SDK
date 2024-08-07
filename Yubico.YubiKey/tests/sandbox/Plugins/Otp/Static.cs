@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Otp.Commands;
 using Yubico.YubiKey.Otp.Operations;

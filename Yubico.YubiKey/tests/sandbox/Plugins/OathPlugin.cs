@@ -15,11 +15,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Oath;
-using Yubico.YubiKey.Oath.Commands;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {

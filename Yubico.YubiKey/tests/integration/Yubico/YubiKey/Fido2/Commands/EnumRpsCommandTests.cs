@@ -19,7 +19,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    [Trait("Category", "FirmwareOrHardwareMissmatch")]
+    [Trait(TraitTypes.Category, TestCategories.FirmwareOrHardwareMismatch)]
     public class EnumRpsCommandTests : SimpleIntegrationTestConnection
     {
         public EnumRpsCommandTests()

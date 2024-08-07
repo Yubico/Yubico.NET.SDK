@@ -20,7 +20,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
-    [Trait("Category", "RequiresBio")]
+    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
     public class CredMgmtTests : IClassFixture<BioFido2Fixture>
     {
         private readonly BioFido2Fixture _bioFido2Fixture;

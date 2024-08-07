@@ -18,11 +18,12 @@ using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
 using Yubico.PlatformInterop;
+using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.U2f.Commands;
 
 namespace Yubico.YubiKey.U2f
 {
-    [Trait("Category", "Elevated")]
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class PinTests : IDisposable
     {
         private readonly FidoConnection _fidoConnection;

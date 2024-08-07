@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Piv
     // set of bytes, followed by 2048 random bytes. If you want to get only
     // random bytes, skip the first SpecifiedStart bytes (get a random object and
     // generate that many bytes).
-    [Trait("Category", "Simple")]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class PinOnlyWithResetTests : IDisposable
     {
         private const int SpecifiedStart = 72;

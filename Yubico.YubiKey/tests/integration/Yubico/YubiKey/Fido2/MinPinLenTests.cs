@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         public void GetMinPinFromCredential_Succeeds()
         {
             using (var fido2Session = new Fido2Session(Device))

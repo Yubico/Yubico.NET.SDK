@@ -21,7 +21,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {
-    [Trait("Category", "Simple")]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class RsaOaepTimingTests
     {
         private const int IterationCount1024 = 200000;

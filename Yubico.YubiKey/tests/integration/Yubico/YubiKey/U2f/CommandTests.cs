@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.PlatformInterop;
+using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.U2f.Commands;
 
 namespace Yubico.YubiKey.U2f
@@ -56,7 +57,7 @@ namespace Yubico.YubiKey.U2f
         }
 
         [Fact]
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         public void RunGetDeviceInfo()
         {
             var cmd = new GetPagedDeviceInfoCommand();

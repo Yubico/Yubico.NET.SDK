@@ -33,7 +33,7 @@ namespace Yubico.YubiKey
         [Fact]
         public void HasFeature_ApplicationU2F_Correct()
         {
-            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevices().First();
+            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
             bool expectedResult = true;
 
             //Can this be removed?
@@ -50,7 +50,7 @@ namespace Yubico.YubiKey
         [Fact]
         public void HasFeature_ApplicationFido2_Correct()
         {
-            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevices().First();
+            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
             bool expectedResult = true;
             if (!yubiKeyDevice.IsSkySeries && yubiKeyDevice.FirmwareVersion.Major < 5)
             {

@@ -377,7 +377,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void Security_Auth_Req(StandardTestDevice testDeviceType)
@@ -496,7 +496,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void Iris_Auth_Req(StandardTestDevice testDeviceType)
@@ -597,7 +597,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         [InlineData(StandardTestDevice.Fw5)]
         public void Facial_Auth_Req(StandardTestDevice testDeviceType)
         {
@@ -696,7 +696,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void Fingerprint_Auth_Req(StandardTestDevice testDeviceType)
@@ -796,7 +796,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void Bitgt_Auth_Req(StandardTestDevice testDeviceType)
@@ -828,7 +828,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void SMSigner_Auth_Req(StandardTestDevice testDeviceType)
@@ -890,7 +890,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void PCRef_Auth_Req(StandardTestDevice testDeviceType)

@@ -20,7 +20,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
-    [Trait("Category", "FirmwareOrHardwareMissmatch")]
+    [Trait(TraitTypes.Category, TestCategories.FirmwareOrHardwareMismatch)]
     public class SimpleCredMgmtTests : SimpleIntegrationTestConnection
     {
         public SimpleCredMgmtTests()

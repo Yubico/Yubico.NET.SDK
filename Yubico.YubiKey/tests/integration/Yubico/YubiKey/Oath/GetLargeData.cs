@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Oath
     // retrieve large amounts of data that spans more
     // than one APDU. For more information, see
     // Pipelines.ResponseChainingTransform.
-    [Trait("Category", "Simple")]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public sealed class GetLargeData
     {
         private static readonly Random random = new Random();

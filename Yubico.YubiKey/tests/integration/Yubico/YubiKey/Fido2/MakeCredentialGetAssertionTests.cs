@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Fido2
         static readonly RelyingParty _rp = new RelyingParty("relyingparty1");
 
         // This test requires user to touch the device.
-        [Fact, Trait("Category", "RequiresTouch")]
+        [Fact, Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
         public void MakeCredential_NonDiscoverable_GetAssertion_Succeeds()
         {
             IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         // This test requires user to touch the device.
-        [Fact, Trait("Category", "RequiresTouch")]
+        [Fact, Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
         public void MakeCredential_NoName_GetAssertion_Succeeds()
         {
             IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
@@ -124,7 +124,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         // This test requires user to touch the device.
-        [Fact, Trait("Category", "RequiresTouch")]
+        [Fact, Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
         public void MakeCredential_MultipleCredentials_GetAssertion_ReturnsMultipleAssertions()
         {
             IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();

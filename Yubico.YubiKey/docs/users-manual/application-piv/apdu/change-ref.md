@@ -71,6 +71,17 @@ Data Length: 0
 The PIN or PUK entered might or might not be correct, however, authentication was denied
 because the number of retries have been exhausted.
 
+#### Response APDU for CHANGE REFERENCE DATA (PIN or PUK failed length and/or complexity requirements)
+
+Total Length: 2\
+Data Length: 0
+
+|   Data    | SW1 | SW2 | 
+|:---------:|:---:|:---:|
+| (no data) | 69  | 85  |
+
+The new PIN or PUK did not meet the specified length requirements, an invalid character/byte was used, and/or the PIN/PUK violated the key's [PIN complexity policy](xref:UsersManualPinComplexityPolicy).
+
 ### Examples
 
 ```C

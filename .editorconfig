@@ -38,7 +38,6 @@ guidelines = 100, 120
 guidelines_style = 2.5px solid 40ff0000
 
 # New line preferences
-end_of_line = crlf
 insert_final_newline = true
 
 #### .NET Coding Conventions ####

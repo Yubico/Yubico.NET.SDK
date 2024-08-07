@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKey.TestUtilities
 {
-    public class TestCategories
+    public static class TestCategories
     {
         /// <summary>
         /// When touch is required, the user should touch the YubiKey.
@@ -22,16 +22,17 @@ namespace Yubico.YubiKey.TestUtilities
         /// aware of when touch is about to be expected.
         /// </summary>
         public const string RequiresTouch = "RequiresTouch";
+        
         /// <summary>
         /// These tests are considered to be simple and should not require any special circumstances to run successfully.
         /// </summary>
         public const string Simple = "Simple";
+        
         /// <summary>
-        /// These tests require that you run your tests in an elevated session, e.g. 'Run as Administrator' on Windows
+        /// These tests require that you run your tests in an elevated session, e.g. 'Run as Administrator' on Windows.
+        /// For example, all FIDO tests require an elevated session on Windows.
         /// </summary>
         public const string Elevated = "Elevated";    
-        
-        public const string FirmwareOrHardwareMismatch = "FirmwareOrHardwareMismatch";    
         
         /// <summary>
         /// These tests require a Yubikey with biometric capabilities
@@ -46,10 +47,15 @@ namespace Yubico.YubiKey.TestUtilities
         /// <summary>
         /// These tests may require step debugging to avoid timing issues
         /// </summary>
-        public const string RequiresStepDebug = "RequiresStepDebug";    
+        public const string RequiresStepDebug = "RequiresStepDebug";
+
+        /// <summary>
+        /// These tests require a Yubikey with FIPS
+        /// </summary>
+        public const string RequiresFips = "RequiresFips";
     }
     
-    public class TraitTypes
+    public static class TraitTypes
     {
         public const string Category = "Category";
     }

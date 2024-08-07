@@ -19,7 +19,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    [Trait(TraitTypes.Category, TestCategories.FirmwareOrHardwareMismatch)]
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class UpdateUserInfoCommandTests : SimpleIntegrationTestConnection
     {
         public UpdateUserInfoCommandTests()

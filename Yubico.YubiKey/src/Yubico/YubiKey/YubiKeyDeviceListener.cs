@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
@@ -50,7 +51,8 @@ namespace Yubico.YubiKey
 
         private static readonly ReaderWriterLockSlim RwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = LoggingConfiguration.GetLogger<YubiKeyDeviceListener>();
+
         private readonly Dictionary<IYubiKeyDevice, bool> _internalCache = new Dictionary<IYubiKeyDevice, bool>();
         private readonly HidDeviceListener _hidListener = HidDeviceListener.Create();
         private readonly SmartCardDeviceListener _smartCardListener = SmartCardDeviceListener.Create();
@@ -60,8 +62,6 @@ namespace Yubico.YubiKey
 
         private YubiKeyDeviceListener()
         {
-            _log.LogInformation("Creating YubiKeyDeviceListener instance.");
-
             _listenerThread = new Thread(ListenForChanges) { IsBackground = true };
             _isListening = true;
 

@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -28,7 +31,7 @@ namespace Yubico.Core.Logging
     /// the logger factory here will impact both the Yubico.YubiKey and Yubico.Core libraries.
     /// </para>
     /// <para>
-    /// The <see cref="LoggerFactory"/> property is used to set and control the concrete log to be used by the SDK. By
+    /// The <see cref="CustomLoggerFactory"/> property is used to set and control the concrete log to be used by the SDK. By
     /// default, we send logs to the "null" logger - effectively disabling logging. If you set this property with your
     /// own logger factory, the SDK will use this log from the point of the set until someone calls this set method again.
     /// </para>
@@ -120,7 +123,7 @@ namespace Yubico.Core.Logging
         /// }
         /// </code>
         /// </example>
-        public static ILoggerFactory LoggerFactory
+        public static ILoggerFactory CustomLoggerFactory
         {
             get => _factory ??= new NullLoggerFactory();
             set => _factory = value;
@@ -156,6 +159,37 @@ namespace Yubico.Core.Logging
         /// }
         /// </code>
         /// </example>
-        public static Logger GetLogger() => new Logger(LoggerFactory.CreateLogger("Yubico.Core logger"));
+        public static Logger GetLogger() => new Logger(CustomLoggerFactory.CreateLogger("Yubico.Core logger"));
+    }
+
+    public static class LoggingConfiguration
+    {
+        private static readonly ILoggerFactory LoggerFactory = GetFactory();
+        private static ILoggerFactory GetFactory()
+        {
+            const string AppsettingsJson = "appsettings.json";
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile(AppsettingsJson, optional: true)
+                .Build();
+
+            return Microsoft.Extensions.Logging.LoggerFactory.Create(
+                builder =>
+                {
+                    try
+                    {
+                        IConfigurationSection configurationSection = configuration.GetRequiredSection("Logging");
+                        _ = builder.AddConfiguration(configurationSection);
+                    }
+                    catch (InvalidOperationException) // File or section does not exist, so we set our own level
+                    {
+                        _ = builder.SetMinimumLevel(LogLevel.Error);
+                    }
+
+                    _ = builder.AddConsole();
+                });
+        }
+
+        public static ILogger GetLogger<T>() where T : class => LoggerFactory.CreateLogger<T>();
     }
 }

@@ -31,4 +31,4 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass locally with my changes
 
-[^1]: See [Yubikey models](https://www.yubico.com/store/) (Multi-protocol, Security Key, FIPS, Bio, YubiHSM)
+[^1]: See [Yubikey models](https://www.yubico.com/products/) (Multi-protocol, Security Key, FIPS, Bio, YubiHSM, YubiHSM FIPS)

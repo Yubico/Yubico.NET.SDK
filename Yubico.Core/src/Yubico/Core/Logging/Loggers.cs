@@ -20,12 +20,13 @@ using Microsoft.Extensions.Logging;
 namespace Yubico.Core.Logging
 {
     /// <summary>
-    /// TODO
+    /// TODO write
     /// </summary>
     public static class Loggers
     {
-        private static readonly ILoggerFactory LoggerFactory = GetFactory();
-        private static ILoggerFactory GetFactory()
+        private static ILoggerFactory LoggerFactory = GetDefaultFactory();
+        
+        private static ILoggerFactory GetDefaultFactory()
         {
             const string AppsettingsJson = "appsettings.json";
             IConfigurationRoot configuration = new ConfigurationBuilder()
@@ -49,6 +50,13 @@ namespace Yubico.Core.Logging
                     _ = builder.AddConsole();
                 });
         }
+
+        /// <summary>
+        /// TODO write
+        /// </summary>
+        /// <param name="configure"></param>
+        public static void ConfigureLoggerFactory(Action<ILoggingBuilder> configure) 
+            => LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(configure);
 
         /// <inheritdoc cref="LoggerFactoryExtensions.CreateLogger{T}"/>
         public static ILogger GetLogger<T>() => LoggerFactory.CreateLogger<T>();

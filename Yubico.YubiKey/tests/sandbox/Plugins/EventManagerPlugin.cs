@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -43,11 +42,6 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 .WriteTo.Console(
                     outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
-
-            Core.Logging.Log.CustomLoggerFactory = LoggerFactory.Create(
-                builder => builder
-                    .AddSerilog(log)
-                    .AddFilter(level => level >= LogLevel.Information));
 
             YubiKeyDeviceListener.Instance.Arrived += (s, e) =>
             {

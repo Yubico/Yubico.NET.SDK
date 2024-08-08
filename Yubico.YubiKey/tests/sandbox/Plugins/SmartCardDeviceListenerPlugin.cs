@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using System;
-using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices.SmartCard;
-using Yubico.Core.Logging;
 using Yubico.YubiKey.InterIndustry.Commands;
 
 namespace Yubico.YubiKey.TestApp.Plugins
@@ -31,16 +29,6 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            Log.CustomLoggerFactory = LoggerFactory.Create(
-                builder => builder.AddSimpleConsole(
-                        options =>
-                        {
-                            options.IncludeScopes = true;
-                            options.SingleLine = true;
-                            options.TimestampFormat = "hh:mm:ss";
-                        })
-                    .AddFilter(level => level >= LogLevel.Information));
-
             Console.WriteLine("Create listener");
             var listener = SmartCardDeviceListener.Create();
 

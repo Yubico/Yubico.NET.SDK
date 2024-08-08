@@ -17,7 +17,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
-using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 using static Yubico.PlatformInterop.NativeMethods;

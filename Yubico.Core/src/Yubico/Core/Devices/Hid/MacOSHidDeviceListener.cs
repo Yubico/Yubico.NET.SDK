@@ -16,7 +16,6 @@ using System;
 using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Logging;
-using Yubico.Core.Logging;
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.Hid

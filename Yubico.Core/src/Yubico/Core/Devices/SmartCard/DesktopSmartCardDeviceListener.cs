@@ -18,7 +18,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
-using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 using static Yubico.PlatformInterop.NativeMethods;

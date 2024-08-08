@@ -14,7 +14,6 @@
 
 using System;
 using Microsoft.Extensions.Logging;
-using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid

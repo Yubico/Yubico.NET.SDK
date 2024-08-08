@@ -24,7 +24,6 @@ using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.TestUtilities;
-using Log = Yubico.Core.Logging.Log;
 
 namespace Yubico.YubiKey
 {
@@ -46,16 +45,16 @@ namespace Yubico.YubiKey
             // Force the old behavior even for newer YubiKeys.
             AppContext.SetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, true);
 
-            using Logger? log = new LoggerConfiguration()
-                .Enrich.With(new ThreadIdEnricher())
-                .WriteTo.Console(
-                    outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
-                .CreateLogger();
-
-            Log.CustomLoggerFactory = LoggerFactory.Create(
-                builder => builder
-                    .AddSerilog(log)
-                    .AddFilter(level => level >= LogLevel.Information));
+            // using Logger? log = new LoggerConfiguration() TODO Investigate if needed
+            //     .Enrich.With(new ThreadIdEnricher())
+            //     .WriteTo.Console(
+            //         outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
+            //     .CreateLogger();
+            //
+            // Log.CustomLoggerFactory = LoggerFactory.Create(
+            //     builder => builder
+            //         .AddSerilog(log)
+            //         .AddFilter(level => level >= LogLevel.Information));
 
             // TEST ASSUMPTION: This test requires FIDO. On Windows, that means this test case must run elevated (admin).
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice();

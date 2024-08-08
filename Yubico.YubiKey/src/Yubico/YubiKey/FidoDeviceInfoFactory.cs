@@ -14,6 +14,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.DeviceExtensions;
@@ -24,10 +25,9 @@ namespace Yubico.YubiKey
 {
     internal static class FidoDeviceInfoFactory
     {
+        private static readonly ILogger Log = Loggers.GetLogger("Yubico.YubiKey.FidoDeviceInfoFactory");
         public static YubiKeyDeviceInfo GetDeviceInfo(IHidDevice device)
         {
-            Logger log = Log.GetLogger();
-
             if (!device.IsYubicoDevice())
             {
                 throw new ArgumentException(ExceptionMessages.InvalidDeviceNotYubico, nameof(device));
@@ -38,7 +38,7 @@ namespace Yubico.YubiKey
                 throw new ArgumentException(ExceptionMessages.InvalidDeviceNotFido, nameof(device));
             }
 
-            log.LogInformation("Getting device info for FIDO device {Device}", device);
+            Log.LogInformation("Getting device info for FIDO device {Device}", device);
 
             if (!TryGetDeviceInfoFromFido(device, out YubiKeyDeviceInfo? ykDeviceInfo))
             {
@@ -69,17 +69,16 @@ namespace Yubico.YubiKey
             IHidDevice device,
             [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)
         {
-            Logger log = Log.GetLogger();
 
             try
             {
-                log.LogInformation("Attempting to read device info via the FIDO interface management command.");
+                Log.LogInformation("Attempting to read device info via the FIDO interface management command.");
                 using var connection = new FidoConnection(device);
 
                 deviceInfo = GetDeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
                 if (deviceInfo is { })
                 {
-                    log.LogInformation("Successfully read device info via FIDO interface management command.");
+                    Log.LogInformation("Successfully read device info via FIDO interface management command.");
                     return true;
                 }
             }
@@ -99,7 +98,7 @@ namespace Yubico.YubiKey
                 ErrorHandler(e, "Must have elevated privileges in Windows to access FIDO device directly.");
             }
 
-            log.LogWarning(
+            Log.LogWarning(
                 "Failed to read device info through the management interface. This may be expected for older YubiKeys.");
 
             deviceInfo = null;
@@ -110,11 +109,9 @@ namespace Yubico.YubiKey
             IHidDevice device,
             [MaybeNullWhen(returnValue: false)] out FirmwareVersion firmwareVersion)
         {
-            Logger log = Log.GetLogger();
-
             try
             {
-                log.LogInformation("Attempting to read firmware version through FIDO.");
+                Log.LogInformation("Attempting to read firmware version through FIDO.");
                 using var connection = new FidoConnection(device);
 
                 VersionResponse response = connection.SendCommand(new VersionCommand());
@@ -122,12 +119,12 @@ namespace Yubico.YubiKey
                 if (response.Status == ResponseStatus.Success)
                 {
                     firmwareVersion = response.GetData();
-                    log.LogInformation("Firmware version: {Version}", firmwareVersion.ToString());
+                    Log.LogInformation("Firmware version: {Version}", firmwareVersion.ToString());
 
                     return true;
                 }
 
-                log.LogError(
+                Log.LogError(
                     "Reading firmware version via FIDO failed with: {Error} {Message}", response.StatusWord,
                     response.StatusMessage);
             }
@@ -147,13 +144,13 @@ namespace Yubico.YubiKey
                 ErrorHandler(e, "Must have elevated privileges in Windows to access FIDO device directly.");
             }
 
-            log.LogWarning("Failed to read firmware version through FIDO.");
+            Log.LogWarning("Failed to read firmware version through FIDO.");
             firmwareVersion = null;
 
             return false;
         }
 
         private static void ErrorHandler(Exception exception, string message) =>
-            Log.GetLogger().LogWarning(exception, message);
+            Log.LogWarning(exception, message);
     }
 }

@@ -16,7 +16,7 @@ using System;
 using System.Globalization;
 using System.Security;
 using System.Security.Cryptography;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivPinOnlyMode GetPinOnlyMode()
         {
-            _log.LogInformation("Get the PIV PIN-only mode of a YubiKey based on AdminData.");
+            _logger.LogInformation("Get the PIV PIN-only mode of a YubiKey based on AdminData.");
 
             PivPinOnlyMode returnValue = PivPinOnlyMode.PinProtectedUnavailable | PivPinOnlyMode.PinDerivedUnavailable;
 
@@ -189,7 +189,7 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         public PivPinOnlyMode TryRecoverPinOnlyMode()
         {
-            _log.LogInformation("Try to authenticate using PIN-only.");
+            _logger.LogInformation("Try to authenticate using PIN-only.");
 
             PivPinOnlyMode returnValue = TryAuthenticatePinOnly(false);
 
@@ -749,8 +749,8 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void SetPinOnlyMode(PivPinOnlyMode pinOnlyMode, PivAlgorithm mgmtKeyAlgorithm)
         {
-            _log.LogInformation(
-                "Set a YubiKey to PIV PIN-only mode: {0}, mgmt key alg = {1}.",
+            _logger.LogInformation(
+                "Set a YubiKey to PIV PIN-only mode: {PivPinOnlyMode}, mgmt key alg = {PivAlgorithm}.",
                 pinOnlyMode.ToString(), mgmtKeyAlgorithm.ToString());
 
             Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;

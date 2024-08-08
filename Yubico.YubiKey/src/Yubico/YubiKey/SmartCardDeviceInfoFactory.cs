@@ -14,6 +14,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.DeviceExtensions;
@@ -26,14 +27,14 @@ namespace Yubico.YubiKey
         public static YubiKeyDeviceInfo GetDeviceInfo(
             ISmartCardDevice device)
         {
-            Logger log = Log.GetLogger();
+            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             if (!device.IsYubicoDevice())
             {
                 throw new ArgumentException(ExceptionMessages.InvalidDeviceNotYubico, nameof(device));
             }
 
-            log.LogInformation("Getting device info for smart card {Device}.", device);
+            logger.LogInformation("Getting device info for smart card {Device}.", device);
 
             if (!TryGetDeviceInfoFromManagement(device, out YubiKeyDeviceInfo? deviceInfo))
             {
@@ -85,18 +86,18 @@ namespace Yubico.YubiKey
             ISmartCardDevice device,
             [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)
         {
-            Logger log = Log.GetLogger();
+            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             try
             {
-                log.LogInformation("Attempting to read device info via the management application.");
+                logger.LogInformation("Attempting to read device info via the management application.");
                 using var connection = new SmartCardConnection(device, YubiKeyApplication.Management);
 
                 deviceInfo = GetDeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
 
                 if (deviceInfo is { })
                 {
-                    log.LogInformation("Successfully read device info via management application.");
+                    logger.LogInformation("Successfully read device info via management application.");
 
                     return true;
                 }
@@ -108,7 +109,7 @@ namespace Yubico.YubiKey
                     "An ISO 7816 application has encountered an error when trying to get device info from management.");
             }
 
-            log.LogWarning(
+            logger.LogWarning(
                 "Failed to read device info through the management interface. This may be expected for older YubiKeys.");
 
             deviceInfo = null;
@@ -120,11 +121,11 @@ namespace Yubico.YubiKey
             ISmartCardDevice device,
             [MaybeNullWhen(returnValue: false)] out FirmwareVersion firmwareVersion)
         {
-            Logger log = Log.GetLogger();
+            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             try
             {
-                log.LogInformation("Attempting to read firmware version through OTP.");
+                logger.LogInformation("Attempting to read firmware version through OTP.");
                 using var connection = new SmartCardConnection(device, YubiKeyApplication.Otp);
 
                 Otp.Commands.ReadStatusResponse response =
@@ -133,12 +134,12 @@ namespace Yubico.YubiKey
                 if (response.Status == ResponseStatus.Success)
                 {
                     firmwareVersion = response.GetData().FirmwareVersion;
-                    log.LogInformation("Firmware version: {Version}", firmwareVersion.ToString());
+                    logger.LogInformation("Firmware version: {Version}", firmwareVersion.ToString());
 
                     return true;
                 }
 
-                log.LogError(
+                logger.LogError(
                     "Reading firmware version via OTP failed with: {Error} {Message}", response.StatusWord,
                     response.StatusMessage);
             }
@@ -153,7 +154,7 @@ namespace Yubico.YubiKey
                 ErrorHandler(e, "The length of GetSerialNumberResponse.GetData response data is invalid.");
             }
 
-            log.LogWarning("Failed to read firmware version through OTP. This may be expected over USB.");
+            logger.LogWarning("Failed to read firmware version through OTP. This may be expected over USB.");
             firmwareVersion = null;
 
             return false;
@@ -163,11 +164,11 @@ namespace Yubico.YubiKey
             ISmartCardDevice device,
             [MaybeNullWhen(returnValue: false)] out FirmwareVersion firmwareVersion)
         {
-            Logger log = Log.GetLogger();
+            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             try
             {
-                log.LogInformation("Attempting to read firmware version through the PIV application.");
+                logger.LogInformation("Attempting to read firmware version through the PIV application.");
                 using var connection = new SmartCardConnection(device, YubiKeyApplication.Piv);
 
                 Piv.Commands.VersionResponse response = connection.SendCommand(new Piv.Commands.VersionCommand());
@@ -175,12 +176,12 @@ namespace Yubico.YubiKey
                 if (response.Status == ResponseStatus.Success)
                 {
                     firmwareVersion = response.GetData();
-                    log.LogInformation("Firmware version: {Version}", firmwareVersion.ToString());
+                    logger.LogInformation("Firmware version: {Version}", firmwareVersion.ToString());
 
                     return true;
                 }
 
-                log.LogError(
+                logger.LogError(
                     "Reading firmware version via PIV failed with: {Error} {Message}", response.StatusWord,
                     response.StatusMessage);
             }
@@ -191,7 +192,7 @@ namespace Yubico.YubiKey
                     "An ISO 7816 application has encountered an error when trying to get firmware version from PIV.");
             }
 
-            log.LogWarning("Failed to read firmware version through PIV.");
+            logger.LogWarning("Failed to read firmware version through PIV.");
             firmwareVersion = null;
 
             return false;
@@ -201,11 +202,11 @@ namespace Yubico.YubiKey
             ISmartCardDevice device,
             out int? serialNumber)
         {
-            Logger log = Log.GetLogger();
+            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             try
             {
-                log.LogInformation("Attempting to read serial number through the OTP application.");
+                logger.LogInformation("Attempting to read serial number through the OTP application.");
                 using var connection = new SmartCardConnection(device, YubiKeyApplication.Otp);
 
                 Otp.Commands.GetSerialNumberResponse response =
@@ -214,12 +215,12 @@ namespace Yubico.YubiKey
                 if (response.Status == ResponseStatus.Success)
                 {
                     serialNumber = response.GetData();
-                    log.LogInformation("Serial number: {SerialNumber}", serialNumber);
+                    logger.LogInformation("Serial number: {SerialNumber}", serialNumber);
 
                     return true;
                 }
 
-                log.LogError(
+                logger.LogError(
                     "Reading serial number via OTP failed with: {Error} {Message}", response.StatusWord,
                     response.StatusMessage);
             }
@@ -235,7 +236,7 @@ namespace Yubico.YubiKey
                 ErrorHandler(e, "The GetSerialNumberResponse.GetData response data length is too short.");
             }
 
-            log.LogWarning("Failed to read serial number through OTP.");
+            logger.LogWarning("Failed to read serial number through OTP.");
             serialNumber = null;
 
             return false;
@@ -245,11 +246,11 @@ namespace Yubico.YubiKey
             ISmartCardDevice device,
             out int? serialNumber)
         {
-            Logger log = Log.GetLogger();
+            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             try
             {
-                log.LogInformation("Attempting to read serial number through the PIV application.");
+                logger.LogInformation("Attempting to read serial number through the PIV application.");
                 using var connection = new SmartCardConnection(device, YubiKeyApplication.Piv);
 
                 Piv.Commands.GetSerialNumberResponse response =
@@ -258,12 +259,12 @@ namespace Yubico.YubiKey
                 if (response.Status == ResponseStatus.Success)
                 {
                     serialNumber = response.GetData();
-                    log.LogInformation("Serial number: {SerialNumber}", serialNumber);
+                    logger.LogInformation("Serial number: {SerialNumber}", serialNumber);
 
                     return true;
                 }
 
-                log.LogError(
+                logger.LogError(
                     "Reading serial number via PIV failed with: {Error} {Message}", response.StatusWord,
                     response.StatusMessage);
             }
@@ -274,7 +275,7 @@ namespace Yubico.YubiKey
                     "An ISO 7816 application has encountered an error when trying to get serial number from PIV.");
             }
 
-            log.LogWarning("Failed to read serial number through PIV.");
+            logger.LogWarning("Failed to read serial number through PIV.");
             serialNumber = null;
 
             return false;
@@ -283,6 +284,8 @@ namespace Yubico.YubiKey
         private static void ErrorHandler(
             Exception exception,
             string message) =>
-            Log.GetLogger().LogWarning(exception, message);
+            Loggers
+                .GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!)
+                .LogWarning(exception, message);
     }
 }

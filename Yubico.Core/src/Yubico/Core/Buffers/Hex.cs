@@ -19,8 +19,6 @@ namespace Yubico.Core.Buffers
     /// <inheritdoc cref="Base16" path="/summary"/>
     /// <remarks>
     /// This class is an alias for <see cref="Base16"/>. New code should use that class
-    /// and existing code should be changed over time. Putting the <see cref="ObsoleteAttribute"/>
-    /// on this class is impractical.
     /// </remarks>
     public class Hex : Base16
     {

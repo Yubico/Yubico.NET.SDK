@@ -17,6 +17,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Buffers;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
@@ -34,7 +35,7 @@ namespace Yubico.Core.Devices.Hid
         private bool _isDisposed;
         private readonly MacOSHidDevice _device;
         private readonly IntPtr _loopId;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Loggers.GetLogger<MacOSHidIOReportConnection>();
 
         private readonly byte[] _readBuffer;
         private GCHandle _readHandle;
@@ -246,14 +247,14 @@ namespace Yubico.Core.Devices.Hid
             byte[] report,
             long reportLength)
         {
-            Logger log = Log.GetLogger();
+            ILogger logger = Logging.Loggers.GetLogger(typeof(MacOSHidIOReportConnection).FullName!);
 
-            log.LogInformation("MacOSHidIOReportConnection.ReportCallback has been called.");
+            logger.LogInformation("MacOSHidIOReportConnection.ReportCallback has been called.");
 
             if (result != 0 || type != IOKitHidConstants.kIOHidReportTypeInput || reportId != 0 || reportLength < 0)
             {
                 // Something went wrong. We don't currently signal, just continue.
-                log.LogWarning(
+                logger.LogWarning(
                     "ReportCallback did not receive some or all of the expected output.\n" +
                     "result = [{Result}], type = [{Type}], reportId = [{ReportId}], reportLength = [{ReportLength}]",
                     result,

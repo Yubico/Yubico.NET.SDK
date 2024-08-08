@@ -14,6 +14,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Logging;
 
@@ -29,7 +30,9 @@ namespace Yubico.YubiKey.DeviceExtensions
             }
             catch (PlatformInterop.SCardException e)
             {
-                Log.GetLogger().LogWarning(e, "Exception encountered when attempting to read device ATR.");
+                Loggers
+                    .GetLogger("Yubico.YubiKey.DeviceExtensions.IsYubicoDevice")
+                    .LogWarning(e, "Exception encountered when attempting to read device ATR.");
             }
 
             return false;

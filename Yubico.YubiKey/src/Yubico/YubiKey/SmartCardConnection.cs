@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Buffers;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;
@@ -26,7 +27,7 @@ namespace Yubico.YubiKey
 {
     internal class SmartCardConnection : IYubiKeyConnection
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Loggers.GetLogger<SmartCardConnection>();
 
         private readonly YubiKeyApplication _yubiKeyApplication;
         private readonly byte[]? _applicationId;

@@ -15,7 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2

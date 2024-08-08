@@ -16,6 +16,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
@@ -31,7 +32,7 @@ namespace Yubico.YubiKey.Pipelines
     {
         private readonly IHidConnection _hidConnection;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Loggers.GetLogger<IHidConnection>();
 
         /// <summary>
         /// An event which is fired if the YubiKey indicates it is waiting for touch. Event handlers

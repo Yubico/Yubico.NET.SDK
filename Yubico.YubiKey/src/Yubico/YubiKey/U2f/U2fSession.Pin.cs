@@ -15,8 +15,8 @@
 using System;
 using System.Globalization;
 using System.Security;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
-using Yubico.Core.Logging;
 using Yubico.YubiKey.U2f.Commands;
 
 namespace Yubico.YubiKey.U2f

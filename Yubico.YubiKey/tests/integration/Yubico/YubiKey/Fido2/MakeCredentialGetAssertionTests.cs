@@ -203,7 +203,7 @@ namespace Yubico.YubiKey.Fido2
 
 
         // This test requires user to touch the device.
-        [Theory, Trait("Category", "RequiresTouch")]
+        [Theory, Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
         [InlineData(CredProtectPolicy.UserVerificationOptional, true)]
         [InlineData(CredProtectPolicy.UserVerificationOptional, false)]
         [InlineData(CredProtectPolicy.UserVerificationRequired, true)]
@@ -219,7 +219,7 @@ namespace Yubico.YubiKey.Fido2
             TestAddCredProtectExtension(expectExtensionSupported: true, credProtectPolicy, enforceCredProtectPolicy);
         }
 
-        [Theory, Trait("Category", "RequiresTouch")]
+        [Theory, Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
         [InlineData(CredProtectPolicy.UserVerificationOptional, true)]
         [InlineData(CredProtectPolicy.UserVerificationOptional, false)]
         [InlineData(CredProtectPolicy.UserVerificationRequired, true)]

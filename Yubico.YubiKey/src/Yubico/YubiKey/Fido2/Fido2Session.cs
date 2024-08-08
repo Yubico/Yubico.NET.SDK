@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 
@@ -65,7 +66,7 @@ namespace Yubico.YubiKey.Fido2
     /// </remarks>
     public sealed partial class Fido2Session : IDisposable
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Loggers.GetLogger<Fido2Session>();
         private bool _disposed;
         private AuthenticatorInfo? _authenticatorInfo;
 

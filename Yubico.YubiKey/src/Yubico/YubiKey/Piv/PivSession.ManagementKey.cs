@@ -15,7 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
@@ -238,7 +238,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryAuthenticateManagementKey(bool mutualAuthentication = true)
         {
-            _log.LogInformation(
+            _logger.LogInformation(
                 $"Try to authenticate the management key: {(mutualAuthentication ? "mutual" : "single")} auth.");
 
             PivPinOnlyMode currentMode = TryAuthenticatePinOnly(true);
@@ -309,7 +309,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void AuthenticateManagementKey(bool mutualAuthentication = true)
         {
-            _log.LogInformation(
+            _logger.LogInformation(
                 $"Authenticate the management key: {(mutualAuthentication ? "mutual" : "single")} auth.");
 
             if (TryAuthenticateManagementKey(mutualAuthentication) == false)
@@ -650,7 +650,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Try to change the management key, touch policy = {0}, algorithm = {1}.",
+            _logger.LogInformation("Try to change the management key, touch policy = {TouchPolicy}, algorithm = {PivALgorithm}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
@@ -761,8 +761,8 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Change the management key, touch policy = {0}, algorithm = {1}.",
-                touchPolicy.ToString(), newKeyAlgorithm.ToString());
+            _logger.LogInformation("Change the management key, touch policy = {TouchPolicy}, algorithm = {PivAlgorithm}.",
+                touchPolicy, newKeyAlgorithm);
 
             if (TryChangeManagementKey(touchPolicy, newKeyAlgorithm) == false)
             {
@@ -907,13 +907,16 @@ namespace Yubico.YubiKey.Piv
             {
                 var setCommand = new SetManagementKeyCommand(newKey, touchPolicy, newKeyAlgorithm);
                 SetManagementKeyResponse setResponse = Connection.SendCommand(setCommand);
-
+            
                 if (setResponse.Status == ResponseStatus.Success)
                 {
                     ManagementKeyAlgorithm = newKeyAlgorithm;
 
                     return true;
                 }
+                
+                _logger.LogInformation($"Failed to set management key. Message: {setResponse.StatusMessage}");
+
             }
 
             return false;
@@ -1036,7 +1039,6 @@ namespace Yubico.YubiKey.Piv
             CompleteAuthenticateManagementKeyResponse completeResponse = Connection.SendCommand(completeCommand);
 
             ManagementKeyAuthenticationResult = completeResponse.GetData();
-
             if (completeResponse.Status == ResponseStatus.Success)
             {
                 // If Success, there are three possibilities, (1) this is
@@ -1045,8 +1047,7 @@ namespace Yubico.YubiKey.Piv
                 // off-card app authenticated, but the YubiKey itself did
                 // not.
                 // If case (3), throw an exception.
-                if (ManagementKeyAuthenticationResult ==
-                    AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed)
+                if (ManagementKeyAuthenticationResult == AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed)
                 {
                     throw new SecurityException(
                         string.Format(
@@ -1056,6 +1057,8 @@ namespace Yubico.YubiKey.Piv
 
                 ManagementKeyAuthenticated = true;
             }
+            
+            _logger.LogInformation($"Failed to authenticate management key. Message: {completeResponse.StatusMessage}");
 
             return ManagementKeyAuthenticated;
         }

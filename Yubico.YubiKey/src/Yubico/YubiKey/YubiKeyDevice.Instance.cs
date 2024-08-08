@@ -16,6 +16,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
@@ -108,7 +109,7 @@ namespace Yubico.YubiKey
         private IYubiKeyDeviceInfo _yubiKeyInfo;
         private Transport _lastActiveTransport;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _logger = Loggers.GetLogger<YubiKeyDevice>();
 
         internal ISmartCardDevice GetSmartCardDevice() => _smartCardDevice!;
 
@@ -161,7 +162,7 @@ namespace Yubico.YubiKey
                     throw new ArgumentException(ExceptionMessages.DeviceTypeNotRecognized, nameof(device));
             }
 
-            _log.LogInformation("Created a YubiKeyDevice based on the {Transport} transport.", _lastActiveTransport);
+            _logger.LogInformation("Created a YubiKeyDevice based on the {Transport} transport.", _lastActiveTransport);
 
             _yubiKeyInfo = info;
             IsNfcDevice = _smartCardDevice?.IsNfcTransport() ?? false;
@@ -382,7 +383,7 @@ namespace Yubico.YubiKey
             byte[]? applicationId,
             StaticKeys? scp03Keys)
         {
-            _log.LogInformation(
+            _logger.LogInformation(
                 "YubiKey {Serial} connecting to {Application} application" + (scp03Keys is null ? "." : " over SCP03."),
                 SerialNumber,
                 application is null ? applicationId is null ? "Unknown" : applicationId.ToString()
@@ -392,14 +393,14 @@ namespace Yubico.YubiKey
             {
                 if (!(applicationId is null) && HasSmartCard && !(_smartCardDevice is null))
                 {
-                    _log.LogInformation("Connecting via the SmartCard interface.");
+                    _logger.LogInformation("Connecting via the SmartCard interface.");
                     WaitForReclaimTimeout(Transport.SmartCard);
                     return scp03Keys is null
                         ? new SmartCardConnection(_smartCardDevice, applicationId)
                         : new Scp03Connection(_smartCardDevice, applicationId, scp03Keys);
                 }
 
-                _log.LogInformation(
+                _logger.LogInformation(
                     (applicationId is null ? "No application given." : "No smart card interface present.") +
                     "Unable to establish connection to YubiKey.");
 
@@ -410,7 +411,7 @@ namespace Yubico.YubiKey
             {
                 if (HasSmartCard && !(_smartCardDevice is null))
                 {
-                    _log.LogInformation("Connecting via the SmartCard interface.");
+                    _logger.LogInformation("Connecting via the SmartCard interface.");
                     WaitForReclaimTimeout(Transport.SmartCard);
                     return new Scp03Connection(_smartCardDevice, (YubiKeyApplication)application, scp03Keys);
                 }
@@ -422,7 +423,7 @@ namespace Yubico.YubiKey
             // if unavailable.
             if (application == YubiKeyApplication.Otp && HasHidKeyboard)
             {
-                _log.LogInformation("Connecting via the Keyboard interface.");
+                _logger.LogInformation("Connecting via the Keyboard interface.");
                 WaitForReclaimTimeout(Transport.HidKeyboard);
                 return new KeyboardConnection(_hidKeyboardDevice!);
             }
@@ -432,19 +433,19 @@ namespace Yubico.YubiKey
             if ((application == YubiKeyApplication.Fido2 || application == YubiKeyApplication.FidoU2f)
                 && HasHidFido)
             {
-                _log.LogInformation("Connecting via the FIDO interface.");
+                _logger.LogInformation("Connecting via the FIDO interface.");
                 WaitForReclaimTimeout(Transport.HidFido);
                 return new FidoConnection(_hidFidoDevice!);
             }
 
             if (HasSmartCard && !(_smartCardDevice is null))
             {
-                _log.LogInformation("Connecting via the SmartCard interface.");
+                _logger.LogInformation("Connecting via the SmartCard interface.");
                 WaitForReclaimTimeout(Transport.SmartCard);
                 return new SmartCardConnection(_smartCardDevice, (YubiKeyApplication)application);
             }
 
-            _log.LogInformation("No smart card interface present. Unable to establish connection to YubiKey.");
+            _logger.LogInformation("No smart card interface present. Unable to establish connection to YubiKey.");
             return null;
         }
 
@@ -1094,14 +1095,14 @@ namespace Yubico.YubiKey
             // We're only affected by the reclaim timeout if we're switching USB transports.
             if (_lastActiveTransport == newTransport)
             {
-                _log.LogInformation(
+                _logger.LogInformation(
                     "{Transport} transport is already active. No need to wait for reclaim.",
                     _lastActiveTransport);
 
                 return;
             }
 
-            _log.LogInformation(
+            _logger.LogInformation(
                 "Switching USB transports from {OldTransport} to {NewTransport}.",
                 _lastActiveTransport,
                 newTransport);
@@ -1114,7 +1115,7 @@ namespace Yubico.YubiKey
             {
                 TimeSpan waitNeeded = reclaimTimeout - timeSinceLastActivation;
 
-                _log.LogInformation(
+                _logger.LogInformation(
                     "Reclaim timeout still active. Need to wait {TimeMS} milliseconds.",
                     waitNeeded.TotalMilliseconds);
 
@@ -1123,7 +1124,7 @@ namespace Yubico.YubiKey
 
             _lastActiveTransport = newTransport;
 
-            _log.LogInformation("Reclaim timeout has lapsed. It is safe to switch USB transports.");
+            _logger.LogInformation("Reclaim timeout has lapsed. It is safe to switch USB transports.");
         }
 
         private bool CanFastReclaim()

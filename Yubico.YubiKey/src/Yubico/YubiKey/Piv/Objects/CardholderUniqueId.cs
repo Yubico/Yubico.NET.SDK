@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
@@ -87,7 +88,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int LrcTag = 0xFE;
 
         private bool _disposed;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Loggers.GetLogger<CardholderUniqueId>();
 
         /// <summary>
         /// The "Federal Agency Smart Credential Number" (FASC-N). This is a fixed

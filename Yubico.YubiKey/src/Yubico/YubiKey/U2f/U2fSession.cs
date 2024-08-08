@@ -21,6 +21,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
@@ -76,7 +77,7 @@ namespace Yubico.YubiKey.U2f
     {
         private const double MaxTimeoutSeconds = 30.0;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Loggers.GetLogger<U2fSession>();
         private bool _disposed;
 
         // The default constructor is explicitly defined to show that we do not want it used.

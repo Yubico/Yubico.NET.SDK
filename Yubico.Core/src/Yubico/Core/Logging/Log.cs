@@ -190,6 +190,7 @@ namespace Yubico.Core.Logging
                 });
         }
 
-        public static ILogger GetLogger<T>() where T : class => LoggerFactory.CreateLogger<T>();
+        /// <inheritdoc cref="LoggerFactoryExtensions.CreateLogger{T}"/>
+        public static ILogger GetLogger<T>() => LoggerFactory.CreateLogger<T>();
     }
 }

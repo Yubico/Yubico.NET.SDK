@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
@@ -34,7 +35,7 @@ namespace Yubico.Core.Devices.Hid
 
         private readonly string _devnode;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Loggers.GetLogger<LinuxHidDevice>();
 
         /// <summary>
         /// Gets a list of all the HIDs on the system (not just YubiKeys).
@@ -78,7 +79,7 @@ namespace Yubico.Core.Devices.Hid
             if (handle.IsInvalid)
             {
                 _log.LogWarning(
-                    "Could not open [{Path}]. Errno = {errno} {errorstring}",
+                    "Could not open [{Path}]. Errno = {ErrNo} {ErrorString}",
                     path, Marshal.GetLastWin32Error(), LibcHelpers.GetErrnoString());
             }
 
@@ -136,7 +137,7 @@ namespace Yubico.Core.Devices.Hid
             }
             else
             {
-                _log.LogWarning("IOCTL failed. {error}", LibcHelpers.GetErrnoString());
+                _log.LogWarning("IOCTL failed. {Error}", LibcHelpers.GetErrnoString());
             }
 
             Marshal.FreeHGlobal(infoStructData);
@@ -161,7 +162,7 @@ namespace Yubico.Core.Devices.Hid
             }
             else
             {
-                _log.LogWarning("IOCTL failed. {error}", LibcHelpers.GetErrnoString());
+                _log.LogWarning("IOCTL failed. {Error}", LibcHelpers.GetErrnoString());
             }
             Marshal.FreeHGlobal(descriptorStructData);
         }
@@ -178,7 +179,7 @@ namespace Yubico.Core.Devices.Hid
             }
             else
             {
-                Log.GetLogger().LogWarning("IOCTL failed. {error}", LibcHelpers.GetErrnoString());
+                Logging.Loggers.GetLogger(typeof(LinuxHidDevice).FullName!).LogWarning("IOCTL failed. {Error}", LibcHelpers.GetErrnoString());
             }
 
             Marshal.FreeHGlobal(descSize);

@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
@@ -27,7 +28,7 @@ namespace Yubico.Core.Devices.Hid
     /// </summary>
     internal class WindowsHidDevice : HidDevice
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Loggers.GetLogger<WindowsHidDevice>();
 
         /// <summary>
         /// Gets the list of Windows HID devices available to the system.

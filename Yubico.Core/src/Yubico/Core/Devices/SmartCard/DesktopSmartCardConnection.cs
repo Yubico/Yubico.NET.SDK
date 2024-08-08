@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
@@ -23,7 +24,7 @@ namespace Yubico.Core.Devices.SmartCard
 {
     public class DesktopSmartCardConnection : ISmartCardConnection
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Loggers.GetLogger<DesktopSmartCardConnection>();
         private readonly DesktopSmartCardDevice _device;
         private readonly SCardContext _context;
         private readonly SCardCardHandle _cardHandle;
@@ -31,7 +32,7 @@ namespace Yubico.Core.Devices.SmartCard
 
         private class TransactionScope : IDisposable
         {
-            private readonly Logger _log = Log.GetLogger();
+            private readonly ILogger _log = Logging.Loggers.GetLogger<TransactionScope>();
             private readonly DesktopSmartCardConnection _thisConnection;
             private readonly IDisposable? _logScope;
             private bool _disposedValue;

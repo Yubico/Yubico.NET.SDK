@@ -16,6 +16,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
@@ -29,7 +30,7 @@ namespace Yubico.Core.Devices.Hid
         private GCHandle? _marshalableThisPtr;
         private CM_NOTIFY_CALLBACK? _callbackDelegate;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Loggers.GetLogger<WindowsHidDeviceListener>();
 
         public WindowsHidDeviceListener()
         {

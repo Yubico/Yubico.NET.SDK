@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
@@ -29,12 +30,12 @@ namespace Yubico.Core.Devices.Hid
     internal class MacOSHidDevice : HidDevice
     {
         private readonly long _entryId;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _logger = Logging.Loggers.GetLogger<MacOSHidDevice>();
 
         public MacOSHidDevice(long entryId) :
             base(entryId.ToString(CultureInfo.InvariantCulture))
         {
-            _log.LogInformation(
+            _logger.LogInformation(
                 $"Creating new instance of MacOSHidDevice based on device with EntryID [{entryId}]",
                 entryId);
 
@@ -49,8 +50,8 @@ namespace Yubico.Core.Devices.Hid
         /// </returns>
         public static IEnumerable<HidDevice> GetList()
         {
-            Logger log = Log.GetLogger();
-            using IDisposable? logScope = log.BeginScope("MacOSHidDevice.GetList()");
+            ILogger logger = Logging.Loggers.GetLogger(typeof(MacOSHidDevice).FullName!);
+            using IDisposable? logScope = logger.BeginScope("MacOSHidDevice.GetList()");
 
             IntPtr manager = IntPtr.Zero;
             IntPtr deviceSet = IntPtr.Zero;
@@ -63,7 +64,7 @@ namespace Yubico.Core.Devices.Hid
                 deviceSet = IOHIDManagerCopyDevices(manager);
 
                 long deviceSetCount = CFSetGetCount(deviceSet);
-                log.LogInformation("Found {DeviceCount} HID devices in this device set.", deviceSetCount);
+                logger.LogInformation("Found {DeviceCount} HID devices in this device set.", deviceSetCount);
 
                 var devices = new IntPtr[deviceSetCount];
 
@@ -84,13 +85,13 @@ namespace Yubico.Core.Devices.Hid
             {
                 if (manager != IntPtr.Zero)
                 {
-                    log.LogInformation("IOHIDManager released.");
+                    logger.LogInformation("IOHIDManager released.");
                     CFRelease(manager);
                 }
 
                 if (deviceSet != IntPtr.Zero)
                 {
-                    log.LogInformation("HID device set released.");
+                    logger.LogInformation("HID device set released.");
                     CFRelease(deviceSet);
                 }
             }
@@ -116,11 +117,11 @@ namespace Yubico.Core.Devices.Hid
 
         internal static long GetEntryId(IntPtr device)
         {
-            Logger log = Log.GetLogger();
+            ILogger Logger = Logging.Loggers.GetLogger(typeof(MacOSHidDevice).FullName!);
 
             int service = IOHIDDeviceGetService(device);
             kern_return_t result = IORegistryEntryGetRegistryEntryID(service, out long entryId);
-            log.IOKitApiCall(nameof(IORegistryEntryGetRegistryEntryID), result);
+            Logger.IOKitApiCall(nameof(IORegistryEntryGetRegistryEntryID), result);
 
             if (result != kern_return_t.KERN_SUCCESS)
             {
@@ -136,7 +137,7 @@ namespace Yubico.Core.Devices.Hid
         public void LogDeviceAccessTime()
         {
             LastAccessed = DateTime.Now;
-            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
+            _logger.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
         }
     }
 }

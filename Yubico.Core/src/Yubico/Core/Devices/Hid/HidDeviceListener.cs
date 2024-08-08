@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
@@ -35,7 +36,7 @@ namespace Yubico.Core.Devices.Hid
     /// </remarks>
     public abstract class HidDeviceListener
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _logger = Logging.Loggers.GetLogger<HidDeviceListener>();
 
         /// <summary>
         /// Subscribe to receive an event whenever a Human Interface Device (HID) is added to the computer.
@@ -75,7 +76,7 @@ namespace Yubico.Core.Devices.Hid
         /// </param>
         protected void OnArrived(IHidDevice device)
         {
-            _log.LogInformation("HID {Device} arrived.", device);
+            _logger.LogInformation("HID {Device} arrived.", device);
             Arrived?.Invoke(this, new HidDeviceEventArgs(device));
         }
 
@@ -88,7 +89,7 @@ namespace Yubico.Core.Devices.Hid
         /// </param>
         protected void OnRemoved(IHidDevice? device)
         {
-            _log.LogInformation("HID {Device} removed.", device);
+            _logger.LogInformation("HID {Device} removed.", device);
             Removed?.Invoke(this, new HidDeviceEventArgs(device));
         }
 

@@ -15,6 +15,7 @@
 using System;
 using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using static Yubico.PlatformInterop.NativeMethods;
 
@@ -28,7 +29,7 @@ namespace Yubico.Core.Devices.Hid
         private Thread? _listenerThread;
         private IntPtr? _runLoop;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Loggers.GetLogger<MacOSHidDeviceListener>();
 
         // Start listening as soon as this object is constructed.
         public MacOSHidDeviceListener()

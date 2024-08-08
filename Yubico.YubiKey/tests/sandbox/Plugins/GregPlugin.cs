@@ -34,14 +34,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
-            Core.Logging.Log.LoggerFactory = LoggerFactory.Create(
+            Core.Logging.Log.CustomLoggerFactory = LoggerFactory.Create(
                 builder => builder
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
-
-
-
-
 
             IYubiKeyDevice? yubiKey = YubiKeyDevice.FindByTransport(Transport.All).First();
 

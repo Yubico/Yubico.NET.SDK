@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            Log.LoggerFactory = LoggerFactory.Create(
+            Log.CustomLoggerFactory = LoggerFactory.Create(
                 builder => builder.AddSimpleConsole(
                         options =>
                         {

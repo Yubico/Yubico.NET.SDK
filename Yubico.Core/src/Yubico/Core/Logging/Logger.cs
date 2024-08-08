@@ -81,7 +81,7 @@ namespace Yubico.Core.Logging
         /// <para>
         /// This method will write an entry to the log that this instance was opened against. The Yubico SDK does not
         /// control the concrete implementation of the log. It defers to the logging provider(s) that the application
-        /// has set up. See <see cref="Yubico.Core.Logging.Log.LoggerFactory"/> for more information on how to register
+        /// has set up. See <see cref="Log.CustomLoggerFactory"/> for more information on how to register
         /// a concrete logger with the SDK.
         /// </para>
         /// </remarks>

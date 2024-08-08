@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 
@@ -67,7 +68,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int MgmtKeyTag = 0x89;
 
         private bool _disposed;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Loggers.GetLogger<PinProtectedData>();
 
         /// <summary>
         /// The management key that will be PIN-protected. If there is no

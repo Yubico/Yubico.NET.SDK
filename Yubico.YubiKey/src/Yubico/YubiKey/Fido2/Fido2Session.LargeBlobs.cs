@@ -16,7 +16,7 @@ using System;
 using System.Buffers.Binary;
 using System.IO;
 using System.Security.Cryptography;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Commands;

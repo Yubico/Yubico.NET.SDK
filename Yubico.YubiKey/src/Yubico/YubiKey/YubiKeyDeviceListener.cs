@@ -51,7 +51,7 @@ namespace Yubico.YubiKey
 
         private static readonly ReaderWriterLockSlim RwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
-        private readonly ILogger _log = LoggingConfiguration.GetLogger<YubiKeyDeviceListener>();
+        private readonly ILogger _log = Loggers.GetLogger<YubiKeyDeviceListener>();
 
         private readonly Dictionary<IYubiKeyDevice, bool> _internalCache = new Dictionary<IYubiKeyDevice, bool>();
         private readonly HidDeviceListener _hidListener = HidDeviceListener.Create();
@@ -346,7 +346,9 @@ namespace Yubico.YubiKey
         }
 
         private static void ErrorHandler(Exception exception) =>
-            Log.GetLogger().LogWarning($"Exception caught: {exception}");
+            Loggers
+                .GetLogger(typeof(YubiKeyDeviceListener).FullName!)
+                .LogWarning($"Exception caught: {exception}");
 
         #region IDisposable Support
 

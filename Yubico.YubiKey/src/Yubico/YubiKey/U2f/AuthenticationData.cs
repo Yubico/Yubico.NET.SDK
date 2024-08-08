@@ -15,6 +15,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Globalization;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
 
@@ -55,7 +56,7 @@ namespace Yubico.YubiKey.U2f
         private const int SignatureOffset = ClientDataOffset + ClientDataHashLength;
         private const int PayloadLength = AppIdHashLength + ClientDataHashLength + CounterLength + MaxBerSignatureLength + 1;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Loggers.GetLogger<AuthenticationData>();
 
         /// <summary>
         /// If the user's presence was verified in the authentication operation,

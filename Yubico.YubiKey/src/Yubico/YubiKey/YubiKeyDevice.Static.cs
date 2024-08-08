@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
@@ -72,9 +73,9 @@ namespace Yubico.YubiKey
         /// </exception>
         public static IEnumerable<IYubiKeyDevice> FindByTransport(Transport transport = Transport.All)
         {
-            Logger log = Log.GetLogger();
+            ILogger logger = Loggers.GetLogger(typeof(YubiKeyDeviceListener).FullName!);
 
-            log.LogInformation("FindByTransport {Transport}", transport);
+            logger.LogInformation("FindByTransport {Transport}", transport);
 
             if (transport == Transport.None)
             {

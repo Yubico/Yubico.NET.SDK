@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Scp03.Commands;
 
@@ -79,7 +80,7 @@ namespace Yubico.YubiKey.Scp03
     public sealed class Scp03Session : IDisposable
     {
         private bool _disposed;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Loggers.GetLogger<Scp03Session>();
 
         /// <summary>
         /// The object that represents the connection to the YubiKey. Most

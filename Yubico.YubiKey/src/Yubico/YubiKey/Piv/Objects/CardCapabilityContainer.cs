@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
+using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
 
 namespace Yubico.YubiKey.Piv.Objects
 {

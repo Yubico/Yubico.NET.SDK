@@ -193,6 +193,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
         private static void ReportResult(Credential credential)
         {
+#pragma warning disable CA1305
             var outputList = new StringBuilder("Added credential:");
             _ = outputList.AppendLine();
             _ = outputList.AppendLine($"Issuer    : {credential.Issuer}");

@@ -14,7 +14,7 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography;
+using Yubico.Core.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {

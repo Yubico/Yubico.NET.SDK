@@ -13,12 +13,14 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Yubico.YubiKey.Oath;
 using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.OathSampleCode
 {
+    [SuppressMessage("Globalization", "CA1305:Specify IFormatProvider")]
     public static class RenameCredential
     {
         // Rename the existing credential on the YubiKey by setting new issuer and account names.
@@ -32,10 +34,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             string newIssuer,
             string newAccount)
         {
-            if (credential is null)
-            {
-                throw new ArgumentNullException(nameof(credential));
-            }
+            ArgumentNullException.ThrowIfNull(credential, nameof(credential));
 
             using var oathSession = new OathSession(yubiKey);
             {

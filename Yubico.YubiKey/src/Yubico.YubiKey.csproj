@@ -15,7 +15,6 @@ limitations under the License. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Label="Assembly level settings">
-
     <!--
     Target frameworks specifies which version(s) of .NET that we should be "linking" against.
     As of 2020, netstandard2.0 allows us to reach the widest audience while providing a large
@@ -109,6 +108,8 @@ limitations under the License. -->
   </ItemGroup>
 
   <ItemGroup Label="Package references specific to Yubico.YubiKey.dll">
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1"/>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="docfx.console" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'" Version="$(DocFxVersion)" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
 
@@ -116,6 +117,11 @@ limitations under the License. -->
     <PackageReference Include="memberpage" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'" Version="$(DocFxVersion)" PrivateAssets="all" IncludeAssets="contentfiles" GeneratePathProperty="true" />
 
     <PackageReference Include="Nullable" Version="1.3.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <PackageReference Include="PolySharp" Version="1.14.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

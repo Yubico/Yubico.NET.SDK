@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
 

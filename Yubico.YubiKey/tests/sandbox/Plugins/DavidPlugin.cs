@@ -469,7 +469,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     }
 
                     List<CredentialRetryPair>? credRetryPairs = HelperGetCreds(hsmAuthConnection);
-                    if (credRetryPairs is null || !credRetryPairs.Any())
+                    if (credRetryPairs is null || credRetryPairs.Count == 0)
                     {
                         return result;
                     }
@@ -797,7 +797,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
                     using (YubiHsmAuthSession yhaSession = new YubiHsmAuthSession(device))
                     {
-                        if (!HelperGetCreds(yhaSession.Connection)!.Any())
+                        if (HelperGetCreds(yhaSession.Connection)!.Count == 0)
                         {
                             AddCredentialCommand cmdAddCred = new AddCredentialCommand(mgmtKey, aesCred);
                             AddCredentialResponse responseAddCred = yhaSession.Connection.SendCommand(cmdAddCred);

@@ -22,6 +22,7 @@ limitations under the License. -->
     <Nullable>disable</Nullable>
     <IsPackable>false</IsPackable>
     <UseWindowsForms Condition=" '$(OS)' == 'Windows_NT'">true</UseWindowsForms>
+    <AnalysisMode>AllDisabledByDefault</AnalysisMode>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharedSampleCode\SharedSampleCode.csproj" />

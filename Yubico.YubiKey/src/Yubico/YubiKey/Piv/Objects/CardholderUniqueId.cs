@@ -15,9 +15,11 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
+using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
 
 namespace Yubico.YubiKey.Piv.Objects
 {
@@ -221,7 +223,7 @@ namespace Yubico.YubiKey.Piv.Objects
             {
                 tlvWriter.WriteValue(FascNumberTag, FascNumber.Span);
                 tlvWriter.WriteValue(GuidTag, GuidValue.Span);
-                tlvWriter.WriteString(ExpirationDateTag, FixedDate, System.Text.Encoding.ASCII);
+                tlvWriter.WriteString(ExpirationDateTag, FixedDate, Encoding.ASCII);
                 tlvWriter.WriteValue(SignatureTag, emptySpan);
                 tlvWriter.WriteValue(LrcTag, emptySpan);
             }
@@ -320,7 +322,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (isValid)
             {
                 _log.LogInformation("Decode data into CardholderUniqueId: ExpirationDate.");
-                if (tlvReader.TryReadString(out string theDate, ExpirationDateTag, System.Text.Encoding.ASCII))
+                if (tlvReader.TryReadString(out string theDate, ExpirationDateTag, Encoding.ASCII))
                 {
                     if (theDate.Equals(FixedDate, StringComparison.Ordinal))
                     {

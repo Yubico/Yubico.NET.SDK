@@ -20,7 +20,7 @@ namespace Yubico.YubiKey
 {
     internal static class GetDeviceInfoHelper
     {
-        private static readonly Logger Logger = Log.GetLogger();
+        private static readonly Logger _logger = Log.GetLogger();
 
         /// <summary>
         /// Fetches and aggregates device configuration details from a YubiKey using multiple APDU commands,
@@ -62,7 +62,7 @@ namespace Yubico.YubiKey
                 }
                 else
                 {
-                    Logger.LogError(
+                    _logger.LogError(
                         "Failed to get device info page-{Page}: {Error} {Message}", page,
                         response.StatusWord, response.StatusMessage);
 

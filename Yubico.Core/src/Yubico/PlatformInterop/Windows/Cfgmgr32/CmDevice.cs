@@ -213,9 +213,7 @@ namespace Yubico.PlatformInterop
 
         private static IList<string> GetDevicePaths(Guid classGuid, string? deviceInstanceId)
         {
-            CmErrorCode errorCode;
-
-            errorCode = CM_Get_Device_Interface_List_Size(
+            CmErrorCode errorCode = CM_Get_Device_Interface_List_Size(
                 out int bufferLength,
                 classGuid,
                 deviceInstanceId,

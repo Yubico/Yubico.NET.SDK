@@ -27,7 +27,7 @@ namespace Yubico.Core.Devices.SmartCard
     internal class DesktopSmartCardDevice : SmartCardDevice
     {
         private readonly string _readerName;
-        private static readonly  ILogger Logger = Logging.Loggers.GetLogger<DesktopSmartCardDevice>();
+        private static readonly ILogger Logger = Logging.Log.GetLogger<DesktopSmartCardDevice>();
 
         public static IReadOnlyList<ISmartCardDevice> GetList()
         {

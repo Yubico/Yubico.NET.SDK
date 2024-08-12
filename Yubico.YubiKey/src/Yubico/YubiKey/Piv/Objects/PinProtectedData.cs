@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int MgmtKeyTag = 0x89;
 
         private bool _disposed;
-        private readonly ILogger _log = Loggers.GetLogger<PinProtectedData>();
+        private readonly ILogger _log = Log.GetLogger<PinProtectedData>();
 
         /// <summary>
         /// The management key that will be PIN-protected. If there is no

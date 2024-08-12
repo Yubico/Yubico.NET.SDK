@@ -27,7 +27,7 @@ namespace Yubico.YubiKey
 {
     internal class SmartCardConnection : IYubiKeyConnection
     {
-        private readonly ILogger _log = Loggers.GetLogger<SmartCardConnection>();
+        private readonly ILogger _log = Log.GetLogger<SmartCardConnection>();
 
         private readonly YubiKeyApplication _yubiKeyApplication;
         private readonly byte[]? _applicationId;

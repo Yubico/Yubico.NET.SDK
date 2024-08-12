@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.U2f
     {
         private const double MaxTimeoutSeconds = 30.0;
 
-        private readonly ILogger _log = Loggers.GetLogger<U2fSession>();
+        private readonly ILogger _log = Log.GetLogger<U2fSession>();
         private bool _disposed;
 
         // The default constructor is explicitly defined to show that we do not want it used.

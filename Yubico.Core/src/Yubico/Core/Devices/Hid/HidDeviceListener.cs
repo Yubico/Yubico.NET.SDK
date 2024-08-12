@@ -35,7 +35,7 @@ namespace Yubico.Core.Devices.Hid
     /// </remarks>
     public abstract class HidDeviceListener
     {
-        private readonly ILogger _logger = Logging.Loggers.GetLogger<HidDeviceListener>();
+        private readonly ILogger _logger = Logging.Log.GetLogger<HidDeviceListener>();
 
         /// <summary>
         /// Subscribe to receive an event whenever a Human Interface Device (HID) is added to the computer.

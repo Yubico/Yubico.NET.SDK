@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.U2f
         private const int SignatureOffset = PublicKeyOffset + PublicKeyLength;
         private const int PayloadLength = AppIdHashLength + ClientDataHashLength + KeyHandleLength + PublicKeyLength + MaxBerSignatureLength + 1;
 
-        private readonly ILogger _log = Loggers.GetLogger<RegistrationData>();
+        private readonly ILogger _log = Log.GetLogger<RegistrationData>();
 
         /// <summary>
         /// The ECDSA public key for this user credential. Each coordinate must

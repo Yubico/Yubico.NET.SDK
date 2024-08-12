@@ -109,7 +109,7 @@ namespace Yubico.YubiKey
         private IYubiKeyDeviceInfo _yubiKeyInfo;
         private Transport _lastActiveTransport;
 
-        private readonly ILogger _logger = Loggers.GetLogger<YubiKeyDevice>();
+        private readonly ILogger _logger = Log.GetLogger<YubiKeyDevice>();
 
         internal ISmartCardDevice GetSmartCardDevice() => _smartCardDevice!;
 

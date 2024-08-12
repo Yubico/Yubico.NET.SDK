@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Pipelines
     {
         private readonly IHidConnection _hidConnection;
 
-        private readonly ILogger _log = Loggers.GetLogger<IHidConnection>();
+        private readonly ILogger _log = Log.GetLogger<IHidConnection>();
 
         /// <summary>
         /// An event which is fired if the YubiKey indicates it is waiting for touch. Event handlers

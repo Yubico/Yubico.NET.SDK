@@ -29,7 +29,7 @@ namespace Yubico.Core.Devices.Hid
         private readonly LinuxFileSafeHandle _handle;
         private bool _isDisposed;
 
-        private readonly ILogger _log = Logging.Loggers.GetLogger<LinuxHidIOReportConnection>();
+        private readonly ILogger _log = Logging.Log.GetLogger<LinuxHidIOReportConnection>();
         private readonly LinuxHidDevice _device;
 
         public int InputReportSize { get; private set; }

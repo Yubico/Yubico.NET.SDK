@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int UnusedTag = 0xFE;
 
         private bool _disposed;
-        private readonly ILogger _log = Loggers.GetLogger<KeyHistory>();
+        private readonly ILogger _log = Log.GetLogger<KeyHistory>();
 
         /// <summary>
         /// Number of Keys with On-Card Certificates. If you set this to zero,

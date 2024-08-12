@@ -35,7 +35,7 @@ namespace Yubico.Core.Devices.Hid
         private bool _isDisposed;
         private readonly MacOSHidDevice _device;
         private readonly IntPtr _loopId;
-        private readonly ILogger _log = Logging.Loggers.GetLogger<MacOSHidIOReportConnection>();
+        private readonly ILogger _log = Logging.Log.GetLogger<MacOSHidIOReportConnection>();
 
         private readonly byte[] _readBuffer;
         private GCHandle _readHandle;
@@ -247,7 +247,7 @@ namespace Yubico.Core.Devices.Hid
             byte[] report,
             long reportLength)
         {
-            ILogger logger = Logging.Loggers.GetLogger(typeof(MacOSHidIOReportConnection).FullName!);
+            ILogger logger = Logging.Log.GetLogger(typeof(MacOSHidIOReportConnection).FullName!);
 
             logger.LogInformation("MacOSHidIOReportConnection.ReportCallback has been called.");
 

@@ -29,7 +29,7 @@ namespace Yubico.Core.Devices.Hid
         private GCHandle? _marshalableThisPtr;
         private CM_NOTIFY_CALLBACK? _callbackDelegate;
 
-        private readonly ILogger _log = Logging.Loggers.GetLogger<WindowsHidDeviceListener>();
+        private readonly ILogger _log = Logging.Log.GetLogger<WindowsHidDeviceListener>();
 
         public WindowsHidDeviceListener()
         {

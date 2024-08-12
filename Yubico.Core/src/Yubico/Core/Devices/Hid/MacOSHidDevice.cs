@@ -29,7 +29,7 @@ namespace Yubico.Core.Devices.Hid
     internal class MacOSHidDevice : HidDevice
     {
         private readonly long _entryId;
-        private readonly ILogger _logger = Logging.Loggers.GetLogger<MacOSHidDevice>();
+        private readonly ILogger _logger = Logging.Log.GetLogger<MacOSHidDevice>();
 
         public MacOSHidDevice(long entryId) :
             base(entryId.ToString(CultureInfo.InvariantCulture))
@@ -49,7 +49,7 @@ namespace Yubico.Core.Devices.Hid
         /// </returns>
         public static IEnumerable<HidDevice> GetList()
         {
-            ILogger logger = Logging.Loggers.GetLogger(typeof(MacOSHidDevice).FullName!);
+            ILogger logger = Logging.Log.GetLogger(typeof(MacOSHidDevice).FullName!);
             using IDisposable? logScope = logger.BeginScope("MacOSHidDevice.GetList()");
 
             IntPtr manager = IntPtr.Zero;
@@ -116,7 +116,7 @@ namespace Yubico.Core.Devices.Hid
 
         internal static long GetEntryId(IntPtr device)
         {
-            ILogger Logger = Logging.Loggers.GetLogger(typeof(MacOSHidDevice).FullName!);
+            ILogger Logger = Logging.Log.GetLogger(typeof(MacOSHidDevice).FullName!);
 
             int service = IOHIDDeviceGetService(device);
             kern_return_t result = IORegistryEntryGetRegistryEntryID(service, out long entryId);

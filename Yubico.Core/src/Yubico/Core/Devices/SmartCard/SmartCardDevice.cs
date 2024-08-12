@@ -25,7 +25,7 @@ namespace Yubico.Core.Devices.SmartCard
     /// </summary>
     public abstract class SmartCardDevice : ISmartCardDevice
     {
-        private readonly ILogger _log = Logging.Loggers.GetLogger<SmartCardDevice>();
+        private readonly ILogger _log = Logging.Log.GetLogger<SmartCardDevice>();
 
         /// <inheritdoc />
         public DateTime LastAccessed { get; protected set; } = DateTime.MinValue;

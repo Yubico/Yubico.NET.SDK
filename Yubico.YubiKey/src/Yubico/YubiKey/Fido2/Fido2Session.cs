@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Fido2
     /// </remarks>
     public sealed partial class Fido2Session : IDisposable
     {
-        private readonly ILogger _log = Loggers.GetLogger<Fido2Session>();
+        private readonly ILogger _log = Log.GetLogger<Fido2Session>();
         private bool _disposed;
         private AuthenticatorInfo? _authenticatorInfo;
 

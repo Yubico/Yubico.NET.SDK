@@ -21,7 +21,7 @@ namespace Yubico.YubiKey
 {
     internal static class GetDeviceInfoHelper
     {
-        private static readonly ILogger Logger = Loggers.GetLogger(typeof(GetDeviceInfoHelper).FullName!);
+        private static readonly ILogger Logger = Log.GetLogger(typeof(GetDeviceInfoHelper).FullName!);
 
         /// <summary>
         /// Fetches and aggregates device configuration details from a YubiKey using multiple APDU commands,

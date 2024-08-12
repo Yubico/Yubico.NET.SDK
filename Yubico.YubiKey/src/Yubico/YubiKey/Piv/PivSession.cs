@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public sealed partial class PivSession : IDisposable
     {
-        private readonly ILogger _logger = Loggers.GetLogger<PivSession>();
+        private readonly ILogger _logger = Log.GetLogger<PivSession>();
         private readonly IYubiKeyDevice _yubiKeyDevice;
         private bool _disposed;
 

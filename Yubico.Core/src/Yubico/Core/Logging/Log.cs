@@ -19,13 +19,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Yubico.Core.Logging
 {
-    /// <summary>
-    /// TODO write
-    /// </summary>
-    public static class Loggers
+    public static partial class Log
     {
-        private static ILoggerFactory LoggerFactory = GetDefaultFactory();
-        
+        private static ILoggerFactory _factoryInstance = GetDefaultFactory();
+
+        //Creates a logging factory based on a JsonConfiguration
         private static ILoggerFactory GetDefaultFactory()
         {
             const string AppsettingsJson = "appsettings.json";
@@ -34,7 +32,9 @@ namespace Yubico.Core.Logging
                 .AddJsonFile(AppsettingsJson, optional: true)
                 .Build();
 
-            return Microsoft.Extensions.Logging.LoggerFactory.Create(
+            IConfigurationSection loggingConfiguration = configuration.GetSection("Logging");
+            // see if creation was OK
+            return LoggerFactory.Create(
                 builder =>
                 {
                     try
@@ -52,16 +52,23 @@ namespace Yubico.Core.Logging
         }
 
         /// <summary>
-        /// TODO write
+        /// <example>
+        /// From your project, you can set up logging dynamically like this, if you dont use this, the default loggingFactory will be used.
+        /// <code language="csharp">
+        /// Logging.ConfigureLoggerFactory(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Trace));
+        /// </code>
+        /// With the default logging factory, you can load config using json.
+        /// </example>
         /// </summary>
         /// <param name="configure"></param>
-        public static void ConfigureLoggerFactory(Action<ILoggingBuilder> configure) 
-            => LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(configure);
+        public static void ConfigureLoggerFactory(Action<ILoggingBuilder> configure) =>
+            _factoryInstance = LoggerFactory.Create(configure);
 
         /// <inheritdoc cref="LoggerFactoryExtensions.CreateLogger{T}"/>
-        public static ILogger GetLogger<T>() => LoggerFactory.CreateLogger<T>();
-        
+        public static ILogger GetLogger<T>() => _factoryInstance.CreateLogger<T>();
+
         /// <inheritdoc cref="LoggerFactoryExtensions.CreateLogger"/>
-        public static ILogger GetLogger(string categoryName) => LoggerFactory.CreateLogger(categoryName);
+        public static ILogger GetLogger(string categoryName) =>
+            _factoryInstance.CreateLogger(categoryName);
     }
 }

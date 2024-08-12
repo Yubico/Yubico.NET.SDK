@@ -35,7 +35,7 @@ namespace Yubico.Core.Devices.SmartCard
     /// </remarks>
     public abstract class SmartCardDeviceListener
     {
-        private readonly ILogger _log = Logging.Loggers.GetLogger<SmartCardDeviceListener>();
+        private readonly ILogger _log = Logging.Log.GetLogger<SmartCardDeviceListener>();
 
         /// <summary>
         /// Subscribe to receive an event whenever a smart card device is added to the computer.

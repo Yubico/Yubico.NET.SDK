@@ -28,7 +28,7 @@ namespace Yubico.Core.Devices.Hid
         private Thread? _listenerThread;
         private IntPtr? _runLoop;
 
-        private readonly ILogger _log = Logging.Loggers.GetLogger<MacOSHidDeviceListener>();
+        private readonly ILogger _log = Logging.Log.GetLogger<MacOSHidDeviceListener>();
 
         // Start listening as soon as this object is constructed.
         public MacOSHidDeviceListener()

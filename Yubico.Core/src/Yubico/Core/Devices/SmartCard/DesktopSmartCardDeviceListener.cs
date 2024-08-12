@@ -29,7 +29,7 @@ namespace Yubico.Core.Devices.SmartCard
     /// </summary>
     internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener, IDisposable
     {
-        private readonly ILogger _log = Logging.Loggers.GetLogger<DesktopSmartCardDeviceListener>();
+        private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardDeviceListener>();
 
         // The resource manager context.
         private SCardContext _context;

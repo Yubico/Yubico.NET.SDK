@@ -30,8 +30,7 @@ namespace Yubico.YubiKey.DeviceExtensions
             }
             catch (PlatformInterop.SCardException e)
             {
-                Loggers
-                    .GetLogger("Yubico.YubiKey.DeviceExtensions.IsYubicoDevice")
+                Log.GetLogger(typeof(KeyboardDeviceInfoFactory).FullName!)
                     .LogWarning(e, "Exception encountered when attempting to read device ATR.");
             }
 

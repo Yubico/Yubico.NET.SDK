@@ -23,7 +23,7 @@ namespace Yubico.YubiKey
 {
     internal static class GetDeviceInfoResponseHelper
     {
-        private static readonly ILogger Logger = Loggers.GetLogger(typeof(GetDeviceInfoResponseHelper).FullName!);
+        private static readonly ILogger Logger = Log.GetLogger(typeof(GetDeviceInfoResponseHelper).FullName!);
 
         /// <summary>
         /// Attempts to create a dictionary from a TLV-encoded byte array by parsing and extracting tag-value pairs.

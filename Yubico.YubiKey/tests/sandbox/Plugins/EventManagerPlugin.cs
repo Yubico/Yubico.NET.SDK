@@ -13,9 +13,12 @@
 // limitations under the License.
 
 using System;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Yubico.Core.Logging;
+using Log = Yubico.Core.Logging.Log;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -37,11 +40,17 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            using Logger? log = new LoggerConfiguration()
+            Logger log = new LoggerConfiguration()
                 .Enrich.With(new ThreadIdEnricher())
                 .WriteTo.Console(
                     outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
+
+            Log.ConfigureLoggerFactory(builder => 
+                builder
+                    .AddSerilog(log)
+                    .AddFilter(level => level >= LogLevel.Information));
+            // TODO test if works
 
             YubiKeyDeviceListener.Instance.Arrived += (s, e) =>
             {

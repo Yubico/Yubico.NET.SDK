@@ -24,7 +24,7 @@ namespace Yubico.YubiKey
 {
     internal static class KeyboardDeviceInfoFactory
     {
-        private static readonly ILogger Logger = Loggers.GetLogger(typeof(KeyboardDeviceInfoFactory).FullName!);
+        private static readonly ILogger Logger = Log.GetLogger(typeof(KeyboardDeviceInfoFactory).FullName!);
 
         public static YubiKeyDeviceInfo GetDeviceInfo(IHidDevice device)
         {

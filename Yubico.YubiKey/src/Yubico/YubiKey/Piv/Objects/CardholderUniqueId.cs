@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int LrcTag = 0xFE;
 
         private bool _disposed;
-        private readonly ILogger _log = Loggers.GetLogger<CardholderUniqueId>();
+        private readonly ILogger _log = Log.GetLogger<CardholderUniqueId>();
 
         /// <summary>
         /// The "Federal Agency Smart Credential Number" (FASC-N). This is a fixed

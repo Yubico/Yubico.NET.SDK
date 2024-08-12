@@ -110,7 +110,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int UnusedTag8 = 0xFE;
 
         private bool _disposed;
-        private readonly ILogger _log = Loggers.GetLogger<CardCapabilityContainer>();
+        private readonly ILogger _log = Log.GetLogger<CardCapabilityContainer>();
 
         /// <summary>
         /// The full Unique Card Identifier which consists of the AID || CardID.

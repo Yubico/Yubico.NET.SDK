@@ -27,7 +27,7 @@ namespace Yubico.Core.Devices.Hid
     /// </summary>
     internal class WindowsHidDevice : HidDevice
     {
-        private readonly ILogger _log = Logging.Loggers.GetLogger<WindowsHidDevice>();
+        private readonly ILogger _log = Logging.Log.GetLogger<WindowsHidDevice>();
 
         /// <summary>
         /// Gets the list of Windows HID devices available to the system.

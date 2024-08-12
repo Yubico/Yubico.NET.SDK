@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Pipelines
     // be available over FIDO.
     internal class OtpErrorTransform : IApduTransform
     {
-        private readonly ILogger _logger = Loggers.GetLogger<OtpErrorTransform>();
+        private readonly ILogger _logger = Log.GetLogger<OtpErrorTransform>();
 
         private readonly IApduTransform _nextTransform;
 

@@ -27,7 +27,7 @@ namespace Yubico.YubiKey
         public static YubiKeyDeviceInfo GetDeviceInfo(
             ISmartCardDevice device)
         {
-            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
+            ILogger logger = Log.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             if (!device.IsYubicoDevice())
             {
@@ -86,7 +86,7 @@ namespace Yubico.YubiKey
             ISmartCardDevice device,
             [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)
         {
-            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
+            ILogger logger = Log.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             try
             {
@@ -121,7 +121,7 @@ namespace Yubico.YubiKey
             ISmartCardDevice device,
             [MaybeNullWhen(returnValue: false)] out FirmwareVersion firmwareVersion)
         {
-            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
+            ILogger logger = Log.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             try
             {
@@ -164,7 +164,7 @@ namespace Yubico.YubiKey
             ISmartCardDevice device,
             [MaybeNullWhen(returnValue: false)] out FirmwareVersion firmwareVersion)
         {
-            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
+            ILogger logger = Log.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             try
             {
@@ -202,7 +202,7 @@ namespace Yubico.YubiKey
             ISmartCardDevice device,
             out int? serialNumber)
         {
-            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
+            ILogger logger = Log.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             try
             {
@@ -246,7 +246,7 @@ namespace Yubico.YubiKey
             ISmartCardDevice device,
             out int? serialNumber)
         {
-            ILogger logger = Loggers.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
+            ILogger logger = Log.GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!);
 
             try
             {
@@ -284,7 +284,7 @@ namespace Yubico.YubiKey
         private static void ErrorHandler(
             Exception exception,
             string message) =>
-            Loggers
+            Log
                 .GetLogger(typeof(SmartCardDeviceInfoFactory).FullName!)
                 .LogWarning(exception, message);
     }

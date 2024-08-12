@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.Scp03
     public sealed class Scp03Session : IDisposable
     {
         private bool _disposed;
-        private readonly ILogger _log = Loggers.GetLogger<Scp03Session>();
+        private readonly ILogger _log = Log.GetLogger<Scp03Session>();
 
         /// <summary>
         /// The object that represents the connection to the YubiKey. Most

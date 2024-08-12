@@ -29,7 +29,7 @@ namespace Yubico.Core.Devices.Hid
         private readonly MacOSHidDevice _device;
         private readonly long _entryId;
         private IntPtr _deviceHandle;
-        private readonly ILogger _log = Logging.Loggers.GetLogger<MacOSHidFeatureReportConnection>();
+        private readonly ILogger _log = Logging.Log.GetLogger<MacOSHidFeatureReportConnection>();
 
         private bool _isDisposed;
 

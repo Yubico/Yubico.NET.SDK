@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Fido2
     {
         private const int DigestLength = 16;
 
-        private readonly ILogger _log = Loggers.GetLogger<SerializedLargeBlobArray>();
+        private readonly ILogger _log = Log.GetLogger<SerializedLargeBlobArray>();
         private readonly List<LargeBlobEntry> _entryList;
 
         /// <summary>

@@ -34,7 +34,7 @@ namespace Yubico.Core.Devices.Hid
 
         private readonly string _devnode;
 
-        private readonly ILogger _log = Logging.Loggers.GetLogger<LinuxHidDevice>();
+        private readonly ILogger _log = Logging.Log.GetLogger<LinuxHidDevice>();
 
         /// <summary>
         /// Gets a list of all the HIDs on the system (not just YubiKeys).
@@ -178,7 +178,7 @@ namespace Yubico.Core.Devices.Hid
             }
             else
             {
-                Logging.Loggers.GetLogger(typeof(LinuxHidDevice).FullName!).LogWarning("IOCTL failed. {Error}", LibcHelpers.GetErrnoString());
+                Logging.Log.GetLogger(typeof(LinuxHidDevice).FullName!).LogWarning("IOCTL failed. {Error}", LibcHelpers.GetErrnoString());
             }
 
             Marshal.FreeHGlobal(descSize);

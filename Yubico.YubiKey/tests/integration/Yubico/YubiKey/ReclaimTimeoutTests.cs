@@ -58,7 +58,6 @@ namespace Yubico.YubiKey
                     .ClearProviders()
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
-            // TODO test if works
 
             // TEST ASSUMPTION: This test requires FIDO. On Windows, that means this test case must run elevated (admin).
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice();

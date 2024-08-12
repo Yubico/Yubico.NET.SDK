@@ -50,7 +50,6 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 builder
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
-            // TODO test if works
             YubiKeyDeviceListener.Instance.Arrived += (s, e) =>
             {
                 Console.WriteLine("YubiKey arrived:");

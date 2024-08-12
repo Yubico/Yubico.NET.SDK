@@ -27,7 +27,7 @@ namespace Yubico.Core.Logging
     // of Yubico.Core.Logging to only have to use one namespace (Yubico.Core.Logging), instead of two (Microsoft.Extensions.Logging
     // as the second). I'm duplicating some code/API/effort in one file to avoid having to over-include in many hundreds
     // of files. Files that have to include both namespaces should then hopefully be exceptional cases.
-    public static class LoggerExtensions
+    public static partial class LoggerExtensions
     {
         // Needed to satisfy compiling out the sensitive logs in Release builds.
         private static void NoOp(params object?[] _) { }

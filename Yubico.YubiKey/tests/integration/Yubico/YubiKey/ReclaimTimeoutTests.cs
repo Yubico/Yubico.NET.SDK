@@ -20,12 +20,12 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Xunit;
-using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.TestUtilities;
 using Log = Yubico.Core.Logging.Log;
+using Logger = Serilog.Core.Logger;
 
 namespace Yubico.YubiKey
 {
@@ -55,6 +55,7 @@ namespace Yubico.YubiKey
 
             Log.ConfigureLoggerFactory(builder => 
                 builder
+                    .ClearProviders()
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
             // TODO test if works

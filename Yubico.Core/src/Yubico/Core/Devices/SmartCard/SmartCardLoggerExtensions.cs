@@ -6,7 +6,7 @@ using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.SmartCard
 {
-    internal static class SmartCardLoggerExtensions
+    internal static partial class SmartCardLoggerExtensions
     {
         public static IDisposable? BeginTransactionScope(this ILogger logger, IDisposable transactionScope) =>
             logger.BeginScope("Transaction[{TransactionID}]", transactionScope.GetHashCode());

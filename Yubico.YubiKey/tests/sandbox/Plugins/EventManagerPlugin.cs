@@ -17,8 +17,8 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using Yubico.Core.Logging;
 using Log = Yubico.Core.Logging.Log;
+using Logger = Serilog.Core.Logger;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -51,7 +51,6 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
             // TODO test if works
-
             YubiKeyDeviceListener.Instance.Arrived += (s, e) =>
             {
                 Console.WriteLine("YubiKey arrived:");

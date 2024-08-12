@@ -69,6 +69,7 @@ namespace Yubico.Core.Logging
     /// After configuring the logger, you can create log instances and log messages as follows:
     /// <example>
     /// <code language="csharp">
+    /// namespace Yubico;
     /// public class ExampleClass
     /// {
     ///     public ExampleClass()
@@ -76,7 +77,7 @@ namespace Yubico.Core.Logging
     ///         // Logger with the class name as the category
     ///         ILogger typeNamedLogger = Log.GetLogger&lt;ExampleClass&gt;();
     ///         typeNamedLogger.LogInformation("Hello World");
-    ///         // Output: ExampleClass: Hello World
+    ///         // Output: Yubico.ExampleClass: Hello World
     ///
     ///         // Logger with a custom category name
     ///         ILogger categoryLogger = Log.GetLogger("SmartCard");

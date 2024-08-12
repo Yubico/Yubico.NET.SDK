@@ -50,6 +50,10 @@ namespace Yubico.Core.Logging
     /// Configure the logger dynamically in your code:
     /// <example>
     /// <code language="csharp">
+    ///
+    /// // Optionally, clear previous loggers
+    /// Log.ConfigureLoggerFactory(builder => builder.ClearProviders());
+    /// 
     /// // Add a console logger (added by default)
     /// Log.ConfigureLoggerFactory(builder => builder.AddConsole());
     ///

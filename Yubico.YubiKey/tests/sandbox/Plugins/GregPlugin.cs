@@ -14,10 +14,6 @@
 
 using System;
 using System.Linq;
-using Microsoft.Extensions.Logging;
-using Serilog;
-using Yubico.Core.Logging;
-using Log = Yubico.Core.Logging.Log;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -30,19 +26,6 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            using Serilog.Core.Logger? log = new LoggerConfiguration()
-                .Enrich.With(new ThreadIdEnricher())
-                .WriteTo.Console(
-                    outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
-                .CreateLogger();
-
-#pragma warning disable CS0618 // Type or member is obsolete
-            Core.Logging.Log.LoggerFactory = LoggerFactory.Create(
-#pragma warning restore CS0618 // Type or member is obsolete
-                builder => builder
-                    .AddSerilog(log)
-                    .AddFilter(level => level >= LogLevel.Information));
-
             IYubiKeyDevice? yubiKey = YubiKeyDevice.FindByTransport(Transport.All).First();
 
             // IYubiKeyDevice? yubiKey = YubiKeyDevice.FindByTransport(Transport.HidFido).First();

@@ -11,21 +11,33 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using System;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
 namespace Yubico.Core.Logging
 {
-    public class LogTests
+    public class LogTests : IDisposable
     {
+        private readonly ILoggerFactory _originalFactory = Log.Instance;
+
+#pragma warning disable CA1816
+        public void Dispose()
+#pragma warning restore CA1816
+        {
+            // Reset to the original factory after each test
+            Log.Instance = _originalFactory;
+        }
+        
         // Ensure that the default LoggerFactory is created when no configuration is provided.
         [Fact]
         public void DefaultLoggerFactory_IsCreated_WhenNoConfigurationProvided()
         {
             // Act
             ILoggerFactory loggerFactory = Log.Instance;
-
+        
             // Assert
             Assert.NotNull(loggerFactory);
             ILogger logger = loggerFactory.CreateLogger<LogTests>();
@@ -39,10 +51,10 @@ namespace Yubico.Core.Logging
             // Arrange
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             Log.Instance = mockLoggerFactory.Object;
-
+        
             // Act
             ILoggerFactory actualFactory = Log.Instance;
-
+        
             // Assert
             Assert.Same(mockLoggerFactory.Object, actualFactory);
         }

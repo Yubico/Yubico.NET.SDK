@@ -128,7 +128,7 @@ namespace Yubico.Core.Logging
             set
             {
                 _factory = value;
-                
+
                 // Also swap out the new implementation instance
                 Instance = value;
             }

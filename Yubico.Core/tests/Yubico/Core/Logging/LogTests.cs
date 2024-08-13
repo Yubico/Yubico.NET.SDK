@@ -30,20 +30,20 @@ namespace Yubico.Core.Logging
             // Reset to the original factory after each test
             Log.Instance = _originalFactory;
         }
-        
+
         // Ensure that the default LoggerFactory is created when no configuration is provided.
         [Fact]
         public void DefaultLoggerFactory_IsCreated_WhenNoConfigurationProvided()
         {
             // Act
             ILoggerFactory loggerFactory = Log.Instance;
-        
+
             // Assert
             Assert.NotNull(loggerFactory);
             ILogger logger = loggerFactory.CreateLogger<LogTests>();
             Assert.NotNull(logger);
         }
-        
+
         // Ensure that LoggerFactory can be replaced manually using the Instance property.
         [Fact]
         public void ManualLoggerFactory_SettingInstance_OverridesDefaultFactory()
@@ -51,14 +51,14 @@ namespace Yubico.Core.Logging
             // Arrange
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             Log.Instance = mockLoggerFactory.Object;
-        
+
             // Act
             ILoggerFactory actualFactory = Log.Instance;
-        
+
             // Assert
             Assert.Same(mockLoggerFactory.Object, actualFactory);
         }
-        
+
         // Ensure that LoggerFactory can be replaced manually using the Instance property.
         // Remove this once we remove Log.Legacy.cs
         [Fact]

@@ -139,7 +139,7 @@ namespace Yubico.Core.Logging
 
         /// <inheritdoc cref="LoggerFactoryExtensions.CreateLogger"/>
         public static ILogger GetLogger(string categoryName) => Instance.CreateLogger(categoryName);
-        
+
         /// <summary>
         /// <example>
         /// From your project, you can set up logging dynamically like this, if you don't use this,
@@ -175,9 +175,9 @@ namespace Yubico.Core.Logging
                         _ = builder.AddConsole();
                     });
             }
-            #pragma warning disable CA1031
+#pragma warning disable CA1031
             catch (Exception e)
-            #pragma warning restore CA1031
+#pragma warning restore CA1031
             {
                 Console.Error.WriteLine(e);
             }

@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
-            Log.ConfigureLoggerFactory(builder => 
+            Log.ConfigureLoggerFactory(builder =>
                 builder
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));

@@ -53,7 +53,7 @@ namespace Yubico.YubiKey
                     outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
-            Log.ConfigureLoggerFactory(builder => 
+            Log.ConfigureLoggerFactory(builder =>
                 builder
                     .ClearProviders()
                     .AddSerilog(log)

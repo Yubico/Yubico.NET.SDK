@@ -8,7 +8,7 @@ namespace Yubico.Core.Devices.SmartCard
         [Obsolete("Obsolete")]
         public static IDisposable BeginTransactionScope(this Logger logger, IDisposable transactionScope) =>
             logger.BeginScope("Transaction[{TransactionID}]", transactionScope.GetHashCode())!;
-        
+
         [Obsolete("Obsolete")]
         public static void SCardApiCall(this Logger logger, string apiName, uint result)
         {

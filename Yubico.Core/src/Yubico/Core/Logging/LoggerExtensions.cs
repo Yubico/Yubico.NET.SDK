@@ -70,7 +70,7 @@ namespace Yubico.Core.Logging
 #else
             NoOp(eventId, message, args);
 #endif
-        
+
         /// <summary>
         /// Formats and writes a debug log message that contains potentially sensitive information.
         /// </summary>
@@ -107,7 +107,7 @@ namespace Yubico.Core.Logging
 #endif
 
         //------------------------------------------TRACE------------------------------------------//
-        
+
         /// <summary>
         /// Formats and writes a trace log message that contains potentially sensitive information.
         /// </summary>
@@ -144,7 +144,7 @@ namespace Yubico.Core.Logging
 #else
             NoOp(eventId, message, args);
 #endif
-        
+
         /// <summary>
         /// Formats and writes a trace log message that contains potentially sensitive information.
         /// </summary>
@@ -254,7 +254,7 @@ namespace Yubico.Core.Logging
 #else
             NoOp(message, args);
 #endif
-        
+
         /// <summary>
         /// Formats and writes a warning log message that contains potentially sensitive information.
         /// </summary>
@@ -291,7 +291,7 @@ namespace Yubico.Core.Logging
 #else
             NoOp(eventId, message, args);
 #endif
-        
+
         /// <summary>
         /// Formats and writes a warning log message that contains potentially sensitive information.
         /// </summary>
@@ -309,7 +309,7 @@ namespace Yubico.Core.Logging
 #else
             NoOp(exception, message, args);
 #endif
-        
+
         /// <summary>
         /// Formats and writes a warning log message that contains potentially sensitive information.
         /// </summary>
@@ -328,7 +328,7 @@ namespace Yubico.Core.Logging
 #endif
 
         //------------------------------------------ERROR------------------------------------------//
-        
+
         /// <summary>
         /// Formats and writes an error log message that contains potentially sensitive information.
         /// </summary>
@@ -347,7 +347,7 @@ namespace Yubico.Core.Logging
 #else
             NoOp(eventId, exception, message, args);
 #endif
-        
+
         /// <summary>
         /// Formats and writes an error log message that contains potentially sensitive information.
         /// </summary>
@@ -365,7 +365,7 @@ namespace Yubico.Core.Logging
 #else
             NoOp(eventId, message, args);
 #endif
-        
+
         /// <summary>
         /// Formats and writes an error log message that contains potentially sensitive information.
         /// </summary>
@@ -383,7 +383,7 @@ namespace Yubico.Core.Logging
 #else
             NoOp(exception, message, args);
 #endif
-        
+
         /// <summary>
         /// Formats and writes an error log message that contains potentially sensitive information.
         /// </summary>
@@ -421,7 +421,7 @@ namespace Yubico.Core.Logging
 #else
             NoOp(eventId, exception, message, args);
 #endif
-        
+
         /// <summary>
         /// Formats and writes a critical log message that contains potentially sensitive information.
         /// </summary>
@@ -439,7 +439,7 @@ namespace Yubico.Core.Logging
 #else
             NoOp(eventId, message, args);
 #endif
-        
+
         /// <summary>
         /// Formats and writes a critical log message that contain potentially sensitive information.
         /// </summary>
@@ -489,7 +489,7 @@ namespace Yubico.Core.Logging
 #else
             NoOp(logLevel, message, args);
 #endif
-        
+
         /// <summary>
         /// Formats and writes a log message that may contain sensitive information at the specified log level.
         /// </summary>

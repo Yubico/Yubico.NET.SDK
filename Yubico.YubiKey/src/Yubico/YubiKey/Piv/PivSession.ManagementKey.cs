@@ -907,14 +907,14 @@ namespace Yubico.YubiKey.Piv
             {
                 var setCommand = new SetManagementKeyCommand(newKey, touchPolicy, newKeyAlgorithm);
                 SetManagementKeyResponse setResponse = Connection.SendCommand(setCommand);
-            
+
                 if (setResponse.Status == ResponseStatus.Success)
                 {
                     ManagementKeyAlgorithm = newKeyAlgorithm;
 
                     return true;
                 }
-                
+
                 _logger.LogInformation($"Failed to set management key. Message: {setResponse.StatusMessage}");
 
             }
@@ -1057,7 +1057,7 @@ namespace Yubico.YubiKey.Piv
 
                 ManagementKeyAuthenticated = true;
             }
-            
+
             _logger.LogInformation($"Failed to authenticate management key. Message: {completeResponse.StatusMessage}");
 
             return ManagementKeyAuthenticated;

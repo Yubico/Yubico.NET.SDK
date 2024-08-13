@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// </summary>
         /// <param name="serialNumber"></param>
         /// <returns></returns>
-        public static IYubiKeyDevice GetBySerial(int serialNumber) 
+        public static IYubiKeyDevice GetBySerial(int serialNumber)
             => GetTestDevices().Single(d => d.SerialNumber == serialNumber);
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <returns>The allow-list filtered YubiKey that was found.</returns>
         public static IYubiKeyDevice GetTestDevice(
             StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
-            Transport transport = Transport.All) 
+            Transport transport = Transport.All)
             => GetTestDevices(transport)
                 .SelectByStandardTestDevice(testDeviceType);
 
@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.TestUtilities
             => GetTestDevices(transport)
                 .SelectByMinimumVersion(minimumFirmwareVersion);
 
-        
+
         private static void CreateAllowListFileIfMissing(string allowListFilePath)
         {
             if (File.Exists(allowListFilePath))

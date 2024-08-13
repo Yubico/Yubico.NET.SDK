@@ -37,8 +37,8 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
             return true;
         }
-        
+
     }
-    
-    
+
+
 }

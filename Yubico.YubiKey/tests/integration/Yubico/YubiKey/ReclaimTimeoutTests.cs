@@ -47,7 +47,7 @@ namespace Yubico.YubiKey
             // Force the old behavior even for newer YubiKeys.
             AppContext.SetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, true);
 
-            Logger log = new LoggerConfiguration()
+            using Logger? log = new LoggerConfiguration()
                 .Enrich.With(new ThreadIdEnricher())
                 .WriteTo.Console(
                     outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")

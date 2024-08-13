@@ -29,12 +29,12 @@ namespace Yubico.Core.Devices.Hid
     internal class MacOSHidDevice : HidDevice
     {
         private readonly long _entryId;
-        private readonly ILogger _logger = Logging.Log.GetLogger<MacOSHidDevice>();
+        private readonly ILogger _log = Logging.Log.GetLogger<MacOSHidDevice>();
 
         public MacOSHidDevice(long entryId) :
             base(entryId.ToString(CultureInfo.InvariantCulture))
         {
-            _logger.LogInformation(
+            _log.LogInformation(
                 $"Creating new instance of MacOSHidDevice based on device with EntryID [{entryId}]",
                 entryId);
 
@@ -136,7 +136,7 @@ namespace Yubico.Core.Devices.Hid
         public void LogDeviceAccessTime()
         {
             LastAccessed = DateTime.Now;
-            _logger.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
+            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
         }
     }
 }

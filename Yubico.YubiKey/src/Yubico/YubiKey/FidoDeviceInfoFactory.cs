@@ -25,7 +25,7 @@ namespace Yubico.YubiKey
 {
     internal static class FidoDeviceInfoFactory
     {
-        private static readonly ILogger Log = Core.Logging.Log.GetLogger("Yubico.YubiKey.FidoDeviceInfoFactory");
+        private static readonly ILogger Log = Core.Logging.Log.GetLogger(typeof(FidoDeviceInfoFactory).FullName!);
         public static YubiKeyDeviceInfo GetDeviceInfo(IHidDevice device)
         {
             if (!device.IsYubicoDevice())

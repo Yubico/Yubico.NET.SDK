@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public sealed partial class PivSession : IDisposable
     {
-        private readonly ILogger _logger = Log.GetLogger<PivSession>();
+        private readonly ILogger _log = Log.GetLogger<PivSession>();
         private readonly IYubiKeyDevice _yubiKeyDevice;
         private bool _disposed;
 
@@ -234,7 +234,7 @@ namespace Yubico.YubiKey.Piv
 
         private PivSession(StaticKeys? scp03Keys, IYubiKeyDevice yubiKey)
         {
-            _logger.LogInformation(
+            _log.LogInformation(
                 "Create a new instance of PivSession" + (scp03Keys is null
                     ? "."
                     : " over SCP03"));
@@ -370,7 +370,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivMetadata GetMetadata(byte slotNumber)
         {
-            _logger.LogInformation("GetMetadata for slot number {SlotNumber:X2}.", slotNumber);
+            _log.LogInformation("GetMetadata for slot number {SlotNumber:X2}.", slotNumber);
 
             if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
             {
@@ -424,7 +424,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivBioMetadata GetBioMetadata()
         {
-            _logger.LogInformation("GetBioMetadata");
+            _log.LogInformation("GetBioMetadata");
             return Connection.SendCommand(new GetBioMetadataCommand()).GetData();
         }
 
@@ -471,7 +471,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ResetApplication()
         {
-            _logger.LogInformation("Resetting the PIV application.");
+            _log.LogInformation("Resetting the PIV application.");
 
             // To reset, both the PIN and PUK must be blocked.
             TryBlock(PivSlot.Pin);
@@ -531,7 +531,7 @@ namespace Yubico.YubiKey.Piv
                 AuthenticateManagementKey();
             }
 
-            _logger.LogDebug("Moving key from {SourceSlot} to {DestinationSlot}", sourceSlot, destinationSlot);
+            _log.LogDebug("Moving key from {SourceSlot} to {DestinationSlot}", sourceSlot, destinationSlot);
             var command = new MoveKeyCommand(sourceSlot, destinationSlot);
             MoveKeyResponse response = Connection.SendCommand(command);
 
@@ -540,7 +540,7 @@ namespace Yubico.YubiKey.Piv
                 throw new InvalidOperationException(response.StatusMessage);
             }
 
-            _logger.LogInformation(
+            _log.LogInformation(
                 "Successfully moved key from {SourceSlot} to {DestinationSlot}", sourceSlot, destinationSlot);
         }
 
@@ -579,7 +579,7 @@ namespace Yubico.YubiKey.Piv
                 AuthenticateManagementKey();
             }
 
-            _logger.LogDebug("Deleting key at slot {TargetSlot}", slotToClear);
+            _log.LogDebug("Deleting key at slot {TargetSlot}", slotToClear);
             var command = new DeleteKeyCommand(slotToClear);
             DeleteKeyResponse response = Connection.SendCommand(command);
 
@@ -596,7 +596,7 @@ namespace Yubico.YubiKey.Piv
                 ? "Successfully deleted key at slot {targetSlot}."
                 : "No data received from Yubikey after attempted delete on slot {targetSlot}, indicating that was likely empty to begin with.";
 
-            _logger.LogInformation(logMessage, slotToClear);
+            _log.LogInformation(logMessage, slotToClear);
         }
 
         // Block the PIN or PUK
@@ -612,7 +612,7 @@ namespace Yubico.YubiKey.Piv
         // PivSlot.Puk, block the PUK.
         private bool BlockPinOrPuk(byte slotNumber)
         {
-            _logger.LogInformation($"Block the {(slotNumber == 0x80 ? "PIN" : "PUK")}.");
+            _log.LogInformation($"Block the {(slotNumber == 0x80 ? "PIN" : "PUK")}.");
             int retriesRemaining;
 
             do

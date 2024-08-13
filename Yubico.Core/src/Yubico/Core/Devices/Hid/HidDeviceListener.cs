@@ -35,7 +35,7 @@ namespace Yubico.Core.Devices.Hid
     /// </remarks>
     public abstract class HidDeviceListener
     {
-        private readonly ILogger _logger = Logging.Log.GetLogger<HidDeviceListener>();
+        private readonly ILogger _log = Logging.Log.GetLogger<HidDeviceListener>();
 
         /// <summary>
         /// Subscribe to receive an event whenever a Human Interface Device (HID) is added to the computer.
@@ -75,7 +75,7 @@ namespace Yubico.Core.Devices.Hid
         /// </param>
         protected void OnArrived(IHidDevice device)
         {
-            _logger.LogInformation("HID {Device} arrived.", device);
+            _log.LogInformation("HID {Device} arrived.", device);
             Arrived?.Invoke(this, new HidDeviceEventArgs(device));
         }
 
@@ -88,7 +88,7 @@ namespace Yubico.Core.Devices.Hid
         /// </param>
         protected void OnRemoved(IHidDevice? device)
         {
-            _logger.LogInformation("HID {Device} removed.", device);
+            _log.LogInformation("HID {Device} removed.", device);
             Removed?.Invoke(this, new HidDeviceEventArgs(device));
         }
 

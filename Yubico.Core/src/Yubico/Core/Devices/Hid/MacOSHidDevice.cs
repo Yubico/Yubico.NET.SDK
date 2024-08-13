@@ -49,8 +49,8 @@ namespace Yubico.Core.Devices.Hid
         /// </returns>
         public static IEnumerable<HidDevice> GetList()
         {
-            ILogger logger = Logging.Log.GetLogger(typeof(MacOSHidDevice).FullName!);
-            using IDisposable? logScope = logger.BeginScope("MacOSHidDevice.GetList()");
+            ILogger log = Logging.Log.GetLogger(typeof(MacOSHidDevice).FullName!);
+            using IDisposable? logScope = log.BeginScope("MacOSHidDevice.GetList()");
 
             IntPtr manager = IntPtr.Zero;
             IntPtr deviceSet = IntPtr.Zero;
@@ -63,7 +63,7 @@ namespace Yubico.Core.Devices.Hid
                 deviceSet = IOHIDManagerCopyDevices(manager);
 
                 long deviceSetCount = CFSetGetCount(deviceSet);
-                logger.LogInformation("Found {DeviceCount} HID devices in this device set.", deviceSetCount);
+                log.LogInformation("Found {DeviceCount} HID devices in this device set.", deviceSetCount);
 
                 var devices = new IntPtr[deviceSetCount];
 
@@ -84,13 +84,13 @@ namespace Yubico.Core.Devices.Hid
             {
                 if (manager != IntPtr.Zero)
                 {
-                    logger.LogInformation("IOHIDManager released.");
+                    log.LogInformation("IOHIDManager released.");
                     CFRelease(manager);
                 }
 
                 if (deviceSet != IntPtr.Zero)
                 {
-                    logger.LogInformation("HID device set released.");
+                    log.LogInformation("HID device set released.");
                     CFRelease(deviceSet);
                 }
             }
@@ -116,11 +116,11 @@ namespace Yubico.Core.Devices.Hid
 
         internal static long GetEntryId(IntPtr device)
         {
-            ILogger Logger = Logging.Log.GetLogger(typeof(MacOSHidDevice).FullName!);
+            ILogger log = Logging.Log.GetLogger(typeof(MacOSHidDevice).FullName!);
 
             int service = IOHIDDeviceGetService(device);
             kern_return_t result = IORegistryEntryGetRegistryEntryID(service, out long entryId);
-            Logger.IOKitApiCall(nameof(IORegistryEntryGetRegistryEntryID), result);
+            log.IOKitApiCall(nameof(IORegistryEntryGetRegistryEntryID), result);
 
             if (result != kern_return_t.KERN_SUCCESS)
             {

@@ -25,6 +25,7 @@ namespace Yubico.YubiKey.Fido2
     {
         [Fact]
         [Trait(TraitTypes.Category, TestCategories.RequiresSetup)]
+        [Trait(TraitTypes.Category, TestCategories.Elevated)]
         public void PinOperations_Succeed()
         {
             // Assumption - the YubiKey returned has a new or reset FIDO2 application with no PIN set.

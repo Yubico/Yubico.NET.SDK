@@ -21,6 +21,8 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
+    [Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
     public class MakeCredentialGetAssertionTests
     {
         static readonly byte[] _clientDataHash = {

@@ -20,6 +20,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class MinPinLenTests : SimpleIntegrationTestConnection
     {
         static readonly byte[] _clientDataHash = {
@@ -42,7 +43,6 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        [Trait(TraitTypes.Category, TestCategories.Simple)]
         public void GetMinPinFromCredential_Succeeds()
         {
             using (var fido2Session = new Fido2Session(Device))

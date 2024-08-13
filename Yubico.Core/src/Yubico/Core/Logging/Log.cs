@@ -12,150 +12,180 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Yubico.Core.Logging
 {
     /// <summary>
-    /// A static class for managing Yubico SDK logging for this process.
+    /// The <see cref="Log"/> class provides centralized logging support for your application or library.
+    /// It allows you to configure logging either through a JSON configuration file (<a href="https://learn.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line#configure-logging-without-code">appsettings.json</a>) 
+    /// or by dynamically setting up a logger using the <see cref="ConfigureLoggerFactory(Action{ILoggingBuilder})"/> method.
+    ///
+    /// <para><b>How to enable Logging:</b></para>
+    /// There are two primary ways to enable logging:
+    /// <list type="bullet">
+    /// <item><description>1. Add an <c><a href="https://learn.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line#configure-logging-without-code">appsettings.json</a></c> to your project.</description></item>
+    /// <item><description>2. Use the <see cref="ConfigureLoggerFactory(Action{ILoggingBuilder})"/> method.</description></item>
+    /// </list>
+    ///
+    /// <para><b>Option 1: Using appsettings.json</b></para>
+    /// Place an <c><a href="https://learn.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line#configure-logging-without-code">appsettings.json</a></c> file in your project directory with the following structure:
+    /// <code language="json">
+    /// {
+    ///   "Logging": {
+    ///     "LogLevel": {
+    ///       "Yubico.Core": "Warning",
+    ///       "Yubico.Yubikey": "Information"
+    ///     }
+    ///   }
+    /// }
+    /// </code>
+    ///
+    /// <para><b>Option 2: Using ConfigureLoggerFactory</b></para>
+    /// Configure the logger dynamically in your code:
+    /// <example>
+    /// <code language="csharp">
+    ///
+    /// // Optionally, clear previous loggers
+    /// Log.ConfigureLoggerFactory(builder => builder.ClearProviders());
+    /// 
+    /// // Add a console logger (added by default)
+    /// Log.ConfigureLoggerFactory(builder => builder.AddConsole());
+    ///
+    /// // Add a Serilog logger
+    /// Log.ConfigureLoggerFactory(builder => builder.AddSerilog());
+    ///
+    /// // Add both Console and Serilog loggers
+    /// Log.ConfigureLoggerFactory(builder => builder.AddConsole().AddSerilog());
+    /// </code>
+    /// </example>
+    ///
+    /// <para><b>Using the Logger</b></para>
+    /// After configuring the logger, you can create log instances and log messages as follows:
+    /// <example>
+    /// <code language="csharp">
+    /// namespace Yubico;
+    /// public class ExampleClass
+    /// {
+    ///     public ExampleClass()
+    ///     {
+    ///         // Logger with the class name as the category
+    ///         ILogger typeNamedLogger = Log.GetLogger&lt;ExampleClass&gt;();
+    ///         typeNamedLogger.LogInformation("Hello World");
+    ///         // Output: Yubico.ExampleClass: Hello World
+    ///
+    ///         // Logger with a custom category name
+    ///         ILogger categoryLogger = Log.GetLogger("SmartCard");
+    ///         categoryLogger.LogInformation("Hello World");
+    ///         // Output: SmartCard: Hello World
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    ///
+    /// <para><b>Note:</b></para>
+    /// You can also directly set a custom logger factory using the <see cref="Log.Instance"/> property, 
+    /// though it is not the recommended approach. Using <see cref="ConfigureLoggerFactory"/>
+    /// or the <a href="https://learn.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line#configure-logging-without-code">appsettings.json</a> approach is preferred.
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// This class is used for managing the active logger used globally by .NET-based Yubico SDKs in the current process.
-    /// Changing the settings in this class will not have any effect on applications or services that are not running
-    /// within the current application's process. It will affect all libraries contained within - for example, changing
-    /// the logger factory here will impact both the Yubico.YubiKey and Yubico.Core libraries.
-    /// </para>
-    /// <para>
-    /// The <see cref="LoggerFactory"/> property is used to set and control the concrete log to be used by the SDK. By
-    /// default, we send logs to the "null" logger - effectively disabling logging. If you set this property with your
-    /// own logger factory, the SDK will use this log from the point of the set until someone calls this set method again.
-    /// </para>
-    /// <para>
-    /// <see cref="GetLogger"/> should be used to return an instance of the <see cref="Logger"/> class. This is the object
-    /// used to actually write the log messages. It is generally OK to cache an instance of a logger within another
-    /// class instance. Holding a Logger instance open longer than that is not recommended, as changes to the LoggerFactory
-    /// will not be reflected until you call the `GetLogger` method again.
-    /// </para>
-    /// </remarks>
-    public static class Log
+    public static partial class Log
     {
-        private static ILoggerFactory? _factory;
+        private static ILoggerFactory? _instance;
+        private static readonly object Lock = new object();
 
         /// <summary>
-        /// The logger factory implementation that should be used by the SDK. Use this to set the active logger.
+        /// Gets or sets the global <see cref="Microsoft.Extensions.Logging.ILoggerFactory"/> instance used for logging throughout the application.
+        /// By default, it's instantiated by using the <c>Logging-section</c> in your
+        /// <a href="https://learn.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line#configure-logging-without-code">appsettings.json</a>file. 
+        /// Refer to the <see cref="Yubico.Core.Logging.Log"/> class for additional information. 
         /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The LoggerFactory controls how the concrete log(s) that the SDK will use get created. This is something that
-        /// should be controlled by the application using the SDK, and not the SDK itself. The application can decide
-        /// whether they would like to send events to the Windows Event Log, or to a cross platform logger such as NLog,
-        /// Serilog, or others. An application can decide to send log messages to multiple sinks as well (see examples).
-        /// </para>
-        /// <para>
-        /// The <see cref="ILoggerFactory"/> interface is the same one that is used by `Microsoft.Extensions.Logging.` You
-        /// can read more about how to integrate with this interface in the
-        /// [Logging in .NET](https://docs.microsoft.com/en-us/dotnet/core/extensions/logging) webpage provided by Microsoft.
-        /// </para>
-        /// </remarks>
-        /// <example>
-        /// <para>
-        /// Send SDK log messages to the console:
-        /// </para>
-        /// <code language="csharp">
-        /// using Microsoft.Extensions.Logging;
-        /// using Yubico.Core.Logging;
-        ///
-        /// static class Program
-        /// {
-        ///     static void EnableLogging()
-        ///     {
-        ///         Log.LoggerFactory = LoggerFactory.Create(
-        ///             builder => builder.AddSimpleConsole(
-        ///                options =>
-        ///                {
-        ///                    options.IncludeScopes = true;
-        ///                    options.SingleLine = true;
-        ///                    options.TimestampFormat = "hh:mm:ss";
-        ///                })
-        ///                .AddFilter(level => level >= LogLevel.Information));
-        ///     }
-        /// }
-        /// </code>
-        /// </example>
-        /// <example>
-        /// <para>
-        /// Send SDK log messages to Serilog.
-        /// </para>
-        /// <para>
-        /// First, begin by adding a package reference to `Serilog.Extensions.Logging` and `Serilog.Sinks.Console` (or
-        /// to the appropriate sink you plan to use).
-        /// </para>
-        /// <para>
-        /// Now, you can add the following code to your application:
-        /// </para>
-        /// <code language="csharp">
-        /// using Microsoft.Extensions.Logging;
-        /// using Serilog;
-        /// using Yubico.Core.Logging;
-        ///
-        /// static class Program
-        /// {
-        ///     static void EnableLogging()
-        ///     {
-        ///         // Serilog does setup through its own LoggerConfiguration builder. The factory will
-        ///         // pick up the log from Serilog.Log.Logger.
-        ///         Serilog.Log.Logger = new LoggerConfiguration()
-        ///             .Enrich().FromLogContext()
-        ///             .WriteTo.Console()
-        ///             .CreateLogger();
-        ///
-        ///         // Fully qualified name to avoid conflicts with Serilog types
-        ///         Yubico.Core.Logging.Log.LoggerFactory = LoggerFactory.Create(
-        ///             builder => builder
-        ///                .AddSerilog(dispose: true)
-        ///                .AddFilter(level => level >= LogLevel.Information));
-        ///     }
-        /// }
-        /// </code>
-        /// </example>
-        public static ILoggerFactory LoggerFactory
+        // This property uses double-checked locking to ensure thread-safe lazy initialization.
+        // The getter initializes the factory if it hasn't been set, while the setter allows
+        // for custom factory configuration.
+        public static ILoggerFactory Instance
         {
-            get => _factory ??= new NullLoggerFactory();
-            set => _factory = value;
+            get
+            {
+                // First check: Quick return if instance is already initialized
+                if (_instance != null)
+                {
+                    return _instance;
+                }
+
+                // Second check: Thread-safe initialization if instance is null
+                lock (Lock)
+                {
+                    // Use null-coalescing assignment to initialize if still null
+                    // This prevents multiple initializations in case of concurrent access
+                    return _instance ??= GetDefaultLoggerFactory();
+                }
+            }
+            set
+            {
+                // Ensure thread-safe assignment of new logger factory
+                lock (Lock)
+                {
+                    // Prevent setting a null value to maintain a valid logger factory
+                    _instance = value ?? throw new ArgumentNullException(nameof(value));
+                }
+            }
         }
 
+        /// <inheritdoc cref="LoggerFactoryExtensions.CreateLogger{T}"/>
+        public static ILogger GetLogger<T>() => Instance.CreateLogger<T>();
+
+        /// <inheritdoc cref="LoggerFactoryExtensions.CreateLogger"/>
+        public static ILogger GetLogger(string categoryName) => Instance.CreateLogger(categoryName);
+
         /// <summary>
-        /// Gets an instance of the active logger.
-        /// </summary>
-        /// <returns>
-        /// An instance of the active concrete logger.
-        /// </returns>
         /// <example>
-        /// <para>
-        /// Write some information to the log.
-        /// </para>
+        /// From your project, you can set up logging dynamically like this, if you don't use this,
+        /// the default dotnet <see cref="Microsoft.Extensions.Logging.LoggerFactory"/>
+        /// will be created and output to the console.
         /// <code language="csharp">
-        /// using Yubico.Core.Logging;
-        ///
-        /// public class Example
-        /// {
-        ///     private Logger _log = Log.GetLogger();
-        ///
-        ///     public void SampleMethod()
-        ///     {
-        ///         _log.LogDebug("The SampleMethod method has been called!");
-        ///     }
-        ///
-        ///     public void StaticMethod()
-        ///     {
-        ///         Logger log = Log.GetLogger(); // Can't use the instance logger because we're static.
-        ///         log.LogDebug("Called from a static method!");
-        ///     }
-        /// }
+        /// Logging.ConfigureLoggerFactory(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Trace));
         /// </code>
+        /// With the default logging factory, you can load config using json.
         /// </example>
-        public static Logger GetLogger() => new Logger(LoggerFactory.CreateLogger("Yubico.Core logger"));
+        /// </summary>
+        /// <param name="configure"></param>
+        public static void ConfigureLoggerFactory(Action<ILoggingBuilder> configure) =>
+            Instance = Microsoft.Extensions.Logging.LoggerFactory.Create(configure);
+
+        //Creates a logging factory based on a JsonConfiguration in appsettings.json
+        private static ILoggerFactory GetDefaultLoggerFactory()
+        {
+            ILoggerFactory? configuredLoggingFactory = null;
+            try
+            {
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: true)
+                    .AddJsonFile("appsettings.Development.json", optional: true)
+                    .Build();
+
+                configuredLoggingFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(
+                    builder =>
+                    {
+                        IConfigurationSection loggingSection = configuration.GetSection("Logging");
+                        _ = builder.AddConfiguration(loggingSection);
+                        _ = builder.AddConsole();
+                    });
+            }
+#pragma warning disable CA1031
+            catch (Exception e)
+#pragma warning restore CA1031
+            {
+                Console.Error.WriteLine(e);
+            }
+
+            return configuredLoggingFactory ?? Microsoft.Extensions.Logging.LoggerFactory.Create(
+                builder => builder
+                    .AddConsole()
+                    .SetMinimumLevel(LogLevel.Error));
+        }
     }
 }

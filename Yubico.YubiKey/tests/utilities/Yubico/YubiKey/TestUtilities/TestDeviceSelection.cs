@@ -84,9 +84,9 @@ namespace Yubico.YubiKey.TestUtilities
                 IYubiKeyDevice device = null!;
                 try
                 {
-                    bool MatchingDeviceSelector(IYubiKeyDevice d) => 
-                        d.FirmwareVersion.Major == majorVersion && 
-                        (formFactor is null || d.FormFactor == formFactor) && 
+                    bool MatchingDeviceSelector(IYubiKeyDevice d) =>
+                        d.FirmwareVersion.Major == majorVersion &&
+                        (formFactor is null || d.FormFactor == formFactor) &&
                         d.IsFipsSeries == isFipsSeries;
 
                     device = devices.First(MatchingDeviceSelector);
@@ -115,25 +115,25 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 ThrowDeviceNotFoundException("No matching YubiKey found", devices);
             }
-            
+
             return device!;
         }
 
-        private static void ThrowDeviceNotFoundException(string errorMessage,IYubiKeyDevice[] devices)
+        private static void ThrowDeviceNotFoundException(string errorMessage, IYubiKeyDevice[] devices)
         {
             var connectedDevicesText = FormatConnectedDevices(devices);
             throw new DeviceNotFoundException($"{errorMessage}. {connectedDevicesText}");
         }
 
         private static string FormatConnectedDevices(IReadOnlyCollection<IYubiKeyDevice> devices)
-       {
-           var deviceText = 
-               devices.Select(y => $"{{{y.FirmwareVersion}, {y.FormFactor}, IsFipsSeries: {y.IsFipsSeries}}}");
-           
-           return devices.Any()
-               ? $"Connected devices: {string.Join(", ", deviceText)}"
-               : string.Empty;
-       }
+        {
+            var deviceText =
+                devices.Select(y => $"{{{y.FirmwareVersion}, {y.FormFactor}, IsFipsSeries: {y.IsFipsSeries}}}");
+
+            return devices.Any()
+                ? $"Connected devices: {string.Join(", ", deviceText)}"
+                : string.Empty;
+        }
     }
 
     // Custom test exception inheriting from InvalidOperationException as some test code depends on InvalidOperationExceptions 

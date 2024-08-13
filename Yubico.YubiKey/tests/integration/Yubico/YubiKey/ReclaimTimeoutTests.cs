@@ -25,6 +25,7 @@ using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.TestUtilities;
 using Log = Yubico.Core.Logging.Log;
+using Logger = Serilog.Core.Logger;
 
 namespace Yubico.YubiKey
 {
@@ -52,8 +53,9 @@ namespace Yubico.YubiKey
                     outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
-            Log.LoggerFactory = LoggerFactory.Create(
-                builder => builder
+            Log.ConfigureLoggerFactory(builder =>
+                builder
+                    .ClearProviders()
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
 

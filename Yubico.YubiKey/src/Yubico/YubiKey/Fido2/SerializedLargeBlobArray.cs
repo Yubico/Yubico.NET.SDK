@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
 
@@ -96,7 +97,7 @@ namespace Yubico.YubiKey.Fido2
     {
         private const int DigestLength = 16;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<SerializedLargeBlobArray>();
         private readonly List<LargeBlobEntry> _entryList;
 
         /// <summary>

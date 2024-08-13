@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.PlatformInterop;
 
 using static Yubico.PlatformInterop.NativeMethods;
@@ -29,7 +29,7 @@ namespace Yubico.Core.Devices.SmartCard
     /// </summary>
     internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener, IDisposable
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardDeviceListener>();
 
         // The resource manager context.
         private SCardContext _context;

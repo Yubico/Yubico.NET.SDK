@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Otp.Commands;
@@ -23,7 +24,7 @@ namespace Yubico.YubiKey.Pipelines
     // be available over FIDO.
     internal class OtpErrorTransform : IApduTransform
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _logger = Log.GetLogger<OtpErrorTransform>();
 
         private readonly IApduTransform _nextTransform;
 
@@ -67,7 +68,7 @@ namespace Yubico.YubiKey.Pipelines
             }
             catch (KeyboardConnectionException e)
             {
-                _log.LogWarning(e, "Handling keyboard connection exception. Translating to APDU response.");
+                _logger.LogWarning(e, "Handling keyboard connection exception. Translating to APDU response.");
 
                 return new ResponseApdu(Array.Empty<byte>(), SWConstants.WarningNvmUnchanged);
             }

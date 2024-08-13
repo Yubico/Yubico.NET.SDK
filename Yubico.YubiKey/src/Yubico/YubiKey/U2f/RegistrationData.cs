@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
@@ -67,7 +68,7 @@ namespace Yubico.YubiKey.U2f
         private const int SignatureOffset = PublicKeyOffset + PublicKeyLength;
         private const int PayloadLength = AppIdHashLength + ClientDataHashLength + KeyHandleLength + PublicKeyLength + MaxBerSignatureLength + 1;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<RegistrationData>();
 
         /// <summary>
         /// The ECDSA public key for this user credential. Each coordinate must

@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
@@ -109,7 +110,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int UnusedTag8 = 0xFE;
 
         private bool _disposed;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<CardCapabilityContainer>();
 
         /// <summary>
         /// The full Unique Card Identifier which consists of the AID || CardID.

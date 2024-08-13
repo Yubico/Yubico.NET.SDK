@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
@@ -22,7 +23,7 @@ namespace Yubico.YubiKey
 {
     internal static class GetDeviceInfoResponseHelper
     {
-        private static readonly Logger Logger = Log.GetLogger();
+        private static readonly ILogger Logger = Log.GetLogger(typeof(GetDeviceInfoResponseHelper).FullName!);
 
         /// <summary>
         /// Attempts to create a dictionary from a TLV-encoded byte array by parsing and extracting tag-value pairs.

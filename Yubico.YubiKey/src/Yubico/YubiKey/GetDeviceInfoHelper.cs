@@ -14,13 +14,14 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey
 {
     internal static class GetDeviceInfoHelper
     {
-        private static readonly Logger Logger = Log.GetLogger();
+        private static readonly ILogger Logger = Log.GetLogger(typeof(GetDeviceInfoHelper).FullName!);
 
         /// <summary>
         /// Fetches and aggregates device configuration details from a YubiKey using multiple APDU commands,

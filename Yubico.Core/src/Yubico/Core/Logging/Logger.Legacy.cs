@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+﻿// Copyright 2021 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ namespace Yubico.Core.Logging
     /// formatting the error and calling one of the existing log methods.
     /// </para>
     /// </remarks>
+    [Obsolete("Obsolete, use equivalent ILogger method, or view the changelog for further instruction.")]
     public sealed class Logger : ILogger
     {
         private readonly ILogger _logger;
@@ -47,6 +48,7 @@ namespace Yubico.Core.Logging
         /// An instance of the concrete logging mechanism. This should be constructed using the <see cref="Log"/> class,
         /// and not called directly.
         /// </param>
+        [Obsolete("Obsolete, use equivalent ILogger method, or view the changelog for further instruction.")]
         internal Logger(ILogger logger)
         {
             _logger = logger;
@@ -85,6 +87,7 @@ namespace Yubico.Core.Logging
         /// a concrete logger with the SDK.
         /// </para>
         /// </remarks>
+        [Obsolete("Obsolete, use equivalent ILogger method, or view the changelog for further instruction.")]
         public void Log<TState>(
             LogLevel logLevel,
             EventId eventId,
@@ -108,6 +111,7 @@ namespace Yubico.Core.Logging
         /// log provider ready to consume it. You can use this method to first test to see if this log level is enabled
         /// before running the extra diagnostics code.
         /// </remarks>
+        [Obsolete("Obsolete, use equivalent ILogger method, or view the changelog for further instruction.")]
         public bool IsEnabled(LogLevel logLevel) => _logger.IsEnabled(logLevel);
 
         /// <summary>
@@ -122,6 +126,7 @@ namespace Yubico.Core.Logging
         /// <returns>
         /// A disposable object that ends the logical operation scope on dispose.
         /// </returns>
+        [Obsolete("Obsolete, use equivalent ILogger method, or view the changelog for further instruction.")]
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull => _logger.BeginScope(state);
     }
 }

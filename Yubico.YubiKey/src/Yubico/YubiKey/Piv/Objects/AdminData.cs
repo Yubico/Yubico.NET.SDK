@@ -16,6 +16,7 @@ using System;
 using System.Buffers.Binary;
 using System.Globalization;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 
@@ -121,7 +122,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const byte DateRead = 4;
 
         private bool _disposed;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<AdminData>();
 
         /// <summary>
         /// Set this to <c>true</c> if the PUK is blocked. If you set a YubiKey

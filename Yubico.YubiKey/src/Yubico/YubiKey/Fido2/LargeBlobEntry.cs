@@ -18,6 +18,7 @@ using System.Formats.Cbor;
 using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Cryptography;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
@@ -58,7 +59,7 @@ namespace Yubico.YubiKey.Fido2
         private const int AssociatedBlob = 0x626C6F62;
         private const int AssociatedSizeOffset = 4;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<LargeBlobEntry>();
 
         /// <summary>
         /// The encrypted data. This is either the retrieved encrypted data when

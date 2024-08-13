@@ -15,7 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
@@ -650,7 +650,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Try to change the management key, touch policy = {0}, algorithm = {1}.",
+            _log.LogInformation("Try to change the management key, touch policy = {TouchPolicy}, algorithm = {PivALgorithm}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
@@ -761,7 +761,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Change the management key, touch policy = {0}, algorithm = {1}.",
+            _log.LogInformation("Change the management key, touch policy = {TouchPolicy}, algorithm = {PivAlgorithm}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             if (TryChangeManagementKey(touchPolicy, newKeyAlgorithm) == false)
@@ -914,6 +914,9 @@ namespace Yubico.YubiKey.Piv
 
                     return true;
                 }
+
+                _log.LogInformation($"Failed to set management key. Message: {setResponse.StatusMessage}");
+
             }
 
             return false;
@@ -1036,7 +1039,6 @@ namespace Yubico.YubiKey.Piv
             CompleteAuthenticateManagementKeyResponse completeResponse = Connection.SendCommand(completeCommand);
 
             ManagementKeyAuthenticationResult = completeResponse.GetData();
-
             if (completeResponse.Status == ResponseStatus.Success)
             {
                 // If Success, there are three possibilities, (1) this is
@@ -1045,8 +1047,7 @@ namespace Yubico.YubiKey.Piv
                 // off-card app authenticated, but the YubiKey itself did
                 // not.
                 // If case (3), throw an exception.
-                if (ManagementKeyAuthenticationResult ==
-                    AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed)
+                if (ManagementKeyAuthenticationResult == AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed)
                 {
                     throw new SecurityException(
                         string.Format(
@@ -1056,6 +1057,8 @@ namespace Yubico.YubiKey.Piv
 
                 ManagementKeyAuthenticated = true;
             }
+
+            _log.LogInformation($"Failed to authenticate management key. Message: {completeResponse.StatusMessage}");
 
             return ManagementKeyAuthenticated;
         }

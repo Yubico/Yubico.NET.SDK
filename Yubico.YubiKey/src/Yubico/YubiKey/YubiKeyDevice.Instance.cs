@@ -16,6 +16,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
@@ -108,7 +109,7 @@ namespace Yubico.YubiKey
         private IYubiKeyDeviceInfo _yubiKeyInfo;
         private Transport _lastActiveTransport;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<YubiKeyDevice>();
 
         internal ISmartCardDevice GetSmartCardDevice() => _smartCardDevice!;
 

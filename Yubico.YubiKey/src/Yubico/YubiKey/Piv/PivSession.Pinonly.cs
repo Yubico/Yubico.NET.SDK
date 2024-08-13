@@ -16,7 +16,7 @@ using System;
 using System.Globalization;
 using System.Security;
 using System.Security.Cryptography;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
@@ -750,7 +750,7 @@ namespace Yubico.YubiKey.Piv
         public void SetPinOnlyMode(PivPinOnlyMode pinOnlyMode, PivAlgorithm mgmtKeyAlgorithm)
         {
             _log.LogInformation(
-                "Set a YubiKey to PIV PIN-only mode: {0}, mgmt key alg = {1}.",
+                "Set a YubiKey to PIV PIN-only mode: {PivPinOnlyMode}, mgmt key alg = {PivAlgorithm}.",
                 pinOnlyMode.ToString(), mgmtKeyAlgorithm.ToString());
 
             Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;

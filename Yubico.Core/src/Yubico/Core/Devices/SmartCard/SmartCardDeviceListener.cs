@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.SmartCard
@@ -35,7 +35,7 @@ namespace Yubico.Core.Devices.SmartCard
     /// </remarks>
     public abstract class SmartCardDeviceListener
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Log.GetLogger<SmartCardDeviceListener>();
 
         /// <summary>
         /// Subscribe to receive an event whenever a smart card device is added to the computer.

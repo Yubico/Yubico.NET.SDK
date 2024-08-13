@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
@@ -151,7 +152,7 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public sealed partial class PivSession : IDisposable
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<PivSession>();
         private readonly IYubiKeyDevice _yubiKeyDevice;
         private bool _disposed;
 
@@ -369,7 +370,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivMetadata GetMetadata(byte slotNumber)
         {
-            _log.LogInformation("GetMetadata for slot number {0:X2}.", slotNumber);
+            _log.LogInformation("GetMetadata for slot number {SlotNumber:X2}.", slotNumber);
 
             if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
             {
@@ -530,7 +531,7 @@ namespace Yubico.YubiKey.Piv
                 AuthenticateManagementKey();
             }
 
-            _log.LogDebug("Moving key from {sourceSlot} to {destinationSlot}", sourceSlot, destinationSlot);
+            _log.LogDebug("Moving key from {SourceSlot} to {DestinationSlot}", sourceSlot, destinationSlot);
             var command = new MoveKeyCommand(sourceSlot, destinationSlot);
             MoveKeyResponse response = Connection.SendCommand(command);
 
@@ -540,7 +541,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             _log.LogInformation(
-                "Successfully moved key from {sourceSlot} to {destinationSlot}", sourceSlot, destinationSlot);
+                "Successfully moved key from {SourceSlot} to {DestinationSlot}", sourceSlot, destinationSlot);
         }
 
         /// <summary>
@@ -578,7 +579,7 @@ namespace Yubico.YubiKey.Piv
                 AuthenticateManagementKey();
             }
 
-            _log.LogDebug("Deleting key at slot {targetSlot}", slotToClear);
+            _log.LogDebug("Deleting key at slot {TargetSlot}", slotToClear);
             var command = new DeleteKeyCommand(slotToClear);
             DeleteKeyResponse response = Connection.SendCommand(command);
 

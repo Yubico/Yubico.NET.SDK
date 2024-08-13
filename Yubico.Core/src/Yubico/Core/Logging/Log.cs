@@ -107,7 +107,6 @@ namespace Yubico.Core.Logging
         // for custom factory configuration.
         public static ILoggerFactory Instance
         {
-
             get
             {
                 // First check: Quick return if instance is already initialized

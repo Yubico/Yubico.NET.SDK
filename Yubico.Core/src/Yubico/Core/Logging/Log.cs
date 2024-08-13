@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -95,14 +93,54 @@ namespace Yubico.Core.Logging
     /// </summary>
     public static partial class Log
     {
-        /// <summary>
-        /// This is the <see cref="Microsoft.Extensions.Logging.LoggerFactory"/> used to internally create loggers.
-        /// By default, it's instantiated by using the Logging-section in your
-        /// <a href="https://learn.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line#configure-logging-without-code">appsettings.json</a>file. 
-        /// Refer to the <see cref="Log"/> class for additional information. 
-        /// </summary>
-        public static ILoggerFactory Instance { get; set; } = GetDefaultLoggerFactory();
+        private static ILoggerFactory? _instance;
+        private static readonly object Lock = new object();
 
+        /// <summary>
+        /// Gets or sets the global <see cref="Microsoft.Extensions.Logging.ILoggerFactory"/> instance used for logging throughout the application.
+        /// By default, it's instantiated by using the <c>Logging-section</c> in your
+        /// <a href="https://learn.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line#configure-logging-without-code">appsettings.json</a>file. 
+        /// Refer to the <see cref="Yubico.Core.Logging.Log"/> class for additional information. 
+        /// </summary>
+        // This property uses double-checked locking to ensure thread-safe lazy initialization.
+        // The getter initializes the factory if it hasn't been set, while the setter allows
+        // for custom factory configuration.
+        public static ILoggerFactory Instance
+        {
+
+            get
+            {
+                // First check: Quick return if instance is already initialized
+                if (_instance != null)
+                {
+                    return _instance;
+                }
+
+                // Second check: Thread-safe initialization if instance is null
+                lock (Lock)
+                {
+                    // Use null-coalescing assignment to initialize if still null
+                    // This prevents multiple initializations in case of concurrent access
+                    return _instance ??= GetDefaultLoggerFactory();
+                }
+            }
+            set
+            {
+                // Ensure thread-safe assignment of new logger factory
+                lock (Lock)
+                {
+                    // Prevent setting a null value to maintain a valid logger factory
+                    _instance = value ?? throw new ArgumentNullException(nameof(value));
+                }
+            }
+        }
+
+        /// <inheritdoc cref="LoggerFactoryExtensions.CreateLogger{T}"/>
+        public static ILogger GetLogger<T>() => Instance.CreateLogger<T>();
+
+        /// <inheritdoc cref="LoggerFactoryExtensions.CreateLogger"/>
+        public static ILogger GetLogger(string categoryName) => Instance.CreateLogger(categoryName);
+        
         /// <summary>
         /// <example>
         /// From your project, you can set up logging dynamically like this, if you don't use this,
@@ -118,34 +156,37 @@ namespace Yubico.Core.Logging
         public static void ConfigureLoggerFactory(Action<ILoggingBuilder> configure) =>
             Instance = Microsoft.Extensions.Logging.LoggerFactory.Create(configure);
 
-        /// <inheritdoc cref="LoggerFactoryExtensions.CreateLogger{T}"/>
-        public static ILogger GetLogger<T>() => Instance.CreateLogger<T>();
-
-        /// <inheritdoc cref="LoggerFactoryExtensions.CreateLogger"/>
-        public static ILogger GetLogger(string categoryName) => Instance.CreateLogger(categoryName);
-
         //Creates a logging factory based on a JsonConfiguration in appsettings.json
         private static ILoggerFactory GetDefaultLoggerFactory()
         {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true)
-                .AddJsonFile("appsettings.Development.json", optional: true)
-                .Build();
+            ILoggerFactory? configuredLoggingFactory = null;
+            try
+            {
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: true)
+                    .AddJsonFile("appsettings.Development.json", optional: true)
+                    .Build();
 
-            IEnumerable<IConfigurationSection> hasSections = configuration.GetChildren();
-            return hasSections.Any()
-                ? Microsoft.Extensions.Logging.LoggerFactory.Create(
+                configuredLoggingFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(
                     builder =>
                     {
                         IConfigurationSection loggingSection = configuration.GetSection("Logging");
                         _ = builder.AddConfiguration(loggingSection);
                         _ = builder.AddConsole();
-                    })
-                : Microsoft.Extensions.Logging.LoggerFactory.Create(
-                    builder => builder
-                        .AddConsole()
-                        .SetMinimumLevel(LogLevel.Error));
+                    });
+            }
+            #pragma warning disable CA1031
+            catch (Exception e)
+            #pragma warning restore CA1031
+            {
+                Console.Error.WriteLine(e);
+            }
+
+            return configuredLoggingFactory ?? Microsoft.Extensions.Logging.LoggerFactory.Create(
+                builder => builder
+                    .AddConsole()
+                    .SetMinimumLevel(LogLevel.Error));
         }
     }
 }

@@ -139,10 +139,10 @@ namespace Yubico.YubiKey.Piv
                 AuthenticateManagementKey();
             }
 
-            var generateCommand = new GenerateKeyPairCommand(slotNumber, algorithm, pinPolicy, touchPolicy);
-            GenerateKeyPairResponse generateResponse = Connection.SendCommand(generateCommand);
+            var command = new GenerateKeyPairCommand(slotNumber, algorithm, pinPolicy, touchPolicy);
+            var response = Connection.SendCommand(command);
 
-            return generateResponse.GetData();
+            return response.GetData();
         }
 
         /// <summary>
@@ -254,12 +254,11 @@ namespace Yubico.YubiKey.Piv
                 AuthenticateManagementKey();
             }
 
-            var importCommand = new ImportAsymmetricKeyCommand(privateKey, slotNumber, pinPolicy, touchPolicy);
-            ImportAsymmetricKeyResponse importResponse = Connection.SendCommand(importCommand);
-
-            if (importResponse.Status != ResponseStatus.Success)
+            var command = new ImportAsymmetricKeyCommand(privateKey, slotNumber, pinPolicy, touchPolicy);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(importResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
@@ -343,7 +342,7 @@ namespace Yubico.YubiKey.Piv
                 AuthenticateManagementKey();
             }
 
-            PivDataTag dataTag = GetCertDataTagFromSlotNumber(slotNumber);
+            var dataTag = GetCertDataTagFromSlotNumber(slotNumber);
 
             byte[] certDer = certificate.GetRawCertData();
             var tlvWriter = new TlvWriter();
@@ -357,12 +356,11 @@ namespace Yubico.YubiKey.Piv
 
             byte[] encodedCert = tlvWriter.Encode();
 
-            var putCommand = new PutDataCommand((int)dataTag, encodedCert);
-            PutDataResponse putResponse = Connection.SendCommand(putCommand);
-
-            if (putResponse.Status != ResponseStatus.Success)
+            var command = new PutDataCommand((int)dataTag, encodedCert);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(putResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
@@ -405,19 +403,18 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public X509Certificate2 GetCertificate(byte slotNumber)
         {
-            PivDataTag dataTag = GetCertDataTagFromSlotNumber(slotNumber);
+            var dataTag = GetCertDataTagFromSlotNumber(slotNumber);
 
-            var getCommand = new GetDataCommand((int)dataTag);
-            GetDataResponse getResponse = Connection.SendCommand(getCommand);
-            ReadOnlyMemory<byte> encodedCertData = getResponse.GetData();
+            var command = new GetDataCommand((int)dataTag);
+            var response = Connection.SendCommand(command);
+            var encodedCertData = response.GetData();
 
             var tlvReader = new TlvReader(encodedCertData);
-            bool isValid = tlvReader.TryReadNestedTlv(out TlvReader nestedReader, PivEncodingTag);
-
+            
+            bool isValid = tlvReader.TryReadNestedTlv(out var nestedReader, PivEncodingTag);
             if (isValid)
             {
-                isValid = nestedReader.TryReadValue(out ReadOnlyMemory<byte> certData, PivCertTag);
-
+                isValid = nestedReader.TryReadValue(out var certData, PivCertTag);
                 if (isValid)
                 {
                     return new X509Certificate2(certData.ToArray());

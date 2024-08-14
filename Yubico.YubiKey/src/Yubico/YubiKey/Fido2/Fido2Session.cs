@@ -215,8 +215,8 @@ namespace Yubico.YubiKey.Fido2
         // necessary to call the command.
         private AuthenticatorInfo SetAndReturnAuthenticatorInfoField()
         {
-            GetInfoResponse info = Connection.SendCommand(new GetInfoCommand());
-            _authenticatorInfo = info.GetData();
+            var response = Connection.SendCommand(new GetInfoCommand());
+            _authenticatorInfo = response.GetData();
 
             return _authenticatorInfo;
         }

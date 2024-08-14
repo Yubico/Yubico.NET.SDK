@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             using var oathSession = new OathSession(yubiKey);
             {
-                IList<Credential> credentials = oathSession.GetCredentials();
+                var credentials = oathSession.GetCredentials();
 
                 // Are there any?
                 if (credentials.Count == 0)

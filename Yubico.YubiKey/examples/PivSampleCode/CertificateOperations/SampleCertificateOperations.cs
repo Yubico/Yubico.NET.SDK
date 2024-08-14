@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             // Build the AsymmetricAlgorithm object from the public key.
-            using AsymmetricAlgorithm dotNetPubKey = KeyConverter.GetDotNetFromPivPublicKey(slotContents.PublicKey);
+            using var dotNetPubKey = KeyConverter.GetDotNetFromPivPublicKey(slotContents.PublicKey);
 
             // Build a cert request object.
             // This sample code uses SHA-256 for all algorithms except ECC P-384.
@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             nameBuilder.AddNameElement(X500NameElement.Locality, "Palo Alto");
             nameBuilder.AddNameElement(X500NameElement.Organization, "Fake");
             nameBuilder.AddNameElement(X500NameElement.CommonName, "Fake Root");
-            X500DistinguishedName sampleRootName = nameBuilder.GetDistinguishedName();
+            var sampleRootName = nameBuilder.GetDistinguishedName();
 
             GetCertRequest(yubiKey, KeyCollectorDelegate, sampleRootName, slotContents);
 
@@ -108,8 +108,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             slotContents.CertRequest.CertificateExtensions.Add(basicConstraints);
             slotContents.CertRequest.CertificateExtensions.Add(keyUsage);
 
-            DateTimeOffset notBefore = DateTimeOffset.Now;
-            DateTimeOffset notAfter = notBefore.AddDays(3650);
+            var notBefore = DateTimeOffset.Now;
+            var notAfter = notBefore.AddDays(3650);
             byte[] serialNumber = new byte[] { 0x01 };
 
             using (var pivSession = new PivSession(yubiKey))
@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 pivSession.KeyCollector = KeyCollectorDelegate;
 
                 var signer = new YubiKeySignatureGenerator(pivSession, slotContents.SlotNumber, slotContents.PublicKey);
-                X509Certificate2 selfSignedCert = slotContents.CertRequest.Create(
+                var selfSignedCert = slotContents.CertRequest.Create(
                     sampleRootName,
                     signer,
                     notBefore,
@@ -219,7 +219,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             // Get a signed cert request.
-            X500DistinguishedName sampleCertName = nameBuilder.GetDistinguishedName();
+            var sampleCertName = nameBuilder.GetDistinguishedName();
             GetCertRequest(yubiKey, KeyCollectorDelegate, sampleCertName, requestorSlotContents);
 
             // In the real world, the cert request would be sent as a PEM
@@ -263,7 +263,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // encoded key value. It will be
             //   04 <x-coordinate> <y-coordinate>
             // where each coordinate is exactly 48 bytes (384 bits) long.
-            HashAlgorithmName signerHash = HashAlgorithmName.SHA256;
+            var signerHash = HashAlgorithmName.SHA256;
             if (string.Equals(signerCert.PublicKey.Oid.FriendlyName, "ECC", StringComparison.Ordinal)
                 && signerCert.PublicKey.EncodedKeyValue.RawData.Length == 97)
             {
@@ -271,7 +271,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             byte[] requestDer = requestorSlotContents.GetCertRequestDer();
-            CertificateRequest certRequest = BuildCertRequestFromDer(requestDer, signerHash);
+            var certRequest = BuildCertRequestFromDer(requestDer, signerHash);
 
             if (isCa)
             {
@@ -282,7 +282,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 certRequest.CertificateExtensions.Add(keyUsage);
             }
 
-            DateTimeOffset notBefore = DateTimeOffset.Now;
+            var notBefore = DateTimeOffset.Now;
             var notAfter = new DateTimeOffset(signerCert.NotAfter);
             byte[] serialNumber = new byte[] { 0x02 };
 
@@ -295,7 +295,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     signerSlotContents.SlotNumber,
                     signerSlotContents.PublicKey);
 
-                X509Certificate2 newCert = certRequest.Create(
+                var newCert = certRequest.Create(
                     signerCert.SubjectName,
                     signer,
                     notBefore,
@@ -327,11 +327,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // writing a lot more code, this sample always uses PSS.
         public static CertificateRequest BuildCertRequestFromDer(byte[] requestDer, HashAlgorithmName signerHash)
         {
-            using AsymmetricAlgorithm requestPublicKey = GetComponentsFromCertRequestDer(
+            using var requestPublicKey = GetComponentsFromCertRequestDer(
                 requestDer,
                 out byte[] _,
-                out SignatureAlgIdConverter _,
-                out X500DistinguishedName requestName,
+                out var _,
+                out var requestName,
                 out byte[] _);
 
             if (requestPublicKey is ECDsa ecDsa)
@@ -355,11 +355,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         {
             byte[] request = PemOperations.GetEncodingFromPem(certRequestPem, "CERTIFICATE REQUEST");
 
-            using AsymmetricAlgorithm pubKey = GetComponentsFromCertRequestDer(
+            using var pubKey = GetComponentsFromCertRequestDer(
                 request,
                 out byte[] toBeSigned,
-                out SignatureAlgIdConverter sigAlgId,
-                out X500DistinguishedName _,
+                out var sigAlgId,
+                out var _,
                 out byte[] signature);
 
             if (string.Equals(pubKey.SignatureAlgorithm, "RSA", StringComparison.Ordinal))
@@ -375,7 +375,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // The YubiKey returns the signature in a format that virtually all
             // standards specify. However, that is not the format the C#
             // verification method needs.
-            PivAlgorithm algorithm = pubKey.KeySize switch
+            var algorithm = pubKey.KeySize switch
             {
                 256 => PivAlgorithm.EccP256,
                 384 => PivAlgorithm.EccP384,
@@ -429,16 +429,16 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             //     signing algID,
             //     signature (BIT STRING)
             var tlvReader = new TlvReader(certDer);
-            TlvReader seqReader = tlvReader.ReadNestedTlv(0x30);
-            ReadOnlyMemory<byte> toBeSigned = seqReader.ReadEncoded(0x30);
-            ReadOnlyMemory<byte> algId = seqReader.ReadEncoded(0x30);
-            ReadOnlyMemory<byte> signature = seqReader.ReadValue(0x03);
+            var seqReader = tlvReader.ReadNestedTlv(0x30);
+            var toBeSigned = seqReader.ReadEncoded(0x30);
+            var algId = seqReader.ReadEncoded(0x30);
+            var signature = seqReader.ReadValue(0x03);
 
             var sigAlgId = new SignatureAlgIdConverter(algId.ToArray());
 
             // Get the public key of the verifying cert. We need it as an
             // AsymmetricAlgorithm object.
-            using AsymmetricAlgorithm pubKey = GetPublicKeyFromCertificate(issuerCert);
+            using var pubKey = GetPublicKeyFromCertificate(issuerCert);
 
             // The signature is a BIT FIELD so the first octet is the unused
             // bits. That's why in the following we use a Slice of the signature
@@ -456,7 +456,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // The YubiKey returns the signature in a format that virtually all
             // standards specify. However, that is not the format the C#
             // verification method needs.
-            PivAlgorithm algorithm = pubKey.KeySize switch
+            var algorithm = pubKey.KeySize switch
             {
                 256 => PivAlgorithm.EccP256,
                 384 => PivAlgorithm.EccP384,
@@ -527,10 +527,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             //     signing algID,
             //     signature (BIT STRING)
             var tlvReader = new TlvReader(requestDer);
-            TlvReader seqReader = tlvReader.ReadNestedTlv(0x30);
-            ReadOnlyMemory<byte> toBeSignedMemory = seqReader.ReadEncoded(0x30);
-            ReadOnlyMemory<byte> algId = seqReader.ReadEncoded(0x30);
-            ReadOnlyMemory<byte> signatureMemory = seqReader.ReadValue(0x03);
+            var seqReader = tlvReader.ReadNestedTlv(0x30);
+            var toBeSignedMemory = seqReader.ReadEncoded(0x30);
+            var algId = seqReader.ReadEncoded(0x30);
+            var signatureMemory = seqReader.ReadValue(0x03);
 
             toBeSigned = toBeSignedMemory.ToArray();
             sigAlgId = new SignatureAlgIdConverter(algId.ToArray());
@@ -549,8 +549,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             tlvReader = new TlvReader(toBeSigned);
             seqReader = tlvReader.ReadNestedTlv(0x30);
             _ = seqReader.ReadValue(0x02);
-            ReadOnlyMemory<byte> subjectName = seqReader.ReadEncoded(0x30);
-            ReadOnlyMemory<byte> subjectPublicKeyInfo = seqReader.ReadEncoded(0x30);
+            var subjectName = seqReader.ReadEncoded(0x30);
+            var subjectPublicKeyInfo = seqReader.ReadEncoded(0x30);
 
             // Build an X500DistinguishedName from the encoded name.
             requestName = new X500DistinguishedName(subjectName.ToArray());

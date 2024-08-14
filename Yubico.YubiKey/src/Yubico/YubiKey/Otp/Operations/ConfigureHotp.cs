@@ -41,11 +41,11 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <inheritdoc/>
         protected override void ExecuteOperation()
         {
-            YubiKeyFlags ykFlags = Settings.YubiKeyFlags;
+            var yubiKeyFlags = Settings.YubiKeyFlags;
 
             var cmd = new ConfigureSlotCommand
             {
-                YubiKeyFlags = ykFlags,
+                YubiKeyFlags = yubiKeyFlags,
                 OtpSlot = OtpSlot!.Value
             };
 
@@ -68,7 +68,8 @@ namespace Yubico.YubiKey.Otp.Operations
                 _key.Span.CopyTo(hotpKey[..HmacKeySize]);
 
                 // Get a span that points to the bytes for the IMF.
-                Span<byte> imf = hotpKey[HmacKeySize..];
+                var imf = hotpKey[HmacKeySize..];
+                
                 // Write it in network order (big endian).
                 BinaryPrimitives.WriteUInt16BigEndian(imf, _imf);
 
@@ -79,7 +80,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 cmd.ApplyCurrentAccessCode(CurrentAccessCode);
                 cmd.SetAccessCode(NewAccessCode);
 
-                ReadStatusResponse response = Connection.SendCommand(cmd);
+                var response = Connection.SendCommand(cmd);
                 if (response.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(string.Format(
@@ -196,7 +197,7 @@ namespace Yubico.YubiKey.Otp.Operations
             }
             _key = key;
 
-            using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
+            using var rng = CryptographyProviders.RngCreator();
             rng.Fill(key.Span);
             return this;
         }

@@ -56,15 +56,15 @@ namespace Yubico.YubiKey.Pipelines
 
             try
             {
-                ResponseApdu response = _nextTransform.Invoke(command, commandType, responseType);
-                int afterSequence = new ReadStatusResponse(response).GetData().SequenceNumber;
+                var responseApdu = _nextTransform.Invoke(command, commandType, responseType);
+                int afterSequence = new ReadStatusResponse(responseApdu).GetData().SequenceNumber;
                 int expectedSequence = (beforeSequence + 1) % 0x100;
 
                 // If we see the sequence number change, we can assume that the configuration was applied successfully. Otherwise
                 // we just invent an error in the response.
                 return afterSequence != expectedSequence
-                    ? new ResponseApdu(response.Data.ToArray(), SWConstants.WarningNvmUnchanged)
-                    : response;
+                    ? new ResponseApdu(responseApdu.Data.ToArray(), SWConstants.WarningNvmUnchanged)
+                    : responseApdu;
             }
             catch (KeyboardConnectionException e)
             {

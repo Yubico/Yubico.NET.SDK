@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Pipelines
         /// <inheritdoc />
         public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
         {
-            ResponseApdu fidoResponse = _nextTransform.Invoke(
+            var fidoResponse = _nextTransform.Invoke(
                 command,
                 commandType,
                 responseType);

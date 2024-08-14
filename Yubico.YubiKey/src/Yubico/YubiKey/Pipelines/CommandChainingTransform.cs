@@ -46,13 +46,13 @@ namespace Yubico.YubiKey.Pipelines
                 return _pipeline.Invoke(command, commandType, responseType);
             }
 
-            ReadOnlyMemory<byte> sourceData = command.Data;
+            var sourceData = command.Data;
             ResponseApdu? responseApdu = null;
 
             while (!sourceData.IsEmpty)
             {
                 int length = Math.Min(MaxSize, sourceData.Length);
-                ReadOnlyMemory<byte> data = sourceData.Slice(0, length);
+                var data = sourceData.Slice(0, length);
                 sourceData = sourceData.Slice(length);
 
                 var partialApdu = new CommandApdu

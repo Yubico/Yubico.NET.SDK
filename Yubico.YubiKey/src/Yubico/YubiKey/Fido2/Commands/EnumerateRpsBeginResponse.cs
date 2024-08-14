@@ -70,15 +70,15 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </exception>
         public (int totalRelyingPartyCount, RelyingParty relyingParty) GetData()
         {
-            CredentialManagementData mgmtData = _response.GetData();
+            var credentialManagementData = _response.GetData();
 
-            if (!(mgmtData.RelyingParty is null)
-                && !(mgmtData.RelyingPartyIdHash is null)
-                && !(mgmtData.TotalRelyingPartyCount is null))
+            if (!(credentialManagementData.RelyingParty is null)
+                && !(credentialManagementData.RelyingPartyIdHash is null)
+                && !(credentialManagementData.TotalRelyingPartyCount is null))
             {
-                if (mgmtData.RelyingParty.IsMatchingRelyingPartyId(mgmtData.RelyingPartyIdHash.Value))
+                if (credentialManagementData.RelyingParty.IsMatchingRelyingPartyId(credentialManagementData.RelyingPartyIdHash.Value))
                 {
-                    return (mgmtData.TotalRelyingPartyCount.Value, mgmtData.RelyingParty);
+                    return (credentialManagementData.TotalRelyingPartyCount.Value, credentialManagementData.RelyingParty);
                 }
             }
 

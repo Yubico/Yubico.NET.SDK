@@ -250,19 +250,20 @@ namespace Yubico.YubiKey.Scp03
             {
                 throw new ArgumentNullException(nameof(newKeySet));
             }
-            var cmd = new PutKeyCommand(Connection.GetScp03Keys(), newKeySet);
-            PutKeyResponse rsp = Connection.SendCommand(cmd);
-            if (rsp.Status != ResponseStatus.Success)
+            
+            var command = new PutKeyCommand(Connection.GetScp03Keys(), newKeySet);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
                 throw new SecureChannelException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.YubiKeyOperationFailed,
-                        rsp.StatusMessage));
+                        response.StatusMessage));
             }
 
-            ReadOnlyMemory<byte> checksum = rsp.GetData();
-            if (!CryptographicOperations.FixedTimeEquals(checksum.Span, cmd.ExpectedChecksum.Span))
+            var checksum = response.GetData();
+            if (!CryptographicOperations.FixedTimeEquals(checksum.Span, command.ExpectedChecksum.Span))
             {
                 throw new SecureChannelException(ExceptionMessages.ChecksumError);
             }
@@ -290,17 +291,17 @@ namespace Yubico.YubiKey.Scp03
         /// </param>
         public void DeleteKeySet(byte keyVersionNumber, bool isLastKey = false)
         {
-            _log.LogInformation("Delete an SCP03 key set from a YubiKey.");
+            _log.LogInformation("Deleting an SCP03 key set from a YubiKey.");
 
-            var cmd = new DeleteKeyCommand(keyVersionNumber, isLastKey);
-            Scp03Response rsp = Connection.SendCommand(cmd);
-            if (rsp.Status != ResponseStatus.Success)
+            var command = new DeleteKeyCommand(keyVersionNumber, isLastKey);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
                 throw new SecureChannelException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.YubiKeyOperationFailed,
-                        rsp.StatusMessage));
+                        response.StatusMessage));
             }
         }
 

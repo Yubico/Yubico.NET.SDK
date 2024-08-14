@@ -176,7 +176,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// </returns>
         private byte[] BuildDataField()
         {
-            TlvWriter tlvWriter = new TlvWriter();
+            var tlvWriter = new TlvWriter();
 
             tlvWriter.WriteString(DataTagConstants.Label, CredentialLabel, Encoding.UTF8);
 
@@ -187,10 +187,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 
             tlvWriter.WriteValue(DataTagConstants.Password, _credentialPassword.Span);
 
-            byte[] returnValue = tlvWriter.Encode();
+            byte[] tlvBytes = tlvWriter.Encode();
             tlvWriter.Clear();
 
-            return returnValue;
+            return tlvBytes;
         }
     }
 }

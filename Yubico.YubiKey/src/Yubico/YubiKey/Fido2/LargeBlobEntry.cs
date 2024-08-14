@@ -121,7 +121,7 @@ namespace Yubico.YubiKey.Fido2
 
             OriginalDataLength = blobData.Length;
 
-            using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
+            using var randomObject = CryptographyProviders.RngCreator();
             byte[] nonce = new byte[NonceSize];
             randomObject.GetBytes(nonce, 0, NonceSize);
             Nonce = new ReadOnlyMemory<byte>(nonce);
@@ -245,13 +245,13 @@ namespace Yubico.YubiKey.Fido2
                 BinaryPrimitives.WriteInt32BigEndian(associatedData, AssociatedBlob);
                 BinaryPrimitives.WriteInt64LittleEndian(associatedData.Slice(AssociatedSizeOffset), (long)OriginalDataLength);
 
-                IAesGcmPrimitives decryptor = CryptographyProviders.AesGcmPrimitivesCreator();
-                bool returnValue = decryptor.DecryptAndVerify(
+                var decryptoAlgorithm = CryptographyProviders.AesGcmPrimitivesCreator();
+                bool decryptSuccess = decryptoAlgorithm.DecryptAndVerify(
                     largeBlobKey.Span, Nonce.Span,
                     Ciphertext.Slice(0, dataToDecryptLength).Span,
                     Ciphertext.Slice(dataToDecryptLength, GcmTagSize).Span, decryptedData, associatedData);
 
-                if (returnValue)
+                if (decryptSuccess)
                 {
                     using var compressedStream = new MemoryStream(decryptedData);
                     using var decompressedStream = new MemoryStream();
@@ -259,16 +259,16 @@ namespace Yubico.YubiKey.Fido2
                     deflateStream.CopyTo(decompressedStream);
                     deflateStream.Flush();
 
-                    returnValue = false;
+                    decryptSuccess = false;
                     if (decompressedStream.Length == OriginalDataLength)
                     {
                         byte[] dataToReturn = decompressedStream.ToArray();
                         plaintext = new Memory<byte>(dataToReturn);
-                        returnValue = true;
+                        decryptSuccess = true;
                     }
                 }
 
-                return returnValue;
+                return decryptSuccess;
             }
             finally
             {
@@ -304,7 +304,7 @@ namespace Yubico.YubiKey.Fido2
                 BinaryPrimitives.WriteInt64LittleEndian(
                     associatedData.Slice(AssociatedSizeOffset), (long)blobData.Length);
 
-                IAesGcmPrimitives encryptor = CryptographyProviders.AesGcmPrimitivesCreator();
+                var encryptor = CryptographyProviders.AesGcmPrimitivesCreator();
                 encryptor.EncryptAndAuthenticate(
                     largeBlobKey.Span, Nonce.Span, dataToEncrypt, encryptedData, gcmTag, associatedData);
                 Array.Copy(encryptedData, 0, ciphertext, 0, encryptedData.Length);

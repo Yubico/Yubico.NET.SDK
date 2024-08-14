@@ -169,7 +169,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
             Algorithm = initializeAuthenticationResponse.Algorithm;
 
-            (bool isMutual, ReadOnlyMemory<byte> clientAuthenticationChallenge) = initializeAuthenticationResponse.GetData();
+            (bool isMutual, var clientAuthenticationChallenge) = initializeAuthenticationResponse.GetData();
             _isMutual = isMutual;
 
             // With single auth, encrypt the challenge. Mutual decrypts.
@@ -209,7 +209,7 @@ namespace Yubico.YubiKey.Piv.Commands
             if (_isMutual)
             {
                 // For mutual auth, we will decrypt the witness
-                using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
+                using var randomObject = CryptographyProviders.RngCreator();
                 randomObject.GetBytes(_buffer, ExpectedResponseOffset * _blockSize, _blockSize);
 
                 // The app will send the YubiKey a challenge in the clear. The

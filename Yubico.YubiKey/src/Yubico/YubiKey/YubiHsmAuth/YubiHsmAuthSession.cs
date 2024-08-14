@@ -118,11 +118,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </exception>
         public void ResetApplication()
         {
-            ResetApplicationResponse resetResponse = Connection.SendCommand(new ResetApplicationCommand());
-
-            if (resetResponse.Status != ResponseStatus.Success)
+            var response = Connection.SendCommand(new ResetApplicationCommand());
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(resetResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
@@ -137,7 +136,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </exception>
         public ApplicationVersion GetApplicationVersion()
         {
-            GetApplicationVersionResponse applicationVersionResponse = Connection.SendCommand(new GetApplicationVersionCommand());
+            var applicationVersionResponse = Connection.SendCommand(new GetApplicationVersionCommand());
 
             if (applicationVersionResponse.Status != ResponseStatus.Success)
             {

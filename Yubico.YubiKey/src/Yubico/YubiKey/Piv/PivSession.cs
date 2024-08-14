@@ -380,10 +380,10 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.NotSupportedByYubiKeyVersion));
             }
 
-            var metadataCommand = new GetMetadataCommand(slotNumber);
-            GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);
+            var command = new GetMetadataCommand(slotNumber);
+            var response = Connection.SendCommand(command);
 
-            return metadataResponse.GetData();
+            return response.GetData();
         }
 
         /// <summary>
@@ -477,10 +477,9 @@ namespace Yubico.YubiKey.Piv
             TryBlock(PivSlot.Pin);
             TryBlock(PivSlot.Puk);
 
-            var resetCommand = new ResetPivCommand();
-            ResetPivResponse resetResponse = Connection.SendCommand(resetCommand);
-
-            if (resetResponse.Status != ResponseStatus.Success)
+            var command = new ResetPivCommand();
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
                 throw new SecurityException(
                     string.Format(
@@ -532,9 +531,9 @@ namespace Yubico.YubiKey.Piv
             }
 
             _log.LogDebug("Moving key from {SourceSlot} to {DestinationSlot}", sourceSlot, destinationSlot);
+            
             var command = new MoveKeyCommand(sourceSlot, destinationSlot);
-            MoveKeyResponse response = Connection.SendCommand(command);
-
+            var response = Connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(response.StatusMessage);
@@ -580,8 +579,9 @@ namespace Yubico.YubiKey.Piv
             }
 
             _log.LogDebug("Deleting key at slot {TargetSlot}", slotToClear);
+            
             var command = new DeleteKeyCommand(slotToClear);
-            DeleteKeyResponse response = Connection.SendCommand(command);
+            var response = Connection.SendCommand(command);
 
             bool unsuccessfulStatus =
                 response.Status != ResponseStatus.Success &&
@@ -627,15 +627,14 @@ namespace Yubico.YubiKey.Piv
                     0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22
                 };
 
-                var changeCommand = new ChangeReferenceDataCommand(slotNumber, currentValue, newValue);
-                ChangeReferenceDataResponse changeResponse = Connection.SendCommand(changeCommand);
-
-                if (changeResponse.Status == ResponseStatus.Failed)
+                var command = new ChangeReferenceDataCommand(slotNumber, currentValue, newValue);
+                var response = Connection.SendCommand(command);
+                if (response.Status == ResponseStatus.Failed)
                 {
                     return false;
                 }
 
-                retriesRemaining = changeResponse.GetData() ?? 1;
+                retriesRemaining = response.GetData() ?? 1;
             }
             while (retriesRemaining > 0);
 
@@ -662,13 +661,13 @@ namespace Yubico.YubiKey.Piv
 
         private PivAlgorithm GetManagementKeyAlgorithm()
         {
-            GetMetadataResponse response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
+            var response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
 
-            PivMetadata metadata = response.GetData();
+            var metadata = response.GetData();
             return metadata.Algorithm;
         }
     }

@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.U2f.Commands
                 throw new InvalidOperationException(StatusMessage);
             }
 
-            ReadOnlySpan<byte> responseApduData = ResponseApdu.Data.Span;
+            var responseApduData = ResponseApdu.Data.Span;
             return Encoding.ASCII.GetString(responseApduData.ToArray());
         }
     }

@@ -17,26 +17,26 @@ namespace Yubico.YubiKey
     internal static class YubiKeyCapabilitiesExtensions
     {
         public static YubiKeyCapabilities ToDeviceInfoCapabilities(
-            this YubiKeyCapabilities yubiKeyCapabilities)
+            this YubiKeyCapabilities capabilities)
         {
-            if (yubiKeyCapabilities.HasFlag(YubiKeyCapabilities.All))
+            if (capabilities.HasFlag(YubiKeyCapabilities.All))
             {
-                return yubiKeyCapabilities;
+                return capabilities;
             }
 
-            YubiKeyCapabilities deviceInfoCapabilities = YubiKeyCapabilities.None;
+            var deviceInfoCapabilities = YubiKeyCapabilities.None;
 
-            if (yubiKeyCapabilities.HasFlag(YubiKeyCapabilities.Otp))
+            if (capabilities.HasFlag(YubiKeyCapabilities.Otp))
             {
                 deviceInfoCapabilities |= YubiKeyCapabilities.Otp;
             }
 
-            if (yubiKeyCapabilities.HasFlag(YubiKeyCapabilities.FidoU2f))
+            if (capabilities.HasFlag(YubiKeyCapabilities.FidoU2f))
             {
                 deviceInfoCapabilities |= YubiKeyCapabilities.FidoU2f | YubiKeyCapabilities.Fido2;
             }
 
-            if (yubiKeyCapabilities.HasFlag(YubiKeyCapabilities.Ccid))
+            if (capabilities.HasFlag(YubiKeyCapabilities.Ccid))
             {
                 deviceInfoCapabilities |=
                     YubiKeyCapabilities.Piv

@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Application_Get_ReturnsYubiHsmAuth()
         {
-            GetApplicationVersionCommand command = new GetApplicationVersionCommand();
+            var command = new GetApplicationVersionCommand();
 
             Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
         }
@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Cla0()
         {
-            GetApplicationVersionCommand command = new GetApplicationVersionCommand();
+            var command = new GetApplicationVersionCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.Cla);
@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Ins0x07()
         {
-            GetApplicationVersionCommand command = new GetApplicationVersionCommand();
+            var command = new GetApplicationVersionCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0x07, apdu.Ins);
@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P1Is0()
         {
-            GetApplicationVersionCommand command = new GetApplicationVersionCommand();
+            var command = new GetApplicationVersionCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.P1);
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P2Is0()
         {
-            GetApplicationVersionCommand command = new GetApplicationVersionCommand();
+            var command = new GetApplicationVersionCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.P2);
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataLength0()
         {
-            GetApplicationVersionCommand command = new GetApplicationVersionCommand();
+            var command = new GetApplicationVersionCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.Data.Length);

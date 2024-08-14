@@ -117,8 +117,8 @@ namespace Yubico.YubiKey
             };
 
             _log.LogInformation("Selecting smart card application [{AID}]", Hex.BytesToHex(_applicationId ?? _yubiKeyApplication.GetIso7816ApplicationId()));
-            ResponseApdu responseApdu = _smartCardConnection.Transmit(selectApplicationCommand.CreateCommandApdu());
-
+            
+            var responseApdu = _smartCardConnection.Transmit(selectApplicationCommand.CreateCommandApdu());
             if (responseApdu.SW != SWConstants.Success)
             {
                 throw new ApduException(
@@ -131,20 +131,20 @@ namespace Yubico.YubiKey
                 };
             }
 
-            ISelectApplicationResponse<ISelectApplicationData>? response = selectApplicationCommand.CreateResponseForApdu(responseApdu);
+            var response = selectApplicationCommand.CreateResponseForApdu(responseApdu);
             SelectApplicationData = response.GetData();
         }
 
         public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse
         {
-            using (IDisposable _ = _smartCardConnection.BeginTransaction(out bool cardWasReset))
+            using (var _ = _smartCardConnection.BeginTransaction(out bool cardWasReset))
             {
                 if (cardWasReset)
                 {
                     SelectApplication();
                 }
 
-                ResponseApdu responseApdu = _apduPipeline.Invoke(
+                var responseApdu = _apduPipeline.Invoke(
                     yubiKeyCommand.CreateCommandApdu(),
                     yubiKeyCommand.GetType(),
                     typeof(TResponse));

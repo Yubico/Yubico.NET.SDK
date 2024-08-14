@@ -306,8 +306,9 @@ namespace Yubico.YubiKey.Piv.Commands
             }
 
             data[IndexValueLength] = (byte)valueLength;
-            Span<byte> returnValue = data.AsSpan(0, length);
-            return returnValue.ToArray();
+            var apduData = data.AsSpan(0, length);
+            
+            return apduData.ToArray();
         }
 
         /// <inheritdoc />

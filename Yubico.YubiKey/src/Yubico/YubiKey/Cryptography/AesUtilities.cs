@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Cryptography
 
             byte[] ciphertext;
 
-            using (Aes aesObj = CryptographyProviders.AesCreator())
+            using (var aesObj = CryptographyProviders.AesCreator())
             {
 #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
                 aesObj.Mode = CipherMode.ECB;
@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.Cryptography
                 aesObj.Padding = PaddingMode.None;
 #pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
                 // a non-default initialization vector
-                ICryptoTransform encryptor = aesObj.CreateEncryptor();
+                var encryptor = aesObj.CreateEncryptor();
 #pragma warning restore CA5401
                 using (var msEncrypt = new MemoryStream())
                 {
@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.Cryptography
 
             byte[] ciphertext;
 
-            using (Aes aesObj = CryptographyProviders.AesCreator())
+            using (var aesObj = CryptographyProviders.AesCreator())
             {
                 aesObj.Mode = CipherMode.CBC;
                 aesObj.KeySize = BlockSizeBits;
@@ -127,7 +127,7 @@ namespace Yubico.YubiKey.Cryptography
                 aesObj.Padding = PaddingMode.None;
 #pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
                 // a non-default initialization vector
-                ICryptoTransform encryptor = aesObj.CreateEncryptor();
+                var encryptor = aesObj.CreateEncryptor();
 #pragma warning restore CA5401
                 using (var msEncrypt = new MemoryStream())
                 {
@@ -181,7 +181,7 @@ namespace Yubico.YubiKey.Cryptography
 
             byte[] plaintext;
 
-            using (Aes aesObj = CryptographyProviders.AesCreator())
+            using (var aesObj = CryptographyProviders.AesCreator())
             {
                 aesObj.Mode = CipherMode.CBC;
                 aesObj.KeySize = BlockSizeBits;
@@ -190,7 +190,7 @@ namespace Yubico.YubiKey.Cryptography
                 aesObj.IV = iv;
                 aesObj.Padding = PaddingMode.None;
 
-                ICryptoTransform decryptor = aesObj.CreateDecryptor();
+                var decryptor = aesObj.CreateDecryptor();
 
                 using (var msDecrypt = new MemoryStream())
                 {

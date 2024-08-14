@@ -203,7 +203,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
-                SimpleKeyCollector keyCollector = new SimpleKeyCollector
+                var keyCollector = new SimpleKeyCollector
                 {
                     // Start with the incorrect cred password, forcing a retry
                     UseDefaultValue = false

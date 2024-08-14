@@ -29,16 +29,17 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <inheritdoc/>
         protected override void ExecuteOperation()
         {
-            YubiKeyFlags ykFlags = Settings.YubiKeyFlags;
-            var cmd = new UpdateSlotCommand
+            var yubiKeyFlags = Settings.YubiKeyFlags;
+            var command = new UpdateSlotCommand
             {
-                YubiKeyFlags = ykFlags,
+                YubiKeyFlags = yubiKeyFlags,
                 OtpSlot = OtpSlot!.Value
             };
-            cmd.ApplyCurrentAccessCode(CurrentAccessCode);
-            cmd.SetAccessCode(NewAccessCode);
+            
+            command.ApplyCurrentAccessCode(CurrentAccessCode);
+            command.SetAccessCode(NewAccessCode);
 
-            ReadStatusResponse response = Connection.SendCommand(cmd);
+            var response = Connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(string.Format(

@@ -53,15 +53,14 @@ namespace Yubico.YubiKey.Fido2.Commands
                 throw new InvalidOperationException(StatusMessage);
             }
 
-            BioEnrollmentData enrollData = _response.GetData();
-
-            if (!(enrollData.LastEnrollSampleStatus is null)
-                && !(enrollData.RemainingSampleCount is null))
+            var bioEnrollmentData = _response.GetData();
+            if (!(bioEnrollmentData.LastEnrollSampleStatus is null)
+                && !(bioEnrollmentData.RemainingSampleCount is null))
             {
                 return new BioEnrollSampleResult(
                     _templateId,
-                    enrollData.LastEnrollSampleStatus.Value,
-                    enrollData.RemainingSampleCount.Value);
+                    bioEnrollmentData.LastEnrollSampleStatus.Value,
+                    bioEnrollmentData.RemainingSampleCount.Value);
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

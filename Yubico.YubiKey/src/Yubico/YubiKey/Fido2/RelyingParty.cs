@@ -179,10 +179,10 @@ namespace Yubico.YubiKey.Fido2
         // Perform the appropriate digest operation to generate the correct value.
         private void ComputeRelyingPartyIdHash()
         {
-            using SHA256 digester = CryptographyProviders.Sha256Creator();
-            digester.Initialize();
+            using var digestHashAlgorihm = CryptographyProviders.Sha256Creator();
+            digestHashAlgorihm.Initialize();
             byte[] utf = Encoding.UTF8.GetBytes(Id);
-            byte[] digest = digester.ComputeHash(utf);
+            byte[] digest = digestHashAlgorihm.ComputeHash(utf);
             RelyingPartyIdHash = new ReadOnlyMemory<byte>(digest);
         }
 

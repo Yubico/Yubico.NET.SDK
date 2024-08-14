@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         {
             short expectedSW = SWConstants.Success;
 
-            SampleYubiHsmAuthResponse response = new SampleYubiHsmAuthResponse(
+            var response = new SampleYubiHsmAuthResponse(
                 new ResponseApdu(new byte[] { }, expectedSW));
 
             Assert.Equal(expectedSW, response.StatusWord);
@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [InlineData(SWConstants.Success, ResponseStatus.Success)]
         public void Status_GivenStatusWord_ReturnsCorrectResponseStatus(short responseSw, ResponseStatus expectedStatus)
         {
-            SampleYubiHsmAuthResponse response = new SampleYubiHsmAuthResponse(
+            var response = new SampleYubiHsmAuthResponse(
                 new ResponseApdu(new byte[] { }, responseSw));
 
             Assert.Equal(expectedStatus, response.Status);
@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [InlineData(SWConstants.Success, SuccessStatusMessage)]
         public void Status_GivenStatusWord_ReturnsCorrectResponseMessage(short responseSw, string expectedMessage)
         {
-            SampleYubiHsmAuthResponse response = new SampleYubiHsmAuthResponse(
+            var response = new SampleYubiHsmAuthResponse(
                 new ResponseApdu(new byte[] { }, responseSw));
 
             Assert.Equal(expectedMessage, response.StatusMessage);

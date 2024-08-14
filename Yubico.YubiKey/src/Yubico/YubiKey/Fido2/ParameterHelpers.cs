@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Fido2
                 throw new ArgumentNullException();
             }
 
-            List<T> returnList = currentList is null ? new List<T>() : currentList;
+            var returnList = currentList ?? new List<T>();
             returnList.Add(itemToAdd);
 
             return returnList;
@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Fido2
                 throw new ArgumentNullException(nameof(theValue));
             }
 
-            Dictionary<string, TValue> returnDictionary =
+            var returnDictionary =
                 currentDictionary is null ? new Dictionary<string, TValue>() : currentDictionary;
 
             // If the key already exists, replace the current value in the
@@ -112,7 +112,7 @@ namespace Yubico.YubiKey.Fido2
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
 
             cbor.WriteStartMap(null);
-            foreach (KeyValuePair<string, TValue> entry in localData)
+            foreach (var entry in localData)
             {
                 cbor.WriteTextString(entry.Key);
                 if (entry.Value is byte[] encodedValue)

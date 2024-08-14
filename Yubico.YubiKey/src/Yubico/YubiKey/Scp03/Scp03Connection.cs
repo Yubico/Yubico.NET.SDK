@@ -38,7 +38,7 @@ namespace Yubico.YubiKey
         public Scp03Connection(ISmartCardDevice smartCardDevice, byte[] applicationId, StaticKeys scp03Keys)
             : base(smartCardDevice, YubiKeyApplication.Unknown, applicationId)
         {
-            YubiKeyApplication setError = YubiKeyApplication.Unknown;
+            var setError = YubiKeyApplication.Unknown;
             if (applicationId.SequenceEqual(YubiKeyApplication.Fido2.GetIso7816ApplicationId()))
             {
                 setError = YubiKeyApplication.Fido2;

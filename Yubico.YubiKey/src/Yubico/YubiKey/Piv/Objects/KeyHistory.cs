@@ -250,7 +250,7 @@ namespace Yubico.YubiKey.Piv.Objects
             //      FE 00
             byte onCard = 0;
             byte offCard = 0;
-            ReadOnlyMemory<byte> offCardUrl = ReadOnlyMemory<byte>.Empty;
+            var offCardUrl = ReadOnlyMemory<byte>.Empty;
             var tlvReader = new TlvReader(encodedData);
             bool isValid = tlvReader.TryReadNestedTlv(out tlvReader, EncodingTag);
             if (isValid)
@@ -267,7 +267,7 @@ namespace Yubico.YubiKey.Piv.Objects
             }
             if (isValid)
             {
-                isValid = tlvReader.TryReadValue(out ReadOnlyMemory<byte> unusedData, UnusedTag);
+                isValid = tlvReader.TryReadValue(out var unusedData, UnusedTag);
                 if (isValid)
                 {
                     isValid = unusedData.Length == 0;

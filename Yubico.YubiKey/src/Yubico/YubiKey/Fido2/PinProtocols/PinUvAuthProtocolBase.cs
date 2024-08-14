@@ -136,7 +136,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// exception.
         /// </para>
         /// </remarks>
-        /// <param new="authenticatorPublicKey">
+        /// <param name="authenticatorPublicKey">
         /// The YubiKey's public key obtained by calling the
         /// <see cref="Yubico.YubiKey.Fido2.Commands.GetKeyAgreementCommand"/>.
         /// </param>
@@ -191,7 +191,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
 
             try
             {
-                IEcdhPrimitives ecdh = CryptographyProviders.EcdhPrimitivesCreator();
+                var ecdh = CryptographyProviders.EcdhPrimitivesCreator();
                 platformKeyPair = ecdh.GenerateKeyPair(ECCurve.NamedCurves.nistP256);
 
                 PlatformPublicKey = new CoseEcPublicKey(platformKeyPair.Value);

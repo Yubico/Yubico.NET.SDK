@@ -125,9 +125,8 @@ namespace Yubico.YubiKey.Piv
         {
             // Try to decode as an RSA public key. If that works, we're done. If
             // not, try ECC. If that doesn't work, exception.
-            bool isCreated = PivRsaPublicKey.TryCreate(out PivPublicKey publicKeyObject, encodedPublicKey);
-
-            if (isCreated == false)
+            bool isCreated = PivRsaPublicKey.TryCreate(out var publicKeyObject, encodedPublicKey);
+            if (!isCreated)
             {
                 if (PivEccPublicKey.TryCreate(out publicKeyObject, encodedPublicKey) == false)
                 {

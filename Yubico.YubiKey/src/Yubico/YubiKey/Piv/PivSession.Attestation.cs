@@ -117,12 +117,12 @@ namespace Yubico.YubiKey.Piv
             if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivAttestation))
             {
                 // This call will throw an exception if the slot number is incorrect.
-                var createCommand = new CreateAttestationStatementCommand(slotNumber);
-                CreateAttestationStatementResponse createResponse = Connection.SendCommand(createCommand);
+                var command = new CreateAttestationStatementCommand(slotNumber);
+                var response = Connection.SendCommand(command);
 
                 // This call will throw an exception if there was a problem with
                 // attestation (imported, invalid cert, etc.).
-                return createResponse.GetData();
+                return response.GetData();
             }
 
             throw new NotSupportedException(
@@ -183,13 +183,14 @@ namespace Yubico.YubiKey.Piv
         {
             if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivAttestation))
             {
-                var getCommand = new GetDataCommand(AttestationCertTag);
-                GetDataResponse getResponse = Connection.SendCommand(getCommand);
-                ReadOnlyMemory<byte> certData = getResponse.GetData();
+                var command = new GetDataCommand(AttestationCertTag);
+                var response = Connection.SendCommand(command);
+                var certData = response.GetData();
 
                 var tlvReader = new TlvReader(certData);
                 tlvReader = tlvReader.ReadNestedTlv(PivEncodingTag);
                 certData = tlvReader.ReadValue(PivCertTag);
+                
                 return new X509Certificate2(certData.ToArray());
             }
 
@@ -341,16 +342,15 @@ namespace Yubico.YubiKey.Piv
 
             ImportPrivateKey(PivSlot.Attestation, privateKey);
 
-            var putCommand = new PutDataCommand(AttestationCertTag, encodedCert);
-            PutDataResponse putResponse = Connection.SendCommand(putCommand);
-
-            if (putResponse.Status != ResponseStatus.Success)
+            var command = new PutDataCommand(AttestationCertTag, encodedCert);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.CommandResponseApduUnexpectedResult,
-                        putResponse.StatusWord.ToString("X4", CultureInfo.InvariantCulture)));
+                        response.StatusWord.ToString("X4", CultureInfo.InvariantCulture)));
             }
         }
 

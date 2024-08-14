@@ -231,7 +231,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 return false;
             }
 
-            DialogResult dResult = DialogResult.OK;
+            var dResult = DialogResult.OK;
             do
             {
                 _pinPopupForm.UpdateMessage(dResult, keyEntryData);

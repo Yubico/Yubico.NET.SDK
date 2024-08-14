@@ -155,7 +155,7 @@ namespace Yubico.YubiKey.Piv.Objects
             _log.LogInformation("Set the GUID of CardholderUniqueId with a random value.");
             Clear();
 
-            using (RandomNumberGenerator randomObject = CryptographyProviders.RngCreator())
+            using (var randomObject = CryptographyProviders.RngCreator())
             {
                 randomObject.GetBytes(_guidValue, 0, GuidLength);
             }
@@ -217,7 +217,7 @@ namespace Yubico.YubiKey.Piv.Objects
             //      3e 00
             //      fe 00
             var tlvWriter = new TlvWriter();
-            ReadOnlySpan<byte> emptySpan = ReadOnlySpan<byte>.Empty;
+            var emptySpan = ReadOnlySpan<byte>.Empty;
             using (tlvWriter.WriteNestedTlv(EncodingTag))
             {
                 tlvWriter.WriteValue(FascNumberTag, FascNumber.Span);
@@ -278,7 +278,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (isValid)
             {
                 _log.LogInformation("Decode data into CardholderUniqueId: FascNumber.");
-                if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> encodedFascn, FascNumberTag))
+                if (tlvReader.TryReadValue(out var encodedFascn, FascNumberTag))
                 {
                     if (MemoryExtensions.SequenceEqual<byte>(encodedFascn.Span, FascNumber.Span))
                     {
@@ -302,12 +302,12 @@ namespace Yubico.YubiKey.Piv.Objects
             if (isValid)
             {
                 _log.LogInformation("Decode data into CardholderUniqueId: Guid.");
-                if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> encodedGuid, GuidTag))
+                if (tlvReader.TryReadValue(out var encodedGuidBytes, GuidTag))
                 {
-                    if (encodedGuid.Length == GuidLength)
+                    if (encodedGuidBytes.Length == GuidLength)
                     {
                         var dest = new Memory<byte>(_guidValue);
-                        encodedGuid.CopyTo(dest);
+                        encodedGuidBytes.CopyTo(dest);
                         return true;
                     }
                 }
@@ -339,9 +339,9 @@ namespace Yubico.YubiKey.Piv.Objects
             if (isValid)
             {
                 _log.LogInformation("Decode data into CardholderUniqueId: TrailingElements.");
-                if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> signature, SignatureTag))
+                if (tlvReader.TryReadValue(out var signatureBytes, SignatureTag))
                 {
-                    if (signature.Length == 0 && tlvReader.TryReadValue(out ReadOnlyMemory<byte> lrc, LrcTag))
+                    if (signatureBytes.Length == 0 && tlvReader.TryReadValue(out var lrc, LrcTag))
                     {
                         if (lrc.Length == 0 && !tlvReader.HasData)
                         {

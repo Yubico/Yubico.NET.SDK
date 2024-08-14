@@ -17,9 +17,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Logging;
-using Yubico.PlatformInterop;
 using Yubico.Core.Logging;
-
+using Yubico.PlatformInterop;
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.Hid

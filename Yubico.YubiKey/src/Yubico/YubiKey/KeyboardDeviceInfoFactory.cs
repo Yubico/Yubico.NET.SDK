@@ -40,32 +40,32 @@ namespace Yubico.YubiKey
                 throw new ArgumentException(ExceptionMessages.InvalidDeviceNotKeyboard, nameof(device));
             }
 
-            if (!TryGetDeviceInfoFromKeyboard(device, out YubiKeyDeviceInfo? ykDeviceInfo))
+            if (!TryGetDeviceInfoFromKeyboard(device, out var deviceInfo))
             {
-                ykDeviceInfo = new YubiKeyDeviceInfo();
+                deviceInfo = new YubiKeyDeviceInfo();
             }
 
             // Manually fill in gaps, if necessary
             var defaultDeviceInfo = new YubiKeyDeviceInfo();
 
-            if (ykDeviceInfo.SerialNumber == defaultDeviceInfo.SerialNumber
+            if (deviceInfo.SerialNumber == defaultDeviceInfo.SerialNumber
                 && TryGetSerialNumberFromKeyboard(device, out int? serialNumber))
             {
-                ykDeviceInfo.SerialNumber = serialNumber;
+                deviceInfo.SerialNumber = serialNumber;
             }
 
-            if (ykDeviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion
-                && TryGetFirmwareVersionFromKeyboard(device, out FirmwareVersion? firmwareVersion))
+            if (deviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion && 
+                TryGetFirmwareVersionFromKeyboard(device, out var firmwareVersion))
             {
-                ykDeviceInfo.FirmwareVersion = firmwareVersion;
+                deviceInfo.FirmwareVersion = firmwareVersion;
             }
 
-            if (ykDeviceInfo.FirmwareVersion < FirmwareVersion.V4_0_0 && ykDeviceInfo.AvailableUsbCapabilities == YubiKeyCapabilities.None)
+            if (deviceInfo.FirmwareVersion < FirmwareVersion.V4_0_0 && deviceInfo.AvailableUsbCapabilities == YubiKeyCapabilities.None)
             {
-                ykDeviceInfo.AvailableUsbCapabilities = YubiKeyCapabilities.Otp;
+                deviceInfo.AvailableUsbCapabilities = YubiKeyCapabilities.Otp;
             }
 
-            return ykDeviceInfo;
+            return deviceInfo;
         }
 
         private static bool TryGetDeviceInfoFromKeyboard(IHidDevice device, [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo yubiKeyDeviceInfo)
@@ -109,8 +109,7 @@ namespace Yubico.YubiKey
                 Logger.LogInformation("Attempting to read serial number through the keybaord interface.");
                 using var keyboardConnection = new KeyboardConnection(device);
 
-                Otp.Commands.GetSerialNumberResponse response = keyboardConnection.SendCommand(new Otp.Commands.GetSerialNumberCommand());
-
+                var response = keyboardConnection.SendCommand(new GetSerialNumberCommand());
                 if (response.Status == ResponseStatus.Success)
                 {
                     serialNumber = response.GetData();
@@ -145,8 +144,7 @@ namespace Yubico.YubiKey
                 Logger.LogInformation("Attempting to read firmware version through the keyboard interface.");
                 using var keyboardConnection = new KeyboardConnection(device);
 
-                Otp.Commands.ReadStatusResponse response = keyboardConnection.SendCommand(new Otp.Commands.ReadStatusCommand());
-
+                var response = keyboardConnection.SendCommand(new ReadStatusCommand());
                 if (response.Status == ResponseStatus.Success)
                 {
                     firmwareVersion = response.GetData().FirmwareVersion;

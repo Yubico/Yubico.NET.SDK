@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Management.Commands
                 };
             }
 
-            if (!YubiKeyDeviceInfo.TryCreateFromResponseData(ResponseApdu.Data, out YubiKeyDeviceInfo? deviceInfo))
+            if (!YubiKeyDeviceInfo.TryCreateFromResponseData(ResponseApdu.Data, out var deviceInfo))
             {
                 throw new MalformedYubiKeyResponseException
                 {

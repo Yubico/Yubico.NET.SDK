@@ -180,8 +180,7 @@ namespace Yubico.YubiKey.Otp
                 throw new InvalidOperationException(ExceptionMessages.OtpSlotsNotConfigured);
             }
 
-            ReadStatusResponse swapResponse = _connection.SendCommand(new SwapSlotsCommand());
-
+            var swapResponse = _connection.SendCommand(new SwapSlotsCommand());
             if (swapResponse.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(swapResponse.StatusMessage);
@@ -245,7 +244,7 @@ namespace Yubico.YubiKey.Otp
             ReadNdefDataResponse response;
             using (_connection = YubiKey.Connect(YubiKeyApplication.OtpNdef))
             {
-                OtpResponse selectResponse = _connection.SendCommand(new SelectNdefDataCommand() { FileID = NdefFileId.Ndef });
+                var selectResponse = _connection.SendCommand(new SelectNdefDataCommand() { FileID = NdefFileId.Ndef });
                 if (selectResponse.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(

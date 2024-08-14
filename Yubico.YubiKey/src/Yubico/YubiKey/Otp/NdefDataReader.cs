@@ -91,7 +91,7 @@ namespace Yubico.YubiKey.Otp
 
             Debug.Assert(responseData[2] == 0xD1); // Short Record, Well-known TypeName, Message Begin, Message End
 
-            ReadOnlySpan<byte> recordType = responseData.Slice(TypeOffset, typeLength);
+            var recordType = responseData.Slice(TypeOffset, typeLength);
 
             Type = recordType[0] switch
             {
@@ -131,7 +131,7 @@ namespace Yubico.YubiKey.Otp
             int languageCodeLength = header & languageCodeLengthMask;
             int textOffset = languageCodeLength + 1;
 
-            Encoding encoding = Encoding.UTF8;
+            var encoding = Encoding.UTF8;
             if (isUtf16)
             {
                 bool bomPresent;

@@ -101,36 +101,32 @@ namespace Yubico.YubiKey.YubiHsmAuth
                                                 ReadOnlyMemory<byte> hostChallenge,
                                                 ReadOnlyMemory<byte> hsmDeviceChallenge)
         {
-            GetAes128SessionKeysCommand getKeysCmd =
-                new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                     credentialLabel,
                     credentialPassword,
                     hostChallenge,
                     hsmDeviceChallenge);
 
-            GetAes128SessionKeysResponse getKeysRsp =
-                Connection.SendCommand(getKeysCmd);
-
-            if (getKeysRsp.Status != ResponseStatus.Success)
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
-                if (getKeysRsp.Status == ResponseStatus.AuthenticationRequired)
+                if (response.Status == ResponseStatus.AuthenticationRequired)
                 {
                     throw new SecurityException(string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.YubiHsmAuthCredPasswordAuthFailed,
-                        getKeysRsp.RetriesRemaining));
+                        response.RetriesRemaining));
                 }
-                else if (getKeysRsp.Status == ResponseStatus.RetryWithTouch)
+
+                if (response.Status == ResponseStatus.RetryWithTouch)
                 {
                     throw new TimeoutException(ExceptionMessages.YubiHsmAuthTouchTimeout);
                 }
-                else
-                {
-                    throw new InvalidOperationException(getKeysRsp.StatusMessage);
-                }
+
+                throw new InvalidOperationException(response.StatusMessage);
             }
 
-            return getKeysRsp.GetData();
+            return response.GetData();
         }
 
         /// <summary>
@@ -234,7 +230,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     .Single(c => c.Credential.Label == credentialLabel)
                     .Credential.TouchRequired;
 
-            Func<KeyEntryData, bool>? keyCollector = GetKeyCollector();
+            var keyCollectorFunc = GetKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {
@@ -243,9 +239,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             try
             {
-                while (keyCollector(keyEntryData))
+                while (keyCollectorFunc(keyEntryData))
                 {
-                    var getKeysCmd =
+                    var command =
                         new GetAes128SessionKeysCommand(
                             credentialLabel,
                             keyEntryData.GetCurrentValue(),
@@ -258,27 +254,25 @@ namespace Yubico.YubiKey.YubiHsmAuth
                         // new thread and send a touch request to the key collector
 
                         keyEntryData.Request = KeyEntryRequest.TouchRequest;
-                        _ = Task.Run(() => keyCollector(keyEntryData));
+                        _ = Task.Run(() => keyCollectorFunc(keyEntryData));
 
                         // We ignore the return value, regardless. So no need to wait.
                     }
 
-                    GetAes128SessionKeysResponse getKeysRsp =
-                        Connection.SendCommand(getKeysCmd);
-
-                    if (getKeysRsp.Status == ResponseStatus.Success)
+                    var response = Connection.SendCommand(command);
+                    if (response.Status == ResponseStatus.Success)
                     {
-                        sessionKeys = getKeysRsp.GetData();
+                        sessionKeys = response.GetData();
 
                         return true;
                     }
 
                     // Handle failure cases
-                    if (getKeysRsp.Status == ResponseStatus.AuthenticationRequired)
+                    if (response.Status == ResponseStatus.AuthenticationRequired)
                     {
                         // Incorrect credential password - retry auth (if possible)
 
-                        if (getKeysRsp.RetriesRemaining == 0)
+                        if (response.RetriesRemaining == 0)
                         {
                             throw new SecurityException(
                                 string.Format(
@@ -288,11 +282,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
                         keyEntryData.Request = KeyEntryRequest.AuthenticateYubiHsmAuthCredentialPassword;
                         keyEntryData.IsRetry = true;
-                        keyEntryData.RetriesRemaining = getKeysRsp.RetriesRemaining;
+                        keyEntryData.RetriesRemaining = response.RetriesRemaining;
 
                         continue;
                     }
-                    else if (getKeysRsp.Status == ResponseStatus.RetryWithTouch)
+                    else if (response.Status == ResponseStatus.RetryWithTouch)
                     {
                         // Touch was expected
                         throw new TimeoutException(ExceptionMessages.YubiHsmAuthTouchTimeout);
@@ -300,7 +294,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     else
                     {
                         // Other error
-                        throw new InvalidOperationException(getKeysRsp.StatusMessage);
+                        throw new InvalidOperationException(response.StatusMessage);
                     }
                 }
             }
@@ -309,7 +303,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 keyEntryData.Clear();
 
                 keyEntryData.Request = KeyEntryRequest.Release;
-                _ = keyCollector(keyEntryData);
+                _ = keyCollectorFunc(keyEntryData);
             }
 
             // User cancelled

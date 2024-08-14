@@ -54,7 +54,7 @@ namespace Yubico.YubiKey
             while (tlvReader.HasData)
             {
                 int tag = tlvReader.PeekTag();
-                ReadOnlyMemory<byte> value = tlvReader.ReadValue(tag);
+                var value = tlvReader.ReadValue(tag);
                 result.Add(tag, value);
             }
 
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey
                 };
             }
 
-            Dictionary<int, ReadOnlyMemory<byte>>? result = CreateApduDictionaryFromResponseData(responseApdu.Data);
+            var result = CreateApduDictionaryFromResponseData(responseApdu.Data);
             return result ?? throw new MalformedYubiKeyResponseException
             {
                 ResponseClass = responseClass,

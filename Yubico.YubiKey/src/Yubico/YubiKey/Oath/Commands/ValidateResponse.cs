@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Oath.Commands
             }
 
             var tlvReader = new TlvReader(ResponseApdu.Data);
-            ReadOnlyMemory<byte> value = tlvReader.ReadValue(ResponseTag);
+            var value = tlvReader.ReadValue(ResponseTag);
 
             return value.Span.SequenceEqual(Response.Span);
         }

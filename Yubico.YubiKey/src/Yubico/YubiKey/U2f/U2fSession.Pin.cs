@@ -107,7 +107,7 @@ namespace Yubico.YubiKey.U2f
         public bool TrySetPin()
         {
             _log.LogInformation("Try to set the U2F PIN using the KeyCollector.");
-            Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
+            var keyCollectorFunc = EnsureKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {
@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.U2f
 
             try
             {
-                while (keyCollector(keyEntryData))
+                while (keyCollectorFunc(keyEntryData))
                 {
                     if (TrySetPin(keyEntryData.GetCurrentValue()))
                     {
@@ -131,7 +131,7 @@ namespace Yubico.YubiKey.U2f
                 keyEntryData.Clear();
 
                 keyEntryData.Request = KeyEntryRequest.Release;
-                _ = keyCollector(keyEntryData);
+                _ = keyCollectorFunc(keyEntryData);
             }
 
             return false;
@@ -164,10 +164,10 @@ namespace Yubico.YubiKey.U2f
         public bool TrySetPin(ReadOnlyMemory<byte> pin)
         {
             _log.LogInformation("Try to set the U2F PIN using a provided value.");
-            var setCommand = new SetPinCommand(ReadOnlyMemory<byte>.Empty, pin);
-            SetPinResponse setResponse = Connection.SendCommand(setCommand);
-
-            return setResponse.StatusWord switch
+            
+            var command = new SetPinCommand(ReadOnlyMemory<byte>.Empty, pin);
+            var response = Connection.SendCommand(command);
+            return response.StatusWord switch
             {
                 SWConstants.Success => true,
                 SWConstants.VerifyFail => throw new SecurityException(
@@ -285,7 +285,7 @@ namespace Yubico.YubiKey.U2f
         public bool TryChangePin()
         {
             _log.LogInformation("Try to change the U2F PIN using the KeyCollector.");
-            Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
+            var keyCollectorFunc = EnsureKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {
@@ -294,7 +294,7 @@ namespace Yubico.YubiKey.U2f
 
             try
             {
-                while (keyCollector(keyEntryData))
+                while (keyCollectorFunc(keyEntryData))
                 {
                     if (TryChangePin(keyEntryData.GetCurrentValue(), keyEntryData.GetNewValue()))
                     {
@@ -309,7 +309,7 @@ namespace Yubico.YubiKey.U2f
                 keyEntryData.Clear();
 
                 keyEntryData.Request = KeyEntryRequest.Release;
-                _ = keyCollector(keyEntryData);
+                _ = keyCollectorFunc(keyEntryData);
             }
 
             return false;
@@ -337,10 +337,9 @@ namespace Yubico.YubiKey.U2f
         public bool TryChangePin(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin)
         {
             _log.LogInformation("Try to change the U2F PIN using provided values.");
-            var setCommand = new SetPinCommand(currentPin, newPin);
-            SetPinResponse setResponse = Connection.SendCommand(setCommand);
-
-            return setResponse.StatusWord switch
+            var command = new SetPinCommand(currentPin, newPin);
+            var response = Connection.SendCommand(command);
+            return response.StatusWord switch
             {
                 SWConstants.Success => true,
                 SWConstants.AuthenticationMethodBlocked => throw new SecurityException(
@@ -434,7 +433,7 @@ namespace Yubico.YubiKey.U2f
         private bool CommonVerifyPin(bool throwOnCancel)
         {
             _log.LogInformation("Verify the U2F PIN using the KeyCollector.");
-            Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
+            var keyCollectorFunc = EnsureKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {
@@ -443,7 +442,7 @@ namespace Yubico.YubiKey.U2f
 
             try
             {
-                while (keyCollector(keyEntryData))
+                while (keyCollectorFunc(keyEntryData))
                 {
                     if (TryVerifyPin(keyEntryData.GetCurrentValue()))
                     {
@@ -458,7 +457,7 @@ namespace Yubico.YubiKey.U2f
                 keyEntryData.Clear();
 
                 keyEntryData.Request = KeyEntryRequest.Release;
-                _ = keyCollector(keyEntryData);
+                _ = keyCollectorFunc(keyEntryData);
             }
 
             if (throwOnCancel)
@@ -494,10 +493,10 @@ namespace Yubico.YubiKey.U2f
         public bool TryVerifyPin(ReadOnlyMemory<byte> pin)
         {
             _log.LogInformation("Try to verify the U2F PIN using a provided value.");
-            var verifyCommand = new VerifyPinCommand(pin);
-            VerifyPinResponse verifyResponse = Connection.SendCommand(verifyCommand);
-
-            return verifyResponse.StatusWord switch
+            
+            var command = new VerifyPinCommand(pin);
+            var response = Connection.SendCommand(command);
+            return response.StatusWord switch
             {
                 SWConstants.Success => true,
                 SWConstants.AuthenticationMethodBlocked => throw new SecurityException(

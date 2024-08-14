@@ -92,6 +92,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 throw new ArgumentNullException(nameof(pinProtocol));
             }
+
             if (pinProtocol.PlatformPublicKey is null)
             {
                 throw new InvalidOperationException(
@@ -99,6 +100,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
+
             if (currentPin.Length > MaximumPinLength)
             {
                 throw new ArgumentException(
@@ -107,7 +109,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         ExceptionMessages.InvalidFido2Pin));
             }
 
-            using SHA256 sha256Object = CryptographyProviders.Sha256Creator();
+            using var sha256Object = CryptographyProviders.Sha256Creator();
             byte[] pin = currentPin.ToArray();
             byte[] digest = sha256Object.ComputeHash(pin);
             CryptographicOperations.ZeroMemory(pin);

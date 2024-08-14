@@ -241,8 +241,9 @@ namespace Yubico.YubiKey.Piv
             _log.LogInformation(
                 $"Try to authenticate the management key: {(mutualAuthentication ? "mutual" : "single")} auth.");
 
-            PivPinOnlyMode currentMode = TryAuthenticatePinOnly(true);
-            if (currentMode.HasFlag(PivPinOnlyMode.PinProtected) || currentMode.HasFlag(PivPinOnlyMode.PinDerived))
+            var currentPinOnlyMode = TryAuthenticatePinOnly(true);
+            if (currentPinOnlyMode.HasFlag(PivPinOnlyMode.PinProtected) ||
+                currentPinOnlyMode.HasFlag(PivPinOnlyMode.PinDerived))
             {
                 return true;
             }
@@ -667,10 +668,9 @@ namespace Yubico.YubiKey.Piv
                     return false;
                 }
 
-                var setCommand = new SetManagementKeyCommand(keyEntryData.GetNewValue(), touchPolicy, newKeyAlgorithm);
-                SetManagementKeyResponse setResponse = Connection.SendCommand(setCommand);
-
-                if (setResponse.Status == ResponseStatus.Success)
+                var command = new SetManagementKeyCommand(keyEntryData.GetNewValue(), touchPolicy, newKeyAlgorithm);
+                var response = Connection.SendCommand(command);
+                if (response.Status == ResponseStatus.Success)
                 {
                     ManagementKeyAlgorithm = newKeyAlgorithm;
 
@@ -681,7 +681,7 @@ namespace Yubico.YubiKey.Piv
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.CommandResponseApduUnexpectedResult,
-                        setResponse.StatusWord.ToString("X4", CultureInfo.InvariantCulture)));
+                        response.StatusWord.ToString("X4", CultureInfo.InvariantCulture)));
             }
             finally
             {
@@ -905,17 +905,16 @@ namespace Yubico.YubiKey.Piv
         {
             if (TryAuthenticateManagementKey(currentKey, true))
             {
-                var setCommand = new SetManagementKeyCommand(newKey, touchPolicy, newKeyAlgorithm);
-                SetManagementKeyResponse setResponse = Connection.SendCommand(setCommand);
-
-                if (setResponse.Status == ResponseStatus.Success)
+                var command = new SetManagementKeyCommand(newKey, touchPolicy, newKeyAlgorithm);
+                var response = Connection.SendCommand(command);
+                if (response.Status == ResponseStatus.Success)
                 {
                     ManagementKeyAlgorithm = newKeyAlgorithm;
 
                     return true;
                 }
 
-                _log.LogInformation($"Failed to set management key. Message: {setResponse.StatusMessage}");
+                _log.LogInformation($"Failed to set management key. Message: {response.StatusMessage}");
 
             }
 
@@ -938,9 +937,9 @@ namespace Yubico.YubiKey.Piv
         {
             if (checkMode)
             {
-                PivPinOnlyMode mode = GetPinOnlyMode();
-
-                if (mode.HasFlag(PivPinOnlyMode.PinProtected) || mode.HasFlag(PivPinOnlyMode.PinDerived))
+                var pinOnlyMode = GetPinOnlyMode();
+                if (pinOnlyMode.HasFlag(PivPinOnlyMode.PinProtected) ||
+                    pinOnlyMode.HasFlag(PivPinOnlyMode.PinDerived))
                 {
                     throw new InvalidOperationException(
                         string.Format(
@@ -1033,10 +1032,10 @@ namespace Yubico.YubiKey.Piv
                                                   PivAlgorithm algorithm)
         {
             var initCommand = new InitializeAuthenticateManagementKeyCommand(mutualAuthentication, algorithm);
-            InitializeAuthenticateManagementKeyResponse initResponse = Connection.SendCommand(initCommand);
+            var initResponse = Connection.SendCommand(initCommand);
 
             var completeCommand = new CompleteAuthenticateManagementKeyCommand(initResponse, mgmtKey);
-            CompleteAuthenticateManagementKeyResponse completeResponse = Connection.SendCommand(completeCommand);
+            var completeResponse = Connection.SendCommand(completeCommand);
 
             ManagementKeyAuthenticationResult = completeResponse.GetData();
             if (completeResponse.Status == ResponseStatus.Success)

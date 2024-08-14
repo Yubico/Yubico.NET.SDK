@@ -175,7 +175,7 @@ namespace Yubico.YubiKey.Piv
             while (tlvReader.HasData)
             {
                 int tag = tlvReader.PeekTag();
-                ReadOnlyMemory<byte> value = tlvReader.ReadValue(tag);
+                var value = tlvReader.ReadValue(tag);
 
                 switch (tag)
                 {

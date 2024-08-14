@@ -82,11 +82,10 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <inheritdoc/>
         protected override void ExecuteOperation()
         {
-            YubiKeyFlags ykFlags = Settings.YubiKeyFlags;
-
+            var yubiKeyFlags = Settings.YubiKeyFlags;
             var cmd = new ConfigureSlotCommand
             {
-                YubiKeyFlags = ykFlags,
+                YubiKeyFlags = yubiKeyFlags,
                 OtpSlot = OtpSlot!.Value
             };
             try
@@ -97,7 +96,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 cmd.ApplyCurrentAccessCode(CurrentAccessCode);
                 cmd.SetAccessCode(NewAccessCode);
 
-                ReadStatusResponse response = Connection.SendCommand(cmd);
+                var response = Connection.SendCommand(cmd);
                 if (response.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(string.Format(
@@ -218,7 +217,7 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
         public ConfigureYubicoOtp UseSerialNumberAsPublicId(Memory<byte>? publicId = null)
         {
-            Memory<byte> serialAsId = publicId ?? new byte[6];
+            var serialAsId = publicId ?? new byte[6];
             var exceptions = new List<Exception>();
             if (!(_useSerialAsPublicId ?? true))
             {
@@ -257,7 +256,7 @@ namespace Yubico.YubiKey.Otp.Operations
             // we won't bother with the MODHEX step.
             // When ykman builds the byte collection, it deals with the serial
             // number as big-endian before converting it, so that's what we'll do.
-            Span<byte> pidSpan = serialAsId.Span;
+            var pidSpan = serialAsId.Span;
             pidSpan[0] = 0xff;
             pidSpan[1] = 0x00;
             BinaryPrimitives.WriteInt32BigEndian(pidSpan[2..], serialNumber!.Value);
@@ -336,7 +335,7 @@ namespace Yubico.YubiKey.Otp.Operations
 
             _privateIdentifier = privateId;
 
-            using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
+            using var rng = CryptographyProviders.RngCreator();
             rng.Fill(privateId.Span);
 
             return this;
@@ -397,7 +396,7 @@ namespace Yubico.YubiKey.Otp.Operations
             }
             _key = key;
 
-            using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
+            using var rng = CryptographyProviders.RngCreator();
             rng.Fill(key.Span);
             return this;
         }

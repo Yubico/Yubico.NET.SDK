@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Pipelines
         /// </summary>
         public void Setup()
         {
-            using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
+            using var rng = CryptographyProviders.RngCreator();
             Setup(rng);
         }
 
@@ -87,55 +87,53 @@ namespace Yubico.YubiKey.Pipelines
         public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
         {
             // Encode command
-            CommandApdu encodedCommand = _session.EncodeCommand(command);
+            var encodedCommand = _session.EncodeCommand(command);
+            
             // Pass along the encoded command
-            ResponseApdu response = _pipeline.Invoke(encodedCommand, commandType, responseType);
-            // Decode response and return it
+            var response = _pipeline.Invoke(encodedCommand, commandType, responseType);
 
             // Special carve out for SelectApplication here, since there will be nothing to decode
             if (commandType == typeof(InterIndustry.Commands.SelectApplicationCommand))
             {
                 return response;
             }
-
+            
+            // Decode response and return it
             return _session.DecodeResponse(response);
         }
 
         private void PerformInitializeUpdate(byte[] hostChallenge)
         {
-            InitializeUpdateCommand initializeUpdateCommand = _session.BuildInitializeUpdate(
+            var initializeUpdateCommand = _session.BuildInitializeUpdate(
                 Scp03Keys.KeyVersionNumber, hostChallenge);
 
-            ResponseApdu initializeUpdateResponseApdu = _pipeline.Invoke(
+            var initializeUpdateResponseApdu = _pipeline.Invoke(
                 initializeUpdateCommand.CreateCommandApdu(),
                 typeof(InitializeUpdateCommand),
                 typeof(InitializeUpdateResponse));
 
-            InitializeUpdateResponse initializeUpdateResponse = initializeUpdateCommand.CreateResponseForApdu(initializeUpdateResponseApdu);
+            var initializeUpdateResponse = initializeUpdateCommand.CreateResponseForApdu(initializeUpdateResponseApdu);
             initializeUpdateResponse.ThrowIfFailed();
             _session.LoadInitializeUpdateResponse(initializeUpdateResponse, Scp03Keys);
         }
 
         private void PerformExternalAuthenticate()
         {
-            ExternalAuthenticateCommand externalAuthenticateCommand = _session.BuildExternalAuthenticate();
+            var externalAuthenticateCommand = _session.BuildExternalAuthenticate();
 
-            ResponseApdu externalAuthenticateResponseApdu = _pipeline.Invoke(
+            var externalAuthenticateResponseApdu = _pipeline.Invoke(
                 externalAuthenticateCommand.CreateCommandApdu(),
                 typeof(ExternalAuthenticateCommand),
                 typeof(ExternalAuthenticateResponse));
 
-            ExternalAuthenticateResponse externalAuthenticateResponse = externalAuthenticateCommand.CreateResponseForApdu(externalAuthenticateResponseApdu);
+            var externalAuthenticateResponse = externalAuthenticateCommand.CreateResponseForApdu(externalAuthenticateResponseApdu);
             externalAuthenticateResponse.ThrowIfFailed();
             _session.LoadExternalAuthenticateResponse(externalAuthenticateResponse);
         }
 
         // There is a call to cleanup and a call to Dispose. The cleanup only
         // needs to call the cleanup on the local APDU Pipeline object.
-        public void Cleanup()
-        {
-            _pipeline.Cleanup();
-        }
+        public void Cleanup() => _pipeline.Cleanup();
 
         public void Dispose()
         {

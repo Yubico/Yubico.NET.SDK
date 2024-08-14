@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Oath
 
         private IEnumerable<Credential> FillWithRandCreds(IYubiKeyDevice testDevice)
         {
-            List<Credential> creds = new List<Credential>();
+            var creds = new List<Credential>();
 
             using (var oathSession = new OathSession(testDevice))
             {

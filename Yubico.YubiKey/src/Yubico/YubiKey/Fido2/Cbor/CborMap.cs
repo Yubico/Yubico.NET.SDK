@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             while (count > 0)
             {
-                TKey currentKey = ReadKey<TKey>(cbor);
+                var currentKey = ReadKey<TKey>(cbor);
                 object? currentValue = ProcessSingleElement(cbor);
                 _dict.Add(currentKey, currentValue);
 
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         public IReadOnlyDictionary<TKey, TValue> AsDictionary<TValue>()
         {
             var returnValue = new Dictionary<TKey, TValue>(_dict.Count);
-            foreach (KeyValuePair<TKey, object?> entry in _dict)
+            foreach (var entry in _dict)
             {
                 object? currentValue = ConvertValue<TValue>(entry.Value);
                 if (!(currentValue is TValue targetValue))
@@ -434,18 +434,18 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
         private static object? ProcessSubMap(CborReader cbor)
         {
-            ReadOnlyMemory<byte> encodedMap = cbor.ReadEncodedValue();
-            var subCbor = new CborReader(encodedMap, CborConformanceMode.Ctap2Canonical);
+            var encodedMapBytes = cbor.ReadEncodedValue();
+            var subCbor = new CborReader(encodedMapBytes, CborConformanceMode.Ctap2Canonical);
             _ = subCbor.ReadStartMap();
 
-            CborReaderState cborType = subCbor.PeekState();
+            var cborType = subCbor.PeekState();
             switch (cborType)
             {
                 case CborReaderState.UnsignedInteger:
                 case CborReaderState.NegativeInteger:
-                    return new CborMap<int>(encodedMap);
+                    return new CborMap<int>(encodedMapBytes);
                 case CborReaderState.TextString:
-                    return new CborMap<string>(encodedMap);
+                    return new CborMap<string>(encodedMapBytes);
                 default:
                     throw new InvalidOperationException(ExceptionMessages.TypeNotSupported);
             }

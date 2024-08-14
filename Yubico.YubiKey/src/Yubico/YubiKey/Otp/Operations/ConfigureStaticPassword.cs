@@ -59,11 +59,11 @@ namespace Yubico.YubiKey.Otp.Operations
                 _passwordHidCodes = _passwordHidCodes
                     .Concat(new byte[SlotConfigureBase.MaxPasswordLength - _passwordHidCodes.Length])
                     .ToArray();
-                YubiKeyFlags ykFlags = Settings.YubiKeyFlags;
-
+                
+                var yubiKeyFlags = Settings.YubiKeyFlags;
                 var cmd = new ConfigureSlotCommand
                 {
-                    YubiKeyFlags = ykFlags,
+                    YubiKeyFlags = yubiKeyFlags,
                     OtpSlot = OtpSlot!.Value
                 };
                 cmd.SetFixedData(_passwordHidCodes.AsSpan(0, SlotConfigureBase.FixedDataLength));
@@ -74,7 +74,7 @@ namespace Yubico.YubiKey.Otp.Operations
 
                 try
                 {
-                    ReadStatusResponse response = Connection.SendCommand(cmd);
+                    var response = Connection.SendCommand(cmd);
                     if (response.Status != ResponseStatus.Success)
                     {
                         throw new InvalidOperationException(
@@ -343,7 +343,8 @@ namespace Yubico.YubiKey.Otp.Operations
                     && _generatePassword.HasValue)
                 {
                     var translator = HidCodeTranslator.GetInstance(_keyboardLayout!.Value);
-                    ReadOnlySpan<char> password = _password.Span;
+                    var password = _password.Span;
+                    
                     if (_generatePassword.Value)
                     {
                         GenerateRandomPassword(translator);
@@ -376,8 +377,8 @@ namespace Yubico.YubiKey.Otp.Operations
             // here.
             void GenerateRandomPassword(HidCodeTranslator translator)
             {
-                Span<char> password = _generatedPassword.Span;
-                using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
+                var password = _generatedPassword.Span;
+                using var rng = CryptographyProviders.RngCreator();
                 // Build the table of possible random characters.
                 byte[] hidTable = translator
                     .SupportedHidCodes

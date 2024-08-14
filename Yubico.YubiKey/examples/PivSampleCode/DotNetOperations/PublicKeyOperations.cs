@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 throw new ArgumentNullException(nameof(publicKey));
             }
 
-            using AsymmetricAlgorithm asymObject = KeyConverter.GetDotNetFromPivPublicKey(publicKey);
+            using var asymObject = KeyConverter.GetDotNetFromPivPublicKey(publicKey);
 
             // The algorithm is either RSA or ECC, otherwise the KeyConverter
             // call would have thrown an exception.
@@ -139,7 +139,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // ECDH object from the EC parameters. So get the ECDsa object, then
             // get the parameters.
             using var ecDsaObject = (ECDsa)KeyConverter.GetDotNetFromPivPublicKey(publicKey);
-            ECParameters ecParams = ecDsaObject.ExportParameters(false);
+            var ecParams = ecDsaObject.ExportParameters(false);
 
             // This is the .NET version of the public key associated with the
             // private key on the YubiKey. The correspondent will combine this

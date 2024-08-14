@@ -73,7 +73,7 @@ namespace Yubico.YubiKey
         /// </exception>
         public static IEnumerable<IYubiKeyDevice> FindByTransport(Transport transport = Transport.All)
         {
-            ILogger log = Log.GetLogger(typeof(YubiKeyDeviceListener).FullName!);
+            var log = Log.GetLogger(typeof(YubiKeyDeviceListener).FullName!);
 
             log.LogInformation("FindByTransport {Transport}", transport);
 

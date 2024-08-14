@@ -111,7 +111,7 @@ namespace Yubico.YubiKey.Otp
                 throw new ArgumentNullException(nameof(languageCode));
             }
 
-            Encoding encoding = encodeAsUtf16 ? Encoding.BigEndianUnicode : Encoding.UTF8;
+            var encoding = encodeAsUtf16 ? Encoding.BigEndianUnicode : Encoding.UTF8;
 
             int languageLength = Encoding.ASCII.GetByteCount(languageCode);
             int valueLength = encoding.GetByteCount(value);

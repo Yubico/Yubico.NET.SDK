@@ -118,7 +118,7 @@ namespace Yubico.YubiKey
         {
             get
             {
-                Transport transports = Transport.None;
+                var transports = Transport.None;
 
                 if (HasHidKeyboard)
                 {
@@ -275,28 +275,28 @@ namespace Yubico.YubiKey
         /// <inheritdoc />
         public IYubiKeyConnection Connect(YubiKeyApplication yubikeyApplication)
         {
-            _ = TryConnect(yubikeyApplication, null, true, out IYubiKeyConnection? returnValue);
+            _ = TryConnect(yubikeyApplication, null, true, out var returnValue);
             return returnValue!;
         }
 
         /// <inheritdoc />
         public IScp03YubiKeyConnection ConnectScp03(YubiKeyApplication yubikeyApplication, StaticKeys scp03Keys)
         {
-            _ = TryConnectScp03(yubikeyApplication, null, scp03Keys, true, out IScp03YubiKeyConnection? returnValue);
+            _ = TryConnectScp03(yubikeyApplication, null, scp03Keys, true, out var returnValue);
             return returnValue!;
         }
 
         /// <inheritdoc />
         public IYubiKeyConnection Connect(byte[] applicationId)
         {
-            _ = TryConnect(null, applicationId, true, out IYubiKeyConnection? returnValue);
+            _ = TryConnect(null, applicationId, true, out var returnValue);
             return returnValue!;
         }
 
         /// <inheritdoc />
         public IScp03YubiKeyConnection ConnectScp03(byte[] applicationId, StaticKeys scp03Keys)
         {
-            _ = TryConnectScp03(null, applicationId, scp03Keys, true, out IScp03YubiKeyConnection? returnValue);
+            _ = TryConnectScp03(null, applicationId, scp03Keys, true, out var returnValue);
             return returnValue!;
         }
 
@@ -339,7 +339,7 @@ namespace Yubico.YubiKey
             [MaybeNullWhen(returnValue: false)]
             out IYubiKeyConnection connection)
         {
-            IYubiKeyConnection? returnValue = Connect(application, applicationId, null);
+            var returnValue = Connect(application, applicationId, null);
             if (!(returnValue is null) || !throwOnFail)
             {
                 connection = returnValue;
@@ -357,7 +357,7 @@ namespace Yubico.YubiKey
             [MaybeNullWhen(returnValue: false)]
             out IScp03YubiKeyConnection connection)
         {
-            IYubiKeyConnection? returnValue = Connect(application, applicationId, scp03Keys);
+            var returnValue = Connect(application, applicationId, scp03Keys);
             if (!(returnValue is null) && returnValue is IScp03YubiKeyConnection scp03Connection)
             {
                 connection = scp03Connection;
@@ -458,7 +458,7 @@ namespace Yubico.YubiKey
                 ResetAfterConfig = true,
             };
 
-            IYubiKeyResponse response = SendConfiguration(command);
+            var response = SendConfiguration(command);
 
             if (response.Status != ResponseStatus.Success)
             {
@@ -480,7 +480,7 @@ namespace Yubico.YubiKey
                 ResetAfterConfig = true,
             };
 
-            IYubiKeyResponse response = SendConfiguration(command);
+            var response = SendConfiguration(command);
 
             if (response.Status != ResponseStatus.Success)
             {
@@ -501,7 +501,7 @@ namespace Yubico.YubiKey
                 ChallengeResponseTimeout = (byte)seconds,
             };
 
-            IYubiKeyResponse response = SendConfiguration(command);
+            var response = SendConfiguration(command);
 
             if (response.Status != ResponseStatus.Success)
             {
@@ -522,7 +522,7 @@ namespace Yubico.YubiKey
                 AutoEjectTimeout = seconds,
             };
 
-            IYubiKeyResponse response = SendConfiguration(command);
+            var response = SendConfiguration(command);
 
             if (response.Status != ResponseStatus.Success)
             {
@@ -540,7 +540,7 @@ namespace Yubico.YubiKey
                 RestrictNfc = enabled
             };
 
-            IYubiKeyResponse response = SendConfiguration(command);
+            var response = SendConfiguration(command);
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(response.StatusMessage);
@@ -555,7 +555,7 @@ namespace Yubico.YubiKey
                 DeviceFlags = deviceFlags,
             };
 
-            IYubiKeyResponse response = SendConfiguration(command);
+            var response = SendConfiguration(command);
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(response.StatusMessage);
@@ -586,7 +586,7 @@ namespace Yubico.YubiKey
             var command = new MgmtCmd.SetDeviceInfoCommand();
             command.SetLockCode(lockCode);
 
-            IYubiKeyResponse response = SendConfiguration(command);
+            var response = SendConfiguration(command);
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(response.StatusMessage);
@@ -611,7 +611,7 @@ namespace Yubico.YubiKey
             command.ApplyLockCode(lockCode);
             command.SetLockCode(_lockCodeAllZeros.Span);
 
-            IYubiKeyResponse response = SendConfiguration(command);
+            var response = SendConfiguration(command);
 
             if (response.Status != ResponseStatus.Success)
             {
@@ -672,7 +672,7 @@ namespace Yubico.YubiKey
             // Newer YubiKeys should use SetDeviceInfo
             if (FirmwareVersion.Major >= 5)
             {
-                DeviceFlags deviceFlags =
+                var deviceFlags =
                     touchEjectEnabled
                     ? DeviceFlags | DeviceFlags.TouchEject
                     : DeviceFlags & ~DeviceFlags.TouchEject;
@@ -735,7 +735,7 @@ namespace Yubico.YubiKey
                 TemporaryTouchThreshold = value
             };
 
-            IYubiKeyResponse response = SendConfiguration(command);
+            var response = SendConfiguration(command);
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(response.StatusMessage);
@@ -1090,7 +1090,7 @@ namespace Yubico.YubiKey
             // should still probably wait a few milliseconds for things to stabilize. But definitely not the full
             // three seconds! For older keys, we use a value of 3.01 seconds to give us a little wiggle room as the
             // YubiKey's measurement for the reclaim timeout is likely not as accurate as our system clock.
-            TimeSpan reclaimTimeout = CanFastReclaim() ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromSeconds(3.01);
+            var reclaimTimeout = CanFastReclaim() ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromSeconds(3.01);
 
             // We're only affected by the reclaim timeout if we're switching USB transports.
             if (_lastActiveTransport == newTransport)
@@ -1107,13 +1107,13 @@ namespace Yubico.YubiKey
                 _lastActiveTransport,
                 newTransport);
 
-            TimeSpan timeSinceLastActivation = DateTime.Now - GetLastActiveTime();
+            var timeSinceLastActivation = DateTime.Now - GetLastActiveTime();
 
             // If we haven't already waited the duration of the reclaim timeout, we need to do so.
             // Otherwise, we've already waited and can immediately switch the transport.
             if (timeSinceLastActivation < reclaimTimeout)
             {
-                TimeSpan waitNeeded = reclaimTimeout - timeSinceLastActivation;
+                var waitNeeded = reclaimTimeout - timeSinceLastActivation;
 
                 _log.LogInformation(
                     "Reclaim timeout still active. Need to wait {TimeMS} milliseconds.",

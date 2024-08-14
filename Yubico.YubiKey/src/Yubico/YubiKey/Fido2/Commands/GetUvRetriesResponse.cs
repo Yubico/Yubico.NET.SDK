@@ -61,14 +61,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </remarks>
         public int GetData()
         {
-            ClientPinData data = _response.GetData();
-
-            if (data.UvRetries is null)
+            var clientPinData = _response.GetData();
+            if (clientPinData.UvRetries is null)
             {
                 throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);
             }
 
-            return data.UvRetries.Value;
+            return clientPinData.UvRetries.Value;
         }
     }
 }

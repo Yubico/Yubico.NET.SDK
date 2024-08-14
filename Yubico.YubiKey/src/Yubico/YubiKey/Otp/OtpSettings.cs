@@ -63,11 +63,12 @@ namespace Yubico.YubiKey.Otp
                 int bitmask = 0;
                 try
                 {
-                    foreach (Flag flag in FlagsSet.Where(k => k != Flag.None))
+                    foreach (var flag in FlagsSet.Where(k => k != Flag.None))
                     {
-                        OtpFlagItem flagItem = _flagDefinitions[flag];
+                        var flagItem = _flagDefinitions[flag];
+                        
                         // Doing this here makes the RequiredOr check easier.
-                        Flag requiredOr =
+                        var requiredOr =
                             flagItem.RequiredOrFlags == Flag.None
                             ? flag
                             : flagItem.RequiredOrFlags;

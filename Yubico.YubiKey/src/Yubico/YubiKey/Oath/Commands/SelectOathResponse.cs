@@ -59,9 +59,9 @@ namespace Yubico.YubiKey.Oath.Commands
             }
 
             FirmwareVersion? version = null;
-            ReadOnlyMemory<byte> salt = ReadOnlyMemory<byte>.Empty;
-            ReadOnlyMemory<byte> challenge = ReadOnlyMemory<byte>.Empty;
-            HashAlgorithm algorithm = HashAlgorithm.Sha1;
+            var salt = ReadOnlyMemory<byte>.Empty;
+            var challenge = ReadOnlyMemory<byte>.Empty;
+            var algorithm = HashAlgorithm.Sha1;
 
             var tlvReader = new TlvReader(ResponseApdu.Data);
             while (tlvReader.HasData)
@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 switch (tlvReader.PeekTag())
                 {
                     case VersionTag:
-                        ReadOnlySpan<byte> firmwareValue = tlvReader.ReadValue(VersionTag).Span;
+                        var firmwareValue = tlvReader.ReadValue(VersionTag).Span;
                         version = new FirmwareVersion
                         {
                             Major = firmwareValue[0],

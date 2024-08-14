@@ -333,13 +333,13 @@ namespace Yubico.YubiKey.Fido2
                 }
                 if (cborMap.Contains(KeyOptions))
                 {
-                    CborMap<string> optionsMap = cborMap.ReadMap<string>(KeyOptions);
-                    Options = optionsMap.AsDictionary<bool>();
+                    var optionsCborMap = cborMap.ReadMap<string>(KeyOptions);
+                    Options = optionsCborMap.AsDictionary<bool>();
                 }
                 MaximumMessageSize = (int?)cborMap.ReadOptional<int>(KeyMaxMsgSize);
                 if (cborMap.Contains(KeyPinUvAuthProtocols))
                 {
-                    IReadOnlyList<int> temp = cborMap.ReadArray<int>(KeyPinUvAuthProtocols);
+                    var temp = cborMap.ReadArray<int>(KeyPinUvAuthProtocols);
                     var translator = new List<PinUvAuthProtocol>(temp.Count);
                     for (int index = 0; index < temp.Count; index++)
                     {
@@ -367,13 +367,13 @@ namespace Yubico.YubiKey.Fido2
                 UvModality = (int?)cborMap.ReadOptional<int>(KeyUvModality);
                 if (cborMap.Contains(KeyCertifications))
                 {
-                    CborMap<string> certMap = cborMap.ReadMap<string>(KeyCertifications);
-                    Certifications = certMap.AsDictionary<int>();
+                    var certCborMap = cborMap.ReadMap<string>(KeyCertifications);
+                    Certifications = certCborMap.AsDictionary<int>();
                 }
                 RemainingDiscoverableCredentials = (int?)cborMap.ReadOptional<int>(KeyRemainingDiscoverableCredentials);
                 if (cborMap.Contains(KeyVendorPrototypeConfigCommands))
                 {
-                    IReadOnlyList<object> intList = cborMap.ReadArray<object>(KeyVendorPrototypeConfigCommands);
+                    var intList = cborMap.ReadArray<object>(KeyVendorPrototypeConfigCommands);
                     var int64List = new List<long>(intList.Count);
                     for (int index = 0; index < intList.Count; index++)
                     {
@@ -486,7 +486,7 @@ namespace Yubico.YubiKey.Fido2
         {
             var algorithms = new List<Tuple<string, CoseAlgorithmIdentifier>>();
 
-            IReadOnlyList<CborMap<string>> entries = cborMap.ReadArray<CborMap<string>>(KeyAlgorithms);
+            var entries = cborMap.ReadArray<CborMap<string>>(KeyAlgorithms);
             for (int index = 0; index < entries.Count; index++)
             {
                 string currentType = entries[index].ReadTextString(ParameterHelpers.TagType);

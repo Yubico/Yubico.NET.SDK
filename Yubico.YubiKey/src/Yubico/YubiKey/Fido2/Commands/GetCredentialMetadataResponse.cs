@@ -57,11 +57,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </exception>
         public (int discoverableCredentialCount, int remainingCredentialCount) GetData()
         {
-            CredentialManagementData mgmtData = _response.GetData();
-
-            if (!(mgmtData.NumberOfDiscoverableCredentials is null) && !(mgmtData.RemainingCredentialCount is null))
+            var credentialManagementData = _response.GetData();
+            if (!(credentialManagementData.NumberOfDiscoverableCredentials is null) && 
+                !(credentialManagementData.RemainingCredentialCount is null))
             {
-                return (mgmtData.NumberOfDiscoverableCredentials.Value, mgmtData.RemainingCredentialCount.Value);
+                return (credentialManagementData.NumberOfDiscoverableCredentials.Value, credentialManagementData.RemainingCredentialCount.Value);
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

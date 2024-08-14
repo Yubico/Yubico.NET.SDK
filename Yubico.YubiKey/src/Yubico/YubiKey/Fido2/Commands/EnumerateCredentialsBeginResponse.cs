@@ -71,22 +71,22 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </exception>
         public (int credentialCount, CredentialUserInfo credentialUserInfo) GetData()
         {
-            CredentialManagementData mgmtData = _response.GetData();
+            var credentialManagementData = _response.GetData();
 
-            if (!(mgmtData.TotalCredentialsForRelyingParty is null)
-                && !(mgmtData.User is null)
-                && !(mgmtData.CredentialId is null)
-                && !(mgmtData.CredentialPublicKey is null)
-                && !(mgmtData.CredProtectPolicy is null))
+            if (!(credentialManagementData.TotalCredentialsForRelyingParty is null)
+                && !(credentialManagementData.User is null)
+                && !(credentialManagementData.CredentialId is null)
+                && !(credentialManagementData.CredentialPublicKey is null)
+                && !(credentialManagementData.CredProtectPolicy is null))
             {
                 var userInfo = new CredentialUserInfo(
-                    mgmtData.User,
-                    mgmtData.CredentialId,
-                    mgmtData.CredentialPublicKey,
-                    mgmtData.CredProtectPolicy.Value,
-                    mgmtData.LargeBlobKey);
+                    credentialManagementData.User,
+                    credentialManagementData.CredentialId,
+                    credentialManagementData.CredentialPublicKey,
+                    credentialManagementData.CredProtectPolicy.Value,
+                    credentialManagementData.LargeBlobKey);
 
-                return (mgmtData.TotalCredentialsForRelyingParty.Value, userInfo);
+                return (credentialManagementData.TotalCredentialsForRelyingParty.Value, userInfo);
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

@@ -39,29 +39,29 @@ namespace Yubico.YubiKey
 
             Log.LogInformation("Getting device info for FIDO device {Device}", device);
 
-            if (!TryGetDeviceInfoFromFido(device, out YubiKeyDeviceInfo? ykDeviceInfo))
+            if (!TryGetDeviceInfoFromFido(device, out var deviceInfo))
             {
-                ykDeviceInfo = new YubiKeyDeviceInfo();
+                deviceInfo = new YubiKeyDeviceInfo();
             }
 
-            ykDeviceInfo.IsSkySeries |= device.ProductId == ProductIdentifiers.SecurityKey;
+            deviceInfo.IsSkySeries |= device.ProductId == ProductIdentifiers.SecurityKey;
 
             // Manually fill in gaps, if necessary
             var defaultDeviceInfo = new YubiKeyDeviceInfo();
 
-            if (ykDeviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion
-                && TryGetFirmwareVersionFromFido(device, out FirmwareVersion? firmwareVersion))
+            if (deviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion && 
+                TryGetFirmwareVersionFromFido(device, out var firmwareVersion))
             {
-                ykDeviceInfo.FirmwareVersion = firmwareVersion;
+                deviceInfo.FirmwareVersion = firmwareVersion;
             }
 
-            if (ykDeviceInfo.FirmwareVersion < FirmwareVersion.V4_0_0 &&
-                ykDeviceInfo.AvailableUsbCapabilities == YubiKeyCapabilities.None)
+            if (deviceInfo.FirmwareVersion < FirmwareVersion.V4_0_0 &&
+                deviceInfo.AvailableUsbCapabilities == YubiKeyCapabilities.None)
             {
-                ykDeviceInfo.AvailableUsbCapabilities = YubiKeyCapabilities.FidoU2f;
+                deviceInfo.AvailableUsbCapabilities = YubiKeyCapabilities.FidoU2f;
             }
 
-            return ykDeviceInfo;
+            return deviceInfo;
         }
 
         private static bool TryGetDeviceInfoFromFido(
@@ -112,8 +112,7 @@ namespace Yubico.YubiKey
                 Log.LogInformation("Attempting to read firmware version through FIDO.");
                 using var connection = new FidoConnection(device);
 
-                VersionResponse response = connection.SendCommand(new VersionCommand());
-
+                var response = connection.SendCommand(new VersionCommand());
                 if (response.Status == ResponseStatus.Success)
                 {
                     firmwareVersion = response.GetData();

@@ -393,10 +393,9 @@ namespace Yubico.YubiKey.Piv
         // Common code, this performs either Signing, Decryption, or Key
         // Agreement. Just pass in the actual command to run, along with some
         // other information.
-        private byte[] PerformPrivateKeyOperation(byte slotNumber,
-                                                  IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> command,
-                                                  PivAlgorithm algorithm,
-                                                  string algorithmExceptionMessage)
+        private byte[] PerformPrivateKeyOperation(
+            byte slotNumber, IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> commandToPerform,
+            PivAlgorithm algorithm,string algorithmExceptionMessage)
         {
             bool pinRequired = true;
 
@@ -412,10 +411,10 @@ namespace Yubico.YubiKey.Piv
             if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
             {
                 var metadataCommand = new GetMetadataCommand(slotNumber);
-                GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);
+                var metadataResponse = Connection.SendCommand(metadataCommand);
 
                 // If there is no key in the slot, this will throw an exception.
-                PivMetadata metadata = metadataResponse.GetData();
+                var metadata = metadataResponse.GetData();
 
                 // We know the algorithm based on the input data. Is it the
                 // algorithm of the key in the slot?
@@ -442,7 +441,7 @@ namespace Yubico.YubiKey.Piv
                 // Metadata is not available on this YubiKey.
                 // Try to perform the operation. If it works, we're done. If not,
                 // we can get limited information on why not.
-                IYubiKeyResponseWithData<byte[]> initialResponse = Connection.SendCommand(command);
+                var initialResponse = Connection.SendCommand(commandToPerform);
 
                 // If the response is AuthRequired, either the PIN is required or
                 // touch is. The response does not tell us which.
@@ -476,11 +475,10 @@ namespace Yubico.YubiKey.Piv
                 VerifyPin();
             }
 
-            IYubiKeyResponseWithData<byte[]> response = Connection.SendCommand(command);
-
-            if (response.Status != ResponseStatus.AuthenticationRequired)
+            var commandToPerformResponse = Connection.SendCommand(commandToPerform);
+            if (commandToPerformResponse.Status != ResponseStatus.AuthenticationRequired)
             {
-                return response.GetData();
+                return commandToPerformResponse.GetData();
             }
 
             // If we reach this code, the Status is AuthRequired and the problem is touch.

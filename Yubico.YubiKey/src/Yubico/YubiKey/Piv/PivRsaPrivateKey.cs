@@ -202,7 +202,7 @@ namespace Yubico.YubiKey.Piv
                 }
 
                 int tag = tlvReader.PeekTag();
-                ReadOnlyMemory<byte> temp = tlvReader.ReadValue(tag);
+                var temp = tlvReader.ReadValue(tag);
                 if (tag <= 0 || tag > CrtComponentCount)
                 {
                     continue;

@@ -45,15 +45,13 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </exception>
         public int GetManagementKeyRetries()
         {
-            GetManagementKeyRetriesResponse retryCountResponse =
-                Connection.SendCommand(new GetManagementKeyRetriesCommand());
-
-            if (retryCountResponse.Status != ResponseStatus.Success)
+            var response = Connection.SendCommand(new GetManagementKeyRetriesCommand());
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(retryCountResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
 
-            return retryCountResponse.GetData();
+            return response.GetData();
         }
 
         /// <summary>
@@ -131,7 +129,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </exception>
         public bool TryChangeManagementKey()
         {
-            Func<KeyEntryData, bool> keyCollector = GetKeyCollector();
+            var keyCollector = GetKeyCollector();
 
             var keyEntryData = new KeyEntryData
             {
@@ -237,7 +235,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             var changeMgmtKeyCmd = new ChangeManagementKeyCommand(currentManagementKey, newManagementKey);
 
-            ChangeManagementKeyResponse changeMgmtKeyRsp =
+            var changeMgmtKeyRsp =
                 Connection.SendCommand(changeMgmtKeyCmd);
 
             if (changeMgmtKeyRsp.Status == ResponseStatus.Success)

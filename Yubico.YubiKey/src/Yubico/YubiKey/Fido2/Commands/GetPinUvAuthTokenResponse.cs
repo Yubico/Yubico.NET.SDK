@@ -56,9 +56,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </returns>
         public ReadOnlyMemory<byte> GetData()
         {
-            ClientPinData data = _response.GetData();
-
-            if (data.PinUvAuthToken is null)
+            var clientPinData = _response.GetData();
+            if (clientPinData.PinUvAuthToken is null)
             {
                 throw new Ctap2DataException(
                     string.Format(
@@ -66,7 +65,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         ExceptionMessages.Ctap2MissingRequiredField));
             }
 
-            return (ReadOnlyMemory<byte>)data.PinUvAuthToken;
+            return (ReadOnlyMemory<byte>)clientPinData.PinUvAuthToken;
         }
     }
 }

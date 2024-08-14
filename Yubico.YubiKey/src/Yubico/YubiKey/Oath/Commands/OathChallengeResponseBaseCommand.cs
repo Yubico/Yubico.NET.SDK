@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.Oath.Commands
         /// </returns>
         protected static byte[] GenerateRandomChallenge()
         {
-            using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
+            using var randomObject = CryptographyProviders.RngCreator();
 
             byte[] randomBytes = new byte[8];
             randomObject.GetBytes(randomBytes);

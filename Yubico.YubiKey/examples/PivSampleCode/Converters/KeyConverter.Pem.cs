@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         //    -----END PRIVATE KEY-----
         public static PivPublicKey GetPivPublicKeyFromPem(char[] pemKeyString)
         {
-            using AsymmetricAlgorithm dotNetObject = GetDotNetFromPem(pemKeyString, false);
+            using var dotNetObject = GetDotNetFromPem(pemKeyString, false);
             return GetPivPublicKeyFromDotNet(dotNetObject);
         }
 
@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         //    -----END PUBLIC KEY-----
         public static char[] GetPemFromPivPublicKey(PivPublicKey pivPublicKey)
         {
-            using AsymmetricAlgorithm dotNetObject = GetDotNetFromPivPublicKey(pivPublicKey);
+            using var dotNetObject = GetDotNetFromPivPublicKey(pivPublicKey);
             return GetPemFromDotNet(dotNetObject, false);
         }
 
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         //    -----END PRIVATE KEY-----
         public static PivPrivateKey GetPivPrivateKeyFromPem(char[] pemKeyString)
         {
-            using AsymmetricAlgorithm dotNetObject = GetDotNetFromPem(pemKeyString, true);
+            using var dotNetObject = GetDotNetFromPem(pemKeyString, true);
             return GetPivPrivateKeyFromDotNet(dotNetObject);
         }
 

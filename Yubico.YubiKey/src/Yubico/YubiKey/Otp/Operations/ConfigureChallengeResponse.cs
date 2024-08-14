@@ -71,11 +71,11 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <inheritdoc/>
         protected override void ExecuteOperation()
         {
-            YubiKeyFlags ykFlags = Settings.YubiKeyFlags;
+            var yubiKeyFlags = Settings.YubiKeyFlags;
 
             var cmd = new ConfigureSlotCommand
             {
-                YubiKeyFlags = ykFlags,
+                YubiKeyFlags = yubiKeyFlags,
                 OtpSlot = OtpSlot!.Value
             };
 
@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 cmd.ApplyCurrentAccessCode(CurrentAccessCode);
                 cmd.SetAccessCode(NewAccessCode);
 
-                ReadStatusResponse response = Connection.SendCommand(cmd);
+                var response = Connection.SendCommand(cmd);
                 if (response.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(
@@ -268,7 +268,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 // Handle generating.
                 if (_generateKey.Value)
                 {
-                    using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
+                    using var rng = CryptographyProviders.RngCreator();
                     rng.Fill(_randomKey.Span);
                     _key = _randomKey;
                     // From here forward, we use _key, so we'll release this

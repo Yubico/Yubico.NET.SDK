@@ -79,7 +79,7 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.IncorrectAesKeyLength));
             }
 
-            using Aes aesObject = CryptographyProviders.AesCreator();
+            using var aesObject = CryptographyProviders.AesCreator();
 #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB' per the standard
             aesObject.Mode = CipherMode.ECB;
 #pragma warning restore CA5358

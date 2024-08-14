@@ -120,15 +120,14 @@ namespace Yubico.YubiKey.Oath
         /// </exception>
         public void ResetApplication()
         {
-            OathResponse resetResponse = Connection.SendCommand(new ResetCommand());
-
-            if (resetResponse.Status != ResponseStatus.Success)
+            var resetOathResponse = Connection.SendCommand(new ResetCommand());
+            if (resetOathResponse.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(resetResponse.StatusMessage);
+                throw new InvalidOperationException(resetOathResponse.StatusMessage);
             }
 
-            SelectOathResponse response = Connection.SendCommand(new SelectOathCommand());
-            _oathData = response.GetData();
+            var selectOathResponse = Connection.SendCommand(new SelectOathCommand());
+            _oathData = selectOathResponse.GetData();
         }
 
         // Checks if the KeyCollector delegate is null

@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
         public override void HandleParameters()
         {
             // If none were specified, print them all.
-            IEnumerable<string> keyboards = (IEnumerable<string>)(Parameters["keyboardids"].Value ?? Array.Empty<string>());
+            var keyboards = (IEnumerable<string>)(Parameters["keyboardids"].Value ?? Array.Empty<string>());
             _keyboards = keyboards.Any()
                 ? keyboards
                 : _keyboardLayouts.Keys;

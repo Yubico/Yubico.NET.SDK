@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             using (var u2fSession = new U2fSession(yubiKey))
             {
                 var fipsModeCommand = new VerifyFipsModeCommand();
-                VerifyFipsModeResponse fipsModeResponse = u2fSession.Connection.SendCommand(fipsModeCommand);
+                var fipsModeResponse = u2fSession.Connection.SendCommand(fipsModeCommand);
                 isFipsMode = fipsModeResponse.GetData();
 
                 return true;

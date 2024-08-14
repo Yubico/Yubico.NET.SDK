@@ -109,28 +109,21 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             managementKeyRetries = null;
 
-            AddCredentialCommand addCredCmd =
-                new AddCredentialCommand(managementKey, credentialWithSecrets);
-
-            AddCredentialResponse addCredRsp = Connection.SendCommand(addCredCmd);
-
-            if (addCredRsp.Status != ResponseStatus.Success)
+            var command = new AddCredentialCommand(managementKey, credentialWithSecrets);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
-                if (addCredRsp.Status == ResponseStatus.AuthenticationRequired)
+                if (response.Status == ResponseStatus.AuthenticationRequired)
                 {
-                    managementKeyRetries = addCredRsp.RetriesRemaining!;
+                    managementKeyRetries = response.RetriesRemaining!;
 
                     return false;
                 }
-                else
-                {
-                    throw new InvalidOperationException(addCredRsp.StatusMessage);
-                }
+
+                throw new InvalidOperationException(response.StatusMessage);
             }
-            else
-            {
-                return true;
-            }
+
+            return true;
         }
 
         /// <summary>
@@ -198,7 +191,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </returns>
         public bool TryAddCredential(CredentialWithSecrets credentialWithSecrets)
         {
-            Func<KeyEntryData, bool>? keyCollector = GetKeyCollector();
+            var keyCollector = GetKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {
@@ -320,7 +313,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </exception>
         public bool TryDeleteCredential(string label)
         {
-            Func<KeyEntryData, bool>? keyCollector = GetKeyCollector();
+            var keyCollector = GetKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {
@@ -446,10 +439,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             managementKeyRetries = null;
 
-            DeleteCredentialCommand deleteCredCmd =
+            var deleteCredCmd =
                 new DeleteCredentialCommand(managementKey, label);
 
-            DeleteCredentialResponse deleteCredRsp =
+            var deleteCredRsp =
                 Connection.SendCommand(deleteCredCmd);
 
             if (deleteCredRsp.Status != ResponseStatus.Success)
@@ -486,7 +479,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </exception>
         public IReadOnlyList<CredentialRetryPair> ListCredentials()
         {
-            ListCredentialsResponse listCredsRsp =
+            var listCredsRsp =
                 Connection.SendCommand(new ListCredentialsCommand());
 
             if (listCredsRsp.Status != ResponseStatus.Success)

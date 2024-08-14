@@ -280,7 +280,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void WriteMsrootsStream(Stream contents)
         {
-            Span<byte> contentsSpan = GetSpanFromStream(contents, out int maxLength);
+            var contentsSpan = GetSpanFromStream(contents, out int maxLength);
             WriteMsrootsSpan(contentsSpan, maxLength);
         }
 
@@ -390,15 +390,15 @@ namespace Yubico.YubiKey.Piv
                             ExceptionMessages.InvalidDataEncoding));
                 }
 
-                var putCommand = new PutDataCommand(MsrootsTag + index, encoding.Slice(0, bytesWritten));
-                PutDataResponse putResponse = Connection.SendCommand(putCommand);
-                if (putResponse.Status != ResponseStatus.Success)
+                var command = new PutDataCommand(MsrootsTag + index, encoding.Slice(0, bytesWritten));
+                var response = Connection.SendCommand(command);
+                if (response.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(
                         string.Format(
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.CommandResponseApduUnexpectedResult,
-                            putResponse.StatusWord.ToString("X4", CultureInfo.InvariantCulture)));
+                            response.StatusWord.ToString("X4", CultureInfo.InvariantCulture)));
                 }
 
                 offset += dataLength;
@@ -481,24 +481,25 @@ namespace Yubico.YubiKey.Piv
 
             for (int index = 0; index < MsrootsObjectCount; index++)
             {
-                var getCommand = new GetDataCommand(MsrootsTag + index);
-                GetDataResponse getResponse = Connection.SendCommand(getCommand);
+                var command = new GetDataCommand(MsrootsTag + index);
+                var response = Connection.SendCommand(command);
 
-                if (getResponse.Status == ResponseStatus.NoData)
+                if (response.Status == ResponseStatus.NoData)
                 {
                     break;
                 }
-                if (getResponse.Status != ResponseStatus.Success)
+                
+                if (response.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(
                         string.Format(
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.CommandResponseApduUnexpectedResult,
-                            getResponse.StatusWord.ToString("X4", CultureInfo.InvariantCulture)));
+                            response.StatusWord.ToString("X4", CultureInfo.InvariantCulture)));
                 }
 
-                var tlvReader = new TlvReader(getResponse.GetData());
-                TlvReader nestedReader = tlvReader.ReadNestedTlv(PivEncodingTag);
+                var tlvReader = new TlvReader(response.GetData());
+                var nestedReader = tlvReader.ReadNestedTlv(PivEncodingTag);
                 int msrootsDataTag = nestedReader.PeekTag();
                 contentArray[index] = nestedReader.ReadValue(msrootsDataTag);
 

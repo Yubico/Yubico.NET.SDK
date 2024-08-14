@@ -38,21 +38,21 @@ namespace Yubico.YubiKey.Oath
         /// </exception>
         public IList<Credential> GetCredentials()
         {
-            var listCommand = new ListCommand();
-            ListResponse listResponse = Connection.SendCommand(listCommand);
+            var command = new ListCommand();
+            var response = Connection.SendCommand(command);
 
-            if (listResponse.Status == ResponseStatus.AuthenticationRequired)
+            if (response.Status == ResponseStatus.AuthenticationRequired)
             {
                 VerifyPassword();
-                listResponse = Connection.SendCommand(listCommand);
+                response = Connection.SendCommand(command);
             }
 
-            if (listResponse.Status != ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(listResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
 
-            IList<Credential> result = listResponse.GetData();
+            IList<Credential> result = response.GetData();
 
             return result;
         }
@@ -83,21 +83,21 @@ namespace Yubico.YubiKey.Oath
         public IDictionary<Credential, Code> CalculateAllCredentials(
             ResponseFormat responseFormat = ResponseFormat.Truncated)
         {
-            var calculateAllCommand = new CalculateAllCredentialsCommand(responseFormat);
-            CalculateAllCredentialsResponse calculateAllResponse = Connection.SendCommand(calculateAllCommand);
+            var command = new CalculateAllCredentialsCommand(responseFormat);
+            var response = Connection.SendCommand(command);
 
-            if (calculateAllResponse.Status == ResponseStatus.AuthenticationRequired)
+            if (response.Status == ResponseStatus.AuthenticationRequired)
             {
                 VerifyPassword();
-                calculateAllResponse = Connection.SendCommand(calculateAllCommand);
+                response = Connection.SendCommand(command);
             }
 
-            if (calculateAllResponse.Status != ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(calculateAllResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
 
-            IDictionary<Credential, Code> result = calculateAllResponse.GetData();
+            var result = response.GetData();
 
             return result;
         }
@@ -129,21 +129,21 @@ namespace Yubico.YubiKey.Oath
             Credential credential,
             ResponseFormat responseFormat = ResponseFormat.Truncated)
         {
-            var calculateCommand = new CalculateCredentialCommand(credential, responseFormat);
-            CalculateCredentialResponse calculateResponse = Connection.SendCommand(calculateCommand);
+            var command = new CalculateCredentialCommand(credential, responseFormat);
+            var response = Connection.SendCommand(command);
 
-            if (calculateResponse.Status == ResponseStatus.AuthenticationRequired)
+            if (response.Status == ResponseStatus.AuthenticationRequired)
             {
                 VerifyPassword();
-                calculateResponse = Connection.SendCommand(calculateCommand);
+                response = Connection.SendCommand(command);
             }
 
-            if (calculateResponse.Status != ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(calculateResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
 
-            Code otpCode = calculateResponse.GetData();
+            var otpCode = response.GetData();
 
             return otpCode;
         }
@@ -187,7 +187,7 @@ namespace Yubico.YubiKey.Oath
             ResponseFormat responseFormat = ResponseFormat.Truncated)
         {
             var credential = new Credential(issuer, account, type, period);
-            Code otpCode = CalculateCredential(credential, responseFormat);
+            var otpCode = CalculateCredential(credential, responseFormat);
 
             return otpCode;
         }
@@ -228,18 +228,18 @@ namespace Yubico.YubiKey.Oath
                 throw new InvalidOperationException(ExceptionMessages.SHA512NotSupported);
             }
 
-            var putCommand = new PutCommand(credential);
-            OathResponse putResponse = Connection.SendCommand(putCommand);
+            var command = new PutCommand(credential);
+            var response = Connection.SendCommand(command);
 
-            if (putResponse.Status == ResponseStatus.AuthenticationRequired)
+            if (response.Status == ResponseStatus.AuthenticationRequired)
             {
                 VerifyPassword();
-                putResponse = Connection.SendCommand(putCommand);
+                response = Connection.SendCommand(command);
             }
 
-            if (putResponse.Status != ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(putResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
@@ -451,18 +451,18 @@ namespace Yubico.YubiKey.Oath
                 throw new InvalidOperationException(ExceptionMessages.RenameCommandNotSupported);
             }
 
-            var renameCommand = new RenameCommand(credential, newIssuer, newAccount);
-            RenameResponse renameResponse = Connection.SendCommand(renameCommand);
+            var command = new RenameCommand(credential, newIssuer, newAccount);
+            var response = Connection.SendCommand(command);
 
-            if (renameResponse.Status == ResponseStatus.AuthenticationRequired)
+            if (response.Status == ResponseStatus.AuthenticationRequired)
             {
                 VerifyPassword();
-                renameResponse = Connection.SendCommand(renameCommand);
+                response = Connection.SendCommand(command);
             }
 
-            if (renameResponse.Status != ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(renameResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 

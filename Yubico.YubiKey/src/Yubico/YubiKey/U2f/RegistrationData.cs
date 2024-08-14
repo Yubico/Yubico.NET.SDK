@@ -138,13 +138,13 @@ namespace Yubico.YubiKey.U2f
             int certLength = 1;
             if (encodedResponse.Length > MinEncodedLength)
             {
-                if (encodedResponse.Span[MsgReservedOffset] == MsgReservedValue
-                    && encodedResponse.Span[MsgKeyHandleOffset] == KeyHandleLength
-                    && encodedResponse.Span[MsgPublicKeyOffset] == PublicKeyTag)
+                if (encodedResponse.Span[MsgReservedOffset] == MsgReservedValue && 
+                    encodedResponse.Span[MsgKeyHandleOffset] == KeyHandleLength &&
+                    encodedResponse.Span[MsgPublicKeyOffset] == PublicKeyTag)
                 {
-                    ReadOnlyMemory<byte> certAndSig = encodedResponse.Slice(MsgCertOffset);
-                    var tlvReader = new TlvReader(certAndSig);
-                    if (tlvReader.TryReadEncoded(out ReadOnlyMemory<byte> cert, CertTag))
+                    var certAndSignatureBytes = encodedResponse.Slice(MsgCertOffset);
+                    var tlvReader = new TlvReader(certAndSignatureBytes);
+                    if (tlvReader.TryReadEncoded(out var cert, CertTag))
                     {
                         certLength = cert.Length;
                         isValid = true;

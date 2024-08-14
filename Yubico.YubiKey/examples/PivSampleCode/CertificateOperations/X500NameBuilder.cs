@@ -91,7 +91,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // If no elements had been added, this method will throw an exception.
         public byte[] GetEncodedName()
         {
-            Array enumValues = Enum.GetValues(typeof(X500NameElement));
+            var enumValues = Enum.GetValues(typeof(X500NameElement));
 
             // The DER encoding is simply the SEQUENCE of each element.
             // Get each encoding in order. That is, no matter what order they

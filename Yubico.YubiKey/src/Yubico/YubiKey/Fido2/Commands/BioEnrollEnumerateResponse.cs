@@ -55,11 +55,10 @@ namespace Yubico.YubiKey.Fido2.Commands
                 return new List<TemplateInfo>();
             }
 
-            BioEnrollmentData enrollData = _response.GetData();
-
-            if (!(enrollData.TemplateInfos is null))
+            var bioEnrollmentData = _response.GetData();
+            if (!(bioEnrollmentData.TemplateInfos is null))
             {
-                return enrollData.TemplateInfos;
+                return bioEnrollmentData.TemplateInfos;
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

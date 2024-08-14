@@ -53,14 +53,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </returns>
         public (int retriesRemaining, bool? powerCycleRequired) GetData()
         {
-            ClientPinData data = _response.GetData();
-
-            if (data.PinRetries is null)
+            var clientPinData = _response.GetData();
+            if (clientPinData.PinRetries is null)
             {
                 throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);
             }
 
-            return (data.PinRetries.Value, data.PowerCycleState);
+            return (clientPinData.PinRetries.Value, clientPinData.PowerCycleState);
         }
     }
 }

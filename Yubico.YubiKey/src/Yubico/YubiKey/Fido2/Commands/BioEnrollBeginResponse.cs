@@ -42,16 +42,16 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <inheritdoc/>
         public BioEnrollSampleResult GetData()
         {
-            BioEnrollmentData enrollData = _response.GetData();
+            var bioEnrollmentData = _response.GetData();
 
-            if (!(enrollData.TemplateId is null)
-                && !(enrollData.LastEnrollSampleStatus is null)
-                && !(enrollData.RemainingSampleCount is null))
+            if (!(bioEnrollmentData.TemplateId is null)
+                && !(bioEnrollmentData.LastEnrollSampleStatus is null)
+                && !(bioEnrollmentData.RemainingSampleCount is null))
             {
                 return new BioEnrollSampleResult(
-                    enrollData.TemplateId.Value,
-                    enrollData.LastEnrollSampleStatus.Value,
-                    enrollData.RemainingSampleCount.Value);
+                    bioEnrollmentData.TemplateId.Value,
+                    bioEnrollmentData.LastEnrollSampleStatus.Value,
+                    bioEnrollmentData.RemainingSampleCount.Value);
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

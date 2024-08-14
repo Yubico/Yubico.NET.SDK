@@ -221,7 +221,7 @@ namespace Yubico.YubiKey.Piv.Objects
             //      88 1A                       (or 12 or 22)
             //         89 18                    (or 10 or 20)
             //            --management key--
-            ReadOnlyMemory<byte> mgmtKey = ReadOnlyMemory<byte>.Empty;
+            var managementKey = ReadOnlyMemory<byte>.Empty;
             var tlvReader = new TlvReader(encodedData);
 
             bool isValid = true;
@@ -232,21 +232,21 @@ namespace Yubico.YubiKey.Piv.Objects
                 {
                     0 => tlvReader.TryReadNestedTlv(out tlvReader, EncodingTag),
                     1 => tlvReader.TryReadNestedTlv(out tlvReader, PinProtectedTag),
-                    2 => tlvReader.TryReadValue(out mgmtKey, MgmtKeyTag),
+                    2 => tlvReader.TryReadValue(out managementKey, MgmtKeyTag),
                     _ => false,
                 };
 
                 count++;
             }
 
-            if (IsValidKeyLength(mgmtKey.Length))
+            if (IsValidKeyLength(managementKey.Length))
             {
-                mgmtKey.CopyTo(_mgmtKey);
-                ManagementKey = _mgmtKey.Slice(0, mgmtKey.Length);
+                managementKey.CopyTo(_mgmtKey);
+                ManagementKey = _mgmtKey.Slice(0, managementKey.Length);
             }
             else
             {
-                if (mgmtKey.Length != 0)
+                if (managementKey.Length != 0)
                 {
                     isValid = false;
                 }

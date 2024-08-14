@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void ConstructorMgmtKeyLabel_ValidInputs_LabelMatchesInput()
         {
-            DeleteCredentialCommand cmd =
+            var cmd =
                 new DeleteCredentialCommand(_mgmtKey, _label);
 
             Assert.Equal(_label, cmd.Label);
@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Label_SetGetValidString_ReturnsMatchingString()
         {
-            DeleteCredentialCommand cmd = new DeleteCredentialCommand(_mgmtKey)
+            var cmd = new DeleteCredentialCommand(_mgmtKey)
             {
                 Label = _label
             };
@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         {
             string invalidLabel = new string('a', length);
 
-            DeleteCredentialCommand cmd = new DeleteCredentialCommand(_mgmtKey);
+            var cmd = new DeleteCredentialCommand(_mgmtKey);
 
             _ = Assert.ThrowsAny<ArgumentException>(() => cmd.Label = invalidLabel);
         }
@@ -100,7 +100,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Application_Get_ReturnsYubiHsmAuth()
         {
-            DeleteCredentialCommand command =
+            var command =
                 new DeleteCredentialCommand(_mgmtKey);
 
             Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Cla0()
         {
-            DeleteCredentialCommand command =
+            var command =
                 new DeleteCredentialCommand(_mgmtKey, _label);
             CommandApdu apdu = command.CreateCommandApdu();
 
@@ -119,7 +119,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Ins0x02()
         {
-            DeleteCredentialCommand command =
+            var command =
                 new DeleteCredentialCommand(_mgmtKey, _label);
             CommandApdu apdu = command.CreateCommandApdu();
 
@@ -129,7 +129,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P1Is0()
         {
-            DeleteCredentialCommand command =
+            var command =
                 new DeleteCredentialCommand(_mgmtKey, _label);
             CommandApdu apdu = command.CreateCommandApdu();
 
@@ -139,7 +139,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P2Is0()
         {
-            DeleteCredentialCommand command =
+            var command =
                 new DeleteCredentialCommand(_mgmtKey, _label);
             CommandApdu apdu = command.CreateCommandApdu();
 
@@ -149,11 +149,11 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsMgmtKeyTag()
         {
-            DeleteCredentialCommand command =
+            var command =
                 new DeleteCredentialCommand(_mgmtKey, _label);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x7b)
             {
@@ -167,11 +167,11 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsMgmtKeyValue()
         {
-            DeleteCredentialCommand command =
+            var command =
                 new DeleteCredentialCommand(_mgmtKey, _label);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x7b)
             {
@@ -187,11 +187,11 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsLabelTag()
         {
-            DeleteCredentialCommand command =
+            var command =
                 new DeleteCredentialCommand(_mgmtKey, _label);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x71)
             {
@@ -205,11 +205,11 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsLabelValue()
         {
-            DeleteCredentialCommand command =
+            var command =
                 new DeleteCredentialCommand(_mgmtKey, _label);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x71)
             {

@@ -93,12 +93,12 @@ namespace Yubico.YubiKey.Piv.Commands
                 };
             }
 
-            ReadOnlySpan<byte> responseApduData = ResponseApdu.Data.Span;
+            var responseApduDataSpan = ResponseApdu.Data.Span;
             return new FirmwareVersion
             {
-                Major = responseApduData[0],
-                Minor = responseApduData[1],
-                Patch = responseApduData[2]
+                Major = responseApduDataSpan[0],
+                Minor = responseApduDataSpan[1],
+                Patch = responseApduDataSpan[2]
             };
         }
     }

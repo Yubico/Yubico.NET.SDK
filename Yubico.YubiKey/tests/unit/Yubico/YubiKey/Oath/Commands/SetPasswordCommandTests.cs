@@ -82,7 +82,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
             OathApplicationData oathData = selectOathResponse.GetData();
-            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {
@@ -111,7 +111,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
             OathApplicationData oathData = selectOathResponse.GetData();
-            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {

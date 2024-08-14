@@ -130,7 +130,7 @@ namespace Yubico.YubiKey
             ReadOnlyMemory<byte> responseApduData,
             [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)
         {
-            Dictionary<int, ReadOnlyMemory<byte>>? data =
+            var data =
                 GetDeviceInfoResponseHelper.CreateApduDictionaryFromResponseData(responseApduData);
 
             if (data is null)
@@ -162,9 +162,9 @@ namespace Yubico.YubiKey
             bool skySeriesFlag = false;
             var deviceInfo = new YubiKeyDeviceInfo();
 
-            foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tagValuePair in responseApduData)
+            foreach (var tagValuePair in responseApduData)
             {
-                ReadOnlySpan<byte> value = tagValuePair.Value.Span;
+                var value = tagValuePair.Value.Span;
                 switch (tagValuePair.Key)
                 {
                     case YubikeyDeviceManagementTags.UsbPrePersCapabilitiesTag:

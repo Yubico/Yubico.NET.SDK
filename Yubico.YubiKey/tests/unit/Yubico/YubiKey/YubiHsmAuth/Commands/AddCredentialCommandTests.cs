@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Application_Get_ReturnsYubiHsmAuth()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
 
             Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
         }
@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Cla0()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.Cla);
@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Ins0x01()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0x01, apdu.Ins);
@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P1Is0()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.P1);
@@ -79,7 +79,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P2Is0()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.P2);
@@ -88,10 +88,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsMgmtKeyTag()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x7b)
             {
@@ -105,10 +105,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsMgmtKeyValue()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x7b)
             {
@@ -124,10 +124,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsLabelTag()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x71)
             {
@@ -141,10 +141,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsLabelValue()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x71)
             {
@@ -160,10 +160,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsTouchRequiredTag()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x7a)
             {
@@ -177,10 +177,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsTouchRequiredValue()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x7a)
             {
@@ -196,10 +196,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsKeyTypeTag()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x74)
             {
@@ -213,10 +213,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsKeyTypeValue()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x74)
             {
@@ -232,10 +232,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsCredPasswordTag()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x73)
             {
@@ -249,10 +249,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsCredPasswordValue()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x73)
             {
@@ -268,10 +268,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_GivenAes128Credential_DataContainsEncKeyTag()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x75)
             {
@@ -285,10 +285,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_GivenAes128Credential_DataContainsEncKeyValue()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x75)
             {
@@ -304,10 +304,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_GivenAes128Credential_DataContainsMacKeyTag()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x76)
             {
@@ -321,10 +321,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_GivenAes128Credential_DataContainsMacKeyValue()
         {
-            AddCredentialCommand command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
+            var command = new AddCredentialCommand(_mgmtKey, _aes128Cred);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x76)
             {

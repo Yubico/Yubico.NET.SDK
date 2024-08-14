@@ -426,21 +426,21 @@ namespace Yubico.YubiKey.Piv.Objects
             // If we have read this before, the XOR will clear the bit.
             elementsRead ^= SaltRead;
 
-            bool isValid = tlvReader.TryReadValue(out ReadOnlyMemory<byte> salt, SaltTag);
+            bool isValid = tlvReader.TryReadValue(out var saltBytes, SaltTag);
             if (isValid)
             {
-                if (salt.Length == 0)
+                if (saltBytes.Length == 0)
                 {
                     Salt = null;
                     return true;
                 }
 
-                if (salt.Length != SaltLength)
+                if (saltBytes.Length != SaltLength)
                 {
                     return false;
                 }
 
-                salt.CopyTo(_salt);
+                saltBytes.CopyTo(_salt);
                 Salt = _salt;
                 isValid = (elementsRead & SaltRead) != 0;
             }
@@ -464,13 +464,13 @@ namespace Yubico.YubiKey.Piv.Objects
             // Also, if the length is 0, there is no date, we'll want the
             // property to be null. It was set to null when we called Clear
             // before decoding.
-            bool isValid = tlvReader.TryReadValue(out ReadOnlyMemory<byte> theTime, DateTag);
-            isValid = isValid && theTime.Length <= 8;
+            bool isValid = tlvReader.TryReadValue(out var theTimeAsBytes, DateTag);
+            isValid = isValid && theTimeAsBytes.Length <= 8;
 
-            if (isValid && theTime.Length > 0)
+            if (isValid && theTimeAsBytes.Length > 0)
             {
                 var cpyObj = new Memory<byte>(new byte[8]);
-                theTime.CopyTo(cpyObj);
+                theTimeAsBytes.CopyTo(cpyObj);
                 long unixTimeSeconds = BinaryPrimitives.ReadInt64LittleEndian(cpyObj.Span);
                 PinLastUpdated = DateTimeOffset.FromUnixTimeSeconds(unixTimeSeconds).UtcDateTime;
 

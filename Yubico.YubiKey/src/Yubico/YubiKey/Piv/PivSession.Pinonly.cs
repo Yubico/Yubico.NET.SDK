@@ -88,26 +88,26 @@ namespace Yubico.YubiKey.Piv
         {
             _log.LogInformation("Get the PIV PIN-only mode of a YubiKey based on AdminData.");
 
-            PivPinOnlyMode returnValue = PivPinOnlyMode.PinProtectedUnavailable | PivPinOnlyMode.PinDerivedUnavailable;
+            var pinOnlyMode = PivPinOnlyMode.PinProtectedUnavailable | PivPinOnlyMode.PinDerivedUnavailable;
 
             if (TryReadObject(out AdminData adminData))
             {
-                returnValue = PivPinOnlyMode.None;
+                pinOnlyMode = PivPinOnlyMode.None;
 
                 if (adminData.PinProtected)
                 {
-                    returnValue |= PivPinOnlyMode.PinProtected;
+                    pinOnlyMode |= PivPinOnlyMode.PinProtected;
                 }
 
                 if (!(adminData.Salt is null))
                 {
-                    returnValue |= PivPinOnlyMode.PinDerived;
+                    pinOnlyMode |= PivPinOnlyMode.PinDerived;
                 }
 
                 adminData.Dispose();
             }
 
-            return returnValue;
+            return pinOnlyMode;
         }
 
         /// <summary>
@@ -191,15 +191,15 @@ namespace Yubico.YubiKey.Piv
         {
             _log.LogInformation("Try to authenticate using PIN-only.");
 
-            PivPinOnlyMode returnValue = TryAuthenticatePinOnly(false);
+            var pinOnlyMode = TryAuthenticatePinOnly(false);
 
             // If the result is None, or PinProtected, or PinDerived, or
             // PinProtected | PinDerived, then everything is fine, just return.
             // In other words, if it does not contain an Unavailable.
-            if (!returnValue.HasFlag(PivPinOnlyMode.PinProtectedUnavailable) &&
-                !returnValue.HasFlag(PivPinOnlyMode.PinDerivedUnavailable))
+            if (!pinOnlyMode.HasFlag(PivPinOnlyMode.PinProtectedUnavailable) &&
+                !pinOnlyMode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable))
             {
-                return returnValue;
+                return pinOnlyMode;
             }
 
             // If we reach this point, either PinProtectedUnavailable or
@@ -208,7 +208,7 @@ namespace Yubico.YubiKey.Piv
             // data is correct and the mgmt key has been authenticated. But we
             // also know that PinDerivedUnavailable is set. That means the ADMIN
             // DATA is wrong. We need to reset it.
-            if (returnValue.HasFlag(PivPinOnlyMode.PinProtected))
+            if (pinOnlyMode.HasFlag(PivPinOnlyMode.PinProtected))
             {
                 // Make sure the PUK is blocked. It probably is, but we're going
                 // to set the PukBlocked field in adminData to true, so make sure
@@ -235,16 +235,16 @@ namespace Yubico.YubiKey.Piv
             // YubiKey to also PIN-protected. Otherwise
             // Reset PRINTED to empty, and make sure ADMIN DATA indicates PUK
             // blocked and PinProtected is false.
-            if (returnValue.HasFlag(PivPinOnlyMode.PinDerived))
+            if (pinOnlyMode.HasFlag(PivPinOnlyMode.PinDerived))
             {
                 // Read the AdminData to get the salt.
-                AdminData adminData = ReadObject<AdminData>();
+                var adminData = ReadObject<AdminData>();
 
                 // Clear out the contents of PRINTED.
                 using var pinProtect = new PinProtectedData();
                 WriteObject(pinProtect);
 
-                PivPinOnlyMode protectMode = PivPinOnlyMode.None;
+                var protectMode = PivPinOnlyMode.None;
 
                 if (adminData.PinProtected)
                 {
@@ -266,7 +266,7 @@ namespace Yubico.YubiKey.Piv
             // means the mgmt key is not authenticated.
             // If we can authenticate the mgmt key, then set ADMIN DATA and
             // PRINTED.
-            Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;
+            var userKeyCollector = KeyCollector;
             using var specialKeyCollector = new SpecialKeyCollector();
 
             try
@@ -279,7 +279,7 @@ namespace Yubico.YubiKey.Piv
                 // "correct, we want to leave it as is, except make sure the
                 // PinProtected property is false and the Salt is null.
                 // If that bit is set, then we want to clear ADMIN DATA.
-                using AdminData adminData = returnValue.HasFlag(PivPinOnlyMode.PinDerivedUnavailable)
+                using var adminData = pinOnlyMode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable)
                     ? new AdminData()
                     : ReadObject<AdminData>();
 
@@ -296,7 +296,7 @@ namespace Yubico.YubiKey.Piv
                 // either the PinProtected or the PinProtectedUnavailable bit
                 // set, and if we reach this point we know the PinProtected bit
                 // is not set). Just leave it. If it was set, clear PRINTED.
-                if (returnValue.HasFlag(PivPinOnlyMode.PinProtectedUnavailable))
+                if (pinOnlyMode.HasFlag(PivPinOnlyMode.PinProtectedUnavailable))
                 {
                     using var pinProtect = new PinProtectedData();
                     WriteObject(pinProtect);
@@ -306,11 +306,11 @@ namespace Yubico.YubiKey.Piv
             }
             catch (InvalidOperationException)
             {
-                return returnValue;
+                return pinOnlyMode;
             }
             catch (OperationCanceledException)
             {
-                return returnValue;
+                return pinOnlyMode;
             }
             finally
             {
@@ -339,17 +339,16 @@ namespace Yubico.YubiKey.Piv
             bool tryPinProtected = true;
             bool tryPinDerived = true;
 
-            PivPinOnlyMode returnValue = PivPinOnlyMode.None;
+            var pinOnlyMode = PivPinOnlyMode.None;
 
             if (trustAdminData)
             {
-                returnValue = GetPinOnlyMode();
-
-                tryPinProtected = returnValue.HasFlag(PivPinOnlyMode.PinProtected);
-                tryPinDerived = returnValue.HasFlag(PivPinOnlyMode.PinDerived);
+                pinOnlyMode = GetPinOnlyMode();
+                tryPinProtected = pinOnlyMode.HasFlag(PivPinOnlyMode.PinProtected);
+                tryPinDerived = pinOnlyMode.HasFlag(PivPinOnlyMode.PinDerived);
             }
 
-            Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;
+            var userKeyCollector = KeyCollector;
             using var specialKeyCollector = new SpecialKeyCollector();
 
             try
@@ -358,11 +357,10 @@ namespace Yubico.YubiKey.Piv
 
                 if (tryPinProtected)
                 {
-                    returnValue = GetPrintedPinProtectedStatus(specialKeyCollector, userKeyCollector);
-
-                    if (trustAdminData && returnValue.HasFlag(PivPinOnlyMode.PinProtected))
+                    pinOnlyMode = GetPrintedPinProtectedStatus(specialKeyCollector, userKeyCollector);
+                    if (trustAdminData && pinOnlyMode.HasFlag(PivPinOnlyMode.PinProtected))
                     {
-                        return returnValue;
+                        return pinOnlyMode;
                     }
                 }
 
@@ -370,12 +368,12 @@ namespace Yubico.YubiKey.Piv
                 {
                     using var adminData = new AdminData();
 
-                    returnValue |= GetPinDerivedStatus(
-                        adminData, returnValue.HasFlag(PivPinOnlyMode.PinProtected), specialKeyCollector,
+                    pinOnlyMode |= GetPinDerivedStatus(
+                        adminData, pinOnlyMode.HasFlag(PivPinOnlyMode.PinProtected), specialKeyCollector,
                         userKeyCollector);
                 }
 
-                return returnValue;
+                return pinOnlyMode;
             }
             finally
             {
@@ -400,25 +398,25 @@ namespace Yubico.YubiKey.Piv
             // verified, ReadObject won't collect and save it.
             // Hence, in order to be able to call VerifyPinAndSave, but only if
             // needed, call the GetDataCommand directly.
-            var getDataCommand = new GetDataCommand((int)PivDataTag.Printed);
-            GetDataResponse getDataResponse = Connection.SendCommand(getDataCommand);
+            var command = new GetDataCommand((int)PivDataTag.Printed);
+            var response = Connection.SendCommand(command);
 
-            if (getDataResponse.Status == ResponseStatus.AuthenticationRequired)
+            if (response.Status == ResponseStatus.AuthenticationRequired)
             {
                 specialKeyCollector.VerifyPinAndSave(this, userKeyCollector);
-                getDataResponse = Connection.SendCommand(getDataCommand);
+                response = Connection.SendCommand(command);
             }
 
-            if (getDataResponse.Status == ResponseStatus.NoData)
+            if (response.Status == ResponseStatus.NoData)
             {
                 return PivPinOnlyMode.None;
             }
 
-            if (getDataResponse.Status == ResponseStatus.Success)
+            if (response.Status == ResponseStatus.Success)
             {
                 using var pinProtect = new PinProtectedData();
 
-                if (pinProtect.TryDecode(getDataResponse.GetData()))
+                if (pinProtect.TryDecode(response.GetData()))
                 {
                     if (pinProtect.ManagementKey is null)
                     {
@@ -465,17 +463,16 @@ namespace Yubico.YubiKey.Piv
             // We could use the TryReadObject to get the admin data, but that
             // returns a new object. We need to fill the incoming object with the
             // data.
-            var getDataCommand = new GetDataCommand(adminData.DataTag);
-            GetDataResponse getDataResponse = Connection.SendCommand(getDataCommand);
-
-            if (getDataResponse.Status == ResponseStatus.NoData)
+            var command = new GetDataCommand(adminData.DataTag);
+            var response = Connection.SendCommand(command);
+            if (response.Status == ResponseStatus.NoData)
             {
                 return PivPinOnlyMode.None;
             }
 
-            if (getDataResponse.Status == ResponseStatus.Success)
+            if (response.Status == ResponseStatus.Success)
             {
-                if (adminData.TryDecode(getDataResponse.GetData()))
+                if (adminData.TryDecode(response.GetData()))
                 {
                     if (adminData.Salt is null)
                     {
@@ -753,7 +750,7 @@ namespace Yubico.YubiKey.Piv
                 "Set a YubiKey to PIV PIN-only mode: {PivPinOnlyMode}, mgmt key alg = {PivAlgorithm}.",
                 pinOnlyMode.ToString(), mgmtKeyAlgorithm.ToString());
 
-            Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;
+            var userKeyCollector = KeyCollector;
             using var specialKeyCollector = new SpecialKeyCollector();
 
             try
@@ -773,14 +770,13 @@ namespace Yubico.YubiKey.Piv
         // there is one) will be the same algorithm of the current one.
         private void SetPinOnlyMode(ReadOnlyMemory<byte> pin, PivPinOnlyMode pinOnlyMode, out int? retriesRemaining)
         {
-            ReadOnlyMemory<byte> pinToUse = pin;
-
-            if (pin.Length == 0)
+            var pinToUse = pin;
+            if (pinToUse.Length == 0)
             {
                 pinToUse = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
             }
 
-            Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;
+            var userKeyCollector = KeyCollector;
             using var specialKeyCollector = new SpecialKeyCollector();
 
             try
@@ -837,24 +833,23 @@ namespace Yubico.YubiKey.Piv
             // We might need to set a mode because it is currently set and the
             // caller wants a new algorithm.
             // Or some other reason.
-            PivPinOnlyMode newMode = PivPinOnlyMode.None;
-
-            PivPinOnlyMode currentMode = GetPrintedPinProtectedStatus(specialKeyCollector, userKeyCollector);
-
-            PinOnlyCheck pinOnlyCheck = CheckPinOnlyStatus(
-                currentMode, pinOnlyMode, PivPinOnlyMode.PinProtected, PivPinOnlyMode.PinProtectedUnavailable,
-                newAlgorithm, ref newMode);
+            var newPinOnlyMode = PivPinOnlyMode.None;
+            var currentPinOnlyMode = GetPrintedPinProtectedStatus(specialKeyCollector, userKeyCollector);
+            
+            var pinOnlyCheck = CheckPinOnlyStatus(
+                currentPinOnlyMode, pinOnlyMode, PivPinOnlyMode.PinProtected, PivPinOnlyMode.PinProtectedUnavailable,
+                newAlgorithm, ref newPinOnlyMode);
 
             using var adminData = new AdminData();
 
             if (pinOnlyCheck == PinOnlyCheck.CanContinue)
             {
-                currentMode |= GetPinDerivedStatus(
-                    adminData, currentMode.HasFlag(PivPinOnlyMode.PinProtected), specialKeyCollector, userKeyCollector);
+                currentPinOnlyMode |= GetPinDerivedStatus(
+                    adminData, currentPinOnlyMode.HasFlag(PivPinOnlyMode.PinProtected), specialKeyCollector, userKeyCollector);
 
                 pinOnlyCheck = CheckPinOnlyStatus(
-                    currentMode, pinOnlyMode, PivPinOnlyMode.PinDerived, PivPinOnlyMode.PinDerivedUnavailable,
-                    newAlgorithm, ref newMode);
+                    currentPinOnlyMode, pinOnlyMode, PivPinOnlyMode.PinDerived, PivPinOnlyMode.PinDerivedUnavailable,
+                    newAlgorithm, ref newPinOnlyMode);
             }
 
             if (pinOnlyCheck == PinOnlyCheck.Unavailable)
@@ -876,7 +871,7 @@ namespace Yubico.YubiKey.Piv
 
             // If the mgmt key has not yet been authenticated, then get it
             // using the KeyCollector.
-            if (!currentMode.HasFlag(PivPinOnlyMode.PinProtected) && !currentMode.HasFlag(PivPinOnlyMode.PinDerived))
+            if (!currentPinOnlyMode.HasFlag(PivPinOnlyMode.PinProtected) && !currentPinOnlyMode.HasFlag(PivPinOnlyMode.PinDerived))
             {
                 // Actually, before we do that, check to see if the requested is
                 // None. It's possible that one or both of the modes is
@@ -912,7 +907,7 @@ namespace Yubico.YubiKey.Piv
             // take care of that.
             if (newAlgorithm)
             {
-                ClearPinOnly(currentMode, specialKeyCollector);
+                ClearPinOnly(currentPinOnlyMode, specialKeyCollector);
 
                 if (pinOnlyMode == PivPinOnlyMode.None)
                 {
@@ -929,7 +924,7 @@ namespace Yubico.YubiKey.Piv
             // If it was authenticated not using PIN-only, then the currentMode
             // contains neither Protected nor Derived.
 
-            if (newMode.HasFlag(PivPinOnlyMode.PinDerived))
+            if (newPinOnlyMode.HasFlag(PivPinOnlyMode.PinDerived))
             {
                 // This will also check to see if we need to set PinProtected
                 // as well, but the newMode is not set yet.
@@ -937,10 +932,10 @@ namespace Yubico.YubiKey.Piv
                 // mode is Derived. We need to set Derived, but then reset
                 // Protected to the Derived value.
                 SetYubiKeyPinDerived(
-                    adminData, currentMode, mgmtKeyAlgorithm, specialKeyCollector, userKeyCollector, ref newMode);
+                    adminData, currentPinOnlyMode, mgmtKeyAlgorithm, specialKeyCollector, userKeyCollector, ref newPinOnlyMode);
             }
 
-            if (newMode.HasFlag(PivPinOnlyMode.PinProtected))
+            if (newPinOnlyMode.HasFlag(PivPinOnlyMode.PinProtected))
             {
                 SetYubiKeyPinProtected(adminData, mgmtKeyAlgorithm, specialKeyCollector);
             }
@@ -949,7 +944,7 @@ namespace Yubico.YubiKey.Piv
             // If the currentMode is UnavailablePinDerived, then don't update
             // AdminData. It was something other than defined value, so we're
             // leaving it.
-            if (!currentMode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable))
+            if (!currentPinOnlyMode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable))
             {
                 WriteObject(adminData);
             }
@@ -1044,12 +1039,11 @@ namespace Yubico.YubiKey.Piv
         {
             byte[] emptyObject = { 0x53, 0x00 };
 
-            var putCmd = new PutDataCommand(dataTag, emptyObject);
-            PutDataResponse putRsp = Connection.SendCommand(putCmd);
-
-            if (putRsp.Status != ResponseStatus.Success)
+            var command = new PutDataCommand(dataTag, emptyObject);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(putRsp.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
@@ -1086,14 +1080,15 @@ namespace Yubico.YubiKey.Piv
                 newMode |= PivPinOnlyMode.PinProtected;
             }
 
-            ReadOnlyMemory<byte> salt = specialKeyCollector.DeriveKeyData
+            var saltBytes = specialKeyCollector.DeriveKeyData
                 (ReadOnlyMemory<byte>.Empty, mgmtKeyAlgorithm, isNewKey: true);
 
             // Call this method instead of the PivSession.Change method directly,
             // because this method will update the current key with the new key.
             specialKeyCollector.ChangeManagementKey(this, mgmtKeyAlgorithm);
             _ = BlockPinOrPuk(PivSlot.Puk);
-            adminData.SetSalt(salt);
+            
+            adminData.SetSalt(saltBytes);
             adminData.PukBlocked = true;
         }
 
@@ -1154,7 +1149,7 @@ namespace Yubico.YubiKey.Piv
 
             mode = PivPinOnlyMode.None;
 
-            Func<KeyEntryData, bool>? userKeyCollector = KeyCollector;
+            var userKeyCollectorFunc = KeyCollector;
             using var specialKeyCollector = new SpecialKeyCollector();
 
             bool isValid = TryReadObject(out AdminData adminData);
@@ -1171,7 +1166,7 @@ namespace Yubico.YubiKey.Piv
                 // In order to do that we need to verify the PIN.
                 isValid = pin.Length switch
                 {
-                    0 => specialKeyCollector.TryVerifyPinAndSave(this, userKeyCollector, out retriesRemaining),
+                    0 => specialKeyCollector.TryVerifyPinAndSave(this, userKeyCollectorFunc, out retriesRemaining),
                     _ => specialKeyCollector.TrySetPin(this, pin, out retriesRemaining)
                 };
 
@@ -1235,7 +1230,7 @@ namespace Yubico.YubiKey.Piv
             finally
             {
                 adminData.Dispose();
-                KeyCollector = userKeyCollector;
+                KeyCollector = userKeyCollectorFunc;
             }
 
             return true;
@@ -1301,7 +1296,7 @@ namespace Yubico.YubiKey.Piv
                 }
                 else
                 {
-                    using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
+                    using var randomObject = CryptographyProviders.RngCreator();
 
                     do
                     {
@@ -1318,18 +1313,19 @@ namespace Yubico.YubiKey.Piv
             // Return the salt.
             // It is the responsibility of the caller to make sure the pin is the
             // correct length.
+            // It will also set the KeyData of the MgmtKeyHolder
             public ReadOnlyMemory<byte> DeriveKeyData(
                 ReadOnlyMemory<byte> pin,
                 ReadOnlyMemory<byte> salt,
                 PivAlgorithm algorithm)
             {
-                ReadOnlyMemory<byte> returnValue = salt;
+                var returnValue = salt;
 
                 if (salt.Length != PinDerivedSaltLength)
                 {
                     byte[] saltData = new byte[PinDerivedSaltLength];
                     returnValue = new ReadOnlyMemory<byte>(saltData);
-                    using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
+                    using var randomObject = CryptographyProviders.RngCreator();
 
                     do
                     {
@@ -1482,23 +1478,23 @@ namespace Yubico.YubiKey.Piv
             // If generating new key data, this will reject weak keys.
             public void SetKeyData(int setFlag, ReadOnlyMemory<byte> keyData, bool isNewKey, PivAlgorithm algorithm)
             {
-                MgmtKeyHolder dest = isNewKey ? _newKey : _currentKey;
+                var destinationKeyHolder = isNewKey ? _newKey : _currentKey;
 
                 if (setFlag == SetKeyDataBuffer)
                 {
-                    dest.SetKeyData(keyData, algorithm);
+                    destinationKeyHolder.SetKeyData(keyData, algorithm);
 
                     return;
                 }
 
                 if (setFlag == SetKeyDataRandom)
                 {
-                    dest.SetKeyData(ReadOnlyMemory<byte>.Empty, algorithm);
+                    destinationKeyHolder.SetKeyData(ReadOnlyMemory<byte>.Empty, algorithm);
 
                     return;
                 }
 
-                dest.SetKeyData(_defaultKey, PivAlgorithm.TripleDes);
+                destinationKeyHolder.SetKeyData(_defaultKey, PivAlgorithm.TripleDes);
             }
 
             // Derive the mgmt key from the PIN in this object, along with the
@@ -1518,9 +1514,9 @@ namespace Yubico.YubiKey.Piv
             // result if a salt is given.
             public ReadOnlyMemory<byte> DeriveKeyData(ReadOnlyMemory<byte> salt, PivAlgorithm algorithm, bool isNewKey)
             {
-                MgmtKeyHolder dest = isNewKey ? _newKey : _currentKey;
+                var destinationKeyHolder = isNewKey ? _newKey : _currentKey;
 
-                return dest.DeriveKeyData(_pinMemory.Slice(start: 0, _pinLength), salt, algorithm);
+                return destinationKeyHolder.DeriveKeyData(_pinMemory.Slice(start: 0, _pinLength), salt, algorithm);
             }
 
             // Change the management key from what is in current to what is in

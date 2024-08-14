@@ -313,15 +313,15 @@ namespace Yubico.YubiKey.Piv
         // instantiation.
         private bool TryReadObject(PivDataObject pivDataObject)
         {
-            var getDataCommand = new GetDataCommand(pivDataObject.DataTag);
-            GetDataResponse getDataResponse = Connection.SendCommand(getDataCommand);
+            var command = new GetDataCommand(pivDataObject.DataTag);
+            var response = Connection.SendCommand(command);
 
             // If GetDataCommand requires the PIN and it had not been verified,
             // verify it now and run it again.
-            if (getDataResponse.Status == ResponseStatus.AuthenticationRequired)
+            if (response.Status == ResponseStatus.AuthenticationRequired)
             {
                 VerifyPin();
-                getDataResponse = Connection.SendCommand(getDataCommand);
+                response = Connection.SendCommand(command);
             }
 
             // If there is no data, simply return the object created, the IsEmpty
@@ -330,9 +330,9 @@ namespace Yubico.YubiKey.Piv
             // the data or we will get an exception because of an error in the
             // GetData, which is the kind of exception we want to throw, even
             // though this is a Try method.
-            if (getDataResponse.Status != ResponseStatus.NoData)
+            if (response.Status != ResponseStatus.NoData)
             {
-                ReadOnlyMemory<byte> encodedData = getDataResponse.GetData();
+                var encodedData = response.GetData();
                 return pivDataObject.TryDecode(encodedData);
             }
 
@@ -391,20 +391,20 @@ namespace Yubico.YubiKey.Piv
             try
             {
                 dataToStore = pivDataObject.Encode();
-                var putDataCommand = new PutDataCommand(pivDataObject.DataTag, dataToStore);
-                PutDataResponse putDataResponse = Connection.SendCommand(putDataCommand);
+                var command = new PutDataCommand(pivDataObject.DataTag, dataToStore);
+                var response = Connection.SendCommand(command);
 
                 // The PutDataCommand requires mgmt key auth, if it has not been
                 // authenticated, do so now and run it again.
-                if (putDataResponse.Status == ResponseStatus.AuthenticationRequired)
+                if (response.Status == ResponseStatus.AuthenticationRequired)
                 {
                     AuthenticateManagementKey(true);
-                    putDataResponse = Connection.SendCommand(putDataCommand);
+                    response = Connection.SendCommand(command);
                 }
 
-                if (putDataResponse.Status != ResponseStatus.Success)
+                if (response.Status != ResponseStatus.Success)
                 {
-                    throw new InvalidOperationException(putDataResponse.StatusMessage);
+                    throw new InvalidOperationException(response.StatusMessage);
                 }
             }
             finally

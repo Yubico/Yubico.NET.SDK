@@ -124,19 +124,18 @@ namespace Yubico.YubiKey
 
             ResetCacheMarkers();
 
-            List<IDevice> devicesToProcess = GetDevices();
+            var devicesToProcess = GetDevices();
 
             _log.LogInformation("Cache currently aware of {Count} YubiKeys.", _internalCache.Count);
 
             var addedYubiKeys = new List<IYubiKeyDevice>();
 
-            foreach (IDevice device in devicesToProcess)
+            foreach (var device in devicesToProcess)
             {
                 _log.LogInformation("Processing device {Device}", device);
 
                 // First check if we've already seen this device (very fast)
-                IYubiKeyDevice? existingEntry = _internalCache.Keys.FirstOrDefault(k => k.Contains(device));
-
+                var existingEntry = _internalCache.Keys.FirstOrDefault(k => k.Contains(device));
                 if (existingEntry != null)
                 {
                     MarkExistingYubiKey(existingEntry);
@@ -198,13 +197,13 @@ namespace Yubico.YubiKey
                 .Select(e => e.Key)
                 .ToList();
 
-            foreach (IYubiKeyDevice removedKey in removedYubiKeys)
+            foreach (var removedKey in removedYubiKeys)
             {
                 OnDeviceRemoved(new YubiKeyDeviceEventArgs(removedKey));
                 _ = _internalCache.Remove(removedKey);
             }
 
-            foreach (IYubiKeyDevice addedKey in addedYubiKeys)
+            foreach (var addedKey in addedYubiKeys)
             {
                 OnDeviceArrived(new YubiKeyDeviceEventArgs(addedKey));
             }
@@ -248,7 +247,7 @@ namespace Yubico.YubiKey
         private void ResetCacheMarkers()
         {
             // Copy the list of keys as changing a dictionary's value will invalidate any enumerators (i.e. the loop).
-            foreach (IYubiKeyDevice cacheDevice in _internalCache.Keys.ToList())
+            foreach (var cacheDevice in _internalCache.Keys.ToList())
             {
                 _internalCache[cacheDevice] = false;
             }

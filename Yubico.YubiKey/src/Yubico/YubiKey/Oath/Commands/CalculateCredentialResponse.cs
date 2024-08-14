@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var tlvReader = new TlvReader(ResponseApdu.Data);
 
-            ReadOnlyMemory<byte> bytes = tlvReader.PeekTag() switch
+            var tlvBytes = tlvReader.PeekTag() switch
             {
                 FullResponseTag => tlvReader.ReadValue(FullResponseTag),
                 TruncatedResponseTag => tlvReader.ReadValue(TruncatedResponseTag),
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 }
             };
 
-            if (bytes.Length < 5)
+            if (tlvBytes.Length < 5)
             {
                 throw new MalformedYubiKeyResponseException()
                 {
@@ -97,10 +97,10 @@ namespace Yubico.YubiKey.Oath.Commands
                 };
             }
 
-            int digits = bytes.Span[0];
+            int digits = tlvBytes.Span[0];
             Credential.Digits = digits;
 
-            uint otpValue = BinaryPrimitives.ReadUInt32BigEndian(bytes.Slice(1).Span);
+            uint otpValue = BinaryPrimitives.ReadUInt32BigEndian(tlvBytes.Slice(1).Span);
             otpValue %= (uint)Math.Pow(10, digits);
             string response = otpValue.ToString(CultureInfo.InvariantCulture).PadLeft(digits, '0');
 

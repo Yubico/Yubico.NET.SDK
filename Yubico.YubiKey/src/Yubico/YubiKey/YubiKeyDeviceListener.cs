@@ -47,10 +47,32 @@ namespace Yubico.YubiKey
         /// </summary>
         public static YubiKeyDeviceListener Instance => _lazyInstance ??= new YubiKeyDeviceListener();
 
+        internal static bool IsListenerRunning => !(_lazyInstance is null);
+
         /// <summary>
         /// Disposes and closes the singleton instance of <see cref="YubiKeyDeviceListener"/>.
         /// </summary>
-        public static void ResetInstance()
+        /// <remarks>
+        /// <para>
+        /// Enumerating YubiKeys is actually done via a cache. As such, this cache must be maintained
+        /// and kept up-to-date. This is done by starting several listeners that run in the background.
+        /// These listen for the relevant OS device arrival and removal events.
+        /// </para>
+        /// <para>
+        /// Normally, these background listeners will run starting with the first enumeration call to the
+        /// SDK and remain active until the process shuts down. But there are cases where you may not want
+        /// the overhead of these listeners running all the time. While they do their best to not consume
+        /// excessive resources, they can sometimes generate log noise, exceptions, etc.
+        /// </para>
+        /// <para>
+        /// This method allows you to stop these
+        /// background listeners and reclaim resources, as possible. This will not invalidate any existing
+        /// IYubiKeyDevice instances, however you will not receive any additional events regarding that device.
+        /// Any subsequent calls to <see cref="YubiKeyDevice.FindAll"/>, <see cref="YubiKeyDevice.FindByTransport"/>,
+        /// or <see cref="Instance"/> will restart the listeners.
+        /// </para>
+        /// </remarks>
+        public static void StopListening()
         {
             if (_lazyInstance != null)
             {
@@ -63,7 +85,7 @@ namespace Yubico.YubiKey
 
         private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
-        private readonly Logger _log = Log.GetLogger<YubiKeyDeviceListener>();
+        private readonly ILogger _log = Log.GetLogger<YubiKeyDeviceListener>();
         private readonly Dictionary<IYubiKeyDevice, bool> _internalCache = new Dictionary<IYubiKeyDevice, bool>();
         private readonly HidDeviceListener _hidListener = HidDeviceListener.Create();
         private readonly SmartCardDeviceListener _smartCardListener = SmartCardDeviceListener.Create();
@@ -77,7 +99,7 @@ namespace Yubico.YubiKey
 
         private YubiKeyDeviceListener()
         {
-            _log.LogInformation("Creating YubiKeyDeviceListener instance.");
+            _log.LogInformation($"Creating {nameof(YubiKeyDeviceListener)} instance.");
 
             SetupDeviceListeners();
 
@@ -89,14 +111,45 @@ namespace Yubico.YubiKey
 
         internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
 
-        private void ListenerHandler(object? sender, EventArgs e) => _semaphore.Release();
+        private void ArriveHandler(object? sender, EventArgs e) => ListenerHandler("Arrival", e);
+
+        private void RemoveHandler(object? sender, EventArgs e) => ListenerHandler("Removal", e);
+
+        private void ListenerHandler(string eventType, EventArgs e)
+        {
+            object? device;
+            string deviceType;
+            if (e is SmartCardDeviceEventArgs se)
+            {
+                deviceType = "smart card";
+                device = se.Device;
+            }
+            else if (e is HidDeviceEventArgs he)
+            {
+                deviceType = "HID";
+                device = he.Device;
+            }
+            else
+            {
+                // Given this is a private method, this case isn't likely.
+                deviceType = "unknown";
+                device = "undefined";
+            }
+
+            _log.LogInformation(
+                "{EventType} of {DeviceType} {Device} is triggering update.",
+                eventType,
+                deviceType,
+                device);
+            _ = _semaphore.Release();
+        }
 
         private void SetupDeviceListeners()
         {
-            _smartCardListener.Arrived += ListenerHandler;
-            _smartCardListener.Removed += ListenerHandler;
-            _hidListener.Arrived += ListenerHandler;
-            _hidListener.Removed += ListenerHandler;
+            _smartCardListener.Arrived += ArriveHandler;
+            _smartCardListener.Removed += RemoveHandler;
+            _hidListener.Arrived += ArriveHandler;
+            _hidListener.Removed += RemoveHandler;
         }
 
         private async Task ListenForChanges()
@@ -368,21 +421,21 @@ namespace Yubico.YubiKey
                     _tokenSource.Cancel();
 
                     // Shut down the listener handlers.
-                    _hidListener.Arrived -= ListenerHandler;
-                    _hidListener.Removed -= ListenerHandler;
+                    _hidListener.Arrived -= ArriveHandler;
+                    _hidListener.Removed -= RemoveHandler;
                     if (_hidListener is IDisposable hidDisp)
                     {
                         hidDisp.Dispose();
                     }
 
-                    _smartCardListener.Arrived -= ListenerHandler;
-                    _smartCardListener.Removed -= ListenerHandler;
+                    _smartCardListener.Arrived -= ArriveHandler;
+                    _smartCardListener.Removed -= RemoveHandler;
                     if (_smartCardListener is IDisposable scDisp)
                     {
                         scDisp.Dispose();
                     }
 
-                    // Give the listen thread a moment (likely is already done).
+                    // Give the listen task a moment (likely is already done).
                     _ = !_listenTask.Wait(100);
                     _listenTask.Dispose();
 
@@ -390,6 +443,11 @@ namespace Yubico.YubiKey
                     _rwLock.Dispose();
                     _semaphore.Dispose();
                     _tokenSource.Dispose();
+
+                    if (ReferenceEquals(_lazyInstance, this))
+                    {
+                        _lazyInstance = null;
+                    }
                 }
                 _isDisposed = true;
             }

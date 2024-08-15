@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Scp03
         {
             if (macChainingValue.Length != 16)
             {
-                throw new ArgumentException(ExceptionMessages.UnknownScp03Error, nameof(macChainingValue));
+                throw new ArgumentException(ExceptionMessages.UnknownScpError, nameof(macChainingValue));
             }
 
             var apduWithLongerLen = AddDataToApdu(apdu, new byte[8]);

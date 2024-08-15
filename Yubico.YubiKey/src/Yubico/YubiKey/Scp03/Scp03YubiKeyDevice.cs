@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey
@@ -20,12 +21,19 @@ namespace Yubico.YubiKey
     {
         public StaticKeys StaticKeys { get; private set; }
 
-        public Scp03YubiKeyDevice(YubiKeyDevice device, StaticKeys staticKeys)
-            : base(device.GetSmartCardDevice(), null, null, device)
+        public Scp03YubiKeyDevice(
+            YubiKeyDevice device,
+            StaticKeys staticKeys)
+            : base(
+                device.GetSmartCardDevice(),
+                null,
+                null, 
+                device)
         {
             StaticKeys = staticKeys.GetCopy();
         }
 
+        [Obsolete("Obsolete")]
         internal override IYubiKeyConnection? Connect(
             YubiKeyApplication? application,
             byte[]? applicationId,
@@ -36,7 +44,7 @@ namespace Yubico.YubiKey
                 return null;
             }
 
-            if (!(scp03Keys is null) && !StaticKeys.AreKeysSame(scp03Keys))
+            if (scp03Keys != null && !StaticKeys.AreKeysSame(scp03Keys))
             {
                 return null;
             }

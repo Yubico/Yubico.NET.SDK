@@ -115,8 +115,10 @@ namespace Yubico.YubiKey.Piv
             };
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
+// TODO
+#pragma warning disable CS0618 // Type or member is obsolete
             using (var pivSession = new PivSession(testDevice, new StaticKeys()))
+#pragma warning restore CS0618 // Type or member is obsolete
             {
                 pivSession.ResetApplication();
 
@@ -304,8 +306,10 @@ namespace Yubico.YubiKey.Piv
                 getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
             }
-
+//TODO 
+#pragma warning disable CS0618 // Type or member is obsolete
             using (var pivSession = new PivSession(testDevice, newKeys))
+#pragma warning restore CS0618 // Type or member is obsolete
             {
                 // Verify the PIN
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;

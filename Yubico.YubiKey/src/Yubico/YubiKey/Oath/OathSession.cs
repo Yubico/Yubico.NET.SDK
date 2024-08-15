@@ -14,8 +14,11 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Extensions.Logging;
+using Yubico.Core.Logging;
 using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Oath.Commands;
+using Yubico.YubiKey.Scp;
 
 namespace Yubico.YubiKey.Oath
 {
@@ -25,6 +28,7 @@ namespace Yubico.YubiKey.Oath
     public sealed partial class OathSession : IDisposable
     {
         private bool _disposed;
+        private readonly ILogger _log = Log.GetLogger<OathSession>();
         private readonly IYubiKeyDevice _yubiKeyDevice;
         internal OathApplicationData _oathData;
 
@@ -81,33 +85,30 @@ namespace Yubico.YubiKey.Oath
         /// <param name="yubiKey">
         /// The object that represents the actual YubiKey which will perform the operations.
         /// </param>
+        /// <param name="keyParameters">TODO</param>
         /// <exception cref="ArgumentNullException">
         /// The <c>yubiKey</c> argument is null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// The <c>SelectApplicationData</c> recived from the <c>yubiKey</c> is null.
         /// </exception>
-        public OathSession(IYubiKeyDevice yubiKey)
+        public OathSession(IYubiKeyDevice yubiKey, ScpKeyParameters? keyParameters = null)
         {
-            if (yubiKey is null)
-            {
-                throw new ArgumentNullException(nameof(yubiKey));
-            }
+            _yubiKeyDevice = yubiKey ?? throw new ArgumentNullException(nameof(yubiKey));
 
-            _yubiKeyDevice = yubiKey;
+            Connection = keyParameters is null
+                ? yubiKey.Connect(YubiKeyApplication.Oath)
+                : yubiKey.ConnectScp(YubiKeyApplication.Oath, keyParameters);
 
-            Connection = yubiKey.Connect(YubiKeyApplication.Oath);
-
-            if (!(Connection.SelectApplicationData is OathApplicationData))
+            if (!(Connection.SelectApplicationData is OathApplicationData data))
             {
                 throw new InvalidOperationException(nameof(Connection.SelectApplicationData));
             }
 
-            _oathData = (Connection.SelectApplicationData as OathApplicationData)!;
+            _oathData = data;
 
             _disposed = false;
         }
-
 
         /// <summary>
         /// Resets the YubiKey's OATH application back to a factory default state.
@@ -126,7 +127,7 @@ namespace Yubico.YubiKey.Oath
                 throw new InvalidOperationException(resetOathResponse.StatusMessage);
             }
 
-            var selectOathResponse = Connection.SendCommand(new SelectOathCommand());
+            var selectOathResponse = Connection.SendCommand(new SelectOathCommand()); // TODO throws error: Wrong syntax
             _oathData = selectOathResponse.GetData();
         }
 
@@ -145,6 +146,7 @@ namespace Yubico.YubiKey.Oath
         /// <summary>
         /// When the OathSession object goes out of scope, this method is called. It will close the session.
         /// </summary>
+
         // Note that .NET recommends a Dispose method call Dispose(true) and GC.SuppressFinalize(this).
         // The actual disposal is in the Dispose(bool) method.
         //
@@ -159,9 +161,25 @@ namespace Yubico.YubiKey.Oath
 
             // At the moment, there is no "close session" method. So for now,
             // just connect to the management application.
-            _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
+            // This can fail, possibly resulting in a SCardException (or other), so we wrap it in a try catch-block to complete the disposal of the PivSession
+            try
+            {
+                _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
+            }
+#pragma warning disable CA1031
+            catch (Exception e)
+#pragma warning restore CA1031
+            {
+                string message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.SessionDisposeUnknownError, e.GetType(), e.Message);
+
+                _log.LogWarning(message);
+            }
+            
             KeyCollector = null;
             Connection.Dispose();
+            
             _disposed = true;
         }
     }

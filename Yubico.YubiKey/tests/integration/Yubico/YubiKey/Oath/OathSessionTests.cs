@@ -14,6 +14,7 @@
 
 using System.Collections.Generic;
 using Xunit;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath
@@ -26,9 +27,9 @@ namespace Yubico.YubiKey.Oath
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var oathSession = new OathSession(testDevice))
+            using (var oathSession = new OathSession(testDevice, Scp03KeyParameters.DefaultKey)) //TODO follow Dains advice to reset the session
             {
-                oathSession.ResetApplication();
+                oathSession.ResetApplication(); // 
                 IList<Credential> data = oathSession.GetCredentials();
 
                 Assert.True(oathSession._oathData.Challenge.IsEmpty);

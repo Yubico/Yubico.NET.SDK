@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Scp03
 
                 _keyVersionNumber = value;
             }
-        }
+        } //TODO replace this?
 
         /// <summary>
         /// AES128 shared secret key used to calculate the Session-MAC key. Also
@@ -127,10 +127,9 @@ namespace Yubico.YubiKey.Scp03
         /// <param name="channelMacKey">16-byte AES128 shared secret key</param>
         /// <param name="channelEncryptionKey">16-byte AES128 shared secret key</param>
         /// <param name="dataEncryptionKey">16-byte AES128 shared secret key</param>
-        public StaticKeys(
-            ReadOnlyMemory<byte> channelMacKey,
-            ReadOnlyMemory<byte> channelEncryptionKey,
-            ReadOnlyMemory<byte> dataEncryptionKey)
+        public StaticKeys(ReadOnlyMemory<byte> channelMacKey,
+                          ReadOnlyMemory<byte> channelEncryptionKey,
+                          ReadOnlyMemory<byte> dataEncryptionKey)
         {
             if (channelMacKey.Length != KeySizeBytes)
             {
@@ -160,9 +159,11 @@ namespace Yubico.YubiKey.Scp03
         /// </summary>
         public StaticKeys()
         {
-            var DefaultKey = new ReadOnlyMemory<byte>(new byte[] {
-                0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f
-            });
+            var DefaultKey = new ReadOnlyMemory<byte>(
+                new byte[]
+                {
+                    0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f
+                });
 
             SetKeys(DefaultKey, DefaultKey, DefaultKey);
             KeyVersionNumber = 255;
@@ -170,10 +171,9 @@ namespace Yubico.YubiKey.Scp03
             _disposed = false;
         }
 
-        private void SetKeys(
-            ReadOnlyMemory<byte> channelMacKey,
-            ReadOnlyMemory<byte> channelEncryptionKey,
-            ReadOnlyMemory<byte> dataEncryptionKey)
+        private void SetKeys(ReadOnlyMemory<byte> channelMacKey,
+                             ReadOnlyMemory<byte> channelEncryptionKey,
+                             ReadOnlyMemory<byte> dataEncryptionKey)
         {
             channelMacKey.CopyTo(_macKey.AsMemory());
             channelEncryptionKey.CopyTo(_encKey.AsMemory());
@@ -181,31 +181,27 @@ namespace Yubico.YubiKey.Scp03
         }
 
         // Get a copy (deep clone) of this object.
-        internal StaticKeys GetCopy()
-        {
-            return new StaticKeys(ChannelMacKey, ChannelEncryptionKey, DataEncryptionKey)
+        internal StaticKeys GetCopy() =>
+            new StaticKeys(ChannelMacKey, ChannelEncryptionKey, DataEncryptionKey)
             {
                 KeyVersionNumber = KeyVersionNumber
             };
-        }
 
         /// <summary>
         /// Determine if the contents of each key is the same for both objects.
         /// If so, this method will return <c>true</c>.
         /// </summary>
-        public bool AreKeysSame(StaticKeys compareKeys)
+        public bool AreKeysSame(StaticKeys? compareKeys)
         {
-            if (!(compareKeys is null))
+            if (compareKeys is null)
             {
-                if (ChannelEncryptionKey.Span.SequenceEqual(compareKeys.ChannelEncryptionKey.Span)
-                    && ChannelMacKey.Span.SequenceEqual(compareKeys.ChannelMacKey.Span)
-                    && DataEncryptionKey.Span.SequenceEqual(compareKeys.DataEncryptionKey.Span))
-                {
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            return 
+                ChannelEncryptionKey.Span.SequenceEqual(compareKeys.ChannelEncryptionKey.Span) &&
+                ChannelMacKey.Span.SequenceEqual(compareKeys.ChannelMacKey.Span) &&
+                DataEncryptionKey.Span.SequenceEqual(compareKeys.DataEncryptionKey.Span);
         }
 
         /// <summary>

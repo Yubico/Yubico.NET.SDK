@@ -87,6 +87,7 @@ namespace Yubico.YubiKey.Scp03
         /// applications will ignore this, but it can be used to call Commands
         /// directly.
         /// </summary>
+        [Obsolete("Obsolete")]
         public IScp03YubiKeyConnection Connection { get; private set; }
 
         // The default constructor explicitly defined. We don't want it to be
@@ -131,6 +132,7 @@ namespace Yubico.YubiKey.Scp03
         /// <exception cref="ArgumentNullException">
         /// The <c>yubiKey</c> or <c>scp03Keys</c> argument is null.
         /// </exception>
+        [Obsolete("Use new Scp")]
         public Scp03Session(IYubiKeyDevice yubiKey, StaticKeys scp03Keys)
         {
             _log.LogInformation("Create a new instance of Scp03Session.");
@@ -242,6 +244,7 @@ namespace Yubico.YubiKey.Scp03
         /// The new key set's checksum failed to verify, or some other error
         /// described in the exception message.
         /// </exception>
+        [Obsolete("Obsolete")]
         public void PutKeySet(StaticKeys newKeySet)
         {
             _log.LogInformation("Put a new SCP03 key set onto a YubiKey.");
@@ -289,6 +292,7 @@ namespace Yubico.YubiKey.Scp03
         /// <c>true</c>, otherwise, pass <c>false</c>. This arg has a default of
         /// <c>false</c> so if no argument is given, it will be <c>false</c>.
         /// </param>
+        [Obsolete("Obsolete")]
         public void DeleteKeySet(byte keyVersionNumber, bool isLastKey = false)
         {
             _log.LogInformation("Deleting an SCP03 key set from a YubiKey.");
@@ -317,6 +321,7 @@ namespace Yubico.YubiKey.Scp03
         // However, that does not apply to sealed classes.
         // So the Dispose method will simply perform the
         // "closing" process, no call to Dispose(bool) or GC.
+        [Obsolete("Obsolete")]
         public void Dispose()
         {
             if (_disposed)

@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Scp03.Commands
@@ -23,6 +25,7 @@ namespace Yubico.YubiKey.Scp03.Commands
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5Fips)]
         [InlineData(StandardTestDevice.Fw5)]
+        [Obsolete("Obsolete")]
         public void DeleteKey_One_Succeeds(StandardTestDevice testDeviceType)
         {
             byte[] key1 = {
@@ -41,12 +44,11 @@ namespace Yubico.YubiKey.Scp03.Commands
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
-
             Assert.True(isValid);
             Assert.NotNull(connection);
 
-            var cmd = new DeleteKeyCommand(1, false);
-            Scp03Response rsp = connection!.SendCommand(cmd);
+            var cmd = new Scp03.Commands.DeleteKeyCommand(1, false);
+            Scp03.Commands.Scp03Response rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
 
@@ -70,13 +72,16 @@ namespace Yubico.YubiKey.Scp03.Commands
             };
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            //TODO 
+#pragma warning disable CS0618 // Type or member is obsolete
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.True(isValid);
             Assert.NotNull(connection);
 
-            var cmd = new DeleteKeyCommand(2, false);
-            Scp03Response rsp = connection!.SendCommand(cmd);
+            var cmd = new Scp03.Commands.DeleteKeyCommand(2, false);
+            Scp03.Commands.Scp03Response rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
 
@@ -100,13 +105,16 @@ namespace Yubico.YubiKey.Scp03.Commands
             };
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            //TODO 
+#pragma warning disable CS0618 // Type or member is obsolete
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.True(isValid);
             Assert.NotNull(connection);
 
-            var cmd = new DeleteKeyCommand(3, true);
-            Scp03Response rsp = connection!.SendCommand(cmd);
+            var cmd = new Scp03.Commands.DeleteKeyCommand(3, true);
+            Scp03.Commands.Scp03Response rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
     }

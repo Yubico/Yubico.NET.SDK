@@ -67,7 +67,7 @@ namespace Yubico.YubiKey.Pipelines
                 responseApdu = _pipeline.Invoke(partialApdu, commandType, responseType);
             }
 
-            return responseApdu!; // Covered by Debug.Assert above.
+            return responseApdu!; // Covered by Debug.Assert above. TODO err??
         }
 
         public void Setup() => _pipeline.Setup();

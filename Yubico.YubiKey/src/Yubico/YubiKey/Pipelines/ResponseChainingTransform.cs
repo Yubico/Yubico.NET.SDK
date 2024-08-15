@@ -47,6 +47,7 @@ namespace Yubico.YubiKey.Pipelines
             var responseApdu = _pipeline.Invoke(command, commandType, responseType);
 
             // Unless we see that bytes are available, there's nothing for this transform to do.
+            // TODO refactor away do while
             if (responseApdu.SW1 != SW1Constants.BytesAvailable)
             {
                 return responseApdu;

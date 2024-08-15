@@ -171,7 +171,7 @@ namespace Yubico.YubiKey.Scp03
         {
             if (_sessionKeys == null)
             {
-                throw new InvalidOperationException(ExceptionMessages.UnknownScp03Error);
+                throw new InvalidOperationException(ExceptionMessages.UnknownScpError);
             }
 
             if (command is null)
@@ -206,7 +206,7 @@ namespace Yubico.YubiKey.Scp03
         {
             if (_sessionKeys is null)
             {
-                throw new InvalidOperationException(ExceptionMessages.UnknownScp03Error);
+                throw new InvalidOperationException(ExceptionMessages.UnknownScpError);
             }
 
             if (response is null)

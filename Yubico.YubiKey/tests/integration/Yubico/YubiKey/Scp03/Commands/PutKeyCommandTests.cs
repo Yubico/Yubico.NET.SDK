@@ -40,7 +40,11 @@ namespace Yubico.YubiKey.Scp03.Commands
             var newKeys = new StaticKeys(key2, key1, key3);
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            //TODO 
+
+#pragma warning disable CS0618 // Type or member is obsolete
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.True(isValid);
             Assert.NotNull(connection);
@@ -84,7 +88,10 @@ namespace Yubico.YubiKey.Scp03.Commands
             };
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            //TODO 
+#pragma warning disable CS0618 // Type or member is obsolete
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.True(isValid);
             Assert.NotNull(connection);
@@ -131,7 +138,10 @@ namespace Yubico.YubiKey.Scp03.Commands
             };
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            //TODO 
+#pragma warning disable CS0618 // Type or member is obsolete
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.True(isValid);
             Assert.NotNull(connection);

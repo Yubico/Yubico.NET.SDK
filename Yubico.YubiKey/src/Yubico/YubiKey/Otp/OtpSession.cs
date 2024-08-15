@@ -16,6 +16,7 @@ using System;
 using System.Globalization;
 using Yubico.YubiKey.Otp.Commands;
 using Yubico.YubiKey.Otp.Operations;
+using Yubico.YubiKey.Scp;
 
 namespace Yubico.YubiKey.Otp
 {
@@ -66,12 +67,15 @@ namespace Yubico.YubiKey.Otp
         /// Constructs a <see cref="OtpSession"/> instance for high-level OTP operations.
         /// </summary>
         /// <param name="yubiKey">Instance of class implementing <see cref="IYubiKeyDevice"/>.</param>
-        public OtpSession(IYubiKeyDevice yubiKey)
+        /// <param name="keyParameters">TODO</param>
+        public OtpSession(IYubiKeyDevice yubiKey, Scp03KeyParameters? keyParameters = null)
         {
             if (yubiKey is null) { throw new ArgumentNullException(nameof(yubiKey)); }
             YubiKey = yubiKey;
-            _connection = yubiKey.Connect(YubiKeyApplication.Otp);
-            _otpStatus = _connection.SendCommand(new ReadStatusCommand()).GetData();
+            _connection = keyParameters is null
+                ? yubiKey.Connect(YubiKeyApplication.Oath)
+                : yubiKey.ConnectScp(YubiKeyApplication.Oath, keyParameters);
+            _otpStatus = _connection.SendCommand(new ReadStatusCommand()).GetData(); // fails on read data Incorrect parameters in the command data field. 0x6A80
         }
 
         #region OTP Operation Object Factory

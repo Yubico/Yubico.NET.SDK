@@ -14,7 +14,8 @@
 
 using System;
 using Yubico.Core.Devices;
-using Yubico.YubiKey.Scp03;
+using Yubico.YubiKey.Scp;
+using StaticKeys = Yubico.YubiKey.Scp03.StaticKeys;
 
 namespace Yubico.YubiKey.TestUtilities
 {
@@ -141,27 +142,97 @@ namespace Yubico.YubiKey.TestUtilities
             EnabledUsbCapabilities = 0;
         }
 
-        public IYubiKeyConnection Connect(YubiKeyApplication yubikeyApplication)
+        public IYubiKeyConnection Connect(YubiKeyApplication yubiKeyApplication)
         {
-            var connection = new HollowConnection(yubikeyApplication, FirmwareVersion)
+            var connection = new HollowConnection(yubiKeyApplication, FirmwareVersion)
             {
                 AlwaysAuthenticatePiv = _alwaysAuthenticatePiv,
             };
 
             return connection;
         }
-
+        
+        public IYubiKeyConnection Connect(byte[] applicationId)
+        {
+            throw new NotImplementedException();
+        }
+        
+        [Obsolete("Obsolete")]
         public IScp03YubiKeyConnection ConnectScp03(YubiKeyApplication yubikeyApplication, StaticKeys scp03Keys)
         {
             throw new NotImplementedException();
         }
 
-        public IYubiKeyConnection Connect(byte[] applicationId)
+        [Obsolete("Obsolete")]
+        public IScp03YubiKeyConnection ConnectScp03(byte[] applicationId, StaticKeys scp03Keys)
         {
             throw new NotImplementedException();
         }
 
-        public IScp03YubiKeyConnection ConnectScp03(byte[] applicationId, StaticKeys scp03Keys)
+        public IScpYubiKeyConnection ConnectScp(YubiKeyApplication yubikeyApplication, ScpKeyParameters scp03Keys)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IScpYubiKeyConnection ConnectScp(byte[] applicationId, ScpKeyParameters scp03Keys)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryConnect(
+            YubiKeyApplication application,
+            out IYubiKeyConnection connection)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryConnect(
+            byte[] applicationId,
+            out IYubiKeyConnection connection)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Obsolete("Obsolete")]
+        public bool TryConnectScp03(
+            YubiKeyApplication application,
+            StaticKeys scp03Keys,
+            out IScp03YubiKeyConnection connection)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Obsolete("Obsolete")]
+        public bool TryConnectScp03(
+            byte[] applicationId,
+            StaticKeys scp03Keys,
+            out IScp03YubiKeyConnection connection)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryConnectScp(
+            YubiKeyApplication application,
+            ScpKeyParameters keyParameters,
+            out IScpYubiKeyConnection connection)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryConnectScp(
+            byte[] applicationId,
+            ScpKeyParameters keyParameters,
+            out IScpYubiKeyConnection connection)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IScpYubiKeyConnection ConnectScp(YubiKeyApplication yubikeyApplication, StaticKeys scp03Keys)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IScpYubiKeyConnection ConnectScp(byte[] applicationId, StaticKeys scp03Keys)
         {
             throw new NotImplementedException();
         }
@@ -171,37 +242,7 @@ namespace Yubico.YubiKey.TestUtilities
         {
             return false;
         }
-
-        bool IYubiKeyDevice.TryConnect(
-            YubiKeyApplication application,
-            out IYubiKeyConnection connection)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IYubiKeyDevice.TryConnectScp03(
-            YubiKeyApplication application,
-            StaticKeys scp03Keys,
-            out IScp03YubiKeyConnection connection)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IYubiKeyDevice.TryConnect(
-            byte[] applicationId,
-            out IYubiKeyConnection connection)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IYubiKeyDevice.TryConnectScp03(
-            byte[] applicationId,
-            StaticKeys scp03Keys,
-            out IScp03YubiKeyConnection connection)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public void SetEnabledNfcCapabilities(YubiKeyCapabilities yubiKeyCapabilities) =>
             throw new NotImplementedException();
 

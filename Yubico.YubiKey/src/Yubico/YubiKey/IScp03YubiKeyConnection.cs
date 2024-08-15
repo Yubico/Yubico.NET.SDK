@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey
@@ -20,6 +22,7 @@ namespace Yubico.YubiKey
     /// The connection class that can perform SCP03 operations will implement not
     /// only <see cref="IYubiKeyConnection"/>, but this interface as well.
     /// </summary>
+    [Obsolete("Use new scp")]
     public interface IScp03YubiKeyConnection : IYubiKeyConnection
     {
         /// <summary>

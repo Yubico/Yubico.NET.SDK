@@ -16,10 +16,12 @@ using System;
 using Xunit;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class SimpleSessionTests
     {
         private readonly byte[] _pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
@@ -45,6 +47,7 @@ namespace Yubico.YubiKey.Scp03
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void ConnectScp03_Application_Succeeds()
         {
             IYubiKeyDevice device = IntegrationTestDeviceEnumeration.GetTestDevice(
@@ -61,6 +64,7 @@ namespace Yubico.YubiKey.Scp03
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void ConnectScp03_AlgorithmId_Succeeds()
         {
             IYubiKeyDevice device = IntegrationTestDeviceEnumeration.GetTestDevice(
@@ -78,6 +82,7 @@ namespace Yubico.YubiKey.Scp03
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void TryConnectScp03_Application_Succeeds()
         {
             IYubiKeyDevice device = IntegrationTestDeviceEnumeration.GetTestDevice(
@@ -97,21 +102,36 @@ namespace Yubico.YubiKey.Scp03
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void TryConnectScp03_AlgorithmId_Succeeds()
         {
-            IYubiKeyDevice device = IntegrationTestDeviceEnumeration.GetTestDevice(
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
                 Transport.SmartCard, FirmwareVersion.V5_3_0);
 
             using var scp03Keys = new StaticKeys();
 
-            bool isValid = device.TryConnectScp03(
-                YubiKeyApplication.Piv.GetIso7816ApplicationId(), scp03Keys, out IScp03YubiKeyConnection? connection);
+            bool isValid = device.TryConnectScp03(YubiKeyApplication.Piv, scp03Keys, out IScp03YubiKeyConnection? connection);
             using (connection)
             {
-                Assert.NotNull(connection);
                 Assert.True(isValid);
+                Assert.NotNull(connection);
                 var cmd = new VerifyPinCommand(_pin);
                 VerifyPinResponse rsp = connection!.SendCommand(cmd);
+                Assert.Equal(ResponseStatus.Success, rsp.Status);
+            }
+        }
+        
+        [Fact]
+        public void TryConnectScp_AlgorithmId_Succeeds()
+        {
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(Transport.SmartCard, FirmwareVersion.V5_3_0);
+            var isValid = device.TryConnectScp(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey, out var connection);
+            using (connection)
+            {
+                Assert.True(isValid);
+                Assert.NotNull(connection);
+                var cmd = new VerifyPinCommand(_pin);
+                var rsp = connection!.SendCommand(cmd);
                 Assert.Equal(ResponseStatus.Success, rsp.Status);
             }
         }

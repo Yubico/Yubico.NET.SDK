@@ -132,7 +132,6 @@ namespace Yubico.YubiKey.TestUtilities
             => GetTestDevices(transport)
                 .SelectByMinimumVersion(minimumFirmwareVersion);
 
-
         private static void CreateAllowListFileIfMissing(string allowListFilePath)
         {
             if (File.Exists(allowListFilePath))

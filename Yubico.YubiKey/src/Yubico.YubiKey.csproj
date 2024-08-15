@@ -73,6 +73,7 @@ limitations under the License. -->
     <Compile Update="Yubico\YubiKey\Otp\OtpSettings.ConfigurationFlags.cs">
       <DependentUpon>OtpSettings.cs</DependentUpon>
     </Compile>
+    <Compile Remove="Yubico\YubiKey\SecurityDomain\**" />
   </ItemGroup>
 
   <ItemGroup Label="Resource file definition">
@@ -106,6 +107,8 @@ limitations under the License. -->
     <None Include="..\..\Yubico.NET.SDK.snk">
       <Link>Yubico.NET.SDK.snk</Link>
     </None>
+    <EmbeddedResource Remove="Yubico\YubiKey\SecurityDomain\**" />
+    <None Remove="Yubico\YubiKey\SecurityDomain\**" />
   </ItemGroup>
 
   <ItemGroup Label="Package references specific to Yubico.YubiKey.dll">

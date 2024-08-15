@@ -47,9 +47,11 @@ namespace Yubico.YubiKey.Piv
             bool isValid = LoadKey(PivAlgorithm.EccP256, 0x89, pinPolicy, PivTouchPolicy.Never, testDevice);
             Assert.True(isValid);
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-
+//TODO 
             using var pivSession = useScp03
+#pragma warning disable CS0618 // Type or member is obsolete
                 ? new PivSession(testDevice, new StaticKeys())
+#pragma warning restore CS0618 // Type or member is obsolete
                 : new PivSession(testDevice);
 
             var collectorObj = new Simple39KeyCollector();

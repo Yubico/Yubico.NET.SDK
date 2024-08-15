@@ -21,6 +21,7 @@ using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.Piv
@@ -186,8 +187,21 @@ namespace Yubico.YubiKey.Piv
         ///     The <c>yubiKey</c> argument is null.
         /// </exception>
         public PivSession(IYubiKeyDevice yubiKey)
-            : this(scp03Keys: null, yubiKey)
         {
+            if (yubiKey is null)
+            {
+                throw new ArgumentNullException(nameof(yubiKey));
+            }
+
+            _log.LogInformation("Create a new instance of PivSession.");
+
+            Connection = yubiKey.Connect(YubiKeyApplication.Piv);
+
+            ResetAuthenticationStatus();
+            UpdateManagementKey(yubiKey);
+
+            _yubiKeyDevice = yubiKey;
+            _disposed = false;
         }
 
         /// <summary>
@@ -227,11 +241,13 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="InvalidOperationException">
         ///     This exception is thrown when unable to determine the management key type.
         /// </exception>
+        [Obsolete("Use new Scp")]
         public PivSession(IYubiKeyDevice yubiKey, StaticKeys scp03Keys)
             : this(scp03Keys, yubiKey)
         {
         }
-
+        
+        [Obsolete("Use new Scp")]
         private PivSession(StaticKeys? scp03Keys, IYubiKeyDevice yubiKey)
         {
             _log.LogInformation(
@@ -247,6 +263,30 @@ namespace Yubico.YubiKey.Piv
             Connection = scp03Keys is null
                 ? yubiKey.Connect(YubiKeyApplication.Piv)
                 : yubiKey.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
+
+            ResetAuthenticationStatus();
+            UpdateManagementKey(yubiKey);
+
+            _yubiKeyDevice = yubiKey;
+            _disposed = false;
+        }
+        
+        public PivSession(IYubiKeyDevice yubiKey, ScpKeyParameters keyParameters)
+        {
+            if (yubiKey is null)
+            {
+                throw new ArgumentNullException(nameof(yubiKey));
+            }
+            
+            string scpType = keyParameters switch
+            {
+                Scp03KeyParameters _ => "SCP03",
+                Scp11KeyParameters _ => "SCP11",
+                _ => string.Empty
+            };
+
+            _log.LogInformation($"Create a new instance of PivSession over {scpType}");
+            Connection = yubiKey.ConnectScp(YubiKeyApplication.Piv, keyParameters);
 
             ResetAuthenticationStatus();
             UpdateManagementKey(yubiKey);
@@ -319,12 +359,8 @@ namespace Yubico.YubiKey.Piv
             {
                 string message = string.Format(
                     CultureInfo.CurrentCulture,
-                    ExceptionMessages.PivSessionDisposeUnknownError, e.GetType(), e.Message);
+                    ExceptionMessages.SessionDisposeUnknownError, e.GetType(), e.Message);
                 
-                // Example:
-                // Exception caught when disposing PivSession: Yubico.PlatformInterop.SCardException,
-                // Unable to begin a transaction with the given smart card. SCARD_E_SERVICE_STOPPED: The smart card resource manager has shut down.
-
                 _log.LogWarning(message);
             }
 

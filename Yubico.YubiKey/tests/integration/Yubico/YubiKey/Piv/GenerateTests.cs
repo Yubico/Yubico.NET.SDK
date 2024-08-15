@@ -15,6 +15,7 @@
 using System;
 using Xunit;
 using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
 
@@ -37,16 +38,17 @@ namespace Yubico.YubiKey.Piv
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(Transport.SmartCard, FirmwareVersion.V5_3_0);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-
-            using var pivSession = useScp03 ? new PivSession(testDevice, new StaticKeys()) : new PivSession(testDevice);
+            using var pivSession = useScp03 
+                ? new PivSession(testDevice, Scp03KeyParameters.DefaultKey) 
+                : new PivSession(testDevice);
+            
             var collectorObj = new Simple39KeyCollector();
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
             var result = pivSession.GenerateKeyPair(PivSlot.Retired12, expectedAlgorithm);
-
             Assert.Equal(expectedAlgorithm, result.Algorithm);
         }
-
+        
         [SkippableTheory(typeof(NotSupportedException))]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]

@@ -15,6 +15,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using Yubico.Core.Devices;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.Scp03;
 using MgmtCmd = Yubico.YubiKey.Management.Commands;
 
@@ -48,14 +49,29 @@ namespace Yubico.YubiKey
         /// Initiate a connection to the specified application on a YubiKey
         /// device.
         /// </summary>
-        /// <param name="yubikeyApplication">
+        /// <param name="application">
         /// The application to reference on the device.
         /// </param>
         /// <returns>
         /// An instance of a class that implements the
         /// <see cref="IYubiKeyConnection"/> interface.
         /// </returns>
-        IYubiKeyConnection Connect(YubiKeyApplication yubikeyApplication);
+        IYubiKeyConnection Connect(YubiKeyApplication application);
+        
+        /// <summary>
+        /// Initiate a connection to the specified application represented as an
+        /// <c>applicationId</c> on a YubiKey device.
+        /// </summary>
+        /// <param name="applicationId">
+        /// A byte array representing the smart card Application ID (AID) for the
+        /// application to open.
+        /// </param>
+        /// <returns>
+        /// An instance of a class that implements the
+        /// <see cref="IYubiKeyConnection"/> interface.
+        /// </returns>
+        [Obsolete("Use corresponding YubiKeyApplication method")]
+        IYubiKeyConnection Connect(byte[] applicationId);
 
         /// <summary>
         /// Initiate a connection to the specified application on a YubiKey
@@ -73,7 +89,7 @@ namespace Yubico.YubiKey
         /// <see cref="IYubiKeyConnection"/>.
         /// </para>
         /// </remarks>
-        /// <param name="yubikeyApplication">
+        /// <param name="application">
         /// The application to reference on the device.
         /// </param>
         /// <param name="scp03Keys">
@@ -83,21 +99,8 @@ namespace Yubico.YubiKey
         /// An instance of a class that implements the
         /// <see cref="IScp03YubiKeyConnection"/> interface.
         /// </returns>
-        IScp03YubiKeyConnection ConnectScp03(YubiKeyApplication yubikeyApplication, StaticKeys scp03Keys);
-
-        /// <summary>
-        /// Initiate a connection to the specified application represented as an
-        /// <c>applicationId</c> on a YubiKey device.
-        /// </summary>
-        /// <param name="applicationId">
-        /// A byte array representing the smart card Application ID (AID) for the
-        /// application to open.
-        /// </param>
-        /// <returns>
-        /// An instance of a class that implements the
-        /// <see cref="IYubiKeyConnection"/> interface.
-        /// </returns>
-        IYubiKeyConnection Connect(byte[] applicationId);
+        [Obsolete("Use new Scp")]
+        IScp03YubiKeyConnection ConnectScp03(YubiKeyApplication application, StaticKeys scp03Keys);
 
         /// <summary>
         /// Initiate a connection to the specified application represented as an
@@ -126,24 +129,14 @@ namespace Yubico.YubiKey
         /// An instance of a class that implements the
         /// <see cref="IYubiKeyConnection"/> interface.
         /// </returns>
+        [Obsolete("Use new Scp")]
         IScp03YubiKeyConnection ConnectScp03(byte[] applicationId, StaticKeys scp03Keys);
+        // TODO DOCU
+        IScpYubiKeyConnection ConnectScp(YubiKeyApplication application, ScpKeyParameters keyParameters);
+        // TODO DOCU
+        IScpYubiKeyConnection ConnectScp(byte[] applicationId, ScpKeyParameters keyParameters);
 
-        /// <summary>
-        /// Checks whether a IYubiKeyDevice instance contains a particular platform <see cref="IDevice" />.
-        /// </summary>
-        /// <param name="other">The device to check.</param>
-        /// <returns>True, if the IYubiKeyDevice contains the platform device.</returns>
-        internal bool Contains(IDevice other);
-
-        /// <summary>
-        /// Checks whether a IYubiKeyDevice instance contains another <see cref="IDevice" /> with the same
-        /// <see cref="IDevice.ParentDeviceId" />.
-        /// </summary>
-        /// <param name="other">The device to check against.</param>
-        /// <returns>True, if the IYubiKeyDevice contains a platform device that shares the same parent.</returns>
-        internal bool HasSameParentDevice(IDevice other);
-
-        /// <summary>
+                /// <summary>
         /// Attempt to connect to the YubiKey device.
         /// </summary>
         /// <param name="application">The application to reference on the device.</param>
@@ -151,6 +144,19 @@ namespace Yubico.YubiKey
         /// <returns>Boolean indicating whether the call was successful.</returns>
         bool TryConnect(
             YubiKeyApplication application,
+            [MaybeNullWhen(returnValue: false)]
+            out IYubiKeyConnection connection);
+                
+        /// <summary>
+        /// Attempt to connect to the YubiKey device.
+        /// </summary>
+        /// <param name="applicationId">A byte array representing the smart card Application ID (AID) for the
+        /// application to open.</param>
+        /// <param name="connection">Out parameter containing the <see cref="IYubiKeyConnection"/> instance.</param>
+        /// <returns>Boolean indicating whether the call was successful.</returns>
+        [Obsolete("Obsolute")]
+        bool TryConnect(
+            byte[] applicationId,
             [MaybeNullWhen(returnValue: false)]
             out IYubiKeyConnection connection);
 
@@ -175,23 +181,12 @@ namespace Yubico.YubiKey
         /// </param>
         /// <param name="connection">Out parameter containing the <see cref="IYubiKeyConnection"/> instance.</param>
         /// <returns>Boolean indicating whether the call was successful.</returns>
+        [Obsolete("Use new Scp")]
         bool TryConnectScp03(
             YubiKeyApplication application,
             StaticKeys scp03Keys,
             [MaybeNullWhen(returnValue: false)]
             out IScp03YubiKeyConnection connection);
-
-        /// <summary>
-        /// Attempt to connect to the YubiKey device.
-        /// </summary>
-        /// <param name="applicationId">A byte array representing the smart card Application ID (AID) for the
-        /// application to open.</param>
-        /// <param name="connection">Out parameter containing the <see cref="IYubiKeyConnection"/> instance.</param>
-        /// <returns>Boolean indicating whether the call was successful.</returns>
-        bool TryConnect(
-            byte[] applicationId,
-            [MaybeNullWhen(returnValue: false)]
-            out IYubiKeyConnection connection);
 
         /// <summary>
         /// Attempt to connect to the YubiKey device. The connection will be made
@@ -214,11 +209,40 @@ namespace Yubico.YubiKey
         /// </param>
         /// <param name="connection">Out parameter containing the <see cref="IYubiKeyConnection"/> instance.</param>
         /// <returns>Boolean indicating whether the call was successful.</returns>
+        [Obsolete("Use new Scp")]
         bool TryConnectScp03(
             byte[] applicationId,
             StaticKeys scp03Keys,
             [MaybeNullWhen(returnValue: false)]
             out IScp03YubiKeyConnection connection);
+        
+        // TODO DOcumentation
+        bool TryConnectScp(
+            YubiKeyApplication application,
+            ScpKeyParameters keyParameters,
+            [MaybeNullWhen(returnValue: false)]
+            out IScpYubiKeyConnection connection);
+        
+        bool TryConnectScp(
+            byte[] applicationId,
+            ScpKeyParameters keyParameters,
+            [MaybeNullWhen(returnValue: false)]
+            out IScpYubiKeyConnection connection);
+        
+        /// <summary>
+        /// Checks whether a IYubiKeyDevice instance contains a particular platform <see cref="IDevice" />.
+        /// </summary>
+        /// <param name="other">The device to check.</param>
+        /// <returns>True, if the IYubiKeyDevice contains the platform device.</returns>
+        internal bool Contains(IDevice other);
+
+        /// <summary>
+        /// Checks whether a IYubiKeyDevice instance contains another <see cref="IDevice" /> with the same
+        /// <see cref="IDevice.ParentDeviceId" />.
+        /// </summary>
+        /// <param name="other">The device to check against.</param>
+        /// <returns>True, if the IYubiKeyDevice contains a platform device that shares the same parent.</returns>
+        internal bool HasSameParentDevice(IDevice other);
 
         /// <summary>
         /// Sets which NFC features are enabled (and disabled).

@@ -29,19 +29,19 @@ namespace Yubico.YubiKey.Cryptography
         /// <remarks>
         /// This is not a secure authenticated encryption scheme.
         /// </remarks>
-        /// <param name="key">16-byte AES128 key</param>
+        /// <param name="encryptionKey">16-byte AES128 key</param>
         /// <param name="plaintext">16-byte input block</param>
         /// <returns>The 16-byte AES128 ciphertext</returns>
-        public static byte[] BlockCipher(byte[] key, ReadOnlySpan<byte> plaintext)
+        public static byte[] BlockCipher(byte[] encryptionKey, ReadOnlySpan<byte> plaintext)
         {
-            if (key is null)
+            if (encryptionKey is null)
             {
-                throw new ArgumentNullException(nameof(key));
+                throw new ArgumentNullException(nameof(encryptionKey));
             }
 
-            if (key.Length != BlockSizeBytes)
+            if (encryptionKey.Length != BlockSizeBytes)
             {
-                throw new ArgumentException(ExceptionMessages.IncorrectAesKeyLength, nameof(key));
+                throw new ArgumentException(ExceptionMessages.IncorrectAesKeyLength, nameof(encryptionKey));
             }
 
             if (plaintext.Length != BlockSizeBytes)
@@ -49,31 +49,26 @@ namespace Yubico.YubiKey.Cryptography
                 throw new ArgumentException(ExceptionMessages.IncorrectPlaintextLength, nameof(plaintext));
             }
 
-            byte[] ciphertext;
-
-            using (var aesObj = CryptographyProviders.AesCreator())
-            {
-#pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
-                aesObj.Mode = CipherMode.ECB;
-#pragma warning restore CA5358
-                aesObj.KeySize = BlockSizeBits;
-                aesObj.BlockSize = BlockSizeBits;
-                aesObj.Key = key;
-                aesObj.IV = new byte[BlockSizeBytes];
-                aesObj.Padding = PaddingMode.None;
-#pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
-                // a non-default initialization vector
-                var encryptor = aesObj.CreateEncryptor();
-#pragma warning restore CA5401
-                using (var msEncrypt = new MemoryStream())
-                {
-                    using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                    {
-                        csEncrypt.Write(plaintext.ToArray(), 0, plaintext.Length);
-                        ciphertext = msEncrypt.ToArray();
-                    }
-                }
-            }
+            using var aesObj = CryptographyProviders.AesCreator();
+            
+            #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
+            aesObj.Mode = CipherMode.ECB;
+            #pragma warning restore CA5358
+            aesObj.KeySize = BlockSizeBits;
+            aesObj.BlockSize = BlockSizeBits;
+            aesObj.Key = encryptionKey;
+            aesObj.IV = new byte[BlockSizeBytes];
+            aesObj.Padding = PaddingMode.None;
+            #pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
+            // a non-default initialization vector
+            var encryptor = aesObj.CreateEncryptor();
+            #pragma warning restore CA5401
+            
+            using var msEncrypt = new MemoryStream();
+            using var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
+            
+            csEncrypt.Write(plaintext.ToArray(), 0, plaintext.Length);
+            byte[] ciphertext = msEncrypt.ToArray();
 
             return ciphertext;
         }

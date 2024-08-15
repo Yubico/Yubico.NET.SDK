@@ -32,7 +32,7 @@ as "SCP03"). This standard prescribes methods to encrypt and authenticate smart 
 (CCID) messages. That is, APDUs and responses are encrypted and contain checksums. If
 executed properly, the only entities that can see the contents of the messages (and
 verify their correctness) will be the YubiKey itself and authorized applications. This
-protocol is produced by GlobalPlatform, an industry consortium of hardware security
+protocol is produced by <a href="https://globalplatform.org/">GlobalPlatform</a>, an industry consortium of hardware security
 vendors that produce standards.
 
 Think of SCP03 as wrapping or unwrapping commands and responses. Before sending the actual
@@ -51,7 +51,7 @@ specifies no method for distributing keys securely.
 
 This added layer of protection makes the most sense when the communication
 channel between the host machine and the device could feasibly be compromised.
-For example, if you tunnel YubiKey commands and resonses over the Internet, in
+For example, if you tunnel YubiKey commands and responses over the Internet, in
 addition to standard web security protocols like TLS, it could makes sense to
 leverage SCP03 as an added layer of defense. Additionally, several 'card
 management systems' use SCP03 to securely remotely manage devices.

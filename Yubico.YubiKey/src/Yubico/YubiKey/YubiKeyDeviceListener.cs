@@ -16,8 +16,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
@@ -111,30 +111,14 @@ namespace Yubico.YubiKey
 
         internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
 
-        private void ArriveHandler(object? sender, EventArgs e) => ListenerHandler("Arrival", e);
+        private void ArriveHandler(object? sender, DeviceEventArgs e) => ListenerHandler("Arrival", e);
 
-        private void RemoveHandler(object? sender, EventArgs e) => ListenerHandler("Removal", e);
+        private void RemoveHandler(object? sender, DeviceEventArgs e) => ListenerHandler("Removal", e);
 
-        private void ListenerHandler(string eventType, EventArgs e)
+        private void ListenerHandler(string eventType, DeviceEventArgs e)
         {
-            object? device;
-            string deviceType;
-            if (e is SmartCardDeviceEventArgs se)
-            {
-                deviceType = "smart card";
-                device = se.Device;
-            }
-            else if (e is HidDeviceEventArgs he)
-            {
-                deviceType = "HID";
-                device = he.Device;
-            }
-            else
-            {
-                // Given this is a private method, this case isn't likely.
-                deviceType = "unknown";
-                device = "undefined";
-            }
+            IDevice? device = e.BaseDevice;
+            string deviceType = e is HidDeviceEventArgs ? "HID" : "smart card";
 
             _log.LogInformation(
                 "{EventType} of {DeviceType} {Device} is triggering update.",

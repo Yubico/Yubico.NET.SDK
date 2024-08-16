@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.Core.Devices.Hid
 {
     /// <summary>
     /// Event arguments given whenever a HID device is added or removed from the system.
     /// </summary>
-    public class HidDeviceEventArgs : EventArgs
+    public class HidDeviceEventArgs : DeviceEventArgs
     {
         /// <summary>
         /// The HID device that originated the event.
@@ -37,7 +35,7 @@ namespace Yubico.Core.Devices.Hid
         /// <param name="device">
         /// The HID device that is originating this event.
         /// </param>
-        public HidDeviceEventArgs(IHidDevice? device)
+        public HidDeviceEventArgs(IHidDevice? device) : base(device)
         {
             Device = device;
         }

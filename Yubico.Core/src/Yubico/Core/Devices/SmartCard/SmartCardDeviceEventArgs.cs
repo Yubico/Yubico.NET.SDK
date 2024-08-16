@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.Core.Devices.SmartCard
 {
     /// <summary>
     /// Event arguments given whenever a smart card device is added or removed from the system.
     /// </summary>
-    public class SmartCardDeviceEventArgs : EventArgs
+    public class SmartCardDeviceEventArgs : DeviceEventArgs
     {
         /// <summary>
         /// The smart card device that originated the event.
@@ -37,7 +35,7 @@ namespace Yubico.Core.Devices.SmartCard
         /// <param name="device">
         /// The smart card device that is originating this event.
         /// </param>
-        public SmartCardDeviceEventArgs(ISmartCardDevice device)
+        public SmartCardDeviceEventArgs(ISmartCardDevice device) : base(device)
         {
             Device = device;
         }

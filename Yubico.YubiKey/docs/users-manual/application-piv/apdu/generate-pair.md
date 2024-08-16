@@ -35,8 +35,8 @@ However, the YubiKey does not support that slot.
 The value for the "remaining bytes" field must be equal to the number of bytes that come after it. For example, if three
 bytes come after the "remaining bytes" field, the field's value must be 03.
 
-There are only four choices for "alg" (algorithm and size): RSA-1024 (06),
-RSA-2048 (07), ECC-P-256 (11), and ECC-P-384 (14).
+There are six choices for "alg" (algorithm and size): RSA-1024 (06),
+RSA-2048 (07), RSA 3072 (08), RSA 4096 (09), ECC-P-256 (11), and ECC-P-384 (14).
 
 Both the PIN policy and touch policy are optional. If either or both are not given, they
 will be default. The default for PIN is "once" and touch is "never".

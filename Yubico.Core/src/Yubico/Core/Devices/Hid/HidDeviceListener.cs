@@ -86,7 +86,7 @@ namespace Yubico.Core.Devices.Hid
         /// <param name="device">
         /// The device instance that originates this event.
         /// </param>
-        protected void OnRemoved(IHidDevice? device)
+        protected void OnRemoved(IHidDevice device)
         {
             _log.LogInformation("HID {Device} removed.", device);
             Removed?.Invoke(this, new HidDeviceEventArgs(device));

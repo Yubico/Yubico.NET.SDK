@@ -54,6 +54,11 @@ namespace Yubico.YubiKey
         /// <see cref="IYubiKeyDevice"/> using their serial number. If they cannot be matched,
         /// each connection will be returned as a separate <see cref="IYubiKeyDevice"/>.
         /// </para>
+        /// <para>
+        /// If your application no longer needs to watch for insertion or removal notifications,
+        /// you can call <see cref="YubiKeyDeviceListener.StopListening"/> to release resources
+        /// and avoid the logging and other actions from the listeners.
+        /// </para>
         /// </remarks>
         /// <param name="transport">
         /// Argument controls which devices are searched for. Values <see cref="Transport.None"/>

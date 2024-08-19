@@ -46,9 +46,7 @@ namespace Yubico.YubiKey
         /// An instance of a <see cref="YubiKeyDeviceListener"/>.
         /// </summary>
         public static YubiKeyDeviceListener Instance => _lazyInstance ??= new YubiKeyDeviceListener();
-
-        internal static bool IsListenerRunning => !(_lazyInstance is null);
-
+        
         /// <summary>
         /// Disposes and closes the singleton instance of <see cref="YubiKeyDeviceListener"/>.
         /// </summary>
@@ -74,12 +72,17 @@ namespace Yubico.YubiKey
         /// </remarks>
         public static void StopListening()
         {
-            if (_lazyInstance != null)
+            if (_lazyInstance == null)
             {
-                _lazyInstance.Dispose();
-                _lazyInstance = null;
+                return;
             }
+
+            _lazyInstance.Dispose();
+            _lazyInstance = null;
         }
+        
+        internal static bool IsListenerRunning => !(_lazyInstance is null);
+        internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
 
         private static YubiKeyDeviceListener? _lazyInstance;
 
@@ -94,7 +97,8 @@ namespace Yubico.YubiKey
         private readonly Task _listenTask;
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private CancellationToken CancellationToken => _tokenSource.Token;
-
+        
+        private bool _isDisposed;
         private bool _isListening;
 
         private YubiKeyDeviceListener()
@@ -109,22 +113,14 @@ namespace Yubico.YubiKey
             _listenTask = ListenForChanges();
         }
 
-        internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
 
-        private void ArriveHandler(object? sender, DeviceEventArgs e) => ListenerHandler("Arrival", e);
+        private void ArriveHandler(object? _, IDeviceEventArgs<IDevice> e) => ListenerHandler("Arrival", e);
 
-        private void RemoveHandler(object? sender, DeviceEventArgs e) => ListenerHandler("Removal", e);
+        private void RemoveHandler(object? _, IDeviceEventArgs<IDevice> e) => ListenerHandler("Removal", e);
 
-        private void ListenerHandler(string eventType, DeviceEventArgs e)
+        private void ListenerHandler(string eventType, IDeviceEventArgs<IDevice> e)
         {
-            IDevice? device = e.BaseDevice;
-            string deviceType = e is HidDeviceEventArgs ? "HID" : "smart card";
-
-            _log.LogInformation(
-                "{EventType} of {DeviceType} {Device} is triggering update.",
-                eventType,
-                deviceType,
-                device);
+            LogEvent(eventType, e);
             _ = _semaphore.Release();
         }
 
@@ -344,6 +340,23 @@ namespace Yubico.YubiKey
         /// Raises event on device removal.
         /// </summary>
         private void OnDeviceRemoved(YubiKeyDeviceEventArgs e) => Removed?.Invoke(typeof(YubiKeyDevice), e);
+        
+        private void LogEvent(string eventType, IDeviceEventArgs<IDevice> e)
+        {
+            var device = e.Device;
+            string deviceTypeText = device switch
+            {
+                ISmartCardDevice _ => "SMART CARD",
+                IHidDevice _ => "HID",
+                _ => "UNKNOWN"
+            };
+
+            _log.LogInformation(
+                "{EventType} of {DeviceType} {Device} is triggering update.",
+                eventType,
+                deviceTypeText,
+                device);
+        }
 
         private static IEnumerable<IDevice> GetHidFidoDevices()
         {
@@ -384,13 +397,10 @@ namespace Yubico.YubiKey
             return Enumerable.Empty<IDevice>();
         }
 
-        private static void ErrorHandler(Exception exception) =>
-            Log
+        private static void ErrorHandler(Exception exception) => Log
                 .GetLogger(typeof(YubiKeyDeviceListener).FullName!)
                 .LogWarning($"Exception caught: {exception}");
-
-        private bool _isDisposed;
-
+        
         /// <summary>
         /// Disposes the objects.
         /// </summary>

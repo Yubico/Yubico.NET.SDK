@@ -238,7 +238,7 @@ namespace Yubico.YubiKey.Piv
         /// </para>
         /// <para>
         /// There are limitations placed on the key and cert. The key must be
-        /// either RSA-2048, ECC-P256, or ECC-P384. The cert must be X.509, it
+        /// either RSA-2048, RSA-3072, RSA-4096, ECC-P256, or ECC-P384. The cert must be X.509, it
         /// must be version 2 or 3, the full DER encoding of the
         /// <c>SubjectName</c> must be fewer than 1029 bytes, and the total
         /// length of the certificate must be fewer than 3052 bytes. This method

@@ -35,8 +35,8 @@ namespace Yubico.YubiKey.Piv
     /// <see cref="PivPublicKey"/>.
     /// </para>
     /// <para>
-    /// The YubiKey supports only 1024-bit and 2048-bit RSA keys, which means
-    /// that the modulus must be exactly 128 or 256 byte long.
+    /// The YubiKey supports 1024-bit, 2048-bit, 3072-bit, and 4096-bit RSA keys, which means
+    /// that the modulus must be exactly 128, 256, 384, or 512 bytes long, respectively.
     /// </para>
     /// <para>
     /// The YubiKey supports only F4 (0x010001 = decimal 65,537) as the public

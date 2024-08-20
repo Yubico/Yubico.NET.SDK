@@ -156,7 +156,7 @@ allows for it.
 Note that if you replace the Yubico key and cert, there is no way to recover these
 original values, they will be gone for good. So use this method with caution.
 
-The replacement key must be either RSA-2048, ECC-P256, or ECC-P384, and there are some
+The replacement key must be either RSA-2048, RSA-3072, RSA-4096, ECC-P256, or ECC-P384, and there are some
 restrictions on the certificate. YubiKeys before version 5 did allow 1024-bit RSA keys as
 attestation keys, but to make your application work for all YubiKeys, you should never use
 a 1024-bit RSA key as an attestation key.

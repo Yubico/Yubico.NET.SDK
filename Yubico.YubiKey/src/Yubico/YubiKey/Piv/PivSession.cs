@@ -308,10 +308,20 @@ namespace Yubico.YubiKey.Piv
 
             // At the moment, there is no "close session" method. So for now,
             // just connect to the management application.
-            _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
+            // This can fail, so we wrap it in a try catch-block to complete the disposal of the PivSession
+            try
+            {
+                _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
+            }
+#pragma warning disable CA1031
+            catch (Exception e)
+#pragma warning restore CA1031
+            {
+                _log.LogWarning(e, ExceptionMessages.PivSessionDisposeUnknownError);
+            }
+
             KeyCollector = null;
             ResetAuthenticationStatus();
-
             Connection.Dispose();
 
             _disposed = true;
@@ -531,7 +541,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             _log.LogDebug("Moving key from {SourceSlot} to {DestinationSlot}", sourceSlot, destinationSlot);
-            
+
             var command = new MoveKeyCommand(sourceSlot, destinationSlot);
             var response = Connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
@@ -579,7 +589,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             _log.LogDebug("Deleting key at slot {TargetSlot}", slotToClear);
-            
+
             var command = new DeleteKeyCommand(slotToClear);
             var response = Connection.SendCommand(command);
 

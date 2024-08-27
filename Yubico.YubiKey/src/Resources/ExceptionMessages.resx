@@ -904,4 +904,7 @@
   <data name="InvalidUriQuery" xml:space="preserve">
     <value>The URI query cannot be null or empty.</value>
   </data>
+  <data name="PivSessionDisposeUnknownError" xml:space="preserve">
+    <value>Unknown error when disposing PivSession</value>
+  </data>
 </root>

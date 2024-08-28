@@ -1914,7 +1914,7 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unknown error when disposing PivSession.
+        ///   Looks up a localized string similar to Exception caught when disposing PivSession: {0}, {1}.
         /// </summary>
         internal static string PivSessionDisposeUnknownError {
             get {

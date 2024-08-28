@@ -308,7 +308,7 @@ namespace Yubico.YubiKey.Piv
 
             // At the moment, there is no "close session" method. So for now,
             // just connect to the management application.
-            // This can fail, so we wrap it in a try catch-block to complete the disposal of the PivSession
+            // This can fail, possibly resulting in a SCardException (or other), so we wrap it in a try catch-block to complete the disposal of the PivSession
             try
             {
                 _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
@@ -317,7 +317,15 @@ namespace Yubico.YubiKey.Piv
             catch (Exception e)
 #pragma warning restore CA1031
             {
-                _log.LogWarning(e, ExceptionMessages.PivSessionDisposeUnknownError);
+                string message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.PivSessionDisposeUnknownError, e.GetType(), e.Message);
+                
+                // Example:
+                // Exception caught when disposing PivSession: Yubico.PlatformInterop.SCardException,
+                // Unable to begin a transaction with the given smart card. SCARD_E_SERVICE_STOPPED: The smart card resource manager has shut down.
+
+                _log.LogWarning(message);
             }
 
             KeyCollector = null;

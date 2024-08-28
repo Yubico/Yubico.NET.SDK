@@ -905,6 +905,6 @@
     <value>The URI query cannot be null or empty.</value>
   </data>
   <data name="PivSessionDisposeUnknownError" xml:space="preserve">
-    <value>Unknown error when disposing PivSession</value>
+    <value>Exception caught when disposing PivSession: {0}, {1}</value>
   </data>
 </root>

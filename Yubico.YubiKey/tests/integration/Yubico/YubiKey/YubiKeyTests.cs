@@ -221,5 +221,29 @@ namespace Yubico.YubiKey
                 _testOutputHelper.WriteLine($"\t({keys.Count}) -{sw.ElapsedMilliseconds,5}ms");
             }
         }
+
+        [Fact]
+        public void TestResettingDeviceListener()
+        {
+            // Get devices (if any) and ensure the listeners are running.
+            List<IYubiKeyDevice> beforeDevices = YubiKeyDevice.FindAll().ToList();
+            _testOutputHelper.WriteLine($"Found {beforeDevices.Count} YubiKey devices before reset");
+
+            // Test that the listeners are running.
+            Assert.True(YubiKeyDeviceListener.IsListenerRunning, $"{nameof(YubiKeyDeviceListener.Instance)} is not active");
+
+            // Stop the listeners.
+            YubiKeyDeviceListener.StopListening();
+
+            // Test that we really stopped it.
+            Assert.False(YubiKeyDeviceListener.IsListenerRunning, $"{nameof(YubiKeyDeviceListener.Instance)} is still active");
+
+            // Make sure we can still enumerate devices.
+            List<IYubiKeyDevice> afterDevices = YubiKeyDevice.FindAll().ToList();
+            _testOutputHelper.WriteLine($"Found {afterDevices.Count} YubiKey devices after reset");
+
+            // Check that we have the same devices as the first check.
+            Assert.True(afterDevices.SequenceEqual(beforeDevices), "Before and after aren't the same.");
+        }
     }
 }

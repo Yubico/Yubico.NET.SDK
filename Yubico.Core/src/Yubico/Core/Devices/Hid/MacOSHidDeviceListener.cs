@@ -139,6 +139,6 @@ namespace Yubico.Core.Devices.Hid
             OnArrived(new MacOSHidDevice(MacOSHidDevice.GetEntryId(device)));
 
         private void RemovedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) =>
-            OnRemoved(null);
+            OnRemoved(NullDevice.Instance);
     }
 }

@@ -128,7 +128,7 @@ namespace Yubico.Core.Devices.Hid
             }
             else if (action == CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL)
             {
-                thisObj?.OnRemoved(null);
+                thisObj?.OnRemoved(NullDevice.Instance);
             }
 
             return 0;

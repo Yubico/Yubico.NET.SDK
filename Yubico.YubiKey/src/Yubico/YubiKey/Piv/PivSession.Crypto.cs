@@ -68,26 +68,15 @@ namespace Yubico.YubiKey.Piv
         /// </code>
         /// </para>
         /// <para>
-        /// If the key is RSA 1024, then the input must be exactly 128 bytes,
+        /// If the key is RSA 1024/2048/3072/4096, then the input must be exactly 128/256/384/512 bytes,
         /// otherwise the method will throw an exception. You can use the
         /// <see cref="Cryptography.RsaFormat"/> class to format the data. That
         /// class will be able to format the digest into either PKCS #1 v1.5 or a
         /// subset of PKCS #1 PSS. However, if that class does not support the
         /// exact format you want, you will have to write your own formatting
-        /// code and guarantee the input to this method is exactly 128 bytes
-        /// (prepend pad bytes of 00 until the length is exactly 128 if needed).
-        /// The signature will be a 128-byte block.
-        /// </para>
-        /// <para>
-        /// If the key is RSA 2048, then the input must be exactly 256 bytes,
-        /// otherwise the method will throw an exception. You can use the
-        /// <see cref="Cryptography.RsaFormat"/> class to format the data. That
-        /// class will be able to format the digest into either PKCS #1 v1.5 or a
-        /// subset of PKCS #1 PSS. However, if that class does not support the
-        /// exact format you want, you will have to write your own formatting
-        /// code and guarantee the input to this method is exactly 256 bytes
-        /// (prepend pad bytes of 00 until the length is exactly 256 if needed).
-        /// The signature will be a 256-byte block.
+        /// code and guarantee the input to this method is exactly 128/256/384/512 bytes
+        /// (prepend pad bytes of 00 until the length is exactly 128/256/384/512 if needed).
+        /// The signature will be a 128/256/384/512-byte block.
         /// </para>
         /// <para>
         /// Signing might require the PIN and/or touch, depending on the PIN and
@@ -187,7 +176,9 @@ namespace Yubico.YubiKey.Piv
         /// </para>
         /// <para>
         /// If the key is RSA 1024, then the input must be exactly 128 bytes. If
-        /// the key is RSA 2048, then the input must be exactly 256 bytes. If the
+        /// the key is RSA 2048, then the input must be exactly 256 bytes. If
+        /// the key is RSA 3072, then the input must be exactly 384 bytes. If
+        /// the key is RSA 4096, then the input must be exactly 512 bytes. If the
         /// input data is not the correct length, the method will throw an
         /// exception.
         /// </para>

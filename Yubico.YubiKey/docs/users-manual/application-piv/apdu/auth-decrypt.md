@@ -20,7 +20,7 @@ limitations under the License. -->
 |:---:|:---:|:-----------:|:-------------:|:----------:|:-------------------------:|:--------:| 
 | 00  | 87  | *algorithm* | *slot number* | *data len* | *encoded data to decrypt* | (absent) |
 
-The *algorithm* is either `06` (RSA-1048) or `07` (RSA-2048). Note that it is not possible
+The *algorithm* is either `06` (RSA-1048), `07` (RSA-2048), `05` (RSA 3072), or `16` (RSA 4096). Note that it is not possible
 to decrypt using ECC.
 
 The *slot number* can be the number of any slot that holds a private key, other than `F9`.

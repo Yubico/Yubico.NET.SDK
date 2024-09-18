@@ -57,8 +57,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// </para>
     /// <para>
     /// The caller supplies the data to decrypt. It must be a block the same size
-    /// as the key. For an RSA-1024 key, the block must be 128 bytes, for an
-    /// RSA-2048 key, the block must be 256 bytes. If the actual data to decrypt
+    /// as the key. For an RSA-1024/RSA-2048/RSA-3072/RSA-4096 key, the block must be 128/256/384/512 bytes. If the actual data to decrypt
     /// is shorter, it must be provided with as many prepended 00 bytes as needed
     /// to make sure the block is the appropriate length.
     /// </para>
@@ -107,7 +106,9 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <para>
         /// If the key that will be used to decrypt is RSA-1024, then the data to
         /// decrypt must be 128 (1024 bits) bytes long. If the key is RSA-2048,
-        /// then the data must be 256 bytes (2048 bits) long. See also the User's
+        /// then the data must be 256 bytes (2048 bits) long. If the key is RSA-3072,
+        /// then the data must be 384 bytes (3072 bits) long. If the key is RSA-4096,
+        /// then the data must be 512 bytes (4096 bits) long. See also the User's
         /// Manual entry on
         /// <xref href="UsersManualPivCommands#authenticate-decrypt"> decrypting </xref>
         /// in the PIV commands page.

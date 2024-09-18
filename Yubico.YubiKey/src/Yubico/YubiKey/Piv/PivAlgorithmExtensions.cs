@@ -121,11 +121,11 @@ namespace Yubico.YubiKey.Piv
         /// Determines if the given algorithm is RSA.
         /// </summary>
         /// <remarks>
-        /// The PivAlgorithm enum contains <c>Rsa1024</c> and <c>Rsa2048</c>. But
+        /// The PivAlgorithm enum contains <c>Rsa1024</c>, <c>Rsa2048</c>, <c>Rsa3072</c>, and <c>Rsa4096</c>. But
         /// sometimes you just want to know if an algorithm is RSA or not. It
         /// would seem you would have to write code such as the following.
         /// <code language="csharp">
-        ///     if ((algorithm == PivAlgorith.Rsa1024) || (algorithm == PivAlgorithm.Rsa2048))
+        ///     if ((algorithm == PivAlgorith.Rsa1024) || (algorithm == PivAlgorithm.Rsa2048) || (algorithm == PivAlgorithm.Rsa3072) || (algorithm == PivAlgorithm.Rsa4096))
         /// </code>
         /// <para>
         /// With this extension, you can simply write.

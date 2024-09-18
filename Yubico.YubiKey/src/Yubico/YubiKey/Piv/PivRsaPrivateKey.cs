@@ -36,10 +36,12 @@ namespace Yubico.YubiKey.Piv
     ///   03 length prime p Exponent dP || 04 length prime q Exponent dQ ||
     /// </code>
     /// <para>
-    /// The YubiKey supports only 1024-bit and 2048-bit RSA keys. Each element in
+    /// The YubiKey supports 1024-bit, 2048-bit, 3072-bit, and 4096-bit RSA keys. Each element in
     /// the private key will be half that size. So for a 1024-bit RSA key pair,
-    /// the CRT components are each 512 bits (64 bytes) long, and for a 2048-bit
-    /// RSA key pair, the CRT components are each 1024 bits (128 bytes) long.
+    /// the CRT components are each 512 bits (64 bytes) long, for a 2048-bit
+    /// RSA key pair, the CRT components are each 1024 bits (128 bytes) long, for a 3072-bit
+    /// RSA key pair, the CRT components are each 1536 bits (192 bytes) long, and for a 4096-bit
+    /// RSA key pair, the CRT components are each 2048 bits (256 bytes) long.
     /// </para>
     /// <para>
     /// You can build an object from either the encoded private key, and then

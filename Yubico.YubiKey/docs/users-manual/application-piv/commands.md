@@ -147,7 +147,7 @@ PIV slots.
 #### Table 1: List of Metadata Elements
 |   Name    |                  Meaning                   |                                    Data                                                                     | Slots                           |
 | :-------: | :----------------------------------------: | :---------------------------------------------------------------------------------------------------------: | :-----------------------------: |
-| Algorithm |            Algorithm of the key            |       PIN, PUK, Triple DES, AES-128, AES-192, AES-256, <br/>RSA-1024, RSA-2048, ECC-P256, or ECC-P384       | all slots                       |
+| Algorithm |            Algorithm of the key            |       PIN, PUK, Triple DES, AES-128, AES-192, AES-256, <br/>RSA-1024, RSA-2048, RSA 3072, RSA 4096, ECC-P256, or ECC-P384       | all slots                       |
 |  Policy   |            PIN and touch policy            | PIN: Default, Never, Once, Always<br/>Touch: Default, Never, Always, Cached                                 | 9A, 9B, 9C, 9D, 9E, F9, 82 - 95 |
 |  Origin   |           Imported or generated            |                             imported/generated                                                              | 9A, 9C, 9D, 9E, F9, 82 - 95     |
 |  Public   |       Pub key partner to the pri key       |                         DER encoding of public key                                                          | 9A, 9C, 9D, 9E, F9, 82 - 95     |
@@ -775,7 +775,7 @@ All YubiKeys with the PIV application.
 
 The management key, slot number, algorithm, key size, PIN policy, and touch policy.
 
-The YubiKey supports RSA 1024 and 2048, along with ECC P-256 and P-384.
+The YubiKey supports RSA 1024, 2048, 3072, and 4096 along with ECC P-256 and P-384.
 
 ### Output
 

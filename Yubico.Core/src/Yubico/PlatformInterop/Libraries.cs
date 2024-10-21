@@ -12,12 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if NET47
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
+#endif
+
 namespace Yubico.PlatformInterop
 {
     internal static partial class Libraries
     {
 #if NET47
-        internal const string NativeShims = "Yubico.NativeShims.dll";
+        internal const string NativeShims = "Yubico.NativeS hims.dll";
+        private static bool _isNativeShimsIsLoaded;
+
+        /// <summary>
+        /// This method needs to run for .NET47 to determine to use either AppDirectory/x86/Yubico.NativeShims.dll or AppDirectory/x64/Yubico.NativeShims.dll 
+        /// </summary>
+        /// <exception cref="DllNotFoundException"></exception>
+        internal static void EnsureNativeShimsLoaded()
+        {
+            if (_isNativeShimsIsLoaded)
+            {
+                return;
+            }
+            
+            IntPtr moduleHandle = LoadLibrary(NativeShimsPath);
+            if (moduleHandle == IntPtr.Zero)
+            {
+                throw new DllNotFoundException($"Failed to load native library: {NativeShimsPath}. Error: {Marshal.GetLastWin32Error()}");
+            }
+
+            _isNativeShimsIsLoaded = true;
+        }
+        
+        private static string NativeShimsPath => Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            Environment.Is64BitProcess ? "x64" : "x86",
+            NativeShims);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        private static extern IntPtr LoadLibrary(string lpFileName);
 #else
         internal const string NativeShims = "Yubico.NativeShims";
 #endif

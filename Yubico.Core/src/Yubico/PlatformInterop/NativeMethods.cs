@@ -24,12 +24,10 @@ namespace Yubico.PlatformInterop
         private const string MacDlLib = "libdl.dylib";
         private const string LinuxDlLib = "libdl.so";
 
-        #if NET47
         static NativeMethods()
         {
-            Libraries.EnsureNativeShimsLoaded();
+            Libraries.EnsureInitialized();
         }
-        #endif
 
         // Note that the DefaultDllImportSearchPaths attribute is a security best
         // practice on the Windows platform (and required by our analyzer

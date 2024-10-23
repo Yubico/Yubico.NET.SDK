@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+// As long as we have the Libraries.Net47.cs class which holds the opposite preprocessor directive check,
+// this check is required - as having both at the same time is not possible.
+#if !NET47 
 
 namespace Yubico.PlatformInterop
 {
@@ -35,34 +37,6 @@ namespace Yubico.PlatformInterop
     /// </remarks>
     internal static partial class Libraries
     {
-#if NET47
-        /// <summary>
-        /// The filename of the native shims library for .NET Framework 4.7.
-        /// </summary>
-        /// <remarks>
-        /// For .NET Framework 4.7, the DLL must be placed in an architecture-specific subdirectory:
-        /// - x86/Yubico.NativeShims.dll for 32-bit processes
-        /// - x64/Yubico.NativeShims.dll for 64-bit processes
-        /// The correct version is loaded at runtime based on the process architecture.
-        /// </remarks>
-        internal const string NativeShims = "Yubico.NativeShims.dll";
-
-        /// <summary>
-        /// Ensures the native library is properly loaded for .NET Framework 4.7.
-        /// </summary>
-        /// <exception cref="DllNotFoundException">
-        /// Thrown when the native library cannot be loaded. This could be due to:
-        /// - Missing DLL file in the architecture-specific directory (x86/x64)
-        /// - Incorrect architecture (x86/x64 mismatch)
-        /// - Missing dependencies
-        /// - Insufficient permissions
-        /// </exception>
-        /// <remarks>
-        /// This method must be called before any P/Invoke calls are made.
-        /// The implementation details are handled in Libraries.Net47.cs.
-        /// </remarks>
-        public static void EnsureInitialized() => Net47Implementation.Initialize();
-#else
         /// <summary>
         /// The filename of the native shims library for modern .NET versions.
         /// </summary>
@@ -81,6 +55,6 @@ namespace Yubico.PlatformInterop
         /// This method exists only for API compatibility with .NET Framework 4.7 code.
         /// </remarks>
         public static void EnsureInitialized() { }
-#endif
     }
 }
+#endif

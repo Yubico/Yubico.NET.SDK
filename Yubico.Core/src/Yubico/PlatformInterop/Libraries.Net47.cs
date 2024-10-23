@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #if NET47
+
 using System;
 using System.IO;
 
@@ -23,6 +24,33 @@ namespace Yubico.PlatformInterop
     /// </summary>
     internal static partial class Libraries
     {
+        /// <summary>
+        /// The filename of the native shims library for .NET Framework 4.7.
+        /// </summary>
+        /// <remarks>
+        /// For .NET Framework 4.7, the DLL must be placed in an architecture-specific subdirectory:
+        /// - x86/Yubico.NativeShims.dll for 32-bit processes
+        /// - x64/Yubico.NativeShims.dll for 64-bit processes
+        /// The correct version is loaded at runtime based on the process architecture.
+        /// </remarks>
+        internal const string NativeShims = "Yubico.NativeShims.dll";
+
+        /// <summary>
+        /// Ensures the native library is properly loaded for .NET Framework 4.7.
+        /// </summary>
+        /// <exception cref="DllNotFoundException">
+        /// Thrown when the native library cannot be loaded. This could be due to:
+        /// - Missing DLL file in the architecture-specific directory (x86/x64)
+        /// - Incorrect architecture (x86/x64 mismatch)
+        /// - Missing dependencies
+        /// - Insufficient permissions
+        /// </exception>
+        /// <remarks>
+        /// This method must be called before any P/Invoke calls are made.
+        /// The implementation details are handled in Libraries.Net47.cs.
+        /// </remarks>
+        public static void EnsureInitialized() => Net47Implementation.Initialize();
+        
         /// <summary>
         /// Encapsulates the .NET Framework 4.7 specific implementation details for native library management.
         /// This nested class handles the dynamic loading of architecture-specific (x86/x64) native libraries.
@@ -48,7 +76,7 @@ namespace Yubico.PlatformInterop
                         ? "x64"
                         : "x86",
                     NativeShims);
-
+            
             /// <summary>
             /// Initializes the native library for the current architecture.
             /// </summary>

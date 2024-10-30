@@ -104,7 +104,7 @@ namespace Yubico.Core.Devices.SmartCard
             uint result = SCardBeginTransaction(_cardHandle);
             _log.SCardApiCall(nameof(SCardBeginTransaction), result);
 
-            // Sometime the smart card is left in a state where it needs to be reset prior to beginning
+            // Sometimes the smart card is left in a state where it needs to be reset prior to beginning
             // a transaction. We should automatically handle this case.
             if (result == ErrorCode.SCARD_W_RESET_CARD)
             {

@@ -33,6 +33,7 @@ namespace Yubico.YubiKey.Pipelines
     internal class ScpApduTransform : IApduTransform, IDisposable
     {
         public ScpKeyParameters KeyParameters { get; }
+        public DataEncryptor? DataEncryptor;
 
         private ScpState ScpState =>
             _scpState ?? throw new InvalidOperationException($"{nameof(Scp.ScpState)} has not been initialized. The Setup method must be called.");
@@ -61,18 +62,21 @@ namespace Yubico.YubiKey.Pipelines
 
             if (KeyParameters.GetType() == typeof(Scp03KeyParameters))
             {
-                InitializeScp03((Scp03KeyParameters)KeyParameters);
+                DataEncryptor = InitializeScp03((Scp03KeyParameters)KeyParameters);
             }
             else if (KeyParameters.GetType() == typeof(Scp11KeyParameters))
             {
-                InitializeScp11((Scp11KeyParameters)KeyParameters);
+                DataEncryptor = InitializeScp11((Scp11KeyParameters)KeyParameters);
             }
         }
 
-        private void InitializeScp11(Scp11KeyParameters keyParameters) 
-            => _scpState = Scp11State.CreateScpState(_pipeline, keyParameters);
+        private DataEncryptor InitializeScp11(Scp11KeyParameters keyParameters)
+        {
+            _scpState = Scp11State.CreateScpState(_pipeline, keyParameters);
+            return _scpState.GetDataEncryptor();
+        }
 
-        private void InitializeScp03(Scp03KeyParameters keyParams)
+        private DataEncryptor InitializeScp03(Scp03KeyParameters keyParams)
         {
             // Generate host challenge
             using var rng = CryptographyProviders.RngCreator();
@@ -80,7 +84,10 @@ namespace Yubico.YubiKey.Pipelines
             rng.GetBytes(hostChallenge);
 
             _scpState = Scp03State.CreateScpState(_pipeline, keyParams, hostChallenge);
+
+            return _scpState.GetDataEncryptor();
         }
+        
 
         public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
         {

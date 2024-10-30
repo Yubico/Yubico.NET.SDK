@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [Obsolete("Use new SessionKeys class instead.")]
     internal class SessionKeys : IDisposable
     {
         private readonly byte[] _sessionMacKey;

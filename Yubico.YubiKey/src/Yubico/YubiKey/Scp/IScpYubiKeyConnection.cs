@@ -24,5 +24,10 @@ namespace Yubico.YubiKey.Scp
         /// Return a reference to the SCP key set used to make the connection.
         /// </summary>
         public ScpKeyParameters KeyParameters { get; }
+
+        internal DataEncryptor? DataEncryptor
+        {
+            get;
+        }
     }
 }

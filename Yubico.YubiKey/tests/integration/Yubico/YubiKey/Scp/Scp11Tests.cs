@@ -52,6 +52,7 @@ namespace Yubico.YubiKey.Scp
             var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!.ExportParameters(false);
             var keyParams = new Scp11KeyParameters(keyReference, ecDsaPublicKey);
             
+            // Try create authenticated session using key params and public key from yubikey
             using (var session = new SecurityDomainSession(Device, keyParams))
             {
                 session.GetKeyInformation();
@@ -59,18 +60,15 @@ namespace Yubico.YubiKey.Scp
         }
 
         [Fact]
-        public void Scp11b_Import_Succeeds() //todo
+        public void Scp11b_Import_Succeeds() //Works
         {
-
-            using (var session = new SecurityDomainSession(Device))
-            {
-                var ecDsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-                var keyReference = new KeyReference(ScpKid.Scp11b, 0x2);
-                // session.PutKeySet(keyReference);
-                session.GetKeyInformation();
-            }
+            var keyReference = new KeyReference(ScpKid.Scp11b, 0x2);
+            var ecDsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            using var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey);
+            
+            session.PutKeySet(keyReference, ecDsa.ExportParameters(true), 0);
+            session.GetKeyInformation();
         }
-
 
         [Fact]
         public void TestGetCertificateBundle() //Works

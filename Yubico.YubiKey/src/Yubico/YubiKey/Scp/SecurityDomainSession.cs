@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -24,6 +25,7 @@ using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Scp.Commands;
+using Yubico.YubiKey.Scp03;
 using Yubico.YubiKit.Core.Util;
 
 namespace Yubico.YubiKey.Scp
@@ -86,6 +88,10 @@ namespace Yubico.YubiKey.Scp
     /// </remarks>
     public sealed class SecurityDomainSession : IDisposable
     {
+        private const byte KeyTypeEccPrivateKeyTag = 0xB1;
+        private const byte KeyTypeEccKeyParamsTag = 0xF0;
+        private const byte KeyTypeEccPublicKeyTag = 0xB0;
+        
         private readonly IYubiKeyDevice _yubiKey;
         private readonly ILogger _log = Log.GetLogger<SecurityDomainSession>();
         private bool _disposed;
@@ -270,21 +276,20 @@ namespace Yubico.YubiKey.Scp
         /// The new key set's checksum failed to verify, or some other error
         /// described in the exception message.
         /// </exception>
-        public void PutKeySet(ScpKeyParameters keyParameters)
+        public void PutKeySet(Scp03KeyParameters keyParameters) // Works for SCP3 but needs to be remade.
         {
             if (Connection is null)
             {
                 throw new InvalidOperationException("No connection initialized. Use the other constructor");
             }
-
+        
             _log.LogInformation("Put a new SCP key set onto a YubiKey.");
-
+        
             if (keyParameters is null)
             {
                 throw new ArgumentNullException(nameof(keyParameters));
             }
-
-            //TODO PutKeyCommand for each, or make a generic one that handles all cases of Scp?
+        
             var command = new PutKeyCommand(Connection.KeyParameters, keyParameters);
             var response = Connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
@@ -295,11 +300,90 @@ namespace Yubico.YubiKey.Scp
                         ExceptionMessages.YubiKeyOperationFailed,
                         response.StatusMessage));
             }
-
+        
             var checksum = response.GetData();
             if (!CryptographicOperations.FixedTimeEquals(checksum.Span, command.ExpectedChecksum.Span))
             {
                 throw new SecureChannelException(ExceptionMessages.ChecksumError);
+            }
+        }
+        
+        
+        /// <summary>
+        /// Puts an ECC private key onto the YubiKey using the Security Domain.
+        /// </summary>
+        /// <param name="keyRef">The key reference identifying where to store the key.</param>
+        /// <param name="secretKey">The ECC private key parameters to store.</param>
+        /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
+        /// <exception cref="ArgumentException">Thrown when the private key is not of type SECP256R1.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
+        public void PutKeySet(KeyReference keyRef, ECParameters secretKey, int replaceKvn)
+        {
+            _log.LogInformation("Importing SCP11 private key into KeyRef {KeyRef}", keyRef);
+
+            var connection = Connection ?? throw new InvalidOperationException(
+                "No secure session established. Connection required for key import.");
+
+            var encryptor = connection.DataEncryptor ?? throw new InvalidOperationException(
+                "No secure session established. DataEncryptor required for key import.");
+
+            if (secretKey.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
+            {
+                throw new ArgumentException("Private key must be of type SECP256R1");
+            }
+            
+            try
+            {
+                // Prepare the command data
+                using var dataStream = new MemoryStream();
+                using var dataWriter = new BinaryWriter(dataStream);
+
+                // Write the key version number
+                dataWriter.Write(keyRef.VersionNumber);
+
+                // Convert the private key to bytes and encrypt it
+                var privateKeyBytes = secretKey.D.AsMemory();
+                try
+                {
+                    // Must be encrypted with the active sessions data encryption key
+                    var encryptedKey = encryptor(privateKeyBytes);
+                    var privateKeyTlv = new TlvObject(KeyTypeEccPrivateKeyTag, encryptedKey.Span).GetBytes();
+                    dataWriter.Write(privateKeyTlv.ToArray());
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(privateKeyBytes.Span);
+                }
+
+                // Write the ECC parameters (currently just 0x00 as per Java implementation)
+                var paramsTlv = new TlvObject(KeyTypeEccKeyParamsTag, new byte[] { 0x00 }).GetBytes();
+                dataWriter.Write(paramsTlv.ToArray());
+                dataWriter.Write((byte)0);
+
+                // Create and send the command
+                var command = new PutKeyCommand2((byte)replaceKvn, keyRef.Id, dataStream.ToArray());
+                var response = connection.SendCommand(command);
+                if (response.Status != ResponseStatus.Success)
+                {
+                    throw new SecureChannelException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.YubiKeyOperationFailed,
+                            response.StatusMessage));
+                }
+
+                // Get the response
+                var responseData = response.GetData();
+                Span<byte> expectedResponseData = new[] { keyRef.VersionNumber };
+                if (!CryptographicOperations.FixedTimeEquals(responseData.Span, expectedResponseData))
+                {
+                    throw new SecureChannelException("Incorrect key check value");
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Failed to put key set for KeyRef {KeyRef}", keyRef);
+                throw;
             }
         }
 
@@ -368,12 +452,13 @@ namespace Yubico.YubiKey.Scp
                     ? string.Empty
                     : $", replacing KVN=0x{replaceKvn:X2}");
 
-            const byte keyTypeEccKeyParamsTag = 0xF0;
-            var paramsTlv = new TlvObject(keyTypeEccKeyParamsTag, new byte[] { 0 }).GetBytes();
+            // Create tlv data for the command
+            var paramsTlv = new TlvObject(KeyTypeEccKeyParamsTag, new byte[] { 0 }).GetBytes();
             byte[] commandData = new byte[paramsTlv.Length + 1];
             commandData[0] = keyRef.VersionNumber;
             paramsTlv.CopyTo(commandData.AsMemory(1));
 
+            // Create and send the command
             var command = new GenerateEcKeyCommand(replaceKvn, keyRef.Id, commandData);
             var response = connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
@@ -381,10 +466,11 @@ namespace Yubico.YubiKey.Scp
                 throw new SecureChannelException(response.StatusMessage);
             }
 
-            const byte keyTypeEccPublicKeyTag = 0xB0;
+            // Parse the response, extract the public point
             var tlvReader = new TlvReader(response.GetData());
-            var encodedPoint = tlvReader.ReadValue(keyTypeEccPublicKeyTag).Span;
+            var encodedPoint = tlvReader.ReadValue(KeyTypeEccPublicKeyTag).Span;
 
+            // Create the ECParameters object with the public point
             return new ECParameters
             {
                 Curve = ECCurve.NamedCurves.nistP256,
@@ -524,7 +610,7 @@ namespace Yubico.YubiKey.Scp
         /// <returns>The data retrieved from the YubiKey.</returns>
         public ReadOnlyMemory<byte> GetData(int tag, ReadOnlyMemory<byte>? data = null)
         {
-            var connection = Connection ?? _yubiKey.Connect(YubiKeyApplication.SecurityDomain);
+            var connection = Connection ?? _yubiKey.Connect(YubiKeyApplication.SecurityDomain); // todo this could be default behaviour
             var response = connection.SendCommand(new GetDataCommand(tag, data));
 
             return response.GetData();

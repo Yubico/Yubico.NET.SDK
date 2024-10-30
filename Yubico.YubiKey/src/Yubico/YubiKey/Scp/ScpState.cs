@@ -1,5 +1,6 @@
 ﻿using System;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Scp
 {
@@ -60,7 +61,7 @@ namespace Yubico.YubiKey.Scp
 
             // Update the sessions MacChainingValue
             MacChainingValue = newMacChainingValue;
-            
+
             return macdApdu;
         }
 
@@ -100,7 +101,6 @@ namespace Yubico.YubiKey.Scp
             {
                 int previousEncryptionCounter = _encryptionCounter - 1;
                 decryptedData = ChannelEncryption.DecryptData(
-
                     responseData[..^8].ToArray(),
                     SessionKeys.EncKey.ToArray(), //todo array
                     previousEncryptionCounter
@@ -112,6 +112,19 @@ namespace Yubico.YubiKey.Scp
             fullDecryptedResponse[decryptedData.Length] = response.SW1;
             fullDecryptedResponse[decryptedData.Length + 1] = response.SW2;
             return new ResponseApdu(fullDecryptedResponse);
+        }
+
+        public DataEncryptor GetDataEncryptor()
+        {
+            if (!SessionKeys.DataEncryptionKey.HasValue)
+            {
+                throw new InvalidOperationException(ExceptionMessages.UnknownScpError); //todo set correct message
+            }
+
+            return data => AesUtilities.AesCbcEncrypt(
+                SessionKeys.DataEncryptionKey.Value.ToArray(),
+                new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                data.Span);
         }
 
         #pragma warning disable CA1822 // Is being used by subclasses
@@ -147,4 +160,6 @@ namespace Yubico.YubiKey.Scp
             }
         }
     }
+
+    internal delegate ReadOnlyMemory<byte> DataEncryptor(ReadOnlyMemory<byte> data);
 }

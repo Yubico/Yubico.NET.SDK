@@ -91,8 +91,11 @@ namespace Yubico.YubiKey.Scp
         {
             Span<byte> macKey = stackalloc byte[staticKeys.ChannelMacKey.Length];
             Span<byte> encKey = stackalloc byte[staticKeys.ChannelEncryptionKey.Length];
+            Span<byte> dekKey = stackalloc byte[staticKeys.DataEncryptionKey.Length];
+
             staticKeys.ChannelMacKey.Span.CopyTo(macKey);
             staticKeys.ChannelEncryptionKey.Span.CopyTo(encKey);
+            staticKeys.DataEncryptionKey.Span.CopyTo(dekKey);
 
             try
             {
@@ -110,12 +113,13 @@ namespace Yubico.YubiKey.Scp
                 var SENC = Derive(DDC_SENC, 128, encKey, hostChallenge, cardChallenge);
                 var SRMAC = Derive(DDC_SRMAC, 128, macKey, hostChallenge, cardChallenge);
 
-                return new SessionKeys(SMAC, SENC, SRMAC);
+                return new SessionKeys(SMAC, SENC, SRMAC, dekKey.ToArray());
             }
             finally
             {
                 CryptographicOperations.ZeroMemory(macKey);
                 CryptographicOperations.ZeroMemory(encKey);
+                CryptographicOperations.ZeroMemory(dekKey);
             }
         }
     }

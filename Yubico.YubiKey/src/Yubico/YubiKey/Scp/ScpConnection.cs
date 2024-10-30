@@ -61,7 +61,9 @@ namespace Yubico.YubiKey.Scp
         
         public ScpKeyParameters KeyParameters => _scpApduTransform.KeyParameters;
 
-        // private ScpApduTransform SetObject(
+        DataEncryptor? IScpYubiKeyConnection.DataEncryptor => _scpApduTransform.DataEncryptor;
+
+        // private ScpApduTransform SetObject( TODO Is this needed? I dont why
         //     YubiKeyApplication application,
         //     ScpKeyParameters keyParameters)
         // {

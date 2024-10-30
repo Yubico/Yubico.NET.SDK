@@ -31,16 +31,16 @@ namespace Yubico.YubiKey.Scp
         /// Gets the session RMAC key.
         /// </summary>
         public ReadOnlyMemory<byte> RmacKey => _rmacKey;
+        
         /// <summary>
         /// Gets the session data encryption key.
-        /// <remarks>This is only set for SCP-11</remarks>
         /// </summary>
         public ReadOnlyMemory<byte>? DataEncryptionKey => _dataEncryptionKey;
 
         private readonly Memory<byte> _macKey;
         private readonly Memory<byte> _encryptionKey;
         private readonly Memory<byte> _rmacKey;
-        private readonly Memory<byte>? _dataEncryptionKey;
+        private readonly Memory<byte> _dataEncryptionKey;
         private bool _disposed;
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.Scp
             Memory<byte> macKey, 
             Memory<byte> encryptionKey, 
             Memory<byte> rmacKey,
-            Memory<byte>? dataEncryptionKey = null)
+            Memory<byte> dataEncryptionKey)
         {
             _macKey = macKey;
             _encryptionKey = encryptionKey;
@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Scp
             CryptographicOperations.ZeroMemory(_macKey.Span);
             CryptographicOperations.ZeroMemory(_encryptionKey.Span);
             CryptographicOperations.ZeroMemory(_rmacKey.Span);
-            CryptographicOperations.ZeroMemory(_dataEncryptionKey.GetValueOrDefault().Span);
+            CryptographicOperations.ZeroMemory(_dataEncryptionKey.Span);
 
             _disposed = true;
         }

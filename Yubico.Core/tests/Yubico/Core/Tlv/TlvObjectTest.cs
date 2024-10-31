@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using Yubico.YubiKit.Core.Util;
 
 namespace Yubico.Core.Tlv.UnitTests
 {

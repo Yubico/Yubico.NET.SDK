@@ -18,6 +18,7 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp03.Commands
 {
+    [Obsolete("This class is obsolete and will be removed in a future release.")]
     public class Scp03ResponseTests
     {
         [Fact]

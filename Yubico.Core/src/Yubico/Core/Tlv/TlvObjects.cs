@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Yubico.Core.Tlv;
 
-namespace Yubico.YubiKit.Core.Util
+namespace Yubico.Core.Tlv
 {
     /// <summary>
     /// Utility methods to encode and decode BER-TLV data.
@@ -45,6 +44,11 @@ namespace Yubico.YubiKit.Core.Util
             return tlvs;
         }
         
+        /// <summary>
+        /// Encodes a list of Tlvs into a sequence of BER-TLV encoded data.
+        /// </summary>
+        /// <param name="list">List of Tlvs to encode</param>
+        /// <returns>BER-TLV encoded list</returns>
         public static byte[] EncodeList(IEnumerable<TlvObject> list)
         {
             if (list is null)
@@ -53,23 +57,25 @@ namespace Yubico.YubiKit.Core.Util
             }
             
             using var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream);
             foreach (TlvObject? tlv in list)
             {
                 ReadOnlyMemory<byte> bytes = tlv.GetBytes();
-#if NETSTANDARD2_1_OR_GREATER
-                stream.Write(bytes.Span);
-#else
-                stream.Write(bytes.Span.ToArray(), 0, bytes.Length);
-#endif
+                writer.Write(bytes.Span.ToArray());
             }
             return stream.ToArray();
         }
 
+        /// <summary>
+        /// Encodes an array of Tlvs into a sequence of BER-TLV encoded data.
+        /// </summary>
+        /// <param name="tlvs">Array of Tlvs to encode</param>
+        /// <returns>BER-TLV encoded array</returns>
         public static byte[] EncodeMany(params TlvObject[] tlvs) => EncodeList(tlvs);
 
 
         //Todo keep?
-        public static byte[] EncodeMap(IReadOnlyDictionary<int, ReadOnlyMemory<byte>> map)
+        public static Memory<byte> EncodeMap(IReadOnlyDictionary<int, ReadOnlyMemory<byte>> map)
         {
             if (map is null)
             {
@@ -93,14 +99,14 @@ namespace Yubico.YubiKit.Core.Util
         /// <param name="tlvData">The TLV data</param>
         /// <returns>The value of the TLV</returns>
         /// <exception cref="InvalidOperationException">If the TLV tag differs from expectedTag</exception>
-        public static ReadOnlyMemory<byte> UnpackValue(int expectedTag, ReadOnlySpan<byte> tlvData)
+        public static Memory<byte> UnpackValue(int expectedTag, ReadOnlySpan<byte> tlvData)
         {
             var tlv = TlvObject.Parse(tlvData);
             if (tlv.Tag != expectedTag)
             {
                 throw new InvalidOperationException($"Expected tag: {expectedTag:X2}, got {tlv.Tag:X2}");
             }
-            return tlv.Value;
+            return tlv.Value.ToArray();
         }
     }
 }

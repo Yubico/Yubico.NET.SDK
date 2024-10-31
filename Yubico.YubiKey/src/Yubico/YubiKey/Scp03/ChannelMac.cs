@@ -22,6 +22,7 @@ using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [Obsolete("Use new ChannelMac instead")]
     internal static class ChannelMac
     {
         public static (CommandApdu macdApdu, byte[] newMacChainingValue) MacApdu(CommandApdu apdu, byte[] macKey, byte[] macChainingValue)

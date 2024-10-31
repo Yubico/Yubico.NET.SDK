@@ -13,11 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.IO;
-using System.Security.Cryptography;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.Scp.Commands
 {
@@ -108,148 +104,32 @@ namespace Yubico.YubiKey.Scp.Commands
     /// </remarks>
     internal class PutKeyCommand : IYubiKeyCommand<PutKeyResponse>
     {
-        private const byte GpPutKeyCla = 0x84;
+        private const byte GpPutKeyCla = 0x80;
         private const byte GpPutKeyIns = 0xD8;
-        private const byte KeyIdentifier = 0x81;
-
-        private const int DataLength = 70;
-
-        private const byte KeyType = 0x88; //AES 
-        private const byte BlockSize = 17;
-        private const byte AesBlockSize = 16;
-        private const byte KeyCheckSize = 3;
-
-        private const int ChecksumLength = (3 * KeyCheckSize) + 1;
-        private const int ChecksumOffsetEnc = 1;
-        private const int ChecksumOffsetMac = ChecksumOffsetEnc + KeyCheckSize;
-        private const int ChecksumOffsetDek = ChecksumOffsetMac + KeyCheckSize;
 
         private readonly byte[] _data;
-        private readonly byte[] _checksum;
-        private readonly byte _p1Value;
+        private readonly byte _p1;
+        private readonly byte _p2;
 
         public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
-
-        /// <summary>
-        /// This is the expected result returned by the YubiKey after completing
-        /// the command. If you want, compare the <c>PutKeyResponse.GetData</c>
-        /// with this value to verify the command did indeed do what you expected.
-        /// </summary>
-        public ReadOnlyMemory<byte> ExpectedChecksum => _checksum;
-
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        private PutKeyCommand()
+        
+        public PutKeyCommand(byte p1, byte p2, ReadOnlyMemory<byte> data)
         {
-            throw new NotImplementedException();
+            _p1 = p1;
+            _p2 = p2;
+            _data = data.ToArray();
         }
 
-        /// <summary>
-        /// Create a new instance of the command. When this command is executed,
-        /// the <c>newKeys</c> will be installed as the keys in slot specified by
-        /// <c>newKeys.KeyVersionNumber</c>. The <c>currentKeys</c> contains the
-        /// keys used to make the connection. This class needs its
-        /// <c>KeyVersionNumber</c> and its DEK.
-        /// </summary>
-        public PutKeyCommand(ScpKeyParameters currentKeys, ScpKeyParameters newKeys) //TODO Is this OK? Behaviour of KVN not clear
-        {
-            // If the currentKeys' KVN is not the same as the newKeys' KVN, then
-            // this command is adding a key set and P1 is zero. Otherwise, this
-            // command is replacing a key, so set P1 to the KVN of the currentKeys.
-            _p1Value = currentKeys.KeyReference.VersionNumber == newKeys.KeyReference.VersionNumber 
-                ? currentKeys.KeyReference.VersionNumber 
-                : (byte)0;
-
-            // Build the data portion of the APDU
-            //  new kvn || ENC data || MAC data || DEK data
-            // where the data for each key is
-            //  key type || len of block || block || len of check || check
-            // The key type is AES, which is the byte 0x88
-            // The block is
-            //  keyLen || encrypted key data
-            // The check is 3 bytes long.
-            // So the data will be
-            //  88 || 11 || 10 || <16 bytes> || 03 || <3-byte check>
-            //            |<--   block    -->|
-            // Because the YubiKey supports only AES-128, and because the key is
-            // a multiple of 16 bytes, no padding is necessary. Because the
-            // YubiKey only supports putting all three keys, we can know in
-            // advance all the lengths, and they will be the same each time. We
-            // also know in advance all the offsets where every element will go.
-            _data = new byte[DataLength];
-            using var memStream = new MemoryStream(_data);
-            using var binaryWriter = new BinaryWriter(memStream);
-            binaryWriter.Write(newKeys.KeyReference.VersionNumber);
-
-            _checksum = new byte[ChecksumLength];
-            _checksum[0] = newKeys.KeyReference.VersionNumber;
-            
-            //TODO Make work with SCp03, Scp11?
-            var currentKeys03 = currentKeys as Scp03KeyParameters ?? Scp03KeyParameters.DefaultKey; //TODO Right now this ?? is acceptable, because Scp03Params are the only ones being used
-            var newKeys03 = newKeys as Scp03KeyParameters ?? Scp03KeyParameters.DefaultKey;
-            
-            byte[] currentDek = currentKeys03.StaticKeys.DataEncryptionKey.ToArray();
-
-            try
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
             {
-                BuildKeyDataField(binaryWriter, newKeys03.StaticKeys.ChannelEncryptionKey, ChecksumOffsetEnc, currentDek);
-                BuildKeyDataField(binaryWriter, newKeys03.StaticKeys.ChannelMacKey, ChecksumOffsetMac, currentDek);
-                BuildKeyDataField(binaryWriter, newKeys03.StaticKeys.DataEncryptionKey, ChecksumOffsetDek, currentDek);
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(currentDek.AsSpan());
-            }
-        }
+                Cla = GpPutKeyCla,
+                Ins = GpPutKeyIns,
+                P1 = _p1,
+                P2 = _p2,
+                Data = _data
+            };
 
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Cla = GpPutKeyCla,
-            Ins = GpPutKeyIns,
-            P1 = _p1Value,
-            P2 = KeyIdentifier,
-            Data = _data
-        };
-
-        public PutKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new PutKeyResponse(responseApdu);
-
-        // Build the key's data field. Place it into _data beginning at
-        // dataOffset.
-        // Use the keyToBlock to encrypt the 16 bytes 0101...01, use the ms 3
-        // bytes as the keyCheck
-        // Use the encryptionKey to encrypt the keyToBlock.
-        //
-        //  keyType || block len || block                   || checkLen || check
-        //    0x88  ||   0x17    || 0x10 || 16-byte encData ||   0x03   || 3 bytes
-        private void BuildKeyDataField(
-            BinaryWriter binaryWriter,
-            ReadOnlyMemory<byte> keyToBlock,
-            int checksumOffset,
-            byte[] encryptionKey)
-        {
-            byte[] keyData = keyToBlock.ToArray();
-
-            try
-            {
-                byte[] dataToEncrypt = new byte[AesBlockSize] { //Initialization Vector, IV
-                    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-                };
-                byte[] checkBlock = AesUtilities.BlockCipher(keyData, dataToEncrypt.AsSpan());
-                byte[] encryptedKey = AesUtilities.BlockCipher(encryptionKey, keyToBlock.Span);
-
-                binaryWriter.Write(KeyType);
-                binaryWriter.Write(BlockSize);
-                binaryWriter.Write(AesBlockSize);
-                binaryWriter.Write(encryptedKey);
-                binaryWriter.Write(KeyCheckSize);
-                binaryWriter.Write(checkBlock, 0, KeyCheckSize);
-                Array.Copy(checkBlock, 0, _checksum, checksumOffset, KeyCheckSize);
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(keyData.AsSpan());
-            }
-        }
+        public PutKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new PutKeyResponse(responseApdu);
     }
 }

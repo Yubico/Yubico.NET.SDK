@@ -16,7 +16,7 @@ using System;
 using Xunit;
 using Yubico.Core.Buffers;
 
-namespace Yubico.YubiKey.Scp03
+namespace Yubico.YubiKey.Scp
 {
     public class PaddingTests
     {
@@ -50,7 +50,7 @@ namespace Yubico.YubiKey.Scp03
             byte[] payload = Get1BytePayload();
 
             // Act
-            byte[] paddedPayload = Padding.PadToBlockSize(payload);
+            Memory<byte> paddedPayload = Padding.PadToBlockSize(payload);
 
             // Assert
             Assert.Equal(paddedPayload, GetPadded1BytePayload());
@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.Scp03
             byte[] payload = Get8BytePayload();
 
             // Act
-            byte[] paddedPayload = Padding.PadToBlockSize(payload);
+            Memory<byte> paddedPayload = Padding.PadToBlockSize(payload);
 
             // Assert
             Assert.Equal(paddedPayload, GetPadded8BytePayload());
@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Scp03
             byte[] payload = Get16BytePayload();
 
             // Act
-            byte[] paddedPayload = Padding.PadToBlockSize(payload);
+            Memory<byte> paddedPayload = Padding.PadToBlockSize(payload);
 
             // Assert
             Assert.Equal(paddedPayload, GetPadded16BytePayload());
@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.Scp03
             byte[] paddedPayload = GetPadded1BytePayload();
 
             // Act
-            byte[] payload = Padding.RemovePadding(paddedPayload);
+            Memory<byte> payload = Padding.RemovePadding(paddedPayload);
 
             // Assert
             Assert.Equal(payload, Get1BytePayload());
@@ -102,7 +102,7 @@ namespace Yubico.YubiKey.Scp03
             byte[] paddedPayload = GetPadded8BytePayload();
 
             // Act
-            byte[] payload = Padding.RemovePadding(paddedPayload);
+            Memory<byte> payload = Padding.RemovePadding(paddedPayload);
 
             // Assert
             Assert.Equal(payload, Get8BytePayload());
@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Scp03
             byte[] paddedPayload = GetPadded16BytePayload();
 
             // Act
-            byte[] payload = Padding.RemovePadding(paddedPayload);
+            Memory<byte> payload = Padding.RemovePadding(paddedPayload);
 
             // Assert
             Assert.Equal(payload, Get16BytePayload());

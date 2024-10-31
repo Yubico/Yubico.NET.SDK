@@ -16,7 +16,7 @@ using System;
 using Xunit;
 using Yubico.Core.Buffers;
 
-namespace Yubico.YubiKey.Scp03
+namespace Yubico.YubiKey.Scp
 {
     public class ChannelEncryptionTests
     {
@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.Scp03
             int ec = GetEncryptionCounter();
 
             // Act
-            byte[] output = ChannelEncryption.EncryptData(payload, key, ec);
+            Memory<byte> output = ChannelEncryption.EncryptData(payload, key, ec);
 
             // Assert
             Assert.Equal(GetCorrectEncryptOutput(), output);
@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Scp03
             int ec = 1;
 
             // Act
-            byte[] output = ChannelEncryption.DecryptData(payload, key, ec);
+            Memory<byte> output = ChannelEncryption.DecryptData(payload, key, ec);
 
             // Assert
             Assert.Equal(GetCorrectDecryptedOutput(), output);

@@ -24,6 +24,7 @@ using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.Pipelines
 {
+    [Obsolete("This class is obsolete and will be removed in a future release.")]
     public class PipelineFixture : IApduTransform
     {
         public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
@@ -82,6 +83,7 @@ namespace Yubico.YubiKey.Pipelines
         }
     }
 
+    [Obsolete("Class is replaced by ScpApduTransform.")]
     public class Scp03ApduTransformTests
     {
         private static IApduTransform GetPipeline() => new PipelineFixture();

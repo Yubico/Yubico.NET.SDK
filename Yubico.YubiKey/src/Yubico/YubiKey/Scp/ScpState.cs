@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Scp
             };
 
             byte[] commandData = command.Data.ToArray();
-            byte[] encryptedData = ChannelEncryption.EncryptData(
+            var encryptedData = ChannelEncryption.EncryptData(
                 commandData, SessionKeys.EncKey.Span, _encryptionCounter);
 
             _encryptionCounter++;
@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Scp
             var responseData = response.Data;
             VerifyRmac(responseData.Span, SessionKeys.RmacKey.Span, MacChainingValue.Span);
 
-            byte[] decryptedData = Array.Empty<byte>();
+            Memory<byte> decryptedData = Array.Empty<byte>();
             if (responseData.Length > 8)
             {
                 int previousEncryptionCounter = _encryptionCounter - 1;
@@ -108,7 +108,7 @@ namespace Yubico.YubiKey.Scp
             }
 
             byte[] fullDecryptedResponse = new byte[decryptedData.Length + 2];
-            decryptedData.CopyTo(fullDecryptedResponse, 0);
+            decryptedData.CopyTo(fullDecryptedResponse);
             fullDecryptedResponse[decryptedData.Length] = response.SW1;
             fullDecryptedResponse[decryptedData.Length + 1] = response.SW2;
             return new ResponseApdu(fullDecryptedResponse);
@@ -121,10 +121,10 @@ namespace Yubico.YubiKey.Scp
                 throw new InvalidOperationException(ExceptionMessages.UnknownScpError); //todo set correct message
             }
 
-            return data => AesUtilities.AesCbcEncrypt(
+            return plainText => AesUtilities.AesCbcEncrypt(
                 SessionKeys.DataEncryptionKey.Value.ToArray(),
                 new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                data.Span);
+                plainText.Span);
         }
 
         #pragma warning disable CA1822 // Is being used by subclasses

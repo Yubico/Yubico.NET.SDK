@@ -33,6 +33,7 @@ namespace Yubico.YubiKey.Scp03.Commands
     /// key set with a KeyVersionNumber of 1) will be the default key set.
     /// </para>
     /// </remarks>
+    [Obsolete("Use new DeleteKeyCommand instead")]
     internal class DeleteKeyCommand : IYubiKeyCommand<Scp03Response>
     {
         private const byte GpDeleteKeyCla = 0x84;

@@ -15,9 +15,10 @@
 using System;
 using Xunit;
 using Yubico.YubiKey.Scp;
+using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Scp03.Commands
+namespace Yubico.YubiKey.Scp.Commands
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class DeleteKeyCommandTests
@@ -80,8 +81,8 @@ namespace Yubico.YubiKey.Scp03.Commands
             Assert.True(isValid);
             Assert.NotNull(connection);
 
-            var cmd = new Scp03.Commands.DeleteKeyCommand(2, false);
-            Scp03.Commands.Scp03Response rsp = connection!.SendCommand(cmd);
+            var cmd = new Scp.Commands.DeleteKeyCommand(2, false);
+            var rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
 
@@ -113,8 +114,8 @@ namespace Yubico.YubiKey.Scp03.Commands
             Assert.True(isValid);
             Assert.NotNull(connection);
 
-            var cmd = new Scp03.Commands.DeleteKeyCommand(3, true);
-            Scp03.Commands.Scp03Response rsp = connection!.SendCommand(cmd);
+            var cmd = new DeleteKeyCommand(3, true);
+            var rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
     }

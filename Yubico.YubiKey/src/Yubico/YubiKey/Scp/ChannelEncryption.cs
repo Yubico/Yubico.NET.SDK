@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.Scp
 {
     internal static class ChannelEncryption
     {
-        public static byte[] EncryptData(ReadOnlySpan<byte> dataToEncrypt, ReadOnlySpan<byte> encryptionKey, int encryptionCounter)
+        public static Memory<byte> EncryptData(ReadOnlySpan<byte> dataToEncrypt, ReadOnlySpan<byte> encryptionKey, int encryptionCounter)
         {
             // NB: Could skip this if the payload is empty (rather than sending a 16-byte encrypted '0x800000...' payload
             byte[] countBytes = new byte[sizeof(int)];
@@ -30,13 +30,13 @@ namespace Yubico.YubiKey.Scp
             countBytes.CopyTo(ivInput, 16 - countBytes.Length); // copy to rightmost part of block
             byte[] iv = AesUtilities.BlockCipher(encryptionKey.ToArray(), ivInput); //todo toarry
 
-            byte[] paddedPayload = Padding.PadToBlockSize(dataToEncrypt.ToArray());
-            byte[] encryptedData = AesUtilities.AesCbcEncrypt(encryptionKey.ToArray(), iv, paddedPayload);
+            var paddedPayload = Padding.PadToBlockSize(dataToEncrypt);
+            var encryptedData = AesUtilities.AesCbcEncrypt(encryptionKey, iv, paddedPayload.Span);
 
             return encryptedData;
         }
 
-        public static byte[] DecryptData(byte[] dataToDecrypt, byte[] key, int encryptionCounter)
+        public static Memory<byte> DecryptData(ReadOnlySpan<byte> dataToDecrypt, ReadOnlySpan<byte> key, int encryptionCounter)
         {
             byte[] countBytes = new byte[sizeof(int)];
             BinaryPrimitives.WriteInt32BigEndian(countBytes, encryptionCounter);
@@ -46,9 +46,9 @@ namespace Yubico.YubiKey.Scp
             ivInput[0] = 0x80; // to mark as RMAC calculation
             byte[] iv = AesUtilities.BlockCipher(key, ivInput);
 
-            byte[] decryptedData = AesUtilities.AesCbcDecrypt(key, iv, dataToDecrypt);
+            var decryptedData = AesUtilities.AesCbcDecrypt(key, iv, dataToDecrypt);
 
-            return Padding.RemovePadding(decryptedData);
+            return Padding.RemovePadding(decryptedData.Span);
         }
     }
 }

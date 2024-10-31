@@ -24,9 +24,9 @@ using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Scp.Commands;
 using Yubico.YubiKey.Scp03;
-using Yubico.YubiKit.Core.Util;
 
 namespace Yubico.YubiKey.Scp
 {
@@ -91,7 +91,8 @@ namespace Yubico.YubiKey.Scp
         private const byte KeyTypeEccPrivateKeyTag = 0xB1;
         private const byte KeyTypeEccKeyParamsTag = 0xF0;
         private const byte KeyTypeEccPublicKeyTag = 0xB0;
-        
+        private const byte KeyTypeAesTag = 0x88;
+
         private readonly IYubiKeyDevice _yubiKey;
         private readonly ILogger _log = Log.GetLogger<SecurityDomainSession>();
         private bool _disposed;
@@ -182,133 +183,88 @@ namespace Yubico.YubiKey.Scp
         }
 
         /// <summary>
-        /// Put the given key set onto the YubiKey.
+        /// Puts an SCP03 key set onto the YubiKey using the Security Domain.
         /// </summary>
-        /// <remarks>
-        /// See the <xref href="UsersManualScp">User's Manual entry</xref> on
-        /// SCP.
-        /// <para>
-        /// On each YubiKey that supports SCP, there is space for three sets of
-        /// keys. Each set contains three keys: "ENC", "MAC", and "DEK" (Channel
-        /// Encryption, Channel MAC, and Data Encryption).
-        /// <code language="adoc">
-        ///    slot 1:   ENC   MAC   DEK
-        ///    slot 2:   ENC   MAC   DEK
-        ///    slot 3:   ENC   MAC   DEK
-        /// </code>
-        /// Each key is 16 bytes. YubiKeys do not support any other key size.
-        /// </para>
-        /// <para>
-        /// Note that the standard allows changing one key in a key set. However,
-        /// YubiKeys only allow calling this command with all three keys. That is,
-        /// with a YubiKey, it is possible only to set or change all three keys of a
-        /// set.
-        /// </para>
-        /// <para>
-        /// Standard YubiKeys are manufactured with one key set, and each key in that
-        /// set is the default value.
-        /// <code language="adoc">
-        ///    slot 1:   ENC(default)  MAC(default)  DEK(default)
-        ///    slot 2:   --empty--
-        ///    slot 3:   --empty--
-        /// </code>
-        /// The default value is 0x40 41 42 ... 4F.
-        /// </para>
-        /// <para>
-        /// The key sets are not specified using a "slot number", rather, each key
-        /// set is given a Key Version Number (KVN). Each key in the set is given a
-        /// Key Identifier (KeyId). The YubiKey allows only 1, 2, and 3 as the
-        /// KeyIds, and SDK users never need to worry about them. If the YubiKey
-        /// contains the default key, the KVN is 255 (0xFF).
-        /// <code language="adoc">
-        ///    slot 1: KVN=0xff  KeyId=1:ENC(default)  KeyId=2:MAC(default)  KeyId=3:DEK(default)
-        ///    slot 2:   --empty--
-        ///    slot 3:   --empty--
-        /// </code>
-        /// </para>
-        /// <para>
-        /// It is possible to use this method to replace or add a key set. However,
-        /// if the YubiKey contains only the initial, default keys, then it is only
-        /// possible to replace that set. For example, suppose you have a YubiKey
-        /// with the default keys and you try to set the keys in slot 2. The YubiKey
-        /// will not allow that and will return an error.
-        /// </para>
-        /// <para>
-        /// When you replace the initial, default keys, you must specify the KVN of
-        /// the new keys. For the YubiKey, in this situation, the KVN must be 1.
-        /// If you supply any other values for the KVN, the YubiKey will return
-        /// an error. Hence, after replacing the initial, default keys, your
-        /// three sets of keys will be the following:
-        /// <code language="adoc">
-        ///    slot 1: KVN=1  newENC  newMAC  newDEK
-        ///    slot 2:   --empty--
-        ///    slot 3:   --empty--
-        /// </code>
-        /// </para>
-        /// <para>
-        /// In order to add or change any key set, you must supply one of the existing
-        /// key sets in order to build the SCP command and to encrypt and
-        /// authenticate the new keys. When replacing the initial, default keys, you
-        /// only have the choice to supply the keys with the KVN of 0xFF.
-        /// </para>
-        /// <para>
-        /// Once you have replaced the original key set, you can use that set to add
-        /// a second set to slot 2. It's KVN must be 2.
-        /// <code language="adoc">
-        ///    slot 1: KVN=1  ENC  MAC  DEK
-        ///    slot 2: KVN=2  ENC  MAC  DEK
-        ///    slot 3:   --empty--
-        /// </code>
-        /// </para>
-        /// <para>
-        /// You can use either key set to add a set to slot 3. You can use a key set
-        /// to replace itself.
-        /// </para>
-        /// </remarks>
-        /// <param name="keyParameters">
-        /// The keys and KeyVersion Number of the set that will be loaded onto
-        /// the YubiKey.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// The <c>newKeySet</c> argument is null.
-        /// </exception>
-        /// <exception cref="SecureChannelException">
-        /// The new key set's checksum failed to verify, or some other error
-        /// described in the exception message.
-        /// </exception>
-        public void PutKeySet(Scp03KeyParameters keyParameters) // Works for SCP3 but needs to be remade.
+        /// <param name="keyRef">The key reference identifying where to store the key.</param>
+        /// <param name="newKeySet">The new SCP03 key set to store.</param>
+        /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
+        /// <exception cref="ArgumentException">Thrown when the KID is not 0x01 for SCP03 key sets.</exception>
+        /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other error
+        /// described in the exception message.</exception>
+        public void PutKeySet(KeyReference keyRef, StaticKeys newKeySet, int replaceKvn)
         {
-            if (Connection is null)
+            _log.LogInformation("Importing SCP03 key set into KeyRef {KeyRef}", keyRef);
+
+            if (keyRef.Id != ScpKid.Scp03)
             {
-                throw new InvalidOperationException("No connection initialized. Use the other constructor");
+                throw new ArgumentException("KID must be 0x01 for SCP03 key sets");
             }
-        
-            _log.LogInformation("Put a new SCP key set onto a YubiKey.");
-        
-            if (keyParameters is null)
+
+            var connection = Connection ?? throw new InvalidOperationException("No connection initialized");
+            var encryptor = connection.DataEncryptor ?? throw new InvalidOperationException("No session DEK available");
+
+            using var dataStream = new MemoryStream();
+            using var dataWriter = new BinaryWriter(dataStream);
+            using var expectedKcvStream = new MemoryStream();
+            using var expectedKcvWriter = new BinaryWriter(expectedKcvStream);
+
+            // Write KVN
+            dataWriter.Write(keyRef.VersionNumber);
+            expectedKcvWriter.Write(keyRef.VersionNumber);
+
+            Span<byte> kcvInput = stackalloc byte[16] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+            ReadOnlySpan<byte> kvcZeroIv = stackalloc byte[16];
+
+            // Process all keys
+            foreach (var key in new[]
+                     {
+                         newKeySet.ChannelEncryptionKey,
+                         newKeySet.ChannelMacKey,
+                         newKeySet.DataEncryptionKey
+                     })
             {
-                throw new ArgumentNullException(nameof(keyParameters));
+                // Key check value (KCV) is first 3 bytes of encrypted test vector
+                var kcv = AesUtilities.AesCbcEncrypt(
+                        key.Span,
+                        kvcZeroIv,
+                        kcvInput)[..3];
+
+                // Encrypt the key using session encryptor
+                var encryptedKey = encryptor(key);
+
+                // Write key structure
+                var tlvData = new TlvObject(KeyTypeAesTag, encryptedKey.Span.ToArray()).GetBytes();
+                dataWriter.Write(tlvData.ToArray());
+
+                // Write KCV
+                byte[] kcvData = kcv.ToArray();
+                dataWriter.Write((byte)kcvData.Length);
+                dataWriter.Write(kcvData);
+
+                // Add KCV to expected response 
+                expectedKcvWriter.Write(kcvData);
             }
-        
-            var command = new PutKeyCommand(Connection.KeyParameters, keyParameters);
-            var response = Connection.SendCommand(command);
+
+            ReadOnlyMemory<byte> commandData = dataStream.ToArray().AsMemory();
+            byte p2 = (byte)(0x80 | keyRef.Id); // OR with 0x80 indicates that we're sending multiple keys
+
+            var command = new PutKeyCommand((byte)replaceKvn, p2, commandData);
+            var response = connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
             {
                 throw new SecureChannelException(
                     string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.YubiKeyOperationFailed,
-                        response.StatusMessage));
+                        CultureInfo.CurrentCulture, ExceptionMessages.YubiKeyOperationFailed, response.StatusMessage));
             }
-        
-            var checksum = response.GetData();
-            if (!CryptographicOperations.FixedTimeEquals(checksum.Span, command.ExpectedChecksum.Span))
+
+            var responseKcvData = response.GetData().Span;
+            ReadOnlySpan<byte> expectedKcvData = expectedKcvStream.ToArray().AsSpan();
+            if (!CryptographicOperations.FixedTimeEquals(responseKcvData, expectedKcvData))
             {
                 throw new SecureChannelException(ExceptionMessages.ChecksumError);
             }
         }
-        
-        
+
         /// <summary>
         /// Puts an ECC private key onto the YubiKey using the Security Domain.
         /// </summary>
@@ -331,7 +287,7 @@ namespace Yubico.YubiKey.Scp
             {
                 throw new ArgumentException("Private key must be of type SECP256R1");
             }
-            
+
             try
             {
                 // Prepare the command data
@@ -361,7 +317,7 @@ namespace Yubico.YubiKey.Scp
                 dataWriter.Write((byte)0);
 
                 // Create and send the command
-                var command = new PutKeyCommand2((byte)replaceKvn, keyRef.Id, dataStream.ToArray());
+                var command = new PutKeyCommand((byte)replaceKvn, keyRef.Id, dataStream.ToArray());
                 var response = connection.SendCommand(command);
                 if (response.Status != ResponseStatus.Success)
                 {
@@ -558,7 +514,8 @@ namespace Yubico.YubiKey.Scp
             const byte tagKeyInformation = 0xE0;
 
             var keys = new Dictionary<KeyReference, Dictionary<byte, byte>>();
-            var tlvDataList = TlvObjects.DecodeList(GetData(tagKeyInformation).Span);
+            var getDataResult = GetData(tagKeyInformation).Span;
+            var tlvDataList = TlvObjects.DecodeList(getDataResult);
             foreach (var tlvObject in tlvDataList)
             {
                 var value = TlvObjects.UnpackValue(0xC0, tlvObject.GetBytes().Span);
@@ -607,10 +564,10 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         /// <param name="tag">The tag of the data to retrieve.</param>
         /// <param name="data">Optional data to send with the command.</param>
-        /// <returns>The data retrieved from the YubiKey.</returns>
+        /// <returns>The encoded tlv data retrieved from the YubiKey. This will have to be decoded</returns>
         public ReadOnlyMemory<byte> GetData(int tag, ReadOnlyMemory<byte>? data = null)
         {
-            var connection = Connection ?? _yubiKey.Connect(YubiKeyApplication.SecurityDomain); // todo this could be default behaviour
+            var connection = Connection ?? _yubiKey.Connect(YubiKeyApplication.SecurityDomain);
             var response = connection.SendCommand(new GetDataCommand(tag, data));
 
             return response.GetData();

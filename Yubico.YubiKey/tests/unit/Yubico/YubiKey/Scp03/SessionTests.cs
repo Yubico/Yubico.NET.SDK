@@ -20,6 +20,7 @@ using Yubico.YubiKey.Scp03.Commands;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [Obsolete("Replaced by SecurityDomainSession")]
     public class SessionTests
     {
         private static byte[] GetChallenge() => Hex.HexToBytes("360CB43F4301B894");

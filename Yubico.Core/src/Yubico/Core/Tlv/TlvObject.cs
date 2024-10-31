@@ -66,7 +66,7 @@ namespace Yubico.Core.Tlv
         /// <summary>
         /// Returns the value.
         /// </summary>
-        public ReadOnlyMemory<byte> Value => _bytes.Skip(_offset).Take(Length).ToArray();
+        public Memory<byte> Value => _bytes.Skip(_offset).Take(Length).ToArray();
 
         /// <summary>
         /// Returns the length of the value.
@@ -74,9 +74,9 @@ namespace Yubico.Core.Tlv
         public int Length { get; }
 
         /// <summary>
-        /// Returns the Tlv as a BER-TLV encoded byte array.
+        /// Returns a copy ofthe Tlv as a BER-TLV encoded byte array.
         /// </summary>
-        public ReadOnlyMemory<byte> GetBytes() => _bytes;
+        public Memory<byte> GetBytes() => _bytes.ToArray();
         
         /// <summary>
         /// Parse a Tlv from a BER-TLV encoded byte array.
@@ -98,6 +98,16 @@ namespace Yubico.Core.Tlv
         /// <returns>The parsed Tlv</returns>
         public static TlvObject Parse(ReadOnlySpan<byte> data, int offset, int length) => Parse(data.Slice(offset, length));
 
+        /// <summary>
+        /// Parse a Tlv from a BER-TLV encoded byte array.
+        /// </summary>
+        /// <param name="buffer">A byte array containing the TLV encoded data.</param>
+        /// <returns>The parsed <see cref="TlvObject"/></returns>
+        /// <remarks>
+        /// This method will parse a TLV from the given buffer and return the parsed Tlv.
+        /// The method will consume the buffer as much as necessary to parse the TLV.
+        /// The method will not throw any exceptions if the buffer is too short to parse the TLV.
+        /// </remarks>
         public static TlvObject ParseFrom(ref ReadOnlySpan<byte> buffer)
         {
             int tag = buffer[0];
@@ -136,6 +146,18 @@ namespace Yubico.Core.Tlv
             return new TlvObject(tag, value);
         }
         
+        /// <summary>
+        /// Returns a string that represents the current object.
+        /// </summary>
+        /// <returns>A string that represents the current object.</returns>
+        /// <remarks>
+        /// The string is of the form <c>Tlv(0xTAG, LENGTH, VALUE)</c>.
+        /// <para>
+        /// The tag is written out in hexadecimal, prefixed by 0x.
+        /// The length is written out in decimal.
+        /// The value is written out in hexadecimal.
+        /// </para>
+        /// </remarks>
         public override string ToString()
         {
 #if NETSTANDARD2_1_OR_GREATER

@@ -22,7 +22,6 @@ using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Scp.Commands;
-using Yubico.YubiKit.Core.Util;
 
 namespace Yubico.YubiKey.Scp
 {
@@ -66,9 +65,10 @@ namespace Yubico.YubiKey.Scp
             byte[] keyLen = { 16 }; // 128-bit
             byte[] keyIdentifier = { 0x11, GetScpIdentifierByte(keyParameters.KeyReference) };
 
-            byte[] hostAuthenticateTlvEncodedData = TlvObjects.EncodeMany(
+            var hostAuthenticateTlvEncodedData = TlvObjects.EncodeMany(
                 new TlvObject(
-                    KeyAgreementTag, TlvObjects.EncodeMany(
+                    KeyAgreementTag,
+                    TlvObjects.EncodeMany(
                         new TlvObject(0x90, keyIdentifier),
                         new TlvObject(0x95, keyUsage),
                         new TlvObject(0x80, keyType),
@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Scp
                     epkSdEckaTlvEncodedData,
                     hostAuthenticateTlvEncodedData,
                     keyUsage,
-                    keyType, 
+                    keyType,
                     keyLen);
 
             var sessionKeys = new SessionKeys(
@@ -160,7 +160,7 @@ namespace Yubico.YubiKey.Scp
                 epkSdEckaTlvEncodedData, skOceEcka.Curve); // Yubikey Ephemeral Public Key 
 
             byte[] keyAgreementFirst = ecdhObject.ComputeSharedSecret(epkSdEcka, eskOceEcka.D);
-            
+
             // Compute key agreement for:
             // Yubikey Public Key + Host Private Key
             byte[] keyAgreementSecond = ecdhObject.ComputeSharedSecret(pkSdEcka, skOceEcka.D);

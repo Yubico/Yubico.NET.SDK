@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp03.Commands
@@ -19,6 +20,7 @@ namespace Yubico.YubiKey.Scp03.Commands
     /// <summary>
     /// Represents the second command in the SCP03 authentication handshake, 'EXTERNAL_AUTHENTICATE'
     /// </summary>
+    [Obsolete("Use new ExternalAuthenticateCommand instead")]
     internal class ExternalAuthenticateCommand : IYubiKeyCommand<ExternalAuthenticateResponse>
     {
         public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;

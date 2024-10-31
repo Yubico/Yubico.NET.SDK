@@ -18,6 +18,7 @@ using Xunit;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
+using GetDataCommand = Yubico.YubiKey.Scp.Commands.GetDataCommand;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
@@ -58,7 +59,7 @@ namespace Yubico.YubiKey.Scp
 
             using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
             {
-                session.PutKeySet(newKeyParams);
+                session.PutKeySet(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
             }
 
             using (_ = new SecurityDomainSession(Device, newKeyParams))
@@ -84,13 +85,13 @@ namespace Yubico.YubiKey.Scp
             // Auth with default key, then replace default key
             using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
             {
-                session.PutKeySet(keyRef1);
+                session.PutKeySet(keyRef1.KeyReference, keyRef1.StaticKeys, 0);
             }
 
             // Authenticate with key1, then add additional key, keyref2
             using (var session = new SecurityDomainSession(Device, keyRef1))
             {
-                session.PutKeySet(keyRef2);
+                session.PutKeySet(keyRef2.KeyReference, keyRef2.StaticKeys, 0);
             }
 
             // Authenticate with key2, delete key 1
@@ -131,12 +132,12 @@ namespace Yubico.YubiKey.Scp
 
             using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
             {
-                session.PutKeySet(keyRef1);
+                session.PutKeySet(keyRef1.KeyReference, keyRef1.StaticKeys, 0);
             }
 
             using (var session = new SecurityDomainSession(Device, keyRef1))
             {
-                session.PutKeySet(keyRef2);
+                session.PutKeySet(keyRef2.KeyReference, keyRef2.StaticKeys, keyRef1.KeyReference.VersionNumber);
             }
 
             using (_ = new SecurityDomainSession(Device, keyRef2))
@@ -189,12 +190,11 @@ namespace Yubico.YubiKey.Scp
             using var connection = Device.Connect(YubiKeyApplication.SecurityDomain);
             const byte TAG_KEY_INFORMATION = 0xE0;
             var response = connection.SendCommand(new GetDataCommand(TAG_KEY_INFORMATION));
-            var res = response.GetData();
+            var result = response.GetData();
 
-            // var result = session.GetKeyInformation();
-            // Assert.NotEmpty(result);
-            // Assert.Equal(4, result.Count);
-            // Assert.Equal(0xFF, result.Keys.First().VersionNumber);
+            Assert.NotEmpty(result.ToArray());
+            // Assert.Equal(4, result.Length);
+            // Assert.Equal(0xFF, result.ToArray().First());
         }
 
         [Fact]
@@ -229,7 +229,7 @@ namespace Yubico.YubiKey.Scp
 
             using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
             {
-                session.PutKeySet(newKeyParams);
+                session.PutKeySet(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
             }
 
             using (var session = new SecurityDomainSession(Device, newKeyParams))

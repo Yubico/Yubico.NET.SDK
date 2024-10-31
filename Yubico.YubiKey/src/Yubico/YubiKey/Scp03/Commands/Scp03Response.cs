@@ -18,6 +18,7 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp03.Commands
 {
+    [Obsolete("Use new ScpResponse instead")]
     internal class Scp03Response : YubiKeyResponse
     {
         public Scp03Response(ResponseApdu responseApdu) :

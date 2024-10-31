@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Buffers.Binary;
+using System.Linq;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [Obsolete("Use new ChannelEncryption instead")]
     internal static class ChannelEncryption
     {
         public static byte[] EncryptData(byte[] payload, byte[] key, int encryptionCounter)
@@ -30,9 +33,9 @@ namespace Yubico.YubiKey.Scp03
             byte[] iv = AesUtilities.BlockCipher(key, ivInput);
 
             byte[] paddedPayload = Padding.PadToBlockSize(payload);
-            byte[] encryptedData = AesUtilities.AesCbcEncrypt(key, iv, paddedPayload);
+            var encryptedData = AesUtilities.AesCbcEncrypt(key.AsSpan(), iv.AsSpan(), paddedPayload.AsSpan());
 
-            return encryptedData;
+            return encryptedData.ToArray();
         }
 
         public static byte[] DecryptData(byte[] payload, byte[] key, int encryptionCounter)
@@ -45,9 +48,9 @@ namespace Yubico.YubiKey.Scp03
             ivInput[0] = 0x80; // to mark as RMAC calculation
             byte[] iv = AesUtilities.BlockCipher(key, ivInput);
 
-            byte[] decryptedData = AesUtilities.AesCbcDecrypt(key, iv, payload);
+            var decryptedData = AesUtilities.AesCbcDecrypt(key.AsSpan(), iv.AsSpan(), payload);
 
-            return Padding.RemovePadding(decryptedData);
+            return Padding.RemovePadding(decryptedData.ToArray()).ToArray();
         }
     }
 }

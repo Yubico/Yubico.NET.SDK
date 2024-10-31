@@ -105,6 +105,7 @@ namespace Yubico.YubiKey.Scp03.Commands
     /// to replace itself.
     /// </para>
     /// </remarks>
+    [Obsolete("Use new PutKeyCommand instead")]
     internal class PutKeyCommand : IYubiKeyCommand<PutKeyResponse>
     {
         private const byte GpPutKeyCla = 0x84;

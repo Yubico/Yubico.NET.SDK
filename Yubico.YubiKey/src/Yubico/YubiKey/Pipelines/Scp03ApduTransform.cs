@@ -31,6 +31,7 @@ namespace Yubico.YubiKey.Pipelines
     ///
     /// Requires pre-shared <see cref="StaticKeys"/>.
     /// </remarks>
+    [Obsolete("Use ScpApduTransform instead.")]
     internal class Scp03ApduTransform : IApduTransform, IDisposable
     {
         private readonly IApduTransform _pipeline;

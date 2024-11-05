@@ -16,9 +16,10 @@ using System;
 using Xunit;
 using Yubico.Core.Buffers;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.Scp03.Commands;
 
-namespace Yubico.YubiKey.Scp03
+namespace Yubico.YubiKey.Scp
 {
     [Obsolete("Replaced by SecurityDomainSession")]
     public class SessionTests

@@ -15,8 +15,8 @@
 using System;
 using Xunit;
 using Yubico.Core.Buffers;
+namespace Yubico.YubiKey.Scp
 
-namespace Yubico.YubiKey.Scp03
 {
     public class DerivationTests
     {
@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Scp03
         [Fact]
         public void Derive_GivenCorrectVals_ReturnsCorrectHostCryptogram()
         {
-            byte[] hostCryptogram = Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetKey(), GetHostChallenge(), GetCardChallenge());
+            var hostCryptogram = Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetKey(), GetHostChallenge(), GetCardChallenge());
             Assert.Equal(GetCorrectDeriveOutput(), hostCryptogram);
         }
     }

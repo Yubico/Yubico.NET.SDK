@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Yubico.Core.Cryptography;
 using Yubico.Core.Iso7816;
@@ -65,7 +66,7 @@ namespace Yubico.YubiKey.Scp
             byte[] keyLen = { 16 }; // 128-bit
             byte[] keyIdentifier = { 0x11, GetScpIdentifierByte(keyParameters.KeyReference) };
 
-            var hostAuthenticateTlvEncodedData = TlvObjects.EncodeMany(
+            byte[] hostAuthenticateTlvEncodedData = TlvObjects.EncodeMany(
                 new TlvObject(
                     KeyAgreementTag,
                     TlvObjects.EncodeMany(
@@ -86,7 +87,7 @@ namespace Yubico.YubiKey.Scp
                     hostAuthenticateTlvEncodedData) as IYubiKeyCommand<ScpResponse>;
 
             var authenticateResponseApdu = pipeline.Invoke(
-                authenticateCommand.CreateCommandApdu(), authenticateCommand.GetType(), typeof(ScpResponse));
+                authenticateCommand.CreateCommandApdu(), authenticateCommand.GetType(), typeof(ScpResponse)); //works
 
             var authenticateResponse = authenticateCommand.CreateResponseForApdu(authenticateResponseApdu);
             authenticateResponse.ThrowIfFailed(
@@ -146,7 +147,7 @@ namespace Yubico.YubiKey.Scp
                 pkSdEcka.Curve, // Yubikey Public Key
                 eskOceEcka.Curve, // Host Ephemeral Private Key
                 skOceEcka.Curve // Host Private Key
-            }.All(c => c.Oid == curve.Oid);
+            }.All(c => c.Oid.Value == curve.Oid.Value);
 
             if (!allKeysAreSameCurve)
             {
@@ -189,15 +190,16 @@ namespace Yubico.YubiKey.Scp
             }
 
             // Get keys
-            byte[] encryptionKey = keys[0];
-            byte[] macKey = keys[1];
-            byte[] rmacKey = keys[2];
-            byte[] dekKey = keys[3];
+            byte[] receiptVerificationKey = keys[0]; // receipt verificationKey
+            byte[] encryptionKey = keys[1];
+            byte[] macKey = keys[2];
+            byte[] rmacKey = keys[3];
+            byte[] dekKey = keys[4];
 
             // Do AES CMAC 
             using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
             Span<byte> oceReceipt = stackalloc byte[16]; // Our generated receipt
-            cmacObj.CmacInit(encryptionKey);
+            cmacObj.CmacInit(receiptVerificationKey);
             cmacObj.CmacUpdate(keyAgreementData);
             cmacObj.CmacFinal(oceReceipt);
 
@@ -260,9 +262,7 @@ namespace Yubico.YubiKey.Scp
             for (int i = 0; i <= n; i++)
             {
                 byte[] certificates = keyParams.Certificates[i].RawData;
-                byte oceRefPadded = (byte)(oceRef.Id | (i < n
-                    ? 0b10000000
-                    : 0x00)); // Is this a good name?
+                byte oceRefPadded = (byte)(oceRef.Id | (i < n ? 0x80 : 0x00)); // Append 0x80 if more certificates following
 
                 var securityOperationCommand = new SecurityOperationCommand(
                     oceRef.VersionNumber,

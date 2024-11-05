@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Scp.Commands
                 throw new ArgumentNullException(nameof(responseApdu));
             }
 
-            if (responseApdu.Data.Length != 0)
+            if (responseApdu.SW != SWConstants.Success)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectExternalAuthenticateData, nameof(responseApdu));
             }

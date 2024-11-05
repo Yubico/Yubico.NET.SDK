@@ -54,12 +54,12 @@ namespace Yubico.YubiKey.Scp
                 sk,
                 sk));
 
-            // assumeFalse("SCP03 not supported over NFC on FIPS capable devices",
+            // assumeFalse("SCP03 not supported over NFC on FIPS capable devices", todo
             //     state.getDeviceInfo().getFipsCapable() != 0 && !state.isUsbTransport());
 
             using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
             {
-                session.PutKeySet(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
+                session.PutKey(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
             }
 
             using (_ = new SecurityDomainSession(Device, newKeyParams))
@@ -85,13 +85,13 @@ namespace Yubico.YubiKey.Scp
             // Auth with default key, then replace default key
             using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
             {
-                session.PutKeySet(keyRef1.KeyReference, keyRef1.StaticKeys, 0);
+                session.PutKey(keyRef1.KeyReference, keyRef1.StaticKeys, 0);
             }
 
             // Authenticate with key1, then add additional key, keyref2
             using (var session = new SecurityDomainSession(Device, keyRef1))
             {
-                session.PutKeySet(keyRef2.KeyReference, keyRef2.StaticKeys, 0);
+                session.PutKey(keyRef2.KeyReference, keyRef2.StaticKeys, 0);
             }
 
             // Authenticate with key2, delete key 1
@@ -132,12 +132,12 @@ namespace Yubico.YubiKey.Scp
 
             using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
             {
-                session.PutKeySet(keyRef1.KeyReference, keyRef1.StaticKeys, 0);
+                session.PutKey(keyRef1.KeyReference, keyRef1.StaticKeys, 0);
             }
 
             using (var session = new SecurityDomainSession(Device, keyRef1))
             {
-                session.PutKeySet(keyRef2.KeyReference, keyRef2.StaticKeys, keyRef1.KeyReference.VersionNumber);
+                session.PutKey(keyRef2.KeyReference, keyRef2.StaticKeys, keyRef1.KeyReference.VersionNumber);
             }
 
             using (_ = new SecurityDomainSession(Device, keyRef2))
@@ -198,7 +198,7 @@ namespace Yubico.YubiKey.Scp
         }
 
         [Fact]
-        public void TestGetCertificateBundle()
+        public void GetCertificates_ReturnsCerts()
         {
             Skip.IfNot(Device.FirmwareVersion >= FirmwareVersion.V5_7_2);
 
@@ -229,7 +229,7 @@ namespace Yubico.YubiKey.Scp
 
             using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
             {
-                session.PutKeySet(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
+                session.PutKey(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
             }
 
             using (var session = new SecurityDomainSession(Device, newKeyParams))

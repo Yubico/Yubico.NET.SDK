@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Scp.Commands
 
         public CommandApdu CreateCommandApdu() => new CommandApdu
         {
-            Cla = 0x84,
+            Cla = 0x80,
             Ins = _ins,
             P1 = _keyVersionNumber,
             P2 = _kid,

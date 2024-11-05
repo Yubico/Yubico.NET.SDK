@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Pipelines
     internal class ScpApduTransform : IApduTransform, IDisposable
     {
         public ScpKeyParameters KeyParameters { get; }
-        public DataEncryptor? DataEncryptor;
+        public DataEncryptor? DataEncryptor; // When is this ever null?
 
         private ScpState ScpState =>
             _scpState ?? throw new InvalidOperationException($"{nameof(Scp.ScpState)} has not been initialized. The Setup method must be called.");

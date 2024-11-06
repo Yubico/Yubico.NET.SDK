@@ -17,11 +17,9 @@ using System;
 namespace Yubico.YubiKey.Scp
 {
     /// <summary>
-    /// Represents errors that occur during encoding or decoding data for SCP03.
+    /// Represents errors that occur during encoding or decoding data for SCP.
     /// </summary>
-#pragma warning disable CA1064 // Exceptions should be public
-    internal class SecureChannelException : Exception
-#pragma warning restore CA1064 // Exceptions should be public
+    public class SecureChannelException : Exception
     {
         public SecureChannelException()
         {
@@ -29,13 +27,13 @@ namespace Yubico.YubiKey.Scp
         }
 
         public SecureChannelException(string message) :
-            base($"SCP03 CardDataException: {message}")
+            base($"SCP CardDataException: {message}")
         {
 
         }
 
         public SecureChannelException(string message, Exception e) :
-            base($"SCP03 CardDataException: {message}", e)
+            base($"SCP CardDataException: {message}", e)
         {
 
         }

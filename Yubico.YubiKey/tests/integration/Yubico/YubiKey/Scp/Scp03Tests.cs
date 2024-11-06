@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Scp
             // Authenticate with key2, delete key 1
             using (var session = new SecurityDomainSession(Device, keyRef2))
             {
-                session.DeleteKeySet(keyRef1.KeyReference.VersionNumber);
+                session.DeleteKeySet(keyRef1.KeyReference);
             }
 
             // Authenticate with key 1, 
@@ -111,7 +111,7 @@ namespace Yubico.YubiKey.Scp
 
             using (var session = new SecurityDomainSession(Device, keyRef2))
             {
-                session.DeleteKeySet(keyRef2.KeyReference.VersionNumber, true);
+                session.DeleteKeySet(keyRef2.KeyReference, true);
             }
 
             // Try to authenticate with key 2, 

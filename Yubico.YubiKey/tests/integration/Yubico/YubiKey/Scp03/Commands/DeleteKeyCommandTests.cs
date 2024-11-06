@@ -82,6 +82,7 @@ namespace Yubico.YubiKey.Scp
             Assert.NotNull(connection);
 
             var cmd = new Scp.Commands.DeleteKeyCommand(2, false);
+
             var rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }

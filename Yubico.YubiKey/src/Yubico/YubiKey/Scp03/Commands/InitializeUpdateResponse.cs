@@ -19,7 +19,7 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp03.Commands
 {
-    [Obsolete("Use new InitializeUpdateResponse instead")]
+    [Obsolete("Use new InitializeUpdateResponse instead")] // TODO Verify still works
     internal class InitializeUpdateResponse : Scp03Response
     {
         public IReadOnlyCollection<byte> DiversificationData { get; protected set; }

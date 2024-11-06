@@ -68,9 +68,15 @@ namespace Yubico.YubiKey.Scp.Commands
         /// deleted but the SCP03 application on the YubiKey will be reset with
         /// the default key.
         /// </remarks>
-        public DeleteKeyCommand(byte keyVersionNumber, bool isLastKey)
+        public DeleteKeyCommand(int keyVersionNumber, bool isLastKey)
         {
-            _data = new[] { KvnTag, KvnLength, keyVersionNumber };
+            _data = new byte[3] { KvnTag, KvnLength, (byte)keyVersionNumber };
+            _p2Value = isLastKey ? GpDeleteLastKeyP2 : GpDeleteKeyP2;
+        }
+
+        internal DeleteKeyCommand(ReadOnlyMemory<byte> data, bool isLastKey)
+        {
+            _data = data.ToArray();
             _p2Value = isLastKey ? GpDeleteLastKeyP2 : GpDeleteKeyP2;
         }
 
@@ -82,6 +88,7 @@ namespace Yubico.YubiKey.Scp.Commands
             P2 = _p2Value,
             Data = _data
         };
+
 
         public ScpResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new ScpResponse(responseApdu);

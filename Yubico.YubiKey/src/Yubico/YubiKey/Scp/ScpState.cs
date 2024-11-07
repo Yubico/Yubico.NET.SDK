@@ -1,6 +1,7 @@
 ﻿using System;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Scp.Helpers;
 
 namespace Yubico.YubiKey.Scp
 {
@@ -15,7 +16,7 @@ namespace Yubico.YubiKey.Scp
         /// <summary>
         /// Initializes the host-side state for an SCP session.
         /// </summary>
-        public ScpState(SessionKeys sessionKeys, Memory<byte> macChain)
+        protected ScpState(SessionKeys sessionKeys, Memory<byte> macChain)
         {
             MacChainingValue = macChain;
             SessionKeys = sessionKeys;
@@ -46,9 +47,8 @@ namespace Yubico.YubiKey.Scp
                 P2 = command.P2
             };
 
-            byte[] commandData = command.Data.ToArray();
             var encryptedData = ChannelEncryption.EncryptData(
-                commandData, SessionKeys.EncKey.Span, _encryptionCounter);
+                command.Data.Span, SessionKeys.EncKey.Span, _encryptionCounter);
 
             _encryptionCounter++;
             encodedCommand.Data = encryptedData;
@@ -96,13 +96,13 @@ namespace Yubico.YubiKey.Scp
             var responseData = response.Data;
             VerifyRmac(responseData.Span, SessionKeys.RmacKey.Span, MacChainingValue.Span);
 
-            Memory<byte> decryptedData = Array.Empty<byte>();
+            ReadOnlyMemory<byte> decryptedData = Array.Empty<byte>();
             if (responseData.Length > 8)
             {
                 int previousEncryptionCounter = _encryptionCounter - 1;
                 decryptedData = ChannelEncryption.DecryptData(
-                    responseData[..^8].ToArray(),
-                    SessionKeys.EncKey.ToArray(), //todo array
+                    responseData[..^8].Span,
+                    SessionKeys.EncKey.Span,
                     previousEncryptionCounter
                     );
             }
@@ -114,38 +114,46 @@ namespace Yubico.YubiKey.Scp
             return new ResponseApdu(fullDecryptedResponse);
         }
 
-        public DataEncryptor GetDataEncryptor()
+        /// <summary>
+        /// Get the encryptor to encrypt any data for a SCP command.
+        /// </summary>
+        /// <returns>
+        /// An encryptor function that takes the plaintext as a parameter and
+        /// returns the encrypted data.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// If the data encryption key has not been set on the session keys.
+        /// </exception>
+        public EncryptDataFunc GetDataEncryptor()
         {
             if (!SessionKeys.DataEncryptionKey.HasValue)
             {
-                throw new InvalidOperationException(ExceptionMessages.UnknownScpError); //todo set correct message
+                throw new InvalidOperationException(ExceptionMessages.UnknownScpError);
             }
 
             return plainText => AesUtilities.AesCbcEncrypt(
-                SessionKeys.DataEncryptionKey.Value.ToArray(),
-                new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                SessionKeys.DataEncryptionKey.Value.Span,
+                new byte[16],
                 plainText.Span);
         }
 
-        #pragma warning disable CA1822 // Is being used by subclasses
-        protected (CommandApdu macdApdu, byte[] newMacChainingValue) MacApdu(
-            #pragma warning restore CA1822
+        protected static (CommandApdu macdApdu, byte[] newMacChainingValue) MacApdu(
             CommandApdu commandApdu,
             ReadOnlySpan<byte> macKey,
             ReadOnlySpan<byte> macChainingValue) =>
             ChannelMac.MacApdu(commandApdu, macKey, macChainingValue);
-
-        protected static void VerifyRmac(
-            ReadOnlySpan<byte> responseData,
-            ReadOnlySpan<byte> rmacKey,
-            ReadOnlySpan<byte> macChainingValue) =>
-            ChannelMac.VerifyRmac(responseData, rmacKey, macChainingValue);
 
         public void Dispose()
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        private static void VerifyRmac(
+            ReadOnlySpan<byte> responseData,
+            ReadOnlySpan<byte> rmacKey,
+            ReadOnlySpan<byte> macChainingValue) =>
+            ChannelMac.VerifyRmac(responseData, rmacKey, macChainingValue);
 
         protected virtual void Dispose(bool disposing)
         {
@@ -161,5 +169,9 @@ namespace Yubico.YubiKey.Scp
         }
     }
 
-    internal delegate ReadOnlyMemory<byte> DataEncryptor(ReadOnlyMemory<byte> data);
+    /// <summary>
+    /// This delegate is used to encrypt data with the session keys
+    /// <seealso cref="ScpState.GetDataEncryptor"/>
+    /// </summary>
+    internal delegate ReadOnlyMemory<byte> EncryptDataFunc(ReadOnlyMemory<byte> data);
 }

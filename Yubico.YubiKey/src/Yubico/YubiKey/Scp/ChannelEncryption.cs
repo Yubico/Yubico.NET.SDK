@@ -16,11 +16,25 @@ using System;
 using System.Buffers.Binary;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp.Helpers
 {
     internal static class ChannelEncryption
     {
-        public static Memory<byte> EncryptData(ReadOnlySpan<byte> dataToEncrypt, ReadOnlySpan<byte> encryptionKey, int encryptionCounter)
+        /// <summary>
+        /// Encrypts the provided data using AES CBC mode with the given key and encryption counter.
+        /// </summary>
+        /// <param name="dataToEncrypt">The data to be encrypted.</param>
+        /// <param name="encryptionKey">The AES key to use for encryption.</param>
+        /// <param name="encryptionCounter">
+        /// A counter used to generate the initialization vector (IV) for encryption.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Memory{T}"/> containing the encrypted data.
+        /// </returns>
+        public static ReadOnlyMemory<byte> EncryptData(
+            ReadOnlySpan<byte> dataToEncrypt,
+            ReadOnlySpan<byte> encryptionKey,
+            int encryptionCounter)
         {
             // NB: Could skip this if the payload is empty (rather than sending a 16-byte encrypted '0x800000...' payload
             byte[] countBytes = new byte[sizeof(int)];
@@ -28,7 +42,7 @@ namespace Yubico.YubiKey.Scp
 
             byte[] ivInput = new byte[16];
             countBytes.CopyTo(ivInput, 16 - countBytes.Length); // copy to rightmost part of block
-            byte[] iv = AesUtilities.BlockCipher(encryptionKey.ToArray(), ivInput); //todo toarry
+            byte[] iv = AesUtilities.BlockCipher(encryptionKey, ivInput);
 
             var paddedPayload = Padding.PadToBlockSize(dataToEncrypt);
             var encryptedData = AesUtilities.AesCbcEncrypt(encryptionKey, iv, paddedPayload.Span);
@@ -36,7 +50,21 @@ namespace Yubico.YubiKey.Scp
             return encryptedData;
         }
 
-        public static Memory<byte> DecryptData(ReadOnlySpan<byte> dataToDecrypt, ReadOnlySpan<byte> key, int encryptionCounter)
+        /// <summary>
+        /// Decrypts the provided data using AES CBC mode with the given key and encryption counter.
+        /// </summary>
+        /// <param name="dataToDecrypt">The encrypted data to be decrypted.</param>
+        /// <param name="key">The AES key to use for decryption.</param>
+        /// <param name="encryptionCounter">
+        /// A counter used to generate the initialization vector (IV) for decryption.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Memory{T}"/> containing the decrypted data with padding removed.
+        /// </returns>
+        public static ReadOnlyMemory<byte> DecryptData(
+            ReadOnlySpan<byte> dataToDecrypt,
+            ReadOnlySpan<byte> key,
+            int encryptionCounter)
         {
             byte[] countBytes = new byte[sizeof(int)];
             BinaryPrimitives.WriteInt32BigEndian(countBytes, encryptionCounter);
@@ -44,8 +72,8 @@ namespace Yubico.YubiKey.Scp
             byte[] ivInput = new byte[16];
             countBytes.CopyTo(ivInput, 16 - countBytes.Length); // copy to rightmost part of block
             ivInput[0] = 0x80; // to mark as RMAC calculation
-            byte[] iv = AesUtilities.BlockCipher(key, ivInput);
 
+            byte[] iv = AesUtilities.BlockCipher(key, ivInput);
             var decryptedData = AesUtilities.AesCbcDecrypt(key, iv, dataToDecrypt);
 
             return Padding.RemovePadding(decryptedData.Span);

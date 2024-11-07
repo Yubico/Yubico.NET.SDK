@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography
@@ -25,6 +26,11 @@ namespace Yubico.YubiKey.Cryptography
 
         protected ECKeyParameters(ECParameters parameters)
         {
+            if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
+            {
+                throw new NotSupportedException("Key must be of type NIST P-256");
+            }
+
             Parameters = parameters.DeepCopy();
         }
     }

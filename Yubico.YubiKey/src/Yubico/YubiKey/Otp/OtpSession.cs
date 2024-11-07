@@ -14,6 +14,8 @@
 
 using System;
 using System.Globalization;
+using Yubico.Core.Logging;
+using Yubico.YubiKey.Oath;
 using Yubico.YubiKey.Otp.Commands;
 using Yubico.YubiKey.Otp.Operations;
 using Yubico.YubiKey.Scp;
@@ -61,21 +63,24 @@ namespace Yubico.YubiKey.Otp
     /// and finally, <c>Execute()</c> tells the operation class to perform the
     /// configuration on the YubiKey.
     /// </example>
-    public sealed class OtpSession : IOtpSession
+    public sealed class OtpSession : ApplicationSession, IOtpSession
     {
         /// <summary>
         /// Constructs a <see cref="OtpSession"/> instance for high-level OTP operations.
         /// </summary>
-        /// <param name="yubiKey">Instance of class implementing <see cref="IYubiKeyDevice"/>.</param>
-        /// <param name="keyParameters">TODO</param>
-        public OtpSession(IYubiKeyDevice yubiKey, Scp03KeyParameters? keyParameters = null)
+        /// <remarks>
+        /// This constructor should be used to obtain an instance of this class for
+        /// performing operations on the YubiKey OTP application. The instance of
+        /// <see cref="IYubiKeyDevice"/> passed in should be a connected YubiKey.
+        /// </remarks>
+        /// <param name="yubiKey">An instance of a class that implements <see cref="IYubiKeyDevice"/>.</param>
+        /// <param name="keyParameters">An instance of <see cref="Scp03KeyParameters"/> containing the
+        /// parameters for the SCP03 key. If <see langword="null"/>, the default parameters will be used. </param>
+        public OtpSession(IYubiKeyDevice yubiKey, ScpKeyParameters? keyParameters = null) 
+            : base(Log.GetLogger<OathSession>(), yubiKey, YubiKeyApplication.Otp, keyParameters)
         {
-            if (yubiKey is null) { throw new ArgumentNullException(nameof(yubiKey)); }
-            YubiKey = yubiKey;
-            _connection = keyParameters is null
-                ? yubiKey.Connect(YubiKeyApplication.Oath)
-                : yubiKey.ConnectScp(YubiKeyApplication.Oath, keyParameters);
-            _otpStatus = _connection.SendCommand(new ReadStatusCommand()).GetData(); // fails on read data Incorrect parameters in the command data field. 0x6A80
+            // Getting the OTP status allows the user to read the OTP status on the OtpSession object.
+            _otpStatus = Connection.SendCommand(new ReadStatusCommand()).GetData(); // 
         }
 
         #region OTP Operation Object Factory
@@ -85,7 +90,7 @@ namespace Yubico.YubiKey.Otp
         /// <param name="slot">The identifier for the OTP application slot to configure.</param>
         /// <returns>An instance of <see cref="Operations.CalculateChallengeResponse"/>.</returns>
         public CalculateChallengeResponse CalculateChallengeResponse(Slot slot) =>
-            new CalculateChallengeResponse(_connection, this, slot);
+            new CalculateChallengeResponse(Connection, this, slot);
 
         /// <summary>
         /// Configures one of the OTP application slots to act as a Yubico OTP device.
@@ -93,7 +98,7 @@ namespace Yubico.YubiKey.Otp
         /// <param name="slot">The identifier for the OTP application slot to configure.</param>
         /// <returns>Instance of <see cref="Operations.ConfigureYubicoOtp"/>.</returns>
         public ConfigureYubicoOtp ConfigureYubicoOtp(Slot slot) =>
-            new ConfigureYubicoOtp(_connection, this, slot);
+            new ConfigureYubicoOtp(Connection, this, slot);
 
         /// <summary>
         /// Removes a slot configuration in the YubiKey's OTP application.
@@ -101,7 +106,7 @@ namespace Yubico.YubiKey.Otp
         /// <param name="slot">The identifier for the OTP application slot configuration to delete.</param>
         /// <returns>An instance of <see cref="Operations.DeleteSlotConfiguration"/>.</returns>
         public DeleteSlotConfiguration DeleteSlotConfiguration(Slot slot) =>
-            new DeleteSlotConfiguration(_connection, this, slot);
+            new DeleteSlotConfiguration(Connection, this, slot);
 
         /// <summary>
         /// Configures one of the OTP application slots to respond to challenges.
@@ -109,17 +114,17 @@ namespace Yubico.YubiKey.Otp
         /// <param name="slot">The identifier for the OTP application slot to configure.</param>
         /// <returns>Instance of <see cref="Operations.ConfigureChallengeResponse"/>.</returns>
         public ConfigureChallengeResponse ConfigureChallengeResponse(Slot slot) =>
-            new ConfigureChallengeResponse(_connection, this, slot);
+            new ConfigureChallengeResponse(Connection, this, slot);
 
         /// <inheritdoc cref="Operations.ConfigureHotp"/>
         /// <param name="slot">OTP Slot to configure.</param>
         public ConfigureHotp ConfigureHotp(Slot slot) =>
-            new ConfigureHotp(_connection, this, slot);
+            new ConfigureHotp(Connection, this, slot);
 
         /// <inheritdoc cref="Operations.ConfigureNdef"/>
         /// <param name="slot">OTP Slot to configure.</param>
         public ConfigureNdef ConfigureNdef(Slot slot) =>
-            new ConfigureNdef(_connection, this, slot);
+            new ConfigureNdef(Connection, this, slot);
 
         /// <summary>
         /// Sets a static password for an OTP application slot on a YubiKey.
@@ -135,7 +140,7 @@ namespace Yubico.YubiKey.Otp
         /// <param name="slot">The identifier for the OTP application slot to configure.</param>
         /// <returns>Instance of <see cref="Operations.ConfigureStaticPassword"/>.</returns>
         public ConfigureStaticPassword ConfigureStaticPassword(Slot slot) =>
-            new ConfigureStaticPassword(_connection, this, slot);
+            new ConfigureStaticPassword(Connection, this, slot);
 
         /// <summary>
         /// Updates the settings of an OTP application slot on a YubiKey without removing
@@ -144,7 +149,7 @@ namespace Yubico.YubiKey.Otp
         /// <param name="slot">The identifier for the OTP application slot to configure.</param>
         /// <inheritdoc cref="OtpSettings{T}.AllowUpdate(bool)" path="/remarks"/>
         public UpdateSlot UpdateSlot(Slot slot) =>
-            new UpdateSlot(_connection, this, slot);
+            new UpdateSlot(Connection, this, slot);
         #endregion
 
         #region Non-Builder Implementations
@@ -184,7 +189,7 @@ namespace Yubico.YubiKey.Otp
                 throw new InvalidOperationException(ExceptionMessages.OtpSlotsNotConfigured);
             }
 
-            var swapResponse = _connection.SendCommand(new SwapSlotsCommand());
+            var swapResponse = Connection.SendCommand(new SwapSlotsCommand());
             if (swapResponse.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(swapResponse.StatusMessage);
@@ -243,12 +248,12 @@ namespace Yubico.YubiKey.Otp
 
             // NDEF is actually a separate application that we need to connect to. Disconnect from OTP, run the NDEF
             // command, and then reconnect to OTP.
-            _connection.Dispose();
+            Connection.Dispose();
 
             ReadNdefDataResponse response;
-            using (_connection = YubiKey.Connect(YubiKeyApplication.OtpNdef))
+            using (var tempConnection = YubiKey.Connect(YubiKeyApplication.OtpNdef)) // TODO Why cant we do this instead of swap connection, open another?
             {
-                var selectResponse = _connection.SendCommand(new SelectNdefDataCommand() { FileID = NdefFileId.Ndef });
+                var selectResponse = tempConnection.SendCommand(new SelectNdefDataCommand() { FileID = NdefFileId.Ndef });
                 if (selectResponse.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(
@@ -258,10 +263,10 @@ namespace Yubico.YubiKey.Otp
                             selectResponse.StatusMessage));
                 }
 
-                response = _connection.SendCommand(new ReadNdefDataCommand());
+                response = tempConnection.SendCommand(new ReadNdefDataCommand());
             }
 
-            _connection = YubiKey.Connect(YubiKeyApplication.Otp);
+            // Connection = YubiKey.Connect(YubiKeyApplication.Otp);
 
             return new NdefDataReader(response.GetData().Span);
         }
@@ -283,18 +288,18 @@ namespace Yubico.YubiKey.Otp
 
         internal FirmwareVersion FirmwareVersion => _otpStatus.FirmwareVersion;
 
-        internal IYubiKeyDevice YubiKey { get; private set; }
+        // internal IYubiKeyDevice YubiKey { get; private set; }
 
         FirmwareVersion IOtpSession.FirmwareVersion => FirmwareVersion;
 
         IYubiKeyDevice IOtpSession.YubiKey => YubiKey;
         #endregion
 
-        /// <inheritdoc />
-        public void Dispose() => _connection.Dispose();
+        // /// <inheritdoc />
+        // public void Dispose() => Connection.Dispose();
 
         #region Private Fields
-        private IYubiKeyConnection _connection;
+        // private IYubiKeyConnection Connection;
         private readonly OtpStatus _otpStatus;
         #endregion
     }

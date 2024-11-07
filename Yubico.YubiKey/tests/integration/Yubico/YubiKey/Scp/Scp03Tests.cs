@@ -13,17 +13,20 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using Xunit;
+using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
 using GetDataCommand = Yubico.YubiKey.Scp.Commands.GetDataCommand;
 
-#pragma warning disable CS0618 // Type or member is obsolete
-
 namespace Yubico.YubiKey.Scp
 {
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class Scp03Tests
     {
         private readonly ReadOnlyMemory<byte> _defaultPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
@@ -39,7 +42,6 @@ namespace Yubico.YubiKey.Scp
             session.Reset();
         }
 
-
         [Fact]
         public void TestImportKey()
         {
@@ -49,14 +51,9 @@ namespace Yubico.YubiKey.Scp
                 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
             };
 
-            var newKeyParams = new Scp03KeyParameters(ScpKid.Scp03, 0x01, new StaticKeys(
-                sk,
-                sk,
-                sk));
+            var newKeyParams = Scp03KeyParameters.FromStaticKeys(new StaticKeys(sk, sk, sk));
 
-            // assumeFalse("SCP03 not supported over NFC on FIPS capable devices", todo
-            //     state.getDeviceInfo().getFipsCapable() != 0 && !state.isUsbTransport());
-
+            // Authenticate with default key, then replace default key
             using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
             {
                 session.PutKey(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
@@ -64,16 +61,31 @@ namespace Yubico.YubiKey.Scp
 
             using (_ = new SecurityDomainSession(Device, newKeyParams))
             {
-                // Authentication with new key should succeed
             }
 
-            Assert.Throws<ArgumentException>(() => //TODO Is this the correct exception to throw? 
+            // Default key should not work now and throw an exception
+            Assert.Throws<ArgumentException>(() =>
             {
                 using (_ = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
                 {
-                    // Default key should not work now and throw an exception
                 }
             });
+        }
+
+
+        [Fact]
+        public void PutKey_WithPublicKey_Succeeds()
+        {
+            var keyReference = new KeyReference(0x10, 0x3);
+
+            using var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey);
+            using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+            var publicKey = new ECPublicKeyParameters(ecdsa);
+            session.PutKey(keyReference, publicKey, 0);
+
+            var keyInformation = session.GetKeyInformation();
+            Assert.True(keyInformation.ContainsKey(keyReference));
         }
 
         [Fact]
@@ -97,7 +109,7 @@ namespace Yubico.YubiKey.Scp
             // Authenticate with key2, delete key 1
             using (var session = new SecurityDomainSession(Device, keyRef2))
             {
-                session.DeleteKeySet(keyRef1.KeyReference);
+                session.DeleteKey(keyRef1.KeyReference);
             }
 
             // Authenticate with key 1, 
@@ -111,7 +123,7 @@ namespace Yubico.YubiKey.Scp
 
             using (var session = new SecurityDomainSession(Device, keyRef2))
             {
-                session.DeleteKeySet(keyRef2.KeyReference, true);
+                session.DeleteKey(keyRef2.KeyReference, true);
             }
 
             // Try to authenticate with key 2, 
@@ -130,46 +142,49 @@ namespace Yubico.YubiKey.Scp
             var keyRef1 = new Scp03KeyParameters(ScpKid.Scp03, 0x10, RandomStaticKeys());
             var keyRef2 = new Scp03KeyParameters(ScpKid.Scp03, 0x10, RandomStaticKeys());
 
+            // Authenticate with default key, then replace default key
             using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
             {
                 session.PutKey(keyRef1.KeyReference, keyRef1.StaticKeys, 0);
             }
-
+            // Authenticate with key1, then add additional key, keyref2
             using (var session = new SecurityDomainSession(Device, keyRef1))
             {
                 session.PutKey(keyRef2.KeyReference, keyRef2.StaticKeys, keyRef1.KeyReference.VersionNumber);
             }
 
+            // Authentication with new key 2 should succeed
             using (_ = new SecurityDomainSession(Device, keyRef2))
             {
-                // Authentication with new key should succeed
             }
 
+            // The ssession throws a SecureChannelException if the attempted key is incorrect --
+            // But only if its not the default key. If it is the default key, it will throw an ArgumentException
             Assert.Throws<SecureChannelException>(
-                () => // TODO SecureChannelException this time for some reason, but ArgumentException if I try with the DefaultKey, check google Keep 
+                () =>
                 {
                     using (_ = new SecurityDomainSession(Device, keyRef1))
                     {
                     }
                 });
-
-            using (_ = new SecurityDomainSession(Device, keyRef2))
-            {
-                // Authentication with new key should succeed
-            }
         }
 
         [Fact]
         public void AuthenticateWithWrongKey_Should_ThrowException()
         {
             var incorrectKeys = RandomStaticKeys();
-            var keyRef = new Scp03KeyParameters(ScpKid.Scp03, 0x01, incorrectKeys);
+            var keyRef = Scp03KeyParameters.FromStaticKeys(incorrectKeys);
 
-            Assert.Throws<ArgumentException>(() => new SecurityDomainSession(Device, keyRef));
+            // Authentication with incorrect key should throw
+            Assert.Throws<ArgumentException>(() =>
+            {
+                using (var session = new SecurityDomainSession(Device, keyRef)) { };
+            });
 
+            // Authentication with default key should succeed
             using (_ = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
             {
-                // Authentication with default key should succeed
+
             }
         }
 
@@ -192,9 +207,25 @@ namespace Yubico.YubiKey.Scp
             var response = connection.SendCommand(new GetDataCommand(TAG_KEY_INFORMATION));
             var result = response.GetData();
 
-            Assert.NotEmpty(result.ToArray());
-            // Assert.Equal(4, result.Length);
-            // Assert.Equal(0xFF, result.ToArray().First());
+            var keyInformation = new Dictionary<KeyReference, Dictionary<byte, byte>>();
+
+            foreach (var tlvObject in TlvObjects.DecodeList(result.Span))
+            {
+                var value = TlvObjects.UnpackValue(0xC0, tlvObject.GetBytes().Span);
+                var keyRef = new KeyReference(value.Span[0], value.Span[1]);
+                var keyComponents = new Dictionary<byte, byte>();
+
+                // Iterate while there are more key components, each component is 2 bytes, so take 2 bytes at a time
+                while (!(value = value[2..]).IsEmpty)
+                {
+                    keyComponents.Add(value.Span[0], value.Span[1]);
+                }
+
+                keyInformation.Add(keyRef, keyComponents);
+            }
+            Assert.NotEmpty(keyInformation);
+            Assert.Equal(4, keyInformation.Keys.Count);
+            Assert.Equal(0xFF, keyInformation.Keys.First().VersionNumber);
         }
 
         [Fact]
@@ -232,17 +263,18 @@ namespace Yubico.YubiKey.Scp
                 session.PutKey(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
             }
 
+            // Authentication with new key should succeed
             using (var session = new SecurityDomainSession(Device, newKeyParams))
             {
-                // Authentication with new key should succeed
                 session.GetKeyInformation();
             }
 
-            Assert.Throws<ArgumentException>(() => //TODO Is this the correct exception to throw? 
+
+            // Default key should not work now and throw an exception
+            Assert.Throws<ArgumentException>(() =>
             {
                 using (_ = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
                 {
-                    // Default key should not work now and throw an exception
                 }
             });
 
@@ -259,26 +291,91 @@ namespace Yubico.YubiKey.Scp
         }
 
         [Fact]
-        public void TryConnectScp_WithApplicationId_Succeeds()
+        public void Scp03_GetSupportedCaIdentifiers_Succeeds()
         {
-            var isValid =
-                Device.TryConnectScp(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey, out var connection);
-            using (connection)
-            {
-                Assert.True(isValid);
-                Assert.NotNull(connection);
+            using var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey);
+            var result = session.GetSupportedCaIdentifiers(true, true);
+            Assert.NotEmpty(result);
+        }
+        
+        [Fact]
+        public void Scp03_GetCardRecognitionData_Succeeds()
+        {
+            using var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey);
+            var result = session.GetCardRecognitionData();
+            Assert.True(result.Length > 0);
+        }
+        
+        [Fact]
+        public void Scp03_GetData_Succeeds()
+        {
+            using var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey);
+            var result = session.GetData(0x66); // Card Data
+            Assert.True(result.Length > 0);
+        }
 
-                var cmd = new VerifyPinCommand(_defaultPin);
-                var rsp = connection.SendCommand(cmd);
-                Assert.Equal(ResponseStatus.Success, rsp.Status);
-            }
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void PivSession_TryVerifyPinAndGetMetaData_Succeeds(
+            StandardTestDevice testDeviceType)
+        {
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            Assert.True(device.FirmwareVersion >= FirmwareVersion.V5_3_0);
+            Assert.True(device.HasFeature(YubiKeyFeature.Scp03));
+
+            using var pivSession = new PivSession(device, Scp03KeyParameters.DefaultKey);
+
+            var result = pivSession.TryVerifyPin(
+                new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 }),
+                out _);
+
+            Assert.True(result);
+
+            var metadata = pivSession.GetMetadata(PivSlot.Pin)!;
+            Assert.Equal(3, metadata.RetryCount);
         }
 
         [Fact]
-        public void TryConnectScp_WithApplication_Succeeds()
+        public void Device_Connect_With_Application_Succeeds()
         {
-            var isValid =
-                Device.TryConnectScp(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey, out var connection);
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
+                Transport.SmartCard, FirmwareVersion.V5_3_0);
+
+            using var connection = device.Connect(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey);
+            Assert.NotNull(connection);
+
+            var cmd = new VerifyPinCommand(_defaultPin);
+            var rsp = connection!.SendCommand(cmd);
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
+        }
+
+        [Fact]
+        public void Device_Connect_ApplicationId_Succeeds()
+        {
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
+                Transport.SmartCard, FirmwareVersion.V5_3_0);
+
+            using IYubiKeyConnection connection = device.Connect(
+                YubiKeyApplication.Piv.GetIso7816ApplicationId(), Scp03KeyParameters.DefaultKey);
+
+            Assert.NotNull(connection);
+
+            var cmd = new VerifyPinCommand(_defaultPin);
+            var rsp = connection!.SendCommand(cmd);
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
+        }
+
+        [Fact]
+        public void Device_TryConnect_With_Application_Succeeds()
+        {
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
+                Transport.SmartCard, FirmwareVersion.V5_3_0);
+
+            var isValid = device.TryConnect(
+                YubiKeyApplication.Piv,
+                Scp03KeyParameters.DefaultKey,
+                out var connection);
+
             using (connection)
             {
                 Assert.NotNull(connection);
@@ -290,29 +387,22 @@ namespace Yubico.YubiKey.Scp
         }
 
         [Fact]
-        public void ConnectScp_WithApplication_Succeeds()
+        public void Device_TryConnect_With_ApplicationId_Succeeds()
         {
-            using IYubiKeyConnection connection =
-                Device.ConnectScp(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey);
-            Assert.NotNull(connection);
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
+                Transport.SmartCard, FirmwareVersion.V5_3_0);
 
-            var cmd = new VerifyPinCommand(_defaultPin);
-            var rsp = connection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
-        }
+            var isValid = device.TryConnect(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey,
+                out var connection);
 
-        [Fact]
-        public void ConnectScp_WithApplicationId_Succeeds()
-        {
-            using IYubiKeyConnection connection = Device.ConnectScp(
-                YubiKeyApplication.Piv.GetIso7816ApplicationId(),
-                Scp03KeyParameters.DefaultKey);
-
-            Assert.NotNull(connection);
-
-            var cmd = new VerifyPinCommand(_defaultPin);
-            var rsp = connection!.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
+            using (connection)
+            {
+                Assert.True(isValid);
+                Assert.NotNull(connection);
+                var cmd = new VerifyPinCommand(_defaultPin);
+                var rsp = connection!.SendCommand(cmd);
+                Assert.Equal(ResponseStatus.Success, rsp.Status);
+            }
         }
 
         #region Helpers

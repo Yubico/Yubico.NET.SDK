@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp.Commands
@@ -41,7 +42,12 @@ namespace Yubico.YubiKey.Scp.Commands
 
             if (responseApdu.Data.Length != 29)
             {
-                throw new ArgumentException(ExceptionMessages.IncorrectInitializeUpdateResponseData, nameof(responseApdu));
+                // This can indicate that the authentication was not successful due to incorrect authentication data, such as keys the keys being used
+                string message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    $"{ExceptionMessages.IncorrectInitializeUpdateResponseData}" + " " +
+                    $"SW: 0x{responseApdu.SW.ToString("X4", CultureInfo.InvariantCulture)}");
+                throw new ArgumentException(message, nameof(responseApdu));
             }
 
             var responseData = responseApdu.Data.Span;

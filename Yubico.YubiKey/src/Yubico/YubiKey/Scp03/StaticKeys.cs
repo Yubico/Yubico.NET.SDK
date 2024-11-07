@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Scp03
 
                 _keyVersionNumber = value;
             }
-        } //TODO replace this?
+        }
 
         /// <summary>
         /// AES128 shared secret key used to calculate the Session-MAC key. Also

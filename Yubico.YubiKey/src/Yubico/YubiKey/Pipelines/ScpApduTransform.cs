@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Scp;
@@ -20,33 +22,36 @@ using Yubico.YubiKey.Scp;
 namespace Yubico.YubiKey.Pipelines
 {
     /// <summary>
+    /// Constructs the shared state for SCP communication over SCP03, SCP11a/b/c.
     /// Performs SCP encrypt-then-MAC on commands and verify-then-decrypt on responses.
     /// </summary>
     /// <remarks>
     /// Does an SCP Initialize Update / External Authenticate handshake at setup.
-    ///
     /// Commands and responses sent through this pipeline are confidential and authenticated.
-    ///
-    /// Requires pre-shared <see cref="Scp03.StaticKeys"/>. TODO
     /// </remarks>
-    // broken into two transforms
     internal class ScpApduTransform : IApduTransform, IDisposable
     {
         public ScpKeyParameters KeyParameters { get; }
-        public DataEncryptor? DataEncryptor; // When is this ever null?
+
+        public EncryptDataFunc EncryptDataFunc =>
+            _dataEncryptor ?? ThrowIfUninitialized<EncryptDataFunc>();
+
+        private EncryptDataFunc? _dataEncryptor;
 
         private ScpState ScpState =>
-            _scpState ?? throw new InvalidOperationException($"{nameof(Scp.ScpState)} has not been initialized. The Setup method must be called.");
-        
+            _scpState ?? ThrowIfUninitialized<ScpState>();
+
         private readonly IApduTransform _pipeline;
         private ScpState? _scpState;
         private bool _disposed;
 
+        [DoesNotReturn]
+        private T ThrowIfUninitialized<T>() => throw new InvalidOperationException($"{nameof(Scp.ScpState)} has not been initialized. The Setup method must be called.");
         /// <summary>
         /// Constructs a new pipeline from the given one.
         /// </summary>
         /// <param name="pipeline">Underlying pipeline to send and receive encoded APDUs with</param>
-        /// <param name="keyParameters"></param>//todo
+        /// <param name="keyParameters">The <see cref="ScpKeyParameters"/> for the SCP connection</param>
         public ScpApduTransform(IApduTransform pipeline, ScpKeyParameters keyParameters)
         {
             _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
@@ -62,21 +67,59 @@ namespace Yubico.YubiKey.Pipelines
 
             if (KeyParameters.GetType() == typeof(Scp03KeyParameters))
             {
-                DataEncryptor = InitializeScp03((Scp03KeyParameters)KeyParameters);
+                _dataEncryptor = InitializeScp03((Scp03KeyParameters)KeyParameters);
             }
             else if (KeyParameters.GetType() == typeof(Scp11KeyParameters))
             {
-                DataEncryptor = InitializeScp11((Scp11KeyParameters)KeyParameters);
+                _dataEncryptor = InitializeScp11((Scp11KeyParameters)KeyParameters);
             }
         }
 
-        private DataEncryptor InitializeScp11(Scp11KeyParameters keyParameters)
+        /// <summary>
+        /// Passes the supplied command into the pipeline, and returns the final response.
+        /// </summary>
+        /// <remarks>
+        /// Encodes the command using the SCP state, sends it to the underlying pipeline, and then decodes the response.
+        /// <para>
+        /// Note: Some commands should not be encoded. For those, the pipeline is invoked directly.
+        /// </para>
+        /// </remarks>
+        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
+        {
+            if (ShouldNotEncode(commandType))
+            {
+                return _pipeline.Invoke(command, commandType, responseType);
+            }
+
+            var encodedCommand = ScpState.EncodeCommand(command);
+            var response = _pipeline.Invoke(encodedCommand, commandType, responseType);
+
+
+            return ScpState.DecodeResponse(response);
+        }
+
+        private static bool ShouldNotEncode(Type commandType)
+        {
+            // This method introduced high coupling between the SCP pipeline and the applications.
+            // The applications should not have to know about the SCP pipeline, or they should be able to
+            // send the commands without the pipeline.
+            var exceptionList = new[]
+            {
+                typeof(InterIndustry.Commands.SelectApplicationCommand),
+                typeof(Oath.Commands.SelectOathCommand),
+                typeof(Scp.Commands.ResetCommand),
+            };
+
+            return exceptionList.Contains(commandType);
+        }
+
+        private EncryptDataFunc InitializeScp11(Scp11KeyParameters keyParameters)
         {
             _scpState = Scp11State.CreateScpState(_pipeline, keyParameters);
             return _scpState.GetDataEncryptor();
         }
 
-        private DataEncryptor InitializeScp03(Scp03KeyParameters keyParams)
+        private EncryptDataFunc InitializeScp03(Scp03KeyParameters keyParams)
         {
             // Generate host challenge
             using var rng = CryptographyProviders.RngCreator();
@@ -86,25 +129,6 @@ namespace Yubico.YubiKey.Pipelines
             _scpState = Scp03State.CreateScpState(_pipeline, keyParams, hostChallenge);
 
             return _scpState.GetDataEncryptor();
-        }
-        
-
-        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
-        {
-            // Encode command
-            var encodedCommand = ScpState.EncodeCommand(command);
-
-            // Pass along the encoded command
-            var response = _pipeline.Invoke(encodedCommand, commandType, responseType);
-
-            // Special carve out for SelectApplication here, since there will be nothing to decode
-            if (commandType == typeof(InterIndustry.Commands.SelectApplicationCommand))
-            {
-                return response;
-            }
-
-            // Decode response and return it
-            return ScpState.DecodeResponse(response);
         }
 
         // There is a call to cleanup and a call to Dispose. The cleanup only

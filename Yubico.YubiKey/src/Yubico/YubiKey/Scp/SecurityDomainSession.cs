@@ -14,15 +14,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
 using Microsoft.Extensions.Logging;
+using Yubico.Core.Buffers;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
@@ -88,12 +86,13 @@ namespace Yubico.YubiKey.Scp
     /// exception.
     /// </para>
     /// </remarks>
-    public sealed class SecurityDomainSession : IDisposable
+    public sealed class SecurityDomainSession : ApplicationSession
     {
-        private const byte KeyTypeEccPrivateKey = 0xB1;
-        private const byte KeyTypeEccKeyParams = 0xF0;
-        private const byte KeyTypeEccPublicKey = 0xB0;
-        private const byte KeyTypeAes = 0x88;
+        #region Tags
+        private const byte EcKeyType = 0xF0;
+        private const byte EcPublicKeyKeyType = 0xB0;
+        private const byte EcPrivateKeyKeyType = 0xB1;
+        private const byte AesKeyType = 0x88;
         private const byte ControlReferenceTag = 0xA6;
         private const byte KidKvnTag = 0x83;
         private const byte KeyInformationTag = 0xE0;
@@ -103,21 +102,38 @@ namespace Yubico.YubiKey.Scp
         private const ushort CertificateStoreTag = 0xBF21;
         private const ushort CaKlocIdentifiersTag = 0xFF33; // Key Loading OCE Certificate
         private const ushort CaKlccIdentifiersTag = 0xFF34; // Key Loading Card Certificate
-        private readonly IYubiKeyDevice _yubiKey;
-        private readonly ILogger _log = Log.GetLogger<SecurityDomainSession>();
-        private bool _disposed;
-        private readonly IScpYubiKeyConnection? _connection;
+        #endregion
 
-        private IScpYubiKeyConnection AuthenticatedConnection =>
-            _connection ?? throw new InvalidOperationException("No secure connection initialized.");
-
-        private IYubiKeyConnection UnauthenticatedConnection => _yubiKey.Connect(YubiKeyApplication.SecurityDomain);
-
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        private SecurityDomainSession()
+        private EncryptDataFunc EncryptData
         {
-            throw new NotImplementedException();
+            get
+            {
+                if (Connection is IScpYubiKeyConnection scpConnection)
+                {
+                    return scpConnection.EncryptDataFunc;
+                }
+
+                throw new InvalidOperationException("No secure connection initialized.");
+            }
+        }
+
+        /// <summary>
+        /// Create an unauthenticated instance of <see cref="SecurityDomainSession"/>, the object that
+        /// represents SCP on the YubiKey.
+        /// </summary>
+        /// <remarks>Sessions created from this constructor will not be able to perform operations which require authentication
+        /// <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
+        /// </remarks>
+        /// <param name="yubiKey">
+        /// The object that represents the actual YubiKey which will perform the
+        /// operations.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>yubiKey</c> argument is null.
+        /// </exception>
+        public SecurityDomainSession(IYubiKeyDevice yubiKey)
+            : base(Log.GetLogger<SecurityDomainSession>(), yubiKey, YubiKeyApplication.SecurityDomain, null)
+        {
         }
 
         /// <summary>
@@ -126,18 +142,16 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         /// <remarks>
         /// See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP.
+        /// <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information on SCP.</para>
         /// <para>
         /// Because this class implements <c>IDisposable</c>, use the <c>using</c>
         /// keyword. For example,
         /// <code language="csharp">
         ///   if (YubiKeyDevice.TryGetYubiKey(serialNumber, out IYubiKeyDevice yubiKeyDevice))
         ///   {
-        ///       var staticKeys = new StaticKeys();
-        ///       // Note that you do not need to call the "WithScp" method when
-        ///       // using the ScpSession class.
-        ///       using (var scp = new ScpSession(yubiKeyDevice, staticKeys))
+        ///       using (var scp = new SecurityDomainSession(yubiKeyDevice, Scp03KeyParameters.DefaultKey))
         ///       {
-        ///           // Perform SCP operations.
+        ///           // Perform SCP operations while authenticated with SCP03
         ///       }
         ///   }
         /// </code>
@@ -156,41 +170,8 @@ namespace Yubico.YubiKey.Scp
         /// The <c>yubiKey</c> or <c>scpKeys</c> argument is null.
         /// </exception>
         public SecurityDomainSession(IYubiKeyDevice yubiKey, ScpKeyParameters scpKeyParameters)
+            : base(Log.GetLogger<SecurityDomainSession>(), yubiKey, YubiKeyApplication.SecurityDomain, scpKeyParameters)
         {
-            _log.LogInformation("Create a new instance of ScpSession.");
-
-            if (yubiKey is null)
-            {
-                throw new ArgumentNullException(nameof(yubiKey));
-            }
-
-            if (scpKeyParameters is null)
-            {
-                throw new ArgumentNullException(nameof(scpKeyParameters));
-            }
-
-            _yubiKey = yubiKey;
-            _connection = yubiKey.ConnectScp(YubiKeyApplication.SecurityDomain, scpKeyParameters);
-        }
-
-        /// <summary>
-        /// Create an unauthenticated instance of <see cref="SecurityDomainSession"/>, the object that
-        /// represents SCP on the YubiKey.
-        /// </summary>
-        /// <remarks>Sessions created from this constructor will not be able to perform operations which require authentication
-        /// <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
-        /// </remarks>
-        /// <param name="yubiKey">
-        /// The object that represents the actual YubiKey which will perform the
-        /// operations.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// The <c>yubiKey</c> argument is null.
-        /// </exception>
-        public SecurityDomainSession(IYubiKeyDevice yubiKey)
-        {
-            _log.LogInformation("Create a new instance of ScpSession.");
-            _yubiKey = yubiKey ?? throw new ArgumentNullException(nameof(yubiKey));
         }
 
         /// <summary>
@@ -200,19 +181,16 @@ namespace Yubico.YubiKey.Scp
         /// <param name="newKeySet">The new SCP03 key set to store.</param>
         /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
         /// <exception cref="ArgumentException">Thrown when the KID is not 0x01 for SCP03 key sets.</exception>
-        /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other scp related error
+        /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other SCP related error
         /// described in the exception message.</exception>
         public void PutKey(KeyReference keyRef, StaticKeys newKeySet, int replaceKvn)
         {
-            _log.LogInformation("Importing SCP03 key set into KeyRef {KeyRef}", keyRef);
+            Logger.LogInformation("Importing SCP03 key set into KeyRef {KeyRef}", keyRef);
 
             if (keyRef.Id != ScpKid.Scp03)
             {
                 throw new ArgumentException("KID must be 0x01 for SCP03 key sets");
             }
-
-            var encryptor = AuthenticatedConnection.DataEncryptor ??
-                throw new InvalidOperationException("No session DEK available");
 
             using var dataStream = new MemoryStream();
             using var dataWriter = new BinaryWriter(dataStream);
@@ -223,8 +201,9 @@ namespace Yubico.YubiKey.Scp
             dataWriter.Write(keyRef.VersionNumber);
             expectedKcvWriter.Write(keyRef.VersionNumber);
 
-            Span<byte> kcvInput = stackalloc byte[16] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+            Span<byte> kcvInput = stackalloc byte[16];
             ReadOnlySpan<byte> kvcZeroIv = stackalloc byte[16];
+            kcvInput.Fill(1);
 
             // Process all keys
             foreach (var key in new[]
@@ -241,10 +220,10 @@ namespace Yubico.YubiKey.Scp
                     kcvInput)[..3];
 
                 // Encrypt the key using session encryptor
-                var encryptedKey = encryptor(key);
+                var encryptedKey = EncryptData(key);
 
                 // Write key structure
-                var tlvData = new TlvObject(KeyTypeAes, encryptedKey.Span.ToArray()).GetBytes();
+                var tlvData = new TlvObject(AesKeyType, encryptedKey.Span.ToArray()).GetBytes();
                 dataWriter.Write(tlvData.ToArray());
 
                 // Write KCV
@@ -260,14 +239,14 @@ namespace Yubico.YubiKey.Scp
             byte p2 = (byte)(0x80 | keyRef.Id); // OR with 0x80 indicates that we're sending multiple keys
 
             var command = new PutKeyCommand((byte)replaceKvn, p2, commandData);
-            var response = AuthenticatedConnection.SendCommand(command);
+            var response = Connection.SendCommand(command);
             ThrowIfFailed(response);
 
             var responseKcvData = response.GetData().Span;
             ReadOnlySpan<byte> expectedKcvData = expectedKcvStream.ToArray().AsSpan();
             ValidateCheckSum(expectedKcvData, responseKcvData);
 
-            _log.LogInformation("Successsfully put static keys for KeyRef {KeyRef}", keyRef);
+            Logger.LogInformation("Successsfully put static keys for KeyRef {KeyRef}", keyRef);
         }
 
         /// <summary>
@@ -278,14 +257,11 @@ namespace Yubico.YubiKey.Scp
         /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
         /// <exception cref="ArgumentException">Thrown when the private key is not of type SECP256R1.</exception>
         /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
-        /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other scp related error
+        /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other SCP related error
         /// described in the exception message.</exception>
         public void PutKey(KeyReference keyRef, ECPrivateKeyParameters privateKeyParameters, int replaceKvn)
         {
-            _log.LogInformation("Importing SCP11 private key into KeyRef {KeyRef}", keyRef);
-
-            var encryptor = AuthenticatedConnection.DataEncryptor ?? throw new InvalidOperationException(
-                "No secure session established. DataEncryptor required for key import.");
+            Logger.LogInformation("Importing SCP11 private key into KeyRef {KeyRef}", keyRef);
 
             var privateKey = privateKeyParameters.Parameters;
             if (privateKey.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
@@ -307,8 +283,8 @@ namespace Yubico.YubiKey.Scp
                 try
                 {
                     // Must be encrypted with the active sessions data encryption key
-                    var encryptedKey = encryptor(privateKeyBytes);
-                    var privateKeyTlv = new TlvObject(KeyTypeEccPrivateKey, encryptedKey.Span).GetBytes();
+                    var encryptedKey = EncryptData(privateKeyBytes);
+                    var privateKeyTlv = new TlvObject(EcPrivateKeyKeyType, encryptedKey.Span).GetBytes();
                     commandDataWriter.Write(privateKeyTlv.ToArray());
                 }
                 finally
@@ -317,13 +293,13 @@ namespace Yubico.YubiKey.Scp
                 }
 
                 // Write the ECC parameters
-                var paramsTlv = new TlvObject(KeyTypeEccKeyParams, new byte[] { 0x00 }).GetBytes();
+                var paramsTlv = new TlvObject(EcKeyType, new byte[] { 0x00 }).GetBytes();
                 commandDataWriter.Write(paramsTlv.ToArray());
                 commandDataWriter.Write((byte)0);
 
                 // Create and send the command
                 var command = new PutKeyCommand((byte)replaceKvn, keyRef.Id, commandDataStream.ToArray());
-                var response = AuthenticatedConnection.SendCommand(command);
+                var response = Connection.SendCommand(command);
                 ThrowIfFailed(response);
 
                 // Get and validate the response
@@ -331,12 +307,11 @@ namespace Yubico.YubiKey.Scp
                 Span<byte> expectedResponseData = new[] { keyRef.VersionNumber };
                 ValidateCheckSum(responseData.Span, expectedResponseData);
 
-                _log.LogInformation("Successsfully put private key for KeyRef {KeyRef}", keyRef);
-
+                Logger.LogInformation("Successsfully put private key for KeyRef {KeyRef}", keyRef);
             }
             catch (Exception ex)
             {
-                _log.LogError(ex, "Failed to put private key for KeyRef {KeyRef}", keyRef);
+                Logger.LogError(ex, "Failed to put private key for KeyRef {KeyRef}", keyRef);
                 throw;
             }
         }
@@ -349,11 +324,11 @@ namespace Yubico.YubiKey.Scp
         /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
         /// <exception cref="ArgumentException">Thrown when the public key is not of type SECP256R1.</exception>
         /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
-        /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other scp related error
+        /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other SCP related error
         /// described in the exception message.</exception>
         public void PutKey(KeyReference keyRef, ECPublicKeyParameters publicKeyParameters, int replaceKvn)
         {
-            _log.LogInformation("Importing SCP11 public key into KeyRef {KeyRef}", keyRef);
+            Logger.LogInformation("Importing SCP11 public key into KeyRef {KeyRef}", keyRef);
 
             var pkParams = publicKeyParameters.Parameters;
             if (pkParams.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
@@ -376,18 +351,18 @@ namespace Yubico.YubiKey.Scp
                         .Concat(pkParams.Q.X)
                         .Concat(pkParams.Q.Y).ToArray().AsSpan();
 
-                byte[] publicKeyTlvData = new TlvObject(KeyTypeEccPublicKey, publicKeyRawData).GetBytes().ToArray();
+                byte[] publicKeyTlvData = new TlvObject(EcPublicKeyKeyType, publicKeyRawData).GetBytes().ToArray();
                 commandDataWriter.Write(publicKeyTlvData);
 
                 // Write the ECC parameters
-                var paramsTlv = new TlvObject(KeyTypeEccKeyParams, new byte[] { 0x00 }).GetBytes();
+                var paramsTlv = new TlvObject(EcKeyType, new byte[] { 0 }).GetBytes();
                 commandDataWriter.Write(paramsTlv.ToArray());
                 commandDataWriter.Write((byte)0);
 
                 // Create and send the command
                 byte[] commandData = commandDataMs.ToArray();
                 var command = new PutKeyCommand((byte)replaceKvn, keyRef.Id, commandData);
-                var response = AuthenticatedConnection.SendCommand(command);
+                var response = Connection.SendCommand(command);
                 ThrowIfFailed(response);
 
                 // Get and validate the response
@@ -396,20 +371,12 @@ namespace Yubico.YubiKey.Scp
 
                 ValidateCheckSum(responseData.Span, expectedResponseData);
 
-                _log.LogInformation("Successsfully put public key for KeyRef {KeyRef}", keyRef);
+                Logger.LogInformation("Successsfully put public key for KeyRef {KeyRef}", keyRef);
             }
             catch (Exception ex)
             {
-                _log.LogError(ex, "Failed to put public key for KeyRef {KeyRef}", keyRef);
+                Logger.LogError(ex, "Failed to put public key for KeyRef {KeyRef}", keyRef);
                 throw;
-            }
-        }
-
-        private static void ValidateCheckSum(ReadOnlySpan<byte> responseData, ReadOnlySpan<byte> expectedResponseData)
-        {
-            if (!CryptographicOperations.FixedTimeEquals(responseData, expectedResponseData))
-            {
-                throw new SecureChannelException(ExceptionMessages.ChecksumError);
             }
         }
 
@@ -433,12 +400,12 @@ namespace Yubico.YubiKey.Scp
         // /// <c>true</c>, otherwise, pass <c>false</c>. This arg has a default of
         // /// <c>false</c> so if no argument is given, it will be <c>false</c>.
         // /// </param>
-        // /// <exception cref="SecureChannelException">Thrown when there was an scp error, described in the exception message.</exception>
+        // /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
         // public void DeleteKeySet(byte keyVersionNumber, bool isLastKey = false)
         // {
         //     _log.LogInformation("Deleting an SCP key set from a YubiKey.");
         //     var command = new DeleteKeyCommand(keyVersionNumber, isLastKey);
-        //     var response = AuthenticatedConnection.SendCommand(command);
+        //     var response = Connection.SendCommand(command);
         //     ThrowIfFailed(response);
         //     _log.LogInformation("Successfully deleted {{KeyVersionNumber}}", keyVersionNumber);
         // }
@@ -481,7 +448,7 @@ namespace Yubico.YubiKey.Scp
                 }
             }
 
-            _log.LogDebug("Deleting keys matching KeyRef {KeyRef}", keyRef);
+            Logger.LogDebug("Deleting keys matching KeyRef {KeyRef}", keyRef);
 
             // Build TLV list for command data
             var tlvList = new List<TlvObject>();
@@ -497,11 +464,11 @@ namespace Yubico.YubiKey.Scp
 
             byte[] data = TlvObjects.EncodeList(tlvList);
             var command = new DeleteKeyCommand(data, deleteLast);
-            var response = AuthenticatedConnection.SendCommand(command);
+            var response = Connection.SendCommand(command);
 
             ThrowIfFailed(response);
 
-            _log.LogInformation("Keys deleted. KeyRef: ({KeyReference})", keyRef);
+            Logger.LogInformation("Keys deleted. KeyRef: ({KeyReference})", keyRef);
         }
 
         /// <summary>
@@ -515,10 +482,10 @@ namespace Yubico.YubiKey.Scp
         /// <param name="keyRef">The KID-KVN pair of the key that should be generated.</param>
         /// <param name="replaceKvn">The key version number of the key set that should be replaced, or 0 to generate a new key pair.</param>
         /// <returns>The parameters of the generated key, including the curve and the public point.</returns>
-        /// <exception cref="SecureChannelException">Thrown when there was an scp error, described in the exception message.</exception>
+        /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
         public ECPublicKeyParameters GenerateEcKey(KeyReference keyRef, byte replaceKvn)
         {
-            _log.LogInformation(
+            Logger.LogInformation(
                 "Generating new key for {KeyRef}{ReplaceMessage}",
                 keyRef,
                 replaceKvn == 0
@@ -526,19 +493,19 @@ namespace Yubico.YubiKey.Scp
                     : $", replacing KVN=0x{replaceKvn:X2}");
 
             // Create tlv data for the command
-            var paramsTlv = new TlvObject(KeyTypeEccKeyParams, new byte[] { 0 }).GetBytes();
+            var paramsTlv = new TlvObject(EcKeyType, new byte[] { 0 }).GetBytes();
             byte[] commandData = new byte[paramsTlv.Length + 1];
             commandData[0] = keyRef.VersionNumber;
             paramsTlv.CopyTo(commandData.AsMemory(1));
 
             // Create and send the command
             var command = new GenerateEcKeyCommand(replaceKvn, keyRef.Id, commandData);
-            var response = AuthenticatedConnection.SendCommand(command);
+            var response = Connection.SendCommand(command);
             ThrowIfFailed(response);
 
             // Parse the response, extract the public point
             var tlvReader = new TlvReader(response.GetData());
-            var encodedPoint = tlvReader.ReadValue(KeyTypeEccPublicKey).Span;
+            var encodedPoint = tlvReader.ReadValue(EcPublicKeyKeyType).Span;
 
             // Create the ECParameters with the public point
             var eccPublicKey = encodedPoint.CreateEcPublicKeyFromBytes();
@@ -553,7 +520,7 @@ namespace Yubico.YubiKey.Scp
         /// <param name="ski">The Subject Key Identifier to store.</param>
         public void StoreCaIssuer(KeyReference keyRef, ReadOnlyMemory<byte> ski)
         {
-            _log.LogDebug("Storing CA issuer SKI for {KeyRef}", keyRef);
+            Logger.LogDebug("Storing CA issuer SKI for {KeyRef}", keyRef);
 
             byte klcc = 0; // Key Loading Card Certificate
             switch (keyRef.Id)
@@ -579,7 +546,7 @@ namespace Yubico.YubiKey.Scp
             // Send store data command
             StoreData(data);
 
-            _log.LogInformation("CA issuer SKI stored");
+            Logger.LogInformation("CA issuer SKI stored");
         }
 
         /// <summary>
@@ -591,10 +558,10 @@ namespace Yubico.YubiKey.Scp
         /// The certificates will be stored in the order they are provided in the list.
         /// </remarks>
         /// <exception cref="ArgumentException">Thrown when certificatedata</exception>
-        /// <exception cref="SecureChannelException">Thrown when there was an scp error, described in the exception message.</exception>
+        /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
         public void StoreCertificates(KeyReference keyRef, IReadOnlyList<X509Certificate2> certificates)
         {
-            _log.LogDebug("Storing certificate bundle for {KeyRef}", keyRef);
+            Logger.LogDebug("Storing certificate bundle for {KeyRef}", keyRef);
 
             // Write each certificate to a memory stream
             using var certDataMs = new MemoryStream();
@@ -613,13 +580,13 @@ namespace Yubico.YubiKey.Scp
 
             // Create and serialize data
             Memory<byte> certDataEncoded = TlvObjects.EncodeMany(
-                        new TlvObject(ControlReferenceTag, new TlvObject(KidKvnTag, keyRef.GetBytes).GetBytes().Span),
+                new TlvObject(ControlReferenceTag, new TlvObject(KidKvnTag, keyRef.GetBytes).GetBytes().Span),
                 new TlvObject(CertificateStoreTag, certDataMs.ToArray())
-            );
+                );
 
             StoreData(certDataEncoded);
 
-            _log.LogInformation("Certificate bundle stored");
+            Logger.LogInformation("Certificate bundle stored");
         }
 
         /// <summary>
@@ -630,19 +597,19 @@ namespace Yubico.YubiKey.Scp
         /// certificate signed by the CA can be used.
         /// </remarks>
         /// <param name="keyRef">A reference to the key for which the allowlist will be stored.</param>
-        /// <param name="serials">The list of certificate serial numbers to be stored in the allowlist.</param>
+        /// <param name="serials">The list of certificate serial numbers (in hexadecimal string format) to be stored in the allowlist for the given <see cref="KeyReference"/>.</param>
         /// <exception cref="ArgumentException">Thrown when a serial number cannot be encoded properly.</exception>
-        /// <exception cref="SecureChannelException">Thrown when there was an scp error, described in the exception message.</exception>
-        public void StoreAllowlist(KeyReference keyRef, IReadOnlyList<BigInteger> serials)
+        /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
+        public void StoreAllowlist(KeyReference keyRef, IReadOnlyCollection<string> serials)
         {
-            _log.LogDebug("Storing allow list for {KeyRef}", keyRef);
+            Logger.LogDebug("Storing allow list for {KeyRef}", keyRef);
 
             using var serialDataMs = new MemoryStream();
-            foreach (var serial in serials)
+            foreach (string? serial in serials)
             {
                 try
                 {
-                    byte[] serialAsBytes = serial.ToByteArray();
+                    byte[] serialAsBytes = Base16.DecodeText(serial);
                     byte[] serialTlvEncoded = new TlvObject(SerialTag, serialAsBytes).GetBytes().ToArray();
                     serialDataMs.Write(serialTlvEncoded, 0, serialTlvEncoded.Length);
                 }
@@ -655,12 +622,19 @@ namespace Yubico.YubiKey.Scp
             Memory<byte> serialsDataEncoded = TlvObjects.EncodeMany(
                 new TlvObject(ControlReferenceTag, new TlvObject(KidKvnTag, keyRef.GetBytes).GetBytes().Span),
                 new TlvObject(SerialsAllowListTag, serialDataMs.ToArray())
-            );
+                );
 
             StoreData(serialsDataEncoded);
 
-            _log.LogInformation("Certificate bundle stored");
+            Logger.LogInformation("Certificate bundle stored");
         }
+
+        /// <summary>
+        /// Clears the allow list for the given <see cref="KeyReference"/>
+        /// </summary>
+        /// <seealso cref="StoreAllowlist"/>
+        /// <param name="keyRef">The key reference that holds the allow list</param>
+        public void ClearAllowList(KeyReference keyRef) => StoreAllowlist(keyRef, Array.Empty<string>());
 
         /// <summary>
         /// Stores data in the Security Domain or targeted Application on the YubiKey using the GlobalPlatform STORE DATA command.
@@ -668,15 +642,18 @@ namespace Yubico.YubiKey.Scp
         /// <remarks>
         /// The STORE DATA command is used to transfer data to either the Security Domain itself or to an Application 
         /// being personalized. The data must be formatted as BER-TLV structures according to ISO 8825.
-        /// 
+        /// <para>
         /// This implementation:
         /// - Uses a single block transfer (P1.b8=1 indicating last block)
         /// - Requires BER-TLV formatted data (P1.b5-b4=10)
         /// - Does not provide encryption information (P1.b7-b6=00)
-        /// 
+        /// </para>
+        /// <para>
         /// Note that this command's behavior depends on the current security context:
         /// - Outside a personalization session: Data is processed by the Security Domain
         /// - During personalization (after INSTALL [for personalization]): Data is forwarded to the target Application
+        /// </para>
+        /// <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
         /// </remarks>
         /// <param name="data">
         /// The data to be stored, which must be formatted as BER-TLV structures according to ISO 8825.
@@ -684,13 +661,13 @@ namespace Yubico.YubiKey.Scp
         /// <exception cref="InvalidOperationException">
         /// Thrown when no secure connection is available or the security context is invalid.
         /// </exception>
-        /// <exception cref="SecureChannelException">Thrown when there was an scp error, described in the exception message.</exception>
-        public void StoreData(ReadOnlyMemory<byte> data)
+        /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
+        public void StoreData(ReadOnlyMemory<byte> data) // TODO make test
         {
-            _log.LogInformation("Storing data with length:{Length}", data.Length);
+            Logger.LogInformation("Storing data with length:{Length}", data.Length);
 
             var command = new StoreDataCommand(data);
-            var response = AuthenticatedConnection.SendCommand(command);
+            var response = Connection.SendCommand(command);
             ThrowIfFailed(response);
         }
 
@@ -698,10 +675,10 @@ namespace Yubico.YubiKey.Scp
         /// Retrieves the key information stored in the YubiKey and returns it in a dictionary format.
         /// </summary>
         /// <returns>A read only dictionary containing the KeyReference as the key and a dictionary of key components as the value.</returns>
-        /// <exception cref="SecureChannelException">Thrown when there was an scp error, described in the exception message.</exception>
+        /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
         public IReadOnlyDictionary<KeyReference, Dictionary<byte, byte>> GetKeyInformation()
         {
-            _log.LogInformation("Getting key information");
+            Logger.LogInformation("Getting key information");
 
             var keyInformation = new Dictionary<KeyReference, Dictionary<byte, byte>>();
 
@@ -730,12 +707,13 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         /// <param name="keyReference">The key reference for which the certificates should be retrieved.</param>
         /// <returns>A list of X.509 certificates associated with the key reference.</returns>
-        /// <exception cref="SecureChannelException">Thrown when there was an scp error, described in the exception message.</exception>
+        /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
         public IReadOnlyList<X509Certificate2> GetCertificates(KeyReference keyReference)
         {
-            _log.LogInformation("Getting certificates for key={KeyRef}", keyReference);
+            Logger.LogInformation("Getting certificates for key={KeyRef}", keyReference);
 
-            var nestedTlv = new TlvObject(ControlReferenceTag,
+            var nestedTlv = new TlvObject(
+                ControlReferenceTag,
                 new TlvObject(KidKvnTag, keyReference.GetBytes).GetBytes().Span
                 ).GetBytes();
 
@@ -755,14 +733,15 @@ namespace Yubico.YubiKey.Scp
         /// <returns>A dictionary of KeyReference and byte arrays representing the CA identifiers.</returns>
         /// <exception cref="ArgumentException">Thrown when both kloc and klcc are false.</exception>
         /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
-        public IReadOnlyDictionary<KeyReference, ReadOnlyMemory<byte>> GetSupportedCaIdentifiers(bool kloc, bool klcc)
+        public IReadOnlyDictionary<KeyReference, ReadOnlyMemory<byte>>
+            GetSupportedCaIdentifiers(bool kloc, bool klcc) // TODO make test
         {
             if (!kloc && !klcc)
             {
                 throw new ArgumentException("At least one of kloc and klcc must be true");
             }
 
-            _log.LogDebug("Getting CA identifiers KLOC={Kloc}, KLCC={Klcc}", kloc, klcc);
+            Logger.LogDebug("Getting CA identifiers KLOC={Kloc}, KLCC={Klcc}", kloc, klcc);
 
             var dataMs = new MemoryStream();
 
@@ -770,13 +749,12 @@ namespace Yubico.YubiKey.Scp
             {
                 try
                 {
-
                     var klocData = GetData(CaKlocIdentifiersTag);
                     dataMs.Write(klocData.Span.ToArray(), 0, klocData.Length);
                 }
-                catch (SecureChannelException e) //when (/*e.StatusWord == SWConstants.ReferencedDataNotFound*/)
+                catch
+                    (SecureChannelException) //when (/*e.StatusWord == SWConstants.ReferencedDataNotFound*/) TODO how get response status?
                 {
-
                     // Ignore this specific exception
                 }
             }
@@ -788,7 +766,7 @@ namespace Yubico.YubiKey.Scp
                     var klccData = GetData(CaKlccIdentifiersTag);
                     dataMs.Write(klccData.Span.ToArray(), 0, klccData.Length);
                 }
-                catch (SecureChannelException e) //when (/*e.StatusWord == SWConstants.ReferencedDataNotFound*/)
+                catch (SecureChannelException) //when (/*e.StatusWord == SWConstants.ReferencedDataNotFound*/) TODO
                 {
                     // Ignore this specific exception
                 }
@@ -813,12 +791,11 @@ namespace Yubico.YubiKey.Scp
             return identifiers;
         }
 
-
-        public Memory<byte> GetCardRecognitionData()
+        public Memory<byte> GetCardRecognitionData() // TODO Ask Dain // TODO make test
         {
-            _log.LogInformation("Getting card recognition deta");
+            Logger.LogInformation("Getting card recognition deta");
 
-            var tlvData = GetData(CardRecognitionDataTag, null).Span;
+            var tlvData = GetData(CardRecognitionDataTag).Span;
             var cardRecognitionData = TlvObjects.UnpackValue(0x73, tlvData);
 
             return cardRecognitionData;
@@ -829,19 +806,19 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         /// <param name="tag">The tag of the data to retrieve.</param>
         /// <param name="data">Optional data to send with the command.</param>
+        /// <remarks>Sessions created from this constructor will not be able to perform operations which require authentication
+        /// <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
+        /// </remarks>
         /// <returns>The encoded tlv data retrieved from the YubiKey.</returns>
-        /// <exception cref="SecureChannelException">Thrown when there was an scp error, described in the exception message.</exception>
+        /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
         public ReadOnlyMemory<byte> GetData(int tag, ReadOnlyMemory<byte>? data = null)
         {
-            var connection = _connection ?? UnauthenticatedConnection;
-
             var command = new GetDataCommand(tag, data);
-            var response = connection.SendCommand(command);
+            var response = Connection.SendCommand(command);
             ThrowIfFailed(response);
 
             return response.GetData();
         }
-
 
         /// <summary>
         /// Perform a factory reset of the Security Domain.
@@ -850,12 +827,7 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         public void Reset()
         {
-            _log.LogDebug("Resetting all SCP keys");
-
-            const byte insInitializeUpdate = 0x50;
-            const byte insExternalAuthenticate = 0x82;
-            const byte insInternalAuthenticate = 0x88;
-            const byte insPerformSecurityOperation = 0x2A;
+            Logger.LogInformation("Resetting all SCP keys");
 
             var keys = GetKeyInformation().Keys;
             foreach (var keyRef in keys) // Reset is done by blocking all available keys
@@ -869,27 +841,27 @@ namespace Yubico.YubiKey.Scp
                         // SCP03 uses KID=0, we use KVN=0 to allow deleting the default keys
                         // which have an invalid KVN (0xff).
                         overridenKeyRef = new KeyReference(0, 0);
-                        ins = insInitializeUpdate;
+                        ins = InitializeUpdateCommand.GpInitializeUpdateIns;
                         break;
                     case 0x02:
                     case 0x03:
                         continue; // Skip these as they are deleted by 0x01
                     case ScpKid.Scp11a:
                     case ScpKid.Scp11c:
-                        ins = insExternalAuthenticate;
+                        ins = ExternalAuthenticateCommand.GpExternalAuthenticateIns;
                         break;
                     case ScpKid.Scp11b:
-                        ins = insInternalAuthenticate;
+                        ins = InternalAuthenticateCommand.GpInternalAuthenticateIns;
                         break;
                     default: // 0x10, 0x20-0x2F
-                        ins = insPerformSecurityOperation;
+                        ins = SecurityOperationCommand.GpPerformSecurityOperationIns;
                         break;
                 }
 
                 // Keys have 65 attempts before blocking (and thus removal)
                 for (int i = 0; i < 65; i++)
                 {
-                    var result = UnauthenticatedConnection.SendCommand(
+                    var result = Connection.SendCommand(
                         new ResetCommand(ins, overridenKeyRef.VersionNumber, overridenKeyRef.Id, new byte[8]));
 
                     switch (result.StatusWord)
@@ -908,7 +880,15 @@ namespace Yubico.YubiKey.Scp
                 }
             }
 
-            _log.LogInformation("SCP keys reset");
+            Logger.LogInformation("SCP keys reset");
+        }
+
+        private static void ValidateCheckSum(ReadOnlySpan<byte> responseData, ReadOnlySpan<byte> expectedResponseData)
+        {
+            if (!CryptographicOperations.FixedTimeEquals(responseData, expectedResponseData))
+            {
+                throw new SecureChannelException(ExceptionMessages.ChecksumError);
+            }
         }
 
         private static void ThrowIfFailed(ScpResponse response)
@@ -919,32 +899,8 @@ namespace Yubico.YubiKey.Scp
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.YubiKeyOperationFailed,
-                         response.StatusMessage));
+                        response.StatusMessage));
             }
-        }
-
-        /// <summary>
-        /// When the ScpSession object goes out of scope, this method is called.
-        /// It will close the session. The most important function of closing a
-        /// session is to close the connection.
-        /// </summary>
-
-        // Note that .NET recommends a Dispose method call Dispose(true) and
-        // GC.SuppressFinalize(this). The actual disposal is in the
-        // Dispose(bool) method.
-        // However, that does not apply to sealed classes.
-        // So the Dispose method will simply perform the
-        // "closing" process, no call to Dispose(bool) or GC.
-        public void Dispose()
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _connection?.Dispose();
-
-            _disposed = true;
         }
     }
 }

@@ -17,24 +17,49 @@ using System.Globalization;
 
 namespace Yubico.YubiKey.Scp
 {
+    /// <summary>
+    /// Represents a reference to a cryptographic key stored on the YubiKey.
+    /// </summary>
     public class KeyReference
     {
+        /// <summary>
+        /// The Key Id (KID) of the key.
+        /// </summary>
         public byte Id { get; }
+        
+        /// <summary>
+        /// The Key Version Number (KVN) of the key.
+        /// </summary>
         public byte VersionNumber { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KeyReference"/> class.
+        /// </summary>
+        /// <param name="id">The ID of the key.</param>
+        /// <param name="versionNumber">The version number of the key.</param>
         public KeyReference(
             byte id,
-            byte versionNumber
-            )
+            byte versionNumber)
         {
             Id = id;
             VersionNumber = versionNumber;
         }
 
+        /// <summary>
+        /// Returns a span of bytes that represent the key reference.
+        /// </summary>
+        public ReadOnlyMemory<byte> GetBytes => new[] { Id, VersionNumber };
 
-        public ReadOnlySpan<byte> GetBytes => new[] { Id, VersionNumber }.AsSpan();
-
-        public override string ToString() => $"KeyRef[Kid=0x{Id:X2}, Kvn=0x{VersionNumber:X2}";
+        /// <summary>
+        /// Returns a string that represents the current object.
+        /// </summary>
+        /// <returns>
+        /// A string that represents the current object in the format
+        /// <para>"KeyRef[Kid=0x{Id:X2}, Kvn=0x{VersionNumber:X2}]"
+        /// </para>
+        /// </returns>
+        /// <example>"KeyRef[Kid=0x01, Kvn=0x02]"</example>
+        public override string ToString() => $"KeyRef[Kid=0x{Id:X2}, Kvn=0x{VersionNumber:X2}]";
 
         public override bool Equals(object? obj)
         {

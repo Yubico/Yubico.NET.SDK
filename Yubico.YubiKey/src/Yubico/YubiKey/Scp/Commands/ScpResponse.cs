@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Diagnostics;
 using Yubico.Core.Iso7816;
 
@@ -40,8 +39,10 @@ namespace Yubico.YubiKey.Scp.Commands
                     Debug.Assert(Status == ResponseStatus.Success);
                     return;
                 default:
-                    throw new SecureChannelException(message ?? StatusMessage); 
+                    throw new SecureChannelException(AddStatusWord(message ?? StatusMessage)); 
             }
+
+            string AddStatusWord(string message) => $"{message} (StatusWord: {StatusWord})";
         }
     }
 }

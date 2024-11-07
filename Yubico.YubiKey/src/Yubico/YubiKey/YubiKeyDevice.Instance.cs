@@ -175,8 +175,6 @@ namespace Yubico.YubiKey
             _yubiKeyInfo = info;
             IsNfcDevice = _smartCardDevice?.IsNfcTransport() ?? false;
             LastActiveTransport = GetTransportIfOnlyDevice();
-
-            //TODO consolidate constructors..
         }
 
         /// <summary>

@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.Cryptography
             byte[] iv = GetIV();
 
             // Act
-            Memory<byte> result = AesUtilities.AesCbcEncrypt(key, iv, plaintext);
+            ReadOnlyMemory<byte> result = AesUtilities.AesCbcEncrypt(key, iv, plaintext);
 
             // Assert
             Assert.Equal(result, Hex.HexToBytes("da19df061b1bcba151d692a4a9e63901"));
@@ -175,7 +175,7 @@ namespace Yubico.YubiKey.Cryptography
             byte[] iv = GetIV();
 
             // Act
-            Memory<byte> result = AesUtilities.AesCbcDecrypt(key, iv, ciphertext);
+            ReadOnlyMemory<byte> result = AesUtilities.AesCbcDecrypt(key, iv, ciphertext);
 
             // Assert
             Assert.Equal(result, Hex.HexToBytes("d1af13631ea24595793ddf5bf6f9c42c"));

@@ -92,7 +92,17 @@ namespace Yubico.YubiKey
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0
                     && (HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv)
                     || HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath)
-                    || HasApplication(yubiKeyDevice, YubiKeyCapabilities.OpenPgp)),
+                    || HasApplication(yubiKeyDevice, YubiKeyCapabilities.OpenPgp)
+                    || HasApplication(yubiKeyDevice, YubiKeyCapabilities.Otp)
+                    || HasApplication(yubiKeyDevice, YubiKeyCapabilities.YubiHsmAuth)),
+
+                YubiKeyFeature.Scp03Oath =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_6_3
+                    && HasFeature(yubiKeyDevice, YubiKeyFeature.Scp03),
+
+                YubiKeyFeature.Scp11 =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_7_2
+                    && HasFeature(yubiKeyDevice, YubiKeyFeature.Scp03),
 
                 YubiKeyFeature.FastUsbReclaim =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_6_0,

@@ -30,7 +30,7 @@ F9
 ```
 
 There are six choices for "alg" (algorithm and size): RSA-1024 (06),
-RSA-2048 (07), RSA 3072 (05), RSA 4096 (16), ECC-P-256 (11), and ECC-P-384 (14).
+RSA-2048 (07), RSA 3072 (08), RSA 4096 (09), ECC-P-256 (11), and ECC-P-384 (14).
 
 The key data to load is a set of TLV constructions. The L (length) is DER encoding
 format. The V is the integer in canonical form. If the key is an RSA private key, there

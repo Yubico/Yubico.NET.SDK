@@ -63,6 +63,16 @@ namespace Yubico.YubiKey
         ///     The ability to communicate using Secure Channel Protocol 3 (SCP03).
         /// </summary>
         Scp03,
+        
+        /// <summary>
+        ///     The ability to communicate using Secure Channel Protocol 3 (SCP03) for OATH credentials.
+        /// </summary>
+        Scp03Oath,
+
+        /// <summary>
+        ///     The ability to communicate using Secure Channel Protocol 11a/b/c (SCP11).
+        /// </summary>
+        Scp11,
 
         /// <summary>
         ///     The YubiKey is capable of switching USB interfaces without the lengthy 3-second reclaim timeout.
@@ -270,6 +280,6 @@ namespace Yubico.YubiKey
         /// <summary>
         ///     Allows temporarily disabling NFC until the next time the YubiKey is powered over USB.
         /// </summary>
-        ManagementNfcRestricted
+        ManagementNfcRestricted,
     }
 }

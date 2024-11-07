@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Scp.Commands
         {
             if (hostChallenge.Length != 8)
             {
-                throw new ArgumentException("Invalid size, must be 8 bytes", nameof(_hostChallenge)); //TODO make localised string
+                throw new ArgumentException("Invalid size, must be 8 bytes", nameof(_hostChallenge));
             }
             
             _hostChallenge = hostChallenge;

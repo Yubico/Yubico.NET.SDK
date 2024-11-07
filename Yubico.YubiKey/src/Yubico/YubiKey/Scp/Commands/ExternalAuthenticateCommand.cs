@@ -18,7 +18,7 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Scp.Commands
 {
     /// <summary>
-    /// Represents the second command in the SCP03 authentication handshake, 'EXTERNAL_AUTHENTICATE' TODO Fix better docu
+    /// Represents the second command in the SCP03 and SCP11a/c authentication handshakes, 'EXTERNAL_AUTHENTICATE'
     /// </summary>
     internal class ExternalAuthenticateCommand : IYubiKeyCommand<ExternalAuthenticateResponse>
     {
@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.Scp.Commands
         private readonly ReadOnlyMemory<byte> _data;
         private readonly byte _keyVersionNumber;
         private readonly byte _keyId;
-        
+
         /// <summary>
         /// Constructs an EXTERNAL_AUTHENTICATE command, containing the provided data.
         /// </summary>
@@ -43,7 +43,13 @@ namespace Yubico.YubiKey.Scp.Commands
             _data = data;
         }
 
-        public ExternalAuthenticateCommand(byte keyVersionNumber, byte keyId, byte[] data)
+        /// <summary>
+        /// Constructs an EXTERNAL_AUTHENTICATE command, containing the provided data. This is used to create an SCP11a/c command.
+        /// </summary>
+        /// <param name="keyVersionNumber"></param>
+        /// <param name="keyId"></param>
+        /// <param name="data"></param>
+        public ExternalAuthenticateCommand(byte keyVersionNumber, byte keyId, ReadOnlyMemory<byte> data)
         {
             _keyVersionNumber = keyVersionNumber;
             _keyId = keyId;
@@ -58,7 +64,7 @@ namespace Yubico.YubiKey.Scp.Commands
             P2 = _keyId > 0 ? _keyId : default,
             Data = _data
         };
-        
+
         public ExternalAuthenticateResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new ExternalAuthenticateResponse(responseApdu);
     }

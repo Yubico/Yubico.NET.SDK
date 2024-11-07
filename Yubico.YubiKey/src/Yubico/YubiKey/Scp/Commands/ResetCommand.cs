@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp.Commands
 {
+
     /// <summary>
-    /// TODO
+    /// This command is used to reset the SCP keys on the YubiKey device back to its factory default state
+    /// In order to reset the YubiKey to its factory default state, one must issue the reset command to the Yubikey
+    /// with incorrect parameters 65 times. This will block the keys and reset the YubiKey to its factory default state.
     /// </summary>
     internal class ResetCommand : IYubiKeyCommand<YubiKeyResponse>
     {
@@ -29,15 +31,20 @@ namespace Yubico.YubiKey.Scp.Commands
         private readonly byte _ins;
 
         /// <summary>
-        /// TODO
+        /// Initialize a new instance of the <see cref="ResetCommand"/>
+        /// Clients should not generally build this manually. Instead, use the 
+        /// <see cref="SecurityDomainSession.Reset"/> to build commands.
         /// </summary>
-        /// <remarks>
-        /// Clients should not generally build this manually.
-        /// </remarks>
-        /// <param name="ins"></param>
-        /// <param name="keyVersionNumber">Which key set to use.</param>
-        /// <param name="kid"></param>
-        /// <param name="data"></param>
+        /// <param name="ins">The instruction byte for the command
+        /// the instruction bytes that are valid are, 
+        /// <see cref="InitializeUpdateCommand.GpInitializeUpdateIns"/>, 
+        /// <see cref="ExternalAuthenticateCommand.GpExternalAuthenticateIns"/>, 
+        /// <see cref="InternalAuthenticateCommand.GpInternalAuthenticateIns"/>, 
+        /// <see cref="SecurityOperationCommand.GpPerformSecurityOperationIns"/>
+        /// </param>
+        /// <param name="keyVersionNumber">The version number of the key</param>
+        /// <param name="kid">The Key id</param>
+        /// <param name="data">The data to be reset</param>
         public ResetCommand(byte ins, byte keyVersionNumber, byte kid, byte[] data)
         {
             _ins = ins;
@@ -53,7 +60,6 @@ namespace Yubico.YubiKey.Scp.Commands
             P1 = _keyVersionNumber,
             P2 = _kid,
             Data = _data,
-            Ne = 0
         };
         public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new YubiKeyResponse(responseApdu);
     }

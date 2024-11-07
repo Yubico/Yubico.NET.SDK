@@ -19,10 +19,28 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKey.Cryptography
 {
     /// <summary>
-    /// EC public key parameters
+    /// Represents the parameters for an Elliptic Curve (EC) public key.
     /// </summary>
+    /// <remarks>
+    /// This class encapsulates the parameters specific to EC public keys,
+    /// ensuring that the key is of type NIST P-256 and contains only the
+    /// necessary public key components. It extends the base <see cref="ECKeyParameters"/>
+    /// class with additional validation to prevent the inclusion of private key data.
+    /// <para>
+    /// This class currently only supports NIST P-256.
+    /// </para>
+    /// </remarks>
     public sealed class ECPublicKeyParameters : ECKeyParameters
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ECPublicKeyParameters"/> class. It is a wrapper for the <see cref="ECParameters"/> class.
+        /// </summary>
+        /// <remarks>
+        /// This constructor is used to create an instance from a <see cref="ECParameters"/> object. It will deep copy 
+        /// the parameters from the ECParameters object and ensure that the key is of type NIST P-256.
+        /// </remarks>
+        /// <param name="parameters"></param>
+        /// <exception cref="ArgumentException">Thrown when the parameters contain private key data (D value).</exception>
         public ECPublicKeyParameters(ECParameters parameters) : base(parameters)
         {
             if (parameters.D != null)
@@ -32,17 +50,23 @@ namespace Yubico.YubiKey.Cryptography
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ECPublicKeyParameters"/> class.
+        /// </summary>
+        /// <param name="ecdsa"></param>
         public ECPublicKeyParameters(ECDsa ecdsa) : base(ecdsa.ExportParameters(false)) { }
 
+        /// <summary>
+        /// Gets the bytes representing the public key.
+        /// </summary>
+        /// <returns>A <see cref="Memory{T}"/> containing the public key bytes with the format 0x04 || X || Y.</returns>
         public Memory<byte> GetBytes()
         {
-            byte[] formatIdentifier = { 0x4 }; // Uncompressed point
-            var publicKeyRawData =
-                formatIdentifier
-                    .Concat(Parameters.Q.X)
-                    .Concat(Parameters.Q.Y)
-                    .ToArray()
-                    .AsMemory();
+            byte[] publicKeyRawData =
+                new byte[] { 0x4 } // Format identifier (uncompressed point): 0x04
+                .Concat(Parameters.Q.X)
+                .Concat(Parameters.Q.Y)
+                .ToArray();
 
             return publicKeyRawData;
         }

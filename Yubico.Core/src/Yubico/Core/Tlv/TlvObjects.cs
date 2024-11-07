@@ -13,7 +13,7 @@ namespace Yubico.Core.Tlv
         /// Decodes a sequence of BER-TLV encoded data into a list of Tlvs.
         /// </summary>
         /// <param name="data">Sequence of TLV encoded data</param>
-        /// <returns>List of Tlvs</returns>
+        /// <returns>List of <see cref="TlvObject"/></returns>
         public static IReadOnlyList<TlvObject> DecodeList(ReadOnlySpan<byte> data)
         {
             var tlvs = new List<TlvObject>();

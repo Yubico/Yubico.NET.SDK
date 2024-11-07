@@ -2184,7 +2184,7 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An unknown SCP error has occurred..
+        ///   Looks up a localized string similar to An unknown SCP error has occurred.
         /// </summary>
         internal static string UnknownScpError {
             get {

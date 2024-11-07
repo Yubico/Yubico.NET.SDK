@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.Cryptography
         /// <param name="iv">16-byte initialization vector (IV)</param>
         /// <param name="plaintext">Input blocks; must be a non-zero multiple of 16 bytes long</param>
         /// <returns>Ciphertext of the same length as the plaintext</returns>
-        public static Memory<byte> AesCbcEncrypt(ReadOnlySpan<byte> encryptionKey, ReadOnlySpan<byte> iv, ReadOnlySpan<byte> plaintext)
+        public static ReadOnlyMemory<byte> AesCbcEncrypt(ReadOnlySpan<byte> encryptionKey, ReadOnlySpan<byte> iv, ReadOnlySpan<byte> plaintext)
         {
             if (encryptionKey.IsEmpty)
             {
@@ -151,7 +151,7 @@ namespace Yubico.YubiKey.Cryptography
         /// <param name="iv">16-byte initialization vector (IV)</param>
         /// <param name="ciphertext">Input blocks; must be a non-zero multiple of 16 bytes long</param>
         /// <returns>Plaintext of the same length as the ciphertext</returns>
-        public static Memory<byte> AesCbcDecrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> iv, ReadOnlySpan<byte> ciphertext)
+        public static ReadOnlyMemory<byte> AesCbcDecrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> iv, ReadOnlySpan<byte> ciphertext)
         {
             if (key == null)
             {

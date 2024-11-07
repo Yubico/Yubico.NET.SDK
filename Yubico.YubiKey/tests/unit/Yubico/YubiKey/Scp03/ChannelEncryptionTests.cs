@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.Scp
             int ec = GetEncryptionCounter();
 
             // Act
-            Memory<byte> output = ChannelEncryption.EncryptData(payload, key, ec);
+            ReadOnlyMemory<byte> output = ChannelEncryption.EncryptData(payload, key, ec);
 
             // Assert
             Assert.Equal(GetCorrectEncryptOutput(), output);
@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Scp
             int ec = 1;
 
             // Act
-            Memory<byte> output = ChannelEncryption.DecryptData(payload, key, ec);
+            ReadOnlyMemory<byte> output = ChannelEncryption.DecryptData(payload, key, ec);
 
             // Assert
             Assert.Equal(GetCorrectDecryptedOutput(), output);

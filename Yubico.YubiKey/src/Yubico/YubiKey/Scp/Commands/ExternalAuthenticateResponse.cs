@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Globalization;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp.Commands
@@ -34,7 +35,11 @@ namespace Yubico.YubiKey.Scp.Commands
 
             if (responseApdu.SW != SWConstants.Success)
             {
-                throw new ArgumentException(ExceptionMessages.IncorrectExternalAuthenticateData, nameof(responseApdu));
+                string message = string.Format(
+                    CultureInfo.CurrentCulture, 
+                    $"{ExceptionMessages.IncorrectExternalAuthenticateData}" + " " +
+                    $"SW: 0x{responseApdu.SW.ToString("X4", CultureInfo.InvariantCulture)}");
+                throw new ArgumentException(message, nameof(responseApdu));
             }
         }
     }

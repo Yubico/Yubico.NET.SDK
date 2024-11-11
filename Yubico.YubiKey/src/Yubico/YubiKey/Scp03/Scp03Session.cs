@@ -251,7 +251,7 @@ namespace Yubico.YubiKey.Scp03
             {
                 throw new ArgumentNullException(nameof(newKeySet));
             }
-            
+
             var command = new PutKeyCommand(Connection.GetScp03Keys(), newKeySet);
             var response = Connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)

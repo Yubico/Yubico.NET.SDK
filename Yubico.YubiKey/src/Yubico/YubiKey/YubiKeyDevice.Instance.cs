@@ -22,7 +22,6 @@ using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.DeviceExtensions;
 using Yubico.YubiKey.Scp;
-using Yubico.YubiKey.Scp03;
 using MgmtCmd = Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey
@@ -106,7 +105,7 @@ namespace Yubico.YubiKey
         internal bool IsNfcDevice { get; private set; }
         internal Transport LastActiveTransport;
         internal ISmartCardDevice GetSmartCardDevice() => _smartCardDevice!;
-        
+
         private ISmartCardDevice? _smartCardDevice;
         private IHidDevice? _hidFidoDevice;
         private IHidDevice? _hidKeyboardDevice;
@@ -117,7 +116,6 @@ namespace Yubico.YubiKey
                 Log.GetLogger<ConnectionFactory>(), this, _smartCardDevice, _hidKeyboardDevice, _hidFidoDevice);
 
         private readonly ILogger _log = Log.GetLogger<YubiKeyDevice>();
-
 
         /// <inheritdoc />
         public Transport AvailableTransports
@@ -193,6 +191,7 @@ namespace Yubico.YubiKey
             _smartCardDevice = smartCardDevice;
             _hidFidoDevice = hidFidoDevice;
             _hidKeyboardDevice = hidKeyboardDevice;
+
             _yubiKeyInfo = yubiKeyDeviceInfo;
             IsNfcDevice = smartCardDevice?.IsNfcTransport() ?? false;
             LastActiveTransport = GetTransportIfOnlyDevice(); // Must be after setting the three device fields.
@@ -208,7 +207,7 @@ namespace Yubico.YubiKey
         /// The device does not have the same ParentDeviceId, or
         /// The device is not of a recognizable type.
         /// </exception>
-        public void Merge(IDevice device) // TODO Consider INTERNAL
+        internal void Merge(IDevice device)
         {
             if (!((IYubiKeyDevice)this).HasSameParentDevice(device))
             {
@@ -223,7 +222,7 @@ namespace Yubico.YubiKey
         /// </summary>
         /// <param name="device"></param>
         /// <param name="info"></param>
-        public void Merge(IDevice device, IYubiKeyDeviceInfo info) // TODO Consider INTERNAL
+        internal void Merge(IDevice device, IYubiKeyDeviceInfo info)
         {
             // First merge the devices
             MergeDevice(device);
@@ -239,152 +238,71 @@ namespace Yubico.YubiKey
             }
         }
 
-        #region obsoletewip
         /// <inheritdoc />
-        [Obsolete("Use new Scp")]
-        public IYubiKeyConnection Connect(byte[] applicationId)
-        {
-            var application = YubiKeyApplicationExtensions.GetById(applicationId);
-            return ConnectionFactory.CreateNonScpConnection(application);
-        }
+        public IYubiKeyConnection Connect(byte[] applicationId) => Connect(applicationId.GetYubiKeyApplication());
 
         /// <inheritdoc />
-        [Obsolete("Use new Scp")]
-        public IScp03YubiKeyConnection ConnectScp03(YubiKeyApplication application, StaticKeys scp03Keys) 
-            => (IScp03YubiKeyConnection)ConnectionFactory.CreateScpConnection(application, scp03Keys);
+        public virtual IYubiKeyConnection Connect(YubiKeyApplication application) =>
+            ConnectionFactory.CreateConnection(application);
 
         /// <inheritdoc />
-        [Obsolete("Use new Scp")]
-        public IScp03YubiKeyConnection ConnectScp03(byte[] applicationId, StaticKeys scp03Keys)
-        {
-            var application = YubiKeyApplicationExtensions.GetById(applicationId);
-            return (IScp03YubiKeyConnection)ConnectionFactory.CreateScpConnection(application, scp03Keys);
-        }
-
-        [Obsolete("Use new Scp")]
-        internal virtual IYubiKeyConnection? Connect(
-            YubiKeyApplication? application,
-            byte[]? applicationId,
-            StaticKeys scp03Keys) // TODO Test that this works
-        {
-            application ??= YubiKeyApplicationExtensions.GetById(applicationId);
-            // return Connect((YubiKeyApplication)application, scp03Keys);
-            return ConnectionFactory.CreateScpConnection((YubiKeyApplication)application, scp03Keys);
-        }
-        
-        [Obsolete("Obsolete")]
-        public virtual IYubiKeyConnection Connect(YubiKeyApplication application, StaticKeys scp03Keys) 
-            => ConnectionFactory.CreateScpConnection(application, scp03Keys);
-        
-        #endregion
+        public virtual IScpYubiKeyConnection Connect(
+            byte[] applicationId,
+            ScpKeyParameters keyParameters) =>
+            Connect(applicationId.GetYubiKeyApplication(), keyParameters);
 
         /// <inheritdoc />
-        public virtual IYubiKeyConnection Connect(YubiKeyApplication application) 
-            => ConnectionFactory.CreateNonScpConnection(application);
-
-        /// <inheritdoc />
-        public virtual IYubiKeyConnection Connect(YubiKeyApplication application, ScpKeyParameters keyParameters) 
-            => ConnectionFactory.CreateScpConnection(application, keyParameters);
-
-        /// <inheritdoc />
-        public IScpYubiKeyConnection ConnectScp(YubiKeyApplication application, ScpKeyParameters keyParameters)
-            => (IScpYubiKeyConnection)ConnectionFactory.CreateScpConnection(application, keyParameters); //TODO is safe?
-
-        /// <inheritdoc />
-        public IScpYubiKeyConnection ConnectScp(byte[] applicationId, ScpKeyParameters keyParameters) //TODO Decide if to keep or not
-        {
-            var application = YubiKeyApplicationExtensions.GetById(applicationId);
-            return (IScpYubiKeyConnection)ConnectionFactory.CreateScpConnection(application, keyParameters); //TODO safe?
-        }
-
-        #region obsoletewip
-        /// <inheritdoc />
-        [Obsolete("Use new Scp")]
-        public bool TryConnectScp03(
+        public virtual IScpYubiKeyConnection Connect(
             YubiKeyApplication application,
-            StaticKeys scp03Keys,
-            [MaybeNullWhen(returnValue: false)] out IScp03YubiKeyConnection connection)
-        {
-            var attemptedConnection = ConnectionFactory.CreateScpConnection(application, scp03Keys);
-            if (attemptedConnection is IScp03YubiKeyConnection scp03Connection) 
-            {
-                connection = scp03Connection;
-                return true;
-            }
-
-            connection = null;
-            return false;
-        }
+            ScpKeyParameters keyParameters) =>
+            ConnectionFactory.CreateScpConnection(application, keyParameters);
 
         /// <inheritdoc />
-        [Obsolete("Use new Scp")]
-        public bool TryConnectScp03(
+        public bool TryConnect(
             byte[] applicationId,
-            StaticKeys scp03Keys,
-            [MaybeNullWhen(returnValue: false)] out IScp03YubiKeyConnection connection)
-        {
-            var application = YubiKeyApplicationExtensions.GetById(applicationId);
-            var attemptedConnection = ConnectionFactory.CreateScpConnection(application, scp03Keys);
-            if (attemptedConnection is IScp03YubiKeyConnection scp03Connection) 
-            {
-                connection = scp03Connection;
-                return true;
-            }
-
-            connection = null;
-            return false;
-        }
-        #endregion
-        
-        /// <inheritdoc />
-
-        [Obsolete("Use corresponding YubiKeyApplication method")]
-        public bool TryConnect( 
-            byte[] applicationId,
-            [MaybeNullWhen(returnValue: false)] out IYubiKeyConnection connection)
-        {
-            var application = YubiKeyApplicationExtensions.GetById(applicationId);
-            connection = ConnectionFactory.CreateNonScpConnection(application);
-            return true; //TODO is this safe? will it throw?
-        }
+            [MaybeNullWhen(returnValue: false)] out IYubiKeyConnection connection) =>
+            TryConnect(applicationId.GetYubiKeyApplication(), out connection);
 
         /// <inheritdoc />
         public bool TryConnect(
             YubiKeyApplication application,
-            [MaybeNullWhen(returnValue: false)] out IYubiKeyConnection connection) // TODO Consider making nullable again
+            [MaybeNullWhen(returnValue: false)] out IYubiKeyConnection connection)
         {
-            connection = ConnectionFactory.CreateNonScpConnection(application);
-            return true; //TODO is this safe? will it throw?
-        }
-        
-        /// <inheritdoc />
-        public bool TryConnectScp(
-            YubiKeyApplication application,
-            ScpKeyParameters keyParameters,
-            [MaybeNullWhen(returnValue: false)] out IScpYubiKeyConnection connection)
-        {
-            var attemptedConnection = ConnectionFactory.CreateScpConnection(application, keyParameters);
-            if (attemptedConnection is IScpYubiKeyConnection scpConnection)
+            try
             {
-                connection = scpConnection;
+                connection = ConnectionFactory.CreateConnection(application);
                 return true;
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Failed to connect to YubiKey");
             }
 
             connection = null;
             return false;
         }
-        
-        public bool TryConnectScp(
+
+        /// <inheritdoc/>
+        public bool TryConnect(
             byte[] applicationId,
+            ScpKeyParameters keyParameters,
+            [MaybeNullWhen(returnValue: false)] out IScpYubiKeyConnection connection) =>
+            TryConnect(applicationId.GetYubiKeyApplication(), keyParameters, out connection);
+
+        /// <inheritdoc />
+        public bool TryConnect(
+            YubiKeyApplication application,
             ScpKeyParameters keyParameters,
             [MaybeNullWhen(returnValue: false)] out IScpYubiKeyConnection connection)
         {
-            var application = YubiKeyApplicationExtensions.GetById(applicationId);
-            var attemptedConnection = ConnectionFactory.CreateScpConnection(application, keyParameters);
-            if (attemptedConnection is IScpYubiKeyConnection scpConnection)
+            try
             {
-                connection = scpConnection;
+                connection = ConnectionFactory.CreateScpConnection(application, keyParameters);
                 return true;
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Failed to connect to YubiKey");
             }
 
             connection = null;
@@ -725,7 +643,7 @@ namespace Yubico.YubiKey
                 connection?.Dispose();
             }
         }
-        
+
         /////////////////////////////////////////// PRIVATE //////////////////////////////////////////////////////////////////
 
         private IYubiKeyResponse SendConfiguration(MgmtCmd.SetDeviceInfoBaseCommand baseCommand)
@@ -787,7 +705,7 @@ namespace Yubico.YubiKey
                 connection?.Dispose();
             }
         }
-        
+
         private void MergeDevice(IDevice device)
         {
             switch (device)
@@ -1072,5 +990,77 @@ namespace Yubico.YubiKey
 
             return Transport.None;
         }
+
+        /// <inheritdoc />
+        [Obsolete("Use new Scp")]
+        public bool TryConnectScp03(
+            YubiKeyApplication application,
+            Yubico.YubiKey.Scp03.StaticKeys scp03Keys,
+            [MaybeNullWhen(returnValue: false)] out IScp03YubiKeyConnection connection)
+        {
+            try
+            {
+                connection = ConnectionFactory.CreateScpConnection(application, scp03Keys);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Failed to connect to YubiKey");
+            }
+
+            connection = null;
+            return false;
+        }
+
+        /// <inheritdoc />
+        [Obsolete("Use new Scp")]
+        public bool TryConnectScp03(
+            byte[] applicationId,
+            Yubico.YubiKey.Scp03.StaticKeys scp03Keys,
+            [MaybeNullWhen(returnValue: false)] out IScp03YubiKeyConnection connection)
+        {
+            try
+            {
+                connection = ConnectionFactory.CreateScpConnection(applicationId.GetYubiKeyApplication(), scp03Keys);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "Failed to connect to YubiKey");
+            }
+
+            connection = null;
+            return false;
+        }
+
+        /// <inheritdoc />
+        [Obsolete("Use new Scp")]
+        public IScp03YubiKeyConnection ConnectScp03(YubiKeyApplication application, Yubico.YubiKey.Scp03.StaticKeys scp03Keys) =>
+            (IScp03YubiKeyConnection)ConnectionFactory.CreateScpConnection(application, scp03Keys);
+
+        /// <inheritdoc />
+        [Obsolete("Use new Scp")]
+        public IScp03YubiKeyConnection ConnectScp03(byte[] applicationId, Yubico.YubiKey.Scp03.StaticKeys scp03Keys) =>
+            ConnectionFactory.CreateScpConnection(
+                applicationId.GetYubiKeyApplication(), scp03Keys);
+
+        [Obsolete("Use new Scp")]
+        internal virtual IYubiKeyConnection? Connect(
+            YubiKeyApplication? application,
+            byte[]? applicationId,
+            Yubico.YubiKey.Scp03.StaticKeys scp03Keys)
+        {
+            var app = application ??
+                applicationId?.GetYubiKeyApplication() ??
+                throw new ArgumentNullException(nameof(applicationId));
+
+            return ConnectionFactory.CreateScpConnection(app, scp03Keys);
+        }
+
+        [Obsolete("Obsolete")]
+        public virtual IYubiKeyConnection Connect(
+            YubiKeyApplication application,
+            Yubico.YubiKey.Scp03.StaticKeys scp03Keys) =>
+            ConnectionFactory.CreateScpConnection(application, scp03Keys);
     }
 }

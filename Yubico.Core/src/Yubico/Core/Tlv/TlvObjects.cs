@@ -23,6 +23,7 @@ namespace Yubico.Core.Tlv
                 var tlv = TlvObject.ParseFrom(ref buffer);
                 tlvs.Add(tlv);
             }
+
             return tlvs.AsReadOnly();
         }
 
@@ -41,9 +42,10 @@ namespace Yubico.Core.Tlv
                 var tlv = TlvObject.ParseFrom(ref buffer);
                 tlvs[tlv.Tag] = tlv.Value;
             }
+
             return tlvs;
         }
-        
+
         /// <summary>
         /// Encodes a list of Tlvs into a sequence of BER-TLV encoded data.
         /// </summary>
@@ -55,7 +57,7 @@ namespace Yubico.Core.Tlv
             {
                 throw new ArgumentNullException(nameof(list));
             }
-            
+
             using var stream = new MemoryStream();
             using var writer = new BinaryWriter(stream);
             foreach (TlvObject? tlv in list)
@@ -63,6 +65,7 @@ namespace Yubico.Core.Tlv
                 ReadOnlyMemory<byte> bytes = tlv.GetBytes();
                 writer.Write(bytes.Span.ToArray());
             }
+
             return stream.ToArray();
         }
 
@@ -72,25 +75,6 @@ namespace Yubico.Core.Tlv
         /// <param name="tlvs">Array of Tlvs to encode</param>
         /// <returns>BER-TLV encoded array</returns>
         public static byte[] EncodeMany(params TlvObject[] tlvs) => EncodeList(tlvs);
-
-
-        //Todo keep?
-        public static Memory<byte> EncodeMap(IReadOnlyDictionary<int, ReadOnlyMemory<byte>> map)
-        {
-            if (map is null)
-            {
-                throw new ArgumentNullException(nameof(map));
-            }
-            
-            using var stream = new MemoryStream();
-            foreach (KeyValuePair<int, ReadOnlyMemory<byte>> entry in map)
-            {
-                var tlv = new TlvObject(entry.Key, entry.Value.ToArray());
-                ReadOnlyMemory<byte> bytes = tlv.GetBytes();
-                stream.Write(bytes.ToArray(), 0,bytes.Length);;
-            }
-            return stream.ToArray();
-        }
 
         /// <summary>
         /// Decode a single TLV encoded object, returning only the value.
@@ -106,6 +90,7 @@ namespace Yubico.Core.Tlv
             {
                 throw new InvalidOperationException($"Expected tag: {expectedTag:X2}, got {tlv.Tag:X2}");
             }
+
             return tlv.Value.ToArray();
         }
     }

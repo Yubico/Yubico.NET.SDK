@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.TestUtilities
             _firmwareVersion = firmwareVersion;
         }
 
-        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
+        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand, bool encrypt = false)
             where TResponse : IYubiKeyResponse
         {
             if (yubiKeyCommand is SelectApplicationCommand)

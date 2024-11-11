@@ -102,27 +102,27 @@ namespace Yubico.YubiKey.Scp
 
         private void
             PerformExternalAuthenticate(
-            IApduTransform pipeline) 
+            IApduTransform pipeline)
         {
             // Create a MAC:ed APDU
-            var unMacedCommand = new ExternalAuthenticateCommand(_hostCryptogram);
+            var eaCommandPlain = new ExternalAuthenticateCommand(_hostCryptogram);
             (var macdApdu, byte[] newMacChainingValue) = MacApdu(
-                unMacedCommand.CreateCommandApdu(),
+                eaCommandPlain.CreateCommandApdu(),
                 SessionKeys.MacKey.ToArray(),
                 MacChainingValue.ToArray()
                 );
 
-            // Update sessions / states MacChainingValue
+            // Update the states MacChainingValue
             MacChainingValue = newMacChainingValue;
 
             // Send command
-            var eaCommand = new ExternalAuthenticateCommand(macdApdu.Data.ToArray());
-            var externalAuthenticateResponseApdu = pipeline.Invoke(
-                eaCommand.CreateCommandApdu(),
+            var eaCommandMaced = new ExternalAuthenticateCommand(macdApdu.Data.ToArray());
+            var eaResponseApdu = pipeline.Invoke(
+                eaCommandMaced.CreateCommandApdu(),
                 typeof(ExternalAuthenticateCommand),
                 typeof(ExternalAuthenticateResponse));
 
-            var externalAuthenticateResponse = eaCommand.CreateResponseForApdu(externalAuthenticateResponseApdu);
+            var externalAuthenticateResponse = eaCommandMaced.CreateResponseForApdu(eaResponseApdu);
             externalAuthenticateResponse.ThrowIfFailed();
         }
     }

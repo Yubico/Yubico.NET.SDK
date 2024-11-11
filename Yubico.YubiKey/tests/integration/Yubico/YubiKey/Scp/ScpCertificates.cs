@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Scp
                 return new ScpCertificates(null, Array.Empty<X509Certificate2>(), null);
             }
 
-            var certList = new List<X509Certificate2>(certificates);
+            var certList = certificates.ToList();
             X509Certificate2? ca = null;
             byte[]? seenSerial = null;
 
@@ -79,13 +79,13 @@ namespace Yubico.YubiKey.Scp
             X509Certificate2? leaf = null;
             if (ordered.Count > 0)
             {
-                // var lastCert = ordered[^1]; todo
-                // var keyUsage = lastCert.Extensions.OfType<X509KeyUsageExtension>().FirstOrDefault()?.KeyUsages ?? Array.Empty<bool>();
-                // if (keyUsage.Length > 4 && keyUsage[4])
-                // {
-                //     leaf = lastCert;
-                //     ordered.RemoveAt(ordered.Count - 1);
-                // }
+                var lastCert = ordered[^1];
+                var keyUsage = lastCert.Extensions.OfType<X509KeyUsageExtension>().FirstOrDefault()?.KeyUsages ?? default;
+                if (keyUsage.HasFlag(X509KeyUsageFlags.DigitalSignature))
+                {
+                    leaf = lastCert;
+                    ordered.RemoveAt(ordered.Count - 1);
+                }
             }
 
             return new ScpCertificates(ca, ordered, leaf);

@@ -42,17 +42,16 @@ namespace Yubico.YubiKey.Scp
             Scp11KeyParameters keyParameters)
         {
             // Perform Security Operation, if needed (for Scp11a and Scp11c)
-            if (keyParameters.KeyReference.Id == ScpKid.Scp11a || keyParameters.KeyReference.Id == ScpKid.Scp11c)
+            if (keyParameters.KeyReference.Id == ScpKeyIds.Scp11A || keyParameters.KeyReference.Id == ScpKeyIds.Scp11C)
             {
                 PerformSecurityOperation(pipeline, keyParameters);
             }
 
-            var securityDomainPublicKey = keyParameters.SecurityDomainEllipticCurveKeyAgreementKeyPublicKey;
-            var securityDomainPublicKeyCurve = securityDomainPublicKey.Curve;
+            var sdEckaPkParams = keyParameters.PkSdEcka.Parameters;
 
             // Generate a public and private key using the supplied curve
             var ekpOceEcka = CryptographyProviders.EcdhPrimitivesCreator()
-                .GenerateKeyPair(securityDomainPublicKeyCurve);
+                .GenerateKeyPair(sdEckaPkParams.Curve);
 
             // Create an encoded point of the ephemeral public key to send to the Yubikey
             byte[] ephemeralPublicKeyEncodedPointOceEcka = new byte[65];
@@ -78,7 +77,7 @@ namespace Yubico.YubiKey.Scp
                 new TlvObject(EckaTag, ephemeralPublicKeyEncodedPointOceEcka)
                 );
 
-            var authenticateCommand = keyParameters.KeyReference.Id == ScpKid.Scp11b
+            var authenticateCommand = keyParameters.KeyReference.Id == ScpKeyIds.Scp11B
                 ? new InternalAuthenticateCommand(
                     keyParameters.KeyReference.VersionNumber, keyParameters.KeyReference.Id,
                     hostAuthenticateTlvEncodedData) as IYubiKeyCommand<ScpResponse>
@@ -102,14 +101,13 @@ namespace Yubico.YubiKey.Scp
                 authenticateResponseTlvs[1].GetBytes().Span); // Yubikey X963KDF Receipt to match with our own X963KDF
 
             var skOceEcka =
-                keyParameters
-                    .OffCardEntityEllipticCurveAgreementPrivateKey ?? // If set, we will use this for SCP11A and SCP11C. 
+                keyParameters.SkOceEcka?.Parameters ?? // If set, we will use this for SCP11A and SCP11C. 
                 ekpOceEcka; // Otherwise, just use the newly created ephemeral key for SCP11b.
 
             var (encryptionKey, macKey, rMacKey, dekKey)
                 = GetX963KDFKeyAgreementKeys(
                     skOceEcka.Curve,
-                    securityDomainPublicKey,
+                    sdEckaPkParams,
                     ekpOceEcka,
                     skOceEcka,
                     sdReceipt,
@@ -235,38 +233,40 @@ namespace Yubico.YubiKey.Scp
         private static byte GetScpIdentifierByte(KeyReference keyReference) =>
             keyReference.Id switch
             {
-                ScpKid.Scp11a => 0b01,
-                ScpKid.Scp11b => 0b00,
-                ScpKid.Scp11c => 0b11,
+                ScpKeyIds.Scp11A => 0b01,
+                ScpKeyIds.Scp11B => 0b00,
+                ScpKeyIds.Scp11C => 0b11,
                 _ => throw new ArgumentException("Invalid SCP11 KID")
             };
 
         private static void PerformSecurityOperation(IApduTransform pipeline, Scp11KeyParameters keyParams)
         {
             // GPC v2.3 Amendment F (SCP11) v1.4 §7.5
-            if (keyParams.OffCardEntityEllipticCurveAgreementPrivateKey == null)
+            if (keyParams.SkOceEcka == null)
             {
                 throw new ArgumentNullException(
-                    nameof(keyParams.OffCardEntityEllipticCurveAgreementPrivateKey),
+                    nameof(keyParams.SkOceEcka),
                     "SCP11a and SCP11c require a private key");
             }
 
-            int n = keyParams.Certificates.Count - 1;
-            if (n < 0)
+            if (keyParams.OceCertificates == null || keyParams.OceCertificates.Count == 0)
             {
                 throw new ArgumentException(
-                    "SCP11a and SCP11c require a certificate chain", nameof(keyParams.Certificates));
+                    "SCP11a and SCP11c require a certificate chain", nameof(keyParams.OceCertificates));
             }
 
-            var oceRef = keyParams.OffCardEntityKeyReference ?? new KeyReference(0, 0);
+            int n = keyParams.OceCertificates.Count - 1;
+            var oceRef = keyParams.OceKeyReference ?? new KeyReference(0, 0);
             for (int i = 0; i <= n; i++)
             {
-                byte[] certificates = keyParams.Certificates[i].RawData;
-                byte oceRefPadded = (byte)(oceRef.Id | (i < n ? 0x80 : 0x00)); // Append 0x80 if more certificates following
+                byte[] certificates = keyParams.OceCertificates[i].RawData;
+                byte oceRefInput = (byte)(oceRef.Id | (i < n
+                    ? 0x80
+                    : 0x00)); // Append 0x80 if more certificates remain to be sent
 
                 var securityOperationCommand = new SecurityOperationCommand(
                     oceRef.VersionNumber,
-                    oceRefPadded,
+                    oceRefInput,
                     certificates);
 
                 // Send payload
@@ -288,11 +288,7 @@ namespace Yubico.YubiKey.Scp
             using var memoryStream = new MemoryStream();
             foreach (var bytes in values)
             {
-#if NETSTANDARD2_1_OR_GREATER
-                memoryStream.Write(bytes.Span);
-#else
                 memoryStream.Write(bytes.Span.ToArray(), 0, bytes.Length);
-#endif
             }
 
             return memoryStream.ToArray();

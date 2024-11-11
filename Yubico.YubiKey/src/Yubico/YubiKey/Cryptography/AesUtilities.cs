@@ -51,22 +51,22 @@ namespace Yubico.YubiKey.Cryptography
 
             using var aesObj = CryptographyProviders.AesCreator();
             byte[] aesObjKey = encryptionKey.ToArray();
-            #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
+#pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
             aesObj.Mode = CipherMode.ECB;
-            #pragma warning restore CA5358
+#pragma warning restore CA5358
             aesObj.KeySize = BlockSizeBits;
             aesObj.BlockSize = BlockSizeBits;
             aesObj.Key = aesObjKey;
             aesObj.IV = new byte[BlockSizeBytes];
             aesObj.Padding = PaddingMode.None;
-            #pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
+#pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
             // a non-default initialization vector
             var encryptor = aesObj.CreateEncryptor();
-            #pragma warning restore CA5401
-            
+#pragma warning restore CA5401
+
             using var msEncrypt = new MemoryStream();
             using var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
-            
+
             csEncrypt.Write(plaintext.ToArray(), 0, plaintext.Length);
             byte[] ciphertext = msEncrypt.ToArray();
 
@@ -184,7 +184,7 @@ namespace Yubico.YubiKey.Cryptography
             aesObj.Mode = CipherMode.CBC;
             aesObj.KeySize = BlockSizeBits;
             aesObj.BlockSize = BlockSizeBits;
-            
+
             aesObj.Key = aesObjKey;
             aesObj.IV = aesObjIv;
             aesObj.Padding = PaddingMode.None;
@@ -194,7 +194,7 @@ namespace Yubico.YubiKey.Cryptography
             using var msDecrypt = new MemoryStream();
             using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Write);
             csDecrypt.Write(ciphertext.ToArray(), 0, ciphertext.Length);
-            
+
             byte[] plaintext = msDecrypt.ToArray();
             return plaintext;
         }

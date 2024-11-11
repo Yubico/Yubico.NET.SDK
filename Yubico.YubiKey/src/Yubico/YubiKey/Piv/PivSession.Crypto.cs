@@ -386,7 +386,7 @@ namespace Yubico.YubiKey.Piv
         // other information.
         private byte[] PerformPrivateKeyOperation(
             byte slotNumber, IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> commandToPerform,
-            PivAlgorithm algorithm,string algorithmExceptionMessage)
+            PivAlgorithm algorithm, string algorithmExceptionMessage)
         {
             bool pinRequired = true;
 

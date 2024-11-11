@@ -65,8 +65,7 @@ namespace Yubico.YubiKey
 
             if (_smartCardDevice is null)
             {
-                string errorMessage = "No smart card interface present. Unable to establish SCP connection to YubiKey."; 
-                throw new InvalidOperationException(errorMessage);
+                throw new InvalidOperationException("No smart card interface present. Unable to establish SCP connection to YubiKey.");
             }
 
             _log.LogInformation("Connecting via the SmartCard interface using SCP03.");
@@ -92,8 +91,7 @@ namespace Yubico.YubiKey
 
             if (_smartCardDevice is null)
             {
-                string errorMessage = "No smart card interface present. Unable to establish SCP connection to YubiKey.";
-                throw new InvalidOperationException(errorMessage);
+                throw new InvalidOperationException("No smart card interface present. Unable to establish SCP connection to YubiKey.");
             }
 
             _log.LogInformation("Connecting via the SmartCard interface using SCP03.");
@@ -117,7 +115,7 @@ namespace Yubico.YubiKey
             if (_smartCardDevice != null)
             {
                 _log.LogInformation("Connecting via the SmartCard interface.");
-                
+
                 WaitForReclaimTimeout(Transport.SmartCard);
                 return new SmartCardConnection(_smartCardDevice, application);
             }
@@ -125,7 +123,7 @@ namespace Yubico.YubiKey
             if (_hidKeyboardDevice != null && application == YubiKeyApplication.Otp)
             {
                 _log.LogInformation("Connecting via the Keyboard interface.");
-                
+
                 WaitForReclaimTimeout(Transport.HidKeyboard);
                 return new KeyboardConnection(_hidKeyboardDevice);
             }
@@ -133,13 +131,12 @@ namespace Yubico.YubiKey
             if (_hidFidoDevice != null && (application == YubiKeyApplication.Fido2 || application == YubiKeyApplication.FidoU2f))
             {
                 _log.LogInformation("Connecting via the FIDO interface.");
-                
+
                 WaitForReclaimTimeout(Transport.HidFido);
                 return new FidoConnection(_hidFidoDevice);
             }
 
-            string errorMessage = "No suitable interface present. Unable to establish connection to YubiKey.";
-            throw new InvalidOperationException(errorMessage);
+            throw new InvalidOperationException("No suitable interface present. Unable to establish connection to YubiKey.");
         }
 
         // This function handles waiting for the reclaim timeout on the YubiKey to elapse. The reclaim timeout requires

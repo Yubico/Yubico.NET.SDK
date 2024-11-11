@@ -33,31 +33,31 @@ namespace Yubico.YubiKey.Scp
         private KeyReference? _oceKeyReference;
         private ECPublicKeyParameters _pkSdEcka;
         private ECPrivateKeyParameters? _skOceEcka;
-        private X509Certificate2[]? _certificates;
+        private X509Certificate2[]? _oceCertificates;
         private bool _disposed;
 
         /// <summary>
-        /// The public key of the Security Domain Elliptic Curve Key Agreement (ECKA) key.
-        /// <remarks>pkSdEcka is short for PublicKey SecurityDomain Elliptic Curve KeyAgreement Key</remarks>
+        /// The public key of the Security Domain Elliptic Curve Key Agreement (ECKA) key (SCP11a/b/c). Required.
+        /// <remarks>'pkSdEcka' is short for PublicKey SecurityDomain Elliptic Curve KeyAgreement (Key)</remarks>
         /// </summary>
-        public ECPublicKeyParameters PkSdEcka => _pkSdEcka; 
+        public ECPublicKeyParameters PkSdEcka => _pkSdEcka;
 
         /// <summary>
-        /// The key reference of the off-card entity. Optional.
-        /// <remarks>oceKeyReference is short for Off-Card Entity Key Reference</remarks>
+        /// The key reference of the off-card entity (SCP11a/c). Optional.
+        /// <remarks>'oceKeyReference' is short for Off-Card Entity Key Reference</remarks>
         /// </summary>
         public KeyReference? OceKeyReference => _oceKeyReference;
 
         /// <summary>
-        /// The private key of the off-card entity Elliptic Curve Key Agreement (ECKA) key. Optional.
-        /// <remarks>skOceEcka is short for Secret Key Off-Card Entity Elliptic Curve KeyAgreement Key</remarks>
+        /// The private key of the off-card entity Elliptic Curve Key Agreement (ECKA) key (SCP11a/c). Optional.
+        /// <remarks>'skOceEcka' is short for Secret Key Off-Card Entity Elliptic Curve KeyAgreement (Key)</remarks>
         /// </summary>
         public ECPrivateKeyParameters? SkOceEcka => _skOceEcka;
 
         /// <summary>
-        /// The certificate chain for the off-card entity. This is used for SCP11a and SCP11c. Optional. //TODO Clarify which ones are for SCP11a and which ones are for SCP11c and which ones are for SCP11b
+        /// The certificate chain, containing the public key for the off-card entity (SCP11a/c).
         /// </summary>
-        public IReadOnlyList<X509Certificate2>? Certificates => _certificates;
+        public IReadOnlyList<X509Certificate2>? OceCertificates => _oceCertificates;
 
         /// <summary>
         /// Creates a new <see cref="Scp11KeyParameters"/> instance.
@@ -75,49 +75,45 @@ namespace Yubico.YubiKey.Scp
             ECPrivateKeyParameters? skOceEcka = null,
             IEnumerable<X509Certificate2>? certificates = null)
             : base(keyReference)
-        { 
+        {
             _pkSdEcka = pkSdEcka;
             _oceKeyReference = oceKeyReference;
             _skOceEcka = skOceEcka;
-            _certificates = certificates?.ToArray();
+            _oceCertificates = certificates?.ToArray();
 
             ValidateParameters();
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Scp11KeyParameters"/> class
-        /// with the specified key reference and security domain elliptic curve key agreement key public key.
-        /// This is used to create SCP11B connections which are authenticated connections.
-        /// </summary>
-        /// <param name="keyReference">The key reference.</param>
-        /// <param name="pkSdEcka">The security domain elliptic curve key agreement key public key.</param>
-        public Scp11KeyParameters(KeyReference keyReference, ECPublicKeyParameters pkSdEcka)
+        public Scp11KeyParameters(
+            KeyReference keyReference,
+            ECPublicKeyParameters pkSdEcka)
             : this(keyReference, pkSdEcka, null, null, null)
         {
-            
+
         }
+
 
         private void ValidateParameters()
         {
             switch (KeyReference.Id)
             {
-                case ScpKid.Scp11b:
+                case ScpKeyIds.Scp11B:
                     if (
                         OceKeyReference != null ||
                         SkOceEcka != null ||
-                        Certificates?.Count > 0
+                        OceCertificates?.Count > 0
                         )
                     {
                         throw new ArgumentException("Cannot provide oceKeyRef, skOceEcka or certificates for SCP11b");
                     }
 
                     break;
-                case ScpKid.Scp11a:
-                case ScpKid.Scp11c:
+                case ScpKeyIds.Scp11A:
+                case ScpKeyIds.Scp11C:
                     if (
                         OceKeyReference == null ||
                         SkOceEcka == null ||
-                        Certificates?.Count == 0
+                        OceCertificates?.Count == 0
                         )
                     {
                         throw new ArgumentException("Must provide oceKeyRef, skOceEcka or certificates for SCP11a/c");
@@ -129,18 +125,22 @@ namespace Yubico.YubiKey.Scp
             }
         }
 
+
+        // TODO Is this needed?
         public void Dispose()
         {
-            if (!_disposed)
+            if (_disposed)
             {
-                CryptographicOperations.ZeroMemory(_skOceEcka?.Parameters.D);
-                _pkSdEcka = null!;
-                _oceKeyReference = null;
-                _skOceEcka = null;
-                _certificates = Array.Empty<X509Certificate2>();
-
-                _disposed = true;
+                return;
             }
+
+            CryptographicOperations.ZeroMemory(_skOceEcka?.Parameters.D);
+            _pkSdEcka = null!;
+            _oceKeyReference = null;
+            _skOceEcka = null;
+            _oceCertificates = Array.Empty<X509Certificate2>();
+
+            _disposed = true;
         }
     }
 }

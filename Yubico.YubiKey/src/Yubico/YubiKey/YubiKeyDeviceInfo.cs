@@ -28,7 +28,7 @@ namespace Yubico.YubiKey
     public class YubiKeyDeviceInfo : IYubiKeyDeviceInfo
     {
         private const byte FipsMask = 0x80;
-        private const byte SkyMask  = 0x40;
+        private const byte SkyMask = 0x40;
         private const byte FormFactorMask = unchecked((byte)~(FipsMask | SkyMask));
 
         private static readonly FirmwareVersion _fipsInclusiveLowerBound =

@@ -63,7 +63,7 @@ namespace Yubico.YubiKey
         ///     The ability to communicate using Secure Channel Protocol 3 (SCP03).
         /// </summary>
         Scp03,
-        
+
         /// <summary>
         ///     The ability to communicate using Secure Channel Protocol 3 (SCP03) for OATH credentials.
         /// </summary>

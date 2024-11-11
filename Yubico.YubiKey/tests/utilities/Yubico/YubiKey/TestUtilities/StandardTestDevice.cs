@@ -37,16 +37,6 @@ namespace Yubico.YubiKey.TestUtilities
         Fw5Fips,
 
         /// <summary>
-        /// Major version 5, USB C Lightning, not FIPS
-        /// </summary>
-        Fw5Ci,
-
-        /// <summary>
-        /// Major version 5, USB C Keychain
-        /// </summary>
-        Fw5C,
-
-        /// <summary>
         /// Major version 5, USB A biometric keychain, not FIPS
         /// </summary>
         Fw5Bio

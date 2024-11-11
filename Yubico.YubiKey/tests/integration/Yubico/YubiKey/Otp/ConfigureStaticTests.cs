@@ -16,6 +16,7 @@ using System;
 using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.YubiKey.Otp.Operations;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Otp
@@ -31,7 +32,7 @@ namespace Yubico.YubiKey.Otp
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var otpSession = new OtpSession(testDevice))
+            using (var otpSession = new OtpSession(testDevice, Scp03KeyParameters.DefaultKey))
             {
                 if (otpSession.IsLongPressConfigured)
                 {

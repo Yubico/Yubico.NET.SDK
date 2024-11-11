@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.Scp;
-using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey
 {
@@ -28,6 +26,6 @@ namespace Yubico.YubiKey
         /// <summary>
         /// Return a reference to the SCP03 key set used to make the connection.
         /// </summary>
-        public StaticKeys GetScp03Keys();
+        public Yubico.YubiKey.Scp03.StaticKeys GetScp03Keys();
     }
 }

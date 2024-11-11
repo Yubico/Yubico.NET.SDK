@@ -18,7 +18,9 @@ namespace Yubico.YubiKey
 {
     public interface IYubiKeyConnection : IDisposable
     {
-        TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse;
+        TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand, bool encrypt = false)
+            where TResponse : IYubiKeyResponse;
+
         /// <summary>
         /// An object representing the response received from the YubiKey after selecting the application.  
         /// </summary>

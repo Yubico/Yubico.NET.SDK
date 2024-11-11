@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.Scp
 {
@@ -21,6 +20,16 @@ namespace Yubico.YubiKey.Scp
     {
         public StaticKeys StaticKeys { get; }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="Scp03KeyParameters"/>, representing the parameters for
+        /// a Secure Channel Protocol 03 (SCP03) key.
+        /// </summary>
+        /// <param name="keyReference">A reference to the key.</param>
+        /// <param name="staticKeys">The static keys shared with the device.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown if <paramref name="keyReference.Id"/> is greater than 3, which is an invalid Key ID
+        /// for SCP03.
+        /// </exception>
         public Scp03KeyParameters(
             KeyReference keyReference,
             StaticKeys staticKeys) : base(keyReference)
@@ -33,6 +42,13 @@ namespace Yubico.YubiKey.Scp
             StaticKeys = staticKeys;
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="Scp03KeyParameters"/>, representing the parameters for
+        /// a Secure Channel Protocol 03 (SCP03) key.
+        /// </summary>
+        /// <param name="keyId">The ID of the key.</param>
+        /// <param name="keyVersionNumber">The version number of the key.</param>
+        /// <param name="staticKeys">The static keys shared with the device.</param>
         public Scp03KeyParameters(
             byte keyId,
             byte keyVersionNumber,
@@ -40,6 +56,13 @@ namespace Yubico.YubiKey.Scp
         {
         }
 
+        /// <summary>
+        /// Gets the default SCP03 key parameters using the default key identifier and static keys.
+        /// </summary>
+        /// <remarks>
+        /// This property provides a convenient way to access default SCP03 key parameters,
+        /// using the standard SCP03 key identifier and default static keys.
+        /// </remarks>
         public static Scp03KeyParameters DefaultKey => new Scp03KeyParameters(ScpKid.Scp03, 0xFF, new StaticKeys());
     }
 }

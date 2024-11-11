@@ -27,9 +27,9 @@ namespace Yubico.YubiKey.Oath
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var oathSession = new OathSession(testDevice, Scp03KeyParameters.DefaultKey)) //TODO follow Dains advice to reset the session
+            using (var oathSession = new OathSession(testDevice))
             {
-                oathSession.ResetApplication(); // 
+                oathSession.ResetApplication();
                 IList<Credential> data = oathSession.GetCredentials();
 
                 Assert.True(oathSession._oathData.Challenge.IsEmpty);

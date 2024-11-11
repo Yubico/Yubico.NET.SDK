@@ -111,8 +111,8 @@ namespace Yubico.YubiKey.Scp.Commands
         private readonly byte _p1;
         private readonly byte _p2;
 
-        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
-        
+        public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
+
         public PutKeyCommand(byte p1, byte p2, ReadOnlyMemory<byte> data)
         {
             _p1 = p1;

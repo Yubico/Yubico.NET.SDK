@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Scp.Commands
             if (responseApdu.SW != SWConstants.Success)
             {
                 string message = string.Format(
-                    CultureInfo.CurrentCulture, 
+                    CultureInfo.CurrentCulture,
                     $"{ExceptionMessages.IncorrectExternalAuthenticateData}" + " " +
                     $"SW: 0x{responseApdu.SW.ToString("X4", CultureInfo.InvariantCulture)}");
                 throw new ArgumentException(message, nameof(responseApdu));

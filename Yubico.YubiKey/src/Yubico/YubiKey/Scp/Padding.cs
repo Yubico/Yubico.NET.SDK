@@ -36,10 +36,10 @@ namespace Yubico.YubiKey.Scp
             Span<byte> padded = stackalloc byte[paddedLen];
             payload.CopyTo(padded);
             padded[payload.Length] = 0x80;
-            
+
             return padded.ToArray();
         }
-        
+
         /// <summary>
         /// Remove the padding from the given <paramref name="paddedPayload"/>.
         /// </summary>
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Scp
                 {
                     return paddedPayload[..i].ToArray();
                 }
-                
+
                 if (paddedPayload[i] != 0x00)
                 {
                     throw new SecureChannelException(ExceptionMessages.InvalidPadding);

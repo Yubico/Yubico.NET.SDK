@@ -15,17 +15,17 @@
 using System;
 using Xunit;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Scp.Commands;
 
-namespace Yubico.YubiKey.Scp03.Commands
+namespace Yubico.YubiKey.Scp0.Commands
 {
-    [Obsolete("This class is obsolete and will be removed in a future release.")]
-    public class Scp03ResponseTests
+    public class ScpResponseTests
     {
         [Fact]
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new Scp03Response(null));
+            _ = Assert.Throws<ArgumentNullException>(() => new ScpResponse(null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Scp03.Commands
             var responseApdu = new ResponseApdu(new byte[] { 24, 73 });
 
             // Act
-            var scp03Response = new Scp03Response(responseApdu);
+            var scp03Response = new ScpResponse(responseApdu);
 
             // Assert
             Assert.Equal(responseApdu.SW, scp03Response.StatusWord);
@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Scp03.Commands
             var responseApdu = new ResponseApdu(new byte[] { SW1Constants.Success, 0x00 });
 
             // Act
-            var scp03Response = new Scp03Response(responseApdu);
+            var scp03Response = new ScpResponse(responseApdu);
 
             // Assert
             Assert.Equal(ResponseStatus.Success, scp03Response.Status);
@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Scp03.Commands
             var responseApdu = new ResponseApdu(new byte[] { SW1Constants.CommandNotAllowed, 0x00 });
 
             // Act
-            var scp03Response = new Scp03Response(responseApdu);
+            var scp03Response = new ScpResponse(responseApdu);
 
             // Assert
             Assert.Equal(ResponseStatus.Failed, scp03Response.Status);

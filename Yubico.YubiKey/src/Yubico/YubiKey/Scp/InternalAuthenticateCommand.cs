@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Scp
             _keyReferenceId = keyReferenceId;
             _data = data;
         }
-        
+
         public CommandApdu CreateCommandApdu() =>
             new CommandApdu
             {
@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.Scp
         public InternalAuthenticateResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new InternalAuthenticateResponse(responseApdu);
     }
-    
+
     internal class InternalAuthenticateResponse : ScpResponse
     {
         public InternalAuthenticateResponse(ResponseApdu responseApdu) : base(responseApdu)

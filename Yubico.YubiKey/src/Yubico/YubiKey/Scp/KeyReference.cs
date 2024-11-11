@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Scp
         /// The Key Id (KID) of the key.
         /// </summary>
         public byte Id { get; }
-        
+
         /// <summary>
         /// The Key Version Number (KVN) of the key.
         /// </summary>

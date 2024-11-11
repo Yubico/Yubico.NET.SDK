@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Scp.Commands
             {
                 throw new ArgumentException("Invalid size, must be 8 bytes", nameof(_hostChallenge));
             }
-            
+
             _hostChallenge = hostChallenge;
             _keyVersionNumber = keyVersionNumber;
         }

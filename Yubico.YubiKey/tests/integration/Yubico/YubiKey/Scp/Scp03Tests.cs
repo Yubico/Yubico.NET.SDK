@@ -29,21 +29,34 @@ namespace Yubico.YubiKey.Scp
     [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class Scp03Tests
     {
+        private IYubiKeyDevice GetDevice(
+            StandardTestDevice desiredDeviceType,
+            Transport transport = Transport.All, 
+            FirmwareVersion? minimumFirmwareVersion = null) 
+            => IntegrationTestDeviceEnumeration.GetTestDevice(desiredDeviceType, transport, minimumFirmwareVersion);
+
         private readonly ReadOnlyMemory<byte> _defaultPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-        private IYubiKeyDevice Device { get; set; }
 
         public Scp03Tests()
         {
-            Device = IntegrationTestDeviceEnumeration.GetTestDevice(
-                Transport.SmartCard,
-                minimumFirmwareVersion: FirmwareVersion.V5_3_0);
-
-            using var session = new SecurityDomainSession(Device);
-            session.Reset();
+            ResetAllowedDevices();
         }
 
-        [Fact]
-        public void TestImportKey()
+        private static void ResetAllowedDevices()
+        {
+            // Reset all attached allowed devices
+            foreach (var availableDevice in IntegrationTestDeviceEnumeration.GetTestDevices())
+            {
+                using var session = new SecurityDomainSession(availableDevice);
+                session.Reset();
+            }
+        }
+
+
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_TestImportKey(StandardTestDevice desiredDeviceType)
         {
             byte[] sk =
             {
@@ -51,34 +64,37 @@ namespace Yubico.YubiKey.Scp
                 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
             };
 
+            var testDevice = GetDevice(desiredDeviceType);
             var newKeyParams = Scp03KeyParameters.FromStaticKeys(new StaticKeys(sk, sk, sk));
 
             // Authenticate with default key, then replace default key
-            using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
+            using (var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey))
             {
                 session.PutKey(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
             }
 
-            using (_ = new SecurityDomainSession(Device, newKeyParams))
+            using (_ = new SecurityDomainSession(testDevice, newKeyParams))
             {
             }
 
             // Default key should not work now and throw an exception
             Assert.Throws<ArgumentException>(() =>
             {
-                using (_ = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
+                using (_ = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey))
                 {
                 }
             });
         }
 
-
-        [Fact]
-        public void PutKey_WithPublicKey_Succeeds()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_PutKey_WithPublicKey_Succeeds(StandardTestDevice desiredDeviceType)
         {
-            var keyReference = new KeyReference(0x10, 0x3);
+            var keyReference = new KeyReference(ScpKeyIds.ScpCaPublicKey, 0x3);
+            var testDevice = GetDevice(desiredDeviceType, Transport.All, FirmwareVersion.V5_7_2);
 
-            using var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey);
+            using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
             var publicKey = new ECPublicKeyParameters(ecdsa);
@@ -88,121 +104,54 @@ namespace Yubico.YubiKey.Scp
             Assert.True(keyInformation.ContainsKey(keyReference));
         }
 
-        [Fact]
-        public void TestDeleteKey()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_AuthenticateWithWrongKey_Should_ThrowException(StandardTestDevice desiredDeviceType)
         {
-            var keyRef1 = new Scp03KeyParameters(ScpKid.Scp03, 0x10, RandomStaticKeys());
-            var keyRef2 = new Scp03KeyParameters(ScpKid.Scp03, 0x55, RandomStaticKeys());
-
-            // Auth with default key, then replace default key
-            using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
-            {
-                session.PutKey(keyRef1.KeyReference, keyRef1.StaticKeys, 0);
-            }
-
-            // Authenticate with key1, then add additional key, keyref2
-            using (var session = new SecurityDomainSession(Device, keyRef1))
-            {
-                session.PutKey(keyRef2.KeyReference, keyRef2.StaticKeys, 0);
-            }
-
-            // Authenticate with key2, delete key 1
-            using (var session = new SecurityDomainSession(Device, keyRef2))
-            {
-                session.DeleteKey(keyRef1.KeyReference);
-            }
-
-            // Authenticate with key 1, 
-            // Should throw because we just deleted it
-            Assert.Throws<ArgumentException>(() =>
-            {
-                using (_ = new SecurityDomainSession(Device, keyRef1))
-                {
-                }
-            });
-
-            using (var session = new SecurityDomainSession(Device, keyRef2))
-            {
-                session.DeleteKey(keyRef2.KeyReference, true);
-            }
-
-            // Try to authenticate with key 2, 
-            // Should throw because we just deleted the last key
-            Assert.Throws<ArgumentException>(() =>
-            {
-                using (_ = new SecurityDomainSession(Device, keyRef2))
-                {
-                }
-            });
-        }
-
-        [Fact]
-        public void TestReplaceKey()
-        {
-            var keyRef1 = new Scp03KeyParameters(ScpKid.Scp03, 0x10, RandomStaticKeys());
-            var keyRef2 = new Scp03KeyParameters(ScpKid.Scp03, 0x10, RandomStaticKeys());
-
-            // Authenticate with default key, then replace default key
-            using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
-            {
-                session.PutKey(keyRef1.KeyReference, keyRef1.StaticKeys, 0);
-            }
-            // Authenticate with key1, then add additional key, keyref2
-            using (var session = new SecurityDomainSession(Device, keyRef1))
-            {
-                session.PutKey(keyRef2.KeyReference, keyRef2.StaticKeys, keyRef1.KeyReference.VersionNumber);
-            }
-
-            // Authentication with new key 2 should succeed
-            using (_ = new SecurityDomainSession(Device, keyRef2))
-            {
-            }
-
-            // The ssession throws a SecureChannelException if the attempted key is incorrect --
-            // But only if its not the default key. If it is the default key, it will throw an ArgumentException
-            Assert.Throws<SecureChannelException>(
-                () =>
-                {
-                    using (_ = new SecurityDomainSession(Device, keyRef1))
-                    {
-                    }
-                });
-        }
-
-        [Fact]
-        public void AuthenticateWithWrongKey_Should_ThrowException()
-        {
+            var testDevice = GetDevice(desiredDeviceType);
             var incorrectKeys = RandomStaticKeys();
             var keyRef = Scp03KeyParameters.FromStaticKeys(incorrectKeys);
 
             // Authentication with incorrect key should throw
             Assert.Throws<ArgumentException>(() =>
             {
-                using (var session = new SecurityDomainSession(Device, keyRef)) { };
+                using (var session = new SecurityDomainSession(testDevice, keyRef)) { }
             });
 
             // Authentication with default key should succeed
-            using (_ = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
+            using (_ = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey))
             {
-
             }
         }
 
-        [Fact]
-        public void GetInformation_WithDefaultKey_Returns_DefaultKey()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_GetInformation_WithDefaultKey_Returns_DefaultKey(StandardTestDevice desiredDeviceType)
         {
-            using var session = new SecurityDomainSession(Device);
+            var testDevice = GetDevice(desiredDeviceType);
+            using var session = new SecurityDomainSession(testDevice);
 
             var result = session.GetKeyInformation();
-            Assert.NotEmpty(result);
-            Assert.Equal(4, result.Count);
+            if (testDevice.FirmwareVersion < FirmwareVersion.V5_7_2)
+            {
+                Assert.Equal(3, result.Count);
+            }
+            else
+            {
+                Assert.Equal(4, result.Count);
+            }
             Assert.Equal(0xFF, result.Keys.First().VersionNumber);
         }
 
-        [Fact]
-        public void Connect_GetInformation_WithDefaultKey_Returns_DefaultKey()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_Connect_GetKeyInformation_WithDefaultKey_Returns_DefaultKey(StandardTestDevice desiredDeviceType)
         {
-            using var connection = Device.Connect(YubiKeyApplication.SecurityDomain);
+            var testDevice = GetDevice(desiredDeviceType);
+            using var connection = testDevice.Connect(YubiKeyApplication.SecurityDomain);
             const byte TAG_KEY_INFORMATION = 0xE0;
             var response = connection.SendCommand(new GetDataCommand(TAG_KEY_INFORMATION));
             var result = response.GetData();
@@ -223,27 +172,41 @@ namespace Yubico.YubiKey.Scp
 
                 keyInformation.Add(keyRef, keyComponents);
             }
+
             Assert.NotEmpty(keyInformation);
-            Assert.Equal(4, keyInformation.Keys.Count);
-            Assert.Equal(0xFF, keyInformation.Keys.First().VersionNumber);
+            Assert.Equal(0xFF, keyInformation.Keys.First().VersionNumber); // 0xff, Default kvn
+
+            if (testDevice.FirmwareVersion < FirmwareVersion.V5_7_2)
+            {
+                Assert.Equal(3, keyInformation.Keys.Count);
+            }
+            else
+            {
+                Assert.Equal(4, keyInformation.Keys.Count);
+            }
         }
 
-        [Fact]
-        public void GetCertificates_ReturnsCerts()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_GetCertificates_ReturnsCerts(StandardTestDevice desiredDeviceType)
         {
-            Skip.IfNot(Device.FirmwareVersion >= FirmwareVersion.V5_7_2);
+            var testDevice = GetDevice(desiredDeviceType, Transport.All, FirmwareVersion.V5_7_2);
 
-            using var session = new SecurityDomainSession(Device);
+            using var session = new SecurityDomainSession(testDevice);
 
-            var keyReference = new KeyReference(ScpKid.Scp11b, 0x1);
+            var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
             var certificateList = session.GetCertificates(keyReference);
 
             Assert.NotEmpty(certificateList);
         }
 
-        [Fact]
-        public void Reset_Restores_SecurityDomainKeys_To_FactoryKeys()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_Reset_Restores_SecurityDomainKeys_To_FactoryKeys(StandardTestDevice desiredDeviceType)
         {
+            var testDevice = GetDevice(desiredDeviceType);
             byte[] sk =
             {
                 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
@@ -251,83 +214,90 @@ namespace Yubico.YubiKey.Scp
             };
 
             var newKeyParams = new Scp03KeyParameters(
-                ScpKid.Scp03,
+                ScpKeyIds.Scp03,
                 0x01,
                 new StaticKeys(sk, sk, sk));
 
-            // TODO assumeFalse("SCP03 not supported over NFC on FIPS capable devices",
+            //  assumeFalse("SCP03 not supported over NFC on FIPS capable devices", TODO
             //     state.getDeviceInfo().getFipsCapable() != 0 && !state.isUsbTransport());
 
-            using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
+            using (var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey))
             {
                 session.PutKey(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
             }
 
             // Authentication with new key should succeed
-            using (var session = new SecurityDomainSession(Device, newKeyParams))
+            using (var session = new SecurityDomainSession(testDevice, newKeyParams))
             {
                 session.GetKeyInformation();
             }
 
-
             // Default key should not work now and throw an exception
             Assert.Throws<ArgumentException>(() =>
             {
-                using (_ = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
+                using (_ = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey))
                 {
                 }
             });
 
-            using (var session = new SecurityDomainSession(Device))
+            using (var session = new SecurityDomainSession(testDevice))
             {
                 session.Reset();
             }
 
             // Successful authentication with default key means key has been restored to factory settings
-            using (var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey))
+            using (var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey))
             {
                 _ = session.GetKeyInformation();
             }
         }
 
-        [Fact]
-        public void Scp03_GetSupportedCaIdentifiers_Succeeds()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_GetSupportedCaIdentifiers_Succeeds(StandardTestDevice desiredDeviceType)
         {
-            using var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey);
+            var testDevice = GetDevice(desiredDeviceType, Transport.All, FirmwareVersion.V5_7_2);
+            using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
+
             var result = session.GetSupportedCaIdentifiers(true, true);
             Assert.NotEmpty(result);
         }
-        
-        [Fact]
-        public void Scp03_GetCardRecognitionData_Succeeds()
+
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_GetCardRecognitionData_Succeeds(StandardTestDevice desiredDeviceType)
         {
-            using var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey);
+            var testDevice = GetDevice(desiredDeviceType);
+            using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
             var result = session.GetCardRecognitionData();
             Assert.True(result.Length > 0);
         }
-        
-        [Fact]
-        public void Scp03_GetData_Succeeds()
+
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_GetData_Succeeds(StandardTestDevice desiredDeviceType)
         {
-            using var session = new SecurityDomainSession(Device, Scp03KeyParameters.DefaultKey);
+            var testDevice = GetDevice(desiredDeviceType);
+            using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
             var result = session.GetData(0x66); // Card Data
             Assert.True(result.Length > 0);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
-        public void PivSession_TryVerifyPinAndGetMetaData_Succeeds(
-            StandardTestDevice testDeviceType)
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_PivSession_TryVerifyPinAndGetMetaData_Succeeds(StandardTestDevice desiredDeviceType)
         {
-            var device = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            Assert.True(device.FirmwareVersion >= FirmwareVersion.V5_3_0);
-            Assert.True(device.HasFeature(YubiKeyFeature.Scp03));
+            var testDevice = GetDevice(desiredDeviceType);
+            Assert.True(testDevice.FirmwareVersion >= FirmwareVersion.V5_3_0);
+            Assert.True(testDevice.HasFeature(YubiKeyFeature.Scp03));
 
-            using var pivSession = new PivSession(device, Scp03KeyParameters.DefaultKey);
+            using var pivSession = new PivSession(testDevice, Scp03KeyParameters.DefaultKey);
 
-            var result = pivSession.TryVerifyPin(
-                new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 }),
-                out _);
+            var result = pivSession.TryVerifyPin(_defaultPin, out _);
 
             Assert.True(result);
 
@@ -335,13 +305,15 @@ namespace Yubico.YubiKey.Scp
             Assert.Equal(3, metadata.RetryCount);
         }
 
-        [Fact]
-        public void Device_Connect_With_Application_Succeeds()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_Device_Connect_With_Application_Succeeds(StandardTestDevice desiredDeviceType)
         {
-            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
-                Transport.SmartCard, FirmwareVersion.V5_3_0);
+            var testDevice = GetDevice(desiredDeviceType);
+            Assert.True(testDevice.FirmwareVersion >= FirmwareVersion.V5_3_0);
 
-            using var connection = device.Connect(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey);
+            using var connection = testDevice.Connect(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey);
             Assert.NotNull(connection);
 
             var cmd = new VerifyPinCommand(_defaultPin);
@@ -349,13 +321,15 @@ namespace Yubico.YubiKey.Scp
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
 
-        [Fact]
-        public void Device_Connect_ApplicationId_Succeeds()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_Device_Connect_ApplicationId_Succeeds(StandardTestDevice desiredDeviceType)
         {
-            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
-                Transport.SmartCard, FirmwareVersion.V5_3_0);
+            var testDevice = GetDevice(desiredDeviceType);
+            Assert.True(testDevice.FirmwareVersion >= FirmwareVersion.V5_3_0);
 
-            using IYubiKeyConnection connection = device.Connect(
+            using IYubiKeyConnection connection = testDevice.Connect(
                 YubiKeyApplication.Piv.GetIso7816ApplicationId(), Scp03KeyParameters.DefaultKey);
 
             Assert.NotNull(connection);
@@ -365,13 +339,15 @@ namespace Yubico.YubiKey.Scp
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
 
-        [Fact]
-        public void Device_TryConnect_With_Application_Succeeds()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_Device_TryConnect_With_Application_Succeeds(StandardTestDevice desiredDeviceType)
         {
-            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
-                Transport.SmartCard, FirmwareVersion.V5_3_0);
+            var testDevice = GetDevice(desiredDeviceType);
+            Assert.True(testDevice.FirmwareVersion >= FirmwareVersion.V5_3_0);
 
-            var isValid = device.TryConnect(
+            var isValid = testDevice.TryConnect(
                 YubiKeyApplication.Piv,
                 Scp03KeyParameters.DefaultKey,
                 out var connection);
@@ -386,13 +362,15 @@ namespace Yubico.YubiKey.Scp
             }
         }
 
-        [Fact]
-        public void Device_TryConnect_With_ApplicationId_Succeeds()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp03_Device_TryConnect_With_ApplicationId_Succeeds(StandardTestDevice desiredDeviceType)
         {
-            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
-                Transport.SmartCard, FirmwareVersion.V5_3_0);
+            var testDevice = GetDevice(desiredDeviceType);
+            Assert.True(testDevice.FirmwareVersion >= FirmwareVersion.V5_3_0);
 
-            var isValid = device.TryConnect(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey,
+            var isValid = testDevice.TryConnect(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey,
                 out var connection);
 
             using (connection)

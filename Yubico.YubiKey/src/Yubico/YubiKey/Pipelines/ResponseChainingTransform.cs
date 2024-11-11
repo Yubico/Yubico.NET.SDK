@@ -47,7 +47,6 @@ namespace Yubico.YubiKey.Pipelines
             var responseApdu = _pipeline.Invoke(command, commandType, responseType);
 
             // Unless we see that bytes are available, there's nothing for this transform to do.
-            // TODO refactor away do while
             if (responseApdu.SW1 != SW1Constants.BytesAvailable)
             {
                 return responseApdu;
@@ -79,7 +78,8 @@ namespace Yubico.YubiKey.Pipelines
             return new ResponseApdu(tempBuffer.ToArray(), responseApdu.SW);
         }
 
-        protected virtual IYubiKeyCommand<YubiKeyResponse> CreateGetResponseCommand(CommandApdu originatingCommand, short SW2) =>
+        protected virtual IYubiKeyCommand<YubiKeyResponse>
+            CreateGetResponseCommand(CommandApdu originatingCommand, short SW2) =>
             new InterIndustry.Commands.GetResponseCommand(originatingCommand, SW2);
 
         public void Setup() => _pipeline.Setup();

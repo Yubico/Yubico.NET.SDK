@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Scp
         /// Gets the session RMAC key.
         /// </summary>
         public ReadOnlyMemory<byte> RmacKey => _rmacKey;
-        
+
         /// <summary>
         /// Gets the session data encryption key.
         /// </summary>
@@ -51,8 +51,8 @@ namespace Yubico.YubiKey.Scp
         /// <param name="rmacKey">The session RMAC key.</param>
         /// <param name="dataEncryptionKey">The session data encryption key. Optional.</param>
         public SessionKeys(
-            Memory<byte> macKey, 
-            Memory<byte> encryptionKey, 
+            Memory<byte> macKey,
+            Memory<byte> encryptionKey,
             Memory<byte> rmacKey,
             Memory<byte> dataEncryptionKey)
         {
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Scp
             _encryptionKey = encryptionKey;
             _rmacKey = rmacKey;
             _dataEncryptionKey = dataEncryptionKey;
-            
+
             _disposed = false;
         }
 

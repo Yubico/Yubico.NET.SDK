@@ -74,7 +74,7 @@ namespace Yubico.YubiKey.Scp03
             cmacObj.CmacInit(rmacKey);
             cmacObj.CmacUpdate(macInp);
             cmacObj.CmacFinal(cmac);
-            
+
             var calculatedRmac = cmac.AsSpan(0, 8);
             if (!CryptographicOperations.FixedTimeEquals(recvdRmac, calculatedRmac))
             {

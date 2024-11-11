@@ -14,9 +14,8 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Scp;
 
-namespace Yubico.YubiKey.Scp03
+namespace Yubico.YubiKey.Scp
 {
     /// <summary>
     /// Represents a triple of SCP03 static keys shared with the device.
@@ -35,7 +34,6 @@ namespace Yubico.YubiKey.Scp03
     /// device.
     /// </para>
     /// </remarks>
-    [Obsolete("Use new Static Keys")]
     public class StaticKeys : IDisposable
     {
         private const int KeySizeBytes = 16;
@@ -189,9 +187,6 @@ namespace Yubico.YubiKey.Scp03
                 KeyVersionNumber = KeyVersionNumber
             };
 
-        internal Scp03KeyParameters ConvertToScp03KeyParameters() =>
-                new Scp03KeyParameters(ScpKeyIds.Scp03, 0xFF, ConvertFromLegacy());
-
         /// <summary>
         /// Determine if the contents of each key is the same for both objects.
         /// If so, this method will return <c>true</c>.
@@ -203,16 +198,11 @@ namespace Yubico.YubiKey.Scp03
                 return false;
             }
 
-            return ChannelEncryptionKey.Span.SequenceEqual(compareKeys.ChannelEncryptionKey.Span) &&
+            return 
+                ChannelEncryptionKey.Span.SequenceEqual(compareKeys.ChannelEncryptionKey.Span) &&
                 ChannelMacKey.Span.SequenceEqual(compareKeys.ChannelMacKey.Span) &&
                 DataEncryptionKey.Span.SequenceEqual(compareKeys.DataEncryptionKey.Span);
         }
-
-        private Scp.StaticKeys ConvertFromLegacy() =>
-            new Scp.StaticKeys(ChannelMacKey, ChannelEncryptionKey, DataEncryptionKey)
-            {
-                // KeyVersionNumber = KeyVersionNumber
-            };
 
         /// <summary>
         /// Releases any unmanaged resources and overwrites any sensitive data.

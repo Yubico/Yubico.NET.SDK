@@ -86,7 +86,7 @@ namespace Yubico.YubiKey
             string possibleScpDescription = string.IsNullOrEmpty(scpType) ? string.Empty : $" over {scpType}";
             Logger.LogInformation($"Connecting to {GetApplicationFriendlyName(application)}{possibleScpDescription}");
 
-            var connection = keyParameters != null 
+            var connection = keyParameters != null
                 ? yubiKey.Connect(application, keyParameters)
                 : yubiKey.Connect(application);
 

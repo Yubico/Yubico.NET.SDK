@@ -136,10 +136,10 @@ namespace Yubico.YubiKey
 
         // The application is set to Oath by enum or by application id
         private bool IsOath =>
-            _yubiKeyApplication == YubiKeyApplication.Oath || 
+            _yubiKeyApplication == YubiKeyApplication.Oath ||
             (_applicationId != null &&
             _applicationId.SequenceEqual(
-                YubiKeyApplication.Oath.GetIso7816ApplicationId())); 
+                YubiKeyApplication.Oath.GetIso7816ApplicationId()));
 
         private IApduTransform AddResponseChainingTransform(IApduTransform pipeline) =>
             IsOath
@@ -171,9 +171,9 @@ namespace Yubico.YubiKey
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.SmartCardPipelineSetupFailed,
                         responseApdu.SW))
-                    {
-                        SW = responseApdu.SW
-                    };
+                {
+                    SW = responseApdu.SW
+                };
             }
 
             // Set the instance property SelectApplicationData

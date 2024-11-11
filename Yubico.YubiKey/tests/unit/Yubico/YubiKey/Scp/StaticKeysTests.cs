@@ -15,7 +15,7 @@
 using System;
 using Xunit;
 
-namespace Yubico.YubiKey.Scp03
+namespace Yubico.YubiKey.Scp
 {
     public class StaticKeysTests
     {

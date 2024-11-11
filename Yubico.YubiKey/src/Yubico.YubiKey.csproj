@@ -1,4 +1,4 @@
-﻿<!-- Copyright 2021 Yubico AB
+<!-- Copyright 2021 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -73,7 +73,6 @@ limitations under the License. -->
     <Compile Update="Yubico\YubiKey\Otp\OtpSettings.ConfigurationFlags.cs">
       <DependentUpon>OtpSettings.cs</DependentUpon>
     </Compile>
-    <Compile Remove="Yubico\YubiKey\SecurityDomain\**" />
   </ItemGroup>
 
   <ItemGroup Label="Resource file definition">
@@ -107,8 +106,6 @@ limitations under the License. -->
     <None Include="..\..\Yubico.NET.SDK.snk">
       <Link>Yubico.NET.SDK.snk</Link>
     </None>
-    <EmbeddedResource Remove="Yubico\YubiKey\SecurityDomain\**" />
-    <None Remove="Yubico\YubiKey\SecurityDomain\**" />
   </ItemGroup>
 
   <ItemGroup Label="Package references specific to Yubico.YubiKey.dll">

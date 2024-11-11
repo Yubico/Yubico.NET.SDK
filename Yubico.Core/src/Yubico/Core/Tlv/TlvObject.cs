@@ -24,40 +24,6 @@ namespace Yubico.Core.Tlv
     /// </summary>
     public class TlvObject
     {
-        private readonly byte[] _bytes;
-        private readonly int _offset;
-
-        /// <summary>
-        /// Creates a new Tlv given a tag and a value.
-        /// </summary>
-        public TlvObject(int tag, ReadOnlySpan<byte> value)
-        {
-            Tag = tag;
-            byte[] buffer = value.ToArray();
-            using var stream = new MemoryStream();
-
-            byte[] tagBytes = BitConverter.GetBytes(tag).Reverse().SkipWhile(b => b == 0).ToArray(); //TODO check 
-            stream.Write(tagBytes, 0, tagBytes.Length);
-
-            Length = buffer.Length;
-            if (Length < 0x80)
-            {
-                stream.WriteByte((byte)Length);
-            }
-            else
-            {
-                byte[] lnBytes = BitConverter.GetBytes(Length).Reverse().SkipWhile(b => b == 0).ToArray();
-                stream.WriteByte((byte)(0x80 | lnBytes.Length));
-                stream.Write(lnBytes, 0, lnBytes.Length);
-            }
-
-            _offset = (int)stream.Position;
-
-            stream.Write(buffer, 0, Length);
-
-            _bytes = stream.ToArray();
-        }
-
         /// <summary>
         /// Returns the tag.
         /// </summary>
@@ -73,11 +39,50 @@ namespace Yubico.Core.Tlv
         /// </summary>
         public int Length { get; }
 
+        private readonly byte[] _bytes;
+        private readonly int _offset;
+
+        /// <summary>
+        /// Creates a new Tlv given a tag and a value.
+        /// </summary>
+        public TlvObject(int tag, ReadOnlySpan<byte> value)
+        {
+            if (tag < 0 || tag > 0xFFFF)
+            {
+                throw new TlvException(ExceptionMessages.TlvUnsupportedTag);
+            }
+
+            Tag = tag;
+            byte[] valueBuffer = value.ToArray();
+            using var ms = new MemoryStream();
+
+            byte[] tagBytes = BitConverter.GetBytes(tag).Reverse().SkipWhile(b => b == 0).ToArray();
+            ms.Write(tagBytes, 0, tagBytes.Length);
+
+            Length = valueBuffer.Length;
+            if (Length < 0x80)
+            {
+                ms.WriteByte((byte)Length);
+            }
+            else
+            {
+                byte[] lnBytes = BitConverter.GetBytes(Length).Reverse().SkipWhile(b => b == 0).ToArray();
+                ms.WriteByte((byte)(0x80 | lnBytes.Length));
+                ms.Write(lnBytes, 0, lnBytes.Length);
+            }
+
+            _offset = (int)ms.Position;
+
+            ms.Write(valueBuffer, 0, Length);
+
+            _bytes = ms.ToArray();
+        }
+
         /// <summary>
         /// Returns a copy ofthe Tlv as a BER-TLV encoded byte array.
         /// </summary>
         public Memory<byte> GetBytes() => _bytes.ToArray();
-        
+
         /// <summary>
         /// Parse a Tlv from a BER-TLV encoded byte array.
         /// </summary>
@@ -88,47 +93,50 @@ namespace Yubico.Core.Tlv
             ReadOnlySpan<byte> buffer = data;
             return ParseFrom(ref buffer);
         }
-        
-        /// <summary>
-        /// Parse a Tlv from a BER-TLV encoded byte array.
-        /// </summary>
-        /// <param name="data">A byte array containing the TLV encoded data.</param>
-        /// <param name="offset">The offset in data where the TLV data begins.</param>
-        /// <param name="length">The length of the TLV encoded data.</param>
-        /// <returns>The parsed Tlv</returns>
-        public static TlvObject Parse(ReadOnlySpan<byte> data, int offset, int length) => Parse(data.Slice(offset, length));
 
         /// <summary>
-        /// Parse a Tlv from a BER-TLV encoded byte array.
+        /// Parses a TLV from a BER-TLV encoded byte array.
         /// </summary>
         /// <param name="buffer">A byte array containing the TLV encoded data.</param>
         /// <returns>The parsed <see cref="TlvObject"/></returns>
         /// <remarks>
         /// This method will parse a TLV from the given buffer and return the parsed Tlv.
         /// The method will consume the buffer as much as necessary to parse the TLV.
-        /// The method will not throw any exceptions if the buffer is too short to parse the TLV.
         /// </remarks>
-        public static TlvObject ParseFrom(ref ReadOnlySpan<byte> buffer)
+        /// <exception cref="ArgumentException">Thrown if the buffer does not contain a valid TLV.</exception>
+        internal static TlvObject ParseFrom(ref ReadOnlySpan<byte> buffer)
         {
+            // The first byte of the TLV is the tag.
             int tag = buffer[0];
-            buffer = buffer[1..];
-            if ((tag & 0x1F) == 0x1F) // Long form tag
+
+            // Determine if the tag is in long form.
+            // Long form tags have more than one byte, starting with 0x1F.
+            if ((buffer[0] & 0x1F) == 0x1F)
             {
-                do
+                // Ensure there is enough data for a long form tag.
+                if (buffer.Length < 2)
                 {
-                    tag = (tag << 8) | buffer[0];
-                    buffer = buffer[1..];
-                } while ((tag & 0x80) == 0x80);
+                    throw new ArgumentException("Insufficient data for long form tag");
+                }
+                // Combine the first two bytes to form the tag.
+                tag = (buffer[0] << 8) | buffer[1];
+                buffer = buffer[2..]; // Skip the tag bytes
+            }
+            else
+            {
+                buffer = buffer[1..]; // Skip the tag byte
             }
 
+            if (buffer.Length < 1)
+            {
+                throw new ArgumentException("Insufficient data for length");
+            }
+
+            // Read the length of the TLV value.
             int length = buffer[0];
             buffer = buffer[1..];
 
-            if (length == 0x80)
-            {
-                throw new ArgumentException("Indefinite length not supported");
-            } 
-
+            // If the length is more than one byte, process remaining bytes.
             if (length > 0x80)
             {
                 int lengthLn = length - 0x80;
@@ -141,11 +149,11 @@ namespace Yubico.Core.Tlv
             }
 
             ReadOnlySpan<byte> value = buffer[..length];
-            buffer = buffer[length..];
+            buffer = buffer[length..]; // Advance the buffer to the end of the value
 
             return new TlvObject(tag, value);
         }
-        
+
         /// <summary>
         /// Returns a string that represents the current object.
         /// </summary>

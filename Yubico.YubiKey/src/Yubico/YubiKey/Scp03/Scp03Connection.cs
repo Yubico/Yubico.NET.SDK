@@ -32,13 +32,13 @@ namespace Yubico.YubiKey
         public Scp03Connection(
             ISmartCardDevice smartCardDevice,
             YubiKeyApplication yubiKeyApplication,
-            StaticKeys scp03Keys)
+            Scp03.StaticKeys scp03Keys)
             : base(smartCardDevice, yubiKeyApplication, null)
         {
             _scp03ApduTransform = SetObject(yubiKeyApplication, scp03Keys);
         }
 
-        public Scp03Connection(ISmartCardDevice smartCardDevice, byte[] applicationId, StaticKeys scp03Keys)
+        public Scp03Connection(ISmartCardDevice smartCardDevice, byte[] applicationId, Scp03.StaticKeys scp03Keys)
             : base(smartCardDevice, YubiKeyApplication.Unknown, applicationId)
         {
             var setError = YubiKeyApplication.Unknown;
@@ -56,7 +56,7 @@ namespace Yubico.YubiKey
 
         private Scp03ApduTransform SetObject(
             YubiKeyApplication setError,
-            StaticKeys scp03Keys)
+            Yubico.YubiKey.Scp03.StaticKeys scp03Keys)
         {
             var scp03ApduTransform = new Scp03ApduTransform(GetPipeline(), scp03Keys);
             IApduTransform apduPipeline = scp03ApduTransform;
@@ -79,7 +79,7 @@ namespace Yubico.YubiKey
             return scp03ApduTransform;
         }
 
-        public StaticKeys GetScp03Keys() => _scp03ApduTransform.Scp03Keys;
+        public Scp03.StaticKeys GetScp03Keys() => _scp03ApduTransform.Scp03Keys;
 
         protected override void Dispose(bool disposing)
         {

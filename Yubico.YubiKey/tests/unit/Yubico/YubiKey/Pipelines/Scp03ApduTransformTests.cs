@@ -24,29 +24,36 @@ using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.Pipelines
 {
-    [Obsolete("This class is obsolete and will be removed in a future release.")]
+    [Obsolete("TODO Migrate?")]
     public class PipelineFixture : IApduTransform
     {
-        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
+        public ResponseApdu Invoke(
+            CommandApdu command,
+            Type commandType,
+            Type responseType,
+            bool encrypt = false)
         {
             if (command is null)
             {
                 throw new ArgumentNullException(nameof(command));
             }
 
-            if (command.AsByteArray().SequenceEqual(new SelectApplicationCommand(YubiKeyApplication.Piv).CreateCommandApdu().AsByteArray()))
+            if (command.AsByteArray().SequenceEqual(new SelectApplicationCommand(YubiKeyApplication.Piv)
+                    .CreateCommandApdu().AsByteArray()))
             {
                 return new ResponseApdu(Hex.HexToBytes("9000"));
             }
             else if (command.AsByteArray().SequenceEqual(Hex.HexToBytes("8050FF0008360CB43F4301B894")))
             {
-                return new ResponseApdu(Hex.HexToBytes("010B001F002500000000FF0360CAAFA4DAC615236ADD5607216F3E115C9000"));
+                return new ResponseApdu(
+                    Hex.HexToBytes("010B001F002500000000FF0360CAAFA4DAC615236ADD5607216F3E115C9000"));
             }
             else if (command.AsByteArray().SequenceEqual(Hex.HexToBytes("848233001045330AB30BB1A079A8E7F77376DB9F2C")))
             {
                 return new ResponseApdu(Hex.HexToBytes("9000"));
             }
-            else if (command.AsByteArray().SequenceEqual(Hex.HexToBytes("84FD0000181CE4E3D8F32D986A886DDBC90C8DB22553C2C04391250CCE")))
+            else if (command.AsByteArray()
+                     .SequenceEqual(Hex.HexToBytes("84FD0000181CE4E3D8F32D986A886DDBC90C8DB22553C2C04391250CCE")))
             {
                 return new ResponseApdu(Hex.HexToBytes("5F67E9E059DF3C52809DC9F6DDFBEF3E4C45691B2C8CDDD89000"));
             }
@@ -57,25 +64,28 @@ namespace Yubico.YubiKey.Pipelines
                 // return new ResponseApdu(Hex.HexToBytes("6a80"));
             }
         }
+
         public void Setup()
         {
-
         }
+
         public void Cleanup()
         {
-
         }
     }
 
     public class RandomNumberGeneratorFixture : RandomNumberGenerator
     {
         private readonly byte[] bytesToGenerate = Hex.HexToBytes("360CB43F4301B894"); // host challenge
-        public override void GetBytes(byte[] arr)
+
+        public override void GetBytes(
+            byte[] arr)
         {
             if (arr is null)
             {
                 throw new ArgumentNullException(nameof(arr));
             }
+
             for (int i = 0; i < bytesToGenerate.Length; i++)
             {
                 arr[i] = bytesToGenerate[i];
@@ -114,7 +124,8 @@ namespace Yubico.YubiKey.Pipelines
             pipeline.Setup(fakeRng);
 
             // Act
-            ResponseApdu responseApdu = pipeline.Invoke(new VersionCommand().CreateCommandApdu(), typeof(object), typeof(object));
+            ResponseApdu responseApdu =
+                pipeline.Invoke(new VersionCommand().CreateCommandApdu(), typeof(object), typeof(object));
             var versionResponse = new VersionResponse(responseApdu);
             FirmwareVersion fwv = versionResponse.GetData();
 

@@ -19,7 +19,7 @@ using Xunit;
 
 namespace Yubico.Core.Tlv.UnitTests
 {
-    public class TlvObjectTest
+    public class TlvObjectTests
     {
         [Fact]
         public void TestDoubleByteTags()
@@ -43,6 +43,23 @@ namespace Yubico.Core.Tlv.UnitTests
             Assert.Equal(new byte[] { 0x80, 0 }, tlv.GetBytes());
         }
 
+
+        [Fact]
+        public void TlvObject_Encode_ReturnsCorrectBytes()
+        {
+            // Arrange
+            int tag = 0x1234;
+            byte[] value = { 0x01, 0x02, 0x03 };
+            TlvObject tlv = new TlvObject(tag, value);
+
+            // Act
+            byte[] encodedBytes = tlv.GetBytes().ToArray();
+
+            // Assert
+            byte[] expectedBytes = { 0x12, 0x34, 0x03, 0x01, 0x02, 0x03 };
+            Assert.True(encodedBytes.SequenceEqual(expectedBytes));
+        }
+
         [Fact]
         public void TestUnwrap()
         {
@@ -59,7 +76,7 @@ namespace Yubico.Core.Tlv.UnitTests
         {
             Assert.Throws<InvalidOperationException>(() => TlvObjects.UnpackValue(0x7F48, new byte[] { 0x7F, 0x49, 0 }));
         }
-        
+
         [Fact]
         public void DecodeList_ValidInput_ReturnsCorrectTlvs()
         {
@@ -118,26 +135,6 @@ namespace Yubico.Core.Tlv.UnitTests
         public void EncodeList_EmptyInput_ReturnsEmptyArray()
         {
             var result = TlvObjects.EncodeList(new List<TlvObject>());
-            Assert.Empty(result.ToArray());
-        }
-
-        [Fact]
-        public void EncodeMap_ValidInput_ReturnsCorrectBytes()
-        {
-            var map = new Dictionary<int, ReadOnlyMemory<byte>>
-            {
-                { 0x01, new byte[] { 0xFF } },
-                { 0x02, new byte[] { 0xAA, 0xBB } }
-            };
-
-            var result = TlvObjects.EncodeMap(map);
-            Assert.Equal(new byte[] { 0x01, 0x01, 0xFF, 0x02, 0x02, 0xAA, 0xBB }, result.ToArray());
-        }
-
-        [Fact]
-        public void EncodeMap_EmptyInput_ReturnsEmptyArray()
-        {
-            var result = TlvObjects.EncodeMap(new Dictionary<int, ReadOnlyMemory<byte>>());
             Assert.Empty(result.ToArray());
         }
 

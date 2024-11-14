@@ -71,6 +71,12 @@ namespace Yubico.YubiKey.Piv
         /// </remarks>
         public AuthenticateManagementKeyResult ManagementKeyAuthenticationResult { get; private set; }
 
+        private PivAlgorithm DefaultManagementKeyAlgorithm =>
+            _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey) &&
+            _yubiKeyDevice.FirmwareVersion > FirmwareVersion.V5_7_0
+                ? PivAlgorithm.Aes192
+                : PivAlgorithm.TripleDes;
+
         /// <summary>
         /// Try to authenticate the management key.
         /// </summary>
@@ -531,7 +537,7 @@ namespace Yubico.YubiKey.Piv
         /// authenticated.
         /// </exception>
         public bool TryChangeManagementKey(PivTouchPolicy touchPolicy = PivTouchPolicy.Default) =>
-            TryChangeManagementKey(touchPolicy, PivAlgorithm.TripleDes);
+            TryChangeManagementKey(touchPolicy, DefaultManagementKeyAlgorithm);
 
         /// <summary>
         /// Try to change the management key. The new key will be the specified
@@ -651,7 +657,8 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Try to change the management key, touch policy = {TouchPolicy}, algorithm = {PivALgorithm}.",
+            _log.LogInformation(
+                "Try to change the management key, touch policy = {TouchPolicy}, algorithm = {PivALgorithm}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
@@ -726,7 +733,7 @@ namespace Yubico.YubiKey.Piv
         /// authenticated.
         /// </exception>
         public void ChangeManagementKey(PivTouchPolicy touchPolicy = PivTouchPolicy.Default) =>
-            ChangeManagementKey(touchPolicy, PivAlgorithm.TripleDes);
+            ChangeManagementKey(touchPolicy, DefaultManagementKeyAlgorithm);
 
         /// <summary>
         /// Change the management key, throw an exception if the user cancels.
@@ -761,7 +768,8 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Change the management key, touch policy = {TouchPolicy}, algorithm = {PivAlgorithm}.",
+            _log.LogInformation(
+                "Change the management key, touch policy = {TouchPolicy}, algorithm = {PivAlgorithm}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             if (TryChangeManagementKey(touchPolicy, newKeyAlgorithm) == false)
@@ -827,7 +835,7 @@ namespace Yubico.YubiKey.Piv
         public bool TryChangeManagementKey(ReadOnlyMemory<byte> currentKey,
                                            ReadOnlyMemory<byte> newKey,
                                            PivTouchPolicy touchPolicy = PivTouchPolicy.Default) =>
-            TryChangeManagementKey(currentKey, newKey, touchPolicy, PivAlgorithm.TripleDes);
+            TryChangeManagementKey(currentKey, newKey, touchPolicy, DefaultManagementKeyAlgorithm);
 
         /// <summary>
         /// Try to change the management key. This method will use the
@@ -915,66 +923,9 @@ namespace Yubico.YubiKey.Piv
                 }
 
                 _log.LogInformation($"Failed to set management key. Message: {response.StatusMessage}");
-
             }
 
             return false;
-        }
-
-        // Verify that and that the given algorithm is allowed.
-        // If checkMode is true, also check that the PIN-only mode is None.
-        // This is called by methods that set PIN-only mode or change the mgmt
-        // key.
-        // The algorithm can only be 3DES or AES, and it can only be AES if the
-        // YubiKey is 5.4.2 or later.
-        // It is not allowed to change the mgmt key if it is PIN-only, so those
-        // methods that change, will check the mode as well (they will pass true
-        // as the checkMode arg).
-        // If setting PIN-only, then the mode is not an issue, so don't check
-        // (pass false as the checkMode arg).
-        // If everything is fine, return, otherwise throw an exception.
-        private void CheckManagementKeyAlgorithm(PivAlgorithm algorithm, bool checkMode)
-        {
-            if (checkMode)
-            {
-                var pinOnlyMode = GetPinOnlyMode();
-                if (pinOnlyMode.HasFlag(PivPinOnlyMode.PinProtected) ||
-                    pinOnlyMode.HasFlag(PivPinOnlyMode.PinDerived))
-                {
-                    throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.MgmtKeyCannotBeChanged));
-                }
-            }
-
-            bool isValid = false;
-
-            switch (algorithm)
-            {
-                case PivAlgorithm.TripleDes:
-                    isValid = true;
-
-                    break;
-
-                case PivAlgorithm.Aes128:
-                case PivAlgorithm.Aes192:
-                case PivAlgorithm.Aes256:
-                    isValid = _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey);
-
-                    break;
-
-                default:
-                    break;
-            }
-
-            if (!isValid)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.UnsupportedAlgorithm));
-            }
         }
 
         // This is the actual Try code, shared by both TryAuth and TryChange.
@@ -1046,7 +997,8 @@ namespace Yubico.YubiKey.Piv
                 // off-card app authenticated, but the YubiKey itself did
                 // not.
                 // If case (3), throw an exception.
-                if (ManagementKeyAuthenticationResult == AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed)
+                if (ManagementKeyAuthenticationResult ==
+                    AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed)
                 {
                     throw new SecurityException(
                         string.Format(
@@ -1060,6 +1012,69 @@ namespace Yubico.YubiKey.Piv
             _log.LogInformation($"Failed to authenticate management key. Message: {completeResponse.StatusMessage}");
 
             return ManagementKeyAuthenticated;
+        }
+
+        private void RefreshManagementKeyAlgorithm() => ManagementKeyAlgorithm = GetManagementKeyAlgorithm();
+
+        private PivAlgorithm GetManagementKeyAlgorithm()
+        {
+            var response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+
+            var metadata = response.GetData();
+            return metadata.Algorithm;
+        }
+
+        // Verify that and that the given algorithm is allowed.
+        // If checkMode is true, also check that the PIN-only mode is None.
+        // This is called by methods that set PIN-only mode or change the mgmt
+        // key.
+        // The algorithm can only be 3DES or AES, and it can only be AES if the
+        // YubiKey is 5.4.2 or later.
+        // It is not allowed to change the mgmt key if it is PIN-only, so those
+        // methods that change, will check the mode as well (they will pass true
+        // as the checkMode arg).
+        // If setting PIN-only, then the mode is not an issue, so don't check
+        // (pass false as the checkMode arg).
+        // If everything is fine, return, otherwise throw an exception.
+        private void CheckManagementKeyAlgorithm(PivAlgorithm algorithm, bool checkMode)
+        {
+            if (checkMode)
+            {
+                var pinOnlyMode = GetPinOnlyMode();
+                if (pinOnlyMode.HasFlag(PivPinOnlyMode.PinProtected) ||
+                    pinOnlyMode.HasFlag(PivPinOnlyMode.PinDerived))
+                {
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.MgmtKeyCannotBeChanged));
+                }
+            }
+
+            bool isValid = IsValid(algorithm);
+            if (!isValid)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.UnsupportedAlgorithm));
+            }
+
+            return;
+
+            bool IsValid(PivAlgorithm pa) =>
+                pa switch
+                {
+                    PivAlgorithm.TripleDes => true, // Default for keys below fw version 5.7
+                    PivAlgorithm.Aes128 => _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey),
+                    PivAlgorithm.Aes192 => _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey),
+                    PivAlgorithm.Aes256 => _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey),
+                    _ => false
+                };
         }
     }
 }

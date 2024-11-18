@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Piv
 
         private PivAlgorithm DefaultManagementKeyAlgorithm =>
             _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey) &&
-            _yubiKeyDevice.FirmwareVersion > FirmwareVersion.V5_7_0
+            _yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_7_0
                 ? PivAlgorithm.Aes192
                 : PivAlgorithm.TripleDes;
 
@@ -1018,6 +1018,13 @@ namespace Yubico.YubiKey.Piv
 
         private PivAlgorithm GetManagementKeyAlgorithm()
         {
+            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
+            {
+                // Assume default for version
+                return DefaultManagementKeyAlgorithm;
+            }
+
+            // Get current ManagementKeyAlgorithm from Yubikey metadata
             var response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
             if (response.Status != ResponseStatus.Success)
             {

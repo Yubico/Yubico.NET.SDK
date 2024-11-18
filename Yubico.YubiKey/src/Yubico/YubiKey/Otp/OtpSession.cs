@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Otp
         /// <param name="yubiKey">An instance of a class that implements <see cref="IYubiKeyDevice"/>.</param>
         /// <param name="keyParameters">An instance of <see cref="Scp03KeyParameters"/> containing the
         /// parameters for the SCP03 key. If <see langword="null"/>, the default parameters will be used. </param>
-        public OtpSession(IYubiKeyDevice yubiKey, ScpKeyParameters? keyParameters = null) 
+        public OtpSession(IYubiKeyDevice yubiKey, ScpKeyParameters? keyParameters = null)
             : base(Log.GetLogger<OathSession>(), yubiKey, YubiKeyApplication.Otp, keyParameters)
         {
             // Getting the OTP status allows the user to read the OTP status on the OtpSession object.
@@ -251,9 +251,9 @@ namespace Yubico.YubiKey.Otp
             Connection.Dispose();
 
             ReadNdefDataResponse response;
-            using (var tempConnection = YubiKey.Connect(YubiKeyApplication.OtpNdef)) // TODO Why cant we do this instead of swap connection, open another?
+            using (Connection = YubiKey.Connect(YubiKeyApplication.OtpNdef))
             {
-                var selectResponse = tempConnection.SendCommand(new SelectNdefDataCommand() { FileID = NdefFileId.Ndef });
+                var selectResponse = Connection.SendCommand(new SelectNdefDataCommand() { FileID = NdefFileId.Ndef });
                 if (selectResponse.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(
@@ -263,11 +263,10 @@ namespace Yubico.YubiKey.Otp
                             selectResponse.StatusMessage));
                 }
 
-                response = tempConnection.SendCommand(new ReadNdefDataCommand());
+                response = Connection.SendCommand(new ReadNdefDataCommand());
             }
 
-            // Connection = YubiKey.Connect(YubiKeyApplication.Otp);
-
+            Connection = GetConnection(YubiKey, YubiKeyApplication.Otp, KeyParameters);
             return new NdefDataReader(response.GetData().Span);
         }
 

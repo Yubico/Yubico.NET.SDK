@@ -325,7 +325,7 @@ namespace Yubico.YubiKey.Piv
         private int CheckWriteLength(string contentsName, long length)
         {
             int maxLength = OldMaximumObjectLength;
-            if (_yubiKeyDevice.FirmwareVersion.Major >= 4)
+            if (YubiKey.FirmwareVersion.Major >= 4)
             {
                 maxLength = NewMaximumObjectLength;
             }

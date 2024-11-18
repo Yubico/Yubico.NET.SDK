@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Scp.Commands
     /// </summary>
     internal class ResetCommand : IYubiKeyCommand<YubiKeyResponse>
     {
-        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
+        public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
         private readonly byte[] _data;
         private readonly byte _keyVersionNumber;
         private readonly byte _kid;

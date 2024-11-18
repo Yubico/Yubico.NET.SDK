@@ -18,12 +18,16 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Scp.Commands
 {
     /// <summary>
-    /// The response to putting or replacing SCP03 keys on the YubiKey.
+    /// The response to putting or replacing SCP keys on the YubiKey.
     /// </summary>
     internal class PutKeyResponse : ScpResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {
         private readonly byte[] _checksum;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PutKeyResponse"/> class.
+        /// </summary>
+        /// <param name="responseApdu">The <see cref="ResponseApdu"/> response from the YubiKey.</param>
         public PutKeyResponse(ResponseApdu responseApdu)
             : base(responseApdu)
         {
@@ -31,6 +35,10 @@ namespace Yubico.YubiKey.Scp.Commands
             responseApdu.Data.CopyTo(_checksum);
         }
 
+        /// <summary>
+        /// Gets the checksum of the stored key.
+        /// </summary>
+        /// <returns>The checksum of the stored key.</returns>
         public ReadOnlyMemory<byte> GetData() => _checksum;
     }
 }

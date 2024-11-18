@@ -16,6 +16,7 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Scp.Commands;
+using Yubico.YubiKey.Scp.Helpers;
 
 namespace Yubico.YubiKey.Scp
 {

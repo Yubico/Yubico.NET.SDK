@@ -35,8 +35,9 @@ namespace Yubico.YubiKey.Scp
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyReference"/> class.
         /// </summary>
-        /// <param name="id">The ID of the key.</param>
-        /// <param name="versionNumber">The version number of the key.</param>
+        /// <param name="id">The ID of the key (KID).</param>
+        /// <param name="versionNumber">The version number of the key (KVN).</param>
+        /// <remarks>See the GlobalPlatform Technology Card Specification v2.3 Amendment F §5.1 Cryptographic Keys for more information on the available KIDs.</remarks>
         public KeyReference(
             byte id,
             byte versionNumber)

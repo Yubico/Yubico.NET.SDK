@@ -13,49 +13,63 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp.Commands
 {
     /// <summary>
-    /// Use this command to delete one of the SCP03 key sets on the YubiKey.
+    /// This class is used to get data from the YubiKey associated with the given tag.
+    /// <para>For getting data in the Security Domain, it is recommended to use the methods provided by <see cref="SecurityDomainSession"/> instead, such as
+    /// <see cref="SecurityDomainSession.GetData"/>, <see cref="SecurityDomainSession.GetCertificates"/>, <see cref="SecurityDomainSession.GetSupportedCaIdentifiers"/>, and <see cref="SecurityDomainSession.GetKeyInformation"/>.
+    /// </para>
     /// </summary>
     /// <remarks>
-    /// See the <xref href="UsersManualScp03">User's Manual entry</xref> on SCP03.
     /// <para>
-    /// This will execute the Delete Command. That is, there is a general purpose
-    /// command that can delete various elements, including keys. However, this
-    /// class can build the general purpose delete command in a way that it will
-    /// only be able to delete keys.
-    /// </para>
-    /// <para>
-    /// Note that if all three key sets are deleted, then the first key set (the
-    /// key set with a KeyVersionNumber of 1) will be the default key set.
+    /// See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.
     /// </para>
     /// </remarks>
+    /// <returns>The encoded tlv data retrieved from the YubiKey.</returns>
+    /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
     internal class GetDataCommand : IYubiKeyCommand<GetDataCommandResponse>
     {
-        private const byte INS_GET_DATA = 0xCA;
+        internal const byte GetDataIns = 0xCA;
         private readonly int _tag;
         private readonly ReadOnlyMemory<byte> _data;
 
         public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetDataCommand"/> class.
+        /// </summary>
+        /// <param name="tag">The tag of the data to retrieve from the YubiKey.</param>
+        /// <param name="data">
+        /// Optional data to be used in the GetData command. This might be used for
+        /// certain YubiKey applications, such as the OpenPGP application.
+        /// </param>
+        /// <remarks>
+        /// <para>For getting data in the Security Domain,
+        /// it is recommended to use the methods provided by <see cref="SecurityDomainSession"/> instead, such as
+        /// <see cref="SecurityDomainSession.GetData"/>, <see cref="SecurityDomainSession.GetCertificates"/>, <see cref="SecurityDomainSession.GetSupportedCaIdentifiers"/>, and <see cref="SecurityDomainSession.GetKeyInformation"/>.
+        /// </para>
+        /// <para>
+        /// See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.
+        /// </para>
+        /// </remarks>
         public GetDataCommand(int tag, ReadOnlyMemory<byte>? data = null)
         {
             _tag = tag;
             _data = data ?? ReadOnlyMemory<byte>.Empty;
         }
 
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Cla = 0,
-            Ins = INS_GET_DATA,
-            P1 = (byte)(_tag >> 8),
-            P2 = (byte)(_tag & 0xFF),
-            Data = _data
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Cla = 0,
+                Ins = GetDataIns,
+                P1 = (byte)(_tag >> 8),
+                P2 = (byte)(_tag & 0xFF),
+                Data = _data
+            };
 
         public GetDataCommandResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new GetDataCommandResponse(responseApdu);
@@ -63,10 +77,18 @@ namespace Yubico.YubiKey.Scp.Commands
 
     internal class GetDataCommandResponse : ScpResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {
+        /// <summary>
+        /// The response to the GetData command.
+        /// </summary>
+        /// <param name="responseApdu">The response APDU from the YubiKey.</param>
         public GetDataCommandResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
         }
 
+        /// <summary>
+        /// Gets the data retrieved from the YubiKey.
+        /// </summary>
+        /// <returns>The data retrieved from the YubiKey.</returns>
         public ReadOnlyMemory<byte> GetData() => ResponseApdu.Data;
     }
 }

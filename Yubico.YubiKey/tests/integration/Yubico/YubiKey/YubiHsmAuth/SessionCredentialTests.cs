@@ -17,22 +17,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security;
 using Xunit;
+using Yubico.YubiKey.Scp;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {
     public class SessionCredentialTests
     {
         #region DeleteCredential
-        [Fact]
-        public void AddCredential_DefaultTestCred_AppContainsOneCred()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        [InlineData(StandardTestDevice.Fw5, true)]
+        [InlineData(StandardTestDevice.Fw5Fips, true)]
+        public void AddCredential_DefaultTestCred_AppContainsOneCred(StandardTestDevice selectedDevice, bool useScp = false)
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice(selectedDevice);
 
             IReadOnlyList<CredentialRetryPair> credentialList;
 
             // Test
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice, useScp ? Scp03KeyParameters.DefaultKey : null))
             {
                 yubiHsmAuthSession.AddCredential(YhaTestUtilities.DefaultMgmtKey, YhaTestUtilities.DefaultAes128Cred);
 
@@ -173,15 +179,19 @@ namespace Yubico.YubiKey.YubiHsmAuth
         #endregion
 
         #region AddCredential
-        [Fact]
-        public void TryAddCredentialKeyCollector_CorrectMgmtKey_AppContainsNewCred()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        [InlineData(StandardTestDevice.Fw5, true)]
+        [InlineData(StandardTestDevice.Fw5Fips, true)]
+        public void TryAddCredentialKeyCollector_CorrectMgmtKey_AppContainsNewCred(StandardTestDevice selectedDevice, bool useScp = false)
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice(selectedDevice);
 
             IReadOnlyList<CredentialRetryPair> credentialList;
 
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice, useScp ? Scp03KeyParameters.DefaultKey : null))
             {
                 yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.DefaultValueCollectorDelegate;
 

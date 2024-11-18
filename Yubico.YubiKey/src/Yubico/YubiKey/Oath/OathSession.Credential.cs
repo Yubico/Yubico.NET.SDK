@@ -217,13 +217,13 @@ namespace Yubico.YubiKey.Oath
             }
 
             if (credential.RequiresTouch == true &&
-                !_yubiKeyDevice.HasFeature(YubiKeyFeature.OathTouchCredential))
+                !YubiKey.HasFeature(YubiKeyFeature.OathTouchCredential))
             {
                 throw new InvalidOperationException(ExceptionMessages.TouchNotSupported);
             }
 
             if (credential.Algorithm == HashAlgorithm.Sha512 &&
-                !_yubiKeyDevice.HasFeature(YubiKeyFeature.OathSha512))
+                !YubiKey.HasFeature(YubiKeyFeature.OathSha512))
             {
                 throw new InvalidOperationException(ExceptionMessages.SHA512NotSupported);
             }
@@ -446,7 +446,7 @@ namespace Yubico.YubiKey.Oath
         /// </exception>
         public void RenameCredential(Credential credential, string? newIssuer, string newAccount)
         {
-            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.OathRenameCredential))
+            if (!YubiKey.HasFeature(YubiKeyFeature.OathRenameCredential))
             {
                 throw new InvalidOperationException(ExceptionMessages.RenameCommandNotSupported);
             }

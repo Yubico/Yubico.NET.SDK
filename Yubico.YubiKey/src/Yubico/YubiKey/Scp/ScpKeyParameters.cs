@@ -16,7 +16,10 @@ using System;
 
 namespace Yubico.YubiKey.Scp
 {
-    public abstract class ScpKeyParameters //TODO handle dispose like static keys? Use ReadOnlyMemorySpan?
+    /// <summary>
+    /// Abstract base class for parameters for a Secure Channel Protocol (SCP) key.
+    /// </summary>
+    public abstract class ScpKeyParameters
     {
         public KeyReference KeyReference { get; protected set; }
 

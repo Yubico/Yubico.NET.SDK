@@ -13,18 +13,29 @@
 // limitations under the License.
 
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Scp.Commands;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp.Commands
 {
+    /// <summary>
+    /// Represents the second command in the SCP03 and SCP11a/c authentication handshakes, 'INTERNAL_AUTHENTICATE'
+    /// </summary>
+    /// <remarks>
+    /// Clients should not generally build this manually. See <see cref="Pipelines.ScpApduTransform"/> for more.
+    /// </remarks>
     internal class InternalAuthenticateCommand : IYubiKeyCommand<InternalAuthenticateResponse>
     {
         public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
-
+        internal const byte GpInternalAuthenticateIns = 0x88;
         private readonly byte _keyReferenceVersionNumber;
         private readonly byte _keyReferenceId;
         private readonly byte[] _data;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InternalAuthenticateCommand"/> class.
+        /// </summary>
+        /// <param name="keyReferenceVersionNumber">The version number of the key reference.</param>
+        /// <param name="keyReferenceId">The ID of the key reference.</param>
+        /// <param name="data">The data to be used for internal authentication.</param>
         public InternalAuthenticateCommand(byte keyReferenceVersionNumber, byte keyReferenceId, byte[] data)
         {
             _keyReferenceVersionNumber = keyReferenceVersionNumber;
@@ -36,7 +47,7 @@ namespace Yubico.YubiKey.Scp
             new CommandApdu
             {
                 Cla = 0x80,
-                Ins = 0x88,
+                Ins = GpInternalAuthenticateIns,
                 P1 = _keyReferenceVersionNumber,
                 P2 = _keyReferenceId,
                 Data = _data
@@ -48,6 +59,11 @@ namespace Yubico.YubiKey.Scp
 
     internal class InternalAuthenticateResponse : ScpResponse
     {
+        /// <summary>
+        /// Creates a new <see cref="InternalAuthenticateResponse"/> from the provided <see cref="ResponseApdu"/>.
+        /// </summary>
+        /// <param name="responseApdu">The <see cref="ResponseApdu"/> to create the response from.</param>
+        /// <returns>A new <see cref="InternalAuthenticateResponse"/>.</returns>
         public InternalAuthenticateResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
         }

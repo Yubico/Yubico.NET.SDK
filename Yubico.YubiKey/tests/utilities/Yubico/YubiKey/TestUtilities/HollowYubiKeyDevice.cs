@@ -278,6 +278,16 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         public void SetLegacyDeviceConfiguration(
+            YubiKeyCapabilities yubiKeyInterfaces,
+            byte challengeResponseTimeout,
+            bool touchEjectEnabled,
+            int autoEjectTimeout = 0,
+            ScpKeyParameters? keyParameters = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetLegacyDeviceConfiguration(
             YubiKeyCapabilities yubiKeyInterfaces, byte challengeResponseTimeout, bool touchEjectEnabled,
             int autoEjectTimeout = 0)
         {

@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Piv
             // This will verify the slot number and dataToSign length. If one or
             // both are incorrect, the call will throw an exception.
             var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber);
-            _yubiKeyDevice.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm);
+            YubiKey.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm);
 
             return PerformPrivateKeyOperation(
                 slotNumber,
@@ -399,7 +399,7 @@ namespace Yubico.YubiKey.Piv
 
             // Metadata will give us our answer, but that feature is
             // available only on YubiKeys beginning with version 5.3.
-            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
+            if (YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
             {
                 var metadataCommand = new GetMetadataCommand(slotNumber);
                 var metadataResponse = Connection.SendCommand(metadataCommand);

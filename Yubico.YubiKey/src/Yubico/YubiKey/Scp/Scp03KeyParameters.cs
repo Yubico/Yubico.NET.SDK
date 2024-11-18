@@ -16,8 +16,16 @@ using System;
 
 namespace Yubico.YubiKey.Scp
 {
-    public class Scp03KeyParameters : ScpKeyParameters
+    /// <summary>
+    /// Represents the parameters for a Secure Channel Protocol 03 (SCP03) key.
+    /// </summary>
+    public sealed class Scp03KeyParameters : ScpKeyParameters, IDisposable
     {
+        private const int DefaultKvn = 0xFF;
+
+        /// <summary>
+        /// The static keys shared with the device when initiating the connection.
+        /// </summary>        
         public StaticKeys StaticKeys { get; }
 
         /// <summary>
@@ -25,7 +33,7 @@ namespace Yubico.YubiKey.Scp
         /// a Secure Channel Protocol 03 (SCP03) key.
         /// </summary>
         /// <param name="keyReference">A reference to the key.</param>
-        /// <param name="staticKeys">The static keys shared with the device.</param>
+        /// <param name="staticKeys">The static keys shared with the device when initiating the connection.</param>
         /// <exception cref="ArgumentException">
         /// Thrown if <paramref name="keyReference.Id"/> is greater than 3, which is an invalid Key ID
         /// for SCP03.
@@ -34,12 +42,12 @@ namespace Yubico.YubiKey.Scp
             KeyReference keyReference,
             StaticKeys staticKeys) : base(keyReference)
         {
-            if (keyReference.Id > 3)
+            if (keyReference.Id < 1 || keyReference.Id > 3)
             {
-                throw new ArgumentException("Invalid KID for SCP03", nameof(keyReference.Id));
+                throw new ArgumentException("Invalid KID for SCP03. Kid must be between 1 and 3", nameof(keyReference.Id));
             }
 
-            StaticKeys = staticKeys;
+            StaticKeys = staticKeys.GetCopy();
         }
 
         /// <summary>
@@ -63,6 +71,18 @@ namespace Yubico.YubiKey.Scp
         /// This property provides a convenient way to access default SCP03 key parameters,
         /// using the standard SCP03 key identifier and default static keys.
         /// </remarks>
-        public static Scp03KeyParameters DefaultKey => new Scp03KeyParameters(ScpKid.Scp03, 0xFF, new StaticKeys());
+        public static Scp03KeyParameters DefaultKey => new Scp03KeyParameters(ScpKeyIds.Scp03, DefaultKvn, new StaticKeys());
+
+        /// <summary>
+        /// Creates a new instance of <see cref="Scp03KeyParameters"/>, representing the parameters for
+        /// a Secure Channel Protocol 03 (SCP03) key, using the standard SCP03 key identifier and
+        /// the given static keys.
+        /// </summary>
+        /// <param name="staticKeys">The static keys shared with the device.</param>
+        /// <returns>An instance of <see cref="Scp03KeyParameters"/>.</returns>
+        public static Scp03KeyParameters FromStaticKeys(StaticKeys staticKeys) =>
+            new Scp03KeyParameters(ScpKeyIds.Scp03, 0x01, staticKeys);
+
+        public void Dispose() => StaticKeys.Dispose();
     }
 }

@@ -28,7 +28,7 @@ namespace Yubico.YubiKey
         /// <summary>
         /// Passes the supplied command into the pipeline, and returns the final response.
         /// </summary>
-        ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType, bool encrypt = false);
+        ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType);
 
         /// <summary>
         /// Sets up the pipeline; should be called only once, before any `Invoke` calls.

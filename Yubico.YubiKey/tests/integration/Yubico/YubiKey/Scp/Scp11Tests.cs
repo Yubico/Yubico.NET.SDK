@@ -1,4 +1,4 @@
-﻿// Copyright 2024 Yubico AB
+// Copyright 2024 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -128,7 +128,7 @@ namespace Yubico.YubiKey.Scp
             configObj = configObj.WithKeyboard(KeyboardLayout.en_US);
             configObj = configObj.GeneratePassword(generatedPassword);
 
-            configObj.Execute(); ;
+            configObj.Execute();
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
@@ -473,14 +473,14 @@ namespace Yubico.YubiKey.Scp
             Org.BouncyCastle.Crypto.Parameters.ECPrivateKeyParameters bcPrivateKey)
         {
             // Convert the BigInteger D to byte array
-            byte[] dBytes = bcPrivateKey.D.ToByteArrayUnsigned();
+            var dBytes = bcPrivateKey.D.ToByteArrayUnsigned();
 
             // Calculate public key point Q = d*G
             var Q = bcPrivateKey.Parameters.G.Multiply(bcPrivateKey.D);
 
             // Get X and Y coordinates as byte arrays
-            byte[] xBytes = Q.XCoord.ToBigInteger().ToByteArrayUnsigned();
-            byte[] yBytes = Q.YCoord.ToBigInteger().ToByteArrayUnsigned();
+            var xBytes = Q.XCoord.ToBigInteger().ToByteArrayUnsigned();
+            var yBytes = Q.YCoord.ToBigInteger().ToByteArrayUnsigned();
 
             // Create ECParameters with P-256 curve
             return new ECParameters
@@ -503,20 +503,20 @@ namespace Yubico.YubiKey.Scp
                 var certificates = new List<X509Certificate2>();
 
                 // Convert PEM to a string
-                string pemString = Encoding.UTF8.GetString(pem);
+                var pemString = Encoding.UTF8.GetString(pem);
 
                 // Split the PEM string into individual certificates
-                string[] pemCerts = pemString.Split(
+                var pemCerts = pemString.Split(
                     new[] { "-----BEGIN CERTIFICATE-----", "-----END CERTIFICATE-----" },
                     StringSplitOptions.RemoveEmptyEntries
                 );
 
-                foreach (string certString in pemCerts)
+                foreach (var certString in pemCerts)
                 {
                     if (!string.IsNullOrWhiteSpace(certString))
                     {
                         // Remove any whitespace and convert to byte array
-                        byte[] certData = Convert.FromBase64String(certString.Trim());
+                        var certData = Convert.FromBase64String(certString.Trim());
                         var cert = new X509Certificate2(certData);
                         certificates.Add(cert);
                     }

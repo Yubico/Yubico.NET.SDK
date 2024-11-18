@@ -322,10 +322,9 @@ namespace Yubico.YubiKey.Oath
                 }
             }
 
-            var setPasswordResponse = Connection.SendCommand(new SetPasswordCommand(newPassword, _oathData)); 
-            if (setPasswordResponse.Status == ResponseStatus.Success) 
+            var setPasswordResponse = Connection.SendCommand(new SetPasswordCommand(newPassword, _oathData));
+            if (setPasswordResponse.Status == ResponseStatus.Success)
             {
-                using var unauthenticatedConnection = _yubiKeyDevice.Connect(YubiKeyApplication.Oath);
                 var selectOathResponse = Connection.SendCommand(new SelectOathCommand());
                 _oathData = selectOathResponse.GetData();
 

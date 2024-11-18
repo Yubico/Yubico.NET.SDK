@@ -16,17 +16,16 @@ using System;
 using System.Security.Cryptography;
 using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Scp03;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp.Helpers
 {
     internal static class Derivation
     {
-        public const byte DDC_SENC = 0x04;
-        public const byte DDC_SMAC = 0x06;
-        public const byte DDC_SRMAC = 0x07;
-        public const byte DDC_CARD_CRYPTOGRAM = 0x00;
-        public const byte DDC_HOST_CRYPTOGRAM = 0x01;
+        internal const byte DDC_SENC = 0x04;
+        internal const byte DDC_SMAC = 0x06;
+        internal const byte DDC_SRMAC = 0x07;
+        internal const byte DDC_CARD_CRYPTOGRAM = 0x00;
+        internal const byte DDC_HOST_CRYPTOGRAM = 0x01;
 
         // Derive a key from the challenges.
         // This method only supports deriving a 64- or 128-bit result based on
@@ -64,18 +63,18 @@ namespace Yubico.YubiKey.Scp
             cmacObj.CmacUpdate(macInp);
             cmacObj.CmacFinal(cmac);
 
-            if (outputLenBits == 128) // Output is a 128 bit key
+            if (outputLenBits == 128) // Output is a 128-bit key
             {
                 return cmac.ToArray();
             }
 
-            // Output is a cryptogram
-            byte[] smallerResult = new byte[8];
+            // Else, output is a cryptogram
+            Span<byte> smallerResult = stackalloc byte[8];
             cmac[..8].CopyTo(smallerResult);
 
             CryptographicOperations.ZeroMemory(cmac);
 
-            return smallerResult;
+            return smallerResult.ToArray();
         }
 
         public static Memory<byte> DeriveCryptogram(

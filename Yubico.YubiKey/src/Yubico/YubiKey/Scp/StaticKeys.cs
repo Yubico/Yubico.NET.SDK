@@ -38,62 +38,11 @@ namespace Yubico.YubiKey.Scp
     {
         private const int KeySizeBytes = 16;
 
-        private const byte MinimumKvnValue = 1;
-        private const byte MaximumKvnValue = 3;
-        private const byte DefaultKvnValue = 0xff;
-
-        private byte _keyVersionNumber;
-
         private readonly byte[] _macKey = new byte[KeySizeBytes];
         private readonly byte[] _encKey = new byte[KeySizeBytes];
         private readonly byte[] _dekKey = new byte[KeySizeBytes];
 
         private bool _disposed;
-
-        /// <summary>
-        /// The number that identifies the key set. Unless specified by the
-        /// caller, this class will assume the Key Version Number is 1, or else
-        /// 255 if the default keys are used.
-        /// </summary>
-        /// <remarks>
-        /// When the SDK makes an SCP03 <c>Connection</c> with a YubiKey, it will
-        /// specify the Key Version Number. In that way, the YubiKey will know
-        /// which keys to use to complete the handshake.
-        /// <para>
-        /// A YubiKey can store up to three sets of SCP03 keys. You can think of
-        /// it as if the YubiKey contains three slots (1, 2, and 3) for SCP03
-        /// keys. Each set (slot) is specified by a number, which the standard
-        /// calls the Key Version Number. On a YubiKey, the only numbers allowed
-        /// to be a Key Version Number are 255, 1, 2, and 3.
-        /// </para>
-        /// <para>
-        /// Most YubiKeys are manufactured with a default set of SCP03 keys in
-        /// slot 1. Slots 2 and 3 are empty. The initial, default set of keys in
-        /// slot 1 is given the Key Version Number 255. If you replace those
-        /// keys, the replacement must be specified as number 1. If you want to
-        /// add key sets to the other two slots, you must use the numbers 2 and
-        /// 3. Note that you cannot set the two empty slots until the initial,
-        /// default keys are replaced.
-        /// </para>
-        /// <para>
-        /// If the Key Version Number to use is not the value this class uses by
-        /// default, then set this value after constructing the object.
-        /// </para>
-        /// </remarks>
-        public byte KeyVersionNumber
-        {
-            get => _keyVersionNumber;
-
-            set
-            {
-                if (value != DefaultKvnValue && (value < MinimumKvnValue || value > MaximumKvnValue))
-                {
-                    throw new ArgumentException(ExceptionMessages.InvalidScp03Kvn);
-                }
-
-                _keyVersionNumber = value;
-            }
-        }
 
         /// <summary>
         /// AES128 shared secret key used to calculate the Session-MAC key. Also
@@ -116,9 +65,6 @@ namespace Yubico.YubiKey.Scp
         /// <summary>
         /// Constructs an instance given the supplied keys. This class will
         /// consider these keys to be the key set with the Key Version Number of
-        /// 1. If the key version number should be something else, set the
-        /// <see cref="KeyVersionNumber"/> property after calling the constructor.
-        /// </summary>
         /// <remarks>
         /// This class will copy the input key data, not just a reference. You
         /// can overwrite the input buffers as soon as the <c>StaticKeys</c>
@@ -127,6 +73,7 @@ namespace Yubico.YubiKey.Scp
         /// <param name="channelMacKey">16-byte AES128 shared secret key</param>
         /// <param name="channelEncryptionKey">16-byte AES128 shared secret key</param>
         /// <param name="dataEncryptionKey">16-byte AES128 shared secret key</param>
+        /// </summary>
         public StaticKeys(ReadOnlyMemory<byte> channelMacKey,
                           ReadOnlyMemory<byte> channelEncryptionKey,
                           ReadOnlyMemory<byte> dataEncryptionKey)
@@ -147,7 +94,6 @@ namespace Yubico.YubiKey.Scp
             }
 
             SetKeys(channelMacKey, channelEncryptionKey, dataEncryptionKey);
-            KeyVersionNumber = 1;
 
             _disposed = false;
         }
@@ -166,11 +112,10 @@ namespace Yubico.YubiKey.Scp
                 });
 
             SetKeys(DefaultKey, DefaultKey, DefaultKey);
-            KeyVersionNumber = 255;
 
             _disposed = false;
         }
-
+        
         private void SetKeys(ReadOnlyMemory<byte> channelMacKey,
                              ReadOnlyMemory<byte> channelEncryptionKey,
                              ReadOnlyMemory<byte> dataEncryptionKey)
@@ -184,7 +129,6 @@ namespace Yubico.YubiKey.Scp
         internal StaticKeys GetCopy() =>
             new StaticKeys(ChannelMacKey, ChannelEncryptionKey, DataEncryptionKey)
             {
-                KeyVersionNumber = KeyVersionNumber
             };
 
         /// <summary>
@@ -198,7 +142,7 @@ namespace Yubico.YubiKey.Scp
                 return false;
             }
 
-            return 
+            return
                 ChannelEncryptionKey.Span.SequenceEqual(compareKeys.ChannelEncryptionKey.Span) &&
                 ChannelMacKey.Span.SequenceEqual(compareKeys.ChannelMacKey.Span) &&
                 DataEncryptionKey.Span.SequenceEqual(compareKeys.DataEncryptionKey.Span);

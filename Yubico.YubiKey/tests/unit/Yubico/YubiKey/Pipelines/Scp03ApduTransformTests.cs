@@ -30,8 +30,7 @@ namespace Yubico.YubiKey.Pipelines
         public ResponseApdu Invoke(
             CommandApdu command,
             Type commandType,
-            Type responseType,
-            bool encrypt = false)
+            Type responseType)
         {
             if (command is null)
             {

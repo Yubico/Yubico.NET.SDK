@@ -15,6 +15,7 @@
 using System;
 using Xunit;
 using Yubico.Core.Buffers;
+using Yubico.YubiKey.Scp.Helpers;
 
 namespace Yubico.YubiKey.Scp
 {

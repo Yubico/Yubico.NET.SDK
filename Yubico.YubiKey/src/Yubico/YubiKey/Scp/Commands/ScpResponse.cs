@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Diagnostics;
 using Yubico.Core.Iso7816;
 
@@ -19,30 +20,36 @@ namespace Yubico.YubiKey.Scp.Commands
 {
     internal class ScpResponse : YubiKeyResponse
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScpResponse"/> class.
+        /// </summary>
+        /// <param name="responseApdu">The ResponseApdu from the YubiKey.</param>
+        /// <exception cref="ArgumentNullException">responseApdu</exception>  
         public ScpResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
 
-        public virtual new ResponseStatus Status => StatusWord switch
+        public void ThrowIfFailed(string? message = null, bool includeStatusWord = true)
         {
-            SWConstants.Success => ResponseStatus.Success,
-            _ => ResponseStatus.Failed
-        };
-
-        public virtual void ThrowIfFailed(string? message = null)
-        {
-            switch (StatusWord)
+            switch (Status)
             {
-                case SWConstants.Success:
+                case ResponseStatus.Success:
                     Debug.Assert(Status == ResponseStatus.Success);
                     return;
+                case ResponseStatus.Failed:
+                case ResponseStatus.RetryWithTouch:
+                case ResponseStatus.AuthenticationRequired:
+                case ResponseStatus.ConditionsNotSatisfied:
+                case ResponseStatus.NoData:
                 default:
-                    throw new SecureChannelException(AddStatusWord(message ?? StatusMessage)); 
+                    throw new SecureChannelException(
+                        includeStatusWord
+                            ? AddStatusWord(message ?? StatusMessage)
+                            : message ?? StatusMessage);
             }
 
-            string AddStatusWord(string message) => $"{message} (StatusWord: {StatusWord})";
+            string AddStatusWord(string originalMessage) => $"{originalMessage} (StatusWord: {StatusWord})";
         }
     }
 }

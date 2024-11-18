@@ -13,9 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp.Helpers
 {
     internal static class Padding
     {
@@ -26,11 +25,6 @@ namespace Yubico.YubiKey.Scp
         /// <returns>The padded payload.</returns>
         public static Memory<byte> PadToBlockSize(ReadOnlySpan<byte> payload)
         {
-            if(payload == null)
-            {
-                throw new ArgumentNullException(nameof(payload));
-            }
-            
             int paddedLen = ((payload.Length / 16) + 1) * 16;
 
             Span<byte> padded = stackalloc byte[paddedLen];

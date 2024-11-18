@@ -119,7 +119,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryVerifyPin()
         {
-            _log.LogInformation("Try to verify the PIV PIN with KeyCollector.");
+            Logger.LogInformation("Try to verify the PIV PIN with KeyCollector.");
 
             if (KeyCollector is null)
             {
@@ -184,7 +184,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void VerifyPin()
         {
-            _log.LogInformation("Verify the PIV PIN.");
+            Logger.LogInformation("Verify the PIV PIN.");
 
             if (TryVerifyPin() == false)
             {
@@ -279,7 +279,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryVerifyPin(ReadOnlyMemory<byte> pin, out int? retriesRemaining)
         {
-            _log.LogInformation("Try to verify the PIV PIN with supplied PIN.");
+            Logger.LogInformation("Try to verify the PIV PIN with supplied PIN.");
             
             retriesRemaining = null;
             PinVerified = false;
@@ -404,7 +404,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangePinAndPukRetryCounts(byte newRetryCountPin, byte newRetryCountPuk)
         {
-            _log.LogInformation("Change the PIV PIN and PUK retry counts: {PinCount}, {PukCount}.", newRetryCountPin,
+            Logger.LogInformation("Change the PIV PIN and PUK retry counts: {PinCount}, {PukCount}.", newRetryCountPin,
                 newRetryCountPuk);
 
             // This will validate the input.
@@ -525,7 +525,7 @@ namespace Yubico.YubiKey.Piv
                                                   byte newRetryCountPuk,
                                                   out int? retriesRemaining)
         {
-            _log.LogInformation(
+            Logger.LogInformation(
                 "Try to change the PIV PIN and PUK retry counts: {PinCount}, {PukCount} with supplied mgmt key and PIN.",
                 newRetryCountPin, newRetryCountPuk);
 
@@ -665,7 +665,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangePin()
         {
-            _log.LogInformation("Try to change the PIV PIN with KeyCollector.");
+            Logger.LogInformation("Try to change the PIV PIN with KeyCollector.");
 
             if (TryGetChangePinMode(ReadOnlyMemory<byte>.Empty, out var mode, out _))
             {
@@ -699,7 +699,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangePin()
         {
-            _log.LogInformation("Change the PIV PIN.");
+            Logger.LogInformation("Change the PIV PIN.");
 
             if (!TryChangePin())
             {
@@ -779,7 +779,7 @@ namespace Yubico.YubiKey.Piv
         public bool TryChangePin(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin,
                                  out int? retriesRemaining)
         {
-            _log.LogInformation("Try to change the PIV PIN with supplied PINs.");
+            Logger.LogInformation("Try to change the PIV PIN with supplied PINs.");
 
             if (TryGetChangePinMode(currentPin, out var mode, out retriesRemaining))
             {
@@ -905,7 +905,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangePuk()
         {
-            _log.LogInformation("Try to change the PIV PUK with KeyCollector.");
+            Logger.LogInformation("Try to change the PIV PUK with KeyCollector.");
 
             return TryChangeReference(KeyEntryRequest.ChangePivPuk, ChangePinOrPuk, PivPinOnlyMode.None);
         }
@@ -934,7 +934,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangePuk()
         {
-            _log.LogInformation("Change the PIV PUK.");
+            Logger.LogInformation("Change the PIV PUK.");
 
             if (TryChangeReference(KeyEntryRequest.ChangePivPuk, ChangePinOrPuk, PivPinOnlyMode.None) == false)
             {
@@ -990,7 +990,7 @@ namespace Yubico.YubiKey.Piv
         public bool TryChangePuk(ReadOnlyMemory<byte> currentPuk, ReadOnlyMemory<byte> newPuk,
                                  out int? retriesRemaining)
         {
-            _log.LogInformation("Try to change the PIV PUK with supplied PUKs.");
+            Logger.LogInformation("Try to change the PIV PUK with supplied PUKs.");
             
             var command = new ChangeReferenceDataCommand(PivSlot.Puk, currentPuk, newPuk);
             var response = Connection.SendCommand(command);
@@ -1116,7 +1116,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryResetPin()
         {
-            _log.LogInformation("Try to reset the PIV PIN using the PIV PUK with KeyCollector.");
+            Logger.LogInformation("Try to reset the PIV PIN using the PIV PUK with KeyCollector.");
 
             if (TryGetChangePinMode(ReadOnlyMemory<byte>.Empty, out var pinOnlyMode, out _))
             {
@@ -1155,7 +1155,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ResetPin()
         {
-            _log.LogInformation("Reset the PIV PIN using the PIV PUK.");
+            Logger.LogInformation("Reset the PIV PIN using the PIV PUK.");
 
             if (TryChangeReference(KeyEntryRequest.ResetPivPinWithPuk, ResetPin, PivPinOnlyMode.None) == false)
             {
@@ -1225,7 +1225,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryResetPin(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, out int? retriesRemaining)
         {
-            _log.LogInformation("Try to reset the PIV PIN using the PIV PUK with supplied PUK and PIN.");
+            Logger.LogInformation("Try to reset the PIV PIN using the PIV PUK with supplied PUK and PIN.");
             
             var command = new ResetRetryCommand(puk, newPin);
             var response = Connection.SendCommand(command);
@@ -1383,7 +1383,7 @@ namespace Yubico.YubiKey.Piv
         {
             if (!ManagementKeyAuthenticated)
             {
-                _log.LogDebug("Unauthenticated attempt to update AdminData failed.");
+                Logger.LogDebug("Unauthenticated attempt to update AdminData failed.");
                 return;
             }
 

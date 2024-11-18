@@ -50,7 +50,8 @@ namespace Yubico.YubiKey.TestUtilities
         private const string YubikeyIntegrationtestAllowedKeysName = "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS";
         private readonly string _allowlistFileName = $"{YubikeyIntegrationtestAllowedKeysName}.txt";
 
-        public IntegrationTestDeviceEnumeration(string? configDirectory = null)
+        public IntegrationTestDeviceEnumeration(
+            string? configDirectory = null)
         {
             var defaultDirectory =
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Yubico");
@@ -89,21 +90,24 @@ namespace Yubico.YubiKey.TestUtilities
         /// </summary>
         /// <param name="serialNumber"></param>
         /// <returns></returns>
-        public static IYubiKeyDevice GetBySerial(int serialNumber)
+        public static IYubiKeyDevice GetBySerial(
+            int serialNumber)
             => GetTestDevices().Single(d => d.SerialNumber == serialNumber);
 
         /// <summary>
         /// Enumerates all YubiKey test devices on a system.
         /// </summary>
         /// <returns>The allow-list filtered list of available Yubikeys</returns>
-        public static IList<IYubiKeyDevice> GetTestDevices(Transport transport = Transport.All)
+        public static IList<IYubiKeyDevice> GetTestDevices(
+            Transport transport = Transport.All)
         {
             return YubiKeyDevice
                 .FindByTransport(transport)
                 .Where(IsAllowedKey)
                 .ToList();
 
-            static bool IsAllowedKey(IYubiKeyDevice key)
+            static bool IsAllowedKey(
+                IYubiKeyDevice key)
                 => key.SerialNumber == null ||
                    Instance.AllowedSerialNumbers.Contains(key.SerialNumber.Value.ToString());
         }
@@ -113,12 +117,15 @@ namespace Yubico.YubiKey.TestUtilities
         /// </summary>
         /// <param name="testDeviceType">The type of the device.</param>
         /// <param name="transport">The transport the device must support.</param>
+        /// <param name="minimumFirmwareVersion">The earliest version number the
+        /// caller is willing to accept. Defaults to the minimum version for the given device.</param>
         /// <returns>The allow-list filtered YubiKey that was found.</returns>
         public static IYubiKeyDevice GetTestDevice(
             StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
-            Transport transport = Transport.All)
+            Transport transport = Transport.All,
+            FirmwareVersion? minimumFirmwareVersion = null)
             => GetTestDevices(transport)
-                .SelectByStandardTestDevice(testDeviceType);
+                .SelectByStandardTestDevice(testDeviceType, minimumFirmwareVersion);
 
         /// <summary>
         /// Get YubiKey test device of specified transport and for which the
@@ -128,11 +135,14 @@ namespace Yubico.YubiKey.TestUtilities
         /// <param name="minimumFirmwareVersion">The earliest version number the
         /// caller is willing to accept.</param>
         /// <returns>The allow-list filtered YubiKey that was found.</returns>
-        public static IYubiKeyDevice GetTestDevice(Transport transport, FirmwareVersion minimumFirmwareVersion)
+        public static IYubiKeyDevice GetTestDevice(
+            Transport transport,
+            FirmwareVersion minimumFirmwareVersion)
             => GetTestDevices(transport)
                 .SelectByMinimumVersion(minimumFirmwareVersion);
 
-        private static void CreateAllowListFileIfMissing(string allowListFilePath)
+        private static void CreateAllowListFileIfMissing(
+            string allowListFilePath)
         {
             if (File.Exists(allowListFilePath))
             {

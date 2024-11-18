@@ -114,7 +114,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public X509Certificate2 CreateAttestationStatement(byte slotNumber)
         {
-            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivAttestation))
+            if (YubiKey.HasFeature(YubiKeyFeature.PivAttestation))
             {
                 // This call will throw an exception if the slot number is incorrect.
                 var command = new CreateAttestationStatementCommand(slotNumber);
@@ -181,7 +181,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public X509Certificate2 GetAttestationCertificate()
         {
-            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivAttestation))
+            if (YubiKey.HasFeature(YubiKeyFeature.PivAttestation))
             {
                 var command = new GetDataCommand(AttestationCertTag);
                 var response = Connection.SendCommand(command);
@@ -364,7 +364,7 @@ namespace Yubico.YubiKey.Piv
         // Return the DER encoding of the certificate.
         private byte[] CheckVersionKeyAndCertRequirements(PivPrivateKey privateKey, X509Certificate2 certificate)
         {
-            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.PivAttestation))
+            if (!YubiKey.HasFeature(YubiKeyFeature.PivAttestation))
             {
                 throw new NotSupportedException(
                     string.Format(

@@ -22,6 +22,13 @@ namespace Yubico.YubiKey.Cryptography
     /// </summary>
     public abstract class ECKeyParameters
     {
+        /// <summary>
+        /// Gets the EC parameters associated with this key.
+        /// </summary>
+        /// <remarks>
+        /// These parameters include the curve information and key data.
+        /// For NIST P-256 keys, this includes the curve definition and public point coordinates.
+        /// </remarks>
         public ECParameters Parameters { get; }
 
         protected ECKeyParameters(ECParameters parameters)

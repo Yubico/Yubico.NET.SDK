@@ -18,14 +18,14 @@ namespace Yubico.YubiKey.Scp
     /// The connection class that can perform SCP03 operations will implement not
     /// only <see cref="IYubiKeyConnection"/>, but this interface as well.
     /// </summary>
-    public interface IScpYubiKeyConnection : IYubiKeyConnection // TODO Why do I need this?
+    public interface IScpYubiKeyConnection : IYubiKeyConnection
     {
         /// <summary>
         /// Return a reference to the SCP key set used to make the connection.
         /// </summary>
         public ScpKeyParameters KeyParameters { get; }
 
-        internal DataEncryptor? DataEncryptor
+        internal EncryptDataFunc EncryptDataFunc
         {
             get;
         }

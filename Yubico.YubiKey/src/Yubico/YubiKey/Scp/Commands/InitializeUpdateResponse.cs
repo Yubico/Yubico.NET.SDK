@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Scp.Commands
         public IReadOnlyCollection<byte> CardCryptogram { get; protected set; }
 
         /// <summary>
-        /// Constructs an InitializeUpdateResponse based on a ResponseApdu received from the YubiKey.
+        /// Constructs an InitializeUpdateResponse based on a ResponseApdu received from the YubiKey after an SCP handshake ('INITIALIZE_UPDATE'). 
         /// </summary>
         /// <param name="responseApdu">The ResponseApdu that corresponds to the issuance of
         /// this command.</param>

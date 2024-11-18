@@ -31,10 +31,10 @@ namespace Yubico.YubiKey.Scp.Commands
     internal class SecurityOperationCommand : IYubiKeyCommand<SecurityOperationResponse>
     {
         public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
-
+        internal const byte GpPerformSecurityOperationIns = 0x2A;
+        private readonly ReadOnlyMemory<byte> _oceCertificates;
         private readonly byte _oceRefVersionNumber;
         private readonly byte _oceKeyId;
-        private readonly ReadOnlyMemory<byte> _oceCertificates;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityOperationCommand"/> class.
@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Scp.Commands
             new CommandApdu
             {
                 Cla = 0x80,
-                Ins = 0x2A,
+                Ins = GpPerformSecurityOperationIns,
                 P1 = _oceRefVersionNumber,
                 P2 = _oceKeyId,
                 Data = _oceCertificates

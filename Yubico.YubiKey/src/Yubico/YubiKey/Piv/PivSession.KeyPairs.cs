@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.Piv
                                             PivPinPolicy pinPolicy = PivPinPolicy.Default,
                                             PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
-            _yubiKeyDevice.ThrowIfUnsupportedAlgorithm(algorithm);
+            YubiKey.ThrowIfUnsupportedAlgorithm(algorithm);
 
             if (ManagementKeyAuthenticated == false)
             {
@@ -247,7 +247,7 @@ namespace Yubico.YubiKey.Piv
                 throw new ArgumentNullException(nameof(privateKey));
             }
 
-            _yubiKeyDevice.ThrowIfUnsupportedAlgorithm(privateKey.Algorithm);
+            YubiKey.ThrowIfUnsupportedAlgorithm(privateKey.Algorithm);
 
             if (ManagementKeyAuthenticated == false)
             {

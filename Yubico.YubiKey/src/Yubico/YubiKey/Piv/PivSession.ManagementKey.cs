@@ -238,7 +238,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryAuthenticateManagementKey(bool mutualAuthentication = true)
         {
-            _log.LogInformation(
+            Logger.LogInformation(
                 $"Try to authenticate the management key: {(mutualAuthentication ? "mutual" : "single")} auth.");
 
             var currentPinOnlyMode = TryAuthenticatePinOnly(true);
@@ -310,7 +310,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void AuthenticateManagementKey(bool mutualAuthentication = true)
         {
-            _log.LogInformation(
+            Logger.LogInformation(
                 $"Authenticate the management key: {(mutualAuthentication ? "mutual" : "single")} auth.");
 
             if (TryAuthenticateManagementKey(mutualAuthentication) == false)
@@ -651,7 +651,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Try to change the management key, touch policy = {TouchPolicy}, algorithm = {PivALgorithm}.",
+            Logger.LogInformation("Try to change the management key, touch policy = {TouchPolicy}, algorithm = {PivALgorithm}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
@@ -761,7 +761,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Change the management key, touch policy = {TouchPolicy}, algorithm = {PivAlgorithm}.",
+            Logger.LogInformation("Change the management key, touch policy = {TouchPolicy}, algorithm = {PivAlgorithm}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             if (TryChangeManagementKey(touchPolicy, newKeyAlgorithm) == false)
@@ -914,7 +914,7 @@ namespace Yubico.YubiKey.Piv
                     return true;
                 }
 
-                _log.LogInformation($"Failed to set management key. Message: {response.StatusMessage}");
+                Logger.LogInformation($"Failed to set management key. Message: {response.StatusMessage}");
 
             }
 
@@ -960,7 +960,7 @@ namespace Yubico.YubiKey.Piv
                 case PivAlgorithm.Aes128:
                 case PivAlgorithm.Aes192:
                 case PivAlgorithm.Aes256:
-                    isValid = _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey);
+                    isValid = YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey);
 
                     break;
 
@@ -1057,7 +1057,7 @@ namespace Yubico.YubiKey.Piv
                 ManagementKeyAuthenticated = true;
             }
 
-            _log.LogInformation($"Failed to authenticate management key. Message: {completeResponse.StatusMessage}");
+            Logger.LogInformation($"Failed to authenticate management key. Message: {completeResponse.StatusMessage}");
 
             return ManagementKeyAuthenticated;
         }

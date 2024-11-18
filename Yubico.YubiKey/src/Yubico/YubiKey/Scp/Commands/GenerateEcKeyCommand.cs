@@ -19,26 +19,29 @@ namespace Yubico.YubiKey.Scp.Commands
 {
     internal class GenerateEcKeyCommand : IYubiKeyCommand<GenerateEcKeyResponse>
     {
-        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
+        public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
+        internal const byte GpGenerateKeyIns = 0xF1;
+
         private readonly ReadOnlyMemory<byte> _data;
         private readonly byte _keyVersionNumber;
-        private readonly byte _kid;
+        private readonly byte _keyId;
 
-        public GenerateEcKeyCommand(byte keyVersionNumber, byte kid, ReadOnlyMemory<byte> data)
+        public GenerateEcKeyCommand(byte keyVersionNumber, byte keyId, ReadOnlyMemory<byte> data)
         {
             _data = data;
             _keyVersionNumber = keyVersionNumber;
-            _kid = kid;
+            _keyId = keyId;
         }
 
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Cla = 0x80,
-            Ins = 0xF1,
-            P1 = _keyVersionNumber,
-            P2 = _kid,
-            Data = _data
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Cla = 0x80,
+                Ins = GpGenerateKeyIns,
+                P1 = _keyVersionNumber,
+                P2 = _keyId,
+                Data = _data
+            };
 
         public GenerateEcKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new GenerateEcKeyResponse(responseApdu);

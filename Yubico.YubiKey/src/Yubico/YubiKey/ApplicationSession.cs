@@ -33,7 +33,7 @@ namespace Yubico.YubiKey
         ///     applications will ignore this, but it can be used to call Commands
         ///     directly.
         /// </summary>
-        public IYubiKeyConnection Connection { get; }
+        public IYubiKeyConnection Connection { get; protected set; }
 
         /// <summary>
         /// Gets the parameters used for establishing a Secure Channel Protocol (SCP) connection.
@@ -42,6 +42,8 @@ namespace Yubico.YubiKey
 
         protected ILogger Logger { get; }
         protected IYubiKeyDevice YubiKey { get; }
+        public YubiKeyApplication Application { get; }
+
 
         private bool _disposed;
 
@@ -62,11 +64,13 @@ namespace Yubico.YubiKey
         {
             Logger = logger;
             YubiKey = device ?? throw new ArgumentNullException(nameof(device));
+            Application = application;
+
             KeyParameters = keyParameters;
-            Connection = GetConnection(YubiKey, application, KeyParameters);
+            Connection = GetConnection(YubiKey, Application, KeyParameters);
         }
 
-        private IYubiKeyConnection GetConnection(
+        protected IYubiKeyConnection GetConnection(
             IYubiKeyDevice yubiKey,
             YubiKeyApplication application,
             ScpKeyParameters? keyParameters)

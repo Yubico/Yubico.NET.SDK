@@ -244,15 +244,14 @@ namespace Yubico.YubiKey.Piv
                 throw new ArgumentNullException(nameof(yubiKey));
             }
 
+            _yubiKeyDevice = yubiKey;
+
             Connection = scp03Keys is null
-                ? yubiKey.Connect(YubiKeyApplication.Piv)
-                : yubiKey.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
+                ? _yubiKeyDevice.Connect(YubiKeyApplication.Piv)
+                : _yubiKeyDevice.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
 
             ResetAuthenticationStatus();
             RefreshManagementKeyAlgorithm();
-
-            _yubiKeyDevice = yubiKey;
-            _disposed = false;
         }
 
         /// <summary>

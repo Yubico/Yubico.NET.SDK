@@ -44,10 +44,12 @@ namespace Yubico.YubiKey.Piv
             };
         }
 
-        [Fact]
-        public void HasFeature_ReturnsCorrect()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void HasFeature_ReturnsCorrect(StandardTestDevice device)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(device);
 
             var expectedResult = testDevice.FirmwareVersion >= new FirmwareVersion(major: 5, minor: 4, patch: 2);
 
@@ -56,47 +58,93 @@ namespace Yubico.YubiKey.Piv
             Assert.Equal(hasFeature, expectedResult);
         }
 
-        [Fact]
-        public void GetManagementAlgorithm_WhenReset_ReturnsCorrectType()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void GetManagementAlgorithm_WhenReset_ReturnsCorrectType(StandardTestDevice device)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
-            var shouldBeTripleDes = testDevice.FirmwareVersion < FirmwareVersion.V5_7_0;
-            var defaultManagementKeyType = shouldBeTripleDes
-                ? PivAlgorithm.TripleDes
-                : PivAlgorithm.Aes192;
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(device);
+            var shouldBeAes = testDevice.FirmwareVersion >= FirmwareVersion.V5_7_0;
+            var mustBeAes = shouldBeAes && testDevice.IsFipsSeries;
+            var defaultManagementKeyType = shouldBeAes
+                ? PivAlgorithm.Aes192
+                : PivAlgorithm.TripleDes;
 
-            var alternativeManagementKeyType = !shouldBeTripleDes
-                ? PivAlgorithm.TripleDes
-                : PivAlgorithm.Aes192;
+            var alternativeManagementKeyType = !shouldBeAes
+                ? PivAlgorithm.Aes192
+                : PivAlgorithm.TripleDes;
 
             using var session = new PivSession(testDevice);
             session.KeyCollector = TestKeyCollectorDelegate;
 
             session.ResetApplication();
-            session.ChangeManagementKey(PivTouchPolicy.None, alternativeManagementKeyType);
-            var firstCheckKeyType = session.ManagementKeyAlgorithm;
+            
+            // This must throw for FIPS devices.
+            if (mustBeAes)
+            {
+                Assert.Throws<InvalidOperationException>(
+                    () => session.ChangeManagementKey(PivTouchPolicy.None, PivAlgorithm.TripleDes));
+            }
+            else
+            {
+                session.ChangeManagementKey(PivTouchPolicy.None, alternativeManagementKeyType);
+                Assert.Equal(alternativeManagementKeyType, session.ManagementKeyAlgorithm);
+                
+                session.AuthenticateManagementKey();
+                session.ResetApplication();
 
-            Assert.Equal(alternativeManagementKeyType, firstCheckKeyType);
-
-            session.AuthenticateManagementKey();
-            session.ResetApplication();
-
-            var secondCheckKeyType = session.ManagementKeyAlgorithm;
-            Assert.Equal(defaultManagementKeyType, secondCheckKeyType);
+                Assert.Equal(defaultManagementKeyType, session.ManagementKeyAlgorithm);
+            }
         }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void ChangeManagementKey_WithDefaultParameters_UsesCorrectTypeForRespectiveVersion(StandardTestDevice device)
+        {
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(device);
+
+            var shouldBeAes = testDevice.FirmwareVersion >= FirmwareVersion.V5_7_0;
+            var mustBeAes = shouldBeAes && testDevice.IsFipsSeries;
+            var defaultManagementKeyType = shouldBeAes || mustBeAes
+                ? PivAlgorithm.Aes192
+                : PivAlgorithm.TripleDes;
+
+            using var session = new PivSession(testDevice);
+            session.KeyCollector = TestKeyCollectorDelegate;
+            session.ResetApplication();
+
+            // This must not throw. 5.7 FIPS requires management key to be AES192.
+            session.ChangeManagementKey();
+            Assert.Equal(defaultManagementKeyType, session.ManagementKeyAlgorithm);
+
+            // This must throw for FIPS devices.
+            if (mustBeAes)
+            {
+                Assert.Throws<InvalidOperationException>(
+                    () => session.ChangeManagementKey(PivTouchPolicy.None, PivAlgorithm.TripleDes));
+            }
+        }
+
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
         public void RandomKey_Authenticates(StandardTestDevice testDeviceType)
         {
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
+            var shouldBeAes = testDevice.FirmwareVersion >= FirmwareVersion.V5_7_0;
+            var mustBeAes = shouldBeAes && testDevice.IsFipsSeries;
+            var defaultManagementKeyType = shouldBeAes || mustBeAes
+                ? PivAlgorithm.Aes192
+                : PivAlgorithm.TripleDes;
+            
             var isValid = false;
             var count = 10;
             for (var index = 0; index < count; index++)
             {
                 GetRandomMgmtKey();
-                isValid = ChangeMgmtKey(testDevice, PivAlgorithm.TripleDes);
+                isValid = ChangeMgmtKey(testDevice, defaultManagementKeyType);
                 if (!isValid)
                 {
                     break;

@@ -244,15 +244,14 @@ namespace Yubico.YubiKey.Piv
                 throw new ArgumentNullException(nameof(yubiKey));
             }
 
+            _yubiKeyDevice = yubiKey;
+
             Connection = scp03Keys is null
-                ? yubiKey.Connect(YubiKeyApplication.Piv)
-                : yubiKey.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
+                ? _yubiKeyDevice.Connect(YubiKeyApplication.Piv)
+                : _yubiKeyDevice.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
 
             ResetAuthenticationStatus();
-            UpdateManagementKey(yubiKey);
-
-            _yubiKeyDevice = yubiKey;
-            _disposed = false;
+            RefreshManagementKeyAlgorithm();
         }
 
         /// <summary>
@@ -313,14 +312,14 @@ namespace Yubico.YubiKey.Piv
             {
                 _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
             }
-#pragma warning disable CA1031
+            #pragma warning disable CA1031
             catch (Exception e)
-#pragma warning restore CA1031
+                #pragma warning restore CA1031
             {
                 string message = string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.PivSessionDisposeUnknownError, e.GetType(), e.Message);
-                
+
                 // Example:
                 // Exception caught when disposing PivSession: Yubico.PlatformInterop.SCardException,
                 // Unable to begin a transaction with the given smart card. SCARD_E_SERVICE_STOPPED: The smart card resource manager has shut down.
@@ -510,7 +509,7 @@ namespace Yubico.YubiKey.Piv
             // As resetting the PIV application resets the management key,
             // the management key must be updated to account for the case when the previous management key type
             // was not the default key type.
-            UpdateManagementKey(_yubiKeyDevice);
+            RefreshManagementKeyAlgorithm();
         }
 
         /// <summary>
@@ -670,23 +669,6 @@ namespace Yubico.YubiKey.Piv
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.ApplicationResetFailure));
-        }
-
-        private void UpdateManagementKey(IYubiKeyDevice yubiKey) =>
-            ManagementKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey)
-                ? GetManagementKeyAlgorithm()
-                : PivAlgorithm.TripleDes; // Default for keys with firmware version < 5.7
-
-        private PivAlgorithm GetManagementKeyAlgorithm()
-        {
-            var response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-
-            var metadata = response.GetData();
-            return metadata.Algorithm;
         }
     }
 }

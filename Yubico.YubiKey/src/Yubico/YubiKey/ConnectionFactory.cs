@@ -68,7 +68,7 @@ namespace Yubico.YubiKey
                 throw new InvalidOperationException("No smart card interface present. Unable to establish SCP connection to YubiKey.");
             }
 
-            _log.LogInformation("Connecting via the SmartCard interface using SCP03.");
+            _log.LogDebug("Connecting via the SmartCard interface using SCP03.");
             WaitForReclaimTimeout(Transport.SmartCard);
 
             return new Scp03Connection(_smartCardDevice, application, scp03Keys);
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey
                 throw new InvalidOperationException("No smart card interface present. Unable to establish SCP connection to YubiKey.");
             }
 
-            _log.LogInformation("Connecting via the SmartCard interface using SCP03.");
+            _log.LogDebug("Connecting via the SmartCard interface using SCP.");
             WaitForReclaimTimeout(Transport.SmartCard);
 
             return new ScpConnection(_smartCardDevice, application, keyParameters);
@@ -114,7 +114,7 @@ namespace Yubico.YubiKey
         {
             if (_smartCardDevice != null)
             {
-                _log.LogInformation("Connecting via the SmartCard interface.");
+                _log.LogDebug("Connecting via the SmartCard interface.");
 
                 WaitForReclaimTimeout(Transport.SmartCard);
                 return new SmartCardConnection(_smartCardDevice, application);
@@ -122,7 +122,7 @@ namespace Yubico.YubiKey
 
             if (_hidKeyboardDevice != null && application == YubiKeyApplication.Otp)
             {
-                _log.LogInformation("Connecting via the Keyboard interface.");
+                _log.LogDebug("Connecting via the Keyboard interface.");
 
                 WaitForReclaimTimeout(Transport.HidKeyboard);
                 return new KeyboardConnection(_hidKeyboardDevice);
@@ -130,7 +130,7 @@ namespace Yubico.YubiKey
 
             if (_hidFidoDevice != null && (application == YubiKeyApplication.Fido2 || application == YubiKeyApplication.FidoU2f))
             {
-                _log.LogInformation("Connecting via the FIDO interface.");
+                _log.LogDebug("Connecting via the FIDO interface.");
 
                 WaitForReclaimTimeout(Transport.HidFido);
                 return new FidoConnection(_hidFidoDevice);
@@ -156,14 +156,14 @@ namespace Yubico.YubiKey
             // We're only affected by the reclaim timeout if we're switching USB transports.
             if (_device.LastActiveTransport == newTransport)
             {
-                _log.LogInformation(
+                _log.LogDebug(
                     "{Transport} transport is already active. No need to wait for reclaim.",
                     _device.LastActiveTransport);
 
                 return;
             }
 
-            _log.LogInformation(
+            _log.LogDebug(
                 "Switching USB transports from {OldTransport} to {NewTransport}.",
                 _device.LastActiveTransport,
                 newTransport);
@@ -176,7 +176,7 @@ namespace Yubico.YubiKey
             {
                 var waitNeeded = reclaimTimeout - timeSinceLastActivation;
 
-                _log.LogInformation(
+                _log.LogDebug(
                     "Reclaim timeout still active. Need to wait {TimeMS} milliseconds.",
                     waitNeeded.TotalMilliseconds);
 
@@ -185,7 +185,7 @@ namespace Yubico.YubiKey
 
             _device.LastActiveTransport = newTransport;
 
-            _log.LogInformation("Reclaim timeout has lapsed. It is safe to switch USB transports.");
+            _log.LogDebug("Reclaim timeout has lapsed. It is safe to switch USB transports.");
         }
 
         private bool CanFastReclaim()
@@ -221,7 +221,7 @@ namespace Yubico.YubiKey
                 _ => "Unknown"
             };
 
-            _log.LogInformation("YubiKey connecting to {Application} application over {ScpInfo}", applicationName, scpInfo);
+            _log.LogDebug("YubiKey connecting to {Application} application over {ScpInfo}", applicationName, scpInfo);
         }
 
         private static string GetApplicationName(YubiKeyApplication application) =>

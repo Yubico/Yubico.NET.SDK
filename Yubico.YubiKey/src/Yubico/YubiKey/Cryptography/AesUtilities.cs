@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Cryptography
         /// <param name="encryptionKey">16-byte AES128 key</param>
         /// <param name="plaintext">16-byte input block</param>
         /// <returns>The 16-byte AES128 ciphertext</returns>
-        public static byte[] BlockCipher(ReadOnlySpan<byte> encryptionKey, ReadOnlySpan<byte> plaintext)
+        public static Memory<byte> BlockCipher(ReadOnlySpan<byte> encryptionKey, ReadOnlySpan<byte> plaintext)
         {
             if (encryptionKey == null)
             {

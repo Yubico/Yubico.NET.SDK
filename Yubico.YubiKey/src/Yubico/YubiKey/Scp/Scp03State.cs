@@ -78,8 +78,7 @@ namespace Yubico.YubiKey.Scp
             return new Scp03State(sessionKeys, hostCryptogram);
         }
 
-        private static (ReadOnlyMemory<byte> cardChallenge, ReadOnlyMemory<byte> cardCryptogram)
-            PerformInitializeUpdate(
+        private static (ReadOnlyMemory<byte> cardChallenge, ReadOnlyMemory<byte> cardCryptogram) PerformInitializeUpdate(
             IApduTransform pipeline,
             Scp03KeyParameters keyParameters,
             ReadOnlyMemory<byte> hostChallenge)
@@ -101,13 +100,11 @@ namespace Yubico.YubiKey.Scp
             return (cardChallenge, cardCryptogram);
         }
 
-        private void
-            PerformExternalAuthenticate(
-            IApduTransform pipeline)
+        private void PerformExternalAuthenticate(IApduTransform pipeline)
         {
             // Create a MAC:ed APDU
             var eaCommandPlain = new ExternalAuthenticateCommand(_hostCryptogram);
-            (var macdApdu, byte[] newMacChainingValue) = MacApdu(
+            var (macdApdu, newMacChainingValue) = MacApdu(
                 eaCommandPlain.CreateCommandApdu(),
                 SessionKeys.MacKey.ToArray(),
                 MacChainingValue.ToArray()
@@ -123,8 +120,7 @@ namespace Yubico.YubiKey.Scp
                 typeof(ExternalAuthenticateCommand),
                 typeof(ExternalAuthenticateResponse));
 
-            var externalAuthenticateResponse = eaCommandMaced.CreateResponseForApdu(eaResponseApdu);
-            externalAuthenticateResponse.ThrowIfFailed();
+            eaCommandMaced.CreateResponseForApdu(eaResponseApdu).ThrowIfFailed();
         }
     }
 }

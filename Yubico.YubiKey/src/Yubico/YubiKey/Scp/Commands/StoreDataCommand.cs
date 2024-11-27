@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Scp.Commands
         private const byte GpStoreDataIns = 0xE2;
         private readonly ReadOnlyMemory<byte> _data;
 
-        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
+        public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StoreDataCommand"/> class, with the given data to be stored.

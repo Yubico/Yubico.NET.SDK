@@ -30,10 +30,10 @@ namespace Yubico.YubiKey.Scp03
 
             byte[] ivInput = new byte[16];
             countBytes.CopyTo(ivInput, 16 - countBytes.Length); // copy to rightmost part of block
-            byte[] iv = AesUtilities.BlockCipher(key, ivInput);
+            var iv = AesUtilities.BlockCipher(key, ivInput);
 
             byte[] paddedPayload = Padding.PadToBlockSize(payload);
-            var encryptedData = AesUtilities.AesCbcEncrypt(key.AsSpan(), iv.AsSpan(), paddedPayload.AsSpan());
+            var encryptedData = AesUtilities.AesCbcEncrypt(key.AsSpan(), iv.Span, paddedPayload.AsSpan());
 
             return encryptedData.ToArray();
         }
@@ -46,9 +46,9 @@ namespace Yubico.YubiKey.Scp03
             byte[] ivInput = new byte[16];
             countBytes.CopyTo(ivInput, 16 - countBytes.Length); // copy to rightmost part of block
             ivInput[0] = 0x80; // to mark as RMAC calculation
-            byte[] iv = AesUtilities.BlockCipher(key, ivInput);
+            var iv = AesUtilities.BlockCipher(key, ivInput);
 
-            var decryptedData = AesUtilities.AesCbcDecrypt(key.AsSpan(), iv.AsSpan(), payload);
+            var decryptedData = AesUtilities.AesCbcDecrypt(key.AsSpan(), iv.Span, payload);
 
             return Padding.RemovePadding(decryptedData.ToArray()).ToArray();
         }

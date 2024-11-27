@@ -94,8 +94,6 @@ namespace Yubico.YubiKey.Scp
             }
 
             SetKeys(channelMacKey, channelEncryptionKey, dataEncryptionKey);
-
-            _disposed = false;
         }
 
         /// <summary>
@@ -105,15 +103,13 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         public StaticKeys()
         {
-            var DefaultKey = new ReadOnlyMemory<byte>(
+            var defaultKey = new ReadOnlyMemory<byte>(
                 new byte[]
                 {
                     0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f
                 });
 
-            SetKeys(DefaultKey, DefaultKey, DefaultKey);
-
-            _disposed = false;
+            SetKeys(defaultKey, defaultKey, defaultKey);
         }
         
         private void SetKeys(ReadOnlyMemory<byte> channelMacKey,
@@ -162,17 +158,21 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (_disposed)
             {
-                if (disposing)
-                {
-                    CryptographicOperations.ZeroMemory(_macKey.AsSpan());
-                    CryptographicOperations.ZeroMemory(_encKey.AsSpan());
-                    CryptographicOperations.ZeroMemory(_dekKey.AsSpan());
-
-                    _disposed = true;
-                }
+                return;
             }
+
+            if (!disposing)
+            {
+                return;
+            }
+
+            CryptographicOperations.ZeroMemory(_macKey.AsSpan());
+            CryptographicOperations.ZeroMemory(_encKey.AsSpan());
+            CryptographicOperations.ZeroMemory(_dekKey.AsSpan());
+
+            _disposed = true;
         }
     }
 }

@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.Cryptography
             byte[] plaintext = GetPlaintext();
 
             // Act
-            byte[] result = AesUtilities.BlockCipher(key, plaintext);
+            var result = AesUtilities.BlockCipher(key, plaintext);
 
             // Assert
             Assert.Equal(result, Hex.HexToBytes("dcc0c378ec111cb23048486ef9d9a6b7"));

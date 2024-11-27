@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.Otp
             : base(Log.GetLogger<OathSession>(), yubiKey, YubiKeyApplication.Otp, keyParameters)
         {
             // Getting the OTP status allows the user to read the OTP status on the OtpSession object.
-            _otpStatus = Connection.SendCommand(new ReadStatusCommand()).GetData(); // 
+            _otpStatus = Connection.SendCommand(new ReadStatusCommand()).GetData();
         }
 
         #region OTP Operation Object Factory

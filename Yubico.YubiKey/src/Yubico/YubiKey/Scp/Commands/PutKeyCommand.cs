@@ -106,7 +106,6 @@ namespace Yubico.YubiKey.Scp.Commands
     {
         private const byte GpPutKeyCla = 0x80;
         private const byte GpPutKeyIns = 0xD8;
-
         private readonly byte[] _data;
         private readonly byte _p1;
         private readonly byte _p2;

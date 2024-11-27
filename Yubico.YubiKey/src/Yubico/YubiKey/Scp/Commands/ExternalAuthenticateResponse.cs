@@ -33,14 +33,18 @@ namespace Yubico.YubiKey.Scp.Commands
                 throw new ArgumentNullException(nameof(responseApdu));
             }
 
-            if (responseApdu.SW != SWConstants.Success)
+            if (responseApdu.SW == SWConstants.Success)
             {
-                string message = string.Format(
-                    CultureInfo.CurrentCulture,
-                    $"{ExceptionMessages.IncorrectExternalAuthenticateData}" + " " +
-                    $"SW: 0x{responseApdu.SW.ToString("X4", CultureInfo.InvariantCulture)}");
-                throw new ArgumentException(message, nameof(responseApdu));
+                return;
             }
+
+            string message = string.Format(
+                CultureInfo.CurrentCulture,
+                $"{ExceptionMessages.IncorrectExternalAuthenticateData}" + " " +
+                $"SW: 0x{responseApdu.SW.ToString("X4", CultureInfo.InvariantCulture)}");
+
+            // Example output: IncorrectExternalAuthenticateData SW: 0x6300
+            throw new ArgumentException(message, nameof(responseApdu));
         }
     }
 }

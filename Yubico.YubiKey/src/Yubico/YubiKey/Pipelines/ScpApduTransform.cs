@@ -31,22 +31,22 @@ namespace Yubico.YubiKey.Pipelines
     /// </remarks>
     internal class ScpApduTransform : IApduTransform, IDisposable
     {
+        /// <summary>
+        /// The <see cref="ScpKeyParameters"/> for the SCP connection
+        /// </summary>
         public ScpKeyParameters KeyParameters { get; }
 
-        public EncryptDataFunc EncryptDataFunc =>
-            _dataEncryptor ?? ThrowIfUninitialized<EncryptDataFunc>();
-
+        /// <summary>
+        /// The <see cref="EncryptDataFunc"/> which encrypts any data using the session key
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown when the <see cref="ScpState"/> has not been initialized.</exception>
+        public EncryptDataFunc EncryptDataFunc => _dataEncryptor ?? ThrowIfUninitialized<EncryptDataFunc>();
+        private ScpState ScpState => _scpState ?? ThrowIfUninitialized<ScpState>();
         private EncryptDataFunc? _dataEncryptor;
-
-        private ScpState ScpState =>
-            _scpState ?? ThrowIfUninitialized<ScpState>();
-
         private readonly IApduTransform _pipeline;
         private ScpState? _scpState;
         private bool _disposed;
 
-        [DoesNotReturn]
-        private T ThrowIfUninitialized<T>() => throw new InvalidOperationException($"{nameof(Scp.ScpState)} has not been initialized. The Setup method must be called.");
         /// <summary>
         /// Constructs a new pipeline from the given one.
         /// </summary>
@@ -61,17 +61,21 @@ namespace Yubico.YubiKey.Pipelines
         /// <summary>
         /// Performs SCP handshake. Must be called after SELECT.
         /// </summary>
+        /// <exception cref="ArgumentException">Thrown if the instance <see cref="KeyParameters"/> is invalid.</exception>
         public void Setup()
         {
             _pipeline.Setup();
 
-            if (KeyParameters.GetType() == typeof(Scp03KeyParameters))
+            switch (KeyParameters)
             {
-                _dataEncryptor = InitializeScp03((Scp03KeyParameters)KeyParameters);
-            }
-            else if (KeyParameters.GetType() == typeof(Scp11KeyParameters))
-            {
-                _dataEncryptor = InitializeScp11((Scp11KeyParameters)KeyParameters);
+                case Scp03KeyParameters scp03KeyParameters:
+                    InitializeScp03(scp03KeyParameters);
+                    break;
+                case Scp11KeyParameters scp11KeyParameters:
+                    InitializeScp11(scp11KeyParameters);
+                    break;
+                default:
+                    throw new ArgumentException($"Type of {nameof(KeyParameters)} is not recognized", nameof(KeyParameters));
             }
         }
 
@@ -94,13 +98,32 @@ namespace Yubico.YubiKey.Pipelines
             var encodedCommand = ScpState.EncodeCommand(command);
             var response = _pipeline.Invoke(encodedCommand, commandType, responseType);
 
-
             return ScpState.DecodeResponse(response);
         }
 
+        private void InitializeScp11(Scp11KeyParameters keyParameters)
+        {
+            _scpState = Scp11State.CreateScpState(_pipeline, keyParameters);
+            _dataEncryptor = _scpState.GetDataEncryptor();
+        }
+
+        private void InitializeScp03(Scp03KeyParameters keyParams)
+        {
+            // Generate host challenge
+            using var rng = CryptographyProviders.RngCreator();
+            byte[] hostChallenge = new byte[8];
+            rng.GetBytes(hostChallenge);
+
+            _scpState = Scp03State.CreateScpState(_pipeline, keyParams, hostChallenge);
+            _dataEncryptor = _scpState.GetDataEncryptor();
+        }
+
+        [DoesNotReturn]
+        private T ThrowIfUninitialized<T>() => throw new InvalidOperationException($"{nameof(Scp.ScpState)} has not been initialized. The Setup method must be called.");
+
         private static bool ShouldNotEncode(Type commandType)
         {
-            // This method introduced high coupling between the SCP pipeline and the applications.
+            // This method introduces some coupling between the SCP pipeline and the applications.
             // The applications should not have to know about the SCP pipeline, or they should be able to
             // send the commands without the pipeline.
             var exemptionList = new[]
@@ -111,24 +134,6 @@ namespace Yubico.YubiKey.Pipelines
             };
 
             return exemptionList.Contains(commandType);
-        }
-
-        private EncryptDataFunc InitializeScp11(Scp11KeyParameters keyParameters)
-        {
-            _scpState = Scp11State.CreateScpState(_pipeline, keyParameters);
-            return _scpState.GetDataEncryptor();
-        }
-
-        private EncryptDataFunc InitializeScp03(Scp03KeyParameters keyParams)
-        {
-            // Generate host challenge
-            using var rng = CryptographyProviders.RngCreator();
-            byte[] hostChallenge = new byte[8];
-            rng.GetBytes(hostChallenge);
-
-            _scpState = Scp03State.CreateScpState(_pipeline, keyParams, hostChallenge);
-
-            return _scpState.GetDataEncryptor();
         }
 
         // There is a call to cleanup and a call to Dispose. The cleanup only

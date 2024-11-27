@@ -17,18 +17,18 @@ limitations under the License. -->
 ### Command APDU Info
 
 | CLA | INS |     P1      |      P2       |     Lc     |               Data               |    Le    |
-|:---:|:---:|:-----------:|:-------------:|:----------:|:--------------------------------:|:--------:| 
-| 00  | 87  | *algorithm* | *slot number* | *data len* | *encoded digest of data to sign* | (absent) |
+| :-: | :-: | :---------: | :-----------: | :--------: | :------------------------------: | :------: |
+| 00  | 87  | _algorithm_ | _slot number_ | _data len_ | _encoded digest of data to sign_ | (absent) |
 
-The *algorithm* is either `06` (RSA-1024), `07` (RSA-2048), `05` (RSA 3072), `16` (RSA 4096), `11` (ECC-P256), or `14`
+The _algorithm_ is either `06` (RSA-1024), `07` (RSA-2048), `05` (RSA 3072), `16` (RSA 4096), `11` (ECC-P256), or `14`
 (ECC-P384).
 
-The *slot number* can be the number of any slot that holds a private key, other than `F9`.
+The _slot number_ can be the number of any slot that holds a private key, other than `F9`.
 That is, the slot number can be any PIV slot other than `80`, `81`, `9B`, or `F9`. The
 attestation key, `F9`, will sign a certificate it creates, so it can sign. It simply
 cannot sign arbitrary data, only attestation statements.
 
-The *encoded digest* is
+The _encoded digest_ is
 
 ```C
   7C len1 82 00 81 len2 <digest block>
@@ -79,12 +79,12 @@ For ECC, there is one format:
 
 #### Response APDU for AUTHENTICATE:SIGN (success)
 
-Total Length: *variable + 2*\
-Data Length: *variable*
+Total Length: _variable + 2_\
+Data Length: _variable_
 
 |               Data                | SW1 | SW2 |
-|:---------------------------------:|:---:|:---:|
-| 7C *len1* 82 *len2 \<signature\>* | 90  | 00  |
+| :-------------------------------: | :-: | :-: |
+| 7C _len1_ 82 _len2 \<signature\>_ | 90  | 00  |
 
 Note that the signature might be returned over multiple commands. Each return command
 will be able to return up to 256 bytes. To get more bytes of a return, call the GET
@@ -122,8 +122,8 @@ Total Length: 2\
 Data Length: 0
 
 |   Data    | SW1 | SW2 |
-|:---------:|:---:|:---:|
-| (no data) | 69  | 82  |  
+| :-------: | :-: | :-: |
+| (no data) | 69  | 82  |
 
 If the key was generated or imported with a PIN policy other than "Never", and the command
 was sent without first verifying the PIN or the wrong PIN was entered, then the following
@@ -190,4 +190,3 @@ Received (SW1=0x90, SW2=0x00):
 Sending: 00 C0 00 00
 Received (SW1=0x6A, SW2=0x80)
 ```
-

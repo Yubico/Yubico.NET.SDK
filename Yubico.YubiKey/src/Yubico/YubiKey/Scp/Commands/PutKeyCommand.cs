@@ -113,6 +113,12 @@ namespace Yubico.YubiKey.Scp.Commands
 
         public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
 
+        /// <summary>
+        /// This is used internally by the <see cref="SecurityDomainSession"/>. Clients should not have to build this manually.
+        /// </summary>
+        /// <param name="p1">The P1 parameter for the PutKey Apdu command</param>
+        /// <param name="p2">The P2 parameter for the PutKey Apdu command</param>
+        /// <param name="data">The data to use for the PutKey Apdu command</param>
         public PutKeyCommand(byte p1, byte p2, ReadOnlyMemory<byte> data)
         {
             _p1 = p1;

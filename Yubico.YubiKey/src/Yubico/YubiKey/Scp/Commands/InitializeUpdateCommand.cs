@@ -54,6 +54,7 @@ namespace Yubico.YubiKey.Scp.Commands
             P1 = (byte)_keyVersionNumber,
             Data = _hostChallenge
         };
+        
         public InitializeUpdateResponse CreateResponseForApdu(ResponseApdu responseApdu) => new InitializeUpdateResponse(responseApdu);
     }
 }

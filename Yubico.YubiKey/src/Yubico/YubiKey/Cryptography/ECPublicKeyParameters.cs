@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Cryptography
         /// Gets the bytes representing the public key.
         /// </summary>
         /// <returns>A <see cref="Memory{T}"/> containing the public key bytes with the format 0x04 || X || Y.</returns>
-        public Memory<byte> GetBytes()
+        public ReadOnlyMemory<byte> GetBytes()
         {
             byte[] publicKeyRawData =
                 new byte[] { 0x4 } // Format identifier (uncompressed point): 0x04

@@ -50,25 +50,27 @@ namespace Yubico.YubiKey.Scp.Helpers
             }
 
             // Add 8 bytes of space for the MAC that will be calculated
-            var apduWithLongerLen = AddDataToApdu(apdu, new byte[8]);
-            byte[] apduBytesWithZeroMac = apduWithLongerLen.AsByteArray();
+            var apduWithLongerLen = AddDataToApdu(apdu, stackalloc byte[8]);
+            Span<byte> apduBytesWithZeroMac = apduWithLongerLen.AsByteArray();
 
             // Prepare input for MAC calculation:
             // - First 16 bytes: MAC chaining value from previous operation
             // - Remaining bytes: APDU bytes (excluding the 8 zero bytes we added)
-            byte[] macInp = new byte[16 + apduBytesWithZeroMac.Length - 8];
-            macChainingValue.CopyTo(macInp);
-            apduBytesWithZeroMac.AsSpan(0, apduBytesWithZeroMac.Length - 8).CopyTo(macInp.AsSpan(16));
+            Span<byte> macInputBuffer = stackalloc byte[16 + apduBytesWithZeroMac.Length - 8];
+            macChainingValue.CopyTo(macInputBuffer);
+            apduBytesWithZeroMac[..^8].CopyTo(macInputBuffer[16..]);
 
             // Calculate MAC using AES-CMAC (16 bytes)
-            Span<byte> newMacChainingValue = stackalloc byte[16];
             using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+
+            Span<byte> newMacChainingValue = stackalloc byte[16];
             cmacObj.CmacInit(macKey);
-            cmacObj.CmacUpdate(macInp);
+            cmacObj.CmacUpdate(macInputBuffer);
             cmacObj.CmacFinal(newMacChainingValue);
 
             // Create final APDU with the first 8 bytes of the MAC appended
             var macdApdu = AddDataToApdu(apdu, newMacChainingValue[..8]);
+
             return (macdApdu, newMacChainingValue.ToArray());
         }
 
@@ -109,18 +111,19 @@ namespace Yubico.YubiKey.Scp.Helpers
             // - Next bytes: Response data (excluding MAC)
             // - Last 2 bytes: Success status words (90 00)
             int respDataLen = response.Length - 8;
-            Span<byte> macInp = stackalloc byte[16 + respDataLen + 2];
-            macChainingValue.CopyTo(macInp);
-            response[..respDataLen].CopyTo(macInp[16..]);
+            Span<byte> macInput = stackalloc byte[16 + respDataLen + 2];
+            macChainingValue.CopyTo(macInput);
+            response[..respDataLen].CopyTo(macInput[16..]);
 
-            macInp[16 + respDataLen] = SW1Constants.Success;
-            macInp[16 + respDataLen + 1] = SWConstants.Success & 0xFF;
+            macInput[16 + respDataLen] = SW1Constants.Success;
+            macInput[16 + respDataLen + 1] = SWConstants.Success & 0xFF;
 
             // Calculate expected MAC using AES-CMAC
             using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            
             Span<byte> cmac = stackalloc byte[16];
             cmacObj.CmacInit(rmacKey);
-            cmacObj.CmacUpdate(macInp);
+            cmacObj.CmacUpdate(macInput);
             cmacObj.CmacFinal(cmac);
     
             // Use constant-time comparison to prevent timing attacks

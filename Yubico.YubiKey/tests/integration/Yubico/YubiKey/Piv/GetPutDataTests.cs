@@ -17,6 +17,7 @@ using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
 
@@ -115,13 +116,14 @@ namespace Yubico.YubiKey.Piv
             };
 
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            // TODO
-#pragma warning disable CS0618 // Type or member is obsolete
-            using (var pivSession = new PivSession(testDevice, new StaticKeys()))
-#pragma warning restore CS0618 // Type or member is obsolete
+
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
+            }
 
+            using (var pivSession = new PivSession(testDevice, Scp03KeyParameters.DefaultKey))
+            {
                 // There should be no data.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Chuid);
                 var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);

@@ -29,6 +29,7 @@ using Yubico.YubiKey.Oath;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.TestUtilities;
+using Yubico.YubiKey.YubiHsmAuth;
 using ECCurve = System.Security.Cryptography.ECCurve;
 using ECPoint = System.Security.Cryptography.ECPoint;
 
@@ -40,18 +41,18 @@ namespace Yubico.YubiKey.Scp
     {
         private const byte OceKid = 0x010;
 
+        public Scp11Tests()
+        {
+            ResetAllowedDevices();
+        }
+
         private IYubiKeyDevice GetDevice(
             StandardTestDevice desiredDeviceType,
             Transport transport = Transport.SmartCard,
             FirmwareVersion? minimumFirmwareVersion = null) =>
             IntegrationTestDeviceEnumeration.GetTestDevice(desiredDeviceType, transport,
                 minimumFirmwareVersion ?? FirmwareVersion.V5_7_2);
-
-        public Scp11Tests()
-        {
-            ResetAllowedDevices();
-        }
-
+        
         private static void ResetAllowedDevices()
         {
             // Reset all attached allowed devices
@@ -75,8 +76,7 @@ namespace Yubico.YubiKey.Scp
             using var session = new PivSession(testDevice, keyParams);
             session.ResetApplication();
 
-            var collectorObj = new Simple39KeyCollector();
-            session.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            session.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
             var isVerified = session.TryVerifyPin();
             Assert.True(isVerified);
 
@@ -100,8 +100,7 @@ namespace Yubico.YubiKey.Scp
             }
 
             using var session = new OathSession(testDevice, keyParams);
-            var collectorObj = new SimpleOathKeyCollector();
-            session.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
+            session.KeyCollector = new SimpleOathKeyCollector().SimpleKeyCollectorDelegate;
 
             session.SetPassword();
             Assert.True(session.IsPasswordProtected);
@@ -117,18 +116,35 @@ namespace Yubico.YubiKey.Scp
             var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
             var keyParams = Get_Scp11b_EncryptedChannel_Parameters(testDevice, keyReference);
 
-            using var otpSession = new OtpSession(testDevice, keyParams);
-            if (otpSession.IsLongPressConfigured)
+            using var session = new OtpSession(testDevice, keyParams);
+            if (session.IsLongPressConfigured)
             {
-                otpSession.DeleteSlot(Slot.LongPress);
+                session.DeleteSlot(Slot.LongPress);
             }
 
-            var configObj = otpSession.ConfigureStaticPassword(Slot.LongPress);
+            var configObj = session.ConfigureStaticPassword(Slot.LongPress);
             var generatedPassword = new Memory<char>(new char[16]);
             configObj = configObj.WithKeyboard(KeyboardLayout.en_US);
             configObj = configObj.GeneratePassword(generatedPassword);
 
             configObj.Execute();
+        }
+        
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Scp11b_YubiHsmSession_Operations_Succeeds(
+            StandardTestDevice desiredDeviceType)
+        {
+            var testDevice = YhaTestUtilities.GetCleanDevice(desiredDeviceType);
+            var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
+            var keyParams = Get_Scp11b_EncryptedChannel_Parameters(testDevice, keyReference);
+
+            using var session = new YubiHsmAuthSession(testDevice, keyParams);
+            session.AddCredential(YhaTestUtilities.DefaultMgmtKey, YhaTestUtilities.DefaultAes128Cred);
+            
+            var result = session.ListCredentials();
+            Assert.Single(result);
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]

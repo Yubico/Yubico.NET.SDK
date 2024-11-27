@@ -17,7 +17,7 @@ using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Scp.Commands;
 
-namespace Yubico.YubiKey.Scp0.Commands
+namespace Yubico.YubiKey.Scp.Commands
 {
     public class ScpResponseTests
     {

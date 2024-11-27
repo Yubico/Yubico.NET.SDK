@@ -60,12 +60,6 @@ namespace Yubico.YubiKey.Piv
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
             Assert.True(testDevice is YubiKeyDevice);
-            //             if (testDevice is YubiKeyDevice device) TODO
-            //             {
-            // #pragma warning disable CS0618 // Specifically testing this feature
-            //                 // testDevice = device.WithScp03(new StaticKeys());
-            // #pragma warning restore CS0618 //
-            //             }
 
             var isValid = DoGenerate(testDevice, 0x86, algorithm, PivPinPolicy.Once, PivTouchPolicy.Never);
             Assert.True(isValid);

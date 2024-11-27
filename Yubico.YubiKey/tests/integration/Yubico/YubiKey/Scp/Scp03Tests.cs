@@ -29,18 +29,18 @@ namespace Yubico.YubiKey.Scp
     [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class Scp03Tests
     {
-        private IYubiKeyDevice GetDevice(
-            StandardTestDevice desiredDeviceType,
-            Transport transport = Transport.All, 
-            FirmwareVersion? minimumFirmwareVersion = null) 
-            => IntegrationTestDeviceEnumeration.GetTestDevice(desiredDeviceType, transport, minimumFirmwareVersion);
-
         private readonly ReadOnlyMemory<byte> _defaultPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
         public Scp03Tests()
         {
             ResetAllowedDevices();
         }
+        
+        private IYubiKeyDevice GetDevice(
+            StandardTestDevice desiredDeviceType,
+            Transport transport = Transport.All, 
+            FirmwareVersion? minimumFirmwareVersion = null) 
+            => IntegrationTestDeviceEnumeration.GetTestDevice(desiredDeviceType, transport, minimumFirmwareVersion);
 
         private static void ResetAllowedDevices()
         {
@@ -51,7 +51,6 @@ namespace Yubico.YubiKey.Scp
                 session.Reset();
             }
         }
-
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]

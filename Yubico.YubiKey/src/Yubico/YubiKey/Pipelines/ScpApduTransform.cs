@@ -103,14 +103,14 @@ namespace Yubico.YubiKey.Pipelines
             // This method introduced high coupling between the SCP pipeline and the applications.
             // The applications should not have to know about the SCP pipeline, or they should be able to
             // send the commands without the pipeline.
-            var exceptionList = new[]
+            var exemptionList = new[]
             {
                 typeof(InterIndustry.Commands.SelectApplicationCommand),
                 typeof(Oath.Commands.SelectOathCommand),
                 typeof(Scp.Commands.ResetCommand),
             };
 
-            return exceptionList.Contains(commandType);
+            return exemptionList.Contains(commandType);
         }
 
         private EncryptDataFunc InitializeScp11(Scp11KeyParameters keyParameters)
@@ -141,19 +141,20 @@ namespace Yubico.YubiKey.Pipelines
             GC.SuppressFinalize(this);
         }
 
-        // The Dispose needs to make sure the local disposable fields are
-        // disposed.
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (_disposed)
             {
-                if (disposing)
-                {
-                    _scpState?.Dispose();
-
-                    _disposed = true;
-                }
+                return;
             }
+
+            if (!disposing)
+            {
+                return;
+            }
+
+            _scpState?.Dispose();
+            _disposed = true;
         }
     }
 }

@@ -22,7 +22,7 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 
 ## Checklist:
 
-- [ ] My code follows the [style guidelines](https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/043119ad1d19e0e6e66556c970a81d0c1aba36c8/CONTRIBUTING.md) of this project 
+- [ ] My code follows the [style guidelines](https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/CONTRIBUTING.md) of this project 
 - [ ] I have performed a self-review of my own code
 - [ ] I have run `dotnet format` to format my code
 - [ ] I have commented my code, particularly in hard-to-understand areas

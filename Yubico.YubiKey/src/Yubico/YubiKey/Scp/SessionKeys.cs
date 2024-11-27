@@ -23,10 +23,12 @@ namespace Yubico.YubiKey.Scp
         /// Gets the session MAC key.
         /// </summary>
         public ReadOnlyMemory<byte> MacKey => _macKey;
+
         /// <summary>
         /// Gets the session encryption key.    
         /// </summary>
         public ReadOnlyMemory<byte> EncKey => _encryptionKey;
+
         /// <summary>
         /// Gets the session RMAC key.
         /// </summary>
@@ -37,10 +39,10 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         public ReadOnlyMemory<byte>? DataEncryptionKey => _dataEncryptionKey;
 
-        private readonly Memory<byte> _macKey;
-        private readonly Memory<byte> _encryptionKey;
-        private readonly Memory<byte> _rmacKey;
-        private readonly Memory<byte> _dataEncryptionKey;
+        private readonly Memory<byte> _macKey = new byte[16];
+        private readonly Memory<byte> _encryptionKey = new byte[16];
+        private readonly Memory<byte> _rmacKey = new byte[16];
+        private readonly Memory<byte> _dataEncryptionKey = new byte[16];
         private bool _disposed;
 
         /// <summary>
@@ -56,12 +58,23 @@ namespace Yubico.YubiKey.Scp
             Memory<byte> rmacKey,
             Memory<byte> dataEncryptionKey)
         {
-            _macKey = macKey;
-            _encryptionKey = encryptionKey;
-            _rmacKey = rmacKey;
-            _dataEncryptionKey = dataEncryptionKey;
-
-            _disposed = false;
+            ValidateKeyLength(macKey, nameof(macKey));
+            ValidateKeyLength(encryptionKey, nameof(encryptionKey));
+            ValidateKeyLength(rmacKey, nameof(rmacKey));
+            ValidateKeyLength(dataEncryptionKey, nameof(dataEncryptionKey));
+            
+            macKey.CopyTo(_macKey);
+            encryptionKey.CopyTo(_encryptionKey);
+            rmacKey.CopyTo(_rmacKey);
+            dataEncryptionKey.CopyTo(_dataEncryptionKey);
+        }
+        
+        private static void ValidateKeyLength(Memory<byte> key, string paramName)
+        {
+            if (key.Length != 16)
+            {
+                throw new ArgumentException("Incorrect session key length. Must be 16.", paramName);
+            }
         }
 
         public void Dispose()

@@ -32,11 +32,24 @@ namespace Yubico.YubiKey.Scp
         private const int EckaTag = 0x5F49;
         private const int KeyAgreementTag = 0xA6;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Scp11State"/> class with the specified session keys and receipt.
+        /// </summary>
+        /// <param name="sessionKeys">The session keys for secure channel communication.</param>
+        /// <param name="receipt">The receipt data used for verification.</param>
         public Scp11State(SessionKeys sessionKeys, Memory<byte> receipt)
             : base(sessionKeys, receipt)
         {
         }
 
+        /// <summary>
+        /// Creates a new SCP11 secure channel state by performing key agreement and authentication with the YubiKey.
+        /// </summary>
+        /// <param name="pipeline">The APDU pipeline for communication with the YubiKey.</param>
+        /// <param name="keyParameters">The key parameters required for SCP11 authentication.</param>
+        /// <returns>A new instance of <see cref="Scp11State"/> configured for secure channel communication.</returns>
+        /// <exception cref="ArgumentException">Thrown when key parameters are invalid or incompatible.</exception>
+        /// <exception cref="SecureChannelException">Thrown when secure channel establishment fails.</exception>
         internal static Scp11State CreateScpState(
             IApduTransform pipeline,
             Scp11KeyParameters keyParameters)
@@ -65,6 +78,7 @@ namespace Yubico.YubiKey.Scp
             byte[] keyLen = { 16 }; // 128-bit
             byte[] keyIdentifier = { 0x11, GetScpIdentifierByte(keyParameters.KeyReference) };
 
+            // Construct the host authentication data (payload)
             byte[] hostAuthenticateTlvEncodedData = TlvObjects.EncodeMany(
                 new TlvObject(
                     KeyAgreementTag,
@@ -77,6 +91,7 @@ namespace Yubico.YubiKey.Scp
                 new TlvObject(EckaTag, ephemeralPublicKeyEncodedPointOceEcka)
                 );
 
+            // Construct the host authentication command
             var authenticateCommand = keyParameters.KeyReference.Id == ScpKeyIds.Scp11B
                 ? new InternalAuthenticateCommand(
                     keyParameters.KeyReference.VersionNumber, keyParameters.KeyReference.Id,
@@ -84,26 +99,31 @@ namespace Yubico.YubiKey.Scp
                 : new ExternalAuthenticateCommand(
                     keyParameters.KeyReference.VersionNumber, keyParameters.KeyReference.Id,
                     hostAuthenticateTlvEncodedData) as IYubiKeyCommand<ScpResponse>;
-
+            
+            // Issue the host authentication command
             var authenticateResponseApdu = pipeline.Invoke(
-                authenticateCommand.CreateCommandApdu(), authenticateCommand.GetType(), typeof(ScpResponse)); //works
+                authenticateCommand.CreateCommandApdu(), authenticateCommand.GetType(), typeof(ScpResponse));
 
             var authenticateResponse = authenticateCommand.CreateResponseForApdu(authenticateResponseApdu);
             authenticateResponse.ThrowIfFailed(
                 $"Error when performing {authenticateCommand.GetType().Name}: {authenticateResponse.StatusMessage}");
 
+            // Decode the response as a TLV list
             var authenticateResponseTlvs = TlvObjects.DecodeList(authenticateResponseApdu.Data.Span);
 
+            // Extract the ephemeral public key from the response
             var epkSdEckaTlv = authenticateResponseTlvs[0];
             var epkSdEckaTlvEncodedData = epkSdEckaTlv.GetBytes();
             var sdReceipt = TlvObjects.UnpackValue(
                 ReceiptTag,
                 authenticateResponseTlvs[1].GetBytes().Span); // Yubikey X963KDF Receipt to match with our own X963KDF
 
+            // Decide which key to use for key agreement
             var skOceEcka =
                 keyParameters.SkOceEcka?.Parameters ?? // If set, we will use this for SCP11A and SCP11C. 
                 ekpOceEcka; // Otherwise, just use the newly created ephemeral key for SCP11b.
 
+            // Perform key agreement
             var (encryptionKey, macKey, rMacKey, dekKey)
                 = GetX963KDFKeyAgreementKeys(
                     skOceEcka.Curve,
@@ -116,7 +136,8 @@ namespace Yubico.YubiKey.Scp
                     keyUsage,
                     keyType,
                     keyLen);
-
+                    
+            // Create the session keys
             var sessionKeys = new SessionKeys(
                 macKey,
                 encryptionKey,
@@ -127,6 +148,22 @@ namespace Yubico.YubiKey.Scp
             return new Scp11State(sessionKeys, sdReceipt.ToArray());
         }
 
+        /// <summary>
+        /// Performs X9.63 Key Derivation Function (KDF) to generate session keys for the secure channel.
+        /// </summary>
+        /// <param name="curve">The elliptic curve used for key agreement.</param>
+        /// <param name="pkSdEcka">The YubiKey's public key parameters.</param>
+        /// <param name="eskOceEcka">The host's ephemeral key pair parameters.</param>
+        /// <param name="skOceEcka">The host's static key pair parameters.</param>
+        /// <param name="sdReceipt">The receipt computed by the YubiKey.</param>
+        /// <param name="epkSdEckaTlvEncodedData">The YubiKey's ephemeral public key in TLV format.</param>
+        /// <param name="hostAuthenticateTlvEncodedData">The host authentication data in TLV format.</param>
+        /// <param name="keyUsage">The intended usage of the derived keys.</param>
+        /// <param name="keyType">The type of keys to be derived.</param>
+        /// <param name="keyLen">The length of keys to be derived.</param>
+        /// <returns>A tuple containing the encryption, MAC, R-MAC, and DEK keys.</returns>
+        /// <exception cref="ArgumentException">Thrown when the curves of the provided keys do not match.</exception>
+        /// <exception cref="SecureChannelException">Thrown when key agreement receipt verification fails.</exception>
         private static (Memory<byte> encryptionKey, Memory<byte> macKey, Memory<byte> rMacKey, Memory<byte> dekKey)
             GetX963KDFKeyAgreementKeys(
             ECCurve curve, // The curve being used for the key agreement
@@ -188,7 +225,7 @@ namespace Yubico.YubiKey.Scp
             }
 
             // Get keys
-            byte[] receiptVerificationKey = keys[0]; // receipt verificationKey
+            byte[] receiptVerificationKey = keys[0];
             byte[] encryptionKey = keys[1];
             byte[] macKey = keys[2];
             byte[] rmacKey = keys[3];
@@ -196,10 +233,11 @@ namespace Yubico.YubiKey.Scp
 
             // Do AES CMAC 
             using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
-            Span<byte> oceReceipt = stackalloc byte[16]; // Our generated receipt
+            
+            Span<byte> oceReceipt = stackalloc byte[16]; 
             cmacObj.CmacInit(receiptVerificationKey);
             cmacObj.CmacUpdate(keyAgreementData);
-            cmacObj.CmacFinal(oceReceipt);
+            cmacObj.CmacFinal(oceReceipt); // Our generated receipt
 
             if (!CryptographicOperations.FixedTimeEquals(
                     oceReceipt, sdReceipt.Span)) // Needs to match with the receipt generated by the Yubikey
@@ -210,6 +248,12 @@ namespace Yubico.YubiKey.Scp
             return (encryptionKey, macKey, rmacKey, dekKey);
         }
 
+        /// <summary>
+        /// Extracts EC public key parameters from TLV-encoded data.
+        /// </summary>
+        /// <param name="epkSdEckaTlv">The TLV-encoded public key data.</param>
+        /// <param name="curve">The elliptic curve parameters.</param>
+        /// <returns>The extracted EC parameters containing the public key coordinates.</returns>
         private static ECParameters ExtractPublicKeyEcParameters(ReadOnlyMemory<byte> epkSdEckaTlv, ECCurve curve)
         {
             var epkSdEckaEncodedPoint = TlvObjects.UnpackValue(EckaTag, epkSdEckaTlv.Span);
@@ -228,8 +272,11 @@ namespace Yubico.YubiKey.Scp
 
         /// <summary>
         /// Gets the standardized SCP identifier for the given key reference.
-        /// Global Platform Secure Channel Protocol 11 Card Specification v2.3 – Amendment F § 7.1.1
+        /// As defined in Global Platform Secure Channel Protocol 11 Card Specification v2.3 – Amendment F § 7.1.1
         /// </summary>
+        /// <param name="keyReference">The key reference to get the identifier for.</param>
+        /// <returns>The SCP identifier byte.</returns>
+        /// <exception cref="ArgumentException">Thrown when the key reference ID is not a valid SCP11 KID.</exception>
         private static byte GetScpIdentifierByte(KeyReference keyReference) =>
             keyReference.Id switch
             {
@@ -239,6 +286,14 @@ namespace Yubico.YubiKey.Scp
                 _ => throw new ArgumentException("Invalid SCP11 KID")
             };
 
+        /// <summary>
+        /// Performs the Security Operation command sequence required for SCP11a and SCP11c authentication.
+        /// </summary>
+        /// <param name="pipeline">The APDU pipeline for communication with the YubiKey.</param>
+        /// <param name="keyParams">The key parameters containing certificates and references.</param>
+        /// <exception cref="ArgumentNullException">Thrown when required key parameters are missing.</exception>
+        /// <exception cref="ArgumentException">Thrown when required certificates are missing.</exception>
+        /// <exception cref="SecureChannelException">Thrown when the security operation fails.</exception>
         private static void PerformSecurityOperation(IApduTransform pipeline, Scp11KeyParameters keyParams)
         {
             // GPC v2.3 Amendment F (SCP11) v1.4 §7.5
@@ -283,6 +338,11 @@ namespace Yubico.YubiKey.Scp
             }
         }
 
+        /// <summary>
+        /// Combines multiple byte arrays into a single array.
+        /// </summary>
+        /// <param name="values">The arrays to merge.</param>
+        /// <returns>A new array containing all input arrays concatenated in sequence.</returns>
         private static byte[] MergeArrays(params ReadOnlyMemory<byte>[] values)
         {
             using var memoryStream = new MemoryStream();

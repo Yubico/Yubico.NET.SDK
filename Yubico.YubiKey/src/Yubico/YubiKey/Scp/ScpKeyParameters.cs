@@ -21,10 +21,15 @@ namespace Yubico.YubiKey.Scp
     /// </summary>
     public abstract class ScpKeyParameters
     {
+        /// <summary>
+        /// The key reference associated with the key parameters.
+        /// </summary>
         public KeyReference KeyReference { get; protected set; }
 
-        public ReadOnlySpan<byte> GetBytes => new ReadOnlySpan<byte>(new[] { KeyReference.Id, KeyReference.VersionNumber });
-
+        /// <summary>
+        /// Creates a new instance of <see cref="ScpKeyParameters"/>.
+        /// </summary>
+        /// <param name="keyReference"></param>
         protected ScpKeyParameters(KeyReference keyReference)
         {
             KeyReference = keyReference;

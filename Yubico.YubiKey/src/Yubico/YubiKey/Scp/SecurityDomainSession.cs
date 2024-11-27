@@ -263,10 +263,10 @@ namespace Yubico.YubiKey.Scp
         }
 
         /// <summary>
-        /// Puts an ECC private key onto the YubiKey using the Security Domain.
+        /// Puts an EC private key onto the YubiKey using the Security Domain.
         /// </summary>
         /// <param name="keyReference">The key reference identifying where to store the key.</param>
-        /// <param name="privateKeyParameters">The ECC private key parameters to store.</param>
+        /// <param name="privateKeyParameters">The EC private key parameters to store.</param>
         /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
         /// <exception cref="ArgumentException">Thrown when the private key is not of type NIST P-256.</exception>
         /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
@@ -306,7 +306,7 @@ namespace Yubico.YubiKey.Scp
                     CryptographicOperations.ZeroMemory(privateKeyBytes.Span);
                 }
 
-                // Write the ECC parameters
+                // Write the EC parameters
                 var paramsTlv = new TlvObject(EcKeyType, new byte[] { 0x00 }).GetBytes();
                 commandDataWriter.Write(paramsTlv.ToArray());
                 commandDataWriter.Write((byte)0);
@@ -331,10 +331,10 @@ namespace Yubico.YubiKey.Scp
         }
 
         /// <summary>
-        /// Puts an ECC public key onto the YubiKey using the Security Domain.
+        /// Puts an EC public key onto the YubiKey using the Security Domain.
         /// </summary>
         /// <param name="keyReference">The key reference identifying where to store the key.</param>
-        /// <param name="publicKeyParameters">The ECC public key parameters to store.</param>
+        /// <param name="publicKeyParameters">The EC public key parameters to store.</param>
         /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
         /// <exception cref="ArgumentException">Thrown when the public key is not of type SECP256R1.</exception>
         /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
@@ -358,13 +358,13 @@ namespace Yubico.YubiKey.Scp
                 // Write the key version number
                 commandDataWriter.Write(keyReference.VersionNumber);
 
-                // Write the ECC public key
+                // Write the EC public key
                 var publicKeyTlvData =
                     new TlvObject(EcPublicKeyKeyType, publicKeyParameters.GetBytes().Span).GetBytes();
 
                 commandDataWriter.Write(publicKeyTlvData.ToArray());
 
-                // Write the ECC parameters
+                // Write the EC parameters
                 var paramsTlv = new TlvObject(EcKeyType, new byte[1]).GetBytes();
                 commandDataWriter.Write(paramsTlv.ToArray());
                 commandDataWriter.Write((byte)0);
@@ -489,10 +489,10 @@ namespace Yubico.YubiKey.Scp
             var encodedPoint = tlvReader.ReadValue(EcPublicKeyKeyType).Span;
 
             // Create the ECParameters with the public point
-            var eccPublicKey = encodedPoint.CreateECPublicKeyFromBytes();
+            var ecPublicKey = encodedPoint.CreateECPublicKeyFromBytes();
 
             Logger.LogInformation("Key generated (KeyReference: {KeyReference})", keyReference);
-            return eccPublicKey;
+            return ecPublicKey;
         }
 
         /// <summary>
@@ -840,11 +840,11 @@ namespace Yubico.YubiKey.Scp
                 {
                     case ScpKeyIds.Scp03:
                         // SCP03 uses KID=0, we use KVN=0 to allow deleting the default keys
-                        // which have an invalid KVN (0xff).
+                        // which have an invalid KVN (0xFF).
                         overridenKeyRef = new KeyReference(0, 0);
                         ins = InitializeUpdateCommand.GpInitializeUpdateIns;
                         break;
-                    case 0x02:
+                    case 0x02: 
                     case 0x03:
                         continue; // Skip these as they are deleted by 0x01
                     case ScpKeyIds.Scp11A:

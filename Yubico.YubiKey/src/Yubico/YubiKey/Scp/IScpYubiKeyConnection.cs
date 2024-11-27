@@ -25,6 +25,9 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         public ScpKeyParameters KeyParameters { get; }
 
+        /// <summary>
+        /// Get the encryptor function to encrypt any data for a SCP command using the current session keys.
+        /// </summary>
         internal EncryptDataFunc EncryptDataFunc
         {
             get;

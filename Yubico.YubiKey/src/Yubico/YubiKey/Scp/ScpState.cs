@@ -7,8 +7,15 @@ namespace Yubico.YubiKey.Scp
 {
     internal abstract class ScpState : IDisposable
     {
+        /// <summary>
+        /// The session keys for secure channel communication.
+        /// </summary>
         protected readonly SessionKeys SessionKeys;
-        protected Memory<byte> MacChainingValue;
+
+        /// <summary>
+        /// The chaining value for the MAC.
+        /// </summary>
+        protected ReadOnlyMemory<byte> MacChainingValue;
 
         private int _encryptionCounter = 1;
         private bool _disposed;
@@ -39,6 +46,7 @@ namespace Yubico.YubiKey.Scp
                 throw new ArgumentNullException(nameof(command));
             }
 
+            // Create an encrypted APDU
             var encodedCommand = new CommandApdu
             {
                 Cla = (byte)(command.Cla | 0x04), //0x04 is for secure-messaging
@@ -47,14 +55,16 @@ namespace Yubico.YubiKey.Scp
                 P2 = command.P2
             };
 
+            // Encrypt the data
             var encryptedData = ChannelEncryption.EncryptData(
                 command.Data.Span, SessionKeys.EncKey.Span, _encryptionCounter);
 
+            // Update the encryption counter
             _encryptionCounter++;
             encodedCommand.Data = encryptedData;
 
             // Create a MAC:ed APDU
-            (var macdApdu, byte[] newMacChainingValue) = MacApdu(
+            var (macdApdu, newMacChainingValue) = MacApdu(
                 encodedCommand,
                 SessionKeys.MacKey.Span,
                 MacChainingValue.Span);
@@ -96,9 +106,11 @@ namespace Yubico.YubiKey.Scp
             var responseData = response.Data;
             VerifyRmac(responseData.Span, SessionKeys.RmacKey.Span, MacChainingValue.Span);
 
+            // Initialize decryptedData as an empty array
             ReadOnlyMemory<byte> decryptedData = Array.Empty<byte>();
             if (responseData.Length > 8)
             {
+                // Decrypt the response data if it's longer than 8 bytes
                 int previousEncryptionCounter = _encryptionCounter - 1;
                 decryptedData = ChannelEncryption.DecryptData(
                     responseData[..^8].Span,
@@ -107,10 +119,15 @@ namespace Yubico.YubiKey.Scp
                     );
             }
 
+            // Create a new array to hold the decrypted data and status words
             byte[] fullDecryptedResponse = new byte[decryptedData.Length + 2];
             decryptedData.CopyTo(fullDecryptedResponse);
+            
+            // Append the status words to the decrypted data
             fullDecryptedResponse[decryptedData.Length] = response.SW1;
             fullDecryptedResponse[decryptedData.Length + 1] = response.SW2;
+            
+            // Return a new ResponseApdu with the decrypted data and status words
             return new ResponseApdu(fullDecryptedResponse);
         }
 
@@ -137,23 +154,30 @@ namespace Yubico.YubiKey.Scp
                 plainText.Span);
         }
 
-        protected static (CommandApdu macdApdu, byte[] newMacChainingValue) MacApdu(
+        /// <summary>
+        /// Performs the MAC on the APDU
+        /// </summary>
+        /// <param name="commandApdu"></param>
+        /// <param name="macKey"></param>
+        /// <param name="macChainingValue"></param>
+        /// <returns></returns>
+        protected static (CommandApdu macdApdu, ReadOnlyMemory<byte> newMacChainingValue) MacApdu(
             CommandApdu commandApdu,
             ReadOnlySpan<byte> macKey,
             ReadOnlySpan<byte> macChainingValue) =>
             ChannelMac.MacApdu(commandApdu, macKey, macChainingValue);
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
 
         private static void VerifyRmac(
             ReadOnlySpan<byte> responseData,
             ReadOnlySpan<byte> rmacKey,
             ReadOnlySpan<byte> macChainingValue) =>
             ChannelMac.VerifyRmac(responseData, rmacKey, macChainingValue);
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
 
         protected virtual void Dispose(bool disposing)
         {

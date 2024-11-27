@@ -1,4 +1,4 @@
-﻿// Copyright 2024 Yubico AB
+// Copyright 2024 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -43,38 +43,58 @@ namespace Yubico.Core.Tlv
         private readonly int _offset;
 
         /// <summary>
-        /// Creates a new Tlv given a tag and a value.
+        /// Creates a new TLV (Tag-Length-Value) object with the specified tag and value.
         /// </summary>
+        /// <param name="tag">The tag value, must be between 0x00 and 0xFFFF.</param>
+        /// <param name="value">The value data as a read-only span of bytes.</param>
+        /// <exception cref="TlvException">Thrown when the tag value is outside the supported range (0x00-0xFFFF).</exception>
+        /// <remarks>
+        /// This constructor creates a BER-TLV encoded structure where:
+        /// - The tag is encoded in the minimum number of bytes needed
+        /// - The length is encoded according to BER-TLV rules
+        /// - The value is stored as provided
+        /// </remarks>
         public TlvObject(int tag, ReadOnlySpan<byte> value)
         {
+            // Validate that the tag is within the supported range (0x00-0xFFFF)
             if (tag < 0 || tag > 0xFFFF)
             {
                 throw new TlvException(ExceptionMessages.TlvUnsupportedTag);
             }
 
             Tag = tag;
+            // Create a copy of the input value
             byte[] valueBuffer = value.ToArray();
             using var ms = new MemoryStream();
 
+            // Convert tag to bytes and remove leading zeros, maintaining BER-TLV format
             byte[] tagBytes = BitConverter.GetBytes(tag).Reverse().SkipWhile(b => b == 0).ToArray();
             ms.Write(tagBytes, 0, tagBytes.Length);
 
             Length = valueBuffer.Length;
+            // For lengths < 128 (0x80), use single byte encoding
             if (Length < 0x80)
             {
                 ms.WriteByte((byte)Length);
             }
+            // For lengths >= 128, use multi-byte encoding with length indicator
             else
             {
+                // Convert length to bytes and remove leading zeros
                 byte[] lnBytes = BitConverter.GetBytes(Length).Reverse().SkipWhile(b => b == 0).ToArray();
+                // Write number of length bytes with high bit set (0x80 | number of bytes)
                 ms.WriteByte((byte)(0x80 | lnBytes.Length));
+                // Write the actual length bytes
                 ms.Write(lnBytes, 0, lnBytes.Length);
             }
 
+            // Store the position where the value begins
             _offset = (int)ms.Position;
 
+            // Write the value bytes
             ms.Write(valueBuffer, 0, Length);
 
+            // Store the complete TLV encoding
             _bytes = ms.ToArray();
         }
 

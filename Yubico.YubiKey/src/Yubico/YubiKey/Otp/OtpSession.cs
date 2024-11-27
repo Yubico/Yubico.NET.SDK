@@ -287,8 +287,6 @@ namespace Yubico.YubiKey.Otp
 
         internal FirmwareVersion FirmwareVersion => _otpStatus.FirmwareVersion;
 
-        // internal IYubiKeyDevice YubiKey { get; private set; }
-
         FirmwareVersion IOtpSession.FirmwareVersion => FirmwareVersion;
 
         IYubiKeyDevice IOtpSession.YubiKey => YubiKey;
@@ -298,7 +296,6 @@ namespace Yubico.YubiKey.Otp
         // public void Dispose() => Connection.Dispose();
 
         #region Private Fields
-        // private IYubiKeyConnection Connection;
         private readonly OtpStatus _otpStatus;
         #endregion
     }

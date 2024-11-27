@@ -21,17 +21,17 @@ using Yubico.YubiKey.Scp;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    ///     Abstract base class for sessions with a YubiKey. This class is used
-    ///     to wrap the <c>IYubiKeyConnection</c> and provide a way of
-    ///     interacting with the connection that is more convenient for most
-    ///     users.
+    /// Abstract base class for sessions with a YubiKey. This class is used
+    /// to wrap the <c>IYubiKeyConnection</c> and provide a way of
+    /// interacting with the connection that is more convenient for most
+    /// users.
     /// </summary>
     public abstract class ApplicationSession : IDisposable
     {
         /// <summary>
-        ///     The object that represents the connection to the YubiKey. Most
-        ///     applications will ignore this, but it can be used to call Commands
-        ///     directly.
+        /// The object that represents the connection to the YubiKey. Most
+        /// applications will ignore this, but it can be used to call Commands
+        /// directly.
         /// </summary>
         public IYubiKeyConnection Connection { get; protected set; }
 
@@ -40,10 +40,19 @@ namespace Yubico.YubiKey
         /// </summary>
         public ScpKeyParameters? KeyParameters { get; }
 
-        protected ILogger Logger { get; }
-        protected IYubiKeyDevice YubiKey { get; }
+        /// <summary>
+        /// The specific YubiKey application to connect to.
+        /// </summary>
         public YubiKeyApplication Application { get; }
-
+        
+        /// <summary>
+        /// The logger instance used for logging information.
+        /// </summary>
+        protected ILogger Logger { get; }
+        /// <summary>
+        /// The YubiKey device to establish a session with.
+        /// </summary>
+        protected IYubiKeyDevice YubiKey { get; }
 
         private bool _disposed;
 
@@ -127,8 +136,9 @@ namespace Yubico.YubiKey
             }
 
             Connection.Dispose();
-            _disposed = true;
             GC.SuppressFinalize(this);
+
+            _disposed = true;
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Scp
         /// <summary>
         /// Initializes the host-side state for an SCP session.
         /// </summary>
-        protected ScpState(SessionKeys sessionKeys, Memory<byte> macChain)
+        protected ScpState(SessionKeys sessionKeys, ReadOnlyMemory<byte> macChain)
         {
             MacChainingValue = macChain;
             SessionKeys = sessionKeys;
@@ -164,14 +164,14 @@ namespace Yubico.YubiKey.Scp
         protected static (CommandApdu macdApdu, ReadOnlyMemory<byte> newMacChainingValue) MacApdu(
             CommandApdu commandApdu,
             ReadOnlySpan<byte> macKey,
-            ReadOnlySpan<byte> macChainingValue) =>
-            ChannelMac.MacApdu(commandApdu, macKey, macChainingValue);
+            ReadOnlySpan<byte> macChainingValue) 
+            => ChannelMac.MacApdu(commandApdu, macKey, macChainingValue);
 
         private static void VerifyRmac(
             ReadOnlySpan<byte> responseData,
             ReadOnlySpan<byte> rmacKey,
-            ReadOnlySpan<byte> macChainingValue) =>
-            ChannelMac.VerifyRmac(responseData, rmacKey, macChainingValue);
+            ReadOnlySpan<byte> macChainingValue) 
+            => ChannelMac.VerifyRmac(responseData, rmacKey, macChainingValue);
 
         public void Dispose()
         {

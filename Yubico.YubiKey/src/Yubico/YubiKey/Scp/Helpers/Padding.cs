@@ -43,11 +43,6 @@ namespace Yubico.YubiKey.Scp.Helpers
         /// <exception cref="SecureChannelException">The padding is invalid.</exception>
         public static Memory<byte> RemovePadding(ReadOnlySpan<byte> paddedPayload)
         {
-            if (paddedPayload == null)
-            {
-                throw new ArgumentNullException(nameof(paddedPayload));
-            }
-
             for (int i = paddedPayload.Length - 1; i >= 0; i--)
             {
                 if (paddedPayload[i] == 0x80)

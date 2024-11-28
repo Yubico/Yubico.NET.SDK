@@ -39,10 +39,10 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         public ReadOnlyMemory<byte>? DataEncryptionKey => _dataEncryptionKey;
 
-        private readonly Memory<byte> _macKey = new byte[16];
-        private readonly Memory<byte> _encryptionKey = new byte[16];
-        private readonly Memory<byte> _rmacKey = new byte[16];
-        private readonly Memory<byte> _dataEncryptionKey = new byte[16];
+        private readonly Memory<byte> _macKey;
+        private readonly Memory<byte> _encryptionKey;
+        private readonly Memory<byte> _rmacKey;
+        private readonly Memory<byte> _dataEncryptionKey;
         private bool _disposed;
 
         /// <summary>
@@ -53,23 +53,23 @@ namespace Yubico.YubiKey.Scp
         /// <param name="rmacKey">The session RMAC key.</param>
         /// <param name="dataEncryptionKey">The session data encryption key. Optional.</param>
         public SessionKeys(
-            Memory<byte> macKey,
-            Memory<byte> encryptionKey,
-            Memory<byte> rmacKey,
-            Memory<byte> dataEncryptionKey)
+            ReadOnlyMemory<byte> macKey,
+            ReadOnlyMemory<byte> encryptionKey,
+            ReadOnlyMemory<byte> rmacKey,
+            ReadOnlyMemory<byte> dataEncryptionKey)
         {
             ValidateKeyLength(macKey, nameof(macKey));
             ValidateKeyLength(encryptionKey, nameof(encryptionKey));
             ValidateKeyLength(rmacKey, nameof(rmacKey));
             ValidateKeyLength(dataEncryptionKey, nameof(dataEncryptionKey));
             
-            macKey.CopyTo(_macKey);
-            encryptionKey.CopyTo(_encryptionKey);
-            rmacKey.CopyTo(_rmacKey);
-            dataEncryptionKey.CopyTo(_dataEncryptionKey);
+            _macKey = macKey.ToArray();
+            _encryptionKey = encryptionKey.ToArray(); 
+            _rmacKey = rmacKey.ToArray();
+            _dataEncryptionKey = dataEncryptionKey.ToArray();
         }
         
-        private static void ValidateKeyLength(Memory<byte> key, string paramName)
+        private static void ValidateKeyLength(ReadOnlyMemory<byte> key, string paramName)
         {
             if (key.Length != 16)
             {

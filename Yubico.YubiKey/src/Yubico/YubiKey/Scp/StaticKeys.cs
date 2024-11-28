@@ -144,18 +144,12 @@ namespace Yubico.YubiKey.Scp
                 DataEncryptionKey.Span.SequenceEqual(compareKeys.DataEncryptionKey.Span);
         }
 
-        /// <summary>
-        /// Releases any unmanaged resources and overwrites any sensitive data.
-        /// </summary>
         public void Dispose()
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Releases any unmanaged resources and overwrites any sensitive data.
-        /// </summary>
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)

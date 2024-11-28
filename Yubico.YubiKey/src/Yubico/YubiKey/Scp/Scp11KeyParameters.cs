@@ -125,8 +125,6 @@ namespace Yubico.YubiKey.Scp
             }
         }
 
-
-        // TODO Is this needed?
         public void Dispose()
         {
             if (_disposed)

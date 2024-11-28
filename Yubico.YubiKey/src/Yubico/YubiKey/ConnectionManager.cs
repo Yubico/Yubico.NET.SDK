@@ -77,6 +77,7 @@ namespace Yubico.YubiKey
                 (ISmartCardDevice _, YubiKeyApplication.Piv) => true,
                 (ISmartCardDevice _, YubiKeyApplication.OpenPgp) => true,
                 (ISmartCardDevice _, YubiKeyApplication.InterIndustry) => true,
+                (ISmartCardDevice _, YubiKeyApplication.SecurityDomain) => true,
                 (ISmartCardDevice _, YubiKeyApplication.YubiHsmAuth) => true,
                 // NB: Certain past models of YK NEO and YK 4 supported these applications over CCID
                 (ISmartCardDevice _, YubiKeyApplication.FidoU2f) => true,

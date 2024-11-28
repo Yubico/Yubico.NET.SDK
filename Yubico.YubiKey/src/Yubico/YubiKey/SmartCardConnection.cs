@@ -52,8 +52,7 @@ namespace Yubico.YubiKey
             if (yubiKeyApplication == YubiKeyApplication.Fido2)
             {
                 _apduPipeline = new FidoErrorTransform(_apduPipeline);
-            } // TODO Why does this constructor following logic differ from overloaded one below?
-              // It appears to be missing Otp Error Transform
+            }
 
             // CCID has the concept of multiple applications. Since we cannot guarantee the
             // state of the smart card when connecting, we should always send down a connection

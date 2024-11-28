@@ -347,7 +347,7 @@ namespace Yubico.YubiKey.Scp
             var pkParams = publicKeyParameters.Parameters;
             if (pkParams.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
             {
-                throw new ArgumentException("Private key must be of type NIST P-256");
+                throw new ArgumentException("Public key must be of type NIST P-256");
             }
 
             try

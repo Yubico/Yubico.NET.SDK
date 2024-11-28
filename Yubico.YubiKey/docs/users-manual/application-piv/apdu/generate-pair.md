@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Command APDU Info
 
-| CLA | INS | P1  |      P2       |     Lc     |                                                      Data                                                      |    Le    |
-| :-: | :-: | :-: | :-----------: | :--------: | :------------------------------------------------------------------------------------------------------------: | :------: |
-| 00  | 47  | 00  | _Slot number_ | _data len_ | [AC *\<remaining bytes\>* 80 01 *\<alg\>*] <br />\[AA 01 _\<pin policy\>_\] <br />\[AB 01 _\<touch policy\>_\] | (absent) |
+| CLA | INS | P1 |      P2       |     Lc     |                                                      Data                                                      |    Le    |
+|:---:|:---:|:--:|:-------------:|:----------:|:--------------------------------------------------------------------------------------------------------------:|:--------:|
+| 00  | 47  | 00 | *Slot number* | *data len* | [AC *\<remaining bytes\>* 80 01 *\<alg\>*] <br />\[AA 01 *\<pin policy\>*\] <br />\[AB 01 *\<touch policy\>*\] | (absent) |
 
 The slot number can be one of the following (hex values):
 
@@ -65,17 +65,17 @@ Total Length: 2\
 Data Length: 0
 
 |   Data    | SW1 | SW2 |
-| :-------: | :-: | :-: |
+|:---------:|:---:|:---:|
 | (no data) | 69  | 82  |
 
 ### Response APDU Info: Success
 
-Total Length: _variable + 2_\
-Data Length: _variable_
+Total Length: *variable + 2*\
+Data Length: *variable*
 
 |     Data     | SW1 | SW2 |
-| :----------: | :-: | :-: |
-| _public key_ | 90  | 00  |
+|:------------:|:---:|:---:|
+| *public key* | 90  | 00  |
 
 The public key is in the form of a set of TLVs. If the key is ECC, there is one TLV, where
 the value (the V) is the public point. If the key is RSA, there are two TLVs, where the

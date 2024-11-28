@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Yubico.Core.Cryptography;
 using Yubico.Core.Iso7816;
@@ -26,6 +25,13 @@ using Yubico.YubiKey.Scp.Commands;
 
 namespace Yubico.YubiKey.Scp
 {
+    /// <summary>
+    /// Manages the state for Secure Channel Protocol 11 (SCP11) communication with a YubiKey.
+    /// This class handles key agreement, authentication, and secure messaging between the host
+    /// and the YubiKey using AES-128 encryption and MAC operations. It supports different SCP11
+    /// variants (11a, 11b, 11c) for establishing secure channels with PIV and other smart card
+    /// applications.
+    /// </summary>
     internal class Scp11State : ScpState
     {
         private const int ReceiptTag = 0x86;

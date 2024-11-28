@@ -188,7 +188,7 @@ namespace Yubico.YubiKey.Piv
         ///     operations.
         /// </param>
         /// <param name="keyParameters">
-        ///     The SCP03 key parameters, if any, to use in establishing the SCP connection.
+        ///     The SCP key parameters, if any, to use in establishing the SCP connection.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     The <c>yubiKey</c> argument is null.
@@ -202,13 +202,6 @@ namespace Yubico.YubiKey.Piv
             ResetAuthenticationStatus();
             RefreshManagementKeyAlgorithm();
         }
-
-        // /// <summary>
-        // ///     The object that represents the connection to the YubiKey. Most
-        // ///     applications will ignore this, but it can be used to call Commands
-        // ///     directly.
-        // /// </summary>
-        // public IYubiKeyConnection Connection { get; }
 
         /// <summary>
         ///     The Delegate this class will call when it needs a PIN, PUK, or

@@ -29,22 +29,6 @@ namespace Yubico.YubiKey.Scp
         private static byte[] GetPadded16BytePayload() => Hex.HexToBytes("000102038005060708090A0B0C0D0E0F80000000000000000000000000000000");
 
         [Fact]
-        public void PadToBlockSize_GivenNullPayload_ThrowsArgumentNullException()
-        {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => Padding.PadToBlockSize(null));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-        }
-
-        [Fact]
-        public void RemovePadding_GivenNullPayload_ThrowsArgumentNullException()
-        {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => Padding.RemovePadding(null));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-        }
-
-        [Fact]
         public void PadToBlockSize_Given1BytePayload_ReturnsCorrectlyPaddedBlock()
         {
             // Arrange

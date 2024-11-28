@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.Scp
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_TestImportKey(StandardTestDevice desiredDeviceType)
+        public void Scp03_PutKey_with_StaticKey_Imports_Key(StandardTestDevice desiredDeviceType)
         {
             byte[] sk =
             {
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Scp
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_PutKey_WithPublicKey_Succeeds(StandardTestDevice desiredDeviceType)
+        public void Scp03_PutKey_with_PublicKey_Imports_Key(StandardTestDevice desiredDeviceType)
         {
             var keyReference = new KeyReference(ScpKeyIds.ScpCaPublicKey, 0x3);
             var testDevice = GetDevice(desiredDeviceType, Transport.All, FirmwareVersion.V5_7_2);
@@ -99,6 +99,7 @@ namespace Yubico.YubiKey.Scp
             var publicKey = new ECPublicKeyParameters(ecdsa);
             session.PutKey(keyReference, publicKey, 0);
 
+            // Verify the generated key was stored
             var keyInformation = session.GetKeyInformation();
             Assert.True(keyInformation.ContainsKey(keyReference));
         }

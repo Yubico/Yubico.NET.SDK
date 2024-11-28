@@ -25,6 +25,9 @@ This is a cross-platform, all encompassing SDK for the YubiKey aimed at large to
 customers. This version is written against .NET Core, and will eventually include bindings to languages
 outside the direct .NET ecosystem.
 
+## SDK Support
+The SDK is targetting net47, netstandard2.0 and netstandard2.1. This means the SDK can be loaded in NET Framework, NET6 and upwards.
+
 ## Documentation
 
 The public documentation for this project is located

@@ -20,7 +20,7 @@ limitations under the License. -->
 | :-: | :-: | :---------: | :-----------: | :--------: | :------------------------------: | :------: |
 | 00  | 87  | _algorithm_ | _slot number_ | _data len_ | _encoded digest of data to sign_ | (absent) |
 
-The _algorithm_ is either `06` (RSA-1024), `07` (RSA-2048), `05` (RSA 3072), `16` (RSA 4096), `11` (ECC-P256), or `14`
+The *algorithm* is either `06` (RSA-1024), `07` (RSA-2048), `05` (RSA 3072), `16` (RSA 4096), `11` (ECC-P256), or `14`
 (ECC-P384).
 
 The _slot number_ can be the number of any slot that holds a private key, other than `F9`.

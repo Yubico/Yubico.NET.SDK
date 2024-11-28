@@ -1,0 +1,145 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build project: Yubico.Yubikey",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/Yubico.YubiKey/src/Yubico.YubiKey.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "run tests: unit",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "${workspaceFolder}/Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "type": "dotnet",
+      "task": "build",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "dotnet: build"
+    },
+    {
+      "label": "run tests: integration (RequiresTouch)",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "${workspaceFolder}/Yubico.YubiKey/tests/integration/Yubico.YubiKey.IntegrationTests.csproj",
+        "--filter",
+        "Category=RequiresTouch",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    },
+    {
+      "label": "run tests: integration (Simple)",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "${workspaceFolder}/Yubico.YubiKey/tests/integration/Yubico.YubiKey.IntegrationTests.csproj",
+        "--filter",
+        "Category=Simple",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    },
+    {
+      "label": "run tests: integration (Elevated)",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "${workspaceFolder}/Yubico.YubiKey/tests/integration/Yubico.YubiKey.IntegrationTests.csproj",
+        "--filter",
+        "Category=Elevated",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    },
+    {
+      "label": "run tests: integration (RequiresBio)",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "${workspaceFolder}/Yubico.YubiKey/tests/integration/Yubico.YubiKey.IntegrationTests.csproj",
+        "--filter",
+        "Category=RequiresBio",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    },
+    {
+      "label": "run tests: integration (RequiresSetup)",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "${workspaceFolder}/Yubico.YubiKey/tests/integration/Yubico.YubiKey.IntegrationTests.csproj",
+        "--filter",
+        "Category=RequiresSetup",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    },
+    {
+      "label": "run tests: integration (RequiresStepDebug)",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "${workspaceFolder}/Yubico.YubiKey/tests/integration/Yubico.YubiKey.IntegrationTests.csproj",
+        "--filter",
+        "Category=RequiresStepDebug",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    },
+    {
+      "label": "run tests: integration (RequiresFips)",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "${workspaceFolder}/Yubico.YubiKey/tests/integration/Yubico.YubiKey.IntegrationTests.csproj",
+        "--filter",
+        "Category=RequiresFips",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    }
+  ]
+}

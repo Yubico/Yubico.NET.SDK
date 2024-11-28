@@ -14,6 +14,7 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -21,17 +22,9 @@ namespace Yubico.YubiKey.Piv
     public class PivMetadataTests
     {
         [Fact]
-        public void SessionMetadata_BadSlot_CorrectException()
+        public void GetMetadataCommand_BadSlot_CorrectException()
         {
-            var yubiKey = new HollowYubiKeyDevice();
-            yubiKey.FirmwareVersion.Major = 5;
-            yubiKey.FirmwareVersion.Minor = 3;
-            yubiKey.AvailableUsbCapabilities = YubiKeyCapabilities.Piv;
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.GetMetadata(0xff));
-            }
+            Assert.Throws<ArgumentException>(() => new GetMetadataCommand(0xff));
         }
 
         [Fact]

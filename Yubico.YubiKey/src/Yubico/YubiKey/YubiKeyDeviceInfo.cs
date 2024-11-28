@@ -299,6 +299,7 @@ namespace Yubico.YubiKey
                 ResetBlocked = ResetBlocked | second.ResetBlocked,
                 SerialNumber = SerialNumber ?? second.SerialNumber,
                 IsFipsSeries = IsFipsSeries || second.IsFipsSeries,
+                IsSkySeries = IsSkySeries || second.IsSkySeries,
 
                 FormFactor = FormFactor != FormFactor.Unknown
                     ? FormFactor

@@ -200,7 +200,7 @@ namespace Yubico.YubiKey.Piv
             : base(Log.GetLogger<PivSession>(), yubiKey, YubiKeyApplication.Piv, keyParameters)
         {
             ResetAuthenticationStatus();
-            UpdateManagementKey(yubiKey);
+            RefreshManagementKeyAlgorithm();
         }
 
         // /// <summary>
@@ -254,6 +254,7 @@ namespace Yubico.YubiKey.Piv
 
             KeyCollector = null;
             ResetAuthenticationStatus();
+
             base.Dispose();
             _disposed = true;
         }
@@ -424,7 +425,7 @@ namespace Yubico.YubiKey.Piv
             // As resetting the PIV application resets the management key,
             // the management key must be updated to account for the case when the previous management key type
             // was not the default key type.
-            UpdateManagementKey(YubiKey);
+            RefreshManagementKeyAlgorithm();
         }
 
         /// <summary>
@@ -572,6 +573,15 @@ namespace Yubico.YubiKey.Piv
 
             return true;
         }
+        
+        // Reset any fields and properties related to authentication or
+        // verification to the initial state: not authenticated, verified, etc.
+        private void ResetAuthenticationStatus()
+        {
+            ManagementKeyAuthenticated = false;
+            ManagementKeyAuthenticationResult = AuthenticateManagementKeyResult.Unauthenticated;
+            PinVerified = false;
+        }
 
         private void TryBlock(byte slot)
         {
@@ -584,32 +594,6 @@ namespace Yubico.YubiKey.Piv
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.ApplicationResetFailure));
-        }
-
-        private void UpdateManagementKey(IYubiKeyDevice yubiKey) =>
-            ManagementKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey)
-                ? GetManagementKeyAlgorithm()
-                : PivAlgorithm.TripleDes; // Default for keys with firmware version < 5.7
-
-        private PivAlgorithm GetManagementKeyAlgorithm()
-        {
-            var response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-
-            var metadata = response.GetData();
-            return metadata.Algorithm;
-        }
-
-        // Reset any fields and properties related to authentication or
-        // verification to the initial state: not authenticated, verified, etc.
-        private void ResetAuthenticationStatus()
-        {
-            ManagementKeyAuthenticated = false;
-            ManagementKeyAuthenticationResult = AuthenticateManagementKeyResult.Unauthenticated;
-            PinVerified = false;
         }
     }
 }

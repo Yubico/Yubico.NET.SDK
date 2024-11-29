@@ -21,6 +21,7 @@ using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
 using GetDataCommand = Yubico.YubiKey.Scp.Commands.GetDataCommand;
 
@@ -35,12 +36,25 @@ namespace Yubico.YubiKey.Scp
         {
             ResetAllowedDevices();
         }
-        
+
         private IYubiKeyDevice GetDevice(
             StandardTestDevice desiredDeviceType,
-            Transport transport = Transport.All, 
-            FirmwareVersion? minimumFirmwareVersion = null) 
-            => IntegrationTestDeviceEnumeration.GetTestDevice(desiredDeviceType, transport, minimumFirmwareVersion);
+            Transport transport = Transport.All,
+            FirmwareVersion? minimumFirmwareVersion = null)
+        {
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(desiredDeviceType, transport, minimumFirmwareVersion);
+            
+            // Since we are in testing, we assume that the keys the default keys are present on the device and haven't been changed
+            // Therefore we will throw an exception if the device is FIPS and the transport is NFC
+            // This can be changed in the future if needed
+            Assert.False(
+                desiredDeviceType == StandardTestDevice.Fw5Fips &&
+                transport == Transport.NfcSmartCard &&
+                testDevice.IsFipsSeries,
+                "SCP03 with the default static keys is not allowed over NFC on FIPS capable devices");
+
+            return testDevice;
+        }
 
         private static void ResetAllowedDevices()
         {
@@ -53,9 +67,10 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_PutKey_with_StaticKey_Imports_Key(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_PutKey_with_StaticKey_Imports_Key(StandardTestDevice desiredDeviceType, Transport transport)
         {
             byte[] sk =
             {
@@ -63,7 +78,7 @@ namespace Yubico.YubiKey.Scp
                 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
             };
 
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
             var newKeyParams = Scp03KeyParameters.FromStaticKeys(new StaticKeys(sk, sk, sk));
 
             // Authenticate with default key, then replace default key
@@ -86,12 +101,49 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_PutKey_with_PublicKey_Imports_Key(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        [Obsolete("Use Scp03_PutKey_with_StaticKey_Imports_Key instead")]
+        public void Obsolete_Scp03_PutKey_with_StaticKey_Imports_Key(StandardTestDevice desiredDeviceType, Transport transport)
+        {
+            byte[] sk =
+            {
+                0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
+                0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
+            };
+
+            var testDevice = GetDevice(desiredDeviceType, transport);
+            var defaultStaticKeys = new Scp03.StaticKeys();
+            var newStaticKeys = new Scp03.StaticKeys(sk, sk, sk);
+
+            // Authenticate with default key, then replace default key
+            using (var session = new Scp03Session(testDevice, defaultStaticKeys))
+            {
+                session.PutKeySet(newStaticKeys);
+            }
+
+            using (_ = new Scp03Session(testDevice, newStaticKeys))
+            {
+            }
+
+            // Default key should not work now and throw an exception
+            Assert.Throws<ArgumentException>(() =>
+            {
+                using (_ = new Scp03Session(testDevice, defaultStaticKeys))
+                {
+                }
+            });
+        }
+
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_PutKey_with_PublicKey_Imports_Key(StandardTestDevice desiredDeviceType, Transport transport)
         {
             var keyReference = new KeyReference(ScpKeyIds.ScpCaPublicKey, 0x3);
-            var testDevice = GetDevice(desiredDeviceType, Transport.All, FirmwareVersion.V5_7_2);
+            var testDevice = GetDevice(desiredDeviceType, transport, FirmwareVersion.V5_7_2);
 
             using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -105,11 +157,12 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_AuthenticateWithWrongKey_Should_ThrowException(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_AuthenticateWithWrongKey_Should_ThrowException(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
             var incorrectKeys = RandomStaticKeys();
             var keyRef = Scp03KeyParameters.FromStaticKeys(incorrectKeys);
 
@@ -126,11 +179,12 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_GetInformation_WithDefaultKey_Returns_DefaultKey(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_GetInformation_WithDefaultKey_Returns_DefaultKey(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
             using var session = new SecurityDomainSession(testDevice);
 
             var result = session.GetKeyInformation();
@@ -146,18 +200,19 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_Connect_GetKeyInformation_WithDefaultKey_Returns_DefaultKey(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_Connect_GetKeyInformation_WithDefaultKey_Returns_DefaultKey(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
             using var connection = testDevice.Connect(YubiKeyApplication.SecurityDomain);
+
             const byte TAG_KEY_INFORMATION = 0xE0;
             var response = connection.SendCommand(new GetDataCommand(TAG_KEY_INFORMATION));
             var result = response.GetData();
 
             var keyInformation = new Dictionary<KeyReference, Dictionary<byte, byte>>();
-
             foreach (var tlvObject in TlvObjects.DecodeList(result.Span))
             {
                 var value = TlvObjects.UnpackValue(0xC0, tlvObject.GetBytes().Span);
@@ -187,11 +242,12 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_GetCertificates_ReturnsCerts(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_GetCertificates_ReturnsCerts(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType, Transport.All, FirmwareVersion.V5_7_2);
+            var testDevice = GetDevice(desiredDeviceType, transport, FirmwareVersion.V5_7_2);
 
             using var session = new SecurityDomainSession(testDevice);
 
@@ -202,11 +258,12 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_Reset_Restores_SecurityDomainKeys_To_FactoryKeys(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_Reset_Restores_SecurityDomainKeys_To_FactoryKeys(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
             byte[] sk =
             {
                 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
@@ -217,9 +274,6 @@ namespace Yubico.YubiKey.Scp
                 ScpKeyIds.Scp03,
                 0x01,
                 new StaticKeys(sk, sk, sk));
-
-            //  assumeFalse("SCP03 not supported over NFC on FIPS capable devices", TODO
-            //     state.getDeviceInfo().getFipsCapable() != 0 && !state.isUsbTransport());
 
             using (var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey))
             {
@@ -253,11 +307,12 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_GetSupportedCaIdentifiers_Succeeds(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_GetSupportedCaIdentifiers_Succeeds(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType, Transport.All, FirmwareVersion.V5_7_2);
+            var testDevice = GetDevice(desiredDeviceType, transport, FirmwareVersion.V5_7_2);
             using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
 
             var result = session.GetSupportedCaIdentifiers(true, true);
@@ -265,38 +320,44 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_GetCardRecognitionData_Succeeds(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_GetCardRecognitionData_Succeeds(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
+
             using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
             var result = session.GetCardRecognitionData();
+
             Assert.True(result.Length > 0);
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_GetData_Succeeds(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_GetData_Succeeds(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
+
             using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
             var result = session.GetData(0x66); // Card Data
+
             Assert.True(result.Length > 0);
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_PivSession_TryVerifyPinAndGetMetaData_Succeeds(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_PivSession_TryVerifyPinAndGetMetaData_Succeeds(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
             Assert.True(testDevice.FirmwareVersion >= FirmwareVersion.V5_3_0);
             Assert.True(testDevice.HasFeature(YubiKeyFeature.Scp03));
 
             using var pivSession = new PivSession(testDevice, Scp03KeyParameters.DefaultKey);
-
             var result = pivSession.TryVerifyPin(_defaultPin, out _);
 
             Assert.True(result);
@@ -306,11 +367,12 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_Device_Connect_With_Application_Succeeds(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_Device_Connect_With_Application_Succeeds(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
             Assert.True(testDevice.FirmwareVersion >= FirmwareVersion.V5_3_0);
 
             using var connection = testDevice.Connect(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey);
@@ -322,11 +384,12 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_Device_Connect_ApplicationId_Succeeds(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_Device_Connect_ApplicationId_Succeeds(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
             Assert.True(testDevice.FirmwareVersion >= FirmwareVersion.V5_3_0);
 
             using IYubiKeyConnection connection = testDevice.Connect(
@@ -340,11 +403,12 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_Device_TryConnect_With_Application_Succeeds(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_Device_TryConnect_With_Application_Succeeds(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
             Assert.True(testDevice.FirmwareVersion >= FirmwareVersion.V5_3_0);
 
             var isValid = testDevice.TryConnect(
@@ -363,11 +427,12 @@ namespace Yubico.YubiKey.Scp
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp03_Device_TryConnect_With_ApplicationId_Succeeds(StandardTestDevice desiredDeviceType)
+        [InlineData(StandardTestDevice.Fw5, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.UsbSmartCard)]
+        [InlineData(StandardTestDevice.Fw5Fips, Transport.NfcSmartCard)]
+        public void Scp03_Device_TryConnect_With_ApplicationId_Succeeds(StandardTestDevice desiredDeviceType, Transport transport)
         {
-            var testDevice = GetDevice(desiredDeviceType);
+            var testDevice = GetDevice(desiredDeviceType, transport);
             Assert.True(testDevice.FirmwareVersion >= FirmwareVersion.V5_3_0);
 
             var isValid = testDevice.TryConnect(YubiKeyApplication.Piv, Scp03KeyParameters.DefaultKey,

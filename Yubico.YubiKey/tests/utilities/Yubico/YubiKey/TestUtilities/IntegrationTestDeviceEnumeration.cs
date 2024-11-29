@@ -125,7 +125,7 @@ namespace Yubico.YubiKey.TestUtilities
             Transport transport = Transport.All,
             FirmwareVersion? minimumFirmwareVersion = null)
             => GetTestDevices(transport)
-                .SelectByStandardTestDevice(testDeviceType, minimumFirmwareVersion);
+                .SelectByStandardTestDevice(testDeviceType, minimumFirmwareVersion, transport);
 
         /// <summary>
         /// Get YubiKey test device of specified transport and for which the

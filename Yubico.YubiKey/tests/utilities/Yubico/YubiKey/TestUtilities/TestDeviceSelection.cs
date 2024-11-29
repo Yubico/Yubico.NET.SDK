@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using TestDev = Yubico.YubiKey.TestUtilities.IntegrationTestDeviceEnumeration;
 
@@ -63,17 +64,20 @@ namespace Yubico.YubiKey.TestUtilities
         /// <param name="testDeviceType">The type of the device.</param>
         /// <param name="minimumFirmwareVersion">The earliest version number the
         /// caller is willing to accept. Defaults to the minimum version for the given device.</param>
-        /// <param name="yubiKeys"></param>
+        /// <param name="yubiKeys">The list of yubikeys to select from</param>
+        /// <param name="transport">The desired transport</param>
         /// <returns>The allow-list filtered YubiKey that was found.</returns>
         public static IYubiKeyDevice SelectByStandardTestDevice(
             this IEnumerable<IYubiKeyDevice> yubiKeys,
             StandardTestDevice testDeviceType,
-            FirmwareVersion? minimumFirmwareVersion = null)
+            FirmwareVersion? minimumFirmwareVersion = null,
+            Transport transport = Transport.All
+            )
         {
             var devices = yubiKeys as IYubiKeyDevice[] ?? yubiKeys.ToArray();
             if (!devices.Any())
             {
-                throw new InvalidOperationException("Could not find any connected Yubikeys");
+                ThrowDeviceNotFoundException("Could not find any connected Yubikeys (Transport: {transport})", devices);
             }
 
             var devicesVersionFiltered =
@@ -107,7 +111,7 @@ namespace Yubico.YubiKey.TestUtilities
                 }
                 catch (InvalidOperationException)
                 {
-                    ThrowDeviceNotFoundException($"Target test device not found ({testDeviceType})", devices);
+                    ThrowDeviceNotFoundException($"Target test device not found ({testDeviceType}, Transport: {transport})", devices);
                 }
 
                 return device;
@@ -123,18 +127,12 @@ namespace Yubico.YubiKey.TestUtilities
                 return minimumFirmwareVersion;
             }
 
-            switch (testDeviceType)
+            return testDeviceType switch
             {
-                case StandardTestDevice.Fw3:
-                    return FirmwareVersion.V3_1_0;
-                case StandardTestDevice.Fw4Fips:
-                    return FirmwareVersion.V4_0_0;
-                case StandardTestDevice.Fw5:
-                case StandardTestDevice.Fw5Fips:
-                case StandardTestDevice.Fw5Bio:
-                default:
-                    return FirmwareVersion.V5_0_0;
-            }
+                StandardTestDevice.Fw3 => FirmwareVersion.V3_1_0,
+                StandardTestDevice.Fw4Fips => FirmwareVersion.V4_0_0,
+                _ => FirmwareVersion.V5_0_0,
+            };
         }
 
         public static IYubiKeyDevice SelectByMinimumVersion(
@@ -153,9 +151,10 @@ namespace Yubico.YubiKey.TestUtilities
                 ThrowDeviceNotFoundException("No matching YubiKey found", devices);
             }
 
-            return device!;
+            return device;
         }
 
+        [DoesNotReturn]
         private static void ThrowDeviceNotFoundException(
             string errorMessage,
             IYubiKeyDevice[] devices)

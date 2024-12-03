@@ -568,10 +568,6 @@ namespace Yubico.YubiKey.Scp
         private static Scp03KeyParameters ImportScp03Key(
             SecurityDomainSession session)
         {
-            // assumeFalse("SCP03 management not supported over NFC on FIPS capable devices",
-            //     state.getDeviceInfo().getFipsCapable() != 0 && !state.isUsbTransport()); // todo
-
-
             var scp03Ref = new KeyReference(0x01, 0x01);
             var staticKeys = new StaticKeys(
                 GetRandomBytes(16),

@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Scp
         public ReadOnlyMemory<byte> RmacKey => _rmacKey;
 
         /// <summary>
-        /// Gets the session data encryption key.
+        /// Gets the session data encryption key (DEK).
         /// </summary>
         public ReadOnlyMemory<byte>? DataEncryptionKey => _dataEncryptionKey;
 

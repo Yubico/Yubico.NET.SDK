@@ -92,12 +92,15 @@ namespace Yubico.YubiKey.Pipelines
         {
             if (ShouldNotEncode(commandType))
             {
+                // Invoke the pipeline without encoding the command
                 return _pipeline.Invoke(command, commandType, responseType);
             }
-
+            
+            // Encode command
             var encodedCommand = ScpState.EncodeCommand(command);
             var response = _pipeline.Invoke(encodedCommand, commandType, responseType);
 
+            // Decode response
             return ScpState.DecodeResponse(response);
         }
 
@@ -111,10 +114,14 @@ namespace Yubico.YubiKey.Pipelines
         {
             // Generate host challenge
             using var rng = CryptographyProviders.RngCreator();
+            
             byte[] hostChallenge = new byte[8];
             rng.GetBytes(hostChallenge);
-
+            
+            // Create the state object that manages keys, mac chaining, etc.
             _scpState = Scp03State.CreateScpState(_pipeline, keyParams, hostChallenge);
+            
+            // Set the data encryptor for later use
             _dataEncryptor = _scpState.GetDataEncryptor();
         }
 

@@ -77,6 +77,7 @@ namespace Yubico.YubiKey.Scp.Helpers
             {
                 throw new SecureChannelException(ExceptionMessages.IncorrectDerivationLength);
             }
+
             // Validate challenge lengths
             if (hostChallenge.Length != 8 || cardChallenge.Length != 8)
             {
@@ -91,7 +92,7 @@ namespace Yubico.YubiKey.Scp.Helpers
 
             // Set output length and counter
             macInputBuffer[14] = outputLenBits;
-            macInputBuffer[15] = 1;  // Counter is always 1 for our use case
+            macInputBuffer[15] = 1; // Counter is always 1 for our use case
 
             // Copy host and cardchallenges to the end of the input buffer
             hostChallenge.CopyTo(macInputBuffer.Slice(16, 8));
@@ -99,25 +100,15 @@ namespace Yubico.YubiKey.Scp.Helpers
 
             // Calculate CMAC using AES-128
             Span<byte> cmac = stackalloc byte[16];
+
             using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
             cmacObj.CmacInit(kdfKey);
             cmacObj.CmacUpdate(macInputBuffer);
             cmacObj.CmacFinal(cmac);
 
-            // If output length is 128 bits, return the full CMAC
-            if (outputLenBits == 128)
-            {
-                return cmac.ToArray();
-            }
-
-            // For 64-bit output (cryptograms), use only the first 8 bytes
-            Span<byte> smallerResult = stackalloc byte[8];
-            cmac[..8].CopyTo(smallerResult);
-
-            // Securely clear the full CMAC from memory
-            CryptographicOperations.ZeroMemory(cmac);
-
-            return smallerResult.ToArray();
+            return outputLenBits == 128
+                ? cmac.ToArray() // If output length is 128 bits, return the full CMAC
+                : cmac[..8].ToArray(); // For 64-bit output (cryptograms), use only the first 8 bytes
         }
 
         /// <summary>
@@ -133,8 +124,8 @@ namespace Yubico.YubiKey.Scp.Helpers
             byte dataDerivationConstant,
             ReadOnlySpan<byte> key,
             ReadOnlySpan<byte> hostChallenge,
-            ReadOnlySpan<byte> cardChallenge) 
-            => Derive(dataDerivationConstant, 64, key, hostChallenge, cardChallenge);
+            ReadOnlySpan<byte> cardChallenge) =>
+            Derive(dataDerivationConstant, 64, key, hostChallenge, cardChallenge);
 
         /// <summary>
         /// Derives session keys from the static keys using host and card challenges.

@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -27,12 +26,8 @@ namespace Yubico.YubiKey.Scp
     /// For SCP11b only keyRef and pkSdEcka are required. Note that this does not authenticate the off-card entity.
     /// For SCP11a and SCP11c the off-card entity CA key reference must be provided, as well as the off-card entity secret key and certificate chain.
     /// </summary>
-    [SuppressMessage("Style", "IDE0032:Use auto property")]
     public sealed class Scp11KeyParameters : ScpKeyParameters, IDisposable
     {
-        private KeyReference? _oceKeyReference;
-        private ECPublicKeyParameters _pkSdEcka;
-        private ECPrivateKeyParameters? _skOceEcka;
         private X509Certificate2[]? _oceCertificates;
         private bool _disposed;
 
@@ -40,19 +35,19 @@ namespace Yubico.YubiKey.Scp
         /// The public key of the Security Domain Elliptic Curve Key Agreement (ECKA) key (SCP11a/b/c). Required.
         /// <remarks>'pkSdEcka' is short for PublicKey SecurityDomain Elliptic Curve KeyAgreement (Key)</remarks>
         /// </summary>
-        public ECPublicKeyParameters PkSdEcka => _pkSdEcka;
+        public ECPublicKeyParameters PkSdEcka { get; private set; }
 
         /// <summary>
         /// The key reference of the off-card entity (SCP11a/c). Optional.
         /// <remarks>'oceKeyReference' is short for Off-Card Entity Key Reference</remarks>
         /// </summary>
-        public KeyReference? OceKeyReference => _oceKeyReference;
+        public KeyReference? OceKeyReference { get; private set; }
 
         /// <summary>
         /// The private key of the off-card entity Elliptic Curve Key Agreement (ECKA) key (SCP11a/c). Optional.
         /// <remarks>'skOceEcka' is short for Secret Key Off-Card Entity Elliptic Curve KeyAgreement (Key)</remarks>
         /// </summary>
-        public ECPrivateKeyParameters? SkOceEcka => _skOceEcka;
+        public ECPrivateKeyParameters? SkOceEcka { get; private set; }
 
         /// <summary>
         /// The certificate chain, containing the public key for the off-card entity (SCP11a/c).
@@ -76,20 +71,27 @@ namespace Yubico.YubiKey.Scp
             IEnumerable<X509Certificate2>? certificates = null)
             : base(keyReference)
         {
-            _pkSdEcka = pkSdEcka;
-            _oceKeyReference = oceKeyReference;
-            _skOceEcka = skOceEcka;
+            PkSdEcka = pkSdEcka;
+            OceKeyReference = oceKeyReference;
+            SkOceEcka = skOceEcka;
             _oceCertificates = certificates?.ToArray();
 
             ValidateParameters();
         }
 
+        /// <summary>
+        /// Creates a new <see cref="Scp11KeyParameters"/> instance for SCP11b.
+        /// </summary>
+        /// <param name="keyReference">The key reference.</param>
+        /// <param name="pkSdEcka">The security domain elliptic curve key agreement key public key.</param>
         public Scp11KeyParameters(
             KeyReference keyReference,
             ECPublicKeyParameters pkSdEcka)
-            : this(keyReference, pkSdEcka, null, null, null)
+            : base(keyReference)
         {
+            PkSdEcka = pkSdEcka;
 
+            ValidateParameters();
         }
 
 
@@ -104,7 +106,7 @@ namespace Yubico.YubiKey.Scp
                         OceCertificates?.Count > 0
                         )
                     {
-                        throw new ArgumentException("Cannot provide oceKeyRef, skOceEcka or certificates for SCP11b");
+                        throw new ArgumentException($"Cannot provide {nameof(OceKeyReference)}, {nameof(SkOceEcka)} or {nameof(OceCertificates)} for SCP11b");
                     }
 
                     break;
@@ -116,7 +118,7 @@ namespace Yubico.YubiKey.Scp
                         OceCertificates?.Count == 0
                         )
                     {
-                        throw new ArgumentException("Must provide oceKeyRef, skOceEcka or certificates for SCP11a/c");
+                        throw new ArgumentException($"Must provide {nameof(OceKeyReference)}, {nameof(SkOceEcka)} or {nameof(OceCertificates)} for SCP11a/c");
                     }
 
                     break;
@@ -125,6 +127,9 @@ namespace Yubico.YubiKey.Scp
             }
         }
 
+        /// <summary>
+        /// This will clear all references and empty  
+        /// </summary>
         public void Dispose()
         {
             if (_disposed)
@@ -132,12 +137,11 @@ namespace Yubico.YubiKey.Scp
                 return;
             }
 
-            CryptographicOperations.ZeroMemory(_skOceEcka?.Parameters.D);
-            _pkSdEcka = null!;
-            _oceKeyReference = null;
-            _skOceEcka = null;
-            _oceCertificates = Array.Empty<X509Certificate2>();
-
+            CryptographicOperations.ZeroMemory(SkOceEcka?.Parameters.D);
+            PkSdEcka = null!;
+            OceKeyReference = null;
+            SkOceEcka = null;
+            _oceCertificates = null;
             _disposed = true;
         }
     }

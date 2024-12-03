@@ -30,8 +30,8 @@ namespace Yubico.YubiKey.Scp
     /// </summary>
     internal class Scp03State : ScpState
     {
-        private readonly ReadOnlyMemory<byte> _hostCryptogram;
-
+        private readonly Memory<byte> _hostCryptogram;
+        private bool _disposed;
         /// <summary>
         /// Creates a new SCP03 secure channel state using the provided session keys and host cryptogram.
         /// </summary>
@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Scp
             ReadOnlyMemory<byte> hostCryptogram)
             : base(sessionKeys, new byte[16])
         {
-            _hostCryptogram = hostCryptogram;
+            _hostCryptogram = hostCryptogram.ToArray();
         }
 
         /// <summary>
@@ -64,10 +64,20 @@ namespace Yubico.YubiKey.Scp
                 throw new ArgumentException("Invalid size, must be 8 bytes", nameof(hostChallenge));
             }
 
+            if (keyParameters is null)
+            {
+                throw new ArgumentNullException(nameof(keyParameters));
+            }
+            
+            if (pipeline is null)
+            {
+                throw new ArgumentNullException(nameof(pipeline));
+            }
+
             var (cardChallenge, cardCryptogram) = PerformInitializeUpdate(pipeline, keyParameters, hostChallenge);
+            
             var state = CreateScpState(keyParameters, hostChallenge, cardChallenge, cardCryptogram);
             state.PerformExternalAuthenticate(pipeline);
-
             return state;
         }
 
@@ -147,7 +157,7 @@ namespace Yubico.YubiKey.Scp
 
         private (ExternalAuthenticateCommand, ReadOnlyMemory<byte> macChainingValue) GetMacedExternalAuthenticateCommand(ExternalAuthenticateCommand externalAuthenticateCommand)
         {
-            (var commandDataMaced, var newMacChainingValue) = GetMacdCommandData(externalAuthenticateCommand.CreateCommandApdu());
+            var (commandDataMaced, newMacChainingValue) = GetMacdCommandData(externalAuthenticateCommand.CreateCommandApdu());
             return (new ExternalAuthenticateCommand(commandDataMaced), newMacChainingValue);
         }
 
@@ -160,6 +170,18 @@ namespace Yubico.YubiKey.Scp
                 );
 
             return (macedApdu.Data, newMacChainingValue);
+        }
+
+        public override void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+                
+            CryptographicOperations.ZeroMemory(_hostCryptogram.Span);
+            base.Dispose();
+            _disposed = true;
         }
     }
 }

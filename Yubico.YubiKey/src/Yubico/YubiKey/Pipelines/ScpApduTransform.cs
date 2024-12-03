@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Pipelines
         /// <remarks>
         /// Encodes the command using the SCP state, sends it to the underlying pipeline, and then decodes the response.
         /// <para>
-        /// Note: Some commands should not be encoded. For those, the pipeline is invoked directly.
+        /// Note: Some commands should not be encoded. For those, the pipeline is invoked directly without encoding.
         /// </para>
         /// </remarks>
         public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
@@ -104,12 +104,6 @@ namespace Yubico.YubiKey.Pipelines
             return ScpState.DecodeResponse(response);
         }
 
-        private void InitializeScp11(Scp11KeyParameters keyParameters)
-        {
-            _scpState = Scp11State.CreateScpState(_pipeline, keyParameters);
-            _dataEncryptor = _scpState.GetDataEncryptor();
-        }
-
         private void InitializeScp03(Scp03KeyParameters keyParams)
         {
             // Generate host challenge
@@ -120,6 +114,15 @@ namespace Yubico.YubiKey.Pipelines
             
             // Create the state object that manages keys, mac chaining, etc.
             _scpState = Scp03State.CreateScpState(_pipeline, keyParams, hostChallenge);
+            
+            // Set the data encryptor for later use
+            _dataEncryptor = _scpState.GetDataEncryptor();
+        }
+
+        private void InitializeScp11(Scp11KeyParameters keyParameters)
+        {
+            // Create the state object that manages keys, mac chaining, etc.
+            _scpState = Scp11State.CreateScpState(_pipeline, keyParameters);
             
             // Set the data encryptor for later use
             _dataEncryptor = _scpState.GetDataEncryptor();

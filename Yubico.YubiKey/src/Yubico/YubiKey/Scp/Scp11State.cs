@@ -73,10 +73,10 @@ namespace Yubico.YubiKey.Scp
                 .GenerateKeyPair(sdEckaPkParams.Curve);
 
             // Create an encoded point of the ephemeral public key to send to the Yubikey
-            byte[] ephemeralPublicKeyEncodedPointOceEcka = new byte[65];
-            ephemeralPublicKeyEncodedPointOceEcka[0] = 0x04; // Coding Identifier Byte
-            ekpOceEcka.Q.X.CopyTo(ephemeralPublicKeyEncodedPointOceEcka, 1);
-            ekpOceEcka.Q.Y.CopyTo(ephemeralPublicKeyEncodedPointOceEcka, 33);
+            byte[] epkOceEckaEncodedPoint = new byte[65];
+            epkOceEckaEncodedPoint[0] = 0x04; // Format identifier byte
+            ekpOceEcka.Q.X.CopyTo(epkOceEckaEncodedPoint, 1);
+            ekpOceEcka.Q.Y.CopyTo(epkOceEckaEncodedPoint, 33);
 
             // GPC v2.3 Amendment F (SCP11) v1.4 §7.6.2.3
             byte[] keyUsage = { 0x3C }; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey.Scp
                         new TlvObject(0x80, keyType),
                         new TlvObject(0x81, keyLen)
                         )),
-                new TlvObject(EckaTag, ephemeralPublicKeyEncodedPointOceEcka)
+                new TlvObject(EckaTag, epkOceEckaEncodedPoint)
                 );
 
             // Construct the host authentication command
@@ -131,7 +131,7 @@ namespace Yubico.YubiKey.Scp
 
             // Perform key agreement
             var (encryptionKey, macKey, rMacKey, dekKey)
-                = GetX963KDFKeyAgreementKeys(
+                = GetX963KdfKeyAgreementKeys(
                     skOceEcka.Curve,
                     sdEckaPkParams,
                     ekpOceEcka,
@@ -171,7 +171,7 @@ namespace Yubico.YubiKey.Scp
         /// <exception cref="ArgumentException">Thrown when the curves of the provided keys do not match.</exception>
         /// <exception cref="SecureChannelException">Thrown when key agreement receipt verification fails.</exception>
         private static (Memory<byte> encryptionKey, Memory<byte> macKey, Memory<byte> rMacKey, Memory<byte> dekKey)
-            GetX963KDFKeyAgreementKeys(
+            GetX963KdfKeyAgreementKeys(
             ECCurve curve, // The curve being used for the key agreement
             ECParameters pkSdEcka, // Yubikey Public Key
             ECParameters eskOceEcka, // Host Ephemeral Private Key

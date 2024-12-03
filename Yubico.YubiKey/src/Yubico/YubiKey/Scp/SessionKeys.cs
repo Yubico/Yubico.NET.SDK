@@ -39,10 +39,11 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         public ReadOnlyMemory<byte>? DataEncryptionKey => _dataEncryptionKey;
 
-        private readonly Memory<byte> _macKey;
-        private readonly Memory<byte> _encryptionKey;
-        private readonly Memory<byte> _rmacKey;
-        private readonly Memory<byte> _dataEncryptionKey;
+        private const byte KeySizeBytes = 16;
+        private readonly Memory<byte> _macKey = new byte[KeySizeBytes];
+        private readonly Memory<byte> _encryptionKey = new byte[KeySizeBytes];
+        private readonly Memory<byte> _rmacKey = new byte[KeySizeBytes];
+        private readonly Memory<byte> _dataEncryptionKey = new byte[KeySizeBytes];
         private bool _disposed;
 
         /// <summary>
@@ -63,15 +64,15 @@ namespace Yubico.YubiKey.Scp
             ValidateKeyLength(rmacKey, nameof(rmacKey));
             ValidateKeyLength(dataEncryptionKey, nameof(dataEncryptionKey));
             
-            _macKey = macKey.ToArray();
-            _encryptionKey = encryptionKey.ToArray(); 
-            _rmacKey = rmacKey.ToArray();
-            _dataEncryptionKey = dataEncryptionKey.ToArray();
+            macKey.CopyTo(_macKey);
+            encryptionKey.CopyTo(_encryptionKey);
+            rmacKey.CopyTo(_rmacKey);
+            dataEncryptionKey.CopyTo(_dataEncryptionKey);
         }
         
         private static void ValidateKeyLength(ReadOnlyMemory<byte> key, string paramName)
         {
-            if (key.Length != 16)
+            if (key.Length != KeySizeBytes)
             {
                 throw new ArgumentException("Incorrect session key length. Must be 16.", paramName);
             }

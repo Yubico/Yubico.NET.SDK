@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.YubiKey.Scp
 {
     /// <summary>
@@ -24,7 +22,7 @@ namespace Yubico.YubiKey.Scp
         /// <summary>
         /// The key reference associated with the key parameters.
         /// </summary>
-        public KeyReference KeyReference { get; protected set; }
+        public KeyReference KeyReference { get; }
 
         /// <summary>
         /// Creates a new instance of <see cref="ScpKeyParameters"/>.

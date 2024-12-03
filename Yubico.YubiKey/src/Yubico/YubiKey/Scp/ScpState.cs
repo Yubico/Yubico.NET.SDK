@@ -122,11 +122,11 @@ namespace Yubico.YubiKey.Scp
             // Create a new array to hold the decrypted data and status words
             byte[] fullDecryptedResponse = new byte[decryptedData.Length + 2];
             decryptedData.CopyTo(fullDecryptedResponse);
-            
+
             // Append the status words to the decrypted data
             fullDecryptedResponse[decryptedData.Length] = response.SW1;
             fullDecryptedResponse[decryptedData.Length + 1] = response.SW2;
-            
+
             // Return a new ResponseApdu with the decrypted data and status words
             return new ResponseApdu(fullDecryptedResponse);
         }
@@ -164,32 +164,27 @@ namespace Yubico.YubiKey.Scp
         protected static (CommandApdu macdApdu, ReadOnlyMemory<byte> newMacChainingValue) MacApdu(
             CommandApdu commandApdu,
             ReadOnlySpan<byte> macKey,
-            ReadOnlySpan<byte> macChainingValue) 
-            => ChannelMac.MacApdu(commandApdu, macKey, macChainingValue);
+            ReadOnlySpan<byte> macChainingValue) =>
+            ChannelMac.MacApdu(commandApdu, macKey, macChainingValue);
 
         private static void VerifyRmac(
             ReadOnlySpan<byte> responseData,
             ReadOnlySpan<byte> rmacKey,
-            ReadOnlySpan<byte> macChainingValue) 
-            => ChannelMac.VerifyRmac(responseData, rmacKey, macChainingValue);
+            ReadOnlySpan<byte> macChainingValue) =>
+            ChannelMac.VerifyRmac(responseData, rmacKey, macChainingValue);
 
-        public void Dispose()
+        public virtual void Dispose()
         {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
+            if (_disposed)
             {
-                if (disposing)
-                {
-                    SessionKeys?.Dispose();
-
-                    _disposed = true;
-                }
+                return;
             }
+
+            SessionKeys.Dispose();
+            MacChainingValue = Array.Empty<byte>();
+
+            GC.SuppressFinalize(this);
+            _disposed = true;
         }
     }
 

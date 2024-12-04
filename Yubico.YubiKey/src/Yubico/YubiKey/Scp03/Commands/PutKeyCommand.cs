@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Scp03.Commands
     /// Use this command to put or replace SCP03 keys on the YubiKey.
     /// </summary>
     /// <remarks>
-    /// See the <xref href="UsersManualScp03">User's Manual entry</xref> on SCP03.
+    /// See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP03.
     /// <para>
     /// On each YubiKey that supports SCP03, there is space for three sets of
     /// keys. Each set contains three keys: "ENC", "MAC", and "DEK" (Channel

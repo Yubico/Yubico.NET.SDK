@@ -366,7 +366,7 @@ Features:
   allows clients of smart cards to encrypt all traffic to and from the card. Since the YubiKey can act as a smart
   card, this means that it is now possible to encrypt all traffic for the PIV application.
   In order for this to work, however, your YubiKey must be pre-configured for this feature. Read more about
-  [SCP03 here](xref:UsersManualScp03).
+  [SCP03 here](xref:UsersManualScp).
 - **Debian, RHEL, and CentOS support**. Our testing of Linux platforms has expanded to include the Debian,
   Red Hat Enterprise Linux (RHEL), and CentOS distributions. Please read [running on Linux](xref:RunningOnLinux)
   for more details.

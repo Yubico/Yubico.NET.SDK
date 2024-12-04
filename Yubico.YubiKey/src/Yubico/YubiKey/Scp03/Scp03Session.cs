@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Scp03
     /// Create a session for managing the SCP03 configuration of a YubiKey.
     /// </summary>
     /// <remarks>
-    /// See the <xref href="UsersManualScp03">User's Manual entry</xref> on SCP03.
+    /// See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP03.
     /// <para>
     /// Usually, you use SCP03 "in the background" to secure the communication
     /// with another application. For example, when you want to perform PIV
@@ -102,7 +102,7 @@ namespace Yubico.YubiKey.Scp03
         /// represents SCP03 on the YubiKey.
         /// </summary>
         /// <remarks>
-        /// See the <xref href="UsersManualScp03">User's Manual entry</xref> on SCP03.
+        /// See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP03.
         /// <para>
         /// Because this class implements <c>IDisposable</c>, use the <c>using</c>
         /// keyword. For example,
@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.Scp03
         /// Put the given key set onto the YubiKey.
         /// </summary>
         /// <remarks>
-        /// See the <xref href="UsersManualScp03">User's Manual entry</xref> on
+        /// See the <xref href="UsersManualScp">User's Manual entry</xref> on
         /// SCP03.
         /// <para>
         /// On each YubiKey that supports SCP03, there is space for three sets of

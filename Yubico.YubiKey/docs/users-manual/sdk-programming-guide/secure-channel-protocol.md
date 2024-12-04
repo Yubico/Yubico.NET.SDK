@@ -1,5 +1,5 @@
 ---
-uid: UsersManualScp03
+uid: UsersManualScp
 ---
 
 <!-- Copyright 2021 Yubico AB

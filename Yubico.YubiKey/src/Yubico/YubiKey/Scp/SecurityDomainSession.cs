@@ -31,60 +31,74 @@ using GetDataCommand = Yubico.YubiKey.Scp.Commands.GetDataCommand;
 namespace Yubico.YubiKey.Scp
 {
     /// <summary>
-    /// Create a session for managing the SCP configuration of a YubiKey.
+    /// Create a session for managing the Secure Channel Protocol (SCP) configuration of a YubiKey.
     /// </summary>
     /// <remarks>
     /// See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP.
     /// <para>
-    /// Usually, you use SCP "in the background" to secure the communication
-    /// with another application. For example, when you want to perform PIV
-    /// operations, but need to send the commands to and get the responses from
-    /// the YubiKey securely (such as sending commands remotely where
-    /// authenticity and confidentiality are required), you use SCP.
+    /// The Security Domain session provides secure communication and key management capabilities
+    /// through both SCP03 (symmetric) and SCP11 (asymmetric) protocols. This session can be used in two ways:
+    /// </para>
+    /// <list type="bullet">
+    /// <item>
+    /// <description>
+    /// For direct SCP management:
+    /// <list type="bullet">
+    /// <item><description>Managing SCP03 symmetric key sets (ENC, MAC, DEK)</description></item>
+    /// <item><description>Managing SCP11 asymmetric keys (EC public/private key pairs)</description></item>
+    /// <item><description>Configuring secure messaging parameters</description></item>
+    /// <item>
+    /// <description>
+    /// Example:
     /// <code language="csharp">
-    ///   if (YubiKeyDevice.TryGetYubiKey(serialNumber, out IYubiKeyDevice yubiKeyDevice))
-    ///   {
-    ///       using (var pivSession = new PivSession(scpDevice, scpKeys))
-    ///       {
-    ///         . . .
-    ///       }
-    ///   }
+    /// using (var scp = new SecurityDomainSession(yubiKeyDevice, scpKeyParameters))
+    /// {
+    ///     // Manage SCP configuration
+    /// }
     /// </code>
-    /// </para>
-    /// <para>
-    /// However, there are times you need to manage the configuration of SCP
-    /// directly, not as simply the security layer for a PIV or other
-    /// applications. The most common operations are loading and deleting SCP
-    /// key sets on the YubiKey.
-    /// </para>
-    /// <para>
-    /// For the SCP configuration management operations, use the
-    /// <c>ScpSession</c> class.
-    /// </para>
-    /// <para>
-    /// Once you have the YubiKey to use, you will build an instance of this
-    /// <c>ScpSession</c> class to represent the SCP on the hardware.
-    /// Because this class implements <c>IDisposable</c>, use the <c>using</c>
-    /// keyword. For example,
+    /// </description>
+    /// </item>
+    /// </list>
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// As a background security layer:
+    /// <list type="bullet">
+    /// <item><description>Secures communication (encrypted channel) with other applications (e.g., PIV, OTP, OATH, YubiHSM)</description></item>
+    /// <item><description>Provides authenticity and confidentiality (encrypted channel) for remote operations</description></item>
+    /// <item>
+    /// <description>
+    /// Example:
     /// <code language="csharp">
-    ///   if (YubiKeyDevice.TryGetYubiKey(serialNumber, out IYubiKeyDevice yubiKeyDevice))
-    ///   {
-    ///       var scpKeys = new StaticKeys();
-    ///       using (var scp = new ScpSession(yubiKeyDevice, scpKeys))
-    ///       {
-    ///           // Perform SCP operations.
-    ///       }
-    ///   }
+    /// using (var pivSession = new PivSession(yubiKeyDevice, scpKeyParameters))
+    /// {
+    ///     // Perform PIV operations with secure messaging
+    /// }
     /// </code>
-    /// </para>
+    /// </description>
+    /// </item>
+    /// </list>
+    /// </description>
+    /// </item>
+    /// </list>
     /// <para>
-    /// If the YubiKey does not support SCP, the constructor will throw an
-    /// exception.
+    /// The session supports various key management operations:
     /// </para>
+    /// <list type="bullet">
+    /// <item><description>Loading and replacing SCP03 key sets</description></item>
+    /// <item><description>Storing EC private keys (NIST P-256)</description></item>
+    /// <item><description>Storing EC public keys (NIST P-256)</description></item>
+    /// <item><description>Managing key certificates and metadata</description></item>
+    /// <item><description>Deleting keys and resetting configurations</description></item>
+    /// </list>
     /// <para>
-    /// If the StaticKeys provided are not correct, the constructor will throw an
-    /// exception.
+    /// The constructor will throw an exception if:
     /// </para>
+    /// <list type="bullet">
+    /// <item><description>The YubiKey does not support SCP</description></item>
+    /// <item><description>The provided key parameters are incorrect</description></item>
+    /// </list>
     /// </remarks>
     public sealed class SecurityDomainSession : ApplicationSession
     {
@@ -270,9 +284,8 @@ namespace Yubico.YubiKey.Scp
         /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
         /// <exception cref="ArgumentException">Thrown when the private key is not of type NIST P-256.</exception>
         /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
-        /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify,
-        /// or some other SCP related error described in the exception message.
-        /// </exception>
+        /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other SCP related error
+        /// described in the exception message.</exception>
         public void PutKey(KeyReference keyReference, ECPrivateKeyParameters privateKeyParameters, int replaceKvn)
         {
             Logger.LogInformation("Importing SCP11 private key into Key Reference: {KeyReference}", keyReference);
@@ -564,7 +577,8 @@ namespace Yubico.YubiKey.Scp
 
             // Create and serialize data
             Memory<byte> certDataEncoded = TlvObjects.EncodeMany(
-                new TlvObject(ControlReferenceTag, new TlvObject(KidKvnTag, keyReference.GetBytes.Span).GetBytes().Span),
+                new TlvObject(
+                    ControlReferenceTag, new TlvObject(KidKvnTag, keyReference.GetBytes.Span).GetBytes().Span),
                 new TlvObject(CertificateStoreTag, ms.ToArray())
                 );
 
@@ -605,7 +619,8 @@ namespace Yubico.YubiKey.Scp
             }
 
             Memory<byte> serialsDataEncoded = TlvObjects.EncodeMany(
-                new TlvObject(ControlReferenceTag, new TlvObject(KidKvnTag, keyReference.GetBytes.Span).GetBytes().Span),
+                new TlvObject(
+                    ControlReferenceTag, new TlvObject(KidKvnTag, keyReference.GetBytes.Span).GetBytes().Span),
                 new TlvObject(SerialsAllowListTag, ms.ToArray())
                 );
 
@@ -844,7 +859,7 @@ namespace Yubico.YubiKey.Scp
                         overridenKeyRef = new KeyReference(0, 0);
                         ins = InitializeUpdateCommand.GpInitializeUpdateIns;
                         break;
-                    case 0x02: 
+                    case 0x02:
                     case 0x03:
                         continue; // Skip these as they are deleted by 0x01
                     case ScpKeyIds.Scp11A:

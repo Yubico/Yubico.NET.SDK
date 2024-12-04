@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Scp03.Commands
     /// Use this command to delete one of the SCP03 key sets on the YubiKey.
     /// </summary>
     /// <remarks>
-    /// See the <xref href="UsersManualScp03">User's Manual entry</xref> on SCP03.
+    /// See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP03.
     /// <para>
     /// This will execute the Delete Command. That is, there is a general purpose
     /// command that can delete various elements, including keys. However, this

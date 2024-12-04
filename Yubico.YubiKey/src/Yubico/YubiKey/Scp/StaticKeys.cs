@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Scp
     /// Represents a triple of SCP03 static keys shared with the device.
     /// </summary>
     /// <remarks>
-    /// See also the <xref href="UsersManualScp03">User's Manual entry</xref> on
+    /// See also the <xref href="UsersManualScp">User's Manual entry</xref> on
     /// SCP03.
     /// <para>
     /// These are the three secret keys that only the device and remote user

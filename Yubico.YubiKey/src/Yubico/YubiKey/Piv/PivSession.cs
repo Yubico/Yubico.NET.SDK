@@ -166,7 +166,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         /// <remarks>
         ///     See the User's Manual entry on
-        ///     <xref href="UsersManualScp03"> SCP03 </xref> for more information on
+        ///     <xref href="UsersManualScp"> SCP03 </xref> for more information on
         ///     this communication protocol.
         ///     <para>
         ///         Because this class implements <c>IDisposable</c>, use the <c>using</c>

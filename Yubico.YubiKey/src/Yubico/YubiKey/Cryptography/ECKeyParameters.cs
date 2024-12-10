@@ -31,6 +31,11 @@ namespace Yubico.YubiKey.Cryptography
         /// </remarks>
         public ECParameters Parameters { get; }
 
+        /// <summary>
+        /// Creates an <see cref="ECKeyParameters"/> from an <see cref="ECParameters"/> object
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <exception cref="NotSupportedException"></exception>
         protected ECKeyParameters(ECParameters parameters)
         {
             if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)

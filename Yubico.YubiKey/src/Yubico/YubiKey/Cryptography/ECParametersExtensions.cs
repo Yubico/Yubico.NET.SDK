@@ -24,28 +24,24 @@ namespace Yubico.YubiKey.Cryptography
     /// </summary>
     public static class ECParametersExtensions
     {
-        public static ECParameters DeepCopy(this ECParameters parameters)
+        public static ECParameters DeepCopy(this ECParameters original)
         {
-            if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
+            if (original.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
             {
                 throw new NotSupportedException("Key must be of type NIST P-256");
             }
 
             var copy = new ECParameters
             {
-                Curve = parameters.Curve,
+                Curve = original.Curve,
                 Q = new ECPoint
                 {
-                    X = parameters.Q.X?.ToArray(),
-                    Y = parameters.Q.Y?.ToArray()
-                }
+                    X = original.Q.X?.ToArray(),
+                    Y = original.Q.Y?.ToArray()
+                },
+                D = original.D?.ToArray() ?? Array.Empty<byte>()
             };
-
-            if (parameters.D != null)
-            {
-                copy.D = parameters.D.ToArray();
-            }
-
+            
             return copy;
         }
 

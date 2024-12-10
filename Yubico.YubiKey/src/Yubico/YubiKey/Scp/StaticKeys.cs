@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2024 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -143,7 +143,9 @@ namespace Yubico.YubiKey.Scp
                 ChannelMacKey.Span.SequenceEqual(compareKeys.ChannelMacKey.Span) &&
                 DataEncryptionKey.Span.SequenceEqual(compareKeys.DataEncryptionKey.Span);
         }
-
+        /// <summary>
+        /// This will clear all references and sensitive buffers  
+        /// </summary>
         public void Dispose()
         {
             Dispose(disposing: true);

@@ -151,9 +151,7 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public sealed partial class PivSession : ApplicationSession
     {
-        private bool _disposed;
-
-        [Obsolete("Use new Scp")]
+        [Obsolete("Use new constructor with ScpKeyParamaters")]
         public PivSession(IYubiKeyDevice yubiKey, Yubico.YubiKey.Scp03.StaticKeys scp03Keys)
             : this(yubiKey, scp03Keys.ConvertToScp03KeyParameters())
         {
@@ -232,24 +230,14 @@ namespace Yubico.YubiKey.Piv
         ///     session is to "un-authenticate" the management key and "un-verify"
         ///     the PIN.
         /// </summary>
-        // Note that .NET recommends a Dispose method call Dispose(true) and
-        // GC.SuppressFinalize(this). The actual disposal is in the
-        // Dispose(bool) method.
-        // However, that does not apply to sealed classes.
-        // So the Dispose method will simply perform the
-        // "closing" process, no call to Dispose(bool) or GC.
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (_disposed)
+            if (disposing)
             {
-                return;
+                KeyCollector = null;
+                ResetAuthenticationStatus();
             }
-
-            KeyCollector = null;
-            ResetAuthenticationStatus();
-
-            base.Dispose();
-            _disposed = true;
+            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -566,7 +554,7 @@ namespace Yubico.YubiKey.Piv
 
             return true;
         }
-        
+
         // Reset any fields and properties related to authentication or
         // verification to the initial state: not authenticated, verified, etc.
         private void ResetAuthenticationStatus()

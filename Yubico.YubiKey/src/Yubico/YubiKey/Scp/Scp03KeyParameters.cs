@@ -87,6 +87,9 @@ namespace Yubico.YubiKey.Scp
         public static Scp03KeyParameters FromStaticKeys(StaticKeys staticKeys) =>
             new Scp03KeyParameters(ScpKeyIds.Scp03, 0x01, staticKeys);
 
+        /// <summary>
+        /// This will clear all references and sensitive buffers  
+        /// </summary>
         public void Dispose() => StaticKeys.Dispose();
     }
 }

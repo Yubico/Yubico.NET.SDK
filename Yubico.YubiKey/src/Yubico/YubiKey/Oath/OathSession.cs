@@ -27,7 +27,6 @@ namespace Yubico.YubiKey.Oath
     /// </summary>
     public sealed partial class OathSession : ApplicationSession
     {
-        private bool _disposed;
         // ReSharper disable once InconsistentNaming
         internal OathApplicationData _oathData; // Internal for testing
 
@@ -124,24 +123,15 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        /// <summary>
-        /// When the OathSession object goes out of scope, this method is called. It will close the session.
-        /// </summary>
-        // Note that .NET recommends a Dispose method call Dispose(true) and GC.SuppressFinalize(this).
-        // The actual disposal is in the Dispose(bool) method.
-        //
-        // However, that does not apply to sealed classes. So the Dispose method will simply perform the
-        // "closing" process, no call to Dispose(bool) or GC.
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (_disposed)
+            if (disposing)
             {
                 return;
             }
 
             KeyCollector = null;
-            base.Dispose();
-            _disposed = true;
+            base.Dispose(disposing);
         }
     }
 }

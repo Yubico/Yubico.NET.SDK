@@ -40,12 +40,6 @@ namespace Yubico.YubiKey.Cryptography
         /// <param name="parameters">The EC parameters.</param>
         public ECPrivateKeyParameters(ECParameters parameters) : base(parameters)
         {
-
-            if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
-            {
-                throw new NotSupportedException("Key must be of type NIST P-256");
-            }
-
             if (parameters.D == null)
             {
                 throw new ArgumentException("Parameters must contain private key data (D value)", nameof(parameters));

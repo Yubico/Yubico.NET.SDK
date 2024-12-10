@@ -99,7 +99,7 @@ namespace Yubico.Core.Tlv
         }
 
         /// <summary>
-        /// Returns a copy ofthe Tlv as a BER-TLV encoded byte array.
+        /// Returns a copy of the Tlv as a BER-TLV encoded byte array.
         /// </summary>
         public Memory<byte> GetBytes() => _bytes.ToArray();
 

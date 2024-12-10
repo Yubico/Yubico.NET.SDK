@@ -128,7 +128,7 @@ namespace Yubico.YubiKey.Scp
         }
 
         /// <summary>
-        /// This will clear all references and empty  
+        /// This will clear all references and sensitive buffers  
         /// </summary>
         public void Dispose()
         {

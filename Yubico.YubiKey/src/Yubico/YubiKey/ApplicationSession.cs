@@ -44,7 +44,7 @@ namespace Yubico.YubiKey
         /// The specific YubiKey application to connect to.
         /// </summary>
         public YubiKeyApplication Application { get; }
-        
+
         /// <summary>
         /// The logger instance used for logging information.
         /// </summary>
@@ -110,35 +110,45 @@ namespace Yubico.YubiKey
         private static string GetApplicationFriendlyName(YubiKeyApplication application) => Enum.GetName(typeof(YubiKeyApplication), application) ?? "Unknown";
 
         /// <summary>
-        /// Clean up the resources used by the session.
+        ///     When the ApplicationSession object goes out of scope, this method is called.
+        ///     It will close the session. The most important function of closing a
+        ///     session is to "un-authenticate" the management key and "un-verify"
+        ///     the PIN.
         /// </summary>
-        public virtual void Dispose()
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
             {
                 return;
             }
 
-            // At the moment, there is no "close session" method. So for now,
-            // just connect to the management application.
-            // This can fail, possibly resulting in a SCardException (or other), so we wrap it in a try catch-block to complete the disposal of the PivSession
-            try
+            if (disposing)
             {
-                _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
+                // At the moment, there is no "close session" method. So for now,
+                // just connect to the management application.
+                // This can fail, possibly resulting in a SCardException (or other), so we wrap it in a try catch-block to complete the disposal of the PivSession
+                try
+                {
+                    _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
+                    Connection.Dispose();
+                }
+                catch (Exception e)
+                {
+                    string message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.SessionDisposeUnknownError, e.GetType(), e.Message);
+
+                    Logger.LogWarning(message);
+                }
+
+                _disposed = true;
             }
-            catch (Exception e)
-            {
-                string message = string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.SessionDisposeUnknownError, e.GetType(), e.Message);
-
-                Logger.LogWarning(message);
-            }
-
-            Connection.Dispose();
-            GC.SuppressFinalize(this);
-
-            _disposed = true;
         }
     }
 }

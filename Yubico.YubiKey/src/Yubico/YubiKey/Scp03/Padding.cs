@@ -17,7 +17,7 @@ using System.Linq;
 
 namespace Yubico.YubiKey.Scp03
 {
-    [Obsolete("Use new Padding class instead")]
+    [Obsolete("Use new Yubico.YubiKey.Scp.Padding class instead")]
     internal static class Padding
     {
         public static byte[] PadToBlockSize(byte[] payload)

@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2024 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ namespace Yubico.YubiKey.Scp
     internal class Scp03State : ScpState
     {
         private readonly Memory<byte> _hostCryptogram;
-        private bool _disposed;
         /// <summary>
         /// Creates a new SCP03 secure channel state using the provided session keys and host cryptogram.
         /// </summary>
@@ -68,14 +67,14 @@ namespace Yubico.YubiKey.Scp
             {
                 throw new ArgumentNullException(nameof(keyParameters));
             }
-            
+
             if (pipeline is null)
             {
                 throw new ArgumentNullException(nameof(pipeline));
             }
 
             var (cardChallenge, cardCryptogram) = PerformInitializeUpdate(pipeline, keyParameters, hostChallenge);
-            
+
             var state = CreateScpState(keyParameters, hostChallenge, cardChallenge, cardCryptogram);
             state.PerformExternalAuthenticate(pipeline);
             return state;
@@ -171,17 +170,17 @@ namespace Yubico.YubiKey.Scp
 
             return (macedApdu.Data, newMacChainingValue);
         }
-
-        public override void Dispose()
+    
+        
+        /// <inheritdoc cref="ScpState.Dispose()"/>
+        protected override void Dispose(bool disposing)
         {
-            if (_disposed)
+            if (disposing)
             {
-                return;
+                CryptographicOperations.ZeroMemory(_hostCryptogram.Span);
             }
-                
-            CryptographicOperations.ZeroMemory(_hostCryptogram.Span);
-            base.Dispose();
-            _disposed = true;
+            
+            base.Dispose(disposing);
         }
     }
 }

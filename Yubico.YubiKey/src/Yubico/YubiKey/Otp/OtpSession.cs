@@ -292,9 +292,6 @@ namespace Yubico.YubiKey.Otp
         IYubiKeyDevice IOtpSession.YubiKey => YubiKey;
         #endregion
 
-        // /// <inheritdoc />
-        // public void Dispose() => Connection.Dispose();
-
         #region Private Fields
         private readonly OtpStatus _otpStatus;
         #endregion

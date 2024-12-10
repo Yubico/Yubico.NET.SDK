@@ -20,7 +20,7 @@ namespace Yubico.YubiKey
     /// The connection class that can perform SCP03 operations will implement not
     /// only <see cref="IYubiKeyConnection"/>, but this interface as well.
     /// </summary>
-    [Obsolete("Use new scp")]
+    [Obsolete("Use IScpYubiKeyConnection")]
     public interface IScp03YubiKeyConnection : IYubiKeyConnection
     {
         /// <summary>

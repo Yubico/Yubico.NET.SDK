@@ -229,17 +229,17 @@ namespace Yubico.YubiKey.Scp03.Commands
                 byte[] dataToEncrypt = new byte[AesBlockSize] {
                     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
                 };
-                
-                var checkBlock = AesUtilities.BlockCipher(keyData, dataToEncrypt.AsSpan());
-                var encryptedKey = AesUtilities.BlockCipher(encryptionKey, keyToBlock.Span);
+
+                byte[] checkBlock = AesUtilities.BlockCipher(keyData, dataToEncrypt.AsSpan());
+                byte[] encryptedKey = AesUtilities.BlockCipher(encryptionKey, keyToBlock.Span);
 
                 binaryWriter.Write(KeyType);
                 binaryWriter.Write(BlockSize);
                 binaryWriter.Write(AesBlockSize);
-                binaryWriter.Write(encryptedKey.ToArray());
+                binaryWriter.Write(encryptedKey);
                 binaryWriter.Write(KeyCheckSize);
-                binaryWriter.Write(checkBlock.ToArray(), 0, KeyCheckSize);
-                Array.Copy(checkBlock.ToArray(), 0, _checksum, checksumOffset, KeyCheckSize);
+                binaryWriter.Write(checkBlock, 0, KeyCheckSize);
+                Array.Copy(checkBlock, 0, _checksum, checksumOffset, KeyCheckSize);
             }
             finally
             {

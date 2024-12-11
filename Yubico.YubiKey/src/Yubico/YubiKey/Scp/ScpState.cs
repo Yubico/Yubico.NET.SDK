@@ -204,9 +204,13 @@ namespace Yubico.YubiKey.Scp
                 return;
             }
 
-            SessionKeys.Dispose();
-            MacChainingValue = Array.Empty<byte>();
-            _encryptionCounter = 0;
+
+            if (disposing)
+            {
+                SessionKeys.Dispose();
+                MacChainingValue = Array.Empty<byte>();
+                _encryptionCounter = 0;
+            }
 
             _disposed = true;
         }

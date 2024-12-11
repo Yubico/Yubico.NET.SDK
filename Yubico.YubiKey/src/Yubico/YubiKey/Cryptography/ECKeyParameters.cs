@@ -27,7 +27,6 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         /// <remarks>
         /// These parameters include the curve information and key data.
-        /// For NIST P-256 keys, this includes the curve definition and public point coordinates.
         /// </remarks>
         public ECParameters Parameters { get; }
 
@@ -38,11 +37,6 @@ namespace Yubico.YubiKey.Cryptography
         /// <exception cref="NotSupportedException"></exception>
         protected ECKeyParameters(ECParameters parameters)
         {
-            if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
-            {
-                throw new NotSupportedException("Key must be of type NIST P-256");
-            }
-
             Parameters = parameters.DeepCopy();
         }
     }

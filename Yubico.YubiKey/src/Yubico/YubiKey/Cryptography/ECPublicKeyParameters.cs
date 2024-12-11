@@ -23,21 +23,19 @@ namespace Yubico.YubiKey.Cryptography
     /// </summary>
     /// <remarks>
     /// This class encapsulates the parameters specific to EC public keys,
-    /// ensuring that the key is of type NIST P-256 and contains only the
-    /// necessary public key components. It extends the base <see cref="ECKeyParameters"/>
-    /// class with additional validation to prevent the inclusion of private key data.
-    /// <para>
-    /// This class currently only supports NIST P-256.
-    /// </para>
+    /// ensuring that the key only contains only necessary public key components.
+    /// It extends the base <see cref="ECKeyParameters"/> class with additional 
+    /// validation to prevent the inclusion of private key data.
     /// </remarks>
-    public sealed class ECPublicKeyParameters : ECKeyParameters
+    public class ECPublicKeyParameters : ECKeyParameters
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ECPublicKeyParameters"/> class. It is a wrapper for the <see cref="ECParameters"/> class.
+        /// Initializes a new instance of the <see cref="ECPublicKeyParameters"/> class.
+        /// It is a wrapper for the <see cref="ECParameters"/> class.
         /// </summary>
         /// <remarks>
-        /// This constructor is used to create an instance from a <see cref="ECParameters"/> object. It will deep copy 
-        /// the parameters from the ECParameters object and ensure that the key is of type NIST P-256.
+        /// This constructor is used to create an instance from a <see cref="ECParameters"/> object.
+        /// It will deep copy the parameters from the <see cref="ECParameters"/> object.
         /// </remarks>
         /// <param name="parameters"></param>
         /// <exception cref="ArgumentException">Thrown when the parameters contain private key data (D value).</exception>
@@ -57,9 +55,9 @@ namespace Yubico.YubiKey.Cryptography
         public ECPublicKeyParameters(ECDsa ecdsa) : base(ecdsa.ExportParameters(false)) { }
 
         /// <summary>
-        /// Gets the bytes representing the public key.
+        /// Gets the bytes representing the public key coordinates.
         /// </summary>
-        /// <returns>A <see cref="Memory{T}"/> containing the public key bytes with the format 0x04 || X || Y.</returns>
+        /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the public key bytes with the format 0x04 || X || Y.</returns>
         public ReadOnlyMemory<byte> GetBytes()
         {
             byte[] publicKeyRawData =

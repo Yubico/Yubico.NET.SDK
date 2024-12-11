@@ -502,7 +502,7 @@ namespace Yubico.YubiKey.Scp
             var encodedPoint = tlvReader.ReadValue(EcPublicKeyKeyType).Span;
 
             // Create the ECParameters with the public point
-            var ecPublicKey = encodedPoint.CreateECPublicKeyFromBytes();
+            var ecPublicKey = CreateECPublicKeyFromBytes(encodedPoint);
 
             Logger.LogInformation("Key generated (KeyReference: {KeyReference})", keyReference);
             return ecPublicKey;
@@ -911,6 +911,42 @@ namespace Yubico.YubiKey.Scp
             {
                 throw new SecureChannelException(ExceptionMessages.ChecksumError);
             }
+        }
+
+        /// <summary>
+        /// Creates an instance from a byte array.
+        /// </summary>
+        /// <remarks>
+        /// The byte array is expected to be in the format 0x04 || X || Y
+        /// where X and Y are the uncompressed (32 bit) coordinates of the point.
+        /// </remarks>
+        /// <param name="bytes">The byte array.</param>
+        /// <returns>An instance of EcPrivateKeyParameters with the nistP256 curve.</returns>
+        /// <exception cref="ArgumentException">Thrown when the byte array is not in the expected format.
+        /// Either the first byte is not 0x04, or the byte array is not 65 bytes long (Key must be of type NIST P-256).</exception>
+        private static ECPublicKeyParameters CreateECPublicKeyFromBytes(ReadOnlySpan<byte> bytes)
+        {
+            if (bytes[0] != 0x04)
+            {
+                throw new ArgumentException("The byte array must start with 0x04", nameof(bytes));
+            }
+
+            if (bytes.Length != 65)
+            {
+                throw new ArgumentException("The byte array must be 65 bytes long (Key must be of type NIST P-256)", nameof(bytes));
+            }
+
+            var ecParameters = new ECParameters
+            {
+                Curve = ECCurve.NamedCurves.nistP256,
+                Q = new ECPoint
+                {
+                    X = bytes.Slice(1, 32).ToArray(), // Starts at 1 because the first byte is 0x04, indicating that it is an uncompressed point
+                    Y = bytes.Slice(33, 32).ToArray()
+                }
+            };
+
+            return new ECPublicKeyParameters(ecParameters);
         }
     }
 }

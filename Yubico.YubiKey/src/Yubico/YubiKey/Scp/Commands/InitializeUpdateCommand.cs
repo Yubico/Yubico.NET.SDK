@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Scp.Commands
         internal const byte GpInitializeUpdateIns = 0x50;
         private const byte GpInitializeUpdateCla = 0x84;
         private readonly ReadOnlyMemory<byte> _hostChallenge;
-        private readonly int _keyVersionNumber;
+        private readonly byte _keyVersionNumber;
 
         /// <summary>
         /// Constructs an INITIALIZE_UPDATE command, containing the provided data.
@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Scp.Commands
         /// </remarks>
         /// <param name="keyVersionNumber">Which key set to use.</param>
         /// <param name="hostChallenge">An 8-byte randomly-generated challenge from the host to the device.</param>
-        public InitializeUpdateCommand(int keyVersionNumber, ReadOnlyMemory<byte> hostChallenge)
+        public InitializeUpdateCommand(byte keyVersionNumber, ReadOnlyMemory<byte> hostChallenge)
         {
             if (hostChallenge.Length != 8)
             {
@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Scp.Commands
         {
             Cla = GpInitializeUpdateCla,
             Ins = GpInitializeUpdateIns,
-            P1 = (byte)_keyVersionNumber,
+            P1 = _keyVersionNumber,
             Data = _hostChallenge
         };
         

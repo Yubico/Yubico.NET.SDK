@@ -73,22 +73,25 @@ namespace Yubico.YubiKey.Scp
                 throw new ArgumentNullException(nameof(pipeline));
             }
 
-            var (cardChallenge, cardCryptogram) = PerformInitializeUpdate(pipeline, keyParameters, hostChallenge);
+            var (cardChallenge, cardCryptogram) = PerformInitializeUpdate(
+                pipeline,
+                keyParameters.KeyReference.VersionNumber,
+                hostChallenge);
 
-            var state = CreateScpState(keyParameters, hostChallenge, cardChallenge, cardCryptogram);
+            var state = CreateScpState(keyParameters.StaticKeys, hostChallenge, cardChallenge, cardCryptogram);
             state.PerformExternalAuthenticate(pipeline);
             return state;
         }
 
         private static Scp03State CreateScpState(
-            Scp03KeyParameters keyParameters,
+            StaticKeys staticKeys,
             ReadOnlyMemory<byte> hostChallenge,
             ReadOnlyMemory<byte> cardChallenge,
             ReadOnlyMemory<byte> cardCryptogram)
         {
             // Derive session keys
             var sessionKeys = Derivation.DeriveSessionKeysFromStaticKeys(
-                keyParameters.StaticKeys,
+                staticKeys,
                 hostChallenge.Span,
                 cardChallenge.Span);
 
@@ -116,11 +119,11 @@ namespace Yubico.YubiKey.Scp
 
         private static (ReadOnlyMemory<byte> cardChallenge, ReadOnlyMemory<byte> cardCryptogram) PerformInitializeUpdate(
             IApduTransform pipeline,
-            Scp03KeyParameters keyParameters,
+            byte keyVersionNumber,
             ReadOnlyMemory<byte> hostChallenge)
         {
             var initializeUpdateCommand = new InitializeUpdateCommand(
-                keyParameters.KeyReference.VersionNumber, hostChallenge);
+                keyVersionNumber, hostChallenge);
 
             var initializeUpdateResponseApdu = pipeline.Invoke(
                 initializeUpdateCommand.CreateCommandApdu(),
@@ -170,14 +173,14 @@ namespace Yubico.YubiKey.Scp
 
             return (macedApdu.Data, newMacChainingValue);
         }
-        
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 CryptographicOperations.ZeroMemory(_hostCryptogram.Span);
             }
-            
+
             base.Dispose(disposing);
         }
     }

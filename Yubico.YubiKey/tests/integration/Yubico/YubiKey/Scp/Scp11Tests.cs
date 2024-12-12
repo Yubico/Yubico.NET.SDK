@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Scp
             FirmwareVersion? minimumFirmwareVersion = null) =>
             IntegrationTestDeviceEnumeration.GetTestDevice(desiredDeviceType, transport,
                 minimumFirmwareVersion ?? FirmwareVersion.V5_7_2);
-        
+
         private static void ResetAllowedDevices()
         {
             // Reset all attached allowed devices
@@ -77,10 +77,32 @@ namespace Yubico.YubiKey.Scp
             session.ResetApplication();
 
             session.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
-            var isVerified = session.TryVerifyPin();
+            
+            session.TryChangePin(Simple39KeyCollector.CollectPin(), new byte[]
+            {
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
+            }, out _);
+            
+            session.TryChangePuk(Simple39KeyCollector.CollectPuk(), new byte[]
+            {
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
+            }, out _);
+            
+            session.TryChangeManagementKey(Simple39KeyCollector.CollectMgmtKey(), new byte[]
+            {
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+                0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x12,
+                0x23, 0x34, 0x45, 0x56, 0x67, 0x78, 0x89, 0x9A
+            }, PivTouchPolicy.Always);
+            
+            var isVerified = session.TryVerifyPin(new byte[]
+            {
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
+            }, out _);
+            
             Assert.True(isVerified);
 
-            var result = session.GenerateKeyPair(PivSlot.Retired12, PivAlgorithm.EccP256);
+            var result = session.GenerateKeyPair(PivSlot.Retired12, PivAlgorithm.EccP256, PivPinPolicy.Always);
             Assert.Equal(PivAlgorithm.EccP256, result.Algorithm);
         }
 
@@ -129,7 +151,7 @@ namespace Yubico.YubiKey.Scp
 
             configObj.Execute();
         }
-        
+
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
@@ -141,8 +163,10 @@ namespace Yubico.YubiKey.Scp
             var keyParams = Get_Scp11b_EncryptedChannel_Parameters(testDevice, keyReference);
 
             using var session = new YubiHsmAuthSession(testDevice, keyParams);
-            session.AddCredential(YhaTestUtilities.DefaultMgmtKey, YhaTestUtilities.DefaultAes128Cred);
-            
+
+            session.ChangeManagementKey(YhaTestUtilities.DefaultMgmtKey, YhaTestUtilities.AlternateMgmtKey);
+            session.AddCredential(YhaTestUtilities.AlternateMgmtKey, YhaTestUtilities.DefaultAes128Cred);
+
             var result = session.ListCredentials();
             Assert.Single(result);
         }

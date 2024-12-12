@@ -52,7 +52,11 @@ namespace Yubico.YubiKey.Cryptography
         /// Initializes a new instance of the <see cref="ECPublicKeyParameters"/> class.
         /// </summary>
         /// <param name="ecdsa"></param>
-        public ECPublicKeyParameters(ECDsa ecdsa) : base(ecdsa.ExportParameters(false)) { }
+        public ECPublicKeyParameters(ECDsa ecdsa)
+            : base(ecdsa?.ExportParameters(false) ?? throw new ArgumentNullException(nameof(ecdsa)))
+        {
+            
+        }
 
         /// <summary>
         /// Gets the bytes representing the public key coordinates.

@@ -52,6 +52,10 @@ namespace Yubico.YubiKey.Cryptography
         /// It exports the parameters from the ECDsa object and deep copy the parameters from the ECParameters object.
         /// </remarks>
         /// <param name="ecdsaObject">The ECDsa object.</param>
-        public ECPrivateKeyParameters(ECDsa ecdsaObject) : base(ecdsaObject.ExportParameters(true)) { }
+        public ECPrivateKeyParameters(ECDsa ecdsaObject)
+            : base(ecdsaObject?.ExportParameters(true) ?? throw new ArgumentNullException())
+        {
+            
+        }
     }
 }

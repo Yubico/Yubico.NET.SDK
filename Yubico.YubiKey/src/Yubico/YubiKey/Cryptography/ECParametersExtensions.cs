@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Linq;
 using System.Security.Cryptography;
 
@@ -39,7 +38,7 @@ namespace Yubico.YubiKey.Cryptography
                     X = original.Q.X?.ToArray(),
                     Y = original.Q.Y?.ToArray()
                 },
-                D = original.D?.ToArray() ?? Array.Empty<byte>()
+                D = original.D?.ToArray()
             };
             
             return copy;

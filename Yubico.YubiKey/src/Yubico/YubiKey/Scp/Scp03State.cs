@@ -170,9 +170,7 @@ namespace Yubico.YubiKey.Scp
 
             return (macedApdu.Data, newMacChainingValue);
         }
-    
         
-        /// <inheritdoc cref="ScpState.Dispose()"/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)

@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.TestUtilities
             var devices = yubiKeys as IYubiKeyDevice[] ?? yubiKeys.ToArray();
             if (!devices.Any())
             {
-                ThrowDeviceNotFoundException("Could not find any connected Yubikeys (Transport: {transport})", devices);
+                ThrowDeviceNotFoundException($"Could not find any connected Yubikeys (Transport: {transport})", devices);
             }
 
             var devicesVersionFiltered =

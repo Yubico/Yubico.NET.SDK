@@ -16,6 +16,27 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.12.x Releases
+### 1.12.0
+
+Release date: December 18th, 2024
+
+Features:
+
+- Secure Channel Protocol support:
+
+   - 
+- [YubiKeyDeviceListener](xref:Yubico.YubiKey.YubiKeyDeviceListener) has been reconfigured to run the listeners in the background instead of the main thread. In addition, the listeners can now be [stopped](xref:Yubico.YubiKey.YubiKeyDeviceListener.StopListening) when needed to reclaim resources. Once stopped, the listeners can be restarted. ([#89](https://github.com/Yubico/Yubico.NET.SDK/pull/89))
+- Microsoft.Extensions.Logging.Console is now the default logger. To enable logging from a dependent project (e.g. unit tests, integration tests, an app), you can either add an appsettings.json to your project or use the ConfigureLoggerFactory. ([#139](https://github.com/Yubico/Yubico.NET.SDK/pull/139))
+- The SDK now uses inferred variable types (var) instead of explicit types in all projects except Yubico.Core. This change aims to improve code readability, reduce verbosity, and enhance developer productivity while maintaining type safety. ([#141](https://github.com/Yubico/Yubico.NET.SDK/pull/141))
+
+Bug Fixes:
+
+- The [PivSession.ChangeManagementKey](xref:Yubico.YubiKey.Piv.PivSession.ChangeManagementKey(Yubico.YubiKey.Piv.PivTouchPolicy)) method was incorrectly assuming Triple-DES was the default management key algorithm for FIPS keys. The SDK now verifies the management key alorithm based on key type and firmware version. ([#162](https://github.com/Yubico/Yubico.NET.SDK/pull/162))
+- The SDK now correctly sets the IYubiKeyDeviceInfo property [IsSkySeries](xref:Yubico.YubiKey.IYubiKeyDeviceInfo.IsSkySeries) to True for YubiKey Security Key Series Enterprise Edition keys. ([#158](https://github.com/Yubico/Yubico.NET.SDK/pull/158))
+- Exceptions are now caught when running [PivSession.Dispose](xref:Yubico.YubiKey.Piv.PivSession.Dispose). This fixes an issue where the Dispose method could not close the Connection in the event of a disconnected YubiKey. ([104](https://github.com/Yubico/Yubico.NET.SDK/issues/104))
+- A dynamic DLL resolution based on process architecture (x86/x64) has been implemented for NativeShims.dll. This fixes a reported issue with the NativeShims.dll location for 32-bit processes. ([#154](https://github.com/Yubico/Yubico.NET.SDK/pull/154))
+
 ## 1.11.x Releases
 ### 1.11.0
 

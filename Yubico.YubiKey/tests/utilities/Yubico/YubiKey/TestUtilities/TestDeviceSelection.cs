@@ -32,12 +32,12 @@ namespace Yubico.YubiKey.TestUtilities
             int serialNumber)
         {
             const int maxReconnectAttempts = 40;
-            const int sleepDuration = 100; //ms
+            var sleepDurationMs = TimeSpan.FromMilliseconds(200);
 
             int reconnectAttempts = 0;
             do
             {
-                System.Threading.Thread.Sleep(sleepDuration);
+                System.Threading.Thread.Sleep(sleepDurationMs);
 
                 try
                 {

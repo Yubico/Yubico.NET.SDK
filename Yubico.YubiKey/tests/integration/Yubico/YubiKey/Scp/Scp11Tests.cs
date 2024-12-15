@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Scp
 
         public Scp11Tests()
         {
-            ResetAllowedDevices();
+            ResetSecurityDomainOnAllowedDevices();
         }
 
         private IYubiKeyDevice GetDevice(
@@ -53,9 +53,8 @@ namespace Yubico.YubiKey.Scp
             IntegrationTestDeviceEnumeration.GetTestDevice(desiredDeviceType, transport,
                 minimumFirmwareVersion ?? FirmwareVersion.V5_7_2);
 
-        private static void ResetAllowedDevices()
+        private static void ResetSecurityDomainOnAllowedDevices()
         {
-            // Reset all attached allowed devices
             foreach (var availableDevice in IntegrationTestDeviceEnumeration.GetTestDevices())
             {
                 using var session = new SecurityDomainSession(availableDevice);
@@ -66,14 +65,16 @@ namespace Yubico.YubiKey.Scp
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp11b_PivSession_Operations_Succeeds(
+        public void Scp11b_App_PivSession_Operations_Succeeds(
             StandardTestDevice desiredDeviceType)
         {
             var testDevice = GetDevice(desiredDeviceType);
             var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
-            var keyParams = Get_Scp11b_EncryptedChannel_Parameters(testDevice, keyReference);
+            var keyParams = Get_Scp11b_SecureConnection_Parameters(testDevice, keyReference);
 
             using var session = new PivSession(testDevice, keyParams);
+
+            session.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
             if (desiredDeviceType == StandardTestDevice.Fw5Fips)
             {
                 ScpTestUtilities.SetFipsApprovedCredentials(session);
@@ -86,12 +87,12 @@ namespace Yubico.YubiKey.Scp
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp11b_OathSession_Operations_Succeeds(
+        public void Scp11b_App_OathSession_Operations_Succeeds(
             StandardTestDevice desiredDeviceType)
         {
             var testDevice = GetDevice(desiredDeviceType);
             var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
-            var keyParams = Get_Scp11b_EncryptedChannel_Parameters(testDevice, keyReference);
+            var keyParams = Get_Scp11b_SecureConnection_Parameters(testDevice, keyReference);
 
             using (var resetSession = new OathSession(testDevice, keyParams))
             {
@@ -108,12 +109,12 @@ namespace Yubico.YubiKey.Scp
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp11b_OtpSession_Operations_Succeeds(
+        public void Scp11b_App_OtpSession_Operations_Succeeds(
             StandardTestDevice desiredDeviceType)
         {
             var testDevice = GetDevice(desiredDeviceType);
             var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
-            var keyParams = Get_Scp11b_EncryptedChannel_Parameters(testDevice, keyReference);
+            var keyParams = Get_Scp11b_SecureConnection_Parameters(testDevice, keyReference);
 
             using var session = new OtpSession(testDevice, keyParams);
             if (session.IsLongPressConfigured)
@@ -132,19 +133,27 @@ namespace Yubico.YubiKey.Scp
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp11b_YubiHsmSession_Operations_Succeeds(StandardTestDevice desiredDeviceType)
+        public void Scp11b_YubiHsmSession_Operations_Succeeds(
+            StandardTestDevice desiredDeviceType)
         {
             var testDevice = YhaTestUtilities.GetCleanDevice(desiredDeviceType);
             var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
-            var keyParams = Get_Scp11b_EncryptedChannel_Parameters(testDevice, keyReference);
+            var keyParams = Get_Scp11b_SecureConnection_Parameters(testDevice, keyReference);
 
             using var session = new YubiHsmAuthSession(testDevice, keyParams);
+
+            byte[] managementKey;
             if (desiredDeviceType == StandardTestDevice.Fw5Fips) // Must change from default management key for FIPS
             {
                 session.ChangeManagementKey(YhaTestUtilities.DefaultMgmtKey, YhaTestUtilities.AlternateMgmtKey);
+                managementKey = YhaTestUtilities.AlternateMgmtKey;
             }
-            
-            session.AddCredential(YhaTestUtilities.AlternateMgmtKey, YhaTestUtilities.DefaultAes128Cred);
+            else
+            {
+                managementKey = YhaTestUtilities.DefaultMgmtKey;
+            }
+
+            session.AddCredential(managementKey, YhaTestUtilities.DefaultAes128Cred);
 
             var result = session.ListCredentials();
             Assert.Single(result);
@@ -153,7 +162,7 @@ namespace Yubico.YubiKey.Scp
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp11b_Establish_Connection_Succeeds(
+        public void Scp11b_EstablishSecureConnection_Succeeds(
             StandardTestDevice desiredDeviceType)
         {
             var testDevice = GetDevice(desiredDeviceType);
@@ -171,8 +180,8 @@ namespace Yubico.YubiKey.Scp
 
             using (var session = new SecurityDomainSession(testDevice, keyParams))
             {
-                var result = session.GetKeyInformation();
-                Assert.NotEmpty(result);
+                _ = session.GetKeyInformation();
+                Assert.Throws<SecureChannelException>(() => VerifyScp11bAuth(session));
             }
         }
 
@@ -186,15 +195,21 @@ namespace Yubico.YubiKey.Scp
             var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x2);
 
             // Start authenticated session with default key
-            using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
+            Scp11KeyParameters keyParameters;
+            using (var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey))
+            {
+                // Generate a new EC key on the host and import via PutKey
+                var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+                var privateKey = new ECPrivateKeyParameters(ecdsa);
+                session.PutKey(keyReference, privateKey, 0);
 
-            // Import private key
-            var ecDsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-            var privateKey = new ECPrivateKeyParameters(ecDsa);
-            session.PutKey(keyReference, privateKey, 0);
+                keyParameters = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(ecdsa));
+            }
 
-            var result = session.GetKeyInformation();
-            Assert.NotEmpty(result);
+            using (var _ = new SecurityDomainSession(testDevice, keyParameters))
+            {
+                // Secure channel established
+            }
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
@@ -236,27 +251,44 @@ namespace Yubico.YubiKey.Scp
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp11a_GenerateEcKey_Succeeds(
+        public void Scp11b_GenerateEcKey_Succeeds(
             StandardTestDevice desiredDeviceType)
         {
             var testDevice = GetDevice(desiredDeviceType);
-            var keyReference = new KeyReference(ScpKeyIds.Scp11A, 0x3);
+            var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x3);
 
             // Start authenticated session
-            using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
+            Scp11KeyParameters keyParameters;
+            using (var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey))
+            {
+                // Generate a new EC key on the Yubikey
+                var publicKey = session.GenerateEcKey(keyReference, 0);
 
-            // Generate a new EC key
-            var generatedKey = session.GenerateEcKey(keyReference, 0);
+                // Verify the generated key
+                Assert.NotNull(publicKey.Parameters.Q.X);
+                Assert.NotNull(publicKey.Parameters.Q.Y);
+                Assert.Equal(32, publicKey.Parameters.Q.X.Length);
+                Assert.Equal(32, publicKey.Parameters.Q.Y.Length);
+                Assert.Equal(ECCurve.NamedCurves.nistP256.Oid.Value, publicKey.Parameters.Curve.Oid.Value);
 
-            // Verify the generated key
-            Assert.NotNull(generatedKey.Parameters.Q.X);
-            Assert.NotNull(generatedKey.Parameters.Q.Y);
-            Assert.Equal(32, generatedKey.Parameters.Q.X.Length);
-            Assert.Equal(32, generatedKey.Parameters.Q.Y.Length);
-            Assert.Equal(ECCurve.NamedCurves.nistP256.Oid.Value, generatedKey.Parameters.Curve.Oid.Value);
+                using var ecdsa = ECDsa.Create(publicKey.Parameters);
+                Assert.NotNull(ecdsa);
 
-            using var ecdsa = ECDsa.Create(generatedKey.Parameters);
-            Assert.NotNull(ecdsa);
+                keyParameters = new Scp11KeyParameters(keyReference, publicKey);
+            }
+
+            using (var _ = new SecurityDomainSession(testDevice, keyParameters))
+            {
+                // Secure channel established
+            }
+        }
+
+        private static void VerifyScp11bAuth(
+            SecurityDomainSession session)
+        {
+            var keyRef = new KeyReference(ScpKeyIds.Scp11B, 0x7f);
+            session.GenerateEcKey(keyRef, 0);
+            session.DeleteKey(keyRef);
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
@@ -335,7 +367,7 @@ namespace Yubico.YubiKey.Scp
             // This is the test. Authenticate with SCP11a should throw.
             Assert.Throws<SecureChannelException>(() =>
             {
-                using (var session = new SecurityDomainSession(testDevice, scp11KeyParams))
+                using (var _ = new SecurityDomainSession(testDevice, scp11KeyParams))
                 {
                     // ... Authenticated
                 }
@@ -348,7 +380,7 @@ namespace Yubico.YubiKey.Scp
             }
 
             // Now, with the allowlist removed, authenticate with SCP11a should now succeed
-            using (var session = new SecurityDomainSession(testDevice, scp11KeyParams))
+            using (var _ = new SecurityDomainSession(testDevice, scp11KeyParams))
             {
                 // ... Authenticated
             }
@@ -364,7 +396,7 @@ namespace Yubico.YubiKey.Scp
             const byte kvn = 0x03;
             var keyRef = new KeyReference(ScpKeyIds.Scp11A, kvn);
 
-            // Start authenticated session with default key
+            // Start secure session with default key
             Scp11KeyParameters keyParams;
             using (var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey))
             {
@@ -372,6 +404,7 @@ namespace Yubico.YubiKey.Scp
             }
 
             // Start authenticated session using new key params and public key from yubikey
+            // Authenticating and deleting should work
             using (var session = new SecurityDomainSession(testDevice, keyParams))
             {
                 session.DeleteKey(keyRef);
@@ -381,7 +414,7 @@ namespace Yubico.YubiKey.Scp
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp11c_Authenticate_Succeeds(
+        public void Scp11c_EstablishSecureConnection_Succeeds(
             StandardTestDevice desiredDeviceType)
         {
             var testDevice = GetDevice(desiredDeviceType);
@@ -594,12 +627,9 @@ namespace Yubico.YubiKey.Scp
         }
 
         /// <summary>
-        /// This is a copy of Scp11b_Authenticate_Succeeds test
+        /// This is a copy of Scp11b_EstablishSecureConnection_Succeeds test
         /// </summary>
-        /// <param name="testDevice"></param>
-        /// <param name="keyReference"></param>
-        /// <returns></returns>
-        private static Scp11KeyParameters Get_Scp11b_EncryptedChannel_Parameters(
+        private static Scp11KeyParameters Get_Scp11b_SecureConnection_Parameters(
             IYubiKeyDevice testDevice,
             KeyReference keyReference)
         {

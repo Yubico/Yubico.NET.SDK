@@ -31,37 +31,37 @@ namespace Yubico.YubiKey.Scp
     public static class ScpKeyIds
     {
         /// <summary>
-        /// Key ID for SCP03 protocol
+        /// Key ID '0x01' for static keys used for SCP03.
         /// </summary>
         public const byte Scp03 = 0x01;
 
         /// <summary>
-        /// Key ID '10' for the public key of the certificate authority, also known as 'PK.CA-KLOC.ECDSA'. Needs to be an ECDSA key.
+        /// Key ID '0x10' for the public key of the certificate authority, also known as 'PK.CA-KLOC.ECDSA'. Needs to be an ECDSA key.
         /// </summary>
         public const byte ScpCaPublicKey = 0x10;
 
         /// <summary>
-        /// Key ID '11' for SK.SD.ECKA used for SCP11a
+        /// Key ID '0x11' for SK.SD.ECKA used for SCP11a.
         /// </summary>
         public const byte Scp11A = 0x11;
 
         /// <summary>
-        /// Key ID '13' for SK.SD.ECKA used for SCP11b
+        /// Key ID '0x13' for SK.SD.ECKA used for SCP11b.
         /// </summary>
         public const byte Scp11B = 0x13;
 
         /// <summary>
-        /// Key ID '14' for the optional static Key-DEK (data encryption key) used with SCP11b only
+        /// Key ID '0x14' for the optional static Key-DEK (data encryption key) used with SCP11b only.
         /// </summary>
         public const byte Scp11BOptionalDek = 0x14;
 
         /// <summary>
-        /// Key ID '15' for SK.SD.ECKA used for SCP11c
+        /// Key ID '0x15' for SK.SD.ECKA used for SCP11c
         /// </summary>
         public const byte Scp11C = 0x15;
 
         /// <summary>
-        /// Key ID '16' for the optional static Key-DEK (data encryption key) used with SCP11c only
+        /// Key ID '0x16' for the optional static Key-DEK (data encryption key) used with SCP11c only.
         /// </summary>
         public const byte Scp11COptionalDek = 0x16;
     }

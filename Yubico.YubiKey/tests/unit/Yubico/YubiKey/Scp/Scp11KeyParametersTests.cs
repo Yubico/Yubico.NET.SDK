@@ -23,25 +23,25 @@ namespace Yubico.YubiKey.Scp
     public class Scp11KeyParametersTests : IDisposable
     {
         private readonly ECCurve _curve = ECCurve.NamedCurves.nistP256;
-        private readonly ECParameters _sdParams;
-        private readonly ECParameters _oceParams;
-        private readonly X509Certificate2[] _certificates;
+        private readonly ECParameters _sdPublicKeyParams;
+        private readonly ECParameters _ocePrivateKeyParams;
+        private readonly X509Certificate2[] _oceCertificates;
 
         public Scp11KeyParametersTests()
         {
-            using var sdKey = ECDsa.Create(_curve);
-            _sdParams = sdKey.ExportParameters(false);
+            using var sdKeyEcdsa = ECDsa.Create(_curve);
+            _sdPublicKeyParams = sdKeyEcdsa.ExportParameters(false);
 
-            using var oceKey = ECDsa.Create(_curve);
-            _oceParams = oceKey.ExportParameters(true);
+            using var oceKeyEcdsa = ECDsa.Create(_curve);
+            _ocePrivateKeyParams = oceKeyEcdsa.ExportParameters(true);
 
             // Create a self-signed cert for testing
             var req = new CertificateRequest(
                 "CN=Test",
-                oceKey,
+                oceKeyEcdsa,
                 HashAlgorithmName.SHA256);
 
-            _certificates = new[]
+            _oceCertificates = new[]
             {
                 req.CreateSelfSigned(
                     DateTimeOffset.UtcNow,
@@ -54,14 +54,14 @@ namespace Yubico.YubiKey.Scp
         {
             // Arrange
             var keyRef = new KeyReference(ScpKeyIds.Scp11B, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdParams);
+            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
 
             // Act
             var keyParams = new Scp11KeyParameters(keyRef, pkSdEcka);
 
             // Assert
             Assert.NotNull(keyParams);
-            Assert.Equal(ScpKeyIds.Scp11B, keyParams.KeyReference.Id);
+            Assert.Equal(0x13, keyParams.KeyReference.Id); // ScpKeyIds.Scp11B
             Assert.Equal(0x01, keyParams.KeyReference.VersionNumber);
             Assert.NotNull(keyParams.PkSdEcka);
             Assert.Null(keyParams.OceKeyReference);
@@ -72,13 +72,14 @@ namespace Yubico.YubiKey.Scp
         [Theory]
         [InlineData(ScpKeyIds.Scp11A)]
         [InlineData(ScpKeyIds.Scp11C)]
-        public void Constructor_Scp11ac_ValidParameters_Succeeds(byte keyId)
+        public void Constructor_Scp11ac_ValidParameters_Succeeds(
+            byte keyId)
         {
             // Arrange
             var keyRef = new KeyReference(keyId, 0x01);
             var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdParams);
-            var skOceEcka = new ECPrivateKeyParameters(_oceParams);
+            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
+            var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
 
             // Act
             var keyParams = new Scp11KeyParameters(
@@ -86,7 +87,7 @@ namespace Yubico.YubiKey.Scp
                 pkSdEcka,
                 oceKeyRef,
                 skOceEcka,
-                _certificates);
+                _oceCertificates);
 
             // Assert
             Assert.NotNull(keyParams);
@@ -99,14 +100,40 @@ namespace Yubico.YubiKey.Scp
             Assert.Single(keyParams.OceCertificates);
         }
 
+        [Theory]
+        [InlineData(ScpKeyIds.Scp11A)]
+        [InlineData(ScpKeyIds.Scp11C)]
+        public void Constructor_Scp11ac_InvalidParameters_ThrowsArgumentException(
+            byte keyId)
+        {
+            // Arrange
+            var keyRef = new KeyReference(keyId, 0x01);
+            var oceKeyRef = new KeyReference(0x01, 0x01);
+            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
+            var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
+
+            // Act
+            Assert.Throws<ArgumentException>(() =>
+            {
+                _ = new Scp11KeyParameters(
+                    keyRef,
+                    pkSdEcka,
+                    oceKeyRef,
+                    skOceEcka,
+                    new X509Certificate2[] { } // Empty list invalid
+                    );
+            });
+        }
+
         [Fact]
         public void Constructor_Scp11b_WithOptionalParams_ThrowsArgumentException()
         {
             // Arrange
-            var keyRef = new KeyReference(ScpKeyIds.Scp11B, 0x01);
+            var keyRef =
+                new KeyReference(ScpKeyIds.Scp11B, 0x01); // SCP11b and these optional parameters should not work
             var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdParams);
-            var skOceEcka = new ECPrivateKeyParameters(_oceParams);
+            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
+            var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
@@ -114,17 +141,18 @@ namespace Yubico.YubiKey.Scp
                 pkSdEcka,
                 oceKeyRef,
                 skOceEcka,
-                _certificates));
+                _oceCertificates));
         }
 
         [Theory]
         [InlineData(ScpKeyIds.Scp11A)]
         [InlineData(ScpKeyIds.Scp11C)]
-        public void Constructor_Scp11ac_MissingParams_ThrowsArgumentException(byte keyId)
+        public void Constructor_Scp11ac_MissingParams_ThrowsArgumentException(
+            byte keyId)
         {
             // Arrange
             var keyRef = new KeyReference(keyId, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdParams);
+            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
@@ -133,14 +161,15 @@ namespace Yubico.YubiKey.Scp
         }
 
         [Theory]
-        [InlineData(0x00)]  // Invalid key ID
-        [InlineData(0x10)]  // Invalid key ID
-        [InlineData(0xFF)]  // Invalid key ID
-        public void Constructor_InvalidKeyId_ThrowsArgumentException(byte keyId)
+        [InlineData(0x00)] // Invalid key ID
+        [InlineData(0x10)] // Invalid key ID
+        [InlineData(0xFF)] // Invalid key ID
+        public void Constructor_InvalidKeyId_ThrowsArgumentException(
+            byte keyId)
         {
             // Arrange
             var keyRef = new KeyReference(keyId, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdParams);
+            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
@@ -154,15 +183,15 @@ namespace Yubico.YubiKey.Scp
             // Arrange
             var keyRef = new KeyReference(ScpKeyIds.Scp11A, 0x01);
             var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdParams);
-            var skOceEcka = new ECPrivateKeyParameters(_oceParams);
+            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
+            var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
 
-            Scp11KeyParameters keyParams = new Scp11KeyParameters(
+            var keyParams = new Scp11KeyParameters(
                 keyRef,
                 pkSdEcka,
                 oceKeyRef,
                 skOceEcka,
-                _certificates);
+                _oceCertificates);
 
             // Act
             keyParams.Dispose();
@@ -178,15 +207,15 @@ namespace Yubico.YubiKey.Scp
             // Arrange
             var keyRef = new KeyReference(ScpKeyIds.Scp11A, 0x01);
             var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdParams);
-            var skOceEcka = new ECPrivateKeyParameters(_oceParams);
+            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
+            var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
 
             var keyParams = new Scp11KeyParameters(
                 keyRef,
                 pkSdEcka,
                 oceKeyRef,
                 skOceEcka,
-                _certificates);
+                _oceCertificates);
 
             // Act & Assert - Should not throw
             keyParams.Dispose();
@@ -195,7 +224,7 @@ namespace Yubico.YubiKey.Scp
 
         public void Dispose()
         {
-            foreach (var cert in _certificates)
+            foreach (var cert in _oceCertificates)
             {
                 cert.Dispose();
             }

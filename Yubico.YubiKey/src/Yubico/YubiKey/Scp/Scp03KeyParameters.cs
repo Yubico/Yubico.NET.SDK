@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Scp
         {
             if (keyReference.Id < 1 || keyReference.Id > 3)
             {
-                throw new ArgumentException("Invalid KID for SCP03. Kid must be between 1 and 3", nameof(keyReference.Id));
+                throw new ArgumentException("Key ID (KID) must be between 1 and 3 for SCP03.", nameof(keyReference.Id));
             }
 
             StaticKeys = staticKeys.GetCopy();

@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Scp.Commands
                             : message ?? StatusMessage);
             }
 
-            string AddStatusWord(string originalMessage) => $"{originalMessage} (StatusWord: {StatusWord})";
+            string AddStatusWord(string originalMessage) => $"{originalMessage} (StatusWord: 0x{StatusWord:X2})";
         }
     }
 }

@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Scp
 
         public Scp03Tests()
         {
-            ResetAllowedDevices();
+            ResetSecurityDomainOnAllowedDevices();
         }
 
         private IYubiKeyDevice GetDevice(
@@ -57,9 +57,8 @@ namespace Yubico.YubiKey.Scp
             return testDevice;
         }
 
-        private static void ResetAllowedDevices()
+        private static void ResetSecurityDomainOnAllowedDevices()
         {
-            // Reset all attached allowed devices
             foreach (var availableDevice in IntegrationTestDeviceEnumeration.GetTestDevices())
             {
                 using var session = new SecurityDomainSession(availableDevice);

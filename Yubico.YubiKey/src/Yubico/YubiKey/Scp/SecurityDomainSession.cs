@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Scp
 
         /// <summary>
         /// Create an unauthenticated instance of <see cref="SecurityDomainSession"/>, the object that
-        /// represents SCP on the YubiKey.
+        /// manages the security domain on the YubiKey.
         /// </summary>
         /// <remarks>Sessions created from this constructor will not be able to perform operations which require authentication
         /// <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
@@ -166,7 +166,7 @@ namespace Yubico.YubiKey.Scp
 
         /// <summary>
         /// Create an instance of <see cref="SecurityDomainSession"/>, the object that
-        /// represents SCP on the YubiKey.
+        /// manages the security domain on the YubiKey.
         /// </summary>
         /// <remarks>
         /// See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP.

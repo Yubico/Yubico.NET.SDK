@@ -316,11 +316,12 @@ namespace Yubico.YubiKey.Scp
                     "SCP11a and SCP11c require a certificate chain", nameof(keyParams.OceCertificates));
             }
 
-            int n = keyParams.OceCertificates.Count - 1;
+            var oceCertificates = keyParams.OceCertificates;
+            int n = oceCertificates.Count - 1;
             var oceRef = keyParams.OceKeyReference ?? new KeyReference(0, 0);
             for (int i = 0; i <= n; i++)
             {
-                byte[] certificates = keyParams.OceCertificates[i].RawData;
+                byte[] certificates = oceCertificates[i].RawData;
                 byte oceRefInput = (byte)(oceRef.Id | (i < n
                     ? 0x80
                     : 0x00)); // Append 0x80 if more certificates remain to be sent

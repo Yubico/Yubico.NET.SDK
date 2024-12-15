@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.Scp
     public abstract class ScpKeyParameters
     {
         /// <summary>
-        /// The key reference associated with the key parameters.
+        /// The <see cref="KeyReference"/> associated with the key parameters, used in all SCP variations.
         /// </summary>
         public KeyReference KeyReference { get; }
 

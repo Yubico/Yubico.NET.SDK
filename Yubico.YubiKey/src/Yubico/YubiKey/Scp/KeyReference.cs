@@ -32,6 +32,14 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         public byte VersionNumber { get; }
 
+        internal KeyReference(
+            byte id,
+            byte versionNumber)
+        {
+            Id = id;
+            VersionNumber = versionNumber;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyReference"/> class.
         /// </summary>
@@ -39,9 +47,7 @@ namespace Yubico.YubiKey.Scp
         /// for a list of possible Key Id's.</param>
         /// <param name="versionNumber">The version number of the key (KVN). Must be between 1 and 127.</param>
         /// <remarks>See the GlobalPlatform Technology Card Specification v2.3 Amendment F §5.1 Cryptographic Keys for more information on the available KIDs.</remarks>
-        public KeyReference(
-            byte id,
-            byte versionNumber)
+        public static KeyReference Create(byte id, byte versionNumber)
         {
             if (versionNumber > 127)
             {
@@ -53,8 +59,7 @@ namespace Yubico.YubiKey.Scp
                 throw new ArgumentException(nameof(id), "Key ID (KID) must be between 0 and 127");
             }
 
-            Id = id;
-            VersionNumber = versionNumber;
+            return new KeyReference(id, versionNumber);
         }
 
         /// <summary>

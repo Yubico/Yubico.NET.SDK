@@ -29,9 +29,33 @@ namespace Yubico.YubiKey.Scp
         }
 
         [Fact]
-        public void Constructor_InvalidParameters_ThrowsException()
+        public void FactoryMethod_ValidParameters_SetsProperties()
         {
-            Assert.Throws<ArgumentException>(() => new KeyReference(ScpKeyIds.Scp11B, 128));
+            var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
+
+            Assert.Equal(0x13, keyReference.Id);
+            Assert.Equal(0x1, keyReference.VersionNumber);
+        }
+
+        [Fact]
+        public void FactoryMethod_InvalidParameters_ThrowsException()
+        {
+            Assert.Throws<ArgumentException>(() => KeyReference.Create(ScpKeyIds.Scp11B, 128));
+        }
+
+        [Fact]
+        public void Constructor_0xFF_SetsProperties()
+        {
+            var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0xFF);
+
+            Assert.Equal(0x13, keyReference.Id);
+            Assert.Equal(0xFF, keyReference.VersionNumber);
+        }
+
+        [Fact]
+        public void FactoryMethod_InvalidKvn_ThrowsException()
+        {
+            Assert.Throws<ArgumentException>(() => KeyReference.Create(ScpKeyIds.Scp11B, 0xFF));
         }
     }
 }

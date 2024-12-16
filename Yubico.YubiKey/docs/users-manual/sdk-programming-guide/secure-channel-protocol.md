@@ -28,7 +28,7 @@ verify their correctness) will be the YubiKey itself and authorized applications
 The YubiKey supports two main variants of SCP:
 
 - **SCP03** - A symmetric key protocol using AES-128 for encryption and authentication
-- **SCP11** - An asymmetric protocol using elliptic curve cryptography (ECC) and X509-certificates
+- **SCP11** - An asymmetric protocol using elliptic curve cryptography (ECC) and X.509-certificates
 
 ## Protocol Overview
 
@@ -41,11 +41,11 @@ Key characteristics:
 - Supported on YubiKey 5 Series with firmware 5.3+
 
 ### SCP11 (Asymmetric)
-SCP11[^1] uses public key cryptography for authentication and key agreement. It provides stronger security guarantees and simpler key management, but with more complex implementation. SCP11 comes in three variants:
+SCP11 uses public key cryptography for authentication and key agreement. It provides stronger security guarantees and simpler key management, but with more complex implementation. SCP11 comes in three variants:
 
 - **SCP11a** - Mutual authentication between YubiKey and host
 - **SCP11b** - YubiKey authenticates to host only
-- **SCP11c** - Enhanced mutual authentication with additional features
+- **SCP11c** - Mutual authentication with additional features, such as offline scripting usage (See [GlobalPlatform SCP11 Specification Annex B](https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/))
 
 Key characteristics:
 - Uses NIST P-256 elliptic curve
@@ -58,7 +58,6 @@ Secure channels are particularly valuable when:
 
 - Communicating with YubiKeys over networks or untrusted channels (e.g. NFC)
 - Managing YubiKeys remotely through card management systems
-- Protecting sensitive operations in multi-tenant environments
 - Ensuring end-to-end security beyond transport encryption
 
 For example, if you tunnel YubiKey commands over the Internet, you might use TLS for transport security and add SCP as an additional layer of defense.
@@ -92,8 +91,15 @@ using var sdSession = new SecurityDomainSession(yubiKeyDevice, scp03Params);
 // Create SCP11b key parameters from public key on YubiKey
 var keyVersionNumber = 0x1; // Example kvn
 var keyId = ScpKeyIds.SCP11B;
-var keyReference = new KeyReference(keyId, keyVersionNumber);
-var certificates = sdSession.GetCertificates(keyReference);  // Get from YubiKey
+var keyReference = KeyReference.Create(keyId, keyVersionNumber);
+
+// Get certificate from YubiKey
+var certificates = sdSession.GetCertificates(keyReference); 
+
+// Verify the Yubikey's certificate chain against a trusted root using your implementation
+CertificateChainVerifier.Verify(certificateList)
+
+// Use the verified leaf certificate to construct ECPublicKeyParameters
 var publicKey = certificates.Last().GetECDsaPublicKey();
 var scp11Params = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(publicKey));
 
@@ -119,7 +125,7 @@ using (var pivSession = new PivSession(yubiKeyDevice, scp03params))
 }
 
 // Using SCP11b
-var keyReference = new KeyReference(ScpKeyIds.Scp11B, kvn);
+var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, kvn);
 using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 {
     // All PivSession-commands are now automatically protected by SCP11
@@ -138,7 +144,7 @@ using (var oathSession = new OathSession(yubiKeyDevice, scp03params))
 }
 
 // Using SCP11b
-var keyReference = new KeyReference(ScpKeyIds.Scp11B, kvn);
+var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, kvn);
 using (var oathSession = new OathSession(yubiKeyDevice, scp11Params))
 {
     // All OathSession-commands are now automatically protected by SCP11
@@ -157,7 +163,7 @@ using (var otpSession = new OtpSession(yubiKeyDevice, scp03params))
 }
 
 // Using SCP11b
-var keyReference = new KeyReference(ScpKeyIds.Scp11B, kvn);
+var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, kvn);
 using (var otpSession = new OtpSession(yubiKeyDevice, scp11Params))
 {
     // All OtpSession-commands are now automatically protected by SCP11
@@ -175,7 +181,7 @@ using (var yubiHsmSession = new YubiHsmAuthSession(yubiKeyDevice, scp03params))
 }
 
 // Using SCP11b
-var keyReference = new KeyReference(ScpKeyIds.Scp11B, kvn);
+var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, kvn);
 using (var yubiHsmSession = new YubiHsmSession(yubiKeyDevice, scp11Params))
 {
     // All yubiHsmSession-commands are now automatically protected by SCP11
@@ -185,7 +191,7 @@ using (var yubiHsmSession = new YubiHsmSession(yubiKeyDevice, scp11Params))
 
 ### Direct Connection
 
-If you need lower-level control, you can establish secure connections directly using [`Connect`](xref:Yubico.YubiKey.IYubiKeyDevice.Connect):
+If you need lower-level control, you can establish secure connections directly using [`Connect`](xref:Yubico.YubiKey.IYubiKeyDevice.Connect*):
 
 ```csharp
 // Using application ID
@@ -228,10 +234,10 @@ session.StoreCertificates(keyReference, certificates);
 session.StoreAllowlist(keyReference, allowedSerials);
 
 // Import private key
-session.PutKey(keyReference, privateKeyParameters, 0)
+session.PutKey(keyReference, privateKeyParameters)
 
 // Import public key
-session.PutKey(keyReference, publicKeyParameters, 0)
+session.PutKey(keyReference, publicKeyParameters)
 
 // Reset to factory defaults
 session.Reset();
@@ -288,12 +294,12 @@ Use `SecurityDomainSession` to manage SCP03 key sets:
 using var session = new SecurityDomainSession(yubiKeyDevice, Scp03KeyParameters.DefaultKey);
 var newKeys = new StaticKeys(newKeyDataMac, newKeyDataEnc, newKeyDataDek);
 var newKeyParams = new Scp03KeyParameters(ScpKeyIds.Scp03, 0x01, newKeys);
-session.PutKey(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
+session.PutKey(newKeyParams.KeyReference, newKeyParams.StaticKeys);
 
 // Add another key set
 using var session = new SecurityDomainSession(yubiKeyDevice, existingKeyParams);
-var keyRef = new KeyReference(ScpKeyIds.Scp03, 0x02);  // KVN=2
-session.PutKey(keyRef, additionalKeys, 0);
+var keyRef = KeyReference.Create(ScpKeyIds.Scp03, 0x02);  // KVN=2
+session.PutKey(keyRef, additionalKeys);
 
 // Delete a key set
 session.DeleteKey(keyRef, false);
@@ -306,22 +312,20 @@ session.Reset();
 
 1. **Key Version Numbers (KVN):**
    - Default key set: KVN=0xFF
-   - Custom key sets: KVN must be 1, 2, or 3
-   - YubiKey enforces these specific values
+   - Accepted values are between 1 and 0x7F
 
-2. **Default Key Replacement:**
+2. **Key Id's (KID)**
+   - Default value: 1
+   - Accepted values are between 1 and 3
+
+3. **Default Key Replacement:**
    - When adding first custom key set, default keys are always removed
-   - Happens regardless of which KVN (1,2,3) is used
    - Cannot retain default keys alongside custom keys
 
-3. **Multiple Key Sets:**
+4. **Multiple Key Sets:**
    - After default keys are replaced, can have 1-3 custom key sets
-   - Each must have unique KVN
+   - Each must have unique KID
    - Can add/remove without affecting other sets
-
-4. **Key Replacement:**
-   - Must authenticate with the key set being replaced
-   - Cannot replace KVN=1 while authenticated with KVN=2
 
 ### Example: Complete Key Management Flow
 
@@ -331,8 +335,8 @@ var defaultScp03Params = Scp03KeyParameters.DefaultKey;
 using (var session = new SecurityDomainSession(yubiKeyDevice, defaultScp03Params))
 {
     // Add first custom key set (removes default)
-    var keyRef1 = new KeyReference(ScpKeyIds.Scp03, 0x01);
-    session.PutKey(keyRef1, newKeys, 0);
+    var keyRef1 = KeyReference.Create(ScpKeyIds.Scp03, 0x01);
+    session.PutKey(keyRef1, newKeys);
 }
 
 // Now authenticate with new keys
@@ -340,8 +344,8 @@ var newScp03Params = new Scp03KeyParameters(ScpKeyIds.Scp03, 0x01, newKeys);
 using (var session = new SecurityDomainSession(yubiKeyDevice, newScp03Params))
 {
     // Add second key set
-    var keyRef2 = new KeyReference(ScpKeyIds.Scp03, 0x02);
-    session.PutKey(keyRef2, customKeys2, 0);
+    var keyRef2 = KeyReference.Create(ScpKeyIds.Scp03, 0x02);
+    session.PutKey(keyRef2, customKeys2);
 
     // Check current key information
     var keyInfo = session.GetKeyInformation();
@@ -364,12 +368,12 @@ The YubiKey provides no metadata about installed keys beyond what's available th
 
 ## SCP11 (Asymmetric Key Protocol)
 
-SCP11[^1] uses asymmetric cryptography based on elliptic curves (NIST P-256) for authentication and key agreement. Compared to SCP03, it uses certificates instead of pre-shared keys, providing greater flexibility in cases where the two entities setting up the secure channel are not deployed in strict pairs. The secure channel can be embedded into complex use cases, such as:
+SCP11 uses asymmetric cryptography based on elliptic curves (NIST P-256) for authentication and key agreement. Compared to SCP03, it uses certificates instead of pre-shared keys, providing greater flexibility in cases where the two entities setting up the secure channel are not deployed in strict pairs. The secure channel can be embedded into complex use cases, such as:
 - Installation of payment credentials on wearables
 - Production systems
 - Remote provisioning of cell phone subscriptions
 
-[^1]: Detailed information about SCP11 can be found in [GlobalPlatform Card Technology, Secure Channel Protocol '11' Card Specification v2.3 – Amendment F, Chapter 2](https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/)
+Detailed information about SCP11 can be found in [GlobalPlatform Card Technology, Secure Channel Protocol '11' Card Specification v2.3 – Amendment F, Chapter 2](https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/)
 
 
 It comes in three variants, each offering different security properties:
@@ -385,18 +389,15 @@ It comes in three variants, each offering different security properties:
 
 - **SCP11b**: YubiKey authenticates to host only
   - Simplest variant, no mutual authentication
-  - Uses only ephemeral key pairs
-  - No certificate chain required
+  - Uses both static and ephemeral key pairs
   - Suitable when host authentication isn't required
 
 - **SCP11c**: Enhanced mutual authentication with additional features
-  - Most secure variant with additional capabilities
   - Uses both static and ephemeral key pairs
   - Supports offline scripting mode:
     - Can precompute personalization scripts for groups of cards
     - Scripts can be deployed via online services or companion apps
     - Cryptographic operations remain on secure OCE server
-  - Includes transaction mechanism with rollback capability
   - Supports authorization rules in OCE certificates
 
 ### Key Benefits of SCP11 over SCP03
@@ -404,9 +405,8 @@ It comes in three variants, each offering different security properties:
 SCP11 provides several advantages over SCP03:
 - Uses certificates instead of pre-shared keys for authentication
 - More flexible deployment - doesn't require strict pairing of entities
-- Supports ECC for key establishment with all AES variants (128/192/256)
+- Supports ECC for key establishment with AES-128
 - Better suited for complex deployment scenarios
-- Can operate through intermediary applications securely
 
 ### Key Parameters
 
@@ -418,7 +418,7 @@ Unlike SCP03's static keys, SCP11 uses `Scp11KeyParameters` which can contain:
 
 ```csharp
 // SCP11b basic parameters
-var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
+var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, 0x1);
 var scp11Params = new Scp11KeyParameters(
     keyReference,
     new ECPublicKeyParameters(publicKey));
@@ -440,12 +440,12 @@ Use `SecurityDomainSession` to manage SCP11 keys and certificates:
 using var session = new SecurityDomainSession(yubiKeyDevice, Scp03KeyParameters.DefaultKey);
 
 // Generate new EC key pair
-var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x3);
-var publicKey = session.GenerateEcKey(keyReference, 0);
+var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, 0x3);
+var publicKey = session.GenerateEcKey(keyReference);
 
 // Import existing key pair
 var privateKey = new ECPrivateKeyParameters(ecdsa);
-session.PutKey(keyReference, privateKey, 0);
+session.PutKey(keyReference, privateKey);
 
 // Store certificates
 session.StoreCertificates(keyReference, certificates);
@@ -464,14 +464,17 @@ Simplest variant, where YubiKey authenticates to host:
 
 ```csharp
 // Get certificates stored on YubiKey
-var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
+var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, 0x1);
 IReadOnlyCollection<X509Certificate2> certificateList;
 using (var session = new SecurityDomainSession(yubiKeyDevice))
 {
     certificateList = session.GetCertificates(keyReference);
 }
 
-// Create parameters using leaf certificate
+// Verify the certificate chain against a trusted root using your implementation
+CertificateChainVerifier.Verify(certificateList)
+
+// Create parameters using leaf certificate which has now been verified
 var leaf = certificateList.Last();
 var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!.ExportParameters(false);
 var keyParams = new Scp11KeyParameters(
@@ -491,15 +494,15 @@ Full mutual authentication requires more setup:
 using var session = new SecurityDomainSession(yubiKeyDevice, Scp03KeyParameters.DefaultKey);
 
 const byte kvn = 0x03;
-var keyRef = new KeyReference(ScpKeyIds.Scp11A, kvn);
+var keyRef = KeyReference.Create(ScpKeyIds.Scp11A, kvn);
 
 // Generate new key pair on YubiKey
-var newPublicKey = session.GenerateEcKey(keyRef, 0);
+var newPublicKey = session.GenerateEcKey(keyRef);
 
 // Setup off-card entity (OCE)
-var oceRef = new KeyReference(OceKid, kvn);
+var oceRef = KeyReference.Create(OceKid, kvn);
 var ocePublicKey = new ECPublicKeyParameters(oceCerts.Ca.PublicKey.GetECDsaPublicKey()!);
-session.PutKey(oceRef, ocePublicKey, 0);
+session.PutKey(oceRef, ocePublicKey);
 
 // Store CA identifier
 var ski = GetSubjectKeyIdentifier(oceCerts.Ca);

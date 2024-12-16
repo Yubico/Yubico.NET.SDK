@@ -2,7 +2,7 @@
 uid: UsersManualScp
 ---
 
-<!-- Copyright 2021 Yubico AB
+<!-- Copyright 2024 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,90 +16,260 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# Secure Channel Protocol 3 ("SCP03")
 
-Commands sent to the YubiKey, or responses from the YubiKey, may contain
-senstive data that should not leak to or be tampered with by other applications
-on the host machine. The operating system of the host machine may provide at
-least one layer of protection by isolating applications from each other using
-separation of memory spaces, permissioned access to system resources like
-devices, and other techniques.
+# Secure Channel Protocol (SCP)
 
-The YubiKey also supports an additional layer of protection that aims to provide
-confidentiality and intergrity of communication to and from the YubiKey, using a
-standardized protocol called "Secure Channel Protocol 3" (commonly referred to
-as "SCP03"). This standard prescribes methods to encrypt and authenticate smart card
-(CCID) messages. That is, APDUs and responses are encrypted and contain checksums. If
-executed properly, the only entities that can see the contents of the messages (and
-verify their correctness) will be the YubiKey itself and authorized applications. This
-protocol is produced by <a href="https://globalplatform.org/">GlobalPlatform</a>, an industry consortium of hardware security
-vendors that produce standards.
+Commands sent to the YubiKey, or responses from the YubiKey, may contain sensitive data that should not leak to or be tampered with by other applications on the host machine. While the operating system provides some protection through memory space isolation and permissioned access, YubiKeys support additional layers of protection through Secure Channel Protocols (SCP).
 
-Think of SCP03 as wrapping or unwrapping commands and responses. Before sending the actual
-command to the YubiKey, wrap it in an SCP03 package. The YubiKey will be able to unwrap it
-and execute the recovered command. After the YubiKey builds the actual response, it wraps
-it in an SCP03 package, and the SDK can then unwrap the package and process the result.
+These protocols, defined by <a href="https://globalplatform.org/">GlobalPlatform</a>, provide confidentiality and integrity of communication between the host and YubiKey. 
+This standard prescribes methods to encrypt and authenticate smart card
+(CCID) messages. That is, APDUs and responses are encrypted and contain checksums. If executed properly, the only entities that can see the contents of the messages (and
+verify their correctness) will be the YubiKey itself and authorized applications.
+The YubiKey supports two main variants of SCP:
 
-Only YubiKey 5 Series devices with firmware version 5.3 or later support the Secure
-Channel Protocol (version 3). Other SCP03 versions are not supported by any YubiKey. In
-addition, while the PIV, OATH, OpenPGP, and YubiCrypt applications use the smart card
-protocols, only the PIV application supports sending and receiving SCP03 messages.
+- **SCP03** - A symmetric key protocol using AES-128 for encryption and authentication
+- **SCP11** - An asymmetric protocol using elliptic curve cryptography (ECC) and X509-certificates
 
-SCP03 relies entirely on symmetric cryptography. Hence, its security is dependent on
-making sure only authorized applications have access to the symmetric keys. The standard
-specifies no method for distributing keys securely.
+## Protocol Overview
 
-This added layer of protection makes the most sense when the communication
-channel between the host machine and the device could feasibly be compromised.
-For example, if you tunnel YubiKey commands and responses over the Internet, in
-addition to standard web security protocols like TLS, it could makes sense to
-leverage SCP03 as an added layer of defense. Additionally, several 'card
-management systems' use SCP03 to securely remotely manage devices.
+### SCP03 (Symmetric)
+SCP03 provides a secure channel using shared secret keys. It is simpler to implement but requires secure key distribution. Think of SCP03 as wrapping commands and responses in an encrypted envelope that only trusted parties can open.
 
-> [!NOTE]
-> SCP03 works only with SmartCard applications, namely PIV, OATH, and OpenPgp.
-> However, SCP03 is supported only on series 5 YubiKeys with firmware version 5.3
-> and later, and only the PIV application.
+Key characteristics:
+- Uses AES-128 symmetric keys
+- Three keys per set: encryption, MAC, and data encryption
+- Supported on YubiKey 5 Series with firmware 5.3+
 
-## Static Keys
+### SCP11 (Asymmetric)
+SCP11[^1] uses public key cryptography for authentication and key agreement. It provides stronger security guarantees and simpler key management, but with more complex implementation. SCP11 comes in three variants:
 
-SCP03 relies on a set of shared, secret, symmetric cryptographic keys, called the
-["static keys"](xref:Yubico.YubiKey.Scp03.StaticKeys), which are known to the application
-and the YubiKey.
+- **SCP11a** - Mutual authentication between YubiKey and host
+- **SCP11b** - YubiKey authenticates to host only
+- **SCP11c** - Enhanced mutual authentication with additional features
 
-Most YubiKeys are manufactured with a default set of keys. The value of these keys is
-specified by the standard, so they are not secret. It is important to emphasize that using
-the default SCP03 keys to connect to a device offers *no additional protection* over
-cleartext communication.
+Key characteristics:
+- Uses NIST P-256 elliptic curve
+- Certificate-based authentication
+- Supported on YubiKey 5 Series with firmware 5.7.2+
 
-It is possible to manufacture YubiKeys with a non-default SCP03 key set (this will be a
-custom order, see your sales rep if you are interested in a custom order), or to change
-the keys on a YubiKey at any time. Hence, if you want to take advantage of SCP03, your
-first task will be to make sure the YubiKey is loaded with a set of keys that only
-authorized applications will know. See the sections below on
-[replacing the default key set](#replacing-the-default-key-set) for a discussion on how to
-do that.
+## When to Use Secure Channels
 
-The three keys that comprise the `StaticKeys` are 16 byte, AES-128 cryptographic
-keys, referred to in the GlobalPlatform SCP03 Specification as the channel encryption key
-(Key-ENC), channel MAC key (Key-MAC), and data encryption key (Key-DEK). In the SDK, these
-keys are held in a [StaticKeys](xref:Yubico.YubiKey.Scp03.StaticKeys) object.
+Secure channels are particularly valuable when:
 
-### Three key sets
+- Communicating with YubiKeys over networks or untrusted channels (e.g. NFC)
+- Managing YubiKeys remotely through card management systems
+- Protecting sensitive operations in multi-tenant environments
+- Ensuring end-to-end security beyond transport encryption
 
-A YubiKey can contain up to three SCP03 key sets. Think of the YubiKey as having three
-slots for SCP03 keys.
+For example, if you tunnel YubiKey commands over the Internet, you might use TLS for transport security and add SCP as an additional layer of defense.
 
-```txt
-   slot 1:   ENC   MAC   DEK
-   slot 2:   ENC   MAC   DEK
-   slot 3:   ENC   MAC   DEK
+## Security Considerations
+
+SCP03 relies entirely on symmetric cryptography, making key distribution a critical security concern. Most YubiKeys ship with default SCP03 keys that are publicly known - using these provides no additional security over cleartext communication.
+
+SCP11, being asymmetric, simplifies key management but requires proper certificate handling and validation. Each variant (a/b/c) offers different security properties suitable for different use cases.
+
+ It is possible to manufacture YubiKeys with custom non-default SCP key sets (this requires a custom order - contact your Yubico sales representative for details).
+
+The following sections detail how to implement both protocols, manage keys and certificates, and integrate secure channels with various YubiKey applications.
+
+## Using Secure Channels with YubiKey Applications
+
+The SDK provides a consistent way to use secure channels across different YubiKey applications. You can enable secure channel communication by providing SCP key parameters when creating application sessions.
+
+### Common Pattern
+
+Each application session (PIV, OATH, OTP, YubiHSM Auth) accepts an optional `ScpKeyParameters` parameter. This can be either `Scp03KeyParameters` or `Scp11KeyParameters` depending on which protocol you want to use.
+
+```csharp
+// Using SCP03
+using var scp03Params = Scp03KeyParameters.DefaultKey;  // For testing only
+using var pivSession = new PivSession(yubiKeyDevice, scp03Params);
+
+// Using SCP11b
+using var sdSession = new SecurityDomainSession(yubiKeyDevice, scp03Params);
+
+// Create SCP11b key parameters from public key on YubiKey
+var keyVersionNumber = 0x1; // Example kvn
+var keyId = ScpKeyIds.SCP11B;
+var keyReference = new KeyReference(keyId, keyVersionNumber);
+var certificates = sdSession.GetCertificates(keyReference);  // Get from YubiKey
+var publicKey = certificates.Last().GetECDsaPublicKey();
+var scp11Params = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(publicKey));
+
+// Use SCP11b parameters to open connection
+using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
+{
+    // All PivSession-commands are now automatically protected by SCP11
+    session.GenerateKeyPair(PivSlot.Retired12, PivAlgorithm.EccP256, PivPinPolicy.Always); // Protected by SCP11
+}
 ```
 
-Each key is 16 bytes. YubiKeys do not support any other key size.
+### Application Examples
 
-Standard YubiKeys are manufactured with one key set, and each key in that set is the
-default value. The default value (prescribed by the standard) is `0x40 41 42 ... 4F`.
+#### PIV with Secure Channel
+
+```csharp
+// Using SCP03
+StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
+using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
+using (var pivSession = new PivSession(yubiKeyDevice, scp03params))
+{
+    // All PivSession-commands are now automatically protected by SCP11
+}
+
+// Using SCP11b
+var keyReference = new KeyReference(ScpKeyIds.Scp11B, kvn);
+using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
+{
+    // All PivSession-commands are now automatically protected by SCP11
+}
+```
+
+#### OATH with Secure Channel
+```csharp
+
+// Using SCP03
+StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
+using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
+using (var oathSession = new OathSession(yubiKeyDevice, scp03params))
+{
+    // All oathSession-commands are now automatically protected by SCP11
+}
+
+// Using SCP11b
+var keyReference = new KeyReference(ScpKeyIds.Scp11B, kvn);
+using (var oathSession = new OathSession(yubiKeyDevice, scp11Params))
+{
+    // All OathSession-commands are now automatically protected by SCP11
+}
+```
+
+#### OTP with Secure Channel
+```csharp
+
+// Using SCP03
+StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
+using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
+using (var otpSession = new OtpSession(yubiKeyDevice, scp03params))
+{
+    // All otpSession-commands are now automatically protected by SCP11
+}
+
+// Using SCP11b
+var keyReference = new KeyReference(ScpKeyIds.Scp11B, kvn);
+using (var otpSession = new OtpSession(yubiKeyDevice, scp11Params))
+{
+    // All OtpSession-commands are now automatically protected by SCP11
+}
+```
+
+#### YubiHSM Auth with Secure Channel
+```csharp
+// Using SCP03
+StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
+using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
+using (var yubiHsmSession = new YubiHsmAuthSession(yubiKeyDevice, scp03params))
+{
+    // All YubiHsmSession-commands are now automatically protected by SCP03
+}
+
+// Using SCP11b
+var keyReference = new KeyReference(ScpKeyIds.Scp11B, kvn);
+using (var yubiHsmSession = new YubiHsmSession(yubiKeyDevice, scp11Params))
+{
+    // All yubiHsmSession-commands are now automatically protected by SCP11
+}
+
+```
+
+### Direct Connection
+
+If you need lower-level control, you can establish secure connections directly using [`Connect`](xref:Yubico.YubiKey.IYubiKeyDevice.Connect):
+
+```csharp
+// Using application ID
+using var connection = yubiKeyDevice.Connect(
+    applicationId,  // byte array for ISO7816 applicationId
+    Scp03KeyParameters.DefaultKey);
+
+// Using YubiKeyApplication enum
+using var connection = yubiKeyDevice.Connect(
+    YubiKeyApplication.Piv,
+    scp11Parameters);
+
+// Try pattern
+if (yubiKeyDevice.TryConnect(
+    YubiKeyApplication.Oath,
+    scpParameters,
+    out var connection))
+{
+    using (connection)
+    {
+        // Use connection
+    }
+}
+```
+
+### Security Domain Management
+
+The [`SecurityDomainSession`](xref:Yubico.YubiKey.Scp.SecurityDomainSession) class provides methods to manage SCP configurations:
+
+```csharp
+using var session = new SecurityDomainSession(yubiKeyDevice, Scp03KeyParameters.DefaultKey);
+
+// Get information about installed keys
+var keyInfo = session.GetKeyInformation();
+
+// Store certificates for SCP11
+session.StoreCertificates(keyReference, certificates);
+
+// Manage allowed certificate serials
+session.StoreAllowlist(keyReference, allowedSerials);
+
+// Import private key
+session.PutKey(keyReference, privateKeyParameters, 0)
+
+// Import public key
+session.PutKey(keyReference, publicKeyParameters, 0)
+
+// Reset to factory defaults
+session.Reset();
+```
+
+> [!NOTE]
+> Using `DefaultKey` in production code provides no security. Always use proper key management in production environments.
+
+The next sections will detail specific key management and protocol details for both SCP03 and SCP11.
+
+## SCP03 (Symmetric Key Protocol)
+
+### Static Keys Structure
+
+SCP03 relies on a set of shared, secret, symmetric cryptographic keys. Each key set consists of three 16-byte AES-128 keys encapsulated in the [`StaticKeys`](xref:Yubico.YubiKey.Scp03.StaticKeys) class:
+
+- Channel encryption key (Key-ENC)
+- Channel MAC key (Key-MAC) 
+- Data encryption key (Key-DEK)
+
+These keys are encapsulated in a `StaticKeys` class and provided to the SDK via `Scp03KeyParameters`:
+
+```csharp
+var staticKeys = new StaticKeys(keyDataMac, keyDataEnc, keyDataDek);
+var scp03Params = new Scp03KeyParameters(ScpKeyIds.Scp03, 0x01, staticKeys);
+```
+
+### Key Sets on the YubiKey
+
+A YubiKey can contain up to three SCP03 key sets. Each set is identified by a Key Version Number (KVN):
+
+```txt
+   slot 1:   ENC   MAC   DEK    (KVN=1)
+   slot 2:   ENC   MAC   DEK    (KVN=2) 
+   slot 3:   ENC   MAC   DEK    (KVN=3)
+```
+
+Standard YubiKeys are manufactured with a default key set (KVN=0xFF):
 
 ```txt
    slot 1:   ENC(default)  MAC(default)  DEK(default)
@@ -107,401 +277,288 @@ default value. The default value (prescribed by the standard) is `0x40 41 42 ...
    slot 3:   --empty--
 ```
 
-The SCP03 standard specifies that each key set be given a Key Version Number (KVN). That
-is, when you specify a particular key set, you won't specify it by slot number but rather
-by KVN. Think of the KVN as the key set's name.
+The default keys are publicly known (0x40 41 42 ... 4F) and provide no security. You should replace them in production environments.
 
-The standard declares that the default key set will have the KVN of 255 (0xFF). It also
-specifies that the KVN for a non-default key set can be any number from 0x01 to 0x7F. The
-standard places no other restrictions on the KVN. For example, a standard-compliant device
-that holds three key sets could allow a caller to specify 0x5A, 0x21, 0x30 as the three
-KVNs.
+### Managing Key Sets
 
-However, the standard also specifies that a device can put its own limitations onto the
-KVNs, and that's what the YubiKey does. A YubiKey only supports KVNs of 1, 2, 3, and 255.
-
-In addition, each key in the set is given a Key Identifier (KeyId). The YubiKey allows
-only 1, 2, and 3 as the KeyIds, but there is no place in the SDK where a KeyId is needed.
-That is, if you use the SDK to perform SCP03 on the YubiKey, the KeyId will never be used.
-
-This is the initial state of the standard YubiKey.
-
-```txt
-   slot 1: KVN=0xff  KeyId=1:ENC(default)  KeyId=2:MAC(default)  KeyId=3:DEK(default)
-   slot 2:   --empty--
-   slot 3:   --empty--
-```
-
-When you add or replace a key set, you must specify the Key Version Number. Remember, the
-YubiKey allows only 1, 2, or 3. For example, if you replace the default key set and you
-specify 1 as the Key Version Number, your YubiKey's SCP03 key situation would look like
-this:
-
-```txt
-   slot 1: KVN=1  ENC(new)  MAC(new)  DEK(new)
-   slot 2:   --empty--
-   slot 3:   --empty--
-```
-
-Suppose you have a YubiKey that has only the default key set, and you put a new SCP03 key
-set onto the device. But this time, you specify 2 as the Key Version Number. In this case,
-the new key set would be placed into the second slot, but the default key set would still
-be removed.
-
-```txt
-   slot 1:   --empty--
-   slot 2: KVN=2  ENC(new)  MAC(new)  DEK(new)
-   slot 3:   --empty--
-```
-
-This happens only when the default key set is on the YubiKey. Once the default key set has
-been removed, it is possible to add a new key set without removing a previous one. That
-is, after the default key set has been removed, you can add a new key set to an empty slot
-without removing any existing key set.
-
-For example, if there is a key set for KVN=2, and only KVN=2, and you add a key set to
-KVN=3, the YubiKey's state will be this:
-
-```txt
-   slot 1:   --empty--
-   slot 2: KVN=2  ENC       MAC       DEK
-   slot 3: KVN=3  ENC(new)  MAC(new)  DEK(new)
-```
-
-It is also possible to replace a key set, that is described [below](#replacing-a-key-set).
-
-#### Slot number and KVN
-
-In SCP03, there is no concept of slots or slot number. We use those terms just to
-illustrate the model. They are meant to describe a location on the YubiKey where key sets
-reside.
-
-When writing code to use SCP03, you use the KVN. That is what the standard specifies.
-Your code will always specify a KVN, and the only KVNs you can use with a YubiKey are
-1, 2, 3, and 255.
-
-You can imagine the actual key data located in slots on the YubiKey, and in the model
-described in this document, the slot number and KVN are almost always the same. That is,
-slot 1 holds the key set with KVN=1, and so on. The exception is when the only key set
-on a YubiKey is the default key. In that case, slot 1 is holding the key set with
-KVN=255.
-
-### The `StaticKeys` class
-
-In order to perform SCP03 operations in the SDK, you must supply one of the key sets
-currently residing on the YubiKey. This is done using the `StaticKeys` class.
+Use `SecurityDomainSession` to manage SCP03 key sets:
 
 ```csharp
-    using var scp03Keys = new StaticKeys(keyDataMac, keyDataEnc, keyDataDek)
-    {
-        KeyVersionNumber = 2
-    }
+// Replace default keys
+using var session = new SecurityDomainSession(yubiKeyDevice, Scp03KeyParameters.DefaultKey);
+var newKeys = new StaticKeys(newKeyDataMac, newKeyDataEnc, newKeyDataDek);
+var newKeyParams = new Scp03KeyParameters(ScpKeyIds.Scp03, 0x01, newKeys);
+session.PutKey(newKeyParams.KeyReference, newKeyParams.StaticKeys, 0);
+
+// Add another key set
+using var session = new SecurityDomainSession(yubiKeyDevice, existingKeyParams);
+var keyRef = new KeyReference(ScpKeyIds.Scp03, 0x02);  // KVN=2
+session.PutKey(keyRef, additionalKeys, 0);
+
+// Delete a key set
+session.DeleteKey(keyRef, false);
+
+// Reset to factory defaults (restore default keys)
+session.Reset();
 ```
 
-The `StaticKeys` class implements `IDisposable`. Hence, you should use the `using` keyword
-when instantiating. When the object goes out of scope, the `Dispose` method will be called
-and the key data will be overwritten.
+### Key Set Rules
 
-When you supply a `StaticKeys` object to the SDK (version 1.9 and later), the object is
-cloned (a deep copy is made).
+1. **Key Version Numbers (KVN):**
+   - Default key set: KVN=0xFF
+   - Custom key sets: KVN must be 1, 2, or 3
+   - YubiKey enforces these specific values
 
-### Managing the keys
+2. **Default Key Replacement:**
+   - When adding first custom key set, default keys are always removed
+   - Happens regardless of which KVN (1,2,3) is used
+   - Cannot retain default keys alongside custom keys
 
-It is the responsibility of the application to know which SCP03 keys are loaded on a
-YubiKey. There are no calls to return "metadata". For example, there is no command that
-can return how many key sets are loaded on a YubiKey or whether the default key has been
-replaced.
+3. **Multiple Key Sets:**
+   - After default keys are replaced, can have 1-3 custom key sets
+   - Each must have unique KVN
+   - Can add/remove without affecting other sets
 
-Your application must know if a particular YubiKey has been programmed at manufacture with
-non-default keys, or if the YubiKey is still configured with the default key set. If you
-replace the default key set, your application must manage the keys that were loaded
-because it will need to provide those keys the next time you use SCP03.
+4. **Key Replacement:**
+   - Must authenticate with the key set being replaced
+   - Cannot replace KVN=1 while authenticated with KVN=2
 
-Your application must know if more than one key set is loaded onto a YubiKey, what the key
-data is, and what Key Version Number is used for each set.
-
-## Using SCP03
-
-There are two categories of SCP03 operations:
-
-* Using SCP03 to secure Smart Card communications
-* Performing SCP03 operations, such as changing or adding a key set
-
-### Securing Smart Card communications
-
-Suppose you are performing PIV operations. You would normally get a YubiKey and then
-instantiate the `PivSession` class.
+### Example: Complete Key Management Flow
 
 ```csharp
-    if (!YubiKeyDevice.TryGetYubiKey(serialNumber, out IYubiKeyDevice yubiKeyDevice))
-    {
-        // error, can't find YubiKey
-    }
-    using (var pivSession = new PivSession(yubiKeyDevice))
-    {
-      . . .
-    }
+// Start with default keys
+var defaultScp03Params = Scp03KeyParameters.DefaultKey;
+using (var session = new SecurityDomainSession(yubiKeyDevice, defaultScp03Params))
+{
+    // Add first custom key set (removes default)
+    var keyRef1 = new KeyReference(ScpKeyIds.Scp03, 0x01);
+    session.PutKey(keyRef1, newKeys, 0);
+}
+
+// Now authenticate with new keys
+var newScp03Params = new Scp03KeyParameters(ScpKeyIds.Scp03, 0x01, newKeys);
+using (var session = new SecurityDomainSession(yubiKeyDevice, newScp03Params))
+{
+    // Add second key set
+    var keyRef2 = new KeyReference(ScpKeyIds.Scp03, 0x02);
+    session.PutKey(keyRef2, customKeys2, 0);
+
+    // Check current key information
+    var keyInfo = session.GetKeyInformation();
+}
 ```
 
-In order to use SCP03 to securely communicate with the YubiKey, all you need to do is
-obtain your `StaticKeys` and supply that key set to the `PivSession` constructor.
+### Key Management Responsibilities
+
+Your application must:
+- Track which keys are loaded on each YubiKey
+- Know if a YubiKey has custom keys from manufacturing
+- Manage key distribution and storage
+- Track KVNs in use
+- Handle key rotation
+
+The YubiKey provides no metadata about installed keys beyond what's available through `GetKeyInformation()`.
+
+> [!NOTE]
+> Always use proper key management in production. Never store sensitive keys in source code or configuration files.
+
+## SCP11 (Asymmetric Key Protocol)
+
+SCP11[^1] uses asymmetric cryptography based on elliptic curves (NIST P-256) for authentication and key agreement. Compared to SCP03, it uses certificates instead of pre-shared keys, providing greater flexibility in cases where the two entities setting up the secure channel are not deployed in strict pairs. The secure channel can be embedded into complex use cases, such as:
+- Installation of payment credentials on wearables
+- Production systems
+- Remote provisioning of cell phone subscriptions
+
+[^1]: Detailed information about SCP11 can be found in [GlobalPlatform Card Technology, Secure Channel Protocol '11' Card Specification v2.3 – Amendment F, Chapter 2](https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/)
+
+
+It comes in three variants, each offering different security properties:
+
+### SCP11 Variants
+
+- **SCP11a**: Full mutual authentication between host and YubiKey using certificates
+  - Basic mutual authentication
+  - Uses both static and ephemeral key pairs
+  - Requires certificate chain and off-card entity (OCE) verification
+  - Supports authorization rules in OCE certificates
+  - Suitable for direct host-to-YubiKey communication
+
+- **SCP11b**: YubiKey authenticates to host only
+  - Simplest variant, no mutual authentication
+  - Uses only ephemeral key pairs
+  - No certificate chain required
+  - Suitable when host authentication isn't required
+
+- **SCP11c**: Enhanced mutual authentication with additional features
+  - Most secure variant with additional capabilities
+  - Uses both static and ephemeral key pairs
+  - Supports offline scripting mode:
+    - Can precompute personalization scripts for groups of cards
+    - Scripts can be deployed via online services or companion apps
+    - Cryptographic operations remain on secure OCE server
+  - Includes transaction mechanism with rollback capability
+  - Supports authorization rules in OCE certificates
+
+### Key Benefits of SCP11 over SCP03
+
+SCP11 provides several advantages over SCP03:
+- Uses certificates instead of pre-shared keys for authentication
+- More flexible deployment - doesn't require strict pairing of entities
+- Supports ECC for key establishment with all AES variants (128/192/256)
+- Better suited for complex deployment scenarios
+- Can operate through intermediary applications securely
+
+### Key Parameters
+
+Unlike SCP03's static keys, SCP11 uses `Scp11KeyParameters` which can contain:
+- Public/private key pairs
+- Certificates
+- Key references
+- Off-card entity (OCE) information
 
 ```csharp
-    if (!YubiKeyDevice.TryGetYubiKey(serialNumber, out IYubiKeyDevice yubiKeyDevice))
-    {
-        // error, can't find YubiKey
-    }
-    // This is the only change you need to make in order to make sure your PIV operations
-    // are protected using SCP03 (assuming you have some method to retrieve the key set).
-    using StaticKeys scp03Keys = RetrieveScp03KeySet();
-    using (var pivSession = new PivSession(yubiKeyDevice, scp03Keys))
-    {
-      . . .
-    }
+// SCP11b basic parameters
+var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
+var scp11Params = new Scp11KeyParameters(
+    keyReference,
+    new ECPublicKeyParameters(publicKey));
+
+// SCP11a/c with full certificate chain
+var scp11Params = new Scp11KeyParameters(
+    keyReference,           // Key reference for this connection
+    pkSdEcka,              // Public key for key agreement
+    oceKeyReference,        // Off-card entity reference
+    skOceEcka,             // Private key for key agreement
+    certificateChain);      // Certificate chain for authentication
 ```
 
-Once you have built the `PivSession` with SCP03, there's no other SCP03 operation you
-need to do. Each PIV operation will now be protected with SCP03.
+### Key Management
 
-Under the covers, each command sent to the YubiKey will first pass through an SCP03 object
-which encrypts the data and appends a checksum. That is, before "leaving the SDK", each
-command is "wrapped" using SCP03.
-
-The YubiKey returns responses that have been protected using SCP03. Before parsing the
-response, the SDK must verify the checksum and decrypt the data. In other words, the first
-thing the SDK does is remove the response's SCP03 "wrapper".
-
-If you are calling commands directly instead of using the `PivSession`, you can still use
-SCP03 by making a connection using
-[ConnectScp03](xref:Yubico.YubiKey.IYubiKeyDevice.ConnectScp03%2A):
+Use `SecurityDomainSession` to manage SCP11 keys and certificates:
 
 ```csharp
-    if (!YubiKeyDevice.TryGetYubiKey(serialNumber, out IYubiKeyDevice yubiKeyDevice))
-    {
-        // error, can't find YubiKey
-    }
+using var session = new SecurityDomainSession(yubiKeyDevice, Scp03KeyParameters.DefaultKey);
 
-   using IYubiKeyConnection connection = yubiKeyDevice.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
+// Generate new EC key pair
+var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x3);
+var publicKey = session.GenerateEcKey(keyReference, 0);
+
+// Import existing key pair
+var privateKey = new ECPrivateKeyParameters(ecdsa);
+session.PutKey(keyReference, privateKey, 0);
+
+// Store certificates
+session.StoreCertificates(keyReference, certificates);
+
+// Manage certificate serial number allowlist
+var serials = new List<string> { 
+    "7F4971B0AD51F84C9DA9928B2D5FEF5E16B2920A", // Examples
+    "6B90028800909F9FFCD641346933242748FBE9AD"
+};
+session.StoreAllowlist(oceKeyReference, serials);
 ```
 
-### Performing SCP03 operations
+### SCP11b Example
 
-It is possible you must perform some SCP03 operation directly. That is, you want to
-perform an operation that is not wrapping a PIV command or unwrapping a response. For
-example, you might need to replace the default SCP03 key set. In this case, use the
-[Scp03Session](xref:Yubico.YubiKey.Scp03.Scp03Session) class.
+Simplest variant, where YubiKey authenticates to host:
 
 ```csharp
-    if (!YubiKeyDevice.TryGetYubiKey(serialNumber, out IYubiKeyDevice yubiKeyDevice))
-    {
-        // error, can't find YubiKey
-    }
-    using StaticKeys scp03Keys = RetrieveScp03KeySet();
-    using (var scp03Session = new Scp03Session(yubiKeyDevice, scp03Keys))
-    {
-      . . .
-    }
+// Get certificates stored on YubiKey
+var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
+IReadOnlyCollection<X509Certificate2> certificateList;
+using (var session = new SecurityDomainSession(yubiKeyDevice))
+{
+    certificateList = session.GetCertificates(keyReference);
+}
+
+// Create parameters using leaf certificate
+var leaf = certificateList.Last();
+var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!.ExportParameters(false);
+var keyParams = new Scp11KeyParameters(
+    keyReference, 
+    new ECPublicKeyParameters(ecDsaPublicKey));
+
+// Use with any application
+using var pivSession = new PivSession(yubiKeyDevice, keyParams);
 ```
 
-Operations "inside" the `Scp03Session` will be protected using SCP03. That is, in order to
-preform an SCP03 operation, one or more commands will be sent to the YubiKey. These
-commands are instructing the YubiKey to perform some set of SCP03 operations. Each of
-these commands, and the responses, will be wrapped using SCP03 as well.
+### SCP11a Example
 
-The SDK has methods that perform these SCP03 operations:
-
-* [Replace the default key set](#replacing-the-default-key-set)
-* [Add a new key set](#adding-a-new-key-set)
-* [Replace a non-default key set](#replacing-a-key-set)
-* [Removing a key set](#removing-a-key-set)
-* [Removing all key sets](#removing-all-key-sets) (reset the YubiKey to the default key set)
-
-#### Replacing the default key set
-
-One of the first things you want to do with SCP03 is to replace the default key set. To do
-so, call [Scp03Session.PutKeySet](xref:Yubico.YubiKey.Scp03.Scp03Session.PutKeySet%2A).
+Full mutual authentication requires more setup:
 
 ```csharp
-    bool isValid = YubiKeyDevice.TryGetYubiKey(serialNumber, out IYubiKeyDevice yubiKeyDevice))
-    // using the no-arg constructor will build a StaticKeys object using the default
-    // key set with the KVN=0xFF.
-    using var scp03Keys = new StaticKeys();
-    using (var scp03Session = new Scp03Session(yubiKeyDevice, scp03Keys))
-    {
-        // Assume you have some method that will retrieve the key set you want to use.
-        // Perhaps it uses a key derivation function based on a YubiKey's serial number.
-        // In this sample, assume the GetStaticKeys method will return a StaticKeys object
-        // with the KVN of the input arg, in this case, the KVN will be 1.
-        using StaticKeys newKeys = GetStaticKeys(1);
-        scp03Session.PutKeySet(newKeys);
-    }
+// Start with default SCP03 connection
+using var session = new SecurityDomainSession(yubiKeyDevice, Scp03KeyParameters.DefaultKey);
+
+const byte kvn = 0x03;
+var keyRef = new KeyReference(ScpKeyIds.Scp11A, kvn);
+
+// Generate new key pair on YubiKey
+var newPublicKey = session.GenerateEcKey(keyRef, 0);
+
+// Setup off-card entity (OCE)
+var oceRef = new KeyReference(OceKid, kvn);
+var ocePublicKey = new ECPublicKeyParameters(oceCerts.Ca.PublicKey.GetECDsaPublicKey()!);
+session.PutKey(oceRef, ocePublicKey, 0);
+
+// Store CA identifier
+var ski = GetSubjectKeyIdentifier(oceCerts.Ca);
+session.StoreCaIssuer(oceRef, ski);
+
+// Create SCP11a parameters
+var scp11Params = new Scp11KeyParameters(
+    keyRef,
+    new ECPublicKeyParameters(newPublicKey.Parameters),
+    oceRef,
+    new ECPrivateKeyParameters(privateKey),
+    certChain);
+
+// Use the secure connection
+using var session = new SecurityDomainSession(yubiKeyDevice, scp11Params);
 ```
 
-The `StaticKeys` object contains a `KeyVersionNumber`. Remember, the KVN is essentially
-the key set's "name". The only KVNs for non-default key sets the YubiKey allows are
-1, 2, and 3.
+### Security Considerations
 
-Once a new key set has been added, the default key set is no longer available. That is,
-even if you specify KVN=2 or 3 when you put a new key set onto a YubiKey, the default
-key set will not remain. You might think that the default key set is in slot 1, and if
-you put a new key set into slot 2 (KVN=2), the default key set will not be affected.
-However, if a YubiKey is set with the default key set, and you call the `PutKeySet`
-method, the default key set will be removed, no matter what the new key set's KVN is.
+1. **Certificate Management:**
+   - Proper certificate validation is crucial
+   - Consider using certificate allowlists
+   - Manage certificate chains carefully
 
-#### Adding a new key set
+2. **Key Generation:**
+   - Can generate keys on YubiKey or import existing
+   - YubiKey-generated keys never leave the device
+   - Imported keys must be properly protected
 
-To add a new key set, simply make sure the KVN of the `StaticKeys` you add is not the same
-as the KVN of the existing key set. For example, suppose you replaced the default key set,
-specifying the new key set's KVN as 1.
+3. **Protocol Selection:**
+   - SCP11b: Simpler but less secure
+   - SCP11a: Better security through mutual auth
+   - SCP11c: Enhanced features but more complex
 
-```txt
-   slot 1: KVN=1  ENC       MAC       DEK
-   slot 2:   --empty--
-   slot 3:   --empty--
-```
+4. **Certificate Allowlists:**
+   - Restrict which certificates can authenticate
+   - Update lists as certificates change
+   - Clear allowlists when no longer needed
 
-To add a new key set with KVN=2, do the following:
+### Checking SCP Support
 
 ```csharp
-    bool isValid = YubiKeyDevice.TryGetYubiKey(serialNumber, out IYubiKeyDevice yubiKeyDevice);
-    // Assume you have a method to retrieve key sets, and you specify retrieving
-    // the key set with KVN of 1.
-    using StaticKeys scp03Keys = GetStaticKeys(1);
-    using (var scp03Session = new Scp03Session(yubiKeyDevice, scp03Keys))
-    {
-        // Now get the key set with KVN of 2. You have the keys, they just have
-        // not been loaded onto the YubiKey yet.
-        StaticKeys newKeys = GetStaticKeys(2);
-        // If you want, make sure the StaticKeys object has the correct KVN.
-        newKeys.KeyVersionNumber = 2;
-        scp03Session.PutKeySet(newKeys);
-        newKeys.Clear();
-    }
+// Check firmware version for SCP11 support
+if (yubiKeyDevice.HasFeature(YubiKeyFeature.Scp11))
+{
+    // Device supports SCP11
+}
+
+// Get information about installed keys
+using var session = new SecurityDomainSession(yubiKeyDevice);
+var keyInfo = session.GetKeyInformation();
+
+// Get supported CA identifiers
+var caIds = session.GetSupportedCaIdentifiers(true, true);
 ```
 
-```txt
-   slot 1: KVN=1  ENC       MAC       DEK
-   slot 2: KVN=2  ENC(new)  MAC(new)  DEK(new)
-   slot 3:   --empty--
-```
+> [!NOTE]
+> SCP11 requires firmware version 5.7.2 or later. Earlier firmware versions only support SCP03.
 
-#### Replacing a key set
-
-In order to replace a key set, use the `PutKeySet` method. However, there is one
-restriction: you can replace a key set only if you build the `Scp03Session` using the key
-set that is to be replaced.
-
-```csharp
-    // This works
-    // Replace the key set with KVN=1 with new keys.
-    // Use the current KVN=1 key set to build the Scp03Session, get the new key set (the
-    // StaticKeys object holding the new key set will have KeyVersionNumber=1), and Put that
-    // new key set.
-    using StaticKeys scp03Keys = GetStaticKeys(1);
-    using (var scp03Session = new Scp03Session(yubiKeyDevice, scp03Keys))
-    {
-        // Assume you have a program that will retrieve a new key set for the given KVN.
-        using StaticKeys newKeySet = GetNewStaticKeys(1);
-        newKeySet.KeyVersionNumber = 1;
-        scp03Session.PutKeySet(newKeySet);
-    }
-```
-
-The following demonstrates an attempt to replace a key set that will not work. The result
-will be an exception. In this case, suppose a YubiKey has two key sets loaded, KVN=1 and
-KVN=2.
-
-```txt
-   slot 1: KVN=1  ENC       MAC       DEK
-   slot 2: KVN=2  ENC       MAC       DEK
-   slot 3:   --empty--
-```
-
-```csharp
-    // This does NOT work
-    // Assume you have a key set with KVN of 1, and you already have a key set with KVN of 2.
-    // Use the current KVN=1 key set to build the Scp03Session, get the new key set (the
-    // StaticKeys object holding the new key set will have KeyVersionNumber=2), and try to
-    // Put that new key set.
-    using StaticKeys scp03Keys = GetStaticKeys(1);
-    using (var scp03Session = new Scp03Session(yubiKeyDevice, scp03Keys))
-    {
-        using StaticKeys newKeySet = GetNewStaticKeys(2);
-        newKeySet.KeyVersionNumber = 2;
-        scp03Session.PutKeySet(newKeySet);
-    }
-```
-
-The `PutKeySet` method will throw an exception. In order to change the key set with KVN=2,
-you must create the `Scp03Session` using the key set with KVN=2.
-
-#### Removing a key set
-
-To delete a key set, simply call the `DeleteKeySet` method. There is one restriction: the
-key set used to build the `Scp03Session` must NOT be the key set deleted, unless there are
-no more key sets on the YubiKey. Otherwise no key set will be deleted and the SDK will
-throw an exception.
-
-```csharp
-    using StaticKeys scp03Keys = GetStaticKeys(1);
-    using (var scp03Session = new Scp03Session(yubiKeyDevice, scp03Keys))
-    {
-        scp03Session.DeleteKeySet(2, false);
-    }
-```
-
-Notice that this sample code created the `Scp03Session` using KVN=1, but deleted the key
-set with KVN=2.
-
-#### Removing all key sets
-
-After you use one of the key sets to remove the other two, it is possible to remove that
-last key set. If it is removed, then the YubiKey will reset its SCP03 program to the
-original, default state. Namely, there will be one key set, and it will be the default
-(KVN=0xff).
-
-For example, suppose you have three SCP03 key sets on the YubiKey.
-
-```txt
-   slot 1: KVN=1  ENC       MAC       DEK
-   slot 2: KVN=2  ENC       MAC       DEK
-   slot 3: KVN=3  ENC       MAC       DEK
-```
-
-Use the KVN=3 key set to delete key sets 1 and 2.
-
-```csharp
-    using StaticKeys scp03Keys = GetStaticKeys(3);
-    using (var scp03Session = new Scp03Session(yubiKeyDevice, scp03Keys))
-    {
-        scp03Session.DeleteKeySet(1, false);
-        scp03Session.DeleteKeySet(2, false);
-    }
-```
-
-```txt
-   slot 1:   --empty--
-   slot 2:   --empty--
-   slot 3: KVN=3  ENC       MAC       DEK
-```
-
-Now it is possible to delete the KVN=3 key set using an `Scp03Session` created using
-the KVN=3 key set. Pass true for the second argument.
-
-```csharp
-    using StaticKeys scp03Keys = GetStaticKeys(3);
-    using (var scp03Session = new Scp03Session(yubiKeyDevice, scp03Keys))
-    {
-        scp03Session.DeleteKeySet(3, true);
-    }
-```
-
-Passing `true` lets the SDK know this is the last key to be deleted. It can then call the
-DELETE KEY command with the appropriate parameters, and the YubiKey will be able to delete
-the key set. After this delete, the state of SCP03 key sets will be the following:
-
-```txt
-   slot 1: KVN=0xff  KeyId=1:ENC(default)  KeyId=2:MAC(default)  KeyId=3:DEK(default)
-   slot 2:   --empty--
-   slot 3:   --empty--
-```
+# Additional documentation
+- [Global Platform Consortium](https://globalplatform.org/)
+- [GlobalPlatform SCP11 Specification](https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/)

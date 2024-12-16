@@ -572,17 +572,21 @@ namespace Yubico.YubiKey.Piv
         ///     Set the YubiKey's PIV application to be PIN-only with a PIN-derived
         ///     and/or PIN-Protected management key of the specified algorithm. This
         ///     sets the YubiKey to either
-        ///     <code>
-        ///   PivPinOnlyMode.PinProtected
-        ///   PivPinOnlyMode.PinDerived
-        ///   PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived
-        ///   PivPinOnlyMode.None
-        /// </code>
-        ///     If the YubiKey is set to PinProtected, PinDerived, or both, the PUK
-        ///     will also be blocked.
-        ///     &gt; [!WARNING]
-        ///     &gt; You should not set a YubiKey for PIN-derived, this feature is
-        ///     &gt; provided only for backwards compatibility.
+        ///        <code>
+        ///        PivPinOnlyMode.PinProtected
+        ///        PivPinOnlyMode.PinDerived
+        ///        PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived
+        ///        PivPinOnlyMode.None
+        ///        </code>
+        ///        <para>
+        ///        If the YubiKey is set to PinProtected, PinDerived, or both, the PUK
+        ///        will also be blocked.
+        ///        </para>
+        ///        <para>
+        ///        &gt; [!WARNING]
+        ///        &gt; You should not set a YubiKey for PIN-derived, this feature is
+        ///        &gt; provided only for backwards compatibility.
+        ///        </para>
         /// </summary>
         /// <remarks>
         ///     PIN-only mode means that the application does not need to enter the

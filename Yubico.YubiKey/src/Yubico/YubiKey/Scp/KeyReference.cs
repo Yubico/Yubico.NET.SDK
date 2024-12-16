@@ -35,13 +35,24 @@ namespace Yubico.YubiKey.Scp
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyReference"/> class.
         /// </summary>
-        /// <param name="id">The ID of the key (KID).</param>
-        /// <param name="versionNumber">The version number of the key (KVN).</param>
+        /// <param name="id">The ID of the key (KID). Accepted values depend on the usage. See <see cref="ScpKeyIds"/>
+        /// for a list of possible Key Id's.</param>
+        /// <param name="versionNumber">The version number of the key (KVN). Must be between 1 and 127.</param>
         /// <remarks>See the GlobalPlatform Technology Card Specification v2.3 Amendment F §5.1 Cryptographic Keys for more information on the available KIDs.</remarks>
         public KeyReference(
             byte id,
             byte versionNumber)
         {
+            if (versionNumber > 127)
+            {
+                throw new ArgumentException(nameof(versionNumber), "Key version number (KVN) must be between 1 and 127");
+            }
+
+            if (id > 127)
+            {
+                throw new ArgumentException(nameof(id), "Key ID (KID) must be between 0 and 127");
+            }
+
             Id = id;
             VersionNumber = versionNumber;
         }

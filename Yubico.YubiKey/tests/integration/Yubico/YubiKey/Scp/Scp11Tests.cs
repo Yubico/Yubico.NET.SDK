@@ -175,6 +175,7 @@ namespace Yubico.YubiKey.Scp
             }
 
             var leaf = certificateList.Last();
+            // Remember to verify the cert chain
             var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!;
             var keyParams = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(ecDsaPublicKey));
 

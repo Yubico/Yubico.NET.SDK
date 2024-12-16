@@ -206,11 +206,11 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         /// <param name="keyReference">The key reference identifying where to store the key.</param>
         /// <param name="staticKeys">The new SCP03 key set to store.</param>
-        /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
+        /// <param name="replaceKvn">The key version number to replace, or 0 for a new key (Default value is 0).</param>
         /// <exception cref="ArgumentException">Thrown when the KID is not 0x01 for SCP03 key sets.</exception>
         /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other SCP related error
         /// described in the exception message.</exception>
-        public void PutKey(KeyReference keyReference, StaticKeys staticKeys, int replaceKvn)
+        public void PutKey(KeyReference keyReference, StaticKeys staticKeys, int replaceKvn = 0)
         {
             Logger.LogInformation("Importing SCP03 key set into KeyReference {KeyReference}", keyReference);
 
@@ -281,12 +281,12 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         /// <param name="keyReference">The key reference identifying where to store the key.</param>
         /// <param name="privateKeyParameters">The EC private key parameters to store.</param>
-        /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
+        /// <param name="replaceKvn">The key version number to replace, or 0 for a new key (Default value is 0).</param>
         /// <exception cref="ArgumentException">Thrown when the private key is not of type NIST P-256.</exception>
         /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
         /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other SCP related error
         /// described in the exception message.</exception>
-        public void PutKey(KeyReference keyReference, ECPrivateKeyParameters privateKeyParameters, int replaceKvn)
+        public void PutKey(KeyReference keyReference, ECPrivateKeyParameters privateKeyParameters, int replaceKvn = 0)
         {
             Logger.LogInformation("Importing SCP11 private key into Key Reference: {KeyReference}", keyReference);
 
@@ -348,12 +348,12 @@ namespace Yubico.YubiKey.Scp
         /// </summary>
         /// <param name="keyReference">The key reference identifying where to store the key.</param>
         /// <param name="publicKeyParameters">The EC public key parameters to store.</param>
-        /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
+        /// <param name="replaceKvn">The key version number to replace, or 0 for a new key (Default value is 0).</param>
         /// <exception cref="ArgumentException">Thrown when the public key is not of type SECP256R1.</exception>
         /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
         /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other SCP related error
         /// described in the exception message.</exception>
-        public void PutKey(KeyReference keyReference, ECPublicKeyParameters publicKeyParameters, int replaceKvn)
+        public void PutKey(KeyReference keyReference, ECPublicKeyParameters publicKeyParameters, int replaceKvn = 0)
         {
             Logger.LogInformation("Importing SCP11 public key into KeyReference: {KeyReference}", keyReference);
 

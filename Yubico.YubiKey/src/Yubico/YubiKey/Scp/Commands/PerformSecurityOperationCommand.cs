@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Scp.Commands
     /// It is typically used in conjunction with other SCP commands like Initialize Update
     /// and External/Internal Authenticate to establish a secure channel.
     /// </remarks>
-    internal class SecurityOperationCommand : IYubiKeyCommand<SecurityOperationResponse>
+    internal class PerformSecurityOperationCommand : IYubiKeyCommand<SecurityOperationResponse>
     {
         public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
         internal const byte GpPerformSecurityOperationIns = 0x2A;
@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Scp.Commands
         private readonly byte _oceKeyId;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityOperationCommand"/> class.
+        /// Initializes a new instance of the <see cref="PerformSecurityOperationCommand"/> class.
         /// </summary>
         /// <param name="oceKeyVersionNumer">The Off-Card Entity key version number.</param>
         /// <param name="oceKeyId">The Off-Card Entity key ID.</param>
@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.Scp.Commands
         /// <remarks>
         /// This command is used as part of the SCP11 protocol suite for presenting the off-card entity's certificate chain to the YubiKey.
         /// </remarks>
-        public SecurityOperationCommand(byte oceKeyVersionNumer, byte oceKeyId, ReadOnlyMemory<byte> oceCertificates)
+        public PerformSecurityOperationCommand(byte oceKeyVersionNumer, byte oceKeyId, ReadOnlyMemory<byte> oceCertificates)
         {
             _oceRefVersionNumber = oceKeyVersionNumer;
             _oceKeyId = oceKeyId;

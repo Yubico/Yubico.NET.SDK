@@ -870,7 +870,7 @@ namespace Yubico.YubiKey.Scp
                         ins = InternalAuthenticateCommand.GpInternalAuthenticateIns;
                         break;
                     default: // 0x10, 0x20-0x2F
-                        ins = SecurityOperationCommand.GpPerformSecurityOperationIns;
+                        ins = PerformSecurityOperationCommand.GpPerformSecurityOperationIns;
                         break;
                 }
 

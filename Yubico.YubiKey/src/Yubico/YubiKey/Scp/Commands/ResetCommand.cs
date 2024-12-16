@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Scp.Commands
         /// <see cref="InitializeUpdateCommand.GpInitializeUpdateIns"/>, 
         /// <see cref="ExternalAuthenticateCommand.GpExternalAuthenticateIns"/>, 
         /// <see cref="InternalAuthenticateCommand.GpInternalAuthenticateIns"/>, 
-        /// <see cref="SecurityOperationCommand.GpPerformSecurityOperationIns"/>
+        /// <see cref="PerformSecurityOperationCommand.GpPerformSecurityOperationIns"/>
         /// </param>
         /// <param name="keyVersionNumber">The version number of the key</param>
         /// <param name="kid">The Key id</param>

@@ -133,7 +133,7 @@ namespace Yubico.YubiKey.Scp
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Scp11b_YubiHsmSession_Operations_Succeeds(
+        public void Scp11b_App_YubiHsmSession_Operations_Succeeds(
             StandardTestDevice desiredDeviceType)
         {
             var testDevice = YhaTestUtilities.GetCleanDevice(desiredDeviceType);
@@ -175,7 +175,7 @@ namespace Yubico.YubiKey.Scp
             }
 
             var leaf = certificateList.Last();
-            var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!.ExportParameters(false);
+            var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!;
             var keyParams = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(ecDsaPublicKey));
 
             using (var session = new SecurityDomainSession(testDevice, keyParams))
@@ -640,7 +640,7 @@ namespace Yubico.YubiKey.Scp
             }
 
             var leaf = certificateList.Last();
-            var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!.ExportParameters(false);
+            var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!;
             var keyParams = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(ecDsaPublicKey));
 
             return keyParams;

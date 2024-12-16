@@ -79,20 +79,20 @@ namespace Yubico.YubiKey.Scp
             ekpOceEcka.Q.Y.CopyTo(epkOceEckaEncodedPoint, 33);
 
             // GPC v2.3 Amendment F (SCP11) v1.4 §7.6.2.3
-            byte[] keyUsage = { 0x3C }; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
+            byte[] scpIdentifier = { 0x11, GetScpParameterByte(keyParameters.KeyReference) };
+            byte[] keyUsageQualifier = { 0x3C }; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
             byte[] keyType = { 0x88 }; // AES
-            byte[] keyLen = { 16 }; // 128-bit
-            byte[] keyIdentifier = { 0x11, GetScpIdentifierByte(keyParameters.KeyReference) };
+            byte[] keyLength = { 16 }; // 128-bit
 
             // Construct the host authentication data (payload)
             byte[] hostAuthenticateTlvEncodedData = TlvObjects.EncodeMany(
                 new TlvObject(
                     KeyAgreementTag,
                     TlvObjects.EncodeMany(
-                        new TlvObject(0x90, keyIdentifier),
-                        new TlvObject(0x95, keyUsage),
+                        new TlvObject(0x90, scpIdentifier),
+                        new TlvObject(0x95, keyUsageQualifier),
                         new TlvObject(0x80, keyType),
-                        new TlvObject(0x81, keyLen)
+                        new TlvObject(0x81, keyLength)
                         )),
                 new TlvObject(EckaTag, epkOceEckaEncodedPoint)
                 );
@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.Scp
                 : new ExternalAuthenticateCommand(
                     keyParameters.KeyReference.VersionNumber, keyParameters.KeyReference.Id,
                     hostAuthenticateTlvEncodedData) as IYubiKeyCommand<ScpResponse>;
-            
+
             // Issue the host authentication command
             var authenticateResponseApdu = pipeline.Invoke(
                 authenticateCommand.CreateCommandApdu(), authenticateCommand.GetType(), typeof(ScpResponse));
@@ -139,10 +139,10 @@ namespace Yubico.YubiKey.Scp
                     sdReceipt,
                     epkSdEckaTlvEncodedData,
                     hostAuthenticateTlvEncodedData,
-                    keyUsage,
+                    keyUsageQualifier,
                     keyType,
-                    keyLen);
-                    
+                    keyLength);
+
             // Create the session keys
             var sessionKeys = new SessionKeys(
                 macKey,
@@ -239,8 +239,8 @@ namespace Yubico.YubiKey.Scp
 
             // Do AES CMAC 
             using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
-            
-            Span<byte> oceReceipt = stackalloc byte[16]; 
+
+            Span<byte> oceReceipt = stackalloc byte[16];
             cmacObj.CmacInit(receiptVerificationKey);
             cmacObj.CmacUpdate(keyAgreementData);
             cmacObj.CmacFinal(oceReceipt); // Our generated receipt
@@ -283,7 +283,7 @@ namespace Yubico.YubiKey.Scp
         /// <param name="keyReference">The key reference to get the identifier for.</param>
         /// <returns>The SCP identifier byte.</returns>
         /// <exception cref="ArgumentException">Thrown when the key reference ID is not a valid SCP11 KID.</exception>
-        private static byte GetScpIdentifierByte(KeyReference keyReference) =>
+        private static byte GetScpParameterByte(KeyReference keyReference) =>
             keyReference.Id switch
             {
                 ScpKeyIds.Scp11A => 0b01,
@@ -295,6 +295,11 @@ namespace Yubico.YubiKey.Scp
         /// <summary>
         /// Performs the Security Operation command sequence required for SCP11a and SCP11c authentication.
         /// </summary>
+        /// <remarks>
+        /// This command is used to submit CERT.OCE.ECKA, or possibly a chain of certificates ending with
+        /// CERT.OCE.ECKA. This is required as a precondition to the initiation of a SCP11a or SCP11c 
+        /// secure channel.
+        /// </remarks>
         /// <param name="pipeline">The APDU pipeline for communication with the YubiKey.</param>
         /// <param name="keyParams">The key parameters containing certificates and references.</param>
         /// <exception cref="ArgumentNullException">Thrown when required key parameters are missing.</exception>
@@ -326,7 +331,7 @@ namespace Yubico.YubiKey.Scp
                     ? 0x80
                     : 0x00)); // Append 0x80 if more certificates remain to be sent
 
-                var securityOperationCommand = new SecurityOperationCommand(
+                var securityOperationCommand = new PerformSecurityOperationCommand(
                     oceRef.VersionNumber,
                     oceRefInput,
                     certificates);
@@ -334,7 +339,7 @@ namespace Yubico.YubiKey.Scp
                 // Send payload
                 var responseSecurityOperation = pipeline.Invoke(
                     securityOperationCommand.CreateCommandApdu(),
-                    typeof(SecurityOperationCommand),
+                    typeof(PerformSecurityOperationCommand),
                     typeof(SecurityOperationResponse));
 
                 if (responseSecurityOperation.SW != SWConstants.Success)

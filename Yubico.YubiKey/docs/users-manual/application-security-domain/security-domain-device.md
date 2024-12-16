@@ -37,11 +37,11 @@ var cardData = session.GetCardRecognitionData();
 
 The card recognition data follows this TLV structure:
 
-| Tag | Description |
-|-----|-------------|
-| 0x66 | Card Data template |
-| 0x73 | Card Recognition Data |
-| ... | Card-specific data elements |
+| Tag  | Description                 |
+| ---- | --------------------------- |
+| 0x66 | Card Data template          |
+| 0x73 | Card Recognition Data       |
+| ...  | Card-specific data elements |
 
 ## Generic Data Operations
 
@@ -67,14 +67,14 @@ session.StoreData(tlvData);
 
 ### Common Data Tags
 
-| Tag | Description | Access Level |
-|-----|-------------|--------------|
-| 0x66 | Card Data | Read-only |
-| 0x73 | Card Recognition | Read-only |
-| 0xE0 | Key Information | Read-only |
-| 0xBF21 | Certificate Store | Read/Write |
-| 0xFF33 | KLOC Identifiers | Read/Write |
-| 0xFF34 | KLCC Identifiers | Read/Write |
+| Tag    | Description       | Access Level |
+| ------ | ----------------- | ------------ |
+| 0x66   | Card Data         | Read-only    |
+| 0x73   | Card Recognition  | Read-only    |
+| 0xE0   | Key Information   | Read-only    |
+| 0xBF21 | Certificate Store | Read/Write   |
+| 0xFF33 | KLOC Identifiers  | Read/Write   |
+| 0xFF34 | KLCC Identifiers  | Read/Write   |
 
 ## Device Configuration
 
@@ -100,13 +100,14 @@ var caIds = session.GetSupportedCaIdentifiers(
 ### Device Status Information
 
 1. **Key Status**
+
 ```csharp
 var keyInfo = session.GetKeyInformation();
 foreach (var entry in keyInfo)
 {
     var keyRef = entry.Key;
     var components = entry.Value;
-    
+
     // Check key type and components
     bool isScp03 = keyRef.Id == ScpKeyIds.Scp03;
     bool hasAllComponents = components.Count == 3; // For SCP03
@@ -114,6 +115,7 @@ foreach (var entry in keyInfo)
 ```
 
 2. **Certificate Status**
+
 ```csharp
 // Check certificate configuration
 foreach (var key in keyInfo.Keys)
@@ -136,6 +138,7 @@ foreach (var key in keyInfo.Keys)
 ### TLV Data Handling
 
 1. **Reading TLV Data**
+
 ```csharp
 var tlvData = session.GetData(tag);
 var tlvReader = new TlvReader(tlvData);
@@ -150,6 +153,7 @@ while (tlvReader.HasData)
 ```
 
 2. **Writing TLV Data**
+
 ```csharp
 using var ms = new MemoryStream();
 using var writer = new BinaryWriter(ms);
@@ -230,54 +234,3 @@ public void CleanupDeviceData()
     }
 }
 ```
-
-## Error Handling
-
-### Common Issues
-
-1. **Data Access Errors**
-   - Verify authentication status
-   - Check access permissions
-   - Validate tag values
-   - Handle missing data gracefully
-
-2. **Storage Errors**
-   - Check available space
-   - Validate data format
-   - Handle truncation
-   - Implement retry logic
-
-### Status Codes
-
-| Status | Description | Action |
-|--------|-------------|--------|
-| 0x6A82 | File not found | Verify tag exists |
-| 0x6A86 | Wrong parameters | Check parameter values |
-| 0x6982 | Security status not satisfied | Authenticate first |
-| 0x6985 | Conditions not satisfied | Check prerequisites |
-
-> [!NOTE]
-> Always validate data before storing and handle errors appropriately to maintain device integrity.
-
-## Security Considerations
-
-1. **Data Protection**
-   - Use secure channels for sensitive operations
-   - Validate data integrity
-   - Implement access controls
-   - Monitor data operations
-
-2. **Error Handling**
-   - Log security-relevant errors
-   - Implement secure error recovery
-   - Avoid information leakage
-   - Maintain audit trail
-
-3. **Access Control**
-   - Verify authentication
-   - Check permissions
-   - Validate operations
-   - Monitor access patterns
-
-> [!IMPORTANT]
-> Some operations may permanently modify the YubiKey. Always validate operations before execution.

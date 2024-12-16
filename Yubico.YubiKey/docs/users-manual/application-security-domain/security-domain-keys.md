@@ -27,7 +27,7 @@ For protocol details and secure channel implementation, see the [Secure Channel 
 The Security Domain manages two main types of keys:
 
 - **SCP03 Keys**: Symmetric AES-128 keys used for secure messaging
-- **SCP11 Keys**: Asymmetric NIST P-256 keys used for authentication and key agreement
+- **SCP11 Keys**: Asymmetric NIST P-256 keys and X.509-certificates used for authentication and key agreement
 
 ## SCP03 Key Management
 
@@ -71,7 +71,7 @@ SCP11 uses NIST P-256 elliptic curve cryptography. Keys can be:
 
 ```csharp
 // Generate new EC key pair
-var keyRef = KeyReference.Create(ScpKeyIds.Scp11B, 0x03);
+var keyRef = KeyReference.Create(ScpKeyIds.Scp11B, keyVersionNumber);
 var publicKey = session.GenerateEcKey(keyRef);
 ```
 
@@ -115,7 +115,7 @@ session.Reset();
 ```
 
 > [!WARNING]
-> Resetting removes all custom keys and restores factory defaults. Ensure you have backups before resetting.
+> Resetting removes all custom keys and restores factory defaults (within the Security Domain). Ensure you have backups before resetting.
 
 ## Key Rotation
 
@@ -128,7 +128,7 @@ Regular key rotation is recommended for security. Here are typical rotation proc
 using var session = new SecurityDomainSession(yubiKeyDevice, currentScp03Params);
 
 // Replace with new keys
-var newKeyRef = KeyReference.Create(ScpKeyIds.Scp03, 0x02);
+var newKeyRef = KeyReference.Create(ScpKeyIds.Scp03, keyVersionNumber);
 session.PutKey(newKeyRef, newStaticKeys, currentKvn);
 ```
 
@@ -138,8 +138,8 @@ session.PutKey(newKeyRef, newStaticKeys, currentKvn);
 using var session = new SecurityDomainSession(yubiKeyDevice, scpParams);
 
 // Generate new key pair
-var newKeyRef = KeyReference.Create(ScpKeyIds.Scp11B, 0x02);
-var newPublicKey = session.GenerateEcKey(newKeyRef, oldKvn);
+var newKeyRef = KeyReference.Create(ScpKeyIds.Scp11B, keyVersionNumber);
+var newPublicKey = session.GenerateEcKey(newKeyRef, oldKvn); // Replaces oldKvn
 ```
 
 ## Security Considerations
@@ -147,13 +147,11 @@ var newPublicKey = session.GenerateEcKey(newKeyRef, oldKvn);
 1. **Key Protection**
    - Store keys securely
    - Use unique keys per device when possible
-   - Consider using SCP11 for better key management
+   - Consider using SCP11 for mutual authentication
    - Avoid storing sensitive keys in source code or configuration files
 
 2. **Key Version Management**
    - Track which keys are loaded on each YubiKey
-   - Know if YubiKeys have custom keys from manufacturing
-   - Manage key distribution and storage
    - Track KVNs in use
 
 3. **Recovery Planning**

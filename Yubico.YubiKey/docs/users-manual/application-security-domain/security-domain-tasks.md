@@ -44,8 +44,8 @@ using var defaultSession = new SecurityDomainSession(
 
 // Generate or obtain your secure keys
 var newKeys = new StaticKeys(newMacKey, newEncKey, newDekKey);
-var keyRef = KeyReference.Create(ScpKeyIds.Scp03, 0x01);
-defaultSession.PutKey(keyRef, newKeys, 0);
+var keyRef = KeyReference.Create(ScpKeyIds.Scp03, keyVersionNumber);
+defaultSession.PutKey(keyRef, newKeys);
 ```
 
 > [!WARNING]
@@ -62,8 +62,8 @@ Start with an authenticated SCP03 session:
 using var session = new SecurityDomainSession(yubiKeyDevice, scp03Params);
 
 // Generate SCP11b key pair
-var keyRef = KeyReference.Create(ScpKeyIds.Scp11B, 0x01);
-var publicKey = session.GenerateEcKey(keyRef, 0);
+var keyRef = KeyReference.Create(ScpKeyIds.Scp11B, keyVersionNumber);
+var publicKey = session.GenerateEcKey(keyRef);
 ```
 
 ### 2. Configure Certificate Chain
@@ -94,7 +94,7 @@ session.StoreAllowlist(keyRef, allowedSerials);
 using var session = new SecurityDomainSession(yubiKeyDevice, currentScp03Params);
 
 // Replace with new keys
-var newKeyRef = KeyReference.Create(ScpKeyIds.Scp03, 0x02);
+var newKeyRef = KeyReference.Create(ScpKeyIds.Scp03, newKvn);
 session.PutKey(newKeyRef, newStaticKeys, currentKvn);
 ```
 
@@ -104,8 +104,8 @@ session.PutKey(newKeyRef, newStaticKeys, currentKvn);
 using var session = new SecurityDomainSession(yubiKeyDevice, scpParams);
 
 // Generate new key pair
-var newKeyRef = KeyReference.Create(ScpKeyIds.Scp11B, 0x02);
-var newPublicKey = session.GenerateEcKey(newKeyRef, oldKvn);
+var newKeyRef = KeyReference.Create(ScpKeyIds.Scp11B, newKvn);
+var newPublicKey = session.GenerateEcKey(newKeyRef, oldKvn); // Will be replaced
 ```
 
 ## Recovery Operations
@@ -137,7 +137,7 @@ foreach (var key in activeKeys)
 ### Factory Reset
 
 ```csharp
-// Warning: This removes all custom keys
+// Warning: This removes all custom keys in the Security Domain
 using var session = new SecurityDomainSession(yubiKeyDevice);
 session.Reset();
 ```
@@ -181,17 +181,17 @@ var scp03Keys = GenerateSecureKeys();
 var (privateKey, publicKey, certificates) = GenerateScp11Credentials();
 ```
 
-2. **Configure YubiKey**
+2. **Configure YubiKey for SCP11B**
 ```csharp
 using var session = new SecurityDomainSession(yubiKeyDevice, Scp03KeyParameters.DefaultKey);
 
 // Replace SCP03 keys
-var scp03Ref = KeyReference.Create(ScpKeyIds.Scp03, 0x01);
-session.PutKey(scp03Ref, scp03Keys, 0);
+var scp03Ref = KeyReference.Create(ScpKeyIds.Scp03, keyVersionNumber);
+session.PutKey(scp03Ref, scp03Keys);
 
 // Set up SCP11
-var scp11Ref = KeyReference.Create(ScpKeyIds.Scp11B, 0x01);
-var scp11Public = session.GenerateEcKey(scp11Ref, 0);
+var scp11Ref = KeyReference.Create(ScpKeyIds.Scp11B, keyVersionNumber);
+var scp11Public = session.GenerateEcKey(scp11Ref);
 session.StoreCertificates(scp11Ref, certificates);
 ```
 
@@ -241,7 +241,6 @@ foreach (var cert in certificates)
    - Verify key version numbers
    - Check key reference values
    - Confirm key components
-   - Try fallback to default keys
 
 2. **Failed Key Import**
    - Validate key formats
@@ -255,13 +254,11 @@ foreach (var cert in certificates)
    - Verify chain order
    - Check CA configuration
    - Validate certificate formats
-   - Confirm authentication level
 
 2. **Access Control Issues**
    - Check allowlist configuration
    - Verify certificate serials
    - Validate certificate dates
-   - Confirm SCP variant support
 
 > [!NOTE]
 > Always maintain detailed logs of key and certificate operations for troubleshooting.

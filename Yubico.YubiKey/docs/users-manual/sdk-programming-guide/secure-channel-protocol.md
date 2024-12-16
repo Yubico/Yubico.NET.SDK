@@ -501,7 +501,7 @@ var newPublicKey = session.GenerateEcKey(keyRef);
 
 // Setup off-card entity (OCE)
 var oceRef = KeyReference.Create(OceKid, kvn);
-var ocePublicKey = new ECPublicKeyParameters(oceCerts.Ca.PublicKey.GetECDsaPublicKey()!);
+var ocePublicKey = new ECPublicKeyParameters(oceCerts.Ca.PublicKey.GetECDsaPublicKey());
 session.PutKey(oceRef, ocePublicKey);
 
 // Store CA identifier
@@ -533,14 +533,15 @@ using var session = new SecurityDomainSession(yubiKeyDevice, scp11Params);
    - Imported keys must be properly protected
 
 3. **Protocol Selection:**
-   - SCP11b: Simpler but less secure
-   - SCP11a: Better security through mutual auth
-   - SCP11c: Enhanced features but more complex
+   - SCP11b: Simplest variant, no mutual authentication
+   - SCP11a: Better security through mutual authentication
+   - SCP11c: Additional features over SCP11a
 
 4. **Certificate Allowlists:**
    - Restrict which certificates can authenticate
    - Update lists as certificates change
    - Clear allowlists when no longer needed
+   - Can be used as a part of a certificate revocation stategy
 
 ### Checking SCP Support
 

@@ -25,17 +25,18 @@ The Security Domain manages X.509 certificates primarily for SCP11 protocol oper
 ### Storing Certificates
 
 Certificates are stored in chains associated with specific key references. A typical certificate chain includes:
+
 - Root CA certificate
 - Intermediate certificates (optional)
 - Leaf (end-entity) certificate
 
 ```csharp
 // Store certificate chain
-var certificates = new List<X509Certificate2> 
-{ 
+var certificates = new List<X509Certificate2>
+{
     rootCert,
-    intermediateCert, 
-    leafCert 
+    intermediateCert,
+    leafCert
 };
 session.StoreCertificates(keyReference, certificates);
 ```
@@ -57,7 +58,7 @@ session.StoreCaIssuer(keyReference, subjectKeyIdentifier);
 var certificates = session.GetCertificates(keyReference);
 
 // Get leaf certificate (last in chain)
-var leafCert = certificates.Last();  
+var leafCert = certificates.Last();
 
 // Get supported CA identifiers
 var caIds = session.GetSupportedCaIdentifiers(
@@ -70,11 +71,19 @@ var caIds = session.GetSupportedCaIdentifiers(
 
 ### Certificate Allowlists
 
+Use of the allowlist can provide the following benefits: 
+- A strong binding to one (or multiple) OCE(s) 
+- Protection against compromised OCEs 
+It is recommended to use the allowlist also as a revocation mechanism for OCE certificates. However, if the 
+allowlist is used in this way, special care shall be taken never to empty/remove the allowlist (i.e. if created, the 
+allowlist shall always contain at least one certificate) because no restrictions apply (i.e. all certificates are 
+accepted) once an allowlist is removed. 
+
 Control which certificates can be used for authentication by maintaining an allowlist of serial numbers:
 
 ```csharp
 // Store allowlist of certificate serial numbers
-var allowedSerials = new List<string> 
+var allowedSerials = new List<string>
 {
     "7F4971B0AD51F84C9DA9928B2D5FEF5E16B2920A",
     "6B90028800909F9FFCD641346933242748FBE9AD"
@@ -90,12 +99,14 @@ session.ClearAllowList(keyReference);
 Different SCP11 variants have different certificate requirements:
 
 ### SCP11a
+
 - Full certificate chain required
 - OCE (Off-Card Entity) certificates needed
 - Supports authorization rules in certificates
 - Used for mutual authentication
 
 Example setup:
+
 ```csharp
 // Setup with full chain for SCP11a
 using var session = new SecurityDomainSession(yubiKeyDevice, scp03Params);
@@ -110,11 +121,12 @@ session.StoreCaIssuer(oceRef, skiBytes);
 ```
 
 ### SCP11b
-- Simplest certificate requirements
-- Only needs device certificate
-- No mutual authentication
+
+- Simplest variant, no mutual authentication
+- Suitable when host authentication isn't required
 
 Example setup:
+
 ```csharp
 // Basic SCP11b setup
 using var session = new SecurityDomainSession(yubiKeyDevice, scp03Params);
@@ -125,25 +137,29 @@ session.StoreCertificates(keyRef, new[] { deviceCert });
 ```
 
 ### SCP11c
-- Enhanced certificate support
+
+- Mutual authentication
 - Similar to SCP11a but with additional features
-- Supports offline authorization
+- such as offline scripting usage (See [GlobalPlatform SCP11 Specification Annex B](https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/))
 
 ## Security Considerations
 
 1. **Certificate Validation**
+
    - Verify certificate chains completely
    - Check certificate revocation status
    - Validate certificate purposes and extensions
    - Ensure proper key usage constraints
 
 2. **Access Control**
+
    - Use allowlists in production environments
    - Regularly review and update allowlists
    - Monitor for unauthorized certificate usage
    - Document certificate authorization policies
 
 3. **Certificate Lifecycle**
+
    - Plan for certificate renewal
    - Handle certificate revocation
    - Maintain certificate inventory
@@ -198,6 +214,7 @@ session.StoreAllowlist(keyRef, newAllowedSerials);
 ### Troubleshooting
 
 1. **Certificate Loading Issues**
+
    - Verify certificate format (X.509 v3)
    - Check certificate chain order
    - Ensure sufficient storage space

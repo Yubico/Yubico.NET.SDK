@@ -300,7 +300,7 @@ namespace Yubico.YubiKey.Piv
         /// </remarks>
         /// <exception cref="InvalidOperationException">
         /// There is no <c>KeyCollector</c> loaded, the key provided was not a
-        /// valid Triple-DES key, or the YubiKey had some other error, such as
+        /// valid Triple-DES or AES key, or the YubiKey had some other error, such as
         /// unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
@@ -399,7 +399,7 @@ namespace Yubico.YubiKey.Piv
         /// <c>false</c> if it does not.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// The key provided was not a valid Triple-DES key, or the YubiKey had
+        /// The key provided was not a valid Triple-DES or AES key, or the YubiKey had
         /// some other error, such as unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
@@ -418,8 +418,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Try to change the management key. This will assume the new key is to
-        /// be Triple-DES.
+        /// Try to change the management key. The default management key algorithm will be used. (Firmware 5.7.x and later: AES-192. Firmware 5.6.x and earlier: TDES.)
         /// </summary>
         /// <remarks>
         /// Upon manufacture of a YubiKey, the PIV application begins with a
@@ -525,7 +524,7 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// There is no <c>KeyCollector</c> loaded, one of the keys provided was
-        /// not a valid Triple-DES key, or the YubiKey had some other error, such
+        /// not a valid Triple-DES  or AES key, or the YubiKey had some other error, such
         /// as unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
@@ -704,8 +703,8 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Change the management key, throw an exception if the user cancels.
-        /// The new key will be Triple-DES.
+        /// Change the management key, throw an exception if the user cancels. 
+        /// The default management key algorithm will be used. (Firmware 5.7.x and later: AES-192. Firmware 5.6.x and earlier: TDES.)
         /// </summary>
         /// <remarks>
         /// This is the same as <c>TryChangeManagementKey(PivTouchPolicy)</c>,
@@ -718,7 +717,7 @@ namespace Yubico.YubiKey.Piv
         /// </remarks>
         /// <exception cref="InvalidOperationException">
         /// There is no <c>KeyCollector</c> loaded, the key provided was not a
-        /// valid Triple-DES key, or the YubiKey had some other error, such as
+        /// valid Triple-DES or AES key, or the YubiKey had some other error, such as
         /// unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
@@ -752,7 +751,7 @@ namespace Yubico.YubiKey.Piv
         /// </remarks>
         /// <exception cref="InvalidOperationException">
         /// There is no <c>KeyCollector</c> loaded, the key provided was not a
-        /// valid Triple-DES key, or the YubiKey had some other error, such as
+        /// valid Triple-DES or AES key, or the YubiKey had some other error, such as
         /// unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
@@ -783,8 +782,7 @@ namespace Yubico.YubiKey.Piv
 
         /// <summary>
         /// Try to change the management key. This method will use the
-        /// <c>currentKey</c> and <c>newKey</c> provided. The new key's algorithm
-        /// will be Triple-DES.
+        /// <c>currentKey</c> and <c>newKey</c> provided.
         /// </summary>
         /// <remarks>
         /// Normally, an application would call the
@@ -821,7 +819,7 @@ namespace Yubico.YubiKey.Piv
         /// if not.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// One of the keys provided was not a valid Triple-DES key, or the
+        /// One of the keys provided was not a valid Triple-DES or AES key, or the
         /// YubiKey had some other error, such as unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
@@ -883,7 +881,7 @@ namespace Yubico.YubiKey.Piv
         /// if not.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// One of the keys provided was not a valid Triple-DES key, or the
+        /// One of the keys provided was not a valid Triple-DES or AES key, or the
         /// YubiKey had some other error, such as unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">

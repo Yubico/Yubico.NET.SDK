@@ -26,6 +26,8 @@ on:
         required: false
         default: "0.0.0-prerelease.YYYYMMDD.B"
         type: string
+  schedule:
+    - cron: '0 0 * * *' # Every day at midnight
 
 jobs:
   build-windows:

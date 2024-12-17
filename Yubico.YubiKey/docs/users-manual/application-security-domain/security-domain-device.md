@@ -114,7 +114,7 @@ foreach (var entry in keyInfo)
 }
 ```
 
-2. **Certificate status**
+2. **Certificate Status**
 
 ```csharp
 // Check certificate configuration
@@ -152,7 +152,7 @@ while (tlvReader.HasData)
 }
 ```
 
-2. **Writing TLV data**
+2. **Writing TLV Data**
 
 ```csharp
 using var ms = new MemoryStream();

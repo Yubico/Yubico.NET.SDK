@@ -175,7 +175,7 @@ oathSession.PutCredential(...); // Protected by SCP11
 
 ### Initial provisioning
 
-1. **Prepare keys and certificates**
+1. **Prepare Keys and Certificates**
 ```csharp
 var scp03Keys = GenerateSecureKeys();
 var (privateKey, publicKey, certificates) = GenerateScp11Credentials();
@@ -195,7 +195,7 @@ var scp11Public = session.GenerateEcKey(scp11Ref);
 session.StoreCertificates(scp11Ref, certificates);
 ```
 
-3. **Validate configuration**
+3. **Validate Configuration**
 ```csharp
 // Test new keys
 using var verifySession = new SecurityDomainSession(

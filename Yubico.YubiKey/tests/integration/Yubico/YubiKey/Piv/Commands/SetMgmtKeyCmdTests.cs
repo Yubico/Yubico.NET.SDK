@@ -52,10 +52,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
                 };
-                var setCmd = new SetManagementKeyCommand(keyData)
-                {
-                    Algorithm = PivAlgorithm.Aes128,
-                };
+                var setCmd = new SetManagementKeyCommand(keyData, PivAlgorithm.Aes128);
 
                 SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, setRsp.Status);

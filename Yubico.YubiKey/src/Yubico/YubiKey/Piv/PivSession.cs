@@ -224,12 +224,6 @@ namespace Yubico.YubiKey.Piv
         /// </remarks>
         public Func<KeyEntryData, bool>? KeyCollector { get; set; }
 
-        /// <summary>
-        ///     When the PivSession object goes out of scope, this method is called.
-        ///     It will close the session. The most important function of closing a
-        ///     session is to "un-authenticate" the management key and "un-verify"
-        ///     the PIN.
-        /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)

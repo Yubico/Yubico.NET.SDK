@@ -148,13 +148,13 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void CreateCommandApdu_GetP1Property_ReturnsThree(bool isMutual)
+        public void CreateCommandApdu_GetP1Property_Returns10ForAes192(bool isMutual)
         {
             CommandApdu cmdApdu = GetCommandApdu(isMutual, true);
 
             byte P1 = cmdApdu.P1;
 
-            Assert.Equal(3, P1);
+            Assert.Equal(10, P1);
         }
 
         [Theory]
@@ -257,10 +257,7 @@ namespace Yubico.YubiKey.Piv.Commands
             }
             finally
             {
-                if (!(replacement is null))
-                {
-                    replacement.RestoreRandomProvider();
-                }
+                replacement?.RestoreRandomProvider();
             }
         }
 
@@ -332,7 +329,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x7C, 0x0A, tag1, 0x08, 0x39, 0xA0, 0xA8, 0xE9, 0xF5, 0x28, 0x87, 0x75, sw1, sw2
                 });
 
-            return new InitializeAuthenticateManagementKeyResponse(responseApdu);
+            return new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.TripleDes);
         }
     }
 }

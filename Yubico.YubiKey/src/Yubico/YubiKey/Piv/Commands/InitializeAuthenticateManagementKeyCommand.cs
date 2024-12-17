@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands
@@ -306,18 +307,25 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
+
+        [Obsolete("This constructor is deprecated. Users must specify management key algorithm type, as it cannot be assumed.")]
+        public InitializeAuthenticateManagementKeyCommand()
+            : this(true)
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the InitializeAuthenticateManagementKeyCommand class for
-        /// Mutual Authentication, and a Triple-DES management key.
+        /// Mutual Authentication.
         /// </summary>
         /// <remarks>
         /// Using this constructor is equivalent to
         /// <code language="csharp">
-        ///  new InitializeAuthenticateManagementKeyCommand(true);
+        ///  new InitializeAuthenticateManagementKeyCommand(true, PivAlgorithm.AES192);
         /// </code>
         /// </remarks>
-        public InitializeAuthenticateManagementKeyCommand()
-            : this(true)
+        public InitializeAuthenticateManagementKeyCommand(PivAlgorithm algorithm)
+        : this(true, algorithm)
         {
         }
 
@@ -335,6 +343,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <param name="mutualAuthentication">
         /// <c>True</c> for mutual authentication, <c>false</c> for single.
         /// </param>
+        [Obsolete("This constructor is deprecated. Users must specify management key algorithm type, as it cannot be assumed.")]
         public InitializeAuthenticateManagementKeyCommand(bool mutualAuthentication)
             : this(mutualAuthentication, PivAlgorithm.TripleDes)
         {

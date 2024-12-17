@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new InitializeAuthenticateManagementKeyResponse(null));
+            _ = Assert.Throws<ArgumentNullException>(() => new InitializeAuthenticateManagementKeyResponse(null, PivAlgorithm.Aes192));
 #pragma warning restore CS8625
         }
 
@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 new byte[] { 0x7C, 0x09, 0x81, 0x07, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() =>
-                new InitializeAuthenticateManagementKeyResponse(responseApdu));
+                new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.Aes192));
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 new byte[] { 0x78, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() =>
-                new InitializeAuthenticateManagementKeyResponse(responseApdu));
+                new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.Aes192));
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 new byte[] { 0x7C, 0x0A, 0x82, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() =>
-                new InitializeAuthenticateManagementKeyResponse(responseApdu));
+                new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.Aes192));
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 new byte[] { 0x7C, 0x0A, 0x81, 0x07, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() =>
-                new InitializeAuthenticateManagementKeyResponse(responseApdu));
+                new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.Aes192));
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Piv.Commands
             var responseApdu = new ResponseApdu(
                 new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
-            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu);
+            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.Aes192);
 
             Assert.Equal(SWConstants.Success, response.StatusWord);
         }
@@ -99,7 +99,7 @@ namespace Yubico.YubiKey.Piv.Commands
             var responseApdu = new ResponseApdu(
                 new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
-            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu);
+            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.Aes192);
 
             Assert.Equal(ResponseStatus.Success, response.Status);
         }
@@ -120,7 +120,7 @@ namespace Yubico.YubiKey.Piv.Commands
             var responseApdu = new ResponseApdu(
                 new byte[] { 0x7C, 0x0A, tag2, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
-            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu);
+            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.Aes192);
 
             (bool isMutualAuth, ReadOnlyMemory<byte> clientAuthenticationChallenge) = response.GetData();
 
@@ -138,7 +138,7 @@ namespace Yubico.YubiKey.Piv.Commands
             var responseApdu = new ResponseApdu(
                 new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
-            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu);
+            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.Aes192);
 
             (bool isMutualAuth, ReadOnlyMemory<byte> clientAuthenticationChallenge) = response.GetData();
 
@@ -155,7 +155,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
-            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu);
+            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.Aes192);
 
             Assert.Equal(SWConstants.ConditionsNotSatisfied, response.StatusWord);
         }
@@ -167,7 +167,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
-            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu);
+            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.Aes192);
 
             Assert.Equal(ResponseStatus.ConditionsNotSatisfied, response.Status);
         }
@@ -179,7 +179,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
-            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu);
+            var response = new InitializeAuthenticateManagementKeyResponse(responseApdu, PivAlgorithm.Aes192);
 
             _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
         }

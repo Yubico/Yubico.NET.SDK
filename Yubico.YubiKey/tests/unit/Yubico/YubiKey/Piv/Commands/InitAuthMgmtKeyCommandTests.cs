@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
-            var command = new InitializeAuthenticateManagementKeyCommand();
+            var command = new InitializeAuthenticateManagementKeyCommand(PivAlgorithm.Aes192);
 
             Assert.True(command is IYubiKeyCommand<InitializeAuthenticateManagementKeyResponse>);
         }
@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Application_Piv()
         {
-            var command = new InitializeAuthenticateManagementKeyCommand();
+            var command = new InitializeAuthenticateManagementKeyCommand(PivAlgorithm.Aes192);
 
             YubiKeyApplication application = command.Application;
 
@@ -146,7 +146,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(
               new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
-            var command = new InitializeAuthenticateManagementKeyCommand();
+            var command = new InitializeAuthenticateManagementKeyCommand(PivAlgorithm.Aes192);
 
             InitializeAuthenticateManagementKeyResponse? response = command.CreateResponseForApdu(responseApdu);
 
@@ -164,9 +164,9 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             InitializeAuthenticateManagementKeyCommand command = constructor switch
             {
-                0 => new InitializeAuthenticateManagementKeyCommand(false),
-                1 => new InitializeAuthenticateManagementKeyCommand(true),
-                _ => new InitializeAuthenticateManagementKeyCommand(),
+                0 => new InitializeAuthenticateManagementKeyCommand(false, PivAlgorithm.Aes192),
+                1 => new InitializeAuthenticateManagementKeyCommand(true, PivAlgorithm.Aes192),
+                _ => new InitializeAuthenticateManagementKeyCommand(PivAlgorithm.Aes192),
             };
 
             return command.CreateCommandApdu();

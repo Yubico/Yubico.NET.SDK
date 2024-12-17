@@ -16,13 +16,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# Security Domain Common Tasks
+# Security Domain common tasks
 
 This document covers common operational tasks and workflows for managing the Security Domain. For detailed information about secure channels, see the [Secure Channel Protocol (SCP)](xref:UsersManualScp) documentation.
 
-## Setting Up a New YubiKey
+## Setting up a new YubiKey
 
-### 1. Initial State Assessment
+### 1. Initial state assessment
 
 Check the current configuration of your YubiKey:
 
@@ -32,7 +32,7 @@ var keyInfo = session.GetKeyInformation();
 var hasDefaultKeys = keyInfo.Any(k => k.Key.VersionNumber == 0xFF);
 ```
 
-### 2. Replacing Default SCP03 Keys
+### 2. Replacing default SCP03 keys
 
 Always replace default keys in production environments:
 
@@ -51,9 +51,9 @@ defaultSession.PutKey(keyRef, newKeys);
 > [!WARNING]
 > Default keys provide no security. Replace them before deploying to production.
 
-## Setting Up SCP11
+## Setting up SCP11
 
-### 1. Generate Initial Keys
+### 1. Generate initial keys
 
 Start with an authenticated SCP03 session:
 
@@ -66,7 +66,7 @@ var keyRef = KeyReference.Create(ScpKeyIds.Scp11B, keyVersionNumber);
 var publicKey = session.GenerateEcKey(keyRef);
 ```
 
-### 2. Configure Certificate Chain
+### 2. Configure certificate chain
 
 ```csharp
 // Store certificates
@@ -77,7 +77,7 @@ var caRef = KeyReference.Create(OceKid, kvn);
 session.StoreCaIssuer(caRef, skiBytes);
 ```
 
-### 3. Set Up Access Control
+### 3. Set up access control
 
 ```csharp
 // Configure certificate allowlist
@@ -85,9 +85,9 @@ var allowedSerials = GetAllowedCertificateSerials();
 session.StoreAllowlist(keyRef, allowedSerials);
 ```
 
-## Key Management Tasks
+## Key management tasks
 
-### Rotating SCP03 Keys
+### Rotating SCP03 keys
 
 ```csharp
 // Authenticate with current keys
@@ -98,7 +98,7 @@ var newKeyRef = KeyReference.Create(ScpKeyIds.Scp03, newKvn);
 session.PutKey(newKeyRef, newStaticKeys, currentKvn);
 ```
 
-### Rotating SCP11 Keys
+### Rotating SCP11 keys
 
 ```csharp
 using var session = new SecurityDomainSession(yubiKeyDevice, scpParams);
@@ -108,9 +108,9 @@ var newKeyRef = KeyReference.Create(ScpKeyIds.Scp11B, newKvn);
 var newPublicKey = session.GenerateEcKey(newKeyRef, oldKvn); // Will be replaced
 ```
 
-## Recovery Operations
+## Recovery operations
 
-### Status Check
+### Status check
 
 ```csharp
 using var session = new SecurityDomainSession(yubiKeyDevice);
@@ -134,7 +134,7 @@ foreach (var key in activeKeys)
 }
 ```
 
-### Factory Reset
+### Factory reset
 
 ```csharp
 // Warning: This removes all custom keys in the Security Domain
@@ -145,9 +145,9 @@ session.Reset();
 > [!IMPORTANT]
 > Resetting removes all custom keys and certificates. Have a recovery plan ready.
 
-## Integration with Other Applications
+## Integration with other applications
 
-### PIV with Secure Channel
+### PIV with secure channel
 
 ```csharp
 // Using SCP03
@@ -159,7 +159,7 @@ using var pivSession = new PivSession(yubiKeyDevice, scp11Params);
 pivSession.GenerateKeyPair(...); // Protected by SCP11
 ```
 
-### OATH with Secure Channel
+### OATH with secure channel
 
 ```csharp
 // Using SCP03
@@ -171,11 +171,11 @@ using var oathSession = new OathSession(yubiKeyDevice, scp11Params);
 oathSession.PutCredential(...); // Protected by SCP11
 ```
 
-## Production Deployment Tasks
+## Production deployment tasks
 
-### Initial Provisioning
+### Initial provisioning
 
-1. **Prepare Keys and Certificates**
+1. **Prepare keys and certificates**
 ```csharp
 var scp03Keys = GenerateSecureKeys();
 var (privateKey, publicKey, certificates) = GenerateScp11Credentials();
@@ -195,7 +195,7 @@ var scp11Public = session.GenerateEcKey(scp11Ref);
 session.StoreCertificates(scp11Ref, certificates);
 ```
 
-3. **Validate Configuration**
+3. **Validate configuration**
 ```csharp
 // Test new keys
 using var verifySession = new SecurityDomainSession(
@@ -206,7 +206,7 @@ var keyInfo = verifySession.GetKeyInformation();
 // Verify expected keys are present
 ```
 
-### Regular Maintenance
+### Regular maintenance
 
 1. **Monitor Key Status**
 ```csharp
@@ -235,7 +235,7 @@ foreach (var cert in certificates)
 
 ## Troubleshooting
 
-### Key Issues
+### Key issues
 
 1. **Unable to Authenticate**
    - Verify key version numbers
@@ -248,7 +248,7 @@ foreach (var cert in certificates)
    - Verify available space
    - Confirm key compatibility
 
-### Certificate Issues
+### Certificate issues
 
 1. **Certificate Chain Problems**
    - Verify chain order

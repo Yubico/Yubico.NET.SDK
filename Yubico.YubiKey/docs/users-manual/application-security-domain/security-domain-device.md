@@ -16,15 +16,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# Security Domain Device Information
+# Security Domain device information
 
 The Security Domain provides access to various device information and configuration data. This document covers device information retrieval and generic data operations. For protocol details, see the [Secure Channel Protocol (SCP)](xref:UsersManualScp) documentation.
 
-## Card Recognition Data
+## Card recognition data
 
 The card recognition data provides information about the YubiKey's capabilities and configuration according to GlobalPlatform Card Specification v2.3.1 §H.2.
 
-### Retrieving Card Data
+### Retrieving card data
 
 ```csharp
 using var session = new SecurityDomainSession(yubiKeyDevice);
@@ -33,7 +33,7 @@ using var session = new SecurityDomainSession(yubiKeyDevice);
 var cardData = session.GetCardRecognitionData();
 ```
 
-### Card Data Structure
+### Card data structure
 
 The card recognition data follows this TLV structure:
 
@@ -43,11 +43,11 @@ The card recognition data follows this TLV structure:
 | 0x73 | Card Recognition Data       |
 | ...  | Card-specific data elements |
 
-## Generic Data Operations
+## Generic data operations
 
 The Security Domain supports general-purpose data retrieval and storage using TLV (Tag-Length-Value) formatting.
 
-### Retrieving Data
+### Retrieving data
 
 ```csharp
 // Get data for a specific tag
@@ -57,7 +57,7 @@ var data = session.GetData(tag);
 var data = session.GetData(tag, additionalData);
 ```
 
-### Storing Data
+### Storing data
 
 ```csharp
 // Store TLV-formatted data
@@ -65,7 +65,7 @@ byte[] tlvData = PrepareTlvData();
 session.StoreData(tlvData);
 ```
 
-### Common Data Tags
+### Common data tags
 
 | Tag    | Description       | Access Level |
 | ------ | ----------------- | ------------ |
@@ -76,9 +76,9 @@ session.StoreData(tlvData);
 | 0xFF33 | KLOC Identifiers  | Read/Write   |
 | 0xFF34 | KLCC Identifiers  | Read/Write   |
 
-## Device Configuration
+## Device configuration
 
-### Checking Capabilities
+### Checking capabilities
 
 ```csharp
 // Check SCP11 support
@@ -97,7 +97,7 @@ var caIds = session.GetSupportedCaIdentifiers(
 );
 ```
 
-### Device Status Information
+### Device status information
 
 1. **Key Status**
 
@@ -114,7 +114,7 @@ foreach (var entry in keyInfo)
 }
 ```
 
-2. **Certificate Status**
+2. **Certificate status**
 
 ```csharp
 // Check certificate configuration
@@ -133,9 +133,9 @@ foreach (var key in keyInfo.Keys)
 }
 ```
 
-## Data Management
+## Data management
 
-### TLV Data Handling
+### TLV data handling
 
 1. **Reading TLV Data**
 
@@ -152,7 +152,7 @@ while (tlvReader.HasData)
 }
 ```
 
-2. **Writing TLV Data**
+2. **Writing TLV data**
 
 ```csharp
 using var ms = new MemoryStream();
@@ -166,7 +166,7 @@ writer.Write(value);
 session.StoreData(ms.ToArray());
 ```
 
-### Data Organization
+### Data organization
 
 The Security Domain organizes data hierarchically:
 
@@ -185,9 +185,9 @@ Root
     └── KLCC Data (0xFF34)
 ```
 
-## Maintenance Operations
+## Maintenance operations
 
-### Data Validation
+### Data validation
 
 ```csharp
 // Validate stored data
@@ -209,7 +209,7 @@ public void ValidateDeviceConfiguration()
 }
 ```
 
-### Data Cleanup
+### Data cleanup
 
 ```csharp
 // Remove unused data

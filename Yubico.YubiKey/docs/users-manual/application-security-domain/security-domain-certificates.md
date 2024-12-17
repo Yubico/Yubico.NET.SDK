@@ -16,13 +16,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# Security Domain Certificate Management
+# Security Domain certificate management
 
 The Security Domain manages X.509 certificates primarily for SCP11 protocol operations. These certificates are used for authentication and establishing secure channels. For detailed information about certificate usage in secure channels, see the [Secure Channel Protocol (SCP)](xref:UsersManualScp) documentation.
 
-## Certificate Operations
+## Certificate operations
 
-### Storing Certificates
+### Storing certificates
 
 Certificates are stored in chains associated with specific key references. A typical certificate chain includes:
 
@@ -41,7 +41,7 @@ var certificates = new List<X509Certificate2>
 session.StoreCertificates(keyReference, certificates);
 ```
 
-### CA Configuration
+### CA configuration
 
 For SCP11a and SCP11c, you need to configure the Certificate Authority (CA) information:
 
@@ -51,7 +51,7 @@ byte[] subjectKeyIdentifier = GetSkiFromCertificate(caCert);
 session.StoreCaIssuer(keyReference, subjectKeyIdentifier);
 ```
 
-### Retrieving Certificates
+### Retrieving certificates
 
 ```csharp
 // Get all certificates for a key reference
@@ -67,9 +67,9 @@ var caIds = session.GetSupportedCaIdentifiers(
 );
 ```
 
-## Access Control
+## Access control
 
-### Certificate Allowlists
+### Certificate allowlists
 
 Use of the allowlist can provide the following benefits: 
 - A strong binding to one (or multiple) OCE(s) 
@@ -94,7 +94,7 @@ session.StoreAllowlist(keyReference, allowedSerials);
 session.ClearAllowList(keyReference);
 ```
 
-## Certificate Management by SCP11 Variant
+## Certificate management by SCP11 variant
 
 Different SCP11 variants have different certificate requirements:
 
@@ -142,7 +142,7 @@ session.StoreCertificates(keyRef, new[] { deviceCert });
 - Similar to SCP11a but with additional features
 - such as offline scripting usage (See [GlobalPlatform SCP11 Specification Annex B](https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/))
 
-## Security Considerations
+## Security considerations
 
 1. **Certificate Validation**
 
@@ -174,9 +174,9 @@ session.StoreCertificates(keyRef, new[] { deviceCert });
 > [!IMPORTANT]
 > Most certificate operations require an authenticated session. Operations are typically only available when using SCP11a or SCP11c variants.
 
-## Common Tasks
+## Common tasks
 
-### Initial Certificate Setup
+### Initial certificate setup
 
 1. Generate or obtain required certificates
 2. Store certificate chain on YubiKey
@@ -199,7 +199,7 @@ session.StoreCaIssuer(oceRef, GetSkiFromCertificate(caCert));
 session.StoreAllowlist(keyRef, allowedSerials);
 ```
 
-### Certificate Rotation
+### Certificate rotation
 
 ```csharp
 using var session = new SecurityDomainSession(yubiKeyDevice, scpParams);

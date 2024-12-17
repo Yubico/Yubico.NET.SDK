@@ -16,20 +16,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# Security Domain Key Management
+# Security Domain key management
 
 The Security Domain supports management of both symmetric (SCP03) and asymmetric (SCP11) keys. This document describes the key types, their usage, and management operations.
 
 For protocol details and secure channel implementation, see the [Secure Channel Protocol (SCP)](xref:UsersManualScp) documentation.
 
-## Key Types
+## Key types
 
 The Security Domain manages two main types of keys:
 
 - **SCP03 Keys**: Symmetric AES-128 keys used for secure messaging
 - **SCP11 Keys**: Asymmetric NIST P-256 keys and X.509-certificates used for authentication and key agreement
 
-## SCP03 Key Management
+## SCP03 key management
 
 Each SCP03 key set consists of three AES-128 keys that work together to secure communications:
 
@@ -39,7 +39,7 @@ Each SCP03 key set consists of three AES-128 keys that work together to secure c
 | Key-MAC | Channel MAC key for message authentication |
 | Key-DEK | Data encryption key for sensitive data |
 
-### Managing SCP03 Keys
+### Managing SCP03 keys
 
 ```csharp
 // Put a new SCP03 key set
@@ -61,13 +61,13 @@ SCP03 key sets are identified by Key Version Numbers:
 > [!NOTE]
 > When adding the first custom key set, the default keys are automatically removed.
 
-## SCP11 Key Management
+## SCP11 key management
 
 SCP11 uses NIST P-256 elliptic curve cryptography. Keys can be:
 - Generated on the YubiKey (recommended)
 - Imported from external sources
 
-### Generating Keys
+### Generating keys
 
 ```csharp
 // Generate new EC key pair
@@ -75,7 +75,7 @@ var keyRef = KeyReference.Create(ScpKeyIds.Scp11B, keyVersionNumber);
 var publicKey = session.GenerateEcKey(keyRef);
 ```
 
-### Importing Keys
+### Importing keys
 
 ```csharp
 // Import existing private key
@@ -87,9 +87,9 @@ var publicKey = new ECPublicKeyParameters(ecdsaPublic);
 session.PutKey(keyRef, publicKey);
 ```
 
-## Key Management Operations
+## Key management operations
 
-### Querying Key Information
+### Querying key information
 
 ```csharp
 // Get information about installed keys
@@ -102,7 +102,7 @@ foreach (var entry in keyInfo)
 }
 ```
 
-### Deleting Keys
+### Deleting keys
 
 Keys can be deleted individually or reset to factory defaults:
 
@@ -117,11 +117,11 @@ session.Reset();
 > [!WARNING]
 > Resetting removes all custom keys and restores factory defaults (within the Security Domain). Ensure you have backups before resetting.
 
-## Key Rotation
+## Key rotation
 
 Regular key rotation is recommended for security. Here are typical rotation procedures:
 
-### SCP03 Key Rotation
+### SCP03 key rotation
 
 ```csharp
 // Authenticate with current keys
@@ -132,7 +132,7 @@ var newKeyRef = KeyReference.Create(ScpKeyIds.Scp03, keyVersionNumber);
 session.PutKey(newKeyRef, newStaticKeys, currentKvn);
 ```
 
-### SCP11 Key Rotation
+### SCP11 key rotation
 
 ```csharp
 using var session = new SecurityDomainSession(yubiKeyDevice, scpParams);
@@ -142,7 +142,7 @@ var newKeyRef = KeyReference.Create(ScpKeyIds.Scp11B, keyVersionNumber);
 var newPublicKey = session.GenerateEcKey(newKeyRef, oldKvn); // Replaces oldKvn
 ```
 
-## Security Considerations
+## Security considerations
 
 1. **Key Protection**
    - Store keys securely

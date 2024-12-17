@@ -79,11 +79,6 @@ function Test-RequiredAssets {
         }
 
         Write-Host "  ✅ Found $($required.Value) in: $($found.Name)" -ForegroundColor Green
-
-        # Verify GitHub attestation
-        if (-not (Test-GithubAttestation -FilePath $found.FullName -RepoName "Yubico/Yubico.NET.SDK")) {
-            throw "Attestation verification failed for: $($found.Name)"
-        }
     }
 }
 
@@ -198,6 +193,7 @@ Invoke-NuGetPackageSigning -Thumbprint "0123456789ABCDEF" -WorkingDirectory "C:\
 .NOTES
 Requires:
 - A smart card with the signing certificate
+- Github CLI for attestation
 - signtool.exe (Windows SDK)
 - nuget.exe
 - PowerShell 5.1 or later
@@ -287,6 +283,12 @@ function Invoke-NuGetPackageSigning {
             $packages = Get-ChildItem -Path $extractPath -Recurse -Include *.nupkg, *.snupkg
             foreach ($package in $packages) {
                 Write-Host "  Copying: $($package.Name)"
+
+                # Verify GitHub attestation (that the file has been downloaded from our repo)
+                if (-not (Test-GithubAttestation -FilePath $package.FullName -RepoName "Yubico/Yubico.NET.SDK")) {
+                    throw "Attestation verification failed for: $($package.Name)"
+                }
+
                 Copy-Item -Path $package.FullName -Destination $directories.Unsigned -Force
             }
             Write-Host "✓ Copied $($packages.Count) package(s)"
@@ -325,7 +327,7 @@ function Invoke-NuGetPackageSigning {
         }
 
         # Copy symbol packages to output directory
-        Write-Host "`nCopying symbol packages..."
+        Write-Host "`nCopying symbol packages..." -ForegroundColor Yellow
         $symbolPackages = Get-ChildItem -Path $directories.Unsigned -Filter "*.snupkg"
         foreach ($package in $symbolPackages) {
             Write-Host "  Copying: $($package.Name)"

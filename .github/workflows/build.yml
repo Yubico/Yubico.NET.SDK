@@ -58,8 +58,6 @@ jobs:
     runs-on: windows-2019
     needs: run-tests
     permissions:
-      pull-requests: write
-      checks: write
       id-token: write
       contents: read
       packages: read

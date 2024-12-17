@@ -109,8 +109,6 @@ jobs:
   pack:
     name: Package artifacts
     permissions:
-      pull-requests: write
-      checks: write
       id-token: write
       contents: read
       packages: read

@@ -30,9 +30,9 @@ The YubiKey supports two main variants of SCP:
 - **SCP03** - A symmetric key protocol using AES-128 for encryption and authentication
 - **SCP11** - An asymmetric protocol using elliptic curve cryptography (ECC) and X.509-certificates
 
-## Protocol Overview
+## Protocol overview
 
-### SCP03 (Symmetric)
+### SCP03 (symmetric)
 SCP03 provides a secure channel using shared secret keys. It is simpler to implement but requires secure key distribution. Think of SCP03 as wrapping commands and responses in an encrypted envelope that only trusted parties can open.
 
 Key characteristics:
@@ -40,7 +40,7 @@ Key characteristics:
 - Three keys per set: encryption, MAC, and data encryption
 - Supported on YubiKey 5 Series with firmware 5.3+
 
-### SCP11 (Asymmetric)
+### SCP11 (asymmetric)
 SCP11 uses public key cryptography for authentication and key agreement. It provides stronger security guarantees and simpler key management, but with more complex implementation. SCP11 comes in three variants:
 
 - **SCP11a** - Mutual authentication between YubiKey and host
@@ -52,7 +52,7 @@ Key characteristics:
 - Certificate-based authentication
 - Supported on YubiKey 5 Series with firmware 5.7.2+
 
-## When to Use Secure Channels
+## When to use secure channels
 
 Secure channels are particularly valuable when:
 
@@ -62,7 +62,7 @@ Secure channels are particularly valuable when:
 
 For example, if you tunnel YubiKey commands over the Internet, you might use TLS for transport security and add SCP as an additional layer of defense.
 
-## Security Considerations
+## Security considerations
 
 SCP03 relies entirely on symmetric cryptography, making key distribution a critical security concern. Most YubiKeys ship with default SCP03 keys that are publicly known - using these provides no additional security over cleartext communication.
 
@@ -72,11 +72,11 @@ SCP11, being asymmetric, simplifies key management but requires proper certifica
 
 The following sections detail how to implement both protocols, manage keys and certificates, and integrate secure channels with various YubiKey applications.
 
-## Using Secure Channels with YubiKey Applications
+## Using secure channels with YubiKey applications
 
 The SDK provides a consistent way to use secure channels across different YubiKey applications. You can enable secure channel communication by providing SCP key parameters when creating application sessions.
 
-### Common Pattern
+### Common pattern
 
 Each application session (PIV, OATH, OTP, YubiHSM Auth) accepts an optional `ScpKeyParameters` parameter. This can be either `Scp03KeyParameters` or `Scp11KeyParameters` depending on which protocol you want to use.
 
@@ -111,9 +111,9 @@ using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 }
 ```
 
-### Application Examples
+### Application examples
 
-#### PIV with Secure Channel
+#### PIV with secure channel
 
 ```csharp
 // Using SCP03
@@ -121,7 +121,7 @@ StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
 using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
 using (var pivSession = new PivSession(yubiKeyDevice, scp03params))
 {
-    // All PivSession-commands are now automatically protected by SCP11
+    // All PivSession-commands are now automatically protected by SCP03
 }
 
 // Using SCP11b
@@ -132,7 +132,7 @@ using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 }
 ```
 
-#### OATH with Secure Channel
+#### OATH with secure channel
 ```csharp
 
 // Using SCP03
@@ -140,7 +140,7 @@ StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
 using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
 using (var oathSession = new OathSession(yubiKeyDevice, scp03params))
 {
-    // All oathSession-commands are now automatically protected by SCP11
+    // All oathSession-commands are now automatically protected by SCP03
 }
 
 // Using SCP11b
@@ -151,7 +151,7 @@ using (var oathSession = new OathSession(yubiKeyDevice, scp11Params))
 }
 ```
 
-#### OTP with Secure Channel
+#### OTP with secure channel
 ```csharp
 
 // Using SCP03
@@ -159,7 +159,7 @@ StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
 using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
 using (var otpSession = new OtpSession(yubiKeyDevice, scp03params))
 {
-    // All otpSession-commands are now automatically protected by SCP11
+    // All otpSession-commands are now automatically protected by SCP03
 }
 
 // Using SCP11b
@@ -170,7 +170,7 @@ using (var otpSession = new OtpSession(yubiKeyDevice, scp11Params))
 }
 ```
 
-#### YubiHSM Auth with Secure Channel
+#### YubiHSM Auth with secure channel
 ```csharp
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
@@ -189,7 +189,7 @@ using (var yubiHsmSession = new YubiHsmSession(yubiKeyDevice, scp11Params))
 
 ```
 
-### Direct Connection
+### Direct connection
 
 If you need lower-level control, you can establish secure connections directly using [`Connect`](xref:Yubico.YubiKey.IYubiKeyDevice.Connect*):
 
@@ -217,7 +217,7 @@ if (yubiKeyDevice.TryConnect(
 }
 ```
 
-### Security Domain Management
+### Security Domain management
 
 The [`SecurityDomainSession`](xref:Yubico.YubiKey.Scp.SecurityDomainSession) class provides methods to manage SCP configurations:
 
@@ -248,9 +248,9 @@ session.Reset();
 
 The next sections will detail specific key management and protocol details for both SCP03 and SCP11.
 
-## SCP03 (Symmetric Key Protocol)
+## SCP03 (symmetric key protocol)
 
-### Static Keys Structure
+### Static keys structure
 
 SCP03 relies on a set of shared, secret, symmetric cryptographic keys. Each key set consists of three 16-byte AES-128 keys encapsulated in the [`StaticKeys`](xref:Yubico.YubiKey.Scp03.StaticKeys) class:
 
@@ -265,7 +265,7 @@ var staticKeys = new StaticKeys(keyDataMac, keyDataEnc, keyDataDek);
 var scp03Params = new Scp03KeyParameters(ScpKeyIds.Scp03, 0x01, staticKeys);
 ```
 
-### Key Sets on the YubiKey
+### Key sets on the YubiKey
 
 A YubiKey can contain up to three SCP03 key sets. Each set is identified by a Key Version Number (KVN):
 
@@ -285,7 +285,7 @@ Standard YubiKeys are manufactured with a default key set (KVN=0xFF):
 
 The default keys are publicly known (0x40 41 42 ... 4F) and provide no security. You should replace them in production environments.
 
-### Managing Key Sets
+### Managing key sets
 
 Use `SecurityDomainSession` to manage SCP03 key sets:
 
@@ -308,7 +308,7 @@ session.DeleteKey(keyRef, false);
 session.Reset();
 ```
 
-### Key Set Rules
+### Key set rules
 
 1. **Key Version Numbers (KVN):**
    - Default key set: KVN=0xFF
@@ -327,7 +327,7 @@ session.Reset();
    - Each must have unique KID
    - Can add/remove without affecting other sets
 
-### Example: Complete Key Management Flow
+### Example: complete key management flow
 
 ```csharp
 // Start with default keys
@@ -352,7 +352,7 @@ using (var session = new SecurityDomainSession(yubiKeyDevice, newScp03Params))
 }
 ```
 
-### Key Management Responsibilities
+### Key management responsibilities
 
 Your application must:
 - Track which keys are loaded on each YubiKey
@@ -366,7 +366,7 @@ The YubiKey provides no metadata about installed keys beyond what's available th
 > [!NOTE]
 > Always use proper key management in production. Never store sensitive keys in source code or configuration files.
 
-## SCP11 (Asymmetric Key Protocol)
+## SCP11 (asymmetric key protocol)
 
 SCP11 uses asymmetric cryptography based on elliptic curves (NIST P-256) for authentication and key agreement. Compared to SCP03, it uses certificates instead of pre-shared keys, providing greater flexibility in cases where the two entities setting up the secure channel are not deployed in strict pairs. The secure channel can be embedded into complex use cases, such as:
 - Installation of payment credentials on wearables
@@ -378,7 +378,7 @@ Detailed information about SCP11 can be found in [GlobalPlatform Card Technology
 
 It comes in three variants, each offering different security properties:
 
-### SCP11 Variants
+### SCP11 variants
 
 - **SCP11a**: Full mutual authentication between host and YubiKey using certificates
   - Basic mutual authentication
@@ -400,7 +400,7 @@ It comes in three variants, each offering different security properties:
     - Cryptographic operations remain on secure OCE server
   - Supports authorization rules in OCE certificates
 
-### Key Benefits of SCP11 over SCP03
+### Key benefits of SCP11 over SCP03
 
 SCP11 provides several advantages over SCP03:
 - Uses certificates instead of pre-shared keys for authentication
@@ -408,7 +408,7 @@ SCP11 provides several advantages over SCP03:
 - Supports ECC for key establishment with AES-128
 - Better suited for complex deployment scenarios
 
-### Key Parameters
+### Key parameters
 
 Unlike SCP03's static keys, SCP11 uses `Scp11KeyParameters` which can contain:
 - Public/private key pairs
@@ -432,7 +432,7 @@ var scp11Params = new Scp11KeyParameters(
     certificateChain);      // Certificate chain for authentication
 ```
 
-### Key Management
+### Key management
 
 Use `SecurityDomainSession` to manage SCP11 keys and certificates:
 
@@ -458,7 +458,7 @@ var serials = new List<string> {
 session.StoreAllowlist(oceKeyReference, serials);
 ```
 
-### SCP11b Example
+### SCP11b example
 
 Simplest variant, where YubiKey authenticates to host:
 
@@ -485,7 +485,7 @@ var keyParams = new Scp11KeyParameters(
 using var pivSession = new PivSession(yubiKeyDevice, keyParams);
 ```
 
-### SCP11a Example
+### SCP11a example
 
 Full mutual authentication requires more setup:
 
@@ -520,7 +520,7 @@ var scp11Params = new Scp11KeyParameters(
 using var session = new SecurityDomainSession(yubiKeyDevice, scp11Params);
 ```
 
-### Security Considerations
+### Security considerations
 
 1. **Certificate Management:**
    - Proper certificate validation is crucial
@@ -543,7 +543,7 @@ using var session = new SecurityDomainSession(yubiKeyDevice, scp11Params);
    - Clear allowlists when no longer needed
    - Can be used as a part of a certificate revocation stategy
 
-### Checking SCP Support
+### Checking SCP support
 
 ```csharp
 // Check firmware version for SCP11 support

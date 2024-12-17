@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# Security Domain Overview
+# Security Domain overview
 
 The Security Domain is a special application on the YubiKey responsible for managing secure communication channels and cryptographic keys. It implements protocols defined by [Global Platform Consortium](https://globalplatform.org/) that provide confidentiality and integrity for commands sent between host applications and the YubiKey.
 
@@ -32,7 +32,7 @@ Hardware:
 Transport Protocols:
 - Smartcard over USB or NFC
 
-## Core Features
+## Core features
 
 The Security Domain provides:
 - Management of secure communication channels (SCP03 and SCP11)
@@ -40,7 +40,7 @@ The Security Domain provides:
 - Certificate management for asymmetric protocols
 - Access control through certificate allowlists
 
-## Basic Usage
+## Basic usage
 
 ```csharp
 // Create session without SCP protection
@@ -52,7 +52,7 @@ using var session = new SecurityDomainSession(yubiKeyDevice, scpKeyParameters);
 session.GenerateEcKey(parameters...); // Protected by secure channel
 ```
 
-## Documentation Structure
+## Documentation structure
 
 The Security Domain functionality is documented in the following sections:
 
@@ -61,7 +61,7 @@ The Security Domain functionality is documented in the following sections:
 - [Common Tasks](xref:SecurityDomainTasks) - Setup, configuration, and maintenance operations
 - [Device Information](xref:SecurityDomainDevice) - Device data and configuration management
 
-## Basic Security Considerations
+## Basic security considerations
 
 When working with the Security Domain:
 - Most operations require an authenticated session
@@ -70,4 +70,4 @@ When working with the Security Domain:
 - Maintain proper key and certificate backups
 
 > [!NOTE]
-> For detailed implementation guidance and best practices, refer to the [Secure Channel Protocol (SCP)](xref:UsersManualScp) documentation.z
+> For detailed implementation guidance and best practices, refer to the [Secure Channel Protocol (SCP)](xref:UsersManualScp) documentation.

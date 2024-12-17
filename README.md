@@ -113,11 +113,6 @@ Prerequisites:
 2. Load `Yubico.NET.SDK.sln` into your IDE.
 3. Build solution
 
-
-## Security
-
-For security concerns, please see our [Security Policy](./SECURITY.md).
-
 ---
 
 📫 Need help? [Create an issue](https://github.com/Yubico/Yubico.NET.SDK/issues/new/choose)  

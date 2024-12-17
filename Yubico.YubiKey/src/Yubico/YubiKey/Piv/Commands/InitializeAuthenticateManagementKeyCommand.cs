@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// information on how to use this authentication.
     /// </para>
     /// <para>
-    /// Upon manufacture of a YubiKey, the management key is a Triple-DES key and
+    /// Upon manufacture of a YubiKey, the management key is either a Triple-DES key (firmware prior to 5.7) or an AES-192 key (firmware 5.7 and later), and
     /// it starts out as a default value:
     /// </para>
     /// <code>

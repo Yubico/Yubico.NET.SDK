@@ -513,14 +513,14 @@ namespace Yubico.YubiKey.Piv
 
         /// <summary>
         ///     Set the YubiKey's PIV application to be PIN-only with a PIN-derived
-        ///     and/or PIN-Protected Triple-DES management key . This sets the
+        ///     and/or PIN-Protected Triple-DES management key. This sets the
         ///     YubiKey to either
         ///     <code>
-        ///   PivPinOnlyMode.PinProtected
-        ///   PivPinOnlyMode.PinDerived
-        ///   PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived
-        ///   PivPinOnlyMode.None
-        /// </code>
+        ///        PivPinOnlyMode.PinProtected
+        ///        PivPinOnlyMode.PinDerived
+        ///        PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived
+        ///        PivPinOnlyMode.None
+        ///     </code>
         ///     If the YubiKey is set to PinProtected, PinDerived, or both, the PUK
         ///     will also be blocked.
         ///     &gt; [!WARNING]
@@ -573,11 +573,11 @@ namespace Yubico.YubiKey.Piv
         ///     and/or PIN-Protected management key of the specified algorithm. This
         ///     sets the YubiKey to either
         ///     <code>
-        ///   PivPinOnlyMode.PinProtected
-        ///   PivPinOnlyMode.PinDerived
-        ///   PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived
-        ///   PivPinOnlyMode.None
-        /// </code>
+        ///        PivPinOnlyMode.PinProtected
+        ///        PivPinOnlyMode.PinDerived
+        ///        PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived
+        ///        PivPinOnlyMode.None
+        ///     </code>
         ///     If the YubiKey is set to PinProtected, PinDerived, or both, the PUK
         ///     will also be blocked.
         ///     &gt; [!WARNING]

@@ -138,8 +138,8 @@ namespace Yubico.YubiKey.Piv
     ///         <xref href="UsersManualSensitive"> sensitive data</xref>.
     ///     </para>
     ///     <para>
-    ///         This class will also need a random number generator and a Triple-DES
-    ///         encryptor/decryptor. It will get them from
+    ///         This class will also need a random number generator and Triple-DES and AES
+    ///         encryptors/decryptors. It will get them from
     ///         <see cref="CryptographyProviders" />. That class will return default
     ///         implementations, unless you replace them. Very few applications will
     ///         choose to replace the defaults, but if you want to, see the documentation

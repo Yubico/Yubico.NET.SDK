@@ -36,10 +36,14 @@ Features:
 
 Bug Fixes:
 
-- The [PivSession.ChangeManagementKey](xref:Yubico.YubiKey.Piv.PivSession.ChangeManagementKey(Yubico.YubiKey.Piv.PivTouchPolicy)) method was incorrectly assuming Triple-DES was the default management key algorithm for FIPS keys. The SDK now verifies the management key alorithm based on key type and firmware version. ([#162](https://github.com/Yubico/Yubico.NET.SDK/pull/162))
+- The [PivSession.ChangeManagementKey](xref:Yubico.YubiKey.Piv.PivSession.ChangeManagementKey(Yubico.YubiKey.Piv.PivTouchPolicy)) method was incorrectly assuming Triple-DES was the default management key algorithm for FIPS keys. The SDK now verifies the management key alorithm based on key type and firmware version. ([#162](https://github.com/Yubico/Yubico.NET.SDK/pull/162), [#167](https://github.com/Yubico/Yubico.NET.SDK/pull/167))
 - The SDK now correctly sets the IYubiKeyDeviceInfo property [IsSkySeries](xref:Yubico.YubiKey.IYubiKeyDeviceInfo.IsSkySeries) to True for YubiKey Security Key Series Enterprise Edition keys. ([#158](https://github.com/Yubico/Yubico.NET.SDK/pull/158))
 - Exceptions are now caught when running PivSession.Dispose. This fixes an issue where the Dispose method could not close the Connection in the event of a disconnected YubiKey. ([#104](https://github.com/Yubico/Yubico.NET.SDK/issues/104))
 - A dynamic DLL resolution based on process architecture (x86/x64) has been implemented for NativeShims.dll. This fixes a reported issue with the NativeShims.dll location for 32-bit processes. ([#154](https://github.com/Yubico/Yubico.NET.SDK/pull/154))
+
+Miscellaneous:
+- Users are now able to verify that the NuGet package has been generated from our repository using [Github Attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) ([#169](https://github.com/Yubico/Yubico.NET.SDK/pull/169)) like this:
+  > \> gh attestation verify .\Yubico.Core.1.12.0.nupkg --repo Yubico/Yubico.NET.SDK
 
 Deprecations:
 

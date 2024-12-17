@@ -115,5 +115,7 @@ Prerequisites:
 
 ---
 
+## Connect with us
+
 📫 Need help? [Create an issue](https://github.com/Yubico/Yubico.NET.SDK/issues/new/choose)  
 📖 Read our blog for the latest Yubico updates [here](https://www.yubico.com/blog/)

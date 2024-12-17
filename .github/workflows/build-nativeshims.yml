@@ -138,8 +138,10 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
-            '${{ github.workspace }}/**/*.nupkg'
-            '${{ github.workspace }}/**/*.dll'
+            Yubico.NativeShims/**/*.dll
+            Yubico.NativeShims/**/*.so
+            Yubico.NativeShims/**/*.dylib
+            Yubico.NativeShims.*.nupkg
 
   publish-internal:
     name: Publish to internal NuGet

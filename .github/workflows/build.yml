@@ -124,9 +124,15 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
-            '${{ github.workspace }}/**/*.nupkg'
-            '${{ github.workspace }}/**/*.snupkg'
-            '${{ github.workspace }}/**/*.dll'
+            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.nupkg
+            Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
+            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
+            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.snupkg
+            Yubico.Core/src/bin/ReleaseWithDocs/*.snupkg
+            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.snupkg
+            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/**/*.dll
+            Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
+            Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
 
       # Package the OATH sample code source
       - name: Save build artifacts

@@ -25,14 +25,50 @@ This is a cross-platform, all encompassing SDK for the YubiKey aimed at large to
 customers. This version is written against .NET Core, and will eventually include bindings to languages
 outside the direct .NET ecosystem.
 
-## SDK Support
-The SDK is targetting net47, netstandard2.0 and netstandard2.1. This means the SDK can be loaded in NET Framework, NET6 and upwards.
+## Quick Start
+```csharp
+// Installation
+dotnet add package Yubico.YubiKey
+```
 
 ## Documentation
 
 The public documentation for this project is located
-at [https://docs.yubico.com/yesdk/](https://docs.yubico.com/yesdk/).
+at [https://docs.yubico.com/yesdk/](https://docs.yubico.com/yesdk/).  
 Here you can find both API reference and a user's manual that describes the concepts that this SDK exposes.
+
+## SDK Support
+The SDK is targeting net47, netstandard2.0 and netstandard2.1.  
+This means the SDK can be loaded in NET Framework, NET6 and upwards.
+
+## SDK Packages
+
+The SDK consists of the following assemblies:
+
+### Public Assemblies
+
+#### Yubico.YubiKey
+Primary assembly containing all classes and types needed for YubiKey interaction.
+
+#### Yubico.Core
+Platform abstraction layer (PAL) providing:
+- OS-specific functionality abstraction
+- Device enumeration
+- Utility classes for various encoding/decoding operations:
+    - Base32
+    - Tag-Length-Value (BER TLV)
+    - ModHex
+
+### Internal Assemblies
+
+#### Yubico.DotNetPolyfills
+> ⚠️ **Not for public use**  
+> Backports BCL features needed by the SDK. Target newer .NET versions directly if you need modern features.
+
+#### Yubico.NativeShims
+> ⚠️ **Not for public use**  
+> 🔧 **Unmanaged Library** 
+> Provides stable ABI for P/Invoke operations in Yubico.Core.
 
 ## Project structure
 

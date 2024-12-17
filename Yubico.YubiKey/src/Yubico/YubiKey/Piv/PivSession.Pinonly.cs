@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivPinOnlyMode GetPinOnlyMode()
         {
-            _log.LogInformation("Get the PIV PIN-only mode of a YubiKey based on AdminData.");
+            Logger.LogInformation("Get the PIV PIN-only mode of a YubiKey based on AdminData.");
 
             var pinOnlyMode = PivPinOnlyMode.PinProtectedUnavailable | PivPinOnlyMode.PinDerivedUnavailable;
 
@@ -189,7 +189,7 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         public PivPinOnlyMode TryRecoverPinOnlyMode()
         {
-            _log.LogInformation("Try to authenticate using PIN-only.");
+            Logger.LogInformation("Try to authenticate using PIN-only.");
 
             var pinOnlyMode = TryAuthenticatePinOnly(false);
 
@@ -746,7 +746,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void SetPinOnlyMode(PivPinOnlyMode pinOnlyMode, PivAlgorithm mgmtKeyAlgorithm)
         {
-            _log.LogInformation(
+            Logger.LogInformation(
                 "Set a YubiKey to PIV PIN-only mode: {PivPinOnlyMode}, mgmt key alg = {PivAlgorithm}.",
                 pinOnlyMode.ToString(), mgmtKeyAlgorithm.ToString());
 

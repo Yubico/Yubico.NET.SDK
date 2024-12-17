@@ -1284,6 +1284,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Key agreement receipts do not match.
+        /// </summary>
+        internal static string KeyAgreementReceiptMissmatch {
+            get {
+                return ResourceManager.GetString("KeyAgreementReceiptMissmatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The keyboard connection does not support writing more than 64 bytes to the device..
         /// </summary>
         internal static string KeyboardDataTooBig {
@@ -1914,15 +1923,6 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Exception caught when disposing PivSession: {0}, {1}.
-        /// </summary>
-        internal static string PivSessionDisposeUnknownError {
-            get {
-                return ResourceManager.GetString("PivSessionDisposeUnknownError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The private ID must be set either explicitly or by specifying that it should be generated before it can be read..
         /// </summary>
         internal static string PrivateIdNotSet {
@@ -2000,6 +2000,15 @@ namespace Yubico.YubiKey {
         internal static string Scp03KeyMismatch {
             get {
                 return ResourceManager.GetString("Scp03KeyMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exception caught when disposing Session: {0}, {1}.
+        /// </summary>
+        internal static string SessionDisposeUnknownError {
+            get {
+                return ResourceManager.GetString("SessionDisposeUnknownError", resourceCulture);
             }
         }
         
@@ -2175,11 +2184,11 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An unknown SCP03 error has occurred..
+        ///   Looks up a localized string similar to An unknown SCP error has occurred.
         /// </summary>
-        internal static string UnknownScp03Error {
+        internal static string UnknownScpError {
             get {
-                return ResourceManager.GetString("UnknownScp03Error", resourceCulture);
+                return ResourceManager.GetString("UnknownScpError", resourceCulture);
             }
         }
         

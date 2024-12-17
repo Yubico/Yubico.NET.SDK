@@ -14,6 +14,9 @@
 
 using System;
 using System.Linq;
+using Microsoft.Extensions.Logging;
+using Yubico.Core.Logging;
+using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -23,6 +26,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
         public override string Description => "A place for Greg's test code";
 
         public GregPlugin(IOutput output) : base(output) { }
+        public static ILogger Logger => Log.GetLogger<GregPlugin>();
 
         public override bool Execute()
         {
@@ -33,8 +37,13 @@ namespace Yubico.YubiKey.TestApp.Plugins
             Console.Error.WriteLine($"YubiKey Version: {yubiKey.FirmwareVersion}");
             Console.Error.WriteLine("NFC Before Value: " + yubiKey.IsNfcRestricted);
 
-            yubiKey.SetIsNfcRestricted(true);
-
+            using (var session = new PivSession(yubiKey))
+            {
+                Logger.LogDebug("Disconnect Yubikey");
+                Console.ReadLine();
+            }
+            //Dispose
+            Console.ReadLine();
             return true;
         }
 

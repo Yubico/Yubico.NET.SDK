@@ -14,7 +14,9 @@
 
 using System;
 using System.Globalization;
-using Yubico.YubiKey.InterIndustry.Commands;
+using Yubico.Core.Logging;
+using Yubico.YubiKey.Oath;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.YubiHsmAuth.Commands;
 
 namespace Yubico.YubiKey.YubiHsmAuth
@@ -22,15 +24,8 @@ namespace Yubico.YubiKey.YubiHsmAuth
     /// <summary>
     /// The main entry-point for all YubiHSM Auth related operations.
     /// </summary>
-    public sealed partial class YubiHsmAuthSession : IDisposable
+    public sealed partial class YubiHsmAuthSession : ApplicationSession
     {
-        private bool _disposed;
-
-        /// <summary>
-        /// The object that represents the connection to the YubiKey.
-        /// </summary>
-        public IYubiKeyConnection Connection { get; private set; }
-
         /// <summary>
         /// The delegate this class will call when it needs a management key or
         /// credential password.
@@ -54,12 +49,6 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </para>
         /// </remarks>
         public Func<KeyEntryData, bool>? KeyCollector { get; set; }
-
-        // The default constructor explicitly defined. We don't want it to be used.
-        private YubiHsmAuthSession()
-        {
-            throw new NotImplementedException();
-        }
 
         /// <summary>
         /// Create an instance of <c>YubiHsmAuthSession</c> class, the object
@@ -90,22 +79,16 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <param name="yubiKey">
         /// The object that represents the actual YubiKey which will perform the operations.
         /// </param>
+        /// <param name="keyParameters">If supplied, the parameters used open the SCP connection.</param>
         /// <exception cref="ArgumentNullException">
         /// The <c>yubiKey</c> argument is null.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// Failed to connect to the YubiHSM Auth application.
         /// </exception>
-        public YubiHsmAuthSession(IYubiKeyDevice yubiKey)
+        public YubiHsmAuthSession(IYubiKeyDevice yubiKey, ScpKeyParameters? keyParameters = null)
+            : base(Log.GetLogger<YubiHsmAuthSession>(), yubiKey, YubiKeyApplication.YubiHsmAuth, keyParameters)
         {
-            if (yubiKey is null)
-            {
-                throw new ArgumentNullException(nameof(yubiKey));
-            }
-
-            Connection = yubiKey.Connect(YubiKeyApplication.YubiHsmAuth);
-
-            _disposed = false;
         }
 
         /// <summary>
@@ -158,28 +141,6 @@ namespace Yubico.YubiKey.YubiHsmAuth
             }
 
             return KeyCollector;
-        }
-
-        /// <summary>
-        /// When the YubiHsmAuthSession object goes out of scope, this method is called. It will close the session.
-        /// </summary>
-        // Note that .NET recommends a Dispose method call Dispose(true) and GC.SuppressFinalize(this).
-        // The actual disposal is in the Dispose(bool) method.
-        //
-        // However, that does not apply to sealed classes. So the Dispose method will simply perform the
-        // "closing" process, no call to Dispose(bool) or GC.
-        public void Dispose()
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            // At the moment, there is no "close session" method. So for now,
-            // just connect to the management application.
-            _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
-            Connection.Dispose();
-            _disposed = true;
         }
     }
 }

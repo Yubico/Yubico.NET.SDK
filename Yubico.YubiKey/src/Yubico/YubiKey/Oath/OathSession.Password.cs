@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Oath
                 {
                     var password = keyEntryData.GetCurrentValue();
                     var command = new ValidateCommand(password, _oathData);
-                    
+
                     var response = Connection.SendCommand(command);
                     if (response.Status == ResponseStatus.Success)
                     {
@@ -322,8 +322,7 @@ namespace Yubico.YubiKey.Oath
                 }
             }
 
-            var setPasswordCommand = new SetPasswordCommand(newPassword, _oathData);
-            var setPasswordResponse = Connection.SendCommand(setPasswordCommand);
+            var setPasswordResponse = Connection.SendCommand(new SetPasswordCommand(newPassword, _oathData));
             if (setPasswordResponse.Status == ResponseStatus.Success)
             {
                 var selectOathResponse = Connection.SendCommand(new SelectOathCommand());

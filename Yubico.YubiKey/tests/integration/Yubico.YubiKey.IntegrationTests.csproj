@@ -31,6 +31,7 @@ limitations under the License. -->
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
     <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
     <ProjectReference Include="..\unit\Yubico.YubiKey.UnitTests.csproj" />

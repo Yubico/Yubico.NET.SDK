@@ -22,13 +22,14 @@ using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [Obsolete("Use new ChannelMac instead")]
     internal static class ChannelMac
     {
         public static (CommandApdu macdApdu, byte[] newMacChainingValue) MacApdu(CommandApdu apdu, byte[] macKey, byte[] macChainingValue)
         {
             if (macChainingValue.Length != 16)
             {
-                throw new ArgumentException(ExceptionMessages.UnknownScp03Error, nameof(macChainingValue));
+                throw new ArgumentException(ExceptionMessages.UnknownScpError, nameof(macChainingValue));
             }
 
             var apduWithLongerLen = AddDataToApdu(apdu, new byte[8]);
@@ -73,7 +74,7 @@ namespace Yubico.YubiKey.Scp03
             cmacObj.CmacInit(rmacKey);
             cmacObj.CmacUpdate(macInp);
             cmacObj.CmacFinal(cmac);
-            
+
             var calculatedRmac = cmac.AsSpan(0, 8);
             if (!CryptographicOperations.FixedTimeEquals(recvdRmac, calculatedRmac))
             {

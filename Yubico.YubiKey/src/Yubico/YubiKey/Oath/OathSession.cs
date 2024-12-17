@@ -14,19 +14,21 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Extensions.Logging;
+using Yubico.Core.Logging;
 using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Oath.Commands;
+using Yubico.YubiKey.Scp;
 
 namespace Yubico.YubiKey.Oath
 {
     /// <summary>
     /// The main entry-point for all OATH related operations.
     /// </summary>
-    public sealed partial class OathSession : IDisposable
+    public sealed partial class OathSession : ApplicationSession
     {
-        private bool _disposed;
-        private readonly IYubiKeyDevice _yubiKeyDevice;
-        internal OathApplicationData _oathData;
+        // ReSharper disable once InconsistentNaming
+        internal OathApplicationData _oathData; // Internal for testing
 
         /// <summary>
         /// Indicates whether the OATH application on the YubiKey is
@@ -34,11 +36,6 @@ namespace Yubico.YubiKey.Oath
         /// before operations can be executed.
         /// </summary>
         public bool IsPasswordProtected => !_oathData.Challenge.IsEmpty;
-
-        /// <summary>
-        /// The object that represents the connection to the YubiKey.
-        /// </summary>
-        public IYubiKeyConnection Connection { get; private set; }
 
         /// <summary>
         /// The Delegate this class will call when it needs a password to unlock the OATH application.
@@ -56,12 +53,6 @@ namespace Yubico.YubiKey.Oath
         /// </p>
         /// </remarks>
         public Func<KeyEntryData, bool>? KeyCollector { get; set; }
-
-        // The default constructor explicitly defined. We don't want it to be used.
-        private OathSession()
-        {
-            throw new NotImplementedException();
-        }
 
         /// <summary>
         /// Create an instance of <c>OathSession</c> class, the object that represents
@@ -81,33 +72,24 @@ namespace Yubico.YubiKey.Oath
         /// <param name="yubiKey">
         /// The object that represents the actual YubiKey which will perform the operations.
         /// </param>
+        /// <param name="keyParameters">If supplied, the parameters used open the SCP connection.</param>
         /// <exception cref="ArgumentNullException">
         /// The <c>yubiKey</c> argument is null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The <c>SelectApplicationData</c> recived from the <c>yubiKey</c> is null.
+        /// The <c>SelectApplicationData</c> received from the <c>yubiKey</c> is null.
         /// </exception>
-        public OathSession(IYubiKeyDevice yubiKey)
+        public OathSession(IYubiKeyDevice yubiKey, ScpKeyParameters? keyParameters = null)
+            : base(Log.GetLogger<OathSession>(), yubiKey, YubiKeyApplication.Oath, keyParameters)
         {
-            if (yubiKey is null)
-            {
-                throw new ArgumentNullException(nameof(yubiKey));
-            }
 
-            _yubiKeyDevice = yubiKey;
-
-            Connection = yubiKey.Connect(YubiKeyApplication.Oath);
-
-            if (!(Connection.SelectApplicationData is OathApplicationData))
+            if (!(Connection.SelectApplicationData is OathApplicationData data))
             {
                 throw new InvalidOperationException(nameof(Connection.SelectApplicationData));
             }
 
-            _oathData = (Connection.SelectApplicationData as OathApplicationData)!;
-
-            _disposed = false;
+            _oathData = data;
         }
-
 
         /// <summary>
         /// Resets the YubiKey's OATH application back to a factory default state.
@@ -130,7 +112,6 @@ namespace Yubico.YubiKey.Oath
             _oathData = selectOathResponse.GetData();
         }
 
-        // Checks if the KeyCollector delegate is null
         private void EnsureKeyCollector()
         {
             if (KeyCollector is null)
@@ -142,27 +123,15 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        /// <summary>
-        /// When the OathSession object goes out of scope, this method is called. It will close the session.
-        /// </summary>
-        // Note that .NET recommends a Dispose method call Dispose(true) and GC.SuppressFinalize(this).
-        // The actual disposal is in the Dispose(bool) method.
-        //
-        // However, that does not apply to sealed classes. So the Dispose method will simply perform the
-        // "closing" process, no call to Dispose(bool) or GC.
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (_disposed)
+            if (disposing)
             {
                 return;
             }
 
-            // At the moment, there is no "close session" method. So for now,
-            // just connect to the management application.
-            _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
             KeyCollector = null;
-            Connection.Dispose();
-            _disposed = true;
+            base.Dispose(disposing);
         }
     }
 }

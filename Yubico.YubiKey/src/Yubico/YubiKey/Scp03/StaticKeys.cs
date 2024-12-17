@@ -14,6 +14,7 @@
 
 using System;
 using System.Security.Cryptography;
+using Yubico.YubiKey.Scp;
 
 namespace Yubico.YubiKey.Scp03
 {
@@ -21,7 +22,7 @@ namespace Yubico.YubiKey.Scp03
     /// Represents a triple of SCP03 static keys shared with the device.
     /// </summary>
     /// <remarks>
-    /// See also the <xref href="UsersManualScp03">User's Manual entry</xref> on
+    /// See also the <xref href="UsersManualScp">User's Manual entry</xref> on
     /// SCP03.
     /// <para>
     /// These are the three secret keys that only the device and remote user
@@ -34,6 +35,7 @@ namespace Yubico.YubiKey.Scp03
     /// device.
     /// </para>
     /// </remarks>
+    [Obsolete("Use new Static Keys")]
     public class StaticKeys : IDisposable
     {
         private const int KeySizeBytes = 16;
@@ -127,10 +129,9 @@ namespace Yubico.YubiKey.Scp03
         /// <param name="channelMacKey">16-byte AES128 shared secret key</param>
         /// <param name="channelEncryptionKey">16-byte AES128 shared secret key</param>
         /// <param name="dataEncryptionKey">16-byte AES128 shared secret key</param>
-        public StaticKeys(
-            ReadOnlyMemory<byte> channelMacKey,
-            ReadOnlyMemory<byte> channelEncryptionKey,
-            ReadOnlyMemory<byte> dataEncryptionKey)
+        public StaticKeys(ReadOnlyMemory<byte> channelMacKey,
+                          ReadOnlyMemory<byte> channelEncryptionKey,
+                          ReadOnlyMemory<byte> dataEncryptionKey)
         {
             if (channelMacKey.Length != KeySizeBytes)
             {
@@ -160,9 +161,11 @@ namespace Yubico.YubiKey.Scp03
         /// </summary>
         public StaticKeys()
         {
-            var DefaultKey = new ReadOnlyMemory<byte>(new byte[] {
-                0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f
-            });
+            var DefaultKey = new ReadOnlyMemory<byte>(
+                new byte[]
+                {
+                    0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f
+                });
 
             SetKeys(DefaultKey, DefaultKey, DefaultKey);
             KeyVersionNumber = 255;
@@ -170,10 +173,9 @@ namespace Yubico.YubiKey.Scp03
             _disposed = false;
         }
 
-        private void SetKeys(
-            ReadOnlyMemory<byte> channelMacKey,
-            ReadOnlyMemory<byte> channelEncryptionKey,
-            ReadOnlyMemory<byte> dataEncryptionKey)
+        private void SetKeys(ReadOnlyMemory<byte> channelMacKey,
+                             ReadOnlyMemory<byte> channelEncryptionKey,
+                             ReadOnlyMemory<byte> dataEncryptionKey)
         {
             channelMacKey.CopyTo(_macKey.AsMemory());
             channelEncryptionKey.CopyTo(_encKey.AsMemory());
@@ -181,32 +183,36 @@ namespace Yubico.YubiKey.Scp03
         }
 
         // Get a copy (deep clone) of this object.
-        internal StaticKeys GetCopy()
-        {
-            return new StaticKeys(ChannelMacKey, ChannelEncryptionKey, DataEncryptionKey)
+        internal StaticKeys GetCopy() =>
+            new StaticKeys(ChannelMacKey, ChannelEncryptionKey, DataEncryptionKey)
             {
                 KeyVersionNumber = KeyVersionNumber
             };
-        }
+        
+        internal Scp03KeyParameters ConvertToScp03KeyParameters() =>
+                new Scp03KeyParameters(ScpKeyIds.Scp03, 0xFF, ConvertFromLegacy());
 
         /// <summary>
         /// Determine if the contents of each key is the same for both objects.
         /// If so, this method will return <c>true</c>.
         /// </summary>
-        public bool AreKeysSame(StaticKeys compareKeys)
+        public bool AreKeysSame(StaticKeys? compareKeys)
         {
-            if (!(compareKeys is null))
+            if (compareKeys is null)
             {
-                if (ChannelEncryptionKey.Span.SequenceEqual(compareKeys.ChannelEncryptionKey.Span)
-                    && ChannelMacKey.Span.SequenceEqual(compareKeys.ChannelMacKey.Span)
-                    && DataEncryptionKey.Span.SequenceEqual(compareKeys.DataEncryptionKey.Span))
-                {
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            return ChannelEncryptionKey.Span.SequenceEqual(compareKeys.ChannelEncryptionKey.Span) &&
+                ChannelMacKey.Span.SequenceEqual(compareKeys.ChannelMacKey.Span) &&
+                DataEncryptionKey.Span.SequenceEqual(compareKeys.DataEncryptionKey.Span);
         }
+        
+        private Scp.StaticKeys ConvertFromLegacy() =>
+            new Scp.StaticKeys(ChannelMacKey, ChannelEncryptionKey, DataEncryptionKey)
+            {
+                // KeyVersionNumber = KeyVersionNumber
+            };
 
         /// <summary>
         /// Releases any unmanaged resources and overwrites any sensitive data.

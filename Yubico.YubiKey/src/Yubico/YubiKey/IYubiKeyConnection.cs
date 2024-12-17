@@ -16,9 +16,20 @@ using System;
 
 namespace Yubico.YubiKey
 {
+    /// <summary>
+    /// Represents a connection to a YubiKey device, enabling the sending of commands and retrieval of responses.
+    /// </summary>
     public interface IYubiKeyConnection : IDisposable
     {
-        TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse;
+        /// <summary>
+        /// Sends a command to the YubiKey device and returns the response.
+        /// </summary>
+        /// <typeparam name="TResponse">The type of response expected from the YubiKey device.</typeparam>
+        /// <param name="yubiKeyCommand">The command to be sent to the YubiKey device.</param>
+        /// <returns>The response received from the YubiKey device.</returns>
+        TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
+            where TResponse : IYubiKeyResponse;
+
         /// <summary>
         /// An object representing the response received from the YubiKey after selecting the application.  
         /// </summary>

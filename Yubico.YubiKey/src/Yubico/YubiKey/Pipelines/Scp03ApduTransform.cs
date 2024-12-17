@@ -31,6 +31,7 @@ namespace Yubico.YubiKey.Pipelines
     ///
     /// Requires pre-shared <see cref="StaticKeys"/>.
     /// </remarks>
+    [Obsolete("Use ScpApduTransform instead.")]
     internal class Scp03ApduTransform : IApduTransform, IDisposable
     {
         private readonly IApduTransform _pipeline;
@@ -88,7 +89,7 @@ namespace Yubico.YubiKey.Pipelines
         {
             // Encode command
             var encodedCommand = _session.EncodeCommand(command);
-            
+
             // Pass along the encoded command
             var response = _pipeline.Invoke(encodedCommand, commandType, responseType);
 
@@ -97,7 +98,7 @@ namespace Yubico.YubiKey.Pipelines
             {
                 return response;
             }
-            
+
             // Decode response and return it
             return _session.DecodeResponse(response);
         }

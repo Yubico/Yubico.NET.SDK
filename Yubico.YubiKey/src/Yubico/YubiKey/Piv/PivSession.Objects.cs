@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public T ReadObject<T>() where T : PivDataObject, new()
         {
-            _log.LogInformation("Read PivObject " + typeof(T) + ".");
+            Logger.LogInformation("Read PivObject " + typeof(T) + ".");
             var returnValue = new T();
 
             if (TryReadObject(returnValue))
@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         public bool TryReadObject<T>(out T pivDataObject) where T : PivDataObject, new()
         {
-            _log.LogInformation("Try to read PivObject " + typeof(T) + ".");
+            Logger.LogInformation("Try to read PivObject " + typeof(T) + ".");
             pivDataObject = new T();
 
             return TryReadObject(pivDataObject);
@@ -207,7 +207,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public T ReadObject<T>(int dataTag) where T : PivDataObject, new()
         {
-            _log.LogInformation("Read PivObject " + typeof(T) + " using dataTag 0x{0:X8}.", dataTag);
+            Logger.LogInformation("Read PivObject " + typeof(T) + " using dataTag 0x{0:X8}.", dataTag);
             var returnValue = new T
             {
                 DataTag = dataTag
@@ -299,7 +299,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryReadObject<T>(int dataTag, out T pivDataObject) where T : PivDataObject, new()
         {
-            _log.LogInformation("Try to read PivObject " + typeof(T) + ".");
+            Logger.LogInformation("Try to read PivObject " + typeof(T) + ".");
             pivDataObject = new T
             {
                 DataTag = dataTag
@@ -384,7 +384,7 @@ namespace Yubico.YubiKey.Piv
             {
                 throw new ArgumentNullException(nameof(pivDataObject));
             }
-            _log.LogInformation("Write PivObject " + pivDataObject.GetType() + " to data tag 0x{0:X8}.");
+            Logger.LogInformation("Write PivObject " + pivDataObject.GetType() + " to data tag 0x{0:X8}.");
 
             byte[] dataToStore = Array.Empty<byte>();
 

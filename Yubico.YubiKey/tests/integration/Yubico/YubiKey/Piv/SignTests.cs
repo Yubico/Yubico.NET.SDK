@@ -18,6 +18,7 @@ using Xunit;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
 
@@ -47,9 +48,8 @@ namespace Yubico.YubiKey.Piv
             bool isValid = LoadKey(PivAlgorithm.EccP256, 0x89, pinPolicy, PivTouchPolicy.Never, testDevice);
             Assert.True(isValid);
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-
             using var pivSession = useScp03
-                ? new PivSession(testDevice, new StaticKeys())
+                ? new PivSession(testDevice, Scp03KeyParameters.DefaultKey)
                 : new PivSession(testDevice);
 
             var collectorObj = new Simple39KeyCollector();

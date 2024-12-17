@@ -266,7 +266,7 @@
   </data>
   <data name="PinComplexityViolation" xml:space="preserve">
     <value>The provided PIN or PUK value violates current complexity conditions.</value>
-  </data>  
+  </data>
   <data name="YubiKeyNotAuthenticatedInPiv" xml:space="preserve">
     <value>PIV management key mutual authentication failed because the YubiKey did not authenticate.</value>
   </data>
@@ -296,7 +296,7 @@
   </data>
   <data name="InvalidTemporaryPinLength" xml:space="preserve">
     <value>The temporary PIN length is invalid.</value>
-  </data>  
+  </data>
   <data name="InvalidPivPutDataLength" xml:space="preserve">
     <value>The length of input to a Put Data operation, {0}, was invalid, the maximum is {1}.</value>
   </data>
@@ -352,8 +352,8 @@
     <value>An unknown error has occurred.</value>
     <comment>Candidate for removal</comment>
   </data>
-  <data name="UnknownScp03Error" xml:space="preserve">
-    <value>An unknown SCP03 error has occurred.</value>
+  <data name="UnknownScpError" xml:space="preserve">
+    <value>An unknown SCP error has occurred</value>
   </data>
   <data name="ValueConversionFailed" xml:space="preserve">
     <value>Cannot convert the data to the requested type. Expected only {0} byte(s) of data, but {1} byte(s) were present.</value>
@@ -904,7 +904,10 @@
   <data name="InvalidUriQuery" xml:space="preserve">
     <value>The URI query cannot be null or empty.</value>
   </data>
-  <data name="PivSessionDisposeUnknownError" xml:space="preserve">
-    <value>Exception caught when disposing PivSession: {0}, {1}</value>
+  <data name="SessionDisposeUnknownError" xml:space="preserve">
+    <value>Exception caught when disposing Session: {0}, {1}</value>
+  </data>
+  <data name="KeyAgreementReceiptMissmatch" xml:space="preserve">
+    <value>Key agreement receipts do not match</value>
   </data>
 </root>

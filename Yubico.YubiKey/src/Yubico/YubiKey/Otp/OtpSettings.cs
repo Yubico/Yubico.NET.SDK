@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Otp
                     foreach (var flag in FlagsSet.Where(k => k != Flag.None))
                     {
                         var flagItem = _flagDefinitions[flag];
-                        
+
                         // Doing this here makes the RequiredOr check easier.
                         var requiredOr =
                             flagItem.RequiredOrFlags == Flag.None

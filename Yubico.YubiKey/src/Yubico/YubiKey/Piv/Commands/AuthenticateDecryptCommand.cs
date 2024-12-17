@@ -57,7 +57,8 @@ namespace Yubico.YubiKey.Piv.Commands
     /// </para>
     /// <para>
     /// The caller supplies the data to decrypt. It must be a block the same size
-    /// as the key. For an RSA-1024/RSA-2048/RSA-3072/RSA-4096 key, the block must be 128/256/384/512 bytes. If the actual data to decrypt
+    /// as the key. For an RSA-1024 key, the block must be 128 bytes, for an
+    /// RSA-2048 key, the block must be 256 bytes, for an RSA-3072 key, the block must be 384 bytes, and for an RSA-4096 key, the block must be 512 bytes. If the actual data to decrypt
     /// is shorter, it must be provided with as many prepended 00 bytes as needed
     /// to make sure the block is the appropriate length.
     /// </para>

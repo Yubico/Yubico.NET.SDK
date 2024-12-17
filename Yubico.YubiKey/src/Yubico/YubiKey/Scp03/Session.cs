@@ -20,6 +20,7 @@ using Yubico.YubiKey.Scp03.Commands;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [Obsolete("Use new SecurityDomainSesion class in Yubico.YubiKey.Scp namespace instead. This will be removed in a future release.")]
     internal class Session : IDisposable
     {
         private SessionKeys? _sessionKeys;
@@ -171,7 +172,7 @@ namespace Yubico.YubiKey.Scp03
         {
             if (_sessionKeys == null)
             {
-                throw new InvalidOperationException(ExceptionMessages.UnknownScp03Error);
+                throw new InvalidOperationException(ExceptionMessages.UnknownScpError);
             }
 
             if (command is null)
@@ -206,7 +207,7 @@ namespace Yubico.YubiKey.Scp03
         {
             if (_sessionKeys is null)
             {
-                throw new InvalidOperationException(ExceptionMessages.UnknownScp03Error);
+                throw new InvalidOperationException(ExceptionMessages.UnknownScpError);
             }
 
             if (response is null)

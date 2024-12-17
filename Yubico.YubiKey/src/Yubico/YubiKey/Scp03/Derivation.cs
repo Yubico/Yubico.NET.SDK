@@ -19,6 +19,7 @@ using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [Obsolete("Use new Derivation class in Yubico.YubiKey.Scp namespace instead. This will be removed in a future release.")]
     internal static class Derivation
     {
         public const byte DDC_SENC = 0x04;

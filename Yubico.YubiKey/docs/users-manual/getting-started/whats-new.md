@@ -38,7 +38,7 @@ Bug Fixes:
 
 - The [PivSession.ChangeManagementKey](xref:Yubico.YubiKey.Piv.PivSession.ChangeManagementKey(Yubico.YubiKey.Piv.PivTouchPolicy)) method was incorrectly assuming Triple-DES was the default management key algorithm for FIPS keys. The SDK now verifies the management key alorithm based on key type and firmware version. ([#162](https://github.com/Yubico/Yubico.NET.SDK/pull/162))
 - The SDK now correctly sets the IYubiKeyDeviceInfo property [IsSkySeries](xref:Yubico.YubiKey.IYubiKeyDeviceInfo.IsSkySeries) to True for YubiKey Security Key Series Enterprise Edition keys. ([#158](https://github.com/Yubico/Yubico.NET.SDK/pull/158))
-- Exceptions are now caught when running [PivSession.Dispose](xref:Yubico.YubiKey.Piv.PivSession.Dispose). This fixes an issue where the Dispose method could not close the Connection in the event of a disconnected YubiKey. ([#104](https://github.com/Yubico/Yubico.NET.SDK/issues/104))
+- Exceptions are now caught when running PivSession.Dispose. This fixes an issue where the Dispose method could not close the Connection in the event of a disconnected YubiKey. ([#104](https://github.com/Yubico/Yubico.NET.SDK/issues/104))
 - A dynamic DLL resolution based on process architecture (x86/x64) has been implemented for NativeShims.dll. This fixes a reported issue with the NativeShims.dll location for 32-bit processes. ([#154](https://github.com/Yubico/Yubico.NET.SDK/pull/154))
 
 Deprecations:
@@ -401,7 +401,7 @@ Features:
   allows clients of smart cards to encrypt all traffic to and from the card. Since the YubiKey can act as a smart
   card, this means that it is now possible to encrypt all traffic for the PIV application.
   In order for this to work, however, your YubiKey must be pre-configured for this feature. Read more about
-  [SCP03 here](xref:UsersManualScp03).
+  [SCP03 here](xref:UsersManualScp).
 - **Debian, RHEL, and CentOS support**. Our testing of Linux platforms has expanded to include the Debian,
   Red Hat Enterprise Linux (RHEL), and CentOS distributions. Please read [running on Linux](xref:RunningOnLinux)
   for more details.

@@ -90,9 +90,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// into a known "control" state for performing integration
         /// tests with the YubiHSM Auth application.
         /// </summary>
-        public static IYubiKeyDevice GetCleanDevice()
+        public static IYubiKeyDevice GetCleanDevice(StandardTestDevice testDeviceType = StandardTestDevice.Fw5)
         {
-            var testDevice = DeviceReset.EnableAllCapabilities(IntegrationTestDeviceEnumeration.GetTestDevice());
+            var testDevice = DeviceReset.EnableAllCapabilities(IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType));
             return DeviceReset.ResetYubiHsmAuth(testDevice);
         }
 

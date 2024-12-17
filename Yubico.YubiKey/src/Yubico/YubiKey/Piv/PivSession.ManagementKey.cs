@@ -72,8 +72,8 @@ namespace Yubico.YubiKey.Piv
         public AuthenticateManagementKeyResult ManagementKeyAuthenticationResult { get; private set; }
 
         private PivAlgorithm DefaultManagementKeyAlgorithm =>
-            _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey) &&
-            _yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_7_0
+            YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey) &&
+            YubiKey.FirmwareVersion >= FirmwareVersion.V5_7_0
                 ? PivAlgorithm.Aes192
                 : PivAlgorithm.TripleDes;
 
@@ -244,7 +244,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryAuthenticateManagementKey(bool mutualAuthentication = true)
         {
-            _log.LogInformation(
+            Logger.LogInformation(
                 $"Try to authenticate the management key: {(mutualAuthentication ? "mutual" : "single")} auth.");
 
             var currentPinOnlyMode = TryAuthenticatePinOnly(true);
@@ -316,7 +316,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void AuthenticateManagementKey(bool mutualAuthentication = true)
         {
-            _log.LogInformation(
+            Logger.LogInformation(
                 $"Authenticate the management key: {(mutualAuthentication ? "mutual" : "single")} auth.");
 
             if (TryAuthenticateManagementKey(mutualAuthentication) == false)
@@ -656,8 +656,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation(
-                "Try to change the management key, touch policy = {TouchPolicy}, algorithm = {PivALgorithm}.",
+            Logger.LogInformation("Try to change the management key, touch policy = {TouchPolicy}, algorithm = {PivALgorithm}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
@@ -767,8 +766,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation(
-                "Change the management key, touch policy = {TouchPolicy}, algorithm = {PivAlgorithm}.",
+            Logger.LogInformation("Change the management key, touch policy = {TouchPolicy}, algorithm = {PivAlgorithm}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             if (TryChangeManagementKey(touchPolicy, newKeyAlgorithm) == false)
@@ -920,7 +918,7 @@ namespace Yubico.YubiKey.Piv
                     return true;
                 }
 
-                _log.LogInformation($"Failed to set management key. Message: {response.StatusMessage}");
+                Logger.LogInformation($"Failed to set management key. Message: {response.StatusMessage}");
             }
 
             return false;
@@ -1007,7 +1005,7 @@ namespace Yubico.YubiKey.Piv
                 ManagementKeyAuthenticated = true;
             }
 
-            _log.LogInformation($"Failed to authenticate management key. Message: {completeResponse.StatusMessage}");
+            Logger.LogInformation($"Failed to authenticate management key. Message: {completeResponse.StatusMessage}");
 
             return ManagementKeyAuthenticated;
         }
@@ -1016,7 +1014,7 @@ namespace Yubico.YubiKey.Piv
 
         private PivAlgorithm GetManagementKeyAlgorithm()
         {
-            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
+            if (!YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
             {
                 // Assume default for version
                 return DefaultManagementKeyAlgorithm;
@@ -1075,9 +1073,9 @@ namespace Yubico.YubiKey.Piv
                 pa switch
                 {
                     PivAlgorithm.TripleDes => true, // Default for keys below fw version 5.7
-                    PivAlgorithm.Aes128 => _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey),
-                    PivAlgorithm.Aes192 => _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey),
-                    PivAlgorithm.Aes256 => _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey),
+                    PivAlgorithm.Aes128 => YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey),
+                    PivAlgorithm.Aes192 => YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey),
+                    PivAlgorithm.Aes256 => YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey),
                     _ => false
                 };
         }

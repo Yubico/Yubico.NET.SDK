@@ -61,6 +61,8 @@ on things like conditions in this file.
     -->
     <NoWarn>@(NoWarn);NU5105</NoWarn>
 
+    <NeutralLanguage>en-US</NeutralLanguage>
+
     <!--
     Create byte-for-byte identical build artifacts given the same build input. Normally, the compiler will
     add certain things to the binary header like timestamp, compiler version, and even more seemingly
@@ -71,15 +73,13 @@ on things like conditions in this file.
     <Deterministic>true</Deterministic>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
-    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <AnalysisMode>Recommended</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <PropertyGroup Label="Production assembly project settings" Condition="'$(IsProdProject)' == 'true'">
 
-    <NeutralLanguage>en-US</NeutralLanguage>
-
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild Condition="$(Configuration.Contains('WithDocs'))">true</GeneratePackageOnBuild>
 
   </PropertyGroup>
 
@@ -110,12 +110,7 @@ on things like conditions in this file.
     being packed as part of its project build, but because of the main project's build pass.
     -->
     <IsPackable>false</IsPackable>
-
-    <!--
-    If no other language or locale is specified, assume that we're all speaking United States English.
-    -->
-    <NeutralLanguage>en-US</NeutralLanguage>
-
+    
   </PropertyGroup>
 
   <!--
@@ -125,6 +120,15 @@ on things like conditions in this file.
 
     <!--
     Do not pack test projects in any of the NuGet packages.
+    -->
+    <IsPackable>false</IsPackable>
+
+  </PropertyGroup>
+
+  <PropertyGroup Label="Sample project settings" Condition="'$(IsSampleProject)'=='true'">
+
+    <!--
+    Do not pack sample projects in any of the NuGet packages.
     -->
     <IsPackable>false</IsPackable>
 

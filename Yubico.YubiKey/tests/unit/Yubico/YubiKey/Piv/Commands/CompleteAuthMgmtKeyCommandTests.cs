@@ -148,13 +148,13 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void CreateCommandApdu_GetP1Property_Returns10ForAes192(bool isMutual)
+        public void CreateCommandApdu_GetP1Property_ReturnsThreeForTdes(bool isMutual)
         {
             CommandApdu cmdApdu = GetCommandApdu(isMutual, true);
 
             byte P1 = cmdApdu.P1;
 
-            Assert.Equal(10, P1);
+            Assert.Equal(3, P1);
         }
 
         [Theory]

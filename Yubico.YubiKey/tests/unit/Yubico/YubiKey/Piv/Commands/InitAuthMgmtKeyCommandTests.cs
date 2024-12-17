@@ -164,9 +164,9 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             InitializeAuthenticateManagementKeyCommand command = constructor switch
             {
-                0 => new InitializeAuthenticateManagementKeyCommand(false, PivAlgorithm.Aes192),
-                1 => new InitializeAuthenticateManagementKeyCommand(true, PivAlgorithm.Aes192),
-                _ => new InitializeAuthenticateManagementKeyCommand(PivAlgorithm.Aes192),
+                0 => new InitializeAuthenticateManagementKeyCommand(false, PivAlgorithm.TripleDes),
+                1 => new InitializeAuthenticateManagementKeyCommand(true, PivAlgorithm.TripleDes),
+                _ => new InitializeAuthenticateManagementKeyCommand(PivAlgorithm.TripleDes),
             };
 
             return command.CreateCommandApdu();

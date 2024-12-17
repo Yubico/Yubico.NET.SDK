@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Piv.Commands
     ///   GetMetadataResponse metadataResponse = connection.SendCommand(metadataCommand);<br/>
     ///   if (metadataResponse.Status == ResponseStatus.Success)
     ///   {
-    ///       PivKeyMetadata keyData = metadataResponse.GetData();
+    ///       PivMetadata keyData = metadataResponse.GetData();
     ///   }
     /// </code>
     /// </remarks>

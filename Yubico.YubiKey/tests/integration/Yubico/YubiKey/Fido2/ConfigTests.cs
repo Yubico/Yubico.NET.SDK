@@ -20,7 +20,8 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
-    [Trait("Category", "Simple")]
+    
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class ConfigTests : SimpleIntegrationTestConnection
     {
         public ConfigTests()

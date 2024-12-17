@@ -92,18 +92,18 @@ namespace Yubico.YubiKey.Oath.Commands
         /// </returns>
         private static Credential _GetCredential(ReadOnlyMemory<byte> value)
         {
-            _ThrowIfNotLength(value, 2);
+            ThrowIfNotLength(value, 2);
 
             byte algorithmType = value.Span[0];
             var algorithm = (HashAlgorithm)(algorithmType & 0x0F);
             var type = (CredentialType)(algorithmType & 0xF0);
             string label = Encoding.UTF8.GetString(value.Slice(1).ToArray());
-            (CredentialPeriod period, string? issuer, string account) = Credential.ParseLabel(label, type);
+            (var credentialPeriod, string? issuer, string account) = Credential.ParseLabel(label, type);
 
-            return new Credential(issuer, account, period, type, algorithm);
+            return new Credential(issuer, account, credentialPeriod, type, algorithm);
         }
 
-        private static void _ThrowIfNotLength(ReadOnlyMemory<byte> value, int minLength)
+        private static void ThrowIfNotLength(ReadOnlyMemory<byte> value, int minLength)
         {
             if (value.Length < minLength)
             {

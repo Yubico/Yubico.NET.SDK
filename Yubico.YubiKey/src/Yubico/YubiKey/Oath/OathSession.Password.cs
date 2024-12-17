@@ -50,13 +50,13 @@ namespace Yubico.YubiKey.Oath
             {
                 if (KeyCollector!(keyEntryData))
                 {
-                    ReadOnlyMemory<byte> password = keyEntryData.GetCurrentValue();
-                    var validateCommand = new ValidateCommand(password, _oathData);
-                    ValidateResponse verifyResponse = Connection.SendCommand(validateCommand);
+                    var password = keyEntryData.GetCurrentValue();
+                    var command = new ValidateCommand(password, _oathData);
 
-                    if (verifyResponse.Status == ResponseStatus.Success)
+                    var response = Connection.SendCommand(command);
+                    if (response.Status == ResponseStatus.Success)
                     {
-                        passwordVerified = verifyResponse.GetData();
+                        passwordVerified = response.GetData();
                     }
                 }
             }
@@ -132,22 +132,22 @@ namespace Yubico.YubiKey.Oath
         /// </exception>
         public bool TryVerifyPassword(ReadOnlyMemory<byte> password)
         {
-            var validateCommand = new ValidateCommand(password, _oathData);
-            ValidateResponse verifyResponse = Connection.SendCommand(validateCommand);
+            var command = new ValidateCommand(password, _oathData);
+            var response = Connection.SendCommand(command);
 
-            if (verifyResponse.Status == ResponseStatus.Success)
+            if (response.Status == ResponseStatus.Success)
             {
-                return verifyResponse.GetData();
+                return response.GetData();
             }
 
-            if (verifyResponse.StatusWord == SWConstants.InvalidCommandDataParameter
-                || verifyResponse.StatusWord == SWConstants.ReferenceDataUnusable)
+            if (response.StatusWord == SWConstants.InvalidCommandDataParameter ||
+                response.StatusWord == SWConstants.ReferenceDataUnusable)
             {
                 return false;
             }
 
             // If the response was anything else, that is an error.
-            throw new InvalidOperationException(verifyResponse.StatusMessage);
+            throw new InvalidOperationException(response.StatusMessage);
         }
 
         /// <summary>
@@ -186,8 +186,8 @@ namespace Yubico.YubiKey.Oath
             {
                 if (KeyCollector!(keyEntryData))
                 {
-                    ReadOnlyMemory<byte> currentPassword = keyEntryData.GetCurrentValue();
-                    ReadOnlyMemory<byte> newPassword = keyEntryData.GetNewValue();
+                    var currentPassword = keyEntryData.GetCurrentValue();
+                    var newPassword = keyEntryData.GetNewValue();
 
                     if (currentPassword.Span.SequenceEqual(newPassword.Span))
                     {
@@ -322,13 +322,11 @@ namespace Yubico.YubiKey.Oath
                 }
             }
 
-            var setPasswordCommand = new SetPasswordCommand(newPassword, _oathData);
-            SetPasswordResponse setPasswordResponse = Connection.SendCommand(setPasswordCommand);
-
+            var setPasswordResponse = Connection.SendCommand(new SetPasswordCommand(newPassword, _oathData));
             if (setPasswordResponse.Status == ResponseStatus.Success)
             {
-                SelectOathResponse response = Connection.SendCommand(new SelectOathCommand());
-                _oathData = response.GetData();
+                var selectOathResponse = Connection.SendCommand(new SelectOathCommand());
+                _oathData = selectOathResponse.GetData();
 
                 return true;
             }

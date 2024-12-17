@@ -68,26 +68,15 @@ namespace Yubico.YubiKey.Piv
         /// </code>
         /// </para>
         /// <para>
-        /// If the key is RSA 1024, then the input must be exactly 128 bytes,
+        /// If the key is RSA 1024/2048/3072/4096, then the input must be exactly 128/256/384/512 bytes,
         /// otherwise the method will throw an exception. You can use the
         /// <see cref="Cryptography.RsaFormat"/> class to format the data. That
         /// class will be able to format the digest into either PKCS #1 v1.5 or a
         /// subset of PKCS #1 PSS. However, if that class does not support the
         /// exact format you want, you will have to write your own formatting
-        /// code and guarantee the input to this method is exactly 128 bytes
-        /// (prepend pad bytes of 00 until the length is exactly 128 if needed).
-        /// The signature will be a 128-byte block.
-        /// </para>
-        /// <para>
-        /// If the key is RSA 2048, then the input must be exactly 256 bytes,
-        /// otherwise the method will throw an exception. You can use the
-        /// <see cref="Cryptography.RsaFormat"/> class to format the data. That
-        /// class will be able to format the digest into either PKCS #1 v1.5 or a
-        /// subset of PKCS #1 PSS. However, if that class does not support the
-        /// exact format you want, you will have to write your own formatting
-        /// code and guarantee the input to this method is exactly 256 bytes
-        /// (prepend pad bytes of 00 until the length is exactly 256 if needed).
-        /// The signature will be a 256-byte block.
+        /// code and guarantee the input to this method is exactly 128/256/384/512 bytes
+        /// (prepend pad bytes of 00 until the length is exactly 128/256/384/512 if needed).
+        /// The signature will be a 128/256/384/512-byte block.
         /// </para>
         /// <para>
         /// Signing might require the PIN and/or touch, depending on the PIN and
@@ -158,7 +147,7 @@ namespace Yubico.YubiKey.Piv
             // This will verify the slot number and dataToSign length. If one or
             // both are incorrect, the call will throw an exception.
             var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber);
-            _yubiKeyDevice.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm);
+            YubiKey.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm);
 
             return PerformPrivateKeyOperation(
                 slotNumber,
@@ -187,7 +176,9 @@ namespace Yubico.YubiKey.Piv
         /// </para>
         /// <para>
         /// If the key is RSA 1024, then the input must be exactly 128 bytes. If
-        /// the key is RSA 2048, then the input must be exactly 256 bytes. If the
+        /// the key is RSA 2048, then the input must be exactly 256 bytes. If
+        /// the key is RSA 3072, then the input must be exactly 384 bytes. If
+        /// the key is RSA 4096, then the input must be exactly 512 bytes. If the
         /// input data is not the correct length, the method will throw an
         /// exception.
         /// </para>
@@ -393,10 +384,9 @@ namespace Yubico.YubiKey.Piv
         // Common code, this performs either Signing, Decryption, or Key
         // Agreement. Just pass in the actual command to run, along with some
         // other information.
-        private byte[] PerformPrivateKeyOperation(byte slotNumber,
-                                                  IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> command,
-                                                  PivAlgorithm algorithm,
-                                                  string algorithmExceptionMessage)
+        private byte[] PerformPrivateKeyOperation(
+            byte slotNumber, IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> commandToPerform,
+            PivAlgorithm algorithm, string algorithmExceptionMessage)
         {
             bool pinRequired = true;
 
@@ -409,13 +399,13 @@ namespace Yubico.YubiKey.Piv
 
             // Metadata will give us our answer, but that feature is
             // available only on YubiKeys beginning with version 5.3.
-            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
+            if (YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
             {
                 var metadataCommand = new GetMetadataCommand(slotNumber);
-                GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);
+                var metadataResponse = Connection.SendCommand(metadataCommand);
 
                 // If there is no key in the slot, this will throw an exception.
-                PivMetadata metadata = metadataResponse.GetData();
+                var metadata = metadataResponse.GetData();
 
                 // We know the algorithm based on the input data. Is it the
                 // algorithm of the key in the slot?
@@ -442,7 +432,7 @@ namespace Yubico.YubiKey.Piv
                 // Metadata is not available on this YubiKey.
                 // Try to perform the operation. If it works, we're done. If not,
                 // we can get limited information on why not.
-                IYubiKeyResponseWithData<byte[]> initialResponse = Connection.SendCommand(command);
+                var initialResponse = Connection.SendCommand(commandToPerform);
 
                 // If the response is AuthRequired, either the PIN is required or
                 // touch is. The response does not tell us which.
@@ -476,11 +466,10 @@ namespace Yubico.YubiKey.Piv
                 VerifyPin();
             }
 
-            IYubiKeyResponseWithData<byte[]> response = Connection.SendCommand(command);
-
-            if (response.Status != ResponseStatus.AuthenticationRequired)
+            var commandToPerformResponse = Connection.SendCommand(commandToPerform);
+            if (commandToPerformResponse.Status != ResponseStatus.AuthenticationRequired)
             {
-                return response.GetData();
+                return commandToPerformResponse.GetData();
             }
 
             // If we reach this code, the Status is AuthRequired and the problem is touch.

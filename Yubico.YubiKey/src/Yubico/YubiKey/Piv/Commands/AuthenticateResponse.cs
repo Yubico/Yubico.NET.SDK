@@ -128,8 +128,8 @@ namespace Yubico.YubiKey.Piv.Commands
         private byte[] ExtractGeneralAuthenticateResponseData()
         {
             var tlvReader = new TlvReader(ResponseApdu.Data);
-            TlvReader dataReader = tlvReader.ReadNestedTlv(NestedTag);
-            ReadOnlyMemory<byte> value = dataReader.ReadValue(ResponseTag);
+            var dataReader = tlvReader.ReadNestedTlv(NestedTag);
+            var value = dataReader.ReadValue(ResponseTag);
 
             return value.ToArray();
         }

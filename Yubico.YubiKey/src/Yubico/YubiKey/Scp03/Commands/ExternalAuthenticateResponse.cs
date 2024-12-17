@@ -17,6 +17,7 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp03.Commands
 {
+    [Obsolete("Use new ExternalAuthenticateResponse instead")]
     internal class ExternalAuthenticateResponse : Scp03Response
     {
         /// <summary>

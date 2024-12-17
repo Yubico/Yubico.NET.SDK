@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Application_Get_ReturnsYubiHsmAuth()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Cla0()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Ins0x03()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P1Is0()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
@@ -129,7 +129,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P2Is0()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
@@ -143,14 +143,14 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsLabelTag()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
                 _hsmDeviceChallenge);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x71)
             {
@@ -164,14 +164,14 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsLabelValue()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
                 _hsmDeviceChallenge);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x71)
             {
@@ -187,14 +187,14 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsContextTag()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
                 _hsmDeviceChallenge);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x77)
             {
@@ -208,14 +208,14 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsContextLength16()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
                 _hsmDeviceChallenge);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x77)
             {
@@ -231,14 +231,14 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsContextValue()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
                 _hsmDeviceChallenge);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x77)
             {
@@ -257,14 +257,14 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsCredPasswordTag()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
                 _hsmDeviceChallenge);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x73)
             {
@@ -278,14 +278,14 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsCredPasswordValue()
         {
-            GetAes128SessionKeysCommand command = new GetAes128SessionKeysCommand(
+            var command = new GetAes128SessionKeysCommand(
                 _label,
                 _password,
                 _hostChallenge,
                 _hsmDeviceChallenge);
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
             int tag = reader.PeekTag();
             while (reader.HasData && tag != 0x73)
             {

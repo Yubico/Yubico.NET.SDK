@@ -61,16 +61,7 @@ namespace Yubico.YubiKey.Piv.Commands
         // ResponseApdu.Data. It will be 8 bytes.
         private readonly byte[]? _clientAuthenticationChallenge;
 
-        /// <summary>
-        /// Constructs an InitializeAuthenticateManagementKeyResponse based on a ResponseApdu
-        /// received from the YubiKey for the Triple-DES algorithm.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The object containing the Response APDU<br/>returned by the YubiKey.
-        /// </param>
-        /// <exception cref="MalformedYubiKeyResponseException">
-        /// Thrown when the data provided does not meet the expectations, and cannot be parsed.
-        /// </exception>
+        [Obsolete("This constructor is deprecated. Users must specify management key algorithm type, as it cannot be assumed.")]
         public InitializeAuthenticateManagementKeyResponse(ResponseApdu responseApdu)
             : this(responseApdu, PivAlgorithm.TripleDes)
         {
@@ -90,8 +81,8 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="MalformedYubiKeyResponseException">
         /// Thrown when the data provided does not meet the expectations, and cannot be parsed.
         /// </exception>
-        public InitializeAuthenticateManagementKeyResponse(ResponseApdu responseApdu, PivAlgorithm algorithm) :
-            base(responseApdu)
+        public InitializeAuthenticateManagementKeyResponse(ResponseApdu responseApdu, PivAlgorithm algorithm)
+        : base(responseApdu)
         {
             Algorithm = algorithm;
 
@@ -113,9 +104,9 @@ namespace Yubico.YubiKey.Piv.Commands
             // just ignore any extra bytes.
             var tlvReader = new TlvReader(ResponseApdu.Data);
             int nestedTag = tlvReader.PeekTag();
-            TlvReader authReader = tlvReader.ReadNestedTlv(nestedTag);
+            var authReader = tlvReader.ReadNestedTlv(nestedTag);
             int authTag = authReader.PeekTag();
-            ReadOnlyMemory<byte> value = authReader.ReadValue(authTag);
+            var value = authReader.ReadValue(authTag);
 
             if (nestedTag != NestedTag || (authTag != MutualAuthTag && authTag != SingleAuthTag))
             {
@@ -124,6 +115,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     ResponseClass = nameof(InitializeAuthenticateManagementKeyResponse),
                 };
             }
+            
             if (value.Length < TDesDataLength)
             {
                 throw new MalformedYubiKeyResponseException()

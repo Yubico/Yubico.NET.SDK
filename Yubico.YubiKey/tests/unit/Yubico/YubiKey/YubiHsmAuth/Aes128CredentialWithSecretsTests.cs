@@ -14,7 +14,6 @@
 
 using System;
 using Xunit;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {
@@ -79,7 +78,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [Fact]
         public void Constructor_SetGetLabel()
         {
-            Aes128CredentialWithSecrets aes128Cred = new Aes128CredentialWithSecrets(
+            var aes128Cred = new Aes128CredentialWithSecrets(
                 _password,
                 _encKey,
                 _macKey,
@@ -92,7 +91,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [Fact]
         public void Constructor_SetGetTouchRequired()
         {
-            Aes128CredentialWithSecrets aes128Cred = new Aes128CredentialWithSecrets(
+            var aes128Cred = new Aes128CredentialWithSecrets(
                 _password,
                 _encKey,
                 _macKey,

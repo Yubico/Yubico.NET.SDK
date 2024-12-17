@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKey.Oath;
-using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.OathSampleCode
 {

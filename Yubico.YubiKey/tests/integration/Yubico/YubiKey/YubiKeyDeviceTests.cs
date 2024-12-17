@@ -20,7 +20,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey
 {
-    [Trait("Category", "RequiresStepDebug")] // Timing issues, may need to step with debugger
+    [Trait(TraitTypes.Category, TestCategories.RequiresStepDebug)] // Timing issues, may need to step with debugger
     public class YubiKeyDeviceTests
     {
         private static readonly byte[] LockCodeAllZero = new byte[16];

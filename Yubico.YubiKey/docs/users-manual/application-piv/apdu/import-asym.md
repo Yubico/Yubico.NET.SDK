@@ -12,14 +12,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Import asymmetric key pair
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---: | :---:
-00 | FE | *algorithm* | *slot number* | *data len* | *set of TLV containing key elements* <br />\[AA 01 *\<pin policy\>*\] <br />\[AB 01 *\<touch policy\>*\] | (absent)
+| CLA | INS |     P1      |      P2       |     Lc     |                                                   Data                                                   |    Le    |
+|:---:|:---:|:-----------:|:-------------:|:----------:|:--------------------------------------------------------------------------------------------------------:|:--------:|
+| 00  | FE  | *algorithm* | *slot number* | *data len* | *set of TLV containing key elements* <br />\[AA 01 *\<pin policy\>*\] <br />\[AB 01 *\<touch policy\>*\] | (absent) |
 
 The slot number can be one of the following (hex values):
 
@@ -30,40 +29,41 @@ The slot number can be one of the following (hex values):
 F9
 ```
 
-There are only four choices for "alg" (algorithm and size): RSA-1024 (06),
-RSA-2048 (07), ECC-P-256 (11), and ECC-P-384 (14).
+There are six choices for "alg" (algorithm and size): RSA-1024 (06),
+RSA-2048 (07), RSA 3072 (05), RSA 4096 (16), ECC-P-256 (11), and ECC-P-384 (14).
 
 The key data to load is a set of TLV constructions. The L (length) is DER encoding
 format. The V is the integer in canonical form. If the key is an RSA private key, there
 are five elements. If it is an ECC key, there is one element.
 
 #### Table 3: List of Private Key Tags
-| Algorithm | Key Element | Tag |
-| :---: | :---: | :---: |
-| RSA | prime *P* | 01 |
-| RSA | prime *Q* | 02 |
-| RSA | prime *p* exponent *dP* | 03 |
-| RSA | prime *q* exponent *dQ* | 04 |
-| RSA | CRT coefficient *QInv* | 05 |
-| ECC | private value *s* | 06 |
+
+| Algorithm |       Key Element       | Tag |
+|:---------:|:-----------------------:|:---:|
+|    RSA    |        prime *P*        | 01  |
+|    RSA    |        prime *Q*        | 02  |
+|    RSA    | prime *p* exponent *dP* | 03  |
+|    RSA    | prime *q* exponent *dQ* | 04  |
+|    RSA    | CRT coefficient *QInv*  | 05  |
+|    ECC    |    private value *s*    | 06  |
 
 ### Response APDU Info: Management Key Authentication Missing
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 82
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 82  |
 
 ### Response APDU Info: Success
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 ### Examples
 

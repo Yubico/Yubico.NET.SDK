@@ -69,8 +69,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                 throw new InvalidOperationException(StatusMessage);
             }
 
-            List<CredentialRetryPair> credentialRetryPairs = new List<CredentialRetryPair>();
-
+            var credentialRetryPairs = new List<CredentialRetryPair>();
             var tlvReader = new TlvReader(ResponseApdu.Data);
 
             // Parse data by iterating over each LabelList element, parsing it into a
@@ -78,7 +77,6 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             while (tlvReader.HasData)
             {
                 int nextTagValue = tlvReader.PeekTag();
-
                 if (nextTagValue != DataTagConstants.LabelList)
                 {
                     throw new MalformedYubiKeyResponseException(
@@ -88,18 +86,17 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                                 nextTagValue));
                 }
 
-                ReadOnlySpan<byte> credentialRetryElement =
-                    tlvReader.ReadValue(DataTagConstants.LabelList).Span;
+                var credentialRetryElement = tlvReader.ReadValue(DataTagConstants.LabelList).Span;
 
                 // Check that it's formatted correctly
-                if (credentialRetryElement.Length < MinElementSize
-                    || credentialRetryElement.Length > MaxElementSize)
+                if (credentialRetryElement.Length < MinElementSize || 
+                    credentialRetryElement.Length > MaxElementSize)
                 {
                     throw new MalformedYubiKeyResponseException(
                         ExceptionMessages.InvalidCredentialRetryDataLength);
                 }
 
-                Credential credential = new Credential(
+                var credential = new Credential(
                     (CryptographicKeyType)credentialRetryElement[CryptoKeyTypeIndex],
                     Encoding.UTF8.GetString(credentialRetryElement[LabelRange].ToArray()),
                     credentialRetryElement[TouchIndex] != 0);

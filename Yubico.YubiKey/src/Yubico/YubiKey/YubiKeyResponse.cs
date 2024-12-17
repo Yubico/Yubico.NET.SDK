@@ -151,12 +151,7 @@ namespace Yubico.YubiKey
         /// <exception cref="ArgumentNullException">responseApdu</exception>
         public YubiKeyResponse(ResponseApdu responseApdu)
         {
-            if (responseApdu is null)
-            {
-                throw new ArgumentNullException(nameof(responseApdu));
-            }
-
-            ResponseApdu = responseApdu;
+            ResponseApdu = responseApdu ?? throw new ArgumentNullException(nameof(responseApdu));
         }
 
         /// <inheritdoc />

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Threading;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Fido2
     /// </remarks>
     public sealed partial class Fido2Session : IDisposable
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<Fido2Session>();
         private bool _disposed;
         private AuthenticatorInfo? _authenticatorInfo;
 
@@ -215,8 +215,8 @@ namespace Yubico.YubiKey.Fido2
         // necessary to call the command.
         private AuthenticatorInfo SetAndReturnAuthenticatorInfoField()
         {
-            GetInfoResponse info = Connection.SendCommand(new GetInfoCommand());
-            _authenticatorInfo = info.GetData();
+            var response = Connection.SendCommand(new GetInfoCommand());
+            _authenticatorInfo = response.GetData();
 
             return _authenticatorInfo;
         }

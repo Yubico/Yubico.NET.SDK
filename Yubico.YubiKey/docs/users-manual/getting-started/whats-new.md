@@ -16,43 +16,75 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.12.x Releases
+### 1.12.0
+
+Release date: December 18th, 2024
+
+Features:
+
+- Security Domain application and Secure Channel Protocol (SCP) ([#164](https://github.com/Yubico/Yubico.NET.SDK/pull/164)):
+
+   - SCP11a/b/c is now supported for the PIV, OATH, OTP, and YubiHSM applications.
+   - SCP03 support has been extended to the OATH, OTP, and YubiHSM applications (previously PIV only).
+   - The Yubico.YubiKey.Scp namespace now provides all SCP and Security Domain functionality. This namepace replaces functionality in the Yubico.YubiKey.Scp03 namespace, which has been deprecated.
+   - The new `SecurityDomainSession` class provides an interface for managing the Security Domain application of a YubiKey. This includes SCP configuration (managing SCP03 key sets and SCP11 asymmetric keys and certificates) and creation of an encrypted communication channel with other YubiKey applications.
+   - New key parameter classes have been added: `ScpKeyParameters`, `Scp03KeyParameters`, `Scp11KeyParameters`, `ECKeyParameters`, `ECPrivateKeyParameters`, `ECPublicKeyParameters`.
+- [YubiKeyDeviceListener](xref:Yubico.YubiKey.YubiKeyDeviceListener) has been reconfigured to run the listeners in the background instead of the main thread. In addition, the listeners can now be [stopped](xref:Yubico.YubiKey.YubiKeyDeviceListener.StopListening) when needed to reclaim resources. Once stopped, the listeners can be restarted. ([#89](https://github.com/Yubico/Yubico.NET.SDK/pull/89))
+- Microsoft.Extensions.Logging.Console is now the default logger. To enable logging from a dependent project (e.g. unit tests, integration tests, an app), you can either add an appsettings.json to your project or use the ConfigureLoggerFactory. ([#139](https://github.com/Yubico/Yubico.NET.SDK/pull/139))
+- The SDK now uses inferred variable types (var) instead of explicit types in all projects except Yubico.Core. This change aims to improve code readability, reduce verbosity, and enhance developer productivity while maintaining type safety. ([#141](https://github.com/Yubico/Yubico.NET.SDK/pull/141))
+
+Bug Fixes:
+
+- The [PivSession.ChangeManagementKey](xref:Yubico.YubiKey.Piv.PivSession.ChangeManagementKey(Yubico.YubiKey.Piv.PivTouchPolicy)) method was incorrectly assuming Triple-DES was the default management key algorithm for FIPS keys. The SDK now verifies the management key alorithm based on key type and firmware version. ([#162](https://github.com/Yubico/Yubico.NET.SDK/pull/162))
+- The SDK now correctly sets the IYubiKeyDeviceInfo property [IsSkySeries](xref:Yubico.YubiKey.IYubiKeyDeviceInfo.IsSkySeries) to True for YubiKey Security Key Series Enterprise Edition keys. ([#158](https://github.com/Yubico/Yubico.NET.SDK/pull/158))
+- Exceptions are now caught when running PivSession.Dispose. This fixes an issue where the Dispose method could not close the Connection in the event of a disconnected YubiKey. ([#104](https://github.com/Yubico/Yubico.NET.SDK/issues/104))
+- A dynamic DLL resolution based on process architecture (x86/x64) has been implemented for NativeShims.dll. This fixes a reported issue with the NativeShims.dll location for 32-bit processes. ([#154](https://github.com/Yubico/Yubico.NET.SDK/pull/154))
+
+Deprecations:
+
+- Yubico.YubiKey/Scp03 namespace.
+- All Yubico.Yubikey.StaticKeys endpoints.
+
+Migration Notes:
+- Use the `SecurityDomainSession` for Security Domain operations.
+- Review your logging configuration if using custom logging.
+- Align with Android/Python SDK naming conventions.
+
 ## 1.11.x Releases
 ### 1.11.0
 
 Release date: June 28th, 2024
 
-This release introduces significant enhancements and new features for the latest YubiKeys, including support for
-firmware version 5.7, which allows for temporary disabling of NFC connectivity and checking PIN complexity status.
-It also expands RSA key support in PIV to 3072 and 4096-bit keys, and includes improvements for YubiKey Bio and
-Multi-Protocol Edition keys.
-Additionally, there are optimizations in USB reclaim speed and adjustments to the touch sensor sensitivity and a few bug
-fixes.
-Several command classes have been deprecated due to changes in how device info is read by the SDK, and integration test
-guardrails have been implemented for better security.
+This release introduces significant enhancements and new features for YubiKeys running the latest firmware (version 5.7) and YubiKey Bio/Bio Multi-Protocol Edition keys. Highlights include temporary disablement of NFC connectivity, PIN complexity status, support for RSA 3072 and 4096-bit keys, and support for biometric verification. Additionally, USB reclaim speed has been optimized and adjustments to the touch sensor sensitivity have been implemented. For details on all changes, see below.  
 
 Features:
 - Support for YubiKeys with the latest firmware (version 5.7): 
   - NFC connectivity can now be temporarily disabled with [SetIsNfcRestricted()](xref:Yubico.YubiKey.YubiKeyDevice.SetIsNfcRestricted%28System.Boolean%29) ([#91](https://github.com/Yubico/Yubico.NET.SDK/pull/91)).
   - Additional property pages on the YubiKey are now read into [YubiKeyDeviceInfo](xref:Yubico.YubiKey.YubiKeyDeviceInfo) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
-  - PIN complexity status can be checked with [IsPinComplexityEnabled](xref:Yubico.YubiKey.YubiKeyDevice.IsPinComplexityEnabled) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
-  - PIN complexity specific error messages and exceptions ([#112](https://github.com/Yubico/Yubico.NET.SDK/pull/112)).
+  - PIN complexity: 
+     - Complexity status can now be checked with [IsPinComplexityEnabled](xref:Yubico.YubiKey.YubiKeyDevice.IsPinComplexityEnabled) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
+     - PIN complexity error messages and exceptions have been added ([#112](https://github.com/Yubico/Yubico.NET.SDK/pull/112)).
   - The set of YubiKey applications that are capable of being put into FIPS mode can be retrieved with [FipsCapable](xref:Yubico.YubiKey.YubiKeyDevice.FipsCapable). The set of YubiKey applications that are in FIPS mode can be retrieved with [FipsApproved](xref:Yubico.YubiKey.YubiKeyDevice.FipsApproved) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
   - The part number for a key’s Secure Element processor, if available, can be retrieved with [PartNumber](xref:Yubico.YubiKey.YubiKeyDevice.PartNumber) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
   - The set of YubiKey applications that are blocked from being reset can be retrieved with [ResetBlocked](xref:Yubico.YubiKey.YubiKeyDevice.ResetBlocked) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
-  - PIV: 3072 and 4096 RSA keys can now be generated and imported ([#100](https://github.com/Yubico/Yubico.NET.SDK/pull/100)).
-  - PIV: Keys can be moved between the different slots on the YubiKey. Any key except the **attestation key** can be moved from one slot to another ([#103](https://github.com/Yubico/Yubico.NET.SDK/pull/103)).
+  - PIV: 
+     - 3072 and 4096 RSA keys can now be generated and imported ([#100](https://github.com/Yubico/Yubico.NET.SDK/pull/100)).
+     - Keys can now be moved between all YubiKey PIV slots except for the attestation slot with [MoveKeyCommand](xref:Yubico.YubiKey.Piv.Commands.MoveKeyCommand). Any PIV key can now be deleted from any PIV slot with [DeleteKeyCommand](xref:Yubico.YubiKey.Piv.Commands.DeleteKeyCommand) ([#103](https://github.com/Yubico/Yubico.NET.SDK/pull/103)).
 - Support for YubiKey Bio/Bio Multi-Protocol Edition keys:
-  - Get bio metadata ([#108](https://github.com/Yubico/Yubico.NET.SDK/pull/108))
-  - Added new verification policy enum values (PIN_OR_MATCH_ONCE, PIN_OR_MATCH_ALWAYS) ([#108](https://github.com/Yubico/Yubico.NET.SDK/pull/108))
-  - Bio user verification ([#108](https://github.com/Yubico/Yubico.NET.SDK/pull/108))
-  - Device Reset ([#110](https://github.com/Yubico/Yubico.NET.SDK/pull/110))
+  - Bio metadata can now be retrieved with [GetBioMetadataCommand](xref:Yubico.YubiKey.Piv.Commands.GetBioMetadataCommand) ([#108](https://github.com/Yubico/Yubico.NET.SDK/pull/108)).
+  - New PIV PIN verification policy enum values ([MatchOnce](xref:Yubico.YubiKey.Piv.PivPinPolicy.MatchOnce), [MatchAlways](xref:Yubico.YubiKey.Piv.PivPinPolicy.MatchAlways)) have been added ([#108](https://github.com/Yubico/Yubico.NET.SDK/pull/108)).
+  - [Biometric verification](../application-piv/commands.md#biometric-verification) is now supported ([#108](https://github.com/Yubico/Yubico.NET.SDK/pull/108)).
+  - A device-wide reset can now be performed on YubiKey Bio Multi-protocol keys with [DeviceReset](xref:Yubico.YubiKey.IYubiKeyDevice.DeviceReset) ([#110](https://github.com/Yubico/Yubico.NET.SDK/pull/110)).
 - The USB reclaim speed, which controls the time it takes to switch from one YubiKey application to another, has been reduced for compatible YubiKeys. To use the previous 3-second reclaim timeout for all keys, see [UseOldReclaimTimeoutBehavior](xref:Yubico.YubiKey.YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior) ([#93](https://github.com/Yubico/Yubico.NET.SDK/pull/93)).
 - The sensitivity of the YubiKey’s capacitive touch sensor can now be temporarily adjusted with [SetTemporaryTouchThreshold](xref:Yubico.YubiKey.YubiKeyDevice.SetTemporaryTouchThreshold%28System.Int32%29) ([#95](https://github.com/Yubico/Yubico.NET.SDK/pull/95)).
 
 Bug fixes:
-- Update ManagementKeyAlgorithm on PIV Application reset ([#105](https://github.com/Yubico/Yubico.NET.SDK/pull/105)).
-- Queue macOS input reports so that large responses aren't dropped ([#84](https://github.com/Yubico/Yubico.NET.SDK/pull/84)).
-- Default back to old SCardConnect behavior. Reverts the change in behavior to open smart card handles exclusively. Instead now defaults back to shared like it was before, but allows for applications to toggle between the new and old behavior through the use of AppContext.SetSwitch ([#83](https://github.com/Yubico/Yubico.NET.SDK/pull/83)).
+- The ManagementKeyAlgorithm is now updated when the PIV Application is reset ([#105](https://github.com/Yubico/Yubico.NET.SDK/pull/105)).
+- macOS input reports are now queued so that large responses aren't dropped ([#84](https://github.com/Yubico/Yubico.NET.SDK/pull/84)).
+- Smart card handles are now opened shared by default. To open them exclusively, use [OpenSmartCardHandlesExclusively](xref:Yubico.Core.CoreCompatSwitches.OpenSmartCardHandlesExclusively) with AppContext.SetSwitch ([#83](https://github.com/Yubico/Yubico.NET.SDK/pull/83)).
+- A build issue that occurred when compiling `Yubico.NativeShims` on MacOS has been fixed ([#109](https://github.com/Yubico/Yubico.NET.SDK/pull/109)).
+- The correct certificate OID friendly names are now used for ECDsaCng (nistP256) and ECDsaOpenSsl (ECDSA_P256) ([#78](https://github.com/Yubico/Yubico.NET.SDK/pull/78)).
 
 Miscellaneous:
 - The way that YubiKey device info is read by the SDK has changed, and as a result, the following GetDeviceInfo command classes have been deprecated ([#91](https://github.com/Yubico/Yubico.NET.SDK/pull/91)): 
@@ -62,13 +94,11 @@ Miscellaneous:
   - [Yubico.YubiKey.Management.Commands.GetDeviceInfoResponse](xref:Yubico.YubiKey.Management.Commands.GetDeviceInfoResponse)
   - [Yubico.YubiKey.Otp.Commands.GetDeviceInfoResponse](xref:Yubico.YubiKey.Otp.Commands.GetDeviceInfoResponse)
   - [Yubico.YubiKey.U2f.Commands.GetDeviceInfoResponse](xref:Yubico.YubiKey.U2f.Commands.GetDeviceInfoResponse)
-- The correct certificate OID friendly names are now used for ECDsaCng (nistP256) and ECDsaOpenSsl (ECDSA_P256) ([#78](https://github.com/Yubico/Yubico.NET.SDK/pull/78)).
 - Integration test guardrails have been added to ensure tests are done only on specified keys. ([#100](https://github.com/Yubico/Yubico.NET.SDK/pull/100)).
-- Fixed build issue when compiling `Yubico.NativeShims` on MacOS ([#109](https://github.com/Yubico/Yubico.NET.SDK/pull/109)).
-- Run unit tests on all platforms in CI ([#80](https://github.com/Yubico/Yubico.NET.SDK/pull/80)).
+- Unit tests were run on all platforms in CI ([#80](https://github.com/Yubico/Yubico.NET.SDK/pull/80)).
 
 Dependencies:
-- Update xUnit and Microsoft.NET.Test.Sdk ([#94](https://github.com/Yubico/Yubico.NET.SDK/pull/94)).
+- The test packages xUnit and Microsoft.NET.Test.Sdk have been updated ([#94](https://github.com/Yubico/Yubico.NET.SDK/pull/94)).
 
 
 ## 1.10.x Releases
@@ -371,7 +401,7 @@ Features:
   allows clients of smart cards to encrypt all traffic to and from the card. Since the YubiKey can act as a smart
   card, this means that it is now possible to encrypt all traffic for the PIV application.
   In order for this to work, however, your YubiKey must be pre-configured for this feature. Read more about
-  [SCP03 here](xref:UsersManualScp03).
+  [SCP03 here](xref:UsersManualScp).
 - **Debian, RHEL, and CentOS support**. Our testing of Linux platforms has expanded to include the Debian,
   Red Hat Enterprise Linux (RHEL), and CentOS distributions. Please read [running on Linux](xref:RunningOnLinux)
   for more details.

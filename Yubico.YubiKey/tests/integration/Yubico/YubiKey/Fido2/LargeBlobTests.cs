@@ -20,7 +20,8 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
-    [Trait("Category", "RequiresBio")]
+    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class LargeBlobTests
     {
         static readonly byte[] _clientDataHash = {

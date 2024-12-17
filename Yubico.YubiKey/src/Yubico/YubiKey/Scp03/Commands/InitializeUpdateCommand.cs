@@ -20,11 +20,12 @@ namespace Yubico.YubiKey.Scp03.Commands
     /// <summary>
     /// Represents the first command in the SCP03 authentication handshake, 'INITIALIZE_UPDATE'
     /// </summary>
+    [Obsolete("Use new InitializeUpdateCommand instead")]
     internal class InitializeUpdateCommand : IYubiKeyCommand<InitializeUpdateResponse>
     {
         public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
-        const byte GpInitializeUpdateCla = 0b1000_0000;
-        const byte GpInitializeUpdateIns = 0x50;
+        private const byte GpInitializeUpdateCla = 0x80;
+        private const byte GpInitializeUpdateIns = 0x50;
         private readonly byte[] _challenge;
         private readonly int _keyVersionNumber;
 

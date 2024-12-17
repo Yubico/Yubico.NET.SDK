@@ -16,7 +16,7 @@ using System;
 using System.Buffers.Binary;
 using System.IO;
 using System.Security.Cryptography;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Commands;
@@ -125,7 +125,7 @@ namespace Yubico.YubiKey.Fido2
             do
             {
                 var command = new GetLargeBlobCommand(offset, maxFragmentLength);
-                GetLargeBlobResponse response = Connection.SendCommand(command);
+                var response = Connection.SendCommand(command);
                 currentData = response.GetData();
 
                 fullEncoding.Write(currentData.ToArray(), 0, currentData.Length);
@@ -143,7 +143,7 @@ namespace Yubico.YubiKey.Fido2
             //      01 byte string
             var cborMap = new CborMap<int>(
                 fullEncoding.GetBuffer().AsMemory<byte>(0, (int)fullEncoding.Length));
-            ReadOnlyMemory<byte> encodedArray = cborMap.ReadByteString(KeyEncodedArray);
+            var encodedArray = cborMap.ReadByteString(KeyEncodedArray);
 
             var returnValue = new SerializedLargeBlobArray(encodedArray);
 
@@ -242,7 +242,7 @@ namespace Yubico.YubiKey.Fido2
 
                 do
                 {
-                    ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                    var currentToken = GetAuthToken(
                         forceToken, PinUvAuthTokenPermissions.LargeBlobWrite, null);
                     currentToken.CopyTo(token.AsMemory());
 
@@ -257,7 +257,8 @@ namespace Yubico.YubiKey.Fido2
                         encodedArray.Length,
                         pinUvAuthParam,
                         (int)AuthProtocol.Protocol);
-                    SetLargeBlobResponse response = Connection.SendCommand(command);
+                    
+                    var response = Connection.SendCommand(command);
                     if (response.Status == ResponseStatus.Success)
                     {
                         remaining -= currentLength;

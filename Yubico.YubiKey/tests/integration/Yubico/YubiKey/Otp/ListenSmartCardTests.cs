@@ -15,10 +15,11 @@
 using Xunit;
 using Xunit.Abstractions;
 using Yubico.Core.Devices.SmartCard;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.PlatformInterop
 {
-    [Trait("Category", "Simple")]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class ListenSmartCardTests
     {
         private int _counter;

@@ -236,22 +236,22 @@ namespace Yubico.YubiKey.Fido2
         // If everything works, return true. Otherwise, return false.
         private bool ReadAttestation(CborMap<int> map)
         {
-            CborMap<string> attest = map.ReadMap<string>(KeyAttestationStatement);
-            EncodedAttestationStatement = attest.Encoded;
-            if (!Format.Equals(PackedString, StringComparison.Ordinal)
-                || !attest.Contains(AlgString) || !attest.Contains(SigString)
-                || attest.Count > MaxAttestationMapCount
-                || (attest.Count == MaxAttestationMapCount && !attest.Contains(X5cString)))
+            var attestCborMap = map.ReadMap<string>(KeyAttestationStatement);
+            EncodedAttestationStatement = attestCborMap.Encoded;
+            if (!Format.Equals(PackedString, StringComparison.Ordinal) || !attestCborMap.Contains(AlgString) ||
+                !attestCborMap.Contains(SigString) ||
+                attestCborMap.Count > MaxAttestationMapCount ||
+                (attestCborMap.Count == MaxAttestationMapCount && !attestCborMap.Contains(X5cString)))
             {
                 return false;
             }
 
-            AttestationAlgorithm = (CoseAlgorithmIdentifier)attest.ReadInt32(AlgString);
-            AttestationStatement = attest.ReadByteString(SigString);
+            AttestationAlgorithm = (CoseAlgorithmIdentifier)attestCborMap.ReadInt32(AlgString);
+            AttestationStatement = attestCborMap.ReadByteString(SigString);
 
-            if (attest.Contains(X5cString))
+            if (attestCborMap.Contains(X5cString))
             {
-                IReadOnlyList<byte[]> certList = attest.ReadArray<byte[]>(X5cString);
+                var certList = attestCborMap.ReadArray<byte[]>(X5cString);
                 var attestationCertificates = new List<X509Certificate2>(certList.Count);
 
                 for (int index = 0; index < certList.Count; index++)
@@ -293,7 +293,7 @@ namespace Yubico.YubiKey.Fido2
                 throw new InvalidOperationException(ExceptionMessages.MissingCtap2Data);
             }
 
-            using SHA256 digester = CryptographyProviders.Sha256Creator();
+            using var digester = CryptographyProviders.Sha256Creator();
             _ = digester.TransformBlock(
                 AuthenticatorData.EncodedAuthenticatorData.ToArray(), 0,
                 AuthenticatorData.EncodedAuthenticatorData.Length, null, 0);

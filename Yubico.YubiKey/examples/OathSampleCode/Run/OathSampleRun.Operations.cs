@@ -121,13 +121,13 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter account name");
             _ = SampleMenu.ReadResponse(out string account);
 
-            _ = ChooseCredentialProperties.RunChooseTypeOption(_menuObject, out CredentialType? type);
+            _ = ChooseCredentialProperties.RunChooseTypeOption(_menuObject, out var type);
 
-            CredentialPeriod period = CredentialPeriod.Undefined;
+            var period = CredentialPeriod.Undefined;
 
             if (type == CredentialType.Totp)
             {
-                _ = ChooseCredentialProperties.RunChoosePeriodOption(_menuObject, out CredentialPeriod? credentialPeriod);
+                _ = ChooseCredentialProperties.RunChoosePeriodOption(_menuObject, out var credentialPeriod);
                 period = (CredentialPeriod)credentialPeriod;
             }
 
@@ -230,7 +230,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             else
             {
                 RunCollectCredential(_menuObject,
-                    out Credential credential,
+                    out var credential,
                     out string newIssuer,
                     out string newAccount);
 
@@ -256,13 +256,13 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter current account name");
             _ = SampleMenu.ReadResponse(out string currentAccount);
 
-            _ = ChooseCredentialProperties.RunChooseTypeOption(menuObject, out CredentialType? type);
+            _ = ChooseCredentialProperties.RunChooseTypeOption(menuObject, out var type);
 
-            CredentialPeriod period = CredentialPeriod.Undefined;
+            var period = CredentialPeriod.Undefined;
 
             if (type == CredentialType.Totp)
             {
-                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out CredentialPeriod? credentialPeriod);
+                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out var credentialPeriod);
                 period = credentialPeriod.Value;
             }
 

@@ -74,16 +74,16 @@ namespace Yubico.YubiKey.Fido2.Cbor
             int? entries = cbor.ReadStartArray();
             int count = entries ?? 0;
 
-            List<string> dest = destination ?? new List<string>(count);
+            var allDestinationsList = destination ?? new List<string>(count);
 
             for (int index = 0; index < count; index++)
             {
-                dest.Add(cbor.ReadTextString());
+                allDestinationsList.Add(cbor.ReadTextString());
             }
 
             cbor.ReadEndArray();
 
-            return dest;
+            return allDestinationsList;
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
 
             cbor.WriteStartArray(localData.Count);
-            foreach (ICborEncode cborEncode in localData)
+            foreach (var cborEncode in localData)
             {
                 cbor.WriteEncodedValue(cborEncode.CborEncode());
             }

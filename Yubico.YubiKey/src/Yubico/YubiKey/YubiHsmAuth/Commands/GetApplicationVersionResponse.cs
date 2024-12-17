@@ -35,9 +35,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                 throw new InvalidOperationException(StatusMessage);
             }
 
-            ReadOnlySpan<byte> versionData = ResponseApdu.Data.Span;
-
-            ApplicationVersion version = new ApplicationVersion()
+            var versionData = ResponseApdu.Data.Span;
+            var version = new ApplicationVersion
             {
                 Major = versionData[0],
                 Minor = versionData[1],

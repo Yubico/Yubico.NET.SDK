@@ -1,3 +1,7 @@
+---
+uid: PivApduVerifyPIN
+---
+
 <!-- Copyright 2021 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +16,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
-## Verify PIN 
+## Verify PIN
 
 ### Command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 20 | 00 | 80 | 08 | *PIN* | (absent)
+| CLA | INS | P1 | P2 | Lc | Data  |    Le    | 
+|:---:|:---:|:--:|:--:|:--:|:-----:|:--------:|
+| 00  | 20  | 00 | 80 | 08 | *PIN* | (absent) |
 
 ### Response APDU info
 
@@ -28,18 +31,18 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 #### Response APDU for VERIFY (Invalid PIN)
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 63 | C4
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 63  | C4  |
 
 If the PIN entered is incorrect, then the error is `63 CX` where *X* is the number of
 retries remaining. In the above, there are 4 retries remaining.
@@ -49,9 +52,9 @@ retries remaining. In the above, there are 4 retries remaining.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 83
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 83  |
 
 Whe the YubiKey returns this Status Word, it is not saying the PIN is incorrect. It is
 simply reporting that there are no retries remaining and the PIN is blocked. Maybe the PIN
@@ -59,6 +62,7 @@ supplied is correct, maybe not. However, because the PIN has been blocked, authe
 was denied.
 
 ### Examples
+
 ```C
 $ opensc-tool -c default  -s 00:a4:04:00:09:a0:00:00:03:08:00:00:10:00
   -s 00:20:00:80:08:31:32:33:34:35:36:ff:ff

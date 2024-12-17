@@ -15,10 +15,8 @@
 using System;
 using System.Buffers.Binary;
 using System.Linq;
-using System.Security.Cryptography;
 using Xunit;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath.Commands
@@ -78,7 +76,7 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void CreateCommandApdu_ReturnsCorrectLength()
         {
-            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {
@@ -102,7 +100,7 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void CreateCommandApdu_ReturnsCorrectData()
         {
-            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {

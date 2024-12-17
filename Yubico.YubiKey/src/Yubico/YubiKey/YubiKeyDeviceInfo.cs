@@ -27,8 +27,8 @@ namespace Yubico.YubiKey
     /// </summary>
     public class YubiKeyDeviceInfo : IYubiKeyDeviceInfo
     {
-        private const byte FipsMask = 0b1000_0000;
-        private const byte SkyMask = 0b0100_0000;
+        private const byte FipsMask = 0x80;
+        private const byte SkyMask = 0x40;
         private const byte FormFactorMask = unchecked((byte)~(FipsMask | SkyMask));
 
         private static readonly FirmwareVersion _fipsInclusiveLowerBound =
@@ -130,7 +130,7 @@ namespace Yubico.YubiKey
             ReadOnlyMemory<byte> responseApduData,
             [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)
         {
-            Dictionary<int, ReadOnlyMemory<byte>>? data =
+            var data =
                 GetDeviceInfoResponseHelper.CreateApduDictionaryFromResponseData(responseApduData);
 
             if (data is null)
@@ -162,9 +162,9 @@ namespace Yubico.YubiKey
             bool skySeriesFlag = false;
             var deviceInfo = new YubiKeyDeviceInfo();
 
-            foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tagValuePair in responseApduData)
+            foreach (var tagValuePair in responseApduData)
             {
-                ReadOnlySpan<byte> value = tagValuePair.Value.Span;
+                var value = tagValuePair.Value.Span;
                 switch (tagValuePair.Key)
                 {
                     case YubikeyDeviceManagementTags.UsbPrePersCapabilitiesTag:
@@ -299,6 +299,7 @@ namespace Yubico.YubiKey
                 ResetBlocked = ResetBlocked | second.ResetBlocked,
                 SerialNumber = SerialNumber ?? second.SerialNumber,
                 IsFipsSeries = IsFipsSeries || second.IsFipsSeries,
+                IsSkySeries = IsSkySeries || second.IsSkySeries,
 
                 FormFactor = FormFactor != FormFactor.Unknown
                     ? FormFactor

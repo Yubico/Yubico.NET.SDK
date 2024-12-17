@@ -20,6 +20,7 @@ namespace Yubico.YubiKey.Scp03.Commands
     /// <summary>
     /// The response to putting or replacing SCP03 keys on the YubiKey.
     /// </summary>
+    [Obsolete("Use new PutKeyResponse instead")]
     internal class PutKeyResponse : Scp03Response, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {
         private readonly byte[] _checksum;

@@ -14,7 +14,6 @@
 
 using System;
 using System.Globalization;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {

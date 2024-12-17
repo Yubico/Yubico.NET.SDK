@@ -54,18 +54,18 @@ or it can consist of all eight integers
 while an "Fp" Elliptic Curve (EC) private key consists of
 
 * curve
-  * prime
-  * order
-  * coefficients
-    * a
-    * b
-    * c
-  * base point
+    * prime
+    * order
+    * coefficients
+        * a
+        * b
+        * c
+    * base point
+        * x-coordinate
+        * y-coordinate
+* public point
     * x-coordinate
     * y-coordinate
-* public point
-  * x-coordinate
-  * y-coordinate
 * private value
 
 If the curve is a standard one (such as NIST P-256), then it can be represented by an
@@ -73,8 +73,8 @@ object identifier (OID).
 
 * OID
 * public point
-  * x-coordinate
-  * y-coordinate
+    * x-coordinate
+    * y-coordinate
 * private value
 
 or even only

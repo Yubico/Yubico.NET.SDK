@@ -15,11 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using Microsoft.Extensions.Logging;
-using Yubico.Core.Logging;
 using Yubico.YubiKey.Oath;
-using Yubico.YubiKey.Oath.Commands;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -33,19 +29,8 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            Log.LoggerFactory = LoggerFactory.Create(
-                builder => builder.AddSimpleConsole(
-                        options =>
-                        {
-                            options.IncludeScopes = true;
-                            options.SingleLine = true;
-                            options.TimestampFormat = "hh:mm:ss";
-                        })
-                    .AddFilter(level => level >= LogLevel.Information));
-
             IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindAll();
             IYubiKeyDevice? yubiKey = keys.First();
-
 
             using var oathSession = new OathSession(yubiKey);
 

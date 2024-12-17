@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Otp.Commands;
@@ -23,7 +24,7 @@ namespace Yubico.YubiKey.Pipelines
     // be available over FIDO.
     internal class OtpErrorTransform : IApduTransform
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _logger = Log.GetLogger<OtpErrorTransform>();
 
         private readonly IApduTransform _nextTransform;
 
@@ -55,19 +56,19 @@ namespace Yubico.YubiKey.Pipelines
 
             try
             {
-                ResponseApdu response = _nextTransform.Invoke(command, commandType, responseType);
-                int afterSequence = new ReadStatusResponse(response).GetData().SequenceNumber;
+                var responseApdu = _nextTransform.Invoke(command, commandType, responseType);
+                int afterSequence = new ReadStatusResponse(responseApdu).GetData().SequenceNumber;
                 int expectedSequence = (beforeSequence + 1) % 0x100;
 
                 // If we see the sequence number change, we can assume that the configuration was applied successfully. Otherwise
                 // we just invent an error in the response.
                 return afterSequence != expectedSequence
-                    ? new ResponseApdu(response.Data.ToArray(), SWConstants.WarningNvmUnchanged)
-                    : response;
+                    ? new ResponseApdu(responseApdu.Data.ToArray(), SWConstants.WarningNvmUnchanged)
+                    : responseApdu;
             }
             catch (KeyboardConnectionException e)
             {
-                _log.LogWarning(e, "Handling keyboard connection exception. Translating to APDU response.");
+                _logger.LogWarning(e, "Handling keyboard connection exception. Translating to APDU response.");
 
                 return new ResponseApdu(Array.Empty<byte>(), SWConstants.WarningNvmUnchanged);
             }

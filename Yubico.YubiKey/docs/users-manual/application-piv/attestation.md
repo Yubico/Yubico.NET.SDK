@@ -129,20 +129,20 @@ When an attestation statement is built, the private key in the attestable slot i
 attestation statement.
 
 * Slot 9A, 9C, 9D, 9E, 82 - 95:
-  * public and private key pair
-  * private key is the attested key
-  * attestation statement:
-    * an X.509 certificate
-    * subject key is the public key partner to the attested key
-    * signed by the attestation key
-    * chains to the attestation cert
+    * public and private key pair
+    * private key is the attested key
+    * attestation statement:
+        * an X.509 certificate
+        * subject key is the public key partner to the attested key
+        * signed by the attestation key
+        * chains to the attestation cert
 * Slot F9:
-  * public and private key pair
-  * private key is the attestation key
-  * attestation certificate:
-    * an X.509 certificate
-    * subject key is the public key partner to private key in F9
-    * chains to a root
+    * public and private key pair
+    * private key is the attestation key
+    * attestation certificate:
+        * an X.509 certificate
+        * subject key is the public key partner to private key in F9
+        * chains to a root
 
 ## Replacing the attestation key and cert
 
@@ -156,7 +156,7 @@ allows for it.
 Note that if you replace the Yubico key and cert, there is no way to recover these
 original values, they will be gone for good. So use this method with caution.
 
-The replacement key must be either RSA-2048, ECC-P256, or ECC-P384, and there are some
+The replacement key must be either RSA-2048, RSA-3072, RSA-4096, ECC-P256, or ECC-P384, and there are some
 restrictions on the certificate. YubiKeys before version 5 did allow 1024-bit RSA keys as
 attestation keys, but to make your application work for all YubiKeys, you should never use
 a 1024-bit RSA key as an attestation key.

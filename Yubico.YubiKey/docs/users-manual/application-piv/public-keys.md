@@ -28,26 +28,26 @@ different elements. For example, an RSA public key consists of two integers:
 while an "Fp" Elliptic Curve (EC) public key consists of
 
 * curve
-  * prime
-  * order
-  * coefficients
-    * a
-    * b
-    * c
-  * base point
+    * prime
+    * order
+    * coefficients
+        * a
+        * b
+        * c
+    * base point
+        * x-coordinate
+        * y-coordinate
+* public point
     * x-coordinate
     * y-coordinate
-* public point
-  * x-coordinate
-  * y-coordinate
 
 If the curve is a standard one (such as NIST P-256), then it can be represented by an
 object identifier (OID).
 
 * OID
 * public point
-  * x-coordinate
-  * y-coordinate
+    * x-coordinate
+    * y-coordinate
 
 There are standards that have defined ways to represent public keys, but unfortunately
 there are more than one. The most common definitions are in X.509 (the certificate
@@ -82,14 +82,16 @@ will need to be able to "convert" between `SubjectPublicKeyInfo` and `PivPublicK
 
 When you generate a new key pair on the PIV application, you are given the public key. The
 key is returned as an instance of the `PivPublicKey` class. From that class you can obtain
-all the information about the key. The object has a property for algorithm:
+all the information about the key. The object has a property for the algorithm, which can include the following:
 
 * RSA 1024
 * RSA 2048
+* RSA 3072
+* RSA 4096
 * ECC P256
 * ECC P384
 
-The object also has properties for
+The object also has properties for:
 
 * PIV-standard encoding
 * YubiKey encoding.

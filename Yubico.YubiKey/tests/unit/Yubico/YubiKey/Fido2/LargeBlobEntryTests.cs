@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Fido2
 
             // The code will generate a random nonce. So to guarantee the nonce
             // we want, use the fixed byte RNG.
-            RandomObjectUtility nonceGenerator =
+            var nonceGenerator =
                 RandomObjectUtility.SetRandomProviderFixedBytes(nonceBytes);
             bool isValid = false;
 

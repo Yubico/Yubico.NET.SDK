@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -43,16 +42,16 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <inheritdoc/>
         public FingerprintSensorInfo GetData()
         {
-            BioEnrollmentData enrollData = _response.GetData();
+            var bioEnrollmentData = _response.GetData();
 
-            if (!(enrollData.FingerprintKind is null)
-                && !(enrollData.MaxCaptureCount is null)
-                && !(enrollData.MaxFriendlyNameBytes is null))
+            if (!(bioEnrollmentData.FingerprintKind is null) &&
+                !(bioEnrollmentData.MaxCaptureCount is null) &&
+                !(bioEnrollmentData.MaxFriendlyNameBytes is null))
             {
                 return new FingerprintSensorInfo(
-                    enrollData.FingerprintKind.Value,
-                    enrollData.MaxCaptureCount.Value,
-                    enrollData.MaxFriendlyNameBytes.Value);
+                    bioEnrollmentData.FingerprintKind.Value,
+                    bioEnrollmentData.MaxCaptureCount.Value,
+                    bioEnrollmentData.MaxFriendlyNameBytes.Value);
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

@@ -49,9 +49,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </remarks>
         public CoseEcPublicKey GetData()
         {
-            ClientPinData data = _response.GetData();
-
-            if (data.KeyAgreement is CoseEcPublicKey ecPublicKey)
+            var clientPinData = _response.GetData();
+            if (clientPinData.KeyAgreement is CoseEcPublicKey ecPublicKey)
             {
                 return ecPublicKey;
             }

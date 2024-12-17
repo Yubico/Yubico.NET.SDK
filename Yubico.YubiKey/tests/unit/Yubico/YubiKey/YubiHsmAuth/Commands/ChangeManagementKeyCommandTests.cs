@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             ChangeManagementKeyCommand command = _command;
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
 
             int mgmtKeyTagCount = 0;
 
@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             ChangeManagementKeyCommand command = _command;
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
 
             int mgmtKeyTagCount = 0;
             byte[] value = Array.Empty<byte>();
@@ -129,7 +129,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             ChangeManagementKeyCommand command = _command;
             CommandApdu apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
 
             int mgmtKeyTagCount = 0;
             byte[] value = Array.Empty<byte>();

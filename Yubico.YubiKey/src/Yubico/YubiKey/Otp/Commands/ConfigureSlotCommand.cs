@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Otp.Commands
                         fixedData.Length));
             }
 
-            Span<byte> target = ConfigurationBuffer.Slice(FixedDataOffset, FixedDataLength);
+            var target = ConfigurationBuffer.Slice(FixedDataOffset, FixedDataLength);
             fixedData.CopyTo(target);
             // If the data is less than the buffer, make sure the rest is empty.
             if (fixedData.Length < FixedDataLength)

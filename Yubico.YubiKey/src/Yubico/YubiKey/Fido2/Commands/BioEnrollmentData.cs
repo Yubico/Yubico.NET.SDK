@@ -175,9 +175,9 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             if (cborMap.Contains(KeyTemplateInfos))
             {
-                IReadOnlyList<CborMap<int>> templateList = cborMap.ReadArray<CborMap<int>>(KeyTemplateInfos);
-                var templateInfos = new List<TemplateInfo>(templateList.Count);
-                foreach (CborMap<int> currentMap in templateList)
+                var cborTemplateList = cborMap.ReadArray<CborMap<int>>(KeyTemplateInfos);
+                var templateInfos = new List<TemplateInfo>(cborTemplateList.Count);
+                foreach (var currentMap in cborTemplateList)
                 {
                     byte[] currentId = currentMap.ReadByteString(KeyTemplateInfoId).ToArray();
                     string friendlyName = currentMap.Contains(KeyFriendlyName) ?

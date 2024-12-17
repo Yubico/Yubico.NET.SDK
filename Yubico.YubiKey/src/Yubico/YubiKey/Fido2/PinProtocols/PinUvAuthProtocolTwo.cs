@@ -14,7 +14,6 @@
 
 using System;
 using System.Globalization;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKey.Cryptography;
@@ -74,17 +73,17 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             // For protocol 2, generate a 16-byte, random IV, encrypt, then
             // return a buffer containing IV || ciphertext.
 
+            using var randomObject = CryptographyProviders.RngCreator();
             byte[] initVector = new byte[BlockSize];
-            using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
             randomObject.GetBytes(initVector);
 
-            using Aes aes = CryptographyProviders.AesCreator();
+            using var aes = CryptographyProviders.AesCreator();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
             aes.IV = initVector;
             aes.Key = _aesKey;
-            using ICryptoTransform aesTransform = aes.CreateEncryptor();
-
+            
+            using var aesTransform = aes.CreateEncryptor();
             byte[] encryptedData = new byte[BlockSize + length];
             Array.Copy(initVector, 0, encryptedData, 0, BlockSize);
             _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, BlockSize);
@@ -121,13 +120,13 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             byte[] initVector = new byte[BlockSize];
             Array.Copy(ciphertext, offset, initVector, 0, BlockSize);
 
-            using Aes aes = CryptographyProviders.AesCreator();
+            using var aes = CryptographyProviders.AesCreator();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
             aes.IV = initVector;
             aes.Key = _aesKey;
-            using ICryptoTransform aesTransform = aes.CreateDecryptor();
-
+            
+            using var aesTransform = aes.CreateDecryptor();
             byte[] decryptedData = new byte[length - BlockSize];
             _ = aesTransform.TransformBlock(ciphertext, BlockSize + offset, length - BlockSize, decryptedData, 0);
 
@@ -156,7 +155,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <inheritdoc />
         protected override byte[] Authenticate(byte[] keyData, byte[] message)
         {
-            using HMAC hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
+            using var hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
             hmacSha256.Key = keyData;
             return hmacSha256.ComputeHash(message);
         }
@@ -195,7 +194,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 // Extract.
                 byte[] salt = new byte[SaltLength];
-                using HMAC hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
+                using var hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
                 hmacSha256.Key = salt;
                 prk = hmacSha256.ComputeHash(buffer);
 

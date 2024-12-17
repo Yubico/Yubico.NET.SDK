@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
@@ -98,7 +97,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                 throw new MalformedYubiKeyResponseException();
             }
 
-            SessionKeys keys = new SessionKeys(
+            var keys = new SessionKeys(
                 ResponseApdu.Data.Slice(encStart, keyLength),
                 ResponseApdu.Data.Slice(macStart, keyLength),
                 ResponseApdu.Data.Slice(rmacStart, keyLength));

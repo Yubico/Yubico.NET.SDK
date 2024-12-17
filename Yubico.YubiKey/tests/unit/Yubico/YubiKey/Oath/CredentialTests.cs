@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Issuer_GetDefaultValue_ReturnsNull()
         {
-            Credential cred = new Credential();
+            var cred = new Credential();
 
             Assert.Null(cred.Issuer);
         }
@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Issuer_SetToTestString_ReturnsTestString()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Issuer = DefaultTestIssuer
             };
@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Issuer_SetToTestStringWithLeadingTrailingWhiteSpace_ReturnsTestString()
         {
-            Credential cred = new Credential();
+            var cred = new Credential();
 
             string? expectedIssuer = "  " + DefaultTestIssuer + " \t ";
             cred.Issuer = expectedIssuer;
@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Issuer_SetToNull_ReturnsNull()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Issuer = null
             };
@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Issuer_SetToEmptyString_ReturnsNull()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Issuer = string.Empty
             };
@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Oath
         [InlineData("\u2000\u2000\u2000")]
         public void Issuer_SetToWhiteSpace_ReturnsNull(string? issuerValue)
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Issuer = issuerValue
             };
@@ -102,7 +102,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_Totp15sIssuerAccount_ReturnsCorrectName()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Totp,
                 Period = CredentialPeriod.Period15,
@@ -119,7 +119,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_Totp30sIssuerAccount_ReturnsCorrectName()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Totp,
                 Period = CredentialPeriod.Period30,
@@ -136,7 +136,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_HotpIssuerAccount_ReturnsCorrectName()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Hotp,
                 Issuer = DefaultTestIssuer,
@@ -155,7 +155,7 @@ namespace Yubico.YubiKey.Oath
         [InlineData("      ")]
         public void Name_Totp15sAccount_ReturnsCorrectName(string? issuerValue)
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Totp,
                 Period = CredentialPeriod.Period15,
@@ -172,7 +172,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_Totp15sAccountDefaultIssuer_ReturnsCorrectName()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Totp,
                 Period = CredentialPeriod.Period15,
@@ -191,7 +191,7 @@ namespace Yubico.YubiKey.Oath
         [InlineData("      ")]
         public void Name_Totp30sAccount_ReturnsCorrectName(string? issuerValue)
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Totp,
                 Period = CredentialPeriod.Period30,
@@ -208,7 +208,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_Totp30sAccountDefaultIssuer_ReturnsCorrectName()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Totp,
                 Period = CredentialPeriod.Period30,
@@ -227,7 +227,7 @@ namespace Yubico.YubiKey.Oath
         [InlineData("      ")]
         public void Name_HotpAccount_ReturnsCorrectName(string? issuerValue)
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Hotp,
                 Issuer = issuerValue,
@@ -243,7 +243,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_HotpAccountDefaultIssuer_ReturnsCorrectName()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Hotp,
                 AccountName = DefaultTestAccount
@@ -265,7 +265,7 @@ namespace Yubico.YubiKey.Oath
         [InlineData(CredentialType.Hotp, CredentialPeriod.Undefined, null, "1234567890123456789012345678901234567890123456789012345678901234")]
         public void Name_64ByteNameLength_ReturnsCorrectName(CredentialType credType, CredentialPeriod credPeriod, string? issuer, string account)
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = credType,
                 Period = credPeriod,
@@ -291,7 +291,7 @@ namespace Yubico.YubiKey.Oath
         [InlineData(CredentialType.Hotp, CredentialPeriod.Undefined, null, "12345678901234567890123456789012345678901234567890123456789012345")]
         public void Name_65ByteNameLength_ThrowsInvalidOperationException(CredentialType credType, CredentialPeriod credPeriod, string? issuer, string account)
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = credType,
                 Period = credPeriod,
@@ -305,7 +305,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_CredTypeDefault_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Issuer = DefaultTestIssuer,
                 AccountName = DefaultTestAccount
@@ -317,7 +317,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_CredTypeNone_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.None,
                 Issuer = DefaultTestIssuer,
@@ -330,7 +330,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_TotpCredPeriodDefault_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Totp,
                 Issuer = DefaultTestIssuer,
@@ -343,7 +343,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_TotpCredPeriodUndefined_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Period = CredentialPeriod.Undefined,
                 Type = CredentialType.Totp,
@@ -357,7 +357,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_Totp30sAccountDefault_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Totp,
                 Period = CredentialPeriod.Period30,
@@ -370,7 +370,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_HotpAccountDefault_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential
+            var cred = new Credential
             {
                 Type = CredentialType.Hotp,
                 Issuer = DefaultTestIssuer

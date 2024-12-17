@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
@@ -27,7 +26,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// The partner Response class is <see cref="VerifyUvResponse"/>.
     /// <para>
     /// Before calling this method, clients must verify that the authenticator is bio-capable and
-    /// not blocked for bio matching.
+    /// not blocked for biometric matching.
     /// </para>
     /// </remarks>
     public sealed class VerifyUvCommand : IYubiKeyCommand<VerifyUvResponse>

@@ -18,7 +18,6 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Yubico.YubiKey;
 using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
@@ -232,7 +231,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 return false;
             }
 
-            DialogResult dResult = DialogResult.OK;
+            var dResult = DialogResult.OK;
             do
             {
                 _pinPopupForm.UpdateMessage(dResult, keyEntryData);

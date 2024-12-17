@@ -23,9 +23,10 @@ namespace Yubico.YubiKey.Fido2
     public class MakeCredentialBlobTests
     {
         [Fact]
+        [Trait(TraitTypes.Category, TestCategories.Elevated)]
         public void CredBlobExtension_Correct()
         {
-            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevices()[0];
+            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
             IYubiKeyConnection connection = yubiKeyDevice.Connect(YubiKeyApplication.Fido2);
 
             var getInfoCmd = new GetInfoCommand();

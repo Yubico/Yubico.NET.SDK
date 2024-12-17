@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKey.Scp03;
+using System;
 
 namespace Yubico.YubiKey
 {
@@ -20,11 +20,12 @@ namespace Yubico.YubiKey
     /// The connection class that can perform SCP03 operations will implement not
     /// only <see cref="IYubiKeyConnection"/>, but this interface as well.
     /// </summary>
+    [Obsolete("Use IScpYubiKeyConnection")]
     public interface IScp03YubiKeyConnection : IYubiKeyConnection
     {
         /// <summary>
         /// Return a reference to the SCP03 key set used to make the connection.
         /// </summary>
-        public StaticKeys GetScp03Keys();
+        public Yubico.YubiKey.Scp03.StaticKeys GetScp03Keys();
     }
 }

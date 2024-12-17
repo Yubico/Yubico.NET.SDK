@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey;
 
 namespace Yubico.YubiKey.TestUtilities
 {

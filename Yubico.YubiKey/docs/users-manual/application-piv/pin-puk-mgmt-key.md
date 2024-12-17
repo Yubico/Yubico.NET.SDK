@@ -32,11 +32,17 @@ is a 6- to 8-byte value, each of the bytes an ASCII number ('0' to '9', which in
 (upper- and lower-case), and even non-alphanumeric characters such as !, %, or # (among
 others).
 
-The PUK is used to unblock the PIN (see the section below on Blocking). The standard
-specifies that it is to be an 8-byte value, each of the bytes any binary value (`0x00` -
-`0xFF`). If your application uses the keyboard to insert the PUK, you might limit the user
-to ASCII characters, but the YubiKey will accept any byte value in the PUK. In addition,
-the YubiKey will allow the PUK to be 6, 7, or 8 bytes long.
+The PUK is used to unblock the PIN (see the section below on [blocking](#blocking)). The standard
+specifies that the PUK is to be an 8-byte value, with each of the bytes any binary value from `0x00` to
+`0xFF`. The YubiKey, however, will accept a PUK of 6 to 8 characters. For YubiKeys with firmware versions prior to 5.7, the key will accept any value in the `0x00` -
+`0xFF` range in the PUK. For YubiKeys with firmware version 5.7 and above, the key will only accept values in the `0x00` -
+`0x7F` range. Values from `0x80` - `0xFF` will be considered invalid by the key, and any attempt to change the PUK to a byte array containing one of these values will fail. 
+
+These restrictions are due to the YubiKey's PUK length requirements: for firmware versions prior to 5.7, the YubiKey simply requires a PUK length of 6-8 bytes, but for firmware version 5.7 and above, that requirement has changed to 6-8 *Unicode code points* in length. This is an important change because the byte representation (UTF-8 encoding) of a single code point can be 1-4 bytes in length, which means that a 6-byte PUK may be less than 6 code points. In order to accommodate keys of varying firmware versions, the SDK maintains a 6-8 byte length requirement when calling [PivSession.TryChangePuk](xref:Yubico.YubiKey.Piv.PivSession.TryChangePuk) or [Piv.Commands.ChangeReferenceDataCommand](xref:Yubico.YubiKey.Piv.Commands.ChangeReferenceDataCommand). However, keys with firmware 5.7 and above will only accept values that represent single-byte code points, hence the restricted range of `0x00` - `0x7F` (the range of `0x80` - `0xFF` represents code points of two bytes in length). For additional information on Unicode, UTF-8, and the SDK, see the [FIDO2 documentation](xref:TheFido2Pin).
+
+> [!NOTE]
+> If your application uses the keyboard to insert the PUK, you might limit the user
+to ASCII characters, regardless of a key's firmware version.
 
 The management key is used to authenticate the entity allowed to perform many YubiKey
 management operations, such as generating a key pair. On YubiKeys before version 5.4.2, it
@@ -51,14 +57,17 @@ The YubiKey is manufactured with the standard default PIN, PUK, and managment ke
 
 * PIN: "123456"
 * PUK: "12345678"
-* Management Key: (Firmware Version 5.6 and below: Triple-DES / 5.7 and above: AES-192), 0x010203040506070801020304050607080102030405060708\
-0102030405060708 three times
+* Management Key: (Firmware Version 5.6 and below: Triple-DES / 5.7 and above: AES-192),
+  0x010203040506070801020304050607080102030405060708\
+  0102030405060708 three times
 
-Note that the PIV standard specifies these default/initial values. For firmware 5.4 YubiKeys that allow AES, the default management key is Triple-DES. For firmware 5.7 and above 
+Note that the PIV standard specifies these default/initial values. For firmware 5.4 YubiKeys that allow AES, the default
+management key is Triple-DES. For firmware 5.7 and above
 YubiKeys, the default management key is AES-192.
 
 Upon receipt of the YubiKey, it is a good idea to change the PIN, PUK, and management key from the default values. See
-[PivSession.TryChangePin](xref:Yubico.YubiKey.Piv.PivSession.TryChangePin%2a), [PivSession.TryChangePuk](xref:Yubico.YubiKey.Piv.PivSession.TryChangePuk), and
+[PivSession.TryChangePin](xref:Yubico.YubiKey.Piv.PivSession.TryChangePin%2a), [PivSession.TryChangePuk](xref:Yubico.YubiKey.Piv.PivSession.TryChangePuk),
+and
 [PivSession.TryChangeManagementKey](xref:Yubico.YubiKey.Piv.PivSession.TryChangeManagementKey%2a).
 
 ### Entering binary data
@@ -158,7 +167,7 @@ never offer the option of changing the retry count again.
 * [Import a private key](xref:Yubico.YubiKey.Piv.PivSession.ImportPrivateKey%2a)
 * [Import a certificate](xref:Yubico.YubiKey.Piv.PivSession.ImportCertificate%2a)
 * [Change the retry counts](xref:Yubico.YubiKey.Piv.PivSession.ChangePinAndPukRetryCounts%2a)\
-also requires the PIN
+  also requires the PIN
 * [Change the management key](xref:Yubico.YubiKey.Piv.PivSession.ChangeManagementKey%2a)
 
 ## Operations that require the PIN
@@ -166,7 +175,7 @@ also requires the PIN
 * [Verify the PIN](xref:Yubico.YubiKey.Piv.PivSession.TryVerifyPin%2a)
 * [Change the PIN](xref:Yubico.YubiKey.Piv.PivSession.TryChangePin%2a)
 * [Change the retry counts](xref:Yubico.YubiKey.Piv.PivSession.ChangePinAndPukRetryCounts%2a)\
-also requires the management key
+  also requires the management key
 * [Sign](xref:Yubico.YubiKey.Piv.PivSession.Sign%2a)
 * [Decrypt](xref:Yubico.YubiKey.Piv.PivSession.Decrypt%2a)
 * [Key Agreement](xref:Yubico.YubiKey.Piv.PivSession.KeyAgree%2a)

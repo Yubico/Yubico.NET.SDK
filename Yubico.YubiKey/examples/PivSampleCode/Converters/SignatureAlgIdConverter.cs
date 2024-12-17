@@ -99,8 +99,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             PssSaltLength = 0;
             PssTrailerField = 0;
             var tlvReader = new TlvReader(algIdDer);
-            TlvReader seqReader = tlvReader.ReadNestedTlv(0x30);
-            ReadOnlyMemory<byte> oid = seqReader.ReadValue(0x06);
+            var seqReader = tlvReader.ReadNestedTlv(0x30);
+            var oid = seqReader.ReadValue(0x06);
 
             if (SetFromOid(oid))
             {

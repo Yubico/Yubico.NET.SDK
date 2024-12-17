@@ -92,8 +92,6 @@ namespace Yubico.YubiKey.Fido2
 
             var session = new Fido2Session(mockYubiKey.Object);
 
-            //session.AuthenticatorInfo;
-
             mockConnection.Verify(c => c.SendCommand(It.IsAny<GetInfoCommand>()));
         }
     }

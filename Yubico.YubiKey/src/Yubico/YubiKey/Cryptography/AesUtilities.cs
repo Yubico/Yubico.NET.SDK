@@ -29,19 +29,19 @@ namespace Yubico.YubiKey.Cryptography
         /// <remarks>
         /// This is not a secure authenticated encryption scheme.
         /// </remarks>
-        /// <param name="key">16-byte AES128 key</param>
+        /// <param name="encryptionKey">16-byte AES128 key</param>
         /// <param name="plaintext">16-byte input block</param>
         /// <returns>The 16-byte AES128 ciphertext</returns>
-        public static byte[] BlockCipher(byte[] key, ReadOnlySpan<byte> plaintext)
+        public static Memory<byte> BlockCipher(ReadOnlySpan<byte> encryptionKey, ReadOnlySpan<byte> plaintext)
         {
-            if (key is null)
+            if (encryptionKey.IsEmpty)
             {
-                throw new ArgumentNullException(nameof(key));
+                throw new ArgumentNullException(nameof(encryptionKey));
             }
 
-            if (key.Length != BlockSizeBytes)
+            if (encryptionKey.Length != BlockSizeBytes)
             {
-                throw new ArgumentException(ExceptionMessages.IncorrectAesKeyLength, nameof(key));
+                throw new ArgumentException(ExceptionMessages.IncorrectAesKeyLength, nameof(encryptionKey));
             }
 
             if (plaintext.Length != BlockSizeBytes)
@@ -49,34 +49,39 @@ namespace Yubico.YubiKey.Cryptography
                 throw new ArgumentException(ExceptionMessages.IncorrectPlaintextLength, nameof(plaintext));
             }
 
-            byte[] ciphertext;
+            byte[] aesObjKey = encryptionKey.ToArray();
 
-            using (Aes aesObj = CryptographyProviders.AesCreator())
+            try
             {
+                using var aesObj = CryptographyProviders.AesCreator();
 #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
                 aesObj.Mode = CipherMode.ECB;
 #pragma warning restore CA5358
                 aesObj.KeySize = BlockSizeBits;
                 aesObj.BlockSize = BlockSizeBits;
-                aesObj.Key = key;
+                aesObj.Key = aesObjKey;
                 aesObj.IV = new byte[BlockSizeBytes];
                 aesObj.Padding = PaddingMode.None;
 #pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
                 // a non-default initialization vector
-                ICryptoTransform encryptor = aesObj.CreateEncryptor();
+                var encryptor = aesObj.CreateEncryptor();
 #pragma warning restore CA5401
-                using (var msEncrypt = new MemoryStream())
-                {
-                    using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                    {
-                        csEncrypt.Write(plaintext.ToArray(), 0, plaintext.Length);
-                        ciphertext = msEncrypt.ToArray();
-                    }
-                }
-            }
 
-            return ciphertext;
+                using var msEncrypt = new MemoryStream();
+                using var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
+
+                csEncrypt.Write(plaintext.ToArray(), 0, plaintext.Length);
+                return msEncrypt.ToArray();
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(aesObjKey);
+            }
         }
+
+        /// <inheritdoc cref="BlockCipher(ReadOnlySpan{byte}, ReadOnlySpan{byte})"/>
+        public static byte[] BlockCipher(byte[] encryptionKey, ReadOnlySpan<byte> plaintext) =>
+            BlockCipher(encryptionKey.AsSpan(), plaintext).ToArray();
 
         /// <summary>
         /// Computes the AES-CBC encryption of the input blocks using the specified key.
@@ -84,25 +89,25 @@ namespace Yubico.YubiKey.Cryptography
         /// <remarks>
         /// This is not a secure authenticated encryption scheme. No padding occurs.
         /// </remarks>
-        /// <param name="key">16-byte AES128 key</param>
+        /// <param name="encryptionKey">16-byte AES128 key</param>
         /// <param name="iv">16-byte initialization vector (IV)</param>
         /// <param name="plaintext">Input blocks; must be a non-zero multiple of 16 bytes long</param>
         /// <returns>Ciphertext of the same length as the plaintext</returns>
-        public static byte[] AesCbcEncrypt(byte[] key, byte[] iv, ReadOnlySpan<byte> plaintext)
+        public static ReadOnlyMemory<byte> AesCbcEncrypt(ReadOnlySpan<byte> encryptionKey, ReadOnlySpan<byte> iv, ReadOnlySpan<byte> plaintext)
         {
-            if (key is null)
+            if (encryptionKey.IsEmpty)
             {
-                throw new ArgumentNullException(nameof(key));
+                throw new ArgumentNullException(nameof(encryptionKey));
             }
 
-            if (iv is null)
+            if (iv.IsEmpty)
             {
                 throw new ArgumentNullException(nameof(iv));
             }
 
-            if (key.Length != BlockSizeBytes)
+            if (encryptionKey.Length != BlockSizeBytes)
             {
-                throw new ArgumentException(ExceptionMessages.IncorrectAesKeyLength, nameof(key));
+                throw new ArgumentException(ExceptionMessages.IncorrectAesKeyLength, nameof(encryptionKey));
             }
 
             if (iv.Length != BlockSizeBytes)
@@ -115,32 +120,38 @@ namespace Yubico.YubiKey.Cryptography
                 throw new ArgumentException(ExceptionMessages.IncorrectCiphertextLength, nameof(plaintext));
             }
 
-            byte[] ciphertext;
+            byte[] aesObjKey = encryptionKey.ToArray();
+            byte[] aesObjIv = iv.ToArray();
 
-            using (Aes aesObj = CryptographyProviders.AesCreator())
+            try
             {
+                using var aesObj = CryptographyProviders.AesCreator();
+
                 aesObj.Mode = CipherMode.CBC;
                 aesObj.KeySize = BlockSizeBits;
                 aesObj.BlockSize = BlockSizeBits;
-                aesObj.Key = key;
-                aesObj.IV = iv;
+                aesObj.Key = aesObjKey;
+                aesObj.IV = aesObjIv;
                 aesObj.Padding = PaddingMode.None;
-#pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
-                // a non-default initialization vector
-                ICryptoTransform encryptor = aesObj.CreateEncryptor();
+#pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use a non-default initialization vector
+                var encryptor = aesObj.CreateEncryptor();
 #pragma warning restore CA5401
-                using (var msEncrypt = new MemoryStream())
-                {
-                    using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                    {
-                        csEncrypt.Write(plaintext.ToArray(), 0, plaintext.Length);
-                        ciphertext = msEncrypt.ToArray();
-                    }
-                }
-            }
+                using var msEncrypt = new MemoryStream();
+                using var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
 
-            return ciphertext;
+                csEncrypt.Write(plaintext.ToArray(), 0, plaintext.Length);
+                return msEncrypt.ToArray();
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(aesObjKey);
+                CryptographicOperations.ZeroMemory(aesObjIv);
+            }
         }
+
+        /// <inheritdoc cref="AesCbcEncrypt(ReadOnlySpan{byte}, ReadOnlySpan{byte}, ReadOnlySpan{byte})"/>
+        public static byte[] AesCbcEncrypt(byte[] encryptionKey, byte[] iv, ReadOnlySpan<byte> plaintext) =>
+            AesCbcEncrypt(encryptionKey.AsSpan(), iv, plaintext).ToArray();
 
         /// <summary>
         /// Computes the AES-CBC decryption of the input blocks using the specified key.
@@ -148,25 +159,25 @@ namespace Yubico.YubiKey.Cryptography
         /// <remarks>
         /// This is not a secure authenticated encryption scheme. No padding occurs.
         /// </remarks>
-        /// <param name="key">16-byte AES128 key</param>
+        /// <param name="decryptionKey">16-byte AES128 key</param>
         /// <param name="iv">16-byte initialization vector (IV)</param>
         /// <param name="ciphertext">Input blocks; must be a non-zero multiple of 16 bytes long</param>
         /// <returns>Plaintext of the same length as the ciphertext</returns>
-        public static byte[] AesCbcDecrypt(byte[] key, byte[] iv, ReadOnlySpan<byte> ciphertext)
+        public static ReadOnlyMemory<byte> AesCbcDecrypt(ReadOnlySpan<byte> decryptionKey, ReadOnlySpan<byte> iv, ReadOnlySpan<byte> ciphertext)
         {
-            if (key is null)
+            if (decryptionKey.IsEmpty)
             {
-                throw new ArgumentNullException(nameof(key));
+                throw new ArgumentNullException(nameof(decryptionKey));
             }
 
-            if (iv is null)
+            if (iv.IsEmpty)
             {
                 throw new ArgumentNullException(nameof(iv));
             }
 
-            if (key.Length != BlockSizeBytes)
+            if (decryptionKey.Length != BlockSizeBytes)
             {
-                throw new ArgumentException(ExceptionMessages.IncorrectAesKeyLength, nameof(key));
+                throw new ArgumentException(ExceptionMessages.IncorrectAesKeyLength, nameof(decryptionKey));
             }
 
             if (iv.Length != BlockSizeBytes)
@@ -179,30 +190,38 @@ namespace Yubico.YubiKey.Cryptography
                 throw new ArgumentException(ExceptionMessages.IncorrectCiphertextLength, nameof(ciphertext));
             }
 
-            byte[] plaintext;
+            byte[] aesObjKey = decryptionKey.ToArray();
+            byte[] aesObjIv = iv.ToArray();
 
-            using (Aes aesObj = CryptographyProviders.AesCreator())
+            try
             {
+                using var aesObj = CryptographyProviders.AesCreator();
+
                 aesObj.Mode = CipherMode.CBC;
                 aesObj.KeySize = BlockSizeBits;
                 aesObj.BlockSize = BlockSizeBits;
-                aesObj.Key = key;
-                aesObj.IV = iv;
+
+                aesObj.Key = aesObjKey;
+                aesObj.IV = aesObjIv;
                 aesObj.Padding = PaddingMode.None;
 
-                ICryptoTransform decryptor = aesObj.CreateDecryptor();
+                var decryptor = aesObj.CreateDecryptor();
 
-                using (var msDecrypt = new MemoryStream())
-                {
-                    using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Write))
-                    {
-                        csDecrypt.Write(ciphertext.ToArray(), 0, ciphertext.Length);
-                        plaintext = msDecrypt.ToArray();
-                    }
-                }
+                using var msDecrypt = new MemoryStream();
+                using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Write);
+
+                csDecrypt.Write(ciphertext.ToArray(), 0, ciphertext.Length);
+                return msDecrypt.ToArray();
             }
-
-            return plaintext;
+            finally
+            {
+                CryptographicOperations.ZeroMemory(aesObjKey);
+                CryptographicOperations.ZeroMemory(aesObjIv);
+            }
         }
+
+        /// <inheritdoc cref="AesCbcDecrypt(ReadOnlySpan{byte}, ReadOnlySpan{byte}, ReadOnlySpan{byte})"/>
+        public static byte[] AesCbcDecrypt(byte[] decryptionKey, byte[] iv, ReadOnlySpan<byte> ciphertext) =>
+            AesCbcDecrypt(decryptionKey.AsSpan(), iv.AsSpan(), ciphertext).ToArray();
     }
 }

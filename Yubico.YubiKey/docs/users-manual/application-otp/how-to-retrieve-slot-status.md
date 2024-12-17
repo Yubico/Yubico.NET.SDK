@@ -18,7 +18,8 @@ limitations under the License. -->
 
 # How to retrieve a slot's status
 
-When you construct an [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) object, you can retrieve the general status of both OTP application [slots](xref:OtpSlots). Slot status will tell you if the slot:
+When you construct an [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) object, you can retrieve the general status of
+both OTP application [slots](xref:OtpSlots). Slot status will tell you if the slot:
 
 * is configured
 * requires touch

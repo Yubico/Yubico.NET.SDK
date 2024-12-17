@@ -18,7 +18,9 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Management
 {
-    [Trait("Category", "Simple")]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
+    [Trait(TraitTypes.Category, TestCategories.RequiresFips)]
+
     public class SetDeviceInfoCommandTests
     {
         [SkippableTheory(typeof(DeviceNotFoundException))]

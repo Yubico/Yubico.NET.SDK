@@ -120,7 +120,9 @@ namespace Yubico.YubiKey.Piv.Commands
         /// The digest data is formatted if RSA. If the key that will be used to
         /// sign is RSA-1024, the the digest data must be 128 (1024 bits) bytes
         /// long. If the key is RSA-2048, then the digest data must be 256 bytes
-        /// (2048 bits) long. See also the User's Manual entry on
+        /// (2048 bits) long. If the key is RSA-3072, then the digest data must be 384 bytes
+        /// (3072 bits) long. If the key is RSA-4096, then the digest data must be 512 bytes
+        /// (4096 bits) long. See also the User's Manual entry on
         /// <xref href="UsersManualPivCommands#authenticate-sign"> signing </xref>
         /// in the PIV commands page.
         /// </para>

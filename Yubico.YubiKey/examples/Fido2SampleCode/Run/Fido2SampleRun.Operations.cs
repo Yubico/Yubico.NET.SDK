@@ -142,7 +142,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             // EventHandler delegates must have access to the serial number.
             // So we're going to use a separate class to handle this.
             var fido2Reset = new Fido2Reset(_yubiKeyChosen.SerialNumber);
-            ResponseStatus status = fido2Reset.RunFido2Reset(_keyCollector.Fido2SampleKeyCollectorDelegate);
+            var status = fido2Reset.RunFido2Reset(_keyCollector.Fido2SampleKeyCollectorDelegate);
             if (status == ResponseStatus.Success)
             {
                 SampleMenu.WriteMessage(MessageType.Title, 0, "\nFIDO2 application successfully reset.\n");
@@ -175,11 +175,11 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         public bool RunVerifyPin()
         {
-            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo);
+            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out var authenticatorInfo);
             if (isValid)
             {
                 isValid = GetVerifyArguments(
-                    true, authenticatorInfo, out PinUvAuthTokenPermissions? permissions, out string relyingPartyId);
+                    true, authenticatorInfo, out var permissions, out string relyingPartyId);
 
                 if (isValid)
                 {
@@ -203,12 +203,12 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         public bool RunVerifyUv()
         {
-            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo);
+            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out var authenticatorInfo);
 
             if (isValid)
             {
                 isValid = GetVerifyArguments(
-                    false, authenticatorInfo, out PinUvAuthTokenPermissions? permissions, out string relyingPartyId);
+                    false, authenticatorInfo, out var permissions, out string relyingPartyId);
 
                 if (isValid && !(permissions is null))
                 {
@@ -258,19 +258,19 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the user DisplayName");
             _ = SampleMenu.ReadResponse(out string userDisplayName);
 
-            RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
+            var randomObject = CryptographyProviders.RngCreator();
             byte[] randomBytes = new byte[16];
             randomObject.GetBytes(randomBytes);
             var userId = new ReadOnlyMemory<byte>(randomBytes);
 
-            ReadOnlyMemory<byte> clientDataHash = BuildFakeClientDataHash(relyingPartyId);
+            var clientDataHash = BuildFakeClientDataHash(relyingPartyId);
 
-            if (!Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo))
+            if (!Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out var authenticatorInfo))
             {
                 return false;
             }
 
-            CredProtectPolicy credProtectPolicy = CredProtectPolicy.None;
+            var credProtectPolicy = CredProtectPolicy.None;
             if (authenticatorInfo.Extensions.Contains("credProtect"))
             {
                 string[] menuItems = new string[] {
@@ -325,7 +325,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 userName, userDisplayName, userId,
                 credProtectPolicy,
                 credBlobData,
-                out MakeCredentialData makeCredentialData);
+                out var makeCredentialData);
 
             if (!isValid)
             {
@@ -360,10 +360,10 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the relyingPartyId");
             _ = SampleMenu.ReadResponse(out string relyingPartyId);
 
-            ReadOnlyMemory<byte> clientDataHash = BuildFakeClientDataHash(relyingPartyId);
+            var clientDataHash = BuildFakeClientDataHash(relyingPartyId);
 
-            ReadOnlyMemory<byte> salt = ReadOnlyMemory<byte>.Empty;
-            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo);
+            var salt = ReadOnlyMemory<byte>.Empty;
+            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out var authenticatorInfo);
             if (isValid)
             {
                 if (authenticatorInfo.Extensions.Contains("hmac-secret"))
@@ -378,7 +378,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                         "digest to the YubiKey as the salt.\n");
                     _ = SampleMenu.ReadResponse(out string dataToDigest);
                     byte[] dataBytes = System.Text.Encoding.Unicode.GetBytes(dataToDigest);
-                    SHA256 digester = CryptographyProviders.Sha256Creator();
+                    var digester = CryptographyProviders.Sha256Creator();
                     _ = digester.TransformFinalBlock(dataBytes, 0, dataBytes.Length);
 
                     salt = new ReadOnlyMemory<byte>(digester.Hash);
@@ -393,8 +393,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 clientDataHash,
                 relyingPartyId,
                 salt,
-                out IReadOnlyList<GetAssertionData> assertions,
-                out IReadOnlyList<byte[]> hmacSecrets))
+                out var assertions,
+                out var hmacSecrets))
             {
                 return false;
             }
@@ -421,7 +421,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<object> credentialData))
+                out var credentialData))
             {
                 return false;
             }
@@ -436,21 +436,21 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<object> credentialData))
+                out var credentialData))
             {
                 return false;
             }
 
             ReportCredentials(credentialData, false, false, out int credentialCount);
 
-            CredentialUserInfo userInfo = SelectCredential(credentialData, credentialCount);
+            var userInfo = SelectCredential(credentialData, credentialCount);
 
             if (userInfo is null)
             {
                 return false;
             }
 
-            UserEntity updatedInfo = GetUpdatedInfo(userInfo.User);
+            var updatedInfo = GetUpdatedInfo(userInfo.User);
 
             return Fido2Protocol.RunUpdateUserInfo(
                 _yubiKeyChosen,
@@ -464,14 +464,14 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<object> credentialData))
+                out var credentialData))
             {
                 return false;
             }
 
             ReportCredentials(credentialData, false, false, out int credentialCount);
 
-            CredentialUserInfo userInfo = SelectCredential(credentialData, credentialCount);
+            var userInfo = SelectCredential(credentialData, credentialCount);
 
             if (userInfo is null)
             {
@@ -497,7 +497,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
             if (!Fido2Protocol.RunGetLargeBlobArray(
                 _yubiKeyChosen,
-                out SerializedLargeBlobArray blobArray))
+                out var blobArray))
             {
                 return true;
             }
@@ -524,7 +524,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         {
             if (!Fido2Protocol.RunGetLargeBlobArray(
                 _yubiKeyChosen,
-                out SerializedLargeBlobArray blobArray))
+                out var blobArray))
             {
                 return false;
             }
@@ -565,7 +565,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<object> credentialData))
+                out var credentialData))
             {
                 return false;
             }
@@ -577,7 +577,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 "LargeBlob data is stored against a credential. Select a credential for which\n" +
                 "you want to see the largeBlob data. It is possible to retrieve data only for\n" +
                 "credentials that have an available Large Blob Key.\n");
-            CredentialUserInfo userInfo = SelectCredential(credentialData, credentialCount);
+            var userInfo = SelectCredential(credentialData, credentialCount);
 
             if (userInfo is null)
             {
@@ -620,7 +620,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             // data and "edit" it.
             if (!Fido2Protocol.RunGetLargeBlobArray(
                 _yubiKeyChosen,
-                out SerializedLargeBlobArray blobArray))
+                out var blobArray))
             {
                 return false;
             }
@@ -628,7 +628,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<object> credentialData))
+                out var credentialData))
             {
                 return false;
             }
@@ -642,7 +642,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 "with the largeBlob option. Hence, you must choose a credential against which the\n" +
                 "data will be stored, and that credential must have an available Large Blob Key.\n" +
                 "Note that this sample code will store only one entry per credential.\n");
-            CredentialUserInfo userInfo = SelectCredential(credentialData, credentialCount);
+            var userInfo = SelectCredential(credentialData, credentialCount);
 
             if (userInfo is null)
             {
@@ -696,7 +696,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         {
             if (!Fido2Protocol.RunGetLargeBlobArray(
                 _yubiKeyChosen,
-                out SerializedLargeBlobArray blobArray))
+                out var blobArray))
             {
                 return false;
             }
@@ -704,7 +704,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<object> credentialData))
+                out var credentialData))
             {
                 return false;
             }
@@ -718,7 +718,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 "YubiKey, or if there is no largeBlob data stored, or nothing stored against\n" +
                 "the selected credential, this sample code will do nothing.\n");
 
-            CredentialUserInfo userInfo = SelectCredential(credentialData, credentialCount);
+            var userInfo = SelectCredential(credentialData, credentialCount);
 
             if (userInfo is null || userInfo.LargeBlobKey is null)
             {
@@ -759,9 +759,9 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetBioInfo(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out BioModality modality,
-                out FingerprintSensorInfo sensorInfo,
-                out IReadOnlyList<TemplateInfo> templates))
+                out var modality,
+                out var sensorInfo,
+                out var templates))
             {
                 return false;
             }
@@ -807,7 +807,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
             try
             {
-                TemplateInfo templateInfo = Fido2Protocol.RunEnrollFingerprint(
+                var templateInfo = Fido2Protocol.RunEnrollFingerprint(
                     _yubiKeyChosen,
                     _keyCollector.Fido2SampleKeyCollectorDelegate,
                     friendlyName,
@@ -834,9 +834,9 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetBioInfo(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out BioModality modality,
-                out FingerprintSensorInfo sensorInfo,
-                out IReadOnlyList<TemplateInfo> templates))
+                out var modality,
+                out var sensorInfo,
+                out var templates))
             {
                 return false;
             }
@@ -867,9 +867,9 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetBioInfo(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out BioModality modality,
-                out FingerprintSensorInfo sensorInfo,
-                out IReadOnlyList<TemplateInfo> templates))
+                out var modality,
+                out var sensorInfo,
+                out var templates))
             {
                 return false;
             }
@@ -915,13 +915,13 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         public bool RunToggleAlwaysUv()
         {
-            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo);
+            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out var authenticatorInfo);
             if (!isValid)
             {
                 return false;
             }
 
-            OptionValue optionValue = authenticatorInfo.GetOptionValue("alwaysUv");
+            var optionValue = authenticatorInfo.GetOptionValue("alwaysUv");
 
             string[] menuItems = new string[] {
                 "Yes",
@@ -961,7 +961,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             isValid = Fido2Protocol.RunToggleAlwaysUv(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out OptionValue newValue);
+                out var newValue);
 
             if (isValid)
             {
@@ -975,13 +975,13 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         public bool RunSetPinConfig()
         {
-            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo);
+            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out var authenticatorInfo);
             if (!isValid)
             {
                 return false;
             }
 
-            OptionValue setMinPinValue = authenticatorInfo.GetOptionValue(AuthenticatorOptions.setMinPINLength);
+            var setMinPinValue = authenticatorInfo.GetOptionValue(AuthenticatorOptions.setMinPINLength);
             if (setMinPinValue != OptionValue.True)
             {
                 SampleMenu.WriteMessage(
@@ -1207,11 +1207,11 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             byte[] idBytes = System.Text.Encoding.Unicode.GetBytes(relyingPartyId);
 
             // Generate a random value to represent the challenge.
-            RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
+            var randomObject = CryptographyProviders.RngCreator();
             byte[] randomBytes = new byte[16];
             randomObject.GetBytes(randomBytes);
 
-            SHA256 digester = CryptographyProviders.Sha256Creator();
+            var digester = CryptographyProviders.Sha256Creator();
             _ = digester.TransformBlock(randomBytes, 0, randomBytes.Length, null, 0);
             _ = digester.TransformFinalBlock(idBytes, 0, idBytes.Length);
 
@@ -1302,7 +1302,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         private bool CollectPermissions(out PinUvAuthTokenPermissions? permissions)
         {
             permissions = null;
-            PinUvAuthTokenPermissions current = PinUvAuthTokenPermissions.None;
+            var current = PinUvAuthTokenPermissions.None;
 
             SampleMenu.WriteMessage(
                 MessageType.Title, 0,
@@ -1368,7 +1368,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         private bool CollectRelyingPartyId(PinUvAuthTokenPermissions? permissions, out string relyingPartyId)
         {
             relyingPartyId = "";
-            PinUvAuthTokenPermissions current = PinUvAuthTokenPermissions.None;
+            var current = PinUvAuthTokenPermissions.None;
             if (!(permissions is null))
             {
                 current = permissions.Value;

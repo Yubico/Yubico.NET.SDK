@@ -22,7 +22,7 @@ namespace Yubico.YubiKey
         // General YubiKey features
 
         /// <summary>
-        ///     The (Yubico)OTP application. Corresponds to the functionality located in the Yubico.YubiKey.Otp namespace.
+        ///     The (Yubico) OTP application. Corresponds to the functionality located in the Yubico.YubiKey.Otp namespace.
         /// </summary>
         OtpApplication,
 
@@ -55,7 +55,7 @@ namespace Yubico.YubiKey
         ManagementApplication,
 
         /// <summary>
-        ///     The ability to change the visibility of the serial number over USB, API, and Button-press.
+        ///     The ability to change the visibility of the serial number over USB, API, and button-press.
         /// </summary>
         SerialNumberVisibilityControls,
 
@@ -63,6 +63,16 @@ namespace Yubico.YubiKey
         ///     The ability to communicate using Secure Channel Protocol 3 (SCP03).
         /// </summary>
         Scp03,
+
+        /// <summary>
+        ///     The ability to communicate using Secure Channel Protocol 3 (SCP03) for OATH credentials.
+        /// </summary>
+        Scp03Oath,
+
+        /// <summary>
+        ///     The ability to communicate using Secure Channel Protocol 11a/b/c (SCP11).
+        /// </summary>
+        Scp11,
 
         /// <summary>
         ///     The YubiKey is capable of switching USB interfaces without the lengthy 3-second reclaim timeout.
@@ -75,7 +85,7 @@ namespace Yubico.YubiKey
         TemporaryTouchThreshold,
 
         /// <summary>
-        ///     The YubiKey supports proprietary reset.
+        ///     Support for device-wide factory reset of YubiKey Bio Multi-protocol Edition keys.
         /// </summary>
         DeviceReset,
 
@@ -87,7 +97,7 @@ namespace Yubico.YubiKey
         OtpOathHotpMode,
 
         /// <summary>
-        ///     A configuration slot that is activated by a longer duration touch of the YubiKey.
+        ///     A configuration slot that is activated by a longer-duration touch of the YubiKey.
         ///     This is also sometimes referred to as "Slot 2".
         /// </summary>
         OtpProtectedLongPressSlot,
@@ -98,43 +108,43 @@ namespace Yubico.YubiKey
         OtpNumericKeypad,
 
         /// <summary>
-        ///     Cause the trigger action of the YubiKey button to become faster.
+        ///     Causes the trigger action of the YubiKey button to become faster.
         /// </summary>
         OtpFastTrigger,
 
         /// <summary>
-        ///     Allow certain non-security related flags to be modified after the configuration
+        ///     Allows certain non-security related flags to be modified after the configuration
         ///     has been written.
         /// </summary>
         OtpUpdatableSlots,
 
         /// <summary>
-        ///     Allow a configuration to be stored without being accessible.
+        ///     Allows a configuration to be stored without being accessible.
         /// </summary>
         OtpDormantSlots,
 
         /// <summary>
-        ///     Invert the configured state of the LED.
+        ///     Inverts the configured state of the LED.
         /// </summary>
         OtpInvertLed,
 
         /// <summary>
-        ///     Truncate the OTP string to 16 characters.
+        ///     Truncates the OTP string to 16 characters.
         /// </summary>
         OtpShortTickets,
 
         /// <summary>
-        ///     Configure the slot to emit a static password.
+        ///     Configures the slot to emit a static password.
         /// </summary>
         OtpStaticPasswordMode,
 
         /// <summary>
-        ///     Use the HMAC message which is less than 64 bytes.
+        ///     Uses the HMAC message which is less than 64 bytes.
         /// </summary>
         OtpVariableSizeHmac,
 
         /// <summary>
-        ///     The YubiKey button touch for challenge response configuration.
+        ///     The YubiKey button touch for challenge-response configuration.
         /// </summary>
         OtpButtonTrigger,
 
@@ -144,7 +154,7 @@ namespace Yubico.YubiKey
         OtpMixedCasePasswords,
 
         /// <summary>
-        ///     Specify that the first byte of the token identifier should be modhex.
+        ///     Specifies that the first byte of the token identifier should be modhex.
         /// </summary>
         OtpFixedModhex,
 
@@ -154,12 +164,12 @@ namespace Yubico.YubiKey
         OtpChallengeResponseMode,
 
         /// <summary>
-        ///     Generation of mixed character and digits.
+        ///     Generation of mixed characters and digits.
         /// </summary>
         OtpAlphaNumericPasswords,
 
         /// <summary>
-        ///     Configure the slot to allow for user-triggered static password change.
+        ///     Configures the slot to allow for user-triggered static password change.
         /// </summary>
         OtpPasswordManualUpdates,
 
@@ -173,7 +183,7 @@ namespace Yubico.YubiKey
 
         /// <summary>
         ///     Ability to use an AES key as the PIV management key. A YubiKey
-        ///     that can set the management key to AES, can still set it to
+        ///     can set the management key to AES or
         ///     Triple-DES.
         /// </summary>
         PivAesManagementKey,
@@ -209,13 +219,13 @@ namespace Yubico.YubiKey
 
         /// <summary>
         ///     The cryptographic ECC algorithm with the parameters P-256,
-        ///     specified in FIPS 186-4 supported by the PIV Application on the YubiKey.
+        ///     specified in FIPS 186-4, supported by the PIV Application on the YubiKey.
         /// </summary>
         PivEccP256,
 
         /// <summary>
         ///     The cryptographic ECC algorithm with the parameters P-384,
-        ///     specified in FIPS 186-4 supported by the PIV Application on the YubiKey.
+        ///     specified in FIPS 186-4, supported by the PIV Application on the YubiKey.
         /// </summary>
         PivEccP384,
 
@@ -232,13 +242,13 @@ namespace Yubico.YubiKey
 
         /// <summary>
         ///     Ability to set touch policy to cached.
-        ///     It means that touch is cached for 15 seconds.
+        ///     (Touch is cached for 15 seconds.)
         /// </summary>
         PivTouchPolicyCached,
 
         /// <summary>
         ///     Ability to set touch policy on private key to cached.
-        ///     It means that touch is cached for 15 seconds.
+        ///     (Touch is cached for 15 seconds.)
         /// </summary>
         PivPrivateKeyTouchPolicyCached,
 
@@ -270,6 +280,6 @@ namespace Yubico.YubiKey
         /// <summary>
         ///     Allows temporarily disabling NFC until the next time the YubiKey is powered over USB.
         /// </summary>
-        ManagementNfcRestricted
+        ManagementNfcRestricted,
     }
 }

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Globalization;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands
@@ -33,12 +31,12 @@ namespace Yubico.YubiKey.Piv.Commands
     ///
     /// <item>
     /// <term><see cref="ResponseStatus.Success"/></term>
-    /// <description>The temporary PIN verified. GetData returns <c>null</c>.</description>
+    /// <description>The temporary PIN was valid and verified successfully. GetData returns <c>null</c>.</description>
     /// </item>
     ///
     /// <item>
     /// <term><see cref="ResponseStatus.AuthenticationRequired"/></term>
-    /// <description>The temporary PIN did not verify. The temporary PIN is cleared from the YubiKey,
+    /// <description>The temporary PIN was not valid. The temporary PIN is cleared from the YubiKey, and
     /// the session is not authenticated.</description>
     /// </item>
     /// </list>

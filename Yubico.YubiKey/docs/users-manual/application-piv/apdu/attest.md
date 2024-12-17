@@ -12,16 +12,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Create attestation statement
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | F9 | *slot number* | 00 | (absent) | (absent) | (absent)
+| CLA | INS |      P1       | P2 |    Lc    |   Data   |    Le    |
+|:---:|:---:|:-------------:|:--:|:--------:|:--------:|:--------:| 
+| 00  | F9  | *slot number* | 00 | (absent) | (absent) | (absent) |
 
-The slot number can be one of the following (hex values): `9A, 9C, 9D, 9E, 82, 93, 84, 85, 86, 87, 88, 89, 8A, 8B, 8C, 8D, 8E, 8F,
+The slot number can be one of the following (hex
+values): `9A, 9C, 9D, 9E, 82, 93, 84, 85, 86, 87, 88, 89, 8A, 8B, 8C, 8D, 8E, 8F,
 90, 91, 92, 93, 94, 95`.
 
 ### Response APDU Info
@@ -29,9 +29,9 @@ The slot number can be one of the following (hex values): `9A, 9C, 9D, 9E, 82, 9
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-*certificate* | 90 | 00
+|     Data      | SW1 | SW2 |
+|:-------------:|:---:|:---:|
+| *certificate* | 90  | 00  |
 
 Note that the certificate will be returned over multiple commands. Each return command
 will be able to return up to 256 bytes. To get more bytes of a return, call the GET

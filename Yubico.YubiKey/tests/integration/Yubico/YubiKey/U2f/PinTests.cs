@@ -13,16 +13,16 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
 using Yubico.PlatformInterop;
+using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.U2f.Commands;
 
 namespace Yubico.YubiKey.U2f
 {
-    [Trait("Category", "Elevated")]
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class PinTests : IDisposable
     {
         private readonly FidoConnection _fidoConnection;
@@ -37,10 +37,10 @@ namespace Yubico.YubiKey.U2f
                 }
             }
 
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
+            var devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 
-            HidDevice? deviceToUse = CommandTests.GetFidoHid(devices);
+            var deviceToUse = CommandTests.GetFidoHid(devices);
             Assert.NotNull(deviceToUse);
 
             if (deviceToUse is null)
@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.U2f
             };
 
             var cmd = new GetPagedDeviceInfoCommand();
-            GetPagedDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            var rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             var getData = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
@@ -78,13 +78,13 @@ namespace Yubico.YubiKey.U2f
             }
 
             var vfyCmd = new VerifyFipsModeCommand();
-            VerifyFipsModeResponse vfyRsp = _fidoConnection.SendCommand(vfyCmd);
+            var vfyRsp = _fidoConnection.SendCommand(vfyCmd);
             Assert.Equal(ResponseStatus.Success, vfyRsp.Status);
-            bool isFipsMode = vfyRsp.GetData();
+            var isFipsMode = vfyRsp.GetData();
             Assert.True(isFipsMode);
 
             var setCmd = new SetPinCommand(currentPin, newPin);
-            SetPinResponse setRsp = _fidoConnection.SendCommand(setCmd);
+            var setRsp = _fidoConnection.SendCommand(setCmd);
             Assert.Equal(ResponseStatus.Success, setRsp.Status);
 
             setCmd = new SetPinCommand(newPin, currentPin);
@@ -107,7 +107,7 @@ namespace Yubico.YubiKey.U2f
             };
 
             var setCmd = new SetPinCommand(currentPin, badPin);
-            SetPinResponse setRsp = _fidoConnection.SendCommand(setCmd);
+            var setRsp = _fidoConnection.SendCommand(setCmd);
             Assert.Equal(ResponseStatus.Failed, setRsp.Status);
         }
 
@@ -122,7 +122,7 @@ namespace Yubico.YubiKey.U2f
             };
 
             var cmd = new GetPagedDeviceInfoCommand();
-            GetPagedDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            var rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             var getData = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.U2f
             }
 
             var vfyCmd = new VerifyPinCommand(correctPin);
-            VerifyPinResponse vfyRsp = _fidoConnection.SendCommand(vfyCmd);
+            var vfyRsp = _fidoConnection.SendCommand(vfyCmd);
             Assert.Equal(ResponseStatus.Success, vfyRsp.Status);
 
             vfyCmd = new VerifyPinCommand(wrongPin);
@@ -160,7 +160,7 @@ namespace Yubico.YubiKey.U2f
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46
             };
 
-            bool isValid = IsYubiKeyVersion4Fips(out bool isFipsMode);
+            var isValid = IsYubiKeyVersion4Fips(out var isFipsMode);
             Skip.IfNot(isValid);
             if (!isFipsMode)
             {
@@ -169,7 +169,7 @@ namespace Yubico.YubiKey.U2f
             }
 
             var vfyCmd = new VerifyPinCommand(correctPin);
-            VerifyPinResponse vfyRsp = _fidoConnection.SendCommand(vfyCmd);
+            var vfyRsp = _fidoConnection.SendCommand(vfyCmd);
             Assert.Equal(ResponseStatus.Success, vfyRsp.Status);
 
             // Verify with the wrong PIN 3 times.
@@ -197,7 +197,7 @@ namespace Yubico.YubiKey.U2f
             isFipsMode = false;
 
             var cmd = new GetPagedDeviceInfoCommand();
-            GetPagedDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            var rsp = _fidoConnection.SendCommand(cmd);
             if (rsp.Status != ResponseStatus.Success)
             {
                 return false;
@@ -213,7 +213,7 @@ namespace Yubico.YubiKey.U2f
             }
 
             var vfyCmd = new VerifyFipsModeCommand();
-            VerifyFipsModeResponse vfyRsp = _fidoConnection.SendCommand(vfyCmd);
+            var vfyRsp = _fidoConnection.SendCommand(vfyCmd);
             if (vfyRsp.Status != ResponseStatus.Success)
             {
                 return false;
@@ -229,7 +229,7 @@ namespace Yubico.YubiKey.U2f
         private bool SetU2fPin(byte[] newPin)
         {
             var setCmd = new SetPinCommand(ReadOnlyMemory<byte>.Empty, newPin);
-            SetPinResponse setRsp = _fidoConnection.SendCommand(setCmd);
+            var setRsp = _fidoConnection.SendCommand(setCmd);
 
             return setRsp.Status == ResponseStatus.Success;
         }

@@ -16,20 +16,20 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
-
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.Hid
 {
     /// <summary>
-    /// macOS implementation of a Human Interface Device (HID)
+    /// MacOS implementation of a Human Interface Device (HID)
     /// </summary>
     internal class MacOSHidDevice : HidDevice
     {
         private readonly long _entryId;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<MacOSHidDevice>();
 
         public MacOSHidDevice(long entryId) :
             base(entryId.ToString(CultureInfo.InvariantCulture))
@@ -49,7 +49,7 @@ namespace Yubico.Core.Devices.Hid
         /// </returns>
         public static IEnumerable<HidDevice> GetList()
         {
-            Logger log = Log.GetLogger();
+            ILogger log = Log.GetLogger(typeof(MacOSHidDevice).FullName!);
             using IDisposable? logScope = log.BeginScope("MacOSHidDevice.GetList()");
 
             IntPtr manager = IntPtr.Zero;
@@ -116,7 +116,7 @@ namespace Yubico.Core.Devices.Hid
 
         internal static long GetEntryId(IntPtr device)
         {
-            Logger log = Log.GetLogger();
+            ILogger log = Log.GetLogger(typeof(MacOSHidDevice).FullName!);
 
             int service = IOHIDDeviceGetService(device);
             kern_return_t result = IORegistryEntryGetRegistryEntryID(service, out long entryId);

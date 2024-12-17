@@ -16,7 +16,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.PlatformInterop;
 
 using static Yubico.PlatformInterop.NativeMethods;
@@ -29,7 +29,7 @@ namespace Yubico.Core.Devices.Hid
         private GCHandle? _marshalableThisPtr;
         private CM_NOTIFY_CALLBACK? _callbackDelegate;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Log.GetLogger<WindowsHidDeviceListener>();
 
         public WindowsHidDeviceListener()
         {
@@ -128,7 +128,7 @@ namespace Yubico.Core.Devices.Hid
             }
             else if (action == CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL)
             {
-                thisObj?.OnRemoved(null);
+                thisObj?.OnRemoved(NullDevice.Instance);
             }
 
             return 0;

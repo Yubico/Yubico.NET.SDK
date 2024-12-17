@@ -22,23 +22,24 @@ using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [Obsolete("Use new ChannelMac instead")]
     internal static class ChannelMac
     {
         public static (CommandApdu macdApdu, byte[] newMacChainingValue) MacApdu(CommandApdu apdu, byte[] macKey, byte[] macChainingValue)
         {
             if (macChainingValue.Length != 16)
             {
-                throw new ArgumentException(ExceptionMessages.UnknownScp03Error, nameof(macChainingValue));
+                throw new ArgumentException(ExceptionMessages.UnknownScpError, nameof(macChainingValue));
             }
 
-            CommandApdu apduWithLongerLen = AddDataToApdu(apdu, new byte[8]);
+            var apduWithLongerLen = AddDataToApdu(apdu, new byte[8]);
             byte[] apduBytesWithZeroMac = ApduToBytes(apduWithLongerLen);
             byte[] apduBytes = apduBytesWithZeroMac.Take(apduBytesWithZeroMac.Length - 8).ToArray();
             byte[] macInp = new byte[16 + apduBytes.Length];
             macChainingValue.CopyTo(macInp, 0);
             apduBytes.CopyTo(macInp, 16);
 
-            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
             cmacObj.CmacInit(macKey);
             cmacObj.CmacUpdate(macInp);
             cmacObj.CmacFinal(macChainingValue);
@@ -68,13 +69,13 @@ namespace Yubico.YubiKey.Scp03
             macInp[16 + respDataLen] = SW1Constants.Success;
             macInp[16 + respDataLen + 1] = SWConstants.Success & 0xFF;
 
-            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
             byte[] cmac = new byte[16];
             cmacObj.CmacInit(rmacKey);
             cmacObj.CmacUpdate(macInp);
             cmacObj.CmacFinal(cmac);
-            Span<byte> calculatedRmac = cmac.AsSpan(0, 8);
 
+            var calculatedRmac = cmac.AsSpan(0, 8);
             if (!CryptographicOperations.FixedTimeEquals(recvdRmac, calculatedRmac))
             {
                 throw new SecureChannelException(ExceptionMessages.IncorrectRmac);

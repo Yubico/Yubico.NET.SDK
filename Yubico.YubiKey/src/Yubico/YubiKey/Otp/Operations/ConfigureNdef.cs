@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 ? NdefConfig.CreateUriConfig(_uri!)
                 : NdefConfig.CreateTextConfig(_text!, _languageCode!, _useUtf16);
 
-            ReadStatusResponse response = Connection.SendCommand(new ConfigureNdefCommand(OtpSlot!.Value, configBuffer.Span));
+            var response = Connection.SendCommand(new ConfigureNdefCommand(OtpSlot!.Value, configBuffer.Span));
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(string.Format(

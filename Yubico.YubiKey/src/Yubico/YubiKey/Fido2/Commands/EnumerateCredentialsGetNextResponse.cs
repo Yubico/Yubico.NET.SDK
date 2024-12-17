@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -43,19 +42,19 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <inheritdoc/>
         public CredentialUserInfo GetData()
         {
-            CredentialManagementData mgmtData = _response.GetData();
+            var credentialManagementData = _response.GetData();
 
-            if (!(mgmtData.User is null)
-                && !(mgmtData.CredentialId is null)
-                && !(mgmtData.CredentialPublicKey is null)
-                && !(mgmtData.CredProtectPolicy is null))
+            if (!(credentialManagementData.User is null)
+                && !(credentialManagementData.CredentialId is null)
+                && !(credentialManagementData.CredentialPublicKey is null)
+                && !(credentialManagementData.CredProtectPolicy is null))
             {
                 return new CredentialUserInfo(
-                    mgmtData.User,
-                    mgmtData.CredentialId,
-                    mgmtData.CredentialPublicKey,
-                    mgmtData.CredProtectPolicy.Value,
-                    mgmtData.LargeBlobKey);
+                    credentialManagementData.User,
+                    credentialManagementData.CredentialId,
+                    credentialManagementData.CredentialPublicKey,
+                    credentialManagementData.CredProtectPolicy.Value,
+                    credentialManagementData.LargeBlobKey);
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

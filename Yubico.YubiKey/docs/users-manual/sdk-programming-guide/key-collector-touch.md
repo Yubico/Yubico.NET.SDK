@@ -127,12 +127,12 @@ procedure can be described as follows:
 
 * The SDK discovers that touch is needed.
 * The SDK creates a new thread (call it thread T) and calls the KeyCollector on this
-thread with the request `TouchRequest`.
+  thread with the request `TouchRequest`.
 * The KeyCollector launches a window with a message. This call returns "immediately" to
-the KeyCollector.
+  the KeyCollector.
 * The KeyCollector in turn returns "immediately" to the SDK.
 * When the operation completes (most likely the user touched the YubiKey's contact), the
-SDK, on Thread T, calls the KeyCollector with the request `Release`.
+  SDK, on Thread T, calls the KeyCollector with the request `Release`.
 * The KeyCollector takes down the window and returns.
 * Thread T ends.
 

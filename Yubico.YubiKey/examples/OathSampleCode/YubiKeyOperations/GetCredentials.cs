@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             using var oathSession = new OathSession(yubiKey);
             {
                 oathSession.KeyCollector = KeyCollectorDelegate;
-                IList<Credential> result = oathSession.GetCredentials();
+                var result = oathSession.GetCredentials();
                 ReportResult(result);
             }
 
@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             {
                 _ = outputList.AppendLine($"Number of credentials: {credentials.Count}");
                 _ = outputList.AppendLine();
-                foreach (Credential currentCredential in credentials)
+                foreach (var currentCredential in credentials)
                 {
                     _ = outputList.AppendLine($"Issuer    : {currentCredential.Issuer}");
                     _ = outputList.AppendLine($"Account   : {currentCredential.AccountName}");

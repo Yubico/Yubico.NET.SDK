@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 // verification needed.
                 assertions = fido2Session.GetAssertions(getAssertionParameters);
 
-                foreach (GetAssertionData assertionData in assertions)
+                foreach (var assertionData in assertions)
                 {
                     byte[] hmacSecret = assertionData.AuthenticatorData.GetHmacSecretExtension(fido2Session.AuthProtocol);
                     hmacSecretList.Add(hmacSecret);
@@ -201,15 +201,15 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
                 returnValue.Add(new Tuple<int, int>(credCount, remainingCount));
 
-                IReadOnlyList<RelyingParty> rpList = fido2Session.EnumerateRelyingParties();
-                foreach (RelyingParty currentRp in rpList)
+                var rpList = fido2Session.EnumerateRelyingParties();
+                foreach (var currentRp in rpList)
                 {
                     returnValue.Add(currentRp);
 
-                    IReadOnlyList<CredentialUserInfo> credentialList =
+                    var credentialList =
                         fido2Session.EnumerateCredentialsForRelyingParty(currentRp);
 
-                    foreach (CredentialUserInfo currentCredential in credentialList)
+                    foreach (var currentCredential in credentialList)
                     {
                         returnValue.Add(currentCredential);
                     }
@@ -288,7 +288,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 throw new ArgumentNullException(nameof(blobArray));
             }
 
-            Memory<byte> plaintext = Memory<byte>.Empty;
+            var plaintext = Memory<byte>.Empty;
             byte[] plainArray = Array.Empty<byte>();
             entryIndex = -1;
             try

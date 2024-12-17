@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Otp.Operations
             };
             cmd.ApplyCurrentAccessCode(CurrentAccessCode);
 
-            ReadStatusResponse response = Connection.SendCommand(cmd);
+            var response = Connection.SendCommand(cmd);
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(string.Format(

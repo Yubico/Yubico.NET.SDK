@@ -44,41 +44,42 @@ namespace Yubico.YubiKey.Pipelines
                 throw new ArgumentNullException(nameof(command));
             }
 
-            ResponseApdu response = _pipeline.Invoke(command, commandType, responseType);
+            var responseApdu = _pipeline.Invoke(command, commandType, responseType);
 
             // Unless we see that bytes are available, there's nothing for this transform to do.
-            if (response.SW1 != SW1Constants.BytesAvailable)
+            if (responseApdu.SW1 != SW1Constants.BytesAvailable)
             {
-                return response;
+                return responseApdu;
             }
 
             var tempBuffer = new List<byte>();
 
             do
             {
-                tempBuffer.AddRange(response.Data.ToArray());
+                tempBuffer.AddRange(responseApdu.Data.ToArray());
 
                 // Note that OATH uses its own "get response" command.
                 // See OathResponseChainingTransform
-                IYubiKeyCommand<YubiKeyResponse> getResponseCommand =
-                    CreateGetResponseCommand(command, response.SW2);
+                var getResponseCommand =
+                    CreateGetResponseCommand(command, responseApdu.SW2);
 
-                response = _pipeline.Invoke(
+                responseApdu = _pipeline.Invoke(
                     getResponseCommand.CreateCommandApdu(),
                     commandType,
                     responseType);
             }
-            while (response.SW1 == SW1Constants.BytesAvailable);
+            while (responseApdu.SW1 == SW1Constants.BytesAvailable);
 
-            if (response.SW == SWConstants.Success)
+            if (responseApdu.SW == SWConstants.Success)
             {
-                tempBuffer.AddRange(response.Data.ToArray());
+                tempBuffer.AddRange(responseApdu.Data.ToArray());
             }
 
-            return new ResponseApdu(tempBuffer.ToArray(), response.SW);
+            return new ResponseApdu(tempBuffer.ToArray(), responseApdu.SW);
         }
 
-        protected virtual IYubiKeyCommand<YubiKeyResponse> CreateGetResponseCommand(CommandApdu originatingCommand, short SW2) =>
+        protected virtual IYubiKeyCommand<YubiKeyResponse>
+            CreateGetResponseCommand(CommandApdu originatingCommand, short SW2) =>
             new InterIndustry.Commands.GetResponseCommand(originatingCommand, SW2);
 
         public void Setup() => _pipeline.Setup();

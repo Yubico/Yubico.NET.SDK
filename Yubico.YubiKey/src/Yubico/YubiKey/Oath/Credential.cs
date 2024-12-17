@@ -420,7 +420,7 @@ namespace Yubico.YubiKey.Oath
         /// </returns>
         internal static (CredentialPeriod period, string? issuer, string account) ParseLabel(string label, CredentialType type)
         {
-            CredentialPeriod period = CredentialPeriod.Period30;
+            var credentialPeriod = CredentialPeriod.Period30;
             string? issuer = null;
             string issuerAccount;
 
@@ -430,7 +430,7 @@ namespace Yubico.YubiKey.Oath
 
                 if (parsedLabel.Length > 1)
                 {
-                    period = (CredentialPeriod)ToInt32(parsedLabel[0], NumberFormatInfo.InvariantInfo);
+                    credentialPeriod = (CredentialPeriod)ToInt32(parsedLabel[0], NumberFormatInfo.InvariantInfo);
                     issuerAccount = parsedLabel[1];
                 }
                 else
@@ -441,7 +441,7 @@ namespace Yubico.YubiKey.Oath
             else
             {
                 issuerAccount = label;
-                period = CredentialPeriod.Undefined;
+                credentialPeriod = CredentialPeriod.Undefined;
             }
 
             string[]? parsedAccount = issuerAccount.Split(':');
@@ -458,7 +458,7 @@ namespace Yubico.YubiKey.Oath
 
             string account = parsedAccount.Last();
 
-            return (period, issuer, account);
+            return (credentialPeriod, issuer, account);
         }
 
         /// <summary>
@@ -502,16 +502,16 @@ namespace Yubico.YubiKey.Oath
                 throw new InvalidOperationException(ExceptionMessages.InvalidUriQuery);
             }
 
-            NameValueCollection? parsedUri = HttpUtility.ParseQueryString(uriQuery);
+            var parsedUri = HttpUtility.ParseQueryString(uriQuery);
 
             string? defaultIssuer = parsedUri["issuer"];
             (string? issuer, string account) = ParseUriPath(uriPath, defaultIssuer);
 
             string secret = parsedUri["secret"];
 
-            CredentialType type = uri.Host == "totp" ? CredentialType.Totp : CredentialType.Hotp;
+            var type = uri.Host == "totp" ? CredentialType.Totp : CredentialType.Hotp;
 
-            HashAlgorithm algorithm = HashAlgorithm.Sha1;
+            var algorithm = HashAlgorithm.Sha1;
             string algorithmString = parsedUri["algorithm"];
 
             if (!string.IsNullOrWhiteSpace(algorithmString))
@@ -550,14 +550,14 @@ namespace Yubico.YubiKey.Oath
                 digits = DefaultDigits;
             }
 
-            CredentialPeriod period = CredentialPeriod.Period30;
+            var credentialPeriod = CredentialPeriod.Period30;
             string periodString = parsedUri["period"];
 
             if (!string.IsNullOrWhiteSpace(periodString))
             {
                 if (int.TryParse(periodString, NumberStyles.Any, CultureInfo.InvariantCulture, out int periodInt))
                 {
-                    period = (CredentialPeriod)periodInt;
+                    credentialPeriod = (CredentialPeriod)periodInt;
                 }
                 else
                 {
@@ -578,7 +578,7 @@ namespace Yubico.YubiKey.Oath
                 issuer = Uri.UnescapeDataString(issuer);
             }
 
-            return new Credential(issuer, Uri.UnescapeDataString(account), type, algorithm, secret, period, digits, counter, false);
+            return new Credential(issuer, Uri.UnescapeDataString(account), type, algorithm, secret, credentialPeriod, digits, counter, false);
         }
 
         /// <summary>

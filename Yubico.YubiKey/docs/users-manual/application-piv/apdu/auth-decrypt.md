@@ -12,16 +12,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Authenticate: decrypt
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 87 | *algorithm* | *slot number* | *data len* | *encoded data to decrypt* | (absent)
+| CLA | INS |     P1      |      P2       |     Lc     |           Data            |    Le    |
+|:---:|:---:|:-----------:|:-------------:|:----------:|:-------------------------:|:--------:| 
+| 00  | 87  | *algorithm* | *slot number* | *data len* | *encoded data to decrypt* | (absent) |
 
-The *algorithm* is either `06` (RSA-1048) or `07` (RSA-2048). Note that it is not possible
+The *algorithm* is either `06` (RSA-1024), `07` (RSA-2048), `05` (RSA 3072), or `16` (RSA 4096). Note that it is not possible
 to decrypt using ECC.
 
 The *slot number* can be the number of any slot that holds a private key, other than `F9`.
@@ -48,9 +47,9 @@ tags when signing. The RSA signing and decrypting operations are mathematically 
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-7C *len1* 82 *len2 \<decrypted data\>* | 90 | 00
+|                  Data                  | SW1 | SW2 |
+|:--------------------------------------:|:---:|:---:|
+| 7C *len1* 82 *len2 \<decrypted data\>* | 90  | 00  |
 
 The decrypted data will not be decoded. That is, it will still be in the form of
 PKCS 1 v1.5 (`00 02 pad 00 plaintext`) or OAEP.
@@ -64,9 +63,9 @@ RESPONSE APDU.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 82
+|   Data    | SW1 | SW2 | 
+|:---------:|:---:|:---:|
+| (no data) | 69  | 82  |
 
 If the key was generated or imported with a PIN policy other than "Never", and the command
 was sent without first verifying the PIN or the wrong PIN was entered, then this response

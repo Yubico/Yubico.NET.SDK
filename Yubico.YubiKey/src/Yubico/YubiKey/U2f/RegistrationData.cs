@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
@@ -67,7 +68,7 @@ namespace Yubico.YubiKey.U2f
         private const int SignatureOffset = PublicKeyOffset + PublicKeyLength;
         private const int PayloadLength = AppIdHashLength + ClientDataHashLength + KeyHandleLength + PublicKeyLength + MaxBerSignatureLength + 1;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<RegistrationData>();
 
         /// <summary>
         /// The ECDSA public key for this user credential. Each coordinate must
@@ -137,13 +138,13 @@ namespace Yubico.YubiKey.U2f
             int certLength = 1;
             if (encodedResponse.Length > MinEncodedLength)
             {
-                if (encodedResponse.Span[MsgReservedOffset] == MsgReservedValue
-                    && encodedResponse.Span[MsgKeyHandleOffset] == KeyHandleLength
-                    && encodedResponse.Span[MsgPublicKeyOffset] == PublicKeyTag)
+                if (encodedResponse.Span[MsgReservedOffset] == MsgReservedValue && 
+                    encodedResponse.Span[MsgKeyHandleOffset] == KeyHandleLength &&
+                    encodedResponse.Span[MsgPublicKeyOffset] == PublicKeyTag)
                 {
-                    ReadOnlyMemory<byte> certAndSig = encodedResponse.Slice(MsgCertOffset);
-                    var tlvReader = new TlvReader(certAndSig);
-                    if (tlvReader.TryReadEncoded(out ReadOnlyMemory<byte> cert, CertTag))
+                    var certAndSignatureBytes = encodedResponse.Slice(MsgCertOffset);
+                    var tlvReader = new TlvReader(certAndSignatureBytes);
+                    if (tlvReader.TryReadEncoded(out var cert, CertTag))
                     {
                         certLength = cert.Length;
                         isValid = true;

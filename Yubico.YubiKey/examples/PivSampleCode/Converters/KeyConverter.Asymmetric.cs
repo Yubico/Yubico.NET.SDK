@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // cast the input to RSA.
             if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmRsa, StringComparison.Ordinal))
             {
-                RSAParameters rsaParams = ((RSA)dotNetObject).ExportParameters(false);
+                var rsaParams = ((RSA)dotNetObject).ExportParameters(false);
                 // This constructor will validate the modulus and exponent.
                 var rsaPubKey = new PivRsaPublicKey(rsaParams.Modulus, rsaParams.Exponent);
                 return (PivPublicKey)rsaPubKey;

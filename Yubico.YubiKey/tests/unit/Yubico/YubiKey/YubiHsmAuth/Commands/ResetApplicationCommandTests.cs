@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -23,7 +22,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Application_Get_ReturnsYubiHsmAuth()
         {
-            ResetApplicationCommand command = new ResetApplicationCommand();
+            var command = new ResetApplicationCommand();
 
             Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
         }
@@ -31,7 +30,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Constructor_ReturnsObject()
         {
-            ResetApplicationCommand command = new ResetApplicationCommand();
+            var command = new ResetApplicationCommand();
 
             Assert.NotNull(command);
         }
@@ -39,7 +38,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Cla0()
         {
-            ResetApplicationCommand command = new ResetApplicationCommand();
+            var command = new ResetApplicationCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.Cla);
@@ -48,7 +47,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Ins0x06()
         {
-            ResetApplicationCommand command = new ResetApplicationCommand();
+            var command = new ResetApplicationCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0x06, apdu.Ins);
@@ -57,7 +56,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P1Is0xde()
         {
-            ResetApplicationCommand command = new ResetApplicationCommand();
+            var command = new ResetApplicationCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0xde, apdu.P1);
@@ -66,7 +65,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P2Is0xad()
         {
-            ResetApplicationCommand command = new ResetApplicationCommand();
+            var command = new ResetApplicationCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0xad, apdu.P2);
@@ -75,7 +74,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataLength0()
         {
-            ResetApplicationCommand command = new ResetApplicationCommand();
+            var command = new ResetApplicationCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.Data.Length);

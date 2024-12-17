@@ -15,7 +15,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Yubico.YubiKey;
 
 namespace Yubico.YubiKey.Sample.SharedCode
 {
@@ -27,7 +26,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
         // none available is a successful completion of its task.
         public static bool RunListYubiKeys(Transport transport)
         {
-            IEnumerable<IYubiKeyDevice> yubiKeyEnumerable = YubiKeyDevice.FindByTransport(transport);
+            var yubiKeyEnumerable = YubiKeyDevice.FindByTransport(transport);
 
             ReportResult(yubiKeyEnumerable);
 
@@ -43,7 +42,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
             if (yubiKeyDevices.Any())
             {
                 outputList = "\n   YubiKeys:";
-                foreach (IYubiKeyDevice current in yubiKeyDevices)
+                foreach (var current in yubiKeyDevices)
                 {
                     int serial = 0;
                     if (!(current.SerialNumber is null))

@@ -13,11 +13,9 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using System.Text;
 using Xunit;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath.Commands
@@ -83,8 +81,8 @@ namespace Yubico.YubiKey.Oath.Commands
         public void CreateCommandApdu_GetNcProperty_ReturnsCorrectLength()
         {
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
-            OathApplicationData oathData = selectOathResponse.GetData();
-            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            var oathData = selectOathResponse.GetData();
+            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {
@@ -111,7 +109,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
             OathApplicationData oathData = selectOathResponse.GetData();
-            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {

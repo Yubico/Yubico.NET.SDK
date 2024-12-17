@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using Yubico.Core.Buffers;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.TestUtilities;
 

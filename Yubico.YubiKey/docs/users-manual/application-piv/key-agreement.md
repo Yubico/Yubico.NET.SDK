@@ -28,10 +28,10 @@ Here is a description of "classical" ECDH.
 
 * Two correspondents agree to an EC parameter set.
 * Phase 1: Each correspondent generates a private and public value.
-  * The correspondents send each other the public values.
+    * The correspondents send each other the public values.
 * Phase 2: Each correspondent uses their own private value with the other correspondent's
-public value to generate a secret.
-  * If the two use the same parameters, they will generate the same secret.
+  public value to generate a secret.
+    * If the two use the same parameters, they will generate the same secret.
 
 The value each correspondent generates is a point on the curve. The ECDH algorithm is
 defined as using the x-coordinate of that resulting point.
@@ -156,13 +156,13 @@ be using it to sign, let's call this her ECDSA key. When she wants to communicat
 Bob, she performs this modified classical DH.
 
 * Phase 1: Alice generates a new EC key pair.
-  * She sends this newly generated ECDH public key to Bob, this message signed using her
-ECDSA private key. The message also contains her cert.
-  * Bob gets this message and verifies it using Alice's cert (chaining to a trusted root).
+    * She sends this newly generated ECDH public key to Bob, this message signed using her
+      ECDSA private key. The message also contains her cert.
+    * Bob gets this message and verifies it using Alice's cert (chaining to a trusted root).
 * Phase 1: Bob generates a new EC key pair.
-  * Bob sends to Alice his public value, signed using his public key (it can be RSA). The
-message contains his cert.
-  * Alice gets this message and verifies it using Bob's cert (chaining to a trusted root).
+    * Bob sends to Alice his public value, signed using his public key (it can be RSA). The
+      message contains his cert.
+    * Alice gets this message and verifies it using Bob's cert (chaining to a trusted root).
 * Phase 2: Both Alice and Bob have the necessary elements to each derive the session key.
 
 If Eve intercepts a message and forwards her own public value, it will be rejected if it

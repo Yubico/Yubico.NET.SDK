@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
@@ -27,11 +28,11 @@ namespace Yubico.Core.Devices.SmartCard
     internal class DesktopSmartCardDevice : SmartCardDevice
     {
         private readonly string _readerName;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<DesktopSmartCardDevice>();
 
         public static IReadOnlyList<ISmartCardDevice> GetList()
         {
-            Logger log = Log.GetLogger();
+            ILogger log = Log.GetLogger<DesktopSmartCardDevice>();
             using IDisposable? logScope = log.BeginScope("SmartCardDevice.GetList()");
 
             uint result = SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext context);
@@ -112,7 +113,6 @@ namespace Yubico.Core.Devices.SmartCard
             base(readerName, atr)
         {
             _readerName = readerName;
-            _log = Log.GetLogger();
         }
 
         public override ISmartCardConnection Connect()

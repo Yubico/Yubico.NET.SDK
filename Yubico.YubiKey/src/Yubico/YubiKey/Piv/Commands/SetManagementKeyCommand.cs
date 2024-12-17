@@ -159,6 +159,12 @@ namespace Yubico.YubiKey.Piv.Commands
             throw new NotImplementedException();
         }
 
+        [Obsolete("This constructor is deprecated. Users must specify management key algorithm type, as it cannot be assumed.")]
+        public SetManagementKeyCommand(ReadOnlyMemory<byte> newKey)
+            : this(newKey, PivTouchPolicy.Default, PivAlgorithm.TripleDes)
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <c>SetManagementKeyCommand</c> class.
         /// This command takes the new management key as input and will set the
@@ -176,11 +182,9 @@ namespace Yubico.YubiKey.Piv.Commands
         ///   };
         /// </code>
         /// <para>
-        /// The default algorithm is <c>TripleDes</c>. If you do not set the
-        /// <c>Algorithm</c> property after instantiating with this constructor,
-        /// the SDK will expect the key to be TripleDES. Valid algorithms are
-        /// <c>PivAlgorithm.TripleDes</c>, <c>PivAlgorithm.Aes128</c>,
-        /// <c>PivAlgorithm.Aes192</c>, and <c>PivAlgorithm.Aes256</c>.
+        /// Valid algorithms are <c>PivAlgorithm.TripleDes</c>,
+        /// <c>PivAlgorithm.Aes128</c>, <c>PivAlgorithm.Aes192</c>, and
+        /// <c>PivAlgorithm.Aes256</c>. FIPS YubiKeys versions 5.7 and greater require <c>PivAlgorithm.Aes192</c>.
         /// </para>
         /// <para>
         /// Note that you need to authenticate the current PIV management key before
@@ -190,36 +194,15 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <param name="newKey">
         /// The bytes that make up the new management key.
         /// </param>
-        public SetManagementKeyCommand(ReadOnlyMemory<byte> newKey)
-            : this(newKey, PivTouchPolicy.Default, PivAlgorithm.TripleDes)
+        /// <param name="algorithm">
+        /// The algorithm of the new management key.
+        /// </param>
+        public SetManagementKeyCommand(ReadOnlyMemory<byte> newKey, PivAlgorithm algorithm)
+        : this(newKey, PivTouchPolicy.Default, algorithm)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the SetManagementKeyCommand class. This
-        /// command takes the new management key and the touch policy as input.
-        /// </summary>
-        /// <remarks>
-        /// Note that a <c>touchPolicy</c> of <c>PivTouchPolicy.Default</c> or
-        /// <c>None</c> is equivalent to <c>Never</c>.
-        /// <para>
-        /// The default algorithm is <c>TripleDes</c>. If you do not set the
-        /// <c>Algorithm</c> property after instantiating with this constructor,
-        /// the SDK will expect the key to be TripleDES. Valid algorithms are
-        /// <c>PivAlgorithm.TripleDes</c>, <c>PivAlgorithm.Aes128</c>,
-        /// <c>PivAlgorithm.Aes192</c>, and <c>PivAlgorithm.Aes256</c>.
-        /// </para>
-        /// <para>
-        /// Note also that you need to authenticate the current PIV management
-        /// key before setting it to a new value with this command.
-        /// </para>
-        /// </remarks>
-        /// <param name="newKey">
-        /// The bytes that make up the new management key.
-        /// </param>
-        /// <param name="touchPolicy">
-        /// The touch policy for the management key.
-        /// </param>
+        [Obsolete("This constructor is deprecated. Users must specify management key algorithm type, as it cannot be assumed.")]
         public SetManagementKeyCommand(ReadOnlyMemory<byte> newKey, PivTouchPolicy touchPolicy)
             : this(newKey, touchPolicy, PivAlgorithm.TripleDes)
         {
@@ -236,7 +219,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <para>
         /// Valid algorithms are <c>PivAlgorithm.TripleDes</c>,
         /// <c>PivAlgorithm.Aes128</c>, <c>PivAlgorithm.Aes192</c>, and
-        /// <c>PivAlgorithm.Aes256</c>,
+        /// <c>PivAlgorithm.Aes256</c>. FIPS YubiKeys versions 5.7 and greater require <c>PivAlgorithm.Aes192</c>.
         /// </para>
         /// <para>
         /// Note also that you need to authenticate the current PIV management

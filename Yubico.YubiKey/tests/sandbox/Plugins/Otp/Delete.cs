@@ -14,7 +14,6 @@
 
 using System;
 using Yubico.YubiKey.Otp;
-using Yubico.YubiKey.Otp.Operations;
 
 namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {

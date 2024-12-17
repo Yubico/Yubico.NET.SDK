@@ -14,7 +14,6 @@
 
 using System;
 using System.Globalization;
-using System.IO;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
@@ -64,13 +63,13 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                         ExceptionMessages.IncorrectPlaintextLength));
             }
 
-            using Aes aes = CryptographyProviders.AesCreator();
+            using var aes = CryptographyProviders.AesCreator();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
             aes.IV = new byte[BlockSize];
             aes.Key = _keyData;
-            using ICryptoTransform aesTransform = aes.CreateEncryptor();
-
+            
+            using var aesTransform = aes.CreateEncryptor();
             byte[] encryptedData = new byte[length];
             _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, 0);
 
@@ -100,13 +99,13 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                         ExceptionMessages.IncorrectCiphertextLength));
             }
 
-            using Aes aes = CryptographyProviders.AesCreator();
+            using var aes = CryptographyProviders.AesCreator();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
             aes.IV = new byte[BlockSize];
             aes.Key = _keyData;
-            using ICryptoTransform aesTransform = aes.CreateDecryptor();
-
+            
+            using var aesTransform = aes.CreateDecryptor();
             byte[] decryptedData = new byte[length];
             _ = aesTransform.TransformBlock(ciphertext, offset, length, decryptedData, 0);
 
@@ -135,7 +134,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <inheritdoc />
         protected override byte[] Authenticate(byte[] keyData, byte[] message)
         {
-            using HMAC hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
+            using var hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
             hmacSha256.Key = keyData;
             return hmacSha256.ComputeHash(message).AsMemory(0, 16).ToArray();
         }
@@ -148,7 +147,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 throw new ArgumentNullException(nameof(buffer));
             }
 
-            using SHA256 sha256 = CryptographyProviders.Sha256Creator();
+            using var sha256 = CryptographyProviders.Sha256Creator();
             _ = sha256.TransformFinalBlock(buffer, 0, buffer.Length);
             if (sha256.Hash.Length != KeyLength)
             {

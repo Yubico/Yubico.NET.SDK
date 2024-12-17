@@ -218,9 +218,6 @@ function Invoke-NuGetPackageSigning {
         Write-Host "  Thumbprint:   $($cert.Thumbprint)"
         Write-Host "  Valid From:   $($cert.NotBefore)"
         Write-Host "  Valid To:     $($cert.NotAfter)"
-        Write-Host "  Provider:     $($cert.PrivateKey.CspKeyContainerInfo.ProviderName)"
-        Write-Host "  Key Storage:  $($cert.PrivateKey.CspKeyContainerInfo.HardwareDevice ? 'Hardware' : 'Software')"
-        Write-Host "  Key Spec:     $($cert.PrivateKey.CspKeyContainerInfo.KeyNumber)`n"
 
         if ($cert.NotAfter -le (Get-Date).AddMonths(1)) {
             Write-Warning "Certificate will expire within one month on $($cert.NotAfter)"

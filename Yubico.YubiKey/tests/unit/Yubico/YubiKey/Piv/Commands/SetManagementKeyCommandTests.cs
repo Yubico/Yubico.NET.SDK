@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
             byte[] mgmtKey = GetMgmtKeyArray();
-            var command = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Always);
+            var command = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Always, PivAlgorithm.TripleDes);
 
             Assert.True(command is IYubiKeyCommand<SetManagementKeyResponse>);
         }
@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_Application_Piv()
         {
             byte[] mgmtKey = GetMgmtKeyArray();
-            var command = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Always);
+            var command = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Always, PivAlgorithm.TripleDes);
 
             YubiKeyApplication application = command.Application;
 
@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             byte[] mgmtKey = GetMgmtKeyArray();
             PivTouchPolicy touchPolicy = PivTouchPolicy.Always;
-            var command = new SetManagementKeyCommand(mgmtKey, touchPolicy);
+            var command = new SetManagementKeyCommand(mgmtKey, touchPolicy, PivAlgorithm.TripleDes);
 
             PivTouchPolicy getPolicy = command.TouchPolicy;
 
@@ -206,11 +206,11 @@ namespace Yubico.YubiKey.Piv.Commands
             switch (cStyle)
             {
                 default:
-                    cmd = new SetManagementKeyCommand(mgmtKey, touchPolicy);
+                    cmd = new SetManagementKeyCommand(mgmtKey, touchPolicy, PivAlgorithm.TripleDes);
                     break;
 
                 case 2:
-                    cmd = new SetManagementKeyCommand(mgmtKey)
+                    cmd = new SetManagementKeyCommand(mgmtKey, PivAlgorithm.TripleDes)
                     {
                         TouchPolicy = touchPolicy,
                     };
@@ -219,13 +219,13 @@ namespace Yubico.YubiKey.Piv.Commands
 
                 case 3:
 #pragma warning disable IDE0017 // Specifically testing this construction
-                    cmd = new SetManagementKeyCommand(mgmtKey);
+                    cmd = new SetManagementKeyCommand(mgmtKey, PivAlgorithm.TripleDes);
                     cmd.TouchPolicy = touchPolicy;
                     break;
 #pragma warning restore IDE0017
 
                 case 4:
-                    cmd = new SetManagementKeyCommand(mgmtKey);
+                    cmd = new SetManagementKeyCommand(mgmtKey, PivAlgorithm.TripleDes);
                     break;
             }
 

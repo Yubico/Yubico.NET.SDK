@@ -267,7 +267,7 @@ namespace Yubico.YubiKey.Piv
             // If we can authenticate the mgmt key, then set ADMIN DATA and
             // PRINTED.
             var userKeyCollector = KeyCollector;
-            using var specialKeyCollector = new SpecialKeyCollector();
+            using var specialKeyCollector = new SpecialKeyCollector(DefaultManagementKeyAlgorithm);
 
             try
             {
@@ -349,7 +349,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             var userKeyCollector = KeyCollector;
-            using var specialKeyCollector = new SpecialKeyCollector();
+            using var specialKeyCollector = new SpecialKeyCollector(DefaultManagementKeyAlgorithm);
 
             try
             {
@@ -513,7 +513,7 @@ namespace Yubico.YubiKey.Piv
 
         /// <summary>
         ///     Set the YubiKey's PIV application to be PIN-only with a PIN-derived
-        ///     and/or PIN-Protected Triple-DES management key. This sets the
+        ///     and/or PIN-Protected management key (Firmware 5.7.x and later: AES-192. Firmware 5.6.x and earlier: TDES.). This sets the
         ///     YubiKey to either
         ///     <code>
         ///        PivPinOnlyMode.PinProtected
@@ -544,7 +544,7 @@ namespace Yubico.YubiKey.Piv
         ///     </para>
         ///     <para>
         ///         Note also that this will make sure that the management key algorithm
-        ///         will be Triple-DES, even if the current management key is a different
+        ///         will be default management key algorithm (Firmware 5.7.x and later: AES-192. Firmware 5.6.x and earlier: TDES.), even if the current management key is a different
         ///         algorithm. This behavior matches how this method operated in previous
         ///         versions of the SDK.
         ///     </para>
@@ -554,7 +554,7 @@ namespace Yubico.YubiKey.Piv
         /// </param>
         /// <exception cref="InvalidOperationException">
         ///     There is no <c>KeyCollector</c> loaded, one of the keys provided was
-        ///     not a valid Triple-DES key, the data stored on the YubiKey is
+        ///     not of a valid key algorithm type (Firmware 5.7.x and later: AES-192. Firmware 5.6.x and earlier: TDES.), the data stored on the YubiKey is
         ///     incompatible with PIN-only, or the YubiKey had some other error, such
         ///     as unreliable connection.
         /// </exception>
@@ -566,7 +566,7 @@ namespace Yubico.YubiKey.Piv
         ///     authenticated, or the remaining retries count indicates the PIN is
         ///     blocked.
         /// </exception>
-        public void SetPinOnlyMode(PivPinOnlyMode pinOnlyMode) => SetPinOnlyMode(pinOnlyMode, PivAlgorithm.TripleDes);
+        public void SetPinOnlyMode(PivPinOnlyMode pinOnlyMode) => SetPinOnlyMode(pinOnlyMode, DefaultManagementKeyAlgorithm);
 
         /// <summary>
         ///     Set the YubiKey's PIV application to be PIN-only with a PIN-derived
@@ -604,13 +604,13 @@ namespace Yubico.YubiKey.Piv
         ///         The management key derived and/or stored in PRINTED will be for the
         ///         specified algorithm. For all YubiKeys, <c>TripleDes</c> is a valid
         ///         algorithm. For YubiKeys 5.4.2 and later, it is possible to set the
-        ///         management key to an AES key. Before setting the
-        ///         <c>mgmtKeyAlgorithm</c> arg to an AES algorithm, make sure it is
+        ///         management key to an AES key. For YubiKeys 5.7 and later, AES192 is the default.
+        ///         Before setting the <c>mgmtKeyAlgorithm</c> arg to an AES algorithm, make sure it is
         ///         allowed on the YubiKey. You can use the <c>HasFeature</c> call. For
         ///         example,
         ///         <code language="csharp">
         ///   PivAlgorithm mgmtKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey) ?
-        ///       PivAlgorithm.Aes128 : PivAlgorithm.TripleDes;
+        ///       PivAlgorithm.Aes192 : PivAlgorithm.TripleDes;
         ///   pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected, mgmtKeyAlgorithm);
         /// </code>
         ///         If the algorithm is not supported by the YubiKey, this method will
@@ -641,16 +641,11 @@ namespace Yubico.YubiKey.Piv
         ///         currently set to PIN-only (and neither PinProtected nor PinDerived is
         ///         Unavailable), this method will remove the contents of the storage
         ///         locations ADMIN DATA and PRINTED, and reset the management key to the
-        ///         default:
-        ///         <code>
-        ///   Triple-DES
-        ///   0x01 02 03 04 05 06 07 08
-        ///     01 02 03 04 05 06 07 08
-        ///     01 02 03 04 05 06 07 08
-        /// </code>
+        ///         default management key. 
         ///         In this case, the <c>mgmtKeyAlgorithm</c> arg will be ignored, the
         ///         management key's algorithm after removing PIN-only status will be
-        ///         Triple-DES. The touch policy of the management key will also be set
+        ///         the default management key algorithm (Firmware 5.7.x and later: AES-192. Firmware 5.6.x and earlier: TDES.).
+        ///         The touch policy of the management key will also be set
         ///         to the default (Never). Note that the management key must be
         ///         authenticated and the PIN verified in order to perform this task.
         ///         This method will authenticate the management key using the PIN-only
@@ -732,7 +727,7 @@ namespace Yubico.YubiKey.Piv
         /// </param>
         /// <exception cref="InvalidOperationException">
         ///     There is no <c>KeyCollector</c> loaded, one of the keys provided was
-        ///     not a valid Triple-DES key, the data stored on the YubiKey is
+        ///     not of a valid key algorithm type (Firmware 5.7.x and later: AES-192. Firmware 5.6.x and earlier: TDES.), the data stored on the YubiKey is
         ///     incompatible with PIN-only, or the YubiKey had some other error, such
         ///     as unreliable connection.
         /// </exception>
@@ -751,7 +746,7 @@ namespace Yubico.YubiKey.Piv
                 pinOnlyMode.ToString(), mgmtKeyAlgorithm.ToString());
 
             var userKeyCollector = KeyCollector;
-            using var specialKeyCollector = new SpecialKeyCollector();
+            using var specialKeyCollector = new SpecialKeyCollector(DefaultManagementKeyAlgorithm);
 
             try
             {
@@ -777,7 +772,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             var userKeyCollector = KeyCollector;
-            using var specialKeyCollector = new SpecialKeyCollector();
+            using var specialKeyCollector = new SpecialKeyCollector(DefaultManagementKeyAlgorithm);
 
             try
             {
@@ -835,7 +830,7 @@ namespace Yubico.YubiKey.Piv
             // Or some other reason.
             var newPinOnlyMode = PivPinOnlyMode.None;
             var currentPinOnlyMode = GetPrintedPinProtectedStatus(specialKeyCollector, userKeyCollector);
-            
+
             var pinOnlyCheck = CheckPinOnlyStatus(
                 currentPinOnlyMode, pinOnlyMode, PivPinOnlyMode.PinProtected, PivPinOnlyMode.PinProtectedUnavailable,
                 newAlgorithm, ref newPinOnlyMode);
@@ -1028,11 +1023,12 @@ namespace Yubico.YubiKey.Piv
                 PutEmptyData(AdminDataDataTag);
             }
 
+            var managementKeyAlgorithm = DefaultManagementKeyAlgorithm;
             specialKeyCollector.SetKeyData(
                 SpecialKeyCollector.SetKeyDataDefault, ReadOnlyMemory<byte>.Empty, isNewKey: true,
-                PivAlgorithm.TripleDes);
+                managementKeyAlgorithm);
 
-            specialKeyCollector.ChangeManagementKey(this, PivAlgorithm.TripleDes);
+            specialKeyCollector.ChangeManagementKey(this, managementKeyAlgorithm);
         }
 
         private void PutEmptyData(int dataTag)
@@ -1087,7 +1083,7 @@ namespace Yubico.YubiKey.Piv
             // because this method will update the current key with the new key.
             specialKeyCollector.ChangeManagementKey(this, mgmtKeyAlgorithm);
             _ = BlockPinOrPuk(PivSlot.Puk);
-            
+
             adminData.SetSalt(saltBytes);
             adminData.PukBlocked = true;
         }
@@ -1150,7 +1146,7 @@ namespace Yubico.YubiKey.Piv
             mode = PivPinOnlyMode.None;
 
             var userKeyCollectorFunc = KeyCollector;
-            using var specialKeyCollector = new SpecialKeyCollector();
+            using var specialKeyCollector = new SpecialKeyCollector(DefaultManagementKeyAlgorithm);
 
             bool isValid = TryReadObject(out AdminData adminData);
 
@@ -1179,9 +1175,10 @@ namespace Yubico.YubiKey.Piv
 
                 _ = specialKeyCollector.DeriveKeyData(salt, ManagementKeyAlgorithm, isNewKey: false);
 
+                var managementKeyAlgorithm = DefaultManagementKeyAlgorithm;
                 specialKeyCollector.SetKeyData(
                     SpecialKeyCollector.SetKeyDataDefault, ReadOnlyMemory<byte>.Empty, isNewKey: true,
-                    PivAlgorithm.TripleDes);
+                    managementKeyAlgorithm);
 
                 // If this fails, then the mgmt key is not PIN-derived from the
                 // PIN and salt, so we'll say it is not PIN-derived.
@@ -1189,7 +1186,7 @@ namespace Yubico.YubiKey.Piv
                         specialKeyCollector.GetCurrentMgmtKey(),
                         specialKeyCollector.GetNewMgmtKey(),
                         PivTouchPolicy.Never,
-                        PivAlgorithm.TripleDes))
+                        managementKeyAlgorithm))
                 {
                     return true;
                 }
@@ -1405,13 +1402,14 @@ namespace Yubico.YubiKey.Piv
             private readonly MgmtKeyHolder _currentKey;
             private readonly Memory<byte> _defaultKey;
             private readonly MgmtKeyHolder _newKey;
+            private readonly PivAlgorithm _defaultManagementKeyAlgorithm;
             private readonly byte[] _pinData = new byte[MaxPinLength];
             private readonly Memory<byte> _pinMemory;
 
             private bool _disposed;
             private int _pinLength;
 
-            public SpecialKeyCollector()
+            public SpecialKeyCollector(PivAlgorithm defaultManagemenyKeyAlgorithm)
             {
                 _defaultKey = new Memory<byte>(
                     new byte[]
@@ -1425,7 +1423,8 @@ namespace Yubico.YubiKey.Piv
                 _newKey = new MgmtKeyHolder();
 
                 // Make sure the current key is init to the default.
-                _currentKey.SetKeyData(_defaultKey, PivAlgorithm.TripleDes);
+                _defaultManagementKeyAlgorithm = defaultManagemenyKeyAlgorithm;
+                _currentKey.SetKeyData(_defaultKey, _defaultManagementKeyAlgorithm);
 
                 PinCollected = false;
                 _pinMemory = new Memory<byte>(_pinData);
@@ -1494,7 +1493,7 @@ namespace Yubico.YubiKey.Piv
                     return;
                 }
 
-                destinationKeyHolder.SetKeyData(_defaultKey, PivAlgorithm.TripleDes);
+                destinationKeyHolder.SetKeyData(_defaultKey, _defaultManagementKeyAlgorithm);
             }
 
             // Derive the mgmt key from the PIN in this object, along with the

@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
                 };
 
-                var initCmd = new InitializeAuthenticateManagementKeyCommand(false);
+                var initCmd = new InitializeAuthenticateManagementKeyCommand(false, PivAlgorithm.TripleDes);
                 InitializeAuthenticateManagementKeyResponse initRsp = pivSession.Connection.SendCommand(initCmd);
                 Assert.Equal(ResponseStatus.Success, initRsp.Status);
 
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
                 };
 
-                var initCmd = new InitializeAuthenticateManagementKeyCommand(true);
+                var initCmd = new InitializeAuthenticateManagementKeyCommand(true, PivAlgorithm.TripleDes);
                 InitializeAuthenticateManagementKeyResponse initRsp = pivSession.Connection.SendCommand(initCmd);
                 Assert.Equal(ResponseStatus.Success, initRsp.Status);
 

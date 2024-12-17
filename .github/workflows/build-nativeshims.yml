@@ -108,6 +108,13 @@ jobs:
 
   pack:
     name: Package artifacts
+    permissions:
+      pull-requests: write
+      checks: write
+      id-token: write
+      contents: read
+      packages: read
+      attestations: write
     runs-on: windows-2019
     needs: [build-windows, build-linux-amd64, build-linux-arm64, build-macos]
     steps:
@@ -128,6 +135,13 @@ jobs:
         with:
           name: Yubico.NativeShims.nupkg
           path: Yubico.NativeShims.*.nupkg
+      
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            '${{ github.workspace }}/**/*.nupkg'
+            '${{ github.workspace }}/**/*.dll'
 
   publish-internal:
     name: Publish to internal NuGet

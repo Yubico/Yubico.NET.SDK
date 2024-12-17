@@ -58,8 +58,12 @@ jobs:
     runs-on: windows-2019
     needs: run-tests
     permissions:
+      pull-requests: write
+      checks: write
+      id-token: write
       contents: read
       packages: read
+      attestations: write
     steps:
       # Checkout the local repository
       - uses: actions/checkout@v4
@@ -117,6 +121,14 @@ jobs:
             Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            '${{ github.workspace }}/**/*.nupkg'
+            '${{ github.workspace }}/**/*.snupkg'
+            '${{ github.workspace }}/**/*.dll'
 
       # Package the OATH sample code source
       - name: Save build artifacts

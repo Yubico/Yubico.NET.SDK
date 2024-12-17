@@ -26,6 +26,8 @@ on:
         required: false
         default: "0.0.0-prerelease.YYYYMMDD.B"
         type: string
+  schedule:
+    - cron: '0 0 * * *' # Every day at midnight
 
 jobs:
   build-windows:
@@ -90,7 +92,7 @@ jobs:
 
   build-macos:
     name: Build macOS
-    runs-on: macos-12
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - run: |
@@ -108,6 +110,11 @@ jobs:
 
   pack:
     name: Package artifacts
+    permissions:
+      id-token: write
+      contents: read
+      packages: read
+      attestations: write
     runs-on: windows-2019
     needs: [build-windows, build-linux-amd64, build-linux-arm64, build-macos]
     steps:
@@ -128,6 +135,15 @@ jobs:
         with:
           name: Yubico.NativeShims.nupkg
           path: Yubico.NativeShims.*.nupkg
+      
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            Yubico.NativeShims/**/*.dll
+            Yubico.NativeShims/**/*.so
+            Yubico.NativeShims/**/*.dylib
+            Yubico.NativeShims.*.nupkg
 
   publish-internal:
     name: Publish to internal NuGet

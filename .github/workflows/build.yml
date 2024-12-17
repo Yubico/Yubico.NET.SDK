@@ -40,6 +40,10 @@ on:
         required: false
         default: "0.0.0-prerelease.YYYYMMDD.B"
         type: string
+  schedule:
+    - cron: '0 0 * * *' # Every day at midnight
+        
+
 
 jobs:
   run-tests:
@@ -58,8 +62,10 @@ jobs:
     runs-on: windows-2019
     needs: run-tests
     permissions:
+      id-token: write
       contents: read
       packages: read
+      attestations: write
     steps:
       # Checkout the local repository
       - uses: actions/checkout@v4
@@ -114,6 +120,20 @@ jobs:
         with:
           name: Assemblies
           path: |
+            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/**/*.dll
+            Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
+            Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.nupkg
+            Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
+            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
+            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.snupkg
+            Yubico.Core/src/bin/ReleaseWithDocs/*.snupkg
+            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.snupkg
             Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll

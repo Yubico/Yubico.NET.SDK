@@ -77,7 +77,13 @@ function Test-RequiredAssets {
         if (-not $found) {
             throw "Required build asset not found: $($required.Key)`nThis file should contain $($required.Value)"
         }
+
         Write-Host "  ✅ Found $($required.Value) in: $($found.Name)" -ForegroundColor Green
+
+        # Verify GitHub attestation
+        if (-not (Test-GithubAttestation -FilePath $found.FullName -RepoName "Yubico/Yubico.NET.SDK")) {
+            throw "Attestation verification failed for: $($found.Name)"
+        }
     }
 }
 
@@ -107,6 +113,39 @@ function Initialize-DirectoryStructure {
     }
 
     return $directories
+}
+
+function Test-GithubAttestation {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FilePath,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$RepoName
+    )
+    
+    Write-Host "  🔐 Verifying attestation for: $FilePath" -ForegroundColor Gray
+    
+    try {
+        # Check if gh CLI is available
+        if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+            throw "GitHub CLI (gh) is not installed or not in PATH"
+        }
+
+        $output = gh attestation verify $FilePath --repo $RepoName 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host $output -ForegroundColor Red
+            throw $output  # This will trigger the catch block
+        }
+        
+        Write-Host "    ✅ Attestation verified" -ForegroundColor Green
+        return $true
+    }
+    catch {
+        Write-Host "    ❌ Attestation verification failed: $_" -ForegroundColor Red
+        return $false
+    }
 }
 
 <#
@@ -196,7 +235,7 @@ function Invoke-NuGetPackageSigning {
         
         # Validate tools existence
         Write-Host "`nVerifying required tools..."
-        if (-not (Test-Path $SignToolPath)) {
+        if (-not (Get-Command $SignToolPath -ErrorAction SilentlyContinue)) {
             throw "SignTool not found at path: $SignToolPath"
         }
         Write-Host "✓ SignTool found at: $SignToolPath"
@@ -254,7 +293,7 @@ function Invoke-NuGetPackageSigning {
         }
 
         # First process nupkg files to sign their contents
-        Write-Host "`nProcessing NuGet packages..."
+        Write-Host "`n📦 Processing NuGet packages..." -ForegroundColor Yellow
         $nugetPackages = Get-ChildItem -Path $directories.Unsigned -Filter "*.nupkg"
         foreach ($package in $nugetPackages) {
             Write-Host "`nSigning contents of: $($package.Name)"

@@ -97,13 +97,13 @@ function Initialize-DirectoryStructure {
         Packages   = Join-Path $BaseDirectory "signed\packages"
     }
 
-    Write-Host "`nCreating directory structure..."
+    Write-Debug "`nCreating directory structure..."
     # Only create the directories we'll manage
     $directories.Keys | Where-Object { $_ -ne 'WorkingDir' } | ForEach-Object {
         $dir = $directories[$_]
         if (-not (Test-Path $dir)) {
             New-Item -ItemType Directory -Path $dir -Force | Out-Null
-            Write-Host "✓ Created: $dir"
+            Write-Debug "✓ Created: $dir"
         }
     }
 
@@ -120,25 +120,23 @@ function Test-GithubAttestation {
         [string]$RepoName
     )
     
-    Write-Host "  🔐 Verifying attestation for: $FilePath" -ForegroundColor Gray
+    # Get the parent directory name and the file name
+    $fileName = (Get-ChildItem $FilePath).Name
+
+    Write-Host "  🔐 Verifying attestation for: ..$parentDir\$fileName" -ForegroundColor Gray
     
     try {
-        # Check if gh CLI is available
-        if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
-            throw "GitHub CLI (gh) is not installed or not in PATH"
-        }
-
         $output = gh attestation verify $FilePath --repo $RepoName 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Host $output -ForegroundColor Red
             throw $output  # This will trigger the catch block
         }
         
-        Write-Host "    ✅ Attestation verified" -ForegroundColor Green
+        Write-Host "    ✅ Verified" -ForegroundColor Green
         return $true
     }
     catch {
-        Write-Host "    ❌ Attestation verification failed: $_" -ForegroundColor Red
+        Write-Host "    ❌ Verification failed: $_" -ForegroundColor Red
         return $false
     }
 }
@@ -159,6 +157,8 @@ How to use:
 3. Start a Powershell terminal, and load the script by running the following command:
    > . \.Yubico.NET.SDK\build\sign.ps1
 4. The script can be invoked by following the examples below.
+
+Set $DebugPreference = "Continue" for verbose output
 
 .PARAMETER Thumbprint
 The thumbprint of the signing certificate stored on the smart card.
@@ -241,6 +241,11 @@ function Invoke-NuGetPackageSigning {
         }
         Write-Host "✓ NuGet found at: $NuGetPath"
 
+        if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+            throw "GitHub CLI installed or not found in PATH"
+        }
+        Write-Host "✓ GitHub CLI found at: $NuGetPath"
+
         # Verify certificate is available and log details
         $cert = Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.Thumbprint -eq $Thumbprint }
         if (-not $cert) {
@@ -304,7 +309,7 @@ function Invoke-NuGetPackageSigning {
             Write-Host "Extracting to: $extractPath"
             Expand-Archive -Path $package.FullName -DestinationPath $extractPath -Force
 
-            Write-Host "Cleaning package structure"
+            Write-Debug "Cleaning package structure"
             Get-ChildItem -Path $extractPath -Recurse -Include "_rels", "package" | Remove-Item -Force -Recurse
             Get-ChildItem -Path $extractPath -Recurse -Filter '[Content_Types].xml' | Remove-Item -Force
 
@@ -318,11 +323,16 @@ function Invoke-NuGetPackageSigning {
                 Sign-SingleFile -FilePath $dll.FullName -Thumbprint $Thumbprint -SignToolPath $SignToolPath -TimestampServer $TimestampServer
             }
 
-            Write-Host "Repacking signed content..."
+            Write-Host "Repacking assemblies..."
             Get-ChildItem -Path $extractPath -Recurse -Filter "*.nuspec" |
             ForEach-Object { 
                 Write-Host "  Packing: $($_.Name)"
-                & $NuGetPath pack $_.FullName -OutputDirectory $directories.Packages 
+                $output = & $NuGetPath pack $_.FullName -OutputDirectory $directories.Packages 2>&1
+                
+                if ($LASTEXITCODE -ne 0) {
+                    $output | ForEach-Object { Write-Host $_ }
+                    throw "Signing failed for file: $FilePath"
+                }
             }
         }
 
@@ -345,7 +355,13 @@ function Invoke-NuGetPackageSigning {
                 "-Timestamper", $TimestampServer,
                 "-NonInteractive"
             )
-            & $NuGetPath @nugetSignParams
+
+            $output = & $NuGetPath @nugetSignParams 2>&1
+                
+            if ($LASTEXITCODE -ne 0) {
+                $output | ForEach-Object { Write-Host $_ }
+                throw "Signing failed for file: $FilePath"
+            }
         }
 
         # Print summary of signed packages
@@ -363,7 +379,9 @@ function Invoke-NuGetPackageSigning {
         }
 
         Write-Host "`n✨ Package signing process completed successfully! ✨" -ForegroundColor Green
-        return $directories.Packages
+        Write-Host "➡️ Locate your signed packages here: $($directories.Packages)" -ForegroundColor Yellow
+
+        return 
     }
     catch {
         Write-Host "`n❌ Error occurred:" -ForegroundColor Red

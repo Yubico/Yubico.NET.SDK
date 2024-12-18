@@ -97,13 +97,13 @@ function Initialize-DirectoryStructure {
         Packages   = Join-Path $BaseDirectory "signed\packages"
     }
 
-    Write-Host "`nCreating directory structure..."
+    Write-Debug "`nCreating directory structure..."
     # Only create the directories we'll manage
     $directories.Keys | Where-Object { $_ -ne 'WorkingDir' } | ForEach-Object {
         $dir = $directories[$_]
         if (-not (Test-Path $dir)) {
             New-Item -ItemType Directory -Path $dir -Force | Out-Null
-            Write-Host "✓ Created: $dir"
+            Write-Debug "✓ Created: $dir"
         }
     }
 
@@ -157,6 +157,8 @@ How to use:
 3. Start a Powershell terminal, and load the script by running the following command:
    > . \.Yubico.NET.SDK\build\sign.ps1
 4. The script can be invoked by following the examples below.
+
+Set $DebugPreference = "Continue" for verbose output
 
 .PARAMETER Thumbprint
 The thumbprint of the signing certificate stored on the smart card.
@@ -307,7 +309,7 @@ function Invoke-NuGetPackageSigning {
             Write-Host "Extracting to: $extractPath"
             Expand-Archive -Path $package.FullName -DestinationPath $extractPath -Force
 
-            Write-Host "Cleaning package structure"
+            Write-Debug "Cleaning package structure"
             Get-ChildItem -Path $extractPath -Recurse -Include "_rels", "package" | Remove-Item -Force -Recurse
             Get-ChildItem -Path $extractPath -Recurse -Filter '[Content_Types].xml' | Remove-Item -Force
 
@@ -377,7 +379,9 @@ function Invoke-NuGetPackageSigning {
         }
 
         Write-Host "`n✨ Package signing process completed successfully! ✨" -ForegroundColor Green
-        return $directories.Packages
+        Write-Host "➡️ Locate your signed packages here: $($directories.Packages)" -ForegroundColor Yellow
+
+        return 
     }
     catch {
         Write-Host "`n❌ Error occurred:" -ForegroundColor Red

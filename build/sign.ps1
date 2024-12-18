@@ -120,25 +120,23 @@ function Test-GithubAttestation {
         [string]$RepoName
     )
     
-    Write-Host "  🔐 Verifying attestation for: $FilePath" -ForegroundColor Gray
+    # Get the parent directory name and the file name
+    $fileName = (Get-ChildItem $FilePath).Name
+
+    Write-Host "  🔐 Verifying attestation for: ..$parentDir\$fileName" -ForegroundColor Gray
     
     try {
-        # Check if gh CLI is available
-        if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
-            throw "GitHub CLI (gh) is not installed or not in PATH"
-        }
-
         $output = gh attestation verify $FilePath --repo $RepoName 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Host $output -ForegroundColor Red
             throw $output  # This will trigger the catch block
         }
         
-        Write-Host "    ✅ Attestation verified" -ForegroundColor Green
+        Write-Host "    ✅ Verified" -ForegroundColor Green
         return $true
     }
     catch {
-        Write-Host "    ❌ Attestation verification failed: $_" -ForegroundColor Red
+        Write-Host "    ❌ Verification failed: $_" -ForegroundColor Red
         return $false
     }
 }
@@ -241,6 +239,11 @@ function Invoke-NuGetPackageSigning {
         }
         Write-Host "✓ NuGet found at: $NuGetPath"
 
+        if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+            throw "GitHub CLI installed or not found in PATH"
+        }
+        Write-Host "✓ GitHub CLI found at: $NuGetPath"
+
         # Verify certificate is available and log details
         $cert = Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.Thumbprint -eq $Thumbprint }
         if (-not $cert) {
@@ -318,11 +321,16 @@ function Invoke-NuGetPackageSigning {
                 Sign-SingleFile -FilePath $dll.FullName -Thumbprint $Thumbprint -SignToolPath $SignToolPath -TimestampServer $TimestampServer
             }
 
-            Write-Host "Repacking signed content..."
+            Write-Host "Repacking assemblies..."
             Get-ChildItem -Path $extractPath -Recurse -Filter "*.nuspec" |
             ForEach-Object { 
                 Write-Host "  Packing: $($_.Name)"
-                & $NuGetPath pack $_.FullName -OutputDirectory $directories.Packages 
+                $output = & $NuGetPath pack $_.FullName -OutputDirectory $directories.Packages 2>&1
+                
+                if ($LASTEXITCODE -ne 0) {
+                    $output | ForEach-Object { Write-Host $_ }
+                    throw "Signing failed for file: $FilePath"
+                }
             }
         }
 
@@ -345,7 +353,13 @@ function Invoke-NuGetPackageSigning {
                 "-Timestamper", $TimestampServer,
                 "-NonInteractive"
             )
-            & $NuGetPath @nugetSignParams
+
+            $output = & $NuGetPath @nugetSignParams 2>&1
+                
+            if ($LASTEXITCODE -ne 0) {
+                $output | ForEach-Object { Write-Host $_ }
+                throw "Signing failed for file: $FilePath"
+            }
         }
 
         # Print summary of signed packages

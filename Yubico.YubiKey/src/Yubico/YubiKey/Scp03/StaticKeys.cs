@@ -190,7 +190,7 @@ namespace Yubico.YubiKey.Scp03
             };
         
         internal Scp03KeyParameters ConvertToScp03KeyParameters() =>
-                new Scp03KeyParameters(ScpKeyIds.Scp03, 0xFF, ConvertFromLegacy());
+                new Scp03KeyParameters(ScpKeyIds.Scp03, DefaultKvnValue, ConvertFromLegacy());
 
         /// <summary>
         /// Determine if the contents of each key is the same for both objects.

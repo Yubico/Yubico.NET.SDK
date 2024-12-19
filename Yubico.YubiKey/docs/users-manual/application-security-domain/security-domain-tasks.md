@@ -73,11 +73,12 @@ var publicKey = session.GenerateEcKey(keyRef);
 session.StoreCertificates(keyRef, certificateChain);
 
 // Configure CA for SCP11a/c
+var oceSubjectKeyIdentifier = GetSkiFromCertificate(oceCertCa);
 var caRef = KeyReference.Create(OceKid, kvn);
-session.StoreCaIssuer(caRef, skiBytes);
+session.StoreCaIssuer(caRef, oceSubjectKeyIdentifier);
 ```
 
-### 3. Set up access control
+### 3. Set up access control (Optional)
 
 ```csharp
 // Configure certificate allowlist
@@ -95,7 +96,7 @@ using var session = new SecurityDomainSession(yubiKeyDevice, currentScp03Params)
 
 // Replace with new keys
 var newKeyRef = KeyReference.Create(ScpKeyIds.Scp03, newKvn);
-session.PutKey(newKeyRef, newStaticKeys, currentKvn);
+session.PutKey(newKeyRef, newStaticKeys, kvnToReplace);
 ```
 
 ### Rotating SCP11 keys
@@ -105,7 +106,7 @@ using var session = new SecurityDomainSession(yubiKeyDevice, scpParams);
 
 // Generate new key pair
 var newKeyRef = KeyReference.Create(ScpKeyIds.Scp11B, newKvn);
-var newPublicKey = session.GenerateEcKey(newKeyRef, oldKvn); // Will be replaced
+var newPublicKey = session.GenerateEcKey(newKeyRef, kvnToReplace); // Will be replaced
 ```
 
 ## Recovery operations
@@ -210,7 +211,7 @@ var keyInfo = verifySession.GetKeyInformation();
 
 1. **Monitor Key Status**
 ```csharp
-// Check key information regularly
+// Check key information
 var keyInfo = session.GetKeyInformation();
 foreach (var key in keyInfo)
 {
@@ -232,33 +233,3 @@ foreach (var cert in certificates)
     }
 }
 ```
-
-## Troubleshooting
-
-### Key issues
-
-1. **Unable to Authenticate**
-   - Verify key version numbers
-   - Check key reference values
-   - Confirm key components
-
-2. **Failed Key Import**
-   - Validate key formats
-   - Check authentication status
-   - Verify available space
-   - Confirm key compatibility
-
-### Certificate issues
-
-1. **Certificate Chain Problems**
-   - Verify chain order
-   - Check CA configuration
-   - Validate certificate formats
-
-2. **Access Control Issues**
-   - Check allowlist configuration
-   - Verify certificate serials
-   - Validate certificate dates
-
-> [!NOTE]
-> Always maintain detailed logs of key and certificate operations for troubleshooting.

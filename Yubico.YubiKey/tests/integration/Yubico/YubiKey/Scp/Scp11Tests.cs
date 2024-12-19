@@ -605,14 +605,17 @@ namespace Yubico.YubiKey.Scp
         private static Scp03KeyParameters ImportScp03Key(
             SecurityDomainSession session)
         {
-            var scp03Ref = new KeyReference(0x01, 0x01);
+            byte scp03KeyId = 0x01;
+            byte kvn = 0x01;
+            
+            var scp03Ref = new KeyReference(scp03KeyId, kvn);
             var staticKeys = new StaticKeys(
                 GetRandomBytes(16),
                 GetRandomBytes(16),
                 GetRandomBytes(16)
             );
 
-            session.PutKey(scp03Ref, staticKeys, 0);
+            session.PutKey(scp03Ref, staticKeys);
 
             return new Scp03KeyParameters(scp03Ref, staticKeys);
         }

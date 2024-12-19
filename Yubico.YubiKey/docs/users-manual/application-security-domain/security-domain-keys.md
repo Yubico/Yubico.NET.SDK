@@ -18,9 +18,11 @@ limitations under the License. -->
 
 # Security Domain key management
 
-The Security Domain supports management of both symmetric (SCP03) and asymmetric (SCP11) keys. This document describes the key types, their usage, and management operations.
+The Security Domain supports management of both symmetric (SCP03) and asymmetric (SCP11) keys. This document describes
+the key types, their usage, and management operations.
 
-For protocol details and secure channel implementation, see the [Secure Channel Protocol (SCP)](xref:UsersManualScp) documentation.
+For protocol details and secure channel implementation, see the [Secure Channel Protocol (SCP)](xref:UsersManualScp)
+documentation.
 
 ## Key types
 
@@ -33,28 +35,30 @@ The Security Domain manages two main types of keys:
 
 Each SCP03 key set consists of three AES-128 keys that work together to secure communications:
 
-| Key Type | Purpose |
-|----------|---------|
-| Key-ENC | Channel encryption key for securing messages |
-| Key-MAC | Channel MAC key for message authentication |
-| Key-DEK | Data encryption key for sensitive data |
+| Key Type | Key ID (KID) | Purpose                                      |
+|----------|--------------|----------------------------------------------|
+| Key-ENC  | 0x1          | Channel encryption key for securing messages |
+| Key-MAC  | 0x2          | Channel MAC key for message authentication   |
+| Key-DEK  | 0x3          | Data encryption key for sensitive data       |
 
 ### Managing SCP03 keys
 
 ```csharp
 // Put a new SCP03 key set
-var keyRef = KeyReference.Create(ScpKeyIds.Scp03, 0x01);  // KVN=1
+var kvn = 0x01;
+var keyRef = KeyReference.Create(ScpKeyIds.Scp03, kvn);
 var staticKeys = new StaticKeys(keyDataMac, keyDataEnc, keyDataDek);
-session.PutKey(keyRef, staticKeys);  // 0 means new key
+session.PutKey(keyRef, staticKeys); 
 
 // Replace existing keys
 var newKeys = new StaticKeys(newMacKey, newEncKey, newDekKey);
-session.PutKey(keyRef, newKeys, currentKvn);
+session.PutKey(keyRef, newKeys, kvnToReplace);
 ```
 
 ### Key Version Numbers (KVN)
 
 SCP03 key sets are identified by Key Version Numbers:
+
 - Default key set: KVN=0xFF (publicly known, no security)
 - Each YubiKey can store up to three custom SCP03 key sets
 
@@ -64,7 +68,8 @@ SCP03 key sets are identified by Key Version Numbers:
 ## SCP11 key management
 
 SCP11 uses NIST P-256 elliptic curve cryptography. Keys can be:
-- Generated on the YubiKey (recommended)
+
+- Generated on the YubiKey
 - Imported from external sources
 
 ### Generating keys
@@ -115,21 +120,22 @@ session.Reset();
 ```
 
 > [!WARNING]
-> Resetting removes all custom keys and restores factory defaults (within the Security Domain). Ensure you have backups before resetting.
+> Resetting removes all custom keys and restores factory defaults (within the Security Domain). Ensure you have backups
+> before resetting.
 
 ## Key rotation
 
-Regular key rotation is recommended for security. Here are typical rotation procedures:
+Here are some simple key rotation procedures:
 
 ### SCP03 key rotation
 
 ```csharp
 // Authenticate with current keys
-using var session = new SecurityDomainSession(yubiKeyDevice, currentScp03Params);
+using var session = new SecurityDomainSession(yubiKeyDevice, scpParams);
 
 // Replace with new keys
 var newKeyRef = KeyReference.Create(ScpKeyIds.Scp03, keyVersionNumber);
-session.PutKey(newKeyRef, newStaticKeys, currentKvn);
+session.PutKey(newKeyRef, newStaticKeys, kvnToReplace);
 ```
 
 ### SCP11 key rotation
@@ -139,32 +145,24 @@ using var session = new SecurityDomainSession(yubiKeyDevice, scpParams);
 
 // Generate new key pair
 var newKeyRef = KeyReference.Create(ScpKeyIds.Scp11B, keyVersionNumber);
-var newPublicKey = session.GenerateEcKey(newKeyRef, oldKvn); // Replaces oldKvn
+var newPublicKey = session.GenerateEcKey(newKeyRef, kvnToReplace);
 ```
 
 ## Security considerations
 
 1. **Key Protection**
-   - Store keys securely
-   - Use unique keys per device when possible
-   - Consider using SCP11 for mutual authentication
-   - Avoid storing sensitive keys in source code or configuration files
+    - Use unique keys per device when possible
+    - Consider using SCP11 for mutual authentication
 
 2. **Key Version Management**
-   - Track which keys are loaded on each YubiKey
-   - Track KVNs in use
+    - Track which keys are loaded on each YubiKey
+    - Track KVNs in use
 
-3. **Recovery Planning**
-   - Maintain backup keys
-   - Document key recovery procedures
-   - Test recovery processes regularly
-   - Keep track of key histories
-
-4. **Default Keys**
-   - Default SCP03 keys provide no security
-   - Replace default keys in production environments
-   - Cannot retain default keys alongside custom keys
-   - Use proper key management in production
+3. **Default Keys**
+    - Default SCP03 keys provide no security
+    - Replace default keys in production environments
+    - Cannot retain default keys alongside custom keys
 
 > [!IMPORTANT]
-> The YubiKey provides no metadata about installed keys beyond what's available through `GetKeyInformation()`. Your application must track additional key management details.
+> The YubiKey provides no metadata about installed keys beyond what's available through `GetKeyInformation()`. Your
+> application must track additional key management details.

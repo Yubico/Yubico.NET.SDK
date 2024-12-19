@@ -21,8 +21,8 @@ namespace Yubico.YubiKey.Scp
     /// </summary>
     public sealed class Scp03KeyParameters : ScpKeyParameters, IDisposable
     {
-        private const int DefaultKvn = 0xFF;
-        private const int DefaultKid = 0x01;
+        private const int DefaultKeyKvn = 0xFF;
+        private const int DefaultKvn = 0x01;
 
         /// <summary>
         /// The static keys shared with the device when initiating the connection.
@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Scp
         /// This property provides a convenient way to access default SCP03 key parameters,
         /// using the standard SCP03 key identifier (0x03) and default static keys with version number 0xFF.
         /// </remarks>
-        public static Scp03KeyParameters DefaultKey => new Scp03KeyParameters(ScpKeyIds.Scp03, DefaultKvn, new StaticKeys());
+        public static Scp03KeyParameters DefaultKey => new Scp03KeyParameters(ScpKeyIds.Scp03, DefaultKeyKvn, new StaticKeys());
 
         /// <summary>
         /// Creates a new instance of <see cref="Scp03KeyParameters"/>, representing the parameters for
@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Scp
         /// <param name="staticKeys">The static keys shared with the device.</param>
         /// <returns>An instance of <see cref="Scp03KeyParameters"/> with key ID 0x03 and version number 0x01.</returns>
         public static Scp03KeyParameters FromStaticKeys(StaticKeys staticKeys) =>
-            new Scp03KeyParameters(ScpKeyIds.Scp03, DefaultKid, staticKeys);
+            new Scp03KeyParameters(ScpKeyIds.Scp03, DefaultKvn, staticKeys);
 
         /// <summary>
         /// This will clear all references and sensitive buffers  

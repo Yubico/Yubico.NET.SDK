@@ -32,6 +32,9 @@ namespace Yubico.YubiKey.Scp
     {
         /// <summary>
         /// Key ID '0x01' for static keys used for SCP03.
+        /// <remarks>When storing SCP03 keysets, the SDK
+        /// will store ke KID's 0x01, 0x02 and 0x03 for ENC, MAC, DEK on the YubiKey
+        /// </remarks>
         /// </summary>
         public const byte Scp03 = 0x01;
 

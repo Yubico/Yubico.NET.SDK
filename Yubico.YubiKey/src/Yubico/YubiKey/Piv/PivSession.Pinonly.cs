@@ -513,7 +513,7 @@ namespace Yubico.YubiKey.Piv
 
         /// <summary>
         ///     Set the YubiKey's PIV application to be PIN-only with a PIN-derived
-        ///     and/or PIN-Protected management key (Firmware 5.7.x and later: AES-192. Firmware 5.6.x and earlier: TDES.). This sets the
+        ///     and/or PIN-Protected management key. The default management key algorithm will be used (AES-192 for YubiKeys with firmware 5.7.x and later, TDES for keys with firmware 5.6.x and earlier). This sets the
         ///     YubiKey to either
         ///     <code>
         ///        PivPinOnlyMode.PinProtected
@@ -727,7 +727,7 @@ namespace Yubico.YubiKey.Piv
         /// </param>
         /// <exception cref="InvalidOperationException">
         ///     There is no <c>KeyCollector</c> loaded, one of the keys provided was
-        ///     not of a valid key algorithm type (Firmware 5.7.x and later: AES-192. Firmware 5.6.x and earlier: TDES.), the data stored on the YubiKey is
+        ///     not of a valid key algorithm type, the data stored on the YubiKey is
         ///     incompatible with PIN-only, or the YubiKey had some other error, such
         ///     as unreliable connection.
         /// </exception>

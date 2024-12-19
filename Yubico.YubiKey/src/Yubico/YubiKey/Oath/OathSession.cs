@@ -127,11 +127,9 @@ namespace Yubico.YubiKey.Oath
         {
             if (disposing)
             {
-                return;
+                KeyCollector = null;
+                base.Dispose(disposing);
             }
-
-            KeyCollector = null;
-            base.Dispose(disposing);
         }
     }
 }

@@ -321,7 +321,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <remarks>
         /// Using this constructor is equivalent to
         /// <code language="csharp">
-        ///  new InitializeAuthenticateManagementKeyCommand(true, PivAlgorithm.AES192);
+        ///  new InitializeAuthenticateManagementKeyCommand(true, PivAlgorithm.algorithm);
         /// </code>
         /// </remarks>
         public InitializeAuthenticateManagementKeyCommand(PivAlgorithm algorithm)

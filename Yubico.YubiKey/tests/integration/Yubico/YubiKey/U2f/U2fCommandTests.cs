@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.U2f
             byte[] pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
             var vfyPinCmd = new VerifyPinCommand(pin);
             VerifyPinResponse vfyPinRsp = _fidoConnection.SendCommand(vfyPinCmd);
-            Assert.Equal(ResponseStatus.Success, vfyPinRsp.Status);
+            Assert.Equal(ResponseStatus.Success, vfyPinRsp.Status); // fails in 1.11.0 
 
             byte[] appId = RegistrationDataTests.GetAppIdArray(true);
             byte[] clientDataHash = RegistrationDataTests.GetClientDataHashArray(true);
@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.U2f
             {
                 authRsp = _fidoConnection.SendCommand(authCmd);
             }
-            Assert.Equal(ResponseStatus.Success, authRsp.Status);
+            Assert.Equal(ResponseStatus.Success, authRsp.Status); // fails in 1.11.0 
             AuthenticationData authData = authRsp.GetData();
             Assert.False(authData.UserPresenceVerified);
 

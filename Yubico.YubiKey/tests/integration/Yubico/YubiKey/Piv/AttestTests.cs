@@ -74,8 +74,8 @@ namespace Yubico.YubiKey.Piv
 
         [Theory]
         [InlineData(PivAlgorithm.Rsa2048, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.Rsa3072, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.Rsa4096, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa3072, StandardTestDevice.Fw5)] // fails because of invalid test data
+        [InlineData(PivAlgorithm.Rsa4096, StandardTestDevice.Fw5)] // fails because of invalid test data
         [InlineData(PivAlgorithm.EccP256, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
         public void AttestGenerated(PivAlgorithm algorithm, StandardTestDevice testDeviceType)

@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.Piv
             byte leafSlotNumber = 0x83;
             int extensionSize = 2107;
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
-            using X509Certificate2 caCert = GetCACert();
+            using X509Certificate2 caCert = GetCACert(); // fails because of invalid test data
 
             _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey, out string priKey);
             var convertPublic = new KeyConverter(pubKey.ToCharArray());
@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Piv
         {
             int extensionSize = 2107;
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
-            using X509Certificate2 caCert = GetCACert();
+            using X509Certificate2 caCert = GetCACert(); // fails because of invalid test data
 
             _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey, out string priKey);
             var convertPublic = new KeyConverter(pubKey.ToCharArray());
@@ -126,7 +126,7 @@ namespace Yubico.YubiKey.Piv
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        public void AllSlot_2079(StandardTestDevice testDeviceType)
+        public void AllSlot_2079(StandardTestDevice testDeviceType) // fails because of invalid test data
         {
             int extensionSize = 1134;
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);

@@ -20,10 +20,10 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class MakeCredentialBlobTests
     {
         [Fact]
-        [Trait(TraitTypes.Category, TestCategories.Elevated)]
         public void CredBlobExtension_Correct()
         {
             IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevice();

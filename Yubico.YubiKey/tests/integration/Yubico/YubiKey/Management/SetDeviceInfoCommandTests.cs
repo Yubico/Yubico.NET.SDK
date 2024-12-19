@@ -20,7 +20,6 @@ namespace Yubico.YubiKey.Management
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
     [Trait(TraitTypes.Category, TestCategories.RequiresFips)]
-
     public class SetDeviceInfoCommandTests
     {
         [SkippableTheory(typeof(DeviceNotFoundException))]

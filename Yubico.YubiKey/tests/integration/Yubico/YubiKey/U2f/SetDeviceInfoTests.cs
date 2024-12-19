@@ -158,7 +158,7 @@ namespace Yubico.YubiKey.U2f
                 YubiKeyInterfaces = YubiKeyCapabilities.All
             };
             YubiKeyResponse rsp = _fidoConnection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
+            Assert.Equal(ResponseStatus.Success, rsp.Status); // fails in 1.11.0 
 
             var getCmd = new GetPagedDeviceInfoCommand();
             GetPagedDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);

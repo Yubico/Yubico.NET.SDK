@@ -225,7 +225,7 @@ namespace Yubico.YubiKey.Piv
                     if (!(adminData.PinLastUpdated is null))
                     {
                         var check = (DateTime)adminData.PinLastUpdated;
-                        Assert.Equal(29, check.Day);
+                        Assert.Equal(29, check.Day); // fails in 1.11.0 
                         Assert.Equal(2, check.Month);
                         Assert.Equal(2000, check.Year);
                     }

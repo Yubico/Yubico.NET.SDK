@@ -20,6 +20,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class SessionGetAes128SessionKeysTests
     {
         #region NonKeyCollector
@@ -82,7 +83,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         // key collector or GetAes128SessionKeys(...) so that you're
         // aware of when touch is about to be expected.
         [Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
-        [Fact(Skip = "Requires user interaction")]
+        [Fact]
         public void GetAes128SessionKeys_TouchRequired_ReturnsSessionKeys()
         {
             // Preconditions
@@ -131,6 +132,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
         #endregion
 
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
         [Fact]
         public void GetAes128SessionKeys_CredNotFound_ThrowsInvalidOpEx()
         {

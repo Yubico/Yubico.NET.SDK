@@ -17,9 +17,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Yubico.PlatformInterop;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.U2f
 {
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
+    [Trait(TraitTypes.Category, TestCategories.RequiresFips)]
     public class SessionPinTests
     {
         private readonly IYubiKeyDevice _yubiKeyDevice;

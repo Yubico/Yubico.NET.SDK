@@ -15,9 +15,11 @@
 using System;
 using System.Security;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class SessionManagementKeyTests
     {
         #region GetRetries

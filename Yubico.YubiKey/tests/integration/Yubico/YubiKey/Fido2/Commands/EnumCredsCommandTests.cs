@@ -96,7 +96,7 @@ Actual:   Failed*/
             EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            (int rpCount, RelyingParty firstRp) = rsp.GetData();
+            (int rpCount, RelyingParty firstRp) = rsp.GetData(); // Yubico.YubiKey.Fido2.Ctap2DataException: The FIDO2 info returned is invalid. also fails in 1.11.0
             Assert.True(rpCount != 0);
 
             var credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol)

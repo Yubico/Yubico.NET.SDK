@@ -20,6 +20,7 @@ namespace Yubico.YubiKey.Piv.Commands
 {
     // All these tests will reset the PIV application, run, then reset the PIV
     // application again.
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class SetMgmtKeyCmdTests : IDisposable
     {
         private readonly IYubiKeyDevice yubiKey;

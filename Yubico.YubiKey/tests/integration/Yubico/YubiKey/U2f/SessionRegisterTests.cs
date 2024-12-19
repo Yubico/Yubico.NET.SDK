@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.U2f
                 u2fSession.KeyCollector = keyCollector.SimpleU2fKeyCollectorDelegate;
 
                 bool isValid = u2fSession.VerifyKeyHandle(appId, clientDataHash, keyHandle);
-                Assert.True(isValid);
+                Assert.True(isValid); // fails in 1.11.0 
 
                 isValid = u2fSession.TryAuthenticate(
                     appId, clientDataHash, keyHandle, new TimeSpan(0, 0, 5), out AuthenticationData? authData, false);

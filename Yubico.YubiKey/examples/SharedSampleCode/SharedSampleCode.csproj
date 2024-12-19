@@ -23,8 +23,16 @@ limitations under the License. -->
     <NoWarn>@(NoWarn);NU5105;NU5104</NoWarn>
   </PropertyGroup>
 
+<!--s-->
+
   <ItemGroup>
-    <PackageReference Include="Yubico.YubiKey" Version="1.*-*" />
+    <ProjectReference Include="..\..\..\Yubico.Core\src\Yubico.Core.csproj" />
+    <ProjectReference Include="..\..\..\Yubico.DotNetPolyfills\src\Yubico.DotNetPolyfills.csproj" />
+    <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Yubico.NativeShims" Version="1.11.0" />
   </ItemGroup>
 
 </Project>

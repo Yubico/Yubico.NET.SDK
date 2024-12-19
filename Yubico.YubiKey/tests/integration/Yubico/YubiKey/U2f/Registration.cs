@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.U2f
                 u2fSession.KeyCollector = k => k.Request switch
                 {
                     KeyEntryRequest.TouchRequest => true,
-                    _ => throw new NotSupportedException("Test requested a key that is not supported by this test case.")
+                    _ => throw new NotSupportedException("Test requested a key that is not supported by this test case.") // fails in 1.11.0 
                 };
 
                 byte[] applicationId = U2fSession.EncodeAndHashString("https://fido.example.com/app");

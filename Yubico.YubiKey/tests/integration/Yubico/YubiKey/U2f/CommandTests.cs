@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.U2f
         {
             var cmd = new VerifyFipsModeCommand();
             VerifyFipsModeResponse rsp = _fidoConnection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
+            Assert.Equal(ResponseStatus.Success, rsp.Status); // fails in 1.11.0 
 
             bool getData = rsp.GetData();
             Assert.False(getData);

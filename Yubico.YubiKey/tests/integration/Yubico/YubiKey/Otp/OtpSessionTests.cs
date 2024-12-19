@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Otp
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void ConfigureStaticPassword_WithWScp_Succeeds(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType, Transport.All, FirmwareVersion.V5_7_0);
 
             using var otpSession = new OtpSession(testDevice, Scp03KeyParameters.DefaultKey);
             if (otpSession.IsLongPressConfigured)

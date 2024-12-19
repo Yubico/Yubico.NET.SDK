@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Piv
             };
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void HasFeature_ReturnsCorrect(StandardTestDevice device)
@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Piv
             Assert.Equal(hasFeature, expectedResult);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void GetManagementAlgorithm_WhenReset_ReturnsCorrectType(StandardTestDevice device)
@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void ChangeManagementKey_WithDefaultParameters_UsesCorrectTypeForRespectiveVersion(StandardTestDevice device)
@@ -126,7 +126,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void RandomKey_Authenticates(StandardTestDevice testDeviceType)

@@ -22,6 +22,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class SessionCredentialTests
     {
         #region DeleteCredential

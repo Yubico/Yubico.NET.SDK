@@ -331,7 +331,7 @@ namespace Yubico.YubiKey.Oath
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                //Why should this fail?
+                //Why should this fail?  // fails in 1.11.0 
                 _ = Assert.Throws<InvalidOperationException>(() => oathSession.AddCredential(
                     "GitHub",
                     "test@gmail.com",

@@ -19,7 +19,8 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    public class CredMetadataCommandTests : SimpleIntegrationTestConnection
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
+    public class CredMetadataCommandTests : SimpleIntegrationTestConnection // todo fails in 1.11.0 as well
     {
         public CredMetadataCommandTests()
             : base(YubiKeyApplication.Fido2)
@@ -40,7 +41,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             PinUvAuthTokenPermissions permissions = PinUvAuthTokenPermissions.CredentialManagement;
             var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, null);
             GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
-            Assert.Equal(ResponseStatus.Success, getTokenRsp.Status); /*Xunit.Sdk.EqualException
+            Assert.Equal(ResponseStatus.Success, getTokenRsp.Status); /*Xunit.Sdk.EqualException  fails in 1.11.0
 Assert.Equal() Failure: Values differ
 Expected: Success
 Actual:   Failed*/
@@ -56,6 +57,7 @@ Actual:   Failed*/
         }
 
         [Fact]
+        
         public void GetMetadataCommand_Preview_Succeeds()
         {
             byte[] pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };

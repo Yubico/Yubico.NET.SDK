@@ -137,7 +137,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// 5.4.2, only Triple-DES (<c>PivAlgorithm.TripleDes</c>) is supported.
         /// Beginning with 5.4.2, the Algorithm can be <c>Aes128</c>,
         /// <c>Aes192</c>, <c>Aes256</c>, or <c>TripleDes</c>. The default is
-        /// <c>TripleDes</c>.
+        /// <c>TripleDes</c> for keys with firmware 5.6.x and earlier and <c>Aes192</c> for YubiKeys with firmware 5.7.x and later.
         /// </summary>
         public PivAlgorithm Algorithm { get; set; }
 
@@ -168,8 +168,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <summary>
         /// Initializes a new instance of the <c>SetManagementKeyCommand</c> class.
         /// This command takes the new management key as input and will set the
-        /// <c>TouchPolicy</c> and <c>Algorithm</c> properties to their
-        /// respective defaults.
+        /// <c>TouchPolicy</c> to the default state and the <c>Algorithm</c> to the algorithm provided.
         /// </summary>
         /// <remarks>
         /// This constructor is provided for those developers who want to use the
@@ -184,7 +183,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <para>
         /// Valid algorithms are <c>PivAlgorithm.TripleDes</c>,
         /// <c>PivAlgorithm.Aes128</c>, <c>PivAlgorithm.Aes192</c>, and
-        /// <c>PivAlgorithm.Aes256</c>. FIPS YubiKeys versions 5.7 and greater require <c>PivAlgorithm.Aes192</c>.
+        /// <c>PivAlgorithm.Aes256</c>. FIPS YubiKeys versions 5.7 and greater require <c>PivAlgorithm.Aes192</c>. YubiKeys with firmware versions prior to 5.4.2 can only use <c>PivAlgorithm.TripleDes</c>.
         /// </para>
         /// <para>
         /// Note that you need to authenticate the current PIV management key before
@@ -219,7 +218,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <para>
         /// Valid algorithms are <c>PivAlgorithm.TripleDes</c>,
         /// <c>PivAlgorithm.Aes128</c>, <c>PivAlgorithm.Aes192</c>, and
-        /// <c>PivAlgorithm.Aes256</c>. FIPS YubiKeys versions 5.7 and greater require <c>PivAlgorithm.Aes192</c>.
+        /// <c>PivAlgorithm.Aes256</c>. FIPS YubiKeys versions 5.7 and greater require <c>PivAlgorithm.Aes192</c>. YubiKeys with firmware versions prior to 5.4.2 can only use <c>PivAlgorithm.TripleDes</c>.
         /// </para>
         /// <para>
         /// Note also that you need to authenticate the current PIV management

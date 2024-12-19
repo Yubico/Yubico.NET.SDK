@@ -17,6 +17,14 @@ limitations under the License. -->
 Here you can find all of the updates and release notes for published versions of the SDK.
 
 ## 1.12.x Releases
+
+### 1.12.1
+
+Release date: December 19th, 2024
+
+Bug Fixes: Now selects correct device initializing Fido2Session [(#179)](https://github.com/Yubico/Yubico.NET.SDK/pull/179)
+
+
 ### 1.12.0
 
 Release date: December 18th, 2024

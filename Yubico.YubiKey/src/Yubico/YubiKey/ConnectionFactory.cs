@@ -112,14 +112,6 @@ namespace Yubico.YubiKey
         /// </remarks>
         public IYubiKeyConnection CreateConnection(YubiKeyApplication application)
         {
-            if (_smartCardDevice != null)
-            {
-                _log.LogDebug("Connecting via the SmartCard interface.");
-
-                WaitForReclaimTimeout(Transport.SmartCard);
-                return new SmartCardConnection(_smartCardDevice, application);
-            }
-
             if (_hidKeyboardDevice != null && application == YubiKeyApplication.Otp)
             {
                 _log.LogDebug("Connecting via the Keyboard interface.");
@@ -128,12 +120,21 @@ namespace Yubico.YubiKey
                 return new KeyboardConnection(_hidKeyboardDevice);
             }
 
-            if (_hidFidoDevice != null && (application == YubiKeyApplication.Fido2 || application == YubiKeyApplication.FidoU2f))
+            bool isFidoApplication = application == YubiKeyApplication.Fido2 || application == YubiKeyApplication.FidoU2f;
+            if (_hidFidoDevice != null && isFidoApplication)
             {
                 _log.LogDebug("Connecting via the FIDO interface.");
 
                 WaitForReclaimTimeout(Transport.HidFido);
                 return new FidoConnection(_hidFidoDevice);
+            }
+            
+            if (_smartCardDevice != null)
+            {
+                _log.LogDebug("Connecting via the SmartCard interface.");
+
+                WaitForReclaimTimeout(Transport.SmartCard);
+                return new SmartCardConnection(_smartCardDevice, application);
             }
 
             throw new InvalidOperationException("No suitable interface present. Unable to establish connection to YubiKey.");

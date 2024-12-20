@@ -283,7 +283,8 @@ Standard YubiKeys are manufactured with a default key set (KVN=0xFF):
    slot 3:   --empty--
 ```
 
-The default keys are publicly known (0x40 41 42 ... 4F) and provide no security. You should replace them in production environments.
+> [!IMPORTANT]
+> The default keys are publicly known (0x40 41 42 ... 4F) and provide no security. You should replace them in production environments.
 
 ### Managing key sets
 
@@ -324,7 +325,7 @@ session.Reset();
 
 4. **Multiple Key Sets:**
    - After default keys are replaced, can have 1-3 custom key sets
-   - Each must have unique KID
+   - Each must have unique KVN
    - Can add/remove without affecting other sets
 
 ### Example: complete key management flow
@@ -332,19 +333,21 @@ session.Reset();
 ```csharp
 // Start with default keys
 var defaultScp03Params = Scp03KeyParameters.DefaultKey;
+var firstKvn = 0x1;
+var keyRef1 = KeyReference.Create(ScpKeyIds.Scp03, firstKvn);
 using (var session = new SecurityDomainSession(yubiKeyDevice, defaultScp03Params))
 {
     // Add first custom key set (removes default)
-    var keyRef1 = KeyReference.Create(ScpKeyIds.Scp03, 0x01);
     session.PutKey(keyRef1, newKeys);
 }
 
 // Now authenticate with new keys
-var newScp03Params = new Scp03KeyParameters(ScpKeyIds.Scp03, 0x01, newKeys);
+var newScp03Params = new Scp03KeyParameters(keyRef1, newKeys);
 using (var session = new SecurityDomainSession(yubiKeyDevice, newScp03Params))
 {
     // Add second key set
-    var keyRef2 = KeyReference.Create(ScpKeyIds.Scp03, 0x02);
+    var secondKvn = 0x2;
+    var keyRef2 = KeyReference.Create(ScpKeyIds.Scp03, secondKvn);
     session.PutKey(keyRef2, customKeys2);
 
     // Check current key information
@@ -354,11 +357,10 @@ using (var session = new SecurityDomainSession(yubiKeyDevice, newScp03Params))
 
 ### Key management responsibilities
 
-Your application must:
+You should:
 - Track which keys are loaded on each YubiKey
-- Know if a YubiKey has custom keys from manufacturing
-- Manage key distribution and storage
 - Track KVNs in use
+- Know if a YubiKey has custom keys from manufacturing
 - Handle key rotation
 
 The YubiKey provides no metadata about installed keys beyond what's available through `GetKeyInformation()`.
@@ -374,7 +376,6 @@ SCP11 uses asymmetric cryptography based on elliptic curves (NIST P-256) for aut
 - Remote provisioning of cell phone subscriptions
 
 Detailed information about SCP11 can be found in [GlobalPlatform Card Technology, Secure Channel Protocol '11' Card Specification v2.3 – Amendment F, Chapter 2](https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/)
-
 
 It comes in three variants, each offering different security properties:
 
@@ -540,8 +541,7 @@ using var session = new SecurityDomainSession(yubiKeyDevice, scp11Params);
 4. **Certificate Allowlists:**
    - Restrict which certificates can authenticate
    - Update lists as certificates change
-   - Clear allowlists when no longer needed
-   - Can be used as a part of a certificate revocation stategy
+   - Can be used as a part of a certificate revocation strategy
 
 ### Checking SCP support
 

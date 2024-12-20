@@ -71,13 +71,7 @@ var caIds = session.GetSupportedCaIdentifiers(
 
 ### Certificate allowlists
 
-Use of the allowlist can provide the following benefits: 
-- A strong binding to one (or multiple) OCE(s) 
-- Protection against compromised OCEs 
-It is recommended to use the allowlist also as a revocation mechanism for OCE certificates. However, if the 
-allowlist is used in this way, special care shall be taken never to empty/remove the allowlist (i.e. if created, the 
-allowlist shall always contain at least one certificate) because no restrictions apply (i.e. all certificates are 
-accepted) once an allowlist is removed. 
+Use of the allowlist will create strong binding to one or multiple OCE(s)
 
 Control which certificates can be used for authentication by maintaining an allowlist of serial numbers:
 
@@ -122,7 +116,7 @@ session.StoreCaIssuer(oceRef, skiBytes);
 
 ### SCP11b
 
-- Simplest variant, no mutual authentication
+- No mutual authentication
 - Suitable when host authentication isn't required
 
 Example setup:
@@ -139,37 +133,19 @@ session.StoreCertificates(keyRef, new[] { deviceCert });
 ### SCP11c
 
 - Mutual authentication
-- Similar to SCP11a but with additional features
-- such as offline scripting usage (See [GlobalPlatform SCP11 Specification Annex B](https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/))
+- Similar to SCP11a but with additional features such as offline scripting usage  
+  (See [GlobalPlatform SCP11 Specification Annex B](https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/))
 
 ## Security considerations
 
 1. **Certificate Validation**
 
    - Verify certificate chains completely
-   - Check certificate revocation status
-   - Validate certificate purposes and extensions
-   - Ensure proper key usage constraints
 
 2. **Access Control**
 
-   - Use allowlists in production environments
+   - Consider using allowlists in production environments
    - Regularly review and update allowlists
-   - Monitor for unauthorized certificate usage
-   - Document certificate authorization policies
-
-3. **Certificate Lifecycle**
-
-   - Plan for certificate renewal
-   - Handle certificate revocation
-   - Maintain certificate inventory
-   - Test certificate rotation procedures
-
-4. **Storage Limitations**
-   - Be aware of YubiKey storage constraints
-   - Optimize certificate chain length
-   - Consider certificate compression if needed
-   - Monitor available storage space
 
 > [!IMPORTANT]
 > Most certificate operations require an authenticated session. Operations are typically only available when using SCP11a or SCP11c variants.
@@ -181,11 +157,11 @@ session.StoreCertificates(keyRef, new[] { deviceCert });
 1. Generate or obtain required certificates
 2. Store certificate chain on YubiKey
 3. Configure CA information if needed
-4. Set up allowlist for production use
+4. Optionally, set up an allowlist
 
 ```csharp
 // Example of complete setup
-using var session = new SecurityDomainSession(yubiKeyDevice, scp03Params);
+using var session = new SecurityDomainSession(yubiKeyDevice, Scp03KeyParameters.DefaultKey);
 var keyRef = KeyReference.Create(ScpKeyIds.Scp11A, kvn);
 
 // Store full chain
@@ -214,17 +190,13 @@ session.StoreAllowlist(keyRef, newAllowedSerials);
 ### Troubleshooting
 
 1. **Certificate Loading Issues**
-
    - Verify certificate format (X.509 v3)
    - Check certificate chain order
-   - Ensure sufficient storage space
    - Validate key references
 
-2. **Authentication Problems**
-   - Verify certificate trust chain
+2. **Authentication Problems**  
+   - Verify certificates
    - Check allowlist configuration
-   - Confirm proper SCP variant usage
-   - Validate certificate dates
 
 > [!NOTE]
 > For additional details on secure channel establishment and certificate usage, refer to the [Secure Channel Protocol (SCP)](xref:UsersManualScp) documentation.

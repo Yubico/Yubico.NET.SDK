@@ -59,26 +59,48 @@ function Test-RequiredAssets {
         [Parameter(Mandatory = $true)]
         [string]$WorkingDirectory,
         
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [string]$NuGetPackagesZip,
         
-        [Parameter(Mandatory = $true)]
-        [string]$SymbolsPackagesZip
+        [Parameter(Mandatory = $false)]
+        [string]$SymbolsPackagesZip,
+
+        [Parameter(Mandatory = $false)]
+        [string]$NativeShimsZip
     )
 
     Write-Host "`nValidating required build assets..."
-    $requiredFiles = @{
-        $NuGetPackagesZip   = "NuGet packages"
-        $SymbolsPackagesZip = "Symbol packages"
-    }
     
-    foreach ($required in $requiredFiles.GetEnumerator()) {
-        $found = Get-ChildItem -Path $WorkingDirectory -Filter $required.Key -ErrorAction SilentlyContinue
-        if (-not $found) {
-            throw "Required build asset not found: $($required.Key)`nThis file should contain $($required.Value)"
-        }
+    $hasCorePackages = -not [string]::IsNullOrWhiteSpace($NuGetPackagesZip) -and -not [string]::IsNullOrWhiteSpace($SymbolsPackagesZip)
+    $hasNativeShims = -not [string]::IsNullOrWhiteSpace($NativeShimsZip)
 
-        Write-Host "  ✅ Found $($required.Value) in: $($found.Name)" -ForegroundColor Green
+    if (-not $hasCorePackages -and -not $hasNativeShims) {
+        throw "No package files specified. Please provide either core packages or native shims package paths."
+    }
+
+    if ($hasCorePackages) {
+        Write-Host "  🔍 Validating core packages..." -ForegroundColor Cyan
+        $coreFiles = @{
+            $NuGetPackagesZip   = "NuGet packages"
+            $SymbolsPackagesZip = "Symbol packages"
+        }
+        
+        foreach ($required in $coreFiles.GetEnumerator()) {
+            $found = Get-ChildItem -Path $WorkingDirectory -Filter $required.Key -ErrorAction SilentlyContinue
+            if (-not $found) {
+                throw "Required build asset not found: $($required.Key)`nThis file should contain $($required.Value)"
+            }
+            Write-Host "    ✅ Found $($required.Value) in: $($found.Name)" -ForegroundColor Green
+        }
+    }
+
+    if ($hasNativeShims) {
+        Write-Host "  🔍 Validating native shims package..." -ForegroundColor Cyan
+        $found = Get-ChildItem -Path $WorkingDirectory -Filter $NativeShimsZip -ErrorAction SilentlyContinue
+        if (-not $found) {
+            throw "Required native shims asset not found: $NativeShimsZip"
+        }
+        Write-Host "    ✅ Found Native Shims package in: $($found.Name)" -ForegroundColor Green
     }
 }
 
@@ -110,6 +132,86 @@ function Initialize-DirectoryStructure {
     return $directories
 }
 
+function Process-ZipPackage {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ZipFile,
+        
+        [Parameter(Mandatory = $true)]
+        [hashtable]$Directories,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$SignToolPath,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$NuGetPath,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$Thumbprint,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$TimestampServer
+    )
+
+    Write-Host "`n  🔄 Processing: $ZipFile" -ForegroundColor Cyan
+    
+    $extractPath = Join-Path $Directories.Unsigned ([System.IO.Path]::GetFileNameWithoutExtension($ZipFile))
+    Write-Host "    📂 Extracting to: $extractPath" -ForegroundColor Gray
+    
+    $zipPath = Join-Path $Directories.WorkingDir $ZipFile
+    Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
+
+    Write-Host "    📋 Copying packages to unsigned directory" -ForegroundColor Gray
+    $packages = Get-ChildItem -Path $extractPath -Recurse -Include *.nupkg, *.snupkg
+    foreach ($package in $packages) {
+        Write-Host "      📦 Copying: $($package.Name)"
+
+        # Verify GitHub attestation
+        if (-not (Test-GithubAttestation -FilePath $package.FullName -RepoName "Yubico/Yubico.NET.SDK")) {
+            throw "Attestation verification failed for: $($package.Name)"
+        }
+
+        Copy-Item -Path $package.FullName -Destination $Directories.Unsigned -Force
+    }
+    Write-Host "    ✅ Copied $($packages.Count) package(s)"
+
+    # Process the packages
+    $nugetPackages = Get-ChildItem -Path $Directories.Unsigned -Filter "*.nupkg"
+    foreach ($package in $nugetPackages) {
+        Write-Host "`n    📝 Signing contents of: $($package.Name)" -ForegroundColor White
+        
+        $extractPath = Join-Path $Directories.Libraries ([System.IO.Path]::GetFileNameWithoutExtension($package.Name))
+        Write-Host "      📂 Extracting to: $extractPath"
+        Expand-Archive -Path $package.FullName -DestinationPath $extractPath -Force
+
+        Write-Debug "      🧹 Cleaning package structure"
+        Get-ChildItem -Path $extractPath -Recurse -Include "_rels", "package" | Remove-Item -Force -Recurse
+        Get-ChildItem -Path $extractPath -Recurse -Filter '[Content_Types].xml' | Remove-Item -Force
+
+        Write-Host "      ✍️ Signing assemblies..."
+        $dlls = Get-ChildItem -Path $extractPath -Include "*.dll" -Recurse
+        foreach ($dll in $dlls) {
+            $frameworkDir = Split-Path (Split-Path $dll.FullName -Parent) -Leaf
+            $fileName = Split-Path $dll.FullName -Leaf
+            Write-Host "        🔏 Signing: ..\$frameworkDir\$fileName" -ForegroundColor Gray
+            Sign-SingleFile -FilePath $dll.FullName -Thumbprint $Thumbprint -SignToolPath $SignToolPath -TimestampServer $TimestampServer
+        }
+
+        Write-Host "      📦 Repacking assemblies..." -ForegroundColor White
+        Get-ChildItem -Path $extractPath -Recurse -Filter "*.nuspec" |
+        ForEach-Object { 
+            Write-Host "        📥 Packing: $($_.Name)"
+            $output = & $NuGetPath pack $_.FullName -OutputDirectory $Directories.Packages 2>&1
+            
+            if ($LASTEXITCODE -ne 0) {
+                $output | ForEach-Object { Write-Host $_ }
+                throw "Packing failed for file: $($_.FullName)"
+            }
+        }
+    }
+}
+
 function Test-GithubAttestation {
     [CmdletBinding()]
     param(
@@ -120,23 +222,21 @@ function Test-GithubAttestation {
         [string]$RepoName
     )
     
-    # Get the parent directory name and the file name
     $fileName = (Get-ChildItem $FilePath).Name
-
-    Write-Host "  🔐 Verifying attestation for: ..$parentDir\$fileName" -ForegroundColor Gray
+    Write-Host "      🔐 Verifying attestation for: $fileName" -ForegroundColor Gray
     
     try {
         $output = gh attestation verify $FilePath --repo $RepoName 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Host $output -ForegroundColor Red
-            throw $output  # This will trigger the catch block
+            throw $output
         }
         
-        Write-Host "    ✅ Verified" -ForegroundColor Green
+        Write-Host "        ✅ Verified" -ForegroundColor Green
         return $true
     }
     catch {
-        Write-Host "    ❌ Verification failed: $_" -ForegroundColor Red
+        Write-Host "        ❌ Verification failed: $_" -ForegroundColor Red
         return $false
     }
 }
@@ -146,17 +246,20 @@ function Test-GithubAttestation {
 Signs NuGet and Symbol packages using a smart card certificate.
 
 .DESCRIPTION
-Signs NuGet packages (*.nupkg) and their corresponding symbol packages (*.snupkg) using a hardware-based certificate. 
-The script processes the contents of two required zip files ('Nuget Packages.zip' and 'Symbols Packages.zip'), 
-signs all assemblies within the NuGet packages, repacks them, and then signs both the NuGet and Symbol packages.
+Signs NuGet packages (*.nupkg), corresponding symbol packages (*.snupkg), and optionally native shim packages 
+using a hardware-based certificate. The script can process:
+1. Core packages (NuGet and Symbol packages)
+2. Native shims package
+3. Both core packages and native shims
+
+The script signs all assemblies within the packages, repacks them, and then signs the final packages.
 
 How to use:
 1. Create a release folder on your machine e.g. ../releases/1.12
-2. Download the build assets "Nuget Packages.zip" and "Symbols Packages.zip" from the latest SDK build action 
-   to the newly created folder.
-3. Start a Powershell terminal, and load the script by running the following command:
+2. Download the build assets from the latest SDK build action to the newly created folder
+3. Start a Powershell terminal, and load the script:
    > . \.Yubico.NET.SDK\build\sign.ps1
-4. The script can be invoked by following the examples below.
+4. Follow the examples below to sign packages
 
 Set $DebugPreference = "Continue" for verbose output
 
@@ -176,19 +279,28 @@ Optional. Path to nuget.exe. Defaults to "nuget.exe" (expects it in PATH).
 Optional. URL of the timestamp server. Defaults to "http://timestamp.digicert.com".
 
 .PARAMETER NuGetPackagesZip
-Optional. Name of the NuGet packages zip file. Defaults to "Nuget Packages.zip".
+Optional. Name of the NuGet packages zip file. Required if signing core packages.
 
 .PARAMETER SymbolsPackagesZip
-Optional. Name of the symbols packages zip file. Defaults to "Symbols Packages.zip".
+Optional. Name of the symbols packages zip file. Required if signing core packages.
+
+.PARAMETER NativeShimsZip
+Optional. Name of the native shims package zip file.
 
 .PARAMETER CleanWorkingDirectory
 Optional switch. If specified, cleans the working directories before processing.
 
 .EXAMPLE
-Invoke-NuGetPackageSigning -Thumbprint "0123456789ABCDEF" -WorkingDirectory "C:\Signing"
+# Sign only native shims
+Invoke-NuGetPackageSigning -Thumbprint "0123456789ABCDEF" -WorkingDirectory "C:\Signing" -NativeShimsZip "Yubico.NativeShims.nupkg.zip"
 
 .EXAMPLE
-Invoke-NuGetPackageSigning -Thumbprint "0123456789ABCDEF" -WorkingDirectory "C:\Signing" -CleanWorkingDirectory -NuGetPath "C:\Tools\nuget.exe"
+# Sign core packages
+Invoke-NuGetPackageSigning -Thumbprint "0123456789ABCDEF" -WorkingDirectory "C:\Signing" -NuGetPackagesZip "Nuget Packages.zip" -SymbolsPackagesZip "Symbols Packages.zip"
+
+.EXAMPLE
+# Sign both core packages and native shims
+Invoke-NuGetPackageSigning -Thumbprint "0123456789ABCDEF" -WorkingDirectory "C:\Signing" -NuGetPackagesZip "Nuget Packages.zip" -SymbolsPackagesZip "Symbols Packages.zip" -NativeShimsZip "Yubico.NativeShims.nupkg.zip"
 
 .NOTES
 Requires:
@@ -217,10 +329,13 @@ function Invoke-NuGetPackageSigning {
         [string]$TimestampServer = "http://timestamp.digicert.com",
         
         [Parameter(Mandatory = $false)]
-        [string]$NuGetPackagesZip = "Nuget Packages.zip",
+        [string]$NuGetPackagesZip,
         
         [Parameter(Mandatory = $false)]
-        [string]$SymbolsPackagesZip = "Symbols Packages.zip",
+        [string]$SymbolsPackagesZip,
+
+        [Parameter(Mandatory = $false)]
+        [string]$NativeShimsZip,
         
         [Parameter(Mandatory = $false)]
         [switch]$CleanWorkingDirectory
@@ -244,7 +359,7 @@ function Invoke-NuGetPackageSigning {
         if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
             throw "GitHub CLI installed or not found in PATH"
         }
-        Write-Host "✓ GitHub CLI found at: $NuGetPath"
+        Write-Host "✓ GitHub CLI found"
 
         # Verify certificate is available and log details
         $cert = Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.Thumbprint -eq $Thumbprint }
@@ -272,76 +387,32 @@ function Invoke-NuGetPackageSigning {
         $directories = Initialize-DirectoryStructure -BaseDirectory $WorkingDirectory
         
         # Validate required zip files
-        Test-RequiredAssets -WorkingDirectory $WorkingDirectory -NuGetPackagesZip $NuGetPackagesZip -SymbolsPackagesZip $SymbolsPackagesZip
+        Test-RequiredAssets -WorkingDirectory $WorkingDirectory -NuGetPackagesZip $NuGetPackagesZip -SymbolsPackagesZip $SymbolsPackagesZip -NativeShimsZip $NativeShimsZip
 
-        # Process each zip file
-        Write-Host "`n📦 Processing ZIP files..." -ForegroundColor Yellow
-        $zipFiles = Get-ChildItem -Path $WorkingDirectory -Filter "*.zip"
-        foreach ($zip in $zipFiles) {
-            Write-Host "`n  🔄 Processing: $($zip.Name)" -ForegroundColor Cyan
+        # Determine which packages to process
+        $hasCorePackages = -not [string]::IsNullOrWhiteSpace($NuGetPackagesZip) -and -not [string]::IsNullOrWhiteSpace($SymbolsPackagesZip)
+        $hasNativeShims = -not [string]::IsNullOrWhiteSpace($NativeShimsZip)
+
+        # Process packages based on what was provided
+        if ($hasCorePackages) {
+            Write-Host "`n📦 Processing Core Packages..." -ForegroundColor Yellow
+            # Process core packages
+            Process-ZipPackage -ZipFile $NuGetPackagesZip -Directories $directories -SignToolPath $SignToolPath -NuGetPath $NuGetPath -Thumbprint $Thumbprint -TimestampServer $TimestampServer
+
+            Write-Host "`n📦 Copying Symbol Packages..." -ForegroundColor Yellow
+            $symbolsExtractPath = Join-Path $directories.Unsigned ([System.IO.Path]::GetFileNameWithoutExtension($SymbolsPackagesZip))
+            Expand-Archive -Path (Join-Path $WorkingDirectory $SymbolsPackagesZip) -DestinationPath $symbolsExtractPath -Force
             
-            $extractPath = Join-Path $directories.Unsigned ([System.IO.Path]::GetFileNameWithoutExtension($zip.Name))
-            Write-Host "    📂 Extracting to: $extractPath" -ForegroundColor Gray
-            Expand-Archive -Path $zip.FullName -DestinationPath $extractPath -Force
-
-            Write-Host "    📋 Copying packages to unsigned directory" -ForegroundColor Gray
-            $packages = Get-ChildItem -Path $extractPath -Recurse -Include *.nupkg, *.snupkg
-            foreach ($package in $packages) {
+            $symbolPackages = Get-ChildItem -Path $symbolsExtractPath -Recurse -Filter "*.snupkg"
+            foreach ($package in $symbolPackages) {
                 Write-Host "  Copying: $($package.Name)"
-
-                # Verify GitHub attestation (that the file has been downloaded from our repo)
-                if (-not (Test-GithubAttestation -FilePath $package.FullName -RepoName "Yubico/Yubico.NET.SDK")) {
-                    throw "Attestation verification failed for: $($package.Name)"
-                }
-
-                Copy-Item -Path $package.FullName -Destination $directories.Unsigned -Force
-            }
-            Write-Host "✓ Copied $($packages.Count) package(s)"
-        }
-
-        # First process nupkg files to sign their contents
-        Write-Host "`n📦 Processing NuGet packages..." -ForegroundColor Yellow
-        $nugetPackages = Get-ChildItem -Path $directories.Unsigned -Filter "*.nupkg"
-        foreach ($package in $nugetPackages) {
-            Write-Host "`nSigning contents of: $($package.Name)"
-            
-            $extractPath = Join-Path $directories.Libraries ([System.IO.Path]::GetFileNameWithoutExtension($package.Name))
-            Write-Host "Extracting to: $extractPath"
-            Expand-Archive -Path $package.FullName -DestinationPath $extractPath -Force
-
-            Write-Debug "Cleaning package structure"
-            Get-ChildItem -Path $extractPath -Recurse -Include "_rels", "package" | Remove-Item -Force -Recurse
-            Get-ChildItem -Path $extractPath -Recurse -Filter '[Content_Types].xml' | Remove-Item -Force
-
-            Write-Host "Signing assemblies..."
-            $dlls = Get-ChildItem -Path $extractPath -Include "*.dll" -Recurse
-            foreach ($dll in $dlls) {
-                # Get the parent directory name (framework target) and the file name
-                $frameworkDir = Split-Path (Split-Path $dll.FullName -Parent) -Leaf
-                $fileName = Split-Path $dll.FullName -Leaf
-                Write-Host "    ✍️ Signing: ..\$frameworkDir\$fileName" -ForegroundColor Gray
-                Sign-SingleFile -FilePath $dll.FullName -Thumbprint $Thumbprint -SignToolPath $SignToolPath -TimestampServer $TimestampServer
-            }
-
-            Write-Host "Repacking assemblies..."
-            Get-ChildItem -Path $extractPath -Recurse -Filter "*.nuspec" |
-            ForEach-Object { 
-                Write-Host "  Packing: $($_.Name)"
-                $output = & $NuGetPath pack $_.FullName -OutputDirectory $directories.Packages 2>&1
-                
-                if ($LASTEXITCODE -ne 0) {
-                    $output | ForEach-Object { Write-Host $_ }
-                    throw "Signing failed for file: $FilePath"
-                }
+                Copy-Item -Path $package.FullName -Destination $directories.Packages -Force
             }
         }
 
-        # Copy symbol packages to output directory
-        Write-Host "`nCopying symbol packages..." -ForegroundColor Yellow
-        $symbolPackages = Get-ChildItem -Path $directories.Unsigned -Filter "*.snupkg"
-        foreach ($package in $symbolPackages) {
-            Write-Host "  Copying: $($package.Name)"
-            Copy-Item -Path $package.FullName -Destination $directories.Packages -Force
+        if ($hasNativeShims) {
+            Write-Host "`n🔧 Processing Native Shims Package..." -ForegroundColor Yellow
+            Process-ZipPackage -ZipFile $NativeShimsZip -Directories $directories -SignToolPath $SignToolPath -NuGetPath $NuGetPath -Thumbprint $Thumbprint -TimestampServer $TimestampServer
         }
 
         # Sign all final packages (both nupkg and snupkg)

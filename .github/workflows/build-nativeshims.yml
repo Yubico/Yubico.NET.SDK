@@ -133,7 +133,7 @@ jobs:
       - run: nuget pack Yubico.NativeShims.nuspec
       - uses: actions/upload-artifact@v4
         with:
-          name: Yubico.NativeShims.nupkg
+          name: NuGet Package NativeShims
           path: Yubico.NativeShims.*.nupkg
       
       - name: Generate artifact attestation

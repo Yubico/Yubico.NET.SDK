@@ -158,34 +158,31 @@ namespace Yubico.Core.Logging
         //Creates a logging factory based on a JsonConfiguration in appsettings.json
         private static ILoggerFactory GetDefaultLoggerFactory()
         {
-            ILoggerFactory? configuredLoggingFactory = null;
-            try
+            string settingsPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
+            if (!File.Exists(settingsPath))
             {
-                IConfigurationRoot configuration = new ConfigurationBuilder()
+                return ErrorLoggerFactory;
+            }
+
+            IConfigurationRoot configuration = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: true)
+                    .AddJsonFile("appsettings.json", optional: false)
                     .AddJsonFile("appsettings.Development.json", optional: true)
                     .Build();
 
-                configuredLoggingFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(
-                    builder =>
-                    {
-                        IConfigurationSection loggingSection = configuration.GetSection("Logging");
-                        _ = builder.AddConfiguration(loggingSection);
-                        _ = builder.AddConsole();
-                    });
-            }
-#pragma warning disable CA1031
-            catch (Exception e)
-#pragma warning restore CA1031
-            {
-                Console.Error.WriteLine(e);
-            }
+            return Microsoft.Extensions.Logging.LoggerFactory.Create(
+                builder =>
+                {
+                    IConfigurationSection loggingSection = configuration.GetSection("Logging");
+                    _ = builder
+                        .AddConfiguration(loggingSection)
+                        .AddConsole();
+                });
+        }
 
-            return configuredLoggingFactory ?? Microsoft.Extensions.Logging.LoggerFactory.Create(
+        private static ILoggerFactory ErrorLoggerFactory => Microsoft.Extensions.Logging.LoggerFactory.Create(
                 builder => builder
                     .AddConsole()
                     .SetMinimumLevel(LogLevel.Error));
-        }
     }
 }

@@ -24,7 +24,12 @@ limitations under the License. -->
     <UseWindowsForms Condition=" '$(OS)' == 'Windows_NT'">true</UseWindowsForms>
   </PropertyGroup>
   <ItemGroup>
+<None Update="appsettings.json">
+  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+</None>
     <ProjectReference Include="..\SharedSampleCode\SharedSampleCode.csproj" />
+
   </ItemGroup>
+
 
 </Project>

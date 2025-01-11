@@ -108,8 +108,6 @@ namespace Yubico.YubiKey.Cryptography
         private const int MinEncodedPointLength = 65;
         private const int P256KeySize = 256;
         private const int P384KeySize = 384;
-        private const string OidP256 = "1.2.840.10045.3.1.7";
-        private const string OidP384 = "1.3.132.0.34";
 
         private const byte EncodedPointTag = 4;
         private const int SequenceTag = 0x30;
@@ -214,9 +212,9 @@ namespace Yubico.YubiKey.Cryptography
 
             string oid = coseKey.Algorithm switch
             {
-                CoseAlgorithmIdentifier.ES256 => OidP256,
-                CoseAlgorithmIdentifier.ECDHwHKDF256 => OidP256,
-                CoseAlgorithmIdentifier.ES384 => OidP384,
+                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.KeyOids.OidP256,
+                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.KeyOids.OidP256,
+                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.KeyOids.OidP384,
                 _ => "",
             };
 
@@ -372,8 +370,8 @@ namespace Yubico.YubiKey.Cryptography
 
                 oid = encodedEccPoint.Length switch
                 {
-                    P256EncodedPointLength => OidP256,
-                    P384EncodedPointLength => OidP384,
+                    P256EncodedPointLength => KeyDefinitions.KeyOids.OidP256,
+                    P384EncodedPointLength => KeyDefinitions.KeyOids.OidP384,
                     _ => "",
                 };
             }
@@ -406,8 +404,8 @@ namespace Yubico.YubiKey.Cryptography
 
             int coordinateLength = ecParameters.Curve.Oid.Value switch
             {
-                OidP256 => (P256EncodedPointLength - 1) / 2,
-                OidP384 => (P384EncodedPointLength - 1) / 2,
+                KeyDefinitions.KeyOids.OidP256 => (P256EncodedPointLength - 1) / 2,
+                KeyDefinitions.KeyOids.OidP384 => (P384EncodedPointLength - 1) / 2,
                 _ => -1,
             };
 

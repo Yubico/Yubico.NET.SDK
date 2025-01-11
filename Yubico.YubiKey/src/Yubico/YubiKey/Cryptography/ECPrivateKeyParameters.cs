@@ -25,7 +25,6 @@ namespace Yubico.YubiKey.Cryptography
     /// contains the necessary private key data.
     /// It extends the base <see cref="ECKeyParameters"/> class with additional validation for private key components.
     /// </remarks>
-
     public class ECPrivateKeyParameters : ECKeyParameters
     {
         /// <summary>

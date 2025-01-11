@@ -102,9 +102,26 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </exception>
         public static CoseKey Create(ReadOnlyMemory<byte> coseEncodedKey, out int bytesRead)
         {
-            var map = new CborMap<int>(coseEncodedKey);
-            bytesRead = map.BytesRead;
+            var cborMap = new CborMap<int>(coseEncodedKey);
+            
+            // Set out-parameter
+            bytesRead = cborMap.BytesRead;
 
+            var algorithm = GetAlgorithm(cborMap);
+            return algorithm switch
+            {
+                CoseAlgorithmIdentifier.ECDHwHKDF256 => new CoseEcPublicKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.ES256 => new CoseEcPublicKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.ES384 => new CoseEcPublicKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.ES512 => new CoseEcPublicKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.EdDSA => new CoseEdDsaPublicKey(coseEncodedKey),
+                _ => throw new NotSupportedException(
+                    string.Format(CultureInfo.CurrentCulture, ExceptionMessages.UnsupportedAlgorithm))
+            };
+        }
+
+        private static CoseAlgorithmIdentifier GetAlgorithm(CborMap<int> map)
+        {
             if (!map.Contains(TagAlgorithm))
             {
                 throw new Ctap2DataException(
@@ -113,20 +130,8 @@ namespace Yubico.YubiKey.Fido2.Cose
                         ExceptionMessages.Ctap2MissingRequiredField));
             }
 
-            // We only support ECC using the P-256 curve. For the algorithm, we
-            // might encounter either -7 (ES256 = ECDSA with SHA-256) or -25
-            // (ECDHwHKDF256). If the -25 seems odd, it is specified in the FIDO2
-            // standard.
             var algorithm = (CoseAlgorithmIdentifier)map.ReadInt32(TagAlgorithm);
-            if (algorithm == CoseAlgorithmIdentifier.ECDHwHKDF256 || algorithm == CoseAlgorithmIdentifier.ES256)
-            {
-                return new CoseEcPublicKey(coseEncodedKey);
-            }
-
-            throw new NotSupportedException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.UnsupportedAlgorithm));
+            return algorithm;
         }
     }
 }

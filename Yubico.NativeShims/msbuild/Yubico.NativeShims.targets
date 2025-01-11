@@ -32,4 +32,18 @@
             <Visible>false</Visible>
         </Content>
     </ItemGroup>
+
+    <!-- AnyCPU -->
+    <ItemGroup Condition="'$(Platform)' == 'AnyCPU'">
+        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x86\native\Yubico.NativeShims.dll">
+            <Link>x86\Yubico.NativeShims.dll</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>false</Visible>
+        </Content>
+        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x64\native\Yubico.NativeShims.dll">
+            <Link>x64\Yubico.NativeShims.dll</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>false</Visible>
+        </Content>
+    </ItemGroup>
 </Project>

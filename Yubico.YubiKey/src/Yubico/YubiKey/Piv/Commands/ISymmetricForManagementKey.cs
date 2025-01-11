@@ -13,9 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
-using System.Security.Cryptography;
-using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {

@@ -17,7 +17,7 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// <summary>
     /// An enumeration of the key families supported by COSE.
     /// </summary>
-    public enum CoseKeyType
+    public enum CoseKeyType // TODO move into KeyDefinitions ?
     {
         /// <summary>
         /// The type could not be determined.

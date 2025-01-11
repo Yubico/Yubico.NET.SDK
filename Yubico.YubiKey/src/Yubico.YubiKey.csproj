@@ -40,6 +40,7 @@ limitations under the License. -->
       Yubico.YubiKey is the official .NET library for integrating with the YubiKey hardware authenticator. This library supports both macOS and Windows operating systems.
     </Description>
     <PackageIcon>yubico-circle-y-mark.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
@@ -99,8 +100,8 @@ limitations under the License. -->
       <LastGenOutput>ResponseStatusMessages.Designer.cs</LastGenOutput>
       <CustomToolNamespace>Yubico.YubiKey</CustomToolNamespace>
     </EmbeddedResource>
-
     <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="" />
     <None Include="..\..\yubico-circle-y-mark.png" Pack="true" PackagePath="" />
     <None Include="..\..\Yubico.NET.SDK.snk">
       <Link>Yubico.NET.SDK.snk</Link>
@@ -109,7 +110,7 @@ limitations under the License. -->
 
   <ItemGroup Label="Package references specific to Yubico.YubiKey.dll">
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0"/>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="docfx.console" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'" Version="$(DocFxVersion)" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
 

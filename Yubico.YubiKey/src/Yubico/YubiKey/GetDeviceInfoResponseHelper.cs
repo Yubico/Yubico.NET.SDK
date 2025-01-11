@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
@@ -22,7 +23,7 @@ namespace Yubico.YubiKey
 {
     internal static class GetDeviceInfoResponseHelper
     {
-        private static readonly Logger _logger = Log.GetLogger();
+        private static readonly ILogger Logger = Log.GetLogger(typeof(GetDeviceInfoResponseHelper).FullName!);
 
         /// <summary>
         /// Attempts to create a dictionary from a TLV-encoded byte array by parsing and extracting tag-value pairs.
@@ -34,7 +35,7 @@ namespace Yubico.YubiKey
         {
             if (tlvData.IsEmpty)
             {
-                _logger.LogWarning("ResponseAPDU data was empty!");
+                Logger.LogWarning("ResponseAPDU data was empty!");
                 return null;
             }
 
@@ -44,7 +45,7 @@ namespace Yubico.YubiKey
             int tlvDataLength = tlvData.Span[0];
             if (tlvDataLength == 0 || 1 + tlvDataLength > tlvData.Length)
             {
-                _logger.LogWarning("TLV Data length was out of expected ranges. {Length}", tlvDataLength);
+                Logger.LogWarning("TLV Data length was out of expected ranges. {Length}", tlvDataLength);
                 return null;
             }
 
@@ -53,7 +54,7 @@ namespace Yubico.YubiKey
             while (tlvReader.HasData)
             {
                 int tag = tlvReader.PeekTag();
-                ReadOnlyMemory<byte> value = tlvReader.ReadValue(tag);
+                var value = tlvReader.ReadValue(tag);
                 result.Add(tag, value);
             }
 
@@ -80,7 +81,7 @@ namespace Yubico.YubiKey
                 };
             }
 
-            Dictionary<int, ReadOnlyMemory<byte>>? result = CreateApduDictionaryFromResponseData(responseApdu.Data);
+            var result = CreateApduDictionaryFromResponseData(responseApdu.Data);
             return result ?? throw new MalformedYubiKeyResponseException
             {
                 ResponseClass = responseClass,

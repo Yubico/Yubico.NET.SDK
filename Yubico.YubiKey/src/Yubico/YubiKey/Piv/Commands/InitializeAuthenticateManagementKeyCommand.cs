@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands
@@ -40,7 +39,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// information on how to use this authentication.
     /// </para>
     /// <para>
-    /// Upon manufacture of a YubiKey, the management key is a Triple-DES key and
+    /// Upon manufacture of a YubiKey, the management key is either a Triple-DES key (firmware prior to 5.7) or an AES-192 key (firmware 5.7 and later), and
     /// it starts out as a default value:
     /// </para>
     /// <code>
@@ -308,18 +307,25 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
+
+        [Obsolete("This constructor is deprecated. Users must specify management key algorithm type, as it cannot be assumed.")]
+        public InitializeAuthenticateManagementKeyCommand()
+            : this(true)
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the InitializeAuthenticateManagementKeyCommand class for
-        /// Mutual Authentication, and a Triple-DES management key.
+        /// Mutual Authentication.
         /// </summary>
         /// <remarks>
         /// Using this constructor is equivalent to
         /// <code language="csharp">
-        ///  new InitializeAuthenticateManagementKeyCommand(true);
+        ///  new InitializeAuthenticateManagementKeyCommand(true, PivAlgorithm.algorithm);
         /// </code>
         /// </remarks>
-        public InitializeAuthenticateManagementKeyCommand()
-            : this(true)
+        public InitializeAuthenticateManagementKeyCommand(PivAlgorithm algorithm)
+        : this(true, algorithm)
         {
         }
 
@@ -337,6 +343,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <param name="mutualAuthentication">
         /// <c>True</c> for mutual authentication, <c>false</c> for single.
         /// </param>
+        [Obsolete("This constructor is deprecated. Users must specify management key algorithm type, as it cannot be assumed.")]
         public InitializeAuthenticateManagementKeyCommand(bool mutualAuthentication)
             : this(mutualAuthentication, PivAlgorithm.TripleDes)
         {

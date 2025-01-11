@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Xunit;
 using Yubico.Core.Iso7816;
 

@@ -63,8 +63,7 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         public static bool IsValidEncodingForPut(this PivDataTag tag, ReadOnlyMemory<byte> encoding)
         {
-            TlvReader? tlvReader = GetTlvReader(tag, encoding);
-
+            var tlvReader = GetTlvReader(tag, encoding);
             if (tlvReader is null)
             {
                 return false;
@@ -334,7 +333,7 @@ namespace Yubico.YubiKey.Piv
             try
             {
                 var tlvReader = new TlvReader(encoding);
-                TlvReader nestedReader = tlvReader.ReadNestedTlv(expectedTag);
+                var nestedReader = tlvReader.ReadNestedTlv(expectedTag);
 
                 if (tlvReader.HasData == false)
                 {
@@ -364,10 +363,10 @@ namespace Yubico.YubiKey.Piv
         // will need to update this code.
         private static bool VerifyTagLength(TlvReader tlvReader, int[] expectedFormat, int optionalIndex)
         {
-            bool returnValue = true;
+            bool verifySuccess = true;
             int index = 0;
 
-            while (returnValue && index < expectedFormat.Length)
+            while (verifySuccess && index < expectedFormat.Length)
             {
                 try
                 {
@@ -389,9 +388,9 @@ namespace Yubico.YubiKey.Piv
                         }
                     }
 
-                    ReadOnlyMemory<byte> value = tlvReader.ReadValue(expectedFormat[index]);
+                    var value = tlvReader.ReadValue(expectedFormat[index]);
 
-                    returnValue = expectedFormat[index + 1] != 0
+                    verifySuccess = expectedFormat[index + 1] != 0
                         ? value.Length <= expectedFormat[index + 1]
                         : value.Length == expectedFormat[index + 2];
 
@@ -399,11 +398,11 @@ namespace Yubico.YubiKey.Piv
                 }
                 catch (TlvException)
                 {
-                    returnValue = false;
+                    verifySuccess = false;
                 }
             }
 
-            return returnValue;
+            return verifySuccess;
         }
     }
 }

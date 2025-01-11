@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.ComponentModel;
 using System.Globalization;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {

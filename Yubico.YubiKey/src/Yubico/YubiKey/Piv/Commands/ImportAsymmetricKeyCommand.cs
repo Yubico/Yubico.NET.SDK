@@ -178,7 +178,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </summary>
         /// <remarks>
         /// The only possible private keys this command will accept are RSA-1024,
-        /// RSA-2048, ECC-P256, and ECC-P384. If you supply any other private
+        /// RSA-2048, RSA-3072, RSA-4096, ECC-P256, and ECC-P384. If you supply any other private
         /// key, the constructor will throw an exception.
         /// <para>
         /// The slot number must be for a slot that holds an asymmetric key. See

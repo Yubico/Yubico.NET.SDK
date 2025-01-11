@@ -77,7 +77,7 @@ namespace System
         public (int Offset, int Length) GetOffsetAndLength(int length)
         {
             int start;
-            Index startIndex = Start;
+            var startIndex = Start;
             if (startIndex.IsFromEnd)
             {
                 start = length - startIndex.Value;
@@ -88,7 +88,7 @@ namespace System
             }
 
             int end;
-            Index endIndex = End;
+            var endIndex = End;
             if (endIndex.IsFromEnd)
             {
                 end = length - endIndex.Value;

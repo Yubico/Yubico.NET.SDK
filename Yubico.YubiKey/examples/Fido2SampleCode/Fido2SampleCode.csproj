@@ -25,7 +25,12 @@ limitations under the License. -->
     <AnalysisMode>AllDisabledByDefault</AnalysisMode>
   </PropertyGroup>
   <ItemGroup>
+<None Update="appsettings.json">
+  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+</None>
     <ProjectReference Include="..\SharedSampleCode\SharedSampleCode.csproj" />
+
   </ItemGroup>
+
 
 </Project>

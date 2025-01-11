@@ -25,8 +25,10 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// The data returned by <c>GetData</c> is a byte array,
     /// containing the decrypted data. The data will be the same size as the key.
-    /// That is, for a 1024-bit RSA key, the decrypted data is 128 bytes, and for
-    /// a 2048-bit key, the decrypted data is 256 bytes.
+    /// That is, for a 1024-bit RSA key, the decrypted data is 128 bytes, for
+    /// a 2048-bit key, the decrypted data is 256 bytes, for
+    /// a 3072-bit key, the decrypted data is 384 bytes, and for
+    /// a 4096-bit key, the decrypted data is 512 bytes.
     /// </para>
     /// <para>
     /// The data returned is almost certainly formatted, either using PKCS 1 v.

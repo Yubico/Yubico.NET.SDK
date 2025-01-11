@@ -184,7 +184,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             _keyCollector.Operation = U2fKeyCollectorOperation.Register;
             if (!U2fProtocol.Register(
                 _yubiKeyChosen, _keyCollector.U2fSampleKeyCollectorDelegate,
-                applicationId, clientDataHash, out RegistrationData registrationData))
+                applicationId, clientDataHash, out var registrationData))
             {
                 return false;
             }
@@ -226,7 +226,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             }
 
             int response = _menuObject.RunMenu("Which credential is to be authenticated?", nameList);
-            RegistrationData regData = _credentials[nameList[response]];
+            var regData = _credentials[nameList[response]];
 
             // There are a number of ways a credential can be unauthenticated.
             // One way is if the keyHandle is invalid. If that is the case, we
@@ -259,7 +259,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             if (!U2fProtocol.Authenticate(
                 _yubiKeyChosen, _keyCollector.U2fSampleKeyCollectorDelegate,
                 regData.ApplicationId, regData.ClientDataHash, regData.KeyHandle,
-                out AuthenticationData authenticationData))
+                out var authenticationData))
             {
                 return false;
             }
@@ -395,7 +395,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "For this sample code, the challenge is a random value base-64 encoded\n");
 
             byte[] randomBytes = new byte[9];
-            using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
+            using var randomObject = CryptographyProviders.RngCreator();
             randomObject.GetBytes(randomBytes, 0, randomBytes.Length);
             string challenge = Convert.ToBase64String(randomBytes);
             SampleMenu.WriteMessage(MessageType.Title, 0, "challenge = " + challenge);

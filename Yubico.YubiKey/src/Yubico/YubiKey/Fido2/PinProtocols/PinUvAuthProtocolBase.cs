@@ -192,7 +192,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
 
             try
             {
-                IEcdhPrimitives ecdh = CryptographyProviders.EcdhPrimitivesCreator();
+                var ecdh = CryptographyProviders.EcdhPrimitivesCreator();
                 platformKeyPair = ecdh.GenerateKeyPair(ECCurve.NamedCurves.nistP256);
 
                 PlatformPublicKey = new CoseEcPublicKey(platformKeyPair.Value);

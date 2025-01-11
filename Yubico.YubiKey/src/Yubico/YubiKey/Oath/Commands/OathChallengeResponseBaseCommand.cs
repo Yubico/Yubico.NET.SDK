@@ -14,7 +14,6 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Linq;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
@@ -54,7 +53,7 @@ namespace Yubico.YubiKey.Oath.Commands
         /// </returns>
         protected static byte[] GenerateRandomChallenge()
         {
-            using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
+            using var randomObject = CryptographyProviders.RngCreator();
 
             byte[] randomBytes = new byte[8];
             randomObject.GetBytes(randomBytes);

@@ -21,6 +21,8 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
+    [Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
     public class MakeCredentialGetAssertionTests
     {
         static readonly byte[] _clientDataHash = {
@@ -31,7 +33,7 @@ namespace Yubico.YubiKey.Fido2
         static readonly RelyingParty _rp = new RelyingParty("relyingparty1");
 
         // This test requires user to touch the device.
-        [Fact, Trait("Category", "RequiresTouch")]
+        [Fact, Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
         public void MakeCredential_NonDiscoverable_GetAssertion_Succeeds()
         {
             IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
@@ -85,7 +87,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         // This test requires user to touch the device.
-        [Fact, Trait("Category", "RequiresTouch")]
+        [Fact, Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
         public void MakeCredential_NoName_GetAssertion_Succeeds()
         {
             IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
@@ -124,7 +126,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         // This test requires user to touch the device.
-        [Fact, Trait("Category", "RequiresTouch")]
+        [Fact, Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
         public void MakeCredential_MultipleCredentials_GetAssertion_ReturnsMultipleAssertions()
         {
             IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
@@ -138,8 +140,9 @@ namespace Yubico.YubiKey.Fido2
                 fido2.KeyCollector = KeyCollector;
                 int startCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!; //RemainingDiscoverableCredentials is NULL on my two keys I tried with (USBA 5.4.3 Keychain and Nano)
 
-                // Verify the PIN
-                fido2.VerifyPin(); //Never completes on my 5.7 
+                // Fido app was reset above, so set and confirm a pin (hardcoded in KeyCollector)
+                fido2.SetPin();
+                fido2.VerifyPin();
 
                 // Call MakeCredential
                 var user1 = new UserEntity(new byte[] { 1, 2, 3, 4 })
@@ -200,6 +203,112 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
+
+        // This test requires user to touch the device.
+        [Theory, Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
+        [InlineData(CredProtectPolicy.UserVerificationOptional, true)]
+        [InlineData(CredProtectPolicy.UserVerificationOptional, false)]
+        [InlineData(CredProtectPolicy.UserVerificationRequired, true)]
+        [InlineData(CredProtectPolicy.UserVerificationRequired, false)]
+        public void AddCredProtectExtension_KeySupportsCredProtectExtension(
+            CredProtectPolicy credProtectPolicy,
+            bool enforceCredProtectPolicy)
+        {
+            // Could have combined expectExtensionSupported cases under a single Theory, but
+            // expectExtensionSupported true vs false requires using YubiKeys with different
+            // firmware, and using separate Theory methods makes it somewhat easier to run them
+            // as separate, grouped sets
+            TestAddCredProtectExtension(expectExtensionSupported: true, credProtectPolicy, enforceCredProtectPolicy);
+        }
+
+        [Theory, Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
+        [InlineData(CredProtectPolicy.UserVerificationOptional, true)]
+        [InlineData(CredProtectPolicy.UserVerificationOptional, false)]
+        [InlineData(CredProtectPolicy.UserVerificationRequired, true)]
+        [InlineData(CredProtectPolicy.UserVerificationRequired, false)]
+        [InlineData(CredProtectPolicy.UserVerificationOptionalWithCredentialIDList, true)]
+        public void AddCredProtectExtension_KeyDoesNotSupportCredProtectExtension(
+            CredProtectPolicy credProtectPolicy,
+            bool enforceCredProtectPolicy)
+        {
+            // Could have combined expectExtensionSupported cases under a single Theory, but
+            // expectExtensionSupported true vs false requires using YubiKeys with different
+            // firmware, and using separate Theory methods makes it somewhat easier to run them
+            // as distinct, grouped sets
+            TestAddCredProtectExtension(expectExtensionSupported: false, credProtectPolicy, enforceCredProtectPolicy);
+        }
+
+        private void TestAddCredProtectExtension(
+            bool expectExtensionSupported,
+            CredProtectPolicy credProtectPolicy,
+            bool enforceCredProtectPolicy)
+        {
+            IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
+
+            bool isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
+            Assert.True(isValid);
+
+            using (var fido2Session = new Fido2Session(yubiKeyDevice))
+            {
+                // Set up a key collector
+                fido2Session.KeyCollector = KeyCollector;
+
+                // Fido app was reset above, so set and confirm a pin (hardcoded in KeyCollector)
+                fido2Session.SetPin();
+                fido2Session.VerifyPin();
+
+                // Note that Name is a required value
+                var user = new UserEntity(new byte[] { 1, 2, 3, 4 })
+                {
+                    Name = "Name",
+                    DisplayName = "DisplayName",
+                };
+
+                var mcParams = new MakeCredentialParameters(_rp, user)
+                {
+                    ClientDataHash = _clientDataHash
+                };
+
+                var isExtensionSupported = fido2Session.AuthenticatorInfo.Extensions?.Contains("credProtect") ?? false;
+
+                // If this fails, the yubikey used doesn't have the proper support level expected for the test
+                // For expectExtensionSupported==true, the key must have FW 5.2.0 or later
+                // For expectExtensionSupported==false, the key must have FW before 5.2.0
+                Assert.Equal(expectExtensionSupported, isExtensionSupported);
+
+                // Act
+                try
+                {
+                    mcParams.AddCredProtectExtension(
+                        credProtectPolicy,
+                        enforceCredProtectPolicy,
+                        fido2Session.AuthenticatorInfo!);
+                }
+                catch (NotSupportedException)
+                {
+                    // This shouldn't fail for Optional, even if the key doesn't support the
+                    // extension, so ensure that's not what was set
+                    Assert.NotEqual(CredProtectPolicy.UserVerificationOptional, credProtectPolicy);
+                    Assert.False(isExtensionSupported);
+                    return;
+                }
+
+                // Verify
+                // The call to set the extension should always succeed under any of these conditions
+                Assert.True(
+                    !enforceCredProtectPolicy
+                    || isExtensionSupported
+                    || credProtectPolicy == CredProtectPolicy.UserVerificationOptional);
+
+                Assert.Equal(expectExtensionSupported, mcParams.Extensions?.ContainsKey("credProtect") ?? false);
+
+                MakeCredentialData mcData = fido2Session.MakeCredential(mcParams);
+
+                CredProtectPolicy cpPolicy = mcData.AuthenticatorData.GetCredProtectExtension();
+                Assert.Equal(expectExtensionSupported ? credProtectPolicy : CredProtectPolicy.None, cpPolicy);
+            }
+        }
+
         private bool KeyCollector(KeyEntryData arg)
         {
             switch (arg.Request)
@@ -208,6 +317,7 @@ namespace Yubico.YubiKey.Fido2
                     Console.WriteLine("YubiKey requires touch");
                     break;
                 case KeyEntryRequest.VerifyFido2Pin:
+                case KeyEntryRequest.SetFido2Pin:
                     arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
                     break;
                 case KeyEntryRequest.VerifyFido2Uv:

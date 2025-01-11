@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Scp03.Commands
     /// Use this command to put or replace SCP03 keys on the YubiKey.
     /// </summary>
     /// <remarks>
-    /// See the <xref href="UsersManualScp03">User's Manual entry</xref> on SCP03.
+    /// See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP03.
     /// <para>
     /// On each YubiKey that supports SCP03, there is space for three sets of
     /// keys. Each set contains three keys: "ENC", "MAC", and "DEK" (Channel
@@ -105,6 +105,7 @@ namespace Yubico.YubiKey.Scp03.Commands
     /// to replace itself.
     /// </para>
     /// </remarks>
+    [Obsolete("Use new PutKeyCommand instead")]
     internal class PutKeyCommand : IYubiKeyCommand<PutKeyResponse>
     {
         private const byte GpPutKeyCla = 0x84;
@@ -228,6 +229,7 @@ namespace Yubico.YubiKey.Scp03.Commands
                 byte[] dataToEncrypt = new byte[AesBlockSize] {
                     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
                 };
+
                 byte[] checkBlock = AesUtilities.BlockCipher(keyData, dataToEncrypt.AsSpan());
                 byte[] encryptedKey = AesUtilities.BlockCipher(encryptionKey, keyToBlock.Span);
 

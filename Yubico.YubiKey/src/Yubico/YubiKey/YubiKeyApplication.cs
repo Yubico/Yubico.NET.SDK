@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
+using Yubico.Core.Buffers;
 
 namespace Yubico.YubiKey
 {
@@ -29,36 +31,70 @@ namespace Yubico.YubiKey
         InterIndustry = 8,
         OtpNdef = 9,
         YubiHsmAuth = 10,
+        [Obsolete("Use SecurityDomain instead")]
         Scp03 = 11,
+        SecurityDomain = 12
     }
 
     internal static class YubiKeyApplicationExtensions
     {
-        private static readonly byte[] ManagementAppId = new byte[] { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x47, 0x11, 0x17 };
-        private static readonly byte[] OtpAppId = new byte[] { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01, 0x01 };
-        private static readonly byte[] FidoU2fAppId = new byte[] { 0xa0, 0x00, 0x00, 0x06, 0x47, 0x2f, 0x00, 0x01 };
-        private static readonly byte[] Fido2AppId = new byte[] { 0xa0, 0x00, 0x00, 0x06, 0x47, 0x2f, 0x00, 0x01 };
-        private static readonly byte[] OathAppId = new byte[] { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01 };
-        private static readonly byte[] OpenPgpAppId = new byte[] { 0xd2, 0x76, 0x00, 0x01, 0x24, 0x01 };
-        private static readonly byte[] PivAppId = new byte[] { 0xa0, 0x00, 0x00, 0x03, 0x08 };
-        private static readonly byte[] OtpNdef = new byte[] { 0xd2, 0x76, 0x00, 0x00, 0x85, 0x01, 0x01 };
-        private static readonly byte[] YubiHsmAuthId = new byte[] { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x07, 0x01 };
-        private static readonly byte[] Scp03AuthId = new byte[] { 0xA0, 0x00, 0x00, 0x01, 0x51, 0x00, 0x00, 0x00 };
+        private static readonly byte[] ManagementAppId = { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x47, 0x11, 0x17 };
+        private static readonly byte[] OtpAppId = { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01, 0x01 };
+        private static readonly byte[] FidoU2fAppId = { 0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01 };
+        private static readonly byte[] Fido2AppId = { 0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01 };
+        private static readonly byte[] OathAppId = { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01 };
+        private static readonly byte[] OpenPgpAppId = { 0xD2, 0x76, 0x00, 0x01, 0x24, 0x01 };
+        private static readonly byte[] PivAppId = { 0xA0, 0x00, 0x00, 0x03, 0x08 };
+        private static readonly byte[] OtpNdef = { 0xD2, 0x76, 0x00, 0x00, 0x85, 0x01, 0x01 };
+        private static readonly byte[] YubiHsmAuthId = { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x07, 0x01 };
+        private static readonly byte[] SecurityDomainAppId = { 0xA0, 0x00, 0x00, 0x01, 0x51, 0x00, 0x00, 0x00 };
 
         public static byte[] GetIso7816ApplicationId(this YubiKeyApplication application) =>
-            application switch
+            Iso7816ApplicationIds.ContainsKey(application)
+                ? Iso7816ApplicationIds[application].ToArray()
+                : throw new NotSupportedException(ExceptionMessages.ApplicationIdNotFound);
+
+        public static IReadOnlyDictionary<YubiKeyApplication, ReadOnlyMemory<byte>> Iso7816ApplicationIds =>
+            new Dictionary<YubiKeyApplication, ReadOnlyMemory<byte>>
             {
-                YubiKeyApplication.Management => ManagementAppId,
-                YubiKeyApplication.Otp => OtpAppId,
-                YubiKeyApplication.FidoU2f => FidoU2fAppId,
-                YubiKeyApplication.Fido2 => Fido2AppId,
-                YubiKeyApplication.Oath => OathAppId,
-                YubiKeyApplication.OpenPgp => OpenPgpAppId,
-                YubiKeyApplication.Piv => PivAppId,
-                YubiKeyApplication.OtpNdef => OtpNdef,
-                YubiKeyApplication.YubiHsmAuth => YubiHsmAuthId,
-                YubiKeyApplication.Scp03 => Scp03AuthId,
-                _ => throw new NotSupportedException(ExceptionMessages.ApplicationIdNotFound),
+                { YubiKeyApplication.Management, ManagementAppId },
+                { YubiKeyApplication.Otp, OtpAppId },
+                { YubiKeyApplication.FidoU2f, FidoU2fAppId },
+                { YubiKeyApplication.Fido2, Fido2AppId },
+                { YubiKeyApplication.Oath, OathAppId },
+                { YubiKeyApplication.OpenPgp, OpenPgpAppId },
+                { YubiKeyApplication.Piv, PivAppId },
+                { YubiKeyApplication.OtpNdef, OtpNdef },
+                { YubiKeyApplication.YubiHsmAuth, YubiHsmAuthId },
+                #pragma warning disable CS0618 // Type or member is obsolete // Remove in next major release
+                { YubiKeyApplication.Scp03, SecurityDomainAppId },
+                #pragma warning restore CS0618 // Type or member is obsolete // Remove in next major release
+                { YubiKeyApplication.SecurityDomain, SecurityDomainAppId }
             };
+
+        /// <summary>
+        /// Gets the <see cref="YubiKeyApplication"/> associated with the given applicationId.
+        /// </summary>
+        /// <param name="applicationId">The application id as a byte array.</param>
+        /// <returns>The associated <see cref="YubiKeyApplication"/>.</returns>
+        /// <exception cref="ArgumentException">No YubiKey application found with the given application id.</exception>
+        public static YubiKeyApplication GetYubiKeyApplication(this ReadOnlySpan<byte> applicationId)
+        {
+            foreach (var kvp in Iso7816ApplicationIds)
+            {
+                if (kvp.Value.Span.SequenceEqual(applicationId))
+                {
+                    return kvp.Key;
+                }
+            }
+
+            throw new ArgumentException(
+                $"No YubiKey application found with application id: {Base16.EncodeBytes(applicationId)}",
+                nameof(applicationId));
+        }
+
+        /// <inheritdoc cref="GetYubiKeyApplication(ReadOnlySpan{byte})"/>
+        public static YubiKeyApplication GetYubiKeyApplication(this byte[] applicationId) =>
+            GetYubiKeyApplication(applicationId.AsSpan());
     }
 }

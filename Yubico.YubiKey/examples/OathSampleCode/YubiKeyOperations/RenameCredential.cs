@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             {
                 oathSession.KeyCollector = KeyCollectorDelegate;
 
-                Credential renamedCredential = oathSession.RenameCredential(
+                var renamedCredential = oathSession.RenameCredential(
                     credential.Issuer,
                     credential.AccountName,
                     newIssuer,
@@ -84,13 +84,13 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter current account name");
             _ = SampleMenu.ReadResponse(out string currentAccount);
 
-            _ = ChooseCredentialProperties.RunChooseTypeOption(menuObject, out CredentialType? type);
+            _ = ChooseCredentialProperties.RunChooseTypeOption(menuObject, out var type);
 
-            CredentialPeriod period = CredentialPeriod.Undefined;
+            var period = CredentialPeriod.Undefined;
 
             if (type == CredentialType.Totp)
             {
-                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out CredentialPeriod? credentialPeriod);
+                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out var credentialPeriod);
                 period = credentialPeriod.Value;
             }
 

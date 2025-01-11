@@ -127,15 +127,15 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 
         private byte[] BuildDataField()
         {
-            TlvWriter tlvWriter = new TlvWriter();
+            var tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(DataTagConstants.ManagementKey, _managementKey.Span);
             tlvWriter.WriteString(DataTagConstants.Label,
                 Label, Encoding.UTF8);
 
-            byte[] returnValue = tlvWriter.Encode();
+            byte[] tlvBytes = tlvWriter.Encode();
             tlvWriter.Clear();
 
-            return returnValue;
+            return tlvBytes;
         }
     }
 }

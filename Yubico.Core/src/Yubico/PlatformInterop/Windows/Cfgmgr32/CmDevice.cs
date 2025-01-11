@@ -109,7 +109,7 @@ namespace Yubico.PlatformInterop
             {
                 return (T)value!;
             }
-            throw new KeyNotFoundException();
+            throw new KeyNotFoundException(property.ToString());
         }
 
         public SafeFileHandle OpenDevice()

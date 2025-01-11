@@ -14,10 +14,8 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 
 namespace Yubico.Core.Iso7816
 {

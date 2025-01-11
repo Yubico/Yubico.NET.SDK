@@ -15,7 +15,6 @@
 using System;
 using System.Security.Cryptography;
 using Xunit;
-using Yubico.Core.Buffers;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv

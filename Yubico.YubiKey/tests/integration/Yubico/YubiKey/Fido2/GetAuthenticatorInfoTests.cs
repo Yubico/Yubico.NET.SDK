@@ -14,13 +14,14 @@
 
 using System.Linq;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
     public class GetAuthenticatorInfoTests
     {
         [Fact]
-        [Trait("Category", "Simple")]
+        [Trait(TraitTypes.Category, TestCategories.Elevated)]
         public void GetAuthenticator_Succeeds()
         {
             IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();

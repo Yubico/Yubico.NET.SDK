@@ -14,6 +14,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Buffers;
 using Yubico.Core.Cryptography;
 using Yubico.Core.Logging;
@@ -28,7 +29,7 @@ namespace Yubico.Core.Devices.Hid
         private readonly LinuxFileSafeHandle _handle;
         private bool _isDisposed;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Log.GetLogger<LinuxHidIOReportConnection>();
         private readonly LinuxHidDevice _device;
 
         public int InputReportSize { get; private set; }
@@ -46,7 +47,7 @@ namespace Yubico.Core.Devices.Hid
 
             if (_handle.IsInvalid)
             {
-                _log.LogError("Could not open device for IO reports: {error}", LibcHelpers.GetErrnoString());
+                _log.LogError("Could not open device for IO reports: {Error}", LibcHelpers.GetErrnoString());
 
                 throw new PlatformApiException(
                     string.Format(
@@ -84,7 +85,7 @@ namespace Yubico.Core.Devices.Hid
                 return;
             }
 
-            _log.LogError("Write failed with: {error}", LibcHelpers.GetErrnoString());
+            _log.LogError("Write failed with: {Error}", LibcHelpers.GetErrnoString());
 
             throw new PlatformApiException(
                 string.Format(
@@ -108,7 +109,7 @@ namespace Yubico.Core.Devices.Hid
                 return outputBuffer;
             }
 
-            _log.LogError("Read failed with: {error}", LibcHelpers.GetErrnoString());
+            _log.LogError("Read failed with: {Error}", LibcHelpers.GetErrnoString());
             throw new PlatformApiException(
                 string.Format(
                     CultureInfo.CurrentCulture,

@@ -17,7 +17,7 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// <summary>
     /// Represents a COSE algorithm identifier.
     /// </summary>
-    public enum CoseAlgorithmIdentifier
+    public enum CoseAlgorithmIdentifier // TODO move into KeyDefinitions ?
     {
         /// <summary>
         /// No algorithm specified.
@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <summary>
         /// ECDH with key derivation function HKDF using SHA-256.
         /// </summary>
-        ECDHwHKDF256 = -25,
+        ECDHwHKDF256 = -25, // TODO Remove? Cannot find a ref to this.
 
         /// <summary>
         /// ECDSA with SHA-384 using the NIST P-384 curve.
@@ -52,6 +52,7 @@ namespace Yubico.YubiKey.Fido2.Cose
 
         /// <summary>
         /// RSASSA-PKCS1-v1_5 with SHA-256
+        /// Currently, not supported by any YubiKey
         /// </summary>
         RS256 = -257,
     }

@@ -48,8 +48,8 @@
     href: sdk-programming-guide/alternate-crypto.md
   - name: Sensitive data
     href: sdk-programming-guide/sensitive-data.md
-  - name: Secure Channel Protocol 3 (SCP03)
-    href: sdk-programming-guide/secure-channel-protocol-3.md
+  - name: Secure Channel Protocol (SCP03, SCP11)
+    href: sdk-programming-guide/secure-channel-protocol.md
   - name: Commands
     href: sdk-programming-guide/commands.md
   - name: Device notifications
@@ -242,6 +242,17 @@
         href: application-piv/apdu/verify-uv.md
       - name: "Get firmware version"
         href: application-piv/apdu/version.md
+- name: "Application: Security Domain"
+  homepage: application-security-domain/security-domain-overview.md
+  items:
+  - name: Key Management
+    href: application-security-domain/security-domain-keys.md
+  - name: Certificate Operations
+    href: application-security-domain/security-domain-certificates.md
+  - name: Common Tasks
+    href: application-security-domain/security-domain-tasks.md
+  - name: Device Information
+    href: application-security-domain/security-domain-device.md
 
 - name: "Application: FIDO U2F"
   homepage: application-u2f/fido-u2f-overview.md

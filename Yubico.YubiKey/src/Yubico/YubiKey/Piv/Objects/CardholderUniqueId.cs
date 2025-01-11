@@ -15,7 +15,8 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
-using System.Text;
+using Microsoft.Extensions.Logging;
+using Yubico.Core.Cryptography;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
@@ -89,7 +90,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int LrcTag = 0xFE;
 
         private bool _disposed;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<CardholderUniqueId>();
 
         /// <summary>
         /// The "Federal Agency Smart Credential Number" (FASC-N). This is a fixed
@@ -156,7 +157,7 @@ namespace Yubico.YubiKey.Piv.Objects
             _log.LogInformation("Set the GUID of CardholderUniqueId with a random value.");
             Clear();
 
-            using (RandomNumberGenerator randomObject = CryptographyProviders.RngCreator())
+            using (var randomObject = CryptographyProviders.RngCreator())
             {
                 randomObject.GetBytes(_guidValue, 0, GuidLength);
             }
@@ -218,12 +219,12 @@ namespace Yubico.YubiKey.Piv.Objects
             //      3e 00
             //      fe 00
             var tlvWriter = new TlvWriter();
-            ReadOnlySpan<byte> emptySpan = ReadOnlySpan<byte>.Empty;
+            var emptySpan = ReadOnlySpan<byte>.Empty;
             using (tlvWriter.WriteNestedTlv(EncodingTag))
             {
                 tlvWriter.WriteValue(FascNumberTag, FascNumber.Span);
                 tlvWriter.WriteValue(GuidTag, GuidValue.Span);
-                tlvWriter.WriteString(ExpirationDateTag, FixedDate, Encoding.ASCII);
+                tlvWriter.WriteString(ExpirationDateTag, FixedDate, System.Text.Encoding.ASCII);
                 tlvWriter.WriteValue(SignatureTag, emptySpan);
                 tlvWriter.WriteValue(LrcTag, emptySpan);
             }
@@ -279,7 +280,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (isValid)
             {
                 _log.LogInformation("Decode data into CardholderUniqueId: FascNumber.");
-                if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> encodedFascn, FascNumberTag))
+                if (tlvReader.TryReadValue(out var encodedFascn, FascNumberTag))
                 {
                     if (MemoryExtensions.SequenceEqual<byte>(encodedFascn.Span, FascNumber.Span))
                     {
@@ -303,12 +304,12 @@ namespace Yubico.YubiKey.Piv.Objects
             if (isValid)
             {
                 _log.LogInformation("Decode data into CardholderUniqueId: Guid.");
-                if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> encodedGuid, GuidTag))
+                if (tlvReader.TryReadValue(out var encodedGuidBytes, GuidTag))
                 {
-                    if (encodedGuid.Length == GuidLength)
+                    if (encodedGuidBytes.Length == GuidLength)
                     {
                         var dest = new Memory<byte>(_guidValue);
-                        encodedGuid.CopyTo(dest);
+                        encodedGuidBytes.CopyTo(dest);
                         return true;
                     }
                 }
@@ -322,7 +323,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (isValid)
             {
                 _log.LogInformation("Decode data into CardholderUniqueId: ExpirationDate.");
-                if (tlvReader.TryReadString(out string theDate, ExpirationDateTag, Encoding.ASCII))
+                if (tlvReader.TryReadString(out string theDate, ExpirationDateTag, System.Text.Encoding.ASCII))
                 {
                     if (theDate.Equals(FixedDate, StringComparison.Ordinal))
                     {
@@ -340,9 +341,9 @@ namespace Yubico.YubiKey.Piv.Objects
             if (isValid)
             {
                 _log.LogInformation("Decode data into CardholderUniqueId: TrailingElements.");
-                if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> signature, SignatureTag))
+                if (tlvReader.TryReadValue(out var signatureBytes, SignatureTag))
                 {
-                    if (signature.Length == 0 && tlvReader.TryReadValue(out ReadOnlyMemory<byte> lrc, LrcTag))
+                    if (signatureBytes.Length == 0 && tlvReader.TryReadValue(out var lrc, LrcTag))
                     {
                         if (lrc.Length == 0 && !tlvReader.HasData)
                         {

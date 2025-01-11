@@ -25,6 +25,7 @@ using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.TestUtilities;
 using Log = Yubico.Core.Logging.Log;
+using Logger = Serilog.Core.Logger;
 
 namespace Yubico.YubiKey
 {
@@ -39,6 +40,7 @@ namespace Yubico.YubiKey
 
     public class ReclaimTimeoutTests
     {
+        [Trait(TraitTypes.Category, TestCategories.Elevated)]
         [Fact]
         public void SwitchingBetweenTransports_ForcesThreeSecondWait()
         {
@@ -51,13 +53,14 @@ namespace Yubico.YubiKey
                     outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
-            Log.LoggerFactory = LoggerFactory.Create(
-                builder => builder
+            Log.ConfigureLoggerFactory(builder =>
+                builder
+                    .ClearProviders()
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
 
             // TEST ASSUMPTION: This test requires FIDO. On Windows, that means this test case must run elevated (admin).
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
 
             // Ensure all interfaces are active
             if (testDevice.EnabledUsbCapabilities != YubiKeyCapabilities.All)

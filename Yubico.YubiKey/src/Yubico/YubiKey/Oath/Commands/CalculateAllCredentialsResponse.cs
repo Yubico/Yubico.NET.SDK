@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Oath.Commands
             while (tlvReader.HasData)
             {
                 (string? OtpString, int? Digits) response = (null, null);
-                CredentialType type = CredentialType.Totp;
+                var credentialType = CredentialType.Totp;
                 bool requiresTouch = false;
 
                 string label = tlvReader.PeekTag() switch
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 {
                     case HotpTag:
                         _ = tlvReader.ReadByte(HotpTag);
-                        type = CredentialType.Hotp;
+                        credentialType = CredentialType.Hotp;
                         break;
 
                     case TouchTag:
@@ -103,12 +103,12 @@ namespace Yubico.YubiKey.Oath.Commands
                         break;
 
                     case FullResponseTag:
-                        ReadOnlyMemory<byte> fullValue = tlvReader.ReadValue(FullResponseTag);
+                        var fullValue = tlvReader.ReadValue(FullResponseTag);
                         response = GetOtpValue(fullValue);
                         break;
 
                     case TruncatedResponseTag:
-                        ReadOnlyMemory<byte> truncatedValue = tlvReader.ReadValue(TruncatedResponseTag);
+                        var truncatedValue = tlvReader.ReadValue(TruncatedResponseTag);
                         response = GetOtpValue(truncatedValue);
                         break;
 
@@ -120,7 +120,7 @@ namespace Yubico.YubiKey.Oath.Commands
                         };
                 }
 
-                Credential credential = FromLabelAndType(label, type);
+                var credential = FromLabelAndType(label, credentialType);
                 credential.RequiresTouch = requiresTouch;
                 credential.Digits = response.Digits;
 
@@ -163,8 +163,8 @@ namespace Yubico.YubiKey.Oath.Commands
                 throw new ArgumentNullException(nameof(label));
             }
 
-            (CredentialPeriod period, string? issuer, string account) = Credential.ParseLabel(label, type);
-            return new Credential(issuer, account, type, period);
+            (var credentialPeriod, string? issuer, string account) = Credential.ParseLabel(label, type);
+            return new Credential(issuer, account, type, credentialPeriod);
         }
     }
 }

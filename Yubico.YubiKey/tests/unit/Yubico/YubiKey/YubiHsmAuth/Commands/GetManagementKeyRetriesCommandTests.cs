@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.Core.Iso7816;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
@@ -27,7 +25,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Application_Get_ReturnsYubiHsmAuth()
         {
-            GetManagementKeyRetriesCommand command =
+            var command =
                 new GetManagementKeyRetriesCommand();
 
             Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
@@ -36,7 +34,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Cla0()
         {
-            GetManagementKeyRetriesCommand command =
+            var command =
                 new GetManagementKeyRetriesCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
@@ -46,7 +44,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Ins0x09()
         {
-            GetManagementKeyRetriesCommand command =
+            var command =
                 new GetManagementKeyRetriesCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
@@ -56,7 +54,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P1Is0()
         {
-            GetManagementKeyRetriesCommand command =
+            var command =
                 new GetManagementKeyRetriesCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
@@ -66,7 +64,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P2Is0()
         {
-            GetManagementKeyRetriesCommand command =
+            var command =
                 new GetManagementKeyRetriesCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 

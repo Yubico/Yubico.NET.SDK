@@ -15,12 +15,12 @@
 using System;
 using System.Globalization;
 using System.Security;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.Scp03;
+using Yubico.YubiKey.Scp;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -138,8 +138,8 @@ namespace Yubico.YubiKey.Piv
     ///         <xref href="UsersManualSensitive"> sensitive data</xref>.
     ///     </para>
     ///     <para>
-    ///         This class will also need a random number generator and a Triple-DES
-    ///         encryptor/decryptor. It will get them from
+    ///         This class will also need a random number generator and Triple-DES and AES
+    ///         encryptors/decryptors. It will get them from
     ///         <see cref="CryptographyProviders" />. That class will return default
     ///         implementations, unless you replace them. Very few applications will
     ///         choose to replace the defaults, but if you want to, see the documentation
@@ -149,43 +149,11 @@ namespace Yubico.YubiKey.Piv
     ///         to learn how to do so.
     ///     </para>
     /// </remarks>
-    public sealed partial class PivSession : IDisposable
+    public sealed partial class PivSession : ApplicationSession
     {
-        private readonly Logger _log = Log.GetLogger();
-        private readonly IYubiKeyDevice _yubiKeyDevice;
-        private bool _disposed;
-
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        private PivSession()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        ///     Create an instance of <c>PivSession</c>, the object that represents
-        ///     the PIV application on the YubiKey.
-        /// </summary>
-        /// <remarks>
-        ///     Because this class implements <c>IDisposable</c>, use the <c>using</c>
-        ///     keyword. For example,
-        ///     <code language="csharp">
-        ///         IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
-        ///         using (var piv = new PivSession(yubiKeyToUse))
-        ///         {
-        ///             /* Perform PIV operations. */
-        ///         }
-        ///     </code>
-        /// </remarks>
-        /// <param name="yubiKey">
-        ///     The object that represents the actual YubiKey which will perform the
-        ///     operations.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///     The <c>yubiKey</c> argument is null.
-        /// </exception>
-        public PivSession(IYubiKeyDevice yubiKey)
-            : this(scp03Keys: null, yubiKey)
+        [Obsolete("Use new constructor with ScpKeyParamaters")]
+        public PivSession(IYubiKeyDevice yubiKey, Yubico.YubiKey.Scp03.StaticKeys scp03Keys)
+            : this(yubiKey, scp03Keys.ConvertToScp03KeyParameters())
         {
         }
 
@@ -196,7 +164,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         /// <remarks>
         ///     See the User's Manual entry on
-        ///     <xref href="UsersManualScp03"> SCP03 </xref> for more information on
+        ///     <xref href="UsersManualScp"> SCP03 </xref> for more information on
         ///     this communication protocol.
         ///     <para>
         ///         Because this class implements <c>IDisposable</c>, use the <c>using</c>
@@ -217,8 +185,8 @@ namespace Yubico.YubiKey.Piv
         ///     The object that represents the actual YubiKey which will perform the
         ///     operations.
         /// </param>
-        /// <param name="scp03Keys">
-        ///     The SCP03 key set to use in establishing the connection.
+        /// <param name="keyParameters">
+        ///     The SCP key parameters, if any, to use in establishing the SCP connection.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     The <c>yubiKey</c> argument is null.
@@ -226,40 +194,12 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="InvalidOperationException">
         ///     This exception is thrown when unable to determine the management key type.
         /// </exception>
-        public PivSession(IYubiKeyDevice yubiKey, StaticKeys scp03Keys)
-            : this(scp03Keys, yubiKey)
+        public PivSession(IYubiKeyDevice yubiKey, ScpKeyParameters? keyParameters = null)
+            : base(Log.GetLogger<PivSession>(), yubiKey, YubiKeyApplication.Piv, keyParameters)
         {
-        }
-
-        private PivSession(StaticKeys? scp03Keys, IYubiKeyDevice yubiKey)
-        {
-            _log.LogInformation(
-                "Create a new instance of PivSession" + (scp03Keys is null
-                    ? "."
-                    : " over SCP03"));
-
-            if (yubiKey is null)
-            {
-                throw new ArgumentNullException(nameof(yubiKey));
-            }
-
-            Connection = scp03Keys is null
-                ? yubiKey.Connect(YubiKeyApplication.Piv)
-                : yubiKey.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
-
             ResetAuthenticationStatus();
-            UpdateManagementKey(yubiKey);
-
-            _yubiKeyDevice = yubiKey;
-            _disposed = false;
+            RefreshManagementKeyAlgorithm();
         }
-
-        /// <summary>
-        ///     The object that represents the connection to the YubiKey. Most
-        ///     applications will ignore this, but it can be used to call Commands
-        ///     directly.
-        /// </summary>
-        public IYubiKeyConnection Connection { get; }
 
         /// <summary>
         ///     The Delegate this class will call when it needs a PIN, PUK, or
@@ -284,45 +224,14 @@ namespace Yubico.YubiKey.Piv
         /// </remarks>
         public Func<KeyEntryData, bool>? KeyCollector { get; set; }
 
-        /// <summary>
-        ///     When the PivSession object goes out of scope, this method is called.
-        ///     It will close the session. The most important function of closing a
-        ///     session is to "un-authenticate" the management key and "un-verify"
-        ///     the PIN.
-        /// </summary>
-
-        // Note that .NET recommends a Dispose method call Dispose(true) and
-        // GC.SuppressFinalize(this). The actual disposal is in the
-        // Dispose(bool) method.
-        //
-        // However, that does not apply to sealed classes.
-        // So the Dispose method will simply perform the
-        // "closing" process, no call to Dispose(bool) or GC.
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (_disposed)
+            if (disposing)
             {
-                return;
+                KeyCollector = null;
+                ResetAuthenticationStatus();
             }
-
-            // At the moment, there is no "close session" method. So for now,
-            // just connect to the management application.
-            _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
-            KeyCollector = null;
-            ResetAuthenticationStatus();
-
-            Connection.Dispose();
-
-            _disposed = true;
-        }
-
-        // Reset any fields and properties related to authentication or
-        // verification to the initial state: not authenticated, verified, etc.
-        private void ResetAuthenticationStatus()
-        {
-            ManagementKeyAuthenticated = false;
-            ManagementKeyAuthenticationResult = AuthenticateManagementKeyResult.Unauthenticated;
-            PinVerified = false;
+            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -369,9 +278,9 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivMetadata GetMetadata(byte slotNumber)
         {
-            _log.LogInformation("GetMetadata for slot number {0:X2}.", slotNumber);
+            Logger.LogInformation("GetMetadata for slot number {SlotNumber:X2}.", slotNumber);
 
-            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
+            if (!YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
             {
                 throw new NotSupportedException(
                     string.Format(
@@ -379,10 +288,10 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.NotSupportedByYubiKeyVersion));
             }
 
-            var metadataCommand = new GetMetadataCommand(slotNumber);
-            GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);
+            var command = new GetMetadataCommand(slotNumber);
+            var response = Connection.SendCommand(command);
 
-            return metadataResponse.GetData();
+            return response.GetData();
         }
 
         /// <summary>
@@ -423,7 +332,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivBioMetadata GetBioMetadata()
         {
-            _log.LogInformation("GetBioMetadata");
+            Logger.LogInformation("GetBioMetadata");
             return Connection.SendCommand(new GetBioMetadataCommand()).GetData();
         }
 
@@ -470,16 +379,15 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ResetApplication()
         {
-            _log.LogInformation("Resetting the PIV application.");
+            Logger.LogInformation("Resetting the PIV application.");
 
             // To reset, both the PIN and PUK must be blocked.
             TryBlock(PivSlot.Pin);
             TryBlock(PivSlot.Puk);
 
-            var resetCommand = new ResetPivCommand();
-            ResetPivResponse resetResponse = Connection.SendCommand(resetCommand);
-
-            if (resetResponse.Status != ResponseStatus.Success)
+            var command = new ResetPivCommand();
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
                 throw new SecurityException(
                     string.Format(
@@ -492,7 +400,7 @@ namespace Yubico.YubiKey.Piv
             // As resetting the PIV application resets the management key,
             // the management key must be updated to account for the case when the previous management key type
             // was not the default key type.
-            UpdateManagementKey(_yubiKeyDevice);
+            RefreshManagementKeyAlgorithm();
         }
 
         /// <summary>
@@ -523,24 +431,24 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">Thrown when the Yubikey doesn't support the Move-operation.</exception>
         public void MoveKey(byte sourceSlot, byte destinationSlot)
         {
-            _yubiKeyDevice.ThrowOnMissingFeature(YubiKeyFeature.PivMoveOrDeleteKey);
+            YubiKey.ThrowOnMissingFeature(YubiKeyFeature.PivMoveOrDeleteKey);
 
             if (!ManagementKeyAuthenticated)
             {
                 AuthenticateManagementKey();
             }
 
-            _log.LogDebug("Moving key from {sourceSlot} to {destinationSlot}", sourceSlot, destinationSlot);
-            var command = new MoveKeyCommand(sourceSlot, destinationSlot);
-            MoveKeyResponse response = Connection.SendCommand(command);
+            Logger.LogDebug("Moving key from {SourceSlot} to {DestinationSlot}", sourceSlot, destinationSlot);
 
+            var command = new MoveKeyCommand(sourceSlot, destinationSlot);
+            var response = Connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
 
-            _log.LogInformation(
-                "Successfully moved key from {sourceSlot} to {destinationSlot}", sourceSlot, destinationSlot);
+            Logger.LogInformation(
+                "Successfully moved key from {SourceSlot} to {DestinationSlot}", sourceSlot, destinationSlot);
         }
 
         /// <summary>
@@ -571,16 +479,17 @@ namespace Yubico.YubiKey.Piv
         /// <seealso cref="AuthenticateManagementKey" />
         public void DeleteKey(byte slotToClear)
         {
-            _yubiKeyDevice.ThrowOnMissingFeature(YubiKeyFeature.PivMoveOrDeleteKey);
+            YubiKey.ThrowOnMissingFeature(YubiKeyFeature.PivMoveOrDeleteKey);
 
             if (!ManagementKeyAuthenticated)
             {
                 AuthenticateManagementKey();
             }
 
-            _log.LogDebug("Deleting key at slot {targetSlot}", slotToClear);
+            Logger.LogDebug("Deleting key at slot {TargetSlot}", slotToClear);
+
             var command = new DeleteKeyCommand(slotToClear);
-            DeleteKeyResponse response = Connection.SendCommand(command);
+            var response = Connection.SendCommand(command);
 
             bool unsuccessfulStatus =
                 response.Status != ResponseStatus.Success &&
@@ -595,7 +504,7 @@ namespace Yubico.YubiKey.Piv
                 ? "Successfully deleted key at slot {targetSlot}."
                 : "No data received from Yubikey after attempted delete on slot {targetSlot}, indicating that was likely empty to begin with.";
 
-            _log.LogInformation(logMessage, slotToClear);
+            Logger.LogInformation(logMessage, slotToClear);
         }
 
         // Block the PIN or PUK
@@ -611,7 +520,7 @@ namespace Yubico.YubiKey.Piv
         // PivSlot.Puk, block the PUK.
         private bool BlockPinOrPuk(byte slotNumber)
         {
-            _log.LogInformation($"Block the {(slotNumber == 0x80 ? "PIN" : "PUK")}.");
+            Logger.LogInformation($"Block the {(slotNumber == 0x80 ? "PIN" : "PUK")}.");
             int retriesRemaining;
 
             do
@@ -626,19 +535,27 @@ namespace Yubico.YubiKey.Piv
                     0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22
                 };
 
-                var changeCommand = new ChangeReferenceDataCommand(slotNumber, currentValue, newValue);
-                ChangeReferenceDataResponse changeResponse = Connection.SendCommand(changeCommand);
-
-                if (changeResponse.Status == ResponseStatus.Failed)
+                var command = new ChangeReferenceDataCommand(slotNumber, currentValue, newValue);
+                var response = Connection.SendCommand(command);
+                if (response.Status == ResponseStatus.Failed)
                 {
                     return false;
                 }
 
-                retriesRemaining = changeResponse.GetData() ?? 1;
+                retriesRemaining = response.GetData() ?? 1;
             }
             while (retriesRemaining > 0);
 
             return true;
+        }
+
+        // Reset any fields and properties related to authentication or
+        // verification to the initial state: not authenticated, verified, etc.
+        private void ResetAuthenticationStatus()
+        {
+            ManagementKeyAuthenticated = false;
+            ManagementKeyAuthenticationResult = AuthenticateManagementKeyResult.Unauthenticated;
+            PinVerified = false;
         }
 
         private void TryBlock(byte slot)
@@ -652,23 +569,6 @@ namespace Yubico.YubiKey.Piv
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.ApplicationResetFailure));
-        }
-
-        private void UpdateManagementKey(IYubiKeyDevice yubiKey) =>
-            ManagementKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey)
-                ? GetManagementKeyAlgorithm()
-                : PivAlgorithm.TripleDes; // Default for keys with firmware version < 5.7
-
-        private PivAlgorithm GetManagementKeyAlgorithm()
-        {
-            GetMetadataResponse response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-
-            PivMetadata metadata = response.GetData();
-            return metadata.Algorithm;
         }
     }
 }

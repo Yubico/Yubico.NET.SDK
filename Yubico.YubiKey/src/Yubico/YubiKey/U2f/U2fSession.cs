@@ -21,6 +21,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
@@ -76,7 +77,7 @@ namespace Yubico.YubiKey.U2f
     {
         private const double MaxTimeoutSeconds = 30.0;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<U2fSession>();
         private bool _disposed;
 
         // The default constructor is explicitly defined to show that we do not want it used.
@@ -314,7 +315,7 @@ namespace Yubico.YubiKey.U2f
                                          TimeSpan timeout)
         {
             _log.LogInformation("Register a new U2F credential.");
-            RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, true);
+            var response = CommonRegister(applicationId, clientDataHash, timeout, true);
 
             // If everything worked, this will return the correct result. If
             // there was an error, this will throw an exception.
@@ -422,7 +423,7 @@ namespace Yubico.YubiKey.U2f
                                 [MaybeNullWhen(returnValue: false)] out RegistrationData registrationData)
         {
             _log.LogInformation("Try to register a new U2F credential.");
-            RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, false);
+            var response = CommonRegister(applicationId, clientDataHash, timeout, false);
 
             if (response.Status == ResponseStatus.Success)
             {
@@ -449,10 +450,10 @@ namespace Yubico.YubiKey.U2f
             Task? touchMessageTask = null;
             var keyEntryData = new KeyEntryData();
 
-            TimeSpan timeoutToUse = GetTimeoutToUse(timeout);
+            var timeoutToUseTimeSpan = GetTimeoutToUse(timeout);
 
             var command = new RegisterCommand(applicationId, clientDataHash);
-            RegisterResponse response = Connection.SendCommand(command);
+            var response = Connection.SendCommand(command);
 
             // This should only apply to FIPS series devices.
             // This response happens if the PIN is not verified.
@@ -490,8 +491,8 @@ namespace Yubico.YubiKey.U2f
                         Thread.Sleep(100);
                         response = Connection.SendCommand(command);
                     }
-                    while (response.Status == ResponseStatus.ConditionsNotSatisfied
-                           && timer.Elapsed < timeoutToUse);
+                    while (response.Status == ResponseStatus.ConditionsNotSatisfied &&
+                           timer.Elapsed < timeoutToUseTimeSpan);
 
                     // Did we break out because of timeout or because the
                     // response was something other than ConditionsNotSatisfied.
@@ -576,7 +577,7 @@ namespace Yubico.YubiKey.U2f
             var command = new AuthenticateCommand(U2fAuthenticationType.CheckOnly, applicationId, clientDataHash,
                 keyHandle);
 
-            AuthenticateResponse response = Connection.SendCommand(command);
+            var response = Connection.SendCommand(command);
 
             // The standard specifies that if the key handle matches, the token
             // must respond with the test-of-user-presence error. If the key
@@ -696,8 +697,7 @@ namespace Yubico.YubiKey.U2f
         {
             _log.LogInformation("Authenticate a U2F credential.");
 
-            AuthenticateResponse response = CommonAuthenticate(
-                applicationId, clientDataHash, keyHandle, timeout, requireProofOfPresence);
+            var response = CommonAuthenticate(applicationId, clientDataHash, keyHandle, timeout, requireProofOfPresence);
 
             // If everything worked, this will return the correct result. If
             // there was an error, this will throw an exception.
@@ -770,9 +770,7 @@ namespace Yubico.YubiKey.U2f
         {
             _log.LogInformation("Try to authenticate a U2F credential.");
 
-            AuthenticateResponse response = CommonAuthenticate(
-                applicationId, clientDataHash, keyHandle, timeout, requireProofOfPresence);
-
+            var response = CommonAuthenticate(applicationId, clientDataHash, keyHandle, timeout, requireProofOfPresence);
             if (response.Status == ResponseStatus.Success)
             {
                 authenticationData = response.GetData();
@@ -798,15 +796,14 @@ namespace Yubico.YubiKey.U2f
             Task? touchMessageTask = null;
             var keyEntryData = new KeyEntryData();
 
-            TimeSpan timeoutToUse = GetTimeoutToUse(timeout);
+            var timeoutToUseTimeSpan = GetTimeoutToUse(timeout);
 
-            U2fAuthenticationType authType = requireProofOfPresence
+            var authType = requireProofOfPresence
                 ? U2fAuthenticationType.EnforceUserPresence
                 : U2fAuthenticationType.DontEnforceUserPresence;
 
             var command = new AuthenticateCommand(authType, applicationId, clientDataHash, keyHandle);
-            AuthenticateResponse response = Connection.SendCommand(command);
-
+            var response = Connection.SendCommand(command);
             if (response.Status == ResponseStatus.ConditionsNotSatisfied)
             {
                 // On a separate thread, call the KeyCollector to announce we
@@ -828,8 +825,8 @@ namespace Yubico.YubiKey.U2f
                         Thread.Sleep(100);
                         response = Connection.SendCommand(command);
                     }
-                    while (response.Status == ResponseStatus.ConditionsNotSatisfied
-                           && timer.Elapsed < timeoutToUse);
+                    while (response.Status == ResponseStatus.ConditionsNotSatisfied &&
+                           timer.Elapsed < timeoutToUseTimeSpan);
 
                     // Did we break out because of timeout or because the
                     // response was something other than ConditionsNotSatisfied.
@@ -885,7 +882,7 @@ namespace Yubico.YubiKey.U2f
         /// </remarks>
         public static byte[] EncodeAndHashString(string data)
         {
-            using (SHA256 sha = CryptographyProviders.Sha256Creator())
+            using (var sha = CryptographyProviders.Sha256Creator())
             {
                 byte[] encodedString = Encoding.UTF8.GetBytes(data);
 

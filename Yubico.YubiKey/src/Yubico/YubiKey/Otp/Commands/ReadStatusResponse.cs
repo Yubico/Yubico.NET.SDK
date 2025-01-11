@@ -65,23 +65,23 @@ namespace Yubico.YubiKey.Otp.Commands
                 };
             }
 
-            ReadOnlySpan<byte> responseApduData = ResponseApdu.Data.Span;
+            var responseApduSpan = ResponseApdu.Data.Span;
 
             return new OtpStatus
             {
                 FirmwareVersion = new FirmwareVersion
                 {
-                    Major = responseApduData[0],
-                    Minor = responseApduData[1],
-                    Patch = responseApduData[2]
+                    Major = responseApduSpan[0],
+                    Minor = responseApduSpan[1],
+                    Patch = responseApduSpan[2]
                 },
-                SequenceNumber = responseApduData[3],
-                ShortPressConfigured = (responseApduData[4] & ShortPressValidMask) != 0,
-                LongPressConfigured = (responseApduData[4] & LongPressValidMask) != 0,
-                ShortPressRequiresTouch = (responseApduData[4] & ShortPressTouchMask) != 0,
-                LongPressRequiresTouch = (responseApduData[4] & LongPressTouchMask) != 0,
-                LedBehaviorInverted = (responseApduData[4] & LedInvertedMask) != 0,
-                TouchLevel = responseApduData[5],
+                SequenceNumber = responseApduSpan[3],
+                ShortPressConfigured = (responseApduSpan[4] & ShortPressValidMask) != 0,
+                LongPressConfigured = (responseApduSpan[4] & LongPressValidMask) != 0,
+                ShortPressRequiresTouch = (responseApduSpan[4] & ShortPressTouchMask) != 0,
+                LongPressRequiresTouch = (responseApduSpan[4] & LongPressTouchMask) != 0,
+                LedBehaviorInverted = (responseApduSpan[4] & LedInvertedMask) != 0,
+                TouchLevel = responseApduSpan[5],
             };
         }
     }

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -48,11 +47,10 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </returns>
         public int GetData()
         {
-            BioEnrollmentData enrollData = _response.GetData();
-
-            if (!(enrollData.Modality is null))
+            var bioEnrollmentData = _response.GetData();
+            if (!(bioEnrollmentData.Modality is null))
             {
-                return enrollData.Modality.Value;
+                return bioEnrollmentData.Modality.Value;
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

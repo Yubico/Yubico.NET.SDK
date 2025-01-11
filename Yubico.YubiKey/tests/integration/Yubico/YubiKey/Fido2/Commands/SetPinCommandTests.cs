@@ -21,7 +21,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    [Trait("Category", "RequiresBio")]
+    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
     public class SetPinCommandTests : SimpleIntegrationTestConnection
     {
         private const int Fido2AuthPin = 1;

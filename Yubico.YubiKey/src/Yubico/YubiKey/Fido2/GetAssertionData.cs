@@ -131,32 +131,35 @@ namespace Yubico.YubiKey.Fido2
             try
             {
                 var map = new CborMap<int>(cborEncoding);
+                var stringCborMap = map.ReadMap<string>(KeyCredential);
 
-                CborMap<string> stringMap = map.ReadMap<string>(KeyCredential);
-                CredentialId = new CredentialId()
+                CredentialId = new CredentialId
                 {
-                    Type = stringMap.ReadTextString(KeyCredentialType),
-                    Id = stringMap.ReadByteString(KeyCredentialId),
+                    Type = stringCborMap.ReadTextString(KeyCredentialType),
+                    Id = stringCborMap.ReadByteString(KeyCredentialId),
                 };
-                if (stringMap.Contains(KeyCredentialTransports))
+
+                if (stringCborMap.Contains(KeyCredentialTransports))
                 {
-                    IReadOnlyList<string> transports = stringMap.ReadArray<string>(KeyCredentialTransports);
+                    var transports = stringCborMap.ReadArray<string>(KeyCredentialTransports);
                     foreach (string current in transports)
                     {
                         CredentialId.AddTransport(current);
                     }
                 }
+
                 AuthenticatorData = new AuthenticatorData(map.ReadByteString(KeyAuthData));
                 Signature = map.ReadByteString(KeySignature);
                 if (map.Contains(KeyUser))
                 {
-                    stringMap = map.ReadMap<string>(KeyUser);
-                    User = new UserEntity(stringMap.ReadByteString(KeyUserId))
+                    stringCborMap = map.ReadMap<string>(KeyUser);
+                    User = new UserEntity(stringCborMap.ReadByteString(KeyUserId))
                     {
-                        Name = (string?)stringMap.ReadOptional<string>(KeyUserName),
-                        DisplayName = (string?)stringMap.ReadOptional<string>(KeyUserDisplayName)
+                        Name = (string?)stringCborMap.ReadOptional<string>(KeyUserName),
+                        DisplayName = (string?)stringCborMap.ReadOptional<string>(KeyUserDisplayName)
                     };
                 }
+
                 NumberOfCredentials = (int?)map.ReadOptional<int>(KeyNumberCredentials);
                 UserSelected = (bool?)map.ReadOptional<bool>(KeyUserSelected);
                 _keyData = (byte[]?)map.ReadOptional<byte[]>(KeyLargeBlobKey);
@@ -198,14 +201,15 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public bool VerifyAssertion(CoseKey publicKey, ReadOnlyMemory<byte> clientDataHash)
         {
-            using SHA256 digester = CryptographyProviders.Sha256Creator();
-            _ = digester.TransformBlock(
+            using var digesterHashAlgorithm = CryptographyProviders.Sha256Creator();
+            _ = digesterHashAlgorithm.TransformBlock(
                 AuthenticatorData.EncodedAuthenticatorData.ToArray(), 0,
                 AuthenticatorData.EncodedAuthenticatorData.Length, null, 0);
-            _ = digester.TransformFinalBlock(clientDataHash.ToArray(), 0, clientDataHash.Length);
+
+            _ = digesterHashAlgorithm.TransformFinalBlock(clientDataHash.ToArray(), 0, clientDataHash.Length);
 
             using var ecdsaVfy = new EcdsaVerify(publicKey);
-            return ecdsaVfy.VerifyDigestedData(digester.Hash, Signature.ToArray());
+            return ecdsaVfy.VerifyDigestedData(digesterHashAlgorithm.Hash, Signature.ToArray());
         }
 
         /// <summary>

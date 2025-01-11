@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public bool RunGetPinOnlyMode()
         {
-            if (PinOnlyMode.RunGetPivPinOnlyMode(_yubiKeyChosen, out PivPinOnlyMode mode))
+            if (PinOnlyMode.RunGetPivPinOnlyMode(_yubiKeyChosen, out var mode))
             {
                 SampleMenu.WriteMessage(MessageType.Title, 0, "PIN-only mode: " + mode.ToString() + "\n");
                 return true;
@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public bool RunSetPinOnlyMode()
         {
-            if (!GetRequestedPinOnlyMode(out PivPinOnlyMode mode))
+            if (!GetRequestedPinOnlyMode(out var mode))
             {
                 return RunInvalidEntry();
             }
@@ -178,7 +178,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "overwritten. The result is the PivPinOnly mode of the YubiKey");
             SampleMenu.WriteMessage(MessageType.Title, 0, "after recovery.\n");
             if (PinOnlyMode.RunRecoverPivPinOnlyMode(
-                _yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate, out PivPinOnlyMode mode))
+                _yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate, out var mode))
             {
                 SampleMenu.WriteMessage(MessageType.Title, 0, "PIN-only mode: " + mode.ToString() + "\n");
                 return true;
@@ -194,17 +194,17 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return RunInvalidEntry();
             }
 
-            if (!GetAsymmetricAlgorithm(out PivAlgorithm algorithm))
+            if (!GetAsymmetricAlgorithm(out var algorithm))
             {
                 return RunInvalidEntry();
             }
 
-            if (!GetPinPolicy(out PivPinPolicy pinPolicy))
+            if (!GetPinPolicy(out var pinPolicy))
             {
                 return RunInvalidEntry();
             }
 
-            if (!GetTouchPolicy(out PivTouchPolicy touchPolicy))
+            if (!GetTouchPolicy(out var touchPolicy))
             {
                 return RunInvalidEntry();
             }
@@ -216,7 +216,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 algorithm,
                 pinPolicy,
                 touchPolicy,
-                out SamplePivSlotContents newSlotContents))
+                out var newSlotContents))
             {
                 newSlotContents.PrintPublicKeyPem();
                 AddSlotContents(newSlotContents);
@@ -233,17 +233,17 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return RunInvalidEntry();
             }
 
-            if (!GetAsymmetricAlgorithm(out PivAlgorithm algorithm))
+            if (!GetAsymmetricAlgorithm(out var algorithm))
             {
                 return RunInvalidEntry();
             }
 
-            if (!GetPinPolicy(out PivPinPolicy pinPolicy))
+            if (!GetPinPolicy(out var pinPolicy))
             {
                 return RunInvalidEntry();
             }
 
-            if (!GetTouchPolicy(out PivTouchPolicy touchPolicy))
+            if (!GetTouchPolicy(out var touchPolicy))
             {
                 return RunInvalidEntry();
             }
@@ -253,8 +253,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return false;
             }
 
-            PivPrivateKey pivPrivateKey = KeyConverter.GetPivPrivateKeyFromPem(pemKey.ToCharArray());
-            PivPublicKey pivPublicKey = KeyConverter.GetPivPublicKeyFromPem(pemKey.ToCharArray());
+            var pivPrivateKey = KeyConverter.GetPivPrivateKeyFromPem(pemKey.ToCharArray());
+            var pivPublicKey = KeyConverter.GetPivPublicKeyFromPem(pemKey.ToCharArray());
 
             if (KeyPairs.RunImportPrivateKey(
                 _yubiKeyChosen,
@@ -264,7 +264,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 slotNumber,
                 pinPolicy,
                 touchPolicy,
-                out SamplePivSlotContents newSlotContents))
+                out var newSlotContents))
             {
                 newSlotContents.PrintPublicKeyPem();
                 AddSlotContents(newSlotContents);
@@ -294,7 +294,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // the code needs to know if the key's algorithm is RSA. If
             // so, it will need to pad the digest.
             // Hence, get the algorithm.
-            SamplePivSlotContents signSlotContents = _slotContentsList.Find(x => x.SlotNumber == slotNumber);
+            var signSlotContents = _slotContentsList.Find(x => x.SlotNumber == slotNumber);
             if (signSlotContents is null)
             {
                 return RunInvalidEntry();
@@ -302,7 +302,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             // This sample code will use SHA-384 for EccP384, and SHA-256
             // for all other algorithms.
-            HashAlgorithmName hashAlgorithm = HashAlgorithmName.SHA384;
+            var hashAlgorithm = HashAlgorithmName.SHA384;
             if (signSlotContents.Algorithm != PivAlgorithm.EccP384)
             {
                 hashAlgorithm = HashAlgorithmName.SHA256;
@@ -312,7 +312,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             // This sample code will always use PSS for the RSA padding
             // scheme.
-            RSASignaturePadding signPaddingScheme = RSASignaturePadding.Pss;
+            var signPaddingScheme = RSASignaturePadding.Pss;
 
             if (!PrivateKeyOperations.RunSignData(
                 _yubiKeyChosen,
@@ -359,7 +359,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             // It is possible to decrypt only if the key is RSA.
-            SamplePivSlotContents decryptSlotContents = _slotContentsList.Find(x => x.SlotNumber == slotNumber);
+            var decryptSlotContents = _slotContentsList.Find(x => x.SlotNumber == slotNumber);
             if (decryptSlotContents is null)
             {
                 return RunInvalidEntry();
@@ -380,7 +380,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             // This sample uses OAEP with SHA-256 as the padding scheme
             // for all RSA key sizes.
-            RSAEncryptionPadding encryptPaddingScheme = RSAEncryptionPadding.OaepSHA256;
+            var encryptPaddingScheme = RSAEncryptionPadding.OaepSHA256;
 
             if (!PublicKeyOperations.SampleEncryptRsa(
                 decryptSlotContents.PublicKey,
@@ -424,7 +424,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             // It is possible to perform Key Agreement only if the key is ECC.
-            SamplePivSlotContents keyAgreeSlotContents = _slotContentsList.Find(x => x.SlotNumber == slotNumber);
+            var keyAgreeSlotContents = _slotContentsList.Find(x => x.SlotNumber == slotNumber);
             if (keyAgreeSlotContents is null)
             {
                 return RunInvalidEntry();
@@ -447,7 +447,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // send the shared secret, but for this sample, we're
             // returning it as well so that we can compare the two
             // results to make sure they match.
-            HashAlgorithmName hashAlgorithm = HashAlgorithmName.SHA256;
+            var hashAlgorithm = HashAlgorithmName.SHA256;
             if (keyAgreeSlotContents.Algorithm == PivAlgorithm.EccP384)
             {
                 hashAlgorithm = HashAlgorithmName.SHA384;
@@ -462,7 +462,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return false;
             }
 
-            PivPublicKey correspondentKey = KeyConverter.GetPivPublicKeyFromPem(correspondentPublicKey);
+            var correspondentKey = KeyConverter.GetPivPublicKeyFromPem(correspondentPublicKey);
 
             if (!PrivateKeyOperations.RunKeyAgree(
                 _yubiKeyChosen,
@@ -499,7 +499,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return RunInvalidEntry();
             }
 
-            SamplePivSlotContents requestSlotContents = _slotContentsList.Find(x => x.SlotNumber == slotNumber);
+            var requestSlotContents = _slotContentsList.Find(x => x.SlotNumber == slotNumber);
             if (requestSlotContents is null)
             {
                 return RunInvalidEntry();
@@ -511,7 +511,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             nameBuilder.AddNameElement(X500NameElement.Locality, "Palo Alto");
             nameBuilder.AddNameElement(X500NameElement.Organization, "Fake");
             nameBuilder.AddNameElement(X500NameElement.CommonName, "Fake Cert");
-            X500DistinguishedName sampleCertName = nameBuilder.GetDistinguishedName();
+            var sampleCertName = nameBuilder.GetDistinguishedName();
             SampleCertificateOperations.GetCertRequest(
                 _yubiKeyChosen,
                 _keyCollector.SampleKeyCollectorDelegate,
@@ -531,7 +531,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return RunInvalidEntry();
             }
 
-            SamplePivSlotContents selfSignedSlotContents = _slotContentsList.Find(x => x.SlotNumber == slotNumber);
+            var selfSignedSlotContents = _slotContentsList.Find(x => x.SlotNumber == slotNumber);
             if (selfSignedSlotContents is null)
             {
                 return RunInvalidEntry();
@@ -557,7 +557,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return RunInvalidEntry();
             }
 
-            SamplePivSlotContents requestorSlotContents = _slotContentsList.Find(x => x.SlotNumber == requestorSlotNumber);
+            var requestorSlotContents = _slotContentsList.Find(x => x.SlotNumber == requestorSlotNumber);
             if (requestorSlotContents is null)
             {
                 return RunInvalidEntry();
@@ -569,7 +569,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return RunInvalidEntry();
             }
 
-            SamplePivSlotContents signerSlotContents = _slotContentsList.Find(x => x.SlotNumber == signerSlotNumber);
+            var signerSlotContents = _slotContentsList.Find(x => x.SlotNumber == signerSlotNumber);
             if (signerSlotContents is null)
             {
                 return RunInvalidEntry();
@@ -602,7 +602,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 _yubiKeyChosen,
                 _keyCollector.SampleKeyCollectorDelegate,
                 slotNumber,
-                out X509Certificate2 certificate);
+                out var certificate);
 
             byte[] certDer = certificate.Export(X509ContentType.Cert);
             char[] certPem = PemOperations.BuildPem("CERTIFICATE", certDer);
@@ -620,7 +620,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             KeyPairs.RunCreateAttestationStatement(
                 _yubiKeyChosen,
                 slotNumber,
-                out X509Certificate2 certificate);
+                out var certificate);
 
             byte[] certDer = certificate.Export(X509ContentType.Cert);
             char[] certPem = PemOperations.BuildPem("CERTIFICATE", certDer);
@@ -630,7 +630,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public bool RunGetAttestationCert()
         {
-            KeyPairs.RunGetAttestationCert(_yubiKeyChosen, out X509Certificate2 certificate);
+            KeyPairs.RunGetAttestationCert(_yubiKeyChosen, out var certificate);
 
             byte[] certDer = certificate.Export(X509ContentType.Cert);
             char[] certPem = PemOperations.BuildPem("CERTIFICATE", certDer);

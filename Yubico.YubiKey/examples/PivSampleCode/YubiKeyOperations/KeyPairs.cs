@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 pivSession.KeyCollector = KeyCollectorDelegate;
 
-                PivPublicKey pivPublicKey = pivSession.GenerateKeyPair(slotNumber, algorithm, pinPolicy, touchPolicy);
+                var pivPublicKey = pivSession.GenerateKeyPair(slotNumber, algorithm, pinPolicy, touchPolicy);
 
                 // At this point you will likely want to save the public key and
                 // other information. For this sample, we're simply going to

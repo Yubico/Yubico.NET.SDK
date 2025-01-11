@@ -24,10 +24,11 @@ namespace Yubico.YubiKey.Pipelines
     {
         public OathResponseChainingTransform(IApduTransform pipeline) : base(pipeline)
         {
-
         }
 
-        protected override IYubiKeyCommand<YubiKeyResponse> CreateGetResponseCommand(CommandApdu originatingCommand, short SW2) =>
+        protected override IYubiKeyCommand<YubiKeyResponse> CreateGetResponseCommand(
+            CommandApdu originatingCommand,
+            short SW2) =>
             new Oath.Commands.GetResponseCommand(originatingCommand, SW2);
     }
 }

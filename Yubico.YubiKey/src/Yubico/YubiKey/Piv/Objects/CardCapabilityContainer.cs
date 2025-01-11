@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
@@ -110,7 +111,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int UnusedTag8 = 0xFE;
 
         private bool _disposed;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<CardCapabilityContainer>();
 
         /// <summary>
         /// The full Unique Card Identifier which consists of the AID || CardID.
@@ -213,7 +214,7 @@ namespace Yubico.YubiKey.Piv.Objects
             _log.LogInformation("Set the CardId of CardCapabilityContainer with a random value.");
             Clear();
 
-            using (RandomNumberGenerator randomObject = CryptographyProviders.RngCreator())
+            using (var randomObject = CryptographyProviders.RngCreator())
             {
                 randomObject.GetBytes(_uniqueCardIdentifier, CardIdOffset, CardIdLength);
             }
@@ -351,7 +352,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (isValid)
             {
                 _log.LogInformation("Decode data into CardCapabilityContainer: UniqueId.");
-                if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> encodedUniqueId, UniqueCardIdTag))
+                if (tlvReader.TryReadValue(out var encodedUniqueId, UniqueCardIdTag))
                 {
                     if (encodedUniqueId.Length == UniqueCardIdLength &&
                         MemoryExtensions.SequenceEqual<byte>(encodedUniqueId.Slice(AidOffset, AidLength).Span, ApplicationIdentifier.Span))
@@ -380,34 +381,34 @@ namespace Yubico.YubiKey.Piv.Objects
             }
 
             _log.LogInformation("Decode data into CardCapabilityContainer: FixedValues.");
-            bool returnValue = isValid;
+            bool readSuccessful = isValid;
 
-            Tuple<int, int, byte>[] elementList = GetFixedTupleArray();
+            var elementList = GetFixedTupleArray();
 
             int index = 0;
-            while (returnValue && index < elementList.Length)
+            while (readSuccessful && index < elementList.Length)
             {
                 if (elementList[index].Item2 == 0)
                 {
-                    returnValue = tlvReader.TryReadValue(out ReadOnlyMemory<byte> currentValue, elementList[index].Item1) &&
+                    readSuccessful = tlvReader.TryReadValue(out var currentValue, elementList[index].Item1) &&
                               currentValue.Length == elementList[index].Item2;
                 }
                 else
                 {
-                    returnValue = tlvReader.TryReadByte(out byte currentValue, elementList[index].Item1) &&
+                    readSuccessful = tlvReader.TryReadByte(out byte currentValue, elementList[index].Item1) &&
                         currentValue == elementList[index].Item3;
                 }
 
                 index++;
             }
 
-            return returnValue;
+            return readSuccessful;
         }
 
         private void WriteFixedValues(TlvWriter tlvWriter)
         {
-            Tuple<int, int, byte>[] elementList = GetFixedTupleArray();
-            ReadOnlySpan<byte> emptySpan = ReadOnlySpan<byte>.Empty;
+            var elementList = GetFixedTupleArray();
+            var emptySpan = ReadOnlySpan<byte>.Empty;
 
             int index = 0;
             do

@@ -29,8 +29,10 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// If the data had been signed by an RSA key, the data will be
     /// random-looking data the same size as the key. That is, for a 1024-bit RSA
-    /// key, the signature is 128 bytes, and for a 2048-bit key, the signature is
-    /// 256 bytes.
+    /// key, the signature is 128 bytes, for a 2048-bit key, the signature is
+    /// 256 bytes, for a 3072-bit key, the signature is
+    /// 384 bytes, and for a 4096-bit key, the signature is
+    /// 512 bytes.
     /// </para>
     /// <para>If the data had been signed by an ECC key, the signature will be the
     /// DER encoding of the following ASN.1 definition.

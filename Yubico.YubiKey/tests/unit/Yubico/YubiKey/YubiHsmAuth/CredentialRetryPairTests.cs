@@ -29,14 +29,14 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [Fact]
         public void Constructor_ReturnsObject()
         {
-            CredentialRetryPair pair = new CredentialRetryPair(cred, 0);
+            var pair = new CredentialRetryPair(cred, 0);
             Assert.NotNull(pair);
         }
 
         [Fact]
         public void Constructor_Given2Retries_SetsRetriesTo2()
         {
-            CredentialRetryPair pair = new CredentialRetryPair(cred, 2);
+            var pair = new CredentialRetryPair(cred, 2);
             Assert.Equal(2, pair.Retries);
         }
 

@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace Yubico.YubiKey.Sample.SharedCode
@@ -57,8 +56,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
             }
 
             // Find all currently connected YubiKeys.
-            IEnumerable<IYubiKeyDevice> yubiKeyEnumerable = YubiKeyDevice.FindByTransport(transport);
-            IYubiKeyDevice[] yubiKeyArray = yubiKeyEnumerable.ToArray();
+            var yubiKeyArray = YubiKeyDevice.FindByTransport(transport).ToArray();
 
             // Are there any?
             if (yubiKeyArray.Length == 0)

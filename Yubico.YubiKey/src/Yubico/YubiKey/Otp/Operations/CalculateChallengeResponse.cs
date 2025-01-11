@@ -139,7 +139,8 @@ namespace Yubico.YubiKey.Otp.Operations
                         OtpSlot!.Value,
                         _algorithm,
                         _challenge);
-                    ChallengeResponseResponse response = Connection.SendCommand(cmd);
+                    
+                    var response = Connection.SendCommand(cmd);
                     if (response.Status != ResponseStatus.Success)
                     {
                         throw new InvalidOperationException(string.Format(

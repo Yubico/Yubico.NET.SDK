@@ -101,11 +101,19 @@ Read more about FIDO2 [here](xref:Fido2Overview).
 ### YubiHSM Auth
 
 YubiHSM Auth is a YubiKey CCID application that stores the long-lived credentials used to establish
-secure sessions with a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol 3
-(SCP03). YubiHSM Auth is supported by YubiKey firmware version 5.4.3.
+secure sessions with a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol (SCP).
+YubiHSM Auth is supported by YubiKey firmware version 5.4.3.
 
 YubiHSM Auth uses hardware to protect these long-lived credentials. In addition to providing robust
 security for the YubiHSM Auth application itself, this hardware protection subsequently increases the
 security of the default password-based solution for YubiHSM 2's authentication.
 
-Read more about YubiHSM Auth [here.](xref:YubiHsmAuthOverview)
+Read more about YubiHSM Auth [here](xref:YubiHsmAuthOverview).
+
+### Security Domain
+
+The Security Domain is a special application on the YubiKey responsible for managing secure communication channels and cryptographic keys.
+It implements protocols defined by [Global Platform Consortium](https://globalplatform.org/) that provide confidentiality and integrity for
+commands sent between host applications and the YubiKey.
+
+Read more about Security Domain [here](xref:SecurityDomainOverview).

@@ -82,14 +82,16 @@ will need to be able to "convert" between `SubjectPublicKeyInfo` and `PivPublicK
 
 When you generate a new key pair on the PIV application, you are given the public key. The
 key is returned as an instance of the `PivPublicKey` class. From that class you can obtain
-all the information about the key. The object has a property for algorithm:
+all the information about the key. The object has a property for the algorithm, which can include the following:
 
 * RSA 1024
 * RSA 2048
+* RSA 3072
+* RSA 4096
 * ECC P256
 * ECC P384
 
-The object also has properties for
+The object also has properties for:
 
 * PIV-standard encoding
 * YubiKey encoding.

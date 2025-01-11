@@ -631,15 +631,21 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="authenticatorInfo">
         /// The FIDO2 <c>AuthenticatorInfo</c> for the YubiKey being used.
         /// </param>
+        /// <param name="enforceCredProtectPolicy">
+        /// Determines the behavior taken when the authenticator does not support the
+        /// requested credProtect extension. Throws NotSupportedException when true, returns
+        /// silently without adding the extension when false.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <c>authenticatorInfo</c> arg is null.
         /// </exception>
-        /// <exception cref="ArgumentException">
+        /// <exception cref="NotSupportedException">
         /// The YubiKey does not support this extension, or the input values were
         /// not correct.
         /// </exception>
         public void AddCredProtectExtension(
             CredProtectPolicy credProtectPolicy,
+            bool enforceCredProtectPolicy,
             AuthenticatorInfo authenticatorInfo)
         {
             if (credProtectPolicy == CredProtectPolicy.None)
@@ -652,7 +658,12 @@ namespace Yubico.YubiKey.Fido2
             }
             if (!authenticatorInfo.Extensions.Contains<string>(KeyCredProtect))
             {
-                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+                if (enforceCredProtectPolicy && credProtectPolicy != CredProtectPolicy.UserVerificationOptional)
+                {
+                    throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+                }
+
+                return;
             }
 
             // The encoding is key/value where the key is "credProtect" and the
@@ -660,6 +671,11 @@ namespace Yubico.YubiKey.Fido2
             // values are 1, 2, or 3, so the encoding is simply 0x01, 02,or 03.
             AddExtension(KeyCredProtect, new byte[] { (byte)credProtectPolicy });
         }
+
+        /// <inheritdoc cref="AddCredProtectExtension(CredProtectPolicy,bool,AuthenticatorInfo)"/>
+        public void AddCredProtectExtension(CredProtectPolicy credProtectPolicy,
+                                            AuthenticatorInfo authenticatorInfo) =>
+            AddCredProtectExtension(credProtectPolicy, true, authenticatorInfo);
 
         /// <summary>
         /// Add an entry to the list of options.

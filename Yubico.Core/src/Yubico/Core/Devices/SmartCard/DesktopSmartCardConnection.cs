@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
-using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 using static Yubico.PlatformInterop.NativeMethods;
@@ -23,7 +23,7 @@ namespace Yubico.Core.Devices.SmartCard
 {
     public class DesktopSmartCardConnection : ISmartCardConnection
     {
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardConnection>();
         private readonly DesktopSmartCardDevice _device;
         private readonly SCardContext _context;
         private readonly SCardCardHandle _cardHandle;
@@ -31,7 +31,7 @@ namespace Yubico.Core.Devices.SmartCard
 
         private class TransactionScope : IDisposable
         {
-            private readonly Logger _log = Log.GetLogger();
+            private readonly ILogger _log = Logging.Log.GetLogger<TransactionScope>();
             private readonly DesktopSmartCardConnection _thisConnection;
             private readonly IDisposable? _logScope;
             private bool _disposedValue;
@@ -104,7 +104,7 @@ namespace Yubico.Core.Devices.SmartCard
             uint result = SCardBeginTransaction(_cardHandle);
             _log.SCardApiCall(nameof(SCardBeginTransaction), result);
 
-            // Sometime the smart card is left in a state where it needs to be reset prior to beginning
+            // Sometimes the smart card is left in a state where it needs to be reset prior to beginning
             // a transaction. We should automatically handle this case.
             if (result == ErrorCode.SCARD_W_RESET_CARD)
             {

@@ -240,7 +240,7 @@ namespace Yubico.YubiKey.Piv.Commands
         // Build this object to use TripleDES with the given key.
         private ICryptoTransform BuildTripleDes(byte[] keyData)
         {
-            using TripleDES tripleDesObject = CryptographyProviders.TripleDesCreator();
+            using var tripleDesObject = CryptographyProviders.TripleDesCreator();
 #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
             tripleDesObject.Mode = CipherMode.ECB;
 #pragma warning restore CA5358
@@ -269,7 +269,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     return BuildDesWithWeakKey(keyData);
                 }
 #pragma warning restore CA5351
-                using DES desObject = CryptographyProviders.DesCreator();
+                using var desObject = CryptographyProviders.DesCreator();
 #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
                 desObject.Mode = CipherMode.ECB;
 #pragma warning restore CA5358
@@ -323,11 +323,11 @@ namespace Yubico.YubiKey.Piv.Commands
             try
             {
 #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
-                using TripleDES tripleDesObject = CryptographyProviders.TripleDesCreator();
+                using var tripleDesObject = CryptographyProviders.TripleDesCreator();
                 tripleDesObject.Mode = CipherMode.ECB;
                 tripleDesObject.Padding = PaddingMode.None;
 
-                using DES desObject = CryptographyProviders.DesCreator();
+                using var desObject = CryptographyProviders.DesCreator();
                 desObject.Mode = CipherMode.ECB;
                 desObject.Padding = PaddingMode.None;
 #pragma warning restore CA5358

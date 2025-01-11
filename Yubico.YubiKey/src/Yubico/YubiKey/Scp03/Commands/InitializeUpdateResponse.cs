@@ -19,6 +19,7 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp03.Commands
 {
+    [Obsolete("Use new InitializeUpdateResponse instead")]
     internal class InitializeUpdateResponse : Scp03Response
     {
         public IReadOnlyCollection<byte> DiversificationData { get; protected set; }
@@ -44,7 +45,7 @@ namespace Yubico.YubiKey.Scp03.Commands
                 throw new ArgumentException(ExceptionMessages.IncorrectInitializeUpdateResponseData, nameof(responseApdu));
             }
 
-            ReadOnlySpan<byte> responseData = responseApdu.Data.Span;
+            var responseData = responseApdu.Data.Span;
             DiversificationData = new ReadOnlyCollection<byte>(responseData[0..10].ToArray());
             KeyInfo = new ReadOnlyCollection<byte>(responseData[10..13].ToArray());
             CardChallenge = new ReadOnlyCollection<byte>(responseData[13..21].ToArray());

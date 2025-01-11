@@ -1,4 +1,4 @@
-<!-- Copyright 2021 Yubico AB
+<!-- Copyright 2024 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,39 +21,101 @@ limitations under the License. -->
 
 # .NET YubiKey SDK
 
-This is a cross-platform, all encompassing SDK for the YubiKey aimed at large to mid-sized enterprise
-customers. This version is written against .NET Core, and will eventually include bindings to languages
-outside the direct .NET ecosystem.
+Enterprise-grade cross-platform SDK for YubiKey integration, built on .NET.
+
+## Table of Contents
+- [Quick Start](#quick-start)
+- [Documentation](#documentation)
+- [SDK Support](#sdk-support)
+- [SDK Packages](#sdk-packages)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [Security](#security)
+
+## Quick Start
+
+### Installation
+```bash
+dotnet add package Yubico.YubiKey
+```
+
+### Basic Usage
+```csharp
+using Yubico.YubiKey;
+
+// Chooses the first YubiKey found on the computer.
+IYubiKeyDevice? SampleChooseYubiKey()
+{
+    IEnumerable<IYubiKeyDevice> list = YubiKeyDevice.FindAll();
+    return list.First();
+}
+```
 
 ## Documentation
 
-The public documentation for this project is located
-at [https://docs.yubico.com/yesdk/](https://docs.yubico.com/yesdk/).
-Here you can find both API reference and a user's manual that describes the concepts that this SDK exposes.
+📚 Official documentation: [docs.yubico.com/yesdk](https://docs.yubico.com/yesdk/)
+- User Manual
+- API Reference
 
-## Project structure
+## SDK Support
 
-The root of this repository contains the various projects that make up the SDK. Inside each project
-folder, you will find:
+Supported Target Frameworks:
+- .NET Framework 4.7
+- .NET Standard 2.1
+- .NET 6 and above
 
-- docs - Supplementary documentation content for the SDK's API documentation.
-- examples - Example code demonstrating various capabilities of the SDK.
-- src - All source code that makes up the project.
-- tests - Unit and integration tests for the project.
+## SDK Packages
+
+### Public Assemblies
+
+#### Yubico.YubiKey
+Primary assembly containing all classes and types needed for YubiKey interaction.
+
+#### Yubico.Core
+Platform abstraction layer (PAL) providing:
+- OS-specific functionality abstraction
+- Device enumeration
+- Utility classes for various encoding/decoding operations:
+  - Base16
+  - Base32
+  - Tag-Length-Value (BER Encoded TLV)
+  - ModHex
+
+### Internal Assemblies
+
+#### Yubico.DotNetPolyfills
+> ⚠️ **Not for public use**  
+> Backports BCL features needed by the SDK.
+
+#### Yubico.NativeShims
+> ⚠️ **Not for public use**  
+> 🔧 **Unmanaged Library**  
+> Provides stable ABI for P/Invoke operations in Yubico.Core.
+
+## Project Structure
+
+Repository organization:
+- 📁 `docs/` - API documentation and supplementary content
+- 📁 `examples/` - Sample code and demonstrations
+- 📁 `src/` - Source code for all projects
+- 📁 `tests/` - Unit and integration tests
 
 ## Contributing
 
-Please read the [Contributor's Guide](./CONTRIBUTING.md) and [Getting started](./contributordocs/getting-started.md)
-pages before opening a pull request on this project.
+1. Read the [Contributor's Guide](./CONTRIBUTING.md)
+2. Review [Getting Started](./contributordocs/getting-started.md)
+3. Submit your Pull Request
 
-### Building
+### Building the Project
 
-Read the [Getting started](./contributordocs/getting-started.md) page to understand the prerequisites needed
-to build. Once those have been installed, you should be able to load the Yubico.NET.SDK.sln file and build.
+Prerequisites:
+1. Install required tools (see [Getting Started](./contributordocs/getting-started.md))
+2. Load `Yubico.NET.SDK.sln` into your IDE.
+3. Build solution
 
-Note that it is also possible to build the DocFX output at the same time as building the libraries. However,
-that is not done by default.
+---
 
-If you want to build the DocFX output when you build the libraries using Visual Studio, open the Visual
-Studio solution file, and open `Build:Configuration Manager...`. In the resulting window, under
-`Active solution configuration:` is a drop-down menu. Select `ReleaseWithDocs`.
+## Connect with us
+
+📫 Need help? [Create an issue](https://github.com/Yubico/Yubico.NET.SDK/issues/new/choose)  
+📖 Read our blog for the latest Yubico updates [here](https://www.yubico.com/blog/)

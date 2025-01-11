@@ -51,13 +51,13 @@ namespace Yubico.YubiKey.Fido2.Commands
                 throw new MalformedYubiKeyResponseException(ExceptionMessages.UnknownFidoError);
             }
 
-            ReadOnlySpan<byte> responseApduData = ResponseApdu.Data.Span;
+            var responseApduDataSpan = ResponseApdu.Data.Span;
 
-            return new FirmwareVersion()
+            return new FirmwareVersion
             {
-                Major = responseApduData[13],
-                Minor = responseApduData[14],
-                Patch = responseApduData[15]
+                Major = responseApduDataSpan[13],
+                Minor = responseApduDataSpan[14],
+                Patch = responseApduDataSpan[15]
             };
         }
     }

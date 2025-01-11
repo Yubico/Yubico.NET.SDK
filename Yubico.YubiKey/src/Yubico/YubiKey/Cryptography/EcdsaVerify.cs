@@ -182,10 +182,11 @@ namespace Yubico.YubiKey.Cryptography
                 throw new ArgumentNullException(nameof(pivPublicKey));
             }
 
-            ReadOnlySpan<byte> pubPoint = pivPublicKey is PivEccPublicKey eccKey
-                ? eccKey.PublicPoint : ReadOnlySpan<byte>.Empty;
+            var publicPointSpan = pivPublicKey is PivEccPublicKey eccKey
+                ? eccKey.PublicPoint 
+                : ReadOnlySpan<byte>.Empty;
 
-            ECDsa = ConvertPublicKey(pubPoint.ToArray());
+            ECDsa = ConvertPublicKey(publicPointSpan.ToArray());
         }
 
         /// <summary>
@@ -387,7 +388,7 @@ namespace Yubico.YubiKey.Cryptography
                 var eccCurve = ECCurve.CreateFromValue(oid);
                 var eccParams = new ECParameters
                 {
-                    Curve = (ECCurve)eccCurve
+                    Curve = eccCurve
                 };
 
                 eccParams.Q.X = xCoordinate;
@@ -401,18 +402,18 @@ namespace Yubico.YubiKey.Cryptography
 
         private static ECDsa CheckECDsa(ECDsa toCheck)
         {
-            ECParameters eccParams = toCheck.ExportParameters(false);
+            var ecParameters = toCheck.ExportParameters(false);
 
-            int coordinateLength = eccParams.Curve.Oid.Value switch
+            int coordinateLength = ecParameters.Curve.Oid.Value switch
             {
                 OidP256 => (P256EncodedPointLength - 1) / 2,
                 OidP384 => (P384EncodedPointLength - 1) / 2,
                 _ => -1,
             };
 
-            if (eccParams.Q.X.Length > 0 && eccParams.Q.X.Length <= coordinateLength)
+            if (ecParameters.Q.X.Length > 0 && ecParameters.Q.X.Length <= coordinateLength)
             {
-                if (eccParams.Q.Y.Length > 0 && eccParams.Q.Y.Length <= coordinateLength)
+                if (ecParameters.Q.Y.Length > 0 && ecParameters.Q.Y.Length <= coordinateLength)
                 {
                     return toCheck;
                 }
@@ -455,7 +456,7 @@ namespace Yubico.YubiKey.Cryptography
         // If the number of non-zero bytes is > CoordinateLength, return false.
         private static bool TryCopyNextInteger(TlvReader tlvReader, Memory<byte> signatureValue, int coordinateLength)
         {
-            if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> rsValue, IntegerTag))
+            if (tlvReader.TryReadValue(out var rsValue, IntegerTag))
             {
                 // strip any leading 00 bytes.
                 int length = rsValue.Length;

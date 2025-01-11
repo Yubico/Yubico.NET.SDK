@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -23,7 +22,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Application_Get_ReturnsYubiHsmAuth()
         {
-            ListCredentialsCommand command = new ListCredentialsCommand();
+            var command = new ListCredentialsCommand();
 
             Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
         }
@@ -31,7 +30,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Constructor_ReturnsObject()
         {
-            ListCredentialsCommand command = new ListCredentialsCommand();
+            var command = new ListCredentialsCommand();
 
             Assert.NotNull(command);
         }
@@ -39,7 +38,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Cla0()
         {
-            ListCredentialsCommand command = new ListCredentialsCommand();
+            var command = new ListCredentialsCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.Cla);
@@ -48,7 +47,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Ins0x05()
         {
-            ListCredentialsCommand command = new ListCredentialsCommand();
+            var command = new ListCredentialsCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0x05, apdu.Ins);
@@ -57,7 +56,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P1Is0()
         {
-            ListCredentialsCommand command = new ListCredentialsCommand();
+            var command = new ListCredentialsCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.P1);
@@ -66,7 +65,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_P2Is0()
         {
-            ListCredentialsCommand command = new ListCredentialsCommand();
+            var command = new ListCredentialsCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.P2);
@@ -75,7 +74,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataLength0()
         {
-            ListCredentialsCommand command = new ListCredentialsCommand();
+            var command = new ListCredentialsCommand();
             CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.Equal(0, apdu.Data.Length);

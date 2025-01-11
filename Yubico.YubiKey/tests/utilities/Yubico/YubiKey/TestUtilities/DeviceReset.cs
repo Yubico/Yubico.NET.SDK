@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using Yubico.YubiKey.Oath;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.YubiHsmAuth;

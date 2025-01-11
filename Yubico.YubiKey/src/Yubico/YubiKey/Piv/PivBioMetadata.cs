@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Piv.Commands;
@@ -62,7 +61,7 @@ namespace Yubico.YubiKey.Piv
             while (tlvReader.HasData)
             {
                 int tag = tlvReader.PeekTag();
-                ReadOnlyMemory<byte> value = tlvReader.ReadValue(tag);
+                var value = tlvReader.ReadValue(tag);
 
                 switch (tag)
                 {

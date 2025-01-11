@@ -16,6 +16,53 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.12.x Releases
+
+### 1.12.1
+
+Release date: December 19th, 2024
+
+Bug Fixes: Now selects correct device initializing Fido2Session [(#179)](https://github.com/Yubico/Yubico.NET.SDK/pull/179)
+
+
+### 1.12.0
+
+Release date: December 18th, 2024
+
+Features:
+
+- Security Domain application and Secure Channel Protocol (SCP) ([#164](https://github.com/Yubico/Yubico.NET.SDK/pull/164)):
+
+   - SCP11a/b/c is now supported for the PIV, OATH, OTP, and YubiHSM applications.
+   - SCP03 support has been extended to the OATH, OTP, and YubiHSM applications (previously PIV only).
+   - The Yubico.YubiKey.Scp namespace now provides all SCP and Security Domain functionality. This namepace replaces functionality in the Yubico.YubiKey.Scp03 namespace, which has been deprecated.
+   - The new `SecurityDomainSession` class provides an interface for managing the Security Domain application of a YubiKey. This includes SCP configuration (managing SCP03 key sets and SCP11 asymmetric keys and certificates) and creation of an encrypted communication channel with other YubiKey applications.
+   - New key parameter classes have been added: `ScpKeyParameters`, `Scp03KeyParameters`, `Scp11KeyParameters`, `ECKeyParameters`, `ECPrivateKeyParameters`, `ECPublicKeyParameters`.
+- [YubiKeyDeviceListener](xref:Yubico.YubiKey.YubiKeyDeviceListener) has been reconfigured to run the listeners in the background instead of the main thread. In addition, the listeners can now be [stopped](xref:Yubico.YubiKey.YubiKeyDeviceListener.StopListening) when needed to reclaim resources. Once stopped, the listeners can be restarted. ([#89](https://github.com/Yubico/Yubico.NET.SDK/pull/89))
+- Microsoft.Extensions.Logging.Console is now the default logger. To enable logging from a dependent project (e.g. unit tests, integration tests, an app), you can either add an appsettings.json to your project or use the ConfigureLoggerFactory. ([#139](https://github.com/Yubico/Yubico.NET.SDK/pull/139))
+- The SDK now uses inferred variable types (var) instead of explicit types in all projects except Yubico.Core. This change aims to improve code readability, reduce verbosity, and enhance developer productivity while maintaining type safety. ([#141](https://github.com/Yubico/Yubico.NET.SDK/pull/141))
+
+Bug Fixes:
+
+- The [PivSession.ChangeManagementKey](xref:Yubico.YubiKey.Piv.PivSession.ChangeManagementKey(Yubico.YubiKey.Piv.PivTouchPolicy)) method was incorrectly assuming Triple-DES was the default management key algorithm for FIPS keys. The SDK now verifies the management key alorithm based on key type and firmware version. ([#162](https://github.com/Yubico/Yubico.NET.SDK/pull/162), [#167](https://github.com/Yubico/Yubico.NET.SDK/pull/167))
+- The SDK now correctly sets the IYubiKeyDeviceInfo property [IsSkySeries](xref:Yubico.YubiKey.IYubiKeyDeviceInfo.IsSkySeries) to True for YubiKey Security Key Series Enterprise Edition keys. ([#158](https://github.com/Yubico/Yubico.NET.SDK/pull/158))
+- Exceptions are now caught when running PivSession.Dispose. This fixes an issue where the Dispose method could not close the Connection in the event of a disconnected YubiKey. ([#104](https://github.com/Yubico/Yubico.NET.SDK/issues/104))
+- A dynamic DLL resolution based on process architecture (x86/x64) has been implemented for NativeShims.dll. This fixes a reported issue with the NativeShims.dll location for 32-bit processes. ([#154](https://github.com/Yubico/Yubico.NET.SDK/pull/154))
+
+Miscellaneous:
+- Users are now able to verify that the NuGet package has been generated from our repository using [Github Attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) ([#169](https://github.com/Yubico/Yubico.NET.SDK/pull/169)) like this:
+  > \> gh attestation verify .\Yubico.Core.1.12.0.nupkg --repo Yubico/Yubico.NET.SDK
+
+Deprecations:
+
+- Yubico.YubiKey/Scp03 namespace.
+- All Yubico.Yubikey.StaticKeys endpoints.
+
+Migration Notes:
+- Use the `SecurityDomainSession` for Security Domain operations.
+- Review your logging configuration if using custom logging.
+- Align with Android/Python SDK naming conventions.
+
 ## 1.11.x Releases
 ### 1.11.0
 
@@ -366,7 +413,7 @@ Features:
   allows clients of smart cards to encrypt all traffic to and from the card. Since the YubiKey can act as a smart
   card, this means that it is now possible to encrypt all traffic for the PIV application.
   In order for this to work, however, your YubiKey must be pre-configured for this feature. Read more about
-  [SCP03 here](xref:UsersManualScp03).
+  [SCP03 here](xref:UsersManualScp).
 - **Debian, RHEL, and CentOS support**. Our testing of Linux platforms has expanded to include the Debian,
   Red Hat Enterprise Linux (RHEL), and CentOS distributions. Please read [running on Linux](xref:RunningOnLinux)
   for more details.

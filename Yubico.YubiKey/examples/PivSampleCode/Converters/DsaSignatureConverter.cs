@@ -90,7 +90,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             int offsetR = 0;
             int offsetS = 0;
             bool isValid = false;
-            if (tlvReader.TryReadNestedTlv(out TlvReader seqReader, 0x30))
+            if (tlvReader.TryReadNestedTlv(out var seqReader, 0x30))
             {
                 if (seqReader.TryReadValue(out rValue, 0x02))
                 {

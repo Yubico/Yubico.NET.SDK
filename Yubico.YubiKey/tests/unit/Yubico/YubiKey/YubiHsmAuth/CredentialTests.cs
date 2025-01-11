@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             CryptographicKeyType expectedKeyType = CryptographicKeyType.Aes128;
 
-            Credential cred = new Credential(
+            var cred = new Credential(
                 expectedKeyType,
                 "test key",
                 false);
@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             string expectedLabel = "test key";
 
-            Credential cred = new Credential(
+            var cred = new Credential(
                 CryptographicKeyType.Aes128,
                 expectedLabel,
                 false);
@@ -84,7 +84,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             bool expectedTouchRequired = true;
 
-            Credential cred = new Credential(
+            var cred = new Credential(
                     CryptographicKeyType.Aes128,
                     "test key",
                     expectedTouchRequired);
@@ -99,7 +99,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             CryptographicKeyType expectedKeyType = CryptographicKeyType.Aes128;
 
-            Credential cred = new Credential(
+            var cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "test key",
                 false)
@@ -113,9 +113,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [Fact]
         public void KeyType_SetNegative1_ThrowsArgOutOfRange()
         {
-            CryptographicKeyType invalidKeyType = (CryptographicKeyType)(-1);
+            var invalidKeyType = (CryptographicKeyType)(-1);
 
-            Credential cred = new Credential(
+            var cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "test key",
                 false);
@@ -129,7 +129,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             CryptographicKeyType invalidKeyType = CryptographicKeyType.None;
 
-            Credential cred = new Credential(
+            var cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "test key",
                 false);
@@ -159,7 +159,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             string expectedLabel = new string('a', labelLength);
 
-            Credential cred = new Credential(
+            var cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "old label",
                 false)
@@ -175,7 +175,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             string expectedLabel = "abc\uD801\uD802d";
 
-            Credential cred = new Credential(
+            var cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "old label",
                 false);
@@ -191,7 +191,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             string expectedLabel = new string('a', labelLength);
 
-            Credential cred = new Credential(
+            var cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "old label",
                 false);
@@ -207,7 +207,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             bool expectedTouch = true;
 
-            Credential cred = new Credential(
+            var cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "test key",
                 false)

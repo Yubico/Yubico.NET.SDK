@@ -30,8 +30,8 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             using var oathSession = new OathSession(yubiKey);
             {
                 oathSession.KeyCollector = KeyCollectorDelegate;
-                IDictionary<Credential, Code> result = oathSession.CalculateAllCredentials();
-                ReportAllResults(result);
+                var results = oathSession.CalculateAllCredentials();
+                ReportAllResults(results);
             }
 
             return true;
@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             using var oathSession = new OathSession(yubiKey);
             {
                 oathSession.KeyCollector = KeyCollectorDelegate;
-                Code code = oathSession.CalculateCredential(credential);
+                var code = oathSession.CalculateCredential(credential);
                 ReportOneResult(credential, code);
             }
 
@@ -66,18 +66,18 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             {
                 _ = outputList.AppendLine($"Number of credentials: {credentials.Count}");
                 _ = outputList.AppendLine();
-                foreach (KeyValuePair<Credential, Code> pair in credentials)
+                foreach (var (credential, code) in credentials)
                 {
-                    _ = outputList.AppendLine($"Issuer    : {pair.Key.Issuer}");
-                    _ = outputList.AppendLine($"Account   : {pair.Key.AccountName}");
-                    _ = outputList.AppendLine($"Type      : {pair.Key.Type}");
-                    _ = outputList.AppendLine($"Period    : {(int?)pair.Key.Period}sec");
-                    _ = outputList.AppendLine($"Digits    : {pair.Key.Digits}");
-                    _ = outputList.AppendLine($"Touch     : {pair.Key.RequiresTouch}");
-                    _ = outputList.AppendLine($"OTP code  : {pair.Value.Value}");
-                    _ = outputList.AppendLine($"ValidFrom : {pair.Value.ValidFrom}");
-                    _ = outputList.AppendLine($"ValidUntil: {pair.Value.ValidUntil}");
-                    _ = outputList.AppendLine($"Name      : {pair.Key.Name}");
+                    _ = outputList.AppendLine($"Issuer    : {credential.Issuer}");
+                    _ = outputList.AppendLine($"Account   : {credential.AccountName}");
+                    _ = outputList.AppendLine($"Type      : {credential.Type}");
+                    _ = outputList.AppendLine($"Period    : {(int?)credential.Period}sec");
+                    _ = outputList.AppendLine($"Digits    : {credential.Digits}");
+                    _ = outputList.AppendLine($"Touch     : {credential.RequiresTouch}");
+                    _ = outputList.AppendLine($"OTP code  : {code.Value}");
+                    _ = outputList.AppendLine($"ValidFrom : {code.ValidFrom}");
+                    _ = outputList.AppendLine($"ValidUntil: {code.ValidUntil}");
+                    _ = outputList.AppendLine($"Name      : {credential.Name}");
                     _ = outputList.AppendLine();
                 }
             }

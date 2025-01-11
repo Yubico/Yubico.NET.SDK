@@ -127,7 +127,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// </returns>
         private byte[] BuildDataField()
         {
-            TlvWriter tlvWriter = new TlvWriter();
+            var tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(DataTagConstants.ManagementKey, _managementKey.Span);
             tlvWriter.WriteString(DataTagConstants.Label,
                 _credentialWithSecrets.Label, Encoding.UTF8);
@@ -139,10 +139,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             tlvWriter.WriteByte(DataTagConstants.Touch,
                 _credentialWithSecrets.TouchRequired ? (byte)1 : (byte)0);
 
-            byte[] returnValue = tlvWriter.Encode();
+            byte[] tlvBytes = tlvWriter.Encode();
             tlvWriter.Clear();
 
-            return returnValue;
+            return tlvBytes;
         }
 
         /// <summary>

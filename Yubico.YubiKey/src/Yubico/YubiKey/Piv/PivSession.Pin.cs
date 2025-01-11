@@ -15,7 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
 
@@ -119,7 +119,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryVerifyPin()
         {
-            _log.LogInformation("Try to verify the PIV PIN with KeyCollector.");
+            Logger.LogInformation("Try to verify the PIV PIN with KeyCollector.");
 
             if (KeyCollector is null)
             {
@@ -184,7 +184,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void VerifyPin()
         {
-            _log.LogInformation("Verify the PIV PIN.");
+            Logger.LogInformation("Verify the PIV PIN.");
 
             if (TryVerifyPin() == false)
             {
@@ -279,17 +279,18 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryVerifyPin(ReadOnlyMemory<byte> pin, out int? retriesRemaining)
         {
-            _log.LogInformation("Try to verify the PIV PIN with supplied PIN.");
+            Logger.LogInformation("Try to verify the PIV PIN with supplied PIN.");
+            
             retriesRemaining = null;
             PinVerified = false;
-            var verifyCommand = new VerifyPinCommand(pin);
-            VerifyPinResponse verifyResponse = Connection.SendCommand(verifyCommand);
+            
+            var command = new VerifyPinCommand(pin);
+            var response = Connection.SendCommand(command);
 
-            PinVerified = verifyResponse.Status == ResponseStatus.Success;
-
+            PinVerified = response.Status == ResponseStatus.Success;
             if (!PinVerified)
             {
-                retriesRemaining = verifyResponse.GetData();
+                retriesRemaining = response.GetData();
 
                 if ((retriesRemaining ?? 1) == 0)
                 {
@@ -403,7 +404,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangePinAndPukRetryCounts(byte newRetryCountPin, byte newRetryCountPuk)
         {
-            _log.LogInformation("Change the PIV PIN and PUK retry counts: {PinCount}, {PukCount}.", newRetryCountPin,
+            Logger.LogInformation("Change the PIV PIN and PUK retry counts: {PinCount}, {PukCount}.", newRetryCountPin,
                 newRetryCountPuk);
 
             // This will validate the input.
@@ -421,7 +422,7 @@ namespace Yubico.YubiKey.Piv
             // PIN-derived, set mode to None and return true.
             // If it does return, then check the mode. If it is PIN-derived, the
             // PIN has been verified and the mgmt key has been authenticated.
-            if (!TryGetChangePinMode(ReadOnlyMemory<byte>.Empty, out PivPinOnlyMode mode, out _))
+            if (!TryGetChangePinMode(ReadOnlyMemory<byte>.Empty, out var pinOnlyMode, out _))
             {
                 throw new OperationCanceledException(
                     string.Format(
@@ -439,17 +440,16 @@ namespace Yubico.YubiKey.Piv
                 VerifyPin();
             }
 
-            SetPinRetriesResponse setRetriesResponse = Connection.SendCommand(setRetriesCommand);
-
-            if (setRetriesResponse.Status != ResponseStatus.Success)
+            var response = Connection.SendCommand(setRetriesCommand);
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(setRetriesResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
 
-            if (mode != PivPinOnlyMode.None)
+            if (pinOnlyMode != PivPinOnlyMode.None)
             {
                 // By passing Empty, this method will use the default PIN.
-                SetPinOnlyMode(ReadOnlyMemory<byte>.Empty, mode, out _);
+                SetPinOnlyMode(ReadOnlyMemory<byte>.Empty, pinOnlyMode, out _);
             }
 
             UpdateAdminData();
@@ -525,7 +525,7 @@ namespace Yubico.YubiKey.Piv
                                                   byte newRetryCountPuk,
                                                   out int? retriesRemaining)
         {
-            _log.LogInformation(
+            Logger.LogInformation(
                 "Try to change the PIV PIN and PUK retry counts: {PinCount}, {PukCount} with supplied mgmt key and PIN.",
                 newRetryCountPin, newRetryCountPuk);
 
@@ -540,14 +540,13 @@ namespace Yubico.YubiKey.Piv
             // It will also return true if the mode is None (YubiKey is not
             // Pin-derived), in which case neither the PIN nor mgmt key is
             // verified/authenticated.
-            if (TryGetChangePinMode(pin, out PivPinOnlyMode mode, out retriesRemaining))
+            if (TryGetChangePinMode(pin, out var mode, out retriesRemaining))
             {
                 if (ManagementKeyAuthenticated || TryAuthenticateManagementKey(managementKey, true))
                 {
                     if (PinVerified || TryVerifyPin(pin, out retriesRemaining))
                     {
-                        SetPinRetriesResponse setRetriesResponse = Connection.SendCommand(setRetriesCommand);
-
+                        var setRetriesResponse = Connection.SendCommand(setRetriesCommand);
                         if (setRetriesResponse.Status == ResponseStatus.Success)
                         {
                             if (mode != PivPinOnlyMode.None)
@@ -666,9 +665,9 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangePin()
         {
-            _log.LogInformation("Try to change the PIV PIN with KeyCollector.");
+            Logger.LogInformation("Try to change the PIV PIN with KeyCollector.");
 
-            if (TryGetChangePinMode(ReadOnlyMemory<byte>.Empty, out PivPinOnlyMode mode, out _))
+            if (TryGetChangePinMode(ReadOnlyMemory<byte>.Empty, out var mode, out _))
             {
                 return TryChangeReference(KeyEntryRequest.ChangePivPin, ChangePinOrPuk, mode);
             }
@@ -700,7 +699,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangePin()
         {
-            _log.LogInformation("Change the PIV PIN.");
+            Logger.LogInformation("Change the PIV PIN.");
 
             if (!TryChangePin())
             {
@@ -780,14 +779,13 @@ namespace Yubico.YubiKey.Piv
         public bool TryChangePin(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin,
                                  out int? retriesRemaining)
         {
-            _log.LogInformation("Try to change the PIV PIN with supplied PINs.");
+            Logger.LogInformation("Try to change the PIV PIN with supplied PINs.");
 
-            if (TryGetChangePinMode(currentPin, out PivPinOnlyMode mode, out retriesRemaining))
+            if (TryGetChangePinMode(currentPin, out var mode, out retriesRemaining))
             {
-                var changeCommand = new ChangeReferenceDataCommand(PivSlot.Pin, currentPin, newPin);
-                ChangeReferenceDataResponse changeResponse = Connection.SendCommand(changeCommand);
-
-                if (changeResponse.Status == ResponseStatus.Success)
+                var command = new ChangeReferenceDataCommand(PivSlot.Pin, currentPin, newPin);
+                var response = Connection.SendCommand(command);
+                if (response.Status == ResponseStatus.Success)
                 {
                     if (mode != PivPinOnlyMode.None)
                     {
@@ -798,7 +796,8 @@ namespace Yubico.YubiKey.Piv
 
                     return true;
                 }
-                else if (changeResponse.Status == ResponseStatus.ConditionsNotSatisfied)
+                
+                if (response.Status == ResponseStatus.ConditionsNotSatisfied)
                 {
                     throw new SecurityException(
                         string.Format(
@@ -809,7 +808,7 @@ namespace Yubico.YubiKey.Piv
 
                 }
 
-                retriesRemaining = changeResponse.GetData();
+                retriesRemaining = response.GetData();
             }
 
             if ((retriesRemaining ?? 1) == 0)
@@ -834,9 +833,8 @@ namespace Yubico.YubiKey.Piv
         /// during the initial YubiKey setup to change from the default PUK, or
         /// later, to change it again.
         /// <para>
-        /// The PUK is six to eight bytes byte long. Although most PUKs will be
-        /// characters, the YubiKey allows any binary data to be a PUK. The
-        /// default is the ASCII string <c>"12345678"</c> which is the byte array
+        /// The PUK must be 6-8 characters. For YubiKeys with firmware versions prior to 5.7, the PUK is allowed to be any character in the <c>0x00</c> - <c>0xFF</c> range for a total length of 6-8 bytes. For YubiKeys with firmware version 5.7 and above, the PUK is allowed to be any character in the <c>0x00</c> - <c>0x7F</c> range for a total length of 6-8 Unicode code points. The
+        /// default PUK is the ASCII string <c>"12345678"</c>, which is the byte array
         /// <code>
         ///   0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38
         /// </code>
@@ -907,7 +905,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangePuk()
         {
-            _log.LogInformation("Try to change the PIV PUK with KeyCollector.");
+            Logger.LogInformation("Try to change the PIV PUK with KeyCollector.");
 
             return TryChangeReference(KeyEntryRequest.ChangePivPuk, ChangePinOrPuk, PivPinOnlyMode.None);
         }
@@ -936,7 +934,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangePuk()
         {
-            _log.LogInformation("Change the PIV PUK.");
+            Logger.LogInformation("Change the PIV PUK.");
 
             if (TryChangeReference(KeyEntryRequest.ChangePivPuk, ChangePinOrPuk, PivPinOnlyMode.None) == false)
             {
@@ -992,11 +990,11 @@ namespace Yubico.YubiKey.Piv
         public bool TryChangePuk(ReadOnlyMemory<byte> currentPuk, ReadOnlyMemory<byte> newPuk,
                                  out int? retriesRemaining)
         {
-            _log.LogInformation("Try to change the PIV PUK with supplied PUKs.");
-            var changeCommand = new ChangeReferenceDataCommand(PivSlot.Puk, currentPuk, newPuk);
-            ChangeReferenceDataResponse changeResponse = Connection.SendCommand(changeCommand);
-
-            if (changeResponse.Status == ResponseStatus.ConditionsNotSatisfied)
+            Logger.LogInformation("Try to change the PIV PUK with supplied PUKs.");
+            
+            var command = new ChangeReferenceDataCommand(PivSlot.Puk, currentPuk, newPuk);
+            var response = Connection.SendCommand(command);
+            if (response.Status == ResponseStatus.ConditionsNotSatisfied)
             {
                 retriesRemaining = null;
                 throw new SecurityException(
@@ -1007,9 +1005,9 @@ namespace Yubico.YubiKey.Piv
                 );
             }
 
-            retriesRemaining = changeResponse.GetData();
+            retriesRemaining = response.GetData();
 
-            return changeResponse.Status == ResponseStatus.Success;
+            return response.Status == ResponseStatus.Success;
         }
 
         /// <summary>
@@ -1118,11 +1116,11 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryResetPin()
         {
-            _log.LogInformation("Try to reset the PIV PIN using the PIV PUK with KeyCollector.");
+            Logger.LogInformation("Try to reset the PIV PIN using the PIV PUK with KeyCollector.");
 
-            if (TryGetChangePinMode(ReadOnlyMemory<byte>.Empty, out PivPinOnlyMode mode, out _))
+            if (TryGetChangePinMode(ReadOnlyMemory<byte>.Empty, out var pinOnlyMode, out _))
             {
-                return TryChangeReference(KeyEntryRequest.ResetPivPinWithPuk, ResetPin, mode);
+                return TryChangeReference(KeyEntryRequest.ResetPivPinWithPuk, ResetPin, pinOnlyMode);
             }
 
             return false;
@@ -1157,7 +1155,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ResetPin()
         {
-            _log.LogInformation("Reset the PIV PIN using the PIV PUK.");
+            Logger.LogInformation("Reset the PIV PIN using the PIV PUK.");
 
             if (TryChangeReference(KeyEntryRequest.ResetPivPinWithPuk, ResetPin, PivPinOnlyMode.None) == false)
             {
@@ -1227,11 +1225,11 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryResetPin(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, out int? retriesRemaining)
         {
-            _log.LogInformation("Try to reset the PIV PIN using the PIV PUK with supplied PUK and PIN.");
-            var resetCommand = new ResetRetryCommand(puk, newPin);
-            ResetRetryResponse resetResponse = Connection.SendCommand(resetCommand);
-
-            if (resetResponse.Status == ResponseStatus.ConditionsNotSatisfied)
+            Logger.LogInformation("Try to reset the PIV PIN using the PIV PUK with supplied PUK and PIN.");
+            
+            var command = new ResetRetryCommand(puk, newPin);
+            var response = Connection.SendCommand(command);
+            if (response.Status == ResponseStatus.ConditionsNotSatisfied)
             {
                 retriesRemaining = null;
                 throw new SecurityException(
@@ -1242,8 +1240,7 @@ namespace Yubico.YubiKey.Piv
                 );
             }
 
-            retriesRemaining = resetResponse.GetData();
-
+            retriesRemaining = response.GetData();
             if ((retriesRemaining ?? 1) == 0)
             {
                 throw new SecurityException(
@@ -1252,7 +1249,7 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.NoMoreRetriesRemaining));
             }
 
-            return resetResponse.Status == ResponseStatus.Success;
+            return response.Status == ResponseStatus.Success;
         }
 
         // Common code to change a PIN or PUK by either ChangeReferenceData or
@@ -1286,9 +1283,8 @@ namespace Yubico.YubiKey.Piv
             {
                 while (KeyCollector(keyEntryData))
                 {
-                    ResponseStatus status = commandResponse(keyEntryData);
-
-                    if (status == ResponseStatus.Success)
+                    var responseStatus = commandResponse(keyEntryData);
+                    if (responseStatus == ResponseStatus.Success)
                     {
                         if (mode != PivPinOnlyMode.None)
                         {
@@ -1311,7 +1307,7 @@ namespace Yubico.YubiKey.Piv
                                 ExceptionMessages.NoMoreRetriesRemaining));
                     }
 
-                    if (status == ResponseStatus.ConditionsNotSatisfied)
+                    if (responseStatus == ResponseStatus.ConditionsNotSatisfied)
                     {
                         keyEntryData.IsViolatingPinComplexity = true;
                     }
@@ -1340,34 +1336,34 @@ namespace Yubico.YubiKey.Piv
                 ? PivSlot.Pin
                 : PivSlot.Puk;
 
-            var changeCommand = new ChangeReferenceDataCommand(
+            var command = new ChangeReferenceDataCommand(
                 slotNumber, keyEntryData.GetCurrentValue(), keyEntryData.GetNewValue());
 
-            ChangeReferenceDataResponse changeResponse = Connection.SendCommand(changeCommand);
+            var response = Connection.SendCommand(command);
 
             // If success, GetData returns null.
             // If wrong PIN/PUK, returns count.
             // If error, throws exception.
-            keyEntryData.RetriesRemaining = changeResponse.GetData();
+            keyEntryData.RetriesRemaining = response.GetData();
 
-            return changeResponse.Status;
+            return response.Status;
         }
 
         // This is a delegate that implements the CommandResponse declaration of
         // TryChangeReference. It executes the ResetRetry command and response.
         private ResponseStatus ResetPin(KeyEntryData keyEntryData)
         {
-            var resetCommand = new ResetRetryCommand(
+            var command = new ResetRetryCommand(
                 keyEntryData.GetCurrentValue(), keyEntryData.GetNewValue());
 
-            ResetRetryResponse resetResponse = Connection.SendCommand(resetCommand);
+            var response = Connection.SendCommand(command);
 
             // If success, GetData returns null.
             // If wrong PUK, returns count.
             // If error, throws exception.
-            keyEntryData.RetriesRemaining = resetResponse.GetData();
+            keyEntryData.RetriesRemaining = response.GetData();
 
-            return resetResponse.Status;
+            return response.Status;
         }
 
         // If the PIN has been changed, update the AdminData element
@@ -1387,7 +1383,7 @@ namespace Yubico.YubiKey.Piv
         {
             if (!ManagementKeyAuthenticated)
             {
-                _log.LogDebug("Unauthenticated attempt to update AdminData failed.");
+                Logger.LogDebug("Unauthenticated attempt to update AdminData failed.");
                 return;
             }
 

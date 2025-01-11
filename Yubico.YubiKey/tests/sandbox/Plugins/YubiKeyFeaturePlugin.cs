@@ -166,7 +166,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
             Output.Write("Select an option and press ENTER. Press any other key to exit: ");
 
             ConsoleKeyInfo inputKey = Console.ReadKey(true);
-            StringBuilder inputStr = new StringBuilder(inputKey.KeyChar.ToString());
+            var inputStr = new StringBuilder(inputKey.KeyChar.ToString());
             Console.Write(inputStr);
 
             while (inputKey.Key != ConsoleKey.Enter)

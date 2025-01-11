@@ -17,9 +17,9 @@ using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Fido2
     {
         private const int DigestLength = 16;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<SerializedLargeBlobArray>();
         private readonly List<LargeBlobEntry> _entryList;
 
         /// <summary>
@@ -311,15 +311,17 @@ namespace Yubico.YubiKey.Fido2
         public byte[] Encode()
         {
             _log.LogInformation("Build the Serialized Large Blob Array.");
-            ReadOnlyMemory<byte> encoding = EncodeBlobArray();
-            ReadOnlyMemory<byte> digest = ComputeDigest(encoding);
+            
+            var encodingBytes = EncodeBlobArray();
+            var digestBytes = ComputeDigest(encodingBytes);
 
-            byte[] returnValue = new byte[encoding.Length + digest.Length];
-            var destination = new Memory<byte>(returnValue);
-            encoding.CopyTo(destination);
-            digest.CopyTo(destination.Slice(encoding.Length));
+            byte[] serializedData = new byte[encodingBytes.Length + digestBytes.Length];
+            var destination = new Memory<byte>(serializedData);
+            
+            encodingBytes.CopyTo(destination);
+            digestBytes.CopyTo(destination.Slice(encodingBytes.Length));
 
-            return returnValue;
+            return serializedData;
         }
 
         // Create the CBOR Array of each of the entries. Set EncodedArray to this
@@ -332,7 +334,7 @@ namespace Yubico.YubiKey.Fido2
                 Digest = null;
                 var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
                 cbor.WriteStartArray(_entryList.Count);
-                foreach (LargeBlobEntry entry in _entryList)
+                foreach (var entry in _entryList)
                 {
                     cbor.WriteEncodedValue(new ReadOnlySpan<byte>(entry.CborEncode()));
                 }
@@ -364,7 +366,7 @@ namespace Yubico.YubiKey.Fido2
 
             if (!(EncodedArray is null) && !(Digest is null))
             {
-                using SHA256 digester = CryptographyProviders.Sha256Creator();
+                using var digester = CryptographyProviders.Sha256Creator();
                 byte[] computedDigest = digester.ComputeHash(EncodedArray.Value.ToArray());
                 var digestSpan = new Span<byte>(computedDigest, 0, DigestLength);
                 returnValue = MemoryExtensions.SequenceEqual<byte>(digestSpan, Digest.Value.Span);
@@ -380,7 +382,7 @@ namespace Yubico.YubiKey.Fido2
         {
             if (Digest is null)
             {
-                using SHA256 digester = CryptographyProviders.Sha256Creator();
+                using var digester = CryptographyProviders.Sha256Creator();
                 Digest = new ReadOnlyMemory<byte>(digester.ComputeHash(encoding.ToArray()), 0, DigestLength);
             }
 

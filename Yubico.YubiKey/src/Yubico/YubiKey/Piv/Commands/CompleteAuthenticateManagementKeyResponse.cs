@@ -152,9 +152,9 @@ namespace Yubico.YubiKey.Piv.Commands
                     var tlvReader = new TlvReader(ResponseApdu.Data);
                     if (tlvReader.TryReadNestedTlv(out tlvReader, EncodingTag))
                     {
-                        if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> responseValue, ResponseTag))
+                        if (tlvReader.TryReadValue(out var tlvBytes, ResponseTag))
                         {
-                            return MemoryExtensions.SequenceEqual(responseValue.Span, YubiKeyAuthenticationExpectedResponse.Span)
+                            return tlvBytes.Span.SequenceEqual(YubiKeyAuthenticationExpectedResponse.Span)
                                 ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
                                 : AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed;
                         }

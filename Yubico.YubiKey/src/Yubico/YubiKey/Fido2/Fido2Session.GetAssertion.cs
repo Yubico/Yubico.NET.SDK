@@ -14,8 +14,12 @@
 
 using System;
 using System.Collections.Generic;
-using Yubico.Core.Cryptography;
-using Yubico.Core.Logging;
+#if NETSTANDARD2_1
+using CryptographicOperations = System.Security.Cryptography.CryptographicOperations;
+#else
+using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
+#endif
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
@@ -98,7 +102,8 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
-            Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
+            
+            var keyCollector = EnsureKeyCollector();
 
             byte[] token = new byte[MaximumAuthTokenLength];
             byte[] clientDataHash = parameters.ClientDataHash.ToArray();
@@ -109,7 +114,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 // The first time through, forceToken will be false.
                 // If there is a second time, it will be true.
-                ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                var currentToken = GetAuthToken(
                     forceToken, PinUvAuthTokenPermissions.GetAssertion, parameters.RelyingParty.Id);
 
                 try
@@ -128,12 +133,12 @@ namespace Yubico.YubiKey.Fido2
                 // do nothing.
                 parameters.EncodeHmacSecretExtension(AuthProtocol);
 
-                GetAssertionResponse rsp = RunGetAssertion(parameters, keyCollector, out CtapStatus ctapStatus);
+                var response = RunGetAssertion(parameters, keyCollector, out var ctapStatus);
 
                 switch (ctapStatus)
                 {
                     case CtapStatus.Ok:
-                        return CompleteGetAssertions(rsp.GetData());
+                        return CompleteGetAssertions(response.GetData());
 
                     case CtapStatus.PinAuthInvalid:
                         // If forceToken is false (its initial value), this
@@ -163,7 +168,7 @@ namespace Yubico.YubiKey.Fido2
                         break;
                 }
 
-                message = rsp.StatusMessage;
+                message = response.StatusMessage;
             } while (forceToken);
 
             throw new Fido2Exception(message);
@@ -186,9 +191,9 @@ namespace Yubico.YubiKey.Fido2
 
             try
             {
-                GetAssertionResponse rsp = Connection.SendCommand(new GetAssertionCommand(parameters));
-                ctapStatus = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : rsp.CtapStatus;
-                return rsp;
+                var response = Connection.SendCommand(new GetAssertionCommand(parameters));
+                ctapStatus = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : response.CtapStatus;
+                return response;
             }
             finally
             {
@@ -205,7 +210,7 @@ namespace Yubico.YubiKey.Fido2
 
             for (int index = 1; index < numberOfCredentials; index++)
             {
-                GetAssertionResponse response = Connection.SendCommand(new GetNextAssertionCommand());
+                var response = Connection.SendCommand(new GetNextAssertionCommand());
                 assertions.Add(response.GetData());
             }
 

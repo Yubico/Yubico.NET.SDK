@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 // The SDK comes with a listener that can tell when a YubiKey has
                 // been removed or inserted.
-                YubiKeyDeviceListener yubiKeyDeviceListener = YubiKeyDeviceListener.Instance;
+                var yubiKeyDeviceListener = YubiKeyDeviceListener.Instance;
 
                 yubiKeyDeviceListener.Arrived += YubiKeyInserted;
                 yubiKeyDeviceListener.Removed += YubiKeyRemoved;
@@ -153,7 +153,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 touchMessageTask.Start();
 
                 var resetCmd = new ResetCommand();
-                ResetResponse resetRsp = fido2Session.Connection.SendCommand(resetCmd);
+                var resetRsp = fido2Session.Connection.SendCommand(resetCmd);
 
                 return resetRsp.Status;
             }

@@ -18,6 +18,7 @@ using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [Obsolete("Use new Derivation class in Yubico.YubiKey.Scp namespace instead. This will be removed in a future release.")]
     internal static class Derivation
     {
         public const byte DDC_SENC = 0x04;
@@ -57,7 +58,7 @@ namespace Yubico.YubiKey.Scp03
             cardChallenge.CopyTo(macInp, 24);
 
             byte[] cmac = new byte[16];
-            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
             cmacObj.CmacInit(kdfKey);
             cmacObj.CmacUpdate(macInp);
             cmacObj.CmacFinal(cmac);

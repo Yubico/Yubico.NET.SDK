@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,10 +61,10 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
             _yubiKeyDevice = null;
             var keyEntryData = new KeyEntryData();
-            KeyEntryRequest keyEntryRequest = KeyEntryRequest.TouchRequest;
+            var keyEntryRequest = KeyEntryRequest.TouchRequest;
             Task? touchMessageTask = null;
 
-            YubiKeyDeviceListener yubiKeyDeviceListener = YubiKeyDeviceListener.Instance;
+            var yubiKeyDeviceListener = YubiKeyDeviceListener.Instance;
 
             yubiKeyDeviceListener.Arrived += YubiKeyInserted;
             yubiKeyDeviceListener.Removed += YubiKeyRemoved;
@@ -88,9 +87,9 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             // The YubiKey has been rebooted, so we need to quickly reset.
             try
             {
-                using IYubiKeyConnection connection = reinsert.Result.Connect(YubiKeyApplication.FidoU2f);
+                using var connection = reinsert.Result.Connect(YubiKeyApplication.FidoU2f);
                 var resetCmd = new ResetCommand();
-                ResetResponse resetRsp = connection.SendCommand(resetCmd);
+                var resetRsp = connection.SendCommand(resetCmd);
 
                 while (resetRsp.Status == ResponseStatus.ConditionsNotSatisfied)
                 {

@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Piv
             byte[] encryptedData = new byte[8];
             byte[] encryptCipher = new byte[8];
 
-            TripleDES desObject = TripleDES.Create();
+            var desObject = TripleDES.Create();
             desObject.Mode = CipherMode.ECB;
             desObject.Padding = PaddingMode.None;
             ICryptoTransform encryptor = desObject.CreateEncryptor(keyData, null);
@@ -122,7 +122,7 @@ namespace Yubico.YubiKey.Piv
             byte[] result3 = new byte[8];
             byte[] result4 = new byte[8];
 
-            TripleDES tDesObject = TripleDES.Create();
+            var tDesObject = TripleDES.Create();
             tDesObject.Mode = CipherMode.ECB;
             tDesObject.Padding = PaddingMode.None;
 
@@ -166,7 +166,7 @@ namespace Yubico.YubiKey.Piv
             byte[] result2 = new byte[8];
             byte[] result3 = new byte[8];
 
-            TripleDES tDesObject = TripleDES.Create();
+            var tDesObject = TripleDES.Create();
             tDesObject.Mode = CipherMode.ECB;
             tDesObject.Padding = PaddingMode.None;
             tDesObject.KeySize = 128;
@@ -212,7 +212,7 @@ namespace Yubico.YubiKey.Piv
             byte[] part1 = new byte[8];
             byte[] part2 = new byte[8];
 
-            TripleDES tDesObject = TripleDES.Create();
+            var tDesObject = TripleDES.Create();
             tDesObject.Mode = CipherMode.ECB;
             tDesObject.Padding = PaddingMode.None;
 
@@ -224,7 +224,7 @@ namespace Yubico.YubiKey.Piv
             eLen = encryptor1.TransformBlock(dataToEncrypt, 0, 8, part1, 0);
             Assert.Equal(8, eLen);
 
-            DES desObject = DES.Create();
+            var desObject = DES.Create();
             desObject.Mode = CipherMode.ECB;
             desObject.Padding = PaddingMode.None;
 

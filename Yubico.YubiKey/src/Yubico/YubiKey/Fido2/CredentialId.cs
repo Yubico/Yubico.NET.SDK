@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
-using System.Globalization;
 using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2
@@ -152,8 +151,8 @@ namespace Yubico.YubiKey.Fido2
             Id = cborMap.ReadByteString(TagId);
             if (cborMap.Contains(TagTransports))
             {
-                IReadOnlyList<string> transportArray = cborMap.ReadArray<string>(TagTransports);
-                foreach (string entry in transportArray)
+                var transports = cborMap.ReadArray<string>(TagTransports);
+                foreach (string entry in transports)
                 {
                     AddTransport(entry);
                 }

@@ -14,7 +14,7 @@
 
 using System;
 using System.Collections.Generic;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Fido2
         {
             _log.LogInformation("Try to EnableEnterpriseAttestation.");
 
-            OptionValue epValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.ep);
+            var epValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.ep);
 
             if (epValue == OptionValue.True)
             {
@@ -84,21 +84,21 @@ namespace Yubico.YubiKey.Fido2
                 return false;
             }
 
-            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+            var currentToken = GetAuthToken(
                 false,
                 PinUvAuthTokenPermissions.AuthenticatorConfiguration,
                 null);
 
-            var enableCmd = new EnableEnterpriseAttestationCommand(currentToken, AuthProtocol);
-            Fido2Response enableRsp = Connection.SendCommand(enableCmd);
-            if (enableRsp.CtapStatus == CtapStatus.PinAuthInvalid)
+            var command = new EnableEnterpriseAttestationCommand(currentToken, AuthProtocol);
+            var response = Connection.SendCommand(command);
+            if (response.CtapStatus == CtapStatus.PinAuthInvalid)
             {
                 currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
-                enableCmd = new EnableEnterpriseAttestationCommand(currentToken, AuthProtocol);
-                enableRsp = Connection.SendCommand(enableCmd);
+                command = new EnableEnterpriseAttestationCommand(currentToken, AuthProtocol);
+                response = Connection.SendCommand(command);
             }
 
-            if (enableRsp.Status == ResponseStatus.Success)
+            if (response.Status == ResponseStatus.Success)
             {
                 // This operation can change the AuthenticatorInfo, so make sure
                 // if someone gets it, they get a new one.
@@ -106,7 +106,7 @@ namespace Yubico.YubiKey.Fido2
                 return true;
             }
 
-            throw new Ctap2DataException(enableRsp.StatusMessage);
+            throw new Ctap2DataException(response.StatusMessage);
         }
 
         /// <summary>
@@ -164,27 +164,27 @@ namespace Yubico.YubiKey.Fido2
         {
             _log.LogInformation("Try to ToggleAlwaysUv.");
 
-            OptionValue alwaysUvValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.alwaysUv);
+            var alwaysUvValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.alwaysUv);
             if (alwaysUvValue != OptionValue.True && alwaysUvValue != OptionValue.False)
             {
                 return false;
             }
 
-            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+            var currentToken = GetAuthToken(
                 false,
                 PinUvAuthTokenPermissions.AuthenticatorConfiguration,
                 null);
 
-            var toggleCmd = new ToggleAlwaysUvCommand(currentToken, AuthProtocol);
-            Fido2Response toggleRsp = Connection.SendCommand(toggleCmd);
-            if (toggleRsp.CtapStatus == CtapStatus.PinAuthInvalid)
+            var command = new ToggleAlwaysUvCommand(currentToken, AuthProtocol);
+            var response = Connection.SendCommand(command);
+            if (response.CtapStatus == CtapStatus.PinAuthInvalid)
             {
                 currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
-                toggleCmd = new ToggleAlwaysUvCommand(currentToken, AuthProtocol);
-                toggleRsp = Connection.SendCommand(toggleCmd);
+                command = new ToggleAlwaysUvCommand(currentToken, AuthProtocol);
+                response = Connection.SendCommand(command);
             }
 
-            if (toggleRsp.Status == ResponseStatus.Success)
+            if (response.Status == ResponseStatus.Success)
             {
                 // This operation can change the AuthenticatorInfo, so make sure
                 // if someone gets it, they get a new one.
@@ -192,7 +192,7 @@ namespace Yubico.YubiKey.Fido2
                 return true;
             }
 
-            throw new Ctap2DataException(toggleRsp.StatusMessage);
+            throw new Ctap2DataException(response.StatusMessage);
         }
 
         /// <summary>
@@ -324,14 +324,14 @@ namespace Yubico.YubiKey.Fido2
         {
             _log.LogInformation("Try to set the PIN config (setMinPINLength).");
 
-            OptionValue setMinPinValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.setMinPINLength);
+            var setMinPinValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.setMinPINLength);
 
             if (setMinPinValue != OptionValue.True)
             {
                 return false;
             }
 
-            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+            var currentToken = GetAuthToken(
                 false,
                 PinUvAuthTokenPermissions.AuthenticatorConfiguration,
                 null);
@@ -342,7 +342,7 @@ namespace Yubico.YubiKey.Fido2
                 forceChangePin,
                 currentToken,
                 AuthProtocol);
-            Fido2Response setRsp = Connection.SendCommand(setCmd);
+            var setRsp = Connection.SendCommand(setCmd);
             if (setRsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
                 currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);

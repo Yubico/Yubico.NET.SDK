@@ -14,13 +14,14 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey
 {
     internal static class GetDeviceInfoHelper
     {
-        private static readonly Logger _logger = Log.GetLogger();
+        private static readonly ILogger Logger = Log.GetLogger(typeof(GetDeviceInfoHelper).FullName!);
 
         /// <summary>
         /// Fetches and aggregates device configuration details from a YubiKey using multiple APDU commands,
@@ -30,8 +31,7 @@ namespace Yubico.YubiKey
         /// <typeparam name="TCommand">The specific type of IGetPagedDeviceInfoCommand, e.g. GetPagedDeviceInfoCommand, which will then allow for returning the appropriate response.</typeparam>
         /// <param name="connection">The connection interface to communicate with a YubiKey.</param>
         /// <returns>A YubiKeyDeviceInfo? object containing all relevant device information if successful, otherwise null.</returns>
-        public static YubiKeyDeviceInfo? GetDeviceInfo<TCommand>(
-            IYubiKeyConnection connection)
+        public static YubiKeyDeviceInfo? GetDeviceInfo<TCommand>(IYubiKeyConnection connection)
             where TCommand
             : IGetPagedDeviceInfoCommand<IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>>,
             new()
@@ -42,27 +42,24 @@ namespace Yubico.YubiKey
             bool hasMoreData = true;
             while (hasMoreData)
             {
-                IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>> response =
-                    connection.SendCommand(new TCommand { Page = (byte)page++ });
-
+                var response = connection.SendCommand(new TCommand { Page = (byte)page++ });
                 if (response.Status == ResponseStatus.Success)
                 {
-                    Dictionary<int, ReadOnlyMemory<byte>> tlvData = response.GetData();
-
-                    foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tlv in tlvData)
+                    var tlvData = response.GetData();
+                    foreach (var tlv in tlvData)
                     {
                         combinedPages.Add(tlv.Key, tlv.Value);
                     }
 
                     const int moreDataTag = 0x10;
 
-                    hasMoreData = tlvData.TryGetValue(moreDataTag, out ReadOnlyMemory<byte> hasMoreDataByte)
+                    hasMoreData = tlvData.TryGetValue(moreDataTag, out var hasMoreDataByte)
                         && hasMoreDataByte.Span.Length == 1
                         && hasMoreDataByte.Span[0] == 1;
                 }
                 else
                 {
-                    _logger.LogError(
+                    Logger.LogError(
                         "Failed to get device info page-{Page}: {Error} {Message}", page,
                         response.StatusWord, response.StatusMessage);
 

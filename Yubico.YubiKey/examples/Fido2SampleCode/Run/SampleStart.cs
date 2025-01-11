@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+// ReSharper disable once RedundantUsingDirective Used on line 44
 using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode

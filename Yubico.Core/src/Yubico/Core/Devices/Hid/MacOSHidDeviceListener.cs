@@ -15,7 +15,7 @@
 using System;
 using System.Text;
 using System.Threading;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.Hid
@@ -28,7 +28,7 @@ namespace Yubico.Core.Devices.Hid
         private Thread? _listenerThread;
         private IntPtr? _runLoop;
 
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Logging.Log.GetLogger<MacOSHidDeviceListener>();
 
         // Start listening as soon as this object is constructed.
         public MacOSHidDeviceListener()
@@ -139,6 +139,6 @@ namespace Yubico.Core.Devices.Hid
             OnArrived(new MacOSHidDevice(MacOSHidDevice.GetEntryId(device)));
 
         private void RemovedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) =>
-            OnRemoved(null);
+            OnRemoved(NullDevice.Instance);
     }
 }

@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 
@@ -92,7 +93,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int UnusedTag = 0xFE;
 
         private bool _disposed;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<KeyHistory>();
 
         /// <summary>
         /// Number of Keys with On-Card Certificates. If you set this to zero,
@@ -249,7 +250,7 @@ namespace Yubico.YubiKey.Piv.Objects
             //      FE 00
             byte onCard = 0;
             byte offCard = 0;
-            ReadOnlyMemory<byte> offCardUrl = ReadOnlyMemory<byte>.Empty;
+            var offCardUrl = ReadOnlyMemory<byte>.Empty;
             var tlvReader = new TlvReader(encodedData);
             bool isValid = tlvReader.TryReadNestedTlv(out tlvReader, EncodingTag);
             if (isValid)
@@ -266,7 +267,7 @@ namespace Yubico.YubiKey.Piv.Objects
             }
             if (isValid)
             {
-                isValid = tlvReader.TryReadValue(out ReadOnlyMemory<byte> unusedData, UnusedTag);
+                isValid = tlvReader.TryReadValue(out var unusedData, UnusedTag);
                 if (isValid)
                 {
                     isValid = unusedData.Length == 0;

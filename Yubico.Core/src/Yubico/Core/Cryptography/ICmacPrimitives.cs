@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Cryptography
 {

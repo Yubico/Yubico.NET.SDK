@@ -14,9 +14,10 @@
 
 using System;
 using System.Globalization;
-using Yubico.Core.Cryptography;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Scp03.Commands;
+using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
 
 namespace Yubico.YubiKey.Scp03
 {
@@ -24,7 +25,7 @@ namespace Yubico.YubiKey.Scp03
     /// Create a session for managing the SCP03 configuration of a YubiKey.
     /// </summary>
     /// <remarks>
-    /// See the <xref href="UsersManualScp03">User's Manual entry</xref> on SCP03.
+    /// See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP03.
     /// <para>
     /// Usually, you use SCP03 "in the background" to secure the communication
     /// with another application. For example, when you want to perform PIV
@@ -76,10 +77,11 @@ namespace Yubico.YubiKey.Scp03
     /// exception.
     /// </para>
     /// </remarks>
+    [Obsolete("Use new SecurityDomainSession")]
     public sealed class Scp03Session : IDisposable
     {
         private bool _disposed;
-        private readonly Logger _log = Log.GetLogger();
+        private readonly ILogger _log = Log.GetLogger<Scp03Session>();
 
         /// <summary>
         /// The object that represents the connection to the YubiKey. Most
@@ -100,7 +102,7 @@ namespace Yubico.YubiKey.Scp03
         /// represents SCP03 on the YubiKey.
         /// </summary>
         /// <remarks>
-        /// See the <xref href="UsersManualScp03">User's Manual entry</xref> on SCP03.
+        /// See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP03.
         /// <para>
         /// Because this class implements <c>IDisposable</c>, use the <c>using</c>
         /// keyword. For example,
@@ -150,7 +152,7 @@ namespace Yubico.YubiKey.Scp03
         /// Put the given key set onto the YubiKey.
         /// </summary>
         /// <remarks>
-        /// See the <xref href="UsersManualScp03">User's Manual entry</xref> on
+        /// See the <xref href="UsersManualScp">User's Manual entry</xref> on
         /// SCP03.
         /// <para>
         /// On each YubiKey that supports SCP03, there is space for three sets of
@@ -249,19 +251,20 @@ namespace Yubico.YubiKey.Scp03
             {
                 throw new ArgumentNullException(nameof(newKeySet));
             }
-            var cmd = new PutKeyCommand(Connection.GetScp03Keys(), newKeySet);
-            PutKeyResponse rsp = Connection.SendCommand(cmd);
-            if (rsp.Status != ResponseStatus.Success)
+
+            var command = new PutKeyCommand(Connection.GetScp03Keys(), newKeySet);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
                 throw new SecureChannelException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.YubiKeyOperationFailed,
-                        rsp.StatusMessage));
+                        response.StatusMessage));
             }
 
-            ReadOnlyMemory<byte> checksum = rsp.GetData();
-            if (!CryptographicOperations.FixedTimeEquals(checksum.Span, cmd.ExpectedChecksum.Span))
+            var checksum = response.GetData();
+            if (!CryptographicOperations.FixedTimeEquals(checksum.Span, command.ExpectedChecksum.Span))
             {
                 throw new SecureChannelException(ExceptionMessages.ChecksumError);
             }
@@ -289,17 +292,17 @@ namespace Yubico.YubiKey.Scp03
         /// </param>
         public void DeleteKeySet(byte keyVersionNumber, bool isLastKey = false)
         {
-            _log.LogInformation("Delete an SCP03 key set from a YubiKey.");
+            _log.LogInformation("Deleting an SCP03 key set from a YubiKey.");
 
-            var cmd = new DeleteKeyCommand(keyVersionNumber, isLastKey);
-            Scp03Response rsp = Connection.SendCommand(cmd);
-            if (rsp.Status != ResponseStatus.Success)
+            var command = new DeleteKeyCommand(keyVersionNumber, isLastKey);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
             {
                 throw new SecureChannelException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.YubiKeyOperationFailed,
-                        rsp.StatusMessage));
+                        response.StatusMessage));
             }
         }
 

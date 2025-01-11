@@ -19,7 +19,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath
 {
-    [Trait("Category", "Simple")]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public sealed class NoCollectorPasswordTests
     {
         [Fact]

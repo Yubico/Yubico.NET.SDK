@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.PlatformInterop;
 
 using static Yubico.PlatformInterop.NativeMethods;
@@ -29,17 +29,16 @@ namespace Yubico.Core.Devices.SmartCard
     /// </summary>
     internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener, IDisposable
     {
-        private readonly Logger _log = Log.GetLogger();
-        
+        private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardDeviceListener>();
+
         // The resource manager context.
         private SCardContext _context;
-        
+
         // The active smart card readers.
         private SCARD_READER_STATE[] _readerStates;
-        private Thread? _listenerThread;
+
         private bool _isListening;
-        private bool _disposedValue; // To detect redundant calls
-        private static readonly string[] _readerNames = ["\\\\?\\Pnp\\Notifications"];
+        private Thread? _listenerThread;
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDeviceListener"/>.
@@ -75,19 +74,16 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void StartListening()
         {
-            if (_isListening)
+            if (!_isListening)
             {
-                return;
+                _listenerThread = new Thread(ListenForReaderChanges)
+                {
+                    IsBackground = true
+                };
+                _isListening = true;
+                Status = DeviceListenerStatus.Started;
+                _listenerThread.Start();
             }
-
-            _listenerThread = new Thread(ListenForReaderChanges)
-            {
-                IsBackground = true
-            };
-
-            _isListening = true;
-            Status = DeviceListenerStatus.Started;
-            _listenerThread.Start();
         }
 
         // This method is the delegate sent to the new Thread.
@@ -108,26 +104,26 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         #region IDisposable Support
-        
+
+        private bool _disposedValue; // To detect redundant calls
+        internal static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
+
         /// <summary>
         /// Disposes the objects.
         /// </summary>
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposedValue)
+            if (!_disposedValue)
             {
-                return;
+                if (disposing)
+                {
+                    uint _ = SCardCancel(_context);
+                    _context.Dispose();
+                    StopListening();
+                }
+                _disposedValue = true;
             }
-
-            if (disposing)
-            {
-                uint _ = SCardCancel(_context);
-                _context.Dispose();
-                StopListening();
-            }
-
-            _disposedValue = true;
         }
 
         ~DesktopSmartCardDeviceListener()
@@ -285,7 +281,7 @@ namespace Yubico.Core.Devices.SmartCard
         // us of the change.
         private bool UsePnpWorkaround()
         {
-            SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(_readerNames);
+            SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(readerNames);
             _ = SCardGetStatusChange(_context, 0, testState, testState.Length);
             bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
             return usePnpWorkaround;

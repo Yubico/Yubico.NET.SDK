@@ -18,7 +18,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Pipelines
@@ -86,15 +85,13 @@ namespace Yubico.YubiKey.Pipelines
             }
 
             byte[] responseData = TransmitCommand(_channelId!.Value, ctapCmd, ctapData, out byte responseByte);
-
-            ResponseApdu responseApdu =
-                responseByte switch
-                {
-                    Ctap1Message => new ResponseApdu(responseData),
-                    CtapHidCbor => CtapToApduResponse.ToCtap2ResponseApdu(responseData),
-                    CtapError => CtapToApduResponse.ToCtap1ResponseApdu(responseData),
-                    _ => new ResponseApdu(responseData, SWConstants.Success),
-                };
+            var responseApdu = responseByte switch
+            {
+                Ctap1Message => new ResponseApdu(responseData),
+                CtapHidCbor => CtapToApduResponse.ToCtap2ResponseApdu(responseData),
+                CtapError => CtapToApduResponse.ToCtap1ResponseApdu(responseData),
+                _ => new ResponseApdu(responseData, SWConstants.Success),
+            };
 
             return responseApdu;
         }
@@ -133,11 +130,9 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         // This function applies a mask to remove the initial frame identifier (0x80)
-        private static byte GetPacketCmd(byte[] packet) =>
-            (byte)(packet[4] & ~0x80);
+        private static byte GetPacketCmd(byte[] packet) => (byte)(packet[4] & ~0x80);
 
-        private static int GetPacketBcnt(byte[] packet) =>
-            (packet[5] << 8) | packet[6];
+        private static int GetPacketBcnt(byte[] packet) => (packet[5] << 8) | packet[6];
 
         private byte[] TransmitCommand(uint channelId, byte commandByte, byte[] data, out byte responseByte)
         {
@@ -158,7 +153,10 @@ namespace Yubico.YubiKey.Pipelines
         {
             // send init request packet
             bool requestFitsInInit = data.Length <= InitDataSize;
-            ReadOnlySpan<byte> dataInInitPacket = requestFitsInInit ? data : data.Slice(0, InitDataSize);
+            var dataInInitPacket = requestFitsInInit
+                ? data
+                : data.Slice(0, InitDataSize);
+
             _hidConnection.SetReport(ConstructInitPacket(channelId, commandByte, dataInInitPacket, data.Length));
 
             if (!requestFitsInInit)
@@ -173,6 +171,7 @@ namespace Yubico.YubiKey.Pipelines
                     data = data[ContinuationDataSize..];
                     seq++;
                 }
+
                 _hidConnection.SetReport(ConstructContinuationPacket(channelId, seq, data));
             }
         }
@@ -214,11 +213,15 @@ namespace Yubico.YubiKey.Pipelines
             {
                 if (!(QueryCancel is null) && QueryCancel(commandByte))
                 {
-                    _hidConnection.SetReport(ConstructInitPacket(channelId, CtapHidCancelCmd, ReadOnlySpan<byte>.Empty, 0));
+                    _hidConnection.SetReport(
+                        ConstructInitPacket(channelId, CtapHidCancelCmd, ReadOnlySpan<byte>.Empty, 0));
+
                     QueryCancel = null;
                 }
+
                 responseInitPacket = _hidConnection.GetReport();
             }
+
             int responseDataLength = GetPacketBcnt(responseInitPacket);
 
             if (responseDataLength > MaxPayloadSize)
@@ -243,6 +246,7 @@ namespace Yubico.YubiKey.Pipelines
                     continuationPacket.AsSpan(ContinuationHeaderSize).CopyTo(responseData.AsSpan(bytesRead));
                     bytesRead += ContinuationDataSize;
                 }
+
                 byte[] lastContinuationPacket = _hidConnection.GetReport();
                 lastContinuationPacket.AsSpan(ContinuationHeaderSize).CopyTo(responseData.AsSpan(bytesRead));
             }
@@ -262,7 +266,7 @@ namespace Yubico.YubiKey.Pipelines
             rng.GetBytes(nonce);
             byte[] response = TransmitCommand(CtapHidBroadcastChannelId, CtapHidInitCmd, nonce, out _);
 
-            Span<byte> receivedNonce = response.AsSpan(0, 8);
+            var receivedNonce = response.AsSpan(0, 8);
 
             if (!nonce.AsSpan().SequenceEqual(receivedNonce))
             {

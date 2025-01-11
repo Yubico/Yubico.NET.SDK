@@ -14,7 +14,6 @@
 
 using System;
 using Xunit;
-using Yubico.Core.Buffers;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands

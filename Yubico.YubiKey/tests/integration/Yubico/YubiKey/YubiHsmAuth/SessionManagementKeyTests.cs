@@ -265,7 +265,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             // Preconditions
             IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-            SimpleKeyCollector keyCollector = new SimpleKeyCollector();
+            var keyCollector = new SimpleKeyCollector();
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
@@ -285,7 +285,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             // Preconditions
             IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-            SimpleKeyCollector keyCollector = new SimpleKeyCollector
+            var keyCollector = new SimpleKeyCollector
             {
                 UseDefaultValue = false,
             };

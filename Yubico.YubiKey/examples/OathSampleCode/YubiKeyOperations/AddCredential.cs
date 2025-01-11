@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 }
                 else
                 {
-                    Credential credential = CollectTotpCredential(menuObject);
+                    var credential = CollectTotpCredential(menuObject);
                     oathSession.AddCredential(credential);
                     ReportResult(credential);
                 }
@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 }
                 else
                 {
-                    Credential credential = CollectHotpCredential(menuObject);
+                    var credential = CollectHotpCredential(menuObject);
                     oathSession.AddCredential(credential);
                     ReportResult(credential);
                 }
@@ -116,12 +116,12 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
                 if (menuObject is null)
                 {
-                    Credential credential = oathSession.AddCredential("Yubico", "testDefaultTotp@example.com");
+                    var credential = oathSession.AddCredential("Yubico", "testDefaultTotp@example.com");
                     ReportResult(credential);
                 }
                 else
                 {
-                    Credential credential = CollectDefaultTotpCredential();
+                    var credential = CollectDefaultTotpCredential();
                     oathSession.AddCredential(credential);
                     ReportResult(credential);
                 }
@@ -144,7 +144,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
                 if (menuObject is null)
                 {
-                    Credential credential = oathSession.AddCredential(
+                    var credential = oathSession.AddCredential(
                         "Yubico",
                         "testDefaultHotp@example.com",
                         CredentialType.Hotp,
@@ -153,7 +153,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 }
                 else
                 {
-                    Credential credential = CollectDefaultHotpCredential();
+                    var credential = CollectDefaultHotpCredential();
                     oathSession.AddCredential(credential);
                     ReportResult(credential);
                 }
@@ -176,14 +176,14 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
                 if (menuObject is null)
                 {
-                    Credential credential = oathSession.AddCredential(
+                    var credential = oathSession.AddCredential(
                         "otpauth://totp/Yubico:testUri@example.com?secret=YY4KVNOUQ5IIUBAOGIDRYZ7FGY54VW54&issuer=Yubico&algorithm=SHA1&digits=6&period=30");
                     ReportResult(credential);
                 }
                 else
                 {
                     string stringFromUri = CollectStringFromUri();
-                    Credential credential = oathSession.AddCredential(stringFromUri);
+                    var credential = oathSession.AddCredential(stringFromUri);
                     ReportResult(credential);
                 }
             }
@@ -255,9 +255,9 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter account name");
             _ = SampleMenu.ReadResponse(out string account);
 
-            _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out CredentialPeriod? period);
+            _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out var period);
 
-            _ = ChooseCredentialProperties.RunChooseAlgorithmOption(menuObject, out HashAlgorithm? algorithm);
+            _ = ChooseCredentialProperties.RunChooseAlgorithmOption(menuObject, out var algorithm);
 
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter secret");
             _ = SampleMenu.ReadResponse(out string secret);
@@ -291,7 +291,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter account name");
             _ = SampleMenu.ReadResponse(out string account);
 
-            _ = ChooseCredentialProperties.RunChooseAlgorithmOption(menuObject, out HashAlgorithm? algorithm);
+            _ = ChooseCredentialProperties.RunChooseAlgorithmOption(menuObject, out var algorithm);
 
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter secret");
             _ = SampleMenu.ReadResponse(out string secret);

@@ -13,109 +13,139 @@
 // limitations under the License.
 
 using Xunit;
+using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath
 {
     [TestCaseOrderer(PriorityOrderer.TypeName, PriorityOrderer.AssembyName)]
-    [Trait("Category", "Simple")]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public sealed class OathSessionPasswordTests
     {
-        [Theory, TestPriority(0)]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void SetPassword(StandardTestDevice testDeviceType)
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, false)]
+        [InlineData(StandardTestDevice.Fw5, true)]
+        [InlineData(StandardTestDevice.Fw5Fips, false)]
+        [InlineData(StandardTestDevice.Fw5Fips, true)]
+        public void SetPassword(
+            StandardTestDevice testDeviceType, bool useScp)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var oathSession = new OathSession(testDevice))
+            var keyParameters = useScp ? Scp03KeyParameters.DefaultKey : null;
+            using (var resetSession = new OathSession(testDevice, keyParameters))
             {
-                var collectorObj = new SimpleOathKeyCollector();
-                oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
-
-                oathSession.SetPassword();
-
-                Assert.False(oathSession._oathData.Challenge.IsEmpty);
+                resetSession.ResetApplication();
             }
+
+            using var oathSession = new OathSession(testDevice, keyParameters);
+            var collectorObj = new SimpleOathKeyCollector();
+            oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
+
+            oathSession.SetPassword();
+
+            Assert.False(oathSession._oathData.Challenge.IsEmpty);
         }
 
-        [Theory, TestPriority(1)]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void VerifyCorrectPassword(StandardTestDevice testDeviceType)
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, false)]
+        [InlineData(StandardTestDevice.Fw5, true)]
+        [InlineData(StandardTestDevice.Fw5Fips, false)]
+        [InlineData(StandardTestDevice.Fw5Fips, true)]
+        public void VerifyCorrectPassword(
+            StandardTestDevice testDeviceType, bool useScp)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var oathSession = new OathSession(testDevice))
-            {
-                var collectorObj = new SimpleOathKeyCollector();
-                oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
+            SetTestPassword(testDevice);
 
-                bool isVerified = oathSession.TryVerifyPassword();
-                Assert.True(isVerified);
-            }
+            using var oathSession = new OathSession(testDevice, useScp ? Scp03KeyParameters.DefaultKey : null);
+            var collectorObj = new SimpleOathKeyCollector();
+            oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
+
+            var isVerified = oathSession.TryVerifyPassword();
+
+            Assert.True(isVerified);
         }
 
-        [Theory, TestPriority(2)]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void VerifyWrongPassword(StandardTestDevice testDeviceType)
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, false)]
+        [InlineData(StandardTestDevice.Fw5, true)]
+        [InlineData(StandardTestDevice.Fw5Fips, false)]
+        [InlineData(StandardTestDevice.Fw5Fips, true)]
+        public void VerifyWrongPassword(
+            StandardTestDevice testDeviceType, bool useScp)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var oathSession = new OathSession(testDevice))
-            {
-                var collectorObj = new SimpleOathKeyCollector();
-                oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
+            SetTestPassword(testDevice);
 
-                collectorObj.KeyFlag = 1;
+            using var oathSession = new OathSession(testDevice, useScp ? Scp03KeyParameters.DefaultKey : null);
+            var collectorObj = new SimpleOathKeyCollector();
+            oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                bool isVerified = oathSession.TryVerifyPassword();
-                Assert.False(isVerified);
-            }
+            collectorObj.KeyFlag = 1;
+
+            var isVerified = oathSession.TryVerifyPassword();
+            Assert.False(isVerified);
         }
 
-        [Theory, TestPriority(3)]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void ChangePassword(StandardTestDevice testDeviceType)
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, false)]
+        [InlineData(StandardTestDevice.Fw5, true)]
+        [InlineData(StandardTestDevice.Fw5Fips, false)]
+        [InlineData(StandardTestDevice.Fw5Fips, true)]
+        public void ChangePassword(
+            StandardTestDevice testDeviceType, bool useScp)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var oathSession = new OathSession(testDevice))
-            {
-                var collectorObj = new SimpleOathKeyCollector();
-                oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
+            SetTestPassword(testDevice);
 
-                collectorObj.KeyFlag = 1;
-                oathSession.SetPassword();
+            using var oathSession = new OathSession(testDevice, useScp ? Scp03KeyParameters.DefaultKey : null);
+            var collectorObj = new SimpleOathKeyCollector();
+            oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
+            collectorObj.KeyFlag = 1;
 
-                Assert.False(oathSession._oathData.Challenge.IsEmpty);
-            }
+            oathSession.SetPassword();
+
+            Assert.False(oathSession._oathData.Challenge.IsEmpty);
         }
 
-        [Theory, TestPriority(4)]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void UnsetPassword(StandardTestDevice testDeviceType)
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, false)]
+        [InlineData(StandardTestDevice.Fw5, true)]
+        [InlineData(StandardTestDevice.Fw5Fips, false)]
+        [InlineData(StandardTestDevice.Fw5Fips, true)]
+        public void UnsetPassword(
+            StandardTestDevice testDeviceType, bool useScp)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var oathSession = new OathSession(testDevice))
+            SetTestPassword(testDevice);
+            using var oathSession = new OathSession(testDevice, useScp ? Scp03KeyParameters.DefaultKey : null);
+            var collectorObj = new SimpleOathKeyCollector();
+            oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
+
+            oathSession.UnsetPassword();
+
+            Assert.False(oathSession.IsPasswordProtected);
+        }
+
+        private void SetTestPassword(IYubiKeyDevice testDevice, Scp03KeyParameters? keyParameters = null)
+        {
+            using (var resetSession = new OathSession(testDevice, keyParameters))
             {
-                oathSession.ResetApplication();
+                resetSession.ResetApplication();
+            }
 
+            using (var oathSession = new OathSession(testDevice, keyParameters))
+            {
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
-
                 oathSession.SetPassword();
 
                 Assert.True(oathSession.IsPasswordProtected);
-            }
-
-            using (var oathSession = new OathSession(testDevice))
-            {
-                var collectorObj = new SimpleOathKeyCollector();
-                oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
-
-                oathSession.UnsetPassword();
-
-                Assert.False(oathSession.IsPasswordProtected);
             }
         }
     }

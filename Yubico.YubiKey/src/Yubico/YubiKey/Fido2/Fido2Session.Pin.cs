@@ -15,7 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security;
-using Yubico.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -283,8 +283,8 @@ namespace Yubico.YubiKey.Fido2
         {
             _log.LogInformation("Add permissions (get new AuthToken with more permissions).");
 
-            PinUvAuthTokenPermissions current = AuthTokenPermissions ?? PinUvAuthTokenPermissions.None;
-            PinUvAuthTokenPermissions allPermissions = permissions | current;
+            var currentPermissions = AuthTokenPermissions ?? PinUvAuthTokenPermissions.None;
+            var allPermissions = permissions | currentPermissions;
 
             // If the caller supplies an RpId, replace the one in the
             // AuthTokenRelyingPartyId property.
@@ -513,9 +513,9 @@ namespace Yubico.YubiKey.Fido2
         public bool TrySetPin()
         {
             _log.LogInformation("Try to set PIN (use KeyCollector).");
-            Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
-
-            var keyEntryData = new KeyEntryData()
+            
+            var keyCollector = EnsureKeyCollector();
+            var keyEntryData = new KeyEntryData
             {
                 Request = KeyEntryRequest.SetFido2Pin,
             };
@@ -584,9 +584,8 @@ namespace Yubico.YubiKey.Fido2
 
             ObtainSharedSecret();
 
-            SetPinResponse result = Connection.SendCommand(new SetPinCommand(AuthProtocol, newPin));
-
-            if (result.Status == ResponseStatus.Success)
+            var response = Connection.SendCommand(new SetPinCommand(AuthProtocol, newPin));
+            if (response.Status == ResponseStatus.Success)
             {
                 // Setting the PIN changes the AuthenticatorInfo, so set this to
                 // null so the next reference initiates a new GetInfo command.
@@ -595,13 +594,13 @@ namespace Yubico.YubiKey.Fido2
             }
 
             // Spec says "PinAuthInvalid" for PIN already set. YubiKey says "NotAllowed".
-            if (GetCtapError(result) == CtapStatus.PinAuthInvalid ||
-                GetCtapError(result) == CtapStatus.NotAllowed)
+            if (GetCtapError(response) == CtapStatus.PinAuthInvalid ||
+                GetCtapError(response) == CtapStatus.NotAllowed)
             {
                 return false; // PIN is already set.
             }
 
-            throw new Fido2Exception(GetCtapError(result), result.StatusMessage);
+            throw new Fido2Exception(GetCtapError(response), response.StatusMessage);
         }
 
         /// <summary>
@@ -674,8 +673,8 @@ namespace Yubico.YubiKey.Fido2
         public bool TryChangePin()
         {
             _log.LogInformation("Try to change PIN (use KeyCollector).");
-            Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
-
+            
+            var keyCollector = EnsureKeyCollector();
             var keyEntryData = new KeyEntryData()
             {
                 Request = KeyEntryRequest.ChangeFido2Pin
@@ -752,14 +751,13 @@ namespace Yubico.YubiKey.Fido2
 
             ObtainSharedSecret();
 
-            ChangePinResponse result = Connection.SendCommand(new ChangePinCommand(AuthProtocol, currentPin, newPin));
-
-            if (result.Status == ResponseStatus.Success)
+            var response = Connection.SendCommand(new ChangePinCommand(AuthProtocol, currentPin, newPin));
+            if (response.Status == ResponseStatus.Success)
             {
                 return true;
             }
 
-            if (GetCtapError(result) == CtapStatus.PinInvalid)
+            if (GetCtapError(response) == CtapStatus.PinInvalid)
             {
                 // FIDO authenticators regenerate the public key used for the auth protocol. We need to
                 // re-initialize everything so we can obtain the new shared secret.
@@ -767,7 +765,7 @@ namespace Yubico.YubiKey.Fido2
                 return false; // PIN is invalid
             }
 
-            throw new Fido2Exception(GetCtapError(result), result.StatusMessage);
+            throw new Fido2Exception(GetCtapError(response), response.StatusMessage);
         }
 
         /// <summary>
@@ -914,9 +912,9 @@ namespace Yubico.YubiKey.Fido2
         public bool TryVerifyPin(PinUvAuthTokenPermissions? permissions = null, string? relyingPartyId = null)
         {
             _log.LogInformation("Try to verify PIN (use KeyCollector).");
-            Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
-
-            var keyEntryData = new KeyEntryData()
+            
+            var keyCollector = EnsureKeyCollector();
+            var keyEntryData = new KeyEntryData
             {
                 Request = KeyEntryRequest.VerifyFido2Pin
             };
@@ -1056,8 +1054,7 @@ namespace Yubico.YubiKey.Fido2
                     relyingPartyId);
             }
 
-            GetPinUvAuthTokenResponse response = Connection.SendCommand(command);
-
+            var response = Connection.SendCommand(command);
             if (response.Status == ResponseStatus.Success)
             {
                 AuthToken = response.GetData();
@@ -1211,9 +1208,9 @@ namespace Yubico.YubiKey.Fido2
         public bool TryVerifyUv(PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
         {
             _log.LogInformation("Try to verify UV (use KeyCollector).");
-            CtapStatus status = DoVerifyUv(permissions, relyingPartyId, out string statusMessage);
-
-            switch (status)
+            
+            var ctapStatus = DoVerifyUv(permissions, relyingPartyId, out string statusMessage);
+            switch (ctapStatus)
             {
                 case CtapStatus.Ok:
                     return true;
@@ -1252,9 +1249,8 @@ namespace Yubico.YubiKey.Fido2
                 return CtapStatus.InvalidParameter;
             }
 
-            Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
+            var keyCollector = EnsureKeyCollector();
 
-            CtapStatus status;
             ObtainSharedSecret();
             var command = new GetPinUvAuthTokenUsingUvCommand(AuthProtocol, permissions, relyingPartyId);
 
@@ -1270,12 +1266,13 @@ namespace Yubico.YubiKey.Fido2
 
             try
             {
+                CtapStatus status;
                 do
                 {
-                    GetPinUvAuthTokenResponse response = Connection.SendCommand(command);
-                    status = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : response.CtapStatus;
+                    var response = Connection.SendCommand(command);
+                    
                     statusMessage = response.StatusMessage;
-
+                    status = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : response.CtapStatus;
                     if (status == CtapStatus.Ok)
                     {
                         AuthToken = response.GetData();
@@ -1375,8 +1372,7 @@ namespace Yubico.YubiKey.Fido2
 
         private PinUvAuthProtocolBase GetPreferredPinProtocol()
         {
-            PinUvAuthProtocol protocol = AuthenticatorInfo.PinUvAuthProtocols?[0] ?? PinUvAuthProtocol.ProtocolOne;
-
+            var protocol = AuthenticatorInfo.PinUvAuthProtocols?[0] ?? PinUvAuthProtocol.ProtocolOne;
             return protocol switch
             {
                 PinUvAuthProtocol.ProtocolOne => new PinUvAuthProtocolOne(),
@@ -1391,10 +1387,9 @@ namespace Yubico.YubiKey.Fido2
 
         private CoseEcPublicKey GetPeerCoseKey()
         {
-            GetKeyAgreementResponse keyAgreementResponse =
-                Connection.SendCommand(new GetKeyAgreementCommand(AuthProtocol.Protocol));
-
-            CoseEcPublicKey peerCoseKey = keyAgreementResponse.GetData();
+            var response = Connection.SendCommand(new GetKeyAgreementCommand(AuthProtocol.Protocol));
+            var peerCoseKey = response.GetData();
+            
             return peerCoseKey;
         }
 
@@ -1403,7 +1398,7 @@ namespace Yubico.YubiKey.Fido2
             if (AuthProtocol.PlatformPublicKey is null)
             {
                 AuthProtocol.Initialize();
-                CoseEcPublicKey peerCoseKey = GetPeerCoseKey();
+                var peerCoseKey = GetPeerCoseKey();
                 AuthProtocol.Encapsulate(peerCoseKey);
             }
         }

@@ -74,11 +74,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             _algorithm = pivPublicKey.Algorithm;
             _rsaPaddingMode = rsaPaddingMode;
 
-            using AsymmetricAlgorithm dotNetPublicKey = KeyConverter.GetDotNetFromPivPublicKey(pivPublicKey);
+            using var dotNetPublicKey = KeyConverter.GetDotNetFromPivPublicKey(pivPublicKey);
 
             if (_algorithm.IsRsa())
             {
-                RSASignaturePadding paddingScheme = rsaPaddingMode == RSASignaturePaddingMode.Pss ?
+                var paddingScheme = rsaPaddingMode == RSASignaturePaddingMode.Pss ?
                     RSASignaturePadding.Pss : RSASignaturePadding.Pkcs1;
                 _defaultGenerator = X509SignatureGenerator.CreateForRSA((RSA)dotNetPublicKey, paddingScheme);
             }

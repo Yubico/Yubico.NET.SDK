@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Collections.ObjectModel;
 using Xunit;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.PinProtocols

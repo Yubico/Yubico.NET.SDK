@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.InvalidPrivateKeyData));
             }
 
-            ReadOnlyMemory<byte> value = tlvReader.ReadValue(EccTag);
+            var value = tlvReader.ReadValue(EccTag);
 
             return new PivEccPrivateKey(value.Span);
         }

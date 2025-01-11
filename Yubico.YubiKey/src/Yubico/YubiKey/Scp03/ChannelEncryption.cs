@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Buffers.Binary;
+using System.Linq;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [Obsolete("Use new ChannelEncryption instead")]
     internal static class ChannelEncryption
     {
         public static byte[] EncryptData(byte[] payload, byte[] key, int encryptionCounter)
@@ -27,12 +30,12 @@ namespace Yubico.YubiKey.Scp03
 
             byte[] ivInput = new byte[16];
             countBytes.CopyTo(ivInput, 16 - countBytes.Length); // copy to rightmost part of block
-            byte[] iv = AesUtilities.BlockCipher(key, ivInput);
+            var iv = AesUtilities.BlockCipher(key, ivInput);
 
             byte[] paddedPayload = Padding.PadToBlockSize(payload);
-            byte[] encryptedData = AesUtilities.AesCbcEncrypt(key, iv, paddedPayload);
+            var encryptedData = AesUtilities.AesCbcEncrypt(key, iv, paddedPayload.AsSpan());
 
-            return encryptedData;
+            return encryptedData.ToArray();
         }
 
         public static byte[] DecryptData(byte[] payload, byte[] key, int encryptionCounter)
@@ -47,7 +50,7 @@ namespace Yubico.YubiKey.Scp03
 
             byte[] decryptedData = AesUtilities.AesCbcDecrypt(key, iv, payload);
 
-            return Padding.RemovePadding(decryptedData);
+            return Padding.RemovePadding(decryptedData.ToArray()).ToArray();
         }
     }
 }

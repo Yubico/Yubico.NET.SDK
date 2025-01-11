@@ -14,7 +14,6 @@
 
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
@@ -26,8 +25,8 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// </summary>
     /// <remarks>
     /// <para>
-    /// An ECC public key consists of a curve and public point. In FIDO2, the curve is represented by the
-    /// <see cref="CoseAlgorithmIdentifier"/> and the public point is simply an x-coordinate and a y-coordinate.
+    /// An ECC public key consists of a curve and public key data. In FIDO2, the curve is represented by the
+    /// <see cref="CoseAlgorithmIdentifier"/> .
     /// </para>
     /// <para>
     /// The FIDO2 standard also specifies an encoding of the public key information. It uses the representation defined
@@ -40,24 +39,14 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// Lastly, there is a constructor that takes in a .NET representation of an EC public key used for interoperating
     /// with the .NET cryptographic library.
     /// </para>
-    /// <para>
-    /// The YubiKey's FIDO2 application currently only supports the NIST P-256 curve. Thus, the SDK - as of version 1.5.0
-    /// - will also only support this curve.
-    /// </para>
     /// </remarks>
-    public class CoseEcPublicKey : CoseKey
+    public class CoseEdDsaPublicKey : CoseKey
     {
         private const int TagCurve = -1;
-        private const int TagX = -2;
-        private const int TagY = -3;
-
-        private byte[] _xCoordinate = Array.Empty<byte>();
-        private byte[] _yCoordinate = Array.Empty<byte>();
-        #pragma warning disable IDE0032
+        private const int TagPublicKey = -2;
+        private const int Ed25519PublicKeyLength = 32;
+        private byte[] _publicKey = Array.Empty<byte>();
         private CoseEcCurve _curve;
-        #pragma warning restore IDE0032
-
-        private readonly KeyDefinitions.Helper _helper = new KeyDefinitions.Helper(); //todo make singleton
 
         /// <summary>
         /// The Elliptic Curve that the key resides on.
@@ -70,53 +59,43 @@ namespace Yubico.YubiKey.Fido2.Cose
             get => _curve;
             set
             {
-                // if (value != CoseEcCurve.P256)
-                // {
-                //     throw new NotSupportedException(
-                //         string.Format(
-                //             CultureInfo.CurrentCulture,
-                //             ExceptionMessages.UnsupportedAlgorithm));
-                // }
-                ValidateCurve(value);
+                if (value != CoseEcCurve.Ed25519) // TODO do validation somewhere else?
+                {
+                    throw new NotSupportedException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.UnsupportedAlgorithm));
+                }
                 _curve = value;
             }
         }
 
         /// <summary>
-        /// The X-coordinate of the public point.
+        /// The public key data.
         /// </summary>
         /// <exception cref="ArgumentException">
-        /// On set, the coordinate in not the correct length.
+        /// On set, the key data is not the correct length.
         /// </exception>
-        public ReadOnlyMemory<byte> XCoordinate
+        public ReadOnlyMemory<byte> PublicKey
         {
-            get => _xCoordinate;
+            get => _publicKey;
             set
             {
-                ValidateLength(value);
-                _xCoordinate = value.ToArray();
-            }
-        }
+                if (value.Length != Ed25519PublicKeyLength)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPublicKeyData));
+                }
 
-        /// <summary>
-        /// The Y-coordinate of the public point.
-        /// </summary>
-        /// <exception cref="ArgumentException">
-        /// On set, the coordinate in not the correct length.
-        /// </exception>
-        public ReadOnlyMemory<byte> YCoordinate
-        {
-            get => _yCoordinate;
-            set
-            {
-                ValidateLength(value);
-                _yCoordinate = value.ToArray();
+                _publicKey = value.ToArray();
             }
         }
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
-        private CoseEcPublicKey()
+        private CoseEdDsaPublicKey()
         {
             throw new NotImplementedException();
         }
@@ -134,23 +113,25 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <param name="curve">
         /// The curve for this public key.
         /// </param>
-        /// <param name="xCoordinate">
+        /// <param name="publicKey">
         /// The x-coordinate of the public point.
-        /// </param>
-        /// <param name="yCoordinate">
-        /// The y-coordinate of the public point.
         /// </param>
         /// <exception cref="ArgumentException">
         /// The <c>encodedPoint</c> is not a correct EC Point encoding.
         /// </exception>
-        public CoseEcPublicKey(CoseEcCurve curve, ReadOnlyMemory<byte> xCoordinate, ReadOnlyMemory<byte> yCoordinate)
+        public CoseEdDsaPublicKey(CoseEcCurve curve, ReadOnlyMemory<byte> publicKey)
         {
-            var definition = curve.GetKeyDefinition();
-            Type = (CoseKeyType)definition.CoseKeyDefinition!.CoseKeyType;
+            if (curve != CoseEcCurve.Ed25519 || 
+                publicKey.Length != Ed25519PublicKeyLength)
+            {
+                throw new ArgumentException(ExceptionMessages.InvalidPublicKeyData);
+            }
+
+            // todo use KeyDefinition Type and Algorithm??
             Curve = curve;
-            XCoordinate = xCoordinate;
-            YCoordinate = yCoordinate;
-            Algorithm = (CoseAlgorithmIdentifier)definition.CoseKeyDefinition.CoseAlgorithm;
+            PublicKey = publicKey;
+            Type = CoseKeyType.Okp;
+            Algorithm = CoseAlgorithmIdentifier.EdDSA;
         }
 
         /// <summary>
@@ -163,13 +144,12 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <exception cref="Ctap2DataException">
         /// The <c>encodedCoseKey</c> is not a correct EC Public Key encoding.
         /// </exception>
-        public CoseEcPublicKey(ReadOnlyMemory<byte> encodedCoseKey)
+        public CoseEdDsaPublicKey(ReadOnlyMemory<byte> encodedCoseKey)
         {
             var map = new CborMap<int>(encodedCoseKey);
 
             Curve = (CoseEcCurve)map.ReadInt32(TagCurve);
-            XCoordinate = map.ReadByteString(TagX);
-            YCoordinate = map.ReadByteString(TagY);
+            PublicKey = map.ReadByteString(TagPublicKey);
             Type = (CoseKeyType)map.ReadInt32(TagKeyType);
             Algorithm = (CoseAlgorithmIdentifier)map.ReadInt32(TagAlgorithm);
         }
@@ -186,23 +166,10 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <exception cref="NotSupportedException">
         /// The parameters/public key specified is not supported.
         /// </exception>
-        public CoseEcPublicKey(ECParameters ecParameters)
+        // ReSharper disable once UnusedParameter.Local
+        public CoseEdDsaPublicKey(ECParameters ecParameters)
         {
-            if (!ecParameters.Curve.IsNamed)
-            {
-                throw new NotSupportedException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.UnsupportedAlgorithm));
-            }
-
-            var definition = _helper.GetKeyDefinitionByOid(ecParameters.Curve.Oid.Value);
-
-            Algorithm = (CoseAlgorithmIdentifier)definition.CoseKeyDefinition!.CoseAlgorithm;
-            Curve = (CoseEcCurve)definition!.CoseKeyDefinition.CoseCurve;
-            Type = (CoseKeyType)definition!.CoseKeyDefinition.CoseKeyType;
-            XCoordinate = ecParameters.Q.X;
-            YCoordinate = ecParameters.Q.Y;
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -214,23 +181,13 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </returns>
         public ECParameters ToEcParameters()
         {
-            var ecParams = new ECParameters
-            {
-                Curve = ECCurve.CreateFromValue(
-                    KeyDefinitions.KeyOids.OidP256) // TODO not OK if using other size than P256
-            };
-
-            ecParams.Q.X = _xCoordinate;
-            ecParams.Q.Y = _yCoordinate;
-
-            return ecParams;
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc/>
         public override byte[] Encode()
         {
-            if (_xCoordinate.Length == 0 ||
-                _yCoordinate.Length == 0)
+            if (_publicKey.Length != Ed25519PublicKeyLength)
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -238,44 +195,12 @@ namespace Yubico.YubiKey.Fido2.Cose
                         ExceptionMessages.NoDataToEncode));
             }
 
-            // This encodes the map of 5 things.
-            // The standard specifies that the Algorithm is -25, ECDH with
-            // HKDF256.
             return new CborMapWriter<int>()
-                .Entry(TagKeyType, (int)Type)
-                .Entry(TagAlgorithm, (int)CoseAlgorithmIdentifier.ECDHwHKDF256) // TODO Use 'Algorithm' here?
-                .Entry(TagCurve, (int)Curve)
-                .Entry(TagX, XCoordinate)
-                .Entry(TagY, YCoordinate)
+                .Entry(TagKeyType, (int)CoseKeyType.Okp)
+                .Entry(TagAlgorithm, (int)CoseAlgorithmIdentifier.EdDSA)
+                .Entry(TagCurve, (int)CoseEcCurve.Ed25519)
+                .Entry(TagPublicKey, PublicKey)
                 .Encode();
-        }
-
-        private void ValidateLength(ReadOnlyMemory<byte> value)
-        {
-            var allowedLengths = _helper.GetEcKeyDefinitions().Select(d => d.LengthInBytes);
-            if (!allowedLengths.Contains(value.Length))
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPublicKeyData));
-            }
-        }
-
-        private void ValidateCurve(CoseEcCurve value)
-        {
-            var allowedCurves = _helper.GetEcKeyDefinitions()
-                .Where(d => d.CoseKeyDefinition != null)
-                .Where(d => d.CoseKeyDefinition!.RequiresYCoordinate)
-                .Select(d => d.CoseKeyDefinition!.CoseCurve);
-
-            if (!allowedCurves.Contains((int)value))
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.UnsupportedAlgorithm));
-            }
         }
     }
 }

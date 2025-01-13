@@ -16,8 +16,8 @@ using System;
 using Moq;
 using Xunit;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.InterIndustry.Commands;
+using Yubico.YubiKey.Scp;
 
 namespace Yubico.YubiKey.Pipelines
 {

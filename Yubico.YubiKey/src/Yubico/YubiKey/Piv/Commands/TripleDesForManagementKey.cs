@@ -433,14 +433,8 @@ namespace Yubico.YubiKey.Piv.Commands
             }
 
             _cryptoTransform.Dispose();
-            if (!(_cryptoTransformA is null))
-            {
-                _cryptoTransformA.Dispose();
-            }
-            if (!(_cryptoTransformB is null))
-            {
-                _cryptoTransformB.Dispose();
-            }
+            _cryptoTransformA?.Dispose();
+            _cryptoTransformB?.Dispose();
 
             _disposed = true;
         }

@@ -596,10 +596,7 @@ namespace Yubico.YubiKey.TestUtilities
         // When done with the object, clear it if you want.
         public void Clear()
         {
-            if (!(_pivPrivateKey is null))
-            {
-                _pivPrivateKey.Clear();
-            }
+            _pivPrivateKey?.Clear();
 
             _pivPrivateKey = new PivPrivateKey();
             _pivPublicKey = new PivPublicKey();

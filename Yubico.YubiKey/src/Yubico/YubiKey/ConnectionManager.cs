@@ -225,14 +225,9 @@ namespace Yubico.YubiKey
             [MaybeNullWhen(returnValue: false)]
             out IYubiKeyConnection connection)
         {
-            var smartCardDevice = device as ISmartCardDevice;
-
-            if (smartCardDevice == null)
-            {
-                throw new ArgumentException(
+            var smartCardDevice = device as ISmartCardDevice ?? throw new ArgumentException(
                     ExceptionMessages.DeviceDoesNotSupportApplication,
                     nameof(applicationId));
-            }
 
             // Since taking a write lock is potentially very expensive, let's try and make a best effort to see if the
             // YubiKey is already present. This way we can fail fast.

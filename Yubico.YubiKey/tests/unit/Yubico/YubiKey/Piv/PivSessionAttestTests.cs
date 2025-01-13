@@ -158,7 +158,7 @@ namespace Yubico.YubiKey.Piv
 
             var certChars = certPem.ToCharArray();
             var certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
-            var certObj = new X509Certificate2(certDer);
+            var certObj = X509CertificateLoader.LoadCertificate(certDer);
 
             using var pivSession = new PivSession(yubiKey);
             var simpleCollector = new SimpleKeyCollector(false);
@@ -190,7 +190,7 @@ namespace Yubico.YubiKey.Piv
 
             var certChars = certPem.ToCharArray();
             var certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
-            var certObj = new X509Certificate2(certDer);
+            var certObj = X509CertificateLoader.LoadCertificate(certDer);
 
             using var pivSession = new PivSession(yubiKey);
             var simpleCollector = new SimpleKeyCollector(false);
@@ -220,7 +220,7 @@ namespace Yubico.YubiKey.Piv
 
             var certChars = certPem.ToCharArray();
             var certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
-            var certObj = new X509Certificate2(certDer);
+            var certObj = X509CertificateLoader.LoadCertificate(certDer);
 
             using var pivSession = new PivSession(yubiKey);
             var simpleCollector = new SimpleKeyCollector(false);

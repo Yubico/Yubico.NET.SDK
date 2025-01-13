@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
                 };
 
-                var initCmd = new InitializeAuthenticateManagementKeyCommand(true, PivAlgorithm.TripleDes);
+                var initCmd = new InitializeAuthenticateManagementKeyCommand(true, PivAlgorithm.TripleDes); // TODO this test only works with 5.4.3 and lower
                 InitializeAuthenticateManagementKeyResponse initRsp = pivSession.Connection.SendCommand(initCmd);
                 Assert.Equal(ResponseStatus.Success, initRsp.Status);
 

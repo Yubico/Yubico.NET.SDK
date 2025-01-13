@@ -83,14 +83,9 @@ namespace Yubico.YubiKey.TestUtilities
         public void GetBytes(byte[] data, int offset, int count)
         {
             ArgumentNullException.ThrowIfNull(data);
-            if (offset < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            }
-            if (count < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count));
-            }
+            ArgumentOutOfRangeException.ThrowIfNegative(offset);
+            ArgumentOutOfRangeException.ThrowIfNegative(count);
+
             if (offset + count > data.Length)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectDerivationLength);

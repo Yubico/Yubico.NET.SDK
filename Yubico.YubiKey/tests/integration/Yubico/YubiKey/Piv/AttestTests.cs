@@ -180,7 +180,7 @@ namespace Yubico.YubiKey.Piv
 
             char[] certChars = certPem.ToCharArray();
             byte[] certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
-            var certObj = new X509Certificate2(certDer);
+            var certObj = X509CertificateLoader.LoadCertificate(certDer);
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 

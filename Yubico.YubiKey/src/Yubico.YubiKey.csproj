@@ -109,7 +109,11 @@ limitations under the License. -->
   </ItemGroup>
 
   <ItemGroup Label="Package references specific to Yubico.YubiKey.dll">
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0"/>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="docfx.console" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'" Version="$(DocFxVersion)" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />

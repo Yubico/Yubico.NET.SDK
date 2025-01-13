@@ -17,11 +17,10 @@ limitations under the License. -->
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT'">net6.0-windows</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT'">net6.0</TargetFrameworks>
-    <Nullable>disable</Nullable>
+	<TargetFramework>net9.0</TargetFramework>
+	<Nullable>disable</Nullable>
     <IsPackable>false</IsPackable>
-    <UseWindowsForms Condition=" '$(OS)' == 'Windows_NT'">true</UseWindowsForms>
+    <!--<UseWindowsForms Condition=" '$(OS)' == 'Windows_NT'">true</UseWindowsForms>-->
     <AnalysisMode>AllDisabledByDefault</AnalysisMode>
   </PropertyGroup>
   <ItemGroup>

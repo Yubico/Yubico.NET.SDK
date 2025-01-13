@@ -19,7 +19,7 @@ limitations under the License. -->
     <PackageId>Yubico.YubiKey.UnitTests</PackageId>
     <RootNamespace></RootNamespace>
 
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
 
     <AnalysisMode>AllDisabledByDefault</AnalysisMode>
 

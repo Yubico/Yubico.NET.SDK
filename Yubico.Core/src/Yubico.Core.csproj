@@ -109,7 +109,11 @@ limitations under the License. -->
 
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1"/>
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
@@ -120,7 +124,7 @@ limitations under the License. -->
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Memory" Version="4.5.5" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0"/>
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
     <!-- The wildcard version tag allows us to include the latest minor and pre-release versions -->
     <PackageReference Include="Yubico.NativeShims" Version="1.*-*" />
@@ -146,6 +150,6 @@ limitations under the License. -->
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="System.Security" Condition="'$(TargetFramework)' == 'net47'"/>
+    <Reference Include="System.Security" Condition="'$(TargetFramework)' == 'net47'" />
   </ItemGroup>
 </Project>

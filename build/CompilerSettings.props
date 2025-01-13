@@ -31,7 +31,7 @@ on things like conditions in this file.
     .NETStandard 2.0 libraries. C# 9.0 requires the .NET 5 runtime. More research can be done at the time
     of .NET 5 release to re-evaluate this statement.
     -->
-    <LangVersion>12</LangVersion>
+    <LangVersion>13.0</LangVersion>
 
     <!--
     Enable nullable reference types. This is a C# 8.0 feature that is off by default, due to backward

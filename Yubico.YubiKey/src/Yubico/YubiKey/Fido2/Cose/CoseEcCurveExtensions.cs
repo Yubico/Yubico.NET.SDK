@@ -21,15 +21,14 @@ namespace Yubico.YubiKey.Fido2.Cose
     {
         public static KeyDefinitions.KeyDefinition GetKeyDefinition(this CoseEcCurve curve)
         {
-            var keyDefinitions = new KeyDefinitions.Helper(); //todo get singleton
             
             var definition = curve switch
             {
-                CoseEcCurve.P256 => keyDefinitions.GetKeyDefinition(KeyDefinitions.KeyType.P256),
-                CoseEcCurve.P384 => keyDefinitions.GetKeyDefinition(KeyDefinitions.KeyType.P384),
-                CoseEcCurve.P521 => keyDefinitions.GetKeyDefinition(KeyDefinitions.KeyType.P521),
-                CoseEcCurve.X25519 => keyDefinitions.GetKeyDefinition(KeyDefinitions.KeyType.X25519),
-                CoseEcCurve.Ed25519 => keyDefinitions.GetKeyDefinition(KeyDefinitions.KeyType.Ed25519),
+                CoseEcCurve.P256 => KeyDefinitions.Helper.GetKeyDefinition(KeyDefinitions.KeyType.P256),
+                CoseEcCurve.P384 => KeyDefinitions.Helper.GetKeyDefinition(KeyDefinitions.KeyType.P384),
+                CoseEcCurve.P521 => KeyDefinitions.Helper.GetKeyDefinition(KeyDefinitions.KeyType.P521),
+                CoseEcCurve.X25519 => KeyDefinitions.Helper.GetKeyDefinition(KeyDefinitions.KeyType.X25519),
+                CoseEcCurve.Ed25519 => KeyDefinitions.Helper.GetKeyDefinition(KeyDefinitions.KeyType.Ed25519),
                 _ => throw new ArgumentException(nameof(curve), "Unknown curve")
             };
 

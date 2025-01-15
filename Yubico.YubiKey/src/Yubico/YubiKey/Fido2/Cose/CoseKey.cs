@@ -27,6 +27,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// The CBOR tag (key of key/value pair) for the COSE key type.
         /// </summary>
         protected const int TagKeyType = 1;
+
         /// <summary>
         /// The CBOR tag (key of key/value pair) for the COSE key algorithm.
         /// </summary>
@@ -103,18 +104,18 @@ namespace Yubico.YubiKey.Fido2.Cose
         public static CoseKey Create(ReadOnlyMemory<byte> coseEncodedKey, out int bytesRead)
         {
             var cborMap = new CborMap<int>(coseEncodedKey);
-            
+
             // Set out-parameter
             bytesRead = cborMap.BytesRead;
 
             var algorithm = GetAlgorithm(cborMap);
             return algorithm switch
             {
-                CoseAlgorithmIdentifier.ECDHwHKDF256 => new CoseEcPublicKey(coseEncodedKey),
-                CoseAlgorithmIdentifier.ES256 => new CoseEcPublicKey(coseEncodedKey),
-                CoseAlgorithmIdentifier.ES384 => new CoseEcPublicKey(coseEncodedKey),
-                CoseAlgorithmIdentifier.ES512 => new CoseEcPublicKey(coseEncodedKey),
-                CoseAlgorithmIdentifier.EdDSA => new CoseEdDsaPublicKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.ECDHwHKDF256 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.ES256 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.ES384 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.ES512 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
+                CoseAlgorithmIdentifier.EdDSA => CoseEdDsaPublicKey.CreateFromEncodedKey(coseEncodedKey),
                 _ => throw new NotSupportedException(
                     string.Format(CultureInfo.CurrentCulture, ExceptionMessages.UnsupportedAlgorithm))
             };

@@ -14,8 +14,6 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Cose
@@ -59,13 +57,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             get => _curve;
             set
             {
-                if (value != CoseEcCurve.Ed25519) // TODO do validation somewhere else?
-                {
-                    throw new NotSupportedException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.UnsupportedAlgorithm));
-                }
+                ValidateCurve(value);
                 _curve = value;
             }
         }
@@ -101,89 +93,57 @@ namespace Yubico.YubiKey.Fido2.Cose
         }
 
         /// <summary>
-        /// Construct a <see cref="CoseEcPublicKey"/> based on the curve and
-        /// point.
+        /// Construct a <see cref="CoseEcPublicKey"/> based on public key data (x-coordinate of public key)
         /// </summary>
         /// <remarks>
-        /// An ECC public key is a curve and public point. This class supports
-        /// only one curve: NIST P-256 (<c>CoseEcCurve.P256</c>). This
-        /// constructor expects the length of each coordinate to be at least one
-        /// byte and 32 bytes or fewer.
+        /// The only valid DSA curve is ED25519.
         /// </remarks>
-        /// <param name="curve">
-        /// The curve for this public key.
-        /// </param>
         /// <param name="publicKey">
         /// The x-coordinate of the public point.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// The <c>encodedPoint</c> is not a correct EC Point encoding.
+        /// Thrown if the public key data is not the correct length.
         /// </exception>
-        public CoseEdDsaPublicKey(CoseEcCurve curve, ReadOnlyMemory<byte> publicKey)
+        public static CoseEdDsaPublicKey CreateFromPublicKeyData(ReadOnlyMemory<byte> publicKey)
         {
-            if (curve != CoseEcCurve.Ed25519 || 
-                publicKey.Length != Ed25519PublicKeyLength)
+            if (publicKey.Length != Ed25519PublicKeyLength)
             {
                 throw new ArgumentException(ExceptionMessages.InvalidPublicKeyData);
             }
 
-            // todo use KeyDefinition Type and Algorithm??
-            Curve = curve;
-            PublicKey = publicKey;
-            Type = CoseKeyType.Okp;
-            Algorithm = CoseAlgorithmIdentifier.EdDSA;
+            return new CoseEdDsaPublicKey
+            {
+                PublicKey = publicKey,
+                Curve = CoseEcCurve.Ed25519,
+                Type = CoseKeyType.Okp,
+                Algorithm = CoseAlgorithmIdentifier.EdDSA
+            };
         }
 
         /// <summary>
-        /// Construct a <see cref="CoseEcPublicKey"/> based on the CBOR encoding
-        /// of a <c>COSE_Key</c>.
+        /// Creates a new instance of <see cref="CoseEdDsaPublicKey"/> from the given encoded COSE key.
         /// </summary>
         /// <param name="encodedCoseKey">
-        /// The CBOR encoding.
+        /// The encoded COSE key in CBOR format.
         /// </param>
+        /// <returns>
+        /// A <see cref="CoseEdDsaPublicKey"/> object initialized with the provided encoded key data.
+        /// </returns>
         /// <exception cref="Ctap2DataException">
-        /// The <c>encodedCoseKey</c> is not a correct EC Public Key encoding.
+        /// Thrown if the <paramref name="encodedCoseKey"/> is not a valid EdDSA Public Key encoding.
         /// </exception>
-        public CoseEdDsaPublicKey(ReadOnlyMemory<byte> encodedCoseKey)
+        public static CoseEdDsaPublicKey CreateFromEncodedKey(ReadOnlyMemory<byte> encodedCoseKey)
         {
             var map = new CborMap<int>(encodedCoseKey);
-
-            Curve = (CoseEcCurve)map.ReadInt32(TagCurve);
-            PublicKey = map.ReadByteString(TagPublicKey);
-            Type = (CoseKeyType)map.ReadInt32(TagKeyType);
-            Algorithm = (CoseAlgorithmIdentifier)map.ReadInt32(TagAlgorithm);
+            return new CoseEdDsaPublicKey
+            {
+                PublicKey = map.ReadByteString(TagPublicKey),
+                Curve = (CoseEcCurve)map.ReadInt32(TagCurve),
+                Type = (CoseKeyType)map.ReadInt32(TagKeyType),
+                Algorithm = (CoseAlgorithmIdentifier)map.ReadInt32(TagAlgorithm)
+            };
         }
-
-        /// <summary>
-        /// Construct a <see cref="CoseEcPublicKey"/> based on .NET elliptic curve parameters.
-        /// </summary>
-        /// <param name="ecParameters">
-        /// An `ECParameters` structure with a specified Curve and a public point Q.
-        /// </param>
-        /// <exception cref="ArgumentException">
-        /// The <c>ECParameters</c> object does not contain a valid curve and
-        /// </exception>
-        /// <exception cref="NotSupportedException">
-        /// The parameters/public key specified is not supported.
-        /// </exception>
-        // ReSharper disable once UnusedParameter.Local
-        public CoseEdDsaPublicKey(ECParameters ecParameters)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Returns the COSE key as a new .NET <c>ECParameters</c> structure. Used
-        /// for interoperating with the .NET crypto library.
-        /// </summary>
-        /// <returns>
-        /// The public key in the form of an <c>ECParameters</c> structure.
-        /// </returns>
-        public ECParameters ToEcParameters()
-        {
-            throw new NotImplementedException();
-        }
-
+        
         /// <inheritdoc/>
         public override byte[] Encode()
         {
@@ -201,6 +161,19 @@ namespace Yubico.YubiKey.Fido2.Cose
                 .Entry(TagCurve, (int)CoseEcCurve.Ed25519)
                 .Entry(TagPublicKey, PublicKey)
                 .Encode();
+        }
+
+        private static void ValidateCurve(CoseEcCurve value)
+        {
+            if (value == CoseEcCurve.Ed25519)
+            {
+                return;
+            }
+
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.UnsupportedAlgorithm));
         }
     }
 }

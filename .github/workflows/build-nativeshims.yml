@@ -117,25 +117,31 @@ jobs:
       attestations: write
     runs-on: windows-2019
     needs: [build-windows, build-linux-amd64, build-linux-arm64, build-macos]
+    env:
+      PACKAGE_VERSION: ${{ github.event.inputs.version != '' && github.event.inputs.version || '1.0.0' }}
+      GITHUB_REPO_URL: https://github.com/${{ github.repository }}
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download contents, set metadata and package
+        uses: actions/download-artifact@v4
       - run: |
           mv nuspec/*.nuspec .
           mv nuspec/readme.md .
           $nuspec = [xml](gc Yubico.NativeShims.nuspec)
           $repo = $nuspec.CreateElement("repository")
-          $repo.SetAttribute("url","https://github.com/${{ github.repository }}")
+          $repo.SetAttribute("url","$env:GITHUB_REPO_URL")
           $repo.SetAttribute("type","git")
           $nuspec.package.metadata.AppendChild($repo)
-          $nuspec.package.metadata.version = "${{ github.event.inputs.version }}"
+          $repo.SetAttribute("url","$env:GITHUB_REPO_URL")
           $nuspec.Save("Yubico.NativeShims.nuspec")
           cat Yubico.NativeShims.nuspec
       - run: nuget pack Yubico.NativeShims.nuspec
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload Nuget Package
+        uses: actions/upload-artifact@v4
         with:
           name: NuGet Package NativeShims
           path: Yubico.NativeShims.*.nupkg
-      
+
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:

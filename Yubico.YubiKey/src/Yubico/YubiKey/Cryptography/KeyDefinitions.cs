@@ -16,11 +16,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Yubico.YubiKey.Fido2.Cose; // Ideally, Cose definitions should move to this namespace
 
 namespace Yubico.YubiKey.Cryptography
 {
     public static class KeyDefinitions
     {
+        public static readonly KeyDefinitionHelper Helper = new KeyDefinitionHelper();
+
         public struct KeyOids
         {
             public const string OidRsa = "1.2.840.113549"; // all RSA keys share the same OID
@@ -31,9 +34,13 @@ namespace Yubico.YubiKey.Cryptography
             public const string OidEd25519 = "1.3.101.112"; // Edwards25519
         }
 
-        public class Helper
+        public class KeyDefinitionHelper
         {
             public KeyDefinition GetKeyDefinition(KeyType type) => _definitions[type];
+
+            public KeyDefinition GetKeyDefinition(CoseEcCurve curve) =>
+                _definitions.Values.Single(
+                    d => d.CoseKeyDefinition != null && d.CoseKeyDefinition.CurveIdentifier == curve);
 
             public KeyDefinition GetKeyDefinitionByOid(string oid)
             {
@@ -73,7 +80,10 @@ namespace Yubico.YubiKey.Cryptography
                             Type = KeyType.P256, LengthInBytes = 32, LengthInBits = 256, Oid = KeyOids.OidP256,
                             IsEcKey = true,
                             CoseKeyDefinition = new CoseKeyDefinition
-                                { CoseKeyType = 2, CoseCurve = 1, CoseAlgorithm = -7, RequiresYCoordinate = true }
+                            {
+                                Type = CoseKeyType.Ec2, CurveIdentifier = CoseEcCurve.P256,
+                                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES256, RequiresYCoordinate = true
+                            }
                         }
                     },
                     {
@@ -83,17 +93,23 @@ namespace Yubico.YubiKey.Cryptography
                             Type = KeyType.P384, LengthInBytes = 48, LengthInBits = 384, Oid = KeyOids.OidP384,
                             IsEcKey = true,
                             CoseKeyDefinition = new CoseKeyDefinition
-                                { CoseKeyType = 2, CoseCurve = 2, CoseAlgorithm = -35, RequiresYCoordinate = true }
+                            {
+                                Type = CoseKeyType.Ec2, CurveIdentifier = CoseEcCurve.P384,
+                                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES384, RequiresYCoordinate = true
+                            }
                         }
                     },
                     {
                         KeyType.P521,
                         new KeyDefinition
                         {
-                            Type = KeyType.P521, LengthInBytes = 65, LengthInBits = 521, Oid = KeyOids.OidP521,
+                            Type = KeyType.P521, LengthInBytes = 66, LengthInBits = 521, Oid = KeyOids.OidP521,
                             IsEcKey = true,
                             CoseKeyDefinition = new CoseKeyDefinition
-                                { CoseKeyType = 2, CoseCurve = 3, CoseAlgorithm = -36, RequiresYCoordinate = true }
+                            {
+                                Type = CoseKeyType.Ec2, CurveIdentifier = CoseEcCurve.P521,
+                                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES512, RequiresYCoordinate = true
+                            }
                         }
                     },
                     {
@@ -103,7 +119,10 @@ namespace Yubico.YubiKey.Cryptography
                             Type = KeyType.X25519, LengthInBytes = 32, LengthInBits = 256, Oid = KeyOids.OidX25519,
                             IsEcKey = true,
                             CoseKeyDefinition = new CoseKeyDefinition
-                                { CoseKeyType = 1, CoseCurve = 4, CoseAlgorithm = -25 }
+                            {
+                                Type = CoseKeyType.Okp, CurveIdentifier = CoseEcCurve.X25519,
+                                AlgorithmIdentifier = CoseAlgorithmIdentifier.ECDHwHKDF256
+                            }
                         }
                     },
                     {
@@ -113,7 +132,10 @@ namespace Yubico.YubiKey.Cryptography
                             Type = KeyType.Ed25519, LengthInBytes = 32, LengthInBits = 256, Oid = KeyOids.OidEd25519,
                             IsEcKey = true,
                             CoseKeyDefinition = new CoseKeyDefinition
-                                { CoseKeyType = 1, CoseCurve = 6, CoseAlgorithm = -8 }
+                            {
+                                Type = CoseKeyType.Okp, CurveIdentifier = CoseEcCurve.Ed25519,
+                                AlgorithmIdentifier = CoseAlgorithmIdentifier.EdDSA
+                            }
                         }
                     },
                     {
@@ -178,9 +200,9 @@ namespace Yubico.YubiKey.Cryptography
 
         public class CoseKeyDefinition
         {
-            public int CoseKeyType { get; set; } // kty - Key Type (1=OKP, 2=EC2)
-            public int CoseCurve { get; set; } // crv - Curve identifier
-            public int CoseAlgorithm { get; set; } // alg - Algorithm identifier
+            public CoseKeyType Type { get; set; } // kty - Key Type (1=OKP, 2=EC2)
+            public CoseEcCurve CurveIdentifier { get; set; } // crv - Curve identifier
+            public CoseAlgorithmIdentifier AlgorithmIdentifier { get; set; } // alg - Algorithm identifier
             public bool RequiresYCoordinate { get; set; } // true for EC2, false for OKP
         }
     }

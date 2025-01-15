@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ECDsa_Verify_Succeeds()
         {
-            var eccCurve = ECCurve.CreateFromValue("1.2.840.10045.3.1.7");
+            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.OidP256);
             var eccParams = new ECParameters
             {
                 Curve = (ECCurve)eccCurve

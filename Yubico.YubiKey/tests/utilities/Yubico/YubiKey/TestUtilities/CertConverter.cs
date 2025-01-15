@@ -16,6 +16,7 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.TestUtilities
@@ -193,7 +194,7 @@ namespace Yubico.YubiKey.TestUtilities
                 {
                     throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
                 }
-                eccCurve = ECCurve.CreateFromValue("1.3.132.0.34");
+                eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.OidP384);
             }
             var eccParams = new ECParameters
             {

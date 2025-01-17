@@ -19,7 +19,6 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
     ca-certificates \
     pkg-config \
     gnupg \
-    libpcsclite-dev \
     zlib1g-dev \
     ninja-build \
     g++-aarch64-linux-gnu \
@@ -27,7 +26,7 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
 
 # Install latest version of CMake for Ubuntu 20.04
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
-echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
+echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
 sudo apt-get update -qq
 sudo apt-get install cmake -yq
 
@@ -35,10 +34,10 @@ sudo apt-get install cmake -yq
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
 
 # Install arm64 version of libpcsclite
-echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal main restricted universe multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main restricted universe multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-security main restricted universe multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list > /dev/null
+echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy main restricted universe multiverse
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates main restricted universe multiverse
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security main restricted universe multiverse
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list > /dev/null
 sudo dpkg --add-architecture arm64
 sudo apt-get update -qq
 sudo apt-get install libpcsclite-dev:arm64 -yq

@@ -19,10 +19,11 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
     ca-certificates \
     pkg-config \
     gnupg \
+    libpcsclite-dev \
     zlib1g-dev \
     ninja-build \
     g++-aarch64-linux-gnu \
-    gcc-aarch64-linux-gnu
+    gcc-aarch64-linux-gnu \
 
 # Install latest version of CMake for Ubuntu
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null

@@ -64,7 +64,7 @@ jobs:
 
   build-linux-amd64:
     name: Build Linux (amd64)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: |
@@ -78,7 +78,7 @@ jobs:
           
   build-linux-arm64:
     name: Build Linux (arm64)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: |

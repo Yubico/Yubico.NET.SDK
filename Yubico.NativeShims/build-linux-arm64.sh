@@ -24,7 +24,7 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
     g++-aarch64-linux-gnu \
     gcc-aarch64-linux-gnu
 
-# Install latest version of CMake for Ubuntu 20.04
+# Install latest version of CMake for Ubuntu
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
 sudo apt-get update -qq

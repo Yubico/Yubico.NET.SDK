@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(Yubico.NativeShims VERSION 1.11.0)
+project(Yubico.NativeShims VERSION 1.12)
 include(CheckCCompilerFlag)
 
 if (APPLE OR UNIX)

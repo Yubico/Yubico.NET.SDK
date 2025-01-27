@@ -81,9 +81,6 @@ namespace Yubico.YubiKey.Cryptography
     /// BER encoding.
     /// </para>
     /// <para>
-    /// This class can verify signatures for P-256 and P-384 only.
-    /// </para>
-    /// <para>
     /// Each of the verify methods will return a boolean, indicating whether the
     /// signature verifies or not. If a signature does not verify, that is not an
     /// error. The methods will throw exceptions if they encounter bad data, such
@@ -103,13 +100,7 @@ namespace Yubico.YubiKey.Cryptography
     /// </remarks>
     public class EcdsaVerify : IDisposable
     {
-        private const int P256EncodedPointLength = 65;
-        private const int P384EncodedPointLength = 97;
-        private const int MinEncodedPointLength = 65;
-        private const int P256KeySize = 256;
-        private const int P384KeySize = 384;
-
-        private const byte EncodedPointTag = 4;
+        private const byte EncodedPointTag = 0x04;
         private const int SequenceTag = 0x30;
         private const int IntegerTag = 0x02;
 
@@ -119,7 +110,7 @@ namespace Yubico.YubiKey.Cryptography
         /// The object built that will perform the verification operation.
         /// </summary>
         /// <remarks>
-        /// This must be P-256 or P-384, and contain valid coordinates.
+        /// This must be P-256, P-384 or P-521, and contain valid coordinates.
         /// </remarks>
         public ECDsa ECDsa { get; private set; }
 
@@ -134,9 +125,6 @@ namespace Yubico.YubiKey.Cryptography
         /// Create an instance of the <see cref="EcdsaVerify"/> class using the
         /// ECDsa object that contains the public key.
         /// </summary>
-        /// <remarks>
-        /// This supports only NIST P-256 and P-384 curves.
-        /// </remarks>
         /// <param name="ecdsa">
         /// The public key to use to verify. This constructor will copy a
         /// reference to this object.
@@ -161,9 +149,6 @@ namespace Yubico.YubiKey.Cryptography
         /// Create an instance of the <see cref="EcdsaVerify"/> class using the
         /// PIV ECC public key.
         /// </summary>
-        /// <remarks>
-        /// This supports only NIST P-256 and P-384 curves.
-        /// </remarks>
         /// <param name="pivPublicKey">
         /// The public key to use to verify.
         /// </param>
@@ -181,7 +166,7 @@ namespace Yubico.YubiKey.Cryptography
             }
 
             var publicPointSpan = pivPublicKey is PivEccPublicKey eccKey
-                ? eccKey.PublicPoint 
+                ? eccKey.PublicPoint
                 : ReadOnlySpan<byte>.Empty;
 
             ECDsa = ConvertPublicKey(publicPointSpan.ToArray());
@@ -191,9 +176,6 @@ namespace Yubico.YubiKey.Cryptography
         /// Create an instance of the <see cref="EcdsaVerify"/> class using the
         /// COSE EC public key.
         /// </summary>
-        /// <remarks>
-        /// This supports only NIST P-256 and P-384 curves.
-        /// </remarks>
         /// <param name="coseKey">
         /// The public key to use to verify.
         /// </param>
@@ -210,13 +192,7 @@ namespace Yubico.YubiKey.Cryptography
                 throw new ArgumentNullException(nameof(coseKey));
             }
 
-            string oid = coseKey.Algorithm switch
-            {
-                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.KeyOids.OidP256,
-                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.KeyOids.OidP256,
-                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.KeyOids.OidP384,
-                _ => "",
-            };
+            string oid = GetOidByAlgorithm(coseKey.Algorithm);
 
             byte[] xCoordinate = Array.Empty<byte>();
             byte[] yCoordinate = Array.Empty<byte>();
@@ -225,8 +201,22 @@ namespace Yubico.YubiKey.Cryptography
                 xCoordinate = ecKey.XCoordinate.ToArray();
                 yCoordinate = ecKey.YCoordinate.ToArray();
             }
+        
+            // TODO Add support for CoseEdDsaPublicKey ?
 
             ECDsa = ConvertPublicKey(oid, xCoordinate, yCoordinate);
+        }
+
+        private static string GetOidByAlgorithm(CoseAlgorithmIdentifier algorithm)
+        {
+            return algorithm switch
+            {
+                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.KeyOids.OidP256,
+                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.KeyOids.OidP256,
+                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.KeyOids.OidP384,
+                CoseAlgorithmIdentifier.ES512 => KeyDefinitions.KeyOids.OidP521,
+                _ => "",
+            };
         }
 
         /// <summary>
@@ -234,10 +224,9 @@ namespace Yubico.YubiKey.Cryptography
         /// encoded point.
         /// </summary>
         /// <remarks>
-        /// This supports only NIST P-256 and P-384 curves and only supports the
-        /// uncompressed encoded point: <c>04||x-coordinate||y-coordinate</c>
+        /// This supports the uncompressed encoded point: <c>04||x-coordinate||y-coordinate</c>
         /// where both coordinates are the curve size (each coordinate is 32 bytes
-        /// for P-256 and 48 bytes for P-384), prepended with 00 bytes if
+        /// for P-256, 48 bytes for P-384 and 66 bytes for P-521), prepended with 00 bytes if
         /// necessary.
         /// </remarks>
         /// <param name="encodedEccPoint">
@@ -258,9 +247,6 @@ namespace Yubico.YubiKey.Cryptography
         /// Create an instance of the <see cref="EcdsaVerify"/> class using the
         /// given certificate.
         /// </summary>
-        /// <remarks>
-        /// This supports only NIST P-256 and P-384 curves.
-        /// </remarks>
         /// <param name="certificate">
         /// The certificate containing the public key to use to verify.
         /// </param>
@@ -277,9 +263,8 @@ namespace Yubico.YubiKey.Cryptography
 
         /// <summary>
         /// Verify the <c>signature</c> using the  <c>dataToVerify</c>. This
-        /// method will digest the <c>dataToVerify</c> using SHA-256 if the
-        /// public key is P-256 and SHA-384 if the public key is P-384, and then
-        /// verify the signature using the digest.
+        /// method will digest the <c>dataToVerify</c> using SHA-256, SHA-384 or SHA-512,
+        /// depending on the public key's curve, and then verify the signature using the digest.
         /// </summary>
         /// <remarks>
         /// If the signature is the standard BER encoding, then pass <c>true</c>
@@ -291,7 +276,7 @@ namespace Yubico.YubiKey.Cryptography
         /// </remarks>
         /// <param name="dataToVerify">
         /// The data data to verify. To verify an ECDSA signature, this method
-        /// will digest the data using SHA-256 or SHA-384, depending on the
+        /// will digest the data using SHA-256, SHA-384 or SHA-512, depending on the
         /// public key's curve.
         /// </param>
         /// <param name="signature">
@@ -313,12 +298,14 @@ namespace Yubico.YubiKey.Cryptography
         {
             HashAlgorithm digester = ECDsa.KeySize switch
             {
-                P256KeySize => CryptographyProviders.Sha256Creator(),
-                P384KeySize => CryptographyProviders.Sha384Creator(),
+                256 => CryptographyProviders.Sha256Creator(),
+                384 => CryptographyProviders.Sha384Creator(),
+                512 => CryptographyProviders.Sha512Creator(),
                 _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm),
             };
 
-            return VerifyDigestedData(digester.ComputeHash(dataToVerify), signature, isStandardSignature);
+            byte[] digestToVerify = digester.ComputeHash(dataToVerify);
+            return VerifyDigestedData(digestToVerify, signature, isStandardSignature);
         }
 
         /// <summary>
@@ -339,7 +326,7 @@ namespace Yubico.YubiKey.Cryptography
         /// The signature to verify.
         /// </param>
         /// <param name="isStandardSignature">
-        /// <c>true</c> if the signature is formatted as the BER encoding
+        /// <c>true</c> if the signature is formatted as the BER encoding (DSASignatureFormat.Rfc3279DerSequence)
         /// specified by most standards, or <c>false</c> if the signature is
         /// formatted as the concatenation of <c>r</c> and <c>s</c>.
         /// </param>
@@ -358,89 +345,89 @@ namespace Yubico.YubiKey.Cryptography
 
         private static ECDsa ConvertPublicKey(ReadOnlyMemory<byte> encodedEccPoint)
         {
-            string oid = "";
-            byte[] xCoordinate = Array.Empty<byte>();
-            byte[] yCoordinate = Array.Empty<byte>();
-
-            if (encodedEccPoint.Length >= MinEncodedPointLength && encodedEccPoint.Span[0] == EncodedPointTag)
+            int minEncodedPointLength = (KeyDefinitions.P256.LengthInBytes * 2) + 1; // This is the minimum length for an encoded point on P-256 (0x04 || x || y)
+            if (encodedEccPoint.Length < minEncodedPointLength || encodedEccPoint.Span[0] != EncodedPointTag)
             {
-                int coordLength = (encodedEccPoint.Length - 1) / 2;
-                xCoordinate = encodedEccPoint.Slice(1, coordLength).ToArray();
-                yCoordinate = encodedEccPoint.Slice(1 + coordLength, coordLength).ToArray();
-
-                oid = encodedEccPoint.Length switch
-                {
-                    P256EncodedPointLength => KeyDefinitions.KeyOids.OidP256,
-                    P384EncodedPointLength => KeyDefinitions.KeyOids.OidP384,
-                    _ => "",
-                };
+                throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
             }
 
+            int coordLength = (encodedEccPoint.Length - 1) / 2;
+            byte[] xCoordinate = encodedEccPoint.Slice(1, coordLength).ToArray();
+            byte[] yCoordinate = encodedEccPoint.Slice(1 + coordLength, coordLength).ToArray();
+
+            string oid = GetOidByLength(encodedEccPoint.Length);
             return ConvertPublicKey(oid, xCoordinate, yCoordinate);
+        }
+
+        private static string GetOidByLength(int encodedPointLength)
+        {
+            if (encodedPointLength == (KeyDefinitions.P256.LengthInBytes * 2) + 1)
+            {
+                return KeyDefinitions.KeyOids.OidP256;
+            }
+            if (encodedPointLength == (KeyDefinitions.P384.LengthInBytes * 2) + 1)
+            {
+                return KeyDefinitions.KeyOids.OidP384;
+            }
+            if (encodedPointLength == (KeyDefinitions.P521.LengthInBytes * 2) + 1)
+            {
+                return KeyDefinitions.KeyOids.OidP521;
+            }
+
+            throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
         }
 
         private static ECDsa ConvertPublicKey(string oid, byte[] xCoordinate, byte[] yCoordinate)
         {
-            if (!string.IsNullOrEmpty(oid))
+            if (string.IsNullOrEmpty(oid))
             {
-                var eccCurve = ECCurve.CreateFromValue(oid);
-                var eccParams = new ECParameters
-                {
-                    Curve = eccCurve
-                };
-
-                eccParams.Q.X = xCoordinate;
-                eccParams.Q.Y = yCoordinate;
-
-                return CheckECDsa(ECDsa.Create(eccParams));
+                throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
             }
 
-            throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
+            var eccCurve = ECCurve.CreateFromValue(oid);
+            var eccParams = new ECParameters
+            {
+                Curve = eccCurve
+            };
+
+            eccParams.Q.X = xCoordinate;
+            eccParams.Q.Y = yCoordinate;
+
+            var ecdsa = ECDsa.Create(eccParams);
+            return CheckECDsa(ecdsa);
         }
 
         private static ECDsa CheckECDsa(ECDsa toCheck)
         {
             var ecParameters = toCheck.ExportParameters(false);
+            var keyDefinition = KeyDefinitions.Helper.GetKeyDefinitionByOid(ecParameters.Curve.Oid.Value);
+            int coordinateLength = keyDefinition.LengthInBytes;
 
-            int coordinateLength = ecParameters.Curve.Oid.Value switch
+            if (ecParameters.Q.X.Length == 0 ||
+                ecParameters.Q.X.Length > coordinateLength ||
+                ecParameters.Q.Y.Length == 0 ||
+                ecParameters.Q.Y.Length > coordinateLength            )
             {
-                KeyDefinitions.KeyOids.OidP256 => (P256EncodedPointLength - 1) / 2,
-                KeyDefinitions.KeyOids.OidP384 => (P384EncodedPointLength - 1) / 2,
-                _ => -1,
-            };
-
-            if (ecParameters.Q.X.Length > 0 && ecParameters.Q.X.Length <= coordinateLength)
-            {
-                if (ecParameters.Q.Y.Length > 0 && ecParameters.Q.Y.Length <= coordinateLength)
-                {
-                    return toCheck;
-                }
+                throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
             }
 
-            throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
+            return toCheck;
         }
 
-
-        // Convert the signature from standard to the concatenation of r and s.
         private static byte[] ConvertSignature(byte[] signature, int publicKeyBitSize)
         {
-            int coordinateLength = publicKeyBitSize / 8;
-            byte[] convertedSignature = new byte[2 * coordinateLength];
-            var signatureMemory = new Memory<byte>(convertedSignature);
+            int bytesNeededForCurve = (publicKeyBitSize + 7) / 8; // Round up to nearest byte
+            Memory<byte> convertedSignatureBuffer = new byte[2 * bytesNeededForCurve];
 
             var tlvReader = new TlvReader(signature);
-            if (tlvReader.TryReadNestedTlv(out tlvReader, SequenceTag))
+            if (!tlvReader.TryReadNestedTlv(out tlvReader, SequenceTag) ||
+                !TryCopyNextInteger(tlvReader, convertedSignatureBuffer, bytesNeededForCurve) ||
+                !TryCopyNextInteger(tlvReader, convertedSignatureBuffer[bytesNeededForCurve..], bytesNeededForCurve))
             {
-                if (TryCopyNextInteger(tlvReader, signatureMemory, coordinateLength))
-                {
-                    if (TryCopyNextInteger(tlvReader, signatureMemory[coordinateLength..], coordinateLength))
-                    {
-                        return convertedSignature;
-                    }
-                }
+                throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
             }
 
-            throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
+            return convertedSignatureBuffer.ToArray();
         }
 
         // Decode the next value in tlvReader, then copy the result into

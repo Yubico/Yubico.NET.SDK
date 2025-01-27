@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         }
 
         /// <summary>
-        /// Construct a <see cref="CoseEcPublicKey"/> based on public key data (x-coordinate of public key)
+        /// Construct a <see cref="CoseEdDsaPublicKey"/> based on public key data (x-coordinate of public key)
         /// </summary>
         /// <remarks>
         /// The only valid DSA curve is ED25519.

@@ -34,6 +34,120 @@ namespace Yubico.YubiKey.Cryptography
             public const string OidEd25519 = "1.3.101.112"; // Edwards25519
         }
 
+        public static readonly KeyDefinition P256 = new KeyDefinition
+        {
+            Type = KeyType.P256,
+            LengthInBytes = 32,
+            LengthInBits = 256,
+            Oid = KeyOids.OidP256,
+            IsEcKey = true,
+            CoseKeyDefinition = new CoseKeyDefinition
+            {
+                Type = CoseKeyType.Ec2,
+                CurveIdentifier = CoseEcCurve.P256,
+                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES256,
+                RequiresYCoordinate = true
+            }
+        };
+
+        public static readonly KeyDefinition P384 = new KeyDefinition
+        {
+            Type = KeyType.P384,
+            LengthInBytes = 48,
+            LengthInBits = 384,
+            Oid = KeyOids.OidP384,
+            IsEcKey = true,
+            CoseKeyDefinition = new CoseKeyDefinition
+            {
+                Type = CoseKeyType.Ec2,
+                CurveIdentifier = CoseEcCurve.P384,
+                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES384,
+                RequiresYCoordinate = true
+            }
+        };
+
+        public static readonly KeyDefinition P521 = new KeyDefinition
+        {
+            Type = KeyType.P521,
+            LengthInBytes = 66,
+            LengthInBits = 521,
+            Oid = KeyOids.OidP521,
+            IsEcKey = true,
+            CoseKeyDefinition = new CoseKeyDefinition
+            {
+                Type = CoseKeyType.Ec2,
+                CurveIdentifier = CoseEcCurve.P521,
+                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES512,
+                RequiresYCoordinate = true
+            }
+        };
+
+        public static readonly KeyDefinition X25519 = new KeyDefinition
+        {
+            Type = KeyType.X25519,
+            LengthInBytes = 32,
+            LengthInBits = 256,
+            Oid = KeyOids.OidX25519,
+            IsEcKey = true,
+            CoseKeyDefinition = new CoseKeyDefinition
+            {
+                Type = CoseKeyType.Okp,
+                CurveIdentifier = CoseEcCurve.X25519,
+                AlgorithmIdentifier = CoseAlgorithmIdentifier.ECDHwHKDF256
+            }
+        };
+
+        public static readonly KeyDefinition Ed25519 = new KeyDefinition
+        {
+            Type = KeyType.Ed25519,
+            LengthInBytes = 32,
+            LengthInBits = 256,
+            Oid = KeyOids.OidEd25519,
+            IsEcKey = true,
+            CoseKeyDefinition = new CoseKeyDefinition
+            {
+                Type = CoseKeyType.Okp,
+                CurveIdentifier = CoseEcCurve.Ed25519,
+                AlgorithmIdentifier = CoseAlgorithmIdentifier.EdDSA
+            }
+        };
+
+        public static readonly KeyDefinition RSA1024 = new KeyDefinition
+        {
+            Type = KeyType.RSA1024,
+            LengthInBytes = 128,
+            LengthInBits = 1024,
+            Oid = KeyOids.OidRsa,
+            IsRsaKey = true
+        };
+
+        public static readonly KeyDefinition RSA2048 = new KeyDefinition
+        {
+            Type = KeyType.RSA2048,
+            LengthInBytes = 256,
+            LengthInBits = 2048,
+            Oid = KeyOids.OidRsa,
+            IsRsaKey = true
+        };
+
+        public static readonly KeyDefinition RSA3072 = new KeyDefinition
+        {
+            Type = KeyType.RSA3072,
+            LengthInBytes = 384,
+            LengthInBits = 3072,
+            Oid = KeyOids.OidRsa,
+            IsRsaKey = true
+        };
+
+        public static readonly KeyDefinition RSA4096 = new KeyDefinition
+        {
+            Type = KeyType.RSA4096,
+            LengthInBytes = 512,
+            LengthInBits = 4096,
+            Oid = KeyOids.OidRsa,
+            IsRsaKey = true
+        };
+
         public class KeyDefinitionHelper
         {
             public KeyDefinition GetKeyDefinition(KeyType type) => _definitions[type];
@@ -64,113 +178,24 @@ namespace Yubico.YubiKey.Cryptography
                 }
             }
 
-            public IReadOnlyCollection<KeyDefinition> GetRsaKeyDefinitions() =>
+            public IReadOnlyCollection<KeyDefinition> GetRsaKeyDefinitions() => // Todo dictioanry?
                 _definitions.Values.Where(d => d.IsRsaKey).ToList();
 
             public IReadOnlyCollection<KeyDefinition> GetEcKeyDefinitions() =>
                 _definitions.Values.Where(d => d.IsEcKey).ToList();
 
-            private readonly IReadOnlyDictionary<KeyType, KeyDefinition> _definitions =
-                new Dictionary<KeyType, KeyDefinition>
-                {
-                    {
-                        KeyType.P256,
-                        new KeyDefinition
-                        {
-                            Type = KeyType.P256, LengthInBytes = 32, LengthInBits = 256, Oid = KeyOids.OidP256,
-                            IsEcKey = true,
-                            CoseKeyDefinition = new CoseKeyDefinition
-                            {
-                                Type = CoseKeyType.Ec2, CurveIdentifier = CoseEcCurve.P256,
-                                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES256, RequiresYCoordinate = true
-                            }
-                        }
-                    },
-                    {
-                        KeyType.P384,
-                        new KeyDefinition
-                        {
-                            Type = KeyType.P384, LengthInBytes = 48, LengthInBits = 384, Oid = KeyOids.OidP384,
-                            IsEcKey = true,
-                            CoseKeyDefinition = new CoseKeyDefinition
-                            {
-                                Type = CoseKeyType.Ec2, CurveIdentifier = CoseEcCurve.P384,
-                                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES384, RequiresYCoordinate = true
-                            }
-                        }
-                    },
-                    {
-                        KeyType.P521,
-                        new KeyDefinition
-                        {
-                            Type = KeyType.P521, LengthInBytes = 66, LengthInBits = 521, Oid = KeyOids.OidP521,
-                            IsEcKey = true,
-                            CoseKeyDefinition = new CoseKeyDefinition
-                            {
-                                Type = CoseKeyType.Ec2, CurveIdentifier = CoseEcCurve.P521,
-                                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES512, RequiresYCoordinate = true
-                            }
-                        }
-                    },
-                    {
-                        KeyType.X25519,
-                        new KeyDefinition
-                        {
-                            Type = KeyType.X25519, LengthInBytes = 32, LengthInBits = 256, Oid = KeyOids.OidX25519,
-                            IsEcKey = true,
-                            CoseKeyDefinition = new CoseKeyDefinition
-                            {
-                                Type = CoseKeyType.Okp, CurveIdentifier = CoseEcCurve.X25519,
-                                AlgorithmIdentifier = CoseAlgorithmIdentifier.ECDHwHKDF256
-                            }
-                        }
-                    },
-                    {
-                        KeyType.Ed25519,
-                        new KeyDefinition
-                        {
-                            Type = KeyType.Ed25519, LengthInBytes = 32, LengthInBits = 256, Oid = KeyOids.OidEd25519,
-                            IsEcKey = true,
-                            CoseKeyDefinition = new CoseKeyDefinition
-                            {
-                                Type = CoseKeyType.Okp, CurveIdentifier = CoseEcCurve.Ed25519,
-                                AlgorithmIdentifier = CoseAlgorithmIdentifier.EdDSA
-                            }
-                        }
-                    },
-                    {
-                        KeyType.RSA1024,
-                        new KeyDefinition
-                        {
-                            Type = KeyType.RSA1024, LengthInBytes = 128, LengthInBits = 1024, Oid = KeyOids.OidRsa,
-                            IsRsaKey = true
-                        }
-                    },
-                    {
-                        KeyType.RSA2048,
-                        new KeyDefinition
-                        {
-                            Type = KeyType.RSA2048, LengthInBytes = 256, LengthInBits = 2048, Oid = KeyOids.OidRsa,
-                            IsRsaKey = true
-                        }
-                    },
-                    {
-                        KeyType.RSA3072,
-                        new KeyDefinition
-                        {
-                            Type = KeyType.RSA3072, LengthInBytes = 384, LengthInBits = 3072, Oid = KeyOids.OidRsa,
-                            IsRsaKey = true
-                        }
-                    },
-                    {
-                        KeyType.RSA4096,
-                        new KeyDefinition
-                        {
-                            Type = KeyType.RSA4096, LengthInBytes = 512, LengthInBits = 4096, Oid = KeyOids.OidRsa,
-                            IsRsaKey = true
-                        }
-                    },
-                };
+            private static readonly IReadOnlyDictionary<KeyType, KeyDefinition> _definitions = new Dictionary<KeyType, KeyDefinition>
+            {
+                { KeyType.P256, P256 },
+                { KeyType.P384, P384 },
+                { KeyType.P521, P521 },
+                { KeyType.X25519, X25519 },
+                { KeyType.Ed25519, Ed25519 },
+                { KeyType.RSA1024, RSA1024 },
+                { KeyType.RSA2048, RSA2048 },
+                { KeyType.RSA3072, RSA3072 },
+                { KeyType.RSA4096, RSA4096 },
+            };
         }
 
         public enum KeyType

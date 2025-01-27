@@ -15,6 +15,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Xunit;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Piv;
@@ -44,6 +45,36 @@ namespace Yubico.YubiKey.Cryptography
 
             using var verifier = new EcdsaVerify(pubKey);
             bool isVerified = verifier.VerifyDigestedData(digest, signature);
+            Assert.True(isVerified);
+        }
+
+        [Theory]
+        [InlineData(KeyDefinitions.KeyType.P256)]
+        [InlineData(KeyDefinitions.KeyType.P384)]
+        [InlineData(KeyDefinitions.KeyType.P521)]
+        public void CoseKey_Verify_WithMultipleCurves_Succeeds(KeyDefinitions.KeyType keyType)
+        {
+            // Arrange
+            var keyDefinition = KeyDefinitions.Helper.GetKeyDefinition(keyType);
+            var (eccCurve, coseCurve) = keyDefinition.Type switch
+            {
+                KeyDefinitions.KeyType.P256 => (ECCurve.NamedCurves.nistP256, CoseEcCurve.P256),
+                KeyDefinitions.KeyType.P384 => (ECCurve.NamedCurves.nistP384, CoseEcCurve.P384),
+                KeyDefinitions.KeyType.P521 => (ECCurve.NamedCurves.nistP521, CoseEcCurve.P521),
+                _ => throw new ArgumentException("Unknown curve")
+            };
+
+            var ecdsa = ECDsa.Create(eccCurve);
+            var digest = ecdsa.SignData(Encoding.GetEncoding("UTF-8").GetBytes("Hello World"), HashAlgorithmName.SHA256);
+            var signature = ecdsa.SignHash(digest, DSASignatureFormat.Rfc3279DerSequence);
+            var ecParams = ecdsa.ExportParameters(false);
+            var pubKey = new CoseEcPublicKey(coseCurve, ecParams.Q.X, ecParams.Q.Y);
+
+            // Act
+            using var verifier = new EcdsaVerify(pubKey);
+            bool isVerified = verifier.VerifyDigestedData(digest, signature);
+
+            // Assert
             Assert.True(isVerified);
         }
 
@@ -77,6 +108,62 @@ namespace Yubico.YubiKey.Cryptography
 
             using var verifier = new EcdsaVerify(pubKey);
             bool isVerified = verifier.VerifyDigestedData(digest, signature);
+            Assert.True(isVerified);
+        }
+
+        [Theory]
+        [InlineData(KeyDefinitions.KeyType.P256)]
+        [InlineData(KeyDefinitions.KeyType.P384)]
+        [InlineData(KeyDefinitions.KeyType.P521)]
+        public void ECDsa_Verify_WithIeeeFormat_Succeeds(KeyDefinitions.KeyType keyType)
+        {
+            // Arrange
+            var keyDefinition = KeyDefinitions.Helper.GetKeyDefinition(keyType);
+            var eccCurve = keyDefinition.Type switch
+            {
+                KeyDefinitions.KeyType.P256 => ECCurve.NamedCurves.nistP256,
+                KeyDefinitions.KeyType.P384 => ECCurve.NamedCurves.nistP384,
+                KeyDefinitions.KeyType.P521 => ECCurve.NamedCurves.nistP521,
+                _ => throw new ArgumentException("Unknown curve")
+            };
+
+            var pubKey = ECDsa.Create(eccCurve);
+            byte[] digest = pubKey.SignData(Encoding.GetEncoding("UTF-8").GetBytes("Hello World"), HashAlgorithmName.SHA256);
+            byte[] signature = pubKey.SignHash(digest, DSASignatureFormat.IeeeP1363FixedFieldConcatenation);
+
+            // Act
+            using var verifier = new EcdsaVerify(pubKey);
+            bool isVerified = verifier.VerifyDigestedData(digest, signature, false);
+
+            // Assert
+            Assert.True(isVerified);
+        }
+
+        [Theory]
+        [InlineData(KeyDefinitions.KeyType.P256)]
+        [InlineData(KeyDefinitions.KeyType.P384)]
+        [InlineData(KeyDefinitions.KeyType.P521)]
+        public void ECDsa_Verify_WithDerFormat_Succeeds(KeyDefinitions.KeyType keyType)
+        {
+            // Arrange
+            var keyDefinition = KeyDefinitions.Helper.GetKeyDefinition(keyType);
+            var eccCurve = keyDefinition.Type switch
+            {
+                KeyDefinitions.KeyType.P256 => ECCurve.NamedCurves.nistP256,
+                KeyDefinitions.KeyType.P384 => ECCurve.NamedCurves.nistP384,
+                KeyDefinitions.KeyType.P521 => ECCurve.NamedCurves.nistP521,
+                _ => throw new ArgumentException("Unknown curve")
+            };
+
+            var pubKey = ECDsa.Create(eccCurve);
+            byte[] digest = pubKey.SignData(Encoding.GetEncoding("UTF-8").GetBytes("Hello World"), HashAlgorithmName.SHA256);
+            byte[] signature = pubKey.SignHash(digest, DSASignatureFormat.Rfc3279DerSequence);
+
+            // Act
+            using var verifier = new EcdsaVerify(pubKey);
+            bool isVerified = verifier.VerifyDigestedData(digest, signature, true);
+
+            // Assert
             Assert.True(isVerified);
         }
 

@@ -45,8 +45,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 Type = CoseKeyType.Ec2,
                 CurveIdentifier = CoseEcCurve.P256,
-                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES256,
-                RequiresYCoordinate = true
+                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES256
             }
         };
 
@@ -61,8 +60,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 Type = CoseKeyType.Ec2,
                 CurveIdentifier = CoseEcCurve.P384,
-                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES384,
-                RequiresYCoordinate = true
+                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES384
             }
         };
 
@@ -77,8 +75,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 Type = CoseKeyType.Ec2,
                 CurveIdentifier = CoseEcCurve.P521,
-                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES512,
-                RequiresYCoordinate = true
+                AlgorithmIdentifier = CoseAlgorithmIdentifier.ES512
             }
         };
 
@@ -216,7 +213,7 @@ namespace Yubico.YubiKey.Cryptography
             public KeyType Type { get; set; }
             public int LengthInBytes { get; set; }
             public int LengthInBits { get; set; }
-            public string? Oid { get; set; }
+            public string Oid { get; set; } = string.Empty;
             public bool IsEcKey { get; set; }
             public bool IsRsaKey { get; set; }
             public string Name => Type.ToString();
@@ -228,7 +225,6 @@ namespace Yubico.YubiKey.Cryptography
             public CoseKeyType Type { get; set; } // kty - Key Type (1=OKP, 2=EC2)
             public CoseEcCurve CurveIdentifier { get; set; } // crv - Curve identifier
             public CoseAlgorithmIdentifier AlgorithmIdentifier { get; set; } // alg - Algorithm identifier
-            public bool RequiresYCoordinate { get; set; } // true for EC2, false for OKP
         }
     }
 }

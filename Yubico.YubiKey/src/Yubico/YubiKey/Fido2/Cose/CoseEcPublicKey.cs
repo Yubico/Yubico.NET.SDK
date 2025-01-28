@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </exception>
         public CoseEcPublicKey(CoseEcCurve curve, ReadOnlyMemory<byte> xCoordinate, ReadOnlyMemory<byte> yCoordinate)
         {
-            var keyDefinition = KeyDefinitions.GetByCoseCurveType(curve) ??
+            var keyDefinition = KeyDefinitions.GetByCoseCurve(curve) ??
                 throw new ArgumentException(nameof(curve), "Unknown curve");
 
             var coseDefinition = keyDefinition.CoseKeyDefinition ??
@@ -266,7 +266,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </returns>
         public ECParameters ToEcParameters()
         {
-            var definition = KeyDefinitions.GetByCoseCurveType(_curve);
+            var definition = KeyDefinitions.GetByCoseCurve(_curve);
 
             var ecParams = new ECParameters
             {

@@ -91,7 +91,7 @@ namespace Yubico.YubiKey.Cryptography
         /// <exception cref="InvalidOperationException">
         /// When the curve type is not supported.
         /// </exception>
-        public static KeyDefinition GetByCoseCurveType(CoseEcCurve curve) =>
+        public static KeyDefinition GetByCoseCurve(CoseEcCurve curve) =>
              _allDefinitions.Values.SingleOrDefault(
                 d => d.CoseKeyDefinition != null && d.CoseKeyDefinition.CurveIdentifier == curve)
                 ?? throw new InvalidOperationException(

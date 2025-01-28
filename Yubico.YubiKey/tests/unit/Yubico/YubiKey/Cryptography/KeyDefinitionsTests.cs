@@ -30,8 +30,8 @@ namespace Yubico.YubiKey.Cryptography
         public void GetByCoseCurveType_ValidCurves_ReturnsCorrectDefinitions()
         {
             // Act & Assert
-            Assert.Equal(KeyDefinitions.P256, KeyDefinitions.GetByCoseCurveType(CoseEcCurve.P256));
-            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByCoseCurveType(CoseEcCurve.Ed25519));
+            Assert.Equal(KeyDefinitions.P256, KeyDefinitions.GetByCoseCurve(CoseEcCurve.P256));
+            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByCoseCurve(CoseEcCurve.Ed25519));
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Cryptography
             CoseEcCurve invalidCurve = (CoseEcCurve)999;
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => KeyDefinitions.GetByCoseCurveType(invalidCurve));
+            Assert.Throws<InvalidOperationException>(() => KeyDefinitions.GetByCoseCurve(invalidCurve));
         }
 
         [Fact]

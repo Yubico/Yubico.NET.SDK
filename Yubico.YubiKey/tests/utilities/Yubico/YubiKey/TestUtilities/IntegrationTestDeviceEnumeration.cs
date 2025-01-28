@@ -41,44 +41,55 @@ namespace Yubico.YubiKey.TestUtilities
     /// </summary>
     public sealed class IntegrationTestDeviceEnumeration
     {
+        // 1. Constants (private, then public)
+        private const string YUBIKEY_INTEGRATIONTEST_ALLOWED_KEYS_VAR_NAME = "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS";
+
+        // 2. Static Fields
+        private static readonly Lazy<IntegrationTestDeviceEnumeration> LazyInstance =
+            new Lazy<IntegrationTestDeviceEnumeration>(() => new IntegrationTestDeviceEnumeration());
+
+        // 3. Instance Fields (readonly, then regular)
+        private readonly string _allowlistFileName = $"{YUBIKEY_INTEGRATIONTEST_ALLOWED_KEYS_VAR_NAME}.txt";
+        private readonly string? _configDirectory;
         public readonly HashSet<string> AllowedSerialNumbers;
 
-        private static readonly Lazy<IntegrationTestDeviceEnumeration> SingleInstance
-            = new Lazy<IntegrationTestDeviceEnumeration>(() => new IntegrationTestDeviceEnumeration());
+        // 4. Properties
+        private string SetupMessage => "In order to prevent you from accidentally wiping your own important keys," +
+                    "you must add your allow-listed Yubikeys serial number to either the environment variable " +
+                    $"'{YUBIKEY_INTEGRATIONTEST_ALLOWED_KEYS_VAR_NAME}' or to the file {_allowlistFileName} at {AllowListFilePath}\n" +
+                    "For the environment variable, they should be added as a colon separated string, e.g: 1232332:347233\n" +
+                    "For the file, they should be added line by line, e.g: 1232332\n347233";
 
-        private static IntegrationTestDeviceEnumeration Instance => SingleInstance.Value;
-        private const string YubikeyIntegrationtestAllowedKeysName = "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS";
-        private readonly string _allowlistFileName = $"{YubikeyIntegrationtestAllowedKeysName}.txt";
+        private string AllowListFilePath => Path.Combine(_configDirectory ?? DefaultDirectory, _allowlistFileName);
+        private static IntegrationTestDeviceEnumeration Instance => LazyInstance.Value;
+        private static string DefaultDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Yubico");
 
-        public IntegrationTestDeviceEnumeration(
-            string? configDirectory = null)
+        public IntegrationTestDeviceEnumeration(string? configDirectory = null)
         {
-            var defaultDirectory =
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Yubico");
-            var allowListFilePath = Path.Combine(configDirectory ?? defaultDirectory, _allowlistFileName);
+            _configDirectory = configDirectory;
 
-            CreateAllowListFileIfMissing(allowListFilePath);
+            Debug.WriteLine(SetupMessage);
+            CreateAllowListFileIfMissing(AllowListFilePath);
 
-            AllowedSerialNumbers = File.Exists(allowListFilePath)
-                ? new HashSet<string>(File.ReadLines(allowListFilePath))
+            // Load the allow-listed serial numbers from the file
+            AllowedSerialNumbers = File.Exists(AllowListFilePath)
+                ? new HashSet<string>(File.ReadLines(AllowListFilePath))
                 : new HashSet<string>();
 
-            var allowedKeys = Environment.GetEnvironmentVariable(YubikeyIntegrationtestAllowedKeysName)
-                ?.Split(':') ?? Array.Empty<string>();
+            // Load the allow-listed serial numbers from the environment variable
+            var allowedSerialNumbersFromEnv = Environment
+                .GetEnvironmentVariable(YUBIKEY_INTEGRATIONTEST_ALLOWED_KEYS_VAR_NAME)?
+                .Split(':') ?? Array.Empty<string>();
 
-            foreach (var allowedKey in allowedKeys)
+            // Add the serial numbers from the environment variable to the allow-list
+            foreach (var allowedSerialNumber in allowedSerialNumbersFromEnv)
             {
-                _ = AllowedSerialNumbers.Add(allowedKey);
+                _ = AllowedSerialNumbers.Add(allowedSerialNumber);
             }
 
             if (!AllowedSerialNumbers.Any())
             {
-                throw new TestClassException(
-                    "In order to prevent you from accidentally wiping your own important keys," +
-                    "you must add your allow-listed Yubikeys serial number to either the environment variable " +
-                    $"'{YubikeyIntegrationtestAllowedKeysName}' or to the file {_allowlistFileName} at {allowListFilePath}\n" +
-                    "For the environment variable, they should be added as a colon separated string, e.g: 1232332:347233\n" +
-                    "For the file, they should be added line by line, e.g: 1232332\n347233");
+                throw new TestClassException(SetupMessage);
             }
 
             Debug.WriteLine("Loaded {0} keys(s) to allow list ({1})", AllowedSerialNumbers.Count,
@@ -141,8 +152,7 @@ namespace Yubico.YubiKey.TestUtilities
             => GetTestDevices(transport)
                 .SelectByMinimumVersion(minimumFirmwareVersion);
 
-        private static void CreateAllowListFileIfMissing(
-            string allowListFilePath)
+        private static void CreateAllowListFileIfMissing(string allowListFilePath)
         {
             if (File.Exists(allowListFilePath))
             {

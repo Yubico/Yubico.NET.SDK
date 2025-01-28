@@ -211,10 +211,10 @@ namespace Yubico.YubiKey.Cryptography
         {
             return algorithm switch
             {
-                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.KeyOids.OidP256,
-                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.KeyOids.OidP256,
-                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.KeyOids.OidP384,
-                CoseAlgorithmIdentifier.ES512 => KeyDefinitions.KeyOids.OidP521,
+                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.KeyOids.P256,
+                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.KeyOids.P256,
+                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.KeyOids.P384,
+                CoseAlgorithmIdentifier.ES512 => KeyDefinitions.KeyOids.P521,
                 _ => "",
             };
         }
@@ -363,15 +363,15 @@ namespace Yubico.YubiKey.Cryptography
         {
             if (encodedPointLength == (KeyDefinitions.P256.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.KeyOids.OidP256;
+                return KeyDefinitions.KeyOids.P256;
             }
             if (encodedPointLength == (KeyDefinitions.P384.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.KeyOids.OidP384;
+                return KeyDefinitions.KeyOids.P384;
             }
             if (encodedPointLength == (KeyDefinitions.P521.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.KeyOids.OidP521;
+                return KeyDefinitions.KeyOids.P521;
             }
 
             throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
@@ -400,7 +400,7 @@ namespace Yubico.YubiKey.Cryptography
         private static ECDsa CheckECDsa(ECDsa toCheck)
         {
             var ecParameters = toCheck.ExportParameters(false);
-            var keyDefinition = KeyDefinitions.Helper.GetKeyDefinitionByOid(ecParameters.Curve.Oid.Value);
+            var keyDefinition = KeyDefinitions.GetByOid(ecParameters.Curve.Oid.Value);
             int coordinateLength = keyDefinition.LengthInBytes;
 
             if (ecParameters.Q.X.Length == 0 ||

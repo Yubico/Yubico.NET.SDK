@@ -22,9 +22,9 @@ namespace Yubico.YubiKey.Fido2.Cose
     public class CosePublicEcKeyTests
     {
         [Theory]
-        [InlineData(KeyDefinitions.KeyOids.OidP256)]
-        [InlineData(KeyDefinitions.KeyOids.OidP384)]
-        [InlineData(KeyDefinitions.KeyOids.OidP521)]
+        [InlineData(KeyDefinitions.KeyOids.P256)]
+        [InlineData(KeyDefinitions.KeyOids.P384)]
+        [InlineData(KeyDefinitions.KeyOids.P521)]
         public void Encoding_Decoding_Key_Returns_ExpectedValues(
             string oid)
         {
@@ -49,9 +49,9 @@ namespace Yubico.YubiKey.Fido2.Cose
         }
         
         [Theory]
-        [InlineData(KeyDefinitions.KeyOids.OidP256)]
-        [InlineData(KeyDefinitions.KeyOids.OidP384)]
-        [InlineData(KeyDefinitions.KeyOids.OidP521)]
+        [InlineData(KeyDefinitions.KeyOids.P256)]
+        [InlineData(KeyDefinitions.KeyOids.P384)]
+        [InlineData(KeyDefinitions.KeyOids.P521)]
         public void Constructor_with_EcParameters(
             string oid)
         {

@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.Cryptography
         public void CoseKey_Verify_WithMultipleCurves_Succeeds(KeyDefinitions.KeyType keyType)
         {
             // Arrange
-            var keyDefinition = KeyDefinitions.Helper.GetKeyDefinition(keyType);
+            var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
             var (eccCurve, coseCurve) = keyDefinition.Type switch
             {
                 KeyDefinitions.KeyType.P256 => (ECCurve.NamedCurves.nistP256, CoseEcCurve.P256),
@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ECDsa_Verify_Succeeds()
         {
-            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.OidP256);
+            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.P256);
             var eccParams = new ECParameters
             {
                 Curve = (ECCurve)eccCurve
@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Cryptography
         public void ECDsa_Verify_WithIeeeFormat_Succeeds(KeyDefinitions.KeyType keyType)
         {
             // Arrange
-            var keyDefinition = KeyDefinitions.Helper.GetKeyDefinition(keyType);
+            var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
             var eccCurve = keyDefinition.Type switch
             {
                 KeyDefinitions.KeyType.P256 => ECCurve.NamedCurves.nistP256,
@@ -146,7 +146,7 @@ namespace Yubico.YubiKey.Cryptography
         public void ECDsa_Verify_WithDerFormat_Succeeds(KeyDefinitions.KeyType keyType)
         {
             // Arrange
-            var keyDefinition = KeyDefinitions.Helper.GetKeyDefinition(keyType);
+            var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
             var eccCurve = keyDefinition.Type switch
             {
                 KeyDefinitions.KeyType.P256 => ECCurve.NamedCurves.nistP256,

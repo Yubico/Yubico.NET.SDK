@@ -53,9 +53,9 @@ namespace Yubico.YubiKey.Fido2.Cose
 
         private byte[] _xCoordinate = Array.Empty<byte>();
         private byte[] _yCoordinate = Array.Empty<byte>();
-        #pragma warning disable IDE0032
+#pragma warning disable IDE0032
         private CoseEcCurve _curve;
-        #pragma warning restore IDE0032
+#pragma warning restore IDE0032
 
         /// <summary>
         /// Creates a new instance of <see cref="CoseEcPublicKey"/> from the given encoded COSE key.
@@ -152,8 +152,10 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </exception>
         public CoseEcPublicKey(CoseEcCurve curve, ReadOnlyMemory<byte> xCoordinate, ReadOnlyMemory<byte> yCoordinate)
         {
-            var definition = curve.GetKeyDefinition();
-            var coseDefinition = definition.CoseKeyDefinition ??
+            var keyDefinition = KeyDefinitions.GetByCoseCurveType(curve) ??
+                throw new ArgumentException(nameof(curve), "Unknown curve");
+
+            var coseDefinition = keyDefinition.CoseKeyDefinition ??
                 throw new ArgumentException(nameof(curve), "Unknown curve");
 
             Type = CoseKeyType.Ec2;
@@ -239,7 +241,7 @@ namespace Yubico.YubiKey.Fido2.Cose
                         ExceptionMessages.UnsupportedAlgorithm));
             }
 
-            var definition = KeyDefinitions.Helper.GetKeyDefinitionByOid(ecParameters.Curve.Oid.Value);
+            var definition = KeyDefinitions.GetByOid(ecParameters.Curve.Oid.Value);
             if (definition.CoseKeyDefinition == null)
             {
                 throw new NotSupportedException(
@@ -264,7 +266,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </returns>
         public ECParameters ToEcParameters()
         {
-            var definition = KeyDefinitions.Helper.GetKeyDefinition(_curve);
+            var definition = KeyDefinitions.GetByCoseCurveType(_curve);
 
             var ecParams = new ECParameters
             {
@@ -305,8 +307,9 @@ namespace Yubico.YubiKey.Fido2.Cose
 
         private static void ValidateLength(ReadOnlyMemory<byte> value)
         {
-            var allowedLengths = KeyDefinitions.Helper.GetEcKeyDefinitions()
-                .Where(c => c.CoseKeyDefinition is { Type: CoseKeyType.Ec2 }).Select(d => d.LengthInBytes);
+            var allowedLengths = KeyDefinitions.GetEcKeyDefinitions()
+                .Where(c => c.CoseKeyDefinition is { Type: CoseKeyType.Ec2 })
+                .Select(d => d.LengthInBytes);
 
             if (!allowedLengths.Contains(value.Length))
             {
@@ -319,7 +322,7 @@ namespace Yubico.YubiKey.Fido2.Cose
 
         private static void ValidateCurve(CoseEcCurve value)
         {
-            var allowedEcCurves = KeyDefinitions.Helper.GetEcKeyDefinitions()
+            var allowedEcCurves = KeyDefinitions.GetEcKeyDefinitions()
                 .Where(d => d.CoseKeyDefinition is { Type: CoseKeyType.Ec2 })
                 .Select(d => d.CoseKeyDefinition!.CurveIdentifier);
 

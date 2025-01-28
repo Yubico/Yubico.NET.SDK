@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Cryptography
     /// </summary>
     public static class KeyDefinitions
     {
-        private static readonly IReadOnlyDictionary<KeyType, KeyDefinition> _allDefinitions;
+        private static readonly Dictionary<KeyType, KeyDefinition> _allDefinitions;
 
         static KeyDefinitions()
         {

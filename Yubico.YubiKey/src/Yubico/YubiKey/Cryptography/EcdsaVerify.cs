@@ -462,7 +462,7 @@ namespace Yubico.YubiKey.Cryptography
                 CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.KeyOids.P256,
                 CoseAlgorithmIdentifier.ES384 => KeyDefinitions.KeyOids.P384,
                 CoseAlgorithmIdentifier.ES512 => KeyDefinitions.KeyOids.P521,
-                _ => "",
+                _ => throw new NotSupportedException(ExceptionMessages.UnsupportedAlgorithm)
             };
         }
 

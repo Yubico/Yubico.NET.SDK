@@ -201,20 +201,8 @@ namespace Yubico.YubiKey.Cryptography
                 xCoordinate = ecKey.XCoordinate.ToArray();
                 yCoordinate = ecKey.YCoordinate.ToArray();
             }
-        
-            ECDsa = ConvertPublicKey(oid, xCoordinate, yCoordinate);
-        }
 
-        private static string GetOidByAlgorithm(CoseAlgorithmIdentifier algorithm)
-        {
-            return algorithm switch
-            {
-                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.KeyOids.P256,
-                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.KeyOids.P256,
-                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.KeyOids.P384,
-                CoseAlgorithmIdentifier.ES512 => KeyDefinitions.KeyOids.P521,
-                _ => "",
-            };
+            ECDsa = ConvertPublicKey(oid, xCoordinate, yCoordinate);
         }
 
         /// <summary>
@@ -404,7 +392,7 @@ namespace Yubico.YubiKey.Cryptography
             if (ecParameters.Q.X.Length == 0 ||
                 ecParameters.Q.X.Length > coordinateLength ||
                 ecParameters.Q.Y.Length == 0 ||
-                ecParameters.Q.Y.Length > coordinateLength            )
+                ecParameters.Q.Y.Length > coordinateLength)
             {
                 throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
             }
@@ -464,6 +452,18 @@ namespace Yubico.YubiKey.Cryptography
             }
 
             return false;
+        }
+
+        private static string GetOidByAlgorithm(CoseAlgorithmIdentifier algorithm)
+        {
+            return algorithm switch
+            {
+                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.KeyOids.P256,
+                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.KeyOids.P256,
+                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.KeyOids.P384,
+                CoseAlgorithmIdentifier.ES512 => KeyDefinitions.KeyOids.P521,
+                _ => "",
+            };
         }
 
         /// <summary>

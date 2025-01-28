@@ -202,8 +202,6 @@ namespace Yubico.YubiKey.Cryptography
                 yCoordinate = ecKey.YCoordinate.ToArray();
             }
         
-            // TODO Add support for CoseEdDsaPublicKey ?
-
             ECDsa = ConvertPublicKey(oid, xCoordinate, yCoordinate);
         }
 

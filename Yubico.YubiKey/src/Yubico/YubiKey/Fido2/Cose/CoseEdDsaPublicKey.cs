@@ -85,12 +85,6 @@ namespace Yubico.YubiKey.Fido2.Cose
             }
         }
 
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        private CoseEdDsaPublicKey()
-        {
-            throw new NotImplementedException();
-        }
 
         /// <summary>
         /// Construct a <see cref="CoseEdDsaPublicKey"/> based on public key data (x-coordinate of public key)

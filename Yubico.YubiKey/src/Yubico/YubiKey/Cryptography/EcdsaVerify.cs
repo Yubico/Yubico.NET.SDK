@@ -286,7 +286,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 256 => CryptographyProviders.Sha256Creator(),
                 384 => CryptographyProviders.Sha384Creator(),
-                512 => CryptographyProviders.Sha512Creator(),
+                521 => CryptographyProviders.Sha512Creator(),
                 _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm),
             };
 

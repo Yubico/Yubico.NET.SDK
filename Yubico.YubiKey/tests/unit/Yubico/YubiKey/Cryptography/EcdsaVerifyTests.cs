@@ -144,6 +144,17 @@ namespace Yubico.YubiKey.Cryptography
             Assert.True(isVerified);
         }
 
+        [Fact]
+        public void EncodedKey_VerifyDigestedData_Succeeds()
+        {
+            byte[] pubKey = GetEncodedPoint();
+            byte[] digest = GetDigest();
+            byte[] signature = GetSignature();
+
+            using var verifier = new EcdsaVerify(pubKey);
+            bool isVerified = verifier.VerifyDigestedData(digest, signature);
+            Assert.True(isVerified);
+        }
 
         [Theory]
         [InlineData(KeyDefinitions.KeyType.P256)]
@@ -163,19 +174,6 @@ namespace Yubico.YubiKey.Cryptography
             bool isVerified = verifier.VerifyData(data, signature, true);
 
             // Assert
-            Assert.True(isVerified);
-        }
-
-
-        [Fact]
-        public void EncodedKey_Verify_Succeeds()
-        {
-            byte[] pubKey = GetEncodedPoint();
-            byte[] digest = GetDigest();
-            byte[] signature = GetSignature();
-
-            using var verifier = new EcdsaVerify(pubKey);
-            bool isVerified = verifier.VerifyDigestedData(digest, signature);
             Assert.True(isVerified);
         }
 

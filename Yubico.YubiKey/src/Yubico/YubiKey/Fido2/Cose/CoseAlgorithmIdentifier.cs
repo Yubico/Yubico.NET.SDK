@@ -18,7 +18,9 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// Represents a COSE algorithm identifier.
     /// <remarks>
     /// This enumeration is based on the IANA COSE Algorithms registry.
+    /// <para>
     /// https://www.iana.org/assignments/cose/cose.xhtml#algorithms
+    /// </para>
     /// </remarks>
     /// </summary>
     public enum CoseAlgorithmIdentifier

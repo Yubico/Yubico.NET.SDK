@@ -165,12 +165,38 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public struct KeyOids
         {
-            public const string Rsa = "1.2.840.113549"; // all RSA keys share the same OID
-            public const string P256 = "1.2.840.10045.3.1.7"; // nistP256 or secP256r1
-            public const string P384 = "1.3.132.0.34"; // nistP384 or secP384r1
-            public const string P521 = "1.3.132.0.35"; // nistP521 or secP521r1
-            public const string X25519 = "1.3.101.110"; // Curve25519
-            public const string Ed25519 = "1.3.101.112"; // Edwards25519
+            /// <summary>
+            /// Represents the object identifier (OID) for RSA keys.
+            /// <remarks>
+            ///  All RSA keys share the same OID
+            /// </remarks>
+            /// </summary>
+            public const string Rsa = "1.2.840.113549";
+
+            /// <summary>
+            /// Represents the object identifier (OID) for nistP256 or secP256r1
+            /// </summary>
+            public const string P256 = "1.2.840.10045.3.1.7";
+
+            /// <summary>
+            /// Represents the object identifier (OID) for nistP384 or secP384r1
+            /// </summary>
+            public const string P384 = "1.3.132.0.34";
+
+            /// <summary>
+            /// Represents the object identifier (OID) for nistP521 or secP521r1
+            /// </summary>
+            public const string P521 = "1.3.132.0.35";
+
+            /// <summary>
+            /// Represents the object identifier (OID) for X25519 (Curve25519)
+            /// </summary>
+            public const string X25519 = "1.3.101.110";
+
+            /// <summary>
+            /// Represents the object identifier (OID) for Ed25519 (Edwards25519)
+            /// </summary>
+            public const string Ed25519 = "1.3.101.112";
         }
 
         /// <summary>
@@ -264,7 +290,7 @@ namespace Yubico.YubiKey.Cryptography
         };
 
         /// <summary>
-        ///  Represents an RSA key with a length of1024 bits.
+        ///  Represents an RSA key with a length of 1024 bits.
         /// </summary>
         public static readonly KeyDefinition RSA1024 = new KeyDefinition
         {

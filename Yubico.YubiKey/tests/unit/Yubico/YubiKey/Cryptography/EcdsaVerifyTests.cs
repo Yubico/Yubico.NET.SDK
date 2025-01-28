@@ -52,20 +52,24 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(KeyDefinitions.KeyType.P256)]
         [InlineData(KeyDefinitions.KeyType.P384)]
         [InlineData(KeyDefinitions.KeyType.P521)]
-        public void CoseKey_VeriDigestedDatafy_WithMultipleCurves_Succeeds(KeyDefinitions.KeyType keyType)
+        public void CoseKey_VerifyDigestedData_WithMultipleCurves_Succeeds(KeyDefinitions.KeyType keyType)
         {
             // Arrange
             (var ecCurve, var coseCurve) = GetCurves(keyType);
 
-            var ecdsa = ECDsa.Create(ecCurve);
-            var digest = ecdsa.SignData(Encoding.GetEncoding("UTF-8").GetBytes("Hello World"), HashAlgorithmName.SHA256);
-            var signature = ecdsa.SignHash(digest, DSASignatureFormat.Rfc3279DerSequence);
-            var ecParams = ecdsa.ExportParameters(false);
-            var pubKey = new CoseEcPublicKey(coseCurve, ecParams.Q.X, ecParams.Q.Y);
+            var pubKey = ECDsa.Create(ecCurve);
+            var sha256 = SHA256.Create();
+
+            var dataToSign = Encoding.GetEncoding("UTF-8").GetBytes("Hello World");
+            var hash = sha256.ComputeHash(dataToSign);
+            var signature = pubKey.SignHash(hash, DSASignatureFormat.Rfc3279DerSequence);
+
+            var ecParams = pubKey.ExportParameters(false);
+            var pubKeyCose = new CoseEcPublicKey(coseCurve, ecParams.Q.X, ecParams.Q.Y);
 
             // Act
-            using var verifier = new EcdsaVerify(pubKey);
-            bool isVerified = verifier.VerifyDigestedData(digest, signature);
+            using var verifier = new EcdsaVerify(pubKeyCose);
+            var isVerified = verifier.VerifyDigestedData(hash, signature);
 
             // Assert
             Assert.True(isVerified);
@@ -112,13 +116,17 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             (var ecCurve, _) = GetCurves(keyType);
+
             var pubKey = ECDsa.Create(ecCurve);
-            byte[] digest = pubKey.SignData(Encoding.GetEncoding("UTF-8").GetBytes("Hello World"), HashAlgorithmName.SHA256);
-            byte[] signature = pubKey.SignHash(digest, DSASignatureFormat.IeeeP1363FixedFieldConcatenation);
+            var sha256 = SHA256.Create();
+
+            var dataToSign = Encoding.GetEncoding("UTF-8").GetBytes("Hello World");
+            var hash = sha256.ComputeHash(dataToSign);
+            var signature = pubKey.SignHash(hash, DSASignatureFormat.IeeeP1363FixedFieldConcatenation);
 
             // Act
             using var verifier = new EcdsaVerify(pubKey);
-            bool isVerified = verifier.VerifyDigestedData(digest, signature, false);
+            var isVerified = verifier.VerifyDigestedData(hash, signature, false);
 
             // Assert
             Assert.True(isVerified);
@@ -132,13 +140,47 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             (var ecCurve, _) = GetCurves(keyType);
+
             var pubKey = ECDsa.Create(ecCurve);
-            byte[] digest = pubKey.SignData(Encoding.GetEncoding("UTF-8").GetBytes("Hello World"), HashAlgorithmName.SHA256);
-            byte[] signature = pubKey.SignHash(digest, DSASignatureFormat.Rfc3279DerSequence);
+            var sha256 = SHA256.Create();
+
+            var dataToSign = Encoding.GetEncoding("UTF-8").GetBytes("Hello World");
+            var hash = sha256.ComputeHash(dataToSign);
+            var signature = pubKey.SignHash(hash, DSASignatureFormat.Rfc3279DerSequence);
 
             // Act
             using var verifier = new EcdsaVerify(pubKey);
-            bool isVerified = verifier.VerifyDigestedData(digest, signature, true);
+            bool isVerified = verifier.VerifyDigestedData(hash, signature, true);
+
+            // Assert
+            Assert.True(isVerified);
+        }
+
+        [Theory]
+        [InlineData(KeyDefinitions.KeyType.P256)]
+        [InlineData(KeyDefinitions.KeyType.P384)]
+        [InlineData(KeyDefinitions.KeyType.P521)]
+        public void ECDsa_VerifyData_WithDerFormat_Succeeds(KeyDefinitions.KeyType keyType)
+        {
+            // Arrange
+            (var ecCurve, _) = GetCurves(keyType);
+
+            var pubKey = ECDsa.Create(ecCurve);
+            HashAlgorithm hashAlgorithm = keyType switch
+            {
+                KeyDefinitions.KeyType.P256 => CryptographyProviders.Sha256Creator(),
+                KeyDefinitions.KeyType.P384 => CryptographyProviders.Sha384Creator(),
+                KeyDefinitions.KeyType.P521 => CryptographyProviders.Sha512Creator(),
+                _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm),
+            };
+
+            var dataToSign = Encoding.GetEncoding("UTF-8").GetBytes("Hello World");
+            var hash = hashAlgorithm.ComputeHash(dataToSign);
+            var signature = pubKey.SignHash(hash, DSASignatureFormat.Rfc3279DerSequence);
+
+            // Act
+            using var verifier = new EcdsaVerify(pubKey);
+            var isVerified = verifier.VerifyData(dataToSign, signature, true);
 
             // Assert
             Assert.True(isVerified);
@@ -153,27 +195,6 @@ namespace Yubico.YubiKey.Cryptography
 
             using var verifier = new EcdsaVerify(pubKey);
             bool isVerified = verifier.VerifyDigestedData(digest, signature);
-            Assert.True(isVerified);
-        }
-
-        [Theory]
-        [InlineData(KeyDefinitions.KeyType.P256)]
-        [InlineData(KeyDefinitions.KeyType.P384)]
-        [InlineData(KeyDefinitions.KeyType.P521)]
-        public void ECDsa_VerifyData_WithDerFormat_Succeeds(KeyDefinitions.KeyType keyType)
-        {
-            // Arrange
-            (var eccCurve, _) = GetCurves(keyType);
-            var pubKey = ECDsa.Create(eccCurve);
-            byte[] data = Encoding.GetEncoding("UTF-8").GetBytes("Hello World");
-            byte[] digest = pubKey.SignData(data, HashAlgorithmName.SHA256);
-            byte[] signature = pubKey.SignHash(digest, DSASignatureFormat.Rfc3279DerSequence);
-
-            // Act
-            using var verifier = new EcdsaVerify(pubKey);
-            bool isVerified = verifier.VerifyData(data, signature, true);
-
-            // Assert
             Assert.True(isVerified);
         }
 

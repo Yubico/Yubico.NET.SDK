@@ -16,6 +16,10 @@ namespace Yubico.YubiKey.Fido2.Cose
 {
     /// <summary>
     /// An enumeration of the key families supported by COSE.
+    /// <remarks>
+    /// This enumeration is based on the IANA COSE Key Common Parameters registry.
+    /// https://www.iana.org/assignments/cose/cose.xhtml#key-type
+    /// </remarks>
     /// </summary>
     public enum CoseKeyType
     {

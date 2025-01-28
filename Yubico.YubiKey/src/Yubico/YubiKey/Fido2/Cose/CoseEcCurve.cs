@@ -16,6 +16,10 @@ namespace Yubico.YubiKey.Fido2.Cose
 {
     /// <summary>
     /// An enumeration of the elliptic curves that are supported by COSE representations.
+    /// <remarks>
+    /// This enumeration is based on the IANA COSE Elliptic Curves registry.
+    /// https://www.iana.org/assignments/cose/cose.xhtml#elliptic-curves
+    /// </remarks>
     /// </summary>
     public enum CoseEcCurve
     {

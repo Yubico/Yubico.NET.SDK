@@ -35,6 +35,11 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         public void Clear() => ClearEventHandlers();
     }
 
+    
+    [CollectionDefinition("SmartCard Device Tests", DisableParallelization = true)]
+    public class SmartCardCollection { }
+
+    [Collection("SmartCard Device Tests")]
     public class SmartCardDeviceListenerTests
     {
         [Fact]
@@ -42,6 +47,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         {
             var listener = SmartCardDeviceListener.Create();
             _ = Assert.IsAssignableFrom<SmartCardDeviceListener>(listener);
+            (listener as IDisposable)?.Dispose();
         }
 
         [Fact]

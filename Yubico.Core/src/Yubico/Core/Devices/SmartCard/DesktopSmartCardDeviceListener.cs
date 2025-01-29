@@ -197,7 +197,7 @@ namespace Yubico.Core.Devices.SmartCard
                     break;
                 }
 
-                var readerStateList = newStates.ToList();
+                List<SCARD_READER_STATE> readerStateList = newStates.ToList();
                 readerStateList.AddRange(addedReaderStates);
 
                 SCARD_READER_STATE[] updatedStates = readerStateList.Except(removedReaderStates, new ReaderStateComparer()).ToArray();

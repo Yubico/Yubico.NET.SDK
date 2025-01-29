@@ -114,6 +114,7 @@ limitations under the License. -->
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.1" />
     <PackageReference Include="System.Memory" Version="4.5.5" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
     <!-- The wildcard version tag allows us to include the latest minor and pre-release versions -->

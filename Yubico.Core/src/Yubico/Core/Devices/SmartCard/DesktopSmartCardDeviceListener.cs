@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -35,7 +36,7 @@ namespace Yubico.Core.Devices.SmartCard
         private SCardContext _context;
 
         // The active smart card readers.
-        private SCARD_READER_STATE[] _readerStates;
+        private ImmutableArray<SCARD_READER_STATE> _readerStates;
 
         private Thread? _listenerThread;
 
@@ -61,14 +62,14 @@ namespace Yubico.Core.Devices.SmartCard
             {
                 context.Dispose(); // Needed to satisfy analyzer (even though it should be null already)
                 _context = new SCardContext(IntPtr.Zero);
-                _readerStates = Array.Empty<SCARD_READER_STATE>();
+                _readerStates = ImmutableArray.Create<SCARD_READER_STATE>();
+
                 Status = DeviceListenerStatus.Error;
                 _log.LogWarning("SmartCardDeviceListener dormant as SDK was unable to establish a context to the PCSC service.");
                 return;
             }
 
             _context = context;
-            _readerStates = GetReaderStateList();
 
             StartListening();
         }
@@ -208,7 +209,8 @@ namespace Yubico.Core.Devices.SmartCard
             var removedDevices = new List<ISmartCardDevice>();
             bool sendEvents = timeout != 0;
 
-            var newStates = (SCARD_READER_STATE[])_readerStates.Clone();
+            SCARD_READER_STATE[] newStates = _readerStates.ToArray();
+
 
             uint getStatusChangeResult = SCardGetStatusChange(_context, timeout, newStates, newStates.Length);
             if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
@@ -305,7 +307,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             UpdateCurrentlyKnownState(ref newStates);
 
-            _readerStates = newStates;
+            _readerStates = ImmutableArray.Create(newStates);
 
             FireEvents(arrivedDevices, removedDevices);
 
@@ -385,7 +387,7 @@ namespace Yubico.Core.Devices.SmartCard
         /// <param name="newStates">State list to check for changes.</param>
         /// <param name="arrivedDevices">List where new arrived devices will be added.</param>
         /// <param name="removedDevices">List where new removed devices will be added.</param>
-        private static void DetectRelevantChanges(SCARD_READER_STATE[] originalStates, SCARD_READER_STATE[] newStates, List<ISmartCardDevice> arrivedDevices, List<ISmartCardDevice> removedDevices)
+        private static void DetectRelevantChanges(ImmutableArray<SCARD_READER_STATE> originalStates, SCARD_READER_STATE[] newStates, List<ISmartCardDevice> arrivedDevices, List<ISmartCardDevice> removedDevices)
         {
             foreach (SCARD_READER_STATE entry in newStates)
             {
@@ -430,7 +432,7 @@ namespace Yubico.Core.Devices.SmartCard
                 _log.SCardApiCall(nameof(SCardEstablishContext), result);
 
                 _context = context;
-                _readerStates = GetReaderStateList();
+                _readerStates = ImmutableArray.Create(GetReaderStateList());
             }
         }
 

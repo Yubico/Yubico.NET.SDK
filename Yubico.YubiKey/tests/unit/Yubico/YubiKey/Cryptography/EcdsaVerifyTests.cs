@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Cryptography
     public class EcdsaVerifyTests
     {
         [Fact]
-        public void PivKey_VerifDigestedData_Succeeds()
+        public void PivKey_VerifyDigestedData_Succeeds()
         {
             var pubKey = new PivEccPublicKey(GetEncodedPoint());
             byte[] digest = GetDigest();

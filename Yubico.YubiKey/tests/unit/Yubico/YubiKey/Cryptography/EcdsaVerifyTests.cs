@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Fact]
-        public void CoseKey_VeriDigestedData_Succeeds()
+        public void CoseKey_VerifyDigestedData_Succeeds()
         {
             var pubKey = new CoseEcPublicKey(CoseEcCurve.P256, GetX(), GetY());
             byte[] digest = GetDigest();

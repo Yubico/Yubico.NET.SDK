@@ -37,8 +37,12 @@ namespace Yubico.Core.Devices.SmartCard
         // The active smart card readers.
         private SCARD_READER_STATE[] _readerStates;
 
-        private bool _isListening;
         private Thread? _listenerThread;
+
+        private readonly object _syncLock = new object();
+        private volatile bool _isListening;
+        private readonly CancellationTokenSource _cancellationSource = new CancellationTokenSource();
+
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDeviceListener"/>.
@@ -74,15 +78,21 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void StartListening()
         {
-            if (!_isListening)
+            lock (_syncLock)
             {
+                if (_isListening)
+                {
+                    return;
+                }
+
                 _listenerThread = new Thread(ListenForReaderChanges)
                 {
                     IsBackground = true
                 };
+
                 _isListening = true;
-                Status = DeviceListenerStatus.Started;
                 _listenerThread.Start();
+                Status = DeviceListenerStatus.Started;
             }
         }
 
@@ -93,14 +103,30 @@ namespace Yubico.Core.Devices.SmartCard
         // will terminate the thread.
         private void ListenForReaderChanges()
         {
-            _log.LogInformation("Smart card listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
-
-            bool usePnpWorkaround = UsePnpWorkaround();
-
-            while (_isListening && CheckForUpdates(-1, usePnpWorkaround))
+            try
             {
+                _log.LogInformation("Smart card listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
+                bool usePnpWorkaround = UsePnpWorkaround();
+                while (!_cancellationSource.Token.IsCancellationRequested)
+                {
+                    bool shouldContinue = CheckForUpdates(-1, usePnpWorkaround);
+                    if (!shouldContinue)
+                    {
+                        break;
+                    }
+                }
             }
+            catch (OperationCanceledException)
+            {
+                _log.LogInformation("Smart card listener thread was cancelled.");
+            }
+
+            catch (Exception ex)
+            {
+                _log.LogError(ex, "An exception occurred in the smart card listener thread.");
+            }
+
         }
 
         #region IDisposable Support
@@ -113,16 +139,24 @@ namespace Yubico.Core.Devices.SmartCard
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (_disposedValue)
             {
-                if (disposing)
-                {
-                    uint _ = SCardCancel(_context);
-                    _context.Dispose();
-                    StopListening();
-                }
-                _disposedValue = true;
+                return;
             }
+
+            if (disposing)
+            {
+                lock (_syncLock)
+                {
+                    _cancellationSource.Cancel();
+                    uint _ = SCardCancel(_context);
+                    StopListening();
+
+                    _context.Dispose();
+                    _cancellationSource.Dispose();
+                }
+            }
+            _disposedValue = true;
         }
 
         ~DesktopSmartCardDeviceListener()
@@ -149,15 +183,23 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void StopListening()
         {
-            if (_listenerThread is null)
+            lock (_syncLock)
             {
-                return;
-            }
+                if (!_isListening || _listenerThread is null)
+                {
+                    return;
+                }
 
-            ClearEventHandlers();
-            _isListening = false;
-            Status = DeviceListenerStatus.Stopped;
-            _listenerThread.Join();
+                _isListening = false;
+                _cancellationSource.Cancel();
+                ClearEventHandlers();
+                Status = DeviceListenerStatus.Stopped;
+
+                if (!_listenerThread.Join(TimeSpan.FromSeconds(5)))
+                {
+                    _log.LogWarning("Failed to stop listener thread within 5 seconds");
+                }
+            }
         }
 
         private bool CheckForUpdates(int timeout, bool usePnpWorkaround)
@@ -169,7 +211,6 @@ namespace Yubico.Core.Devices.SmartCard
             var newStates = (SCARD_READER_STATE[])_readerStates.Clone();
 
             uint getStatusChangeResult = SCardGetStatusChange(_context, timeout, newStates, newStates.Length);
-
             if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
             {
                 _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
@@ -383,11 +424,14 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void UpdateCurrentContext()
         {
-            uint result = SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext context);
-            _log.SCardApiCall(nameof(SCardEstablishContext), result);
+            lock (_syncLock)
+            {
+                uint result = SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext context);
+                _log.SCardApiCall(nameof(SCardEstablishContext), result);
 
-            _context = context;
-            _readerStates = GetReaderStateList();
+                _context = context;
+                _readerStates = GetReaderStateList();
+            }
         }
 
         /// <summary>

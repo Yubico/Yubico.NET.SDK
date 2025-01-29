@@ -295,10 +295,8 @@ namespace Yubico.YubiKey.Fido2.Cose
 
             return new CborMapWriter<int>()
                 .Entry(TagKeyType, (int)CoseKeyType.Ec2)
-
-                // .Entry(TagAlgorithm, (int)Algorithm) // Should be correct, right? Instead of -25
-                .Entry(
-                    TagAlgorithm, (int)CoseAlgorithmIdentifier.ECDHwHKDF256) // Should be correct, right? Instead of -25
+                // .Entry(TagAlgorithm, (int)Algorithm) // Should be correct, right? Instead of hardcoding -25
+                .Entry(TagAlgorithm, (int)CoseAlgorithmIdentifier.ECDHwHKDF256)
                 .Entry(TagCurve, (int)Curve)
                 .Entry(TagX, XCoordinate)
                 .Entry(TagY, YCoordinate)

@@ -31,12 +31,6 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// in RFC8152: CBOR Object Signing and Encryption (COSE) standard. Supplementary information can be found in
     /// section 6.5.6 of the CTAP2.1 specification (under the heading `getPublicKey()`).
     /// </para>
-    /// <para>
-    /// This class has multiple constructors. One constructs an empty object and allows the caller to set the key
-    /// parameters via the properties on this class. Another constructs a key based on the COSE form encoded in CBOR.
-    /// Lastly, there is a constructor that takes in a .NET representation of an EC public key used for interoperating
-    /// with the .NET cryptographic library.
-    /// </para>
     /// </remarks>
     public class CoseEdDsaPublicKey : CoseKey
     {

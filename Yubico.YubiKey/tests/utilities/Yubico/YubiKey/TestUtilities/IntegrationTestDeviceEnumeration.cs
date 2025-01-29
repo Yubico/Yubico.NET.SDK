@@ -41,19 +41,19 @@ namespace Yubico.YubiKey.TestUtilities
     /// </summary>
     public sealed class IntegrationTestDeviceEnumeration
     {
-        // 1. Constants (private, then public)
+
         private const string YUBIKEY_INTEGRATIONTEST_ALLOWED_KEYS_VAR_NAME = "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS";
 
-        // 2. Static Fields
+
         private static readonly Lazy<IntegrationTestDeviceEnumeration> LazyInstance =
             new Lazy<IntegrationTestDeviceEnumeration>(() => new IntegrationTestDeviceEnumeration());
 
-        // 3. Instance Fields (readonly, then regular)
+
         private readonly string _allowlistFileName = $"{YUBIKEY_INTEGRATIONTEST_ALLOWED_KEYS_VAR_NAME}.txt";
         private readonly string? _configDirectory;
         public readonly HashSet<string> AllowedSerialNumbers;
 
-        // 4. Properties
+
         private string SetupMessage => "In order to prevent you from accidentally wiping your own important keys," +
                     "you must add your allow-listed Yubikeys serial number to either the environment variable " +
                     $"'{YUBIKEY_INTEGRATIONTEST_ALLOWED_KEYS_VAR_NAME}' or to the file {_allowlistFileName} at {AllowListFilePath}\n" +

@@ -19,7 +19,7 @@ using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Fido2.Cose
 {
-    public class CosePublicEcKeyTests
+    public class CoseEcPublicKeyTests
     {
         [Theory]
         [InlineData(KeyDefinitions.KeyOids.P256)]

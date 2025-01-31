@@ -74,7 +74,8 @@ enabled over USB. The CCID (smart card) interface is enabled when the PIV, OATH,
 applications are enabled over USB.
 
 OTP interface output is sent as a series of keystrokes from a virtual HID keyboard. This allows
-for OTP to be used in any environment which can accept standard keyboard input.
+for OTP to be used in any environment which can accept standard keyboard input. For more information 
+on the HID Keyboard transport, see the [OTP application documentation](xref:OtpHID).
 
 The FIDO interface has a HID usage page set to `0xF1D0`.
 
@@ -82,15 +83,15 @@ The FIDO interface has a HID usage page set to `0xF1D0`.
 
 #### HID keyboard
 
-The SDK's HID operations on Linux make use of libudev", and "libc", and "hidraw. Make sure
+The SDK's HID operations on Linux make use of "libudev", "libc", and "hidraw". Make sure
 they are available on the device.
 
 The shared libraries "libudev" and "libc" must in one of the paths the SDK will search
-(see the .NET documentation for the `DllImportSearchPath` enum, the SDK uses the value
+(see the .NET documentation for the `DllImportSearchPath` enum; the SDK uses the value
 `SafeDirectories`).
 
 One directory the SDK searches is `/usr/lib`. If the SDK cannot find some needed library,
-it will likely be easiest to simply create a symbolic link. For example,
+it will likely be easiest to simply create a symbolic link. For example:
 
 ```
 $ cd /usr/lib
@@ -130,7 +131,7 @@ should be part of the Linux kernel and there should be nothing you need to do.
 In order to use the SDK to contact a YubiKey on a Linux device, you need to install the
 "pcsclite" library. This is an Open Source implementation of PC/SC (personal computers/
 smart card), a specification for integrating smart cards into computer environments. If it
-is not already installed on your Linux device, you will likely run a command such as
+is not already installed on your Linux device, you will likely run a command such as:
 
 ```
 $ apt-get install libpcsclite1

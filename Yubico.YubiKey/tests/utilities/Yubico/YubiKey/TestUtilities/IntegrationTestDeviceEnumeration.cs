@@ -101,10 +101,12 @@ namespace Yubico.YubiKey.TestUtilities
         public static IList<IYubiKeyDevice> GetTestDevices(
             Transport transport = Transport.All)
         {
-            return YubiKeyDevice
+            var filteredKeys = YubiKeyDevice
                 .FindByTransport(transport)
                 .Where(IsAllowedKey)
                 .ToList();
+
+            return filteredKeys;
 
             static bool IsAllowedKey(
                 IYubiKeyDevice key)

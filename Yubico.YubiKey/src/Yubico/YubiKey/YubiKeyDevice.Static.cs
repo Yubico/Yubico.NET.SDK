@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -101,10 +102,14 @@ namespace Yubico.YubiKey
             }
 
             // Return any key that has at least one overlapping available transport with the requested transports.
-            return YubiKeyDeviceListener
+            var devices = YubiKeyDeviceListener
                 .Instance
                 .GetAll()
                 .Where(k => (k.AvailableTransports & transport) != 0);
+
+            Debug.WriteLine("Found {0} YubiKeys: {1}", devices.Count(), string.Join(", ", devices.Select(d => d.SerialNumber)));
+
+            return devices;
         }
 
         /// <summary>

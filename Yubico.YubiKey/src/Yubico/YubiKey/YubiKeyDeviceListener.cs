@@ -90,8 +90,8 @@ namespace Yubico.YubiKey
 
         private readonly ILogger _log = Log.GetLogger<YubiKeyDeviceListener>();
         private readonly Dictionary<IYubiKeyDevice, bool> _internalCache = new Dictionary<IYubiKeyDevice, bool>();
-        private readonly HidDeviceListener _hidListener = HidDeviceListener.Create();
-        private readonly SmartCardDeviceListener _smartCardListener = SmartCardDeviceListener.Create();
+        private readonly HidDeviceListener _hidListener;
+        private readonly SmartCardDeviceListener _smartCardListener;
 
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
         private readonly Task _listenTask;
@@ -104,7 +104,8 @@ namespace Yubico.YubiKey
         private YubiKeyDeviceListener()
         {
             _log.LogInformation($"Creating {nameof(YubiKeyDeviceListener)} instance.");
-
+            _hidListener = HidDeviceListener.Create();
+            _smartCardListener = SmartCardDeviceListener.Create();
             SetupDeviceListeners();
 
             _log.LogInformation("Performing initial cache population.");

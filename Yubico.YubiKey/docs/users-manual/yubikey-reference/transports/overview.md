@@ -137,6 +137,22 @@ is not already installed on your Linux device, you will likely run a command suc
 $ apt-get install libpcsclite1
 ```
 
+**Arch Linux**: 
+
+If on Arch Linux, you may also need to install `pcsc-tools`:
+
+```
+sudo pacman -S pcsc-tools 
+```
+
+Once installed, start the pcsc daemon:
+
+```
+sudo systemctl enable --now pcscd.socket
+sudo systemctl start --now pcscd.socket
+```
+
+
 ## NFC
 
 In addition to USB, the YubiKey 5 NFC keys also provide an NFC wireless interface for

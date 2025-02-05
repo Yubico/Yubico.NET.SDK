@@ -22,8 +22,9 @@ namespace Yubico.YubiKey.Fido2.Cose
             .Replace("-----BEGIN PUBLIC KEY-----", "")
             .Replace("-----END PUBLIC KEY-----", "")
             .Replace("\n", "")
-            .Trim()
-        ).Skip(12).ToArray(); // Skip the COSE key header and extract the public key data
+            .Trim())
+        .Skip(12) // Skip the ASN.1 metadata bytes and keep only the public key data (32 bytes)
+        .ToArray(); 
 
         [Fact]
         public void CreateFromPublicKeyData_ValidKey_ReturnsExpectedKey()

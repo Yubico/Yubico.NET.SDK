@@ -73,6 +73,93 @@ over USB. The HID FIDO interface is enabled when either the U2F or FIDO2 applica
 enabled over USB. The CCID (smart card) interface is enabled when the PIV, OATH, or OpenPGP
 applications are enabled over USB.
 
+OTP interface output is sent as a series of keystrokes from a virtual HID keyboard. This allows
+for OTP to be used in any environment which can accept standard keyboard input. For more information 
+on the HID Keyboard transport, see the [OTP application documentation](xref:OtpHID).
+
+The FIDO interface has a HID usage page set to `0xF1D0`.
+
+### Linux support
+
+#### HID keyboard
+
+The SDK's HID operations on Linux make use of "libudev", "libc", and "hidraw". Make sure
+they are available on the device.
+
+The shared libraries "libudev" and "libc" must in one of the paths the SDK will search
+(see the .NET documentation for the `DllImportSearchPath` enum; the SDK uses the value
+`SafeDirectories`).
+
+One directory the SDK searches is `/usr/lib`. If the SDK cannot find some needed library,
+it will likely be easiest to simply create a symbolic link. For example:
+
+```
+$ cd /usr/lib
+$ sudo ln -s /usr/lib/x86_64-linux-gnu/libudev.so libudev.so
+```
+
+**udev**:
+
+The udev library is part of Linux and will probably already be installed on the device. It
+is commonly found in a directory such as
+
+```
+/usr/lib/x86_64-linux-gnu/libudev.so
+```
+
+If so, there is likely nothing you will need to do. If the SDK cannot find `libudev.so`,
+make sure it is on the device (e.g. `$ find /usr -name libudev.so`). If it is, maybe it is
+not in a standard location and you need to make a symbolic link.
+
+**libc**:
+
+The SDK expects a libc library named `libc.so.6` to be in the shared library search path.
+If it is not, you will likely make a symbolic link in `/usr/lib`.
+
+```
+$ cd /usr/lib
+$ sudo ln -s /usr/lib/x86_64-linux-gnu/libc.so.6 libc.so.6
+```
+
+**hidraw**:
+
+The hidraw library is a driver that provides an interface to USB devices. This driver
+should be part of the Linux kernel and there should be nothing you need to do.
+
+#### Smart card
+
+In order to use the SDK to contact a YubiKey on a Linux device, you need to install the
+"pcsclite" library. This is an Open Source implementation of PC/SC (personal computers/
+smart card), a specification for integrating smart cards into computer environments. If it
+is not already installed on your Linux device, you will likely run a command such as:
+
+```
+$ apt-get install libpcsclite1
+```
+
+**Arch Linux**: 
+
+If on Arch Linux, you need to install both `pcsclite` and `ccid`:
+
+```
+sudo pacman -S pcsclite ccid
+```
+
+Optionally, you can also install `pcsc-tools`, which provides additional tools for troubleshooting smart card connectivity:
+
+```
+sudo pacman -S pcsc-tools 
+```
+
+Once package installation is complete, start the pcsc daemon:
+
+```
+sudo systemctl enable --now pcscd.socket
+sudo systemctl start --now pcscd.socket
+```
+
+For more information on working with smart cards on Arch Linux, see the [Arch Linux documentation](https://wiki.archlinux.org/title/Smartcards).
+
 ## NFC
 
 In addition to USB, the YubiKey 5 NFC keys also provide an NFC wireless interface for
@@ -91,9 +178,3 @@ operation will succeed. After a period of inactivity, a YubiKey placed on a desk
 may power down to help prevent unintended access to the device. To regain connectivity with
 an NFC reader, remove the YubiKey from the reader and reposition it on the reader. Some NFC
 readers may power cycle the YubiKey and, in doing so, prevent the device from powering down.
-
-## See also
-
-- [Transport: HID Keyboard (OTP)](xref:YubiKeyTransportHIDKeyboard)
-- [Transport: Smart Card (CCID)](xref:YubiKeyTransportSmartCard)
-- [Transport: HID FIDO](xref:YubiKeyTransportHIDFIDO)

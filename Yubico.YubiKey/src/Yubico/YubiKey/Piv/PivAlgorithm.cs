@@ -89,6 +89,7 @@ namespace Yubico.YubiKey.Piv
         /// Indicates that the slot contains a PIN or PUK (slots 80 and 81).
         /// While not a cryptographic algorithm, it is used in the PIV Metadata.
         /// </summary>
-        Pin = 0xFF
+        Pin = 0xFF,
+        EccP521 = 0x100
     }
 }

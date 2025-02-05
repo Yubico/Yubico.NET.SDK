@@ -116,6 +116,10 @@ namespace Yubico.YubiKey.TestUtilities
         // constructor will not build a key.
         // If the PEM is a private key, the constructor will build its own local
         // copy of a private key and a public key.
+        public KeyConverter(string pemKeyString) :
+            this(pemKeyString.ToCharArray())
+        {
+        }
         public KeyConverter(char[] pemKeyString)
         {
             // Search for the PublicKeyStart and End or PrivateKeyStart and End.
@@ -597,10 +601,7 @@ namespace Yubico.YubiKey.TestUtilities
         // When done with the object, clear it if you want.
         public void Clear()
         {
-            if (!(_pivPrivateKey is null))
-            {
-                _pivPrivateKey.Clear();
-            }
+            _pivPrivateKey?.Clear();
 
             _pivPrivateKey = new PivPrivateKey();
             _pivPublicKey = new PivPublicKey();

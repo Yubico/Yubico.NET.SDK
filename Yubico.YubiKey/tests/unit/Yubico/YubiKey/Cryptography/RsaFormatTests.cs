@@ -263,12 +263,12 @@ namespace Yubico.YubiKey.Cryptography
                 padding = RSASignaturePadding.Pss;
             }
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string? publicKeyPem, out string? privateKeyPem);
 
             try
             {
-                publicKey = new KeyConverter(publicKeyPem.ToCharArray());
-                privateKey = new KeyConverter(privateKeyPem.ToCharArray());
+                publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
+                privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
 
                 _ = digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
                 byte[] formattedData;
@@ -347,12 +347,12 @@ namespace Yubico.YubiKey.Cryptography
                 padding = RSASignaturePadding.Pss;
             }
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string? publicKeyPem, out string? privateKeyPem);
 
             try
             {
-                publicKey = new KeyConverter(publicKeyPem.ToCharArray());
-                privateKey = new KeyConverter(privateKeyPem.ToCharArray());
+                publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
+                privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
 
                 using RSA rsaPrivate = privateKey.GetRsaObject();
                 byte[] signature = rsaPrivate.SignData(dataToSign, hashAlg, padding);
@@ -427,12 +427,12 @@ namespace Yubico.YubiKey.Cryptography
                 };
             }
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string? publicKeyPem, out string? privateKeyPem);
 
             try
             {
-                publicKey = new KeyConverter(publicKeyPem.ToCharArray());
-                privateKey = new KeyConverter(privateKeyPem.ToCharArray());
+                publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
+                privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
 
                 byte[] formattedData;
                 if (format == 1)
@@ -498,11 +498,11 @@ namespace Yubico.YubiKey.Cryptography
                 };
             }
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var publicKeyPem, out var privateKeyPem);
             try
             {
-                publicKey = new KeyConverter(publicKeyPem.ToCharArray());
-                privateKey = new KeyConverter(privateKeyPem.ToCharArray());
+                publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
+                privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
 
                 using RSA rsaPublic = publicKey.GetRsaObject();
 

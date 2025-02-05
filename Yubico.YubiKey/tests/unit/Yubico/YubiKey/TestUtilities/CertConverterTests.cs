@@ -30,10 +30,10 @@ namespace Yubico.YubiKey.TestUtilities
         [InlineData(PivAlgorithm.EccP384)]
         public void CertConverter_AllOperations_Succeed(PivAlgorithm algorithm)
         {
-            bool isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out string certPem, out _, out _);
+            bool isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out var certPem, out _, out _);
             Assert.True(isValid);
 
-            var certConverter = new CertConverter(certPem.ToCharArray());
+            var certConverter = new CertConverter(certPem!.ToCharArray());
 
             Assert.Equal(certConverter.Algorithm, algorithm);
 

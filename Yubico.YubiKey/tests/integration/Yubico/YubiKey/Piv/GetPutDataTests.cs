@@ -13,12 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Scp;
-using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -33,7 +31,7 @@ namespace Yubico.YubiKey.Piv
                 out var cert, out var privateKey);
             Assert.True(isValid);
 
-            var certDer = cert.GetRawCertData();
+            var certDer = cert!.GetRawCertData();
             byte[] feData = { 0xFE, 0x00 };
             var tlvWriter = new TlvWriter();
             using (tlvWriter.WriteNestedTlv(0x53))
@@ -54,7 +52,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
-                pivSession.ImportPrivateKey(PivSlot.Authentication, privateKey, PivPinPolicy.Never,
+                pivSession.ImportPrivateKey(PivSlot.Authentication, privateKey!, PivPinPolicy.Never,
                     PivTouchPolicy.Never);
             }
 

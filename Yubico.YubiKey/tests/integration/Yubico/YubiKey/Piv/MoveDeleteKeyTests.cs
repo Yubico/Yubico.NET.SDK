@@ -75,9 +75,8 @@ namespace Yubico.YubiKey.Piv
 
             DeleteKeys(pivSession, sourceSlot, destinationSlot);
 
-            var keyConverter = SampleKeyPairs.GetKeyConverter(expectedAlgorithm);
-            var importedPrivateKey = keyConverter.GetPivPrivateKey();
-            var importedPublicKey = keyConverter.GetPivPublicKey();
+            var importedPrivateKey = SampleKeyPairs.GetPivPrivateKey(expectedAlgorithm);
+            var importedPublicKey =  SampleKeyPairs.GetPivPublicKey(expectedAlgorithm);
 
             pivSession.ImportPrivateKey(sourceSlot, importedPrivateKey);
 

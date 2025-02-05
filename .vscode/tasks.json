@@ -14,12 +14,28 @@
       "problemMatcher": "$msCompile"
     },
     {
-      "label": "run tests: unit",
+      "label": "run unit tests: Yubico.YubiKey",
       "command": "dotnet",
       "type": "process",
       "args": [
         "test",
         "${workspaceFolder}/Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "run unit tests: Yubico.Core",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "${workspaceFolder}/Yubico.Core/tests/Yubico.Core.UnitTests.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],

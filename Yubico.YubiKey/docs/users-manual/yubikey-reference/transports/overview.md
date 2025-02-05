@@ -139,19 +139,26 @@ $ apt-get install libpcsclite1
 
 **Arch Linux**: 
 
-If on Arch Linux, you may also need to install `pcsc-tools`:
+If on Arch Linux, you need to install both `pcsclite` and `ccid`:
+
+```
+sudo pacman -S pcsclite ccid
+```
+
+Optionally, you can also install `pcsc-tools`, which provides additional tools for troubleshooting smart card connectivity:
 
 ```
 sudo pacman -S pcsc-tools 
 ```
 
-Once installed, start the pcsc daemon:
+Once package installation is complete, start the pcsc daemon:
 
 ```
 sudo systemctl enable --now pcscd.socket
 sudo systemctl start --now pcscd.socket
 ```
 
+For more information on working with smart cards on Arch Linux, see the [Arch Linux documentation](https://wiki.archlinux.org/title/Smartcards).
 
 ## NFC
 

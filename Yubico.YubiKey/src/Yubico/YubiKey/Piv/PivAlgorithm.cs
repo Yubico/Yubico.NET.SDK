@@ -86,10 +86,14 @@ namespace Yubico.YubiKey.Piv
         EccP384 = 0x14,
 
         /// <summary>
+        /// Indicates that the algorithm is ECC and the parameters are P-521,
+        /// </summary>
+        EccP521 = 0x15,
+
+        /// <summary>
         /// Indicates that the slot contains a PIN or PUK (slots 80 and 81).
         /// While not a cryptographic algorithm, it is used in the PIV Metadata.
         /// </summary>
         Pin = 0xFF,
-        EccP521 = 0x100
     }
 }

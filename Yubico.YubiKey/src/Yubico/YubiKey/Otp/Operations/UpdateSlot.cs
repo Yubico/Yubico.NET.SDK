@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 YubiKeyFlags = yubiKeyFlags,
                 OtpSlot = OtpSlot!.Value
             };
-            
+
             command.ApplyCurrentAccessCode(CurrentAccessCode);
             command.SetAccessCode(NewAccessCode);
 

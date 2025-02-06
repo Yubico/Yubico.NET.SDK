@@ -121,12 +121,12 @@ namespace Yubico.YubiKey.Scp.Helpers
 
             // Calculate expected MAC using AES-CMAC
             using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
-            
+
             Span<byte> cmac = stackalloc byte[16];
             cmacObj.CmacInit(rmacKey);
             cmacObj.CmacUpdate(macInput);
             cmacObj.CmacFinal(cmac);
-    
+
             // Use constant-time comparison to prevent timing attacks
             if (!CryptographicOperations.FixedTimeEquals(recvdRmac, cmac[..8]))
             {
@@ -154,7 +154,7 @@ namespace Yubico.YubiKey.Scp.Helpers
 
             data.CopyTo(newData.AsSpan(currentDataLength));
             newApdu.Data = newData;
-            
+
             return newApdu;
         }
     }

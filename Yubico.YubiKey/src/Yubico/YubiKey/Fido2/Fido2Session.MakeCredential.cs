@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
-            
+
             var keyCollector = EnsureKeyCollector();
 
             byte[] token = new byte[MaximumAuthTokenLength];
@@ -181,7 +181,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 var response = Connection.SendCommand(new MakeCredentialCommand(parameters));
                 ctapStatus = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : response.CtapStatus;
-                
+
                 return response;
             }
             finally

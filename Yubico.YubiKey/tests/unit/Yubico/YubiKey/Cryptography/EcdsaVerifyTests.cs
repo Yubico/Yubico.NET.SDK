@@ -15,6 +15,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Xunit;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Piv;
@@ -24,7 +25,7 @@ namespace Yubico.YubiKey.Cryptography
     public class EcdsaVerifyTests
     {
         [Fact]
-        public void PivKey_Verify_Succeeds()
+        public void PivKey_VerifyDigestedData_Succeeds()
         {
             var pubKey = new PivEccPublicKey(GetEncodedPoint());
             byte[] digest = GetDigest();
@@ -36,7 +37,7 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Fact]
-        public void CoseKey_Verify_Succeeds()
+        public void CoseKey_VerifyDigestedData_Succeeds()
         {
             var pubKey = new CoseEcPublicKey(CoseEcCurve.P256, GetX(), GetY());
             byte[] digest = GetDigest();
@@ -47,8 +48,35 @@ namespace Yubico.YubiKey.Cryptography
             Assert.True(isVerified);
         }
 
+        [Theory]
+        [InlineData(KeyDefinitions.KeyType.P256)]
+        [InlineData(KeyDefinitions.KeyType.P384)]
+        [InlineData(KeyDefinitions.KeyType.P521)]
+        public void CoseKey_VerifyDigestedData_WithMultipleCurves_Succeeds(KeyDefinitions.KeyType keyType)
+        {
+            // Arrange
+            (var ecCurve, var coseCurve) = GetCurves(keyType);
+
+            var pubKey = ECDsa.Create(ecCurve);
+            var sha256 = SHA256.Create();
+
+            var dataToSign = Encoding.GetEncoding("UTF-8").GetBytes("Hello World");
+            var hash = sha256.ComputeHash(dataToSign);
+            var signature = pubKey.SignHash(hash, DSASignatureFormat.Rfc3279DerSequence);
+
+            var ecParams = pubKey.ExportParameters(false);
+            var pubKeyCose = new CoseEcPublicKey(coseCurve, ecParams.Q.X, ecParams.Q.Y);
+
+            // Act
+            using var verifier = new EcdsaVerify(pubKeyCose);
+            var isVerified = verifier.VerifyDigestedData(hash, signature);
+
+            // Assert
+            Assert.True(isVerified);
+        }
+
         [Fact]
-        public void Cert_Verify_Succeeds()
+        public void Cert_Verify_DigestedDataSucceeds()
         {
             var pubKey = X509CertificateLoader.LoadCertificate(GetCert());
 
@@ -60,9 +88,9 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Fact]
-        public void ECDsa_Verify_Succeeds()
+        public void ECDsa_VerifyDigestedData_Succeeds()
         {
-            var eccCurve = ECCurve.CreateFromValue("1.2.840.10045.3.1.7");
+            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.P256);
             var eccParams = new ECParameters
             {
                 Curve = (ECCurve)eccCurve
@@ -81,8 +109,86 @@ namespace Yubico.YubiKey.Cryptography
             Assert.True(isVerified);
         }
 
+        [Theory]
+        [InlineData(KeyDefinitions.KeyType.P256)]
+        [InlineData(KeyDefinitions.KeyType.P384)]
+        [InlineData(KeyDefinitions.KeyType.P521)]
+        public void ECDsa_VerifyDigestedData_WithIeeeFormat_Succeeds(KeyDefinitions.KeyType keyType)
+        {
+            // Arrange
+            (var ecCurve, _) = GetCurves(keyType);
+
+            var pubKey = ECDsa.Create(ecCurve);
+            var sha256 = SHA256.Create();
+
+            var dataToSign = Encoding.GetEncoding("UTF-8").GetBytes("Hello World");
+            var hash = sha256.ComputeHash(dataToSign);
+            var signature = pubKey.SignHash(hash, DSASignatureFormat.IeeeP1363FixedFieldConcatenation);
+
+            // Act
+            using var verifier = new EcdsaVerify(pubKey);
+            var isVerified = verifier.VerifyDigestedData(hash, signature, false);
+
+            // Assert
+            Assert.True(isVerified);
+        }
+
+        [Theory]
+        [InlineData(KeyDefinitions.KeyType.P256)]
+        [InlineData(KeyDefinitions.KeyType.P384)]
+        [InlineData(KeyDefinitions.KeyType.P521)]
+        public void ECDsa_VerifyDigestedData_WithDerFormat_Succeeds(KeyDefinitions.KeyType keyType)
+        {
+            // Arrange
+            (var ecCurve, _) = GetCurves(keyType);
+
+            var pubKey = ECDsa.Create(ecCurve);
+            var sha256 = SHA256.Create();
+
+            var dataToSign = Encoding.GetEncoding("UTF-8").GetBytes("Hello World");
+            var hash = sha256.ComputeHash(dataToSign);
+            var signature = pubKey.SignHash(hash, DSASignatureFormat.Rfc3279DerSequence);
+
+            // Act
+            using var verifier = new EcdsaVerify(pubKey);
+            bool isVerified = verifier.VerifyDigestedData(hash, signature, true);
+
+            // Assert
+            Assert.True(isVerified);
+        }
+
+        [Theory]
+        [InlineData(KeyDefinitions.KeyType.P256)]
+        [InlineData(KeyDefinitions.KeyType.P384)]
+        [InlineData(KeyDefinitions.KeyType.P521)]
+        public void ECDsa_VerifyData_WithDerFormat_Succeeds(KeyDefinitions.KeyType keyType)
+        {
+            // Arrange
+            (var ecCurve, _) = GetCurves(keyType);
+
+            var pubKey = ECDsa.Create(ecCurve);
+            HashAlgorithm hashAlgorithm = keyType switch
+            {
+                KeyDefinitions.KeyType.P256 => CryptographyProviders.Sha256Creator(),
+                KeyDefinitions.KeyType.P384 => CryptographyProviders.Sha384Creator(),
+                KeyDefinitions.KeyType.P521 => CryptographyProviders.Sha512Creator(),
+                _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm),
+            };
+
+            var dataToSign = Encoding.GetEncoding("UTF-8").GetBytes("Hello World");
+            var hash = hashAlgorithm.ComputeHash(dataToSign);
+            var signature = pubKey.SignHash(hash, DSASignatureFormat.Rfc3279DerSequence);
+
+            // Act
+            using var verifier = new EcdsaVerify(pubKey);
+            var isVerified = verifier.VerifyData(dataToSign, signature, true);
+
+            // Assert
+            Assert.True(isVerified);
+        }
+
         [Fact]
-        public void EncodedKey_Verify_Succeeds()
+        public void EncodedKey_VerifyDigestedData_Succeeds()
         {
             byte[] pubKey = GetEncodedPoint();
             byte[] digest = GetDigest();
@@ -104,6 +210,20 @@ namespace Yubico.YubiKey.Cryptography
             Array.Copy(yCoord, 0, encoding, xCoord.Length + 1, yCoord.Length);
 
             return encoding;
+        }
+
+        private static (ECCurve ecCurve, CoseEcCurve coseCurve) GetCurves(KeyDefinitions.KeyType keyType)
+        {
+            var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
+            var (eccCurve, coseCurve) = keyDefinition.Type switch
+            {
+                KeyDefinitions.KeyType.P256 => (ECCurve.NamedCurves.nistP256, CoseEcCurve.P256),
+                KeyDefinitions.KeyType.P384 => (ECCurve.NamedCurves.nistP384, CoseEcCurve.P384),
+                KeyDefinitions.KeyType.P521 => (ECCurve.NamedCurves.nistP521, CoseEcCurve.P521),
+                _ => throw new ArgumentException("Unknown curve")
+            };
+
+            return (eccCurve, coseCurve);
         }
 
 

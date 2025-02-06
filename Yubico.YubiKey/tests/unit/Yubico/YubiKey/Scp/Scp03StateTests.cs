@@ -11,9 +11,9 @@ namespace Yubico.YubiKey.Scp
     public class Scp03StateTests
     {
         readonly byte[] ResponseData;
-        
+
         internal Scp03State State { get; set; }
-        
+
         public Scp03StateTests()
         {
             var parent = new Mock<IApduTransform>();
@@ -28,8 +28,7 @@ namespace Yubico.YubiKey.Scp
                     typeof(InitializeUpdateCommand),
                     typeof(InitializeUpdateResponse)))
                 .Returns(new ResponseApdu(ResponseData));
-            
-            
+
             parent.Setup(p => p.Invoke(
                     It.IsAny<CommandApdu>(),
                     typeof(ExternalAuthenticateCommand),
@@ -56,8 +55,7 @@ namespace Yubico.YubiKey.Scp
                     typeof(InitializeUpdateCommand),
                     typeof(InitializeUpdateResponse)))
                 .Returns(new ResponseApdu(responseApduData));
-            
-            
+
             parent.Setup(p => p.Invoke(
                     It.IsAny<CommandApdu>(),
                     typeof(ExternalAuthenticateCommand),
@@ -104,15 +102,15 @@ namespace Yubico.YubiKey.Scp
             Span<byte> putKeyData = stackalloc byte[256];
             rng.GetBytes(putKeyData);
             var originalCommand = new PutKeyCommand(1, 2, putKeyData.ToArray()).CreateCommandApdu();
-        
+
             // Act
             var encodedCommand = State.EncodeCommand(originalCommand);
-        
+
             // Assert
             Assert.NotNull(encodedCommand);
             Assert.NotEqual(originalCommand.Data, encodedCommand.Data);
         }
-       
+
         private static byte[] GetFakeResponseApduData(
             byte[] hostChallenge,
             byte[] cardChallenge)

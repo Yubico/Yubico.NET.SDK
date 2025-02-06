@@ -410,7 +410,7 @@ namespace Yubico.YubiKey.Piv
             var encodedCertData = response.GetData();
 
             var tlvReader = new TlvReader(encodedCertData);
-            
+
             bool isValid = tlvReader.TryReadNestedTlv(out var nestedReader, PivEncodingTag);
             if (isValid)
             {

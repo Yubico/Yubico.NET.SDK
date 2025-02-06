@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     ResponseClass = nameof(InitializeAuthenticateManagementKeyResponse),
                 };
             }
-            
+
             if (value.Length < TDesDataLength)
             {
                 throw new MalformedYubiKeyResponseException()

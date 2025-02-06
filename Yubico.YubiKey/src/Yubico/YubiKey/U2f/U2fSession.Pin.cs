@@ -164,7 +164,7 @@ namespace Yubico.YubiKey.U2f
         public bool TrySetPin(ReadOnlyMemory<byte> pin)
         {
             _log.LogInformation("Try to set the U2F PIN using a provided value.");
-            
+
             var command = new SetPinCommand(ReadOnlyMemory<byte>.Empty, pin);
             var response = Connection.SendCommand(command);
             return response.StatusWord switch
@@ -493,7 +493,7 @@ namespace Yubico.YubiKey.U2f
         public bool TryVerifyPin(ReadOnlyMemory<byte> pin)
         {
             _log.LogInformation("Try to verify the U2F PIN using a provided value.");
-            
+
             var command = new VerifyPinCommand(pin);
             var response = Connection.SendCommand(command);
             return response.StatusWord switch

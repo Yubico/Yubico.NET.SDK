@@ -86,11 +86,11 @@ namespace Yubico.YubiKey.Cryptography
             Assert.NotNull(publicKeyParams.Parameters.Q.Y);
             Assert.Equal(1 + publicKeyParams.Parameters.Q.X.Length + publicKeyParams.Parameters.Q.Y.Length, bytes.Length);
             Assert.Equal(0x04, bytes.Span[0]); // Check format identifier
-            
+
             // Verify X and Y coordinates are correctly copied
             var xCoord = bytes.Slice(1, publicKeyParams.Parameters.Q.X.Length);
             var yCoord = bytes.Slice(1 + publicKeyParams.Parameters.Q.X.Length);
-            
+
             Assert.True(xCoord.Span.SequenceEqual(publicKeyParams.Parameters.Q.X));
             Assert.True(yCoord.Span.SequenceEqual(publicKeyParams.Parameters.Q.Y));
         }
@@ -103,7 +103,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             using var ecdsa = ECDsa.Create(ECCurve.CreateFromOid(Oid.FromOidValue(oid, OidGroup.PublicKeyAlgorithm)));
-            
+
             // Act
             var publicKeyParams = new ECPublicKeyParameters(ecdsa);
 

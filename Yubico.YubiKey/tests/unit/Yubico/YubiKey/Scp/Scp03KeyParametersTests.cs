@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.Scp
                 new byte[16], // mac
                 new byte[16]  // dek
             );
-            
+
             var keyParams = new Scp03KeyParameters(ScpKeyIds.Scp03, 0x01, staticKeys);
 
             // Act

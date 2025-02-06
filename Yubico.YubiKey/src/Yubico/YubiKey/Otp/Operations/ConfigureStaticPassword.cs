@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 _passwordHidCodes = _passwordHidCodes
                     .Concat(new byte[SlotConfigureBase.MaxPasswordLength - _passwordHidCodes.Length])
                     .ToArray();
-                
+
                 var yubiKeyFlags = Settings.YubiKeyFlags;
                 var cmd = new ConfigureSlotCommand
                 {
@@ -345,7 +345,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 {
                     var translator = HidCodeTranslator.GetInstance(_keyboardLayout!.Value);
                     var password = _password.Span;
-                    
+
                     if (_generatePassword.Value)
                     {
                         GenerateRandomPassword(translator);

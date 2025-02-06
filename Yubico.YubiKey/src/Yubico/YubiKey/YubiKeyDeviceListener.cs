@@ -46,7 +46,7 @@ namespace Yubico.YubiKey
         /// An instance of a <see cref="YubiKeyDeviceListener"/>.
         /// </summary>
         public static YubiKeyDeviceListener Instance => _lazyInstance ??= new YubiKeyDeviceListener();
-        
+
         /// <summary>
         /// Disposes and closes the singleton instance of <see cref="YubiKeyDeviceListener"/>.
         /// </summary>
@@ -80,7 +80,7 @@ namespace Yubico.YubiKey
             _lazyInstance.Dispose();
             _lazyInstance = null;
         }
-        
+
         internal static bool IsListenerRunning => !(_lazyInstance is null);
         internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
 
@@ -97,7 +97,7 @@ namespace Yubico.YubiKey
         private readonly Task _listenTask;
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private CancellationToken CancellationToken => _tokenSource.Token;
-        
+
         private bool _isDisposed;
         private bool _isListening;
 
@@ -340,7 +340,7 @@ namespace Yubico.YubiKey
         /// Raises event on device removal.
         /// </summary>
         private void OnDeviceRemoved(YubiKeyDeviceEventArgs e) => Removed?.Invoke(typeof(YubiKeyDevice), e);
-        
+
         private void LogEvent(string eventType, IDeviceEventArgs<IDevice> e)
         {
             var device = e.Device;
@@ -400,7 +400,7 @@ namespace Yubico.YubiKey
         private static void ErrorHandler(Exception exception) => Log
                 .GetLogger(typeof(YubiKeyDeviceListener).FullName!)
                 .LogWarning($"Exception caught: {exception}");
-        
+
         /// <summary>
         /// Disposes the objects.
         /// </summary>

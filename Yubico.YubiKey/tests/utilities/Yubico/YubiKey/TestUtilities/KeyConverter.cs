@@ -16,6 +16,7 @@ using System;
 using System.Globalization;
 using System.Numerics;
 using System.Security.Cryptography;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.TestUtilities
@@ -447,7 +448,7 @@ namespace Yubico.YubiKey.TestUtilities
         // exception.
         public ECDsa GetEccObject()
         {
-            var eccCurve = ECCurve.CreateFromValue("1.2.840.10045.3.1.7");
+            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.P256);
             if (_pivPublicKey.Algorithm != PivAlgorithm.EccP256)
             {
                 if (_pivPublicKey.Algorithm != PivAlgorithm.EccP384)
@@ -458,7 +459,7 @@ namespace Yubico.YubiKey.TestUtilities
                             RequestedKeyMessage));
                 }
 
-                eccCurve = ECCurve.CreateFromValue("1.3.132.0.34");
+                eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.P384);
             }
 
             var eccParams = new ECParameters

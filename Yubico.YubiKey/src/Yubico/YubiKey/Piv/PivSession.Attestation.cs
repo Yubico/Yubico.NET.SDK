@@ -190,7 +190,7 @@ namespace Yubico.YubiKey.Piv
                 var tlvReader = new TlvReader(certData);
                 tlvReader = tlvReader.ReadNestedTlv(PivEncodingTag);
                 certData = tlvReader.ReadValue(PivCertTag);
-                
+
                 return new X509Certificate2(certData.ToArray());
             }
 

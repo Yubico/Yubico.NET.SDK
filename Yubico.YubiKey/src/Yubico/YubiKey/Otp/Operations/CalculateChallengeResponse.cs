@@ -139,7 +139,7 @@ namespace Yubico.YubiKey.Otp.Operations
                         OtpSlot!.Value,
                         _algorithm,
                         _challenge);
-                    
+
                     var response = Connection.SendCommand(cmd);
                     if (response.Status != ResponseStatus.Success)
                     {

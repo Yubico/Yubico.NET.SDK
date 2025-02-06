@@ -102,7 +102,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
-            
+
             var keyCollector = EnsureKeyCollector();
 
             byte[] token = new byte[MaximumAuthTokenLength];

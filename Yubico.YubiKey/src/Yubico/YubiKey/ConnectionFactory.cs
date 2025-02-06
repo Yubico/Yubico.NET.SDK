@@ -128,7 +128,7 @@ namespace Yubico.YubiKey
                 WaitForReclaimTimeout(Transport.HidFido);
                 return new FidoConnection(_hidFidoDevice);
             }
-            
+
             if (_smartCardDevice != null)
             {
                 _log.LogDebug("Connecting via the SmartCard interface.");

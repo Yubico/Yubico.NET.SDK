@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Scp
 
             SetKeys(defaultKey, defaultKey, defaultKey);
         }
-        
+
         private void SetKeys(ReadOnlyMemory<byte> channelMacKey,
                              ReadOnlyMemory<byte> channelEncryptionKey,
                              ReadOnlyMemory<byte> dataEncryptionKey)

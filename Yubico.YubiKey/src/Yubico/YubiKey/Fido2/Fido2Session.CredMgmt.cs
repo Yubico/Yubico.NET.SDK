@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 IsPreview = isPreview
             };
-            
+
             var response = Connection.SendCommand(command);
 
             // If the error is PinAuthInvalid, try again.

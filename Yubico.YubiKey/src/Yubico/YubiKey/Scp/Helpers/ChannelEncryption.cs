@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.Scp.Helpers
             var iv = AesUtilities.BlockCipher(key, ivInput);
             var decryptedData = AesUtilities.AesCbcDecrypt(key, iv.Span, encryptedData);
             var plainText = Padding.RemovePadding(decryptedData.Span);
-            
+
             return plainText;
         }
     }

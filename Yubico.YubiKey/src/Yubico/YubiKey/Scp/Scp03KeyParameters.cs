@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.Scp
             StaticKeys staticKeys) : this(new KeyReference(keyId, keyVersionNumber), staticKeys)
         {
         }
-        
+
         /// <summary>
         /// Gets the default SCP03 key parameters using the default key identifier and static keys.
         /// </summary>

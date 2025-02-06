@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
@@ -21,6 +22,7 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Fido2
 {
     [Trait(TraitTypes.Category, TestCategories.Elevated)]
+    [Trait(TraitTypes.Category, TestCategories.RequiresSetup)] // Requires pin 123456 and one FIDO credential set up
     public class SimpleCredMgmtTests : SimpleIntegrationTestConnection
     {
         public SimpleCredMgmtTests()
@@ -29,67 +31,56 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        public void GetMetadata_Succeeds()
+        public void GetMetadata_Succeeds() // Works when at least one credential is set up
         {
-            using (var fido2Session = new Fido2Session(Device))
-            {
-                fido2Session.KeyCollector = LocalKeyCollector;
+            using var fido2Session = new Fido2Session(Device);
+            fido2Session.KeyCollector = LocalKeyCollector;
 
-                (int credCount, int slotCount) = fido2Session.GetCredentialMetadata();
-                Assert.Equal(1, credCount); /*Xunit.Sdk.EqualException
-Assert.Equal() Failure: Values differ
-Expected: 1
-Actual:   0*/
-                Assert.Equal(24, slotCount);
-            }
+            (var credCount, var slotCount) = fido2Session.GetCredentialMetadata();
+
+            Assert.Equal(1, credCount);
+            Assert.Equal(24, slotCount);
         }
 
         [Fact]
-        public void EnumerateRps_Succeeds()
+        public void EnumerateRps_Succeeds() // Works when at least one credential is set up
         {
-            using (var fido2Session = new Fido2Session(Device))
-            {
-                fido2Session.KeyCollector = LocalKeyCollector;
+            using var fido2Session = new Fido2Session(Device);
+            fido2Session.KeyCollector = LocalKeyCollector;
 
-                IReadOnlyList<RelyingParty> rpList = fido2Session.EnumerateRelyingParties();
-                Assert.Equal(2, rpList.Count); //Failing test  Yubico.YubiKey.Fido2.Ctap2DataException: The FIDO2 info returned is invalid.
-            }
+            var rpList = fido2Session.EnumerateRelyingParties();
+
+            Assert.Single(rpList);
         }
 
         [Fact]
-        public void EnumerateCreds_Succeeds() // Failing test, Yubico.YubiKey.Fido2.Ctap2DataException: The FIDO2 info returned is invalid.
+        public void EnumerateCreds_Succeeds() // Works when at least one credential is set up
         {
-            using (var fido2Session = new Fido2Session(Device))
-            {
-                fido2Session.KeyCollector = LocalKeyCollector;
+            using var fido2Session = new Fido2Session(Device);
+            fido2Session.KeyCollector = LocalKeyCollector;
 
-                IReadOnlyList<RelyingParty> rpList = fido2Session.EnumerateRelyingParties();
-                IReadOnlyList<CredentialUserInfo> ykCredList =
-                    fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
-                Assert.Equal(2, ykCredList.Count);
-            }
+            var rpList = fido2Session.EnumerateRelyingParties();
+            var ykCredList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
+
+            Assert.Single(ykCredList);
         }
 
         [Fact]
-        public void DeleteCred_Succeeds()
+        public void DeleteCred_Succeeds() // Works when at least one credential is set up
         {
-            using (var fido2Session = new Fido2Session(Device))
-            {
-                fido2Session.KeyCollector = LocalKeyCollector;
+            using var fido2Session = new Fido2Session(Device);
+            fido2Session.KeyCollector = LocalKeyCollector;
 
-                IReadOnlyList<RelyingParty> rpList = fido2Session.EnumerateRelyingParties();
-                IReadOnlyList<CredentialUserInfo> credList =
-                    fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
-                int count = credList.Count;
+            var rpList = fido2Session.EnumerateRelyingParties();
+            var credList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
+            var count = credList.Count;
 
-                fido2Session.ClearAuthToken();
+            fido2Session.ClearAuthToken();
+            fido2Session.DeleteCredential(credList[0].CredentialId);
+            credList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
 
-                fido2Session.DeleteCredential(credList[0].CredentialId);
-
-                credList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
-                Assert.NotNull(credList);
-                Assert.True(credList.Count == count - 1);
-            }
+            Assert.NotNull(credList);
+            Assert.True(credList.Count == count - 1);
         }
 
         private bool LocalKeyCollector(KeyEntryData arg)

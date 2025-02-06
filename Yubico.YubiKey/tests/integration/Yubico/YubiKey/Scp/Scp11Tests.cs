@@ -607,7 +607,7 @@ namespace Yubico.YubiKey.Scp
         {
             byte scp03KeyId = 0x01;
             byte kvn = 0x01;
-            
+
             var scp03Ref = new KeyReference(scp03KeyId, kvn);
             var staticKeys = new StaticKeys(
                 GetRandomBytes(16),

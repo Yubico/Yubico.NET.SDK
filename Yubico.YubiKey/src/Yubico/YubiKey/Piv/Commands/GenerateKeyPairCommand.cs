@@ -307,7 +307,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
             data[IndexValueLength] = (byte)valueLength;
             var apduData = data.AsSpan(0, length);
-            
+
             return apduData.ToArray();
         }
 

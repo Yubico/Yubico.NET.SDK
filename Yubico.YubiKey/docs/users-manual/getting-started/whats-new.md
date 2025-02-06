@@ -516,7 +516,7 @@ PCSC-lite library.
 
 Some symlinks may need to be present in order for the .NET runtime to find the appropriate system
 libraries (such as pcsc-lite, udev, etc.) Information about how to create these links can be found
-on [this page](xref:YubiKeyTransportHIDKeyboard).
+on [this page](xref:YubiKeyTransportOverview).
 
 ## 1.0.x Releases
 

@@ -1,9 +1,7 @@
 # Update to latest vcpkg baseline
 Push-Location $env:VCPKG_INSTALLATION_ROOT
 git checkout master
-git restore .
-git pull
-vcpkg x-update-baseline
+.\bootstrap-vcpkg.bat
 Pop-Location
 
 # 32-bit builds

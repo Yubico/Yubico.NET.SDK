@@ -65,13 +65,13 @@ namespace Yubico.YubiKey.Scp
             ValidateKeyLength(encryptionKey, nameof(encryptionKey));
             ValidateKeyLength(rmacKey, nameof(rmacKey));
             ValidateKeyLength(dataEncryptionKey, nameof(dataEncryptionKey));
-            
+
             macKey.CopyTo(_macKey);
             encryptionKey.CopyTo(_encryptionKey);
             rmacKey.CopyTo(_rmacKey);
             dataEncryptionKey.CopyTo(_dataEncryptionKey);
         }
-        
+
         private static void ValidateKeyLength(ReadOnlyMemory<byte> key, string paramName)
         {
             if (key.Length != KeySizeBytes)

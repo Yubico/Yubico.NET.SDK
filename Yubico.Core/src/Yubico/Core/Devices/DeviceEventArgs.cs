@@ -32,9 +32,9 @@ namespace Yubico.Core.Devices
     /// <typeparam name="TDevice">The specific type of <see cref="IDevice"/> this event argument represents.
     /// This type parameter is covariant, allowing for more specific device types to be used
     /// where a more general device type is expected.</typeparam>
-    #pragma warning disable CA1711 // Identifiers should not have incorrect suffix
+#pragma warning disable CA1711 // Identifiers should not have incorrect suffix
     public interface IDeviceEventArgs<out TDevice> where TDevice : IDevice
-    #pragma warning restore CA1711 // Identifiers should not have incorrect suffix
+#pragma warning restore CA1711 // Identifiers should not have incorrect suffix
     {
         /// <summary>
         /// Gets the specific type of <see cref="IDevice"/> that originated the event.

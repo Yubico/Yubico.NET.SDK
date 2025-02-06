@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.TestUtilities
             }
 
             cert = TestKeys.GetCertificate(curve).AsX509Certificate2();
-            privateKey = TestKeys.GetKey(curve, true).AsPrivateKey();
+            privateKey = TestKeys.GetPrivateKey(curve).AsPrivateKey();
             return true;
         }
 
@@ -56,30 +56,30 @@ namespace Yubico.YubiKey.TestUtilities
             }
 
             var testCert = TestKeys.GetCertificate(curve, validAttest);
-            var testPrivKey = TestKeys.GetKey(curve, true);
-            var testPubKey = TestKeys.GetKey(curve, false);
+            var testPrivKey = TestKeys.GetPrivateKey(curve);
+            var testPubKey = TestKeys.GetPublicKey(curve);
 
-            cert = testCert.AsPem();
-            privateKey = testPrivKey.AsPem();
-            publicKey = testPubKey.AsPem();
+            cert = testCert.AsPemString();
+            privateKey = testPrivKey.AsPemString();
+            publicKey = testPubKey.AsPemString();
             return true;
         }
 
         public static PivPublicKey GetPivPublicKey(PivAlgorithm algorithm)
         {
-            string curve = GetCurveFromAlgorithm(algorithm);
-            return TestKeys.GetKey(curve, false).AsPublicKey();
+            var curve = GetCurveFromAlgorithm(algorithm);
+            return TestKeys.GetPublicKey(curve).AsPublicKey();
         }
 
         public static PivPrivateKey GetPivPrivateKey(PivAlgorithm algorithm) 
         {
-            string curve = GetCurveFromAlgorithm(algorithm);
-            return TestKeys.GetKey(curve, true).AsPrivateKey();
+            var curve = GetCurveFromAlgorithm(algorithm);
+            return TestKeys.GetPrivateKey(curve).AsPrivateKey();
         }
 
         public static X509Certificate2 GetCert(PivAlgorithm algorithm)
         {
-            string curve = GetCurveFromAlgorithm(algorithm);
+            var curve = GetCurveFromAlgorithm(algorithm);
             return TestKeys.GetCertificate(curve).AsX509Certificate2();
         }
 

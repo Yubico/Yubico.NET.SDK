@@ -17,15 +17,35 @@ namespace Yubico.YubiKey.TestUtilities
         protected readonly byte[] _bytes;
         protected readonly string _pemStringFull;
 
+        /// <summary>
+        /// Initializes a new instance of TestCrypto with PEM-encoded data from a file.
+        /// </summary>
+        /// <param name="filePath">Path to the PEM file containing cryptographic data.</param>
         protected TestCrypto(string filePath)
         {
-            var pemString = File.ReadAllText(filePath);
-            _pemStringFull = pemString.Replace("\n", "").Trim();
+            _pemStringFull = File
+                .ReadAllText(filePath)
+                .Replace("\n", "")
+                .Trim();
             _bytes = GetBytesFromPem(_pemStringFull);
         }
 
+        /// <summary>
+        /// Returns the raw byte representation of the cryptographic data.
+        /// </summary>
+        /// <returns>Byte array containing the decoded cryptographic data.</returns>
         public byte[] AsRawBytes() => _bytes;
-        public string AsPem() => _pemStringFull;
+
+        /// <summary>
+        /// Returns the complete PEM-encoded string representation.
+        /// </summary>
+        /// <returns>String containing the full PEM data including headers and footers.</returns>
+        public string AsPemString() => _pemStringFull;
+
+        /// <summary>
+        /// Returns the Base64-encoded data without PEM headers and footers.
+        /// </summary>
+        /// <returns>Base64 string of the cryptographic data.</returns>
         public string AsBase64() => StripPemHeaderFooter(_pemStringFull);
 
         private static byte[] GetBytesFromPem(string pemData)
@@ -53,17 +73,32 @@ namespace Yubico.YubiKey.TestUtilities
         }
     }
 
+    /// <summary>
+    /// Represents a cryptographic key for testing purposes, supporting both RSA and EC keys.
+    /// Provides conversion methods to standard .NET cryptographic types.
+    /// </summary>
     public class TestKey : TestCrypto
     {
         private readonly string _curve;
         private readonly bool _isPrivate;
 
+        /// <summary>
+        /// Loads a test key from the TestData directory.
+        /// </summary>
+        /// <param name="curve">The curve or key type (e.g., "rsa2048", "secp256r1")</param>
+        /// <param name="isPrivate">True for private key, false for public key</param>
+        /// <returns>A TestKey instance representing the loaded key</returns>
         private TestKey(string filePath, string curve, bool isPrivate) : base(filePath)
         {
             _curve = curve;
             _isPrivate = isPrivate;
         }
 
+        /// <summary>
+        /// Converts the key to an RSA instance if it represents an RSA key.
+        /// </summary>
+        /// <returns>RSA instance initialized with the key data</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the key is not an RSA key</exception>
         public RSA AsRSA()
         {
             if (!_curve.StartsWith("rsa", StringComparison.OrdinalIgnoreCase))
@@ -77,6 +112,11 @@ namespace Yubico.YubiKey.TestUtilities
             return rsa;
         }
 
+        /// <summary>
+        /// Converts the key to an ECDsa instance if it represents an EC key.
+        /// </summary>
+        /// <returns>ECDsa instance initialized with the key data</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the key is not an EC key</exception>
         public ECDsa AsECDsa()
         {
             if (_curve.StartsWith("rsa", StringComparison.OrdinalIgnoreCase))
@@ -90,26 +130,27 @@ namespace Yubico.YubiKey.TestUtilities
             return ecdsa;
         }
 
+        /// <summary>
+        /// Converts the key to a PIV private key format.
+        /// </summary>
+        /// <returns>PivPrivateKey instance</returns>
         public static TestKey Load(string curve, bool isPrivate)
         {
             var fileName = $"{curve}_{(isPrivate ? "private" : "public")}.pem";
             var filePath = Path.Combine("TestData", fileName);
             return new TestKey(filePath, curve, isPrivate);
         }
-
-        internal PivPrivateKey AsPrivateKey()
-        {
-            return new KeyConverter(_pemStringFull).GetPivPrivateKey();
-        }
-
-        internal PivPublicKey AsPublicKey()
-        {
-            return new KeyConverter(_pemStringFull).GetPivPublicKey();
-        }
     }
 
+    /// <summary>
+    /// Represents an X.509 certificate for testing purposes.
+    /// Supports both regular and attestation certificates.
+    /// </summary>
     public class TestCertificate : TestCrypto
     {
+        /// <summary>
+        /// Indicates whether this certificate is an attestation certificate.
+        /// </summary>
         public readonly bool IsAttestation;
 
         private TestCertificate(string filePath, bool isAttestation) : base(filePath)
@@ -117,22 +158,55 @@ namespace Yubico.YubiKey.TestUtilities
             IsAttestation = isAttestation;
         }
 
+        /// <summary>
+        /// Converts the certificate to an X509Certificate2 instance.
+        /// </summary>
+        /// <returns>X509Certificate2 instance initialized with the certificate data</returns>
         public X509Certificate2 AsX509Certificate2()
         {
             return new X509Certificate2(_bytes);
         }
 
+        /// <summary>
+        /// Loads a certificate from the TestData directory.
+        /// </summary>
+        /// <param name="curve">The curve or key type associated with the certificate</param>
+        /// <param name="isAttestation">True if loading an attestation certificate</param>
+        /// <returns>A TestCertificate instance</returns>
         public static TestCertificate Load(string curve, bool isAttestation = false)
         {
-            string fileName = $"{curve}_cert{(isAttestation ? "_attest" : "")}.pem";
-            string filePath = Path.Combine("TestData", fileName);
+            var fileName = $"{curve}_cert{(isAttestation ? "_attest" : "")}.pem";
+            var filePath = Path.Combine("TestData", fileName);
             return new TestCertificate(filePath, isAttestation);
         }
     }
 
+    /// <summary>
+    /// Provides convenient static methods to access test keys and certificates.
+    /// </summary>
     public static class TestKeys
     {
-        public static TestKey GetKey(string curve, bool isPrivate) => TestKey.Load(curve, isPrivate);
+
+        /// <summary>
+        /// Gets a private key for the specified curve.
+        /// </summary>
+        /// <param name="curve">The curve or key type</param>
+        /// <returns>TestKey instance representing the private key</returns>
+        public static TestKey GetPrivateKey(string curve) => TestKey.Load(curve, true);
+
+        /// <summary>
+        /// Gets a public key for the specified curve.
+        /// </summary>
+        /// <param name="curve">The curve or key type</param>
+        /// <returns>TestKey instance representing the public key</returns>
+        public static TestKey GetPublicKey(string curve) => TestKey.Load(curve, false);
+
+        /// <summary>
+        /// Gets a certificate for the specified curve.
+        /// </summary>
+        /// <param name="curve">The curve or key type</param>
+        /// <param name="isAttestation">True to get an attestation certificate</param>
+        /// <returns>TestCertificate instance</returns>s
         public static TestCertificate GetCertificate(string curve, bool isAttestation = false) =>
             TestCertificate.Load(curve, isAttestation);
     }

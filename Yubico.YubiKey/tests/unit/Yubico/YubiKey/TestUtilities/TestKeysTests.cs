@@ -9,7 +9,7 @@ namespace Yubico.YubiKey.TestUtilities
         [Fact]
         public void TestKey_LoadRSA_CanReadPublicKey()
         {
-            var key = TestKeys.GetKey("rsa4096", false);
+            var key = TestKeys.GetPublicKey("rsa4096");
             
             var rsaKey = key.AsRSA();
             Assert.NotNull(rsaKey);
@@ -19,7 +19,7 @@ namespace Yubico.YubiKey.TestUtilities
         [Fact]
         public void TestKey_LoadRSA_CanReadPrivateKey()
         {
-            var key = TestKeys.GetKey("rsa4096", true);
+            var key = TestKeys.GetPrivateKey("rsa4096");
             
             var rsaKey = key.AsRSA();
             Assert.NotNull(rsaKey);
@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.TestUtilities
         [Fact]
         public void TestKey_LoadECDsa_CanReadPublicKey()
         {
-            var key = TestKeys.GetKey("p384", false);
+            var key = TestKeys.GetPublicKey("p384");
             
             var ecKey = key.AsECDsa();
             Assert.NotNull(ecKey);
@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.TestUtilities
         [Fact]
         public void TestKey_LoadECDsa_ThrowsOnRSAKey()
         {
-            var key = TestKeys.GetKey("rsa4096", false);
+            var key = TestKeys.GetPublicKey("rsa4096");
             
             Assert.Throws<InvalidOperationException>(() => key.AsECDsa());
         }
@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.TestUtilities
         [Fact]
         public void TestKey_LoadRSA_ThrowsOnECKey()
         {
-            var key = TestKeys.GetKey("p384", false);
+            var key = TestKeys.GetPublicKey("p384");
             
             Assert.Throws<InvalidOperationException>(() => key.AsRSA());
         }
@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.TestUtilities
         [Fact]
         public void TestKey_AsBase64_StripsHeaders()
         {
-            var key = TestKeys.GetKey("rsa4096", false);
+            var key = TestKeys.GetPublicKey("rsa4096");
             
             string base64 = key.AsBase64();
             Assert.DoesNotContain("-----BEGIN", base64);
@@ -65,9 +65,9 @@ namespace Yubico.YubiKey.TestUtilities
         [Fact]
         public void TestKey_AsPemBase64_PreservesFormat()
         {
-            var key = TestKeys.GetKey("rsa4096", false);
+            var key = TestKeys.GetPublicKey("rsa4096");
             
-            string pem = key.AsPem();
+            string pem = key.AsPemString();
             Assert.Contains("-----BEGIN PUBLIC KEY-----", pem);
             Assert.Contains("-----END PUBLIC KEY-----", pem);
         }
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey.TestUtilities
         [Fact]
         public void TestKey_Load_ThrowsOnMissingFile()
         {
-            Assert.Throws<FileNotFoundException>(() => TestKeys.GetKey("invalid", false));
+            Assert.Throws<FileNotFoundException>(() => TestKeys.GetPublicKey("invalid"));
         }
 
         [Fact]

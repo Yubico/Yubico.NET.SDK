@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Otp.Operations
 
                 // Get a span that points to the bytes for the IMF.
                 var imf = hotpKey[HmacKeySize..];
-                
+
                 // Write it in network order (big endian).
                 BinaryPrimitives.WriteUInt16BigEndian(imf, _imf);
 

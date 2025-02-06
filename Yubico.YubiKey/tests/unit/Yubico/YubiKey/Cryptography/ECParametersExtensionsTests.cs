@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.Cryptography
             Assert.Equal(original.Q.X, copy.Q.X);
             Assert.Equal(original.Q.Y, copy.Q.Y);
             Assert.Equal(original.D, copy.D);
-            
+
             // Verify independence
             Assert.NotSame(original.Q.X, copy.Q.X);
             Assert.NotSame(original.Q.Y, copy.Q.Y);

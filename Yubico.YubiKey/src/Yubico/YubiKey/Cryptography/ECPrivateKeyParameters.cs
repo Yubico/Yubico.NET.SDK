@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.Cryptography
         public ECPrivateKeyParameters(ECDsa ecdsaObject)
             : base(ecdsaObject?.ExportParameters(true) ?? throw new ArgumentNullException())
         {
-            
+
         }
     }
 }

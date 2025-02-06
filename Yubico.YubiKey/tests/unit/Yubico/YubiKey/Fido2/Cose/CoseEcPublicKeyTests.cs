@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Fido2.Cose
                 CoseAlgorithmIdentifier.ES384,
                 publicKey.Q.X,
                 publicKey.Q.Y);
-            
+
             // Act
             var coseEncodedKey = coseKey.Encode(); // Encode
             var coseKey2 = new CoseEcPublicKey(coseEncodedKey); // Decode
@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             Assert.Equal(publicKey.Q.X, publicKey2.Q.X);
             Assert.Equal(publicKey.Q.Y, publicKey2.Q.Y);
         }
-        
+
         [Theory]
         [InlineData(KeyDefinitions.KeyOids.P256)]
         [InlineData(KeyDefinitions.KeyOids.P384)]

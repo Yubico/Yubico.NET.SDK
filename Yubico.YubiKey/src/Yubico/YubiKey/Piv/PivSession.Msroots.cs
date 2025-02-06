@@ -488,7 +488,7 @@ namespace Yubico.YubiKey.Piv
                 {
                     break;
                 }
-                
+
                 if (response.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(

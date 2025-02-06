@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Cryptography
             Assert.NotNull(privateKeyParams.Parameters.D);
             Assert.NotNull(privateKeyParams.Parameters.Q.X);
             Assert.NotNull(privateKeyParams.Parameters.Q.Y);
-            
+
             // Act - Modify original parameters
             originalParams.D[0] = (byte)(originalParams.D[0] + 1);
             originalParams.Q.X[0] = (byte)(originalParams.Q.X[0] + 1);
@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             using var ecdsa = ECDsa.Create(ECCurve.CreateFromOid(Oid.FromOidValue(oid, OidGroup.PublicKeyAlgorithm)));
-            
+
             // Act
             var privateKeyParams = new ECPrivateKeyParameters(ecdsa);
 

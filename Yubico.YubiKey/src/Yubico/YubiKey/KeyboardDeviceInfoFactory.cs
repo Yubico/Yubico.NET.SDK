@@ -54,7 +54,7 @@ namespace Yubico.YubiKey
                 deviceInfo.SerialNumber = serialNumber;
             }
 
-            if (deviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion && 
+            if (deviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion &&
                 TryGetFirmwareVersionFromKeyboard(device, out var firmwareVersion))
             {
                 deviceInfo.FirmwareVersion = firmwareVersion;

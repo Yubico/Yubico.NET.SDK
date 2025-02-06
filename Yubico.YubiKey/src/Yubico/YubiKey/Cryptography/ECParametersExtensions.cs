@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Cryptography
                 },
                 D = original.D?.ToArray()
             };
-            
+
             return copy;
         }
     }

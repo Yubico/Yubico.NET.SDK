@@ -188,7 +188,7 @@ namespace Yubico.YubiKey.Scp03
             {
                 KeyVersionNumber = KeyVersionNumber
             };
-        
+
         internal Scp03KeyParameters ConvertToScp03KeyParameters() =>
                 new Scp03KeyParameters(ScpKeyIds.Scp03, DefaultKvnValue, ConvertFromLegacy());
 
@@ -207,7 +207,7 @@ namespace Yubico.YubiKey.Scp03
                 ChannelMacKey.Span.SequenceEqual(compareKeys.ChannelMacKey.Span) &&
                 DataEncryptionKey.Span.SequenceEqual(compareKeys.DataEncryptionKey.Span);
         }
-        
+
         private Scp.StaticKeys ConvertFromLegacy() =>
             new Scp.StaticKeys(ChannelMacKey, ChannelEncryptionKey, DataEncryptionKey)
             {

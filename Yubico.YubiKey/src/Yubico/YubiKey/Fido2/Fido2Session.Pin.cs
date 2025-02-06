@@ -513,7 +513,7 @@ namespace Yubico.YubiKey.Fido2
         public bool TrySetPin()
         {
             _log.LogInformation("Try to set PIN (use KeyCollector).");
-            
+
             var keyCollector = EnsureKeyCollector();
             var keyEntryData = new KeyEntryData
             {
@@ -673,7 +673,7 @@ namespace Yubico.YubiKey.Fido2
         public bool TryChangePin()
         {
             _log.LogInformation("Try to change PIN (use KeyCollector).");
-            
+
             var keyCollector = EnsureKeyCollector();
             var keyEntryData = new KeyEntryData()
             {
@@ -912,7 +912,7 @@ namespace Yubico.YubiKey.Fido2
         public bool TryVerifyPin(PinUvAuthTokenPermissions? permissions = null, string? relyingPartyId = null)
         {
             _log.LogInformation("Try to verify PIN (use KeyCollector).");
-            
+
             var keyCollector = EnsureKeyCollector();
             var keyEntryData = new KeyEntryData
             {
@@ -1208,7 +1208,7 @@ namespace Yubico.YubiKey.Fido2
         public bool TryVerifyUv(PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
         {
             _log.LogInformation("Try to verify UV (use KeyCollector).");
-            
+
             var ctapStatus = DoVerifyUv(permissions, relyingPartyId, out string statusMessage);
             switch (ctapStatus)
             {
@@ -1270,7 +1270,7 @@ namespace Yubico.YubiKey.Fido2
                 do
                 {
                     var response = Connection.SendCommand(command);
-                    
+
                     statusMessage = response.StatusMessage;
                     status = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : response.CtapStatus;
                     if (status == CtapStatus.Ok)
@@ -1389,7 +1389,7 @@ namespace Yubico.YubiKey.Fido2
         {
             var response = Connection.SendCommand(new GetKeyAgreementCommand(AuthProtocol.Protocol));
             var peerCoseKey = response.GetData();
-            
+
             return peerCoseKey;
         }
 

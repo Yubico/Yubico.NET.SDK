@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             aes.Padding = PaddingMode.None;
             aes.IV = new byte[BlockSize];
             aes.Key = _keyData;
-            
+
             using var aesTransform = aes.CreateEncryptor();
             byte[] encryptedData = new byte[length];
             _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, 0);
@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             aes.Padding = PaddingMode.None;
             aes.IV = new byte[BlockSize];
             aes.Key = _keyData;
-            
+
             using var aesTransform = aes.CreateDecryptor();
             byte[] decryptedData = new byte[length];
             _ = aesTransform.TransformBlock(ciphertext, offset, length, decryptedData, 0);

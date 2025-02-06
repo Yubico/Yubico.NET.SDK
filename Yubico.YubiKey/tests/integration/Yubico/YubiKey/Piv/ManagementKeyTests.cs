@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Piv
             session.KeyCollector = TestKeyCollectorDelegate;
 
             session.ResetApplication();
-            
+
             // This must throw for FIPS devices.
             if (mustBeAes)
             {
@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.Piv
             {
                 session.ChangeManagementKey(PivTouchPolicy.None, alternativeManagementKeyType);
                 Assert.Equal(alternativeManagementKeyType, session.ManagementKeyAlgorithm);
-                
+
                 session.AuthenticateManagementKey();
                 session.ResetApplication();
 
@@ -138,7 +138,7 @@ namespace Yubico.YubiKey.Piv
             var defaultManagementKeyType = shouldBeAes || mustBeAes
                 ? PivAlgorithm.Aes192
                 : PivAlgorithm.TripleDes;
-            
+
             var isValid = false;
             var count = 10;
             for (var index = 0; index < count; index++)

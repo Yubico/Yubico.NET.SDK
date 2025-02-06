@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                 var credentialRetryElement = tlvReader.ReadValue(DataTagConstants.LabelList).Span;
 
                 // Check that it's formatted correctly
-                if (credentialRetryElement.Length < MinElementSize || 
+                if (credentialRetryElement.Length < MinElementSize ||
                     credentialRetryElement.Length > MaxElementSize)
                 {
                     throw new MalformedYubiKeyResponseException(

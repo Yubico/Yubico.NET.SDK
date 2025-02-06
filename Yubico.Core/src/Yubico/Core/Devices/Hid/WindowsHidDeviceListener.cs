@@ -105,7 +105,7 @@ namespace Yubico.Core.Devices.Hid
 
         private static int OnEventReceived(IntPtr hNotify, IntPtr context, CM_NOTIFY_ACTION action, IntPtr eventDataPtr, int eventDataSize)
         {
-            GCHandle thisPtr = GCHandle.FromIntPtr(context);
+            var thisPtr = GCHandle.FromIntPtr(context);
             var thisObj = thisPtr.Target as WindowsHidDeviceListener;
             thisObj?._log.LogInformation("ConfigMgr callback received.");
 

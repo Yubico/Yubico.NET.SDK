@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         public (int discoverableCredentialCount, int remainingCredentialCount) GetData()
         {
             var credentialManagementData = _response.GetData();
-            if (!(credentialManagementData.NumberOfDiscoverableCredentials is null) && 
+            if (!(credentialManagementData.NumberOfDiscoverableCredentials is null) &&
                 !(credentialManagementData.RemainingCredentialCount is null))
             {
                 return (credentialManagementData.NumberOfDiscoverableCredentials.Value, credentialManagementData.RemainingCredentialCount.Value);

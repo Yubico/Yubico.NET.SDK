@@ -16,7 +16,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         MCowBQYDK2VwAyEAGD3XimAmDGEYgGkS7BQIi6YJsm8bkJdo6rbHl2z4qao=
         -----END PUBLIC KEY-----
         ";
-        
+
         private static byte[] ValidEd25519PublicKey => Convert
         .FromBase64String(ValidEd25519PublicKeyPem
             .Replace("-----BEGIN PUBLIC KEY-----", "")
@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             .Replace("\n", "")
             .Trim())
         .Skip(12) // Skip the ASN.1 metadata bytes and keep only the public key data (32 bytes)
-        .ToArray(); 
+        .ToArray();
 
         [Fact]
         public void CreateFromPublicKeyData_ValidKey_ReturnsExpectedKey()

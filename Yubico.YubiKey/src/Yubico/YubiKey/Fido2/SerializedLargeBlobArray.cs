@@ -311,13 +311,13 @@ namespace Yubico.YubiKey.Fido2
         public byte[] Encode()
         {
             _log.LogInformation("Build the Serialized Large Blob Array.");
-            
+
             var encodingBytes = EncodeBlobArray();
             var digestBytes = ComputeDigest(encodingBytes);
 
             byte[] serializedData = new byte[encodingBytes.Length + digestBytes.Length];
             var destination = new Memory<byte>(serializedData);
-            
+
             encodingBytes.CopyTo(destination);
             digestBytes.CopyTo(destination.Slice(encodingBytes.Length));
 

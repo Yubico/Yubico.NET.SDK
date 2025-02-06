@@ -49,7 +49,7 @@ namespace Yubico.YubiKey
             // Manually fill in gaps, if necessary
             var defaultDeviceInfo = new YubiKeyDeviceInfo();
 
-            if (deviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion && 
+            if (deviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion &&
                 TryGetFirmwareVersionFromFido(device, out var firmwareVersion))
             {
                 deviceInfo.FirmwareVersion = firmwareVersion;

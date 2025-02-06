@@ -257,7 +257,7 @@ namespace Yubico.YubiKey.Fido2
                         encodedArray.Length,
                         pinUvAuthParam,
                         (int)AuthProtocol.Protocol);
-                    
+
                     var response = Connection.SendCommand(command);
                     if (response.Status == ResponseStatus.Success)
                     {

@@ -154,8 +154,8 @@ namespace Yubico.YubiKey
         // Any other value entered will be considered Release.
         public void SdkUpdate(KeyEntryData keyEntryData)
         {
-            var request = keyEntryData.Request == KeyEntryRequest.EnrollFingerprint 
-                ? KeyEntryRequest.EnrollFingerprint 
+            var request = keyEntryData.Request == KeyEntryRequest.EnrollFingerprint
+                ? KeyEntryRequest.EnrollFingerprint
                 : KeyEntryRequest.Release;
 
             lock (_updateLock)

@@ -131,7 +131,7 @@ namespace Yubico.YubiKey.Fido2.Cose
                 Algorithm = (CoseAlgorithmIdentifier)map.ReadInt32(TagAlgorithm)
             };
         }
-        
+
         /// <inheritdoc/>
         public override byte[] Encode()
         {

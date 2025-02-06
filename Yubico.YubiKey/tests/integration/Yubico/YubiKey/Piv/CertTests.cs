@@ -31,11 +31,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096)]
         public void GetCert_Succeeds(StandardTestDevice targetDevice, PivAlgorithm algorithm)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out var certPem, out string _, out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out var certPem, out var _, out var privateKeyPem);
 
-            var certConverter = new CertConverter(certPem.ToCharArray());
+            var certConverter = new CertConverter(certPem!.ToCharArray());
             var certificate = certConverter.GetCertObject();
-            var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
+            var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
             var pivPrivateKey = privateKey.GetPivPrivateKey();
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(targetDevice);
 
@@ -62,9 +62,9 @@ namespace Yubico.YubiKey.Piv
             var isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out var certPem, out _, out var privateKeyPem);
             Assert.True(isValid);
 
-            var certConverter = new CertConverter(certPem.ToCharArray());
+            var certConverter = new CertConverter(certPem!.ToCharArray());
             var certificate = certConverter.GetCertObject();
-            var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
+            var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
             var pivPrivateKey = privateKey.GetPivPrivateKey();
 
             byte slotNumber = 0x8B;

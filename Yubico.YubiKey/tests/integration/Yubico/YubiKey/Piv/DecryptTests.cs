@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Piv
             };
 
             _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out _, out var privateKeyPem);
-            var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
+            var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
             var pivPrivateKey = privateKey.GetPivPrivateKey();
 
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
@@ -82,7 +82,7 @@ namespace Yubico.YubiKey.Piv
             };
 
             _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out _, out var privateKeyPem);
-            var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
+            var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
             var pivPrivateKey = privateKey.GetPivPrivateKey();
 
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
@@ -127,8 +127,8 @@ namespace Yubico.YubiKey.Piv
             GetArbitraryData(dataToEncrypt);
 
             _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var pubKeyPem, out var priKeyPem);
-            var pubKey = new KeyConverter(pubKeyPem.ToCharArray());
-            var priKey = new KeyConverter(priKeyPem.ToCharArray());
+            var pubKey = new KeyConverter(pubKeyPem!.ToCharArray());
+            var priKey = new KeyConverter(priKeyPem!.ToCharArray());
 
             using var rsaObject = pubKey.GetRsaObject();
             var encryptedData = rsaObject.Encrypt(dataToEncrypt, rsaPadding);

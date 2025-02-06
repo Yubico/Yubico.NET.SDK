@@ -231,9 +231,9 @@ namespace Yubico.YubiKey.Piv
                 _ => RSASignaturePadding.Pss,
             };
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string pubKeyPem, out string priKeyPem);
-            var pubKey = new KeyConverter(pubKeyPem.ToCharArray());
-            var priKey = new KeyConverter(priKeyPem.ToCharArray());
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var pubKeyPem, out var priKeyPem);
+            var pubKey = new KeyConverter(pubKeyPem!.ToCharArray());
+            var priKey = new KeyConverter(priKeyPem!.ToCharArray());
 
             try
             {
@@ -279,9 +279,9 @@ namespace Yubico.YubiKey.Piv
 
             digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string pubKeyPem, out string priKeyPem);
-            var pubKey = new KeyConverter(pubKeyPem.ToCharArray());
-            var priKey = new KeyConverter(priKeyPem.ToCharArray());
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var pubKeyPem, out var priKeyPem);
+            var pubKey = new KeyConverter(pubKeyPem!.ToCharArray());
+            var priKey = new KeyConverter(priKeyPem!.ToCharArray());
 
             try
             {

@@ -38,5 +38,11 @@ limitations under the License. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="TestData\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
 </Project>

@@ -27,10 +27,10 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Parse_FromRsaClass(StandardTestDevice testDeviceType)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out string publicKeyPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out var publicKeyPem, out var privateKeyPem);
 
-            var publicKey = new KeyConverter(publicKeyPem.ToCharArray());
-            var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
+            var publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
+            var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
 
             byte[] dataToSign = {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
@@ -99,12 +99,12 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384, 384)]
         public void UseKeyConverter(PivAlgorithm algorithm, int keySize)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicPem, out string privatePem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var publicPem, out var privatePem);
 
-            var publicKey = new KeyConverter(publicPem.ToCharArray());
+            var publicKey = new KeyConverter(publicPem!.ToCharArray());
             Assert.Equal(algorithm, publicKey.Algorithm);
 
-            var privateKey = new KeyConverter(privatePem.ToCharArray());
+            var privateKey = new KeyConverter(privatePem!.ToCharArray());
             Assert.Equal(algorithm, privateKey.Algorithm);
 
             if (algorithm == PivAlgorithm.Rsa1024 || algorithm == PivAlgorithm.Rsa2048)

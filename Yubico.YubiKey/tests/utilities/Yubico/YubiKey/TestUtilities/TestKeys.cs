@@ -164,7 +164,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <returns>X509Certificate2 instance initialized with the certificate data</returns>
         public X509Certificate2 AsX509Certificate2()
         {
-            return new X509Certificate2(_bytes);
+            return X509CertificateLoader.LoadCertificate(_bytes);
         }
 
         /// <summary>

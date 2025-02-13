@@ -234,7 +234,7 @@ SOFTWARE.
 ==================================================
 The following license applies to
 \CONTRIBUTING.md
-\Yubico.DotNetPolyfills\src\System.Security.Cryptography\CryptographicOperations.cs
+\Yubico.Core\src\System.Security.Cryptography\CryptographicOperations.cs
 \Yubico.YubiKey\src\Yubico\YubiKey\Cryptography\RandomNumberGeneratorExt.cs
 
 The MIT License (MIT)

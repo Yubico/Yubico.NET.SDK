@@ -148,8 +148,4 @@ limitations under the License. -->
     </AssemblyAttribute>
 
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Security" Condition="'$(TargetFramework)' == 'net47'" />
-  </ItemGroup>
 </Project>

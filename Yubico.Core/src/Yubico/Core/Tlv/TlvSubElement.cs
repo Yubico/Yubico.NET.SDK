@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System;
-using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
+using System.Security.Cryptography;
 
 namespace Yubico.Core.Tlv
 {

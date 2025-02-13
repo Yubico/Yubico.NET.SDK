@@ -15,11 +15,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Globalization;
-#if NETSTANDARD2_1
-using CryptographicOperations = System.Security.Cryptography.CryptographicOperations;
-#else
-using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
-#endif
+using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;

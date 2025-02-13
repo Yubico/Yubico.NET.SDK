@@ -14,6 +14,7 @@
 
 using System;
 using System.Globalization;
+using System.Security.Cryptography;
 using Yubico.Core.Cryptography;
 using Yubico.Core.Iso7816;
 

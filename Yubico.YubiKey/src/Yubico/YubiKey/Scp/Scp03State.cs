@@ -19,7 +19,7 @@ using Yubico.Core.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Scp.Commands;
 using Yubico.YubiKey.Scp.Helpers;
-using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
+
 
 namespace Yubico.YubiKey.Scp
 {

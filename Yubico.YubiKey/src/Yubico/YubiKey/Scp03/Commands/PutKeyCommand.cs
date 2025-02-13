@@ -14,6 +14,7 @@
 
 using System;
 using System.IO;
+using System.Security.Cryptography;
 using Yubico.Core.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;

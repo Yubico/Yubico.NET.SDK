@@ -15,7 +15,6 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
 
 namespace Yubico.YubiKey.Cryptography
 {

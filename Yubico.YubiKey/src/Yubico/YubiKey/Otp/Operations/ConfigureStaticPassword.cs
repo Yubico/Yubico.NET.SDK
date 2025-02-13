@@ -20,7 +20,7 @@ using System.Security.Cryptography;
 using Yubico.Core.Devices.Hid;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Otp.Commands;
-using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
+
 
 namespace Yubico.YubiKey.Otp.Operations
 {

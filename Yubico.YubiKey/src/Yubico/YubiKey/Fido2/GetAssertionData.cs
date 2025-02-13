@@ -20,7 +20,7 @@ using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
-using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
+
 
 namespace Yubico.YubiKey.Fido2
 {

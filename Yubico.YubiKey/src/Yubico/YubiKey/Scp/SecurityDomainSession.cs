@@ -20,13 +20,11 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Buffers;
-using Yubico.Core.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Scp.Commands;
-using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
 using DeleteKeyCommand = Yubico.YubiKey.Scp.Commands.DeleteKeyCommand;
 using GetDataCommand = Yubico.YubiKey.Scp.Commands.GetDataCommand;
 

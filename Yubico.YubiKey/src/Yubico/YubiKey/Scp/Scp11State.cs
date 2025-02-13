@@ -22,12 +22,6 @@ using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Scp.Commands;
-#if NETSTANDARD2_1
-using CryptographicOperations = System.Security.Cryptography.CryptographicOperations;
-#else
-using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
-#endif
-
 
 namespace Yubico.YubiKey.Scp
 {

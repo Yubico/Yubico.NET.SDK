@@ -14,7 +14,7 @@
 
 using System;
 using System.Globalization;
-using Yubico.Core.Cryptography;
+using System.Security.Cryptography;
 using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Management.Commands

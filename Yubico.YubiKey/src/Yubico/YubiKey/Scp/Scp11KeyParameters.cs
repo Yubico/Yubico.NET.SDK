@@ -17,9 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
-using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
 
 namespace Yubico.YubiKey.Scp
 {

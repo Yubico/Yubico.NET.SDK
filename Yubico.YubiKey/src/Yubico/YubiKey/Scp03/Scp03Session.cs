@@ -14,10 +14,10 @@
 
 using System;
 using System.Globalization;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Scp03.Commands;
-using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
 
 namespace Yubico.YubiKey.Scp03
 {

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Security.Cryptography;
 using Yubico.Core.Cryptography;
 
 namespace Yubico.YubiKey.Scp03

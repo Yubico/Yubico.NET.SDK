@@ -17,7 +17,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKey.Cryptography;
-using CryptographicOperations = Yubico.Core.Cryptography.CryptographicOperations;
+
 
 namespace Yubico.YubiKey.Fido2.PinProtocols
 {

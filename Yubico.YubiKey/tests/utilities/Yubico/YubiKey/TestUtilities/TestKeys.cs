@@ -14,6 +14,9 @@ namespace Yubico.YubiKey.TestUtilities
     /// </summary>
     public abstract class TestCrypto
     {
+        /// <summary>
+        /// The raw byte representation of the cryptographic data in DER format.
+        /// </summary>
         protected readonly byte[] _bytes;
         protected readonly string _pemStringFull;
 
@@ -164,7 +167,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <returns>X509Certificate2 instance initialized with the certificate data</returns>
         public X509Certificate2 AsX509Certificate2()
         {
-            return new X509Certificate2(_bytes);
+            return X509CertificateLoader.LoadCertificate(_bytes);
         }
 
         /// <summary>

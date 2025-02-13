@@ -76,9 +76,9 @@ namespace Yubico.Core.Devices.Hid
             // 012345678901234567890123456789
             //             ^---     ^---
 
-            #pragma warning disable CA1862
+#pragma warning disable CA1862
             if (instancePath.ToUpperInvariant().Contains("VID") && instancePath.ToUpperInvariant().Contains("HID"))
-            #pragma warning restore CA1862
+#pragma warning restore CA1862
             {
                 // If this fails, vendorId will be 0.
                 _ = TryGetHexShort(instancePath, 12, 4, out ushort vendorId);

@@ -28,10 +28,10 @@ namespace Yubico.PlatformInterop
     [SuppressMessage("Style", "IDE0044:Add readonly modifier")]
     internal struct SCARD_READER_STATE
     {
-        #pragma warning disable IDE0032
+#pragma warning disable IDE0032
         [MarshalAs(UnmanagedType.LPStr)]
         private string _readerName;
-        #pragma warning restore IDE0032
+#pragma warning restore IDE0032
         private IntPtr _userData;
         private uint _currentState;
         private uint _eventState;

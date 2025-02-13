@@ -32,7 +32,7 @@ namespace Yubico.PlatformInterop
         private uint _currentState;
         private uint _eventState;
         private uint _atrLength;
-        
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 36)]
         private byte[] _answerToReset;
 

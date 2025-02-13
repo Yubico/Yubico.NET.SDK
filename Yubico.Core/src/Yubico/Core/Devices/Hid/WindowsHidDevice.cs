@@ -76,8 +76,8 @@ namespace Yubico.Core.Devices.Hid
             // 012345678901234567890123456789
             //             ^---     ^---
 
-// Disable string comparison warning for this method as it needs to compile for both net47, netstandard 2.0 and 2.1
-#pragma warning disable CA1862 
+            // Disable string comparison warning for this method as it needs to compile for both net47, netstandard 2.0 and 2.1
+#pragma warning disable CA1862
             if (instancePath.ToUpperInvariant().Contains("VID") && instancePath.ToUpperInvariant().Contains("HID"))
 #pragma warning restore CA1862
             {

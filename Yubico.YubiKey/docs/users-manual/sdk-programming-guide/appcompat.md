@@ -28,7 +28,7 @@ The .NET SDK strives to maintain both source and behavioral compatibility across
 **Source compatibility** is the promise that your source code should continue to compile as-is when you update your
 application to the latest version of the SDK. This promise extends to "minor" (feature) and "patch" (bug-fix) releases
 of the SDK. Additionally, we only make this guarantee for the `Yubico.YubiKey` and the `Yubico.Core` assemblies. Since
-`Yubico.NativeShims` and `Yubico.DotnetPolyfills` are meant to be purely for internal use, we *do not* make any
+`Yubico.NativeShims` is meant to be purely for internal use, we *do not* make any
 guarantees here.
 
 **Behavioral compatibility** is the promise that your application will behave exactly the same after you have upgraded

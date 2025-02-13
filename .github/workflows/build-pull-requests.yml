@@ -63,7 +63,6 @@ jobs:
         with:
           name: Nuget Packages ReleaseWithDocs
           path: |
-            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
 
@@ -72,6 +71,5 @@ jobs:
         with:
           name: Assemblies ReleaseWithDocs
           path: |
-            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll

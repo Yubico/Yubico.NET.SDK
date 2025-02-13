@@ -31,18 +31,6 @@ for external milestones.
   <PropertyGroup Label="Versions for all projects">
 
     <!--
-    Yubico.DotNetPolyfills project
-
-    This project includes polyfill code that allows other projects in this repository to use .NET
-    library features and APIs in older versions of the .NET Standard.
-
-    Increment the major version whenever we remove support for a .NET version.
-    Increment the minor version whenever we add support for a new class or type.
-    Increment the patch version for bug fixes.
-    -->
-<YubicoDotNetPolyfillsVersion>1.12.1</YubicoDotNetPolyfillsVersion>
-
-    <!--
     Yubico.Core project
 
     This project provides foundational components and platform abstractions to other libraries

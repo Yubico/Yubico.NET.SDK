@@ -15,7 +15,6 @@ limitations under the License. #>
 function Build-YubiKeySdkProject
 {
     $ProjectPaths = @{
-        "DotNetPolyfills" = "./Yubico.DotNetPolyfills/src/Yubico.DotNetPolyfills.csproj"
         "CoreRef" = "./Yubico.Core/ref/Yubico.Core.Ref.csproj"
         "CoreSrc" = "./Yubico.Core/src/Yubico.Core.csproj"
         "YubiKey" = "./Yubico.YubiKey/src/Yubico.YubiKey.csproj"
@@ -29,7 +28,6 @@ function Build-YubiKeySdkProject
         Write-Error "The dotnet CLI was not found. You can install all prerequisites using Install-YubiKeySdkTools."
     }
 
-    Build-Project $ProjectPaths["DotNetPolyfills"] $CurrentConfiguration
     Build-Project $ProjectPaths["CoreRef"] $CurrentConfiguration
     Build-Project $ProjectPaths["CoreSrc"] $CurrentConfiguration
     Build-Project $ProjectPaths["YubiKey"] $CurrentConfiguration
@@ -40,12 +38,9 @@ function Test-YubiKeySdkProject
     $CurrentConfiguration = "Debug"
 
     $ProjectPaths = @{
-        "DotNetPolyfills" = "./Yubico.DotNetPolyfills/tests/Yubico.DotNetPolyfills.UnitTests.csproj"
         "Core" = "./Yubico.Core/tests/Yubico.Core.UnitTests.csproj"
         "YubiKey" = "./Yubico.YubiKey/tests/Yubico.YubiKey.UnitTests.csproj"
     }
-
-    Test-Project $ProjectPaths["DotNetPolyfills"] $CurrentConfiguration
 
     # We should test core for each RID that we build for
     Test-Project $ProjectPaths["Core"] $CurrentConfiguration "win-x64"

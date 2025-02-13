@@ -114,7 +114,7 @@ Read more about YubiHSM Auth [here.](xref:YubiHsmAuthOverview)
 
 ## SDK components
 
-The YubiKey SDK is comprised of three managed assemblies:
+The YubiKey SDK is comprised of two managed assemblies:
 
 - **Yubico.YubiKey** is the primary assembly that contains all of the classes and types needed for
   interacting with the YubiKey.
@@ -122,11 +122,7 @@ The YubiKey SDK is comprised of three managed assemblies:
   abstraction layer (PAL). All interaction with operating-system specific functionality is contained
   within this library. It also contains useful utility classes that can be used for encoding and
   decoding different kinds of data, such as Base32, Tag-Length-Value (TLV), and ModHex.
-- **Yubico.DotNetPolyfills** is an internal library used to backport certain .NET base class library (BCL)
-  features needed by the SDK. Types in this assembly are subject to change and are not meant for
-  general public consumption. If you wish to use the newest features of .NET, you should target
-  the .NET implementation that contains those features directly.
-- **Yubico.NativeShims** is an internal unmanaged library that provides a stable Application
+- **Yubico.NativeShims** is an internal *unmanaged library* that provides a stable Application
   Binary Interface (ABI) to the P/Invoke Foreign Function Interface (FFI) in Yubico.Core.
 
 All components of the SDK are built to the .NET Standard 2.0 specification. This means that either
@@ -236,13 +232,3 @@ to run across different platforms and operating systems.
 
 For most consumers of the SDK, this library will automatically be included when you reference the `Yubico.YubiKey`
 NuGet package.
-
-### Yubico.DotNetPolyfills
-
-Yubico.DotNetPolyfills is a support project for .NET-based Yubico libraries. It is not to be consumed. Yubico
-will not make any effort at providing a stable API surface around this assembly, and it may have breaking changes
-applied to it at any point in time. Its purpose is to provide the SDK, which targets .NET Standard 2.0, with missing
-APIs so that we can leverage certain newer features. If you wish to use the latest features of .NET, your library
-or application should target a newer standard. If that is not possible, we recommend that you invest in creating
-your own polyfills library. This way, you can implement precisely what your project needs and not have to rely on
-what may or may not be implemented here.

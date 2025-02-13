@@ -80,7 +80,6 @@ jobs:
         run: |
           $file = gci ./build/Versions.props
           $versionProp = [xml](gc $file.FullName)
-          $versionProp.Project.PropertyGroup.YubicoDotNetPolyfillsVersion = "${{ github.event.inputs.version }}"
           $versionProp.Project.PropertyGroup.YubicoCoreVersion = "${{ github.event.inputs.version }}"
           $versionProp.Project.PropertyGroup.YubicoYubiKeyVersion = "${{ github.event.inputs.version }}"
           $versionProp.Save($file.FullName)
@@ -101,7 +100,6 @@ jobs:
         with:
           name: Nuget Packages
           path: |
-            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
       
@@ -110,7 +108,6 @@ jobs:
         with:
           name: Symbols Packages
           path: |
-            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.snupkg
             Yubico.Core/src/bin/ReleaseWithDocs/*.snupkg
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.snupkg
 
@@ -119,7 +116,6 @@ jobs:
         with:
           name: Assemblies
           path: |
-            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
 
@@ -127,13 +123,10 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
-            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
-            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.snupkg
             Yubico.Core/src/bin/ReleaseWithDocs/*.snupkg
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.snupkg
-            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
 
@@ -178,10 +171,8 @@ jobs:
         with:
           name: Nuget Packages
       - run: |
-          $polyfills = (Get-ChildItem -Recurse Yubico.DotnetPolyfills/*.nupkg)[0].FullName
           $core = (Get-ChildItem -Recurse Yubico.Core/*.nupkg)[0].FullName
           $yubikey = (Get-ChildItem -Recurse Yubico.YubiKey/*.nupkg)[0].FullName
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
-          dotnet nuget push $polyfills --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
           dotnet nuget push $core --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
           dotnet nuget push $yubikey --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}

@@ -14,7 +14,7 @@ limitations under the License. -->
 
 # Versioning
 
-Yubico.DotNetPolyfills and Yubico.Core versions are incremented following
+Yubico.YubiKey and Yubico.Core versions are incremented following
 [Semantic Versioning (SemVer) 2.0.0](https://semver.org/spec/v2.0.0.html). In contrast to 1.0.0, the
 pre-release notation in 2.0.0 uses [dot separated identifiers](https://semver.org/spec/v2.0.0.html#spec-item-9)
 and identifiers consisting of only digits are compared numerically for
@@ -37,6 +37,6 @@ for that day (meaning another release/tag exists called 1.1.0-beta.2021.11.11.1)
 We only need to rev the version when we plan to snapshot a release. This should always happen prior to
 releasing updated packages on NuGet.
 
-While all three major projects have similar version numbers early on in the project - they may diverge
+While both projects have similar version numbers early on in the project - they may diverge
 over time. We should avoid updating the revision for the sake of updating the revision (except maybe
 during major releases). This avoids churning our customer's package feeds.

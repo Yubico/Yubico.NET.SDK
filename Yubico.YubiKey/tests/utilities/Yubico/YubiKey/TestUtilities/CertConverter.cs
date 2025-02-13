@@ -70,7 +70,6 @@ namespace Yubico.YubiKey.TestUtilities
                 CertificateStartLength,
                 pemCertString.Length - (CertificateStartLength + CertificateEndLength));
             _certificateObject = X509CertificateLoader.LoadCertificate(certDer);
-            //_certificateObject = new X509Certificate2(certDer);
             SetAlgorithm();
         }
 
@@ -78,7 +77,6 @@ namespace Yubico.YubiKey.TestUtilities
         public CertConverter(byte[] certDer)
         {
             _certificateObject = X509CertificateLoader.LoadCertificate(certDer);
-
             SetAlgorithm();
         }
 
@@ -92,7 +90,6 @@ namespace Yubico.YubiKey.TestUtilities
         {
             byte[] certDer = cert.GetRawCertData();
             _certificateObject = X509CertificateLoader.LoadCertificate(certDer);
-
             SetAlgorithm();
         }
 
@@ -109,10 +106,7 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         // Return the DER encoding of the X.509 certificate.
-        public byte[] GetCertDer()
-        {
-            return _certificateObject.GetRawCertData();
-        }
+        public byte[] GetCertDer() => _certificateObject.GetRawCertData();
 
         public char[] GetCertPem()
         {

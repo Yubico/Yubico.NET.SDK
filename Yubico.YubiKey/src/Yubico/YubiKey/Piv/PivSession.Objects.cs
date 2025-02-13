@@ -16,7 +16,6 @@ using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
-using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
 

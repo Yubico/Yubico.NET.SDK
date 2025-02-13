@@ -17,7 +17,6 @@ using System.Buffers.Binary;
 using System.Globalization;
 using System.Security.Cryptography;
 using Yubico.Core.Buffers;
-using Yubico.Core.Cryptography;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Otp.Commands

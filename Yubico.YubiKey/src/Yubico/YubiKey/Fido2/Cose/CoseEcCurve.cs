@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// </para>
     /// </remarks>
     /// </summary>
-    public enum CoseEcCurve // TODO move into KeyDefinitions ?
+    public enum CoseEcCurve
     {
         /// <summary>
         /// The EC curve could not be determined.

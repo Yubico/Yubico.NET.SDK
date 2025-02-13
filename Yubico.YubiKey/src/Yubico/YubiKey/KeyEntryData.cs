@@ -14,7 +14,6 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.Core.Cryptography;
 
 namespace Yubico.YubiKey
 {

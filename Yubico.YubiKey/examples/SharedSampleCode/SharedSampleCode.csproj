@@ -25,8 +25,8 @@ limitations under the License. -->
   </PropertyGroup>
 
   <!--
-  To test against local YubiKey library changes, uncomment the following line and adjust the path as needed.
-  and comment out the PackageReference line that references the wildcard version (which is attained from NuGet).
+  To test against local YubiKey library changes, uncomment the following line and adjust the path as needed 
+  and comment out the Yubico.YubiKey PackageReference line below that references the wildcard version (which would then be fetched from the NuGet servers).
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
   </ItemGroup>-->

@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// </para>
     /// </remarks>
     /// </summary>
-    public enum CoseAlgorithmIdentifier // TODO move into KeyDefinitions ?
+    public enum CoseAlgorithmIdentifier
     {
         /// <summary>
         /// No algorithm specified.
@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <summary>
         /// ECDH with key derivation function HKDF using SHA-256.
         /// </summary>
-        ECDHwHKDF256 = -25, // TODO Remove? Cannot find a ref to this.
+        ECDHwHKDF256 = -25,
 
         /// <summary>
         /// ECDSA with SHA-384 using the NIST P-384 curve.

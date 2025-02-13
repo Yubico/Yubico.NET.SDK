@@ -15,7 +15,6 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
-using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2

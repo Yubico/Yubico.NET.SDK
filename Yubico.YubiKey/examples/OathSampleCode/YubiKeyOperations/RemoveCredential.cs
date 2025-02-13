@@ -13,14 +13,12 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Yubico.YubiKey.Oath;
 using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.OathSampleCode
 {
-    [SuppressMessage("Globalization", "CA1305:Specify IFormatProvider")]
     public static class RemoveCredential
     {
         // Remove an existing credential on the YubiKey.

@@ -14,14 +14,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Yubico.YubiKey.Oath;
 using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.OathSampleCode
 {
-    [SuppressMessage("Globalization", "CA1305:Specify IFormatProvider")]
     public static class GetCredentials
     {
         // Get all configured credentials on the YbiKey.

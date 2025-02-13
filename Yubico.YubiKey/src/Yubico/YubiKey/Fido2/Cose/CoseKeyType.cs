@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// </para>
     /// </remarks>
     /// </summary>
-    public enum CoseKeyType // TODO move into KeyDefinitions ?
+    public enum CoseKeyType
     {
         /// <summary>
         /// The type could not be determined.

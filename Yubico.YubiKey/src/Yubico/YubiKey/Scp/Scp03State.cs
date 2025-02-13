@@ -15,7 +15,6 @@
 using System;
 using System.Linq;
 using System.Security.Cryptography;
-using Yubico.Core.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Scp.Commands;
 using Yubico.YubiKey.Scp.Helpers;

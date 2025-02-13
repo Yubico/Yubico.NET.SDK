@@ -34,8 +34,7 @@ dotnet_diagnostic.CA1859.severity = suggestion
 
 #### Core EditorConfig Options ####
 
-# We can't do this until C# 9.
-csharp_style_implicit_object_creation_when_type_is_apparent = false
+csharp_style_implicit_object_creation_when_type_is_apparent = true
 
 # Indentation and spacing
 indent_size = 4

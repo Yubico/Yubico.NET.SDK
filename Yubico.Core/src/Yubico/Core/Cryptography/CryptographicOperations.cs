@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 #else
 namespace System.Security.Cryptography
 {
-    internal static class CryptographicOperations
+    public static class CryptographicOperations
     {
         /// <summary>
         /// Determine the equality of two byte sequences in an amount of time which depends on

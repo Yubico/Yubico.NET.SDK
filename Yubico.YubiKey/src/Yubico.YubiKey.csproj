@@ -126,7 +126,8 @@ limitations under the License. -->
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="PolySharp" Version="1.15.0">
+    <!-- Before updating PolySharp, we should do some due dilligence on the update -->
+    <PackageReference Include="PolySharp" Version="1.15.0" AllowUpdates="false">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

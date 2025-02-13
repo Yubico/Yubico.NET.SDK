@@ -119,7 +119,8 @@ limitations under the License. -->
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-    <PackageReference Include="PolySharp" Version="1.15.0">
+    <!-- Before updating PolySharp, we should do some due dilligence on the update -->
+    <PackageReference Include="PolySharp" Version="1.15.0" AllowUpdates="false">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -128,7 +129,6 @@ limitations under the License. -->
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
     <!-- The wildcard version tag allows us to include the latest minor and pre-release versions -->
     <PackageReference Include="Yubico.NativeShims" Version="1.*-*" />
-    <!--    <ProjectReference Include="..\..\Yubico.DotNetPolyfills\src\Yubico.DotNetPolyfills.csproj" />-->
   </ItemGroup>
 
   <ItemGroup Label="Expose internal test hooks to Unit Test projects">

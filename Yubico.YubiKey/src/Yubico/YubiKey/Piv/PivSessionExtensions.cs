@@ -39,7 +39,8 @@ namespace Yubico.YubiKey.Piv
             bool isSupported = algorithm switch
             {
                 PivAlgorithm.Rsa3072 => device.HasFeature(YubiKeyFeature.PivRsa3072),
-                PivAlgorithm.Rsa4096 => device.HasFeature(YubiKeyFeature.PivRsa4096),
+                PivAlgorithm.Rsa4096 => device.HasFeature(YubiKeyFeature.PivRsa4096), // TODO - Add Ed25119
+                PivAlgorithm
                 _ => true
             };
 

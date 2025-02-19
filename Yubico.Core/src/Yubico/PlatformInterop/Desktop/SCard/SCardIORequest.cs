@@ -42,7 +42,9 @@ namespace Yubico.PlatformInterop
         public SCARD_IO_REQUEST(SCARD_PROTOCOL protocol)
         {
             Protocol = protocol;
-            PciLength = Marshal.SizeOf<SCARD_IO_REQUEST>();
+#pragma warning disable CA2263 // Prefer generic overload when type is known
+            PciLength = Marshal.SizeOf(typeof(SCARD_IO_REQUEST));
+#pragma warning restore CA2263 // Prefer generic overload when type is known
         }
     }
 }

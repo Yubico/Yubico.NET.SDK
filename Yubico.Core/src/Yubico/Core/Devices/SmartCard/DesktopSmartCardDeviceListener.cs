@@ -106,7 +106,6 @@ namespace Yubico.Core.Devices.SmartCard
         #region IDisposable Support
 
         private bool _disposedValue; // To detect redundant calls
-        internal static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
 
         /// <summary>
         /// Disposes the objects.
@@ -281,6 +280,7 @@ namespace Yubico.Core.Devices.SmartCard
         // us of the change.
         private bool UsePnpWorkaround()
         {
+            string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
             SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(readerNames);
             _ = SCardGetStatusChange(_context, 0, testState, testState.Length);
             bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);

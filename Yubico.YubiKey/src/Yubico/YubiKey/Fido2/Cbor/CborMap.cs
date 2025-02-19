@@ -170,43 +170,26 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// </summary>
         public object? ReadOptional<T>(TKey key)
         {
-            if (!_dict.ContainsKey(key))
+            if (!_dict.TryGetValue(key, out object? value))
             {
                 return null;
             }
 
-            return ConvertValue<T>(_dict[key]);
+            return ConvertValue<T>(value);
         }
 
         // If the value is a T, return it.
         // If the value is a long or ulong, convert it to a T and return it.
-        internal static object? ConvertValue<T>(object? value)
-        {
-            switch (typeof(T))
+        internal static object? ConvertValue<T>(object? value) =>
+            Type.GetTypeCode(typeof(T)) switch
             {
-                case Type intType when intType == typeof(int):
-                    return ReadInt32(value);
-
-                case Type uintType when uintType == typeof(uint):
-                    return ReadUInt32(value);
-
-                case Type longType when longType == typeof(long):
-                    return ReadInt64(value);
-
-                case Type ulongType when ulongType == typeof(ulong):
-                    return ReadUInt64(value);
-
-                default:
-                    if (value is T typedValue)
-                    {
-                        return typedValue;
-                    }
-
-                    break;
-            }
-
-            throw new InvalidCastException();
-        }
+                TypeCode.Int32 => ReadInt32(value),
+                TypeCode.UInt32 => ReadUInt32(value),
+                TypeCode.Int64 => ReadInt64(value),
+                TypeCode.UInt64 => ReadUInt64(value),
+                _ when value is T typedValue => typedValue,
+                _ => throw new InvalidCastException($"Cannot convert value to type {typeof(T)}")
+            };
 
         /// <summary>
         /// Read the value for the given key as a signed 32-bit integer.

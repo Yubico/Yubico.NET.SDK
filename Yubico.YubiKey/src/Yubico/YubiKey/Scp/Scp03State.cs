@@ -19,6 +19,7 @@ using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Scp.Commands;
 using Yubico.YubiKey.Scp.Helpers;
 
+
 namespace Yubico.YubiKey.Scp
 {
     /// <summary>

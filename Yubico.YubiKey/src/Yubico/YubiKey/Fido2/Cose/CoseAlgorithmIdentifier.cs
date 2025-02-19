@@ -58,6 +58,7 @@ namespace Yubico.YubiKey.Fido2.Cose
 
         /// <summary>
         /// RSASSA-PKCS1-v1_5 with SHA-256
+        /// Currently, not supported by any YubiKey
         /// </summary>
         RS256 = -257,
     }

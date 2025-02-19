@@ -21,6 +21,7 @@ using Yubico.Core.Devices.Hid;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Otp.Commands;
 
+
 namespace Yubico.YubiKey.Otp.Operations
 {
     /// <summary>

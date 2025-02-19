@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKey.Cryptography;
 
+
 namespace Yubico.YubiKey.Fido2.PinProtocols
 {
     /// <summary>

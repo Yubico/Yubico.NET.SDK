@@ -18,6 +18,7 @@ using Yubico.Core.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
 
+
 namespace Yubico.YubiKey.Scp.Helpers
 {
     /// <summary>

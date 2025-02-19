@@ -73,10 +73,7 @@ namespace Yubico.YubiKey.TestUtilities
         // random bytes, placing them into data.
         public void GetBytes(byte[] data)
         {
-            if (data is null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
+            ArgumentNullException.ThrowIfNull(data);
 
             GetBytes(data, 0, data.Length);
         }
@@ -85,18 +82,10 @@ namespace Yubico.YubiKey.TestUtilities
         // offset.
         public void GetBytes(byte[] data, int offset, int count)
         {
-            if (data is null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
-            if (offset < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            }
-            if (count < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count));
-            }
+            ArgumentNullException.ThrowIfNull(data);
+            ArgumentOutOfRangeException.ThrowIfNegative(offset);
+            ArgumentOutOfRangeException.ThrowIfNegative(count);
+
             if (offset + count > data.Length)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectDerivationLength);
@@ -213,10 +202,7 @@ namespace Yubico.YubiKey.TestUtilities
         //   }
         public static RandomObjectUtility SetRandomProviderFixedBytes(byte[] fixedBytes)
         {
-            if (fixedBytes is null)
-            {
-                throw new ArgumentNullException(nameof(fixedBytes));
-            }
+            ArgumentNullException.ThrowIfNull(fixedBytes);
             var randomUtility = new RandomObjectUtility(fixedBytes);
             randomUtility.ReplaceRandomProvider();
 

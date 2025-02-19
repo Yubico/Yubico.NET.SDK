@@ -29,10 +29,12 @@ resharper_csharp_wrap_parameters_style = chop_always
 # C# files
 [*.cs]
 
+# Use concrete types when possible for improved performance
+dotnet_diagnostic.CA1859.severity = suggestion
+
 #### Core EditorConfig Options ####
 
-# We can't do this until C# 9.
-csharp_style_implicit_object_creation_when_type_is_apparent = false
+csharp_style_implicit_object_creation_when_type_is_apparent = true
 
 # Indentation and spacing
 indent_size = 4
@@ -341,6 +343,9 @@ csharp_style_var_for_built_in_types = true:suggestion
 csharp_style_unused_value_expression_statement_preference = unused_local_variable:none
 resharper_for_simple_types = use_var
 
+# CA1860: Avoid using 'Enumerable.Any()' extension method
+dotnet_diagnostic.CA1860.severity = suggestion
+
 # CA1707: Identifiers should not contain underscores
 dotnet_diagnostic.ca1707.severity = none
 
@@ -362,3 +367,5 @@ dotnet_diagnostic.ca1014.severity = none
 csharp_style_var_elsewhere = false:warning
 csharp_style_var_for_built_in_types = false:warning
 csharp_style_var_when_type_is_apparent = true:warning
+dotnet_diagnostic.IDE0007.severity = none
+dotnet_diagnostic.IDE0008.severity = none

@@ -78,7 +78,8 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void Cert_Verify_DigestedDataSucceeds()
         {
-            var pubKey = new X509Certificate2(GetCert());
+            var pubKey = X509CertificateLoader.LoadCertificate(GetCert());
+
             byte[] digest = GetDigest();
             byte[] signature = GetSignature();
             using var verifier = new EcdsaVerify(pubKey);

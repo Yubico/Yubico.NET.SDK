@@ -19,6 +19,7 @@ using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cose;
 
+
 namespace Yubico.YubiKey.Fido2.PinProtocols
 {
     /// <summary>
@@ -150,7 +151,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <exception cref="InvalidOperationException">
         /// The object is not available for <c>Encapsulate</c> because it still
         /// contains data from a previous operation. It is necessary to call
-        /// <c>Initialize</c> before reusing an Protocol object.
+        /// <c>Initialize</c> before reusing a Protocol object.
         /// </exception>
         public virtual void Encapsulate(CoseKey authenticatorPublicKey)
         {

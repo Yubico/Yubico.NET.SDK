@@ -17,6 +17,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
+
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
@@ -432,14 +433,8 @@ namespace Yubico.YubiKey.Piv.Commands
             }
 
             _cryptoTransform.Dispose();
-            if (!(_cryptoTransformA is null))
-            {
-                _cryptoTransformA.Dispose();
-            }
-            if (!(_cryptoTransformB is null))
-            {
-                _cryptoTransformB.Dispose();
-            }
+            _cryptoTransformA?.Dispose();
+            _cryptoTransformB?.Dispose();
 
             _disposed = true;
         }

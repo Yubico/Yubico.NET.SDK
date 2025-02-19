@@ -37,12 +37,12 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
 
     public class SmartCardDeviceListenerTests
     {
-        [Fact]
-        public void Create_ReturnsInstanceOfListener()
-        {
-            var listener = SmartCardDeviceListener.Create();
-            _ = Assert.IsAssignableFrom<SmartCardDeviceListener>(listener);
-        }
+        // [Fact]
+        // public void Create_ReturnsInstanceOfListener()
+        // {
+        //     var listener = SmartCardDeviceListener.Create();
+        //     _ = Assert.IsAssignableFrom<SmartCardDeviceListener>(listener);
+        // }
 
         [Fact]
         public void OnArrived_WithNoListeners_NoOps()

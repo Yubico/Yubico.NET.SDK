@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
+
 namespace Yubico.YubiKey.Scp.Helpers
 {
     /// <summary>

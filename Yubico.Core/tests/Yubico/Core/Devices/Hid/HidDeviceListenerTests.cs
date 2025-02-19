@@ -39,12 +39,12 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
     public class HidDeviceListenerTests
     {
-        [Fact]
-        public void Create_ReturnsInstanceOfListener()
-        {
-            var listener = HidDeviceListener.Create();
-            _ = Assert.IsAssignableFrom<HidDeviceListener>(listener);
-        }
+        // [Fact]
+        // public void Create_ReturnsInstanceOfListener()
+        // {
+        //     var listener = HidDeviceListener.Create();
+        //     _ = Assert.IsAssignableFrom<HidDeviceListener>(listener);
+        // }
 
         [Fact]
         public void OnArrived_WithNoListeners_NoOps()

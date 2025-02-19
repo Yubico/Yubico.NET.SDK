@@ -500,7 +500,7 @@ namespace Yubico.YubiKey.Scp
                 .Select(certEntry =>
                 {
                     var cert = DotNetUtilities.ToX509Certificate(certEntry.Certificate);
-                    return new X509Certificate2(
+                    return X509CertificateLoader.LoadCertificate(
                         cert.Export(X509ContentType.Cert)
                     );
                 });
@@ -570,7 +570,7 @@ namespace Yubico.YubiKey.Scp
                     {
                         // Remove any whitespace and convert to byte array
                         var certData = Convert.FromBase64String(certString.Trim());
-                        var cert = new X509Certificate2(certData);
+                        var cert = X509CertificateLoader.LoadCertificate(certData);
                         certificates.Add(cert);
                     }
                 }

@@ -16,13 +16,13 @@ using System;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.Piv;
 
-namespace Yubico.YubiKey.TestUtilities 
+namespace Yubico.YubiKey.TestUtilities
 {
     public static class SampleKeyPairs
     {
         // Get a private key with its matching certificate
         public static bool GetMatchingKeyAndCert(
-            PivAlgorithm algorithm, 
+            PivAlgorithm algorithm,
             out X509Certificate2? cert,
             out PivPrivateKey? privateKey)
         {
@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.TestUtilities
         public static bool GetKeysAndCertPem(
             PivAlgorithm algorithm,
             bool validAttest,
-            out string? cert, 
+            out string? cert,
             out string? publicKey,
             out string? privateKey)
         {
@@ -50,7 +50,7 @@ namespace Yubico.YubiKey.TestUtilities
             if (string.IsNullOrEmpty(curve))
             {
                 cert = null;
-                privateKey = null; 
+                privateKey = null;
                 publicKey = null;
                 return false;
             }
@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.TestUtilities
             return TestKeys.GetPublicKey(curve).AsPublicKey();
         }
 
-        public static PivPrivateKey GetPivPrivateKey(PivAlgorithm algorithm) 
+        public static PivPrivateKey GetPivPrivateKey(PivAlgorithm algorithm)
         {
             var curve = GetCurveFromAlgorithm(algorithm);
             return TestKeys.GetPrivateKey(curve).AsPrivateKey();
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.TestUtilities
             return algorithm switch
             {
                 PivAlgorithm.Rsa1024 => "rsa1024",
-                PivAlgorithm.Rsa2048 => "rsa2048", 
+                PivAlgorithm.Rsa2048 => "rsa2048",
                 PivAlgorithm.Rsa3072 => "rsa3072",
                 PivAlgorithm.Rsa4096 => "rsa4096",
                 PivAlgorithm.EccP256 => "p256",

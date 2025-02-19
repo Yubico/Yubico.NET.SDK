@@ -20,10 +20,10 @@ limitations under the License. -->
     <RootNamespace>Yubico.YubiKey.TestApp</RootNamespace>
     <PackageId>Yubico.YubiKey.TestApp</PackageId>
 
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <OutputType>Exe</OutputType>
 
-    <AnalysisMode>Minimum</AnalysisMode>
+    <AnalysisMode>AllDisabledByDefault</AnalysisMode>
 
     <!-- StrongName signing -->
     <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must

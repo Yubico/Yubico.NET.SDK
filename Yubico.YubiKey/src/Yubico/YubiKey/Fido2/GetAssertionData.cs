@@ -21,6 +21,7 @@ using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 
+
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>

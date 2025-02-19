@@ -21,6 +21,7 @@ using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
 
+
 namespace Yubico.YubiKey.Piv
 {
     // This portion of the PivSession class contains code related to PIN-only

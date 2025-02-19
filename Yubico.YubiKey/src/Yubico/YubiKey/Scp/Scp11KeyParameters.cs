@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Scp
                     nameof(keyReference));
             }
 
-            if (!oceCertificates.Any())
+            if (oceCertificates.Count == 0)
             {
                 throw new ArgumentException("Must provide a certificate chain for SCP11a/c", nameof(oceCertificates));
             }

@@ -42,7 +42,7 @@ namespace Yubico.PlatformInterop
         public SCARD_IO_REQUEST(SCARD_PROTOCOL protocol)
         {
             Protocol = protocol;
-            PciLength = Marshal.SizeOf(typeof(SCARD_IO_REQUEST));
+            PciLength = Marshal.SizeOf<SCARD_IO_REQUEST>();
         }
     }
 }

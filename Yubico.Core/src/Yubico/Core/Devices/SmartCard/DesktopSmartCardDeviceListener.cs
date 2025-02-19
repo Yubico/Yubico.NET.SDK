@@ -106,6 +106,7 @@ namespace Yubico.Core.Devices.SmartCard
         #region IDisposable Support
 
         private bool _disposedValue; // To detect redundant calls
+        internal static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
 
         /// <summary>
         /// Disposes the objects.
@@ -192,7 +193,7 @@ namespace Yubico.Core.Devices.SmartCard
                 SCARD_READER_STATE[] removedReaderStates = newStates.Except(eventStateList, new ReaderStateComparer()).ToArray();
 
                 // Don't get status changes if there are no updates in state list.
-                if (!addedReaderStates.Any() && !removedReaderStates.Any())
+                if (addedReaderStates.Length == 0 && removedReaderStates.Length == 0)
                 {
                     break;
                 }
@@ -214,7 +215,7 @@ namespace Yubico.Core.Devices.SmartCard
                 // Only call get status change if a new reader was added. If nothing was added,
                 // we would otherwise hang / timeout here because all changes (in SCard's mind)
                 // have been dealt with.
-                if (addedReaderStates.Any())
+                if (addedReaderStates.Length != 0)
                 {
                     _log.LogInformation("Additional smart card readers were found. Calling GetStatusChange for more information.");
                     getStatusChangeResult = SCardGetStatusChange(_context, 0, updatedStates, updatedStates.Length);
@@ -280,7 +281,7 @@ namespace Yubico.Core.Devices.SmartCard
         // us of the change.
         private bool UsePnpWorkaround()
         {
-            SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(new[] { "\\\\?\\Pnp\\Notifications" });
+            SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(readerNames);
             _ = SCardGetStatusChange(_context, 0, testState, testState.Length);
             bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
             return usePnpWorkaround;

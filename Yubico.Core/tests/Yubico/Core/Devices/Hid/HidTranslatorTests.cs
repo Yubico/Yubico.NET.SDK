@@ -166,7 +166,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Originally, I hard-coded these, but I decided that it should do
             // this dynamically so that newly added keyboard layouts aren't left
             // out of these tests.
-            foreach (KeyboardLayout layout in (KeyboardLayout[])Enum.GetValues(typeof(KeyboardLayout)))
+            foreach (KeyboardLayout layout in Enum.GetValues<KeyboardLayout>())
             {
                 yield return new object[] { layout, GetDataForKeyboard(layout) };
             }

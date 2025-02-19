@@ -5,7 +5,7 @@
 
 using System.Runtime.CompilerServices;
 
-#if !NETSTANDARD2_0
+#if NETSTANDARD2_1_OR_GREATER
 [assembly: TypeForwardedTo(typeof(System.Security.Cryptography.CryptographicOperations))]
 
 #else

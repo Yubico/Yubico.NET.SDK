@@ -24,13 +24,23 @@ limitations under the License. -->
 Enterprise-grade cross-platform SDK for YubiKey integration, built on .NET.
 
 ## Table of Contents
-- [Quick Start](#quick-start)
-- [Documentation](#documentation)
-- [SDK Support](#sdk-support)
-- [SDK Packages](#sdk-packages)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [Security](#security)
+- [.NET YubiKey SDK](#net-yubikey-sdk)
+  - [Table of Contents](#table-of-contents)
+  - [Quick Start](#quick-start)
+    - [Installation](#installation)
+    - [Basic Usage](#basic-usage)
+  - [Documentation](#documentation)
+  - [SDK Support](#sdk-support)
+  - [SDK Packages](#sdk-packages)
+    - [Public Assemblies](#public-assemblies)
+      - [Yubico.YubiKey](#yubicoyubikey)
+      - [Yubico.Core](#yubicocore)
+    - [Internal Assemblies](#internal-assemblies)
+      - [Yubico.NativeShims](#yubiconativeshims)
+  - [Project Structure](#project-structure)
+  - [Contributing](#contributing)
+    - [Building the Project](#building-the-project)
+  - [Connect with us](#connect-with-us)
 
 ## Quick Start
 
@@ -44,7 +54,7 @@ dotnet add package Yubico.YubiKey
 using Yubico.YubiKey;
 
 // Chooses the first YubiKey found on the computer.
-IYubiKeyDevice? SampleChooseYubiKey()
+IYubiKeyDevice? GetFirstYubiKey()
 {
     IEnumerable<IYubiKeyDevice> list = YubiKeyDevice.FindAll();
     return list.First();
@@ -82,10 +92,6 @@ Platform abstraction layer (PAL) providing:
   - ModHex
 
 ### Internal Assemblies
-
-#### Yubico.DotNetPolyfills
-> ⚠️ **Not for public use**  
-> Backports BCL features needed by the SDK.
 
 #### Yubico.NativeShims
 > ⚠️ **Not for public use**  

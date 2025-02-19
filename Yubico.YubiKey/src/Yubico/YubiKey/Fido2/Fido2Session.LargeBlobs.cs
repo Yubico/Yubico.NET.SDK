@@ -21,6 +21,7 @@ using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Commands;
 
+
 namespace Yubico.YubiKey.Fido2
 {
     // This portion of the Fido2Session class deals with setting and getting

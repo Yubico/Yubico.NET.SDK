@@ -74,8 +74,7 @@ one or more 'Project File' (\*.csproj, \*.cxproj, etc.) that represents a single
 The .NET YubiKey SDK project has a single solution file located in the root of the repository called
 Yubico.NET.SDK.sln.
 
-Within the solution there are three groupings of projects: Yubico.YubiKey, Yubico.Core, and
-Yubico.DotnetPolyfills.
+Within the solution there are two groupings of projects: Yubico.YubiKey and Yubico.Core.
 
 Each project folder may have one or more subfolders:
 

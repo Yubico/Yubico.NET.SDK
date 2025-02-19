@@ -55,7 +55,7 @@ namespace Yubico.Core.Cryptography
             Assert.True(isValid);
         }
 
-        [SkippableFact(typeof(System.PlatformNotSupportedException))]
+        [Fact]
         public void Encrypt_Decrypt_Succeeds_RandomValues_Succeed()
         {
             var random = RandomNumberGenerator.Create();

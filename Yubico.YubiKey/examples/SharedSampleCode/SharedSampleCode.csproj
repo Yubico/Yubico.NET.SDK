@@ -15,7 +15,7 @@ limitations under the License. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <AnalysisMode>AllDisabledByDefault</AnalysisMode>
   </PropertyGroup>

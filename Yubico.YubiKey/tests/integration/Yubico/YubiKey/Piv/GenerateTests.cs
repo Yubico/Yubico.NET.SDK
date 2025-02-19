@@ -16,7 +16,6 @@ using System;
 using Xunit;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Scp;
-using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -29,6 +28,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
         [InlineData(PivAlgorithm.Rsa4096)]
+        [InlineData(PivAlgorithm.Ed25519)]
         [InlineData(PivAlgorithm.Rsa1024, true)]
         [InlineData(PivAlgorithm.Rsa2048, true)]
         [InlineData(PivAlgorithm.Rsa3072, true)]

@@ -95,5 +95,7 @@ namespace Yubico.YubiKey.Piv
         /// While not a cryptographic algorithm, it is used in the PIV Metadata.
         /// </summary>
         Pin = 0xFF,
+        Ed25519 = 0xE0,
+        X25519 = 0xE1
     }
 }

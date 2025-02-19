@@ -131,7 +131,7 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _algorithm;
             set
             {
-                if (value.IsValidAlgorithmForGenerate() == false)
+                if (!value.GetByKeyDefinitionKeyType().SupportsKeyGeneration)
                 {
                     throw new ArgumentException(
                         string.Format(

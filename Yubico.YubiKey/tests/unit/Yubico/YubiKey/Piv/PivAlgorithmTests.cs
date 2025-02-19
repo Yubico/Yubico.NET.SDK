@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 
 namespace Yubico.YubiKey.Piv
@@ -28,6 +29,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.None, false)]
         [InlineData(PivAlgorithm.TripleDes, false)]
         [InlineData(PivAlgorithm.Pin, false)]
+        [Obsolete("This test is obsolete. It is testing a deprecated method.")]
         public void IsValidAlg_ReturnsCorrect(PivAlgorithm algorithm, bool expectedResult)
         {
             bool result = algorithm.IsValidAlgorithmForGenerate();

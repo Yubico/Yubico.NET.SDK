@@ -12,13 +12,66 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using Yubico.YubiKey.Cryptography;
+
 namespace Yubico.YubiKey.Piv
 {
+    public record PivAlgorithmDefinition
+    {
+        public required PivAlgorithm Algorithm { get; init; }
+        public required KeyDefinitions.KeyDefinition KeyDefinition { get; init; }
+        public bool SupportsKeyGeneration => Algorithm switch
+        {
+            PivAlgorithm.Rsa1024 => true,
+            PivAlgorithm.Rsa2048 => true,
+            PivAlgorithm.Rsa3072 => true,
+            PivAlgorithm.Rsa4096 => true,
+            PivAlgorithm.EccP256 => true,
+            PivAlgorithm.EccP384 => true,
+            PivAlgorithm.Ed25519 => true,
+            _ => false,
+        };
+    }
+
     /// <summary>
     /// Extension methods to operate on the PivAlgorithm enum.
     /// </summary>
     public static class PivAlgorithmExtensions
     {
+
+        // WIll be used in PivSession and the Command classes
+        // Might do special class for the tuple
+
+// Possible nullable?
+// Or store in dict, and use containskey
+        public static PivAlgorithmDefinition GetByKeyDefinitionKeyType(this KeyDefinitions.KeyType keyType) => keyType switch
+        {
+            KeyDefinitions.KeyType.RSA1024 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa1024, KeyDefinition = KeyDefinitions.RSA1024 },
+            KeyDefinitions.KeyType.RSA2048 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa2048, KeyDefinition = KeyDefinitions.RSA2048 },
+            KeyDefinitions.KeyType.RSA3072 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa3072, KeyDefinition = KeyDefinitions.RSA3072 },
+            KeyDefinitions.KeyType.RSA4096 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa4096, KeyDefinition = KeyDefinitions.RSA4096 },
+            KeyDefinitions.KeyType.P256 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP256, KeyDefinition = KeyDefinitions.P256 },
+            KeyDefinitions.KeyType.P384 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP384, KeyDefinition = KeyDefinitions.P384 },
+            KeyDefinitions.KeyType.Ed25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Ed25519, KeyDefinition = KeyDefinitions.Ed25519 },
+            KeyDefinitions.KeyType.X25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.X25519, KeyDefinition = KeyDefinitions.X25519 },
+            _ => throw new NotSupportedException("Unsupported key type" + keyType),
+        };
+
+// Possible nullable?
+        public static PivAlgorithmDefinition GetByKeyDefinitionKeyType(this PivAlgorithm algorithm) => algorithm switch
+        {
+            PivAlgorithm.Rsa1024 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa1024, KeyDefinition = KeyDefinitions.RSA1024 },
+            PivAlgorithm.Rsa2048 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa2048, KeyDefinition = KeyDefinitions.RSA2048 },
+            PivAlgorithm.Rsa3072 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa3072, KeyDefinition = KeyDefinitions.RSA3072 },
+            PivAlgorithm.Rsa4096 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa4096, KeyDefinition = KeyDefinitions.RSA4096 },
+            PivAlgorithm.EccP256 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP256, KeyDefinition = KeyDefinitions.P256 },
+            PivAlgorithm.EccP384 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP384, KeyDefinition = KeyDefinitions.P384 },
+            PivAlgorithm.Ed25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Ed25519, KeyDefinition = KeyDefinitions.Ed25519 },
+            PivAlgorithm.X25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.X25519, KeyDefinition = KeyDefinitions.X25519 },
+            _ => throw new NotSupportedException("Unsupported key type" + algorithm),
+        };
+
         /// <summary>
         /// Determines if the given algorithm is one that can be used to generate
         /// a key pair.
@@ -39,6 +92,7 @@ namespace Yubico.YubiKey.Piv
         /// A boolean, true if the algorithm is one that can be used to generate
         /// a key pair, and false otherwise.
         /// </returns>
+        [Obsolete("Use other")]
         public static bool IsValidAlgorithmForGenerate(this PivAlgorithm algorithm) => algorithm switch
         {
             PivAlgorithm.Rsa1024 => true,
@@ -47,6 +101,7 @@ namespace Yubico.YubiKey.Piv
             PivAlgorithm.Rsa4096 => true,
             PivAlgorithm.EccP256 => true,
             PivAlgorithm.EccP384 => true,
+            PivAlgorithm.Ed25519 => true,
             _ => false,
         };
 
@@ -104,18 +159,21 @@ namespace Yubico.YubiKey.Piv
         /// <returns>
         /// An int, the size, in bits, of a key of the given algorithm.
         /// </returns>
-        public static int KeySizeBits(this PivAlgorithm algorithm) => algorithm switch
+        public static int KeySizeBits(this PivAlgorithm algorithm)
         {
-            PivAlgorithm.Rsa1024 => 1024,
-            PivAlgorithm.Rsa2048 => 2048,
-            PivAlgorithm.Rsa3072 => 3072,
-            PivAlgorithm.Rsa4096 => 4096,
-            PivAlgorithm.EccP256 => 256,
-            PivAlgorithm.EccP384 => 384,
-            PivAlgorithm.TripleDes => 192,
-            PivAlgorithm.Pin => 64,
-            _ => 0,
-        };
+            return algorithm switch
+            {
+                PivAlgorithm.Rsa1024 or
+                PivAlgorithm.Rsa2048 or
+                PivAlgorithm.Rsa3072 or
+                PivAlgorithm.Rsa4096 or
+                PivAlgorithm.EccP256 or
+                PivAlgorithm.EccP384 => algorithm.GetByKeyDefinitionKeyType().KeyDefinition.LengthInBits,
+                PivAlgorithm.TripleDes => 192,
+                PivAlgorithm.Pin => 64,
+                _ => 0,
+            };
+        }
 
         /// <summary>
         /// Determines if the given algorithm is RSA.
@@ -140,14 +198,7 @@ namespace Yubico.YubiKey.Piv
         /// <returns>
         /// A boolean, true if the algorithm is RSA, and false otherwise.
         /// </returns>
-        public static bool IsRsa(this PivAlgorithm algorithm) => algorithm switch
-        {
-            PivAlgorithm.Rsa1024 => true,
-            PivAlgorithm.Rsa2048 => true,
-            PivAlgorithm.Rsa3072 => true,
-            PivAlgorithm.Rsa4096 => true,
-            _ => false,
-        };
+        public static bool IsRsa(this PivAlgorithm algorithm) => algorithm.GetByKeyDefinitionKeyType().KeyDefinition.IsRsaKey;
 
         /// <summary>
         /// Determines if the given algorithm is ECC.
@@ -172,11 +223,6 @@ namespace Yubico.YubiKey.Piv
         /// <returns>
         /// A boolean, true if the algorithm is ECC, and false otherwise.
         /// </returns>
-        public static bool IsEcc(this PivAlgorithm algorithm) => algorithm switch
-        {
-            PivAlgorithm.EccP256 => true,
-            PivAlgorithm.EccP384 => true,
-            _ => false,
-        };
+        public static bool IsEcc(this PivAlgorithm algorithm) => algorithm.GetByKeyDefinitionKeyType().KeyDefinition.IsEcKey;
     }
 }

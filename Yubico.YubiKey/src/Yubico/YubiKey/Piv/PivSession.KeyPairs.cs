@@ -18,6 +18,7 @@ using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Piv.Commands;
+using static Yubico.YubiKey.Cryptography.KeyDefinitions;
 
 namespace Yubico.YubiKey.Piv
 {

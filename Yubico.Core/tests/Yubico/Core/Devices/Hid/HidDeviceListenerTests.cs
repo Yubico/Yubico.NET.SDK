@@ -39,7 +39,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
     public class HidDeviceListenerTests
     {
-        // [Fact]
+        // [Fact] // Fails on CI because of it's trying to access the HID device which is not available
         // public void Create_ReturnsInstanceOfListener()
         // {
         //     var listener = HidDeviceListener.Create();

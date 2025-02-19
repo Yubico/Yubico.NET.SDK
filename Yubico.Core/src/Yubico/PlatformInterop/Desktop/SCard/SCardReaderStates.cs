@@ -23,15 +23,15 @@ namespace Yubico.PlatformInterop
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     // Justification: Fields are read/write via interop. Readonly might not have any effect there, but it may give
-    // maintainers a falls impression about the true nature of these fields.
+    // maintainers a false impression about the true nature of these fields.
     [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Local")]
     [SuppressMessage("Style", "IDE0044:Add readonly modifier")]
     internal struct SCARD_READER_STATE
     {
-#pragma warning disable IDE0032 // Use auto property
+#pragma warning disable IDE0032 // Use auto property, leave as is for now, as it auto property may not work with interop
         [MarshalAs(UnmanagedType.LPStr)]
         private string _readerName;
-#pragma warning restore IDE0032 // Use auto property
+#pragma warning restore IDE0032 // Use auto property, leave as is for now, as it auto property may not work with interop
         private IntPtr _userData;
         private uint _currentState;
         private uint _eventState;

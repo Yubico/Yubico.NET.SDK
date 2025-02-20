@@ -86,10 +86,12 @@ jobs:
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity minimal Yubico.NET.SDK.sln
 
-      - name: Build Documentation
-        uses: nunit/docfx-action@v2.4.0
-        with:
-          args: Yubico.YubiKey/src/docfx.json --warningsAsErrors --logLevel Warning --logFile ..\docs\log.txt
+      # Build the documentation
+      - name: Install docfx tool
+        run: |
+          dotnet tool install --global docfx --version 2.78.2
+          docfx --version
+          docfx Yubico.YubiKey/src/docfx.json --warningsAsErrors --logLevel Warning --logFile ..\docs\log.txt
 
       - name: Check for content in Yubico.YubiKey/docs/_site
         run: |

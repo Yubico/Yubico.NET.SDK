@@ -99,7 +99,9 @@ jobs:
         with:
           name: Documentation
           path: Yubico.YubiKey/docs/_site/
-
+          if-no-files-found: error
+          
+      # Upload the NuGet packages
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -107,7 +109,9 @@ jobs:
           path: |
             Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
+          if-no-files-found: error
       
+      # Upload the symbols
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -115,7 +119,9 @@ jobs:
           path: |
             Yubico.Core/src/bin/ReleaseWithDocs/*.snupkg
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.snupkg
-
+          if-no-files-found: error
+      
+      # Upload assemblies
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -123,7 +129,9 @@ jobs:
           path: |
             Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
-
+          if-no-files-found: error
+      
+      # Generate artifact attestation
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
@@ -134,24 +142,6 @@ jobs:
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.snupkg
             Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
-
-      # Package the OATH sample code source
-      - name: Save build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: OATH Sample Code
-          path: |
-            Yubico.YubiKey/examples/OathSampleCode
-            Yubico.YubiKey/examples/SharedSampleCode
-
-      # Package the PIV sample code source
-      - name: Save build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: PIV Sample Code
-          path: |
-            Yubico.YubiKey/examples/PivSampleCode
-            Yubico.YubiKey/examples/SharedSampleCode
       
   upload-docs:
     name: Upload docs

@@ -163,7 +163,7 @@ limitations under the License. -->
     <Error Condition="'$(DocFXExists)' != '0'" Text="DocFX is not installed. Please install it using: dotnet tool install --global docfx" />
   </Target>
 
-  <Target Name="DocFXBuild" AfterTargets="Build" DependsOnTargets="CheckDocFX" Condition="'$(Configuration)' == 'Release'">
+  <Target Name="DocFXBuild" AfterTargets="Build" DependsOnTargets="CheckDocFX" Condition="'$(Configuration)' == 'ReleaseWithDocs'">
     <Exec Command="docfx build $(MSBuildProjectDirectory)/docfx.json --logLevel warning --log docfx-log.txt --warningsAsErrors" IgnoreExitCode="true">
       <Output TaskParameter="ExitCode" PropertyName="DocFXExitCode" />
     </Exec>

@@ -43,8 +43,6 @@ on:
   schedule:
     - cron: '0 0 * * *' # Every day at midnight
         
-
-
 jobs:
   run-tests:
     name: Run tests
@@ -87,6 +85,18 @@ jobs:
       # Build the project
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity minimal Yubico.NET.SDK.sln
+
+      - name: Build Documentation
+        uses: nunit/docfx-action@v2.4.0
+        with:
+          args: Yubico.YubiKey/src/docfx.json --warningsAsErrors --logLevel Warning --logFile ..\docs\log.txt
+
+      - name: Check for content in Yubico.YubiKey/docs/_site
+        run: |
+          if [ -z "$(ls -A Yubico.YubiKey/docs/_site)" ]; then
+            echo "No content in Yubico.YubiKey/docs/_site"
+            exit 1
+          fi
 
       # Upload artifacts
       - name: Save documentation artifacts

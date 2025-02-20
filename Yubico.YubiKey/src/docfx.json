@@ -7,6 +7,7 @@
       "dest": "../docs/yubikey-api/",
       "disableGitFeatures": true,
       "disableDefaultFilter": false,
+      "memberLayout": "separatePages",
       "filter": "../docs/filterConfig.yml"
     },
     {
@@ -16,6 +17,7 @@
       "dest": "../docs/core-api/",
       "disableGitFeatures": true,
       "disableDefaultFilter": false,
+      "memberLayout": "separatePages",
       "filter": "../docs/filterConfig.yml"
     }
   ],

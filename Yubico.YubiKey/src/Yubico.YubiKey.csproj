@@ -155,4 +155,16 @@ limitations under the License. -->
 
   </ItemGroup>
 
+  <!-- DocFX build target runs after Release-build -->
+  <Target Name="CheckDocFX">
+    <Exec Command="docfx --version" EchoOff="true" ContinueOnError="true" StandardErrorImportance="High" StandardOutputImportance="High">
+      <Output TaskParameter="ExitCode" PropertyName="DocFXExists" />
+    </Exec>
+    <Error Condition="'$(DocFXExists)' != '0'" Text="DocFX is not installed. Please install it using: dotnet tool install --global docfx" />
+  </Target>
+
+  <Target Name="DocFXBuild" AfterTargets="Build" DependsOnTargets="CheckDocFX" Condition="'$(Configuration)' == 'Release'">
+    <Exec Command="docfx build $(MSBuildProjectDirectory)/docfx.json --log docfxlogz.txt" IgnoreExitCode="true"/>
+  </Target>
+
 </Project>

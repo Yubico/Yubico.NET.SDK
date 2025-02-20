@@ -156,7 +156,7 @@ jobs:
     name: Publish to internal NuGet
     runs-on: windows-2019
     needs: build-artifacts
-    if: ${{ github.event.inputs.push-to-dev }}
+    if: ${{ github.event.inputs.push-to-dev == 'true' }}
     permissions:
       contents: read
       packages: write

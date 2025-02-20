@@ -93,16 +93,16 @@ jobs:
           docfx --version
           docfx Yubico.YubiKey/src/docfx.json --logLevel error --log Yubico.YubiKey/docs/log.txt
 
-      # Upload artifacts
-      - name: Save documentation artifacts
+      # Upload documentation
+      - name: "Save build artifacts: Docs"
         uses: actions/upload-artifact@v4
         with:
           name: Documentation
           path: Yubico.YubiKey/docs/_site/
           if-no-files-found: error
           
-      # Upload the NuGet packages
-      - name: Save build artifacts
+      # Upload NuGet packages
+      - name: "Save build artifacts: Nuget Packages"
         uses: actions/upload-artifact@v4
         with:
           name: Nuget Packages
@@ -111,8 +111,8 @@ jobs:
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
           if-no-files-found: error
       
-      # Upload the symbols
-      - name: Save build artifacts
+      # Upload symbols
+      - name: "Save build artifacts: Symbols Packages"
         uses: actions/upload-artifact@v4
         with:
           name: Symbols Packages
@@ -122,7 +122,7 @@ jobs:
           if-no-files-found: error
       
       # Upload assemblies
-      - name: Save build artifacts
+      - name: "Save build artifacts: Assemblies"
         uses: actions/upload-artifact@v4
         with:
           name: Assemblies

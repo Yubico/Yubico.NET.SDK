@@ -2,7 +2,7 @@
   "metadata": [
     {
       "src": [
-        "bin/ReleaseWithDocs/netstandard2.0/Yubico.YubiKey.dll"
+        "bin/Release/netstandard2.0/Yubico.YubiKey.dll"
       ],
       "dest": "../docs/yubikey-api/",
       "disableGitFeatures": true,
@@ -11,7 +11,7 @@
     },
     {
       "src": [
-        "bin/ReleaseWithDocs/netstandard2.0/Yubico.Core.dll"
+        "bin/Release/netstandard2.0/Yubico.Core.dll"
       ],
       "dest": "../docs/core-api/",
       "disableGitFeatures": true,

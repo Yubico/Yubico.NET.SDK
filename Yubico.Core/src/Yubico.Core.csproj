@@ -25,7 +25,7 @@ limitations under the License. -->
     <!-- Suppressed warnings-->
     <!-- NU5104 - We want to allow prerelease NuGet packages -->
     <NoWarn>@(NoWarn);NU5104</NoWarn>
-    <Configurations>Debug;Release;ReleaseWithDocs</Configurations>
+    <Configurations>Debug;Release</Configurations>
 
     <!-- DocFX will throw a warning (which we set as an error) if it doesn't find a reference assembly. -->
     <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
@@ -106,7 +106,6 @@ limitations under the License. -->
       <DependentUpon>HidCodeTranslator.cs</DependentUpon>
     </Compile>
   </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />

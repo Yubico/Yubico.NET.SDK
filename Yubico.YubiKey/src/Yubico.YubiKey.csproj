@@ -24,7 +24,7 @@ limitations under the License. -->
 
     <RootNamespace></RootNamespace>
 
-    <Configurations>Debug;Release;ReleaseWithDocs</Configurations>
+    <Configurations>Debug;Release</Configurations>
 
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>

@@ -18,31 +18,31 @@ name: Build
 on:
   push:
     branches:
-      - 'main'
-      - 'develop'
+      - "main"
+      - "develop"
     paths:
-      - '**.h'
-      - '**.c'
-      - '**.cs'
-      - '**.csproj'
-      - '**.sln'
-      - '.github/workflows/build.yml'
+      - "**.h"
+      - "**.c"
+      - "**.cs"
+      - "**.csproj"
+      - "**.sln"
+      - ".github/workflows/build.yml"
 
   workflow_dispatch:
     inputs:
       push-to-dev:
-        description: 'Push to internal NuGet'
+        description: "Push to internal NuGet"
         required: false
         default: false
         type: boolean
       version:
-        description: 'Version'
+        description: "Version"
         required: false
         default: "0.0.0-prerelease.YYYYMMDD.B"
         type: string
   schedule:
-    - cron: '0 0 * * *' # Every day at midnight
-        
+    - cron: "0 0 * * *" # Every day at midnight
+
 jobs:
   run-tests:
     name: Run tests
@@ -82,16 +82,15 @@ jobs:
           $versionProp.Project.PropertyGroup.YubicoYubiKeyVersion = "${{ github.event.inputs.version }}"
           $versionProp.Save($file.FullName)
 
-      # Build the project
-      - name: Build Yubico.NET.SDK.sln
-        run: dotnet pack --configuration Release --nologo --verbosity minimal Yubico.NET.SDK.sln
-
-      # Build the documentation
-      - name: Build docs
+      # Install DocFX
+      - name: Install DocFX
         run: |
           dotnet tool install --global docfx --version 2.78.2
-          docfx --version
-          docfx Yubico.YubiKey/src/docfx.json --logLevel warning --log Yubico.YubiKey/docs/log.txt --warningsAsErrors
+
+      # Build the project
+      - name: Build Yubico.NET.SDK.sln
+        run:
+          dotnet pack --configuration Release --nologo --verbosity minimal Yubico.NET.SDK.sln
 
       # Upload documentation
       - name: "Save build artifacts: Docs"
@@ -100,7 +99,7 @@ jobs:
           name: Documentation
           path: Yubico.YubiKey/docs/_site/
           if-no-files-found: error
-          
+
       # Upload NuGet packages
       - name: "Save build artifacts: Nuget Packages"
         uses: actions/upload-artifact@v4
@@ -110,7 +109,7 @@ jobs:
             Yubico.Core/src/bin/Release/*.nupkg
             Yubico.YubiKey/src/bin/Release/*.nupkg
           if-no-files-found: error
-      
+
       # Upload symbols
       - name: "Save build artifacts: Symbols Packages"
         uses: actions/upload-artifact@v4
@@ -120,7 +119,7 @@ jobs:
             Yubico.Core/src/bin/Release/*.snupkg
             Yubico.YubiKey/src/bin/Release/*.snupkg
           if-no-files-found: error
-      
+
       # Upload assemblies
       - name: "Save build artifacts: Assemblies"
         uses: actions/upload-artifact@v4
@@ -130,7 +129,7 @@ jobs:
             Yubico.Core/src/bin/Release/**/*.dll
             Yubico.YubiKey/src/bin/Release/**/*.dll
           if-no-files-found: error
-      
+
       # Generate artifact attestation
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
@@ -142,7 +141,7 @@ jobs:
             Yubico.YubiKey/src/bin/Release/*.snupkg
             Yubico.Core/src/bin/Release/**/*.dll
             Yubico.YubiKey/src/bin/Release/**/*.dll
-      
+
   upload-docs:
     name: Upload docs
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'

@@ -90,7 +90,7 @@ jobs:
       - name: Build docs
         run: |
           dotnet tool install --global docfx --version "2.*"
-          docfx Yubico.YubiKey/src/docfx.json --logLevel warning --log Yubico.YubiKey/docs/docfx.log
+          docfx Yubico.YubiKey/src/docfx.json --logLevel warning
 
       # Upload documentation
       - name: "Save build artifacts: Docs"

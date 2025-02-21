@@ -1,24 +1,30 @@
 {
   "metadata": [
     {
-      "src": [
-        "bin/Release/netstandard2.0/Yubico.YubiKey.dll"
-      ],
+      "src": ".",
+      "files": ["Yubico.YubiKey.csproj"],
+      "exclude": ["**/bin/**", "**/obj/**"],
       "dest": "../docs/yubikey-api/",
       "disableGitFeatures": true,
       "disableDefaultFilter": false,
       "memberLayout": "separatePages",
-      "filter": "../docs/filterConfig.yml"
+      "filter": "../docs/filterConfig.yml",
+      "properties": {
+        "TargetFramework": "netstandard2.0"
+      }
     },
     {
-      "src": [
-        "bin/Release/netstandard2.0/Yubico.Core.dll"
-      ],
+      "src": "../Yubico.Core/src",
+      "files": ["Yubico.Core.csproj"],
+      "exclude": ["**/bin/**", "**/obj/**"],
       "dest": "../docs/core-api/",
       "disableGitFeatures": true,
       "disableDefaultFilter": false,
       "memberLayout": "separatePages",
-      "filter": "../docs/filterConfig.yml"
+      "filter": "../docs/filterConfig.yml",
+      "properties": {
+        "TargetFramework": "netstandard2.0"
+      }
     }
   ],
   "build": {
@@ -39,21 +45,14 @@
     ],
     "resource": [
       {
-        "files": [
-          "images/**"
-        ],
+        "files": ["images/**"],
         "src": "../docs/"
       }
     ],
     "overwrite": [
       {
-        "files": [
-          "namespaces/**.md"
-        ],
-        "exclude": [
-          "obj/**",
-          "_site/**"
-        ],
+        "files": ["namespaces/**.md"],
+        "exclude": ["obj/**", "_site/**"],
         "src": "../docs/"
       }
     ],

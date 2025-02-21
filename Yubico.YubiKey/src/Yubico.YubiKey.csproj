@@ -155,21 +155,25 @@ limitations under the License. -->
 
   </ItemGroup>
 
-  <!-- DocFX build target runs after Release-build -->
+  <!-- Build documentation -->
+  <!-- DocFX is a tool that generates documentation from source code. It is used to generate the API documentation for the YubiKey SDK. -->
+  <!-- Run this before submitting a PR to make sure that your code does not produce any documentation issues -->
+  <!-- This can be called either by command line or in VS Code Tasks (.vscode/tasks.json) 
+    > dotnet msbuild Yubico.YubiKey/src/Yubico.YubiKey.csproj /t:DocFXBuild 
+  -->
+  <Target Name="DocFXBuild" DependsOnTargets="CheckDocFX;Restore;Build">
+    <Exec Command="docfx build $(MSBuildProjectDirectory)/docfx.json --logLevel warning --log ../docs/docfx.log --warningsAsErrors" IgnoreExitCode="true">
+      <Output TaskParameter="ExitCode" PropertyName="DocFXExitCode" />
+    </Exec>
+    <!-- Quirk. 255 seems to be the exit code it uses but we don't know the reason, so we catch it and refer to the log -->
+    <Error Condition="'$(DocFXExitCode)' != '255' AND '$(DocFXExitCode)' != '0'" Text="DocFX build failed with exit code $(DocFXExitCode). Check docfx-log.txt for details." />
+  </Target>
+
+  <!-- Check if DocFX is installed -->
   <Target Name="CheckDocFX">
     <Exec Command="docfx --version" ContinueOnError="true">
       <Output TaskParameter="ExitCode" PropertyName="DocFXExists" />
     </Exec>
     <Error Condition="'$(DocFXExists)' != '0'" Text="DocFX is not installed. Please install it using: dotnet tool install --global docfx" />
   </Target>
-
-  <Target Name="DocFXBuild" AfterTargets="Build" DependsOnTargets="CheckDocFX" Condition="'$(Configuration)' == 'ReleaseWithDocs'">
-    <Exec Command="docfx build $(MSBuildProjectDirectory)/docfx.json --logLevel warning --log docfx-log.txt --warningsAsErrors" IgnoreExitCode="true">
-      <Output TaskParameter="ExitCode" PropertyName="DocFXExitCode" />
-    </Exec>
-    <!-- Quirk. 255 seems to be the exit code it uses but we don't know the reason, so we catch it and refer to the log -->
-    <Error Condition="'$(DocFXExitCode)' != '255' AND '$(DocFXExitCode)' != '0'" 
-       Text="DocFX build failed with exit code $(DocFXExitCode). Check docfx-log.txt for details." />
-  </Target>
-
 </Project>

@@ -156,6 +156,22 @@
       ],
       "problemMatcher": "$msCompile",
       "group": "test"
+    },
+    {
+      "label": "Build DocFX Documentation",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "msbuild",
+        "${workspaceFolder}/Yubico.YubiKey/src/Yubico.YubiKey.csproj",
+        "/t:DocFXBuild",
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "Builds the documentation using DocFX"
     }
   ]
 }

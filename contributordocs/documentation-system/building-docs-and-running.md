@@ -14,8 +14,15 @@ limitations under the License. -->
 
 # Building the docs and running
 
-We have DocFX integrated into the project's build system using NuGet. Documentation is automatically
-generated when the source code is compiled.
+We use DocFX to build the documentation for the Yubico.YubiKey project. This is a tool that
+generates documentation from comments in the source code. The comments are written in Markdown
+format.
+
+In order to build the documentation, use either of the following methods: 
+1. Command Line: `docfx build Yubico.YubiKey/src/docfx.json`
+2. VS Code: Run the build task `DocFXBuild` using [VS Code Tasks](https://code.visualstudio.com/docs/editor/tasks) 
+   
+> Note: In order to run `docfx` commands, you need to have docfx installed. Install `docfx` using the following command: `dotnet tool install -g docfx`
 
 The result is in `Yubico.YubiKey/docs/_site`. The home page is `index.html`.
 

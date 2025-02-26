@@ -163,7 +163,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ```
 
-- See [how-to-install.md](./Yubico.YubiKey/docs/users-manual/getting-started/how-to-install.md) for
+- See [how-to-install.md](./docs/users-manual/getting-started/how-to-install.md) for
   an example of the header in a markdown file.
 - See [YubiKeyDeviceInfo.cs](./Yubico.YubiKey/src/Yubico/YubiKey/YubiKeyDeviceInfo.cs) for an example
   of the header in a C# file.

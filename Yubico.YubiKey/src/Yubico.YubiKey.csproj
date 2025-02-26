@@ -162,7 +162,7 @@ limitations under the License. -->
     > dotnet msbuild Yubico.YubiKey/src/Yubico.YubiKey.csproj /t:DocFXBuild 
   -->
   <Target Name="DocFXBuild" DependsOnTargets="CheckDocFX;Restore;Build">
-    <Exec Command="docfx build $(MSBuildProjectDirectory)/docfx.json --logLevel warning --log ../docs/docfx.log --warningsAsErrors" IgnoreExitCode="true">
+    <Exec Command="docfx build ../../docfx.json --logLevel warning --log ../docs/docfx.log --warningsAsErrors" IgnoreExitCode="true">
       <Output TaskParameter="ExitCode" PropertyName="DocFXExitCode" />
     </Exec>
     <!-- Quirk. 255 seems to be the exit code it uses but we don't know the reason, so we catch it and refer to the log -->

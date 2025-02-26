@@ -1,41 +1,42 @@
 {
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
   "metadata": [
     {
       "src": [
         {
-          "files": ["Yubico.Core.csproj"],
-          "src": "./Yubico.Core/src/",
-          "exclude": ["**/bin/**", "**/obj/**"]
+          "files": ["**/Yubico.Core.csproj"],
+          "src": "./Yubico.Core/src/"
         }
       ],
       "disableGitFeatures": true,
       "disableDefaultFilter": false,
+      "namespaceLayout": "flattened",
       "memberLayout": "separatePages",
       "filter": "./docs/filterConfig.yml",
-      "dest": "./docs/core-api",
-      "properties": {
-        "TargetFramework": "netstandard2.0"
-      }
+      "output": "./docs/core-api",
+      "properties": { "TargetFramework": "netstandard2.0" }
     },
     {
       "src": [
         {
-          "files": ["Yubico.YubiKey.csproj"],
-          "src": "./Yubico.YubiKey/src/",
-          "exclude": ["**/bin/**", "**/obj/**"]
+          "files": ["**/Yubico.YubiKey.csproj"],
+          "src": "./Yubico.YubiKey/src/"
         }
       ],
       "disableGitFeatures": true,
       "disableDefaultFilter": false,
+      "namespaceLayout": "flattened",
       "memberLayout": "separatePages",
       "filter": "./docs/filterConfig.yml",
-      "dest": "./docs/yubikey-api",
-      "properties": {
-        "TargetFramework": "netstandard2.0"
-      }
+      "output": "./docs/yubikey-api",
+      "properties": { "TargetFramework": "netstandard2.0" }
     }
   ],
   "build": {
+    "sitemap": {
+      "baseUrl": "https://dotnet.github.io/docfx",
+      "changefreq": "monthly"
+    },
     "content": [
       {
         "files": [
@@ -64,18 +65,15 @@
         "src": "./docs/"
       }
     ],
-    "dest": "./docs/_site/",
+    "output": "./docs/_site/",
     "globalMetadataFiles": [],
     "globalMetadata": {
-      "_appFaviconPath": "images/favicon.ico"
+      "_appFaviconPath": "images/favicon.ico",
+      "_enableSearch": true
     },
     "fileMetadataFiles": [],
-    "template": ["default", "./docs/memberpage", "./docs/yubikeysdk-template"],
-    "postProcessors": [],
-    "markdownEngineName": "markdig",
-    "noLangKeyword": false,
-    "keepFileLink": false,
-    "cleanupCacheHistory": false,
+    "template": ["default", "./docs/yubikeysdk-template"],
+    "postProcessors": ["ExtractSearchIndex"],
     "disableGitFeatures": false
   }
 }

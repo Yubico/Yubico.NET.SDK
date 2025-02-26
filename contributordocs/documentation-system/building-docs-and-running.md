@@ -19,7 +19,7 @@ generates documentation from comments in the source code. The comments are writt
 format.
 
 In order to build the documentation, use either of the following methods: 
-1. Command Line: `docfx build Yubico.YubiKey/src/docfx.json`
+1. Command Line: `docfx build jdocfx.json`
 2. VS Code: Run the build task `DocFXBuild` using [VS Code Tasks](https://code.visualstudio.com/docs/editor/tasks) 
    
 > Note: In order to run `docfx` commands, you need to have docfx installed. Install `docfx` using the following command: `dotnet tool install -g docfx`

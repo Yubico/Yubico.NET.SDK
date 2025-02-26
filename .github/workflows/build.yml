@@ -90,14 +90,22 @@ jobs:
       - name: Build docs
         run: |
           dotnet tool install --global docfx --version "2.*"
-          docfx Yubico.YubiKey/src/docfx.json --logLevel warning
+          docfx docfx.json --logLevel warning --log docfx.log --warningsAsErrors
+
+      # Upload documentation log
+      - name: "Save build artifacts: Docs log"
+        uses: actions/upload-artifact@v4
+        with:
+          name: Documentation log
+          path: docfx.log
+          if-no-files-found: error
 
       # Upload documentation
       - name: "Save build artifacts: Docs"
         uses: actions/upload-artifact@v4
         with:
           name: Documentation
-          path: Yubico.YubiKey/docs/_site/
+          path: docs/_site/
           if-no-files-found: error
           
       # Upload NuGet packages

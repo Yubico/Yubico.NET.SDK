@@ -160,11 +160,11 @@
     {
       "label": "Build DocFX Documentation",
       "type": "shell",
-      "command": "dotnet",
+      "command": "docfx",
       "args": [
-        "msbuild",
-        "${workspaceFolder}/Yubico.YubiKey/src/Yubico.YubiKey.csproj",
-        "/t:DocFXBuild",
+        "docfx.json",
+        "--log",
+        "docfx.log"
       ],
       "group": {
         "kind": "build",

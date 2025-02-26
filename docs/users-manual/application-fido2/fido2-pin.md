@@ -197,7 +197,7 @@ Once you have an array of characters, you can convert that into UTF-8 using the 
 ```
 
 This byte array is what you pass to the
-[SetPinCommand](xref:Yubico.YubiKey.Fido2.Commands.SetPinCossssssmmand).
+[SetPinCommand](xref:Yubico.YubiKey.Fido2.Commands.SetPinCommand).
 
 If you are using the `string` class to normalize, your code could look something like
 this.

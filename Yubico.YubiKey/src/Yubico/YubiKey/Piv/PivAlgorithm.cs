@@ -95,7 +95,15 @@ namespace Yubico.YubiKey.Piv
         /// While not a cryptographic algorithm, it is used in the PIV Metadata.
         /// </summary>
         Pin = 0xFF,
-        Ed25519 = 0xE0,
-        X25519 = 0xE1
+
+        /// <summary>
+        /// Indicates that the algorithm is ECC and the parameters are Ed25519
+        /// </summary>
+        EccEd25519 = 0xE0,
+        
+        /// <summary>
+        /// Indicates that the algorithm is ECC and the parameters are X25519
+        /// </summary>
+        EccX25519 = 0xE1
     }
 }

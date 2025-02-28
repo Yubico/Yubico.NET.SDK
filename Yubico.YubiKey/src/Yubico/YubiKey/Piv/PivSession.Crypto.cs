@@ -142,12 +142,27 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">
         /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
-        public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
+        [Obsolete("Use Sign(byte, ReadOnlyMemory<byte>, PivAlgorithm) instead.")]
+        public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign) // TODO Docs
         {
-            // This will verify the slot number and dataToSign length. If one or
-            // both are incorrect, the call will throw an exception.
-            var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber);
-            YubiKey.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm);
+            var signCommand = BuildSignCommand(slotNumber, dataToSign);
+
+            YubiKey.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm); //TODO Verify good 
+
+            return PerformPrivateKeyOperation(
+                slotNumber,
+                signCommand,
+                signCommand.Algorithm,
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.IncorrectDigestLength));
+        }
+
+        public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign, PivAlgorithm algorithm) // TODO Docs
+        {
+            var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber, algorithm);
+
+            YubiKey.ThrowIfUnsupportedAlgorithm(algorithm); //TODO Verify good 
 
             return PerformPrivateKeyOperation(
                 slotNumber,
@@ -353,6 +368,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public byte[] KeyAgree(byte slotNumber, PivPublicKey correspondentPublicKey)
         {
+            // TODO Add X25519
             if (correspondentPublicKey is null)
             {
                 throw new ArgumentNullException(nameof(correspondentPublicKey));
@@ -385,8 +401,10 @@ namespace Yubico.YubiKey.Piv
         // Agreement. Just pass in the actual command to run, along with some
         // other information.
         private byte[] PerformPrivateKeyOperation(
-            byte slotNumber, IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> commandToPerform,
-            PivAlgorithm algorithm, string algorithmExceptionMessage)
+            byte slotNumber,
+            IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> commandToPerform,
+            PivAlgorithm algorithm,
+            string algorithmExceptionMessage)
         {
             bool pinRequired = true;
 
@@ -477,6 +495,21 @@ namespace Yubico.YubiKey.Piv
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.IncompleteCommandInput));
+        }
+
+        [Obsolete]
+        private AuthenticateSignCommand BuildSignCommand(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
+        {
+            if (YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
+            {
+                var slotMetadata = GetMetadata(slotNumber);
+                var algorithm = slotMetadata.Algorithm;
+                return new AuthenticateSignCommand(dataToSign, slotNumber, algorithm);
+            }
+            else
+            {
+                return new AuthenticateSignCommand(dataToSign, slotNumber);
+            }
         }
     }
 }

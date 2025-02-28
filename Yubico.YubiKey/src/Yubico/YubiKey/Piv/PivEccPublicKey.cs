@@ -171,6 +171,10 @@ namespace Yubico.YubiKey.Piv
         {
             switch (publicPoint.Length)
             {
+                case 32: //TODO Is this good enough?
+                    Algorithm = PivAlgorithm.EccEd25519;
+
+                    break;
                 case EccP256PublicKeySize:
                     Algorithm = PivAlgorithm.EccP256;
 
@@ -185,11 +189,14 @@ namespace Yubico.YubiKey.Piv
                     return false;
             }
 
-            if (publicPoint[0] != LeadingEccByte)
+            if (Algorithm == PivAlgorithm.EccP256 || Algorithm == PivAlgorithm.EccP384)
             {
-                return false;
+                if (publicPoint[0] != LeadingEccByte)
+                {
+                    return false;
+                }
             }
-
+            
             var tlvWriter = new TlvWriter();
 
             using (tlvWriter.WriteNestedTlv(PublicKeyTag))

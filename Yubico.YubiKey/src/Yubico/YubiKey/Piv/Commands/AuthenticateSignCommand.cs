@@ -161,6 +161,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The data to sign (formatted digest) is not the correct length.
         /// </exception>
+        [Obsolete("Use the constructor that takes a ReadOnlyMemory<byte> instead and provide a PivAlgorithm.")]
         public AuthenticateSignCommand(ReadOnlyMemory<byte> digestData, byte slotNumber)
         {
             DataTag = DigestTag;
@@ -185,6 +186,72 @@ namespace Yubico.YubiKey.Piv.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.IncorrectDigestLength)),
             };
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the AuthenticateSignCommand class. This
+        /// command takes the slot number and the (possibly formatted) digest of
+        /// the data to sign.
+        /// </summary>
+        /// <remarks>
+        /// The slot number must be for a slot that holds an asymmetric key and
+        /// can perform arbitrary signing, which is all asymmetric key slots other
+        /// than <c>F9</c>. See the User's Manual
+        /// <xref href="UsersManualPivSlots"> entry on PIV slots </xref>,
+        /// <xref href="UsersManualPivCommands#authenticate-sign"> entry on signing </xref>,
+        /// and <see cref="PivSlot"/>.
+        /// <para>
+        /// The digest data is formatted if RSA. If the key that will be used to
+        /// sign is RSA-1024, the digest data must be 128 (1024 bits) bytes
+        /// long. If the key is RSA-2048, then the digest data must be 256 bytes
+        /// (2048 bits) long. If the key is RSA-3072, then the digest data must be 384 bytes
+        /// (3072 bits) long. If the key is RSA-4096, then the digest data must be 512 bytes
+        /// (4096 bits) long. See also the User's Manual entry on
+        /// <xref href="UsersManualPivCommands#authenticate-sign"> signing </xref>
+        /// in the PIV commands page.
+        /// </para>
+        /// <para>
+        /// For ECC, the digest data is not formatted, it is simply the output of
+        /// the message digest algorithm. If the key that will be used to sign is
+        /// ECC-P256, then the digest data must be 32 bytes (256 bits) long. You
+        /// will likely use SHA-256, which is the algorithm specified in the PIV
+        /// standard. If the key is ECC-P384, then the digest data must be 48
+        /// bytes (384 bits) long. You will likely use SHA-384, which is the
+        /// algorithm specified in the PIV standard.
+        /// </para>
+        /// <para>
+        /// Note that if the result of the digest has leading 00 bytes, you leave
+        /// those bytes in the <c>digestData</c>. For example:
+        /// </para>
+        /// <code>
+        ///  If the result of the SHA-256 digest is
+        ///    00 00 87 A9 31 ... 7C
+        ///  then you pass in 32 bytes:
+        ///    00 00 87 A9 31 ... 7C
+        ///  Do not strip the leading 00 bytes and pass in only 30 bytes (87 A9 ... 7C).
+        /// </code>
+        /// <para>
+        /// If you are signing with ECC and you use a digest algorithm that
+        /// produces smaller output (not recommended, but if you do), prepend 00
+        /// bytes to make sure the length of data passed in is the correct length.
+        /// </para>
+        /// </remarks>
+        /// <param name="digestData">
+        /// The message digest of the data to sign, formatted, if RSA.
+        /// </param>
+        /// <param name="slotNumber">
+        /// The slot holding the private key to use.
+        /// </param>
+        /// <param name="algorithm">The algorithm of the key to use.</param>
+        /// <exception cref="ArgumentException">
+        /// The data to sign (formatted digest) is not the correct length.
+        /// </exception>
+        public AuthenticateSignCommand(ReadOnlyMemory<byte> digestData, byte slotNumber, PivAlgorithm algorithm)
+        {
+            DataTag = DigestTag;
+            Data = digestData;
+            SlotNumber = slotNumber;
+            Algorithm = algorithm;
         }
 
         /// <inheritdoc />

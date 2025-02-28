@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.Piv
             PivAlgorithm.Rsa4096 => true,
             PivAlgorithm.EccP256 => true,
             PivAlgorithm.EccP384 => true,
-            PivAlgorithm.Ed25519 => true,
+            PivAlgorithm.EccEd25519 => true,
             _ => false,
         };
     }
@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Piv
     public static class PivAlgorithmExtensions
     {
 
-        // WIll be used in PivSession and the Command classes
+        //  Todo WIll be used in PivSession and the Command classes
         // Might do special class for the tuple
 
 // Possible nullable?
@@ -53,8 +53,8 @@ namespace Yubico.YubiKey.Piv
             KeyDefinitions.KeyType.RSA4096 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa4096, KeyDefinition = KeyDefinitions.RSA4096 },
             KeyDefinitions.KeyType.P256 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP256, KeyDefinition = KeyDefinitions.P256 },
             KeyDefinitions.KeyType.P384 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP384, KeyDefinition = KeyDefinitions.P384 },
-            KeyDefinitions.KeyType.Ed25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Ed25519, KeyDefinition = KeyDefinitions.Ed25519 },
-            KeyDefinitions.KeyType.X25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.X25519, KeyDefinition = KeyDefinitions.X25519 },
+            KeyDefinitions.KeyType.Ed25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccEd25519, KeyDefinition = KeyDefinitions.Ed25519 },
+            KeyDefinitions.KeyType.X25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccX25519, KeyDefinition = KeyDefinitions.X25519 },
             _ => throw new NotSupportedException("Unsupported key type" + keyType),
         };
 
@@ -67,8 +67,9 @@ namespace Yubico.YubiKey.Piv
             PivAlgorithm.Rsa4096 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa4096, KeyDefinition = KeyDefinitions.RSA4096 },
             PivAlgorithm.EccP256 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP256, KeyDefinition = KeyDefinitions.P256 },
             PivAlgorithm.EccP384 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP384, KeyDefinition = KeyDefinitions.P384 },
-            PivAlgorithm.Ed25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Ed25519, KeyDefinition = KeyDefinitions.Ed25519 },
-            PivAlgorithm.X25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.X25519, KeyDefinition = KeyDefinitions.X25519 },
+            PivAlgorithm.EccEd25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccEd25519, KeyDefinition = KeyDefinitions.Ed25519 },
+            PivAlgorithm.EccX25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccX25519, KeyDefinition = KeyDefinitions.X25519 },
+            // PivAlgorithm.TripleDes => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.TripleDes, KeyDefinition = KeyDefinitions.TripleDes },
             _ => throw new NotSupportedException("Unsupported key type" + algorithm),
         };
 
@@ -101,7 +102,7 @@ namespace Yubico.YubiKey.Piv
             PivAlgorithm.Rsa4096 => true,
             PivAlgorithm.EccP256 => true,
             PivAlgorithm.EccP384 => true,
-            PivAlgorithm.Ed25519 => true,
+            PivAlgorithm.EccEd25519 => true,
             _ => false,
         };
 
@@ -223,6 +224,9 @@ namespace Yubico.YubiKey.Piv
         /// <returns>
         /// A boolean, true if the algorithm is ECC, and false otherwise.
         /// </returns>
-        public static bool IsEcc(this PivAlgorithm algorithm) => algorithm.GetByKeyDefinitionKeyType().KeyDefinition.IsEcKey;
+        public static bool IsEcc(this PivAlgorithm algorithm)
+        {
+            return algorithm.GetByKeyDefinitionKeyType().KeyDefinition.IsEcKey;
+        }
     }
 }

@@ -8,19 +8,22 @@ namespace Yubico.YubiKey.TestUtilities
         /// Converts the key to a PIV private key format.
         /// </summary>
         /// <returns>PivPrivateKey instance</returns>
-        public static PivPrivateKey AsPrivateKey(this TestKey key)
+        public static PivPrivateKey AsPivPrivateKey(this TestKey key)
         {
-            return new KeyConverter(key.AsPemString()).GetPivPrivateKey();
+            var keyConverter = new KeyConverter(key.AsPemString()); 
+            var pivKey = keyConverter.GetPivPrivateKey();
+            return pivKey;
         }
 
         /// <summary>
         /// Converts the key to a PIV public key format.
         /// </summary>
         /// <returns>PivPublicKey instance</returns>
-        public static PivPublicKey AsPublicKey(this TestKey key)
-
+        public static PivPublicKey AsPivPublicKey(this TestKey key)
         {
-            return new KeyConverter(key.AsPemString()).GetPivPublicKey();
+            var keyConverter = new KeyConverter(key.AsPemString()); // works
+            var pivKey = keyConverter.GetPivPublicKey(); // doesnt work
+            return pivKey;
         }
     }
 }

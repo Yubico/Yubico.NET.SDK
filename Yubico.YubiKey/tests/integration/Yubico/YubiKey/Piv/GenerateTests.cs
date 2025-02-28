@@ -28,24 +28,18 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
         [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.Ed25519)]
+        [InlineData(PivAlgorithm.EccEd25519)]
         [InlineData(PivAlgorithm.Rsa1024, true)]
         [InlineData(PivAlgorithm.Rsa2048, true)]
         [InlineData(PivAlgorithm.Rsa3072, true)]
         [InlineData(PivAlgorithm.Rsa4096, true)]
+        [InlineData(PivAlgorithm.EccEd25519, true)]
         public void SimpleGenerate(PivAlgorithm expectedAlgorithm, bool useScp03 = false)
         {
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(Transport.SmartCard, FirmwareVersion.V5_3_0);
-
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            using var pivSession = useScp03
-                ? new PivSession(testDevice, Scp03KeyParameters.DefaultKey)
-                : new PivSession(testDevice);
 
-            var collectorObj = new Simple39KeyCollector();
-            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-            var result = pivSession.GenerateKeyPair(PivSlot.Retired12, expectedAlgorithm);
+            var result = DoGenerate(testDevice, PivSlot.Retired12, expectedAlgorithm, useScp03: useScp03);
             Assert.Equal(expectedAlgorithm, result.Algorithm);
         }
 
@@ -54,6 +48,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
         [InlineData(PivAlgorithm.Rsa4096)]
+        [InlineData(PivAlgorithm.EccEd25519)]
         public void GenerateAndSign(PivAlgorithm algorithm)
         {
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(Transport.SmartCard, FirmwareVersion.V5_3_0);
@@ -61,83 +56,52 @@ namespace Yubico.YubiKey.Piv
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
             Assert.True(testDevice is YubiKeyDevice);
 
-            var isValid = DoGenerate(testDevice, 0x86, algorithm, PivPinPolicy.Once, PivTouchPolicy.Never);
-            Assert.True(isValid);
+            DoGenerate(testDevice, PivSlot.Retired12, algorithm);
 
-            isValid = DoSignNoPin(testDevice, 0x86, algorithm);
+            var isValid = DoSign(testDevice, PivSlot.Retired12, algorithm, usePinVerify: false);
             Assert.False(isValid);
 
-            isValid = DoSignWithPin(testDevice, 0x86, algorithm);
+            isValid = DoSign(testDevice, PivSlot.Retired12, algorithm, usePinVerify: true);
             Assert.True(isValid);
         }
 
-        private static bool DoGenerate(
+        private static PivPublicKey DoGenerate(
             IYubiKeyDevice yubiKey, byte slotNumber, PivAlgorithm algorithm,
-            PivPinPolicy pinPolicy, PivTouchPolicy touchPolicy)
+            PivPinPolicy pinPolicy = PivPinPolicy.Once, PivTouchPolicy touchPolicy = PivTouchPolicy.Never, bool useScp03 = false)
         {
-            using var pivSession = new PivSession(yubiKey);
+            using var pivSession = useScp03
+                ? new PivSession(yubiKey, Scp03KeyParameters.DefaultKey)
+                : new PivSession(yubiKey);
+
             var collectorObj = new Simple39KeyCollector();
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            _ = pivSession.GenerateKeyPair(
-                slotNumber, algorithm, pinPolicy, touchPolicy);
-
-            return true;
+            return pivSession.GenerateKeyPair(slotNumber, algorithm, pinPolicy, touchPolicy);
         }
 
-        private static bool DoSignNoPin(
-            IYubiKeyDevice yubiKey, byte slotNumber, PivAlgorithm algorithm)
+        private static bool DoSign(
+            IYubiKeyDevice yubiKey, byte slotNumber, PivAlgorithm algorithm, bool usePinVerify)
         {
             using var pivSession = new PivSession(yubiKey);
 
+            if (usePinVerify)
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                if (!pivSession.TryVerifyPin())
+                {
+                    return false;
+                }
+
+            }
+
             var digestData = GetDigestData(algorithm);
-            var signCommand = new AuthenticateSignCommand(digestData, slotNumber);
+            var signCommand = new AuthenticateSignCommand(digestData, slotNumber, algorithm);
             var signResponse = pivSession.Connection.SendCommand(signCommand);
 
             return signResponse.Status == ResponseStatus.Success;
         }
-
-        private static bool DoSignWithPin(
-            IYubiKeyDevice yubiKey, byte slotNumber, PivAlgorithm algorithm)
-        {
-            using var pivSession = new PivSession(yubiKey);
-
-            var collectorObj = new Simple39KeyCollector();
-            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-            if (pivSession.TryVerifyPin() == false)
-            {
-                return false;
-            }
-
-            var digestData = GetDigestData(algorithm);
-            var signCommand = new AuthenticateSignCommand(digestData, slotNumber);
-            var signResponse = pivSession.Connection.SendCommand(signCommand);
-            if (signResponse.Status != ResponseStatus.Success)
-            {
-                return false;
-            }
-
-            var signature1 = signResponse.GetData();
-
-            signCommand = new AuthenticateSignCommand(digestData, slotNumber);
-            signResponse = pivSession.Connection.SendCommand(signCommand);
-            if (signResponse.Status != ResponseStatus.Success)
-            {
-                return false;
-            }
-
-            var signature2 = signResponse.GetData();
-
-            var returnValue = signature1[10] == signature2[10];
-
-            if (algorithm == PivAlgorithm.EccP256 || algorithm == PivAlgorithm.EccP384)
-            {
-                returnValue = signature1[11] != signature2[11];
-            }
-
-            return returnValue;
-        }
-
         private static byte[] GetDigestData(PivAlgorithm algorithm) => algorithm switch
         {
             PivAlgorithm.Rsa2048 => new byte[] {

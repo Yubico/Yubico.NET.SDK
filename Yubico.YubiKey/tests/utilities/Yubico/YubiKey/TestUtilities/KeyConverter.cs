@@ -87,6 +87,9 @@ namespace Yubico.YubiKey.TestUtilities
         public const int KeyTypePivPublic = 7;
         public const int KeyTypePivPrivate = 8;
 
+        public bool IsPrivate { get; private set; }
+        public PivAlgorithm Algorithm { get; private set; }
+        
         private PivPrivateKey _pivPrivateKey = new PivPrivateKey();
         private PivPublicKey _pivPublicKey = new PivPublicKey();
 
@@ -207,8 +210,7 @@ namespace Yubico.YubiKey.TestUtilities
             SetProperties(true);
         }
 
-        public bool IsPrivate { get; private set; }
-        public PivAlgorithm Algorithm { get; private set; }
+
 
         // This lets you know if you will be able to get a particular key out of
         // this object.
@@ -373,6 +375,23 @@ namespace Yubico.YubiKey.TestUtilities
         // not return a reference.
         public PivPrivateKey GetPivPrivateKey()
         {
+            if (_pivPrivateKey.Algorithm == PivAlgorithm.EccEd25519) // This is the simple one
+            {
+                var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
+                var last32Bytes = testPrivateKey.KeyBytes.AsSpan()[^32..];
+                var pivPrivateKey2 = new PivEccPrivateKey(last32Bytes.ToArray(), PivAlgorithm.EccEd25519);
+                return pivPrivateKey2;
+            }
+            
+            if (_pivPrivateKey.Algorithm == PivAlgorithm.EccEd25519) // This is good as well, but a bit too complex. However it could be used to replace keyconverter
+            {
+                var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
+                var parser = new PrivateKeyInfoParser();
+                var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(testPrivateKey.KeyBytes);
+                var pivPrivateKey = new PivEccPrivateKey(keyInfo.PrivateKey, _pivPrivateKey.Algorithm);
+                return pivPrivateKey;
+            }
+            
             if (_pivPrivateKey.Algorithm != PivAlgorithm.None)
             {
                 return PivPrivateKey.Create(_pivPrivateKey.EncodedPrivateKey);
@@ -670,7 +689,18 @@ namespace Yubico.YubiKey.TestUtilities
                     BuildPivPublicKey(eccObject);
                     BuildPivPrivateKey(eccObject);
                 }
+                else if (encodedKey[offset + 3] == 0x04)
+                {
+                    BuildPivPrivateKey(encodedKey);
+                    // BuildPivPublicKey(eccObject); // TODO needed?
+                }
             }
+        }
+
+        private void BuildPivPrivateKey(Memory<byte> encodedKey)
+        {
+            var keyDataRange = ^32..;
+            _pivPrivateKey = new PivEccPrivateKey(encodedKey.Span[keyDataRange], PivAlgorithm.EccEd25519);
         }
 
         private void BuildPivPublicKey(char[] pemKeyString)
@@ -736,14 +766,15 @@ namespace Yubico.YubiKey.TestUtilities
         {
             // We need to build the private value and it must be exactly
             // the keySize.
-            int keySize = eccObject.KeySize / 8;
-            ECParameters eccParams = eccObject.ExportParameters(true);
-            byte[] privateValue = new byte[keySize];
-            int offset = keySize - eccParams.D!.Length;
+            var keySize = eccObject.KeySize / 8;
+            var eccParams = eccObject.ExportParameters(true);
+            var offset = keySize - eccParams.D!.Length;
+
+            var privateValue = new byte[keySize];
             Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
 
-            var eccPriKey = new PivEccPrivateKey(privateValue);
-            _pivPrivateKey = (PivPrivateKey)eccPriKey;
+            var eccPriKey = new PivEccPrivateKey(privateValue, Algorithm);
+            _pivPrivateKey = eccPriKey;
         }
 
         private void BuildPivPublicKey(ECDsa eccObject)
@@ -763,7 +794,7 @@ namespace Yubico.YubiKey.TestUtilities
             Array.Copy(eccParams.Q.Y, 0, point, offset, eccParams.Q.Y.Length);
 
             var eccPubKey = new PivEccPublicKey(point);
-            _pivPublicKey = (PivPublicKey)eccPubKey;
+            _pivPublicKey = eccPubKey;
         }
 
         // Multiply p and q to get the modulus

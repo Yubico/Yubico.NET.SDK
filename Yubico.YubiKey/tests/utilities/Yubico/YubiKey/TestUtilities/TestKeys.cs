@@ -16,6 +16,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.TestUtilities
 {
@@ -47,10 +48,10 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         /// <summary>
-        /// Returns the raw byte representation of the cryptographic data.
+        /// Returns the raw byte representation of the key data.
         /// </summary>
         /// <returns>Byte array containing the decoded cryptographic data.</returns>
-        public byte[] AsRawBytes() => _bytes;
+        public byte[] KeyBytes => _bytes;
 
         /// <summary>
         /// Returns the complete PEM-encoded string representation.
@@ -62,8 +63,8 @@ namespace Yubico.YubiKey.TestUtilities
         /// Returns the Base64-encoded data without PEM headers and footers.
         /// </summary>
         /// <returns>Base64 string of the cryptographic data.</returns>
-        public string AsBase64() => StripPemHeaderFooter(_pemStringFull);
-
+        public string AsBase64String() => StripPemHeaderFooter(_pemStringFull);
+        
         private static byte[] GetBytesFromPem(string pemData)
         {
             var base64 = StripPemHeaderFooter(pemData);
@@ -101,6 +102,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <summary>
         /// Loads a test key from the TestData directory.
         /// </summary>
+        /// <param name="filePath">The path to the PEM file containing the key data</param>
         /// <param name="curve">The curve or key type (e.g., "rsa2048", "secp256r1")</param>
         /// <param name="isPrivate">True for private key, false for public key</param>
         /// <returns>A TestKey instance representing the loaded key</returns>
@@ -178,10 +180,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// Converts the certificate to an X509Certificate2 instance.
         /// </summary>
         /// <returns>X509Certificate2 instance initialized with the certificate data</returns>
-        public X509Certificate2 AsX509Certificate2()
-        {
-            return X509CertificateLoader.LoadCertificate(_bytes);
-        }
+        public X509Certificate2 AsX509Certificate2() => X509CertificateLoader.LoadCertificate(_bytes);
 
         /// <summary>
         /// Loads a certificate from the TestData directory.
@@ -211,6 +210,13 @@ namespace Yubico.YubiKey.TestUtilities
         public static TestKey GetPrivateKey(string curve) => TestKey.Load(curve, true);
 
         /// <summary>
+        /// Get a private key for the specified algorithm.
+        /// </summary>
+        /// <param name="algorithm">The piv algorithm</param>
+        /// <returns>TestKey instance representing the private key</returns>
+        public static TestKey GetPrivateKey(PivAlgorithm algorithm) => GetPrivateKey(GetCurveFromAlgorithm(algorithm));
+
+        /// <summary>
         /// Gets a public key for the specified curve.
         /// </summary>
         /// <param name="curve">The curve or key type</param>
@@ -225,5 +231,22 @@ namespace Yubico.YubiKey.TestUtilities
         /// <returns>TestCertificate instance</returns>s
         public static TestCertificate GetCertificate(string curve, bool isAttestation = false) =>
             TestCertificate.Load(curve, isAttestation);
+
+        private static string GetCurveFromAlgorithm(PivAlgorithm algorithm)
+        {
+            return algorithm switch
+            {
+                PivAlgorithm.Rsa1024 => "rsa1024",
+                PivAlgorithm.Rsa2048 => "rsa2048",
+                PivAlgorithm.Rsa3072 => "rsa3072",
+                PivAlgorithm.Rsa4096 => "rsa4096",
+                PivAlgorithm.EccP256 => "p256",
+                PivAlgorithm.EccP384 => "p384",
+                PivAlgorithm.EccP521 => "p521",
+                PivAlgorithm.EccEd25519 => "ed25519",
+                PivAlgorithm.EccX25519 => "x25519",
+                _ => throw new ArgumentException("No curve mapped", nameof(algorithm))
+            };
+        }
     }
 }

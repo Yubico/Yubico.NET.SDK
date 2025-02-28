@@ -20,7 +20,6 @@ namespace Yubico.YubiKey.TestUtilities
 {
     public static class SampleKeyPairs
     {
-        // Get a private key with its matching certificate
         public static bool GetMatchingKeyAndCert(
             PivAlgorithm algorithm,
             out X509Certificate2? cert,
@@ -35,7 +34,7 @@ namespace Yubico.YubiKey.TestUtilities
             }
 
             cert = TestKeys.GetCertificate(curve).AsX509Certificate2();
-            privateKey = TestKeys.GetPrivateKey(curve).AsPrivateKey();
+            privateKey = TestKeys.GetPrivateKey(curve).AsPivPrivateKey();
             return true;
         }
 
@@ -68,13 +67,17 @@ namespace Yubico.YubiKey.TestUtilities
         public static PivPublicKey GetPivPublicKey(PivAlgorithm algorithm)
         {
             var curve = GetCurveFromAlgorithm(algorithm);
-            return TestKeys.GetPublicKey(curve).AsPublicKey();
+            return TestKeys
+                .GetPublicKey(curve)
+                .AsPivPublicKey();
         }
 
         public static PivPrivateKey GetPivPrivateKey(PivAlgorithm algorithm)
         {
             var curve = GetCurveFromAlgorithm(algorithm);
-            return TestKeys.GetPrivateKey(curve).AsPrivateKey();
+            return TestKeys
+                .GetPrivateKey(curve)
+                .AsPivPrivateKey();
         }
 
         public static X509Certificate2 GetCert(PivAlgorithm algorithm)
@@ -83,9 +86,8 @@ namespace Yubico.YubiKey.TestUtilities
             return TestKeys.GetCertificate(curve).AsX509Certificate2();
         }
 
-        private static string GetCurveFromAlgorithm(PivAlgorithm algorithm)
-        {
-            return algorithm switch
+        private static string GetCurveFromAlgorithm(PivAlgorithm algorithm) =>
+            algorithm switch
             {
                 PivAlgorithm.Rsa1024 => "rsa1024",
                 PivAlgorithm.Rsa2048 => "rsa2048",
@@ -94,8 +96,9 @@ namespace Yubico.YubiKey.TestUtilities
                 PivAlgorithm.EccP256 => "p256",
                 PivAlgorithm.EccP384 => "p384",
                 PivAlgorithm.EccP521 => "p521",
+                PivAlgorithm.EccEd25519 => "ed25519",
+                PivAlgorithm.EccX25519 => "x25519",
                 _ => throw new ArgumentException("No curve mapped", nameof(algorithm))
             };
-        }
     }
 }

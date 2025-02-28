@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.TestUtilities
         {
             var key = TestKeys.GetPublicKey("rsa4096");
 
-            string base64 = key.AsBase64();
+            string base64 = key.AsBase64String();
             Assert.DoesNotContain("-----BEGIN", base64);
             Assert.DoesNotContain("-----END", base64);
             Assert.DoesNotContain("\n", base64);

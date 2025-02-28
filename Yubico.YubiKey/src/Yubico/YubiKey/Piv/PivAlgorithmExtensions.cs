@@ -30,6 +30,7 @@ namespace Yubico.YubiKey.Piv
             PivAlgorithm.EccP256 => true,
             PivAlgorithm.EccP384 => true,
             PivAlgorithm.EccEd25519 => true,
+            PivAlgorithm.EccX25519 => true,
             _ => false,
         };
     }

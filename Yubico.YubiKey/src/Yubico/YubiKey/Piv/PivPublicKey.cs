@@ -114,6 +114,7 @@ namespace Yubico.YubiKey.Piv
         /// <param name="encodedPublicKey">
         /// The PIV TLV encoding.
         /// </param>
+        /// <param name="algorithm"></param>
         /// <returns>
         /// An instance of a subclass of <c>PivPublicKey</c>, the actual key
         /// represented by the encoding.
@@ -121,8 +122,13 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The key data supplied is not a supported encoding.
         /// </exception>
-        public static PivPublicKey Create(ReadOnlyMemory<byte> encodedPublicKey)
+        public static PivPublicKey Create(ReadOnlyMemory<byte> encodedPublicKey, PivAlgorithm? algorithm = null)
         {
+            if (algorithm is PivAlgorithm.EccEd25519 or PivAlgorithm.EccX25519)
+            {
+                return new PivEccPublicKey(encodedPublicKey.Span, algorithm.Value);
+            }
+
             // Try to decode as an RSA public key. If that works, we're done. If
             // not, try ECC. If that doesn't work, exception.
             bool isCreated = PivRsaPublicKey.TryCreate(out var publicKeyObject, encodedPublicKey);

@@ -235,7 +235,7 @@ namespace Yubico.YubiKey.Piv
                     case PublicTag:
                         // Public: public key partner to the private key in the
                         // slot
-                        PublicKey = PivPublicKey.Create(value);
+                        PublicKey = PivPublicKey.Create(value, Algorithm);
 
                         break;
 

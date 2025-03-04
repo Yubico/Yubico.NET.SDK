@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         public bool IsPrivate { get; private set; }
         public PivAlgorithm Algorithm { get; private set; }
-        
+
         private PivPrivateKey _pivPrivateKey = new PivPrivateKey();
         private PivPublicKey _pivPublicKey = new PivPublicKey();
 
@@ -119,11 +119,14 @@ namespace Yubico.YubiKey.TestUtilities
         // constructor will not build a key.
         // If the PEM is a private key, the constructor will build its own local
         // copy of a private key and a public key.
-        public KeyConverter(string pemKeyString) :
+        public KeyConverter(
+            string pemKeyString) :
             this(pemKeyString.ToCharArray())
         {
         }
-        public KeyConverter(char[] pemKeyString)
+
+        public KeyConverter(
+            char[] pemKeyString)
         {
             // Search for the PublicKeyStart and End or PrivateKeyStart and End.
             if (VerifyPemHeaderAndFooter(pemKeyString, PublicKeyStart.ToCharArray(), PublicKeyEnd.ToCharArray()))
@@ -140,7 +143,8 @@ namespace Yubico.YubiKey.TestUtilities
 
         // This will clone the input key object, so that the KeyConverter object
         // will have its own copy.
-        public KeyConverter(PivPublicKey pivPublicKey)
+        public KeyConverter(
+            PivPublicKey pivPublicKey)
         {
             if (pivPublicKey.Algorithm != PivAlgorithm.None)
             {
@@ -158,7 +162,8 @@ namespace Yubico.YubiKey.TestUtilities
         // public point (a private key does not need the public key in order to
         // perform its operations), but the default implementation of ECC in C#
         // (what this class uses) requires the public point as well.
-        public KeyConverter(PivPrivateKey pivPrivateKey)
+        public KeyConverter(
+            PivPrivateKey pivPrivateKey)
         {
             if (pivPrivateKey.Algorithm != PivAlgorithm.None)
             {
@@ -177,7 +182,9 @@ namespace Yubico.YubiKey.TestUtilities
         // the constructor will throw an exception.
         // If that arg is false, this constructor will build only a public key,
         // even if the RSA object contains the private key.
-        public KeyConverter(RSA rsaObject, bool isPrivate)
+        public KeyConverter(
+            RSA rsaObject,
+            bool isPrivate)
         {
             if (isPrivate)
             {
@@ -198,7 +205,9 @@ namespace Yubico.YubiKey.TestUtilities
         // the constructor will throw an exception.
         // If that arg is false, this constructor will build only a public key,
         // even if the ECDsa object contains the private key.
-        public KeyConverter(ECDsa eccObject, bool isPrivate)
+        public KeyConverter(
+            ECDsa eccObject,
+            bool isPrivate)
         {
             if (isPrivate)
             {
@@ -209,7 +218,6 @@ namespace Yubico.YubiKey.TestUtilities
 
             SetProperties(true);
         }
-
 
 
         // This lets you know if you will be able to get a particular key out of
@@ -233,7 +241,8 @@ namespace Yubico.YubiKey.TestUtilities
         // Calling this method with KeyTypeECDsaPrivate will return false. This
         // is because this class cannot build an ECDsa object from the data found
         // in a PivPrivateKey.
-        public bool IsKeyAvailable(int keyType)
+        public bool IsKeyAvailable(
+            int keyType)
         {
             bool returnValue = false;
 
@@ -336,9 +345,17 @@ namespace Yubico.YubiKey.TestUtilities
         // an ECC private key.
         public PivPublicKey GetPivPublicKey()
         {
+            // if (_pivPublicKey.Algorithm == PivAlgorithm.EccX25519)
+            // {
+            //     var testPublicKey = TestKeys.GetPublicKey(_pivPublicKey.Algorithm);
+            //     var last32Bytes = testPublicKey.KeyBytes.AsSpan()[^32..];
+            //     var pivPublicKey = new PivEccPublicKey(last32Bytes, PivAlgorithm.EccEd25519);
+            //     return pivPublicKey;
+            // }
+
             if (_pivPublicKey.Algorithm != PivAlgorithm.None)
             {
-                return PivPublicKey.Create(_pivPublicKey.PivEncodedPublicKey);
+                return PivPublicKey.Create(_pivPublicKey.PivEncodedPublicKey, _pivPublicKey.Algorithm);
             }
 
             if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 || _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
@@ -379,11 +396,21 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
                 var last32Bytes = testPrivateKey.KeyBytes.AsSpan()[^32..];
-                var pivPrivateKey2 = new PivEccPrivateKey(last32Bytes.ToArray(), PivAlgorithm.EccEd25519);
-                return pivPrivateKey2;
+                var pivPrivateKey = new PivEccPrivateKey(last32Bytes.ToArray(), PivAlgorithm.EccEd25519);
+                return pivPrivateKey;
             }
-            
-            if (_pivPrivateKey.Algorithm == PivAlgorithm.EccEd25519) // This is good as well, but a bit too complex. However it could be used to replace keyconverter
+
+            if (_pivPrivateKey.Algorithm == PivAlgorithm.EccX25519) // This is the simple one
+            {
+                var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
+                var last32Bytes = testPrivateKey.KeyBytes.AsSpan()[^32..];
+                var pivPrivateKey = new PivEccPrivateKey(last32Bytes.ToArray(), PivAlgorithm.EccEd25519);
+                return pivPrivateKey;
+            }
+
+            if (_pivPrivateKey.Algorithm ==
+                PivAlgorithm
+                    .EccEd25519) // This is good as well, but a bit too complex. However it could be used to replace keyconverter
             {
                 var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
                 var parser = new PrivateKeyInfoParser();
@@ -391,7 +418,7 @@ namespace Yubico.YubiKey.TestUtilities
                 var pivPrivateKey = new PivEccPrivateKey(keyInfo.PrivateKey, _pivPrivateKey.Algorithm);
                 return pivPrivateKey;
             }
-            
+
             if (_pivPrivateKey.Algorithm != PivAlgorithm.None)
             {
                 return PivPrivateKey.Create(_pivPrivateKey.EncodedPrivateKey);
@@ -634,7 +661,8 @@ namespace Yubico.YubiKey.TestUtilities
         // the algorithm is None.
         // But if the arg is false, go ahead and set the properties, even if that
         // means the keys are empty and the Algorithm is None.
-        private void SetProperties(bool exceptionOnNoData)
+        private void SetProperties(
+            bool exceptionOnNoData)
         {
             IsPrivate = false;
             Algorithm = _pivPrivateKey.Algorithm;
@@ -659,7 +687,8 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Build the private key from the PRIVATE KEY PEM. If possible, build the
         // public key as well.
-        private void BuildPivPrivateKey(char[] pemKeyString)
+        private void BuildPivPrivateKey(
+            char[] pemKeyString)
         {
             // Read everything between the labels.
             byte[] encodedKey = Convert.FromBase64CharArray(
@@ -691,19 +720,21 @@ namespace Yubico.YubiKey.TestUtilities
                 }
                 else if (encodedKey[offset + 3] == 0x04)
                 {
-                    BuildPivPrivateKey(encodedKey);
-                    // BuildPivPublicKey(eccObject); // TODO needed?
+                    var keyDataRange = ^32..;
+                    _pivPrivateKey = new PivEccPrivateKey(encodedKey.AsSpan()[keyDataRange], PivAlgorithm.EccEd25519);
+                    // BuildPivPublicKey(eccObject); // TODO How do get this? I can get it from the file data. Possibly compute from the private key?
+                }
+                else if (encodedKey[offset + 3] == 0x03) // Not sure if this is correct. It appears ED and X keys share this byte
+                {
+                    var keyDataRange = ^32..;
+                    _pivPrivateKey = new PivEccPrivateKey(encodedKey.AsSpan()[keyDataRange], PivAlgorithm.EccX25519);
+                    // BuildPivPublicKey(eccObject); // TODO How do get this? I can get it from the file data. Possibly compute from the private key?
                 }
             }
         }
-
-        private void BuildPivPrivateKey(Memory<byte> encodedKey)
-        {
-            var keyDataRange = ^32..;
-            _pivPrivateKey = new PivEccPrivateKey(encodedKey.Span[keyDataRange], PivAlgorithm.EccEd25519);
-        }
-
-        private void BuildPivPublicKey(char[] pemKeyString)
+        
+        private void BuildPivPublicKey(
+            char[] pemKeyString)
         {
             // Read everything between the labels.
             byte[] encodedKey = Convert.FromBase64CharArray(
@@ -730,10 +761,19 @@ namespace Yubico.YubiKey.TestUtilities
 
                     BuildPivPublicKey(eccObject);
                 }
+                else if (encodedKey[offset + 3] == 0x04) // Ed25519
+                {
+                    _pivPublicKey = new PivEccPublicKey(encodedKey.AsSpan()[^32..], PivAlgorithm.EccEd25519);
+                }
+                else if (encodedKey[offset + 3] == 0x03) // X25519
+                {
+                    _pivPublicKey = new PivEccPublicKey(encodedKey.AsSpan()[^32..], PivAlgorithm.EccX25519);
+                }
             }
         }
 
-        private void BuildPivPrivateKey(RSA rsaObject)
+        private void BuildPivPrivateKey(
+            RSA rsaObject)
         {
             RSAParameters rsaParams = rsaObject.ExportParameters(true);
 
@@ -754,7 +794,8 @@ namespace Yubico.YubiKey.TestUtilities
             }
         }
 
-        private void BuildPivPublicKey(RSA rsaObject)
+        private void BuildPivPublicKey(
+            RSA rsaObject)
         {
             RSAParameters rsaParams = rsaObject.ExportParameters(false);
 
@@ -762,7 +803,8 @@ namespace Yubico.YubiKey.TestUtilities
             _pivPublicKey = (PivPublicKey)rsaPubKey;
         }
 
-        private void BuildPivPrivateKey(ECDsa eccObject)
+        private void BuildPivPrivateKey(
+            ECDsa eccObject)
         {
             // We need to build the private value and it must be exactly
             // the keySize.
@@ -777,7 +819,8 @@ namespace Yubico.YubiKey.TestUtilities
             _pivPrivateKey = eccPriKey;
         }
 
-        private void BuildPivPublicKey(ECDsa eccObject)
+        private void BuildPivPublicKey(
+            ECDsa eccObject)
         {
             int keySize = eccObject.KeySize / 8;
 
@@ -803,7 +846,9 @@ namespace Yubico.YubiKey.TestUtilities
         // There is no way to overwrite sensitive data. This needs to be updated
         // to use a multi-precision arithmetic library that is good to use with
         // crypto.
-        private static byte[] GetModulusFromPrimes(byte[] primeP, byte[] primeQ)
+        private static byte[] GetModulusFromPrimes(
+            byte[] primeP,
+            byte[] primeQ)
         {
             byte[] pValue = Array.Empty<byte>();
             byte[] qValue = Array.Empty<byte>();
@@ -841,7 +886,10 @@ namespace Yubico.YubiKey.TestUtilities
         // There is no way to overwrite sensitive data. This needs to be updated
         // to use a multi-precision arithmetic library that is good to use with
         // crypto.
-        private static byte[] GetPrivateExponentFromPrimes(byte[] primeP, byte[] primeQ, byte[] publicExponent)
+        private static byte[] GetPrivateExponentFromPrimes(
+            byte[] primeP,
+            byte[] primeQ,
+            byte[] publicExponent)
         {
             byte[] pValue = new byte[primeP.Length + 1];
             Array.Copy(primeP, 0, pValue, 1, primeP.Length);
@@ -872,7 +920,9 @@ namespace Yubico.YubiKey.TestUtilities
         // There is no way to overwrite sensitive data. This needs to be updated
         // to use a multi-precision arithmetic library that is good to use with
         // crypto.
-        public static BigInteger ModInverse(BigInteger value, BigInteger modulo)
+        public static BigInteger ModInverse(
+            BigInteger value,
+            BigInteger modulo)
         {
             if (1 != Egcd(value, modulo, out BigInteger x, out _))
             {
@@ -930,7 +980,10 @@ namespace Yubico.YubiKey.TestUtilities
         // skip the value (that will be length octets) and return the offset into
         // the buffer where the next TLV begins.
         // If the length octets are invalid, return -1.
-        private static int ReadTagLen(byte[] buffer, int offset, bool readValue)
+        private static int ReadTagLen(
+            byte[] buffer,
+            int offset,
+            bool readValue)
         {
             // Make sure there are enough bytes to read.
             if (offset < 0 || buffer.Length < offset + 2)
@@ -984,7 +1037,10 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Verify that the given string begins with the targetStart and ends with
         // the targetEnd.
-        private static bool VerifyPemHeaderAndFooter(char[] pemKeyString, char[] targetStart, char[] targetEnd)
+        private static bool VerifyPemHeaderAndFooter(
+            char[] pemKeyString,
+            char[] targetStart,
+            char[] targetEnd)
         {
             bool returnValue = false;
             if (pemKeyString.Length > targetStart.Length + targetEnd.Length)
@@ -1000,7 +1056,10 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Compare the chars in buffer beginning at offset with the chars in
         // target.
-        private static bool CompareToTarget(char[] buffer, int offset, char[] target)
+        private static bool CompareToTarget(
+            char[] buffer,
+            int offset,
+            char[] target)
         {
             int index = 0;
             for (; index < target.Length; index++)

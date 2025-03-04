@@ -28,6 +28,8 @@ namespace Yubico.YubiKey.TestUtilities
     /// </summary>
     public abstract class TestCrypto
     {
+        public const string TestDataDirectory = "TestData";
+
         /// <summary>
         /// The raw byte representation of the cryptographic data in DER format.
         /// </summary>
@@ -65,6 +67,8 @@ namespace Yubico.YubiKey.TestUtilities
         /// <returns>Base64 string of the cryptographic data.</returns>
         public string AsBase64String() => StripPemHeaderFooter(_pemStringFull);
         
+        public static byte[] ReadTestData(string fileName) => File.ReadAllBytes(Path.Combine(TestDataDirectory, fileName));
+        
         private static byte[] GetBytesFromPem(string pemData)
         {
             var base64 = StripPemHeaderFooter(pemData);
@@ -96,7 +100,7 @@ namespace Yubico.YubiKey.TestUtilities
     /// </summary>
     public class TestKey : TestCrypto
     {
-        private readonly string _curve;
+        public readonly string _curve;
         private readonly bool _isPrivate;
 
         /// <summary>
@@ -152,10 +156,15 @@ namespace Yubico.YubiKey.TestUtilities
         /// Converts the key to a PIV private key format.
         /// </summary>
         /// <returns>PivPrivateKey instance</returns>
-        public static TestKey Load(string curve, bool isPrivate)
+        public static TestKey Load(string curve, bool isPrivate, int? index = null)
         {
-            var fileName = $"{curve}_{(isPrivate ? "private" : "public")}.pem";
-            var filePath = Path.Combine("TestData", fileName);
+            if(index is 0 or 1)
+            {
+                index = null;
+            }
+            
+            var fileName = $"{curve}_{(isPrivate ? "private" : "public")}{(index.HasValue ? $"_{index}" : "")}.pem";
+            var filePath = Path.Combine(TestDataDirectory, fileName);
             return new TestKey(filePath, curve, isPrivate);
         }
     }
@@ -191,7 +200,7 @@ namespace Yubico.YubiKey.TestUtilities
         public static TestCertificate Load(string curve, bool isAttestation = false)
         {
             var fileName = $"{curve}_cert{(isAttestation ? "_attest" : "")}.pem";
-            var filePath = Path.Combine("TestData", fileName);
+            var filePath = Path.Combine(TestDataDirectory, fileName);
             return new TestCertificate(filePath, isAttestation);
         }
     }
@@ -201,7 +210,6 @@ namespace Yubico.YubiKey.TestUtilities
     /// </summary>
     public static class TestKeys
     {
-
         /// <summary>
         /// Gets a private key for the specified curve.
         /// </summary>
@@ -215,13 +223,16 @@ namespace Yubico.YubiKey.TestUtilities
         /// <param name="algorithm">The piv algorithm</param>
         /// <returns>TestKey instance representing the private key</returns>
         public static TestKey GetPrivateKey(PivAlgorithm algorithm) => GetPrivateKey(GetCurveFromAlgorithm(algorithm));
+        public static (TestKey publicKey, TestKey privateKey) GetKeyPair(string curve) => (GetPublicKey(curve), GetPrivateKey(curve));
+        public static (TestKey publicKey, TestKey privateKey) GetKeyPair(PivAlgorithm algorithm) => GetKeyPair(GetCurveFromAlgorithm(algorithm)); 
 
         /// <summary>
         /// Gets a public key for the specified curve.
         /// </summary>
         /// <param name="curve">The curve or key type</param>
         /// <returns>TestKey instance representing the public key</returns>
-        public static TestKey GetPublicKey(string curve) => TestKey.Load(curve, false);
+        public static TestKey GetPublicKey(string curve, int? index = null) => TestKey.Load(curve, false, index);
+        public static TestKey GetPublicKey(PivAlgorithm algorithm, int? index = null) => GetPublicKey(GetCurveFromAlgorithm(algorithm), index);
 
         /// <summary>
         /// Gets a certificate for the specified curve.

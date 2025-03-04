@@ -452,9 +452,23 @@ namespace Yubico.YubiKey.Piv
             };
 
             var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber);
-            AuthenticateSignResponse signResponse = pivSession.Connection.SendCommand(signCommand);
+            var signResponse = pivSession.Connection.SendCommand(signCommand);
 
             return signResponse.Status == expectedStatus;
         }
+        
+        // private AuthenticateSignCommand BuildSignCommand(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
+        // {
+        //     if (ubiKey.HasFeature(YubiKeyFeature.PivMetadata))
+        //     {
+        //         var slotMetadata = GetMetadata(slotNumber);
+        //         var algorithm = slotMetadata.Algorithm;
+        //         return new AuthenticateSignCommand(dataToSign, slotNumber, algorithm);
+        //     }
+        //     else
+        //     {
+        //         return new AuthenticateSignCommand(dataToSign, slotNumber);
+        //     }
+        // }
     }
 }

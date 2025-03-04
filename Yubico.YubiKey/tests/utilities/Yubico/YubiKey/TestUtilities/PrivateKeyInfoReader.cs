@@ -51,6 +51,32 @@ namespace Yubico.YubiKey.TestUtilities
             return new EdPrivateKeyInfo { AlgorithmOid = algorithmOid, PrivateKey = privateKey };
         }
     }
+    
+        public class X25519KeyParser : IPrivateKeyParser<EdPrivateKeyInfo>
+        {
+            private const string Ed25519Oid = "1.3.101.110";
+    
+            public bool CanParse(
+                string algorithmOid) =>
+                algorithmOid == Ed25519Oid;
+    
+            public byte[] ParseKeyData(
+                byte[] keyData)
+            {
+                var keyReader = new AsnReader(keyData, AsnEncodingRules.DER);
+                return keyReader.ReadOctetString();
+            }
+    
+            public EdPrivateKeyInfo CreatePrivateKeyInfo(
+                string algorithmOid,
+                byte[] keyData,
+                string? curveOid,
+                byte[] privateKeyInfoAllBytes)
+            {
+                var privateKey = ParseKeyData(keyData);
+                return new EdPrivateKeyInfo { AlgorithmOid = algorithmOid, PrivateKey = privateKey };
+            }
+        }
 
     public class EcKeyParser : IPrivateKeyParser<EcPrivateKeyInfo>
     {
@@ -140,7 +166,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <summary>
         /// Create a parser with the default set of key parsers
         /// </summary>
-        public PrivateKeyInfoParser() : this([new Ed25519KeyParser(), new EcKeyParser(), new RsaKeyParser()])
+        public PrivateKeyInfoParser() : this([new Ed25519KeyParser(), new X25519KeyParser(), new EcKeyParser(), new RsaKeyParser()])
         {
         }
 

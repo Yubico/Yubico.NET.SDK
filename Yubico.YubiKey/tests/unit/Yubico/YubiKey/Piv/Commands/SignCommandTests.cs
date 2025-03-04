@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
             byte[] digest = PivCommandResponseTestData.GetDigestData(PivAlgorithm.Rsa1024);
-            var signCommand = new AuthenticateSignCommand(digest, 0x9A);
+            var signCommand = new AuthenticateSignCommand(digest, 0x9A, PivAlgorithm.Rsa1024);
 
             Assert.True(signCommand is IYubiKeyCommand<AuthenticateSignResponse>);
         }

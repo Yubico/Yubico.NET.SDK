@@ -235,7 +235,7 @@ namespace Yubico.YubiKey.Piv
             ReadOnlyMemory<byte> privateValue = GetPrivateValue(algorithm);
             ReadOnlyMemory<byte> encoding = GetCorrectEncoding(algorithm);
 
-            var eccPrivate = new PivEccPrivateKey(privateValue.Span);
+            var eccPrivate = new PivEccPrivateKey(privateValue.Span, algorithm);
 
             ReadOnlyMemory<byte> getEncoding = eccPrivate.EncodedPrivateKey;
 
@@ -364,7 +364,7 @@ namespace Yubico.YubiKey.Piv
                 offset = keySize - eccParams.D!.Length;
                 Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
 
-                var eccPriKey = new PivEccPrivateKey(privateValue);
+                var eccPriKey = new PivEccPrivateKey(privateValue, algorithm);
                 privateKey = (PivPrivateKey)eccPriKey;
             }
 

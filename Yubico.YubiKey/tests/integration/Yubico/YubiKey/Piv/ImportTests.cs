@@ -13,16 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Formats.Asn1;
-using System.Numerics;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -37,49 +29,63 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP256, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccEd25519, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccX25519, StandardTestDevice.Fw5)]
         public void SimpleImportSucceeds(
             PivAlgorithm algorithm,
             StandardTestDevice testDeviceType)
         {
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(algorithm);
 
-            using var pivSession = GetSession(testDevice);
-
-            var testPrivateKey = TestKeys.GetPrivateKey(algorithm);
             var parser = new PrivateKeyInfoParser();
+            PivPrivateKey pivPrivateKey;
             switch (algorithm)
             {
                 case PivAlgorithm.EccP256 or PivAlgorithm.EccP384:
                     {
                         var keyInfo = parser.ParsePrivateKey<EcPrivateKeyInfo>(testPrivateKey.KeyBytes);
-                        var pivPrivateKey = new PivEccPrivateKey(keyInfo.PrivateKey, algorithm);
-                        pivSession.ImportPrivateKey(PivSlot.Retired1, pivPrivateKey);
+                        pivPrivateKey = new PivEccPrivateKey(keyInfo.PrivateKey, algorithm);
+                        // pivPrivateKey = PivPrivateKey.Create(keyInfo.PrivateKey); // TODO This factory method doesnt read this type of key representation
                         break;
                     }
-                case PivAlgorithm.EccEd25519:
+                case PivAlgorithm.EccEd25519 or PivAlgorithm.EccX25519:
                     {
                         var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(testPrivateKey.KeyBytes);
-                        var pivPrivateKey = new PivEccPrivateKey(keyInfo.PrivateKey, algorithm);
-                        pivSession.ImportPrivateKey(PivSlot.Retired1, pivPrivateKey);
+                        pivPrivateKey = new PivEccPrivateKey(keyInfo.PrivateKey, algorithm);
+                        // pivPrivateKey = PivPrivateKey.Create(keyInfo.PrivateKey);
+
                         break;
                     }
                 case PivAlgorithm.Rsa1024 or PivAlgorithm.Rsa2048 or PivAlgorithm.Rsa3072 or PivAlgorithm.Rsa4096:
                     {
                         var keyInfo = parser.ParsePrivateKey<RsaPrivateKeyInfo>(testPrivateKey.KeyBytes);
-                        var pivPrivateKey = new PivRsaPrivateKey(keyInfo.Prime1, keyInfo.Prime2, keyInfo.Exponent1,
-                            keyInfo.Exponent2, keyInfo.Coefficient);
-                        pivSession.ImportPrivateKey(PivSlot.Retired1, pivPrivateKey);
+                        pivPrivateKey = new PivRsaPrivateKey(keyInfo.Prime1, keyInfo.Prime2, keyInfo.Exponent1,
+                        keyInfo.Exponent2, keyInfo.Coefficient);
+                        // pivPrivateKey = PivPrivateKey.Create(keyInfo.PrivateKey);
+
                         break;
                     }
                 default:
                     throw new ArgumentException($"Unexpected algorithm {algorithm}", nameof(algorithm));
             }
+            
+            const PivPinPolicy expectedPinPolicy = PivPinPolicy.Once;
+            const PivTouchPolicy expectedTouchPolicy = PivTouchPolicy.Always;
+            
+            // Act
+            using var pivSession = GetSession(testDevice);
+            
+            pivSession.ImportPrivateKey(PivSlot.Retired1, pivPrivateKey, expectedPinPolicy, expectedTouchPolicy);
 
+            // Assert
             var slotMetadata = pivSession.GetMetadata(PivSlot.Retired1);
-            var slotAlgorithm = slotMetadata.Algorithm;
+            Assert.Equal(algorithm, slotMetadata.Algorithm);
 
-            Assert.Equal(algorithm, slotAlgorithm);
+            var testPivPublicKey = testPublicKey.AsPivPublicKey();
+            Assert.Equal(slotMetadata.PublicKey.YubiKeyEncodedPublicKey, testPivPublicKey.YubiKeyEncodedPublicKey);
+            
+            Assert.Equal(expectedPinPolicy, slotMetadata.PinPolicy);
+            Assert.Equal(expectedTouchPolicy, slotMetadata.TouchPolicy);
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
@@ -114,6 +120,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa2048, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa3072, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa4096, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccEd25519, StandardTestDevice.Fw5)]
         public void CertImport(
             PivAlgorithm algorithm,
             StandardTestDevice testDeviceType)

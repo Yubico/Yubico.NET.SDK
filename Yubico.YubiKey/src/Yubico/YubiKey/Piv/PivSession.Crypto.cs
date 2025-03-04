@@ -157,6 +157,125 @@ namespace Yubico.YubiKey.Piv
                     ExceptionMessages.IncorrectDigestLength));
         }
 
+        /// <summary>
+        /// Create a digital signature using the key in the given slot.
+        /// </summary>
+        /// <remarks>
+        /// The caller supplies the data to sign in the form of a formatted
+        /// message digest.
+        /// <para>
+        /// This method returns the digital signature created, if it can build
+        /// one. Otherwise it will throw an exception.
+        /// </para>
+        /// <para>
+        /// If the slot specified is not one that can sign, or it does not
+        /// contain a key, this method will throw an exception. If the input data
+        /// is not the correct length, the method will throw an exception.
+        /// </para>
+        /// <para>
+        /// If the key is ECC P-256, then the formatted digest is simply the
+        /// message digest itself, but it must be exactly 32 bytes. If the input
+        /// is not exactly 32 bytes, the method will throw an exception. If the
+        /// input data is shorter than 32 bytes, prepend pad bytes of 00 until
+        /// the length is exactly 32 bytes. You will almost certainly want to use
+        /// SHA-256 as the digest algorithm. The signature will be the BER
+        /// encoding of
+        /// <code>
+        ///   SEQUENCE {
+        ///     r   INTEGER,
+        ///     s   INTEGER }
+        /// </code>
+        /// </para>
+        /// <para>
+        /// If the key is ECC P-384, then the formatted digest is simply the
+        /// message digest itself, but it must be exactly 48 bytes. If the input
+        /// is not exactly 48 bytes, the method will throw an exception. If the
+        /// input data is shorter than 48 bytes, prepend pad bytes of 00 until
+        /// the length is exactly 48 bytes. You will almost certainly want to use
+        /// SHA-384 as the digest algorithm. The signature will be the BER
+        /// encoding of
+        /// <code>
+        ///   SEQUENCE {
+        ///     r   INTEGER,
+        ///     s   INTEGER }
+        /// </code>
+        /// </para>
+        /// <para>
+        /// If the key is RSA 1024/2048/3072/4096, then the input must be exactly 128/256/384/512 bytes,
+        /// otherwise the method will throw an exception. You can use the
+        /// <see cref="Cryptography.RsaFormat"/> class to format the data. That
+        /// class will be able to format the digest into either PKCS #1 v1.5 or a
+        /// subset of PKCS #1 PSS. However, if that class does not support the
+        /// exact format you want, you will have to write your own formatting
+        /// code and guarantee the input to this method is exactly 128/256/384/512 bytes
+        /// (prepend pad bytes of 00 until the length is exactly 128/256/384/512 if needed).
+        /// The signature will be a 128/256/384/512-byte block.
+        /// </para>
+        /// <para>
+        /// Signing might require the PIN and/or touch, depending on the PIN and
+        /// touch policies specified at the time the key was generated or
+        /// imported.
+        /// </para>
+        /// <para>
+        /// If a PIN is required, this method will call the necessary
+        /// routines to verify the PIN. See <see cref="VerifyPin()"/> for more
+        /// information on PIN verification. If the user cancels, this method
+        /// will throw an exception.
+        /// </para>
+        /// <para>
+        /// If touch is required, the YubiKey itself will flash its touch signal
+        /// and wait. If the YubiKey is not touched before the touch timeout, the
+        /// YubiKey will return with an error, and this method will throw an
+        /// exception (<c>OperationCanceledException</c>). Note that this method
+        /// will not make another effort to sign if the YubiKey is not touched,
+        /// it will simply throw the exception.
+        /// </para>
+        /// <para>
+        /// Note that on YubiKeys prior to version 5.3, it is not possible to know
+        /// programmatically what the PIN or touch policies are without actually
+        /// trying to sign. Also, it is not possible to know programmatically if
+        /// an authentication failure is due to PIN or touch. This means that on
+        /// older YubiKeys, this method will try to sign without the PIN, and if
+        /// it does not work because of authentication failure, it will not know
+        /// if the failure was due to PIN or touch. Hence, it will try to verify
+        /// the PIN then try to sign again. This all means that on older
+        /// YubiKeys, it is possible a YubiKey slot was originally configured
+        /// with a PIN policy of "never" and a touch policy of "always", and this
+        /// method will call for the PIN anyway. This happens if the user does
+        /// not touch the YubiKey before the timeout. See the User's Manual entry
+        /// on <xref href="UsersManualPivKeepingTrack">keeping track</xref> of
+        /// slot contents.
+        /// </para>
+        /// </remarks>
+        /// <param name="slotNumber">
+        /// The slot containing the key to use.
+        /// </param>
+        /// <param name="dataToSign">
+        /// The formatted message digest.
+        /// </param>
+        /// <param name="algorithm">The algorithm to use.</param>
+        /// <returns>
+        /// The resulting signature.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// The slot number given was not valid, or the data to sign was an
+        /// invalid length.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// There was no key in the slot specified or the data did not match the
+        /// key (e.g. the data to sign was 32 bytes long but the key was ECC
+        /// P-384).
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// Either the PIN was required and the user canceled collection or touch
+        /// was required and the user did not touch within the timeout period.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// The remaining retries count indicates the PIN is blocked.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
+        /// </exception>
         public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign, PivAlgorithm algorithm) // TODO Docs
         {
             var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber, algorithm);
@@ -497,16 +616,14 @@ namespace Yubico.YubiKey.Piv
 
         private AuthenticateSignCommand BuildSignCommand(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
         {
-            if (YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
-            {
-                var slotMetadata = GetMetadata(slotNumber);
-                var algorithm = slotMetadata.Algorithm;
-                return new AuthenticateSignCommand(dataToSign, slotNumber, algorithm);
-            }
-            else
+            if (!YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
             {
                 return new AuthenticateSignCommand(dataToSign, slotNumber);
             }
+
+            var slotMetadata = GetMetadata(slotNumber);
+            var algorithm = slotMetadata.Algorithm;
+            return new AuthenticateSignCommand(dataToSign, slotNumber, algorithm);
         }
     }
 }

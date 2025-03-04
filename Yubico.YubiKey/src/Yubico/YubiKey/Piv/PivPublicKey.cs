@@ -14,6 +14,8 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Extensions.Logging;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -70,6 +72,8 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public class PivPublicKey
     {
+        protected static readonly ILogger Logger = Log.GetLogger<PivPublicKey>();
+
         /// <summary>
         /// The algorithm of the key in this object.
         /// </summary>
@@ -124,26 +128,46 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public static PivPublicKey Create(ReadOnlyMemory<byte> encodedPublicKey, PivAlgorithm? algorithm = null)
         {
-            if (algorithm is PivAlgorithm.EccEd25519 or PivAlgorithm.EccX25519)
+            PivPublicKey publicKeyObject;
+            
+            switch (algorithm)
             {
-                return new PivEccPublicKey(encodedPublicKey.Span, algorithm.Value);
+                case PivAlgorithm.Rsa1024:
+                case PivAlgorithm.Rsa2048:
+                case PivAlgorithm.Rsa3072:
+                case PivAlgorithm.Rsa4096:
+                    if (PivRsaPublicKey.TryCreate(out publicKeyObject, encodedPublicKey))
+                    {
+                        return publicKeyObject;
+                    }
+                    break;
+
+                case PivAlgorithm.EccP256:
+                case PivAlgorithm.EccP384:
+                case PivAlgorithm.EccP521:
+                case PivAlgorithm.EccEd25519:
+                case PivAlgorithm.EccX25519:
+                    if (PivEccPublicKey.TryCreate(out var ecPublicKey, encodedPublicKey, algorithm))
+                    {
+                        return ecPublicKey;
+                    }
+                    break;
+
+                case null:
+                    if (PivEccPublicKey.TryCreate(out publicKeyObject, encodedPublicKey))
+                    {
+                        return publicKeyObject;
+                    }
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null);
             }
 
-            // Try to decode as an RSA public key. If that works, we're done. If
-            // not, try ECC. If that doesn't work, exception.
-            bool isCreated = PivRsaPublicKey.TryCreate(out var publicKeyObject, encodedPublicKey);
-            if (!isCreated)
-            {
-                if (PivEccPublicKey.TryCreate(out publicKeyObject, encodedPublicKey) == false)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPublicKeyData));
-                }
-            }
-
-            return publicKeyObject;
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.InvalidPublicKeyData));
         }
     }
 }

@@ -62,12 +62,14 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public class PivPrivateKey
     {
-        private const int primePTag = 0x01;
-        private const int primeQTag = 0x02;
-        private const int exponentPTag = 0x03;
-        private const int exponentQTag = 0x04;
-        private const int CoefficientTag = 0x05;
-        private const int EccTag = 0x06;
+        protected const int PrimePTag = 0x01;
+        protected const int PrimeQTag = 0x02;
+        protected const int ExponentPTag = 0x03;
+        protected const int ExponentQTag = 0x04;
+        protected const int CoefficientTag = 0x05;
+        protected const int EccTag = 0x06;
+        protected const int EccEd25519Tag = 0x7;
+        protected const int EccX25519Tag = 0x8;
 
         /// <summary>
         /// The algorithm of the key in this object.
@@ -120,13 +122,7 @@ namespace Yubico.YubiKey.Piv
 
             switch (tag)
             {
-                default:
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPrivateKeyData));
-
-                case EccTag:
+                case var _ when IsValidEccTag(tag):
                     return PivEccPrivateKey.CreateEccPrivateKey(encodedPrivateKey);
 
                 case primePTag:
@@ -135,8 +131,24 @@ namespace Yubico.YubiKey.Piv
                 case exponentQTag:
                 case CoefficientTag:
                     return PivRsaPrivateKey.CreateRsaPrivateKey(encodedPrivateKey);
+
+                default:
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPrivateKeyData));
             }
         }
+        
+        // Will need to parse the raw key data, possibly using Asn1 reader you have in testutils.
+        // public static PivPrivateKey CreateFromRawKeyData(ReadOnlyMemory<byte> rawKeyData) => new PivEccPrivateKey(rawKeyData);
+
+        protected static bool IsValidEccTag(int peekTag) =>
+            peekTag switch
+            {
+                EccTag or EccEd25519Tag or EccX25519Tag => true,
+                _ => false
+            };
 
         /// <summary>
         /// Call on the object to clear (overwrite) any sensitive data it is

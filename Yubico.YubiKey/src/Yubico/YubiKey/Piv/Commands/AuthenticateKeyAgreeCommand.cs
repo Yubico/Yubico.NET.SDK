@@ -139,6 +139,14 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.IncorrectEccKeyLength)),
             };
         }
+        
+        public AuthenticateKeyAgreeCommand(ReadOnlyMemory<byte> correspondentPublicKey, byte slotNumber, PivAlgorithm algorithm)
+        {
+            DataTag = KeyAgreeTag;
+            Data = correspondentPublicKey;
+            SlotNumber = slotNumber;
+            Algorithm = algorithm;
+        }
 
         /// <inheritdoc />
         public AuthenticateKeyAgreeResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

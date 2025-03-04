@@ -51,11 +51,6 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public sealed class PivRsaPrivateKey : PivPrivateKey
     {
-        private const int PrimePTag = 0x01;
-        private const int PrimeQTag = 0x02;
-        private const int ExponentPTag = 0x03;
-        private const int ExponentQTag = 0x04;
-        private const int CoefficientTag = 0x05;
         private const int Rsa1024CrtBlockSize = 64;
         private const int Rsa2048CrtBlockSize = 128;
         private const int Rsa3072CrtBlockSize = 192;

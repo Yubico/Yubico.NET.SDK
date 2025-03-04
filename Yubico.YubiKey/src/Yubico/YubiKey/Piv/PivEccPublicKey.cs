@@ -14,6 +14,8 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Extensions.Logging;
+using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Piv
@@ -55,6 +57,7 @@ namespace Yubico.YubiKey.Piv
         private const byte LeadingEccByte = 0x04;
 
         private Memory<byte> _publicPoint;
+
 
         // The default constructor. We don't want it to be used by anyone outside
         // this class.
@@ -126,13 +129,15 @@ namespace Yubico.YubiKey.Piv
         /// <param name="encodedPublicKey">
         /// The PIV TLV encoding.
         /// </param>
+        /// <param name="algorithm">The algorithm (and key size) of the key pair generated. If set, will use the algorithm instead of guessing the algorithm by length</param>
         /// <returns>
         /// True if the method was able to create a new RSA public key object,
         /// false otherwise.
         /// </returns>
         internal static bool TryCreate(
             out PivPublicKey publicKeyObject,
-            ReadOnlyMemory<byte> encodedPublicKey)
+            ReadOnlyMemory<byte> encodedPublicKey,
+            PivAlgorithm? algorithm = null)
         {
             var returnValue = new PivEccPublicKey();
             publicKeyObject = returnValue;
@@ -164,10 +169,13 @@ namespace Yubico.YubiKey.Piv
                     value = tlvReader.ReadValue(EccTag);
                 }
 
-                return returnValue.LoadEccPublicKeyByLength(value.Span);
+                return algorithm.HasValue
+                    ? returnValue.LoadEccPublicKey(value.Span, algorithm.Value)
+                    : returnValue.LoadEccPublicKeyByLength(value.Span);
             }
-            catch (TlvException)
+            catch (TlvException ex)
             {
+                Logger.LogWarning(ex, "Exception while reading public key data");
                 return false;
             }
         }
@@ -199,7 +207,6 @@ namespace Yubico.YubiKey.Piv
                     return false;
             }
 
-            // Maybe keep this.. ? 
             if (Algorithm == PivAlgorithm.EccP256 || Algorithm == PivAlgorithm.EccP384)
             {
                 if (publicPoint[0] != LeadingEccByte)

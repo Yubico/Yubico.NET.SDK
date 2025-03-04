@@ -156,7 +156,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivMetadata(ReadOnlyMemory<byte> responseData, byte slotNumber)
         {
-            if (PivSlot.IsValidSlotNumber(slotNumber) == false)
+            if (!PivSlot.IsValidSlotNumber(slotNumber))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -170,8 +170,13 @@ namespace Yubico.YubiKey.Piv
             RetriesRemaining = -1;
             PublicKey = new PivPublicKey();
 
-            var tlvReader = new TlvReader(responseData);
+            // This will update the fields in this object
+            ParseResponseData(responseData);
+        }
 
+        private void ParseResponseData(ReadOnlyMemory<byte> responseData)
+        {
+            var tlvReader = new TlvReader(responseData);
             while (tlvReader.HasData)
             {
                 int tag = tlvReader.PeekTag();

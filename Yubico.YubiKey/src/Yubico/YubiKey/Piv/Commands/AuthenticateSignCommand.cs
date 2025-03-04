@@ -161,7 +161,6 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The data to sign (formatted digest) is not the correct length.
         /// </exception>
-        [Obsolete("Use the constructor that takes a ReadOnlyMemory<byte> instead and provide a PivAlgorithm.")]
         public AuthenticateSignCommand(ReadOnlyMemory<byte> digestData, byte slotNumber)
         {
             DataTag = DigestTag;

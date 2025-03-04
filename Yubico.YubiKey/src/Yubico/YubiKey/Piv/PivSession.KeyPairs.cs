@@ -128,10 +128,11 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">
         /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
-        public PivPublicKey GenerateKeyPair(byte slotNumber,
-                                            PivAlgorithm algorithm,
-                                            PivPinPolicy pinPolicy = PivPinPolicy.Default,
-                                            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        public PivPublicKey GenerateKeyPair(
+            byte slotNumber,
+            PivAlgorithm algorithm,
+            PivPinPolicy pinPolicy = PivPinPolicy.Default,
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
             YubiKey.ThrowIfUnsupportedAlgorithm(algorithm);
 
@@ -238,10 +239,11 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">
         /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
-        public void ImportPrivateKey(byte slotNumber,
-                                     PivPrivateKey privateKey,
-                                     PivPinPolicy pinPolicy = PivPinPolicy.Default,
-                                     PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        public void ImportPrivateKey(
+            byte slotNumber,
+            PivPrivateKey privateKey,
+            PivPinPolicy pinPolicy = PivPinPolicy.Default,
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
             if (privateKey == null)
             {

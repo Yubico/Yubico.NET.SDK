@@ -125,10 +125,10 @@ namespace Yubico.YubiKey.Piv
                 case var _ when IsValidEccTag(tag):
                     return PivEccPrivateKey.CreateEccPrivateKey(encodedPrivateKey);
 
-                case primePTag:
-                case primeQTag:
-                case exponentPTag:
-                case exponentQTag:
+                case PrimePTag: // TODO Is PrimePTag not enough? Is it not the first byte of a RSA key??
+                case PrimeQTag:
+                case ExponentPTag:
+                case ExponentQTag:
                 case CoefficientTag:
                     return PivRsaPrivateKey.CreateRsaPrivateKey(encodedPrivateKey);
 

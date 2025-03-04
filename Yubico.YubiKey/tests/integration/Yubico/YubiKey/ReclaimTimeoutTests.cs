@@ -93,7 +93,8 @@ namespace Yubico.YubiKey
             sw3.Stop();
 
             const long expectedLapse = 3000;
-            Assert.True(sw1.ElapsedMilliseconds > expectedLapse);
+            const long firstConnectionMaxTime = 100;
+            Assert.True(sw1.ElapsedMilliseconds < firstConnectionMaxTime);
             Assert.True(sw2.ElapsedMilliseconds > expectedLapse);
             Assert.True(sw3.ElapsedMilliseconds > expectedLapse);
         }

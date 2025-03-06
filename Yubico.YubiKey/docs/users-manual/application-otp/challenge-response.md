@@ -63,7 +63,7 @@ with a 16-byte key using the AES encryption algorithm (AES requires that data be
 the encryption key). The resulting Yubico OTP (as a byte array) becomes the response.
 
 For HMAC-SHA1 challenge-response, the key will receive a challenge of up to 64 bytes in size, which will be digested (
-hashed) with a 20-byte secret key, resulting in a 20-byte response (which can be received by an application as a byte array or 6-10 digit numeric code). For HOTPs, the challenge must be specified by the application. For TOTPs, the current time will be used as the challenge. 
+hashed) with a 20-byte secret key, resulting in a 20-byte response (which can be received by an application as a byte array or 6-10 digit numeric code). For HOTPs, the challenge must be specified by the host application. For TOTPs, the current Unix time will be used as the challenge. 
 
 > [!NOTE]  
 > Hashing/digesting is a one-way operation, meaning that once a block of data is hashed, it cannot be converted back

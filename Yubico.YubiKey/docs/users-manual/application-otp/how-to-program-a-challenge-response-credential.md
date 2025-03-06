@@ -32,7 +32,7 @@ Slots can be programmed with one of the following types of credentials:
 - [Yubico OTP](xref:OtpYubicoOtp)
 
 During a challenge-response operation, a slot programmed with an HMAC-SHA1 credential will digest the challenge with
-that credential via the HMAC-SHA1 algorithm, producing an HOTP code. If the slot was programmed with a Yubico OTP
+that credential via the HMAC-SHA1 algorithm, producing an HOTP or TOTP. If the slot was programmed with a Yubico OTP
 credential, the key will encrypt the challenge with that credential via the Yubico OTP algorithm, producing a Yubico
 OTP.
 

@@ -19,12 +19,12 @@ generates documentation from comments in the source code. The comments are writt
 format.
 
 In order to build the documentation, use either of the following methods: 
-1. Command Line: `docfx build jdocfx.json`
+1. Command Line: `docfx build docfx.json`
 2. VS Code: Run the build task `DocFXBuild` using [VS Code Tasks](https://code.visualstudio.com/docs/editor/tasks) 
    
 > Note: In order to run `docfx` commands, you need to have docfx installed. Install `docfx` using the following command: `dotnet tool install -g docfx`
 
-The result is in `Yubico.YubiKey/docs/_site`. The home page is `index.html`.
+The result is in `docs/_site`. The home page is `index.html`.
 
 There might be placeholders for content we will have to write but you can click on "Api Documentation"
 to get to the classes. The comments you wrote will be reflected in the documentation.
@@ -32,16 +32,6 @@ to get to the classes. The comments you wrote will be reflected in the documenta
 Note that even if there is a class and/or method with no documentation, there is an entry for it.
 Everything is there except the content.
 
-## Command line
-
-If you want to use the command line version, cd into the `Yubico.YubiKey/src` directory and run `docfx`.
-
-```shell
-$ cd Yubico.NET.SDK/Yubico.YubiKey/src
-$ docfx docfx.json
-```
-
-Using the command line tool, you will have options (such as `-t`) and subcommands (such as pdf).
 
 ## Local web server
 

@@ -35,6 +35,11 @@ on:
         required: false
         default: false
         type: boolean
+      push-to-docs:
+        description: 'Push docs to internal GCP'
+        required: false
+        default: false
+        type: boolean
       version:
         description: 'Version'
         required: false
@@ -152,7 +157,7 @@ jobs:
       
   upload-docs:
     name: Upload docs
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    if: ${{ github.event.inputs.push-to-docs == 'true' }}
     permissions:
       id-token: write
       contents: read

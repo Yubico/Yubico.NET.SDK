@@ -100,7 +100,7 @@ Platform abstraction layer (PAL) providing:
 > Provides stable ABI for P/Invoke operations in Yubico.Core.
 
 ## Build asset attestation
-Using [Github Attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds), you are able verify that the NuGet package has been generated from our repository, right down to the specific Github Action that built it like this:  
+Using [GitHub Attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds), you are able to verify that the NuGet package has been generated from our repository, right down to the specific GitHub Action that built it like this:  
 `> gh attestation verify .\Yubico.Core.1.12.0.nupkg --repo Yubico/Yubico.NET.SDK`
 
 Note that you need to have the [`gh`](https://cli.github.com/) CLI installed.

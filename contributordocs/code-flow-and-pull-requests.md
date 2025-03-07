@@ -106,19 +106,21 @@ better name than it is to push code that has nothing to do with the original nam
 Prior to merging into `develop`, you should check your own work for the following things:
 
 - Did I remember to document all public APIs, types, members, etc.?
-- Did I build the ReleaseWithDocs configuration and check for build errors in the examples and documentation?
+- Did I [build the documentation](./documentation-system/building-docs-and-running.md) and check for build errors in the examples and documentation?
 - Did I write unit and/or integration tests for the functionality I just added?
 
 If the answer to any one of these questions is no, please take the time to complete this task. Chances
 are you will be asked to do so anyways as part of the pull request process.
 
-✅ **DO** a full build (ReleaseWithDocs) prior to opening a pull request.
+✅ **DO** a full build and build documentation prior to opening a pull request.
 
 ✅ **CONSIDER** doing a self-review based on the branch diffs before opening a PR. Often times you can
 catch mistakes yourself this way.
 
 ❌ **DO NOT** open a pull request for code that is not ready. Draft PRs can be used for this, or you can
 direct someone to checkout your in-progress branch.
+
+> ⚠ **NOTE:** See the page on [Building the docs and running](./documentation-system/building-docs-and-running.md) page for more information on building the documentation.
 
 ### Doing the review
 

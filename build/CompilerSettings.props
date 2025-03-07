@@ -77,12 +77,6 @@ on things like conditions in this file.
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
-  <PropertyGroup Label="Production assembly project settings" Condition="'$(IsProdProject)' == 'true'">
-
-    <GeneratePackageOnBuild Condition="$(Configuration.Contains('WithDocs'))">true</GeneratePackageOnBuild>
-
-  </PropertyGroup>
-
   <!--
   Settings that affect reference assemblies.
   -->

@@ -37,6 +37,7 @@ Enterprise-grade cross-platform SDK for YubiKey integration, built on .NET.
       - [Yubico.Core](#yubicocore)
     - [Internal Assemblies](#internal-assemblies)
       - [Yubico.NativeShims](#yubiconativeshims)
+  - [Build asset attestation](#build-asset-attestation)
   - [Project Structure](#project-structure)
   - [Contributing](#contributing)
     - [Building the Project](#building-the-project)
@@ -97,6 +98,12 @@ Platform abstraction layer (PAL) providing:
 > ⚠️ **Not for public use**  
 > 🔧 **Unmanaged Library**  
 > Provides stable ABI for P/Invoke operations in Yubico.Core.
+
+## Build asset attestation
+Using [GitHub Attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds), you are able to verify that the NuGet package has been generated from our repository, right down to the specific GitHub Action that built it like this:  
+`> gh attestation verify .\Yubico.Core.1.12.0.nupkg --repo Yubico/Yubico.NET.SDK`
+
+Note that you need to have the [`gh`](https://cli.github.com/) CLI installed.
 
 ## Project Structure
 

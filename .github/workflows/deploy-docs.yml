@@ -68,7 +68,7 @@ jobs:
         working-directory: ./self
 
       - name: Push changes to GitOps repo
-        run : ${{ github.workspace }}/self/.github/scripts/commit-and-push.sh
+        run: ${{ github.workspace }}/self/.github/scripts/commit-and-push.sh
         working-directory: ./gitops
         env:
           DOC_PATH: docs-gitops/k8s/yesdk/kustomization.yaml

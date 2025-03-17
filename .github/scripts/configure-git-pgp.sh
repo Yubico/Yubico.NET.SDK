@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ -z "${PGP_KEY:-}" ]]; then
+  echo "PGP_KEY must be set."
+  exit 1
+fi
+
 echo "$PGP_KEY" | gpg --import
 
 key_id=$(gpg --list-secret-keys --with-colons | awk -F: '$1 == "sec" {print $5}')

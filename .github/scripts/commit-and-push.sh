@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ -z "${GITOPS_BRANCH:-}" ]]; then
+  echo "GITOPS_BRANCH must be set."
+  exit 1
+fi
+
+if [[ -z "${IMAGE_TAG:-}" ]]; then
+  echo "IMAGE_TAG must be set."
+  exit 1
+fi
+
+
 commit_msg=$(
 cat <<EOF
 Update $DOC_PATH

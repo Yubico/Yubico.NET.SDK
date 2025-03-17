@@ -11,10 +11,11 @@ if [[ -z "${IMAGE_TAG:-}" ]]; then
   exit 1
 fi
 
+kustomization_path="k8s/yesdk/kustomization.yaml"
 
 commit_msg=$(
 cat <<EOF
-Update $DOC_PATH
+Update $kustomization_path
 
 Using image tag $IMAGE_TAG
 
@@ -28,7 +29,7 @@ if git diff --exit-code --quiet; then
   exit 0
 fi
 
-git add --all
+git add "$kustomization_path"
 git commit --message "$commit_msg"
 
 max_retries=10

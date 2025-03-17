@@ -73,7 +73,7 @@ jobs:
         env:
           DOC_PATH: docs-gitops/k8s/yesdk/kustomization.yaml
           GITOPS_BRANCH: ${{ inputs.gitops-branch }}
-          IMAGE_URL: "${{ inputs.image-tag }}"
+          IMAGE_TAG: "${{ inputs.image-tag }}"
 
   verify:
     name: Verify deployment completion

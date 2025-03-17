@@ -241,7 +241,7 @@ namespace Yubico.YubiKey.Fido2.Cose
                         ExceptionMessages.UnsupportedAlgorithm));
             }
 
-            var definition = KeyDefinitions.GetByOid(ecParameters.Curve.Oid.Value);
+            var definition = KeyDefinitions.GetByOid(ecParameters.Curve.Oid.Value, OidType.CurveOid);
             if (definition.CoseKeyDefinition == null)
             {
                 throw new NotSupportedException(
@@ -270,7 +270,7 @@ namespace Yubico.YubiKey.Fido2.Cose
 
             var ecParams = new ECParameters
             {
-                Curve = ECCurve.CreateFromValue(definition.Oid),
+                Curve = ECCurve.CreateFromValue(definition.CurveOid),
                 Q = new ECPoint
                 {
                     X = _xCoordinate,

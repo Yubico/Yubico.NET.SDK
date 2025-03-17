@@ -21,6 +21,54 @@ namespace Yubico.YubiKey.Piv
     [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class ImportTests
     {
+        
+        // [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        // [InlineData(PivAlgorithm.EccP256, StandardTestDevice.Fw5)]
+        // [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
+        // [InlineData(PivAlgorithm.EccEd25519, StandardTestDevice.Fw5)]
+        // [InlineData(PivAlgorithm.EccX25519, StandardTestDevice.Fw5)]
+        // public void Import_with_PublicKeyParameters_Succeeds(
+        //     PivAlgorithm algorithm,
+        //     StandardTestDevice testDeviceType)
+        // {
+        //     var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+        //     var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(algorithm);
+        //     var asPivPrivateKey = testPrivateKey.AsPivPrivateKey();
+        //     var pivPrivateKey = PivPrivateKey.Create(asPivPrivateKey.EncodedPrivateKey);
+        //     
+        //     Assert.Equal(algorithm, pivPrivateKey.Algorithm);
+        //     
+        // }
+        
+        // [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        // [InlineData(PivAlgorithm.EccP256, StandardTestDevice.Fw5)]
+        // [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
+        // [InlineData(PivAlgorithm.EccEd25519, StandardTestDevice.Fw5)]
+        // [InlineData(PivAlgorithm.EccX25519, StandardTestDevice.Fw5)]
+        // public void PivTlvImportSucceeds(
+        //     PivAlgorithm algorithm,
+        //     StandardTestDevice testDeviceType)
+        // {
+        //     var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(algorithm);
+        //     var asPivPrivateKey = testPrivateKey.AsPivPrivateKey();
+        //     var pivPrivateKey = PivPrivateKey.Create(asPivPrivateKey.EncodedPrivateKey);
+        //     
+        //     Assert.Equal(algorithm, pivPrivateKey.Algorithm);
+        //     
+        //     // Act
+        //     var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+        //     using var pivSession = GetSession(testDevice);
+        //     pivSession.ImportPrivateKey(PivSlot.Retired1, pivPrivateKey);
+        //
+        //     // Assert
+        //     var slotMetadata = pivSession.GetMetadata(PivSlot.Retired1);
+        //     Assert.Equal(algorithm, slotMetadata.Algorithm);
+        //     
+        //     var testPivPublicKey = testPublicKey.AsPivPublicKey();
+        //     Assert.Equal(slotMetadata.PublicKey.YubiKeyEncodedPublicKey, testPivPublicKey.YubiKeyEncodedPublicKey);
+        // }
+        //
+        
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
         [InlineData(PivAlgorithm.Rsa1024, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa2048, StandardTestDevice.Fw5)]
@@ -30,7 +78,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccEd25519, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccX25519, StandardTestDevice.Fw5)]
-        public void SimpleImportSucceeds(
+        public void RawKeyImportSucceeds( // Works
             PivAlgorithm algorithm,
             StandardTestDevice testDeviceType)
         {
@@ -45,15 +93,12 @@ namespace Yubico.YubiKey.Piv
                     {
                         var keyInfo = parser.ParsePrivateKey<EcPrivateKeyInfo>(testPrivateKey.KeyBytes);
                         pivPrivateKey = new PivEccPrivateKey(keyInfo.PrivateKey, algorithm);
-                        // pivPrivateKey = PivPrivateKey.Create(keyInfo.PrivateKey); // TODO This factory method doesnt read this type of key representation
                         break;
                     }
                 case PivAlgorithm.EccEd25519 or PivAlgorithm.EccX25519:
                     {
                         var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(testPrivateKey.KeyBytes);
                         pivPrivateKey = new PivEccPrivateKey(keyInfo.PrivateKey, algorithm);
-                        // pivPrivateKey = PivPrivateKey.Create(keyInfo.PrivateKey);
-
                         break;
                     }
                 case PivAlgorithm.Rsa1024 or PivAlgorithm.Rsa2048 or PivAlgorithm.Rsa3072 or PivAlgorithm.Rsa4096:
@@ -61,8 +106,6 @@ namespace Yubico.YubiKey.Piv
                         var keyInfo = parser.ParsePrivateKey<RsaPrivateKeyInfo>(testPrivateKey.KeyBytes);
                         pivPrivateKey = new PivRsaPrivateKey(keyInfo.Prime1, keyInfo.Prime2, keyInfo.Exponent1,
                         keyInfo.Exponent2, keyInfo.Coefficient);
-                        // pivPrivateKey = PivPrivateKey.Create(keyInfo.PrivateKey);
-
                         break;
                     }
                 default:

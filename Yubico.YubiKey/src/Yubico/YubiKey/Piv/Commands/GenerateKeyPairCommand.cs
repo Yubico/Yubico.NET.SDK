@@ -150,7 +150,9 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _algorithm;
             set
             {
-                if (!value.GetByKeyDefinitionKeyType().SupportsKeyGeneration)
+                var keyDefinitionKeyType = value.GetPivKeyDef();
+                bool supportsKeyGeneration = keyDefinitionKeyType is { SupportsKeyGeneration: true };
+                if (!supportsKeyGeneration)
                 {
                     throw new ArgumentException(
                         string.Format(
@@ -276,8 +278,10 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.InvalidSlot,
                         _slotNumber));
             }
-
-            if (!_algorithm.GetByKeyDefinitionKeyType().SupportsKeyGeneration)
+            
+            var keyDefinitionKeyType = _algorithm.GetPivKeyDef();
+            bool supportsKeyGeneration = keyDefinitionKeyType is { SupportsKeyGeneration: true };
+            if (!supportsKeyGeneration)
             {
                 throw new InvalidOperationException(
                     string.Format(

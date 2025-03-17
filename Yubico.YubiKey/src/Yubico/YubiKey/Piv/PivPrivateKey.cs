@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -60,16 +61,19 @@ namespace Yubico.YubiKey.Piv
     /// </code>
     /// </para>
     /// </remarks>
+    // public class PivPrivateKey : IPrivateKeyParameters
     public class PivPrivateKey
     {
-        protected const int PrimePTag = 0x01;
-        protected const int PrimeQTag = 0x02;
-        protected const int ExponentPTag = 0x03;
-        protected const int ExponentQTag = 0x04;
-        protected const int CoefficientTag = 0x05;
-        protected const int EccTag = 0x06;
-        protected const int EccEd25519Tag = 0x7;
-        protected const int EccX25519Tag = 0x8;
+        internal const int PrimePTag = 0x01;
+        internal const int PrimeQTag = 0x02;
+        internal const int ExponentPTag = 0x03;
+        internal const int ExponentQTag = 0x04;
+        internal const int CoefficientTag = 0x05;
+        internal const int EccTag = 0x06;
+        internal const int EccEd25519Tag = 0x7;
+        internal const int EccX25519Tag = 0x8;
+
+        protected Memory<byte> EncodedKey { get; set; }
 
         /// <summary>
         /// The algorithm of the key in this object.
@@ -79,12 +83,13 @@ namespace Yubico.YubiKey.Piv
         /// </value>
         public PivAlgorithm Algorithm { get; protected set; }
 
-        protected Memory<byte> EncodedKey { get; set; }
-
         /// <summary>
         /// Contains the TLV encoding of the private key.
         /// </summary>
         public ReadOnlyMemory<byte> EncodedPrivateKey => EncodedKey;
+        
+        protected KeyDefinitions.KeyDefinition KeyDefinition { get; set; } = null!;
+        public IPrivateKeyParameters KeyParameters { get; protected set; } = null!;
 
         /// <summary>
         /// This builds an empty object. The <c>Algorithm</c> is <c>None</c> and
@@ -114,41 +119,26 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public static PivPrivateKey Create(ReadOnlyMemory<byte> encodedPrivateKey)
         {
-            byte tag = 0;
-            if (encodedPrivateKey.Length > 0)
+            if (encodedPrivateKey.IsEmpty)
             {
-                tag = encodedPrivateKey.Span[0];
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidPrivateKeyData));
             }
 
-            switch (tag)
+            byte tag = encodedPrivateKey.Span[0];
+            return tag switch
             {
-                case var _ when IsValidEccTag(tag):
-                    return PivEccPrivateKey.CreateEccPrivateKey(encodedPrivateKey);
-
-                case PrimePTag: // TODO Is PrimePTag not enough? Is it not the first byte of a RSA key??
-                case PrimeQTag:
-                case ExponentPTag:
-                case ExponentQTag:
-                case CoefficientTag:
-                    return PivRsaPrivateKey.CreateRsaPrivateKey(encodedPrivateKey);
-
-                default:
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPrivateKeyData));
-            }
-        }
-        
-        // Will need to parse the raw key data, possibly using Asn1 reader you have in testutils.
-        // public static PivPrivateKey CreateFromRawKeyData(ReadOnlyMemory<byte> rawKeyData) => new PivEccPrivateKey(rawKeyData);
-
-        protected static bool IsValidEccTag(int peekTag) =>
-            peekTag switch
-            {
-                EccTag or EccEd25519Tag or EccX25519Tag => true,
-                _ => false
+                _ when IsValidEccTag(tag)
+                    => PivEccPrivateKey.CreateEccPrivateKey(encodedPrivateKey),
+                _ when IsValidRsaTag(tag)
+                    => PivRsaPrivateKey.CreateRsaPrivateKey(encodedPrivateKey),
+                _ => throw new ArgumentException(
+                    string.Format(CultureInfo.CurrentCulture, ExceptionMessages.InvalidPrivateKeyData))
             };
+        }
+
 
         /// <summary>
         /// Call on the object to clear (overwrite) any sensitive data it is
@@ -159,5 +149,47 @@ namespace Yubico.YubiKey.Piv
             CryptographicOperations.ZeroMemory(EncodedKey.Span);
             EncodedKey = Memory<byte>.Empty;
         }
+
+        public static PivPrivateKey Create(IPrivateKeyParameters privateKeyParameters)
+        {
+            return privateKeyParameters switch
+            {
+                RSAPrivateKeyParameters rsaKey => PivRsaPrivateKey.CreateFromPrivateKey(rsaKey),
+                ECPrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
+                EDsaPrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
+                ECX25519PrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
+                Curve25519PrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
+                _ => throw new ArgumentException("Invalid key type", nameof(privateKeyParameters))
+            };
+        }
+
+        public KeyDefinitions.KeyDefinition GetKeyDefinition() => KeyDefinition;
+
+        public KeyDefinitions.KeyType GetKeyType() => KeyDefinition.KeyType;
+
+        public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => KeyParameters.EncodeToPkcs8();
+
+        public ReadOnlyMemory<byte> GetPrivateKey() => KeyParameters.GetPrivateKey();
+        
+        internal static bool IsValidEccTag(int peekTag) =>
+            peekTag switch
+            {
+                EccTag or
+                    EccEd25519Tag or
+                    EccX25519Tag => true,
+                _ => false
+            };
+        
+        internal static bool IsValidRsaTag(int peekTag) =>
+            peekTag switch
+            {
+                PrimePTag or 
+                    PrimeQTag or 
+                    ExponentPTag or 
+                    ExponentQTag or 
+                    CoefficientTag => true,
+                _ => false
+            };
+
     }
 }

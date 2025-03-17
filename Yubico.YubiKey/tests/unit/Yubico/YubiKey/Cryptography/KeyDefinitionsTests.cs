@@ -48,8 +48,8 @@ namespace Yubico.YubiKey.Cryptography
         public void GetByOid_ValidOids_ReturnsCorrectDefinitions()
         {
             // Act & Assert
-            Assert.Equal(KeyDefinitions.P256, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.P256));
-            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Ed25519));
+            Assert.Equal(KeyDefinitions.P256, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.P256, OidType.CurveOid));
+            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.Ed25519, OidType.CurveOid));
         }
 
 
@@ -57,22 +57,22 @@ namespace Yubico.YubiKey.Cryptography
         public void GetByOid_P521_ReturnsCorrectDefinitions()
         {
             // Act & Assert
-            Assert.Equal(KeyDefinitions.P521, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.P521));
-            Assert.Equal(66, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.P521).LengthInBytes);
+            Assert.Equal(KeyDefinitions.P521, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.P521, OidType.CurveOid));
+            Assert.Equal(66, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.P521, OidType.CurveOid).LengthInBytes);
         }
 
         [Fact]
         public void GetByOid_RsaOid_ThrowsNotSupportedException()
         {
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Rsa));
+            Assert.Throws<NotSupportedException>(() => KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.Rsa, OidType.AlgorithmOid));
         }
 
         [Fact]
         public void GetByOid_InvalidOid_ThrowsNotSupportedException()
         {
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => KeyDefinitions.GetByOid("1.2.3.4.5"));
+            Assert.Throws<NotSupportedException>(() => KeyDefinitions.GetByOid("1.2.3.4.5", OidType.CurveOid));
         }
 
         [Fact]

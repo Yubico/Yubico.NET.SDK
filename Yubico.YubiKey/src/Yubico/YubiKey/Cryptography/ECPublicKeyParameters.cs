@@ -23,12 +23,14 @@ namespace Yubico.YubiKey.Cryptography
     /// </summary>
     /// <remarks>
     /// This class encapsulates the parameters specific to EC public keys,
-    /// ensuring that the key only contains only necessary public key components.
+    /// ensuring that the key only contains necessary public key components.
     /// It extends the base <see cref="ECKeyParameters"/> class with additional 
     /// validation to prevent the inclusion of private key data.
     /// </remarks>
-    public class ECPublicKeyParameters : ECKeyParameters
+    public class ECPublicKeyParameters : ECKeyParameters, IPublicKeyParameters
     {
+        private readonly byte[] _encodedKey;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ECPublicKeyParameters"/> class.
         /// It is a wrapper for the <see cref="ECParameters"/> class.
@@ -46,6 +48,7 @@ namespace Yubico.YubiKey.Cryptography
                 throw new ArgumentException(
                     "Parameters must not contain private key data (D value)", nameof(parameters));
             }
+            _encodedKey = AsnPublicKeyWriter.EncodeToSpki(parameters);
         }
 
         /// <summary>
@@ -53,11 +56,11 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         /// <param name="ecdsa"></param>
         public ECPublicKeyParameters(ECDsa ecdsa)
-            : base(ecdsa?.ExportParameters(false) ?? throw new ArgumentNullException(nameof(ecdsa)))
+            : this(ecdsa?.ExportParameters(false) ?? throw new ArgumentNullException(nameof(ecdsa)))
         {
 
         }
-
+        
         /// <summary>
         /// Gets the bytes representing the public key coordinates.
         /// </summary>
@@ -66,11 +69,14 @@ namespace Yubico.YubiKey.Cryptography
         {
             byte[] publicKeyRawData =
                 new byte[] { 0x4 } // Format identifier (uncompressed point): 0x04
-                .Concat(Parameters.Q.X)
-                .Concat(Parameters.Q.Y)
-                .ToArray();
+                    .Concat(Parameters.Q.X)
+                    .Concat(Parameters.Q.Y)
+                    .ToArray();
 
             return publicKeyRawData;
         }
+
+        public ReadOnlyMemory<byte> GetPublicPoint() => GetBytes();
+        public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => _encodedKey;
     }
 }

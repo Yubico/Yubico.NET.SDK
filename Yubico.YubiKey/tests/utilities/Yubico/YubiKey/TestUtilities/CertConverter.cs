@@ -148,9 +148,10 @@ namespace Yubico.YubiKey.TestUtilities
                 RSAParameters rsaParams = rsaObject.ExportParameters(false);
                 return new PivRsaPublicKey(rsaParams.Modulus, rsaParams.Exponent);
             }
+            
             if (Algorithm.IsEcc())
             {
-                return new PivEccPublicKey(_certificateObject.PublicKey.EncodedKeyValue.RawData);
+                return PivEccPublicKey.CreateFromPublicPoint(_certificateObject.PublicKey.EncodedKeyValue.RawData, Algorithm.GetKeyType());
             }
             throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
         }
@@ -192,7 +193,7 @@ namespace Yubico.YubiKey.TestUtilities
                 {
                     throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
                 }
-                eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.P384);
+                eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.Curve.P384);
             }
             var eccParams = new ECParameters
             {

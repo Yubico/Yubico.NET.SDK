@@ -20,8 +20,10 @@ namespace Yubico.YubiKey.Cryptography
     /// <summary>
     /// Base class for EC key parameters
     /// </summary>
-    public abstract class ECKeyParameters
+    public abstract class ECKeyParameters : IKeyParameters
     {
+        private readonly KeyDefinitions.KeyDefinition _keyDefinition;
+
         /// <summary>
         /// Gets the EC parameters associated with this key.
         /// </summary>
@@ -38,6 +40,10 @@ namespace Yubico.YubiKey.Cryptography
         protected ECKeyParameters(ECParameters parameters)
         {
             Parameters = parameters.DeepCopy();
+            _keyDefinition = KeyDefinitions.GetByOid(parameters.Curve.Oid, OidType.CurveOid);
         }
+
+        public KeyDefinitions.KeyDefinition GetKeyDefinition() => _keyDefinition;
+        public KeyDefinitions.KeyType GetKeyType() => _keyDefinition.KeyType;
     }
 }

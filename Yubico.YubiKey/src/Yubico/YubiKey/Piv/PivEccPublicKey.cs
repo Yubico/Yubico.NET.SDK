@@ -14,9 +14,10 @@
 
 using System;
 using System.Globalization;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
-using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -49,20 +50,194 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public sealed class PivEccPublicKey : PivPublicKey
     {
-        private const int PublicKeyTag = 0x7F49;
         private const int EccTag = 0x86;
         private const int EccP256PublicKeySize = 65;
         private const int EccP384PublicKeySize = 97;
-        private const int SliceIndex = 3;
         private const byte LeadingEccByte = 0x04;
 
-        private Memory<byte> _publicPoint;
+        private ReadOnlyMemory<byte> _publicPoint;
 
+        /// <summary>
+        /// Contains the public point: <c>04 || x-coordinate || y-coordinate</c>.
+        /// </summary>
+        public new ReadOnlySpan<byte> PublicPoint
+        {
+            set => _publicPoint = value.ToArray();
+            get => _publicPoint.ToArray();
+        }
 
-        // The default constructor. We don't want it to be used by anyone outside
-        // this class.
         private PivEccPublicKey()
         {
+        }
+
+        private PivEccPublicKey(
+            Memory<byte> publicPoint,
+            Memory<byte> pivTlvEncodedKey,
+            Memory<byte> yubiKeyEncodedKey,
+            Memory<byte> encodedKey,
+            PivAlgorithm algorithm,
+            KeyDefinitions.KeyDefinition keyDefinition)
+        {
+            _publicPoint = publicPoint;
+            EncodedKey = encodedKey;
+            PivEncodedKey = pivTlvEncodedKey;
+            YubiKeyEncodedKey = yubiKeyEncodedKey;
+            Algorithm = algorithm;
+            KeyDefinition = keyDefinition;
+        }
+
+        internal static bool CanCreate(ReadOnlyMemory<byte> encodedPublicKey)
+        {
+            try
+            {
+                var tlvReader = new TlvReader(encodedPublicKey);
+                int tag = tlvReader.PeekTag(2);
+                if (tag != PublicKeyTag)
+                {
+                    return false;
+                }
+
+                tlvReader = tlvReader.ReadNestedTlv(tag);
+                tag = tlvReader.PeekTag();
+                return tag == EccTag && tlvReader.TryReadValue(out _, EccTag);
+            }
+            catch (TlvException ex)
+            {
+                Logger.LogWarning(ex, "Exception while reading public key data");
+                return false;
+            }
+        }
+
+        public static PivEccPublicKey CreateFromPublicKey(IPublicKeyParameters keyParameters)
+        {
+            var keyDefinition = keyParameters.GetKeyDefinition();
+            var keyType = keyDefinition.KeyType;
+            var algorithm = keyType.GetPivAlgorithm();
+
+            return EncodeAndCreate(
+                keyParameters.GetPublicPoint().Span, algorithm,
+                keyParameters.ExportSubjectPublicKeyInfo(), 
+                keyDefinition);
+        }
+
+        public static PivEccPublicKey CreateFromPublicPoint(
+            ReadOnlyMemory<byte> publicPoint,
+            KeyDefinitions.KeyType keyType)
+        {
+            var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
+            var algorithm = keyType.GetPivAlgorithm();
+            byte[] encodedKey = AsnPublicKeyWriter.EncodeToSpki(publicPoint, keyType);
+
+            return EncodeAndCreate(publicPoint.Span, algorithm, encodedKey, keyDefinition);
+        }
+
+        /// <summary>
+        /// Try to create a new instance of an ECC public key object based on the
+        /// encoding.
+        /// </summary>
+        /// <remarks>
+        /// This static method will build a <c>PivEccPublicKey</c> object and set
+        /// the output parameter <c>publicKeyObject</c> to the resulting key. If
+        /// the encoding is not of a supported ECC public key, it will return
+        /// false.
+        /// </remarks>
+        /// <param name="encodedPublicKey">
+        /// The PIV TLV encoding.
+        /// </param>
+        /// <param name="algorithm">The algorithm (and key size) of the key pair generated. If set, will use the algorithm instead of guessing the algorithm by length</param>
+        /// <returns>
+        /// True if the method was able to create a new RSA public key object,
+        /// false otherwise.
+        /// </returns>
+        internal static PivPublicKey CreateFromPivEncoding(
+            ReadOnlyMemory<byte> encodedPublicKey,
+            PivAlgorithm? algorithm = null)
+        {
+            var tlvReader = new TlvReader(encodedPublicKey);
+
+            // Read the public key tag
+            int tag = tlvReader.PeekTag(2);
+            if (tag == PublicKeyTag)
+            {
+                tlvReader = tlvReader.ReadNestedTlv(tag);
+            }
+
+            // Read the ECC tag
+            tag = tlvReader.PeekTag();
+            if (tag != EccTag)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidPublicKeyData)
+                    );
+            }
+
+            var publicPoint = tlvReader.ReadValue(EccTag);
+            if (algorithm.HasValue)
+            {
+                var keyType = algorithm.Value.GetKeyType();
+                var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
+                byte[] encodedKey = AsnPublicKeyWriter.EncodeToSpki(publicPoint, keyType);
+                return EncodeAndCreate(publicPoint.Span, algorithm.Value, encodedKey, keyDefinition);
+            }
+            else
+            {
+                var pivAlgorithm = GetAlgorithm(publicPoint.Span);
+                var keyType = pivAlgorithm.GetKeyType();
+                var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
+                byte[] encodedKey = AsnPublicKeyWriter.EncodeToSpki(publicPoint, keyType);
+                return EncodeAndCreate(publicPoint.Span, pivAlgorithm, encodedKey, keyDefinition);
+            }
+        }
+
+        private static PivEccPublicKey EncodeAndCreate(
+            ReadOnlySpan<byte> publicPoint,
+            PivAlgorithm algorithm,
+            ReadOnlyMemory<byte> encodedKey,
+            KeyDefinitions.KeyDefinition keyDefinition)
+        {
+            var tlvWriter = new TlvWriter();
+            using (tlvWriter.WriteNestedTlv(PublicKeyTag))
+            {
+                tlvWriter.WriteValue(EccTag, publicPoint);
+            }
+
+            var pivEncodedKey = tlvWriter.Encode().AsSpan();
+
+            // The first two bytes are the public key tag, followed by third byte, the ECC tag 
+            var yubiKeyEncodedKey = pivEncodedKey[3..];
+
+            return new PivEccPublicKey(
+                publicPoint.ToArray(),
+                pivEncodedKey.ToArray(),
+                yubiKeyEncodedKey.ToArray(),
+                encodedKey.ToArray(),
+                algorithm,
+                keyDefinition);
+        }
+
+        // This should not be used, as it is not guaranteed to be correct for all algorithms (e.g. P256, ED25519, X25519 which all share have the same length)
+        private static PivAlgorithm GetAlgorithm(ReadOnlySpan<byte> publicPoint)
+        {
+            var algorithm = publicPoint.Length switch
+            {
+                EccP256PublicKeySize => PivAlgorithm.EccP256,
+                EccP384PublicKeySize => PivAlgorithm.EccP384,
+                _ => throw new ArgumentException(
+                    string.Format(CultureInfo.CurrentCulture, ExceptionMessages.InvalidPublicKeyData))
+            };
+
+            if (algorithm is PivAlgorithm.EccP256 or PivAlgorithm.EccP384 &&
+                publicPoint[0] != LeadingEccByte)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidPublicKeyData));
+            }
+
+            return algorithm;
         }
 
         /// <summary>
@@ -86,9 +261,13 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The format of the public point is not supported.
         /// </exception>
-        public PivEccPublicKey(ReadOnlySpan<byte> publicPoint)
+        [Obsolete(
+            "This constructor is deprecated. Users must specify management key algorithm type, as it cannot be assumed.")]
+        public PivEccPublicKey(
+            ReadOnlySpan<byte>
+                publicPoint)
         {
-            if (LoadEccPublicKeyByLength(publicPoint) == false)
+            if (LoadEccPublicKey(publicPoint) == false)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -97,102 +276,11 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        public PivEccPublicKey(ReadOnlySpan<byte> publicPoint, PivAlgorithm algorithm)
-        {
-            if (!LoadEccPublicKey(publicPoint, algorithm))
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPublicKeyData));
-            }
-        }
-
-        /// <summary>
-        /// Contains the public point: <c>04 || x-coordinate || y-coordinate</c>.
-        /// </summary>
-        public ReadOnlySpan<byte> PublicPoint => _publicPoint.Span;
-
-        /// <summary>
-        /// Try to create a new instance of an ECC public key object based on the
-        /// encoding.
-        /// </summary>
-        /// <remarks>
-        /// This static method will build a <c>PivEccPublicKey</c> object and set
-        /// the output parameter <c>publicKeyObject</c> to the resulting key. If
-        /// the encoding is not of a supported ECC public key, it will return
-        /// false.
-        /// </remarks>
-        /// <param name="publicKeyObject">
-        /// Where the resulting public key object will be deposited.
-        /// </param>
-        /// <param name="encodedPublicKey">
-        /// The PIV TLV encoding.
-        /// </param>
-        /// <param name="algorithm">The algorithm (and key size) of the key pair generated. If set, will use the algorithm instead of guessing the algorithm by length</param>
-        /// <returns>
-        /// True if the method was able to create a new RSA public key object,
-        /// false otherwise.
-        /// </returns>
-        internal static bool TryCreate(
-            out PivPublicKey publicKeyObject,
-            ReadOnlyMemory<byte> encodedPublicKey,
-            PivAlgorithm? algorithm = null)
-        {
-            var returnValue = new PivEccPublicKey();
-            publicKeyObject = returnValue;
-
-            try
-            {
-                var tlvReader = new TlvReader(encodedPublicKey);
-                int tag = tlvReader.PeekTag(2);
-                if (tag == PublicKeyTag)
-                {
-                    tlvReader = tlvReader.ReadNestedTlv(tag);
-                }
-
-                ReadOnlyMemory<byte> value = null;
-
-                while (tlvReader.HasData)
-                {
-                    tag = tlvReader.PeekTag();
-                    if (tag != EccTag)
-                    {
-                        return false;
-                    }
-
-                    if (value.IsEmpty == false)
-                    {
-                        return false;
-                    }
-
-                    value = tlvReader.ReadValue(EccTag);
-                }
-
-                return algorithm.HasValue
-                    ? returnValue.LoadEccPublicKey(value.Span, algorithm.Value)
-                    : returnValue.LoadEccPublicKeyByLength(value.Span);
-            }
-            catch (TlvException ex)
-            {
-                Logger.LogWarning(ex, "Exception while reading public key data");
-                return false;
-            }
-        }
-
-        // Load the public point and build the encoded key.
-        // This method will verify that this class supports the public key given.
-        // If successful, return true.
-        // If the key given is not supported or the key could not be loaded,
-        // return false.
-        private bool LoadEccPublicKeyByLength(ReadOnlySpan<byte> publicPoint)
+        [Obsolete("Use PivEccPublicKey.CreateFromPublicPoint(publicPoint, algorithm) instead")]
+        private bool LoadEccPublicKey(ReadOnlySpan<byte> publicPoint)
         {
             switch (publicPoint.Length)
             {
-                // case 32: //TODO Is this good enough?
-                //     Algorithm = PivAlgorithm.EccEd25519;
-                //
-                //     break;
                 case EccP256PublicKeySize:
                     Algorithm = PivAlgorithm.EccP256;
 
@@ -207,28 +295,11 @@ namespace Yubico.YubiKey.Piv
                     return false;
             }
 
-            if (Algorithm == PivAlgorithm.EccP256 || Algorithm == PivAlgorithm.EccP384)
+            if (publicPoint[0] != LeadingEccByte)
             {
-                if (publicPoint[0] != LeadingEccByte)
-                {
-                    return false;
-                }
+                return false;
             }
 
-            LoadEccPublicKey(publicPoint);
-
-            return true;
-        }
-
-        private bool LoadEccPublicKey(ReadOnlySpan<byte> publicPoint, PivAlgorithm algorithm)
-        {
-            Algorithm = algorithm;
-            LoadEccPublicKey(publicPoint);
-            return true;
-        }
-
-        private void LoadEccPublicKey(ReadOnlySpan<byte> publicPoint)
-        {
             var tlvWriter = new TlvWriter();
             using (tlvWriter.WriteNestedTlv(PublicKeyTag))
             {
@@ -236,12 +307,11 @@ namespace Yubico.YubiKey.Piv
             }
 
             PivEncodedKey = tlvWriter.Encode();
-
-            // The Metadate encoded key is the contents of the nested. So set
-            // that to be a slice of the EncodedKey.
-            YubiKeyEncodedKey = PivEncodedKey[SliceIndex..];
+            YubiKeyEncodedKey = PivEncodedKey[3..];
 
             _publicPoint = new Memory<byte>(publicPoint.ToArray());
+            // TODO Must set the new properties (EncodedKey, KeyDefinition, PublicPoint)
+            return true;
         }
     }
 }

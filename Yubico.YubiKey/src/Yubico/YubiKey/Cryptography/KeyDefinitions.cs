@@ -79,6 +79,19 @@ namespace Yubico.YubiKey.Cryptography
             return definition;
         }
 
+        public static KeyDefinition GetByRsaLength(int keySizeBits)
+        {
+            foreach (var keyDef in (KeyDefinition[]) [RSA1024, RSA2048, RSA3072, RSA4096])
+            {
+                if (keySizeBits.Equals(keyDef.LengthInBits))
+                {
+                    return keyDef;
+                }
+            }
+
+            throw new NotSupportedException("Unsupported RSA length");
+        }
+
         /// <summary>
         /// Gets a key definition by its curve type.
         /// </summary>
@@ -92,13 +105,13 @@ namespace Yubico.YubiKey.Cryptography
         /// When the curve type is not supported.
         /// </exception>
         public static KeyDefinition GetByCoseCurve(CoseEcCurve curve) =>
-             _allDefinitions.Values.SingleOrDefault(
+            _allDefinitions.Values.SingleOrDefault(
                 d => d.CoseKeyDefinition != null && d.CoseKeyDefinition.CurveIdentifier == curve)
-                ?? throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.UnsupportedAlgorithm,
-                        curve));
+            ?? throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.UnsupportedAlgorithm,
+                    curve));
 
         /// <summary>
         /// Gets a key definition by its object identifier (OID).
@@ -106,13 +119,14 @@ namespace Yubico.YubiKey.Cryptography
         /// <param name="oid">
         ///  The object identifier (OID) of the key.
         /// </param>
+        /// <param name="oidType">The type of oid.</param>
         /// <returns>
         ///  The key definition for the specified OID.
         /// </returns>
         /// <exception cref="NotSupportedException">
         ///  When the OID is not supported or when the OID is for an RSA key.
         /// </exception>
-        public static KeyDefinition GetByOid(Oid oid) => GetByOid(oid.Value);
+        public static KeyDefinition GetByOid(Oid oid, OidType oidType) => GetByOid(oid.Value, oidType);
 
         /// <summary>
         /// Gets a key definition by its object identifier (OID).
@@ -120,27 +134,30 @@ namespace Yubico.YubiKey.Cryptography
         /// <param name="oid">
         ///  The object identifier (OID) of the key.
         /// </param>
+        /// <param name="oidType">The type of oid</param>
         /// <returns>
         ///  The key definition for the specified OID.
         /// </returns>
         /// <exception cref="NotSupportedException">
         ///  When the OID is not supported or when the OID is for an RSA key.
         /// </exception>
-        public static KeyDefinition GetByOid(string oid)
+        public static KeyDefinition GetByOid(string oid, OidType oidType)
         {
-            if (string.Equals(oid, KeyOids.Rsa, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(oid, KeyOids.Algorithm.Rsa, StringComparison.OrdinalIgnoreCase))
             {
                 throw new NotSupportedException(
                     "RSA keys are not supported by this method as all RSA keys share the same OID.");
             }
 
-            return _allDefinitions.Values.SingleOrDefault(d => d.Oid == oid) ??
-            throw new NotSupportedException(
+            var keyDefinition = oidType == OidType.AlgorithmOid
+                ? _allDefinitions.Values.SingleOrDefault(d => d.AlgorithmOid == oid)
+                : _allDefinitions.Values.SingleOrDefault(d => d.CurveOid == oid);
+
+            return keyDefinition ?? throw new NotSupportedException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.UnsupportedAlgorithm));
         }
-
 
         /// <summary>
         /// Gets all RSA key definitions.
@@ -163,40 +180,83 @@ namespace Yubico.YubiKey.Cryptography
         /// <summary>
         /// Represents the object identifiers (OIDs) of cryptographic keys.
         /// </summary>
-        public struct KeyOids
+        /// <summary>
+        /// Contains OIDs for cryptographic algorithms used in key operations.
+        /// </summary>
+        public static class KeyOids
         {
             /// <summary>
-            /// Represents the object identifier (OID) for RSA keys.
-            /// <remarks>
-            ///  All RSA keys share the same OID
-            /// </remarks>
+            /// Algorithm OIDs identify the general key algorithm family
             /// </summary>
-            public const string Rsa = "1.2.840.113549";
+            public static class Algorithm
+            {
+                /// <summary>
+                /// RSA Encryption algorithm OID
+                /// </summary>
+                public const string Rsa = "1.2.840.113549.1.1.1";
+
+                /// <summary>
+                /// Elliptic Curve public key algorithm OID (ANSI X9.62)
+                /// </summary>
+                public const string EllipticCurve = "1.2.840.10045.2.1";
+
+                /// <summary>
+                /// Edwards-curve Digital Signature Algorithm OID
+                /// </summary>
+                public const string EdDsa = "1.3.101.112";
+            }
 
             /// <summary>
-            /// Represents the object identifier (OID) for nistP256 or secP256r1
+            /// Curve OIDs specify the exact curve parameters for elliptic curve keys
             /// </summary>
-            public const string P256 = "1.2.840.10045.3.1.7";
+            public static class Curve
+            {
+                /// <summary>
+                /// Represents the OID for NIST P-256 curve (also known as secp256r1)
+                /// </summary>
+                public const string P256 = "1.2.840.10045.3.1.7";
+
+                /// <summary>
+                /// Represents the OID for NIST P-384 curve (also known as secp384r1)
+                /// </summary>
+                public const string P384 = "1.3.132.0.34";
+
+                /// <summary>
+                /// Represents the OID for NIST P-521 curve (also known as secp521r1)
+                /// </summary>
+                public const string P521 = "1.3.132.0.35";
+
+                /// <summary>
+                /// Represents the OID for X25519 (Curve25519) used for key exchange
+                /// </summary>
+                public const string X25519 = "1.3.101.110";
+
+                /// <summary>
+                /// Represents the OID for Ed25519 (Edwards25519) used for signatures
+                /// Note: This appears in parameters when EdDsa is used with Ed25519
+                /// </summary>
+                public const string Ed25519 = "1.3.101.112";
+            }
 
             /// <summary>
-            /// Represents the object identifier (OID) for nistP384 or secP384r1
+            /// Gets the algorithm and curve OIDs for a specific key type
             /// </summary>
-            public const string P384 = "1.3.132.0.34";
-
-            /// <summary>
-            /// Represents the object identifier (OID) for nistP521 or secP521r1
-            /// </summary>
-            public const string P521 = "1.3.132.0.35";
-
-            /// <summary>
-            /// Represents the object identifier (OID) for X25519 (Curve25519)
-            /// </summary>
-            public const string X25519 = "1.3.101.110";
-
-            /// <summary>
-            /// Represents the object identifier (OID) for Ed25519 (Edwards25519)
-            /// </summary>
-            public const string Ed25519 = "1.3.101.112";
+            public static (string AlgorithmOid, string? Curveoid) GetOidsForKeyType(KeyType keyType)
+            {
+                return keyType switch
+                {
+                    KeyType.RSA1024 => (Algorithm.Rsa, null),
+                    KeyType.RSA2048 => (Algorithm.Rsa, null),
+                    KeyType.RSA3072 => (Algorithm.Rsa, null),
+                    KeyType.RSA4096 => (Algorithm.Rsa, null),
+                    KeyType.P256 => (Algorithm.EllipticCurve, Curve.P256),
+                    KeyType.P384 => (Algorithm.EllipticCurve, Curve.P384),
+                    KeyType.P521 => (Algorithm.EllipticCurve, Curve.P521),
+                    KeyType.X25519 => (Algorithm.EllipticCurve, Curve.X25519),
+                    KeyType.Ed25519 => (Algorithm.EdDsa, null), // EdDSA doesn't use a separate parameter OID
+                    _ => throw new ArgumentException($"Unsupported key type: {keyType}")
+                };
+            }
         }
 
         /// <summary>
@@ -204,10 +264,11 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition P256 = new KeyDefinition
         {
-            Type = KeyType.P256,
+            KeyType = KeyType.P256,
             LengthInBytes = 32,
             LengthInBits = 256,
-            Oid = KeyOids.P256,
+            AlgorithmOid = KeyOids.Algorithm.EllipticCurve,
+            CurveOid = KeyOids.Curve.P256,
             IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition
             {
@@ -222,10 +283,11 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition P384 = new KeyDefinition
         {
-            Type = KeyType.P384,
+            KeyType = KeyType.P384,
             LengthInBytes = 48,
             LengthInBits = 384,
-            Oid = KeyOids.P384,
+            AlgorithmOid = KeyOids.Algorithm.EllipticCurve,
+            CurveOid = KeyOids.Curve.P384,
             IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition
             {
@@ -240,10 +302,11 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition P521 = new KeyDefinition
         {
-            Type = KeyType.P521,
+            KeyType = KeyType.P521,
             LengthInBytes = 66,
             LengthInBits = 521,
-            Oid = KeyOids.P521,
+            AlgorithmOid = KeyOids.Algorithm.EllipticCurve,
+            CurveOid = KeyOids.Curve.P521,
             IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition
             {
@@ -258,10 +321,11 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition X25519 = new KeyDefinition
         {
-            Type = KeyType.X25519,
+            KeyType = KeyType.X25519,
             LengthInBytes = 32,
             LengthInBits = 256,
-            Oid = KeyOids.X25519,
+            AlgorithmOid = KeyOids.Algorithm.EdDsa,
+            CurveOid = KeyOids.Curve.X25519,
             IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition
             {
@@ -276,10 +340,11 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition Ed25519 = new KeyDefinition
         {
-            Type = KeyType.Ed25519,
+            KeyType = KeyType.Ed25519,
             LengthInBytes = 32,
             LengthInBits = 256,
-            Oid = KeyOids.Ed25519,
+            AlgorithmOid = KeyOids.Algorithm.EdDsa,
+            CurveOid = KeyOids.Curve.Ed25519,
             IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition
             {
@@ -294,10 +359,10 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition RSA1024 = new KeyDefinition
         {
-            Type = KeyType.RSA1024,
+            KeyType = KeyType.RSA1024,
             LengthInBytes = 128,
             LengthInBits = 1024,
-            Oid = KeyOids.Rsa,
+            AlgorithmOid = KeyOids.Algorithm.Rsa,
             IsRsaKey = true
         };
 
@@ -306,10 +371,10 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition RSA2048 = new KeyDefinition
         {
-            Type = KeyType.RSA2048,
+            KeyType = KeyType.RSA2048,
             LengthInBytes = 256,
             LengthInBits = 2048,
-            Oid = KeyOids.Rsa,
+            AlgorithmOid = KeyOids.Algorithm.Rsa,
             IsRsaKey = true
         };
 
@@ -318,10 +383,10 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition RSA3072 = new KeyDefinition
         {
-            Type = KeyType.RSA3072,
+            KeyType = KeyType.RSA3072,
             LengthInBytes = 384,
             LengthInBits = 3072,
-            Oid = KeyOids.Rsa,
+            AlgorithmOid = KeyOids.Algorithm.Rsa,
             IsRsaKey = true
         };
 
@@ -330,10 +395,10 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition RSA4096 = new KeyDefinition
         {
-            Type = KeyType.RSA4096,
+            KeyType = KeyType.RSA4096,
             LengthInBytes = 512,
             LengthInBits = 4096,
-            Oid = KeyOids.Rsa,
+            AlgorithmOid = KeyOids.Algorithm.Rsa,
             IsRsaKey = true
         };
 
@@ -361,42 +426,69 @@ namespace Yubico.YubiKey.Cryptography
             /// <summary>
             /// Gets or sets the type of the key.
             /// </summary>
-            public KeyType Type { get; set; }
+            public KeyType KeyType { get; init; }
 
             /// <summary>
             /// Gets or sets the length of the key in bytes.
             /// </summary>
-            public int LengthInBytes { get; set; }
+            public int LengthInBytes { get; init; }
 
             /// <summary>
             /// Gets or sets the length of the key in bits.
             /// </summary>
-            public int LengthInBits { get; set; }
+            public int LengthInBits { get; init; }
 
             /// <summary>
             /// Gets or sets the object identifier (OID) of the key.
             /// </summary>
-            public string Oid { get; set; } = string.Empty;
+            public string AlgorithmOid { get; init; } = null!;
+
+            public string? CurveOid { get; init; }
 
             /// <summary>
             /// Gets or sets a value indicating whether the key is an elliptic curve (EC) key.
             /// </summary>
-            public bool IsEcKey { get; set; }
+            public bool IsEcKey { get; init; }
 
             /// <summary>
             /// Gets or sets a value indicating whether the key is an RSA key.
             /// </summary>
-            public bool IsRsaKey { get; set; }
+            public bool IsRsaKey { get; init; }
 
             /// <summary>
             /// Gets the name of the key, which is the string representation of the key type.
             /// </summary>
-            public string Name => Type.ToString();
+            public string Name => KeyType.ToString();
 
             /// <summary>
             /// Gets or sets the COSE key definition associated with this key.
             /// </summary>
-            public CoseKeyDefinition? CoseKeyDefinition { get; set; }
+            public CoseKeyDefinition? CoseKeyDefinition { get; init; }
+
+            public override bool Equals(object? obj) =>
+                obj is KeyDefinition other &&
+                KeyType == other.KeyType &&
+                LengthInBytes == other.LengthInBytes &&
+                LengthInBits == other.LengthInBits &&
+                AlgorithmOid == other.AlgorithmOid &&
+                CurveOid == other.CurveOid &&
+                IsEcKey == other.IsEcKey &&
+                IsRsaKey == other.IsRsaKey &&
+                CoseKeyDefinition == other.CoseKeyDefinition;
+
+            public override int GetHashCode()
+            {
+                var hashCode = new HashCode();
+                hashCode.Add(KeyType);
+                hashCode.Add(LengthInBytes);
+                hashCode.Add(LengthInBits);
+                hashCode.Add(AlgorithmOid);
+                hashCode.Add(CurveOid);
+                hashCode.Add(IsEcKey);
+                hashCode.Add(IsRsaKey);
+                // hashCode.Add(CoseKeyDefinition);
+                return hashCode.ToHashCode();
+            }
         }
 
         /// <summary>
@@ -414,6 +506,11 @@ namespace Yubico.YubiKey.Cryptography
             public CoseEcCurve CurveIdentifier { get; set; } // crv - Curve identifier
             public CoseAlgorithmIdentifier AlgorithmIdentifier { get; set; } // alg - Algorithm identifier
         }
+    }
 
+    public enum OidType
+    {
+        AlgorithmOid,
+        CurveOid
     }
 }

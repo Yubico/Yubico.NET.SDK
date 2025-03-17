@@ -349,15 +349,15 @@ namespace Yubico.YubiKey.Cryptography
         {
             if (encodedPointLength == (KeyDefinitions.P256.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.KeyOids.P256;
+                return KeyDefinitions.KeyOids.Curve.P256;
             }
             if (encodedPointLength == (KeyDefinitions.P384.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.KeyOids.P384;
+                return KeyDefinitions.KeyOids.Curve.P384;
             }
             if (encodedPointLength == (KeyDefinitions.P521.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.KeyOids.P521;
+                return KeyDefinitions.KeyOids.Curve.P521;
             }
 
             throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
@@ -386,7 +386,7 @@ namespace Yubico.YubiKey.Cryptography
         private static ECDsa CheckECDsa(ECDsa toCheck)
         {
             var ecParameters = toCheck.ExportParameters(false);
-            var keyDefinition = KeyDefinitions.GetByOid(ecParameters.Curve.Oid.Value);
+            var keyDefinition = KeyDefinitions.GetByOid(ecParameters.Curve.Oid.Value, OidType.CurveOid);
             int coordinateLength = keyDefinition.LengthInBytes;
 
             if (ecParameters.Q.X.Length == 0 ||
@@ -458,10 +458,10 @@ namespace Yubico.YubiKey.Cryptography
         {
             return algorithm switch
             {
-                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.KeyOids.P256,
-                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.KeyOids.P256,
-                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.KeyOids.P384,
-                CoseAlgorithmIdentifier.ES512 => KeyDefinitions.KeyOids.P521,
+                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.KeyOids.Curve.P256,
+                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.KeyOids.Curve.P256,
+                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.KeyOids.Curve.P384,
+                CoseAlgorithmIdentifier.ES512 => KeyDefinitions.KeyOids.Curve.P521,
                 _ => throw new NotSupportedException(ExceptionMessages.UnsupportedAlgorithm)
             };
         }

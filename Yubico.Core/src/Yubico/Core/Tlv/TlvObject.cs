@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
@@ -113,6 +114,23 @@ namespace Yubico.Core.Tlv
             ReadOnlySpan<byte> buffer = data;
             return ParseFrom(ref buffer);
         }
+        
+        /// <inheritdoc cref="TlvObject.Parse(ReadOnlySpan{byte})"/> 
+        // public static TlvObject Parse(ReadOnlyMemory<byte> data) => Parse(data.Span);
+        
+        public static bool TryParse(ReadOnlySpan<byte> data, [NotNullWhen(true)] out TlvObject? tlvObject)
+        {
+            tlvObject = null;
+            try
+            {
+                tlvObject = ParseFrom(ref data);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// Parses a TLV from a BER-TLV encoded byte array.
@@ -126,6 +144,11 @@ namespace Yubico.Core.Tlv
         /// <exception cref="ArgumentException">Thrown if the buffer does not contain a valid TLV.</exception>
         internal static TlvObject ParseFrom(ref ReadOnlySpan<byte> buffer)
         {
+            if (buffer.Length == 0)
+            {
+                throw new ArgumentException("Insufficient data for tag");
+            }
+            
             // The first byte of the TLV is the tag.
             int tag = buffer[0];
 

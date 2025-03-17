@@ -107,6 +107,7 @@ namespace Yubico.YubiKey.TestUtilities
             var privateKey = ParseKeyData(keyData);
             return new EcPrivateKeyInfo { AlgorithmOid = algorithmOid, CurveOid = curveOid, PrivateKey = privateKey };
         }
+        
     }
 
     public class RsaKeyParser : IPrivateKeyParser<RsaPrivateKeyInfo>
@@ -213,7 +214,7 @@ namespace Yubico.YubiKey.TestUtilities
             }
 
             var algorithmIdentifierSequence = privateKeyInfoSequence.ReadSequence();
-            string algorithmOid = algorithmIdentifierSequence.ReadObjectIdentifier();
+            var algorithmOid = algorithmIdentifierSequence.ReadObjectIdentifier();
             string? curveOid = null;
             if (algorithmIdentifierSequence.HasData)
             {

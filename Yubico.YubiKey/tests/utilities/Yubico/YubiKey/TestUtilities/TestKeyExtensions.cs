@@ -44,9 +44,7 @@ namespace Yubico.YubiKey.TestUtilities
                             keyInfo.Exponent2, keyInfo.Coefficient);
                     }
                 default: throw new ArgumentException("Unknown curve");
-                    
             }
-            
         }
 
         /// <summary>

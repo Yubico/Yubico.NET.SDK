@@ -392,32 +392,32 @@ namespace Yubico.YubiKey.TestUtilities
         // not return a reference.
         public PivPrivateKey GetPivPrivateKey()
         {
-            if (_pivPrivateKey.Algorithm == PivAlgorithm.EccEd25519) // This is the simple one
-            {
-                var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
-                var last32Bytes = testPrivateKey.KeyBytes.AsSpan()[^32..];
-                var pivPrivateKey = new PivEccPrivateKey(last32Bytes.ToArray(), PivAlgorithm.EccEd25519);
-                return pivPrivateKey;
-            }
-
-            if (_pivPrivateKey.Algorithm == PivAlgorithm.EccX25519) // This is the simple one
-            {
-                var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
-                var last32Bytes = testPrivateKey.KeyBytes.AsSpan()[^32..];
-                var pivPrivateKey = new PivEccPrivateKey(last32Bytes.ToArray(), PivAlgorithm.EccEd25519);
-                return pivPrivateKey;
-            }
-
-            if (_pivPrivateKey.Algorithm ==
-                PivAlgorithm
-                    .EccEd25519) // This is good as well, but a bit too complex. However it could be used to replace keyconverter
-            {
-                var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
-                var parser = new PrivateKeyInfoParser();
-                var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(testPrivateKey.KeyBytes);
-                var pivPrivateKey = new PivEccPrivateKey(keyInfo.PrivateKey, _pivPrivateKey.Algorithm);
-                return pivPrivateKey;
-            }
+            // if (_pivPrivateKey.Algorithm == PivAlgorithm.EccEd25519) // This is the simple one
+            // {
+            //     var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
+            //     var last32Bytes = testPrivateKey.KeyBytes.AsSpan()[^32..];
+            //     var pivPrivateKey = new PivEccPrivateKey(last32Bytes.ToArray(), PivAlgorithm.EccEd25519);
+            //     return pivPrivateKey;
+            // }
+            //
+            // if (_pivPrivateKey.Algorithm == PivAlgorithm.EccX25519) // This is the simple one
+            // {
+            //     var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
+            //     var last32Bytes = testPrivateKey.KeyBytes.AsSpan()[^32..];
+            //     var pivPrivateKey = new PivEccPrivateKey(last32Bytes.ToArray(), PivAlgorithm.EccEd25519);
+            //     return pivPrivateKey;
+            // }
+            //
+            // if (_pivPrivateKey.Algorithm ==
+            //     PivAlgorithm
+            //         .EccEd25519) // This is good as well, but a bit too complex. However it could be used to replace keyconverter
+            // {
+            //     var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
+            //     var parser = new PrivateKeyInfoParser();
+            //     var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(testPrivateKey.KeyBytes);
+            //     var pivPrivateKey = new PivEccPrivateKey(keyInfo.PrivateKey, _pivPrivateKey.Algorithm);
+            //     return pivPrivateKey;
+            // }
 
             if (_pivPrivateKey.Algorithm != PivAlgorithm.None)
             {
@@ -498,7 +498,7 @@ namespace Yubico.YubiKey.TestUtilities
         // exception.
         public ECDsa GetEccObject()
         {
-            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.P256);
+            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.Curve.P256);
             if (_pivPublicKey.Algorithm != PivAlgorithm.EccP256)
             {
                 if (_pivPublicKey.Algorithm != PivAlgorithm.EccP384)
@@ -509,7 +509,7 @@ namespace Yubico.YubiKey.TestUtilities
                             RequestedKeyMessage));
                 }
 
-                eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.P384);
+                eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.Curve.P384);
             }
 
             var eccParams = new ECParameters
@@ -702,7 +702,8 @@ namespace Yubico.YubiKey.TestUtilities
             offset = ReadTagLen(encodedKey, offset, false);
             if (offset > 0)
             {
-                if (encodedKey[offset + 3] == 0x86)
+                var tag = encodedKey[offset + 3];
+                if (tag == 0x86)
                 {
                     using var rsaObject = RSA.Create();
                     rsaObject.ImportPkcs8PrivateKey(encodedKey, out _);
@@ -710,7 +711,7 @@ namespace Yubico.YubiKey.TestUtilities
                     BuildPivPublicKey(rsaObject);
                     BuildPivPrivateKey(rsaObject);
                 }
-                else if (encodedKey[offset + 3] == 0xCE)
+                else if (tag == 0xCE)
                 {
                     using var eccObject = ECDsa.Create();
                     eccObject.ImportPkcs8PrivateKey(encodedKey, out _);
@@ -718,13 +719,13 @@ namespace Yubico.YubiKey.TestUtilities
                     BuildPivPublicKey(eccObject);
                     BuildPivPrivateKey(eccObject);
                 }
-                else if (encodedKey[offset + 3] == 0x04)
+                else if (tag == 0x04)
                 {
                     var keyDataRange = ^32..;
                     _pivPrivateKey = new PivEccPrivateKey(encodedKey.AsSpan()[keyDataRange], PivAlgorithm.EccEd25519);
                     // BuildPivPublicKey(eccObject); // TODO How do get this? I can get it from the file data. Possibly compute from the private key?
                 }
-                else if (encodedKey[offset + 3] == 0x03) // Not sure if this is correct. It appears ED and X keys share this byte
+                else if (tag == 0x03) // Not sure if this is correct. It appears ED and X keys share this byte
                 {
                     var keyDataRange = ^32..;
                     _pivPrivateKey = new PivEccPrivateKey(encodedKey.AsSpan()[keyDataRange], PivAlgorithm.EccX25519);
@@ -763,11 +764,11 @@ namespace Yubico.YubiKey.TestUtilities
                 }
                 else if (encodedKey[offset + 3] == 0x04) // Ed25519
                 {
-                    _pivPublicKey = new PivEccPublicKey(encodedKey.AsSpan()[^32..], PivAlgorithm.EccEd25519);
+                    _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyDefinitions.KeyType.Ed25519);
                 }
                 else if (encodedKey[offset + 3] == 0x03) // X25519
                 {
-                    _pivPublicKey = new PivEccPublicKey(encodedKey.AsSpan()[^32..], PivAlgorithm.EccX25519);
+                    _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyDefinitions.KeyType.Ed25519);
                 }
             }
         }
@@ -836,7 +837,8 @@ namespace Yubico.YubiKey.TestUtilities
             offset += keySize + (keySize - eccParams.Q.Y!.Length);
             Array.Copy(eccParams.Q.Y, 0, point, offset, eccParams.Q.Y.Length);
 
-            var eccPubKey = new PivEccPublicKey(point);
+            var keyDefinition = KeyDefinitions.GetByOid(eccParams.Curve.Oid.Value!, OidType.CurveOid);
+            var eccPubKey = PivEccPublicKey.CreateFromPublicPoint(point, keyDefinition.KeyType);
             _pivPublicKey = eccPubKey;
         }
 

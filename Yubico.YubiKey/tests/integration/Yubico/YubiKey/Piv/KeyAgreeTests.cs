@@ -52,13 +52,13 @@ namespace Yubico.YubiKey.Piv
             Assert.Equal(onYubiKeyX25519Key.PublicKey.YubiKeyEncodedPublicKey, pivPublicKey.YubiKeyEncodedPublicKey);
 
             // Act
-            var pivEccPublicKeyPeer = algorithm is PivAlgorithm.EccEd25519 or PivAlgorithm.EccX25519
+            var pivEccPublicKeyPeer = algorithm is PivAlgorithm.EccX25519
                 ? (PivEccPublicKey)pivPublicKeyPeer // For EccEd25519 and EccX25519, we wanted to test with a different public key
                 : (PivEccPublicKey)pivPublicKey; // For other algorithms, we decided its fine to use the same public key
             var sharedSecret = pivSession.KeyAgree(0x85, pivEccPublicKeyPeer);
 
             // Assert
-            if (algorithm is PivAlgorithm.EccEd25519 or PivAlgorithm.EccX25519)
+            if (algorithm is  PivAlgorithm.EccX25519)
             {
                 const string keyAgreeFilename = "x25519_private_and_public2_shared_secret.bin";
                 var expectedSharedSecret = TestCrypto.ReadTestData(keyAgreeFilename);
@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Piv
                 PivPublicKey pivPublicKeyPeer1 = null!;
                 try
                 {
-                    var testPublicKeyPeer = TestKeys.GetPublicKey(algorithm, 2);
+                    var testPublicKeyPeer = TestKeys.GetTestPublicKey(algorithm, 2);
                     pivPublicKeyPeer1 = testPublicKeyPeer.AsPivPublicKey();
                 }
                 catch (FileNotFoundException)

@@ -33,8 +33,8 @@ namespace Yubico.YubiKey.TestUtilities
                 return false;
             }
 
-            cert = TestKeys.GetCertificate(curve).AsX509Certificate2();
-            privateKey = TestKeys.GetPrivateKey(curve).AsPivPrivateKey();
+            cert = TestKeys.GetTestCertificate(curve).AsX509Certificate2();
+            privateKey = TestKeys.GetTestPrivateKey(curve).AsPivPrivateKey();
             return true;
         }
 
@@ -54,9 +54,9 @@ namespace Yubico.YubiKey.TestUtilities
                 return false;
             }
 
-            var testCert = TestKeys.GetCertificate(curve, validAttest);
-            var testPrivKey = TestKeys.GetPrivateKey(curve);
-            var testPubKey = TestKeys.GetPublicKey(curve);
+            var testCert = TestKeys.GetTestCertificate(curve, validAttest);
+            var testPrivKey = TestKeys.GetTestPrivateKey(curve);
+            var testPubKey = TestKeys.GetTestPublicKey(curve);
 
             cert = testCert.AsPemString();
             privateKey = testPrivKey.AsPemString();
@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.TestUtilities
         {
             var curve = GetCurveFromAlgorithm(algorithm);
             return TestKeys
-                .GetPublicKey(curve)
+                .GetTestPublicKey(curve)
                 .AsPivPublicKey();
         }
 
@@ -76,14 +76,14 @@ namespace Yubico.YubiKey.TestUtilities
         {
             var curve = GetCurveFromAlgorithm(algorithm);
             return TestKeys
-                .GetPrivateKey(curve)
+                .GetTestPrivateKey(curve)
                 .AsPivPrivateKey();
         }
 
         public static X509Certificate2 GetCert(PivAlgorithm algorithm)
         {
             var curve = GetCurveFromAlgorithm(algorithm);
-            return TestKeys.GetCertificate(curve).AsX509Certificate2();
+            return TestKeys.GetTestCertificate(curve).AsX509Certificate2();
         }
 
         private static string GetCurveFromAlgorithm(PivAlgorithm algorithm) =>

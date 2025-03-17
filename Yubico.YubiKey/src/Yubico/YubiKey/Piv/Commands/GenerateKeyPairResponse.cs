@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _slotNumber;
             set
             {
-                if (PivSlot.IsValidSlotNumberForGenerate(value) == false)
+                if (!PivSlot.IsValidSlotNumberForGenerate(value))
                 {
                     throw new ArgumentException(
                         string.Format(
@@ -113,6 +113,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             ExceptionMessages.InvalidSlot,
                             value));
                 }
+
                 _slotNumber = value;
             }
         }
@@ -131,13 +132,16 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _algorithm;
             set
             {
-                if (!value.GetByKeyDefinitionKeyType().SupportsKeyGeneration)
+                var keyDefinitionKeyType = value.GetPivKeyDef();
+                bool supportsKeyGeneration = keyDefinitionKeyType is { SupportsKeyGeneration: true };
+                if (!supportsKeyGeneration)
                 {
                     throw new ArgumentException(
                         string.Format(
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.InvalidAlgorithm));
                 }
+
                 _algorithm = value;
             }
         }
@@ -155,8 +159,10 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <param name="algorithm">
         /// The algorithm (and key size) of the key pair generated.
         /// </param>
-        public GenerateKeyPairResponse(ResponseApdu responseApdu, byte slotNumber, PivAlgorithm algorithm) :
-            base(responseApdu)
+        public GenerateKeyPairResponse(
+            ResponseApdu responseApdu,
+            byte slotNumber,
+            PivAlgorithm algorithm) : base(responseApdu)
         {
             SlotNumber = slotNumber;
             Algorithm = algorithm;
@@ -183,10 +189,11 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public PivPublicKey GetData() => Status switch
-        {
-            ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data, Algorithm),
-            _ => throw new InvalidOperationException(StatusMessage),
-        };
+        public PivPublicKey GetData() =>
+            Status switch
+            {
+                ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data, Algorithm),
+                _ => throw new InvalidOperationException(StatusMessage),
+            };
     }
 }

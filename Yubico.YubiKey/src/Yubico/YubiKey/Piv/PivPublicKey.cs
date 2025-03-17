@@ -16,6 +16,7 @@ using System;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -72,6 +73,7 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public class PivPublicKey
     {
+        protected const int PublicKeyTag = 0x7F49;
         protected static readonly ILogger Logger = Log.GetLogger<PivPublicKey>();
 
         /// <summary>
@@ -82,11 +84,15 @@ namespace Yubico.YubiKey.Piv
         /// </value>
         public PivAlgorithm Algorithm { get; protected set; }
 
+        public IPublicKeyParameters KeyParameters { get; protected set; } = null!;
+        protected KeyDefinitions.KeyDefinition KeyDefinition { get; set; } = new();
         protected Memory<byte> PivEncodedKey { get; set; }
         protected Memory<byte> YubiKeyEncodedKey { get; set; }
+        protected Memory<byte> EncodedKey { get; set; }
+        protected ReadOnlyMemory<byte> PublicPoint { get; set; }
 
         /// <summary>
-        /// Contains the TLV encoding of the public key. 
+        /// Contains the PIV TLV encoding of the public key. 
         /// If there is no encoded public key, this will be a buffer of length 0.
         /// </summary>
         public ReadOnlyMemory<byte> PivEncodedPublicKey => PivEncodedKey;
@@ -107,6 +113,18 @@ namespace Yubico.YubiKey.Piv
             PivEncodedKey = Memory<byte>.Empty;
             YubiKeyEncodedKey = Memory<byte>.Empty;
         }
+        
+        public static PivPublicKey Create(IPublicKeyParameters keyParameters)
+        {
+            return keyParameters switch
+            {
+                RSAPublicKeyParameters rsaKey => PivRsaPublicKey.CreateFromPublicKey(rsaKey),
+                ECPublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
+                EDsaPublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
+                ECX25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
+                _ => throw new ArgumentException("Invalid key type", nameof(keyParameters))
+            };
+        }
 
         /// <summary>
         /// Create a new instance of a PivPublicKey from the given encoded value.
@@ -126,42 +144,16 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The key data supplied is not a supported encoding.
         /// </exception>
-        public static PivPublicKey Create(ReadOnlyMemory<byte> encodedPublicKey, PivAlgorithm? algorithm = null)
+        public static PivPublicKey Create(ReadOnlyMemory<byte> encodedPublicKey, PivAlgorithm algorithm)
         {
-            PivPublicKey publicKeyObject;
-            
-            switch (algorithm)
+            if (algorithm.IsEcc())
             {
-                case PivAlgorithm.Rsa1024:
-                case PivAlgorithm.Rsa2048:
-                case PivAlgorithm.Rsa3072:
-                case PivAlgorithm.Rsa4096:
-                    if (PivRsaPublicKey.TryCreate(out publicKeyObject, encodedPublicKey))
-                    {
-                        return publicKeyObject;
-                    }
-                    break;
+                return PivEccPublicKey.CreateFromPivEncoding(encodedPublicKey, algorithm);
+            }
 
-                case PivAlgorithm.EccP256:
-                case PivAlgorithm.EccP384:
-                case PivAlgorithm.EccP521:
-                case PivAlgorithm.EccEd25519:
-                case PivAlgorithm.EccX25519:
-                    if (PivEccPublicKey.TryCreate(out var ecPublicKey, encodedPublicKey, algorithm))
-                    {
-                        return ecPublicKey;
-                    }
-                    break;
-
-                case null:
-                    if (PivEccPublicKey.TryCreate(out publicKeyObject, encodedPublicKey))
-                    {
-                        return publicKeyObject;
-                    }
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null);
+            if (algorithm.IsRsa())
+            {
+                return PivRsaPublicKey.CreateFromPivEncoding(encodedPublicKey);
             }
 
             throw new ArgumentException(
@@ -169,5 +161,35 @@ namespace Yubico.YubiKey.Piv
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.InvalidPublicKeyData));
         }
+
+        public static PivPublicKey Create(ReadOnlyMemory<byte> encodedPublicKey)
+        {
+            if (PivRsaPublicKey.CanCreate(encodedPublicKey))
+            {
+                return PivRsaPublicKey.CreateFromPivEncoding(encodedPublicKey);
+            }
+
+            if (PivEccPublicKey.CanCreate(encodedPublicKey))
+            {
+                return PivEccPublicKey.CreateFromPivEncoding(encodedPublicKey);
+            }
+
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.InvalidPublicKeyData));
+        }
+
+        // public override ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => EncodedKey;
+        // public override ReadOnlyMemory<byte> GetPublicPoint() => PublicPoint;
+        // public override KeyDefinitions.KeyDefinition GetKeyDefinition() => KeyDefinition;
+        // public override KeyDefinitions.KeyType GetKeyType() => KeyDefinition.KeyType;
+        public KeyDefinitions.KeyDefinition GetKeyDefinition() => KeyDefinition;
+
+        public KeyDefinitions.KeyType GetKeyType() => KeyDefinition.KeyType;
+
+        public ReadOnlyMemory<byte> GetPublicPoint() => PublicPoint;
+
+        public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => EncodedKey;
     }
 }

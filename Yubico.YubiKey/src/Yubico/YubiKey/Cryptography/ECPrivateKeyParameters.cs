@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography
@@ -25,8 +26,10 @@ namespace Yubico.YubiKey.Cryptography
     /// contains the necessary private key data.
     /// It extends the base <see cref="ECKeyParameters"/> class with additional validation for private key components.
     /// </remarks>
-    public class ECPrivateKeyParameters : ECKeyParameters
+    public class ECPrivateKeyParameters : ECKeyParameters, IPrivateKeyParameters
     {
+        private readonly byte[] _encodedKey;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ECPrivateKeyParameters"/> class.
         /// It is a wrapper for the <see cref="ECParameters"/> class.
@@ -42,6 +45,8 @@ namespace Yubico.YubiKey.Cryptography
             {
                 throw new ArgumentException("Parameters must contain private key data (D value)", nameof(parameters));
             }
+
+            _encodedKey = AsnPrivateKeyWriter.EncodeToPkcs8(parameters);
         }
 
         /// <summary>
@@ -52,9 +57,47 @@ namespace Yubico.YubiKey.Cryptography
         /// </remarks>
         /// <param name="ecdsaObject">The ECDsa object.</param>
         public ECPrivateKeyParameters(ECDsa ecdsaObject)
-            : base(ecdsaObject?.ExportParameters(true) ?? throw new ArgumentNullException())
+            : this(ecdsaObject?.ExportParameters(true) ?? throw new ArgumentNullException())
         {
+        }
 
+        public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => _encodedKey;
+        public ReadOnlyMemory<byte> GetPrivateKey() => Parameters.D.ToArray();
+
+        public static ECPrivateKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
+        {
+            var parameters = AsnPrivateKeyReader.CreateECParameters(encodedKey);
+            return new ECPrivateKeyParameters(parameters);
+        }
+
+        public static ECPrivateKeyParameters CreateFromParameters(ECParameters parameters)
+        {
+            return new ECPrivateKeyParameters(parameters);
+        }
+
+        public static ECPrivateKeyParameters CreateFromValue(
+            ReadOnlyMemory<byte> privateValue,
+            KeyDefinitions.KeyType keyType)
+        {
+            if (keyType != KeyDefinitions.KeyType.P256 && 
+                keyType != KeyDefinitions.KeyType.P384 &&
+                keyType != KeyDefinitions.KeyType.P521)
+            {
+                throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null);
+            }
+
+            var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
+            string oidValue = keyDefinition.CurveOid ?? throw new ArgumentException("Curve OID is null.");
+
+            var curve = ECCurve.CreateFromOid(new Oid(oidValue));
+            var parameters = new ECParameters
+            {
+                Curve = curve,
+                D = privateValue.ToArray(),
+            };
+
+            var ecdsa = ECDsa.Create(parameters);
+            return new ECPrivateKeyParameters(ecdsa.ExportParameters(true));
         }
     }
 }

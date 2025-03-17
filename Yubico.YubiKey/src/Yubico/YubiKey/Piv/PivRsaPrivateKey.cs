@@ -16,6 +16,7 @@ using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -46,7 +47,7 @@ namespace Yubico.YubiKey.Piv
     /// <para>
     /// You can build an object from either the encoded private key, and then
     /// examine each component, or you can build an object from the components,
-    /// then then examine the encoding.
+    /// then examine the encoding.
     /// </para>
     /// </remarks>
     public sealed class PivRsaPrivateKey : PivPrivateKey
@@ -133,17 +134,20 @@ namespace Yubico.YubiKey.Piv
             ReadOnlySpan<byte> exponentQ,
             ReadOnlySpan<byte> coefficient)
         {
-            Algorithm = primeP.Length switch
+            var keyType = primeP.Length switch
             {
-                Rsa1024CrtBlockSize => PivAlgorithm.Rsa1024,
-                Rsa2048CrtBlockSize => PivAlgorithm.Rsa2048,
-                Rsa3072CrtBlockSize => PivAlgorithm.Rsa3072,
-                Rsa4096CrtBlockSize => PivAlgorithm.Rsa4096,
+                Rsa1024CrtBlockSize => KeyDefinitions.KeyType.RSA1024,
+                Rsa2048CrtBlockSize => KeyDefinitions.KeyType.RSA2048,
+                Rsa3072CrtBlockSize => KeyDefinitions.KeyType.RSA3072,
+                Rsa4096CrtBlockSize => KeyDefinitions.KeyType.RSA4096,
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidPrivateKeyData)),
             };
+
+            Algorithm = keyType.GetPivAlgorithm();
+            KeyDefinition = KeyDefinitions.GetByKeyType(keyType);
 
             if (primeQ.Length != primeP.Length || exponentP.Length != primeP.Length
                 || exponentQ.Length != primeP.Length || coefficient.Length != primeP.Length)
@@ -167,6 +171,20 @@ namespace Yubico.YubiKey.Piv
             _exponentP = new Memory<byte>(exponentP.ToArray());
             _exponentQ = new Memory<byte>(exponentQ.ToArray());
             _coefficient = new Memory<byte>(coefficient.ToArray());
+
+            var rsaParameters = new RSAParameters
+            {
+                // D = privateExponent,      // Private exponent
+                // Modulus = modulus,        // Modulus (n)
+                // Exponent = publicExponent, // Public exponent (e)
+                P = _primeP.ToArray(), // First prime factor
+                Q = _primeQ.ToArray(), // Second prime factor
+                DP = _exponentP.ToArray(), // d mod (p-1)
+                DQ = _exponentQ.ToArray(), // d mod (q-1)
+                InverseQ = _coefficient.ToArray() // (q^-1) mod p
+            };
+            
+            KeyParameters = RSAPrivateKeyParameters.CreateFromParameters(rsaParameters);
         }
 
         /// <summary>
@@ -204,6 +222,7 @@ namespace Yubico.YubiKey.Piv
                 {
                     continue;
                 }
+
                 if (valueArray[tag - 1].IsEmpty == false)
                 {
                     continue;
@@ -240,6 +259,17 @@ namespace Yubico.YubiKey.Piv
             _coefficient = Memory<byte>.Empty;
 
             base.Clear();
+        }
+
+        public static PivPrivateKey CreateFromPrivateKey(IPrivateKeyParameters keyParameters)
+        {
+            if (keyParameters is not RSAPrivateKeyParameters parameters)
+            {
+                throw new NotSupportedException("Argument is not of type RSAPrivateKeyParameters");
+            }
+
+            var rsaParams = parameters.Parameters;
+            return new PivRsaPrivateKey(rsaParams.P, rsaParams.Q, rsaParams.DP, rsaParams.DQ, rsaParams.InverseQ);
         }
     }
 }

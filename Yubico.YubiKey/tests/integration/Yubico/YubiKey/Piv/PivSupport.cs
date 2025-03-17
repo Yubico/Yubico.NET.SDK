@@ -33,16 +33,18 @@ namespace Yubico.YubiKey.Piv
                 }
             }
 
+            const byte EccTag = 0x06;
+            const byte Length = 0x20;
             var priKey = PivPrivateKey.Create(new byte[]
             {
-                0x06, 0x20,
+                EccTag, Length,
                 0xba, 0x29, 0x7a, 0xc6, 0x64, 0x62, 0xef, 0x6c, 0xd0, 0x89, 0x76, 0x5c, 0xbd, 0x46, 0x52, 0x2b,
                 0xb0, 0x48, 0x0e, 0x85, 0x49, 0x15, 0x85, 0xe7, 0x7a, 0x74, 0x3c, 0x8e, 0x03, 0x59, 0x8d, 0x3a
             });
 
             var importCommand = new ImportAsymmetricKeyCommand(
                 priKey, slotNumber, PivPinPolicy.Never, PivTouchPolicy.Never);
-            ImportAsymmetricKeyResponse importResponse = pivSession.Connection.SendCommand(importCommand);
+            var importResponse = pivSession.Connection.SendCommand(importCommand);
 
             return importResponse.Status == ResponseStatus.Success;
         }

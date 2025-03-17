@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void PivKey_VerifyDigestedData_Succeeds()
         {
-            var pubKey = new PivEccPublicKey(GetEncodedPoint());
+            var pubKey = PivEccPublicKey.CreateFromPublicPoint(GetEncodedPoint(), KeyDefinitions.KeyType.P256);
             byte[] digest = GetDigest();
             byte[] signature = GetSignature();
 
@@ -90,7 +90,7 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ECDsa_VerifyDigestedData_Succeeds()
         {
-            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.P256);
+            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.Curve.P256);
             var eccParams = new ECParameters
             {
                 Curve = (ECCurve)eccCurve
@@ -205,7 +205,7 @@ namespace Yubico.YubiKey.Cryptography
             byte[] yCoord = GetY();
 
             byte[] encoding = new byte[xCoord.Length + yCoord.Length + 1];
-            encoding[0] = 4;
+            encoding[0] = 0x4;
             Array.Copy(xCoord, 0, encoding, 1, xCoord.Length);
             Array.Copy(yCoord, 0, encoding, xCoord.Length + 1, yCoord.Length);
 
@@ -215,7 +215,7 @@ namespace Yubico.YubiKey.Cryptography
         private static (ECCurve ecCurve, CoseEcCurve coseCurve) GetCurves(KeyDefinitions.KeyType keyType)
         {
             var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
-            var (eccCurve, coseCurve) = keyDefinition.Type switch
+            var (eccCurve, coseCurve) = keyDefinition.KeyType switch
             {
                 KeyDefinitions.KeyType.P256 => (ECCurve.NamedCurves.nistP256, CoseEcCurve.P256),
                 KeyDefinitions.KeyType.P384 => (ECCurve.NamedCurves.nistP384, CoseEcCurve.P384),

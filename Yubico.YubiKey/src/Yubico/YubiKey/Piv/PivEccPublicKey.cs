@@ -50,7 +50,6 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public sealed class PivEccPublicKey : PivPublicKey
     {
-        private const int EccTag = 0x86;
         private const int EccP256PublicKeySize = 65;
         private const int EccP384PublicKeySize = 97;
         private const byte LeadingEccByte = 0x04;

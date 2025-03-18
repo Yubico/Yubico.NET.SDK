@@ -78,5 +78,7 @@ namespace Yubico.YubiKey.Cryptography
 
         public ReadOnlyMemory<byte> GetPublicPoint() => GetBytes();
         public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => _encodedKey;
+
+        public static ECPublicKeyParameters CreateFromParameters(ECParameters ecParameters) => new(ecParameters);
     }
 }

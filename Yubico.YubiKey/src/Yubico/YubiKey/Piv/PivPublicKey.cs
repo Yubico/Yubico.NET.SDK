@@ -73,6 +73,9 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public class PivPublicKey
     {
+        protected const int EccTag = 0x86;
+        protected const int ModulusTag = 0x81;
+        protected const int ExponentTag = 0x82;
         protected const int PublicKeyTag = 0x7F49;
         protected static readonly ILogger Logger = Log.GetLogger<PivPublicKey>();
 
@@ -113,7 +116,7 @@ namespace Yubico.YubiKey.Piv
             PivEncodedKey = Memory<byte>.Empty;
             YubiKeyEncodedKey = Memory<byte>.Empty;
         }
-        
+
         public static PivPublicKey Create(IPublicKeyParameters keyParameters)
         {
             return keyParameters switch
@@ -179,11 +182,7 @@ namespace Yubico.YubiKey.Piv
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.InvalidPublicKeyData));
         }
-
-        // public override ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => EncodedKey;
-        // public override ReadOnlyMemory<byte> GetPublicPoint() => PublicPoint;
-        // public override KeyDefinitions.KeyDefinition GetKeyDefinition() => KeyDefinition;
-        // public override KeyDefinitions.KeyType GetKeyType() => KeyDefinition.KeyType;
+        
         public KeyDefinitions.KeyDefinition GetKeyDefinition() => KeyDefinition;
 
         public KeyDefinitions.KeyType GetKeyType() => KeyDefinition.KeyType;
@@ -191,5 +190,21 @@ namespace Yubico.YubiKey.Piv
         public ReadOnlyMemory<byte> GetPublicPoint() => PublicPoint;
 
         public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => EncodedKey;
+
+        internal static bool IsValidEccTag(int peekTag) =>
+            peekTag switch
+            {
+                EccTag => true,
+                _ => false
+            };
+
+        internal static bool IsValidRsaTag(int peekTag) =>
+            peekTag switch
+            {
+                ModulusTag or
+                    ExponentTag
+                    => true,
+                _ => false
+            };
     }
 }

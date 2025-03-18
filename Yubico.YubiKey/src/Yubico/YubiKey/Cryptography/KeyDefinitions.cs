@@ -331,7 +331,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 Type = CoseKeyType.Okp,
                 CurveIdentifier = CoseEcCurve.X25519,
-                AlgorithmIdentifier = CoseAlgorithmIdentifier.ECDHwHKDF256
+                AlgorithmIdentifier = CoseAlgorithmIdentifier.ECDHwHKDF256 // Hmm? Really?
             }
         };
 

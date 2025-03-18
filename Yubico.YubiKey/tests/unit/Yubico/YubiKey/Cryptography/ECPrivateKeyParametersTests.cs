@@ -19,7 +19,7 @@ namespace Yubico.YubiKey.Cryptography
             var pivPrivateKeyEncoded = pivPrivateKey.EncodedPrivateKey;
 
             // Act
-            var privateKeyParams = KeyParametersPivHelper.CreateFromPivEncoding<ECPrivateKeyParameters>(pivPrivateKeyEncoded);
+            var privateKeyParams = KeyParametersPivHelper.CreatePrivateParametersFromPivEncoding<ECPrivateKeyParameters>(pivPrivateKeyEncoded);
             var parameters = privateKeyParams.Parameters;
 
             // Assert

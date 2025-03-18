@@ -1,11 +1,74 @@
 ﻿using System;
 using System.Security.Cryptography;
 using Xunit;
+using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {
     public class ECPublicKeyParametersTests
     {
+        
+        [Theory]
+        [InlineData(KeyDefinitions.KeyType.P256)]
+        [InlineData(KeyDefinitions.KeyType.P384)]
+        [InlineData(KeyDefinitions.KeyType.P521)]
+        public void CreateFromPivEncoding_WithValidParameters_CreatesInstance(KeyDefinitions.KeyType keyType)
+        {
+            // Arrange
+            var testKey = TestKeys.GetTestPublicKey(keyType);
+            var pivPublicKey = testKey.AsPivPublicKey();
+            var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
+
+            // Act
+            var publicKeyParams = KeyParametersPivHelper.CreatePublicParametersFromPivEncoding<ECPublicKeyParameters>(pivPublicKeyEncoded);
+            var resultParameters = publicKeyParams.Parameters;
+
+            // Assert
+            var testKeyParameters = testKey.AsECDsa().ExportParameters(false);
+            Assert.Equal(testKeyParameters.D, resultParameters.D);
+            Assert.Equal(testKeyParameters.Curve.Oid.Value, resultParameters.Curve.Oid.Value);
+            Assert.Equal(testKeyParameters.Q.X, resultParameters.Q.X);
+            Assert.Equal(testKeyParameters.Q.Y, resultParameters.Q.Y);
+        }
+        
+        
+        // [Fact]
+        // public void CreateFromPkcs8_WithValidParameters_CreatesInstance()
+        // {
+        //     // Arrange
+        //     using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        //     var parameters = ecdsa.ExportParameters(true);
+        //
+        //     // Act
+        //     var publicKey = ecdsa.ExportSubjectPublicKeyInfo();
+        //     var publicKeyParams = ECPublicKeyParameters.CreateFromPkcs8(publicKey);
+        //
+        //     // Assert
+        //     Assert.NotNull(publicKeyParams.Parameters.D);
+        //     Assert.Equal(parameters.D, publicKeyParams.Parameters.D);
+        //     Assert.Equal(parameters.Q.X, publicKeyParams.Parameters.Q.X);
+        //     Assert.Equal(parameters.Q.Y, publicKeyParams.Parameters.Q.Y);
+        // }
+        //
+        // [Fact]
+        // public void CreateFromValue_WithValidParameters_CreatesInstance()
+        // {
+        //     // Arrange
+        //     using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        //     var parameters = ecdsa.ExportParameters(true);
+        //
+        //     // Act
+        //     var publicKeyParams =
+        //         ECPublicKeyParameters.CreateFromValue(parameters.D!, KeyDefinitions.KeyType.P256);
+        //
+        //     // Assert
+        //     Assert.NotNull(publicKeyParams.Parameters.D);
+        //     Assert.Equal(parameters.D, publicKeyParams.Parameters.D);
+        //     Assert.Equal(parameters.Q.X, publicKeyParams.Parameters.Q.X);
+        //     Assert.Equal(parameters.Q.Y, publicKeyParams.Parameters.Q.Y);
+        // }
+        
         [Fact]
         public void Constructor_WithValidPublicParameters_CreatesInstance()
         {
@@ -23,7 +86,7 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Fact]
-        public void Constructor_WithPrivateKeyData_ThrowsArgumentException()
+        public void Constructor_WithPublicKeyData_ThrowsArgumentException()
         {
             // Arrange
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);

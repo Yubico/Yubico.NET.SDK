@@ -65,8 +65,6 @@ namespace Yubico.YubiKey.Piv
     public sealed class PivRsaPublicKey : PivPublicKey
     {
         private const int ValidExponentLength = 3;
-        private const int ModulusTag = 0x81;
-        private const int ExponentTag = 0x82;
         private const int PublicComponentCount = 2;
         private const int ModulusIndex = 0;
         private const int ExponentIndex = 1;
@@ -148,7 +146,6 @@ namespace Yubico.YubiKey.Piv
                 }
 
                 var valueArray = new ReadOnlyMemory<byte>[PublicComponentCount];
-
                 while (tlvReader.HasData)
                 {
                     int valueIndex;
@@ -236,7 +233,7 @@ namespace Yubico.YubiKey.Piv
                 throw;
             }
         }
-
+        
         // Load the modulus and exponent and build the encoded key.
         // This method will verify that this class supports the public key given.
         // If successful, return true.

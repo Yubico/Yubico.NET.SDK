@@ -823,19 +823,20 @@ namespace Yubico.YubiKey.TestUtilities
         private void BuildPivPublicKey(
             ECDsa eccObject)
         {
-            int keySize = eccObject.KeySize / 8;
+            var keySizeBytes = (int)Math.Ceiling((double)eccObject.KeySize / 8);
 
             // We need to build the public point as
             //  04 || x-coord || y-coord
             // Each coordinate must be the exact length.
             // Prepend 00 bytes if the coordinate is not long enough.
-            ECParameters eccParams = eccObject.ExportParameters(false);
-            byte[] point = new byte[(keySize * 2) + 1];
-            point[0] = 4;
-            int offset = 1 + (keySize - eccParams.Q.X!.Length);
-            Array.Copy(eccParams.Q.X, 0, point, offset, eccParams.Q.X.Length);
-            offset += keySize + (keySize - eccParams.Q.Y!.Length);
-            Array.Copy(eccParams.Q.Y, 0, point, offset, eccParams.Q.Y.Length);
+            var eccParams = eccObject.ExportParameters(false);
+            var point = new byte[(keySizeBytes * 2) + 1];
+            var offset = 1;
+
+            point[0] = 0x4;
+            Array.Copy(eccParams.Q.X!, 0, point, offset, eccParams.Q.X!.Length);
+            offset += keySizeBytes;
+            Array.Copy(eccParams.Q.Y!, 0, point, offset, eccParams.Q.Y!.Length);
 
             var keyDefinition = KeyDefinitions.GetByOid(eccParams.Curve.Oid.Value!, OidType.CurveOid);
             var eccPubKey = PivEccPublicKey.CreateFromPublicPoint(point, keyDefinition.KeyType);

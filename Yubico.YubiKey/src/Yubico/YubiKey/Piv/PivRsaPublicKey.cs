@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.InvalidPublicKeyData));
             }
         }
-        
+
         private PivRsaPublicKey(
             Memory<byte> modulus,
             Memory<byte> publicExponent,
@@ -222,8 +222,14 @@ namespace Yubico.YubiKey.Piv
                     valueArray[valueIndex] = tlvReader.ReadValue(tag);
                 }
 
-                _ = pivRsaPublicKey.LoadRsaPublicKey(
-                    valueArray[ModulusIndex].Span, valueArray[ExponentIndex].Span);
+                bool couldLoad = pivRsaPublicKey.LoadRsaPublicKey(valueArray[ModulusIndex].Span, valueArray[ExponentIndex].Span);
+                if (!couldLoad)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPublicKeyData));
+                }
 
                 return pivRsaPublicKey;
             }
@@ -233,7 +239,7 @@ namespace Yubico.YubiKey.Piv
                 throw;
             }
         }
-        
+
         // Load the modulus and exponent and build the encoded key.
         // This method will verify that this class supports the public key given.
         // If successful, return true.
@@ -371,7 +377,10 @@ namespace Yubico.YubiKey.Piv
             // The keyOffsetIndex is 4 or 5 for the RSA key sizes we support.
             // The offset of 4 is correct for up to 128 bytes of data (size of RSA1024)
             // The offset of 5 is correct for up to 64 KiB of data - large enough to accomodate any existing larger RSA key sizes.
-            int keyOffsetIndex = algorithm == PivAlgorithm.Rsa1024 ? 4 : 5;
+            int keyOffsetIndex = algorithm == PivAlgorithm.Rsa1024
+                ? 4
+                : 5;
+
             var yubiKeyEncodedKey = pivEncodedKey[keyOffsetIndex..];
 
             return new PivRsaPublicKey(

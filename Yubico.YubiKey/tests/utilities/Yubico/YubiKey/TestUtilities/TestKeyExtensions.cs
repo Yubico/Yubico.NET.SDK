@@ -16,22 +16,22 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 case "p256":
                     {
-                        var keyInfo = parser.ParsePrivateKey<EcPrivateKeyInfo>(key.KeyBytes);
+                        var keyInfo = parser.ParsePrivateKey<EcPrivateKeyInfo>(key.EncodedKey);
                         return new PivEccPrivateKey(keyInfo.PrivateKey, PivAlgorithm.EccP256);
                     }
                 case "p384":
                     {
-                        var keyInfo = parser.ParsePrivateKey<EcPrivateKeyInfo>(key.KeyBytes);
+                        var keyInfo = parser.ParsePrivateKey<EcPrivateKeyInfo>(key.EncodedKey);
                         return new PivEccPrivateKey(keyInfo.PrivateKey, PivAlgorithm.EccP384);
                     }
                 case "ed25519":
                     {
-                        var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(key.KeyBytes);
+                        var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(key.EncodedKey);
                         return new PivEccPrivateKey(keyInfo.PrivateKey, PivAlgorithm.EccEd25519);
                     }
                 case "x25519":
                     {
-                        var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(key.KeyBytes);
+                        var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(key.EncodedKey);
                         return new PivEccPrivateKey(keyInfo.PrivateKey, PivAlgorithm.EccX25519);
                     }
                 case "rsa1024":
@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.TestUtilities
                 case "rsa3072":
                 case "rsa4096":
                     {
-                        var keyInfo = parser.ParsePrivateKey<RsaPrivateKeyInfo>(key.KeyBytes);
+                        var keyInfo = parser.ParsePrivateKey<RsaPrivateKeyInfo>(key.EncodedKey);
                         return new PivRsaPrivateKey(keyInfo.Prime1, keyInfo.Prime2, keyInfo.Exponent1,
                             keyInfo.Exponent2, keyInfo.Coefficient);
                     }

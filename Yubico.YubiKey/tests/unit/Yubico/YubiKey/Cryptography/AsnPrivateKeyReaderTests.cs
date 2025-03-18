@@ -33,7 +33,7 @@ public class AsnPrivateKeyReaderTests
     {
         // Arrange
         var testKey = TestKeys.GetTestPrivateKey(keyType);
-        var keyBytes = testKey.KeyBytes;
+        var keyBytes = testKey.EncodedKey;
 
         // Act
         var result = AsnPrivateKeyReader.DecodePkcs8EncodedKey(keyBytes);
@@ -68,7 +68,7 @@ public class AsnPrivateKeyReaderTests
     {
         // Arrange
         var testKey = TestKeys.GetTestPrivateKey(keyType);
-        var keyBytes = testKey.KeyBytes;
+        var keyBytes = testKey.EncodedKey;
 
         // Act
         var privateKeyParameters = AsnPrivateKeyReader.DecodePkcs8EncodedKey(keyBytes);
@@ -123,7 +123,7 @@ public class AsnPrivateKeyReaderTests
     {
         // Arrange
         var testKey = TestKeys.GetTestPrivateKey(KeyDefinitions.KeyType.X25519);
-        var keyBytes = testKey.KeyBytes;
+        var keyBytes = testKey.EncodedKey;
 
         // Act
         var result = AsnPrivateKeyReader.DecodePkcs8EncodedKey(keyBytes);
@@ -161,7 +161,7 @@ public class AsnPrivateKeyReaderTests
     {
         // Arrange
         var testKey = TestKeys.GetTestPrivateKey(KeyDefinitions.KeyType.Ed25519);
-        var keyBytes = testKey.KeyBytes;
+        var keyBytes = testKey.EncodedKey;
 
         // Act
         var result = AsnPrivateKeyReader.DecodePkcs8EncodedKey(keyBytes);
@@ -375,7 +375,7 @@ public class AsnPrivateKeyReaderTests
     }
 
     [Theory]
-    [InlineData(KeyDefinitions.KeyType.RSA2048)]
+    // [InlineData(KeyDefinitions.KeyType.RSA2048)] // Because our SDK doesn't make use of the excluded RSA parameters in the CRT format, we cant make a full PKCS privateKeyInfo  
     [InlineData(KeyDefinitions.KeyType.P256)]
     [InlineData(KeyDefinitions.KeyType.P384)]
     [InlineData(KeyDefinitions.KeyType.P521)]
@@ -383,12 +383,12 @@ public class AsnPrivateKeyReaderTests
     [InlineData(KeyDefinitions.KeyType.X25519)]
     public void Roundtrip_WithTestKeys_ShouldRetainKeyProperties(KeyDefinitions.KeyType keyType)  // Todo doesnt work with P256, P384, P521 because the format we write is different than the format we read. Why?
     {
-        // Arrange - Get the test key
+        // Arrange
         var testKey = TestKeys.GetTestPrivateKey(keyType);
-        var keyBytes = testKey.KeyBytes;
+        var testEncodedKey = testKey.EncodedKey;
 
-        // Act - Parse it with AsnPrivateKeyReader
-        var privateKeyParameters = AsnPrivateKeyReader.DecodePkcs8EncodedKey(keyBytes);
+        // Act
+        var privateKeyParameters = AsnPrivateKeyReader.DecodePkcs8EncodedKey(testEncodedKey);
 
         // Check that the encoded key matches the original input
         // Assert.Equal(
@@ -396,23 +396,43 @@ public class AsnPrivateKeyReaderTests
         //     Convert.ToBase64String(privateKeyParameters.GetEncoded().ToArray())
         // );
 
-        var encoded = privateKeyParameters.ExportPkcs8PrivateKey();
-        var expectedByteString = string.Join(" ", keyBytes.Select(p => p.ToString("X2")));
-        var actualyByteString = string.Join(" ", encoded.ToArray().Select(p => p.ToString("X2")));
+        var exportedEncodedKey = privateKeyParameters.ExportPkcs8PrivateKey();
+        var expectedByteString = string.Join(" ", testEncodedKey.Select(p => p.ToString("X2")));
+        var actualyByteString = string.Join(" ", exportedEncodedKey.ToArray().Select(p => p.ToString("X2")));
 
         Assert.Equal(expectedByteString, actualyByteString);
-        Assert.Equal(keyBytes.Length, encoded.Length);
-        Assert.Equal(keyBytes, encoded);
+        Assert.Equal(testEncodedKey.Length, exportedEncodedKey.Length);
+        Assert.Equal(testEncodedKey, exportedEncodedKey);
         Assert.Equal(KeyDefinitions.GetByKeyType(keyType), privateKeyParameters.GetKeyDefinition());
+    }
+    
+    [Theory]
+    // [InlineData(KeyDefinitions.KeyType.RSA2048)] // Because our SDK doesn't make use of the excluded RSA parameters in the CRT format, we cant make a full PKCS privateKeyInfo  
+    [InlineData(KeyDefinitions.KeyType.P256)]
+    [InlineData(KeyDefinitions.KeyType.P384)]
+    [InlineData(KeyDefinitions.KeyType.P521)]
+    [InlineData(KeyDefinitions.KeyType.Ed25519)]
+    [InlineData(KeyDefinitions.KeyType.X25519)]
+    public void Roundtrip_WithTestKeys_ShouldRetainKeyFunctionality(KeyDefinitions.KeyType keyType) 
+    {
+        // Arrange
+        var testKey = TestKeys.GetTestPrivateKey(keyType);
+        var testEncodedKey = testKey.EncodedKey;
+
+        // Act
+        var privateKeyParameters = AsnPrivateKeyReader.DecodePkcs8EncodedKey(testEncodedKey);
+        var exportedEncodedKey = privateKeyParameters.ExportPkcs8PrivateKey();
+        var decodedParams = AsnPrivateKeyReader.DecodePkcs8EncodedKey(exportedEncodedKey);
+        AsnPrivateKeyWriterTests.KeyEquivalenceTestHelper.VerifyFunctionalEquivalence(privateKeyParameters, decodedParams, keyType);
     }
 
     [Fact]
     public void FromEncodedKey_WithKeyPair_CorrectlyExtractsPrivateAndPublicComponents()
     {
-        // Arrange - Get a key pair
+        // Arrange
         var (publicKey, privateKey) = TestKeys.GetKeyPair(KeyDefinitions.KeyType.RSA2048);
-        var privateKeyBytes = privateKey.KeyBytes;
-        var publicKeyBytes = publicKey.KeyBytes;
+        var privateKeyBytes = privateKey.EncodedKey;
+        var publicKeyBytes = publicKey.EncodedKey;
 
         // Act
         var privateParams = AsnPrivateKeyReader.DecodePkcs8EncodedKey(privateKeyBytes);

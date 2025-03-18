@@ -19,9 +19,9 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-// public abstract class RSAKeyParameters : IKeyParameters
+// TODO Follow same pattern as ECKeyParameters?
+// public abstract class RSAKeyParameters : IKeyParameters 
 public abstract class RSAKeyParameters
-
 {
     public RSAParameters Parameters { get; set; }
     // public KeyDefinitions.KeyDefinition GetKeyDefinition() => throw new NotImplementedException();

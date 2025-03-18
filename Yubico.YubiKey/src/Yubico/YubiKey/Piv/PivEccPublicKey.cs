@@ -152,41 +152,52 @@ namespace Yubico.YubiKey.Piv
             ReadOnlyMemory<byte> encodedPublicKey,
             PivAlgorithm? algorithm = null)
         {
-            var tlvReader = new TlvReader(encodedPublicKey);
-
-            // Read the public key tag
-            int tag = tlvReader.PeekTag(2);
-            if (tag == PublicKeyTag)
+            try
             {
-                tlvReader = tlvReader.ReadNestedTlv(tag);
-            }
+                var tlvReader = new TlvReader(encodedPublicKey);
 
-            // Read the ECC tag
-            tag = tlvReader.PeekTag();
-            if (tag != EccTag)
+                // Read the public key tag
+                int tag = tlvReader.PeekTag(2);
+                if (tag == PublicKeyTag)
+                {
+                    tlvReader = tlvReader.ReadNestedTlv(tag);
+                }
+
+                // Read the ECC tag
+                tag = tlvReader.PeekTag();
+                if (tag != EccTag)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPublicKeyData)
+                        );
+                }
+
+                var publicPoint = tlvReader.ReadValue(EccTag);
+                if (algorithm.HasValue)
+                {
+                    var keyType = algorithm.Value.GetKeyType();
+                    var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
+                    byte[] encodedKey = AsnPublicKeyWriter.EncodeToSpki(publicPoint, keyType);
+                    return EncodeAndCreate(publicPoint.Span, algorithm.Value, encodedKey, keyDefinition);
+                }
+                else
+                {
+                    var pivAlgorithm = GetAlgorithm(publicPoint.Span);
+                    var keyType = pivAlgorithm.GetKeyType();
+                    var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
+                    byte[] encodedKey = AsnPublicKeyWriter.EncodeToSpki(publicPoint, keyType);
+                    return EncodeAndCreate(publicPoint.Span, pivAlgorithm, encodedKey, keyDefinition);
+                }
+            }
+            catch (TlvException)
             {
                 throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidPublicKeyData)
                     );
-            }
-
-            var publicPoint = tlvReader.ReadValue(EccTag);
-            if (algorithm.HasValue)
-            {
-                var keyType = algorithm.Value.GetKeyType();
-                var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
-                byte[] encodedKey = AsnPublicKeyWriter.EncodeToSpki(publicPoint, keyType);
-                return EncodeAndCreate(publicPoint.Span, algorithm.Value, encodedKey, keyDefinition);
-            }
-            else
-            {
-                var pivAlgorithm = GetAlgorithm(publicPoint.Span);
-                var keyType = pivAlgorithm.GetKeyType();
-                var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
-                byte[] encodedKey = AsnPublicKeyWriter.EncodeToSpki(publicPoint, keyType);
-                return EncodeAndCreate(publicPoint.Span, pivAlgorithm, encodedKey, keyDefinition);
             }
         }
 

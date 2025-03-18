@@ -24,7 +24,7 @@ public class RSAPublicKeyParameters : RSAKeyParameters, IPublicKeyParameters
 
     public RSAPublicKeyParameters(RSAParameters parameters)
     {
-        Parameters = parameters;
+        Parameters = parameters.DeepCopy();
         _keyDefinition = KeyDefinitions.GetByRsaLength(parameters.Modulus.Length * 8);
         _encodedKey = AsnPublicKeyWriter.EncodeToSpki(parameters);
     }

@@ -28,46 +28,11 @@ public class AsnPublicKeyReaderTests
     [InlineData(KeyDefinitions.KeyType.RSA2048)]
     [InlineData(KeyDefinitions.KeyType.RSA3072)]
     [InlineData(KeyDefinitions.KeyType.RSA4096)]
-    [InlineData(KeyDefinitions.KeyType.P256)]
-    [InlineData(KeyDefinitions.KeyType.P384)]
-    [InlineData(KeyDefinitions.KeyType.P521)]
-    [InlineData(KeyDefinitions.KeyType.Ed25519)]
-    [InlineData(KeyDefinitions.KeyType.X25519)]
-    public void dsadasd(KeyDefinitions.KeyType keyType)
-    {
-        // Arrange
-        var testKey = TestKeys.GetTestPublicKey(keyType);
-        var keyBytes = testKey.KeyBytes;
-
-        // Act
-        var result = AsnPublicKeyReader.DecodeFromSpki(keyBytes);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.IsType<RSAPublicKeyParameters>(result);
-        
-        var rsaParams = (RSAPublicKeyParameters)result;
-        Assert.NotNull(rsaParams.Parameters.Modulus);
-        Assert.NotNull(rsaParams.Parameters.Exponent);
-        
-        var expectedKeySize = KeyDefinitions.GetByKeyType(keyType).LengthInBits;
-        var actualKeySize = rsaParams.Parameters.Modulus.Length * 8;
-        
-        Assert.InRange(actualKeySize, expectedKeySize - 1, expectedKeySize);
-    }
-    
-    
-    
-    [Theory]
-    [InlineData(KeyDefinitions.KeyType.RSA1024)]
-    [InlineData(KeyDefinitions.KeyType.RSA2048)]
-    [InlineData(KeyDefinitions.KeyType.RSA3072)]
-    [InlineData(KeyDefinitions.KeyType.RSA4096)]
     public void DecodeFromSpki_WithRsaPublicKey_ReturnsCorrectParameters(KeyDefinitions.KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(keyType);
-        var keyBytes = testKey.KeyBytes;
+        var keyBytes = testKey.EncodedKey;
 
         // Act
         var result = AsnPublicKeyReader.DecodeFromSpki(keyBytes);
@@ -94,7 +59,7 @@ public class AsnPublicKeyReaderTests
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(keyType);
-        var keyBytes = testKey.KeyBytes;
+        var keyBytes = testKey.EncodedKey;
 
         // Act
         var result = AsnPublicKeyReader.DecodeFromSpki(keyBytes);
@@ -137,7 +102,7 @@ public class AsnPublicKeyReaderTests
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(KeyDefinitions.KeyType.X25519);
-        var keyBytes = testKey.KeyBytes;
+        var keyBytes = testKey.EncodedKey;
 
         // Act
         var result = AsnPublicKeyReader.DecodeFromSpki(keyBytes);
@@ -157,7 +122,7 @@ public class AsnPublicKeyReaderTests
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(KeyDefinitions.KeyType.Ed25519);
-        var keyBytes = testKey.KeyBytes;
+        var keyBytes = testKey.EncodedKey;
 
         // Act
         var result = AsnPublicKeyReader.DecodeFromSpki(keyBytes);
@@ -182,7 +147,7 @@ public class AsnPublicKeyReaderTests
         {
             // Arrange
             var testKey = TestKeys.GetTestPublicKey(keySize);
-            var keyBytes = testKey.KeyBytes;
+            var keyBytes = testKey.EncodedKey;
 
             // Act
             var result = AsnPublicKeyReader.DecodeFromSpki(keyBytes);
@@ -316,7 +281,7 @@ public class AsnPublicKeyReaderTests
     {
         // Arrange - Get the test key
         var testKey = TestKeys.GetTestPublicKey(keyType);
-        var keyBytes = testKey.KeyBytes;
+        var keyBytes = testKey.EncodedKey;
         
         // Act - Parse it with AsnPublicKeyReader
         var result = AsnPublicKeyReader.DecodeFromSpki(keyBytes);

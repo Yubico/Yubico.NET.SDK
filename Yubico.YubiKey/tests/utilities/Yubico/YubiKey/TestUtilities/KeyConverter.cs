@@ -809,14 +809,15 @@ namespace Yubico.YubiKey.TestUtilities
         {
             // We need to build the private value and it must be exactly
             // the keySize.
-            var keySize = eccObject.KeySize / 8;
+            var keySizeBytes = (int)Math.Ceiling((double)eccObject.KeySize / 8);
             var eccParams = eccObject.ExportParameters(true);
-            var offset = keySize - eccParams.D!.Length;
+            var offset = keySizeBytes - eccParams.D!.Length;
 
-            var privateValue = new byte[keySize];
+            var privateValue = new byte[keySizeBytes];
             Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
-
-            var eccPriKey = new PivEccPrivateKey(privateValue, Algorithm);
+            var eccOid = eccParams.Curve.Oid.Value!;
+            var keyDefinition = KeyDefinitions.GetByOid(eccOid, OidType.CurveOid);
+            var eccPriKey = new PivEccPrivateKey(privateValue, keyDefinition.KeyType.GetPivAlgorithm());
             _pivPrivateKey = eccPriKey;
         }
 

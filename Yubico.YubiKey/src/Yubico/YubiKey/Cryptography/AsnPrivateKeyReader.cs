@@ -406,4 +406,5 @@ public class EDsaPrivateKeyParameters : IPrivateKeyParameters
     public KeyDefinitions.KeyType GetKeyType() => _keyDefinition.KeyType;
 
     public ReadOnlyMemory<byte> GetPrivateKey() => _privateKeyData;
+    
 }

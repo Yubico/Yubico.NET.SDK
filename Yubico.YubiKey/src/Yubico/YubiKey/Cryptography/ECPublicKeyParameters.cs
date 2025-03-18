@@ -29,8 +29,6 @@ namespace Yubico.YubiKey.Cryptography
     /// </remarks>
     public class ECPublicKeyParameters : ECKeyParameters, IPublicKeyParameters
     {
-        private readonly byte[] _encodedKey;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ECPublicKeyParameters"/> class.
         /// It is a wrapper for the <see cref="ECParameters"/> class.
@@ -48,7 +46,6 @@ namespace Yubico.YubiKey.Cryptography
                 throw new ArgumentException(
                     "Parameters must not contain private key data (D value)", nameof(parameters));
             }
-            _encodedKey = AsnPublicKeyWriter.EncodeToSpki(parameters);
         }
 
         /// <summary>
@@ -77,7 +74,7 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         public ReadOnlyMemory<byte> GetPublicPoint() => GetBytes();
-        public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => _encodedKey;
+        public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => AsnPublicKeyWriter.EncodeToSpki(Parameters);
 
         public static ECPublicKeyParameters CreateFromParameters(ECParameters ecParameters) => new(ecParameters);
     }

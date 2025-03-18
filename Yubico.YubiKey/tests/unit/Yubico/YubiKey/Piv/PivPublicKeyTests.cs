@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Piv
         {
             // Arrange
             var testKey = TestKeys.GetTestPublicKey(algorithm);
-            var publicKeyParameters = AsnPublicKeyReader.DecodeFromSpki(testKey.KeyBytes);
+            var publicKeyParameters = AsnPublicKeyReader.DecodeFromSpki(testKey.EncodedKey);
 
             Assert.IsAssignableFrom<IPublicKeyParameters>(publicKeyParameters);
 
@@ -46,9 +46,9 @@ namespace Yubico.YubiKey.Piv
             var pivPublicKey = PivPublicKey.Create(publicKeyParameters);
 
             // Assert
-            Assert.Equal(testKey.KeyBytes, subjectPublicKeyInfo);
+            Assert.Equal(testKey.EncodedKey, subjectPublicKeyInfo);
             Assert.Equal(algorithm.GetPivKeyDef()!.KeyDefinition, pivPublicKey.GetKeyDefinition());
-            Assert.Equal(testKey.KeyBytes, pivPublicKey.ExportSubjectPublicKeyInfo());
+            Assert.Equal(testKey.EncodedKey, pivPublicKey.ExportSubjectPublicKeyInfo());
             Assert.Equal(algorithm, pivPublicKey.Algorithm);
         }
         

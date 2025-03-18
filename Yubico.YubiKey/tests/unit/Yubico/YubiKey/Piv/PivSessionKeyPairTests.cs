@@ -94,10 +94,8 @@ namespace Yubico.YubiKey.Piv
             {
                 var simpleCollector = new SimpleKeyCollector(false);
                 pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-                _ = Assert.Throws<ArgumentNullException>(() => pivSession.ImportPrivateKey(0x85, null));
-#pragma warning restore CS8625 // Testing null input.
+                PivPrivateKey pivPrivateKey = null!;
+                _ = Assert.Throws<ArgumentNullException>(() => pivSession.ImportPrivateKey(0x85, pivPrivateKey));
             }
         }
 

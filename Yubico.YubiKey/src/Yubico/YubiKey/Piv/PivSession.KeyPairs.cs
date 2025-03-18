@@ -17,6 +17,7 @@ using System.Globalization;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using static Yubico.YubiKey.Cryptography.KeyDefinitions;
 
@@ -245,19 +246,48 @@ namespace Yubico.YubiKey.Piv
             PivPinPolicy pinPolicy = PivPinPolicy.Default,
             PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
+            ImportPrivateKey(slotNumber, privateKey.KeyParameters, pinPolicy, touchPolicy); // TODO Breaking? Check if its a breaking change
+
+            // if (privateKey == null)
+            // {
+            //     throw new ArgumentNullException(nameof(privateKey));
+            // }
+            //
+            // YubiKey.ThrowIfUnsupportedAlgorithm(privateKey.Algorithm);
+            //
+            // if (ManagementKeyAuthenticated == false)
+            // {
+            //     AuthenticateManagementKey();
+            // }
+            //
+            // var command = new ImportAsymmetricKeyCommand(privateKey, slotNumber, pinPolicy, touchPolicy);
+            // var response = Connection.SendCommand(command);
+            // if (response.Status != ResponseStatus.Success)
+            // {
+            //     throw new InvalidOperationException(response.StatusMessage);
+            // }
+        }
+        
+        public void ImportPrivateKey(
+            byte slotNumber,
+            IPrivateKeyParameters privateKey,
+            PivPinPolicy pinPolicy = PivPinPolicy.Default,
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        {
             if (privateKey == null)
             {
                 throw new ArgumentNullException(nameof(privateKey));
             }
 
-            YubiKey.ThrowIfUnsupportedAlgorithm(privateKey.Algorithm);
+            YubiKey.ThrowIfUnsupportedAlgorithm(privateKey.GetKeyType().GetPivAlgorithm());
 
             if (ManagementKeyAuthenticated == false)
             {
                 AuthenticateManagementKey();
             }
 
-            var command = new ImportAsymmetricKeyCommand(privateKey, slotNumber, pinPolicy, touchPolicy);
+            var pivPrivateKey = PivPrivateKey.Create(privateKey);
+            var command = new ImportAsymmetricKeyCommand(pivPrivateKey, slotNumber, pinPolicy, touchPolicy);
             var response = Connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
             {

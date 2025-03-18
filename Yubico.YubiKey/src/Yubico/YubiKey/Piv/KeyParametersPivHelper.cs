@@ -30,7 +30,7 @@ public static class PivEncodingReader
     const int PublicKeyTag = 0x7F49;
     const int PublicComponentCount = 2;
 
-    public static (ReadOnlyMemory<byte> Modulus, ReadOnlyMemory<byte> Exponent) GetPublicRsaValues(
+    public static (ReadOnlyMemory<byte> Modulus, ReadOnlyMemory<byte> Exponent) GetPublicRSAValues(
         ReadOnlyMemory<byte> encodedPublicKey)
     {
         var tlvReader = new TlvReader(encodedPublicKey);
@@ -159,7 +159,7 @@ public static class KeyParametersPivHelper
 
     private static RSAPublicKeyParameters CreatePublicRsaFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
     {
-        var (modulus, exponent) = PivEncodingReader.GetPublicRsaValues(pivEncodingBytes);
+        var (modulus, exponent) = PivEncodingReader.GetPublicRSAValues(pivEncodingBytes);
         var rsaParameters = new RSAParameters { Modulus = modulus.ToArray(), Exponent = exponent.ToArray() };
         return RSAPublicKeyParameters.CreateFromParameters(rsaParameters);
     }
@@ -167,13 +167,6 @@ public static class KeyParametersPivHelper
     private static ECPublicKeyParameters CreatePublicEcFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
     {
         var publicPointData = PivEncodingReader.GetPublicECValues(pivEncodingBytes);
-
-        // Determine size of array
-        // Determine size of coordinate
-        // Match against keydefinition EC lengths
-        // Get the x y values
-        // Set the curve oid
-
         if (publicPointData.Span[0] != 0x4)
         {
             throw new ArgumentException(
@@ -184,21 +177,20 @@ public static class KeyParametersPivHelper
         }
 
         var publicKeyData = publicPointData.Span[1..];
-        var coordinateLength = publicKeyData.Length / 2;
-
-        var keyDefintion = KeyDefinitions
+        int coordinateLength = publicKeyData.Length / 2;
+        var keyDefinition = KeyDefinitions
             .GetEcKeyDefinitions()
             .Where(kd => kd.AlgorithmOid == KeyDefinitions.KeyOids.Algorithm.EllipticCurve)
             .Single(kd => kd.LengthInBytes == coordinateLength);
 
-        var x = publicPointData.Span.Slice(1, keyDefintion.LengthInBytes).ToArray();
-        var y = publicPointData.Span.Slice(1 + keyDefintion.LengthInBytes, keyDefintion.LengthInBytes).ToArray();
+        byte[]? x = publicPointData.Span.Slice(1, keyDefinition.LengthInBytes).ToArray();
+        byte[]? y = publicPointData.Span.Slice(1 + keyDefinition.LengthInBytes, keyDefinition.LengthInBytes).ToArray();
         var rsaParameters = new ECParameters
-            { Q = new ECPoint() { X = x, Y = y }, Curve = ECCurve.CreateFromValue(keyDefintion.CurveOid) };
+        {
+            Q = new ECPoint { X = x, Y = y }, 
+            Curve = ECCurve.CreateFromValue(keyDefinition.CurveOid)
+        };
 
-        // var x = publicPoint.Span.Slice(1, 32).ToArray();
-        // var y = publicPoint.Span.Slice(33, 32).ToArray();
-        // var rsaParameters = new ECParameters { Q = new ECPoint(){ X = x, Y = y}, Curve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.Curve.P256)};
         return ECPublicKeyParameters.CreateFromParameters(rsaParameters);
     }
 

@@ -48,7 +48,7 @@ public class Curve25519PrivateKeyParametersTests
             var privateKey = testKey.GetPrivateKey();
 
             // Act
-            var privateKeyParams = Curve25519PrivateKeyParameters.CreateFromPkcs8(testKey.KeyBytes); 
+            var privateKeyParams = Curve25519PrivateKeyParameters.CreateFromPkcs8(testKey.EncodedKey); 
 
             // Assert
             Assert.NotNull(privateKeyParams);

@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// Returns the raw byte DER representation of the key data.
         /// </summary>
         /// <returns>Byte array containing the decoded cryptographic data.</returns>
-        public byte[] KeyBytes => _bytes;
+        public byte[] EncodedKey => _bytes;
 
         /// <summary>
         /// Returns the complete PEM-encoded string representation.
@@ -160,15 +160,19 @@ namespace Yubico.YubiKey.TestUtilities
         //         _ => throw new ArgumentOutOfRangeException(nameof(publicKeyParameters))
         //     };
         // }
-        
+
         public byte[] GetPublicPoint()
         {
-            var publicKeyParameters = AsnPublicKeyReader.DecodeFromSpki(this.KeyBytes);
+            var publicKeyParameters = AsnPublicKeyReader.DecodeFromSpki(this.EncodedKey);
             return publicKeyParameters switch
             {
                 ECPublicKeyParameters ecParams => ecParams.GetPublicPoint().ToArray(),
-                Curve25519PublicKeyParameters x25519Params when x25519Params.GetKeyType() == KeyDefinitions.KeyType.X25519  => x25519Params.GetPublicPoint().ToArray(),
-                Curve25519PublicKeyParameters eDsaParams  when eDsaParams.GetKeyType() == KeyDefinitions.KeyType.Ed25519  => eDsaParams.GetPublicPoint().ToArray(),
+                Curve25519PublicKeyParameters x25519Params when x25519Params.GetKeyType() == KeyDefinitions.KeyType.X25519 
+                    => x25519Params.GetPublicPoint().ToArray(),
+                Curve25519PublicKeyParameters eDsaParams when eDsaParams.GetKeyType() == KeyDefinitions.KeyType.Ed25519
+                    => eDsaParams.GetPublicPoint().ToArray(),
+                EDsaPublicKeyParameters eDsaParams => eDsaParams.GetPublicPoint().ToArray(),
+                ECX25519PublicKeyParameters x25519Params => x25519Params.GetPublicPoint().ToArray(),
                 RSAPublicKeyParameters => throw new InvalidOperationException(
                     "Use GetModulus() and GetExponent() instead for RSA keys"),
                 _ => throw new ArgumentOutOfRangeException(nameof(publicKeyParameters))
@@ -187,15 +191,18 @@ namespace Yubico.YubiKey.TestUtilities
         //         _ => throw new ArgumentOutOfRangeException(nameof(privateKeyParameters))
         //     };
         // }
-        
+
         public byte[] GetPrivateKey()
         {
-            var privateKeyParameters = AsnPrivateKeyReader.DecodePkcs8EncodedKey(KeyBytes);
+            var privateKeyParameters = AsnPrivateKeyReader.DecodePkcs8EncodedKey(EncodedKey);
             return privateKeyParameters switch
             {
                 ECPrivateKeyParameters ecParams => ecParams.Parameters.D!,
-                Curve25519PrivateKeyParameters x25519Params when x25519Params.GetKeyType() == KeyDefinitions.KeyType.X25519 => x25519Params.GetPrivateKey().ToArray(),
-                Curve25519PrivateKeyParameters eDsaParams when eDsaParams.GetKeyType() == KeyDefinitions.KeyType.Ed25519 => eDsaParams.GetPrivateKey().ToArray(),
+                Curve25519PrivateKeyParameters x25519Params when x25519Params.GetKeyType() ==
+                                                                 KeyDefinitions.KeyType.X25519 => x25519Params
+                    .GetPrivateKey().ToArray(),
+                Curve25519PrivateKeyParameters eDsaParams when eDsaParams.GetKeyType() == KeyDefinitions.KeyType.Ed25519
+                    => eDsaParams.GetPrivateKey().ToArray(),
                 RSAPrivateKeyParameters => throw new InvalidOperationException("Use AsRSA() instead for RSA keys"),
                 _ => throw new ArgumentOutOfRangeException(nameof(privateKeyParameters))
             };

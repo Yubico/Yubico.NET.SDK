@@ -20,16 +20,16 @@ namespace Yubico.YubiKey.Cryptography;
 public class RSAPrivateKeyParameters : RSAKeyParameters, IPrivateKeyParameters
 {
     private readonly KeyDefinitions.KeyDefinition _keyDefinition;
-    // private readonly ReadOnlyMemory<byte> _encodedKey;
+ 
 
     public RSAPrivateKeyParameters(RSAParameters parameters)
     {
-        Parameters = parameters;
+        Parameters = parameters.DeepCopy();
         _keyDefinition = KeyDefinitions.GetByRsaLength(parameters.DP.Length * 8 * 2);
-        // _encodedKey =  AsnPrivateKeyWriter.EncodeToPkcs8(parameters); 
+
     }
 
-    // public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => _encodedKey;
+    // public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(parameters);
     public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => throw new NotSupportedException("Not supported for RSA keys.");
 
     public ReadOnlyMemory<byte> GetPrivateKey() =>

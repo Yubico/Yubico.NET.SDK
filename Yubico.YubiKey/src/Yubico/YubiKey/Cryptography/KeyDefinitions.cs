@@ -191,19 +191,24 @@ namespace Yubico.YubiKey.Cryptography
             public static class Algorithm
             {
                 /// <summary>
-                /// RSA Encryption algorithm OID
+                /// RSA Encryption algorithm OID (PKCS#1)
                 /// </summary>
                 public const string Rsa = "1.2.840.113549.1.1.1";
 
                 /// <summary>
-                /// Elliptic Curve public key algorithm OID (ANSI X9.62)
+                /// Represents the general Elliptic Curve public key algorithm OID (ANSI X9.62)
                 /// </summary>
                 public const string EllipticCurve = "1.2.840.10045.2.1";
 
                 /// <summary>
-                /// Edwards-curve Digital Signature Algorithm OID
+                /// Represents the OID for X25519 (Curve25519) used for key exchange
                 /// </summary>
-                public const string EdDsa = "1.3.101.112";
+                public const string X25519 = "1.3.101.110";
+
+                /// <summary>
+                /// Represents the OID for Ed25519 (Edwards25519) used for signatures
+                /// </summary>
+                public const string Ed25519 = "1.3.101.112";
             }
 
             /// <summary>
@@ -225,17 +230,6 @@ namespace Yubico.YubiKey.Cryptography
                 /// Represents the OID for NIST P-521 curve (also known as secp521r1)
                 /// </summary>
                 public const string P521 = "1.3.132.0.35";
-
-                /// <summary>
-                /// Represents the OID for X25519 (Curve25519) used for key exchange
-                /// </summary>
-                public const string X25519 = "1.3.101.110";
-
-                /// <summary>
-                /// Represents the OID for Ed25519 (Edwards25519) used for signatures
-                /// Note: This appears in parameters when EdDsa is used with Ed25519
-                /// </summary>
-                public const string Ed25519 = "1.3.101.112";
             }
 
             /// <summary>
@@ -249,11 +243,13 @@ namespace Yubico.YubiKey.Cryptography
                     KeyType.RSA2048 => (Algorithm.Rsa, null),
                     KeyType.RSA3072 => (Algorithm.Rsa, null),
                     KeyType.RSA4096 => (Algorithm.Rsa, null),
+                    
                     KeyType.P256 => (Algorithm.EllipticCurve, Curve.P256),
                     KeyType.P384 => (Algorithm.EllipticCurve, Curve.P384),
                     KeyType.P521 => (Algorithm.EllipticCurve, Curve.P521),
-                    KeyType.X25519 => (Algorithm.EllipticCurve, Curve.X25519),
-                    KeyType.Ed25519 => (Algorithm.EdDsa, null), // EdDSA doesn't use a separate parameter OID
+                    
+                    KeyType.X25519 => (Algorithm.X25519, null),
+                    KeyType.Ed25519 => (Algorithm.Ed25519, null),
                     _ => throw new ArgumentException($"Unsupported key type: {keyType}")
                 };
             }
@@ -324,8 +320,7 @@ namespace Yubico.YubiKey.Cryptography
             KeyType = KeyType.X25519,
             LengthInBytes = 32,
             LengthInBits = 256,
-            AlgorithmOid = KeyOids.Algorithm.EdDsa,
-            CurveOid = KeyOids.Curve.X25519,
+            AlgorithmOid = KeyOids.Algorithm.X25519,
             IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition
             {
@@ -343,8 +338,7 @@ namespace Yubico.YubiKey.Cryptography
             KeyType = KeyType.Ed25519,
             LengthInBytes = 32,
             LengthInBits = 256,
-            AlgorithmOid = KeyOids.Algorithm.EdDsa,
-            CurveOid = KeyOids.Curve.Ed25519,
+            AlgorithmOid = KeyOids.Algorithm.Ed25519,
             IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition
             {

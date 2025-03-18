@@ -174,12 +174,13 @@ public static class AsnPublicKeyWriter
     private static byte[] CreateCurve25519ToSpki(ReadOnlyMemory<byte> publicKey, KeyDefinitions.KeyType keyType)
     {
         var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
-        if (keyDefinition.CurveOid is null)
+        if (keyDefinition.AlgorithmOid is null)
         {
             throw new ArgumentException("Curve OID is null.");
         }
 
-        if (keyDefinition.CurveOid != KeyDefinitions.KeyOids.Curve.X25519 && keyDefinition.CurveOid != KeyDefinitions.KeyOids.Curve.Ed25519)
+        if (keyDefinition.AlgorithmOid != KeyDefinitions.KeyOids.Algorithm.X25519 && 
+            keyDefinition.AlgorithmOid != KeyDefinitions.KeyOids.Algorithm.Ed25519)
         {
             throw new ArgumentException("Invalid curve OID."); 
         }
@@ -196,7 +197,7 @@ public static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(keyDefinition.CurveOid);
+        writer.WriteObjectIdentifier(keyDefinition.AlgorithmOid);
         writer.PopSequence();
 
         // Write subject public key as BIT STRING
@@ -223,7 +224,7 @@ public static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Curve.Ed25519);
+        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.Ed25519);
         writer.PopSequence();
 
         // Write subject public key as BIT STRING
@@ -250,7 +251,7 @@ public static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Curve.X25519);
+        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.X25519);
         writer.PopSequence();
 
         // Write subject public key as BIT STRING

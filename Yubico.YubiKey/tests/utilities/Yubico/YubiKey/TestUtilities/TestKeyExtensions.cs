@@ -27,12 +27,12 @@ namespace Yubico.YubiKey.TestUtilities
                 case "ed25519":
                     {
                         var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(key.EncodedKey);
-                        return new PivEccPrivateKey(keyInfo.PrivateKey, PivAlgorithm.EccEd25519);
+                        return new PivCurve25519PrivateKey(keyInfo.PrivateKey, PivAlgorithm.EccEd25519);
                     }
                 case "x25519":
                     {
                         var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(key.EncodedKey);
-                        return new PivEccPrivateKey(keyInfo.PrivateKey, PivAlgorithm.EccX25519);
+                        return new PivCurve25519PrivateKey(keyInfo.PrivateKey, PivAlgorithm.EccX25519);
                     }
                 case "rsa1024":
                 case "rsa2048":

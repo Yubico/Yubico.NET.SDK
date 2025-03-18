@@ -130,16 +130,16 @@ public class AsnPrivateKeyReader
                     return new ECPrivateKeyParameters(ecParams);
                 }
 
-            // case KeyDefinitions.KeyOids.Curve.X25519:
+            // case KeyDefinitions.KeyOids.Algorithm.X25519:
             //     {
             //         return CreateX25519PrivateKeyParameters(seqPrivateKeyInfo, encodedKey);
             //     }
-            // case KeyDefinitions.KeyOids.Curve.Ed25519:
+            // case KeyDefinitions.KeyOids.Algorithm.Ed25519:
             //     {
             //         return CreateEd25519PrivateKeyParameters(seqPrivateKeyInfo, encodedKey);
             //     }
-            case KeyDefinitions.KeyOids.Curve.X25519:
-            case KeyDefinitions.KeyOids.Curve.Ed25519:
+            case KeyDefinitions.KeyOids.Algorithm.X25519:
+            case KeyDefinitions.KeyOids.Algorithm.Ed25519:
                 {
                     return Curve25519PrivateKeyParameters.CreateFromPkcs8(encodedKey);
                 }
@@ -230,8 +230,6 @@ public class AsnPrivateKeyReader
             var tag = seqEcPrivateKey.PeekTag();
             if (tag is { TagValue: 1, TagClass: TagClass.ContextSpecific })
             {
-                // [1] public key
-                // ReadOnlyMemory<byte> publicKeyBytes = berReader.ReadBitString(out int unusedBits, tag);
                 ReadOnlyMemory<byte> publicKeyBytes = seqEcPrivateKey.ReadBitString(out int unusedBits, tag);
                 if (unusedBits != 0)
                 {
@@ -295,7 +293,7 @@ public class AsnPrivateKeyReader
     //         throw new CryptographicException("Invalid X25519 private key: incorrect length");
     //     }
     //
-    //     var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.X25519, OidType.CurveOid);
+    //     var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.X25519, OidType.AlgorithmId);
     //     return new ECX25519PrivateKeyParameters(encodedKey, privateKeyData, keyDefinition);
     // }
 
@@ -316,7 +314,7 @@ public class AsnPrivateKeyReader
     //         throw new CryptographicException("Invalid Ed25519 private key: incorrect length");
     //     }
     //
-    //     var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.Ed25519, OidType.CurveOid);
+    //     var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.Ed25519, OidType.AlgorithmId);
     //     return new EDsaPrivateKeyParameters(encodedKey, privateKeyData, keyDefinition);
     // }
 

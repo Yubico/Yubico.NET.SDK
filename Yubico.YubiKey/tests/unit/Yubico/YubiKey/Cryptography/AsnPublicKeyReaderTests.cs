@@ -114,7 +114,7 @@ public class AsnPublicKeyReaderTests
         var x25519Params = (ECX25519PublicKeyParameters)result;
         Assert.NotNull(x25519Params);
         Assert.Equal(32, x25519Params.GetPublicPoint().Length);
-        Assert.Equal(KeyDefinitions.KeyOids.Curve.X25519, x25519Params.GetKeyDefinition().CurveOid);
+        Assert.Equal(KeyDefinitions.KeyOids.Algorithm.X25519, x25519Params.GetKeyDefinition().AlgorithmOid);
     }
 
     [Fact]
@@ -134,7 +134,7 @@ public class AsnPublicKeyReaderTests
         var ed25519Params = (EDsaPublicKeyParameters)result;
         Assert.NotNull(ed25519Params);
         Assert.Equal(32, ed25519Params.GetPublicPoint().Length);
-        Assert.Equal(KeyDefinitions.KeyOids.Curve.Ed25519, ed25519Params.GetKeyDefinition().CurveOid);
+        Assert.Equal(KeyDefinitions.KeyOids.Algorithm.Ed25519, ed25519Params.GetKeyDefinition().AlgorithmOid);
     }
 
     [Fact]

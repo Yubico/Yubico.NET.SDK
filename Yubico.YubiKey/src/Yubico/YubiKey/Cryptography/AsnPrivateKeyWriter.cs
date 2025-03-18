@@ -239,7 +239,7 @@ public static class AsnPrivateKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Curve.Ed25519);
+        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.Ed25519);
         writer.PopSequence();
 
         // PrivateKey as OCTET STRING
@@ -277,7 +277,7 @@ public static class AsnPrivateKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Curve.X25519);
+        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.X25519);
         writer.PopSequence();
 
         // PrivateKey as OCTET STRING

@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Act & Assert
             Assert.Equal(KeyDefinitions.P256, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.P256, OidType.CurveOid));
-            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.Ed25519, OidType.CurveOid));
+            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.Ed25519, OidType.AlgorithmOid));
         }
 
 

@@ -51,9 +51,9 @@ public class Curve25519PrivateKeyParameters : IPrivateKeyParameters
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
         
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if(oidAlgorithm != KeyDefinitions.KeyOids.Curve.X25519 && oidAlgorithm != KeyDefinitions.KeyOids.Curve.Ed25519)
+        if(oidAlgorithm != KeyDefinitions.KeyOids.Algorithm.X25519 && oidAlgorithm != KeyDefinitions.KeyOids.Algorithm.Ed25519)
         {
-            throw new ArgumentException("Invalid curve OID. Must be: " + KeyDefinitions.KeyOids.Curve.X25519 + " or " + KeyDefinitions.KeyOids.Curve.Ed25519);
+            throw new ArgumentException("Invalid curve OID. Must be: " + KeyDefinitions.KeyOids.Algorithm.X25519 + " or " + KeyDefinitions.KeyOids.Algorithm.Ed25519);
         }
         
         var seqPrivateKey = new AsnReader(seqPrivateKeyInfo.ReadOctetString(), AsnEncodingRules.DER);
@@ -71,7 +71,7 @@ public class Curve25519PrivateKeyParameters : IPrivateKeyParameters
             throw new CryptographicException("Invalid Curve25519 private key: incorrect length");
         }
         
-        var keyDefinition = KeyDefinitions.GetByOid(oidAlgorithm, OidType.CurveOid);
+        var keyDefinition = KeyDefinitions.GetByOid(oidAlgorithm, OidType.AlgorithmOid);
         return new Curve25519PrivateKeyParameters(encodedKey, privateKeyData, keyDefinition);
     }
 

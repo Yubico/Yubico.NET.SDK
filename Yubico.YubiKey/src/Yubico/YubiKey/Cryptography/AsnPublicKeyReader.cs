@@ -50,7 +50,7 @@ public class AsnPublicKeyReader
 
                     return CreateEcPublicKeyParameters(oidCurve, bitString);
                 }
-            case KeyDefinitions.KeyOids.Curve.X25519:
+            case KeyDefinitions.KeyOids.Algorithm.X25519:
                 {
                     byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
                     if (unusedBitCount != 0)
@@ -58,10 +58,10 @@ public class AsnPublicKeyReader
                         throw new CryptographicException("Invalid RSA public key encoding");
                     }
 
-                    var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.X25519, OidType.CurveOid);
+                    var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.X25519, OidType.AlgorithmOid);
                     return new ECX25519PublicKeyParameters(encodedKey, subjectPublicKey, keyDefinition);
                 }
-            case KeyDefinitions.KeyOids.Curve.Ed25519:
+            case KeyDefinitions.KeyOids.Algorithm.Ed25519:
                 {
                     byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
                     if (unusedBitCount != 0)
@@ -69,7 +69,7 @@ public class AsnPublicKeyReader
                         throw new CryptographicException("Invalid RSA public key encoding");
                     }
                     
-                    var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.Ed25519, OidType.CurveOid);
+                    var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.Ed25519, OidType.AlgorithmOid);
                     return new EDsaPublicKeyParameters(encodedKey, subjectPublicKey, keyDefinition);
                 }
         }
@@ -123,7 +123,6 @@ public class AsnPublicKeyReader
             throw new CryptographicException("Unsupported EC point format");
         }
 
-        // Split coordinates - for P-256, each coordinate is 32 bytes
         int coordinateSize = GetCoordinateSizeFromCurve(oidCurve);
 
         byte[] xCoordinate = new byte[coordinateSize];

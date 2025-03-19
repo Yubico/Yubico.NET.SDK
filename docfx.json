@@ -69,7 +69,7 @@
     "globalMetadataFiles": [],
     "globalMetadata": {
       "_appFaviconPath": "images/favicon.ico",
-      "_enableSearch": true
+      "_enableSearch": false
     },
     "fileMetadataFiles": [],
     "template": ["default", "./docs/yubikeysdk-template"],

@@ -13,18 +13,29 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
-using Microsoft.Extensions.Logging;
-using Yubico.Core.Logging;
+using System.Collections.Generic;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
+    /// <summary>
+    /// Represents the connection between a PIV algorithm and its corresponding key definition.
+    /// </summary>
     public record PivAlgorithmDefinition
     {
+        /// <summary>
+        /// The PIV algorithm associated with this definition.
+        /// </summary>
         public required PivAlgorithm Algorithm { get; init; }
+
+        /// <summary>
+        /// The key definition associated with this algorithm.
+        /// </summary>
         public required KeyDefinition KeyDefinition { get; init; }
 
+        /// <summary>
+        /// Indicates whether this algorithm supports key pair generation on the YubiKey.
+        /// </summary>
         public bool SupportsKeyGeneration =>
             Algorithm switch
             {
@@ -40,108 +51,127 @@ namespace Yubico.YubiKey.Piv
             };
     }
 
-    public static class IPublicKeyParametersExtensions
-    {
-        public static PivAlgorithmDefinition GetPivDefinition(this IPublicKeyParameters parameters) =>
-            parameters.KeyDefinition.GetKeyDefinition();
-    }
-
     /// <summary>
-    /// Extension methods to operate on the PivAlgorithm enum.
+    /// Extension methods for working with the PivAlgorithm enum.
     /// </summary>
     public static class PivAlgorithmExtensions
     {
-        //  Todo WIll be used in PivSession and the Command classes
-        // Might do special class for the tuple
+        // Mapping between PIV algorithms and key definitions
+        private static readonly Dictionary<PivAlgorithm, PivAlgorithmDefinition> _pivAlgorithmMap;
+        private static readonly Dictionary<KeyType, PivAlgorithm> _keyTypeToPivAlgorithmMap;
 
-        // Possible nullable?
-        // Or store in dict, and use containskey
-        // public static PivAlgorithmDefinition? GetByKeyDefinitionKeyType(this KeyType keyType) => keyType switch
-        // {
-        //     KeyType.RSA1024 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa1024, KeyDefinition = KeyDefinitions.RSA1024 },
-        //     KeyType.RSA2048 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa2048, KeyDefinition = KeyDefinitions.RSA2048 },
-        //     KeyType.RSA3072 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa3072, KeyDefinition = KeyDefinitions.RSA3072 },
-        //     KeyType.RSA4096 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa4096, KeyDefinition = KeyDefinitions.RSA4096 },
-        //     KeyType.P256 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP256, KeyDefinition = KeyDefinitions.P256 },
-        //     KeyType.P384 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP384, KeyDefinition = KeyDefinitions.P384 },
-        //     KeyType.Ed25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccEd25519, KeyDefinition = KeyDefinitions.Ed25519 },
-        //     KeyType.X25519 => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccX25519, KeyDefinition = KeyDefinitions.X25519 },
-        //     _ => null,
-        // };
-
-        // TODO Optimize
-        public static PivAlgorithmDefinition GetKeyDefinition(this KeyDefinition keyDefinition)
+        static PivAlgorithmExtensions()
         {
-            PivAlgorithmDefinition[] definitions =
-            [
-                new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa1024, KeyDefinition = KeyDefinitions.RSA1024 },
-                new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa2048, KeyDefinition = KeyDefinitions.RSA2048 },
-                new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa3072, KeyDefinition = KeyDefinitions.RSA3072 },
-                new PivAlgorithmDefinition { Algorithm = PivAlgorithm.Rsa4096, KeyDefinition = KeyDefinitions.RSA4096 },
-                new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP256, KeyDefinition = KeyDefinitions.P256 },
-                new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccP384, KeyDefinition = KeyDefinitions.P384 },
-                new PivAlgorithmDefinition
-                    { Algorithm = PivAlgorithm.EccEd25519, KeyDefinition = KeyDefinitions.Ed25519 },
-                new PivAlgorithmDefinition { Algorithm = PivAlgorithm.EccX25519, KeyDefinition = KeyDefinitions.X25519 }
-            ];
-
-            return definitions.Single(d => d.KeyDefinition.KeyType == keyDefinition.KeyType);
-        }
-
-        // Possible nullable?
-        public static PivAlgorithmDefinition? GetPivKeyDef(this PivAlgorithm algorithm) =>
-            algorithm switch
+            // Initialize mappings
+            _pivAlgorithmMap = new Dictionary<PivAlgorithm, PivAlgorithmDefinition>
             {
-                PivAlgorithm.Rsa1024 => new PivAlgorithmDefinition
-                    { Algorithm = PivAlgorithm.Rsa1024, KeyDefinition = KeyDefinitions.RSA1024 },
-                PivAlgorithm.Rsa2048 => new PivAlgorithmDefinition
-                    { Algorithm = PivAlgorithm.Rsa2048, KeyDefinition = KeyDefinitions.RSA2048 },
-                PivAlgorithm.Rsa3072 => new PivAlgorithmDefinition
-                    { Algorithm = PivAlgorithm.Rsa3072, KeyDefinition = KeyDefinitions.RSA3072 },
-                PivAlgorithm.Rsa4096 => new PivAlgorithmDefinition
-                    { Algorithm = PivAlgorithm.Rsa4096, KeyDefinition = KeyDefinitions.RSA4096 },
-                PivAlgorithm.EccP256 => new PivAlgorithmDefinition
-                    { Algorithm = PivAlgorithm.EccP256, KeyDefinition = KeyDefinitions.P256 },
-                PivAlgorithm.EccP384 => new PivAlgorithmDefinition
-                    { Algorithm = PivAlgorithm.EccP384, KeyDefinition = KeyDefinitions.P384 },
-                PivAlgorithm.EccP521 => new PivAlgorithmDefinition
-                    { Algorithm = PivAlgorithm.EccP521, KeyDefinition = KeyDefinitions.P521 },
-                PivAlgorithm.EccEd25519 => new PivAlgorithmDefinition
-                    { Algorithm = PivAlgorithm.EccEd25519, KeyDefinition = KeyDefinitions.Ed25519 },
-                PivAlgorithm.EccX25519 => new PivAlgorithmDefinition
-                    { Algorithm = PivAlgorithm.EccX25519, KeyDefinition = KeyDefinitions.X25519 },
-                // PivAlgorithm.TripleDes => new PivAlgorithmDefinition { Algorithm = PivAlgorithm.TripleDes, KeyDefinition = KeyDefinitions.TripleDes },
-                _ => null,
+                { PivAlgorithm.Rsa1024, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.Rsa1024, KeyDefinition = KeyDefinitions.RSA1024 } },
+                { PivAlgorithm.Rsa2048, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.Rsa2048, KeyDefinition = KeyDefinitions.RSA2048 } },
+                { PivAlgorithm.Rsa3072, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.Rsa3072, KeyDefinition = KeyDefinitions.RSA3072 } },
+                { PivAlgorithm.Rsa4096, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.Rsa4096, KeyDefinition = KeyDefinitions.RSA4096 } },
+                { PivAlgorithm.EccP256, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.EccP256, KeyDefinition = KeyDefinitions.P256 } },
+                { PivAlgorithm.EccP384, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.EccP384, KeyDefinition = KeyDefinitions.P384 } },
+                { PivAlgorithm.EccP521, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.EccP521, KeyDefinition = KeyDefinitions.P521 } },
+                { PivAlgorithm.EccEd25519, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.EccEd25519, KeyDefinition = KeyDefinitions.Ed25519 } },
+                { PivAlgorithm.EccX25519, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.EccX25519, KeyDefinition = KeyDefinitions.X25519 } },
+                { PivAlgorithm.Aes128, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.Aes128, KeyDefinition = KeyDefinitions.AES128 } },
+                { PivAlgorithm.Aes192, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.Aes192, KeyDefinition = KeyDefinitions.AES192 } },
+                { PivAlgorithm.Aes256, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.Aes256, KeyDefinition = KeyDefinitions.AES256 } },
+                { PivAlgorithm.TripleDes, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.TripleDes, KeyDefinition = KeyDefinitions.TripleDes } },
+                { PivAlgorithm.None, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.None, KeyDefinition = null! } },
+                { PivAlgorithm.Pin, new PivAlgorithmDefinition 
+                    { Algorithm = PivAlgorithm.Pin, KeyDefinition = null! } },
             };
 
+            // Create reverse mapping (KeyType to PivAlgorithm)
+            _keyTypeToPivAlgorithmMap = new Dictionary<KeyType, PivAlgorithm>
+            {
+                { KeyType.RSA1024, PivAlgorithm.Rsa1024 },
+                { KeyType.RSA2048, PivAlgorithm.Rsa2048 },
+                { KeyType.RSA3072, PivAlgorithm.Rsa3072 },
+                { KeyType.RSA4096, PivAlgorithm.Rsa4096 },
+                { KeyType.P256, PivAlgorithm.EccP256 },
+                { KeyType.P384, PivAlgorithm.EccP384 },
+                { KeyType.P521, PivAlgorithm.EccP521 },
+                { KeyType.Ed25519, PivAlgorithm.EccEd25519 },
+                { KeyType.X25519, PivAlgorithm.EccX25519 },
+                { KeyType.AES128, PivAlgorithm.Aes128 },
+                { KeyType.AES192, PivAlgorithm.Aes192 },
+                { KeyType.AES256, PivAlgorithm.Aes256 },
+                { KeyType.TripleDes, PivAlgorithm.TripleDes },
+            };
+        }
+
+        /// <summary>
+        /// Gets the PivAlgorithmDefinition for a given KeyDefinition.
+        /// </summary>
+        /// <param name="keyDefinition">The key definition to look up.</param>
+        /// <returns>The corresponding PivAlgorithmDefinition.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when no matching algorithm definition is found.</exception>
+        public static PivAlgorithmDefinition GetPivKeyDefinition(this KeyDefinition keyDefinition)
+        {
+            if (!_keyTypeToPivAlgorithmMap.TryGetValue(keyDefinition.KeyType, out var algorithm))
+            {
+                throw new InvalidOperationException($"No PIV algorithm mapping found for key type: {keyDefinition.KeyType}");
+            }
+
+            return _pivAlgorithmMap[algorithm];
+        }
+
+        /// <summary>
+        /// Gets the PivAlgorithmDefinition for a given PivAlgorithm.
+        /// </summary>
+        /// <param name="algorithm">The PIV algorithm to look up.</param>
+        /// <returns>The corresponding PivAlgorithmDefinition, or null if not found.</returns>
+        public static PivAlgorithmDefinition GetPivKeyDefinition(this PivAlgorithm algorithm) =>
+            _pivAlgorithmMap.TryGetValue(algorithm, out var definition) 
+                ? definition 
+                : throw new NotSupportedException($"Unsupported algorithm: {algorithm}");
+
+        /// <summary>
+        /// Converts a KeyType to its corresponding PivAlgorithm.
+        /// </summary>
+        /// <param name="keyType">The key type to convert.</param>
+        /// <returns>The corresponding PivAlgorithm.</returns>
+        /// <exception cref="NotSupportedException">Thrown when the key type is not supported by PIV.</exception>
         public static PivAlgorithm GetPivAlgorithm(this KeyType keyType)
         {
-            return keyType switch
+            if (!_keyTypeToPivAlgorithmMap.TryGetValue(keyType, out var algorithm))
             {
-                KeyType.Ed25519 => PivAlgorithm.EccEd25519,
-                KeyType.X25519 => PivAlgorithm.EccX25519,
-                KeyType.P256 => PivAlgorithm.EccP256,
-                KeyType.P384 => PivAlgorithm.EccP384,
-                KeyType.P521 => PivAlgorithm.EccP521,
-                KeyType.RSA1024 => PivAlgorithm.Rsa1024,
-                KeyType.RSA2048 => PivAlgorithm.Rsa2048,
-                KeyType.RSA3072 => PivAlgorithm.Rsa3072,
-                KeyType.RSA4096 => PivAlgorithm.Rsa4096,
-                _ => throw new NotSupportedException("Unsupported keytype")
-            };
+                throw new NotSupportedException($"Unsupported key type: {keyType}");
+            }
+
+            return algorithm;
         }
 
+        /// <summary>
+        /// Converts a PivAlgorithm to its corresponding KeyType.
+        /// </summary>
+        /// <param name="pivAlgorithm">The PIV algorithm to convert.</param>
+        /// <returns>The corresponding KeyType.</returns>
+        /// <exception cref="NotSupportedException">Thrown when the PIV algorithm cannot be mapped to a KeyType.</exception>
         public static KeyType GetKeyType(this PivAlgorithm pivAlgorithm)
         {
-            return pivAlgorithm switch
+            if (!_pivAlgorithmMap.TryGetValue(pivAlgorithm, out var definition))
             {
-                PivAlgorithm.EccEd25519 => KeyType.Ed25519,
-                PivAlgorithm.EccX25519 => KeyType.X25519,
-                PivAlgorithm.EccP256 => KeyType.P256,
-                PivAlgorithm.EccP384 => KeyType.P384,
-                PivAlgorithm.EccP521 => KeyType.P521,
-                _ => throw new NotSupportedException("Unsupported pivAlgorithm")
-            };
+                throw new NotSupportedException($"Unsupported PIV algorithm: {pivAlgorithm}");
+            }
+
+            return definition.KeyDefinition.KeyType;
         }
 
         /// <summary>
@@ -164,19 +194,9 @@ namespace Yubico.YubiKey.Piv
         /// A boolean, true if the algorithm is one that can be used to generate
         /// a key pair, and false otherwise.
         /// </returns>
-        [Obsolete("Use other")]
+        [Obsolete("Use algorithm.GetPivKeyDef()?.SupportsKeyGeneration ?? false instead")]
         public static bool IsValidAlgorithmForGenerate(this PivAlgorithm algorithm) =>
-            algorithm switch
-            {
-                PivAlgorithm.Rsa1024 => true,
-                PivAlgorithm.Rsa2048 => true,
-                PivAlgorithm.Rsa3072 => true,
-                PivAlgorithm.Rsa4096 => true,
-                PivAlgorithm.EccP256 => true,
-                PivAlgorithm.EccP384 => true,
-                PivAlgorithm.EccEd25519 => true,
-                _ => false,
-            };
+            algorithm.GetPivKeyDefinition()?.SupportsKeyGeneration ?? false;
 
         /// <summary>
         /// The size of a key, in bits, of the given algorithm.
@@ -207,6 +227,12 @@ namespace Yubico.YubiKey.Piv
         ///     Rsa4096    4096
         ///     EccP256     256
         ///     EccP384     384
+        ///     EccP521     521
+        ///     EccEd25519  256
+        ///     EccX25519   256
+        ///     Aes128      128
+        ///     Aes192      192
+        ///     Aes256      256
         ///     TripleDes   192
         ///     Pin          64
         ///     None          0
@@ -234,18 +260,20 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         public static int KeySizeBits(this PivAlgorithm algorithm)
         {
-            switch (algorithm)
+            // Special handling for PIN algorithm
+            if (algorithm == PivAlgorithm.Pin)
             {
-                case PivAlgorithm.TripleDes:
-                    return 192;
-                case PivAlgorithm.Pin:
-                    return 64;
+                return 64;
             }
 
-            var keyDefinition = algorithm.GetPivKeyDef();
-            return keyDefinition != null
-                ? keyDefinition.KeyDefinition.LengthInBits
-                : 0;
+            if (algorithm == PivAlgorithm.None)
+            {
+                return 0;
+            }
+
+            // Try to get the key definition
+            var keyDefinition = algorithm.GetPivKeyDefinition();
+            return keyDefinition.KeyDefinition.LengthInBits;
         }
 
         /// <summary>
@@ -273,7 +301,7 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         public static bool IsRsa(this PivAlgorithm algorithm)
         {
-            var keyDefinition = algorithm.GetPivKeyDef();
+            var keyDefinition = algorithm.GetPivKeyDefinition();
             return keyDefinition is { KeyDefinition.IsRsaKey: true };
         }
 
@@ -302,7 +330,7 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         public static bool IsEcc(this PivAlgorithm algorithm)
         {
-            var keyDefinition = algorithm.GetPivKeyDef();
+            var keyDefinition = algorithm.GetPivKeyDefinition();
             return keyDefinition is { KeyDefinition.IsEcKey: true };
         }
     }

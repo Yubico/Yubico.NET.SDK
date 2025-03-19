@@ -109,9 +109,9 @@ public class AsnPublicKeyReaderTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<X25519PublicKeyParameters>(result);
+        Assert.IsType<Curve25519PublicKeyParameters>(result);
         
-        var x25519Params = (X25519PublicKeyParameters)result;
+        var x25519Params = (Curve25519PublicKeyParameters)result;
         Assert.NotNull(x25519Params);
         Assert.Equal(32, x25519Params.PublicPoint.Length);
         Assert.Equal(KeyDefinitions.CryptoOids.X25519, x25519Params.KeyDefinition.AlgorithmOid);
@@ -129,9 +129,9 @@ public class AsnPublicKeyReaderTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<Ed25519PublicKeyParameters>(result);
+        Assert.IsType<Curve25519PublicKeyParameters>(result);
         
-        var ed25519Params = (Ed25519PublicKeyParameters)result;
+        var ed25519Params = (Curve25519PublicKeyParameters)result;
         Assert.NotNull(ed25519Params);
         Assert.Equal(32, ed25519Params.PublicPoint.Length);
         Assert.Equal(KeyDefinitions.CryptoOids.Ed25519, ed25519Params.KeyDefinition.AlgorithmOid);
@@ -291,8 +291,9 @@ public class AsnPublicKeyReaderTests
         {
             RSAPublicKeyParameters rsaParams => AsnPublicKeyWriter.EncodeToSpki(rsaParams.Parameters),
             ECPublicKeyParameters ecParams => AsnPublicKeyWriter.EncodeToSpki(ecParams.Parameters),
-            Ed25519PublicKeyParameters edParams => AsnPublicKeyWriter.EncodeToSpki(edParams.PublicPoint.ToArray(), KeyType.Ed25519),
-            X25519PublicKeyParameters x25519Params => AsnPublicKeyWriter.EncodeToSpki(x25519Params.PublicPoint.ToArray(), KeyType.X25519),
+            Ed25519PublicKeyParameters edParams => AsnPublicKeyWriter.EncodeToSpki(edParams.PublicPoint.ToArray(), keyType),
+            X25519PublicKeyParameters x25519Params => AsnPublicKeyWriter.EncodeToSpki(x25519Params.PublicPoint.ToArray(), keyType),
+            Curve25519PublicKeyParameters x25519Params => AsnPublicKeyWriter.EncodeToSpki(x25519Params.PublicPoint.ToArray(), keyType),
             _ => throw new NotSupportedException($"Unsupported key type: {result.GetType()}")
         };
         

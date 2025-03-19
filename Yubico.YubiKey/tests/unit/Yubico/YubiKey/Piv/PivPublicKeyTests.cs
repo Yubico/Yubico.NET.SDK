@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Piv
 
             // Assert
             Assert.Equal(testKey.EncodedKey, subjectPublicKeyInfo);
-            Assert.Equal(algorithm.GetPivKeyDef()!.KeyDefinition, pivPublicKey.GetKeyDefinition());
+            Assert.Equal(algorithm.GetPivKeyDefinition()!.KeyDefinition, pivPublicKey.GetKeyDefinition());
             Assert.Equal(testKey.EncodedKey, pivPublicKey.ExportSubjectPublicKeyInfo());
             Assert.Equal(algorithm, pivPublicKey.Algorithm);
         }
@@ -619,14 +619,10 @@ namespace Yubico.YubiKey.Piv
                     subjectPublicKeyInfo = ecDsa.ExportSubjectPublicKeyInfo();
                     break;
                 case PivAlgorithm.EccEd25519:
-                    Assert.IsAssignableFrom<Ed25519PublicKeyParameters>(publicKeyParameters);
-                    subjectPublicKeyInfo = ((Ed25519PublicKeyParameters)publicKeyParameters).ExportSubjectPublicKeyInfo()
-                        .ToArray();
-                    break;
                 case PivAlgorithm.EccX25519:
-                    Assert.IsAssignableFrom<X25519PublicKeyParameters>(publicKeyParameters);
-                    subjectPublicKeyInfo = ((X25519PublicKeyParameters)publicKeyParameters)
-                        .ExportSubjectPublicKeyInfo().ToArray();
+                    Assert.IsAssignableFrom<Curve25519PublicKeyParameters>(publicKeyParameters);
+                    subjectPublicKeyInfo = ((Curve25519PublicKeyParameters)publicKeyParameters).ExportSubjectPublicKeyInfo()
+                        .ToArray();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null);

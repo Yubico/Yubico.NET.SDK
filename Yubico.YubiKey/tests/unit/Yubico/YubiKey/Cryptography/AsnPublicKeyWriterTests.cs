@@ -113,8 +113,8 @@ public class AsnPublicKeyWriterTests
         var decodedParams = AsnPublicKeyReader.DecodeFromSpki(encoded);
         
         // Assert
-        Assert.IsType<Ed25519PublicKeyParameters>(decodedParams);
-        var edParams = (Ed25519PublicKeyParameters)decodedParams;
+        Assert.IsType<Curve25519PublicKeyParameters>(decodedParams);
+        var edParams = (Curve25519PublicKeyParameters)decodedParams;
         
         Assert.Equal(publicKey, edParams.PublicPoint.ToArray());
     }
@@ -132,8 +132,8 @@ public class AsnPublicKeyWriterTests
         var decodedParams = AsnPublicKeyReader.DecodeFromSpki(encoded);
         
         // Assert
-        Assert.IsType<X25519PublicKeyParameters>(decodedParams);
-        var x25519Params = (X25519PublicKeyParameters)decodedParams;
+        Assert.IsType<Curve25519PublicKeyParameters>(decodedParams);
+        var x25519Params = (Curve25519PublicKeyParameters)decodedParams;
         
         Assert.Equal(publicKey, x25519Params.PublicPoint.ToArray());
     }
@@ -221,8 +221,8 @@ public class AsnPublicKeyWriterTests
         var decodedParams = AsnPublicKeyReader.DecodeFromSpki(encoded);
         
         // Assert
-        Assert.IsType<Ed25519PublicKeyParameters>(decodedParams);
-        var edParams = (Ed25519PublicKeyParameters)decodedParams;
+        Assert.IsType<Curve25519PublicKeyParameters>(decodedParams);
+        var edParams = (Curve25519PublicKeyParameters)decodedParams;
         
         Assert.Equal(publicKey, edParams.PublicPoint.ToArray());
     }

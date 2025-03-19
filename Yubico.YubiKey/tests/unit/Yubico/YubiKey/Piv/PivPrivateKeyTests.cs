@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Piv
             var pivPrivateKey = PivPrivateKey.Create(privateKeyParameters);
 
             // Assert
-            Assert.Equal(algorithm.GetPivKeyDef()!.KeyDefinition, pivPrivateKey.GetKeyDefinition());
+            Assert.Equal(algorithm.GetPivKeyDefinition()!.KeyDefinition, pivPrivateKey.GetKeyDefinition());
             Assert.Equal(algorithm, pivPrivateKey.Algorithm);
             var testKeyInfo = AsnPrivateKeyReader.DecodePkcs8EncodedKey(testKey.EncodedKey);
             var actualInfo = AsnPrivateKeyReader.DecodePkcs8EncodedKey(pivPrivateKey.ExportPkcs8PrivateKey());

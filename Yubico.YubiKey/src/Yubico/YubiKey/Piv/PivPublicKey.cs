@@ -123,8 +123,9 @@ namespace Yubico.YubiKey.Piv
             {
                 RSAPublicKeyParameters rsaKey => PivRsaPublicKey.CreateFromPublicKey(rsaKey),
                 ECPublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
-                Ed25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
-                X25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
+                // Ed25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
+                // X25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
+                Curve25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
                 _ => throw new ArgumentException("Invalid key type", nameof(keyParameters))
             };
         }

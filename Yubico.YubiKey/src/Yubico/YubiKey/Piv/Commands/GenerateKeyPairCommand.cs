@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _algorithm;
             set
             {
-                var keyDefinitionKeyType = value.GetPivKeyDef();
+                var keyDefinitionKeyType = value.GetPivKeyDefinition();
                 bool supportsKeyGeneration = keyDefinitionKeyType is { SupportsKeyGeneration: true };
                 if (!supportsKeyGeneration)
                 {
@@ -279,7 +279,7 @@ namespace Yubico.YubiKey.Piv.Commands
                         _slotNumber));
             }
             
-            var keyDefinitionKeyType = _algorithm.GetPivKeyDef();
+            var keyDefinitionKeyType = _algorithm.GetPivKeyDefinition();
             bool supportsKeyGeneration = keyDefinitionKeyType is { SupportsKeyGeneration: true };
             if (!supportsKeyGeneration)
             {

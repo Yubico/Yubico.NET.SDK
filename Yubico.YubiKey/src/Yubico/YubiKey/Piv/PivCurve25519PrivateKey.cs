@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.Piv
             EncodedKey = tlvWriter.Encode();
             Algorithm = algorithm;
             
-            var keyType = algorithm.GetPivKeyDef()!.KeyDefinition.KeyType; // TODO null
+            var keyType = algorithm.GetPivKeyDefinition()!.KeyDefinition.KeyType; // TODO null
             KeyParameters = Curve25519PrivateKeyParameters.CreateFromValue(privateValue.ToArray(), keyType);
             _privateValue = new Memory<byte>(privateValue.ToArray());
         }

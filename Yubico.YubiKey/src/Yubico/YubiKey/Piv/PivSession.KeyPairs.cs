@@ -137,10 +137,7 @@ namespace Yubico.YubiKey.Piv
         {
             YubiKey.ThrowIfUnsupportedAlgorithm(algorithm);
 
-            if (ManagementKeyAuthenticated == false)
-            {
-                AuthenticateManagementKey();
-            }
+            RefreshManagementKeyAuthentication();
 
             var command = new GenerateKeyPairCommand(slotNumber, algorithm, pinPolicy, touchPolicy);
             var response = Connection.SendCommand(command);
@@ -246,28 +243,111 @@ namespace Yubico.YubiKey.Piv
             PivPinPolicy pinPolicy = PivPinPolicy.Default,
             PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
+            if (privateKey == null)
+            {
+                throw new ArgumentNullException(nameof(privateKey));
+            }
+            
+            if (privateKey.KeyParameters == null) // To throw an ArgumentNullException here would be a breaking change
+            {
+                throw new ArgumentException(nameof(privateKey.KeyParameters));
+            }
+            
             ImportPrivateKey(slotNumber, privateKey.KeyParameters, pinPolicy, touchPolicy); // TODO Breaking? Check if its a breaking change
-
-            // if (privateKey == null)
-            // {
-            //     throw new ArgumentNullException(nameof(privateKey));
-            // }
-            //
-            // YubiKey.ThrowIfUnsupportedAlgorithm(privateKey.Algorithm);
-            //
-            // if (ManagementKeyAuthenticated == false)
-            // {
-            //     AuthenticateManagementKey();
-            // }
-            //
-            // var command = new ImportAsymmetricKeyCommand(privateKey, slotNumber, pinPolicy, touchPolicy);
-            // var response = Connection.SendCommand(command);
-            // if (response.Status != ResponseStatus.Success)
-            // {
-            //     throw new InvalidOperationException(response.StatusMessage);
-            // }
         }
         
+        /// <summary>
+        /// Import a private key into the given slot.
+        /// </summary>
+        /// <remarks>
+        /// When you import a key, you specify which slot will hold this key. If
+        /// there is a key in that slot already, this method will replace it.
+        /// That old key will be gone and there will be nothing you can do to
+        /// recover it. Hence, use this method with caution.
+        /// <para>
+        /// This method will not return to you the public key partner to the
+        /// private key imported into the slot. For YubiKeys before version 5.3,
+        /// you will not have the opportunity to obtain the public key, so make
+        /// sure your application manages it right from the start. Beginning with
+        /// version 5.3, it is possible to get a public key out of a slot at any
+        /// time.
+        /// </para>
+        /// <para>
+        /// You also have the opportunity to specify the PIN and touch policies
+        /// of the private key generated. These policies describe what will be
+        /// required when using the key. For example, if the PIN policy is
+        /// <c>Always</c>, then every time the key is used (to sign, decrypt, or
+        /// perform key agreement), it will be necessary to verify the PIV PIN.
+        /// With the touch policy, for instance, setting it to <c>Always</c> will
+        /// require touch every time the key is used. This method has the
+        /// policies as optional arguments. If you do not specify these
+        /// arguments, the key pair will be generated with the policies set to
+        /// <c>Default</c>. Currently for all YubiKeys, the default PIN
+        /// policy is <c>Once</c>, and the default touch policy is <c>Never</c>.
+        /// </para>
+        /// <para>
+        /// In order to perform this operation, the management key must be
+        /// authenticated during this session. If it has not been authenticated,
+        /// this method will call <see cref="AuthenticateManagementKey"/>. That
+        /// is, your application does not need to authenticate the management key
+        /// separately (i.e., call <c>TryAuthenticateManagementKey</c> or
+        /// <c>AuthenticateManagementKey</c>), this method will determine if the
+        /// management key has been authenticated or not, and if not, it will
+        /// make the call to perform mutual authentication.
+        /// </para>
+        /// <para>
+        /// The authentication method will collect the management key using the
+        /// <c>KeyCollector</c> delegate. If no such delegate has been set, it
+        /// will throw an exception.
+        /// </para>
+        /// <para>
+        /// The <c>KeyCollector</c> has an option to cancel the operation. That
+        /// is, the <c>AuthenticateManagementKey</c> method will call the
+        /// <c>KeyCollector</c> requesting the management key, and it is possible
+        /// that during the collection operations, the user cancels. The
+        /// <c>KeyCollector</c> will return to the authentication method noting
+        /// the cancellation. In that case, it will throw an exception. If you
+        /// want the authentication to return <c>false</c> on user cancellation,
+        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> directly
+        /// before calling this method.
+        /// </para>
+        /// </remarks>
+        /// <param name="privateKey">
+        /// The private key parameters and values to import into the YubiKey.
+        /// </param>
+        /// <param name="slotNumber">
+        /// The slot into which the key will be imported.
+        /// </param>
+        /// <param name="pinPolicy">
+        /// The PIN policy the key will have. If no argument is given, the policy
+        /// will be <c>Default</c>.
+        /// </param>
+        /// <param name="touchPolicy">
+        /// The touch policy the key will have. If no argument is given, the policy
+        /// will be <c>Default</c>.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>privateKey</c> argument is <c>null</c>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The slot specified is not valid for generating a key pair, or the
+        /// <c>privateKey</c> object is empty.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// There is no <c>KeyCollector</c> loaded, the key provided was not a
+        /// valid Triple-DES key, or the YubiKey had some other error, such as
+        /// unreliable connection.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The user canceled management key collection.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// Mutual authentication was performed and the YubiKey was not
+        /// authenticated.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
+        /// </exception>
         public void ImportPrivateKey(
             byte slotNumber,
             IPrivateKeyParameters privateKey,
@@ -281,10 +361,7 @@ namespace Yubico.YubiKey.Piv
 
             YubiKey.ThrowIfUnsupportedAlgorithm(privateKey.KeyType.GetPivAlgorithm());
 
-            if (ManagementKeyAuthenticated == false)
-            {
-                AuthenticateManagementKey();
-            }
+            RefreshManagementKeyAuthentication();
 
             var pivPrivateKey = PivPrivateKey.Create(privateKey);
             var command = new ImportAsymmetricKeyCommand(pivPrivateKey, slotNumber, pinPolicy, touchPolicy);
@@ -370,10 +447,7 @@ namespace Yubico.YubiKey.Piv
                 throw new ArgumentNullException(nameof(certificate));
             }
 
-            if (ManagementKeyAuthenticated == false)
-            {
-                AuthenticateManagementKey();
-            }
+            RefreshManagementKeyAuthentication();
 
             var dataTag = GetCertDataTagFromSlotNumber(slotNumber);
 
@@ -482,6 +556,16 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.InvalidSlot,
                         slotNumber)),
             };
+        }
+        
+        private void RefreshManagementKeyAuthentication()
+        {
+            if (ManagementKeyAuthenticated)
+            {
+                return;
+            }
+            
+            AuthenticateManagementKey();
         }
     }
 }

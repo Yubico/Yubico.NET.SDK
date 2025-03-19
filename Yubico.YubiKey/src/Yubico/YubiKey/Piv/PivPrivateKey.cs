@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         public ReadOnlyMemory<byte> EncodedPrivateKey => EncodedKey;
         
-        protected KeyDefinitions.KeyDefinition KeyDefinition { get; set; } = null!;
+        protected KeyDefinition KeyDefinition { get; set; } = null!;
         public IPrivateKeyParameters KeyParameters { get; protected set; } = null!;
 
         /// <summary>
@@ -156,20 +156,20 @@ namespace Yubico.YubiKey.Piv
             {
                 RSAPrivateKeyParameters rsaKey => PivRsaPrivateKey.CreateFromPrivateKey(rsaKey),
                 ECPrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
-                EDsaPrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
-                ECX25519PrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
+                Ed25519PrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
+                X25519PrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
                 Curve25519PrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
                 _ => throw new ArgumentException("Invalid key type", nameof(privateKeyParameters))
             };
         }
 
-        public KeyDefinitions.KeyDefinition GetKeyDefinition() => KeyDefinition;
+        public KeyDefinition GetKeyDefinition() => KeyDefinition;  // TODO keep these?
 
-        public KeyDefinitions.KeyType GetKeyType() => KeyDefinition.KeyType;
+        public KeyType GetKeyType => KeyParameters.KeyDefinition.KeyType;  // TODO keep these?
 
-        public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => KeyParameters.EncodeToPkcs8();
+        public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => KeyParameters.EncodeToPkcs8();  // TODO keep these?
 
-        public ReadOnlyMemory<byte> GetPrivateKey() => KeyParameters.GetPrivateKey();
+        public ReadOnlyMemory<byte> GetPrivateKey() => KeyParameters.PrivateKey; // TODO keep these?
         
         internal static bool IsValidEccTag(int peekTag) =>
             peekTag switch

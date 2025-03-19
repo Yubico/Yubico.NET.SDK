@@ -373,7 +373,7 @@ namespace Yubico.YubiKey.Scp
 
                 // Write the EC public key
                 var publicKeyTlvData =
-                    new TlvObject(EcPublicKeyKeyType, publicKeyParameters.GetBytes().Span).GetBytes();
+                    new TlvObject(EcPublicKeyKeyType, publicKeyParameters.PublicPoint.Span).GetBytes();
 
                 commandDataWriter.Write(publicKeyTlvData.ToArray());
 

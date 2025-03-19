@@ -28,8 +28,6 @@ namespace Yubico.YubiKey.Cryptography
     /// </remarks>
     public class ECPrivateKeyParameters : ECKeyParameters, IPrivateKeyParameters
     {
-        private readonly byte[] _encodedKey;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ECPrivateKeyParameters"/> class.
         /// It is a wrapper for the <see cref="ECParameters"/> class.
@@ -45,8 +43,6 @@ namespace Yubico.YubiKey.Cryptography
             {
                 throw new ArgumentException("Parameters must contain private key data (D value)", nameof(parameters));
             }
-
-            _encodedKey = AsnPrivateKeyWriter.EncodeToPkcs8(parameters);
         }
 
         /// <summary>
@@ -61,27 +57,21 @@ namespace Yubico.YubiKey.Cryptography
         {
         }
 
-        public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => _encodedKey;
-        public ReadOnlyMemory<byte> GetPrivateKey() => Parameters.D.ToArray();
-
+        public ReadOnlyMemory<byte> PrivateKey => Parameters.D.ToArray();
+        public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
         public static ECPrivateKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
         {
             var parameters = AsnPrivateKeyReader.CreateECParameters(encodedKey);
             return new ECPrivateKeyParameters(parameters);
         }
-
-        public static ECPrivateKeyParameters CreateFromParameters(ECParameters parameters)
-        {
-            return new ECPrivateKeyParameters(parameters);
-        }
-
+        public static ECPrivateKeyParameters CreateFromParameters(ECParameters parameters) => new(parameters);
         public static ECPrivateKeyParameters CreateFromValue(
             ReadOnlyMemory<byte> privateValue,
-            KeyDefinitions.KeyType keyType)
+            KeyType keyType)
         {
-            if (keyType != KeyDefinitions.KeyType.P256 && 
-                keyType != KeyDefinitions.KeyType.P384 &&
-                keyType != KeyDefinitions.KeyType.P521)
+            if (keyType != Cryptography.KeyType.P256 &&
+                keyType != Cryptography.KeyType.P384 &&
+                keyType != Cryptography.KeyType.P521)
             {
                 throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null);
             }

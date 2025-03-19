@@ -24,9 +24,9 @@ namespace Yubico.YubiKey.Cryptography;
 public abstract class RSAKeyParameters
 {
     public RSAParameters Parameters { get; set; }
-    // public KeyDefinitions.KeyDefinition GetKeyDefinition() => throw new NotImplementedException();
+    // public KeyDefinition GetKeyDefinition() => throw new NotImplementedException();
     //
-    // public KeyDefinitions.KeyType GetKeyType() => throw new NotImplementedException();
+    // public KeyType GetKeyType() => throw new NotImplementedException();
     //
     // protected RSAKeyParameters()
     // {

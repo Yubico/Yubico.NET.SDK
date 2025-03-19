@@ -19,29 +19,29 @@ namespace Yubico.YubiKey.Cryptography;
 
 public class RSAPrivateKeyParameters : RSAKeyParameters, IPrivateKeyParameters
 {
-    private readonly KeyDefinitions.KeyDefinition _keyDefinition;
- 
+    private KeyDefinition _keyDefinition { get; }
 
     public RSAPrivateKeyParameters(RSAParameters parameters)
     {
         Parameters = parameters.DeepCopy();
-        _keyDefinition = KeyDefinitions.GetByRsaLength(parameters.DP.Length * 8 * 2);
-
+        _keyDefinition = KeyDefinitions.GetByRSALength(parameters.DP.Length * 8 * 2);
     }
 
     // public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(parameters);
-    public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => throw new NotSupportedException("Not supported for RSA keys.");
+    public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() =>
+        throw new NotSupportedException("Not supported for RSA keys.");
 
-    public ReadOnlyMemory<byte> GetPrivateKey() =>
+    public ReadOnlyMemory<byte> PrivateKey =>
         throw new InvalidOperationException("Not supported for RSA keys. Use Parameters instead for RSA keys.");
 
-    public KeyDefinitions.KeyDefinition GetKeyDefinition() => _keyDefinition;
-    public KeyDefinitions.KeyType GetKeyType() => _keyDefinition.KeyType;
+    public KeyDefinition KeyDefinition => _keyDefinition;
+    public KeyType KeyType => _keyDefinition.KeyType;
 
     public static RSAPrivateKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
     {
         var parameters = AsnPrivateKeyReader.CreateRSAParameters(encodedKey);
         return new RSAPrivateKeyParameters(parameters);
     }
+
     public static RSAPrivateKeyParameters CreateFromParameters(RSAParameters parameters) => new(parameters);
 }

@@ -498,7 +498,7 @@ namespace Yubico.YubiKey.TestUtilities
         // exception.
         public ECDsa GetEccObject()
         {
-            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.Curve.P256);
+            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.CryptoOids.P256);
             if (_pivPublicKey.Algorithm != PivAlgorithm.EccP256)
             {
                 if (_pivPublicKey.Algorithm != PivAlgorithm.EccP384)
@@ -509,7 +509,7 @@ namespace Yubico.YubiKey.TestUtilities
                             RequestedKeyMessage));
                 }
 
-                eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.Curve.P384);
+                eccCurve = ECCurve.CreateFromValue(KeyDefinitions.CryptoOids.P384);
             }
 
             var eccParams = new ECParameters
@@ -764,11 +764,11 @@ namespace Yubico.YubiKey.TestUtilities
                 }
                 else if (encodedKey[offset + 3] == 0x04) // Ed25519
                 {
-                    _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyDefinitions.KeyType.Ed25519);
+                    _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyType.Ed25519);
                 }
                 else if (encodedKey[offset + 3] == 0x03) // X25519
                 {
-                    _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyDefinitions.KeyType.Ed25519);
+                    _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyType.Ed25519);
                 }
             }
         }
@@ -816,7 +816,7 @@ namespace Yubico.YubiKey.TestUtilities
             var privateValue = new byte[keySizeBytes];
             Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
             var eccOid = eccParams.Curve.Oid.Value!;
-            var keyDefinition = KeyDefinitions.GetByOid(eccOid, OidType.CurveOid);
+            var keyDefinition = KeyDefinitions.GetByOid(eccOid);
             var eccPriKey = new PivEccPrivateKey(privateValue, keyDefinition.KeyType.GetPivAlgorithm());
             _pivPrivateKey = eccPriKey;
         }
@@ -839,7 +839,7 @@ namespace Yubico.YubiKey.TestUtilities
             offset += keySizeBytes;
             Array.Copy(eccParams.Q.Y!, 0, point, offset, eccParams.Q.Y!.Length);
 
-            var keyDefinition = KeyDefinitions.GetByOid(eccParams.Curve.Oid.Value!, OidType.CurveOid);
+            var keyDefinition = KeyDefinitions.GetByOid(eccParams.Curve.Oid.Value!);
             var eccPubKey = PivEccPublicKey.CreateFromPublicPoint(point, keyDefinition.KeyType);
             _pivPublicKey = eccPubKey;
         }

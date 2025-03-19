@@ -24,12 +24,12 @@ namespace Yubico.YubiKey.Cryptography;
 public class AsnPrivateKeyReaderTests
 {
     [Theory]
-    [InlineData(KeyDefinitions.KeyType.RSA1024)]
-    [InlineData(KeyDefinitions.KeyType.RSA2048)]
-    [InlineData(KeyDefinitions.KeyType.RSA3072)]
-    [InlineData(KeyDefinitions.KeyType.RSA4096)]
+    [InlineData(KeyType.RSA1024)]
+    [InlineData(KeyType.RSA2048)]
+    [InlineData(KeyType.RSA3072)]
+    [InlineData(KeyType.RSA4096)]
     public void FromEncodedKey_WithRsaPrivateKey_ReturnsCorrectParameters(
-        KeyDefinitions.KeyType keyType)
+        KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPrivateKey(keyType);
@@ -60,11 +60,11 @@ public class AsnPrivateKeyReaderTests
     }
 
     [Theory]
-    [InlineData(KeyDefinitions.KeyType.P256)]
-    [InlineData(KeyDefinitions.KeyType.P384)]
-    [InlineData(KeyDefinitions.KeyType.P521)]
+    [InlineData(KeyType.P256)]
+    [InlineData(KeyType.P384)]
+    [InlineData(KeyType.P521)]
     public void FromEncodedKey_WithEcPrivateKey_ReturnsCorrectParameters(
-        KeyDefinitions.KeyType keyType)
+        KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPrivateKey(keyType);
@@ -83,9 +83,9 @@ public class AsnPrivateKeyReaderTests
         // Verify curve matches expected
         var expectedCurveOid = keyType switch
         {
-            KeyDefinitions.KeyType.P256 => KeyDefinitions.KeyOids.Curve.P256,
-            KeyDefinitions.KeyType.P384 => KeyDefinitions.KeyOids.Curve.P384,
-            KeyDefinitions.KeyType.P521 => KeyDefinitions.KeyOids.Curve.P521,
+            KeyType.P256 => KeyDefinitions.CryptoOids.P256,
+            KeyType.P384 => KeyDefinitions.CryptoOids.P384,
+            KeyType.P521 => KeyDefinitions.CryptoOids.P521,
             _ => throw new ArgumentOutOfRangeException(nameof(keyType))
         };
 
@@ -103,7 +103,7 @@ public class AsnPrivateKeyReaderTests
     // public void FromEncodedKey_WithX25519PrivateKey_ReturnsCorrectParameters()
     // {
     //     // Arrange
-    //     var testKey = TestKeys.GetTestPrivateKey(KeyDefinitions.KeyType.X25519);
+    //     var testKey = TestKeys.GetTestPrivateKey(KeyType.X25519);
     //     var keyBytes = testKey.KeyBytes;
     //
     //     // Act
@@ -115,14 +115,14 @@ public class AsnPrivateKeyReaderTests
     //
     //     var x25519Params = (ECX25519PrivateKeyParameters)result;
     //     Assert.Equal(32, x25519Params.GetPrivateKey().Length);
-    //     Assert.Equal(KeyDefinitions.KeyOids.Algorithm.X25519, x25519Params.GetKeyDefinition().CurveOid);
+    //     Assert.Equal(KeyDefinitions.KeyOids.X25519, x25519Params.GetKeyDefinition().CurveOid);
     // }
     
     [Fact]
     public void FromEncodedKey_WithX25519PrivateKey_ReturnsCorrectParameters()
     {
         // Arrange
-        var testKey = TestKeys.GetTestPrivateKey(KeyDefinitions.KeyType.X25519);
+        var testKey = TestKeys.GetTestPrivateKey(KeyType.X25519);
         var keyBytes = testKey.EncodedKey;
 
         // Act
@@ -133,15 +133,15 @@ public class AsnPrivateKeyReaderTests
         Assert.IsType<Curve25519PrivateKeyParameters>(result);
 
         var x25519Params = (Curve25519PrivateKeyParameters)result;
-        Assert.Equal(32, x25519Params.GetPrivateKey().Length);
-        Assert.Equal(KeyDefinitions.KeyOids.Algorithm.X25519, x25519Params.GetKeyDefinition().AlgorithmOid);
+        Assert.Equal(32, x25519Params.PrivateKey.Length);
+        Assert.Equal(KeyDefinitions.CryptoOids.X25519, x25519Params.KeyDefinition.AlgorithmOid);
     }
 
     // [Fact]
     // public void FromEncodedKey_WithEd25519PrivateKey_ReturnsCorrectParameters()
     // {
     //     // Arrange
-    //     var testKey = TestKeys.GetTestPrivateKey(KeyDefinitions.KeyType.Ed25519);
+    //     var testKey = TestKeys.GetTestPrivateKey(KeyType.Ed25519);
     //     var keyBytes = testKey.KeyBytes;
     //
     //     // Act
@@ -153,14 +153,14 @@ public class AsnPrivateKeyReaderTests
     //
     //     var ed25519Params = (EDsaPrivateKeyParameters)result;
     //     Assert.Equal(32, ed25519Params.GetPrivateKey().Length);
-    //     Assert.Equal(KeyDefinitions.KeyOids.Algorithm.Ed25519, ed25519Params.GetKeyDefinition().CurveOid);
+    //     Assert.Equal(KeyDefinitions.KeyOids.Ed25519, ed25519Params.GetKeyDefinition().CurveOid);
     // }
     
     [Fact]
     public void FromEncodedKey_WithEd25519PrivateKey_ReturnsCorrectParameters()
     {
         // Arrange
-        var testKey = TestKeys.GetTestPrivateKey(KeyDefinitions.KeyType.Ed25519);
+        var testKey = TestKeys.GetTestPrivateKey(KeyType.Ed25519);
         var keyBytes = testKey.EncodedKey;
 
         // Act
@@ -171,8 +171,8 @@ public class AsnPrivateKeyReaderTests
         Assert.IsType<Curve25519PrivateKeyParameters>(result);
 
         var ed25519Params = (Curve25519PrivateKeyParameters)result;
-        Assert.Equal(32, ed25519Params.GetPrivateKey().Length);
-        Assert.Equal(KeyDefinitions.KeyOids.Algorithm.Ed25519, ed25519Params.GetKeyDefinition().AlgorithmOid);
+        Assert.Equal(32, ed25519Params.PrivateKey.Length);
+        Assert.Equal(KeyDefinitions.CryptoOids.Ed25519, ed25519Params.KeyDefinition.AlgorithmOid);
     }
 
     [Fact]
@@ -186,7 +186,7 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.Rsa);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.RSA);
                 writer.WriteNull();
             }
 
@@ -210,7 +210,7 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.Rsa);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.RSA);
                 writer.WriteNull();
             }
 
@@ -251,8 +251,8 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.EllipticCurve);
-                writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Curve.P256);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.EC);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.P256);
             }
 
             // Create invalid EC key with wrong version
@@ -285,7 +285,7 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.EllipticCurve);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.EC);
                 // Use secp256k1 (Bitcoin curve) which isn't supported in the implementation
                 writer.WriteObjectIdentifier("1.3.132.0.10");
             }
@@ -337,7 +337,7 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.X25519);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.X25519);
             }
 
             // Write invalid X25519 key (should be 32 bytes)
@@ -361,7 +361,7 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.Ed25519);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.Ed25519);
             }
 
             // Write invalid Ed25519 key (should be 32 bytes)
@@ -375,13 +375,13 @@ public class AsnPrivateKeyReaderTests
     }
 
     // [Theory]
-    // // [InlineData(KeyDefinitions.KeyType.RSA2048)] // TODO Because our SDK doesn't make use of the excluded RSA parameters in the CRT format, we cant make a full PKCS privateKeyInfo  
-    // [InlineData(KeyDefinitions.KeyType.P256)]
-    // [InlineData(KeyDefinitions.KeyType.P384)]
-    // [InlineData(KeyDefinitions.KeyType.P521)]
-    // [InlineData(KeyDefinitions.KeyType.Ed25519)]
-    // [InlineData(KeyDefinitions.KeyType.X25519)]
-    // public void Roundtrip_WithTestKeys_ShouldRetainKeyProperties(KeyDefinitions.KeyType keyType)  // Todo doesnt work with P256, P384, P521 because the format we write is different than the format we read. Why?
+    // // [InlineData(KeyType.RSA2048)] // TODO Because our SDK doesn't make use of the excluded RSA parameters in the CRT format, we cant make a full PKCS privateKeyInfo  
+    // [InlineData(KeyType.P256)]
+    // [InlineData(KeyType.P384)]
+    // [InlineData(KeyType.P521)]
+    // [InlineData(KeyType.Ed25519)]
+    // [InlineData(KeyType.X25519)]
+    // public void Roundtrip_WithTestKeys_ShouldRetainKeyProperties(KeyType keyType)  // Todo doesnt work with P256, P384, P521 because the format we write is different than the format we read. Why?
     // {
     //     // Arrange
     //     var testKey = TestKeys.GetTestPrivateKey(keyType);
@@ -407,13 +407,13 @@ public class AsnPrivateKeyReaderTests
     // }
     
     [Theory]
-    // [InlineData(KeyDefinitions.KeyType.RSA2048)] // Because our SDK doesn't make use of the excluded RSA parameters in the CRT format, we cant make a full PKCS privateKeyInfo  
-    [InlineData(KeyDefinitions.KeyType.P256)]
-    [InlineData(KeyDefinitions.KeyType.P384)]
-    [InlineData(KeyDefinitions.KeyType.P521)]
-    [InlineData(KeyDefinitions.KeyType.Ed25519)]
-    [InlineData(KeyDefinitions.KeyType.X25519)]
-    public void Roundtrip_WithTestKeys_ShouldRetainKeyFunctionality(KeyDefinitions.KeyType keyType) 
+    // [InlineData(KeyType.RSA2048)] // Because our SDK doesn't make use of the excluded RSA parameters in the CRT format, we cant make a full PKCS privateKeyInfo  
+    [InlineData(KeyType.P256)]
+    [InlineData(KeyType.P384)]
+    [InlineData(KeyType.P521)]
+    [InlineData(KeyType.Ed25519)]
+    [InlineData(KeyType.X25519)]
+    public void Roundtrip_WithTestKeys_ShouldRetainKeyFunctionality(KeyType keyType) 
     {
         // Arrange
         var testKey = TestKeys.GetTestPrivateKey(keyType);
@@ -430,7 +430,7 @@ public class AsnPrivateKeyReaderTests
     public void FromEncodedKey_WithKeyPair_CorrectlyExtractsPrivateAndPublicComponents()
     {
         // Arrange
-        var (publicKey, privateKey) = TestKeys.GetKeyPair(KeyDefinitions.KeyType.RSA2048);
+        var (publicKey, privateKey) = TestKeys.GetKeyPair(KeyType.RSA2048);
         var privateKeyBytes = privateKey.EncodedKey;
         var publicKeyBytes = publicKey.EncodedKey;
 

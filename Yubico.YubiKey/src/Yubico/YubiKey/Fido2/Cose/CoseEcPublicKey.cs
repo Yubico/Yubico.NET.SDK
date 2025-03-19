@@ -241,7 +241,7 @@ namespace Yubico.YubiKey.Fido2.Cose
                         ExceptionMessages.UnsupportedAlgorithm));
             }
 
-            var definition = KeyDefinitions.GetByOid(ecParameters.Curve.Oid.Value, OidType.CurveOid);
+            var definition = KeyDefinitions.GetByOid(ecParameters.Curve.Oid.Value);
             if (definition.CoseKeyDefinition == null)
             {
                 throw new NotSupportedException(

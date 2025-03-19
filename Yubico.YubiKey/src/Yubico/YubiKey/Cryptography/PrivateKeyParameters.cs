@@ -16,20 +16,12 @@ using System;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public interface IKeyParameters
+public abstract class PrivateKeyParameters : IPrivateKeyParameters
 {
-    public KeyDefinition KeyDefinition { get; }
-    public KeyType KeyType{ get; }
-}
+    public abstract KeyDefinition KeyDefinition { get; }
+    public abstract KeyType KeyType { get; }
 
-public interface IPublicKeyParameters : IKeyParameters
-{
-    public ReadOnlyMemory<byte> PublicPoint { get; }
-    public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo();
-}
+    public abstract ReadOnlyMemory<byte> ExportPkcs8PrivateKey();
 
-public interface IPrivateKeyParameters : IKeyParameters
-{
-    public ReadOnlyMemory<byte> ExportPkcs8PrivateKey();
-    public ReadOnlyMemory<byte> PrivateKey { get; }
+    public abstract ReadOnlyMemory<byte> PrivateKey { get; }
 }

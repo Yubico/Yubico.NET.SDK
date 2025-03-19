@@ -123,7 +123,7 @@ namespace Yubico.YubiKey.Piv
             Memory<byte> yubiKeyEncodedKey,
             Memory<byte> encodedKey,
             PivAlgorithm algorithm,
-            KeyDefinitions.KeyDefinition keyDefinition)
+            KeyDefinition keyDefinition)
         {
             _modulus = modulus;
             _publicExponent = publicExponent;
@@ -334,7 +334,7 @@ namespace Yubico.YubiKey.Piv
                 throw new ArgumentException();
             }
 
-            var keyDefinition = rsaKey.GetKeyDefinition();
+            var keyDefinition = rsaKey.KeyDefinition;
             var keyType = keyDefinition.KeyType;
             var algorithm = keyType.GetPivAlgorithm();
             var encodedKey = rsaKey.ExportSubjectPublicKeyInfo();
@@ -351,7 +351,7 @@ namespace Yubico.YubiKey.Piv
             ReadOnlySpan<byte> publicExponent,
             PivAlgorithm algorithm,
             ReadOnlyMemory<byte> encodedKey,
-            KeyDefinitions.KeyDefinition keyDefinition)
+            KeyDefinition keyDefinition)
         {
             if ((modulus[0] & 0x80) == 0)
             {

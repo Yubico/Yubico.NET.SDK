@@ -126,8 +126,8 @@ namespace Yubico.YubiKey.TestUtilities
             _isPrivate = isPrivate;
         }
 
-        public KeyDefinitions.KeyDefinition GetKeyDefinition() =>
-            KeyDefinitions.GetByKeyType(Enum.Parse<KeyDefinitions.KeyType>(_curve, true));
+        public KeyDefinition GetKeyDefinition() =>
+            KeyDefinitions.GetByKeyType(Enum.Parse<KeyType>(_curve, true));
 
         public byte[] GetExponent()
         {
@@ -166,13 +166,13 @@ namespace Yubico.YubiKey.TestUtilities
             var publicKeyParameters = AsnPublicKeyReader.DecodeFromSpki(this.EncodedKey);
             return publicKeyParameters switch
             {
-                ECPublicKeyParameters ecParams => ecParams.GetPublicPoint().ToArray(),
-                Curve25519PublicKeyParameters x25519Params when x25519Params.GetKeyType() == KeyDefinitions.KeyType.X25519 
-                    => x25519Params.GetPublicPoint().ToArray(),
-                Curve25519PublicKeyParameters eDsaParams when eDsaParams.GetKeyType() == KeyDefinitions.KeyType.Ed25519
-                    => eDsaParams.GetPublicPoint().ToArray(),
-                EDsaPublicKeyParameters eDsaParams => eDsaParams.GetPublicPoint().ToArray(),
-                ECX25519PublicKeyParameters x25519Params => x25519Params.GetPublicPoint().ToArray(),
+                ECPublicKeyParameters ecParams => ecParams.PublicPoint.ToArray(),
+                Curve25519PublicKeyParameters x25519Params when x25519Params.KeyType == KeyType.X25519 
+                    => x25519Params.PublicPoint.ToArray(),
+                Curve25519PublicKeyParameters eDsaParams when eDsaParams.KeyType == KeyType.Ed25519
+                    => eDsaParams.PublicPoint.ToArray(),
+                Ed25519PublicKeyParameters eDsaParams => eDsaParams.PublicPoint.ToArray(),
+                X25519PublicKeyParameters x25519Params => x25519Params.PublicPoint.ToArray(),
                 RSAPublicKeyParameters => throw new InvalidOperationException(
                     "Use GetModulus() and GetExponent() instead for RSA keys"),
                 _ => throw new ArgumentOutOfRangeException(nameof(publicKeyParameters))
@@ -198,11 +198,11 @@ namespace Yubico.YubiKey.TestUtilities
             return privateKeyParameters switch
             {
                 ECPrivateKeyParameters ecParams => ecParams.Parameters.D!,
-                Curve25519PrivateKeyParameters x25519Params when x25519Params.GetKeyType() ==
-                                                                 KeyDefinitions.KeyType.X25519 => x25519Params
-                    .GetPrivateKey().ToArray(),
-                Curve25519PrivateKeyParameters eDsaParams when eDsaParams.GetKeyType() == KeyDefinitions.KeyType.Ed25519
-                    => eDsaParams.GetPrivateKey().ToArray(),
+                Curve25519PrivateKeyParameters x25519Params when x25519Params.KeyType ==
+                                                                 KeyType.X25519 => x25519Params
+                    .PrivateKey.ToArray(),
+                Curve25519PrivateKeyParameters eDsaParams when eDsaParams.KeyType == KeyType.Ed25519
+                    => eDsaParams.PrivateKey.ToArray(),
                 RSAPrivateKeyParameters => throw new InvalidOperationException("Use AsRSA() instead for RSA keys"),
                 _ => throw new ArgumentOutOfRangeException(nameof(privateKeyParameters))
             };
@@ -318,7 +318,7 @@ namespace Yubico.YubiKey.TestUtilities
             string curve) => TestKey.Load(curve, true);
 
         public static TestKey GetTestPrivateKey(
-            KeyDefinitions.KeyType keyType) => GetTestPrivateKey(GetCurveFromAlgorithm(keyType));
+            KeyType keyType) => GetTestPrivateKey(GetCurveFromAlgorithm(keyType));
 
         /// <summary>
         /// Get a private key for the specified algorithm.
@@ -335,7 +335,7 @@ namespace Yubico.YubiKey.TestUtilities
             PivAlgorithm algorithm) => GetKeyPair(GetCurveFromAlgorithm(algorithm));
 
         public static (TestKey publicKey, TestKey privateKey) GetKeyPair(
-            KeyDefinitions.KeyType keyType) => GetKeyPair(GetCurveFromAlgorithm(keyType));
+            KeyType keyType) => GetKeyPair(GetCurveFromAlgorithm(keyType));
 
 
         /// <summary>
@@ -352,7 +352,7 @@ namespace Yubico.YubiKey.TestUtilities
             int? index = null) => GetTestPublicKey(GetCurveFromAlgorithm(algorithm), index);
 
         public static TestKey GetTestPublicKey(
-            KeyDefinitions.KeyType keyType,
+            KeyType keyType,
             int? index = null) => GetTestPublicKey(GetCurveFromAlgorithm(keyType), index);
 
         /// <summary>
@@ -395,7 +395,7 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         private static string GetCurveFromAlgorithm(
-            KeyDefinitions.KeyType keyType)
+            KeyType keyType)
         {
             return keyType.ToString().ToLower();
         }

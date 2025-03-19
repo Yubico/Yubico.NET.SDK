@@ -29,15 +29,15 @@ public static class AsnPrivateKeyWriter
     /// <param name="privateKey">The private key as a byte array.</param>
     /// <param name="keyType">The type of the key.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded private key in PKCS#8 format.</returns>
-    public static byte[] EncodeToPkcs8(ReadOnlyMemory<byte> privateKey, KeyDefinitions.KeyType keyType) // 
+    public static byte[] EncodeToPkcs8(ReadOnlyMemory<byte> privateKey, KeyType keyType) // 
     {
         return keyType switch
         {
-            KeyDefinitions.KeyType.P256 => CreateEcEncodedKey(privateKey, KeyDefinitions.KeyOids.Curve.P256, null),
-            KeyDefinitions.KeyType.P384 => CreateEcEncodedKey(privateKey, KeyDefinitions.KeyOids.Curve.P384, null),
-            KeyDefinitions.KeyType.P521 => CreateEcEncodedKey(privateKey, KeyDefinitions.KeyOids.Curve.P521, null),
-            KeyDefinitions.KeyType.X25519 => CreateX25519EncodedKey(privateKey.Span),
-            KeyDefinitions.KeyType.Ed25519 => CreateEd25519EncodedKey(privateKey.Span),
+            KeyType.P256 => CreateEcEncodedKey(privateKey, KeyDefinitions.CryptoOids.P256, null),
+            KeyType.P384 => CreateEcEncodedKey(privateKey, KeyDefinitions.CryptoOids.P384, null),
+            KeyType.P521 => CreateEcEncodedKey(privateKey, KeyDefinitions.CryptoOids.P521, null),
+            KeyType.X25519 => CreateX25519EncodedKey(privateKey.Span),
+            KeyType.Ed25519 => CreateEd25519EncodedKey(privateKey.Span),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
         };
     }
@@ -52,18 +52,18 @@ public static class AsnPrivateKeyWriter
     public static byte[] EncodeToPkcs8(
         ReadOnlyMemory<byte> privateKey,
         ReadOnlyMemory<byte>? publicPoint,
-        KeyDefinitions.KeyType keyType)
+        KeyType keyType)
     {
         return keyType switch
         {
-            KeyDefinitions.KeyType.P256 => CreateEcEncodedKey(
-                privateKey, KeyDefinitions.KeyOids.Curve.P256, publicPoint),
-            KeyDefinitions.KeyType.P384 => CreateEcEncodedKey(
-                privateKey, KeyDefinitions.KeyOids.Curve.P384, publicPoint),
-            KeyDefinitions.KeyType.P521 => CreateEcEncodedKey(
-                privateKey, KeyDefinitions.KeyOids.Curve.P521, publicPoint),
-            KeyDefinitions.KeyType.X25519 => CreateX25519EncodedKey(privateKey.Span),
-            KeyDefinitions.KeyType.Ed25519 => CreateEd25519EncodedKey(privateKey.Span),
+            KeyType.P256 => CreateEcEncodedKey(
+                privateKey, KeyDefinitions.CryptoOids.P256, publicPoint),
+            KeyType.P384 => CreateEcEncodedKey(
+                privateKey, KeyDefinitions.CryptoOids.P384, publicPoint),
+            KeyType.P521 => CreateEcEncodedKey(
+                privateKey, KeyDefinitions.CryptoOids.P521, publicPoint),
+            KeyType.X25519 => CreateX25519EncodedKey(privateKey.Span),
+            KeyType.Ed25519 => CreateEd25519EncodedKey(privateKey.Span),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
         };
     }
@@ -108,7 +108,7 @@ public static class AsnPrivateKeyWriter
         writer.WriteInteger(0);
 
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.Rsa);
+        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.RSA);
         writer.WriteNull();
         writer.PopSequence();
 
@@ -200,7 +200,7 @@ public static class AsnPrivateKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.EllipticCurve);
+        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.EC);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 
@@ -239,7 +239,7 @@ public static class AsnPrivateKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.Ed25519);
+        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.Ed25519);
         writer.PopSequence();
 
         // PrivateKey as OCTET STRING
@@ -277,7 +277,7 @@ public static class AsnPrivateKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.X25519);
+        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.X25519);
         writer.PopSequence();
 
         // PrivateKey as OCTET STRING
@@ -337,16 +337,16 @@ public static class PrivateKeyParametersExtensions
     /// </summary>
     /// <param name="parameters">The private key parameters.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded private key.</returns>
-    public static byte[] EncodeToPkcs8(this IPrivateKeyParameters parameters)
+    public static byte[] EncodeToPkcs8(this IPrivateKeyParameters parameters) // TODO keep?
     {
         return parameters switch
         {
             RSAPrivateKeyParameters rsaParams => AsnPrivateKeyWriter.EncodeToPkcs8(rsaParams.Parameters),
             ECPrivateKeyParameters ecParams => AsnPrivateKeyWriter.EncodeToPkcs8(ecParams.Parameters),
-            Curve25519PrivateKeyParameters edParams when edParams.GetKeyType() == KeyDefinitions.KeyType.Ed25519 
-                => AsnPrivateKeyWriter.EncodeToPkcs8(edParams.GetPrivateKey(), KeyDefinitions.KeyType.Ed25519),
-            Curve25519PrivateKeyParameters x25519Params when x25519Params.GetKeyType() == KeyDefinitions.KeyType.X25519  
-                => AsnPrivateKeyWriter.EncodeToPkcs8(x25519Params.GetPrivateKey(), KeyDefinitions.KeyType.X25519),
+            Curve25519PrivateKeyParameters edParams when edParams.KeyType == KeyType.Ed25519 
+                => AsnPrivateKeyWriter.EncodeToPkcs8(edParams.PrivateKey, KeyType.Ed25519),
+            Curve25519PrivateKeyParameters x25519Params when x25519Params.KeyType == KeyType.X25519  
+                => AsnPrivateKeyWriter.EncodeToPkcs8(x25519Params.PrivateKey, KeyType.X25519),
             _ => throw new NotSupportedException($"Key type {parameters.GetType().Name} is not supported for encoding.")
         };
     }

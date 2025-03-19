@@ -279,7 +279,7 @@ namespace Yubico.YubiKey.Piv
                 throw new ArgumentNullException(nameof(privateKey));
             }
 
-            YubiKey.ThrowIfUnsupportedAlgorithm(privateKey.GetKeyType().GetPivAlgorithm());
+            YubiKey.ThrowIfUnsupportedAlgorithm(privateKey.KeyType.GetPivAlgorithm());
 
             if (ManagementKeyAuthenticated == false)
             {

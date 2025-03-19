@@ -29,6 +29,8 @@ namespace Yubico.YubiKey.Cryptography
     /// </remarks>
     public class ECPublicKeyParameters : ECKeyParameters, IPublicKeyParameters
     {
+        private readonly byte[] _publicPointBytes;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ECPublicKeyParameters"/> class.
         /// It is a wrapper for the <see cref="ECParameters"/> class.
@@ -41,6 +43,9 @@ namespace Yubico.YubiKey.Cryptography
         /// <exception cref="ArgumentException">Thrown when the parameters contain private key data (D value).</exception>
         public ECPublicKeyParameters(ECParameters parameters) : base(parameters)
         {
+            // Format identifier (uncompressed point): 0x04
+            _publicPointBytes = [0x4, .. Parameters.Q.X, .. Parameters.Q.Y];
+
             if (parameters.D != null)
             {
                 throw new ArgumentException(
@@ -55,25 +60,21 @@ namespace Yubico.YubiKey.Cryptography
         public ECPublicKeyParameters(ECDsa ecdsa)
             : this(ecdsa?.ExportParameters(false) ?? throw new ArgumentNullException(nameof(ecdsa)))
         {
-
         }
-        
+
         /// <summary>
         /// Gets the bytes representing the public key coordinates.
         /// </summary>
         /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the public key bytes with the format 0x04 || X || Y.</returns>
-        public ReadOnlyMemory<byte> GetBytes()
-        {
-            byte[] publicKeyRawData =
-                new byte[] { 0x4 } // Format identifier (uncompressed point): 0x04
-                    .Concat(Parameters.Q.X)
-                    .Concat(Parameters.Q.Y)
-                    .ToArray();
+        [Obsolete("Use PublicPoint instead")]
+        public ReadOnlyMemory<byte> GetBytes() => _publicPointBytes;
 
-            return publicKeyRawData;
-        }
+        /// <summary>
+        /// Gets the bytes representing the public key coordinates.
+        /// </summary>
+        /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the public key bytes with the format 0x04 || X || Y.</returns>
+        public ReadOnlyMemory<byte> PublicPoint => _publicPointBytes;
 
-        public ReadOnlyMemory<byte> GetPublicPoint() => GetBytes();
         public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => AsnPublicKeyWriter.EncodeToSpki(Parameters);
 
         public static ECPublicKeyParameters CreateFromParameters(ECParameters ecParameters) => new(ecParameters);

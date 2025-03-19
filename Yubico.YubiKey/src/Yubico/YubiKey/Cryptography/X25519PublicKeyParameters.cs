@@ -16,16 +16,16 @@ using System;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class EDsaPublicKeyParameters : IPublicKeyParameters
+public class X25519PublicKeyParameters : IPublicKeyParameters
 {
-    private readonly KeyDefinitions.KeyDefinition _keyDefinition;
+    private KeyDefinition _keyDefinition { get; }
     private readonly Memory<byte> _publicPoint;
     private readonly Memory<byte> _encodedKey;
 
-    public EDsaPublicKeyParameters(
+    public X25519PublicKeyParameters(
         ReadOnlyMemory<byte> encodedKey,
         ReadOnlyMemory<byte> publicPoint,
-        KeyDefinitions.KeyDefinition keyDefinition)
+        KeyDefinition keyDefinition)
     {
         _keyDefinition = keyDefinition;
         _publicPoint = new byte[publicPoint.Length];
@@ -35,9 +35,8 @@ public class EDsaPublicKeyParameters : IPublicKeyParameters
         encodedKey.CopyTo(_encodedKey);
     }
 
-    public KeyDefinitions.KeyType GetKeyType() => _keyDefinition.KeyType;
+    public KeyType KeyType => _keyDefinition.KeyType;
     public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => _encodedKey;
-    public KeyDefinitions.KeyDefinition GetKeyDefinition() => _keyDefinition;
-
-    public ReadOnlyMemory<byte> GetPublicPoint() => _publicPoint;
+    public KeyDefinition KeyDefinition => _keyDefinition;
+    public ReadOnlyMemory<byte> PublicPoint => _publicPoint;
 }

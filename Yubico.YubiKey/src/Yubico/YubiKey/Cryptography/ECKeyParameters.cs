@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Cryptography
     /// </summary>
     public abstract class ECKeyParameters : IKeyParameters
     {
-        private readonly KeyDefinitions.KeyDefinition _keyDefinition;
+        private KeyDefinition _keyDefinition { get; }
 
         /// <summary>
         /// Gets the EC parameters associated with this key.
@@ -40,10 +40,10 @@ namespace Yubico.YubiKey.Cryptography
         protected ECKeyParameters(ECParameters parameters)
         {
             Parameters = parameters.DeepCopy();
-            _keyDefinition = KeyDefinitions.GetByOid(parameters.Curve.Oid, OidType.CurveOid);
+            _keyDefinition = KeyDefinitions.GetByOid(parameters.Curve.Oid);
         }
 
-        public KeyDefinitions.KeyDefinition GetKeyDefinition() => _keyDefinition;
-        public KeyDefinitions.KeyType GetKeyType() => _keyDefinition.KeyType;
+        public KeyDefinition KeyDefinition => _keyDefinition;
+        public KeyType KeyType => _keyDefinition.KeyType;
     }
 }

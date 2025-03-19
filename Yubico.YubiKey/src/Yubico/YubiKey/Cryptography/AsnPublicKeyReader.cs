@@ -26,51 +26,50 @@ public class AsnPublicKeyReader
         var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
         var seqSubjectPublicKeyInfo = reader.ReadSequence();
         var seqAlgorithmIdentifier = seqSubjectPublicKeyInfo.ReadSequence();
-        
+
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
         switch (oidAlgorithm)
         {
-            case KeyDefinitions.KeyOids.Algorithm.Rsa:
+            case KeyDefinitions.CryptoOids.RSA:
                 {
                     if (seqAlgorithmIdentifier.HasData)
                     {
                         seqAlgorithmIdentifier.ReadNull();
                         seqAlgorithmIdentifier.ThrowIfNotEmpty();
                     }
+
                     return CreateRsaPublicKeyParameters(seqSubjectPublicKeyInfo);
                 }
-            case KeyDefinitions.KeyOids.Algorithm.EllipticCurve:
+            case KeyDefinitions.CryptoOids.EC:
                 {
                     string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
                     byte[] bitString = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
                     if (unusedBitCount != 0)
                     {
-                        throw new CryptographicException("Invalid RSA public key encoding");
+                        throw new CryptographicException("Invalid EllipticCurve public key encoding");
                     }
 
                     return CreateEcPublicKeyParameters(oidCurve, bitString);
                 }
-            case KeyDefinitions.KeyOids.Algorithm.X25519:
+            case KeyDefinitions.CryptoOids.X25519:
                 {
                     byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
                     if (unusedBitCount != 0)
                     {
-                        throw new CryptographicException("Invalid RSA public key encoding");
+                        throw new CryptographicException("Invalid X25519 public key encoding");
                     }
 
-                    var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.X25519, OidType.AlgorithmOid);
-                    return new ECX25519PublicKeyParameters(encodedKey, subjectPublicKey, keyDefinition);
+                    return Curve25519PublicKeyParameters.CreateFromValue(subjectPublicKey, KeyType.X25519);
                 }
-            case KeyDefinitions.KeyOids.Algorithm.Ed25519:
+            case KeyDefinitions.CryptoOids.Ed25519:
                 {
                     byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
                     if (unusedBitCount != 0)
                     {
-                        throw new CryptographicException("Invalid RSA public key encoding");
+                        throw new CryptographicException("Invalid Ed25519 public key encoding");
                     }
-                    
-                    var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.Ed25519, OidType.AlgorithmOid);
-                    return new EDsaPublicKeyParameters(encodedKey, subjectPublicKey, keyDefinition);
+
+                    return Curve25519PublicKeyParameters.CreateFromValue(subjectPublicKey, KeyType.Ed25519);
                 }
         }
 
@@ -99,14 +98,14 @@ public class AsnPublicKeyReader
 
         var rsaParameters = new RSAParameters
             { Modulus = modulus, Exponent = exponent };
-        
+
         return new RSAPublicKeyParameters(rsaParameters);
     }
 
     private static ECPublicKeyParameters CreateEcPublicKeyParameters(string oidCurve, byte[] bitString)
     {
-        if (oidCurve is not (KeyDefinitions.KeyOids.Curve.P256 or KeyDefinitions.KeyOids.Curve.P384
-            or KeyDefinitions.KeyOids.Curve.P521))
+        if (oidCurve is not (KeyDefinitions.CryptoOids.P256 or KeyDefinitions.CryptoOids.P384
+            or KeyDefinitions.CryptoOids.P521))
         {
             throw new NotSupportedException(
                 string.Format(
@@ -149,11 +148,11 @@ public class AsnPublicKeyReader
     {
         switch (oidCurve)
         {
-            case KeyDefinitions.KeyOids.Curve.P256:
+            case KeyDefinitions.CryptoOids.P256:
                 return ECCurve.NamedCurves.nistP256;
-            case KeyDefinitions.KeyOids.Curve.P384:
+            case KeyDefinitions.CryptoOids.P384:
                 return ECCurve.NamedCurves.nistP384;
-            case KeyDefinitions.KeyOids.Curve.P521:
+            case KeyDefinitions.CryptoOids.P521:
                 return ECCurve.NamedCurves.nistP521;
             default:
                 throw new NotSupportedException($"Curve OID {oidCurve} is not supported");
@@ -162,7 +161,7 @@ public class AsnPublicKeyReader
 
     private static int GetCoordinateSizeFromCurve(string oidCurve)
     {
-        var keyDef = KeyDefinitions.GetByOid(oidCurve, OidType.CurveOid);
+        var keyDef = KeyDefinitions.GetByOid(oidCurve);
         return keyDef.LengthInBytes;
     }
 

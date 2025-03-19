@@ -75,7 +75,7 @@ namespace Yubico.YubiKey.Piv
             Memory<byte> yubiKeyEncodedKey,
             Memory<byte> encodedKey,
             PivAlgorithm algorithm,
-            KeyDefinitions.KeyDefinition keyDefinition)
+            KeyDefinition keyDefinition)
         {
             _publicPoint = publicPoint;
             EncodedKey = encodedKey;
@@ -109,19 +109,19 @@ namespace Yubico.YubiKey.Piv
 
         public static PivCurve25519PublicKey CreateFromPublicKey(IPublicKeyParameters keyParameters)
         {
-            var keyDefinition = keyParameters.GetKeyDefinition();
+            var keyDefinition = keyParameters.KeyDefinition;
             var keyType = keyDefinition.KeyType;
             var algorithm = keyType.GetPivAlgorithm();
 
             return EncodeAndCreate(
-                keyParameters.GetPublicPoint().Span, algorithm,
+                keyParameters.PublicPoint.Span, algorithm,
                 keyParameters.ExportSubjectPublicKeyInfo(), 
                 keyDefinition);
         }
 
         public static PivCurve25519PublicKey CreateFromPublicPoint(
             ReadOnlyMemory<byte> publicPoint,
-            KeyDefinitions.KeyType keyType)
+            KeyType keyType)
         {
             var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
             var algorithm = keyType.GetPivAlgorithm();
@@ -187,7 +187,7 @@ namespace Yubico.YubiKey.Piv
             ReadOnlySpan<byte> publicPoint,
             PivAlgorithm algorithm,
             ReadOnlyMemory<byte> encodedKey,
-            KeyDefinitions.KeyDefinition keyDefinition)
+            KeyDefinition keyDefinition)
         {
             var tlvWriter = new TlvWriter();
             using (tlvWriter.WriteNestedTlv(PublicKeyTag))

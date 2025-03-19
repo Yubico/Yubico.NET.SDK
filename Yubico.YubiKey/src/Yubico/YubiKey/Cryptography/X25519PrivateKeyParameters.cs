@@ -16,27 +16,28 @@ using System;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class ECX25519PublicKeyParameters : IPublicKeyParameters
+public class X25519PrivateKeyParameters : IPrivateKeyParameters
 {
-    private readonly KeyDefinitions.KeyDefinition _keyDefinition;
-    private readonly Memory<byte> _publicPoint;
+    private KeyDefinition _keyDefinition { get; }
+    private readonly Memory<byte> _privateKeyData;
     private readonly Memory<byte> _encodedKey;
 
-    public ECX25519PublicKeyParameters(
+    public X25519PrivateKeyParameters(
         ReadOnlyMemory<byte> encodedKey,
-        ReadOnlyMemory<byte> publicPoint,
-        KeyDefinitions.KeyDefinition keyDefinition)
+        ReadOnlyMemory<byte> privateKeyData,
+        KeyDefinition keyDefinition)
     {
         _keyDefinition = keyDefinition;
-        _publicPoint = new byte[publicPoint.Length];
+        _privateKeyData = new byte[privateKeyData.Length];
         _encodedKey = new byte[encodedKey.Length];
 
-        publicPoint.CopyTo(_publicPoint);
+        privateKeyData.CopyTo(_privateKeyData);
         encodedKey.CopyTo(_encodedKey);
     }
 
-    public KeyDefinitions.KeyType GetKeyType() => _keyDefinition.KeyType;
-    public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => _encodedKey;
-    public KeyDefinitions.KeyDefinition GetKeyDefinition() => _keyDefinition;
-    public ReadOnlyMemory<byte> GetPublicPoint() => _publicPoint;
+    public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => _encodedKey;
+
+    public KeyDefinition KeyDefinition => _keyDefinition;
+    public KeyType KeyType => _keyDefinition.KeyType;
+    public ReadOnlyMemory<byte> PrivateKey => _privateKeyData;
 }

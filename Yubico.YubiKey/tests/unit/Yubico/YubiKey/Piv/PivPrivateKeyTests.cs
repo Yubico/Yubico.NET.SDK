@@ -64,13 +64,13 @@ namespace Yubico.YubiKey.Piv
                 case PivAlgorithm.EccEd25519:
                     privateKeyParameters =
                         Curve25519PrivateKeyParameters.CreateFromValue(testKey.GetPrivateKey(),
-                            KeyDefinitions.KeyType.Ed25519);
+                            KeyType.Ed25519);
                     Assert.IsAssignableFrom<Curve25519PrivateKeyParameters>(privateKeyParameters);
                     break;
                 case PivAlgorithm.EccX25519:
                     privateKeyParameters =
                         Curve25519PrivateKeyParameters.CreateFromValue(testKey.GetPrivateKey(),
-                            KeyDefinitions.KeyType.X25519);
+                            KeyType.X25519);
                     Assert.IsAssignableFrom<Curve25519PrivateKeyParameters>(privateKeyParameters);
                     break;
                 default:
@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Piv
             Assert.Equal(algorithm, pivPrivateKey.Algorithm);
             var testKeyInfo = AsnPrivateKeyReader.DecodePkcs8EncodedKey(testKey.EncodedKey);
             var actualInfo = AsnPrivateKeyReader.DecodePkcs8EncodedKey(pivPrivateKey.ExportPkcs8PrivateKey());
-            Assert.Equal(testKeyInfo.GetPrivateKey(), actualInfo.GetPrivateKey());
+            Assert.Equal(testKeyInfo.PrivateKey, actualInfo.PrivateKey);
         }
 
         // [Theory]

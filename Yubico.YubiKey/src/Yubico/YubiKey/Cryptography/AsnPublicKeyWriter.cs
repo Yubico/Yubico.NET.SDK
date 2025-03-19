@@ -29,17 +29,17 @@ public static class AsnPublicKeyWriter
     /// <param name="publicPoint">The public key point as a byte array.</param>
     /// <param name="keyType">The type of the key.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
-    public static byte[] EncodeToSpki(ReadOnlyMemory<byte> publicPoint, KeyDefinitions.KeyType keyType)
+    public static byte[] EncodeToSpki(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
     {
         var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
         int coordinateLength = keyDefinition.LengthInBytes;
         return keyType switch
         {
-            KeyDefinitions.KeyType.P256 => CreateEcEncodedKey(publicPoint, KeyDefinitions.KeyOids.Curve.P256, coordinateLength),
-            KeyDefinitions.KeyType.P384 => CreateEcEncodedKey(publicPoint, KeyDefinitions.KeyOids.Curve.P384, coordinateLength),
-            KeyDefinitions.KeyType.P521 => CreateEcEncodedKey(publicPoint, KeyDefinitions.KeyOids.Curve.P521, coordinateLength),
-            KeyDefinitions.KeyType.X25519 => CreateCurve25519ToSpki(publicPoint, keyType),
-            KeyDefinitions.KeyType.Ed25519 => CreateCurve25519ToSpki(publicPoint, keyType),
+            KeyType.P256 => CreateEcEncodedKey(publicPoint, KeyDefinitions.CryptoOids.P256, coordinateLength),
+            KeyType.P384 => CreateEcEncodedKey(publicPoint, KeyDefinitions.CryptoOids.P384, coordinateLength),
+            KeyType.P521 => CreateEcEncodedKey(publicPoint, KeyDefinitions.CryptoOids.P521, coordinateLength),
+            KeyType.X25519 => CreateCurve25519ToSpki(publicPoint, keyType),
+            KeyType.Ed25519 => CreateCurve25519ToSpki(publicPoint, keyType),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
         };
     }
@@ -83,7 +83,7 @@ public static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.Rsa);
+        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.RSA);
         writer.WriteNull();
         writer.PopSequence();
 
@@ -158,7 +158,7 @@ public static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.EllipticCurve);
+        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.EC);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 
@@ -171,7 +171,7 @@ public static class AsnPublicKeyWriter
         return writer.Encode();
     }
     
-    private static byte[] CreateCurve25519ToSpki(ReadOnlyMemory<byte> publicKey, KeyDefinitions.KeyType keyType)
+    private static byte[] CreateCurve25519ToSpki(ReadOnlyMemory<byte> publicKey, KeyType keyType)
     {
         var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
         if (keyDefinition.AlgorithmOid is null)
@@ -179,8 +179,8 @@ public static class AsnPublicKeyWriter
             throw new ArgumentException("Curve OID is null.");
         }
 
-        if (keyDefinition.AlgorithmOid != KeyDefinitions.KeyOids.Algorithm.X25519 && 
-            keyDefinition.AlgorithmOid != KeyDefinitions.KeyOids.Algorithm.Ed25519)
+        if (keyDefinition.AlgorithmOid != KeyDefinitions.CryptoOids.X25519 && 
+            keyDefinition.AlgorithmOid != KeyDefinitions.CryptoOids.Ed25519)
         {
             throw new ArgumentException("Invalid curve OID."); 
         }
@@ -224,7 +224,7 @@ public static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.Ed25519);
+        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.Ed25519);
         writer.PopSequence();
 
         // Write subject public key as BIT STRING
@@ -251,7 +251,7 @@ public static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.X25519);
+        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.X25519);
         writer.PopSequence();
 
         // Write subject public key as BIT STRING
@@ -287,7 +287,7 @@ public static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.EllipticCurve);
+        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.EC);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 
@@ -335,8 +335,8 @@ public static class PublicKeyParametersExtensions
         {
             RSAPublicKeyParameters rsaParams => AsnPublicKeyWriter.EncodeToSpki(rsaParams.Parameters),
             ECPublicKeyParameters ecParams => AsnPublicKeyWriter.EncodeToSpki(ecParams.Parameters),
-            EDsaPublicKeyParameters edParams => AsnPublicKeyWriter.EncodeToSpki(edParams.GetPublicPoint(), KeyDefinitions.KeyType.Ed25519),
-            ECX25519PublicKeyParameters x25519Params => AsnPublicKeyWriter.EncodeToSpki(x25519Params.GetPublicPoint(), KeyDefinitions.KeyType.X25519),
+            Ed25519PublicKeyParameters edParams => AsnPublicKeyWriter.EncodeToSpki(edParams.PublicPoint, KeyType.Ed25519),
+            X25519PublicKeyParameters x25519Params => AsnPublicKeyWriter.EncodeToSpki(x25519Params.PublicPoint, KeyType.X25519),
             _ => throw new NotSupportedException($"Key type {parameters.GetType().Name} is not supported for encoding.")
         };
     }

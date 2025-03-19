@@ -24,11 +24,11 @@ namespace Yubico.YubiKey.Cryptography;
 public class AsnPublicKeyReaderTests
 {
     [Theory]
-    [InlineData(KeyDefinitions.KeyType.RSA1024)]
-    [InlineData(KeyDefinitions.KeyType.RSA2048)]
-    [InlineData(KeyDefinitions.KeyType.RSA3072)]
-    [InlineData(KeyDefinitions.KeyType.RSA4096)]
-    public void DecodeFromSpki_WithRsaPublicKey_ReturnsCorrectParameters(KeyDefinitions.KeyType keyType)
+    [InlineData(KeyType.RSA1024)]
+    [InlineData(KeyType.RSA2048)]
+    [InlineData(KeyType.RSA3072)]
+    [InlineData(KeyType.RSA4096)]
+    public void DecodeFromSpki_WithRsaPublicKey_ReturnsCorrectParameters(KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(keyType);
@@ -52,10 +52,10 @@ public class AsnPublicKeyReaderTests
     }
 
     [Theory]
-    [InlineData(KeyDefinitions.KeyType.P256)]
-    [InlineData(KeyDefinitions.KeyType.P384)]
-    [InlineData(KeyDefinitions.KeyType.P521)]
-    public void DecodeFromSpki_WithEcPublicKey_ReturnsCorrectParameters(KeyDefinitions.KeyType keyType)
+    [InlineData(KeyType.P256)]
+    [InlineData(KeyType.P384)]
+    [InlineData(KeyType.P521)]
+    public void DecodeFromSpki_WithEcPublicKey_ReturnsCorrectParameters(KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(keyType);
@@ -75,9 +75,9 @@ public class AsnPublicKeyReaderTests
         // Verify curve matches expected
         var expectedCurveName = keyType switch
         {
-            KeyDefinitions.KeyType.P256 => "nistP256",
-            KeyDefinitions.KeyType.P384 => "nistP384",
-            KeyDefinitions.KeyType.P521 => "nistP521",
+            KeyType.P256 => "nistP256",
+            KeyType.P384 => "nistP384",
+            KeyType.P521 => "nistP521",
             _ => throw new ArgumentOutOfRangeException(nameof(keyType))
         };
         
@@ -86,9 +86,9 @@ public class AsnPublicKeyReaderTests
         // Verify coordinate sizes
         var expectedCoordinateSize = keyType switch
         {
-            KeyDefinitions.KeyType.P256 => 32,
-            KeyDefinitions.KeyType.P384 => 48,
-            KeyDefinitions.KeyType.P521 => 66,
+            KeyType.P256 => 32,
+            KeyType.P384 => 48,
+            KeyType.P521 => 66,
             _ => throw new ArgumentOutOfRangeException(nameof(keyType))
         };
         
@@ -101,7 +101,7 @@ public class AsnPublicKeyReaderTests
     public void DecodeFromSpki_WithX25519PublicKey_ReturnsCorrectParameters()
     {
         // Arrange
-        var testKey = TestKeys.GetTestPublicKey(KeyDefinitions.KeyType.X25519);
+        var testKey = TestKeys.GetTestPublicKey(KeyType.X25519);
         var keyBytes = testKey.EncodedKey;
 
         // Act
@@ -109,19 +109,19 @@ public class AsnPublicKeyReaderTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<ECX25519PublicKeyParameters>(result);
+        Assert.IsType<X25519PublicKeyParameters>(result);
         
-        var x25519Params = (ECX25519PublicKeyParameters)result;
+        var x25519Params = (X25519PublicKeyParameters)result;
         Assert.NotNull(x25519Params);
-        Assert.Equal(32, x25519Params.GetPublicPoint().Length);
-        Assert.Equal(KeyDefinitions.KeyOids.Algorithm.X25519, x25519Params.GetKeyDefinition().AlgorithmOid);
+        Assert.Equal(32, x25519Params.PublicPoint.Length);
+        Assert.Equal(KeyDefinitions.CryptoOids.X25519, x25519Params.KeyDefinition.AlgorithmOid);
     }
 
     [Fact]
     public void DecodeFromSpki_WithEd25519PublicKey_ReturnsCorrectParameters()
     {
         // Arrange
-        var testKey = TestKeys.GetTestPublicKey(KeyDefinitions.KeyType.Ed25519);
+        var testKey = TestKeys.GetTestPublicKey(KeyType.Ed25519);
         var keyBytes = testKey.EncodedKey;
 
         // Act
@@ -129,19 +129,19 @@ public class AsnPublicKeyReaderTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<EDsaPublicKeyParameters>(result);
+        Assert.IsType<Ed25519PublicKeyParameters>(result);
         
-        var ed25519Params = (EDsaPublicKeyParameters)result;
+        var ed25519Params = (Ed25519PublicKeyParameters)result;
         Assert.NotNull(ed25519Params);
-        Assert.Equal(32, ed25519Params.GetPublicPoint().Length);
-        Assert.Equal(KeyDefinitions.KeyOids.Algorithm.Ed25519, ed25519Params.GetKeyDefinition().AlgorithmOid);
+        Assert.Equal(32, ed25519Params.PublicPoint.Length);
+        Assert.Equal(KeyDefinitions.CryptoOids.Ed25519, ed25519Params.KeyDefinition.AlgorithmOid);
     }
 
     [Fact]
     public void DecodeFromSpki_WithMultipleRsaKeys_AllKeysAreReadCorrectly()
     {
         // Test with different RSA key sizes to ensure consistent parsing
-        var keySizes = new[] { KeyDefinitions.KeyType.RSA1024, KeyDefinitions.KeyType.RSA2048, KeyDefinitions.KeyType.RSA3072, KeyDefinitions.KeyType.RSA4096 };
+        var keySizes = new[] { KeyType.RSA1024, KeyType.RSA2048, KeyType.RSA3072, KeyType.RSA4096 };
         
         foreach (var keySize in keySizes)
         {
@@ -171,7 +171,7 @@ public class AsnPublicKeyReaderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.Rsa);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.RSA);
                 writer.WriteNull();
             }
             
@@ -195,8 +195,8 @@ public class AsnPublicKeyReaderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.EllipticCurve);
-                writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Curve.P256);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.EC);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.P256);
             }
             
             // Create EC point data with compressed format (0x03) instead of uncompressed (0x04)
@@ -225,7 +225,7 @@ public class AsnPublicKeyReaderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.KeyOids.Algorithm.EllipticCurve);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.EC);
                 // Use secp256k1 (Bitcoin curve) which isn't supported in the implementation
                 writer.WriteObjectIdentifier("1.3.132.0.10");
             }
@@ -273,11 +273,11 @@ public class AsnPublicKeyReaderTests
     }
 
     [Theory]
-    [InlineData(KeyDefinitions.KeyType.RSA2048)]
-    [InlineData(KeyDefinitions.KeyType.P256)]
-    [InlineData(KeyDefinitions.KeyType.Ed25519)]
-    [InlineData(KeyDefinitions.KeyType.X25519)]
-    public void Roundtrip_WithTestKeys_ShouldRetainKeyProperties(KeyDefinitions.KeyType keyType)
+    [InlineData(KeyType.RSA2048)]
+    [InlineData(KeyType.P256)]
+    [InlineData(KeyType.Ed25519)]
+    [InlineData(KeyType.X25519)]
+    public void Roundtrip_WithTestKeys_ShouldRetainKeyProperties(KeyType keyType)
     {
         // Arrange - Get the test key
         var testKey = TestKeys.GetTestPublicKey(keyType);
@@ -291,8 +291,8 @@ public class AsnPublicKeyReaderTests
         {
             RSAPublicKeyParameters rsaParams => AsnPublicKeyWriter.EncodeToSpki(rsaParams.Parameters),
             ECPublicKeyParameters ecParams => AsnPublicKeyWriter.EncodeToSpki(ecParams.Parameters),
-            EDsaPublicKeyParameters edParams => AsnPublicKeyWriter.EncodeToSpki(edParams.GetPublicPoint().ToArray(), KeyDefinitions.KeyType.Ed25519),
-            ECX25519PublicKeyParameters x25519Params => AsnPublicKeyWriter.EncodeToSpki(x25519Params.GetPublicPoint().ToArray(), KeyDefinitions.KeyType.X25519),
+            Ed25519PublicKeyParameters edParams => AsnPublicKeyWriter.EncodeToSpki(edParams.PublicPoint.ToArray(), KeyType.Ed25519),
+            X25519PublicKeyParameters x25519Params => AsnPublicKeyWriter.EncodeToSpki(x25519Params.PublicPoint.ToArray(), KeyType.X25519),
             _ => throw new NotSupportedException($"Unsupported key type: {result.GetType()}")
         };
         
@@ -327,18 +327,18 @@ public class AsnPublicKeyReaderTests
                     Convert.ToBase64String(ecParams2.Parameters.Q.Y!));
                 break;
                 
-            case EDsaPublicKeyParameters edParams1:
-                var edParams2 = (EDsaPublicKeyParameters)result2;
+            case Ed25519PublicKeyParameters edParams1:
+                var edParams2 = (Ed25519PublicKeyParameters)result2;
                 Assert.Equal(
-                    Convert.ToBase64String(edParams1.GetPublicPoint().ToArray()), 
-                    Convert.ToBase64String(edParams2.GetPublicPoint().ToArray()));
+                    Convert.ToBase64String(edParams1.PublicPoint.ToArray()), 
+                    Convert.ToBase64String(edParams2.PublicPoint.ToArray()));
                 break;
                 
-            case ECX25519PublicKeyParameters x25519Params1:
-                var x25519Params2 = (ECX25519PublicKeyParameters)result2;
+            case X25519PublicKeyParameters x25519Params1:
+                var x25519Params2 = (X25519PublicKeyParameters)result2;
                 Assert.Equal(
-                    Convert.ToBase64String(x25519Params1.GetPublicPoint().ToArray()), 
-                    Convert.ToBase64String(x25519Params2.GetPublicPoint().ToArray()));
+                    Convert.ToBase64String(x25519Params1.PublicPoint.ToArray()), 
+                    Convert.ToBase64String(x25519Params2.PublicPoint.ToArray()));
                 break;
         }
     }

@@ -70,8 +70,8 @@ namespace Yubico.YubiKey.Piv
         {
             var keyType = privateValue.Length switch
             {
-                EccP256PrivateKeySize => KeyDefinitions.KeyType.P256,
-                EccP384PrivateKeySize => KeyDefinitions.KeyType.P384,
+                EccP256PrivateKeySize => KeyType.P256,
+                EccP384PrivateKeySize => KeyType.P384,
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
@@ -125,7 +125,7 @@ namespace Yubico.YubiKey.Piv
         private PivEccPrivateKey(
             Memory<byte> privateValue,
             PivAlgorithm algorithm,
-            KeyDefinitions.KeyDefinition keyDefinition,
+            KeyDefinition keyDefinition,
             byte[] pivEncodedKey,
             IPrivateKeyParameters keyParameters)
         {
@@ -182,10 +182,10 @@ namespace Yubico.YubiKey.Piv
 
         public static PivPrivateKey CreateFromPrivateKey(IPrivateKeyParameters keyParameters)
         {
-            var keyDefinition = keyParameters.GetKeyDefinition();
+            var keyDefinition = keyParameters.KeyDefinition;
             var keyType = keyDefinition.KeyType;
             var algorithm = keyType.GetPivAlgorithm();
-            var privateValue = keyParameters.GetPrivateKey();
+            var privateValue = keyParameters.PrivateKey;
             int eccTag = algorithm switch
             {
                 PivAlgorithm.EccEd25519 => EccEd25519Tag,

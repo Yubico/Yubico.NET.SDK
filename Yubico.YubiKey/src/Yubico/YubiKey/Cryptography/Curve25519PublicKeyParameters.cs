@@ -13,30 +13,55 @@
 // limitations under the License.
 
 using System;
+using System.Formats.Asn1;
+using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
 public class Curve25519PublicKeyParameters : IPublicKeyParameters
 {
-    private readonly KeyDefinitions.KeyDefinition _keyDefinition;
+    private KeyDefinition _keyDefinition { get; }
     private readonly Memory<byte> _publicPoint;
-    private readonly Memory<byte> _encodedKey;
 
-    public Curve25519PublicKeyParameters(
-        ReadOnlyMemory<byte> encodedKey,
+    public static Curve25519PublicKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
+    {
+        var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
+        var seqSubjectPublicKeyInfo = reader.ReadSequence();
+        var seqAlgorithmIdentifier = seqSubjectPublicKeyInfo.ReadSequence();
+
+        string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
+
+        byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
+        if (unusedBitCount != 0)
+        {
+            throw new CryptographicException("Invalid X25519 public key encoding");
+        }
+
+        var keyType = KeyDefinitions.GetKeyTypeByOid(oidAlgorithm);
+        return CreateFromValue(subjectPublicKey, keyType);
+    }
+
+    public static Curve25519PublicKeyParameters CreateFromValue(ReadOnlyMemory<byte> publicKey, KeyType keyType)
+    {
+        var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
+        return new Curve25519PublicKeyParameters(publicKey, keyDefinition);
+    }
+
+    private Curve25519PublicKeyParameters(
         ReadOnlyMemory<byte> publicPoint,
-        KeyDefinitions.KeyDefinition keyDefinition)
+        KeyDefinition keyDefinition)
     {
         _keyDefinition = keyDefinition;
         _publicPoint = new byte[publicPoint.Length];
-        _encodedKey = new byte[encodedKey.Length];
 
         publicPoint.CopyTo(_publicPoint);
-        encodedKey.CopyTo(_encodedKey);
     }
 
-    public KeyDefinitions.KeyType GetKeyType() => _keyDefinition.KeyType;
-    public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => _encodedKey;
-    public KeyDefinitions.KeyDefinition GetKeyDefinition() => _keyDefinition;
-    public ReadOnlyMemory<byte> GetPublicPoint() => _publicPoint;
+    public KeyType KeyType => _keyDefinition.KeyType;
+
+    public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() =>
+        AsnPublicKeyWriter.EncodeToSpki(_publicPoint, _keyDefinition.KeyType);
+
+    public KeyDefinition KeyDefinition => _keyDefinition;
+    public ReadOnlyMemory<byte> PublicPoint => _publicPoint;
 }

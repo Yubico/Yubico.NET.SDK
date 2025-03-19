@@ -23,16 +23,16 @@ namespace Yubico.YubiKey.Piv
     public class ImportTests
     {
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(KeyDefinitions.KeyType.RSA1024, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.RSA2048, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.RSA3072, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.P256, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.P384, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.Ed25519, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.X25519, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.X25519, StandardTestDevice.Fw5)]
         public void Import_with_PrivateKeyParameters_Succeeds_and_HasExpectedValues(
-            KeyDefinitions.KeyType keyType,
+            KeyType keyType,
             StandardTestDevice testDeviceType)
         {
             // Arrange
@@ -42,20 +42,20 @@ namespace Yubico.YubiKey.Piv
             IPrivateKeyParameters keyParameters;
             switch (keyType)
             {
-                case KeyDefinitions.KeyType.P256:
-                case KeyDefinitions.KeyType.P384:
-                case KeyDefinitions.KeyType.P521:
+                case KeyType.P256:
+                case KeyType.P384:
+                case KeyType.P521:
                     keyParameters = ECPrivateKeyParameters.CreateFromValue(testPrivateKey.GetPrivateKey(), keyType);
                     break;
-                case KeyDefinitions.KeyType.X25519:
-                case KeyDefinitions.KeyType.Ed25519:
+                case KeyType.X25519:
+                case KeyType.Ed25519:
                     keyParameters =
                         Curve25519PrivateKeyParameters.CreateFromValue(testPrivateKey.GetPrivateKey(), keyType);
                     break;
-                case KeyDefinitions.KeyType.RSA1024:
-                case KeyDefinitions.KeyType.RSA2048:
-                case KeyDefinitions.KeyType.RSA3072:
-                case KeyDefinitions.KeyType.RSA4096:
+                case KeyType.RSA1024:
+                case KeyType.RSA2048:
+                case KeyType.RSA3072:
+                case KeyType.RSA4096:
                     keyParameters =
                         RSAPrivateKeyParameters.CreateFromParameters(testPrivateKey.AsRSA().ExportParameters(true));
                     break;
@@ -83,17 +83,17 @@ namespace Yubico.YubiKey.Piv
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(KeyDefinitions.KeyType.RSA1024, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.RSA2048, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.RSA3072, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.P256, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.P384, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.Ed25519, StandardTestDevice.Fw5)]
-        [InlineData(KeyDefinitions.KeyType.X25519, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.X25519, StandardTestDevice.Fw5)]
         public void
             ImportPrivateKey_with_PivPrivateKey_Succeeds_and_HasExpectedValues( // Works, but replace the parsers with the AsnKeyReader/Writer
-                KeyDefinitions.KeyType keyType,
+                KeyType keyType,
                 StandardTestDevice testDeviceType)
         {
             
@@ -104,20 +104,20 @@ namespace Yubico.YubiKey.Piv
             // PivPrivateKey pivPrivateKey;
             // switch (keyType)
             // {
-            //     case KeyDefinitions.KeyType.P256:
-            //     case KeyDefinitions.KeyType.P384:
-            //     case KeyDefinitions.KeyType.P521:
+            //     case KeyType.P256:
+            //     case KeyType.P384:
+            //     case KeyType.P521:
             //         pivPrivateKey = PivPrivateKey.Create
             //         break;
-            //     case KeyDefinitions.KeyType.X25519:
-            //     case KeyDefinitions.KeyType.Ed25519:
+            //     case KeyType.X25519:
+            //     case KeyType.Ed25519:
             //         pivPrivateKey =
             //             Curve25519PrivateKeyParameters.CreateFromValue(testPrivateKey.GetPrivateKey(), keyType);
             //         break;
-            //     case KeyDefinitions.KeyType.RSA1024:
-            //     case KeyDefinitions.KeyType.RSA2048:
-            //     case KeyDefinitions.KeyType.RSA3072:
-            //     case KeyDefinitions.KeyType.RSA4096:
+            //     case KeyType.RSA1024:
+            //     case KeyType.RSA2048:
+            //     case KeyType.RSA3072:
+            //     case KeyType.RSA4096:
             //         pivPrivateKey =
             //             RSAPrivateKeyParameters.CreateFromParameters(testPrivateKey.AsRSA().ExportParameters(true));
             //         break;

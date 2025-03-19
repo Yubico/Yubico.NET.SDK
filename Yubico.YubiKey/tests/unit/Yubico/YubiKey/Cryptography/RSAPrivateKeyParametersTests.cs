@@ -25,7 +25,7 @@ public class RSAPrivateKeyParametersTests
     public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()
     {
         // Arrange
-        var testKey = TestKeys.GetTestPrivateKey(KeyDefinitions.KeyType.RSA2048);
+        var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
         var pivPrivateKey = testKey.AsPivPrivateKey();
         var pivPrivateKeyEncoded = pivPrivateKey.EncodedPrivateKey;
 

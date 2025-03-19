@@ -619,13 +619,13 @@ namespace Yubico.YubiKey.Piv
                     subjectPublicKeyInfo = ecDsa.ExportSubjectPublicKeyInfo();
                     break;
                 case PivAlgorithm.EccEd25519:
-                    Assert.IsAssignableFrom<EDsaPublicKeyParameters>(publicKeyParameters);
-                    subjectPublicKeyInfo = ((EDsaPublicKeyParameters)publicKeyParameters).ExportSubjectPublicKeyInfo()
+                    Assert.IsAssignableFrom<Ed25519PublicKeyParameters>(publicKeyParameters);
+                    subjectPublicKeyInfo = ((Ed25519PublicKeyParameters)publicKeyParameters).ExportSubjectPublicKeyInfo()
                         .ToArray();
                     break;
                 case PivAlgorithm.EccX25519:
-                    Assert.IsAssignableFrom<ECX25519PublicKeyParameters>(publicKeyParameters);
-                    subjectPublicKeyInfo = ((ECX25519PublicKeyParameters)publicKeyParameters)
+                    Assert.IsAssignableFrom<X25519PublicKeyParameters>(publicKeyParameters);
+                    subjectPublicKeyInfo = ((X25519PublicKeyParameters)publicKeyParameters)
                         .ExportSubjectPublicKeyInfo().ToArray();
                     break;
                 default:

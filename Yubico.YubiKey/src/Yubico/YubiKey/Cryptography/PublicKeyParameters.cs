@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Cryptography;
 public abstract class PublicKeyParameters : IPublicKeyParameters
 {
     public abstract ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo();
-    public abstract ReadOnlyMemory<byte> GetPublicPoint();
-    public abstract KeyDefinitions.KeyDefinition GetKeyDefinition();
-    public abstract KeyDefinitions.KeyType GetKeyType();
+    public abstract ReadOnlyMemory<byte> PublicPoint { get; }
+    public abstract KeyDefinition KeyDefinition { get; }
+    public abstract KeyType KeyType { get; }
 }

@@ -14,7 +14,7 @@ namespace Yubico.YubiKey.Cryptography
         public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()
         {
             // Arrange
-            var testKey = TestKeys.GetTestPrivateKey(KeyDefinitions.KeyType.P256);
+            var testKey = TestKeys.GetTestPrivateKey(KeyType.P256);
             var pivPrivateKey = testKey.AsPivPrivateKey();
             var pivPrivateKeyEncoded = pivPrivateKey.EncodedPrivateKey;
 
@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.Cryptography
 
             // Act
             var privateKeyParams =
-                ECPrivateKeyParameters.CreateFromValue(parameters.D!, KeyDefinitions.KeyType.P256);
+                ECPrivateKeyParameters.CreateFromValue(parameters.D!, KeyType.P256);
 
             // Assert
             Assert.NotNull(privateKeyParams.Parameters.D);

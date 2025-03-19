@@ -13,29 +13,31 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class RSAPublicKeyParameters : RSAKeyParameters, IPublicKeyParameters
+public class Ed25519PublicKeyParameters : IPublicKeyParameters
 {
     private KeyDefinition _keyDefinition { get; }
-    private readonly ReadOnlyMemory<byte> _encodedKey;
+    private readonly Memory<byte> _publicPoint;
+    private readonly Memory<byte> _encodedKey;
 
-    public RSAPublicKeyParameters(RSAParameters parameters)
+    public Ed25519PublicKeyParameters(
+        ReadOnlyMemory<byte> encodedKey,
+        ReadOnlyMemory<byte> publicPoint,
+        KeyDefinition keyDefinition)
     {
-        Parameters = parameters.DeepCopy();
-        _keyDefinition = KeyDefinitions.GetByRSALength(parameters.Modulus.Length * 8);
-        _encodedKey = AsnPublicKeyWriter.EncodeToSpki(parameters);
+        _keyDefinition = keyDefinition;
+        _publicPoint = new byte[publicPoint.Length];
+        _encodedKey = new byte[encodedKey.Length];
+
+        publicPoint.CopyTo(_publicPoint);
+        encodedKey.CopyTo(_encodedKey);
     }
 
-    public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => _encodedKey;
-
-    public ReadOnlyMemory<byte> PublicPoint =>
-        throw new NotSupportedException("Not supported for RSA keys. Use Parameters instead for RSA keys.");
-
-    public KeyDefinition KeyDefinition => _keyDefinition;
     public KeyType KeyType => _keyDefinition.KeyType;
+    public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => _encodedKey;
+    public KeyDefinition KeyDefinition => _keyDefinition;
 
-    public static RSAPublicKeyParameters CreateFromParameters(RSAParameters rsaParameters) => new(rsaParameters);
+    public ReadOnlyMemory<byte> PublicPoint => _publicPoint;
 }

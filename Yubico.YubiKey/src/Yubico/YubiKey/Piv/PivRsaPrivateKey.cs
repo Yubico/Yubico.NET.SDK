@@ -136,10 +136,10 @@ namespace Yubico.YubiKey.Piv
         {
             var keyType = primeP.Length switch
             {
-                Rsa1024CrtBlockSize => KeyDefinitions.KeyType.RSA1024,
-                Rsa2048CrtBlockSize => KeyDefinitions.KeyType.RSA2048,
-                Rsa3072CrtBlockSize => KeyDefinitions.KeyType.RSA3072,
-                Rsa4096CrtBlockSize => KeyDefinitions.KeyType.RSA4096,
+                Rsa1024CrtBlockSize => KeyType.RSA1024,
+                Rsa2048CrtBlockSize => KeyType.RSA2048,
+                Rsa3072CrtBlockSize => KeyType.RSA3072,
+                Rsa4096CrtBlockSize => KeyType.RSA4096,
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,

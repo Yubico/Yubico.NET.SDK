@@ -11,16 +11,16 @@ namespace Yubico.YubiKey.Cryptography
         public void GetByKeyType_ValidTypes_ReturnsCorrectDefinitions()
         {
             // Act & Assert
-            Assert.Equal(KeyDefinitions.P256, KeyDefinitions.GetByKeyType(KeyDefinitions.KeyType.P256));
-            Assert.Equal(KeyDefinitions.RSA2048, KeyDefinitions.GetByKeyType(KeyDefinitions.KeyType.RSA2048));
-            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByKeyType(KeyDefinitions.KeyType.Ed25519));
+            Assert.Equal(KeyDefinitions.P256, KeyDefinitions.GetByKeyType(KeyType.P256));
+            Assert.Equal(KeyDefinitions.RSA2048, KeyDefinitions.GetByKeyType(KeyType.RSA2048));
+            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByKeyType(KeyType.Ed25519));
         }
 
         [Fact]
         public void GetByKeyType_InvalidType_ThrowsException()
         {
             // Arrange
-            var invalidType = (KeyDefinitions.KeyType)999;
+            var invalidType = (KeyType)999;
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => KeyDefinitions.GetByKeyType(invalidType));
@@ -48,8 +48,8 @@ namespace Yubico.YubiKey.Cryptography
         public void GetByOid_ValidOids_ReturnsCorrectDefinitions()
         {
             // Act & Assert
-            Assert.Equal(KeyDefinitions.P256, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.P256, OidType.CurveOid));
-            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.Ed25519, OidType.AlgorithmOid));
+            Assert.Equal(KeyDefinitions.P256, KeyDefinitions.GetByOid(KeyDefinitions.CryptoOids.P256));
+            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByOid(KeyDefinitions.CryptoOids.Ed25519));
         }
 
 
@@ -57,22 +57,22 @@ namespace Yubico.YubiKey.Cryptography
         public void GetByOid_P521_ReturnsCorrectDefinitions()
         {
             // Act & Assert
-            Assert.Equal(KeyDefinitions.P521, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.P521, OidType.CurveOid));
-            Assert.Equal(66, KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Curve.P521, OidType.CurveOid).LengthInBytes);
+            Assert.Equal(KeyDefinitions.P521, KeyDefinitions.GetByOid(KeyDefinitions.CryptoOids.P521));
+            Assert.Equal(66, KeyDefinitions.GetByOid(KeyDefinitions.CryptoOids.P521).LengthInBytes);
         }
 
         [Fact]
         public void GetByOid_RsaOid_ThrowsNotSupportedException()
         {
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.Rsa, OidType.AlgorithmOid));
+            Assert.Throws<NotSupportedException>(() => KeyDefinitions.GetByOid(KeyDefinitions.CryptoOids.RSA));
         }
 
         [Fact]
         public void GetByOid_InvalidOid_ThrowsNotSupportedException()
         {
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => KeyDefinitions.GetByOid("1.2.3.4.5", OidType.CurveOid));
+            Assert.Throws<NotSupportedException>(() => KeyDefinitions.GetByOid("1.2.3.4.5"));
         }
 
         [Fact]

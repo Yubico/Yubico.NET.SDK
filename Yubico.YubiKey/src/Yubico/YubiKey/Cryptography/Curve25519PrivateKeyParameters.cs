@@ -20,23 +20,8 @@ namespace Yubico.YubiKey.Cryptography;
 
 public class Curve25519PrivateKeyParameters : IPrivateKeyParameters
 {
-    private readonly KeyDefinitions.KeyDefinition _keyDefinition;
-    private readonly Memory<byte> _privateKeyData;
-    private readonly Memory<byte> _encodedKey;
-
-    private Curve25519PrivateKeyParameters(
-        ReadOnlyMemory<byte> encodedKey,
-        ReadOnlyMemory<byte> privateKeyData,
-        KeyDefinitions.KeyDefinition keyDefinition)
-    {
-        _keyDefinition = keyDefinition;
-        _privateKeyData = new byte[privateKeyData.Length];
-        _encodedKey = new byte[encodedKey.Length];
-
-        privateKeyData.CopyTo(_privateKeyData);
-        encodedKey.CopyTo(_encodedKey);
-    }
-    
+    private KeyDefinition _keyDefinition { get; }
+    private readonly Memory<byte> _privateKey;
     public static Curve25519PrivateKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
     {
         var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
@@ -49,43 +34,70 @@ public class Curve25519PrivateKeyParameters : IPrivateKeyParameters
         }
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
-        
+
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if(oidAlgorithm != KeyDefinitions.KeyOids.Algorithm.X25519 && oidAlgorithm != KeyDefinitions.KeyOids.Algorithm.Ed25519)
+        if (oidAlgorithm != KeyDefinitions.CryptoOids.X25519 &&
+            oidAlgorithm != KeyDefinitions.CryptoOids.Ed25519)
         {
-            throw new ArgumentException("Invalid curve OID. Must be: " + KeyDefinitions.KeyOids.Algorithm.X25519 + " or " + KeyDefinitions.KeyOids.Algorithm.Ed25519);
+            throw new ArgumentException(
+                "Invalid curve OID. Must be: " + KeyDefinitions.CryptoOids.X25519 + " or " +
+                KeyDefinitions.CryptoOids.Ed25519);
         }
-        
+
         var seqPrivateKey = new AsnReader(seqPrivateKeyInfo.ReadOctetString(), AsnEncodingRules.DER);
         var tag = seqPrivateKey.PeekTag();
         if (tag.TagValue != 4 || tag.TagClass != TagClass.Universal)
         {
             throw new CryptographicException("Invalid Curve25519 private key");
         }
-        // TOdo optionaly verify clamping and structure of X25519 or Ed25519 key
-        
-        byte[] privateKeyData = seqPrivateKey.ReadOctetString();
+
+        // Verify clamping and structure of X25519 or Ed25519 key
+
+        byte[] privateKey = seqPrivateKey.ReadOctetString();
         seqPrivateKeyInfo.ThrowIfNotEmpty();
-        if (privateKeyData.Length != 32)
+        if (privateKey.Length != 32)
         {
             throw new CryptographicException("Invalid Curve25519 private key: incorrect length");
         }
-        
-        var keyDefinition = KeyDefinitions.GetByOid(oidAlgorithm, OidType.AlgorithmOid);
-        return new Curve25519PrivateKeyParameters(encodedKey, privateKeyData, keyDefinition);
-    }
 
-    public static Curve25519PrivateKeyParameters CreateFromValue(ReadOnlyMemory<byte> privateKey, KeyDefinitions.KeyType keyType)
+        var keyDefinition = KeyDefinitions.GetByOid(oidAlgorithm);
+        return new Curve25519PrivateKeyParameters(privateKey, keyDefinition);
+
+    }
+    public static Curve25519PrivateKeyParameters CreateFromValue(ReadOnlyMemory<byte> privateKey, KeyType keyType)
     {
         var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
-        byte[] encodedPkcs8 = AsnPrivateKeyWriter.EncodeToPkcs8(privateKey, keyType);
-        return new Curve25519PrivateKeyParameters(encodedPkcs8, privateKey, keyDefinition);
+        return new Curve25519PrivateKeyParameters(privateKey, keyDefinition);
+    }
+
+    private static void VerifyX25519(ReadOnlyMemory<byte> x25519privateKey)
+    {
+        // Verify X25519 bit clamping requirements per RFC 7748
+        if ((x25519privateKey.Span[0] & 0b111) != 0 ||  // Check that the 3 least significant bits are 0
+            (x25519privateKey.Span[31] & 0b_10000000) != 0 || // Check most significant bit is 0
+            (x25519privateKey.Span[31] & 0b_1000000) != 0b_1000000) // Check second-most significant bit is 1
+        {
+            throw new CryptographicException("Invalid X25519 private key: improper bit clamping");
+        }
     }
     
-    public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => _encodedKey;
+    private Curve25519PrivateKeyParameters(
+        ReadOnlyMemory<byte> privateKey,
+        KeyDefinition keyDefinition)
+    {
+        if (keyDefinition.AlgorithmOid == KeyDefinitions.CryptoOids.X25519)
+        {
+            VerifyX25519(privateKey);
+        }
 
-    public KeyDefinitions.KeyDefinition GetKeyDefinition() => _keyDefinition;
-    public KeyDefinitions.KeyType GetKeyType() => _keyDefinition.KeyType;
+        _privateKey = new byte[privateKey.Length];
+        _keyDefinition = keyDefinition;
 
-    public ReadOnlyMemory<byte> GetPrivateKey() => _privateKeyData;
+        privateKey.CopyTo(_privateKey);
+    }
+
+    public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(_privateKey, KeyType);
+    public KeyDefinition KeyDefinition => _keyDefinition;
+    public KeyType KeyType => _keyDefinition.KeyType;
+    public ReadOnlyMemory<byte> PrivateKey => _privateKey;
 }

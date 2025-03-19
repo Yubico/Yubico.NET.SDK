@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Piv
         public PivAlgorithm Algorithm { get; protected set; }
 
         public IPublicKeyParameters KeyParameters { get; protected set; } = null!;
-        protected KeyDefinitions.KeyDefinition KeyDefinition { get; set; } = new();
+        protected KeyDefinition KeyDefinition { get; set; } = new();
         protected Memory<byte> PivEncodedKey { get; set; }
         protected Memory<byte> YubiKeyEncodedKey { get; set; }
         protected Memory<byte> EncodedKey { get; set; }
@@ -123,8 +123,8 @@ namespace Yubico.YubiKey.Piv
             {
                 RSAPublicKeyParameters rsaKey => PivRsaPublicKey.CreateFromPublicKey(rsaKey),
                 ECPublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
-                EDsaPublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
-                ECX25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
+                Ed25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
+                X25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
                 _ => throw new ArgumentException("Invalid key type", nameof(keyParameters))
             };
         }
@@ -183,9 +183,9 @@ namespace Yubico.YubiKey.Piv
                     ExceptionMessages.InvalidPublicKeyData));
         }
         
-        public KeyDefinitions.KeyDefinition GetKeyDefinition() => KeyDefinition;
+        public KeyDefinition GetKeyDefinition() => KeyDefinition;
 
-        public KeyDefinitions.KeyType GetKeyType() => KeyDefinition.KeyType;
+        public KeyType GetKeyType() => KeyDefinition.KeyType;
 
         public ReadOnlyMemory<byte> GetPublicPoint() => PublicPoint;
 

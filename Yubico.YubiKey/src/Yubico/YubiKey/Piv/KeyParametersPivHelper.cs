@@ -180,7 +180,7 @@ public static class KeyParametersPivHelper
         int coordinateLength = publicKeyData.Length / 2;
         var keyDefinition = KeyDefinitions
             .GetEcKeyDefinitions()
-            .Where(kd => kd.AlgorithmOid == KeyDefinitions.KeyOids.Algorithm.EllipticCurve)
+            .Where(kd => kd.AlgorithmOid == KeyDefinitions.CryptoOids.EC)
             .Single(kd => kd.LengthInBytes == coordinateLength);
 
         byte[]? x = publicPointData.Span.Slice(1, keyDefinition.LengthInBytes).ToArray();
@@ -201,15 +201,15 @@ public static class KeyParametersPivHelper
             switch (tlv.Tag)
             {
                 case PivPrivateKey.EccTag:
-                    List<KeyDefinitions.KeyDefinition> allowed =
+                    List<KeyDefinition> allowed =
                         [KeyDefinitions.P256, KeyDefinitions.P384, KeyDefinitions.P521];
 
                     var keyDefinition = allowed.Single(kd => kd.LengthInBytes == tlv.Value.Span.Length);
                     return ECPrivateKeyParameters.CreateFromValue(tlv.Value.Span.ToArray(), keyDefinition.KeyType);
                 case PivPrivateKey.EccEd25519Tag:
-                    return ECPrivateKeyParameters.CreateFromValue(tlv.Value.ToArray(), KeyDefinitions.KeyType.Ed25519);
+                    return ECPrivateKeyParameters.CreateFromValue(tlv.Value.ToArray(), KeyType.Ed25519);
                 case PivPrivateKey.EccX25519Tag:
-                    return ECPrivateKeyParameters.CreateFromValue(tlv.Value.ToArray(), KeyDefinitions.KeyType.X25519);
+                    return ECPrivateKeyParameters.CreateFromValue(tlv.Value.ToArray(), KeyType.X25519);
             }
         }
 

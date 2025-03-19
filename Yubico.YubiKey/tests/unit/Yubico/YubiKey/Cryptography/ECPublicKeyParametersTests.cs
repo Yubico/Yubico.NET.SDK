@@ -10,10 +10,10 @@ namespace Yubico.YubiKey.Cryptography
     {
         
         [Theory]
-        [InlineData(KeyDefinitions.KeyType.P256)]
-        [InlineData(KeyDefinitions.KeyType.P384)]
-        [InlineData(KeyDefinitions.KeyType.P521)]
-        public void CreateFromPivEncoding_WithValidParameters_CreatesInstance(KeyDefinitions.KeyType keyType)
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.P521)]
+        public void CreateFromPivEncoding_WithValidParameters_CreatesInstance(KeyType keyType)
         {
             // Arrange
             var testKey = TestKeys.GetTestPublicKey(keyType);
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Cryptography
         //
         //     // Act
         //     var publicKeyParams =
-        //         ECPublicKeyParameters.CreateFromValue(parameters.D!, KeyDefinitions.KeyType.P256);
+        //         ECPublicKeyParameters.CreateFromValue(parameters.D!, KeyType.P256);
         //
         //     // Assert
         //     Assert.NotNull(publicKeyParams.Parameters.D);
@@ -135,24 +135,24 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Fact]
-        public void GetBytes_ReturnsCorrectFormat()
+        public void PublicPoint_ReturnsCorrectFormat()
         {
             // Arrange
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
             var publicKeyParams = new ECPublicKeyParameters(ecdsa);
 
             // Act
-            var bytes = publicKeyParams.GetBytes();
+            var publicPoint = publicKeyParams.PublicPoint;
 
             // Assert
             Assert.NotNull(publicKeyParams.Parameters.Q.X);
             Assert.NotNull(publicKeyParams.Parameters.Q.Y);
-            Assert.Equal(1 + publicKeyParams.Parameters.Q.X.Length + publicKeyParams.Parameters.Q.Y.Length, bytes.Length);
-            Assert.Equal(0x04, bytes.Span[0]); // Check format identifier
+            Assert.Equal(1 + publicKeyParams.Parameters.Q.X.Length + publicKeyParams.Parameters.Q.Y.Length, publicPoint.Length);
+            Assert.Equal(0x04, publicPoint.Span[0]); // Check format identifier
 
             // Verify X and Y coordinates are correctly copied
-            var xCoord = bytes.Slice(1, publicKeyParams.Parameters.Q.X.Length);
-            var yCoord = bytes.Slice(1 + publicKeyParams.Parameters.Q.X.Length);
+            var xCoord = publicPoint.Slice(1, publicKeyParams.Parameters.Q.X.Length);
+            var yCoord = publicPoint.Slice(1 + publicKeyParams.Parameters.Q.X.Length);
 
             Assert.True(xCoord.Span.SequenceEqual(publicKeyParams.Parameters.Q.X));
             Assert.True(yCoord.Span.SequenceEqual(publicKeyParams.Parameters.Q.Y));

@@ -36,7 +36,7 @@ public class AsnPrivateKeyReader
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
 
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != KeyDefinitions.KeyOids.Algorithm.EllipticCurve)
+        if (oidAlgorithm != KeyDefinitions.CryptoOids.EC)
         {
             throw new NotSupportedException(
                 string.Format(
@@ -46,9 +46,9 @@ public class AsnPrivateKeyReader
 
         string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
         if (oidCurve is not (
-            KeyDefinitions.KeyOids.Curve.P256 or
-            KeyDefinitions.KeyOids.Curve.P384 or
-            KeyDefinitions.KeyOids.Curve.P521))
+            KeyDefinitions.CryptoOids.P256 or
+            KeyDefinitions.CryptoOids.P384 or
+            KeyDefinitions.CryptoOids.P521))
         {
             throw new NotSupportedException(
                 string.Format(
@@ -74,7 +74,7 @@ public class AsnPrivateKeyReader
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
 
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != KeyDefinitions.KeyOids.Algorithm.Rsa)
+        if (oidAlgorithm != KeyDefinitions.CryptoOids.RSA)
         {
             throw new NotSupportedException(
                 string.Format(
@@ -102,7 +102,7 @@ public class AsnPrivateKeyReader
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
         switch (oidAlgorithm)
         {
-            case KeyDefinitions.KeyOids.Algorithm.Rsa:
+            case KeyDefinitions.CryptoOids.RSA:
                 {
                     if (seqAlgorithmIdentifier.HasData)
                     {
@@ -113,12 +113,12 @@ public class AsnPrivateKeyReader
                     var rsaParameters= CreateRsaPrivateKeyParameters(seqPrivateKeyInfo);
                     return new RSAPrivateKeyParameters(rsaParameters);
                 }
-            case KeyDefinitions.KeyOids.Algorithm.EllipticCurve:
+            case KeyDefinitions.CryptoOids.EC:
                 {
                     string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
 
-                    if (oidCurve is not (KeyDefinitions.KeyOids.Curve.P256 or KeyDefinitions.KeyOids.Curve.P384
-                        or KeyDefinitions.KeyOids.Curve.P521))
+                    if (oidCurve is not (KeyDefinitions.CryptoOids.P256 or KeyDefinitions.CryptoOids.P384
+                        or KeyDefinitions.CryptoOids.P521))
                     {
                         throw new NotSupportedException(
                             string.Format(
@@ -130,16 +130,16 @@ public class AsnPrivateKeyReader
                     return new ECPrivateKeyParameters(ecParams);
                 }
 
-            // case KeyDefinitions.KeyOids.Algorithm.X25519:
+            // case KeyDefinitions.KeyOids.X25519:
             //     {
             //         return CreateX25519PrivateKeyParameters(seqPrivateKeyInfo, encodedKey);
             //     }
-            // case KeyDefinitions.KeyOids.Algorithm.Ed25519:
+            // case KeyDefinitions.KeyOids.Ed25519:
             //     {
             //         return CreateEd25519PrivateKeyParameters(seqPrivateKeyInfo, encodedKey);
             //     }
-            case KeyDefinitions.KeyOids.Algorithm.X25519:
-            case KeyDefinitions.KeyOids.Algorithm.Ed25519:
+            case KeyDefinitions.CryptoOids.X25519:
+            case KeyDefinitions.CryptoOids.Ed25519:
                 {
                     return Curve25519PrivateKeyParameters.CreateFromPkcs8(encodedKey);
                 }
@@ -293,7 +293,7 @@ public class AsnPrivateKeyReader
     //         throw new CryptographicException("Invalid X25519 private key: incorrect length");
     //     }
     //
-    //     var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.X25519, OidType.AlgorithmId);
+    //     var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.X25519, OidType.AlgorithmId);
     //     return new ECX25519PrivateKeyParameters(encodedKey, privateKeyData, keyDefinition);
     // }
 
@@ -314,7 +314,7 @@ public class AsnPrivateKeyReader
     //         throw new CryptographicException("Invalid Ed25519 private key: incorrect length");
     //     }
     //
-    //     var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Algorithm.Ed25519, OidType.AlgorithmId);
+    //     var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Ed25519, OidType.AlgorithmId);
     //     return new EDsaPrivateKeyParameters(encodedKey, privateKeyData, keyDefinition);
     // }
 
@@ -322,11 +322,11 @@ public class AsnPrivateKeyReader
     {
         switch (oidCurve)
         {
-            case KeyDefinitions.KeyOids.Curve.P256:
+            case KeyDefinitions.CryptoOids.P256:
                 return ECCurve.NamedCurves.nistP256;
-            case KeyDefinitions.KeyOids.Curve.P384:
+            case KeyDefinitions.CryptoOids.P384:
                 return ECCurve.NamedCurves.nistP384;
-            case KeyDefinitions.KeyOids.Curve.P521:
+            case KeyDefinitions.CryptoOids.P521:
                 return ECCurve.NamedCurves.nistP521;
             default:
                 throw new NotSupportedException($"Curve OID {oidCurve} is not supported");
@@ -335,7 +335,7 @@ public class AsnPrivateKeyReader
 
     private static int GetCoordinateSizeFromCurve(string oidCurve)
     {
-        var keyDef = KeyDefinitions.GetByOid(oidCurve, OidType.CurveOid);
+        var keyDef = KeyDefinitions.GetByOid(oidCurve);
         return keyDef.LengthInBytes;
     }
 
@@ -350,59 +350,4 @@ public class AsnPrivateKeyReader
 
         return data;
     }
-}
-
-public class ECX25519PrivateKeyParameters : IPrivateKeyParameters
-{
-    private readonly KeyDefinitions.KeyDefinition _keyDefinition;
-    private readonly Memory<byte> _privateKeyData;
-    private readonly Memory<byte> _encodedKey;
-
-    public ECX25519PrivateKeyParameters(
-        ReadOnlyMemory<byte> encodedKey,
-        ReadOnlyMemory<byte> privateKeyData,
-        KeyDefinitions.KeyDefinition keyDefinition)
-    {
-        _keyDefinition = keyDefinition;
-        _privateKeyData = new byte[privateKeyData.Length];
-        _encodedKey = new byte[encodedKey.Length];
-
-        privateKeyData.CopyTo(_privateKeyData);
-        encodedKey.CopyTo(_encodedKey);
-    }
-
-    public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => _encodedKey;
-
-    public KeyDefinitions.KeyDefinition GetKeyDefinition() => _keyDefinition;
-    public KeyDefinitions.KeyType GetKeyType() => _keyDefinition.KeyType;
-
-    public ReadOnlyMemory<byte> GetPrivateKey() => _privateKeyData;
-}
-
-public class EDsaPrivateKeyParameters : IPrivateKeyParameters
-{
-    private readonly KeyDefinitions.KeyDefinition _keyDefinition;
-    private readonly Memory<byte> _privateKeyData;
-    private readonly Memory<byte> _encodedKey;
-
-    public EDsaPrivateKeyParameters(
-        ReadOnlyMemory<byte> encodedKey,
-        ReadOnlyMemory<byte> privateKeyData,
-        KeyDefinitions.KeyDefinition keyDefinition)
-    {
-        _keyDefinition = keyDefinition;
-        _privateKeyData = new byte[privateKeyData.Length];
-        _encodedKey = new byte[encodedKey.Length];
-
-        privateKeyData.CopyTo(_privateKeyData);
-        encodedKey.CopyTo(_encodedKey);
-    }
-
-    public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => _encodedKey;
-
-    public KeyDefinitions.KeyDefinition GetKeyDefinition() => _keyDefinition;
-    public KeyDefinitions.KeyType GetKeyType() => _keyDefinition.KeyType;
-
-    public ReadOnlyMemory<byte> GetPrivateKey() => _privateKeyData;
-    
 }

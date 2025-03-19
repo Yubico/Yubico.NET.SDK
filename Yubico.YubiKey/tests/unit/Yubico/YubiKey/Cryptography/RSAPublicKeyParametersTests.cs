@@ -13,7 +13,7 @@ namespace Yubico.YubiKey.Cryptography
         public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()
         {
             // Arrange
-            var testKey = TestKeys.GetTestPublicKey(KeyDefinitions.KeyType.RSA2048);
+            var testKey = TestKeys.GetTestPublicKey(KeyType.RSA2048);
             var pivPublicKey = testKey.AsPivPublicKey();
             var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
 
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Cryptography
         public void GetBytes_ReturnsCorrectFormat()
         {
             // Arrange
-            var testPublicKey = TestKeys.GetTestPublicKey(KeyDefinitions.KeyType.RSA2048);
+            var testPublicKey = TestKeys.GetTestPublicKey(KeyType.RSA2048);
             var parameters = testPublicKey.AsRSA().ExportParameters(false);
             
             // Act

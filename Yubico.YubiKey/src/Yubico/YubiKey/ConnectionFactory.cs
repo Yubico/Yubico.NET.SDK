@@ -154,7 +154,7 @@ namespace Yubico.YubiKey
                 ? TimeSpan.FromMilliseconds(100)
                 : TimeSpan.FromSeconds(3.01);
 
-            // Skip waiting if the transport is already active or was previously None
+            // We're only affected by the reclaim timeout if we're switching USB transports.
             if (_device.LastActiveTransport == newTransport)
             {
                 _log.LogDebug(

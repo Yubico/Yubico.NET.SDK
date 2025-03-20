@@ -155,12 +155,11 @@ namespace Yubico.YubiKey
                 : TimeSpan.FromSeconds(3.01);
 
             // Skip waiting if the transport is already active or was previously None
-            if (_device.LastActiveTransport == newTransport || _device.LastActiveTransport == Transport.None)
+            if (_device.LastActiveTransport == newTransport)
             {
                 _log.LogDebug(
                     "{Transport} transport is already active. No need to wait for reclaim.",
                     _device.LastActiveTransport);
-                _device.LastActiveTransport = newTransport;
                 return;
             }
 

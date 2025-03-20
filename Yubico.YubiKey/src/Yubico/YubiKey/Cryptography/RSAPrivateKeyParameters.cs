@@ -23,8 +23,15 @@ public class RSAPrivateKeyParameters : RSAKeyParameters, IPrivateKeyParameters
 
     public RSAPrivateKeyParameters(RSAParameters parameters)
     {
-        Parameters = parameters.DeepCopy();
-        _keyDefinition = KeyDefinitions.GetByRSALength(parameters.DP.Length * 8 * 2);
+        // Get the key length from the CRT component before normalization
+        // This uses Chinese Remainder Theorem (CRT) components which is what the YubiKey uses
+        int keyLengthBits = parameters.DP?.Length * 8 * 2 ?? 0;
+        
+        // Apply normalization for cross-platform compatibility
+        Parameters = parameters.NormalizeParameters();
+        
+        // Use the original key length from CRT component for key definition
+        _keyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits);
     }
 
     // public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(parameters);

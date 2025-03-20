@@ -87,13 +87,14 @@ namespace Yubico.YubiKey.Cryptography
         {
             foreach (var keyDef in (KeyDefinition[]) [RSA1024, RSA2048, RSA3072, RSA4096])
             {
-                if (keySizeBits.Equals(keyDef.LengthInBits))
+                // Allow small variations in key size
+                if (keySizeBits == keyDef.LengthInBits || Math.Abs(keySizeBits - keyDef.LengthInBits) <= 1)
                 {
                     return keyDef;
                 }
             }
 
-            throw new NotSupportedException("Unsupported RSA length");
+            throw new NotSupportedException($"Unsupported RSA length: {keySizeBits}");
         }
 
         /// <summary>

@@ -199,7 +199,8 @@ public class AsnPrivateKeyReader
             InverseQ = inverseQ
         };
 
-        return rsaParameters;
+        // Apply normalization for cross-platform compatibility
+        return rsaParameters.NormalizeParameters();
     }
 
     private static ECParameters CreateEcPrivateKeyParameters(AsnReader seqPrivateKeyInfo, string oidCurve)

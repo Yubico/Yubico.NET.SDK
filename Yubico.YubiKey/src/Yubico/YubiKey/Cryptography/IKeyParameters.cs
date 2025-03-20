@@ -24,7 +24,7 @@ public interface IKeyParameters
 
 public interface IPublicKeyParameters : IKeyParameters
 {
-    public ReadOnlyMemory<byte> PublicPoint { get; }
+    public ReadOnlyMemory<byte> PublicPoint { get; } // TODO Only valid for EC? Perhaps remove, and keep only exportPublicKeyInfo
     public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo();
 }
 

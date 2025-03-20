@@ -36,7 +36,7 @@ public class AsnPrivateKeyReader
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
 
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != KeyDefinitions.CryptoOids.EC)
+        if (oidAlgorithm != KeyDefinitions.CryptoOids.ECDSA)
         {
             throw new NotSupportedException(
                 string.Format(
@@ -113,7 +113,7 @@ public class AsnPrivateKeyReader
                     var rsaParameters= CreateRsaPrivateKeyParameters(seqPrivateKeyInfo);
                     return new RSAPrivateKeyParameters(rsaParameters);
                 }
-            case KeyDefinitions.CryptoOids.EC:
+            case KeyDefinitions.CryptoOids.ECDSA:
                 {
                     string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
 

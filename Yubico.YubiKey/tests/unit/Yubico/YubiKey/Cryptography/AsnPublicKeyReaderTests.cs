@@ -195,7 +195,7 @@ public class AsnPublicKeyReaderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.EC);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.ECDSA);
                 writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.P256);
             }
             
@@ -225,7 +225,7 @@ public class AsnPublicKeyReaderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.EC);
+                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.ECDSA);
                 // Use secp256k1 (Bitcoin curve) which isn't supported in the implementation
                 writer.WriteObjectIdentifier("1.3.132.0.10");
             }

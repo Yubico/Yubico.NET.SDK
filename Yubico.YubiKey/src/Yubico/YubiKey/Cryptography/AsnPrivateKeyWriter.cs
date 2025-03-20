@@ -200,7 +200,7 @@ public static class AsnPrivateKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.EC);
+        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.ECDSA);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 

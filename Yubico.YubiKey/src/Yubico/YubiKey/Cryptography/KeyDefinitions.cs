@@ -197,7 +197,7 @@ namespace Yubico.YubiKey.Cryptography
             /// <summary>
             /// Represents the general Elliptic Curve public key algorithm OID (ANSI X9.62)
             /// </summary>
-            public const string EC = "1.2.840.10045.2.1";
+            public const string ECDSA = "1.2.840.10045.2.1";
 
             /// <summary>
             /// Represents the OID for X25519 (Curve25519) used for key exchange
@@ -256,9 +256,9 @@ namespace Yubico.YubiKey.Cryptography
                     KeyType.RSA3072 => (RSA, null),
                     KeyType.RSA4096 => (RSA, null),
 
-                    KeyType.P256 => (EC, P256),
-                    KeyType.P384 => (EC, P384),
-                    KeyType.P521 => (EC, P521),
+                    KeyType.P256 => (EC: ECDSA, P256),
+                    KeyType.P384 => (EC: ECDSA, P384),
+                    KeyType.P521 => (EC: ECDSA, P521),
 
                     KeyType.X25519 => (X25519, null),
                     KeyType.Ed25519 => (Ed25519, null),
@@ -281,7 +281,7 @@ namespace Yubico.YubiKey.Cryptography
             KeyType = KeyType.P256,
             LengthInBytes = 32,
             LengthInBits = 256,
-            AlgorithmOid = CryptoOids.EC,
+            AlgorithmOid = CryptoOids.ECDSA,
             CurveOid = CryptoOids.P256,
             IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition
@@ -300,7 +300,7 @@ namespace Yubico.YubiKey.Cryptography
             KeyType = KeyType.P384,
             LengthInBytes = 48,
             LengthInBits = 384,
-            AlgorithmOid = CryptoOids.EC,
+            AlgorithmOid = CryptoOids.ECDSA,
             CurveOid = CryptoOids.P384,
             IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition
@@ -319,7 +319,7 @@ namespace Yubico.YubiKey.Cryptography
             KeyType = KeyType.P521,
             LengthInBytes = 66,
             LengthInBits = 521,
-            AlgorithmOid = CryptoOids.EC,
+            AlgorithmOid = CryptoOids.ECDSA,
             CurveOid = CryptoOids.P521,
             IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition

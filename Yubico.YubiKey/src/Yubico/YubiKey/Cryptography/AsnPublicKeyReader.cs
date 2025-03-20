@@ -40,7 +40,7 @@ public class AsnPublicKeyReader
 
                     return CreateRsaPublicKeyParameters(seqSubjectPublicKeyInfo);
                 }
-            case KeyDefinitions.CryptoOids.EC:
+            case KeyDefinitions.CryptoOids.ECDSA:
                 {
                     string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
                     byte[] bitString = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);

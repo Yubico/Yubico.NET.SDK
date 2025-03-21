@@ -69,9 +69,9 @@ namespace Yubico.YubiKey.Cryptography
             ReadOnlyMemory<byte> privateValue,
             KeyType keyType)
         {
-            if (keyType != Cryptography.KeyType.P256 &&
-                keyType != Cryptography.KeyType.P384 &&
-                keyType != Cryptography.KeyType.P521)
+            if (keyType != KeyType.P256 &&
+                keyType != KeyType.P384 &&
+                keyType != KeyType.P521)
             {
                 throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null);
             }

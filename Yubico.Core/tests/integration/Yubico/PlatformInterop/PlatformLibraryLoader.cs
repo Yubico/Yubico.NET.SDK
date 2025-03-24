@@ -43,7 +43,7 @@ namespace Yubico.PlatformInterop
                 }
 
                 // Free the library handle since we only wanted to check if it could be loaded
-                FreeLibrary(handle);
+                FreeLibraryHandles(handle);
 
                 return (true, $"Successfully loaded library: {libraryName}");
             }
@@ -92,7 +92,7 @@ namespace Yubico.PlatformInterop
             throw new PlatformNotSupportedException("Current OS is not supported");
         }
 
-        private static bool FreeLibrary(
+        private static bool FreeLibraryHandles(
             IntPtr handle)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -115,9 +115,10 @@ namespace Yubico.PlatformInterop
         private static extern IntPtr LoadLibraryW(
             [MarshalAs(UnmanagedType.LPWStr)] string lpFileName);
 
+        
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool FreeLibraryWin(
+        private static extern bool FreeLibrary(
             IntPtr hModule);
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -137,7 +138,7 @@ namespace Yubico.PlatformInterop
             string libraryName) => LoadLibraryW(libraryName);
 
         private static bool WindowsFreeLibrary(
-            IntPtr handle) => FreeLibraryWin(handle);
+            IntPtr handle) => FreeLibrary(handle);
 
         // Constants for FormatMessage
         private const uint FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000;

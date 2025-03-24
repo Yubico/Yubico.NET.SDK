@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Pipelines
 
                 responseApdu = _pipeline.Invoke(partialApdu, commandType, responseType);
 
-                // Stop sending data when the YubiKey response is 0x67 (when the chained data
+                // Stop sending data when the YubiKey response is 0x6700 (when the chained data
                 // sent exceeds the max allowed length) and let caller handle the response
                 if (responseApdu.SW != SWConstants.WrongLength)
                 {

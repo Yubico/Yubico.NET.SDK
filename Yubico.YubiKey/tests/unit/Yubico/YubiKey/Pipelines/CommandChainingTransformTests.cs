@@ -148,7 +148,7 @@ namespace Yubico.YubiKey.Pipelines
 
             // Arrange
             var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object) { MaxSize = 4 };
+            var transform = new CommandChainingTransform(mockTransform.Object) { MaxChunkSize = 4 };
             var commandApdu = new CommandApdu { Data = Enumerable.Repeat<byte>(0xFF, 16).ToArray() };
 
             _ = mockTransform
@@ -169,7 +169,7 @@ namespace Yubico.YubiKey.Pipelines
 
             // Arrange
             var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object) { MaxSize = 4 };
+            var transform = new CommandChainingTransform(mockTransform.Object) { MaxChunkSize = 4 };
             var commandApdu = new CommandApdu
             {
                 Ins = 1,
@@ -201,7 +201,7 @@ namespace Yubico.YubiKey.Pipelines
 
             // Arrange
             var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object) { MaxSize = 4 };
+            var transform = new CommandChainingTransform(mockTransform.Object) { MaxChunkSize = 4 };
             var commandApdu = new CommandApdu
             {
                 Data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }

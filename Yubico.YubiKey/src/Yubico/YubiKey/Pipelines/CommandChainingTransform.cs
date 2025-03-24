@@ -13,7 +13,10 @@
 // limitations under the License.
 
 using System;
+using System.Globalization;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Pipelines
 {
@@ -23,7 +26,9 @@ namespace Yubico.YubiKey.Pipelines
     /// </summary>
     internal class CommandChainingTransform : IApduTransform
     {
-        public int MaxSize { get; internal set; } = 255;
+        private readonly ILogger _log = Log.GetLogger<CommandChainingTransform>();
+
+        public int MaxChunkSize { get; internal set; } = 255;
 
         readonly IApduTransform _pipeline;
 
@@ -41,33 +46,51 @@ namespace Yubico.YubiKey.Pipelines
                 throw new ArgumentNullException(nameof(command));
             }
 
-            if (command.Data.IsEmpty || command.Data.Length <= MaxSize)
+            // Send regular short APDU
+            int commandDataSize = command.Data.Length;
+            if (commandDataSize <= MaxChunkSize)
             {
+                _log.LogDebug("Sending short APDU");
                 return _pipeline.Invoke(command, commandType, responseType);
             }
 
+            // Send chained short APDU
             var sourceData = command.Data;
             ResponseApdu? responseApdu = null;
-
+            _log.LogDebug("APDU size exceeds size of short APDU, proceeding to send data in chunks instead");
             while (!sourceData.IsEmpty)
             {
-                int length = Math.Min(MaxSize, sourceData.Length);
-                var data = sourceData.Slice(0, length);
-                sourceData = sourceData.Slice(length);
+                int chunkLength = Math.Min(MaxChunkSize, sourceData.Length);
+                var dataChunk = sourceData[..chunkLength];
+                sourceData = sourceData[chunkLength..];
 
                 var partialApdu = new CommandApdu
                 {
-                    Cla = (byte)(command.Cla | (sourceData.IsEmpty ? 0 : 0x10)),
+                    Cla = (byte)(command.Cla | (sourceData.IsEmpty
+                        ? 0
+                        : 0x10)),
                     Ins = command.Ins,
                     P1 = command.P1,
                     P2 = command.P2,
-                    Data = data
+                    Data = dataChunk
                 };
 
                 responseApdu = _pipeline.Invoke(partialApdu, commandType, responseType);
+
+                // Stop sending data when the YubiKey response is 0x67 (when the chained data
+                // sent exceeds the max allowed length) and let caller handle the response
+                if (responseApdu.SW != SWConstants.WrongLength)
+                {
+                    continue;
+                }
+
+                _log.LogWarning("Sent data exceeds max allowed length by YubiKey. (SW: 0x{StatusWord})",
+                    responseApdu.SW.ToString("X4", CultureInfo.InvariantCulture));
+                
+                return responseApdu;
             }
 
-            return responseApdu!; // Covered by Debug.Assert above.
+            return responseApdu!;
         }
 
         public void Setup() => _pipeline.Setup();

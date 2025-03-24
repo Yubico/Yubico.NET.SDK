@@ -34,8 +34,9 @@ namespace Yubico.YubiKey
         private readonly byte[]? _applicationId;
         private readonly ISmartCardConnection _smartCardConnection;
         private IApduTransform _apduPipeline;
-        private bool _disposedValue;
 
+        private bool _disposedValue;
+        private bool IsOath => GetIsAuth();
         public ISelectApplicationData? SelectApplicationData { get; set; }
 
         /// <summary>
@@ -47,7 +48,7 @@ namespace Yubico.YubiKey
         public SmartCardConnection(
             ISmartCardDevice smartCardDevice,
             YubiKeyApplication yubiKeyApplication)
-            : this(smartCardDevice, yubiKeyApplication, null)
+            : this(smartCardDevice, yubiKeyApplication, (byte[]?)null)
         {
             if (yubiKeyApplication == YubiKeyApplication.Fido2)
             {
@@ -69,10 +70,7 @@ namespace Yubico.YubiKey
         public SmartCardConnection(
             ISmartCardDevice smartCardDevice,
             byte[] applicationId)
-            : this(
-                smartCardDevice,
-                YubiKeyApplication.Unknown,
-                applicationId)
+            : this(smartCardDevice, YubiKeyApplication.Unknown, applicationId)
         {
             if (applicationId.SequenceEqual(YubiKeyApplication.Fido2.GetIso7816ApplicationId()))
             {
@@ -111,9 +109,34 @@ namespace Yubico.YubiKey
 
             _smartCardConnection = smartCardDevice.Connect();
 
-            _apduPipeline = new SmartCardTransform(_smartCardConnection);
+            // Set up the pipeline
+            _apduPipeline =new SmartCardTransform(_smartCardConnection);
             _apduPipeline = AddResponseChainingTransform(_apduPipeline);
             _apduPipeline = new CommandChainingTransform(_apduPipeline);
+        }
+
+        public virtual TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
+            where TResponse : IYubiKeyResponse
+        {
+            using var _ = _smartCardConnection.BeginTransaction(out bool cardWasReset);
+            if (cardWasReset)
+            {
+                SelectApplication();
+            }
+
+            var responseApdu = _apduPipeline.Invoke(
+                yubiKeyCommand.CreateCommandApdu(),
+                yubiKeyCommand.GetType(),
+                typeof(TResponse));
+
+            return yubiKeyCommand.CreateResponseForApdu(responseApdu);
+        }
+        
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         // Allow subclasses to build a different pipeline, which means they need
@@ -133,12 +156,19 @@ namespace Yubico.YubiKey
             SelectApplication();
         }
 
-        // The application is set to Oath by enum or by application id
-        private bool IsOath =>
-            _yubiKeyApplication == YubiKeyApplication.Oath ||
-            (_applicationId != null &&
-            _applicationId.SequenceEqual(
-                YubiKeyApplication.Oath.GetIso7816ApplicationId()));
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _apduPipeline.Cleanup();
+                    _smartCardConnection.Dispose();
+                }
+
+                _disposedValue = true;
+            }
+        }
 
         private IApduTransform AddResponseChainingTransform(IApduTransform pipeline) =>
             IsOath
@@ -170,9 +200,9 @@ namespace Yubico.YubiKey
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.SmartCardPipelineSetupFailed,
                         responseApdu.SW))
-                {
-                    SW = responseApdu.SW
-                };
+                    {
+                        SW = responseApdu.SW
+                    };
             }
 
             // Set the instance property SelectApplicationData
@@ -180,45 +210,10 @@ namespace Yubico.YubiKey
             SelectApplicationData = response.GetData();
         }
 
-        public virtual TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
-            where TResponse : IYubiKeyResponse
-        {
-            using (var _ = _smartCardConnection.BeginTransaction(out bool cardWasReset))
-            {
-                if (cardWasReset)
-                {
-                    SelectApplication();
-                }
-
-                var responseApdu = _apduPipeline.Invoke(
-                    yubiKeyCommand.CreateCommandApdu(),
-                    yubiKeyCommand.GetType(),
-                    typeof(TResponse)
-                    );
-
-                return yubiKeyCommand.CreateResponseForApdu(responseApdu);
-            }
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    _apduPipeline.Cleanup();
-                    _smartCardConnection.Dispose();
-                }
-
-                _disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
+        private bool GetIsAuth() =>
+            _yubiKeyApplication == YubiKeyApplication.Oath ||
+            (_applicationId != null &&
+            _applicationId.SequenceEqual(
+                YubiKeyApplication.Oath.GetIso7816ApplicationId()));
     }
 }

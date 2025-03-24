@@ -15,7 +15,7 @@
 using System;
 using Xunit;
 
-namespace Yubico.Core.Iso7816.UnitTests
+namespace Yubico.Core.Iso7816
 {
     public class ResponseApduTests
     {

@@ -16,7 +16,7 @@ using System;
 using System.Security.Cryptography;
 using Xunit;
 
-namespace Yubico.Core.Tlv.UnitTests
+namespace Yubico.Core.Tlv
 {
     public class TlvTryTests
     {

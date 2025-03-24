@@ -19,7 +19,7 @@ using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Yubico.Core.Tlv.UnitTests
+namespace Yubico.Core.Tlv
 {
     public class TlvWriterTests
     {

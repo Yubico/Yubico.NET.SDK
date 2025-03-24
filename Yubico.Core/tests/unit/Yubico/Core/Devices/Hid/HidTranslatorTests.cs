@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Xunit;
 
-namespace Yubico.Core.Devices.Hid.UnitTests
+namespace Yubico.Core.Devices.Hid
 {
     public class HidTranslatorTests
     {

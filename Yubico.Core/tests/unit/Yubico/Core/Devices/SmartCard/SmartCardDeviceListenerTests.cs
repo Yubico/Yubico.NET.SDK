@@ -16,7 +16,7 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.Core.Devices.SmartCard.UnitTests
+namespace Yubico.Core.Devices.SmartCard
 {
     class FakeSmartCardDevice : ISmartCardDevice
     {

@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Yubico.Core.Iso7816.UnitTests
+namespace Yubico.Core.Iso7816
 {
     public class CommandApduTests
     {

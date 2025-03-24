@@ -20,16 +20,11 @@ on:
 
 jobs:
   test:
-    name: Ubuntu .NET ${{ matrix.framework }}
+    name: Ubuntu
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: read
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        framework: ['net8.0', 'net6.0']
       
     steps:
       - uses: actions/checkout@v4
@@ -45,16 +40,16 @@ jobs:
           sudo apt-get update && sudo apt-get install pcscd -yq
           sudo ln -s /usr/lib/x86_64-linux-gnu/libudev.so.1 /usr/lib/libudev.so
 
-      - name: Test Yubico.Core Unit Tests
-        run: dotnet test Yubico.Core/tests/unit/Yubico.Core.UnitTests.csproj -f ${{ matrix.framework }} --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
-
-      - name: Test Yubico.Core Integration Tests
-        run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj -f ${{ matrix.framework }} --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
-
       - name: Test Yubico.YubiKey
-        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj -f ${{ matrix.framework }} --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
+        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
+  
+      - name: Test Yubico.Core
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj            --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
+      
+      - name: Test Yubico.Core Integration Tests
+        run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 
-      - name: Upload Test Results
+      - name: Upload Test Result Files
         uses: actions/upload-artifact@v4
         with:
           name: TestResults-Ubuntu

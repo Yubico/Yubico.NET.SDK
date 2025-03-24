@@ -20,16 +20,11 @@ on:
 
 jobs:
   test:
-    name: Windows .NET ${{ matrix.framework }}
+    name: Windows
     runs-on: windows-latest
     permissions:
       packages: read
       contents: read
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        framework: ['net8.0', 'net6.0', 'net47']
       
     steps:
       - uses: actions/checkout@v4
@@ -40,16 +35,19 @@ jobs:
       - name: Add local NuGet repository
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
  
-      - name: Test Yubico.Core Unit Tests
-        run: dotnet test Yubico.Core/tests/unit/Yubico.Core.UnitTests.csproj -f ${{ matrix.framework }} --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
+      - name: Test Yubico.YubiKey
+        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
+  
+      - name: Test Yubico.Core
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj            --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
 
       - name: Test Yubico.Core Integration Tests
-        run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj -f ${{ matrix.framework }} --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
+        run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 
-      - name: Test Yubico.YubiKey
-        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj -f ${{ matrix.framework }} --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
+      - name: Test Yubico.Core Integration Tests (NET47)
+        run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj -f net47  --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 
-      - name: Upload Test Results
+      - name: Upload Test Result Files
         uses: actions/upload-artifact@v4
         with:
           name: TestResults-Windows

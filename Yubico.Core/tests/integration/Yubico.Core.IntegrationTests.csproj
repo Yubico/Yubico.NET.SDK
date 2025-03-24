@@ -1,0 +1,45 @@
+<!-- Copyright 2024 Yubico AB
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Yubico.Core.IntegrationTests</AssemblyName>
+    <RootNamespace></RootNamespace>
+    <PackageId>Yubico.Core.IntegrationTests</PackageId>
+
+    <TargetFrameworks>net8.0;net6.0;net47</TargetFrameworks>
+    <AnalysisMode>Minimum</AnalysisMode>
+    <!-- StrongName signing -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
+    <ProjectReference Include="..\..\src\Yubico.Core.csproj" />
+    <PackageReference Include="coverlet.collector" Version="6.0.2" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="xunit" Version="2.4.1" Condition="'$(TargetFramework)' == 'net47'" />
+    <PackageReference Include="xunit" Version="2.8.1" Condition="'$(TargetFramework)' != 'net47'" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" Condition="'$(TargetFramework)' == 'net47'" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1" Condition="'$(TargetFramework)' != 'net47'" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

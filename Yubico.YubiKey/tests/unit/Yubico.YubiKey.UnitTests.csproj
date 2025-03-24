@@ -19,7 +19,7 @@ limitations under the License. -->
     <PackageId>Yubico.YubiKey.UnitTests</PackageId>
     <RootNamespace></RootNamespace>
 
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
 
     <AnalysisMode>AllDisabledByDefault</AnalysisMode>
 
@@ -28,6 +28,11 @@ limitations under the License. -->
          be strong named, since it uses InternalsVisibleTo. -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  
+  <!-- Suppress TFM support build warnings for the net6.0 target -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <ItemGroup>

@@ -48,7 +48,8 @@ namespace Yubico.YubiKey.TestUtilities
         // constructor, it likely won't be very useful. Use the static method
         // GetRandomObject instead, and you can get an instance of
         // RandomNumberGenerator, which is much more useful.
-        public RandomObjectUtility(byte[] bytesToReturn)
+        public RandomObjectUtility(
+            byte[] bytesToReturn)
         {
             _offset = 0;
 
@@ -71,7 +72,8 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Fill the given buffer with random bytes. That is, generate data.Length
         // random bytes, placing them into data.
-        public void GetBytes(byte[] data)
+        public void GetBytes(
+            byte[] data)
         {
             ArgumentNullException.ThrowIfNull(data);
 
@@ -80,11 +82,28 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Generate count random bytes, placing them into data beginning at
         // offset.
-        public void GetBytes(byte[] data, int offset, int count)
+        public void GetBytes(
+            byte[] data,
+            int offset,
+            int count)
         {
             ArgumentNullException.ThrowIfNull(data);
+
+#if NET8_0_OR_GREATER
             ArgumentOutOfRangeException.ThrowIfNegative(offset);
             ArgumentOutOfRangeException.ThrowIfNegative(count);
+#else
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
+#endif
+
 
             if (offset + count > data.Length)
             {
@@ -163,7 +182,8 @@ namespace Yubico.YubiKey.TestUtilities
         // If you get a Mock RNG, you can call other methods, such as GetInt32 or
         // GetNonZeroBytes, however, the behavior will likely be inappropriate.
         // If you need more methods overridden, add them to the Mock Setup.
-        public static RandomNumberGenerator GetRandomObject(byte[]? fixedBytes)
+        public static RandomNumberGenerator GetRandomObject(
+            byte[]? fixedBytes)
         {
             if (fixedBytes is null)
             {
@@ -178,7 +198,10 @@ namespace Yubico.YubiKey.TestUtilities
             _ = mock.Setup(rand => rand.GetBytes(It.IsAny<byte[]>()))
                 .Callback<byte[]>(randomBytes => redirect.GetBytes(randomBytes));
             _ = mock.Setup(rand => rand.GetBytes(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()))
-                .Callback<byte[], int, int>((randomBytes, offset, count) => redirect.GetBytes(randomBytes, offset, count));
+                .Callback<byte[], int, int>((
+                    randomBytes,
+                    offset,
+                    count) => redirect.GetBytes(randomBytes, offset, count));
 
             return mock.Object;
         }
@@ -200,7 +223,8 @@ namespace Yubico.YubiKey.TestUtilities
         //   {
         //       replacement.RestoreRandomProvider();
         //   }
-        public static RandomObjectUtility SetRandomProviderFixedBytes(byte[] fixedBytes)
+        public static RandomObjectUtility SetRandomProviderFixedBytes(
+            byte[] fixedBytes)
         {
             ArgumentNullException.ThrowIfNull(fixedBytes);
             var randomUtility = new RandomObjectUtility(fixedBytes);

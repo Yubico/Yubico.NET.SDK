@@ -31,6 +31,9 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: "./global.json"
+          dotnet-version: | 
+            6.0.x
+            8.0.x
 
       - name: Add local NuGet repository
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
@@ -44,7 +47,7 @@ jobs:
         run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
   
       - name: Test Yubico.Core
-        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj            --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
+        run: dotnet test Yubico.Core/tests/unit/Yubico.Core.UnitTests.csproj            --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
       
       - name: Test Yubico.Core Integration Tests
         run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"

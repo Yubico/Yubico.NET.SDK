@@ -51,8 +51,11 @@ jobs:
       - name: Test Yubico.Core
         run: dotnet test Yubico.Core/tests/unit/Yubico.Core.UnitTests.csproj            --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
 
-      - name: Test Yubico.Core Integration Tests
-        run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
+      - name: Test Yubico.Core Integration tests (NET6)
+        run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj -f net6.0 --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
+
+      - name: Test Yubico.Core Integration tests (NET8)
+        run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj -f net8.0 --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 
       - name: Upload Test Result Files
         uses: actions/upload-artifact@v4

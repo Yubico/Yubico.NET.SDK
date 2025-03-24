@@ -70,7 +70,12 @@ namespace Yubico.Core.Cryptography
 
             IAesGcmPrimitives aesObj = AesGcmPrimitives.Create();
             aesObj.EncryptAndAuthenticate(keyData, nonce, plaintext, ciphertext, tag, associatedData);
+#if NET6_0
+            var aesGcm = new AesGcm(keyData);
+#else
             var aesGcm = new AesGcm(keyData, tag.Length);
+#endif
+
             aesGcm.Encrypt(nonce, plaintext, ciphertextS, tagS, associatedData);
 
             bool isValid = ciphertextS.AsSpan().SequenceEqual(ciphertext.AsSpan());

@@ -153,7 +153,7 @@ namespace Yubico.YubiKey.Pipelines
 
             _ = mockTransform
                 .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
-                .Returns(new ResponseApdu([], 0x90))
+                .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
                 .Callback<CommandApdu, Type, Type>((a, b, c) => observedCla.Add(a.Cla));
 
             // Act
@@ -181,7 +181,7 @@ namespace Yubico.YubiKey.Pipelines
 
             _ = mockTransform
                 .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
-                .Returns(new ResponseApdu([], 0x90))
+                .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
                 .Callback<CommandApdu, Type, Type>((a, b, c) => observedApdus.Add(a));
 
             // Act
@@ -211,7 +211,7 @@ namespace Yubico.YubiKey.Pipelines
 
             _ = mockTransform
                 .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
-                .Returns(new ResponseApdu([], 0x90))
+                .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
                 .Callback<CommandApdu, Type, Type>((a, b, c) => observedApdus.Add(a.Data.ToArray()));
 
             // Act

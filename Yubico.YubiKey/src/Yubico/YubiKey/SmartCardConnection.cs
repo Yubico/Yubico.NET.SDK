@@ -34,9 +34,8 @@ namespace Yubico.YubiKey
         private readonly byte[]? _applicationId;
         private readonly ISmartCardConnection _smartCardConnection;
         private IApduTransform _apduPipeline;
-
         private bool _disposedValue;
-        private bool IsOath => GetIsAuth();
+        private bool IsOath => GetIsOauth();
         public ISelectApplicationData? SelectApplicationData { get; set; }
 
         /// <summary>
@@ -48,7 +47,7 @@ namespace Yubico.YubiKey
         public SmartCardConnection(
             ISmartCardDevice smartCardDevice,
             YubiKeyApplication yubiKeyApplication)
-            : this(smartCardDevice, yubiKeyApplication, (byte[]?)null)
+            : this(smartCardDevice, yubiKeyApplication, null)
         {
             if (yubiKeyApplication == YubiKeyApplication.Fido2)
             {
@@ -110,7 +109,7 @@ namespace Yubico.YubiKey
             _smartCardConnection = smartCardDevice.Connect();
 
             // Set up the pipeline
-            _apduPipeline =new SmartCardTransform(_smartCardConnection);
+            _apduPipeline = new SmartCardTransform(_smartCardConnection);
             _apduPipeline = AddResponseChainingTransform(_apduPipeline);
             _apduPipeline = new CommandChainingTransform(_apduPipeline);
         }
@@ -210,7 +209,7 @@ namespace Yubico.YubiKey
             SelectApplicationData = response.GetData();
         }
 
-        private bool GetIsAuth() =>
+        private bool GetIsOauth() =>
             _yubiKeyApplication == YubiKeyApplication.Oath ||
             (_applicationId != null &&
             _applicationId.SequenceEqual(

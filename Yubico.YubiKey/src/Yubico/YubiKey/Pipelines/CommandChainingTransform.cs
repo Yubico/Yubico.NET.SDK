@@ -38,6 +38,7 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         public void Cleanup() => _pipeline.Cleanup();
+        public void Setup() => _pipeline.Setup();
 
         public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
         {
@@ -46,7 +47,7 @@ namespace Yubico.YubiKey.Pipelines
                 throw new ArgumentNullException(nameof(command));
             }
 
-            // Send regular short APDU
+            // Send single short APDU
             int commandDataSize = command.Data.Length;
             if (commandDataSize <= MaxChunkSize)
             {
@@ -54,45 +55,69 @@ namespace Yubico.YubiKey.Pipelines
                 return _pipeline.Invoke(command, commandType, responseType);
             }
 
-            // Send chained short APDU
-            var sourceData = command.Data;
-            ResponseApdu? responseApdu = null;
+            // Send a series of short APDU's
             _log.LogDebug("APDU size exceeds size of short APDU, proceeding to send data in chunks instead");
+            return SendChainedApdu(command, commandType, responseType);
+        }
+
+        private ResponseApdu SendChainedApdu(CommandApdu command, Type commandType, Type responseType)
+        {
+            ResponseApdu? responseApdu = null;
+            var sourceData = command.Data;
             while (!sourceData.IsEmpty)
             {
-                int chunkLength = Math.Min(MaxChunkSize, sourceData.Length);
-                var dataChunk = sourceData[..chunkLength];
-                sourceData = sourceData[chunkLength..];
-
-                var partialApdu = new CommandApdu
-                {
-                    Cla = (byte)(command.Cla | (sourceData.IsEmpty
-                        ? 0
-                        : 0x10)),
-                    Ins = command.Ins,
-                    P1 = command.P1,
-                    P2 = command.P2,
-                    Data = dataChunk
-                };
-
-                responseApdu = _pipeline.Invoke(partialApdu, commandType, responseType);
-
-                // Stop sending data when the YubiKey response is 0x6700 (when the chained data
-                // sent exceeds the max allowed length) and let caller handle the response
-                if (responseApdu.SW != SWConstants.WrongLength)
+                responseApdu = SendPartial(command, commandType, responseType, ref sourceData);
+                if (responseApdu.SW == SWConstants.Success)
                 {
                     continue;
                 }
 
-                _log.LogWarning("Sent data exceeds max allowed length by YubiKey. (SW: 0x{StatusWord})",
-                    responseApdu.SW.ToString("X4", CultureInfo.InvariantCulture));
-                
-                return responseApdu;
+                return FailedResponse(responseApdu);
             }
 
             return responseApdu!;
         }
 
-        public void Setup() => _pipeline.Setup();
+        private ResponseApdu SendPartial(
+            CommandApdu command,
+            Type commandType,
+            Type responseType,
+            ref ReadOnlyMemory<byte> sourceData)
+        {
+            int chunkLength = Math.Min(MaxChunkSize, sourceData.Length);
+            var dataChunk = sourceData[..chunkLength];
+            sourceData = sourceData[chunkLength..];
+
+            var partialApdu = new CommandApdu
+            {
+                Cla = (byte)(command.Cla | (sourceData.IsEmpty
+                    ? 0
+                    : 0x10)),
+                Ins = command.Ins,
+                P1 = command.P1,
+                P2 = command.P2,
+                Data = dataChunk
+            };
+
+            var responseApdu = _pipeline.Invoke(partialApdu, commandType, responseType);
+            return responseApdu;
+        }
+
+        private ResponseApdu FailedResponse(ResponseApdu responseApdu)
+        {
+            var currentCulture = CultureInfo.CurrentCulture;
+            string errorMessage = responseApdu.SW switch
+            {
+                SWConstants.WrongLength => string.Format(
+                    currentCulture, "Sent data exceeds max allowed length by YubiKey. (SW: 0x{0})",
+                    responseApdu.SW.ToString("X4", currentCulture)),
+                _ => string.Format(
+                    currentCulture, "Received error response from YubiKey. (SW: 0x{0})",
+                    responseApdu.SW.ToString("X4", currentCulture))
+            };
+
+            _log.LogWarning(errorMessage);
+            return responseApdu;
+        }
     }
 }

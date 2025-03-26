@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+// Copyright 2021 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -67,12 +67,11 @@ namespace Yubico.YubiKey.Pipelines
             while (!sourceData.IsEmpty)
             {
                 responseApdu = SendPartial(command, commandType, responseType, ref sourceData);
-                if (responseApdu.SW == SWConstants.Success)
+                if (responseApdu.SW != SWConstants.Success)
                 {
-                    continue;
+                    _log.LogWarning("Received error response from YubiKey. (SW: 0x{StatusWord})", responseApdu.SW.ToString("X4", CultureInfo.CurrentCulture));
+                    return responseApdu;
                 }
-
-                return FailedResponse(responseApdu);
             }
 
             return responseApdu!;
@@ -100,23 +99,6 @@ namespace Yubico.YubiKey.Pipelines
             };
 
             var responseApdu = _pipeline.Invoke(partialApdu, commandType, responseType);
-            return responseApdu;
-        }
-
-        private ResponseApdu FailedResponse(ResponseApdu responseApdu)
-        {
-            var currentCulture = CultureInfo.CurrentCulture;
-            string errorMessage = responseApdu.SW switch
-            {
-                SWConstants.WrongLength => string.Format(
-                    currentCulture, "Sent data exceeds max allowed length by YubiKey. (SW: 0x{0})",
-                    responseApdu.SW.ToString("X4", currentCulture)),
-                _ => string.Format(
-                    currentCulture, "Received error response from YubiKey. (SW: 0x{0})",
-                    responseApdu.SW.ToString("X4", currentCulture))
-            };
-
-            _log.LogWarning(errorMessage);
             return responseApdu;
         }
     }

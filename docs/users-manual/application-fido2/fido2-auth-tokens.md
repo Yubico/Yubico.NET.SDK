@@ -97,7 +97,7 @@ In the SDK, an AuthToken is retrieved by calling one of the `Verify` methods, su
         * Send a command to the YubiKey containing the encrypted "PinHash", permissions, and other info
         * If the PIN was correct, the YubiKey verifies the "PinHash"
         * The YubiKey returns a PinUvAuthToken (with permissions attached), which is the AuthToken to use
-    * PIN with permissions
+    * UV with permissions
         * The caller supplies the permissions
         * Send a command to the YubiKey containing permissions, and other info
         * Upon receiving the command, the YubiKey will wait for the user to verify the fingerprint
@@ -157,7 +157,7 @@ An AuthToken's permissions can also expire. There are a number of ways to expire
 most common is when the YubiKey, upon receiving an AuthParam for one command, will
 "expire" an AuthToken, and it cannot be used again (in the FIDO2 terminology, "expire" is
 an active verb, it is something the YubiKey does to the PinToken). To perform another
-command requires the client retrieve a new AuthToken. In still other cases an AuthToken
+command requires the client to retrieve a new AuthToken. In still other cases an AuthToken
 can be "partially expired", where it can be reused for some commands, but not for others.
 
 Note that "expire" will usually have nothing to do with time. That is, a YubiKey will
@@ -220,7 +220,7 @@ commands or several calls to the same command.
 
 On a FIDO2 version 2.1 YubiKey, the PinToken can only be used to perform MakeCredential
 and GetAssertion. Furthermore, it can be expired, and in fact, it can be used to build an
-AuthParam that will authenticate only call to one command.
+AuthParam that will authenticate a call to only one command.
 
 ### PinUvAuthToken
 
@@ -299,7 +299,7 @@ you will want to perform Bio Enrollment, get an AuthToken with that permission. 
 know you will want to get an assertion and write data to the [large blob](large-blobs.md),
 get an AuthToken with those two permissions.
 
-To get an AuthToken with permissions, call one of the `VerifyPin` or VerifyUv` methods.
+To get an AuthToken with permissions, call one of the `VerifyPin` or `VerifyUv` methods.
 For example
 
 ```csharp

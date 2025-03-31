@@ -27,7 +27,6 @@ namespace Yubico.YubiKey.Cryptography
             Assert.Equal(parameters.D, privateKeyParams.Parameters.D);
         }
         
-        
         [Fact]
         public void CreateFromPkcs8_WithValidParameters_CreatesInstance()
         {

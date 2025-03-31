@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void PivKey_VerifyDigestedData_Succeeds()
         {
-            var pubKey = PivEccPublicKey.CreateFromPublicPoint(GetEncodedPoint(), KeyType.P256);
+            var pubKey = new PivEccPublicKey(GetEncodedPoint());
             byte[] digest = GetDigest();
             byte[] signature = GetSignature();
 

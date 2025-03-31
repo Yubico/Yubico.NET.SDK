@@ -107,7 +107,8 @@ namespace Yubico.YubiKey.TestUtilities
     /// </summary>
     public class TestKey : TestCrypto
     {
-        public readonly string _curve;
+        // public readonly string Curve; // TODO KeyType?
+        public readonly KeyType KeyType;
         private readonly bool _isPrivate;
 
         /// <summary>
@@ -119,7 +120,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <returns>A TestKey instance representing the loaded key</returns>
         private TestKey(
             string filePath,
-            string curve,
+            KeyType keyType,
             bool isPrivate) : base(filePath)
         {
             // Curve = curve;
@@ -128,8 +129,10 @@ namespace Yubico.YubiKey.TestUtilities
             _isPrivate = isPrivate;
         }
 
+        public KeyDefinition KeyDefinition { get; private set; }
+
         public KeyDefinition GetKeyDefinition() =>
-            KeyDefinitions.GetByKeyType(Enum.Parse<KeyType>(_curve, true));
+            KeyDefinitions.GetByKeyType(KeyType);
 
         public byte[] GetExponent()
         {
@@ -149,62 +152,26 @@ namespace Yubico.YubiKey.TestUtilities
             catch { return []; }
         }
 
-        // public byte[] GetPublicPoint()
-        // {
-        //     var publicKeyParameters = AsnPublicKeyReader.DecodeFromSpki(this.KeyBytes);
-        //     return publicKeyParameters switch
-        //     {
-        //         ECPublicKeyParameters ecParams => ecParams.GetPublicPoint().ToArray(),
-        //         ECX25519PublicKeyParameters x25519Params => x25519Params.GetPublicPoint().ToArray(),
-        //         EDsaPublicKeyParameters eDsaParams => eDsaParams.GetPublicPoint().ToArray(),
-        //         RSAPublicKeyParameters => throw new InvalidOperationException(
-        //             "Use GetModulus() and GetExponent() instead for RSA keys"),
-        //         _ => throw new ArgumentOutOfRangeException(nameof(publicKeyParameters))
-        //     };
-        // }
-
         public byte[] GetPublicPoint()
         {
-            var publicKeyParameters = AsnPublicKeyReader.DecodeFromSpki(this.EncodedKey);
+            var publicKeyParameters = AsnPublicKeyReader.CreateKeyParameters(EncodedKey);
             return publicKeyParameters switch
             {
                 ECPublicKeyParameters ecParams => ecParams.PublicPoint.ToArray(),
-                Curve25519PublicKeyParameters x25519Params when x25519Params.KeyType == KeyType.X25519 
-                    => x25519Params.PublicPoint.ToArray(),
-                Curve25519PublicKeyParameters eDsaParams when eDsaParams.KeyType == KeyType.Ed25519
-                    => eDsaParams.PublicPoint.ToArray(),
-                Ed25519PublicKeyParameters eDsaParams => eDsaParams.PublicPoint.ToArray(),
-                X25519PublicKeyParameters x25519Params => x25519Params.PublicPoint.ToArray(),
+                Curve25519PublicKeyParameters eDsaParams => eDsaParams.PublicPoint.ToArray(),
                 RSAPublicKeyParameters => throw new InvalidOperationException(
                     "Use GetModulus() and GetExponent() instead for RSA keys"),
                 _ => throw new ArgumentOutOfRangeException(nameof(publicKeyParameters))
             };
         }
 
-        // public byte[] GetPrivateKey()
-        // {
-        //     var privateKeyParameters = AsnPrivateKeyReader.DecodePkcs8EncodedKey(KeyBytes);
-        //     return privateKeyParameters switch
-        //     {
-        //         ECPrivateKeyParameters ecParams => ecParams.Parameters.D!,
-        //         ECX25519PrivateKeyParameters x25519Params => x25519Params.GetPrivateKey().ToArray(),
-        //         EDsaPrivateKeyParameters eDsaParams => eDsaParams.GetPrivateKey().ToArray(),
-        //         RSAPrivateKeyParameters => throw new InvalidOperationException("Use AsRSA() instead for RSA keys"),
-        //         _ => throw new ArgumentOutOfRangeException(nameof(privateKeyParameters))
-        //     };
-        // }
-
         public byte[] GetPrivateKey()
         {
-            var privateKeyParameters = AsnPrivateKeyReader.DecodePkcs8EncodedKey(EncodedKey);
+            var privateKeyParameters = AsnPrivateKeyReader.CreateKeyParameters(EncodedKey);
             return privateKeyParameters switch
             {
                 ECPrivateKeyParameters ecParams => ecParams.Parameters.D!,
-                Curve25519PrivateKeyParameters x25519Params when x25519Params.KeyType ==
-                                                                 KeyType.X25519 => x25519Params
-                    .PrivateKey.ToArray(),
-                Curve25519PrivateKeyParameters eDsaParams when eDsaParams.KeyType == KeyType.Ed25519
-                    => eDsaParams.PrivateKey.ToArray(),
+                Curve25519PrivateKeyParameters cv25519 => cv25519.PrivateKey.ToArray(),
                 RSAPrivateKeyParameters => throw new InvalidOperationException("Use AsRSA() instead for RSA keys"),
                 _ => throw new ArgumentOutOfRangeException(nameof(privateKeyParameters))
             };
@@ -235,7 +202,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <exception cref="InvalidOperationException">Thrown if the key is not an EC key</exception>
         public ECDsa AsECDsa()
         {
-            if (_curve.StartsWith("rsa", StringComparison.OrdinalIgnoreCase))
+            if (!KeyDefinition.IsEcKey)
             {
                 throw new InvalidOperationException("Not an EC key");
             }
@@ -251,7 +218,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// </summary>
         /// <returns>PivPrivateKey instance</returns>
         public static TestKey Load(
-            string curve,
+            KeyType keyType,
             bool isPrivate,
             int? index = null)
         {
@@ -260,9 +227,10 @@ namespace Yubico.YubiKey.TestUtilities
                 index = null;
             }
 
-            var fileName = $"{curve}_{(isPrivate ? "private" : "public")}{(index.HasValue ? $"_{index}" : "")}.pem";
+            var curveName = keyType.ToString().ToLower();
+            var fileName = $"{curveName}_{(isPrivate ? "private" : "public")}{(index.HasValue ? $"_{index}" : "")}.pem";
             var filePath = Path.Combine(TestDataDirectory, fileName);
-            return new TestKey(filePath, curve, isPrivate);
+            return new TestKey(filePath, keyType, isPrivate);
         }
     }
 
@@ -297,10 +265,11 @@ namespace Yubico.YubiKey.TestUtilities
         /// <param name="isAttestation">True if loading an attestation certificate</param>
         /// <returns>A TestCertificate instance</returns>
         public static TestCertificate Load(
-            string curve,
+            KeyType keyType,
             bool isAttestation = false)
         {
-            var fileName = $"{curve}_cert{(isAttestation ? "_attest" : "")}.pem";
+            var curveName = keyType.ToString().ToLower();
+            var fileName = $"{curveName}_cert{(isAttestation ? "_attest" : "")}.pem";
             var filePath = Path.Combine(TestDataDirectory, fileName);
             return new TestCertificate(filePath, isAttestation);
         }
@@ -311,16 +280,8 @@ namespace Yubico.YubiKey.TestUtilities
     /// </summary>
     public static class TestKeys
     {
-        /// <summary>
-        /// Gets a private key for the specified curve.
-        /// </summary>
-        /// <param name="curve">The curve or key type</param>
-        /// <returns>TestKey instance representing the private key</returns>
         public static TestKey GetTestPrivateKey(
-            string curve) => TestKey.Load(curve, true);
-
-        public static TestKey GetTestPrivateKey(
-            KeyType keyType) => GetTestPrivateKey(GetCurveFromAlgorithm(keyType));
+            KeyType keyType) => TestKey.Load(keyType, true);
 
         /// <summary>
         /// Get a private key for the specified algorithm.
@@ -328,34 +289,23 @@ namespace Yubico.YubiKey.TestUtilities
         /// <param name="algorithm">The piv algorithm</param>
         /// <returns>TestKey instance representing the private key</returns>
         public static TestKey GetTestPrivateKey(
-            PivAlgorithm algorithm) => GetTestPrivateKey(GetCurveFromAlgorithm(algorithm));
+            PivAlgorithm algorithm) => GetTestPrivateKey(algorithm.GetKeyType());
 
         public static (TestKey publicKey, TestKey privateKey) GetKeyPair(
-            string curve) => (GetTestPublicKey(curve), GetTestPrivateKey(curve));
-
-        public static (TestKey publicKey, TestKey privateKey) GetKeyPair(
-            PivAlgorithm algorithm) => GetKeyPair(GetCurveFromAlgorithm(algorithm));
-
-        public static (TestKey publicKey, TestKey privateKey) GetKeyPair(
-            KeyType keyType) => GetKeyPair(GetCurveFromAlgorithm(keyType));
+            KeyType keyType) => (GetTestPublicKey(keyType), GetTestPrivateKey(keyType));
 
 
         /// <summary>
         /// Gets a public key for the specified curve.
         /// </summary>
-        /// <param name="curve">The curve or key type</param>
+        /// <param name="keyType">The key type</param>
         /// <returns>TestKey instance representing the public key</returns>
         public static TestKey GetTestPublicKey(
-            string curve,
-            int? index = null) => TestKey.Load(curve, false, index);
-
-        public static TestKey GetTestPublicKey(
-            PivAlgorithm algorithm,
-            int? index = null) => GetTestPublicKey(GetCurveFromAlgorithm(algorithm), index);
-
-        public static TestKey GetTestPublicKey(
             KeyType keyType,
-            int? index = null) => GetTestPublicKey(GetCurveFromAlgorithm(keyType), index);
+            int? index = null)
+        {
+            return TestKey.Load(keyType, false, index);
+        }
 
         /// <summary>
         /// Gets a certificate for the specified curve.
@@ -364,42 +314,8 @@ namespace Yubico.YubiKey.TestUtilities
         /// <param name="isAttestation">True to get an attestation certificate</param>
         /// <returns>TestCertificate instance</returns>s
         public static TestCertificate GetTestCertificate(
-            string curve,
+            KeyType curve,
             bool isAttestation = false) =>
             TestCertificate.Load(curve, isAttestation);
-
-        private static string GetCurveFromAlgorithm(
-            PivAlgorithm algorithm)
-        {
-            switch (algorithm)
-            {
-                case PivAlgorithm.Rsa1024:
-                    return "rsa1024";
-                case PivAlgorithm.Rsa2048:
-                    return "rsa2048";
-                case PivAlgorithm.Rsa3072:
-                    return "rsa3072";
-                case PivAlgorithm.Rsa4096:
-                    return "rsa4096";
-                case PivAlgorithm.EccP256:
-                    return "p256";
-                case PivAlgorithm.EccP384:
-                    return "p384";
-                case PivAlgorithm.EccP521:
-                    return "p521";
-                case PivAlgorithm.EccEd25519:
-                    return "ed25519";
-                case PivAlgorithm.EccX25519:
-                    return "x25519";
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null);
-            }
-        }
-
-        private static string GetCurveFromAlgorithm(
-            KeyType keyType)
-        {
-            return keyType.ToString().ToLower();
-        }
     }
 }

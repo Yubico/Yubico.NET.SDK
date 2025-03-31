@@ -14,6 +14,7 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -30,9 +31,9 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.TripleDes, false)]
         [InlineData(PivAlgorithm.Pin, false)]
         [Obsolete("This test is obsolete. It is testing a deprecated method.")]
-        public void IsValidAlg_ReturnsCorrect(PivAlgorithm algorithm, bool expectedResult)
+        public void IsValidAlg_ReturnsCorrect(PivAlgorithm keyType, bool expectedResult)
         {
-            bool result = algorithm.IsValidAlgorithmForGenerate();
+            bool result = keyType.IsValidAlgorithmForGenerate();
 
             Assert.Equal(expectedResult, result);
         }
@@ -47,9 +48,9 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.None, false)]
         [InlineData(PivAlgorithm.TripleDes, false)]
         [InlineData(PivAlgorithm.Pin, false)]
-        public void IsRsa_ReturnsCorrect(PivAlgorithm algorithm, bool expectedResult)
+        public void IsRsa_ReturnsCorrect(PivAlgorithm keyType, bool expectedResult)
         {
-            bool result = algorithm.IsRsa();
+            bool result = keyType.IsRsa();
 
             Assert.Equal(expectedResult, result);
         }
@@ -64,9 +65,9 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.None, false)]
         [InlineData(PivAlgorithm.TripleDes, false)]
         [InlineData(PivAlgorithm.Pin, false)]
-        public void IsEcc_ReturnsCorrect(PivAlgorithm algorithm, bool expectedResult)
+        public void IsEcc_ReturnsCorrect(PivAlgorithm keyType, bool expectedResult)
         {
-            bool result = algorithm.IsEcc();
+            bool result = keyType.IsEcc();
 
             Assert.Equal(expectedResult, result);
         }
@@ -81,10 +82,9 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.None, 0)]
         [InlineData(PivAlgorithm.TripleDes, 192)]
         [InlineData(PivAlgorithm.Pin, 64)]
-        public void KeySizeBits_ReturnsCorrect(PivAlgorithm algorithm, int expectedResult)
+        public void KeySizeBits_ReturnsCorrect(PivAlgorithm keyType, int expectedResult)
         {
-            int result = algorithm.KeySizeBits();
-
+            int result = keyType.KeySizeBits();
             Assert.Equal(expectedResult, result);
         }
     }

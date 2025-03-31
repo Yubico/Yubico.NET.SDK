@@ -1,6 +1,7 @@
 using System;
 using System.Security.Cryptography;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography;
 
@@ -25,8 +26,8 @@ public class AsnPublicKeyWriterTests
         var parameters = rsa.ExportParameters(false);
         
         // Act
-        var encoded = AsnPublicKeyWriter.EncodeToSpki(parameters.Modulus, parameters.Exponent);
-        var decodedParams = AsnPublicKeyReader.DecodeFromSpki(encoded);
+        var encoded = AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(parameters.Modulus, parameters.Exponent);
+        var decodedParams = AsnPublicKeyReader.CreateKeyParameters(encoded);
         
         // Assert
         Assert.IsType<RSAPublicKeyParameters>(decodedParams);
@@ -56,8 +57,8 @@ public class AsnPublicKeyWriterTests
         var parameters = rsa.ExportParameters(false);
         
         // Act
-        var encoded = AsnPublicKeyWriter.EncodeToSpki(parameters);
-        var decodedParams = AsnPublicKeyReader.DecodeFromSpki(encoded);
+        var encoded = AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(parameters);
+        var decodedParams = AsnPublicKeyReader.CreateKeyParameters(encoded);
         
         // Assert
         Assert.IsType<RSAPublicKeyParameters>(decodedParams);
@@ -85,8 +86,8 @@ public class AsnPublicKeyWriterTests
         var parameters = ecdsa.ExportParameters(false);
         
         // Act
-        var encoded = AsnPublicKeyWriter.EncodeToSpki(parameters);
-        var decodedParams = AsnPublicKeyReader.DecodeFromSpki(encoded);
+        var encoded = AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(parameters);
+        var decodedParams = AsnPublicKeyReader.CreateKeyParameters(encoded);
         
         // Assert
         Assert.IsType<ECPublicKeyParameters>(decodedParams);
@@ -109,8 +110,8 @@ public class AsnPublicKeyWriterTests
         rng.GetBytes(publicKey);
         
         // Act
-        var encoded = AsnPublicKeyWriter.EncodeToSpki(publicKey, KeyType.Ed25519);
-        var decodedParams = AsnPublicKeyReader.DecodeFromSpki(encoded);
+        var encoded = AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(publicKey, KeyType.Ed25519);
+        var decodedParams = AsnPublicKeyReader.CreateKeyParameters(encoded);
         
         // Assert
         Assert.IsType<Curve25519PublicKeyParameters>(decodedParams);
@@ -128,8 +129,8 @@ public class AsnPublicKeyWriterTests
         rng.GetBytes(publicKey);
         
         // Act
-        var encoded = AsnPublicKeyWriter.EncodeToSpki(publicKey, KeyType.X25519);
-        var decodedParams = AsnPublicKeyReader.DecodeFromSpki(encoded);
+        var encoded = AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(publicKey, KeyType.X25519);
+        var decodedParams = AsnPublicKeyReader.CreateKeyParameters(encoded);
         
         // Assert
         Assert.IsType<Curve25519PublicKeyParameters>(decodedParams);
@@ -147,28 +148,8 @@ public class AsnPublicKeyWriterTests
         var invalidKey = new byte[keySize];
         
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => AsnPublicKeyWriter.EncodeToSpki(invalidKey, KeyType.Ed25519));
-        Assert.Throws<ArgumentException>(() => AsnPublicKeyWriter.EncodeToSpki(invalidKey, KeyType.Ed25519));
-    }
-    
-    [Fact]
-    public void ConvertViaExtensionMethod_ShouldWork()
-    {
-        // Arrange
-        using var rsa = RSA.Create(2048);
-        var parameters = rsa.ExportParameters(false);
-        var rsaKeyParams = new RSAPublicKeyParameters(parameters);
-        
-        // Act - use the extension method
-        var encoded = rsaKeyParams.ToEncodedKey();
-        var decodedParams = AsnPublicKeyReader.DecodeFromSpki(encoded);
-        
-        // Assert
-        Assert.IsType<RSAPublicKeyParameters>(decodedParams);
-        var roundTrippedParams = (RSAPublicKeyParameters)decodedParams;
-        
-        Assert.Equal(parameters.Modulus, roundTrippedParams.Parameters.Modulus);
-        Assert.Equal(parameters.Exponent, roundTrippedParams.Parameters.Exponent);
+        Assert.Throws<ArgumentException>(() => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(invalidKey, KeyType.Ed25519));
+        Assert.Throws<ArgumentException>(() => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(invalidKey, KeyType.Ed25519));
     }
     
     [Theory]
@@ -197,8 +178,8 @@ public class AsnPublicKeyWriterTests
         Buffer.BlockCopy(parameters.Q.Y!, 0, publicPoint, coordinateLength+1, coordinateLength);
         
         // Act
-        var encoded = AsnPublicKeyWriter.EncodeToSpki(publicPoint, keyType);
-        var decodedParams = AsnPublicKeyReader.DecodeFromSpki(encoded);
+        var encoded = AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(publicPoint, keyType);
+        var decodedParams = AsnPublicKeyReader.CreateKeyParameters(encoded);
         
         // Assert
         Assert.IsType<ECPublicKeyParameters>(decodedParams);
@@ -206,6 +187,61 @@ public class AsnPublicKeyWriterTests
         
         Assert.Equal(parameters.Q.X, ecParams.Parameters.Q.X);
         Assert.Equal(parameters.Q.Y, ecParams.Parameters.Q.Y);
+    }
+    
+    [Theory]
+    [InlineData(KeyType.P256)]
+    [InlineData(KeyType.P384)]
+    [InlineData(KeyType.P521)]
+    public void FromECParameters_ShouldCreateValidEncoding(KeyType keyType)
+    {
+        // Arrange
+        using var ecdsa = keyType switch
+        {
+            KeyType.P256 => ECDsa.Create(ECCurve.NamedCurves.nistP256),
+            KeyType.P384 => ECDsa.Create(ECCurve.NamedCurves.nistP384),
+            KeyType.P521 => ECDsa.Create(ECCurve.NamedCurves.nistP521),
+            _ => throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null)
+        };
+        
+        var parameters = ecdsa.ExportParameters(false);
+        
+        // Act
+        var encoded = AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(parameters);
+        var decodedParams = AsnPublicKeyReader.CreateKeyParameters(encoded);
+        
+        // Assert
+        Assert.IsType<ECPublicKeyParameters>(decodedParams);
+        var ecParams = (ECPublicKeyParameters)decodedParams;
+        
+        Assert.Equal(parameters.Q.X, ecParams.Parameters.Q.X);
+        Assert.Equal(parameters.Q.Y, ecParams.Parameters.Q.Y);
+    }
+    
+    [Theory]
+    [InlineData(KeyType.P256)]
+    [InlineData(KeyType.P384)]
+    [InlineData(KeyType.P521)]
+    public void FromECParameters_WithTestKeys_ShouldCreateValidEncoding(KeyType keyType)
+    {
+        // Arrange
+        var testPublicKey = TestKeys.GetTestPublicKey(keyType);
+        var testECDsa = testPublicKey.AsECDsa();
+        var testEcParameters = testECDsa.ExportParameters(false);
+        
+        // Act
+        var encoded = AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(testEcParameters);
+        var decodedParams = AsnPublicKeyReader.CreateKeyParameters(encoded);
+        
+        // Assert
+        Assert.IsType<ECPublicKeyParameters>(decodedParams);
+        var ecParams = (ECPublicKeyParameters)decodedParams;
+        
+        Assert.Equal(testEcParameters.Q.X, ecParams.Parameters.Q.X);
+        Assert.Equal(testEcParameters.Q.Y, ecParams.Parameters.Q.Y);
+        
+        Assert.Equal(testPublicKey.EncodedKey, encoded);
+        Assert.Equal(testPublicKey.EncodedKey, testECDsa.ExportSubjectPublicKeyInfo());
     }
     
     [Fact]
@@ -217,8 +253,8 @@ public class AsnPublicKeyWriterTests
         rng.GetBytes(publicKey);
         
         // Act
-        var encoded = AsnPublicKeyWriter.EncodeToSpki(publicKey, KeyType.Ed25519);
-        var decodedParams = AsnPublicKeyReader.DecodeFromSpki(encoded);
+        var encoded = AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(publicKey, KeyType.Ed25519);
+        var decodedParams = AsnPublicKeyReader.CreateKeyParameters(encoded);
         
         // Assert
         Assert.IsType<Curve25519PublicKeyParameters>(decodedParams);

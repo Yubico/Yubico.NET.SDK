@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
@@ -33,17 +34,28 @@ namespace Yubico.YubiKey.Piv
                 }
             }
 
-            const byte EccTag = 0x06;
-            const byte Length = 0x20;
-            var priKey = PivPrivateKey.Create(new byte[]
-            {
-                EccTag, Length,
-                0xba, 0x29, 0x7a, 0xc6, 0x64, 0x62, 0xef, 0x6c, 0xd0, 0x89, 0x76, 0x5c, 0xbd, 0x46, 0x52, 0x2b,
-                0xb0, 0x48, 0x0e, 0x85, 0x49, 0x15, 0x85, 0xe7, 0x7a, 0x74, 0x3c, 0x8e, 0x03, 0x59, 0x8d, 0x3a
-            });
+            // const byte EccTag = 0x06;
+            // const byte Length = 0x20;
+            // var priKey = PivPrivateKey.Create(new byte[]
+            // {
+            //     EccTag, Length,
+            //     0xba, 0x29, 0x7a, 0xc6, 0x64, 0x62, 0xef, 0x6c, 0xd0, 0x89, 0x76, 0x5c, 0xbd, 0x46, 0x52, 0x2b,
+            //     0xb0, 0x48, 0x0e, 0x85, 0x49, 0x15, 0x85, 0xe7, 0x7a, 0x74, 0x3c, 0x8e, 0x03, 0x59, 0x8d, 0x3a
+            // });
 
+            var priKey = ECPrivateKeyParameters.CreateFromValue(
+                new byte[]
+                {
+                    0xba, 0x29, 0x7a, 0xc6, 0x64, 0x62, 0xef, 0x6c, 0xd0, 0x89, 0x76, 0x5c, 0xbd, 0x46, 0x52, 0x2b,
+                    0xb0, 0x48, 0x0e, 0x85, 0x49, 0x15, 0x85, 0xe7, 0x7a, 0x74, 0x3c, 0x8e, 0x03, 0x59, 0x8d, 0x3a
+                }, KeyType.P256
+                );
+
+            // var importCommand = new ImportAsymmetricKeyCommand(
+            //     priKey, slotNumber, PivPinPolicy.Never, PivTouchPolicy.Never);
+            
             var importCommand = new ImportAsymmetricKeyCommand(
-                priKey, slotNumber, PivPinPolicy.Never, PivTouchPolicy.Never);
+                priKey.ToPivEncodedPrivateKey(), priKey.KeyType, slotNumber, PivPinPolicy.Never, PivTouchPolicy.Never);
             var importResponse = pivSession.Connection.SendCommand(importCommand);
 
             return importResponse.Status == ResponseStatus.Success;
@@ -65,7 +77,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             var genPairCommand = new GenerateKeyPairCommand(
-                slotNumber, PivAlgorithm.EccP256, PivPinPolicy.Never, PivTouchPolicy.Never);
+                slotNumber, KeyType.P256, PivPinPolicy.Never, PivTouchPolicy.Never);
             GenerateKeyPairResponse genPairResponse =
                 pivSession.Connection.SendCommand(genPairCommand);
 

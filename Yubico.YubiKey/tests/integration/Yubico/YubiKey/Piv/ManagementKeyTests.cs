@@ -15,6 +15,7 @@
 using System;
 using Xunit;
 using Xunit.Abstractions;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -67,12 +68,12 @@ namespace Yubico.YubiKey.Piv
             var shouldBeAes = testDevice.FirmwareVersion >= FirmwareVersion.V5_7_0;
             var mustBeAes = shouldBeAes && testDevice.IsFipsSeries;
             var defaultManagementKeyType = shouldBeAes
-                ? PivAlgorithm.Aes192
-                : PivAlgorithm.TripleDes;
+                ? KeyType.AES192
+                : KeyType.TripleDes;
 
             var alternativeManagementKeyType = !shouldBeAes
-                ? PivAlgorithm.Aes192
-                : PivAlgorithm.TripleDes;
+                ? KeyType.AES192
+                : KeyType.TripleDes;
 
             using var session = new PivSession(testDevice);
             session.KeyCollector = TestKeyCollectorDelegate;
@@ -83,17 +84,17 @@ namespace Yubico.YubiKey.Piv
             if (mustBeAes)
             {
                 Assert.Throws<InvalidOperationException>(
-                    () => session.ChangeManagementKey(PivTouchPolicy.None, PivAlgorithm.TripleDes));
+                    () => session.ChangeManagementKey(PivTouchPolicy.None, KeyType.TripleDes.GetPivAlgorithm()));
             }
             else
             {
-                session.ChangeManagementKey(PivTouchPolicy.None, alternativeManagementKeyType);
-                Assert.Equal(alternativeManagementKeyType, session.ManagementKeyAlgorithm);
+                session.ChangeManagementKey(PivTouchPolicy.None, alternativeManagementKeyType.GetPivAlgorithm());
+                Assert.Equal(alternativeManagementKeyType.GetPivAlgorithm(), session.ManagementKeyAlgorithm);
 
                 session.AuthenticateManagementKey();
                 session.ResetApplication();
 
-                Assert.Equal(defaultManagementKeyType, session.ManagementKeyAlgorithm);
+                Assert.Equal(defaultManagementKeyType.GetPivAlgorithm(), session.ManagementKeyAlgorithm);
             }
         }
 
@@ -107,8 +108,8 @@ namespace Yubico.YubiKey.Piv
             var shouldBeAes = testDevice.FirmwareVersion >= FirmwareVersion.V5_7_0;
             var mustBeAes = shouldBeAes && testDevice.IsFipsSeries;
             var defaultManagementKeyType = shouldBeAes || mustBeAes
-                ? PivAlgorithm.Aes192
-                : PivAlgorithm.TripleDes;
+                ? KeyType.AES192
+                : KeyType.TripleDes;
 
             using var session = new PivSession(testDevice);
             session.KeyCollector = TestKeyCollectorDelegate;
@@ -116,13 +117,13 @@ namespace Yubico.YubiKey.Piv
 
             // This must not throw. 5.7 FIPS requires management key to be AES192.
             session.ChangeManagementKey();
-            Assert.Equal(defaultManagementKeyType, session.ManagementKeyAlgorithm);
+            Assert.Equal(defaultManagementKeyType.GetPivAlgorithm(), session.ManagementKeyAlgorithm);
 
             // This must throw for FIPS devices.
             if (mustBeAes)
             {
                 Assert.Throws<InvalidOperationException>(
-                    () => session.ChangeManagementKey(PivTouchPolicy.None, PivAlgorithm.TripleDes));
+                    () => session.ChangeManagementKey(PivTouchPolicy.None, KeyType.TripleDes.GetPivAlgorithm()));
             }
         }
 
@@ -136,8 +137,8 @@ namespace Yubico.YubiKey.Piv
             var shouldBeAes = testDevice.FirmwareVersion >= FirmwareVersion.V5_7_0;
             var mustBeAes = shouldBeAes && testDevice.IsFipsSeries;
             var defaultManagementKeyType = shouldBeAes || mustBeAes
-                ? PivAlgorithm.Aes192
-                : PivAlgorithm.TripleDes;
+                ? KeyType.AES192
+                : KeyType.TripleDes;
 
             var isValid = false;
             var count = 10;
@@ -177,11 +178,11 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        private bool ChangeMgmtKey(IYubiKeyDevice testDevice, PivAlgorithm managementKeyType)
+        private bool ChangeMgmtKey(IYubiKeyDevice testDevice, KeyType managementKeyType)
         {
             using var pivSession = new PivSession(testDevice);
             pivSession.KeyCollector = TestKeyCollectorDelegate;
-            var isChanged = pivSession.TryChangeManagementKey(PivTouchPolicy.Default, managementKeyType);
+            var isChanged = pivSession.TryChangeManagementKey(PivTouchPolicy.Default, managementKeyType.GetPivAlgorithm());
             if (isChanged)
             {
                 Array.Copy(_newKey, _currentKey, length: 24);

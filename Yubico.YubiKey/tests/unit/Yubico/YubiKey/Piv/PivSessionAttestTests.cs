@@ -15,6 +15,7 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -87,7 +88,7 @@ namespace Yubico.YubiKey.Piv
                 }
             };
 
-            var privateKey = new PivPrivateKey();
+            var privateKey = new EmptyPrivateKeyParameters();
 #pragma warning disable SYSLIB0026
             var cert = new X509Certificate2();
 #pragma warning restore SYSLIB0026
@@ -107,12 +108,12 @@ namespace Yubico.YubiKey.Piv
                 },
                 AvailableUsbCapabilities = YubiKeyCapabilities.Piv
             };
-            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out X509Certificate2? cert, out _);
+            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(KeyType.RSA2048, out X509Certificate2? cert, out _);
             Assert.True(isValid);
 
             using var pivSession = new PivSession(yubiKey);
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => pivSession.ReplaceAttestationKeyAndCertificate(null, cert!));
+            _ = Assert.Throws<ArgumentNullException>(() => pivSession.ReplaceAttestationKeyAndCertificate((IPrivateKeyParameters)null!, cert!));
 #pragma warning restore CS8625 // testing a null input.
         }
 
@@ -128,16 +129,18 @@ namespace Yubico.YubiKey.Piv
                 },
                 AvailableUsbCapabilities = YubiKeyCapabilities.Piv
             };
-            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out _, out PivPrivateKey? privateKey);
-            Assert.True(isValid);
+
+            var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
+            var privateKey = RSAPrivateKeyParameters.CreateFromPkcs8(testKey.EncodedKey);
 
             using var pivSession = new PivSession(yubiKey);
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => pivSession.ReplaceAttestationKeyAndCertificate(privateKey!, null));
+            _ = Assert.Throws<ArgumentNullException>(() => pivSession.ReplaceAttestationKeyAndCertificate(privateKey, null));
 #pragma warning restore CS8625 // testing a null input.
         }
 
         [Fact]
+        [Obsolete("Replaced by IPrivateKeyParameters")]
         public void ReplaceAttest_Rsa1024_ThrowsException()
         {
             var yubiKey = new HollowYubiKeyDevice(true)
@@ -154,7 +157,7 @@ namespace Yubico.YubiKey.Piv
                 BadAttestationPairs.KeyRsa1024CertValid, out var privateKeyPem, out var certPem);
 
             var priKey = new KeyConverter(privateKeyPem.ToCharArray());
-            PivPrivateKey pivPrivateKey = priKey.GetPivPrivateKey();
+            var pivPrivateKey = priKey.GetPivPrivateKey();
 
             var certChars = certPem.ToCharArray();
             var certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
@@ -171,6 +174,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(BadAttestationPairs.KeyRsa2048CertVersion1)]
         [InlineData(BadAttestationPairs.KeyEccP256CertVersion1)]
         [InlineData(BadAttestationPairs.KeyEccP384CertVersion1)]
+        [Obsolete("Replaced by IPrivateKeyParameters")]
         public void ReplaceAttest_Version1Cert_ThrowsException(int whichPair)
         {
             var yubiKey = new HollowYubiKeyDevice(true)
@@ -200,6 +204,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Replaced by IPrivateKeyParameters")]
         public void ReplaceAttest_BigName_ThrowsException()
         {
             var yubiKey = new HollowYubiKeyDevice(true)

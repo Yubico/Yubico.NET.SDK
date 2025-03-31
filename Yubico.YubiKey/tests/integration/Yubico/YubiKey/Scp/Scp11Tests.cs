@@ -80,8 +80,8 @@ namespace Yubico.YubiKey.Scp
                 ScpTestUtilities.SetFipsApprovedCredentials(session);
             }
 
-            var result = session.GenerateKeyPair(PivSlot.Retired12, PivAlgorithm.EccP256, PivPinPolicy.Always);
-            Assert.Equal(PivAlgorithm.EccP256, result.Algorithm);
+            var result = session.GenerateKeyPair(PivSlot.Retired12, KeyType.P256, PivPinPolicy.Always);
+            Assert.Equal(KeyType.P256, result.KeyType);
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]

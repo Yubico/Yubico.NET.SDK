@@ -18,13 +18,11 @@ namespace Yubico.YubiKey.Cryptography
             var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
 
             // Act
-            var publicKeyParams =
-                KeyParametersPivHelper.CreatePublicParametersFromPivEncoding<RSAPublicKeyParameters>(
-                    pivPublicKeyEncoded);
+            var publicKeyParams = KeyParametersPivHelper.CreatePublicRsaFromPivEncoding(pivPublicKeyEncoded);
             var resultParameters = publicKeyParams.Parameters;
 
             // Assert
-            var testKeyParameters = testKey.AsRSA().ExportParameters(false);
+            var testKeyParameters = testKey.AsRSA().ExportParameters(false); // Todo how is this working? We're not using the private key, aha, they are probably empty
             Assert.Equal(testKeyParameters.D, resultParameters.D);
             Assert.Equal(testKeyParameters.DP, resultParameters.DP);
             Assert.Equal(testKeyParameters.DQ, resultParameters.DQ);
@@ -119,7 +117,7 @@ namespace Yubico.YubiKey.Cryptography
 
             // Verify the bytes can be used to recreate the RSA key
             var rsa2 = RSA.Create();
-            rsa2.ImportSubjectPublicKeyInfo(subjectPublicKeyInfo.Span, out _);
+            rsa2.ImportSubjectPublicKeyInfo(subjectPublicKeyInfo, out _);
             var rsaParams2 = rsa2.ExportParameters(false);
 
             Assert.True(publicKeyParams.Parameters.Modulus.AsSpan().SequenceEqual(rsaParams2.Modulus));

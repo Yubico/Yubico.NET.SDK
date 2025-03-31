@@ -101,7 +101,7 @@ namespace Yubico.Core.Tlv.UnitTests
         public void DecodeMap_ValidInput_ReturnsCorrectDictionary()
         {
             var input = new byte[] { 0x01, 0x01, 0xFF, 0x02, 0x02, 0xAA, 0xBB };
-            var result = TlvObjects.DecodeMap(input);
+            var result = TlvObjects.DecodeDictionary(input);
 
             Assert.Equal(2, result.Count);
             Assert.Equal(new byte[] { 0xFF }, result[0x01].ToArray());
@@ -112,7 +112,7 @@ namespace Yubico.Core.Tlv.UnitTests
         public void DecodeMap_DuplicateTags_KeepsLastValue()
         {
             var input = new byte[] { 0x01, 0x01, 0xFF, 0x01, 0x01, 0xEE };
-            var result = TlvObjects.DecodeMap(input);
+            var result = TlvObjects.DecodeDictionary(input);
 
             Assert.Single(result);
             Assert.Equal(new byte[] { 0xEE }, result[0x01].ToArray());

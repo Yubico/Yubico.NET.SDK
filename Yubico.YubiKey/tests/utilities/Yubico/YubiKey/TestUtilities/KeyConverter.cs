@@ -349,13 +349,13 @@ namespace Yubico.YubiKey.TestUtilities
             // {
             //     var testPublicKey = TestKeys.GetPublicKey(_pivPublicKey.Algorithm);
             //     var last32Bytes = testPublicKey.KeyBytes.AsSpan()[^32..];
-            //     var pivPublicKey = new PivEccPublicKey(last32Bytes, PivAlgorithm.EccEd25519);
+            //     var pivPublicKey = new PivEccPublicKey(last32Bytes, KeyType.Ed25519);
             //     return pivPublicKey;
             // }
 
             if (_pivPublicKey.Algorithm != PivAlgorithm.None)
             {
-                return PivPublicKey.Create(_pivPublicKey.PivEncodedPublicKey, _pivPublicKey.Algorithm);
+                return PivPublicKey.Create(_pivPublicKey.PivEncodedPublicKey);
             }
 
             if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 || _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
@@ -719,18 +719,18 @@ namespace Yubico.YubiKey.TestUtilities
                     BuildPivPublicKey(eccObject);
                     BuildPivPrivateKey(eccObject);
                 }
-                else if (tag == 0x04)
-                {
-                    var keyDataRange = ^32..;
-                    _pivPrivateKey = new PivEccPrivateKey(encodedKey.AsSpan()[keyDataRange], PivAlgorithm.EccEd25519);
-                    // BuildPivPublicKey(eccObject); // TODO How do get this? I can get it from the file data. Possibly compute from the private key?
-                }
-                else if (tag == 0x03) // Not sure if this is correct. It appears ED and X keys share this byte
-                {
-                    var keyDataRange = ^32..;
-                    _pivPrivateKey = new PivEccPrivateKey(encodedKey.AsSpan()[keyDataRange], PivAlgorithm.EccX25519);
-                    // BuildPivPublicKey(eccObject); // TODO How do get this? I can get it from the file data. Possibly compute from the private key?
-                }
+                // else if (tag == 0x04)
+                // {
+                //     var keyDataRange = ^32..;
+                //     _pivPrivateKey = new PivEccPrivateKey(encodedKey.AsSpan()[keyDataRange], PivAlgorithm.EccEd25519);
+                //     // BuildPivPublicKey(eccObject); // TODO How do get this? I can get it from the file data. Possibly compute from the private key?
+                // }
+                // else if (tag == 0x03) // Not sure if this is correct. It appears ED and X keys share this byte
+                // {
+                //     var keyDataRange = ^32..;
+                //     _pivPrivateKey = new PivEccPrivateKey(encodedKey.AsSpan()[keyDataRange], PivAlgorithm.EccX25519);
+                //     // BuildPivPublicKey(eccObject); // TODO How do get this? I can get it from the file data. Possibly compute from the private key?
+                // }
             }
         }
         
@@ -762,14 +762,14 @@ namespace Yubico.YubiKey.TestUtilities
 
                     BuildPivPublicKey(eccObject);
                 }
-                else if (encodedKey[offset + 3] == 0x04) // Ed25519
-                {
-                    _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyType.Ed25519);
-                }
-                else if (encodedKey[offset + 3] == 0x03) // X25519
-                {
-                    _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyType.Ed25519);
-                }
+                // else if (encodedKey[offset + 3] == 0x04) // Ed25519
+                // {
+                //     _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyType.Ed25519);
+                // }
+                // else if (encodedKey[offset + 3] == 0x03) // X25519
+                // {
+                //     _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyType.Ed25519);
+                // }
             }
         }
 
@@ -815,9 +815,11 @@ namespace Yubico.YubiKey.TestUtilities
 
             var privateValue = new byte[keySizeBytes];
             Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
-            var eccOid = eccParams.Curve.Oid.Value!;
-            var keyDefinition = KeyDefinitions.GetByOid(eccOid);
-            var eccPriKey = new PivEccPrivateKey(privateValue, keyDefinition.KeyType.GetPivAlgorithm());
+            // var eccOid = eccParams.Curve.Oid.Value!;
+            // var keyDefinition = KeyDefinitions.GetByOid(eccOid);
+            // var eccPriKey = new PivEccPrivateKey(privateValue, keyDefinition.KeyType.GetPivAlgorithm());
+            var eccPriKey = new PivEccPrivateKey(privateValue);
+
             _pivPrivateKey = eccPriKey;
         }
 
@@ -839,8 +841,10 @@ namespace Yubico.YubiKey.TestUtilities
             offset += keySizeBytes;
             Array.Copy(eccParams.Q.Y!, 0, point, offset, eccParams.Q.Y!.Length);
 
-            var keyDefinition = KeyDefinitions.GetByOid(eccParams.Curve.Oid.Value!);
-            var eccPubKey = PivEccPublicKey.CreateFromPublicPoint(point, keyDefinition.KeyType);
+            // var keyDefinition = KeyDefinitions.GetByOid(eccParams.Curve.Oid.Value!);
+            // var eccPubKey = PivEccPublicKey.CreateFromPublicPoint(point, keyDefinition.KeyType);
+            var eccPubKey = new PivEccPublicKey(point.AsSpan());
+
             _pivPublicKey = eccPubKey;
         }
 

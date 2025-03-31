@@ -14,6 +14,7 @@
 
 using System.Linq;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -36,7 +37,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.ResetApplication();
 
                 _ = pivSession.GenerateKeyPair(
-                    slotNumber, PivAlgorithm.EccP256, PivPinPolicy.Always, PivTouchPolicy.Never);
+                    slotNumber, KeyType.P256, PivPinPolicy.Always, PivTouchPolicy.Never);
 
                 byte[] dataToSign = {
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
@@ -45,10 +46,10 @@ namespace Yubico.YubiKey.Piv
                     0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88
                 };
 
-                byte[] signature1 = pivSession.Sign(slotNumber, dataToSign, PivAlgorithm.EccP256);
+                byte[] signature1 = pivSession.Sign(slotNumber, dataToSign, KeyType.P256);
                 Assert.Equal(0x30, signature1[0]);
 
-                byte[] signature2 = pivSession.Sign(slotNumber, dataToSign, PivAlgorithm.EccP256);
+                byte[] signature2 = pivSession.Sign(slotNumber, dataToSign, KeyType.P256);
                 bool isSame = signature1.SequenceEqual(signature2);
                 Assert.False(isSame);
             }
@@ -70,7 +71,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.ResetApplication();
 
                 _ = pivSession.GenerateKeyPair(
-                    slotNumber, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                    slotNumber, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.Never);
 
                 byte[] dataToSign = {
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
@@ -79,10 +80,10 @@ namespace Yubico.YubiKey.Piv
                     0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88
                 };
 
-                byte[] signature1 = pivSession.Sign(slotNumber, dataToSign, PivAlgorithm.EccP256);
+                byte[] signature1 = pivSession.Sign(slotNumber, dataToSign, KeyType.P256);
                 Assert.Equal(0x30, signature1[0]);
 
-                byte[] signature2 = pivSession.Sign(slotNumber, dataToSign, PivAlgorithm.EccP256);
+                byte[] signature2 = pivSession.Sign(slotNumber, dataToSign, KeyType.P256);
                 bool isSame = signature1.SequenceEqual(signature2);
                 Assert.False(isSame);
             }

@@ -14,6 +14,7 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
 
@@ -277,7 +278,7 @@ namespace Yubico.YubiKey.Piv
 
             var pivMetadata = new PivMetadata(testData, 0xF9);
 
-            Assert.True(pivMetadata.Algorithm == PivAlgorithm.Rsa2048);
+            Assert.True(pivMetadata.Algorithm == KeyType.RSA2048.GetPivAlgorithm());
         }
 
         [Fact]
@@ -521,7 +522,7 @@ namespace Yubico.YubiKey.Piv
 
             var pivMetadata = new PivMetadata(testData, 0x9A);
 
-            Assert.True(pivMetadata.Algorithm == PivAlgorithm.EccP256);
+            Assert.True(pivMetadata.Algorithm == KeyType.P256.GetPivAlgorithm());
         }
 
         [Fact]

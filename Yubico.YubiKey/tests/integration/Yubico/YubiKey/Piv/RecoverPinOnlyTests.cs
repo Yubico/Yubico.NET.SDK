@@ -14,6 +14,7 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
@@ -101,7 +102,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                 _ = Assert.Throws<OperationCanceledException>(() => pivSession.GenerateKeyPair(
-                    PivSlot.Authentication, PivAlgorithm.EccP256));
+                    PivSlot.Authentication, KeyType.P256));
             }
 
             using (var pivSession = new PivSession(yubiKey))
@@ -123,8 +124,8 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(0x86, PivAlgorithm.EccP256);
-                Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
+                var publicKey = pivSession.GenerateKeyPair(0x86, KeyType.P256);
+                Assert.Equal(KeyType.P256, publicKey.KeyType);
             }
         }
 
@@ -175,8 +176,8 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(0x87, PivAlgorithm.EccP256);
-                Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
+                var publicKey = pivSession.GenerateKeyPair(0x87, KeyType.P256);
+                Assert.Equal(KeyType.P256, publicKey.KeyType);
             }
 
             using (var pivSession = new PivSession(yubiKey))

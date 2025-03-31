@@ -29,7 +29,7 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(parameters);
-        var decodedParams = AsnPrivateKeyReader.DecodePkcs8EncodedKey(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreateKeyParameters(encoded);
 
         // Assert
         Assert.IsType<RSAPrivateKeyParameters>(decodedParams);
@@ -86,7 +86,7 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(parameters);
-        var decodedParams = AsnPrivateKeyReader.DecodePkcs8EncodedKey(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreateKeyParameters(encoded);
 
         // Assert
         Assert.IsType<ECPrivateKeyParameters>(decodedParams);
@@ -150,7 +150,7 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(parameters.D!, publicPoint, keyType);
-        var decodedParams = AsnPrivateKeyReader.DecodePkcs8EncodedKey(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreateKeyParameters(encoded);
 
         // Assert
         Assert.IsType<ECPrivateKeyParameters>(decodedParams);
@@ -184,7 +184,7 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(testEncodedKeyData, KeyType.Ed25519);
-        var decodedParams = AsnPrivateKeyReader.DecodePkcs8EncodedKey(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreateKeyParameters(encoded);
 
         // Assert
         Assert.IsType<Curve25519PrivateKeyParameters>(decodedParams);
@@ -207,7 +207,7 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(testEncodedKeyData, KeyType.X25519);
-        var decodedParams = AsnPrivateKeyReader.DecodePkcs8EncodedKey(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreateKeyParameters(encoded);
 
         // Assert
         Assert.IsType<Curve25519PrivateKeyParameters>(decodedParams);
@@ -246,31 +246,6 @@ public class AsnPrivateKeyWriterTests
     }
 
     [Theory]
-    [InlineData(KeyType.RSA2048)]
-    [InlineData(KeyType.P256)]
-    public void TestExtensionMethod_WithTestKeys(
-        KeyType keyType)
-    {
-        // Arrange - Get the test private key
-        var testKey = TestKeys.GetTestPrivateKey(keyType);
-
-        // Parse with AsnPrivateKeyReader to get the parameters
-        var privateKeyParameters = AsnPrivateKeyReader.DecodePkcs8EncodedKey(testKey.EncodedKey);
-
-        // Act - Use the extension method
-        var encoded = privateKeyParameters.EncodeToPkcs8();
-
-        // Parse again with AsnPrivateKeyReader
-        var decodedParams = AsnPrivateKeyReader.DecodePkcs8EncodedKey(encoded);
-
-        // Assert by verifying key type and capabilities
-        Assert.Equal(privateKeyParameters.GetType(), decodedParams.GetType());
-
-        // Use functional verification based on key type
-        KeyEquivalenceTestHelper.VerifyFunctionalEquivalence(privateKeyParameters, decodedParams, keyType);
-    }
-
-    [Theory]
     [InlineData(KeyType.RSA1024)]
     [InlineData(KeyType.RSA2048)]
     [InlineData(KeyType.RSA3072)]
@@ -287,11 +262,10 @@ public class AsnPrivateKeyWriterTests
         var testKey = TestKeys.GetTestPrivateKey(keyType);
 
         // Parse with AsnPrivateKeyReader to get the parameters
-        var privateKeyParameters = AsnPrivateKeyReader.DecodePkcs8EncodedKey(testKey.EncodedKey);
+        var privateKeyParameters = AsnPrivateKeyReader.CreateKeyParameters(testKey.EncodedKey);
 
         // Re-encode using our writer
         byte[] reencoded;
-
         switch (privateKeyParameters)
         {
             case RSAPrivateKeyParameters rsaParams:
@@ -300,19 +274,11 @@ public class AsnPrivateKeyWriterTests
             case ECPrivateKeyParameters ecParams:
                 reencoded = AsnPrivateKeyWriter.EncodeToPkcs8(ecParams.Parameters);
                 break;
-            case Curve25519PrivateKeyParameters edParams when keyType == KeyType.Ed25519:
-                reencoded = AsnPrivateKeyWriter.EncodeToPkcs8(edParams.PrivateKey, KeyType.Ed25519);
+            case Curve25519PrivateKeyParameters { KeyType: KeyType.X25519 } cvParams:
+                reencoded = AsnPrivateKeyWriter.EncodeToPkcs8(cvParams.PrivateKey, KeyType.X25519);
                 break;
-            case Curve25519PrivateKeyParameters x25519Params when keyType == KeyType.X25519:
-                reencoded = AsnPrivateKeyWriter.EncodeToPkcs8(x25519Params.PrivateKey,
-                    KeyType.X25519);
-                break;
-            case Ed25519PrivateKeyParameters edParams: // Keep?
-                reencoded = AsnPrivateKeyWriter.EncodeToPkcs8(edParams.PrivateKey, KeyType.Ed25519);
-                break;
-            case X25519PrivateKeyParameters x25519Params: // Keep?
-                reencoded = AsnPrivateKeyWriter.EncodeToPkcs8(x25519Params.PrivateKey,
-                    KeyType.X25519);
+            case Curve25519PrivateKeyParameters { KeyType: KeyType.Ed25519 } cvParams:
+                    reencoded = AsnPrivateKeyWriter.EncodeToPkcs8(cvParams.PrivateKey, KeyType.Ed25519);
                 break;
             default:
                 throw new NotSupportedException(
@@ -320,7 +286,7 @@ public class AsnPrivateKeyWriterTests
         }
 
         // Parse again with AsnPrivateKeyReader
-        var roundTrippedParams = AsnPrivateKeyReader.DecodePkcs8EncodedKey(reencoded);
+        var roundTrippedParams = AsnPrivateKeyReader.CreateKeyParameters(reencoded);
 
         // Assert by verifying key type and capabilities
         Assert.Equal(privateKeyParameters.GetType(), roundTrippedParams.GetType());

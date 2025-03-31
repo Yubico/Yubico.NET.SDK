@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
@@ -23,104 +24,16 @@ namespace Yubico.YubiKey.Piv
     public class PivPrivateKeyTests
     {
         [Theory]
-        // [InlineData(PivAlgorithm.Rsa1024)]
-        // [InlineData(PivAlgorithm.Rsa2048)]
-        // [InlineData(PivAlgorithm.Rsa3072)]
-        // [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        [InlineData(PivAlgorithm.EccEd25519)]
-        [InlineData(PivAlgorithm.EccX25519)]
-        public void CreateFromPrivateKeyParameters_ReturnsPivPrivateKey(
-            PivAlgorithm algorithm)
-        {
-            // Arrange
-            var testKey = TestKeys.GetTestPrivateKey(algorithm);
-            IPrivateKeyParameters privateKeyParameters;
-            switch (algorithm)
-            {
-                // case PivAlgorithm.Rsa1024: // TODO I can get this to work in test, but the public interface doesnt include D value when creating PivPublicKeys for some reason, so the test seems to be have better circumstance than the real world, unless I create an overload ofc..
-                // case PivAlgorithm.Rsa2048:
-                // case PivAlgorithm.Rsa3072:
-                // case PivAlgorithm.Rsa4096:
-                // var rsaParams = testKey.AsRSA().ExportParameters(true);
-                // privateKeyParameters =
-                //     RSAPrivateKeyParameters.CreateFromValue(
-                //         rsaParams.D,
-                //         rsaParams.P, 
-                //         rsaParams.Q,
-                //         rsaParams.DP,
-                //         rsaParams.DQ,
-                //         rsaParams.InverseQ);
-                // Assert.IsAssignableFrom<RSAPrivateKeyParameters>(privateKeyParameters);
-                // break;
-                case PivAlgorithm.EccP256:
-                case PivAlgorithm.EccP384:
-                case PivAlgorithm.EccP521:
-                    privateKeyParameters =
-                        ECPrivateKeyParameters.CreateFromValue(testKey.GetPrivateKey(), algorithm.GetKeyType());
-                    Assert.IsAssignableFrom<ECPrivateKeyParameters>(privateKeyParameters);
-                    break;
-                case PivAlgorithm.EccEd25519:
-                    privateKeyParameters =
-                        Curve25519PrivateKeyParameters.CreateFromValue(testKey.GetPrivateKey(),
-                            KeyType.Ed25519);
-                    Assert.IsAssignableFrom<Curve25519PrivateKeyParameters>(privateKeyParameters);
-                    break;
-                case PivAlgorithm.EccX25519:
-                    privateKeyParameters =
-                        Curve25519PrivateKeyParameters.CreateFromValue(testKey.GetPrivateKey(),
-                            KeyType.X25519);
-                    Assert.IsAssignableFrom<Curve25519PrivateKeyParameters>(privateKeyParameters);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null);
-            }
-
-            // Act
-            var pivPrivateKey = PivPrivateKey.Create(privateKeyParameters);
-
-            // Assert
-            Assert.Equal(algorithm.GetPivKeyDefinition()!.KeyDefinition, pivPrivateKey.GetKeyDefinition());
-            Assert.Equal(algorithm, pivPrivateKey.Algorithm);
-            var testKeyInfo = AsnPrivateKeyReader.DecodePkcs8EncodedKey(testKey.EncodedKey);
-            var actualInfo = AsnPrivateKeyReader.DecodePkcs8EncodedKey(pivPrivateKey.ExportPkcs8PrivateKey());
-            Assert.Equal(testKeyInfo.PrivateKey, actualInfo.PrivateKey);
-        }
-
-        // [Theory]
-        // // [InlineData(PivAlgorithm.Rsa1024)]
-        // [InlineData(PivAlgorithm.EccP256)]
-        // public void Create_ReturnsPivPrivateKey2(PivAlgorithm algorithm) // TODO from PKCS8 is all well and dandy but, we want to support creating a privateKeyParameters using the TLV PivPrivateKey format 
-        // {
-        //     // Arrange
-        //     var testKey = TestKeys.GetPublicKey(algorithm);
-        //     var privateKeyParameters = AsnPrivateKeyReader.FromPkcs8EncodedKey(testKey.KeyBytes);
-        //     var keyObject = PivPrivateKey.Create(privateKeyParameters);
-        // }
-
-        // [Theory]
-        // // [InlineData(PivAlgorithm.Rsa1024)]
-        // [InlineData(PivAlgorithm.EccP256)]
-        // public void Create_ReturnsPivPrivateKey2(PivAlgorithm algorithm) // TODO from PKCS8 is all well and dandy but, we want to support creating a privateKeyParameters using the TLV PivPrivateKey format 
-        // {
-        //     // Arrange
-        //     var testKey = TestKeys.GetPublicKey(algorithm);
-        //     var privateKeyParameters = AsnPrivateKeyReader.FromPkcs8EncodedKey(testKey.KeyBytes);
-        //     var keyObject = PivPrivateKey.Create(privateKeyParameters);
-        // }
-
-        [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
         public void Create_ReturnsPivPrivateKey(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> keyData = SampleKeyPairs.GetPivPrivateKey(algorithm).EncodedPrivateKey;
+            ReadOnlyMemory<byte> keyData = SampleKeyPairs.GetPivPrivateKey(keyType).EncodedPrivateKey;
 
             var keyObject = PivPrivateKey.Create(keyData);
 
@@ -131,34 +44,34 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
         public void Create_SetsAlgorithmCorrectly(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> keyData = SampleKeyPairs.GetPivPrivateKey(algorithm).EncodedPrivateKey;
+            ReadOnlyMemory<byte> keyData = SampleKeyPairs.GetPivPrivateKey(keyType).EncodedPrivateKey;
 
             var keyObject = PivPrivateKey.Create(keyData);
 
-            Assert.Equal(algorithm, keyObject.Algorithm);
+            Assert.Equal(keyType.GetPivAlgorithm(), keyObject.Algorithm);
 
             keyObject.Clear();
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
         public void Create_SetsEncodedCorrectly(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
-            ReadOnlyMemory<byte> encoding = GetCorrectEncoding(algorithm);
+            ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
+            ReadOnlyMemory<byte> encoding = GetCorrectEncoding(keyType);
 
             var keyObject = PivPrivateKey.Create(keyData);
 
@@ -172,13 +85,13 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
         public void Create_SetsPrimePCorrectly(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
-            ReadOnlyMemory<byte> primeP = GetRsaComponent(algorithm, 1);
+            ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
+            ReadOnlyMemory<byte> primeP = GetRsaComponent(keyType, 1);
 
             var keyObject = PivPrivateKey.Create(keyData);
 
@@ -193,13 +106,13 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
         public void Create_SetsPrimeQCorrectly(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
-            ReadOnlyMemory<byte> primeQ = GetRsaComponent(algorithm, 2);
+            ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
+            ReadOnlyMemory<byte> primeQ = GetRsaComponent(keyType, 2);
 
             var keyObject = PivPrivateKey.Create(keyData);
 
@@ -214,13 +127,13 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
         public void Create_SetsExponentPCorrectly(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
-            ReadOnlyMemory<byte> exponentP = GetRsaComponent(algorithm, 3);
+            ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
+            ReadOnlyMemory<byte> exponentP = GetRsaComponent(keyType, 3);
 
             var keyObject = PivPrivateKey.Create(keyData);
 
@@ -235,13 +148,13 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
         public void Create_SetsExponentQCorrectly(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
-            ReadOnlyMemory<byte> exponentQ = GetRsaComponent(algorithm, 4);
+            ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
+            ReadOnlyMemory<byte> exponentQ = GetRsaComponent(keyType, 4);
 
             var keyObject = PivPrivateKey.Create(keyData);
 
@@ -256,13 +169,13 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
         public void Create_SetsCoefficientCorrectly(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
-            ReadOnlyMemory<byte> coefficient = GetRsaComponent(algorithm, 5);
+            ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
+            ReadOnlyMemory<byte> coefficient = GetRsaComponent(keyType, 5);
 
             var keyObject = PivPrivateKey.Create(keyData);
 
@@ -277,13 +190,13 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
         public void CreateEcc_SetsPrivateValueCorrectly(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
-            ReadOnlyMemory<byte> privateValue = GetPrivateValue(algorithm);
+            ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
+            ReadOnlyMemory<byte> privateValue = GetPrivateValue(keyType);
 
             var keyObject = PivPrivateKey.Create(keyData);
 
@@ -299,17 +212,17 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
         public void RsaConstructor_Components_BuildsEncoding(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> primeP = GetRsaComponent(algorithm, 1);
-            ReadOnlyMemory<byte> primeQ = GetRsaComponent(algorithm, 2);
-            ReadOnlyMemory<byte> exponentP = GetRsaComponent(algorithm, 3);
-            ReadOnlyMemory<byte> exponentQ = GetRsaComponent(algorithm, 4);
-            ReadOnlyMemory<byte> coefficient = GetRsaComponent(algorithm, 5);
-            ReadOnlyMemory<byte> encoding = GetCorrectEncoding(algorithm);
+            ReadOnlyMemory<byte> primeP = GetRsaComponent(keyType, 1);
+            ReadOnlyMemory<byte> primeQ = GetRsaComponent(keyType, 2);
+            ReadOnlyMemory<byte> exponentP = GetRsaComponent(keyType, 3);
+            ReadOnlyMemory<byte> exponentQ = GetRsaComponent(keyType, 4);
+            ReadOnlyMemory<byte> coefficient = GetRsaComponent(keyType, 5);
+            ReadOnlyMemory<byte> encoding = GetCorrectEncoding(keyType);
 
             var rsaPrivate = new PivRsaPrivateKey(
                 primeP.Span,
@@ -326,15 +239,15 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
         public void EccConstructor_Components_BuildsEncoding(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> privateValue = GetPrivateValue(algorithm);
-            ReadOnlyMemory<byte> encoding = GetCorrectEncoding(algorithm);
+            ReadOnlyMemory<byte> privateValue = GetPrivateValue(keyType);
+            ReadOnlyMemory<byte> encoding = GetCorrectEncoding(keyType);
 
-            var eccPrivate = new PivEccPrivateKey(privateValue.Span, algorithm);
+            var eccPrivate = new PivEccPrivateKey(privateValue.Span);
 
             ReadOnlyMemory<byte> getEncoding = eccPrivate.EncodedPrivateKey;
 
@@ -343,16 +256,16 @@ namespace Yubico.YubiKey.Piv
             Assert.True(compareResult);
         }
 
-        // [Fact]
-        // public void Create_NullData_ThrowsExcpetion()
-        // {
-        //     _ = Assert.Throws<ArgumentException>(() => PivPrivateKey.Create(null, ));
-        // }
+        [Fact]
+        public void Create_NullData_ThrowsExcpetion()
+        {
+            _ = Assert.Throws<ArgumentException>(() => PivPrivateKey.Create(null));
+        }
 
         [Fact]
         public void Create_BadTag_ThrowsExcpetion()
         {
-            Memory<byte> keyData = GetKeyData(PivAlgorithm.EccP256);
+            Memory<byte> keyData = GetKeyData(KeyType.P256);
             keyData.Span[0] = 0x84;
             _ = Assert.Throws<ArgumentException>(() => PivPrivateKey.Create(keyData));
         }
@@ -366,22 +279,22 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void RsaConstructor_NoPrimeP_ThrowsExcpetion()
         {
-            Memory<byte> keyData = GetKeyData(PivAlgorithm.Rsa1024);
+            Memory<byte> keyData = GetKeyData(KeyType.RSA1024);
             Memory<byte> badData = keyData.Slice(66);
             _ = Assert.Throws<ArgumentException>(() => PivRsaPrivateKey.CreateRsaPrivateKey(badData));
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
         public void RsaConstructor_BadPrimeQ_ThrowsExcpetion(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            ReadOnlyMemory<byte> primeP = GetRsaComponent(algorithm, 1);
-            ReadOnlyMemory<byte> primeQ = GetRsaComponent(algorithm, 2);
-            ReadOnlyMemory<byte> exponentP = GetRsaComponent(algorithm, 3);
-            ReadOnlyMemory<byte> exponentQ = GetRsaComponent(algorithm, 4);
-            ReadOnlyMemory<byte> coefficient = GetRsaComponent(algorithm, 5);
+            ReadOnlyMemory<byte> primeP = GetRsaComponent(keyType, 1);
+            ReadOnlyMemory<byte> primeQ = GetRsaComponent(keyType, 2);
+            ReadOnlyMemory<byte> exponentP = GetRsaComponent(keyType, 3);
+            ReadOnlyMemory<byte> exponentQ = GetRsaComponent(keyType, 4);
+            ReadOnlyMemory<byte> coefficient = GetRsaComponent(keyType, 5);
 
             primeQ = primeQ.Slice(1);
 
@@ -396,28 +309,29 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
         public void EccConstructor_BadPoint_ThrowsExcpetion(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
-            Memory<byte> privateValue = GetCorrectEncoding(algorithm);
+            var privateValue = GetCorrectEncoding(keyType);
             privateValue = privateValue.Slice(3);
+            
             _ = Assert.Throws<ArgumentException>(() =>
-                PivEccPublicKey.CreateFromPublicPoint(privateValue, algorithm.GetKeyType()));
+                new PivEccPublicKey(privateValue.Span));
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
         public void GetPivPrivateKey_FromPem(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
             PivPrivateKey privateKey;
 
-            bool isValid = GetPemKey(algorithm, out string pemKey);
+            bool isValid = GetPemKey(keyType, out string pemKey);
             Assert.True(isValid);
 
             string b64EncodedKey = pemKey
@@ -467,11 +381,11 @@ namespace Yubico.YubiKey.Piv
                 offset = keySize - eccParams.D!.Length;
                 Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
 
-                var eccPriKey = new PivEccPrivateKey(privateValue, algorithm);
+                var eccPriKey = new PivEccPrivateKey(privateValue);
                 privateKey = (PivPrivateKey)eccPriKey;
             }
 
-            Assert.Equal(algorithm, privateKey.Algorithm);
+            Assert.Equal(keyType.GetPivAlgorithm(), privateKey.Algorithm);
         }
 
         // Read the tag in the buffer at the given offset. Then read the length
@@ -536,28 +450,28 @@ namespace Yubico.YubiKey.Piv
         }
 
         private static Memory<byte> GetPrivateValue(
-            PivAlgorithm algorithm)
+            KeyType keyType)
         {
             if (!keyType.GetKeyDefinition().IsEcKey)
             {
                 return Memory<byte>.Empty;
             }
 
-            Memory<byte> keyData = GetCorrectEncoding(algorithm);
+            Memory<byte> keyData = GetCorrectEncoding(keyType);
             Memory<byte> privateValue = keyData.Slice(2);
             return privateValue;
         }
 
         // if tag is 01, get the primeP, if 02, get primeQ, and so on.
         private static Memory<byte> GetRsaComponent(
-            PivAlgorithm algorithm,
+            KeyType keyType,
             int tag)
         {
             int start = 2;
             int count = 64;
-            if (algorithm != PivAlgorithm.Rsa1024)
+            if (keyType != KeyType.RSA1024)
             {
-                if (algorithm != PivAlgorithm.Rsa2048)
+                if (keyType != KeyType.RSA2048)
                 {
                     return Memory<byte>.Empty;
                 }
@@ -573,14 +487,14 @@ namespace Yubico.YubiKey.Piv
 
             start += (start + count) * (tag - 1);
 
-            Memory<byte> encoding = GetCorrectEncoding(algorithm);
+            Memory<byte> encoding = GetCorrectEncoding(keyType);
             return encoding.Slice(start, count);
         }
 
         private static Memory<byte> GetCorrectEncoding(
-            PivAlgorithm algorithm) => algorithm switch
+            KeyType keyType) => keyType switch
         {
-            PivAlgorithm.Rsa2048 => new Memory<byte>(new byte[]
+            KeyType.RSA2048 => new Memory<byte>(new byte[]
             {
                 0x01, 0x81, 0x80,
                 0xBE, 0xA1, 0x5B, 0x22, 0xFD, 0xA3, 0x6A, 0x10, 0x02, 0x72, 0xA2, 0xF8, 0x24, 0xC7, 0xA1, 0x92,
@@ -628,13 +542,13 @@ namespace Yubico.YubiKey.Piv
                 0xDD, 0x17, 0xC3, 0xD7, 0x34, 0x61, 0x35, 0x8C, 0x96, 0xF4, 0x6F, 0x53, 0x00, 0x22, 0x3E, 0x1F,
                 0x49, 0x9C, 0x11, 0x07, 0xF9, 0xD2, 0xB7, 0xDF, 0x1F, 0x3A, 0x54, 0xC6, 0xCD, 0xB0, 0x1C, 0x07
             }),
-            _ => GetKeyData(algorithm),
+            _ => GetKeyData(keyType),
         };
 
         private static Memory<byte> GetKeyData(
-            PivAlgorithm algorithm) => algorithm switch
+            KeyType keyType) => keyType switch
         {
-            PivAlgorithm.Rsa1024 => new Memory<byte>(new byte[]
+            KeyType.RSA1024 => new Memory<byte>(new byte[]
             {
                 0x01, 0x40, 0x9E, 0x30, 0x1E, 0x17, 0x0D, 0x31, 0x39, 0x30, 0x32, 0x31, 0x38, 0x31, 0x32, 0x33,
                 0x32, 0x32, 0x32, 0x5A, 0x17, 0x0D, 0x32, 0x30, 0x30, 0x32, 0x31, 0x38, 0x31, 0x32, 0x33, 0x32,
@@ -658,7 +572,7 @@ namespace Yubico.YubiKey.Piv
                 0x49, 0x9A, 0x79, 0x97, 0x56, 0x74, 0x5A, 0x00, 0xFF, 0xED, 0x46, 0x69, 0x4C, 0xF2, 0xF6, 0x3B,
                 0xB3, 0x25, 0x53, 0x70, 0xE9, 0x04, 0x1D, 0xA9, 0x9D, 0xFC
             }),
-            PivAlgorithm.Rsa2048 => new Memory<byte>(new byte[]
+            KeyType.RSA2048 => new Memory<byte>(new byte[]
             {
                 0x02, 0x81, 0x80,
                 0xCB, 0x28, 0x4D, 0x6C, 0xFE, 0xDB, 0x36, 0xDF, 0x73, 0x00, 0xB1, 0xC7, 0x9D, 0x34, 0x89, 0x61,
@@ -706,7 +620,7 @@ namespace Yubico.YubiKey.Piv
                 0x5A, 0x30, 0x25, 0x31, 0x23, 0x30, 0x21, 0x06, 0x03, 0x55, 0x04, 0x03, 0x0C, 0x1A, 0x59, 0x75,
                 0x62, 0x69, 0x4B, 0x65, 0x79, 0x20, 0x50, 0x49, 0x56, 0x20, 0x41, 0x74, 0x74, 0x65, 0x73, 0x74,
             }),
-            PivAlgorithm.EccP256 => new Memory<byte>(new byte[]
+            KeyType.P256 => new Memory<byte>(new byte[]
             {
                 0x06, 0x20,
                 0x0C, 0x3B, 0x19, 0x42, 0x63, 0x20, 0x8C, 0xA1, 0x2F, 0xEE, 0x1C, 0xB4, 0xD8, 0x81, 0x96, 0x9F,
@@ -722,16 +636,16 @@ namespace Yubico.YubiKey.Piv
         };
 
         private static bool GetPemKey(
-            PivAlgorithm algorithm,
+            KeyType keyType,
             out string pemKey)
         {
-            switch (algorithm)
+            switch (keyType)
             {
                 default:
                     pemKey = "no key";
                     return false;
 
-                case PivAlgorithm.Rsa1024:
+                case KeyType.RSA1024:
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAOx0RJUAUd0+rhhv\n" +
@@ -751,7 +665,7 @@ namespace Yubico.YubiKey.Piv
                         "-----END PRIVATE KEY-----";
                     break;
 
-                case PivAlgorithm.Rsa2048:
+                case KeyType.RSA2048:
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCgsyBkABsCTCzz\n" +
@@ -783,7 +697,7 @@ namespace Yubico.YubiKey.Piv
                         "-----END PRIVATE KEY-----";
                     break;
 
-                case PivAlgorithm.EccP256:
+                case KeyType.P256:
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgFWkUnZ613jEzqIKn\n" +
@@ -792,7 +706,7 @@ namespace Yubico.YubiKey.Piv
                         "-----END PRIVATE KEY-----";
                     break;
 
-                case PivAlgorithm.EccP384:
+                case KeyType.P384:
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDCy4BfV3HHsGbmN1sL7\n" +
@@ -804,6 +718,40 @@ namespace Yubico.YubiKey.Piv
             }
 
             return true;
+        }
+        private static byte[] GetSubjectPrivateKeyInfo(
+            KeyType keyType,
+            IPrivateKeyParameters privateKeyParameters)
+        {
+            byte[] subjectPrivateKeyInfo;
+            switch (keyType)
+            {
+                case KeyType.RSA1024:
+                case KeyType.RSA2048:
+                case KeyType.RSA3072:
+                case KeyType.RSA4096:
+                    Assert.IsAssignableFrom<RSAPrivateKeyParameters>(privateKeyParameters);
+                    var rsa = RSA.Create(((RSAPrivateKeyParameters)privateKeyParameters).Parameters);
+                    subjectPrivateKeyInfo = rsa.ExportPkcs8PrivateKey();
+                    break;
+                case KeyType.P256:
+                case KeyType.P384:
+                case KeyType.P521:
+                    Assert.IsAssignableFrom<ECPrivateKeyParameters>(privateKeyParameters);
+                    var ecDsa = ECDsa.Create(((ECPrivateKeyParameters)privateKeyParameters).Parameters);
+                    subjectPrivateKeyInfo = ecDsa.ExportPkcs8PrivateKey();
+                    break;
+                case KeyType.Ed25519:
+                case KeyType.X25519:
+                    Assert.IsAssignableFrom<Curve25519PrivateKeyParameters>(privateKeyParameters);
+                    subjectPrivateKeyInfo =
+                        ((Curve25519PrivateKeyParameters)privateKeyParameters).ExportPkcs8PrivateKey();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null);
+            }
+
+            return subjectPrivateKeyInfo;
         }
     }
 }

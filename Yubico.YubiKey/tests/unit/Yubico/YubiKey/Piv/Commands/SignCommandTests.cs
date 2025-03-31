@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -24,8 +25,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
-            byte[] digest = PivCommandResponseTestData.GetDigestData(PivAlgorithm.Rsa1024);
-            var signCommand = new AuthenticateSignCommand(digest, 0x9A, PivAlgorithm.Rsa1024);
+            byte[] digest = PivCommandResponseTestData.GetDigestData(KeyType.RSA1024);
+            var signCommand = new AuthenticateSignCommand(digest, 0x9A, KeyType.RSA1024.GetPivAlgorithm());
 
             Assert.True(signCommand is IYubiKeyCommand<AuthenticateSignResponse>);
         }
@@ -45,7 +46,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(0x99)]
         public void Constructor_BadSlotNumber_ThrowsException(byte slotNumber)
         {
-            _ = Assert.Throws<ArgumentException>(() => GetCommandObject(slotNumber, PivAlgorithm.EccP256));
+            _ = Assert.Throws<ArgumentException>(() => GetCommandObject(slotNumber, KeyType.P256));
         }
 
         [Theory]
@@ -66,7 +67,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Application_Piv()
         {
-            byte[] digest = PivCommandResponseTestData.GetDigestData(PivAlgorithm.Rsa2048);
+            byte[] digest = PivCommandResponseTestData.GetDigestData(KeyType.RSA2048);
             var command = new AuthenticateSignCommand(digest, 0x95);
 
             YubiKeyApplication application = command.Application;
@@ -75,13 +76,13 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(0x9A, PivAlgorithm.EccP256)]
-        [InlineData(0x9C, PivAlgorithm.EccP384)]
-        [InlineData(0x82, PivAlgorithm.Rsa1024)]
-        [InlineData(0x83, PivAlgorithm.Rsa2048)]
-        public void Constructor_Property_SlotNum(byte slotNumber, PivAlgorithm algorithm)
+        [InlineData(0x9A, KeyType.P256)]
+        [InlineData(0x9C, KeyType.P384)]
+        [InlineData(0x82, KeyType.RSA1024)]
+        [InlineData(0x83, KeyType.RSA2048)]
+        public void Constructor_Property_SlotNum(byte slotNumber, KeyType keyType)
         {
-            AuthenticateSignCommand command = GetCommandObject(slotNumber, algorithm);
+            AuthenticateSignCommand command = GetCommandObject(slotNumber, keyType);
 
             byte getSlotNum = command.SlotNumber;
 
@@ -89,13 +90,13 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero(PivAlgorithm algorithm)
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        public void CreateCommandApdu_GetClaProperty_ReturnsZero(KeyType keyType)
         {
-            CommandApdu cmdApdu = GetSignCommandApdu(0x8F, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x8F, keyType);
 
             byte Cla = cmdApdu.Cla;
 
@@ -103,15 +104,15 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        public void CreateCommandApdu_GetInsProperty_ReturnsHex87(PivAlgorithm algorithm)
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        public void CreateCommandApdu_GetInsProperty_ReturnsHex87(KeyType keyType)
         {
-            CommandApdu cmdApdu = GetSignCommandApdu(0x90, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x90, keyType);
 
             byte Ins = cmdApdu.Ins;
 
@@ -119,29 +120,29 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(PivAlgorithm algorithm)
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(KeyType keyType)
         {
-            CommandApdu cmdApdu = GetSignCommandApdu(0x91, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x91, keyType);
 
             byte P1 = cmdApdu.P1;
 
-            Assert.Equal((byte)algorithm, P1);
+            Assert.Equal((byte)keyType.GetPivAlgorithm(), P1);
         }
 
         [Theory]
-        [InlineData(0x9D, PivAlgorithm.EccP256)]
-        [InlineData(0x9E, PivAlgorithm.EccP384)]
-        [InlineData(0x92, PivAlgorithm.Rsa1024)]
-        [InlineData(0x93, PivAlgorithm.Rsa2048)]
-        public void CreateCommandApdu_GetP2Property_ReturnsSlotNum(byte slotNumber, PivAlgorithm algorithm)
+        [InlineData(0x9D, KeyType.P256)]
+        [InlineData(0x9E, KeyType.P384)]
+        [InlineData(0x92, KeyType.RSA1024)]
+        [InlineData(0x93, KeyType.RSA2048)]
+        public void CreateCommandApdu_GetP2Property_ReturnsSlotNum(byte slotNumber, KeyType keyType)
         {
-            CommandApdu cmdApdu = GetSignCommandApdu(slotNumber, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(slotNumber, keyType);
 
             byte P2 = cmdApdu.P2;
 
@@ -149,13 +150,13 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256, 38)]
-        [InlineData(PivAlgorithm.EccP384, 54)]
-        [InlineData(PivAlgorithm.Rsa1024, 136)]
-        [InlineData(PivAlgorithm.Rsa2048, 266)]
-        public void CreateCommandApdu_GetNcProperty_ReturnsCorrect(PivAlgorithm algorithm, int expected)
+        [InlineData(KeyType.P256, 38)]
+        [InlineData(KeyType.P384, 54)]
+        [InlineData(KeyType.RSA1024, 136)]
+        [InlineData(KeyType.RSA2048, 266)]
+        public void CreateCommandApdu_GetNcProperty_ReturnsCorrect(KeyType keyType, int expected)
         {
-            CommandApdu cmdApdu = GetSignCommandApdu(0x94, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x94, keyType);
 
             int Nc = cmdApdu.Nc;
 
@@ -163,12 +164,12 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        public void CreateCommandApdu_GetNeProperty_ReturnsZero(PivAlgorithm algorithm)
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.RSA1024)]
+        public void CreateCommandApdu_GetNeProperty_ReturnsZero(KeyType keyType)
         {
-            CommandApdu cmdApdu = GetSignCommandApdu(0x95, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x95, keyType);
 
             int Ne = cmdApdu.Ne;
 
@@ -176,18 +177,18 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        public void CreateCommandApdu_GetData_ReturnsCorrect(PivAlgorithm algorithm)
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        public void CreateCommandApdu_GetData_ReturnsCorrect(KeyType keyType)
         {
-            byte[] prefix = GetDigestDataPrefix(algorithm);
-            byte[] digest = PivCommandResponseTestData.GetDigestData(algorithm);
+            byte[] prefix = GetDigestDataPrefix(keyType);
+            byte[] digest = PivCommandResponseTestData.GetDigestData(keyType);
             var expected = new List<byte>(prefix);
             expected.AddRange(digest);
 
-            CommandApdu cmdApdu = GetSignCommandApdu(0x85, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x85, keyType);
 
             ReadOnlyMemory<byte> data = cmdApdu.Data;
 
@@ -207,23 +208,23 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
 
-            AuthenticateSignCommand command = GetCommandObject(0x86, PivAlgorithm.EccP256);
+            AuthenticateSignCommand command = GetCommandObject(0x86, KeyType.P256);
 
             AuthenticateSignResponse response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is AuthenticateSignResponse);
         }
 
-        private static CommandApdu GetSignCommandApdu(byte slotNumber, PivAlgorithm algorithm)
+        private static CommandApdu GetSignCommandApdu(byte slotNumber, KeyType keyType)
         {
-            AuthenticateSignCommand cmd = GetCommandObject(slotNumber, algorithm);
+            AuthenticateSignCommand cmd = GetCommandObject(slotNumber, keyType);
 
             return cmd.CreateCommandApdu();
         }
 
-        private static AuthenticateSignCommand GetCommandObject(byte slotNumber, PivAlgorithm algorithm)
+        private static AuthenticateSignCommand GetCommandObject(byte slotNumber, KeyType keyType)
         {
-            byte[] digest = PivCommandResponseTestData.GetDigestData(algorithm);
+            byte[] digest = PivCommandResponseTestData.GetDigestData(keyType);
             var cmd = new AuthenticateSignCommand(digest, slotNumber);
 
             return cmd;
@@ -248,22 +249,22 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 default:
                 case 1:
-                    digest = PivCommandResponseTestData.GetDigestData(PivAlgorithm.Rsa1024);
+                    digest = PivCommandResponseTestData.GetDigestData(KeyType.RSA1024);
                     break;
 
                 case 3:
                 case 4:
-                    digest = PivCommandResponseTestData.GetDigestData(PivAlgorithm.Rsa2048);
+                    digest = PivCommandResponseTestData.GetDigestData(KeyType.RSA2048);
                     break;
 
                 case 5:
                 case 6:
-                    digest = PivCommandResponseTestData.GetDigestData(PivAlgorithm.EccP256);
+                    digest = PivCommandResponseTestData.GetDigestData(KeyType.P256);
                     break;
 
                 case 7:
                 case 8:
-                    digest = PivCommandResponseTestData.GetDigestData(PivAlgorithm.EccP384);
+                    digest = PivCommandResponseTestData.GetDigestData(KeyType.P384);
                     break;
             }
 
@@ -280,12 +281,12 @@ namespace Yubico.YubiKey.Piv.Commands
             return digest;
         }
 
-        // Get the TL TL TL prefix for each algorithm.
-        private static byte[] GetDigestDataPrefix(PivAlgorithm algorithm) => algorithm switch
+        // Get the TL TL TL prefix for each keyType.
+        private static byte[] GetDigestDataPrefix(KeyType keyType) => keyType switch
         {
-            PivAlgorithm.Rsa2048 => new byte[] { 0x7C, 0x82, 0x01, 0x06, 0x82, 0x00, 0x81, 0x82, 0x01, 0x00 },
-            PivAlgorithm.EccP256 => new byte[] { 0x7C, 0x24, 0x82, 0x00, 0x81, 0x20 },
-            PivAlgorithm.EccP384 => new byte[] { 0x7C, 0x34, 0x82, 0x00, 0x81, 0x30 },
+            KeyType.RSA2048 => new byte[] { 0x7C, 0x82, 0x01, 0x06, 0x82, 0x00, 0x81, 0x82, 0x01, 0x00 },
+            KeyType.P256 => new byte[] { 0x7C, 0x24, 0x82, 0x00, 0x81, 0x20 },
+            KeyType.P384 => new byte[] { 0x7C, 0x34, 0x82, 0x00, 0x81, 0x30 },
             _ => new byte[] { 0x7C, 0x81, 0x85, 0x82, 0x00, 0x81, 0x81, 0x80 },
         };
     }

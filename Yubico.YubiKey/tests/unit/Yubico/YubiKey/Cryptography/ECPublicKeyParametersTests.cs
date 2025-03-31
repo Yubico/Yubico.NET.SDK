@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.Cryptography
             var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
 
             // Act
-            var publicKeyParams = KeyParametersPivHelper.CreatePublicParametersFromPivEncoding<ECPublicKeyParameters>(pivPublicKeyEncoded);
+            var publicKeyParams = KeyParametersPivHelper.CreatePublicEcFromPivEncoding(pivPublicKeyEncoded);
             var resultParameters = publicKeyParams.Parameters;
 
             // Assert
@@ -32,41 +32,58 @@ namespace Yubico.YubiKey.Cryptography
         }
         
         
-        // [Fact]
-        // public void CreateFromPkcs8_WithValidParameters_CreatesInstance()
-        // {
-        //     // Arrange
-        //     using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-        //     var parameters = ecdsa.ExportParameters(true);
-        //
-        //     // Act
-        //     var publicKey = ecdsa.ExportSubjectPublicKeyInfo();
-        //     var publicKeyParams = ECPublicKeyParameters.CreateFromPkcs8(publicKey);
-        //
-        //     // Assert
-        //     Assert.NotNull(publicKeyParams.Parameters.D);
-        //     Assert.Equal(parameters.D, publicKeyParams.Parameters.D);
-        //     Assert.Equal(parameters.Q.X, publicKeyParams.Parameters.Q.X);
-        //     Assert.Equal(parameters.Q.Y, publicKeyParams.Parameters.Q.Y);
-        // }
-        //
-        // [Fact]
-        // public void CreateFromValue_WithValidParameters_CreatesInstance()
-        // {
-        //     // Arrange
-        //     using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-        //     var parameters = ecdsa.ExportParameters(true);
-        //
-        //     // Act
-        //     var publicKeyParams =
-        //         ECPublicKeyParameters.CreateFromValue(parameters.D!, KeyType.P256);
-        //
-        //     // Assert
-        //     Assert.NotNull(publicKeyParams.Parameters.D);
-        //     Assert.Equal(parameters.D, publicKeyParams.Parameters.D);
-        //     Assert.Equal(parameters.Q.X, publicKeyParams.Parameters.Q.X);
-        //     Assert.Equal(parameters.Q.Y, publicKeyParams.Parameters.Q.Y);
-        // }
+        [Theory]
+        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.P521)]
+        public void CreateECDsaFromPkcs8EncodedKey_WithValidParameters_CreatesInstance(KeyType keyType)
+        {
+            // Arrange
+            var curve = ECCurve.CreateFromValue(KeyDefinitions.GetByKeyType(keyType).CurveOid!);
+            using var ecdsa = ECDsa.Create(curve);
+            var parameters = ecdsa.ExportParameters(false);
+        
+            // Act
+            var publicKey = ecdsa.ExportSubjectPublicKeyInfo();
+            var publicKeyParams = ECPublicKeyParameters.CreateFromPkcs8(publicKey);
+            var ecPublicKeyParams = publicKeyParams as ECPublicKeyParameters;
+            Assert.NotNull(ecPublicKeyParams);
+
+            // Assert
+            Assert.Equal(parameters.Q.X, ecPublicKeyParams.Parameters.Q.X);
+            Assert.Equal(parameters.Q.Y, ecPublicKeyParams.Parameters.Q.Y);
+        }
+        
+        [Theory]
+        [InlineData(KeyType.P256)]
+        public void CreateFromValue_WithValidParameters_CreatesInstance(KeyType keyType)
+        {
+            // Arrange
+            var testPublicKey = TestKeys.GetTestPublicKey(keyType);
+            
+            // Act
+            var testPublicPoint = testPublicKey.GetPublicPoint();
+            var publicKeyParams = ECPublicKeyParameters.CreateFromValue(testPublicPoint, keyType);
+            var ecPublicKeyParams = publicKeyParams as ECPublicKeyParameters;
+            Assert.NotNull(ecPublicKeyParams);
+
+            // Assert
+            Assert.Equal(testPublicPoint, ecPublicKeyParams.PublicPoint);
+        }
+        
+        [Theory]
+        [InlineData(KeyType.X25519)]
+        public void CreateFromValue_WithInvalidParameters_CreatesInstance(KeyType keyType)
+        {
+            // Arrange
+            var testPublicKey = TestKeys.GetTestPublicKey(keyType);
+            var testPublicPoint = testPublicKey.GetPublicPoint();
+            // Act, Assert
+            Assert.Throws<ArgumentException>(() =>
+            {
+                ECPublicKeyParameters.CreateFromValue(testPublicPoint, keyType);
+            });
+        }
         
         [Fact]
         public void Constructor_WithValidPublicParameters_CreatesInstance()

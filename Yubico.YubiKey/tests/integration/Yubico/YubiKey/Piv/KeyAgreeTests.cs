@@ -25,40 +25,51 @@ namespace Yubico.YubiKey.Piv
     [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class KeyAgreeTests
     {
-        [Theory]
-        [InlineData(PivAlgorithm.EccP256, PivPinPolicy.Always, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP256, PivPinPolicy.Never, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP384, PivPinPolicy.Always, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP384, PivPinPolicy.Never, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccX25519, PivPinPolicy.Never, StandardTestDevice.Fw5)]
+        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        [InlineData(KeyType.P256, PivPinPolicy.Always, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P256, PivPinPolicy.Never, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P384, PivPinPolicy.Always, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P384, PivPinPolicy.Never, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.X25519, PivPinPolicy.Never, StandardTestDevice.Fw5)]
         public void KeyAgree_Succeeds(
-            PivAlgorithm algorithm,
+            KeyType keyType,
             PivPinPolicy pinPolicy,
             StandardTestDevice testDeviceType)
         {
             // Arrange
-            var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(algorithm);
-            var pivPrivateKey = testPrivateKey.AsPivPrivateKey();
-            var pivPublicKey = testPublicKey.AsPivPublicKey();
-            var pivPublicKeyPeer = GetPivPublicKeyPeer();
-            
+            var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var privateKeyParameters = AsnPrivateKeyReader.CreateKeyParameters(testPrivateKey.EncodedKey);
+            IPublicKeyParameters publicKeyPeer;
+            if (keyType is KeyType.X25519)
+            {
+                var testSelectedPublicKeyPeer = TestKeys.GetTestPublicKey(keyType, 2);
+                publicKeyPeer = AsnPublicKeyReader.CreateKeyParameters(testSelectedPublicKeyPeer.EncodedKey);
+            }
+            else
+            {
+                var oid = keyType.ToCurveOid()!;
+                var curve = ECCurve.CreateFromValue(oid); 
+                publicKeyPeer = ECPublicKeyParameters.CreateFromParameters(ECDsa.Create(curve).ExportParameters(false));
+            }
+
             using var pivSession = GetSession(testDevice);
-
-            pivSession.ImportPrivateKey(0x85, pivPrivateKey, pinPolicy, PivTouchPolicy.Never);
-            var onYubiKeyX25519Key = pivSession.GetMetadata(0x85);
-
-            // Verify that the public key is the same as the one we just imported on the YubiKey
-            Assert.Equal(onYubiKeyX25519Key.PublicKey.YubiKeyEncodedPublicKey, pivPublicKey.YubiKeyEncodedPublicKey);
-
+            pivSession.ImportPrivateKey(0x85, privateKeyParameters, pinPolicy, PivTouchPolicy.Never);
+            var metadata = pivSession.GetMetadata(0x85);
+            
             // Act
-            var pivEccPublicKeyPeer = algorithm is PivAlgorithm.EccX25519
-                ? (PivEccPublicKey)pivPublicKeyPeer // For EccEd25519 and EccX25519, we wanted to test with a different public key
-                : (PivEccPublicKey)pivPublicKey; // For other algorithms, we decided its fine to use the same public key
-            var sharedSecret = pivSession.KeyAgree(0x85, pivEccPublicKeyPeer);
+            var sharedSecret = pivSession.KeyAgree(0x85, publicKeyPeer);
 
             // Assert
-            if (algorithm is  PivAlgorithm.EccX25519)
+            byte[] publicPoint = metadata.PublicKeyParameters switch
+            {
+                ECPublicKeyParameters ecDsa => ecDsa.PublicPoint.ToArray(),
+                Curve25519PublicKeyParameters edDsa => edDsa.PublicPoint.ToArray(),
+                _ => throw new ArgumentException("Invalid public key type")
+            };
+            
+            Assert.Equal(testPublicKey.GetPublicPoint(), publicPoint);
+            if (keyType is KeyType.X25519)
             {
                 const string keyAgreeFilename = "x25519_private_and_public2_shared_secret.bin";
                 var expectedSharedSecret = TestCrypto.ReadTestData(keyAgreeFilename);
@@ -66,46 +77,29 @@ namespace Yubico.YubiKey.Piv
             }
             else
             {
-                var expectedSecretLength = (pivEccPublicKeyPeer.PublicPoint.Length - 1) / 2;
+                var expectedSecretLength = (publicKeyPeer.KeyDefinition.LengthInBytes - 1) / 2;
                 Assert.Equal(expectedSecretLength, sharedSecret.Length);
-            }
-
-            return;
-
-            PivPublicKey GetPivPublicKeyPeer()
-            {
-                PivPublicKey pivPublicKeyPeer1 = null!;
-                try
-                {
-                    var testPublicKeyPeer = TestKeys.GetTestPublicKey(algorithm, 2);
-                    pivPublicKeyPeer1 = testPublicKeyPeer.AsPivPublicKey();
-                }
-                catch (FileNotFoundException)
-                {
-                
-                }
-
-                return pivPublicKeyPeer1;
             }
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha1, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha256, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha384, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha512, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha1, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha256, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha384, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha512, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P256, 0x8a, RsaFormat.Sha1, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P256, 0x8a, RsaFormat.Sha256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P256, 0x8a, RsaFormat.Sha384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P256, 0x8a, RsaFormat.Sha512, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P384, 0x8b, RsaFormat.Sha1, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P384, 0x8b, RsaFormat.Sha256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P384, 0x8b, RsaFormat.Sha384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.P384, 0x8b, RsaFormat.Sha512, StandardTestDevice.Fw5)]
+        [Obsolete("Fix later")] // TODO
         public void KeyAgree_MatchesCSharp(
-            PivAlgorithm algorithm,
+            KeyType keyType,
             byte slotNumber,
             int digestAlgorithm,
             StandardTestDevice testDeviceType)
         {
             // Build the correspondent objects.
-            bool isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out _, out _, out var privateKeyPem);
+            bool isValid = SampleKeyPairs.GetKeysAndCertPem(keyType, true, out _, out _, out var privateKeyPem);
             Assert.True(isValid);
             var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
 
@@ -118,7 +112,7 @@ namespace Yubico.YubiKey.Piv
             privateKey.Clear();
 
             // Build the YubiKey objects.
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out _, out privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out _, out privateKeyPem);
             privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
             PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
@@ -164,7 +158,7 @@ namespace Yubico.YubiKey.Piv
         public void NoKeyInSlot_KeyAgree_Exception(
             StandardTestDevice testDeviceType)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.EccP384, false, out _, out var publicKeyPem, out _);
+            _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.P384, false, out _, out var publicKeyPem, out _);
             var publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
             PivPublicKey pivPublicKey = publicKey.GetPivPublicKey();
 

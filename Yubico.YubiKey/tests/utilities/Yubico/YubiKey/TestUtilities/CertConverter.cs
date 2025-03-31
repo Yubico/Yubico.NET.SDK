@@ -151,7 +151,9 @@ namespace Yubico.YubiKey.TestUtilities
             
             if (Algorithm.IsEcc())
             {
-                return PivEccPublicKey.CreateFromPublicPoint(_certificateObject.PublicKey.EncodedKeyValue.RawData, Algorithm.GetKeyType());
+                // return PivEccPublicKey.CreateFromPublicPoint(_certificateObject.PublicKey.EncodedKeyValue.RawData, Algorithm.GetKeyType());
+                return new PivEccPublicKey(_certificateObject.PublicKey.EncodedKeyValue.RawData);
+
             }
             throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
         }

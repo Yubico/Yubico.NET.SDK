@@ -14,11 +14,7 @@
 
 using System;
 using System.Globalization;
-using System.Linq;
-using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
 using Yubico.Core.Tlv;
-using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -64,13 +60,7 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public sealed class PivRsaPublicKey : PivPublicKey
     {
-        private const int ValidExponentLength = 3;
-        private const int PublicComponentCount = 2;
-        private const int ModulusIndex = 0;
-        private const int ExponentIndex = 1;
-
-        private static readonly byte[] ExponentF4 = { 0x01, 0x00, 0x01 };
-
+        private readonly byte[] _exponentF4 = { 0x01, 0x00, 0x01 };
         private Memory<byte> _modulus;
         private Memory<byte> _publicExponent;
 
@@ -79,16 +69,6 @@ namespace Yubico.YubiKey.Piv
         private PivRsaPublicKey()
         {
         }
-
-        /// <summary>
-        /// Contains the modulus portion of the RSA public key.
-        /// </summary>
-        public ReadOnlySpan<byte> Modulus => _modulus.Span;
-
-        /// <summary>
-        /// Contains the public exponent portion of the RSA public key.
-        /// </summary>
-        public ReadOnlySpan<byte> PublicExponent => _publicExponent.Span;
 
         /// <summary>
         /// Create a new instance of an RSA public key object based on the
@@ -107,7 +87,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivRsaPublicKey(ReadOnlySpan<byte> modulus, ReadOnlySpan<byte> publicExponent)
         {
-            if (!LoadRsaPublicKey(modulus, publicExponent))
+            if (LoadRsaPublicKey(modulus, publicExponent) == false)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -116,36 +96,58 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        private PivRsaPublicKey(
-            Memory<byte> modulus,
-            Memory<byte> publicExponent,
-            Memory<byte> pivEncodedKey,
-            Memory<byte> yubiKeyEncodedKey,
-            Memory<byte> encodedKey,
-            PivAlgorithm algorithm,
-            KeyDefinition keyDefinition)
-        {
-            _modulus = modulus;
-            _publicExponent = publicExponent;
-            YubiKeyEncodedKey = yubiKeyEncodedKey;
-            EncodedKey = encodedKey;
-            PivEncodedKey = pivEncodedKey;
-            Algorithm = algorithm;
-            KeyDefinition = keyDefinition;
-        }
+        /// <summary>
+        /// Contains the modulus portion of the RSA public key.
+        /// </summary>
+        public ReadOnlySpan<byte> Modulus => _modulus.Span;
 
-        internal static bool CanCreate(ReadOnlyMemory<byte> encodedPublicKey)
+        /// <summary>
+        /// Contains the public exponent portion of the RSA public key.
+        /// </summary>
+        public ReadOnlySpan<byte> PublicExponent => _publicExponent.Span;
+
+        /// <summary>
+        /// Try to create a new instance of an RSA public key object based on the
+        /// encoding.
+        /// </summary>
+        /// <remarks>
+        /// This static method will build a <c>PivRsaPublicKey</c> object and set
+        /// the output parameter <c>publicKeyObject</c> to the resulting key. If
+        /// the encoding is not of a supported RSA public key, it will return
+        /// false.
+        /// </remarks>
+        /// <param name="publicKeyObject">
+        /// Where the resulting public key object will be deposited.
+        /// </param>
+        /// <param name="encodedPublicKey">
+        /// The PIV TLV encoding.
+        /// </param>
+        /// <returns>
+        /// True if the method was able to create a new RSA public key object,
+        /// false otherwise.
+        /// </returns>
+        internal static bool TryCreate(out PivPublicKey publicKeyObject,
+                                       ReadOnlyMemory<byte> encodedPublicKey)
         {
+            const int PublicComponentCount = 2;
+            const int ModulusIndex = 0;
+            const int ExponentIndex = 1;
+            
+            var returnValue = new PivRsaPublicKey();
+            publicKeyObject = returnValue;
+
             try
             {
                 var tlvReader = new TlvReader(encodedPublicKey);
                 int tag = tlvReader.PeekTag(2);
-                if (tag == PublicKeyTag)
+
+                if (tag == PivConstants.PublicKeyTag)
                 {
                     tlvReader = tlvReader.ReadNestedTlv(tag);
                 }
 
                 var valueArray = new ReadOnlyMemory<byte>[PublicComponentCount];
+
                 while (tlvReader.HasData)
                 {
                     int valueIndex;
@@ -153,12 +155,12 @@ namespace Yubico.YubiKey.Piv
 
                     switch (tag)
                     {
-                        case ModulusTag:
+                        case PivConstants.PublicRSAModulusTag:
                             valueIndex = ModulusIndex;
 
                             break;
 
-                        case ExponentTag:
+                        case PivConstants.PublicRSAExponentTag:
                             valueIndex = ExponentIndex;
 
                             break;
@@ -174,69 +176,13 @@ namespace Yubico.YubiKey.Piv
 
                     valueArray[valueIndex] = tlvReader.ReadValue(tag);
                 }
+
+                return returnValue.LoadRsaPublicKey(
+                    valueArray[ModulusIndex].Span, valueArray[ExponentIndex].Span);
             }
-            catch (Exception ex)
+            catch (TlvException)
             {
-                Logger.LogWarning("Unable to create RSA public key: {ExceptionMessage}", ex.Message);
                 return false;
-            }
-
-            return true;
-        }
-
-        public static PivPublicKey CreateFromPivEncoding(ReadOnlyMemory<byte> encodedPublicKey)
-        {
-            var pivRsaPublicKey = new PivRsaPublicKey();
-
-            try
-            {
-                var tlvReader = new TlvReader(encodedPublicKey);
-                int tag = tlvReader.PeekTag(2);
-                if (tag == PublicKeyTag)
-                {
-                    tlvReader = tlvReader.ReadNestedTlv(tag);
-                }
-
-                var valueArray = new ReadOnlyMemory<byte>[PublicComponentCount];
-
-                while (tlvReader.HasData)
-                {
-                    tag = tlvReader.PeekTag();
-                    int valueIndex = tag switch
-                    {
-                        ModulusTag => ModulusIndex,
-                        ExponentTag => ExponentIndex,
-                        _ => throw new ArgumentException(
-                            string.Format(CultureInfo.CurrentCulture, ExceptionMessages.InvalidPublicKeyData))
-                    };
-
-                    if (!valueArray[valueIndex].IsEmpty)
-                    {
-                        throw new ArgumentException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.InvalidPublicKeyData)
-                            );
-                    }
-
-                    valueArray[valueIndex] = tlvReader.ReadValue(tag);
-                }
-
-                bool couldLoad = pivRsaPublicKey.LoadRsaPublicKey(valueArray[ModulusIndex].Span, valueArray[ExponentIndex].Span);
-                if (!couldLoad)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPublicKeyData));
-                }
-
-                return pivRsaPublicKey;
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning("Unable to create RSA public key: {ExceptionMessage}", ex.Message);
-                throw;
             }
         }
 
@@ -278,10 +224,10 @@ namespace Yubico.YubiKey.Piv
             }
 
             var tlvWriter = new TlvWriter();
-            using (tlvWriter.WriteNestedTlv(PublicKeyTag))
+            using (tlvWriter.WriteNestedTlv(PivConstants.PublicKeyTag))
             {
-                tlvWriter.WriteValue(ModulusTag, modulus);
-                tlvWriter.WriteValue(ExponentTag, ExponentF4);
+                tlvWriter.WriteValue(PivConstants.PublicRSAModulusTag, modulus);
+                tlvWriter.WriteValue(PivConstants.PublicRSAExponentTag, _exponentF4);
             }
 
             PivEncodedKey = tlvWriter.Encode();
@@ -291,22 +237,20 @@ namespace Yubico.YubiKey.Piv
             // The keyOffsetIndex is 4 or 5 for the RSA key sizes we support.
             // The offset of 4 is correct for up to 128 bytes of data (size of RSA1024)
             // The offset of 5 is correct for up to 64 KiB of data - large enough to accomodate any existing larger RSA key sizes.
-            int keyOffsetIndex = Algorithm == PivAlgorithm.Rsa1024
-                ? 4
-                : 5;
-
+            int keyOffsetIndex = Algorithm == PivAlgorithm.Rsa1024 ? 4 : 5;
             YubiKeyEncodedKey = PivEncodedKey[keyOffsetIndex..];
 
             _modulus = new Memory<byte>(modulus.ToArray());
-            _publicExponent = new Memory<byte>(ExponentF4);
+            _publicExponent = new Memory<byte>(_exponentF4);
 
             return true;
         }
 
         // Is the given exponent 01 00 01?
         // This will allow leading 00 bytes, such as 00 01 00 01.
-        private static bool IsExponentF4(ReadOnlySpan<byte> exponent)
+        private bool IsExponentF4(ReadOnlySpan<byte> exponent)
         {
+            const int ValidExponentLength = 3;
             if (exponent.Length < ValidExponentLength)
             {
                 return false;
@@ -324,73 +268,7 @@ namespace Yubico.YubiKey.Piv
                 index++;
             }
 
-            return exponent.EndsWith<byte>(ExponentF4);
-        }
-
-        public static PivPublicKey CreateFromPublicKey(IPublicKeyParameters rsaKey)
-        {
-            if (rsaKey is not RSAPublicKeyParameters rsaKeyParams)
-            {
-                throw new ArgumentException();
-            }
-
-            var keyDefinition = rsaKey.KeyDefinition;
-            var keyType = keyDefinition.KeyType;
-            var algorithm = keyType.GetPivAlgorithm();
-            var encodedKey = rsaKey.ExportSubjectPublicKeyInfo();
-            return EncodeAndCreate(
-                rsaKeyParams.Parameters.Modulus,
-                rsaKeyParams.Parameters.Exponent,
-                algorithm,
-                encodedKey,
-                keyDefinition);
-        }
-
-        private static PivRsaPublicKey EncodeAndCreate(
-            ReadOnlySpan<byte> modulus,
-            ReadOnlySpan<byte> publicExponent,
-            PivAlgorithm algorithm,
-            ReadOnlyMemory<byte> encodedKey,
-            KeyDefinition keyDefinition)
-        {
-            if ((modulus[0] & 0x80) == 0)
-            {
-                throw new ArgumentException("Modulus must be positive");
-            }
-
-            if (!IsExponentF4(publicExponent))
-            {
-                throw new ArgumentException("Exponent must be 01 00 01");
-            }
-
-            var tlvWriter = new TlvWriter();
-            using (tlvWriter.WriteNestedTlv(PublicKeyTag))
-            {
-                tlvWriter.WriteValue(ModulusTag, modulus);
-                tlvWriter.WriteValue(ExponentTag, ExponentF4);
-            }
-
-            var pivEncodedKey = tlvWriter.Encode().AsSpan();
-
-            // Since the public key is nested within the TLV structure, 
-            // we must offset by {keyOffsetIndex} to access the public key.
-            // The keyOffsetIndex is 4 or 5 for the RSA key sizes we support.
-            // The offset of 4 is correct for up to 128 bytes of data (size of RSA1024)
-            // The offset of 5 is correct for up to 64 KiB of data - large enough to accomodate any existing larger RSA key sizes.
-            int keyOffsetIndex = algorithm == PivAlgorithm.Rsa1024
-                ? 4
-                : 5;
-
-            var yubiKeyEncodedKey = pivEncodedKey[keyOffsetIndex..];
-
-            return new PivRsaPublicKey(
-                modulus.ToArray(),
-                publicExponent.ToArray(),
-                pivEncodedKey.ToArray(),
-                yubiKeyEncodedKey.ToArray(),
-                encodedKey.ToArray(),
-                algorithm,
-                keyDefinition);
+            return exponent.EndsWith<byte>(_exponentF4);
         }
     }
 }

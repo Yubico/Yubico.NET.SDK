@@ -19,17 +19,34 @@ namespace Yubico.YubiKey.Cryptography;
 public interface IKeyParameters
 {
     public KeyDefinition KeyDefinition { get; }
-    public KeyType KeyType{ get; }
+    public KeyType KeyType { get; }
 }
 
 public interface IPublicKeyParameters : IKeyParameters
 {
-    public ReadOnlyMemory<byte> PublicPoint { get; } // TODO Only valid for EC? Perhaps remove, and keep only exportPublicKeyInfo
-    public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo();
+    public byte[] ExportSubjectPublicKeyInfo();
 }
 
 public interface IPrivateKeyParameters : IKeyParameters
 {
-    public ReadOnlyMemory<byte> ExportPkcs8PrivateKey();
+    public byte[] ExportPkcs8PrivateKey();
+    public void Clear();
+}
+
+public class EmptyPublicKeyParameters : IPublicKeyParameters
+{
+    public KeyDefinition KeyDefinition { get; } = new();
+    public KeyType KeyType { get; }
+    public ReadOnlyMemory<byte> PublicPoint { get; }
+    public byte[] ExportSubjectPublicKeyInfo() => Array.Empty<byte>();
+}
+
+public class EmptyPrivateKeyParameters : IPrivateKeyParameters
+{
+    public KeyDefinition KeyDefinition { get; } = new KeyDefinition();
+    public KeyType KeyType { get; }
+    public byte[] ExportPkcs8PrivateKey() => Array.Empty<byte>();
+
     public ReadOnlyMemory<byte> PrivateKey { get; }
+    public void Clear() => throw new NotImplementedException();
 }

@@ -59,8 +59,40 @@ public class RSAPrivateKeyParametersTests
         Assert.Equal(parameters.Exponent, privateKeyParams.Parameters.Exponent);
         Assert.Equal(parameters.P, privateKeyParams.Parameters.P);
         Assert.Equal(parameters.Q, privateKeyParams.Parameters.Q);
+        Assert.Equal(parameters.D, privateKeyParams.Parameters.D);
         Assert.Equal(parameters.DP, privateKeyParams.Parameters.DP);
         Assert.Equal(parameters.DQ, privateKeyParams.Parameters.DQ);
         Assert.Equal(parameters.InverseQ, privateKeyParams.Parameters.InverseQ);
+    }
+    
+    [Fact]
+    public void CreateFromRsaParameters_WithValidParameters_CreatesInstance()
+    {
+        // Arrange
+        using var rsa = RSA.Create(2048);
+        var parameters = rsa.ExportParameters(true);
+        var crtParameters = new RSAParameters
+        {
+            P = parameters.P,
+            Q = parameters.Q,
+            DP = parameters.DP,
+            DQ = parameters.DQ,
+            InverseQ = parameters.InverseQ
+        };
+        
+        // Act
+        RSAPrivateKeyParameters privateKeyParams = RSAPrivateKeyParameters.CreateFromParameters(crtParameters);
+
+        // Assert
+        // Assert.Equal(parameters.Modulus, privateKeyParams.Parameters.Modulus);
+        // Assert.Equal(parameters.Exponent, privateKeyParams.Parameters.Exponent);
+        // Assert.Equal(crtParameters.D, privateKeyParams.Parameters.D);
+        Assert.Equal(crtParameters.P, privateKeyParams.Parameters.P);
+        Assert.Equal(crtParameters.Q, privateKeyParams.Parameters.Q);
+        Assert.Equal(crtParameters.DP, privateKeyParams.Parameters.DP);
+        Assert.Equal(crtParameters.DQ, privateKeyParams.Parameters.DQ);
+        Assert.Equal(crtParameters.InverseQ, privateKeyParams.Parameters.InverseQ);
+        
+        Assert.Equal(rsa.ExportPkcs8PrivateKey(), privateKeyParams.ExportPkcs8PrivateKey());
     }
 }

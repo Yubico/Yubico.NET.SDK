@@ -15,7 +15,9 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Security.Cryptography;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -169,6 +171,7 @@ namespace Yubico.YubiKey.Piv
             RetryCount = -1;
             RetriesRemaining = -1;
             PublicKey = new PivPublicKey();
+            PublicKeyParameters = new EmptyPublicKeyParameters();
 
             // This will update the fields in this object
             ParseResponseData(responseData);
@@ -197,6 +200,7 @@ namespace Yubico.YubiKey.Piv
                         bool isKnownAlgorithm = Enum.IsDefined(typeof(PivAlgorithm), (PivAlgorithm)value.Span[0]);
                         Debug.Assert(isKnownAlgorithm);
                         Algorithm = (PivAlgorithm)value.Span[0];
+                        // KeyType = Algorithm.GetKeyType();
 
                         break;
 
@@ -238,12 +242,12 @@ namespace Yubico.YubiKey.Piv
                         break;
 
                     case PublicTag:
-                        // Public: public key partner to the private key in the
-                        // slot
-                        PublicKey = PivPublicKey.Create(value, Algorithm);
+                        // Public: public key partner to the private key in the slot
+                        PublicKey = PivPublicKey.Create(value, Algorithm); // Either remove, or dont throw when they try to createa a curve key, or allow creation of curve pivpublickeys
+                        // PublicKeyParameters = KeyParametersPivHelper.CreatePublicParametersFromPivEncoding<IPublicKeyParameters>(value);
 
+                        PublicKeyParameters = KeyParametersPivHelper.CreatePublicParameters(value, Algorithm.GetKeyType());
                         break;
-
                     case DefaultTag:
                         // Default: whether the PIN/PUK/Mgmt key is default or not
                         // One byte, no more, no less.
@@ -283,7 +287,7 @@ namespace Yubico.YubiKey.Piv
         /// Note that if a slot is empty, the Algorithm will be<br/>
         /// <c>PivAlgorithm.None</c>.
         /// </summary>
-        public PivAlgorithm Algorithm { get; private set; }
+        public PivAlgorithm Algorithm { get; private set; } // TODO Replace with KeyType
 
         /// <summary>
         /// If the key is PIN, PUK, or management, is it the default value?<br/>
@@ -307,7 +311,12 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// The public key associated with the private key in the given slot.
         /// </summary>
-        public PivPublicKey PublicKey { get; private set; }
+        public PivPublicKey PublicKey { get; private set; } // TODO Obsolete
+        
+        /// <summary>
+        /// The public key associated with the private key in the given slot.
+        /// </summary>
+        public IPublicKeyParameters PublicKeyParameters { get; private set; }
 
         /// <summary>
         /// The total number of wrong PINs or PUKs that can be entered before the

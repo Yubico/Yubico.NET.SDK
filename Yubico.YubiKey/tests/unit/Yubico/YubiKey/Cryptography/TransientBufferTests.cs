@@ -11,17 +11,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-using System;
+using Xunit;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public abstract class PrivateKeyParameters : IPrivateKeyParameters
+public class TransientBufferTests
 {
-    public abstract KeyDefinition KeyDefinition { get; }
-    public abstract KeyType KeyType { get; }
 
-    public abstract ReadOnlyMemory<byte> ExportPkcs8PrivateKey();
+    [Fact]
+    public void Dispose_ShouldClearArrayContent()
+    {
+        byte[] privateKeyData = new byte[] { 10, 20, 30, 40, 50 };
 
-    public abstract ReadOnlyMemory<byte> PrivateKey { get; }
+        using (var secureData = new MemoryWiper(privateKeyData))
+        {
+            Assert.Equal(new byte[] { 10, 20, 30, 40, 50 }, secureData.Data);
+        }
+
+        Assert.All(privateKeyData, b => Assert.Equal(0, b)); // Ensure each byte is 0
+    }
 }

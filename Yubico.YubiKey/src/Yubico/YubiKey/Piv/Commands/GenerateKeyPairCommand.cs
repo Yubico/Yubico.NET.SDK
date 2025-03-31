@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -224,6 +225,18 @@ namespace Yubico.YubiKey.Piv.Commands
             PinPolicy = pinPolicy;
             TouchPolicy = touchPolicy;
         }
+        
+        public GenerateKeyPairCommand(
+            byte slotNumber,
+            KeyType keyType,
+            PivPinPolicy pinPolicy,
+            PivTouchPolicy touchPolicy)
+        {
+            SlotNumber = slotNumber;
+            Algorithm = keyType.GetPivAlgorithm();
+            PinPolicy = pinPolicy;
+            TouchPolicy = touchPolicy;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <c>GenerateKeyPairCommand</c> class.
@@ -292,7 +305,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte[] data = {
                 0xAC, 0x09, 0x80, 0x01, 0x00, 0xAA, 0x01, 0x00, 0xAB, 0x01, 0x00
             };
-            data[IndexAlgorithmByte] = (byte)Algorithm;
+            data[IndexAlgorithmByte] = (byte)_algorithm;
             data[IndexTouchPolicyByte] = (byte)TouchPolicy;
             data[IndexPinPolicyByte] = (byte)PinPolicy;
             int length = data.Length;
@@ -318,6 +331,6 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <inheritdoc />
         public GenerateKeyPairResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new GenerateKeyPairResponse(responseApdu, SlotNumber, Algorithm);
+          new GenerateKeyPairResponse(responseApdu, SlotNumber);
     }
 }

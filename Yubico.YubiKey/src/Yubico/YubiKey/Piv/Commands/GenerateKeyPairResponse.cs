@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -87,7 +88,6 @@ namespace Yubico.YubiKey.Piv.Commands
     /// </remarks>
     public class GenerateKeyPairResponse : PivResponse, IYubiKeyResponseWithData<PivPublicKey>
     {
-        // These are needed so we can make the check on the set of the property.
         private byte _slotNumber;
         private PivAlgorithm _algorithm;
 
@@ -127,7 +127,8 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The algorithm specified is not a supported asymmetric algorithm.
         /// </exception>
-        public PivAlgorithm Algorithm
+        [Obsolete("Replaced by PublicKeyParameters.KeyType")] 
+        public PivAlgorithm Algorithm // TODO the algorithm is not returned by the generate key pair, so this is useless, its already known by the caller
         {
             get => _algorithm;
             set
@@ -159,6 +160,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <param name="algorithm">
         /// The algorithm (and key size) of the key pair generated.
         /// </param>
+        [Obsolete("Use other constructor")] // TODO check this out
         public GenerateKeyPairResponse(
             ResponseApdu responseApdu,
             byte slotNumber,
@@ -167,6 +169,25 @@ namespace Yubico.YubiKey.Piv.Commands
             SlotNumber = slotNumber;
             Algorithm = algorithm;
         }
+        
+        /// <summary>
+        /// Constructs a GenerateKeyPairResponse based on a ResponseApdu received from
+        /// the YubiKey.
+        /// </summary>
+        /// <param name="responseApdu">
+        /// The object containing the response APDU<br/>returned by the YubiKey.
+        /// </param>
+        /// <param name="slotNumber">
+        /// The slot for which the key pair was generated.
+        /// </param>
+        public GenerateKeyPairResponse(
+            ResponseApdu responseApdu,
+            byte slotNumber) : base(responseApdu)
+        {
+            SlotNumber = slotNumber;
+        }
+
+        public Memory<byte> Data => ResponseApdu.Data.ToArray();
 
         /// <summary>
         /// Gets the public key from the YubiKey response.
@@ -189,10 +210,12 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public PivPublicKey GetData() =>
+        public PivPublicKey GetData() => // To change this to return IPublicKeyPArameters would be a brekaing change. But is it necessary? Can we still use
+            // the pivpublickey inside the piv app? yes we can, but we dont need the caller to know we are converting in the bg
+            // but in some times the caller is receiving a pivpublickey..
             Status switch
             {
-                ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data, Algorithm),
+                ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data),
                 _ => throw new InvalidOperationException(StatusMessage),
             };
     }

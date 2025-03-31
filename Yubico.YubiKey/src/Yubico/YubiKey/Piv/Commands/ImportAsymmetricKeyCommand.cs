@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -107,8 +108,6 @@ namespace Yubico.YubiKey.Piv.Commands
 
         private byte _slotNumber;
 
-        private readonly PivPrivateKey _privateKey;
-
         /// <summary>
         /// The slot into which the key will be imported.
         /// </summary>
@@ -165,6 +164,8 @@ namespace Yubico.YubiKey.Piv.Commands
             0xAA, 0x01, 0x00, 0xAB, 0x01, 0x00
         ];
 
+        private readonly ReadOnlyMemory<byte> _encodedKey;
+
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private ImportAsymmetricKeyCommand()
@@ -214,6 +215,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The <c>privateKey</c> argument does not contain a key.
         /// </exception>
+        [Obsolete("Use explicit constructor instead")]
         public ImportAsymmetricKeyCommand(
             PivPrivateKey privateKey,
             byte slotNumber,
@@ -232,12 +234,12 @@ namespace Yubico.YubiKey.Piv.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidPrivateKeyData));
             }
-
+            
+            _encodedKey = privateKey.EncodedPrivateKey;
             Algorithm = privateKey.Algorithm;
             SlotNumber = slotNumber;
             PinPolicy = pinPolicy;
             TouchPolicy = touchPolicy;
-            _privateKey = privateKey;
         }
 
         /// <summary>
@@ -272,6 +274,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The <c>privateKey</c> argument does not contain a key.
         /// </exception>
+        [Obsolete("Use explicit constructor instead")]
         public ImportAsymmetricKeyCommand(PivPrivateKey privateKey)
         {
             if (privateKey is null)
@@ -288,10 +291,25 @@ namespace Yubico.YubiKey.Piv.Commands
             }
 
             _slotNumber = 0;
-            _privateKey = privateKey;
+            _encodedKey = privateKey.EncodedPrivateKey;
+
             Algorithm = privateKey.Algorithm;
             PinPolicy = PivPinPolicy.Default;
             TouchPolicy = PivTouchPolicy.Default;
+        }
+
+        public ImportAsymmetricKeyCommand(
+            ReadOnlyMemory<byte> encodedKey,
+            KeyType keyType,
+            byte slotNumber,
+            PivPinPolicy pinPolicy = PivPinPolicy.Default,
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        {
+            _encodedKey = encodedKey;
+            _slotNumber = slotNumber;
+            Algorithm = keyType.GetPivAlgorithm();
+            PinPolicy = pinPolicy;
+            TouchPolicy = touchPolicy;
         }
 
         /// <inheritdoc />
@@ -333,15 +351,15 @@ namespace Yubico.YubiKey.Piv.Commands
                 policyLength += PinPolicyLength;
             }
 
-            int apduTotalLength = _privateKey.EncodedPrivateKey.Length + policyLength;
+            int apduTotalLength = _encodedKey.Length + policyLength;
             byte[] result = new byte[apduTotalLength];
             Span<byte> resultSpan = result;
 
             // Copy private key data
-            _privateKey.EncodedPrivateKey.Span.CopyTo(resultSpan);
+            _encodedKey.Span.CopyTo(resultSpan);
 
             // Write policy data
-            var policyDestination = resultSpan[_privateKey.EncodedPrivateKey.Length..];
+            var policyDestination = resultSpan[_encodedKey.Length..];
 
             if (includePinPolicy)
             {

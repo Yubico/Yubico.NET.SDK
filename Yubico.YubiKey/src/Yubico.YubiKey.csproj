@@ -73,6 +73,17 @@ limitations under the License. -->
     <Compile Update="Yubico\YubiKey\Otp\OtpSettings.ConfigurationFlags.cs">
       <DependentUpon>OtpSettings.cs</DependentUpon>
     </Compile>
+    <Compile Remove="Yubico\YubiKey\Cryptography\Ed25519PrivateKeyParameters.cs" />
+    <Compile Remove="Yubico\YubiKey\Cryptography\Ed25519PublicKeyParameters.cs" />
+    <Compile Remove="Yubico\YubiKey\Cryptography\RSAKeyParameters.cs" />
+    <Compile Remove="Yubico\YubiKey\Cryptography\X25519PrivateKeyParameters.cs" />
+    <Compile Remove="Yubico\YubiKey\Cryptography\X25519PublicKeyParameters.cs" />
+    <Compile Remove="Yubico\YubiKey\Piv\PivCurve25519PrivateKey.cs" />
+    <Compile Remove="Yubico\YubiKey\Piv\PivCurve25519PublicKey.cs" />
+    <Compile Remove="Yubico\YubiKey\Cryptography\PublicKeyParametersExtensions.cs" />
+    <Compile Remove="Yubico\YubiKey\Cryptography\PublicKeyParameters.cs" />
+    <Compile Remove="Yubico\YubiKey\Cryptography\PrivateKeyParametersExtensions.cs" />
+    <Compile Remove="Yubico\YubiKey\Cryptography\PrivateKeyParameters.cs" />
   </ItemGroup>
 
   <ItemGroup Label="Resource file definition">

@@ -17,32 +17,41 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class RSAPrivateKeyParameters : RSAKeyParameters, IPrivateKeyParameters
+public class RSAPrivateKeyParameters : IPrivateKeyParameters
 {
     private KeyDefinition _keyDefinition { get; }
+    public RSAParameters Parameters { get; }
+    public KeyDefinition KeyDefinition => _keyDefinition;
+    public KeyType KeyType => _keyDefinition.KeyType;
 
     public RSAPrivateKeyParameters(RSAParameters parameters)
     {
-        // Get the key length from the CRT component before normalization
-        // This uses Chinese Remainder Theorem (CRT) components which is what the YubiKey uses
         int keyLengthBits = parameters.DP?.Length * 8 * 2 ?? 0;
         
-        // Apply normalization for cross-platform compatibility
         Parameters = parameters.NormalizeParameters();
-        
-        // Use the original key length from CRT component for key definition
         _keyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits);
     }
 
-    // public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(parameters);
-    public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() =>
-        throw new NotSupportedException("Not supported for RSA keys.");
-
-    public ReadOnlyMemory<byte> PrivateKey =>
-        throw new InvalidOperationException("Not supported for RSA keys. Use Parameters instead for RSA keys.");
-
-    public KeyDefinition KeyDefinition => _keyDefinition;
-    public KeyType KeyType => _keyDefinition.KeyType;
+    public byte[] ExportPkcs8PrivateKey()
+    {
+        if (Parameters.D == null || 
+            Parameters.Exponent == null || 
+            Parameters.Modulus == null)
+        {
+            throw new InvalidOperationException("Cannot export private key, missing required parameters");
+        }
+        
+        return AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
+    }
+    
+    public void Clear()
+    {
+        CryptographicOperations.ZeroMemory(Parameters.P);
+        CryptographicOperations.ZeroMemory(Parameters.Q);
+        CryptographicOperations.ZeroMemory(Parameters.DP);
+        CryptographicOperations.ZeroMemory(Parameters.DQ);
+        CryptographicOperations.ZeroMemory(Parameters.InverseQ);
+    }
 
     public static RSAPrivateKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
     {
@@ -51,4 +60,5 @@ public class RSAPrivateKeyParameters : RSAKeyParameters, IPrivateKeyParameters
     }
 
     public static RSAPrivateKeyParameters CreateFromParameters(RSAParameters parameters) => new(parameters);
+    public static RSAPrivateKeyParameters Empty() => new RSAPrivateKeyParameters(new RSAParameters()); // Will crashg when look up key def..
 }

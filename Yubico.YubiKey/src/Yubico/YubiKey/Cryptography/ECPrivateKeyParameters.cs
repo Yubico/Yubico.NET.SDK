@@ -1,17 +1,17 @@
-// Copyright 2024 Yubico AB
-// 
-// Licensed under the Apache License, Version 2.0 (the "License").
-// You may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
+// // Copyright 2024 Yubico AB
+// // 
+// // Licensed under the Apache License, Version 2.0 (the "License").
+// // You may not use this file except in compliance with the License.
+// // You may obtain a copy of the License at
+// // 
+// //     http://www.apache.org/licenses/LICENSE-2.0
+// // 
+// // Unless required by applicable law or agreed to in writing, software
+// // distributed under the License is distributed on an "AS IS" BASIS,
+// // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// // See the License for the specific language governing permissions and
+// // limitations under the License.
+//
 using System;
 using System.Linq;
 using System.Security.Cryptography;
@@ -26,8 +26,13 @@ namespace Yubico.YubiKey.Cryptography
     /// contains the necessary private key data.
     /// It extends the base <see cref="ECKeyParameters"/> class with additional validation for private key components.
     /// </remarks>
-    public class ECPrivateKeyParameters : ECKeyParameters, IPrivateKeyParameters
+    public class ECPrivateKeyParameters : IPrivateKeyParameters
     {
+        public ECParameters Parameters { get; }
+        public KeyDefinition KeyDefinition { get; }
+        public KeyType KeyType => KeyDefinition.KeyType;
+        public ReadOnlyMemory<byte> PrivateKey => Parameters.D.ToArray();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ECPrivateKeyParameters"/> class.
         /// It is a wrapper for the <see cref="ECParameters"/> class.
@@ -37,12 +42,15 @@ namespace Yubico.YubiKey.Cryptography
         /// the parameters from the ECParameters object.
         /// </remarks>
         /// <param name="parameters">The EC parameters.</param>
-        public ECPrivateKeyParameters(ECParameters parameters) : base(parameters)
+        public ECPrivateKeyParameters(ECParameters parameters)
         {
             if (parameters.D == null)
             {
                 throw new ArgumentException("Parameters must contain private key data (D value)", nameof(parameters));
             }
+            
+            Parameters = parameters.DeepCopy();
+            KeyDefinition = KeyDefinitions.GetByOid(parameters.Curve.Oid);
         }
 
         /// <summary>
@@ -53,12 +61,25 @@ namespace Yubico.YubiKey.Cryptography
         /// </remarks>
         /// <param name="ecdsaObject">The ECDsa object.</param>
         public ECPrivateKeyParameters(ECDsa ecdsaObject)
-            : this(ecdsaObject?.ExportParameters(true) ?? throw new ArgumentNullException())
         {
+            if (ecdsaObject == null)
+            {
+                throw new ArgumentNullException(nameof(ecdsaObject));
+            }
+
+            Parameters = ecdsaObject.ExportParameters(true);
+            KeyDefinition = KeyDefinitions.GetByOid(Parameters.Curve.Oid);
+        }
+        
+        public byte[] ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
+
+        public void Clear()
+        {
+            CryptographicOperations.ZeroMemory(Parameters.Q.Y);
+            CryptographicOperations.ZeroMemory(Parameters.Q.X);
+            CryptographicOperations.ZeroMemory(Parameters.D);
         }
 
-        public ReadOnlyMemory<byte> PrivateKey => Parameters.D.ToArray();
-        public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
         public static ECPrivateKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
         {
             var parameters = AsnPrivateKeyReader.CreateECParameters(encodedKey);
@@ -89,5 +110,7 @@ namespace Yubico.YubiKey.Cryptography
             var ecdsa = ECDsa.Create(parameters);
             return new ECPrivateKeyParameters(ecdsa.ExportParameters(true));
         }
+
+
     }
 }

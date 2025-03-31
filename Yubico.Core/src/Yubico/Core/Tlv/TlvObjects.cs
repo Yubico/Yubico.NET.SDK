@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace Yubico.Core.Tlv
 {
@@ -33,7 +34,7 @@ namespace Yubico.Core.Tlv
         /// </summary>
         /// <param name="data">Sequence of TLV encoded data</param>
         /// <returns>Dictionary of Tag-Value pairs</returns>
-        public static IReadOnlyDictionary<int, ReadOnlyMemory<byte>> DecodeMap(ReadOnlySpan<byte> data)
+        public static IReadOnlyDictionary<int, ReadOnlyMemory<byte>> DecodeDictionary(ReadOnlySpan<byte> data)
         {
             var tlvs = new Dictionary<int, ReadOnlyMemory<byte>>();
             ReadOnlySpan<byte> buffer = data;
@@ -92,6 +93,51 @@ namespace Yubico.Core.Tlv
             }
 
             return tlv.Value.ToArray();
+        }
+        
+        public static Memory<byte> EncodeDictionary(IReadOnlyDictionary<int, byte[]> map)
+        {
+            if (map is null)
+            {
+                throw new ArgumentNullException(nameof(map));
+            }
+
+            int totalSize = 0;
+            foreach (KeyValuePair<int, byte[]> entry in map)
+            {
+                var tlv = new TlvObject(entry.Key, entry.Value ?? Array.Empty<byte>());
+                ReadOnlyMemory<byte> bytes = tlv.GetBytes();
+                totalSize += bytes.Length;
+            }
+
+            byte[] result = new byte[totalSize];
+            int position = 0;
+
+            try
+            {
+                foreach (KeyValuePair<int, byte[]> entry in map)
+                {
+                    var tlv = new TlvObject(entry.Key, entry.Value ?? Array.Empty<byte>());
+                    byte[] tlvBytes = tlv.GetBytes().ToArray();
+            
+                    try
+                    {
+                        Buffer.BlockCopy(tlvBytes, 0, result, position, tlvBytes.Length);
+                        position += tlvBytes.Length;
+                    }
+                    finally
+                    {
+                        CryptographicOperations.ZeroMemory(tlvBytes);
+                    }
+                }
+
+                return result.AsMemory(0, position);
+            }
+            catch
+            {
+                CryptographicOperations.ZeroMemory(result);
+                throw;
+            }
         }
     }
 }

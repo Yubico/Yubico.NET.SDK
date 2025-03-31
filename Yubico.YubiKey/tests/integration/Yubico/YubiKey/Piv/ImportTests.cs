@@ -144,6 +144,28 @@ namespace Yubico.YubiKey.Piv
 
             Assert.Equal(expectedPinPolicy, slotMetadata.PinPolicy);
             Assert.Equal(expectedTouchPolicy, slotMetadata.TouchPolicy);
+            
+            var keyDefinition = keyType.GetKeyDefinition();
+            if (keyDefinition.IsEcKey)
+            {
+                var publicPoint = slotMetadata.PublicKeyParameters switch
+                {
+                    ECPublicKeyParameters ecDsa => ecDsa.PublicPoint.ToArray(),
+                    Curve25519PublicKeyParameters edDsa => edDsa.PublicPoint.ToArray(),
+                    _ => throw new ArgumentException("Invalid public key type")
+                };
+                Assert.Equal(testPublicKey.GetPublicPoint(), publicPoint);
+            }
+            else
+            {
+                var publicRSAParameters = slotMetadata.PublicKeyParameters as RSAPublicKeyParameters;
+                
+                Assert.NotNull(publicRSAParameters);
+                var rsaParameters = testPublicKey.AsRSA().ExportParameters(false);
+                Assert.Equal(rsaParameters.Modulus, publicRSAParameters.Parameters.Modulus);
+                Assert.Equal(rsaParameters.Exponent, publicRSAParameters.Parameters.Exponent);
+            }
+
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]

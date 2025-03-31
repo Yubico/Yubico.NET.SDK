@@ -16,92 +16,16 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Security.Cryptography;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv;
 
-public static class PivEncodingReader
-{
-    const int EccTag = 0x86;
-    const int ModulusTag = 0x81;
-    const int ExponentTag = 0x82;
-    const int PublicKeyTag = 0x7F49;
-    const int PublicComponentCount = 2;
-
-    public static (ReadOnlyMemory<byte> Modulus, ReadOnlyMemory<byte> Exponent) GetPublicRSAValues(
-        ReadOnlyMemory<byte> encodedPublicKey)
-    {
-        var tlvReader = new TlvReader(encodedPublicKey);
-        int tag = tlvReader.PeekTag(2);
-        if (tag == PublicKeyTag)
-        {
-            tlvReader = tlvReader.ReadNestedTlv(tag);
-        }
-
-        var valueArray = new ReadOnlyMemory<byte>[PublicComponentCount];
-
-        while (tlvReader.HasData)
-        {
-            tag = tlvReader.PeekTag();
-            int valueIndex = tag switch
-            {
-                ModulusTag => 0,
-                ExponentTag => 1,
-                _ => throw new ArgumentException(
-                    string.Format(CultureInfo.CurrentCulture, ExceptionMessages.InvalidPublicKeyData))
-            };
-
-            if (!valueArray[valueIndex].IsEmpty)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPublicKeyData)
-                    );
-            }
-
-            valueArray[valueIndex] = tlvReader.ReadValue(tag);
-        }
-
-        return (valueArray[0], valueArray[1]);
-    }
-
-    public static ReadOnlyMemory<byte> GetPublicECValues(ReadOnlyMemory<byte> encodedPublicKey)
-    {
-        var tlvReader = new TlvReader(encodedPublicKey);
-
-        int tag = tlvReader.PeekTag(2);
-        if (tag == PublicKeyTag)
-        {
-            tlvReader = tlvReader.ReadNestedTlv(tag);
-        }
-
-        tag = tlvReader.PeekTag();
-        if (tag != EccTag)
-        {
-            throw new ArgumentException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.InvalidPublicKeyData)
-                );
-        }
-
-        var publicPoint = tlvReader.ReadValue(EccTag);
-        return publicPoint;
-    }
-}
-
 public static class KeyParametersPivHelper
 {
-    const int PrimePTag = 0x01;
-    const int PrimeQTag = 0x02;
-    const int ExponentPTag = 0x03;
-    const int ExponentQTag = 0x04;
-    const int CoefficientTag = 0x05;
-    const int CrtComponentCount = 5;
-
+    // PIV TLV Encoding ---> IPrivateKeyParameters
     public static T CreatePrivateParametersFromPivEncoding<T>(ReadOnlyMemory<byte> pivEncodingBytes)
         where T : IPrivateKeyParameters
     {
@@ -116,8 +40,8 @@ public static class KeyParametersPivHelper
         byte tag = pivEncodingBytes.Span[0];
         IPrivateKeyParameters pkp = tag switch
         {
-            _ when PivPrivateKey.IsValidEccTag(tag) => CreatePrivateEcFromPivEncoding(pivEncodingBytes),
-            _ when PivPrivateKey.IsValidRsaTag(tag) => CreatePrivateRsaFromPivEncoding(pivEncodingBytes),
+            _ when PivConstants.IsValidPrivateECTag(tag) => CreatePrivateEcFromPivEncoding(pivEncodingBytes),
+            _ when PivConstants.IsValidPrivateRSATag(tag) => CreatePrivateRsaFromPivEncoding(pivEncodingBytes),
             _ => throw new ArgumentException(
                 string.Format(CultureInfo.CurrentCulture, ExceptionMessages.InvalidPrivateKeyData))
         };
@@ -125,48 +49,74 @@ public static class KeyParametersPivHelper
         return (T)pkp;
     }
 
-    public static T CreatePublicParametersFromPivEncoding<T>(ReadOnlyMemory<byte> pivEncodingBytes)
-        where T : IPublicKeyParameters
+    // PIV TLV Encoding ---> IPublicKeyParameters
+    
+    // Problem with this method is that we dont know if its a x25519 or ed25519 (or p256) as they share length
+    // public static T CreatePublicParametersFromPivEncoding<T>(ReadOnlyMemory<byte> pivEncodingBytes)
+    //     where T : IPublicKeyParameters
+    // {
+    //     if (pivEncodingBytes.IsEmpty)
+    //     {
+    //         throw new ArgumentException(
+    //             string.Format(
+    //                 CultureInfo.CurrentCulture,
+    //                 ExceptionMessages.InvalidPrivateKeyData));
+    //     }
+    //
+    //     // KeyType keyType = GetKeyType(pivEncodingBytes);
+    //     int tag = GetKeyTag(pivEncodingBytes);
+    //     IPublicKeyParameters pkp = tag switch
+    //     {
+    //         _ when PivConstants.IsValidPublicECTag(tag) && pivEncodingBytes.Length == 34 => CreatePublicCurve25519FromPivEncoding(pivEncodingBytes, KeyType.X25519), // temp
+    //         _ when PivConstants.IsValidPublicECTag(tag) => CreatePublicEcFromPivEncoding(pivEncodingBytes),
+    //         _ when PivConstants.IsValidPublicRSATag(tag) => CreatePublicRsaFromPivEncoding(pivEncodingBytes),
+    //         _ => throw new ArgumentException(
+    //             string.Format(CultureInfo.CurrentCulture, ExceptionMessages.InvalidPublicKeyData))
+    //     };
+    //
+    //     return (T)pkp;
+    // }
+
+    public static IPublicKeyParameters CreatePublicParameters(ReadOnlyMemory<byte> value, KeyType keyType)
     {
-        if (pivEncodingBytes.IsEmpty)
+        return keyType switch
         {
-            throw new ArgumentException(
+            KeyType.Ed25519 or KeyType.X25519 => KeyParametersPivHelper
+                .CreatePublicCurve25519FromPivEncoding(value, keyType),
+            KeyType.P256 or KeyType.P384 or KeyType.P521 => KeyParametersPivHelper
+                .CreatePublicEcFromPivEncoding(value),
+            KeyType.RSA1024 or KeyType.RSA2048 or KeyType.RSA3072 or KeyType.RSA4096 => KeyParametersPivHelper
+                .CreatePublicRsaFromPivEncoding(value),
+            _ => throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    ExceptionMessages.InvalidPrivateKeyData));
-        }
-
-        int tag = GetKeyTag(pivEncodingBytes);
-        IPublicKeyParameters pkp = tag switch
-        {
-            _ when PivPublicKey.IsValidEccTag(tag) => CreatePublicEcFromPivEncoding(pivEncodingBytes),
-            _ when PivPublicKey.IsValidRsaTag(tag) => CreatePublicRsaFromPivEncoding(pivEncodingBytes),
-            _ => throw new ArgumentException(
-                string.Format(CultureInfo.CurrentCulture, ExceptionMessages.InvalidPublicKeyData))
+                    ExceptionMessages.InvalidApduResponseData))
         };
-
-        return (T)pkp;
     }
 
     private static int GetKeyTag(ReadOnlyMemory<byte> pivEncodingBytes)
     {
         var tlvReader = new TlvReader(pivEncodingBytes);
         int tag = tlvReader.PeekTag(2);
-        tlvReader = tlvReader.ReadNestedTlv(tag);
-        tag = tlvReader.PeekTag();
-        return tag;
+        if (tag == PivConstants.PublicKeyTag)
+        {
+            tlvReader = tlvReader.ReadNestedTlv(tag);
+            return tlvReader.PeekTag();
+        }
+
+        return pivEncodingBytes.Span[0];
     }
 
-    private static RSAPublicKeyParameters CreatePublicRsaFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
+    public static RSAPublicKeyParameters CreatePublicRsaFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
     {
         var (modulus, exponent) = PivEncodingReader.GetPublicRSAValues(pivEncodingBytes);
         var rsaParameters = new RSAParameters { Modulus = modulus.ToArray(), Exponent = exponent.ToArray() };
         return RSAPublicKeyParameters.CreateFromParameters(rsaParameters);
     }
 
-    private static ECPublicKeyParameters CreatePublicEcFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
+    public static ECPublicKeyParameters CreatePublicEcFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
     {
-        var publicPointData = PivEncodingReader.GetPublicECValues(pivEncodingBytes);
+        var publicPointData = PivEncodingReader.GetECPublicPointValues(pivEncodingBytes);
         if (publicPointData.Span[0] != 0x4)
         {
             throw new ArgumentException(
@@ -185,30 +135,36 @@ public static class KeyParametersPivHelper
 
         byte[]? x = publicPointData.Span.Slice(1, keyDefinition.LengthInBytes).ToArray();
         byte[]? y = publicPointData.Span.Slice(1 + keyDefinition.LengthInBytes, keyDefinition.LengthInBytes).ToArray();
-        var rsaParameters = new ECParameters
+        var parameters = new ECParameters
         {
-            Q = new ECPoint { X = x, Y = y }, 
+            Q = new ECPoint { X = x, Y = y },
             Curve = ECCurve.CreateFromValue(keyDefinition.CurveOid)
         };
 
-        return ECPublicKeyParameters.CreateFromParameters(rsaParameters);
+        return ECPublicKeyParameters.CreateFromParameters(parameters);
     }
 
-    private static ECPrivateKeyParameters CreatePrivateEcFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
+    public static Curve25519PublicKeyParameters CreatePublicCurve25519FromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes, KeyType keyType)
     {
-        if (TlvObject.TryParse(pivEncodingBytes.Span, out var tlv) && PivPrivateKey.IsValidEccTag(tlv.Tag))
+        var publicPoint = PivEncodingReader.GetECPublicPointValues(pivEncodingBytes);
+        return Curve25519PublicKeyParameters.CreateFromValue(publicPoint, keyType);
+    }
+
+    public static ECPrivateKeyParameters CreatePrivateEcFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
+    {
+        if (TlvObject.TryParse(pivEncodingBytes.Span, out var tlv) && PivConstants.IsValidPrivateECTag(tlv.Tag))
         {
             switch (tlv.Tag)
             {
-                case PivPrivateKey.EccTag:
+                case PivConstants.PrivateECDsaTag:
                     List<KeyDefinition> allowed =
                         [KeyDefinitions.P256, KeyDefinitions.P384, KeyDefinitions.P521];
 
                     var keyDefinition = allowed.Single(kd => kd.LengthInBytes == tlv.Value.Span.Length);
                     return ECPrivateKeyParameters.CreateFromValue(tlv.Value.Span.ToArray(), keyDefinition.KeyType);
-                case PivPrivateKey.EccEd25519Tag:
+                case PivConstants.PrivateECEd25519Tag:
                     return ECPrivateKeyParameters.CreateFromValue(tlv.Value.ToArray(), KeyType.Ed25519);
-                case PivPrivateKey.EccX25519Tag:
+                case PivConstants.PrivateECX25519Tag:
                     return ECPrivateKeyParameters.CreateFromValue(tlv.Value.ToArray(), KeyType.X25519);
             }
         }
@@ -219,8 +175,10 @@ public static class KeyParametersPivHelper
                 ExceptionMessages.InvalidPrivateKeyData));
     }
 
-    private static RSAPrivateKeyParameters CreatePrivateRsaFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
+    public static RSAPrivateKeyParameters CreatePrivateRsaFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
     {
+        const int CrtComponentCount = 5;
+
         var tlvReader = new TlvReader(pivEncodingBytes);
         var valueArray = new ReadOnlyMemory<byte>[CrtComponentCount];
 
@@ -254,11 +212,11 @@ public static class KeyParametersPivHelper
             valueArray[tag - 1] = temp;
         }
 
-        var primeP = valueArray[PrimePTag - 1].Span;
-        var primeQ = valueArray[PrimeQTag - 1].Span;
-        var exponentP = valueArray[ExponentPTag - 1].Span;
-        var exponentQ = valueArray[ExponentQTag - 1].Span;
-        var coefficient = valueArray[CoefficientTag - 1].Span;
+        var primeP = valueArray[PivConstants.PrivateRSAPrimePTag - 1].Span;
+        var primeQ = valueArray[PivConstants.PrivateRSAPrimeQTag - 1].Span;
+        var exponentP = valueArray[PivConstants.PrivateRSAExponentPTag - 1].Span;
+        var exponentQ = valueArray[PivConstants.PrivateRSAExponentQTag - 1].Span;
+        var coefficient = valueArray[PivConstants.PrivateRSACoefficientTag - 1].Span;
 
         var rsaParameters = new RSAParameters
         {

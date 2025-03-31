@@ -21,9 +21,59 @@ namespace Yubico.YubiKey.Cryptography;
 
 public class AsnPrivateKeyReader
 {
-    public static ECParameters CreateECParameters(ReadOnlyMemory<byte> encodedKey)
+    public static IPrivateKeyParameters CreateKeyParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
-        var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
+        var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
+        var seqPrivateKeyInfo = reader.ReadSequence();
+
+        // PKCS#8 starts with a version (integer 0)
+        var version = seqPrivateKeyInfo.ReadInteger();
+        if (version != 0)
+        {
+            throw new CryptographicException("Invalid PKCS#8 private key format: unexpected version");
+        }
+
+        var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
+        string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        switch (oidAlgorithm)
+        {
+            case KeyDefinitions.CryptoOids.RSA:
+                {
+                    if (seqAlgorithmIdentifier.HasData)
+                    {
+                        seqAlgorithmIdentifier.ReadNull();
+                        seqAlgorithmIdentifier.ThrowIfNotEmpty();
+                    }
+
+                    var rsaParameters = CreateRSAPrivateKeyParameters(seqPrivateKeyInfo);
+                    return new RSAPrivateKeyParameters(rsaParameters);
+                }
+            case KeyDefinitions.CryptoOids.ECDSA:
+                {
+                    string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
+
+                    var ecParams = CreateECPrivateKeyParameters(seqPrivateKeyInfo, oidCurve);
+                    return new ECPrivateKeyParameters(ecParams);
+                }
+            case KeyDefinitions.CryptoOids.X25519:
+            case KeyDefinitions.CryptoOids.Ed25519:
+                {
+                    return Curve25519PrivateKeyParameters.CreateFromPkcs8(pkcs8EncodedKey);
+                }
+        }
+
+        throw new NotSupportedException(
+            string.Format(
+                CultureInfo.CurrentCulture,
+                ExceptionMessages.UnsupportedAlgorithm));
+    }
+
+    public static Curve25519PrivateKeyParameters CreateCurve25519Parameters(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
+        Curve25519PrivateKeyParameters.CreateFromPkcs8(pkcs8EncodedKey);
+
+    public static ECParameters CreateECParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    {
+        var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
         var seqPrivateKeyInfo = reader.ReadSequence();
 
         // PKCS#8 starts with a version (integer 0)
@@ -56,12 +106,12 @@ public class AsnPrivateKeyReader
                     ExceptionMessages.UnsupportedAlgorithm));
         }
 
-        return CreateEcPrivateKeyParameters(seqPrivateKeyInfo, oidCurve);
+        return CreateECPrivateKeyParameters(seqPrivateKeyInfo, oidCurve);
     }
 
-    public static RSAParameters CreateRSAParameters(ReadOnlyMemory<byte> encodedKey)
+    public static RSAParameters CreateRSAParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
-        var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
+        var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
         var seqPrivateKeyInfo = reader.ReadSequence();
 
         // PKCS#8 starts with a version (integer 0)
@@ -81,77 +131,11 @@ public class AsnPrivateKeyReader
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.UnsupportedAlgorithm));
         }
-        
-        return CreateRsaPrivateKeyParameters(seqPrivateKeyInfo);
+
+        return CreateRSAPrivateKeyParameters(seqPrivateKeyInfo);
     }
 
-    public static IPrivateKeyParameters DecodePkcs8EncodedKey(ReadOnlyMemory<byte> encodedKey)
-    {
-        var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
-        var seqPrivateKeyInfo = reader.ReadSequence();
-
-        // PKCS#8 starts with a version (integer 0)
-        var version = seqPrivateKeyInfo.ReadInteger();
-        if (version != 0)
-        {
-            throw new CryptographicException("Invalid PKCS#8 private key format: unexpected version");
-        }
-
-        var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
-
-        string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        switch (oidAlgorithm)
-        {
-            case KeyDefinitions.CryptoOids.RSA:
-                {
-                    if (seqAlgorithmIdentifier.HasData)
-                    {
-                        seqAlgorithmIdentifier.ReadNull();
-                        seqAlgorithmIdentifier.ThrowIfNotEmpty();
-                    }
-
-                    var rsaParameters= CreateRsaPrivateKeyParameters(seqPrivateKeyInfo);
-                    return new RSAPrivateKeyParameters(rsaParameters);
-                }
-            case KeyDefinitions.CryptoOids.ECDSA:
-                {
-                    string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
-
-                    if (oidCurve is not (KeyDefinitions.CryptoOids.P256 or KeyDefinitions.CryptoOids.P384
-                        or KeyDefinitions.CryptoOids.P521))
-                    {
-                        throw new NotSupportedException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.UnsupportedAlgorithm));
-                    }
-
-                    var ecParams = CreateEcPrivateKeyParameters(seqPrivateKeyInfo, oidCurve);
-                    return new ECPrivateKeyParameters(ecParams);
-                }
-
-            // case KeyDefinitions.KeyOids.X25519:
-            //     {
-            //         return CreateX25519PrivateKeyParameters(seqPrivateKeyInfo, encodedKey);
-            //     }
-            // case KeyDefinitions.KeyOids.Ed25519:
-            //     {
-            //         return CreateEd25519PrivateKeyParameters(seqPrivateKeyInfo, encodedKey);
-            //     }
-            case KeyDefinitions.CryptoOids.X25519:
-            case KeyDefinitions.CryptoOids.Ed25519:
-                {
-                    return Curve25519PrivateKeyParameters.CreateFromPkcs8(encodedKey);
-                }
-        }
-
-        throw new NotSupportedException(
-            string.Format(
-                CultureInfo.CurrentCulture,
-                ExceptionMessages.UnsupportedAlgorithm));
-    }
-
-    private static RSAParameters CreateRsaPrivateKeyParameters(AsnReader seqPrivateKeyInfo)
+    private static RSAParameters CreateRSAPrivateKeyParameters(AsnReader seqPrivateKeyInfo)
     {
         // Read private key octet string
         ReadOnlyMemory<byte> privateKeyData = seqPrivateKeyInfo.ReadOctetString();
@@ -178,177 +162,164 @@ public class AsnPrivateKeyReader
         var coefficient = seqRsaPrivateKey.ReadIntegerBytes();
 
         // Remove leading zeros where needed
-        byte[] modulusBytes = TrimLeadingZero(modulus).ToArray();
-        byte[] exponentBytes = TrimLeadingZero(publicExponent).ToArray();
-        byte[] dBytes = TrimLeadingZero(privateExponent).ToArray();
-        byte[] p = TrimLeadingZero(prime1).ToArray();
-        byte[] q = TrimLeadingZero(prime2).ToArray();
-        byte[] dp = TrimLeadingZero(exponent1).ToArray();
-        byte[] dq = TrimLeadingZero(exponent2).ToArray();
-        byte[] inverseQ = TrimLeadingZero(coefficient).ToArray();
+        var modulusBytes = AsnUtilities.TrimLeadingZeroes(modulus.Span);
+        var exponentBytes = AsnUtilities.TrimLeadingZeroes(publicExponent.Span);
+        var dBytes = AsnUtilities.TrimLeadingZeroes(privateExponent.Span);
+        var p = AsnUtilities.TrimLeadingZeroes(prime1.Span);
+        var q = AsnUtilities.TrimLeadingZeroes(prime2.Span);
+        var dp = AsnUtilities.TrimLeadingZeroes(exponent1.Span);
+        var dq = AsnUtilities.TrimLeadingZeroes(exponent2.Span);
+        var inverseQ = AsnUtilities.TrimLeadingZeroes(coefficient.Span);
 
         var rsaParameters = new RSAParameters
         {
-            Modulus = modulusBytes,
-            Exponent = exponentBytes,
-            D = dBytes,
-            P = p,
-            Q = q,
-            DP = dp,
-            DQ = dq,
-            InverseQ = inverseQ
+            Modulus = modulusBytes.ToArray(),
+            Exponent = exponentBytes.ToArray(),
+            D = dBytes.ToArray(),
+            P = p.ToArray(),
+            Q = q.ToArray(),
+            DP = dp.ToArray(),
+            DQ = dq.ToArray(),
+            InverseQ = inverseQ.ToArray()
         };
 
         // Apply normalization for cross-platform compatibility
         return rsaParameters.NormalizeParameters();
     }
 
-    private static ECParameters CreateEcPrivateKeyParameters(AsnReader seqPrivateKeyInfo, string oidCurve)
+    private static ECParameters CreateECPrivateKeyParameters(AsnReader seqPrivateKeyInfo, string curveOid)
     {
-        // Read private key octet string
-        ReadOnlyMemory<byte> privateKeyData = seqPrivateKeyInfo.ReadOctetString();
-        seqPrivateKeyInfo.ThrowIfNotEmpty();
-
-        // Parse the EC private key structure
-        var privateKeyReader = new AsnReader(privateKeyData, AsnEncodingRules.BER);
-        var seqEcPrivateKey = privateKeyReader.ReadSequence();
-
-        // EC private key sequence: Version, privateKey, [0] parameters (optional), [1] publicKey (optional)
-        var ecVersion = seqEcPrivateKey.ReadInteger();
-        if (ecVersion != 1)
+        if (curveOid is not (KeyDefinitions.CryptoOids.P256 or KeyDefinitions.CryptoOids.P384
+            or KeyDefinitions.CryptoOids.P521))
         {
-            throw new CryptographicException("Invalid EC private key format: unexpected version");
+            throw new NotSupportedException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.UnsupportedAlgorithm));
         }
 
-        byte[] dValue = seqEcPrivateKey.ReadOctetString();
-
-        // Get the public key if present (optional [1] tag)
-        ECPoint point = default;
-
-        // Check for optional parameters and public key
-        while (seqEcPrivateKey.HasData)
+        try
         {
-            var tag = seqEcPrivateKey.PeekTag();
-            if (tag is { TagValue: 1, TagClass: TagClass.ContextSpecific })
+            // Read private key octet string
+            // byte[] privateKeyData = seqPrivateKeyInfo.ReadOctetString();
+            using var seqPrivateKeyInfoBuffer = new MemoryWiper(seqPrivateKeyInfo.ReadOctetString());
+            seqPrivateKeyInfo.ThrowIfNotEmpty();
+
+            // Parse the EC private key structure
+            var privateKeyReader = new AsnReader(seqPrivateKeyInfoBuffer.Data, AsnEncodingRules.BER);
+            var seqEcPrivateKey = privateKeyReader.ReadSequence();
+
+            // EC private key sequence: Version, privateKey, [0] parameters (optional), [1] publicKey (optional)
+            var ecVersion = seqEcPrivateKey.ReadInteger();
+            if (ecVersion != 1)
             {
-                ReadOnlyMemory<byte> publicKeyBytes = seqEcPrivateKey.ReadBitString(out int unusedBits, tag);
-                if (unusedBits != 0)
-                {
-                    throw new CryptographicException("Invalid EC public key encoding");
-                }
+                throw new CryptographicException("Invalid EC private key format: unexpected version");
+            }
 
-                // Process the public key point
-                if (publicKeyBytes.Length > 0 && publicKeyBytes.Span[0] == 0x04) // Uncompressed point format
-                {
-                    int coordinateSize = GetCoordinateSizeFromCurve(oidCurve);
+            using var dValueBuffer = new MemoryWiper(seqEcPrivateKey.ReadOctetString());
+            // byte[] dValue = seqEcPrivateKey.ReadOctetString(); // TODO clear this memory
 
-                    if (publicKeyBytes.Length == (2 * coordinateSize) + 1) // Format: 0x04 + X + Y
+            // Get the public key if present (optional [1] tag)
+            ECPoint point = default;
+
+            // Check for optional parameters and public key
+            while (seqEcPrivateKey.HasData)
+            {
+                var tag = seqEcPrivateKey.PeekTag();
+                if (tag is { TagValue: 1, TagClass: TagClass.ContextSpecific })
+                {
+                    ReadOnlyMemory<byte> publicKeyBytes = seqEcPrivateKey.ReadBitString(out int unusedBits, tag);
+                    if (unusedBits != 0)
                     {
-                        byte[] xCoordinate = new byte[coordinateSize];
-                        byte[] yCoordinate = new byte[coordinateSize];
+                        throw new CryptographicException("Invalid EC public key encoding");
+                    }
 
-                        publicKeyBytes.Slice(1, coordinateSize).CopyTo(xCoordinate);
-                        publicKeyBytes.Slice(1 + coordinateSize, coordinateSize).CopyTo(yCoordinate);
-
-                        point = new ECPoint
+                    // Process the public key point
+                    if (publicKeyBytes.Length > 0 && publicKeyBytes.Span[0] == 0x04) // Uncompressed point format
+                    {
+                        int coordinateSize = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
+                        bool sizeIsValid = publicKeyBytes.Length == (2 * coordinateSize) + 1;
+                        if (sizeIsValid) // Format: 0x04 + X + Y
                         {
-                            X = xCoordinate,
-                            Y = yCoordinate
-                        };
+                            byte[] xCoordinate = new byte[coordinateSize];
+                            byte[] yCoordinate = new byte[coordinateSize];
+
+                            publicKeyBytes.Slice(1, coordinateSize).CopyTo(xCoordinate);
+                            publicKeyBytes.Slice(1 + coordinateSize, coordinateSize).CopyTo(yCoordinate);
+
+                            point = new ECPoint
+                            {
+                                X = xCoordinate,
+                                Y = yCoordinate
+                            };
+                        }
                     }
                 }
+                else
+                {
+                    // Skip other optional fields
+                    _ = seqEcPrivateKey.ReadEncodedValue();
+                }
             }
-            else
+
+            var curve = ECCurve.CreateFromValue(curveOid);
+            byte[] dValue = dValueBuffer.Data;
+            var ecParams = new ECParameters
             {
-                // Skip other optional fields
-                _ = seqEcPrivateKey.ReadEncodedValue();
-            }
+                Curve = curve,
+                D = dValue,
+                Q = point
+            };
+
+            return ecParams;
         }
-
-        // Create ECParameters
-        var curve = GetCurveFromOid(oidCurve);
-        var ecParams = new ECParameters
+        finally
         {
-            Curve = curve,
-            D = dValue,
-            Q = point
-        };
-
-        return ecParams;
-    }
-
-    // private static IPrivateKeyParameters CreateX25519PrivateKeyParameters(
-    //     AsnReader seqPrivateKeyInfo,
-    //     ReadOnlyMemory<byte> encodedKey)
-    // {
-    //     var seqPrivateKey = new AsnReader(seqPrivateKeyInfo.ReadOctetString(), AsnEncodingRules.DER);
-    //     var tag = seqPrivateKey.PeekTag();
-    //     if (tag.TagValue != 4 || tag.TagClass != TagClass.Universal)
-    //     {
-    //         throw new CryptographicException("Invalid X25519 private key");
-    //     }
-    //     byte[] privateKeyData = seqPrivateKey.ReadOctetString();
-    //     seqPrivateKeyInfo.ThrowIfNotEmpty();
-    //     if (privateKeyData.Length != 32)
-    //     {
-    //         throw new CryptographicException("Invalid X25519 private key: incorrect length");
-    //     }
-    //
-    //     var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.X25519, OidType.AlgorithmId);
-    //     return new ECX25519PrivateKeyParameters(encodedKey, privateKeyData, keyDefinition);
-    // }
-
-    // private static IPrivateKeyParameters CreateEd25519PrivateKeyParameters(
-    //     AsnReader seqPrivateKeyInfo,
-    //     ReadOnlyMemory<byte> encodedKey)
-    // {
-    //     var seqPrivateKey = new AsnReader(seqPrivateKeyInfo.ReadOctetString(), AsnEncodingRules.DER);
-    //     var tag = seqPrivateKey.PeekTag();
-    //     if (tag.TagValue != 4 || tag.TagClass != TagClass.Universal)
-    //     {
-    //         throw new CryptographicException("Invalid Ed25519 private key");
-    //     }
-    //     byte[] privateKeyData = seqPrivateKey.ReadOctetString();
-    //     seqPrivateKeyInfo.ThrowIfNotEmpty();
-    //     if (privateKeyData.Length != 32)
-    //     {
-    //         throw new CryptographicException("Invalid Ed25519 private key: incorrect length");
-    //     }
-    //
-    //     var keyDefinition = KeyDefinitions.GetByOid(KeyDefinitions.KeyOids.Ed25519, OidType.AlgorithmId);
-    //     return new EDsaPrivateKeyParameters(encodedKey, privateKeyData, keyDefinition);
-    // }
-
-    private static ECCurve GetCurveFromOid(string oidCurve)
-    {
-        switch (oidCurve)
-        {
-            case KeyDefinitions.CryptoOids.P256:
-                return ECCurve.NamedCurves.nistP256;
-            case KeyDefinitions.CryptoOids.P384:
-                return ECCurve.NamedCurves.nistP384;
-            case KeyDefinitions.CryptoOids.P521:
-                return ECCurve.NamedCurves.nistP521;
-            default:
-                throw new NotSupportedException($"Curve OID {oidCurve} is not supported");
+            // CryptographicOperations.ZeroMemory(seqPrivateKeyInfo); // TODO();
+            // CryptographicOperations.ZeroMemory(dValue.GetBuffer()); // TODO();
         }
-    }
-
-    private static int GetCoordinateSizeFromCurve(string oidCurve)
-    {
-        var keyDef = KeyDefinitions.GetByOid(oidCurve);
-        return keyDef.LengthInBytes;
-    }
-
-    private static ReadOnlyMemory<byte> TrimLeadingZero(ReadOnlyMemory<byte> data)
-    {
-        if (data.Length > 1 && data.Span[0] == 0)
-        {
-            byte[] result = new byte[data.Length - 1];
-            data[1..].CopyTo(result);
-            return result;
-        }
-
-        return data;
     }
 }
+
+public class MemoryWiper : IDisposable
+{
+    private byte[] _sourceData; 
+    private bool _disposed;
+
+    public byte[] Data => _disposed 
+        ? throw new ObjectDisposedException(nameof(MemoryWiper)) 
+        : _sourceData;
+    
+    public int Length => _disposed ? 0 : _sourceData?.Length ?? 0;
+
+    public MemoryWiper(byte[] data)
+    {
+        _sourceData = data ?? throw new ArgumentNullException(nameof(data));
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing && _sourceData != null)
+            {
+                // Clear the ORIGINAL array
+                CryptographicOperations.ZeroMemory(_sourceData);
+                _sourceData = null!;
+            }
+            _disposed = true;
+        }
+    }
+
+    ~MemoryWiper()
+    {
+        Dispose(false);
+    }
+}
+

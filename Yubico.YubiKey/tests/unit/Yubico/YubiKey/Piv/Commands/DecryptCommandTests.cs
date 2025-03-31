@@ -137,7 +137,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
             byte P1 = cmdApdu.P1;
 
-            Assert.Equal((byte)expectedAlgorithm, P1);
+            Assert.Equal((byte)expectedAlgorithm.GetPivAlgorithm(), P1);
         }
 
         [Theory]

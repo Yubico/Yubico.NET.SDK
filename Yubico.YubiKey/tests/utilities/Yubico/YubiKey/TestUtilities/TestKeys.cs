@@ -122,7 +122,9 @@ namespace Yubico.YubiKey.TestUtilities
             string curve,
             bool isPrivate) : base(filePath)
         {
-            _curve = curve;
+            // Curve = curve;
+            KeyDefinition = keyType.GetKeyDefinition();
+            KeyType = keyType;
             _isPrivate = isPrivate;
         }
 
@@ -215,7 +217,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <exception cref="InvalidOperationException">Thrown if the key is not an RSA key</exception>
         public RSA AsRSA()
         {
-            if (!_curve.StartsWith("rsa", StringComparison.OrdinalIgnoreCase))
+            if (!KeyType.GetKeyDefinition().IsRsaKey)
             {
                 throw new InvalidOperationException("Not an RSA key");
             }

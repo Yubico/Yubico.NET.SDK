@@ -16,7 +16,6 @@ using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using Yubico.Core.Tlv;
-using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -63,77 +62,31 @@ namespace Yubico.YubiKey.Piv
         /// <param name="privateValue">
         /// The private value to use to build the object.
         /// </param>
+        /// <param name="algorithm">The algorithm used, if empty, it will be determined at best effort.</param>
         /// <exception cref="ArgumentException">
         /// The size of the private value is not supported by the YubiKey.
         /// </exception>
-        public PivEccPrivateKey(ReadOnlySpan<byte> privateValue)
+        public PivEccPrivateKey(ReadOnlySpan<byte> privateValue, PivAlgorithm? algorithm = null)
         {
-            var keyType = privateValue.Length switch
+            if (algorithm.HasValue)
             {
-                EccP256PrivateKeySize => KeyType.P256,
-                EccP384PrivateKeySize => KeyType.P384,
-                _ => throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPrivateKeyData)),
-            };
-
-            Algorithm = keyType.GetPivAlgorithm();
+                Algorithm = algorithm.Value;
+            }
+            else
+            {
+                Algorithm = privateValue.Length switch
+                {
+                    EccP256PrivateKeySize => PivAlgorithm.EccP256,
+                    EccP384PrivateKeySize => PivAlgorithm.EccP384,
+                    _ => throw new ArgumentException(string.Format(
+                        CultureInfo.CurrentCulture, ExceptionMessages.InvalidPrivateKeyData))
+                };
+            }
 
             var tlvWriter = new TlvWriter();
-            tlvWriter.WriteValue(EccTag, privateValue);
+            tlvWriter.WriteValue(PivConstants.PrivateECDsaTag, privateValue);
             EncodedKey = tlvWriter.Encode();
             _privateValue = new Memory<byte>(privateValue.ToArray());
-
-            KeyParameters = ECPrivateKeyParameters.CreateFromValue(privateValue.ToArray(), keyType);
-        }
-
-        /// <summary>
-        /// Create a new instance of an ECC private key object based on the given
-        /// private value and algorithm.
-        /// </summary>
-        /// <remarks>
-        /// The private value will be a "byte array", no tags or length octets.
-        /// For <c>PivAlgorithm.EccP256</c> it must be 32 bytes. For
-        /// <c>PivAlgorithm.EccP384</c> it must be 48 bytes.
-        /// </remarks>
-        /// <param name="privateValue">
-        /// The private value to use to build the object.
-        /// </param>
-        /// <param name="algorithm">
-        /// The algorithm to use with the private value.
-        /// </param>
-        public PivEccPrivateKey(ReadOnlySpan<byte> privateValue, PivAlgorithm algorithm)
-        {
-            int eccTag = algorithm switch
-            {
-                PivAlgorithm.EccEd25519 => EccEd25519Tag,
-                PivAlgorithm.EccX25519 => EccX25519Tag,
-                _ => EccTag
-            };
-
-            var tlvWriter = new TlvWriter();
-            tlvWriter.WriteValue(eccTag, privateValue);
-            EncodedKey = tlvWriter.Encode();
-            Algorithm = algorithm;
-            
-            var keyType = algorithm.GetPivKeyDefinition()!.KeyDefinition.KeyType; // TODO null
-            KeyParameters = ECPrivateKeyParameters.CreateFromValue(privateValue.ToArray(), keyType);
-            _privateValue = new Memory<byte>(privateValue.ToArray());
-        }
-
-        private PivEccPrivateKey(
-            Memory<byte> privateValue,
-            PivAlgorithm algorithm,
-            KeyDefinition keyDefinition,
-            byte[] pivEncodedKey,
-            IPrivateKeyParameters keyParameters)
-        {
-            _privateValue = privateValue;
-            KeyParameters = keyParameters;
-            Algorithm = algorithm;
-            EncodedKey = pivEncodedKey;
-            KeyDefinition = keyDefinition;
         }
 
         /// <summary>
@@ -151,24 +104,19 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public static PivEccPrivateKey CreateEccPrivateKey(ReadOnlyMemory<byte> encodedPrivateKey)
         {
-            if (TlvObject.TryParse(encodedPrivateKey.Span, out var tlv) && IsValidEccTag(tlv.Tag))
+            var tlvReader = new TlvReader(encodedPrivateKey);
+
+            if (tlvReader.HasData == false || tlvReader.PeekTag() != PivConstants.PrivateECDsaTag)
             {
-                return tlv.Tag switch
-                {
-                    EccTag => new PivEccPrivateKey(tlv.Value.Span),
-                    EccEd25519Tag => new PivEccPrivateKey(tlv.Value.Span, PivAlgorithm.EccEd25519),
-                    EccX25519Tag => new PivEccPrivateKey(tlv.Value.Span, PivAlgorithm.EccX25519),
-                    _ => throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPrivateKeyData))
-                };
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidPrivateKeyData));
             }
 
-            throw new ArgumentException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.InvalidPrivateKeyData));
+            var value = tlvReader.ReadValue(PivConstants.PrivateECDsaTag);
+
+            return new PivEccPrivateKey(value.Span);
         }
 
         /// <inheritdoc />
@@ -178,26 +126,6 @@ namespace Yubico.YubiKey.Piv
             _privateValue = Memory<byte>.Empty;
 
             base.Clear();
-        }
-
-        public static PivPrivateKey CreateFromPrivateKey(IPrivateKeyParameters keyParameters)
-        {
-            var keyDefinition = keyParameters.KeyDefinition;
-            var keyType = keyDefinition.KeyType;
-            var algorithm = keyType.GetPivAlgorithm();
-            var privateValue = keyParameters.PrivateKey;
-            int eccTag = algorithm switch
-            {
-                PivAlgorithm.EccEd25519 => EccEd25519Tag,
-                PivAlgorithm.EccX25519 => EccX25519Tag,
-                _ => EccTag
-            };
-
-            var tlvWriter = new TlvWriter();
-            tlvWriter.WriteValue(eccTag, privateValue.ToArray());
-            byte[] pivEncodedKey = tlvWriter.Encode();
-
-            return new PivEccPrivateKey(privateValue.ToArray(), algorithm, keyDefinition, pivEncodedKey, keyParameters);
         }
     }
 }

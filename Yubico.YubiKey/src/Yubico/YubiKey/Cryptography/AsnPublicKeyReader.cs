@@ -21,13 +21,20 @@ namespace Yubico.YubiKey.Cryptography;
 
 public class AsnPublicKeyReader
 {
-    public static IPublicKeyParameters DecodeFromSpki(ReadOnlyMemory<byte> encodedKey)
+    public static IPublicKeyParameters CreateKeyParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
-        var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
+        var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
         var seqSubjectPublicKeyInfo = reader.ReadSequence();
         var seqAlgorithmIdentifier = seqSubjectPublicKeyInfo.ReadSequence();
 
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
+        if (unusedBitCount != 0)
+        {
+            throw new CryptographicException(
+                "Invalid subject public key encoding"); // TODO Make into localized string?
+        }
+
         switch (oidAlgorithm)
         {
             case KeyDefinitions.CryptoOids.RSA:
@@ -38,37 +45,19 @@ public class AsnPublicKeyReader
                         seqAlgorithmIdentifier.ThrowIfNotEmpty();
                     }
 
-                    return CreateRsaPublicKeyParameters(seqSubjectPublicKeyInfo);
+                    return CreateRSAPublicKeyParameters(subjectPublicKey);
                 }
             case KeyDefinitions.CryptoOids.ECDSA:
                 {
                     string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
-                    byte[] bitString = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
-                    if (unusedBitCount != 0)
-                    {
-                        throw new CryptographicException("Invalid EllipticCurve public key encoding");
-                    }
-
-                    return CreateEcPublicKeyParameters(oidCurve, bitString);
+                    return CreateECPublicKeyParameters(oidCurve, subjectPublicKey);
                 }
             case KeyDefinitions.CryptoOids.X25519:
                 {
-                    byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
-                    if (unusedBitCount != 0)
-                    {
-                        throw new CryptographicException("Invalid X25519 public key encoding");
-                    }
-
                     return Curve25519PublicKeyParameters.CreateFromValue(subjectPublicKey, KeyType.X25519);
                 }
             case KeyDefinitions.CryptoOids.Ed25519:
                 {
-                    byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
-                    if (unusedBitCount != 0)
-                    {
-                        throw new CryptographicException("Invalid Ed25519 public key encoding");
-                    }
-
                     return Curve25519PublicKeyParameters.CreateFromValue(subjectPublicKey, KeyType.Ed25519);
                 }
         }
@@ -79,32 +68,29 @@ public class AsnPublicKeyReader
                 ExceptionMessages.UnsupportedAlgorithm));
     }
 
-    private static IPublicKeyParameters CreateRsaPublicKeyParameters(AsnReader seqSubjectPublicKeyInfo)
+    private static RSAPublicKeyParameters CreateRSAPublicKeyParameters(byte[] subjectPublicKey)
     {
-        byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
-        if (unusedBitCount != 0)
-        {
-            throw new CryptographicException("Invalid RSA public key encoding");
-        }
-
         var subjectPublicKeyReader = new AsnReader(subjectPublicKey, AsnEncodingRules.DER);
         var seqSubjectPublicKey = subjectPublicKeyReader.ReadSequence();
         var modulusBigInt = seqSubjectPublicKey.ReadIntegerBytes();
         var exponentBigInt = seqSubjectPublicKey.ReadIntegerBytes();
+
         seqSubjectPublicKey.ThrowIfNotEmpty();
 
-        byte[] modulus = TrimLeadingZero(modulusBigInt).ToArray();
-        byte[] exponent = TrimLeadingZero(exponentBigInt).ToArray();
-
+        var modulus = AsnUtilities.TrimLeadingZeroes(modulusBigInt.Span);
+        var exponent = AsnUtilities.TrimLeadingZeroes(exponentBigInt.Span);
         var rsaParameters = new RSAParameters
-            { Modulus = modulus, Exponent = exponent };
+        {
+            Modulus = modulus.ToArray(),
+            Exponent = exponent.ToArray()
+        };
 
         return new RSAPublicKeyParameters(rsaParameters);
     }
 
-    private static ECPublicKeyParameters CreateEcPublicKeyParameters(string oidCurve, byte[] bitString)
+    private static ECPublicKeyParameters CreateECPublicKeyParameters(string curveOid, byte[] subjectPublicKey)
     {
-        if (oidCurve is not (KeyDefinitions.CryptoOids.P256 or KeyDefinitions.CryptoOids.P384
+        if (curveOid is not (KeyDefinitions.CryptoOids.P256 or KeyDefinitions.CryptoOids.P384
             or KeyDefinitions.CryptoOids.P521))
         {
             throw new NotSupportedException(
@@ -113,24 +99,22 @@ public class AsnPublicKeyReader
                     ExceptionMessages.UnsupportedAlgorithm));
         }
 
-        var curve = GetCurveFromOid(oidCurve);
-
         // For PKCS EC keys, the bit string contains the EC point in uncompressed form
         // Format is typically: 0x04 + X coordinate + Y coordinate
-        if (bitString[0] != 0x04)
+        if (subjectPublicKey[0] != 0x04)
         {
             throw new CryptographicException("Unsupported EC point format");
         }
 
-        int coordinateSize = GetCoordinateSizeFromCurve(oidCurve);
-
+        int coordinateSize = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
         byte[] xCoordinate = new byte[coordinateSize];
         byte[] yCoordinate = new byte[coordinateSize];
 
         // Skip the first byte (0x04 indicating uncompressed point)
-        Buffer.BlockCopy(bitString, 1, xCoordinate, 0, coordinateSize);
-        Buffer.BlockCopy(bitString, 1 + coordinateSize, yCoordinate, 0, coordinateSize);
+        Buffer.BlockCopy(subjectPublicKey, 1, xCoordinate, 0, coordinateSize);
+        Buffer.BlockCopy(subjectPublicKey, 1 + coordinateSize, yCoordinate, 0, coordinateSize);
 
+        var curve = ECCurve.CreateFromValue(curveOid);
         var ecParams = new ECParameters
         {
             Curve = curve,
@@ -142,38 +126,5 @@ public class AsnPublicKeyReader
         };
 
         return new ECPublicKeyParameters(ecParams);
-    }
-
-    private static ECCurve GetCurveFromOid(string oidCurve)
-    {
-        switch (oidCurve)
-        {
-            case KeyDefinitions.CryptoOids.P256:
-                return ECCurve.NamedCurves.nistP256;
-            case KeyDefinitions.CryptoOids.P384:
-                return ECCurve.NamedCurves.nistP384;
-            case KeyDefinitions.CryptoOids.P521:
-                return ECCurve.NamedCurves.nistP521;
-            default:
-                throw new NotSupportedException($"Curve OID {oidCurve} is not supported");
-        }
-    }
-
-    private static int GetCoordinateSizeFromCurve(string oidCurve)
-    {
-        var keyDef = KeyDefinitions.GetByOid(oidCurve);
-        return keyDef.LengthInBytes;
-    }
-
-    private static ReadOnlyMemory<byte> TrimLeadingZero(ReadOnlyMemory<byte> data)
-    {
-        if (data.Length > 1 && data.Span[0] == 0)
-        {
-            byte[] result = new byte[data.Length - 1];
-            data[1..].CopyTo(result);
-            return result;
-        }
-
-        return data;
     }
 }

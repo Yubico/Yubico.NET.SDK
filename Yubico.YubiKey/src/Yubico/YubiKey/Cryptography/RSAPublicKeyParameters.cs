@@ -17,25 +17,32 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class RSAPublicKeyParameters : RSAKeyParameters, IPublicKeyParameters
+public class RSAPublicKeyParameters : IPublicKeyParameters
 {
     private KeyDefinition _keyDefinition { get; }
-    private readonly ReadOnlyMemory<byte> _encodedKey;
+    public RSAParameters Parameters { get; }
+    public KeyDefinition KeyDefinition => _keyDefinition;
+    public KeyType KeyType => _keyDefinition.KeyType;
 
     public RSAPublicKeyParameters(RSAParameters parameters)
     {
         Parameters = parameters.DeepCopy();
         _keyDefinition = KeyDefinitions.GetByRSALength(parameters.Modulus.Length * 8);
-        _encodedKey = AsnPublicKeyWriter.EncodeToSpki(parameters);
     }
 
-    public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => _encodedKey;
+    public byte[] ExportSubjectPublicKeyInfo()
+    {
+        if (Parameters.Exponent == null ||
+            Parameters.Modulus == null)
+        {
+            throw new InvalidOperationException("Cannot export public key, missing required parameters");
+        }
 
-    public ReadOnlyMemory<byte> PublicPoint =>
-        throw new NotSupportedException("Not supported for RSA keys. Use Parameters instead for RSA keys.");
-
-    public KeyDefinition KeyDefinition => _keyDefinition;
-    public KeyType KeyType => _keyDefinition.KeyType;
+        return AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(Parameters);
+    }
 
     public static RSAPublicKeyParameters CreateFromParameters(RSAParameters rsaParameters) => new(rsaParameters);
+
+    public static IPublicKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
+        AsnPublicKeyReader.CreateKeyParameters(encodedKey);
 }

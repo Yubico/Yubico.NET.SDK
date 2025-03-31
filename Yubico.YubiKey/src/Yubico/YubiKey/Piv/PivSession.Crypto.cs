@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
@@ -253,7 +254,7 @@ namespace Yubico.YubiKey.Piv
         /// <param name="dataToSign">
         /// The formatted message digest.
         /// </param>
-        /// <param name="algorithm">The algorithm to use.</param>
+        /// <param name="keyType">The algorithm to use.</param>
         /// <returns>
         /// The resulting signature.
         /// </returns>
@@ -276,12 +277,12 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">
         /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
-        public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign, PivAlgorithm algorithm) // TODO Docs
+        public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign, KeyType keyType)
         {
-            var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber, algorithm);
-
-            YubiKey.ThrowIfUnsupportedAlgorithm(algorithm); //TODO Verify good 
-
+            var pivAlgorithm = keyType.GetPivAlgorithm();
+            YubiKey.ThrowIfUnsupportedAlgorithm(pivAlgorithm);
+            
+            var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber, pivAlgorithm);
             return PerformPrivateKeyOperation(
                 slotNumber,
                 signCommand,
@@ -504,6 +505,37 @@ namespace Yubico.YubiKey.Piv
             // This will verify the slot number and dataToSign length. If one or
             // both are incorrect, the call will throw an exception.
             var keyAgreeCommand = new AuthenticateKeyAgreeCommand(publicPoint, slotNumber, correspondentPublicKey.Algorithm);
+
+            return PerformPrivateKeyOperation(
+                slotNumber,
+                keyAgreeCommand,
+                keyAgreeCommand.Algorithm,
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.IncorrectEccKeyLength));
+        }
+        
+        public byte[] KeyAgree(byte slotNumber, IPublicKeyParameters correspondentPublicKey)
+        {
+            if (correspondentPublicKey is null)
+            {
+                throw new ArgumentNullException(nameof(correspondentPublicKey));
+            }
+
+            byte[] publicPoint = correspondentPublicKey switch
+            {
+                ECPublicKeyParameters ecDsa => ecDsa.PublicPoint.ToArray(),
+                Curve25519PublicKeyParameters edDsa when correspondentPublicKey.KeyDefinition.KeyType == KeyType.X25519 
+                    => edDsa.PublicPoint.ToArray(),
+                _ => throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidPublicKeyData))
+            };
+            
+            var keyAgreeCommand = new AuthenticateKeyAgreeCommand(
+                publicPoint, slotNumber, 
+                correspondentPublicKey.KeyType.GetPivAlgorithm());
 
             return PerformPrivateKeyOperation(
                 slotNumber,

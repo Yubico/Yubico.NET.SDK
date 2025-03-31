@@ -19,41 +19,56 @@ namespace Yubico.YubiKey.Cryptography;
 
 public class Curve25519PublicKeyParametersTests
 {
-    [Fact]
-    public void CreateFromValue_CreatesInstance()
+    [Theory]
+    [InlineData(KeyType.Ed25519)]
+    [InlineData(KeyType.X25519)]
+    public void CreateFromValue_CreatesInstance(KeyType keyType)
     {
-        foreach (var keyType in (KeyType[])[KeyType.X25519, KeyType.Ed25519])
-        {
-            // Arrange
-            var testKey = TestKeys.GetTestPublicKey(keyType);
-            var publicKey = testKey.GetPublicPoint();
+        // Arrange
+        var testKey = TestKeys.GetTestPublicKey(keyType);
+        var testPublicPoint = testKey.GetPublicPoint();
 
-            // Act
-            var publicKeyParams = Curve25519PublicKeyParameters.CreateFromValue(publicKey, keyType); 
+        // Act
+        var publicKeyParams = Curve25519PublicKeyParameters.CreateFromValue(testPublicPoint, keyType); 
 
-            // Assert
-            Assert.NotNull(publicKeyParams);
-            Assert.Equal(publicKey, publicKeyParams.PublicPoint);
-            Assert.Equal(testKey.GetKeyDefinition(), publicKeyParams.KeyDefinition);
-        }
+        // Assert
+        Assert.NotNull(publicKeyParams);
+        Assert.Equal(testPublicPoint, publicKeyParams.PublicPoint);
+        Assert.Equal(testKey.GetKeyDefinition(), publicKeyParams.KeyDefinition);
     }
-        
-    [Fact]
-    public void CreateFromPkcs8_CreatesInstance()
+
+    [Theory]
+    [InlineData(KeyType.Ed25519)]
+    [InlineData(KeyType.X25519)]
+    public void CreateCurve25519FromPkcs8EncodedKey_WithValidParameters_CreatesInstance(KeyType keyType)
     {
-        foreach (var keyType in (KeyType[])[KeyType.X25519, KeyType.Ed25519])
-        {
-            // Arrange
-            var testKey = TestKeys.GetTestPublicKey(keyType);
-            var publicKey = testKey.GetPublicPoint();
+        // Arrange
+        var testPublicKey = TestKeys.GetTestPublicKey(keyType);
+            
+        // Act
+        var publicKeyParams = ECPublicKeyParameters.CreateFromPkcs8(testPublicKey.EncodedKey);
+        var ecPublicKeyParams = publicKeyParams as Curve25519PublicKeyParameters;
+        Assert.NotNull(ecPublicKeyParams);
 
-            // Act
-            var publicKeyParams = Curve25519PublicKeyParameters.CreateFromPkcs8(testKey.EncodedKey); 
+        // Assert
+        Assert.Equal(testPublicKey.GetPublicPoint(), ecPublicKeyParams.PublicPoint);
+    }
+    
+    [Theory]
+    [InlineData(KeyType.Ed25519)]
+    [InlineData(KeyType.X25519)]
+    public void CreateFromPkcs8_CreatesInstance(KeyType keyType)
+    {
+        // Arrange
+        var testKey = TestKeys.GetTestPublicKey(keyType);
+        var publicKey = testKey.GetPublicPoint();
 
-            // Assert
-            Assert.NotNull(publicKeyParams);
-            Assert.Equal(publicKey, publicKeyParams.PublicPoint);
-            Assert.Equal(testKey.GetKeyDefinition(), publicKeyParams.KeyDefinition);
-        }
+        // Act
+        var publicKeyParams = Curve25519PublicKeyParameters.CreateFromPkcs8(testKey.EncodedKey); 
+
+        // Assert
+        Assert.NotNull(publicKeyParams);
+        Assert.Equal(publicKey, publicKeyParams.PublicPoint);
+        Assert.Equal(testKey.GetKeyDefinition(), publicKeyParams.KeyDefinition);
     }
 }

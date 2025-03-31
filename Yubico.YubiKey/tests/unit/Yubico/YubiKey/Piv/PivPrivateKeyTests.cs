@@ -538,7 +538,7 @@ namespace Yubico.YubiKey.Piv
         private static Memory<byte> GetPrivateValue(
             PivAlgorithm algorithm)
         {
-            if (!algorithm.IsEcc())
+            if (!keyType.GetKeyDefinition().IsEcKey)
             {
                 return Memory<byte>.Empty;
             }

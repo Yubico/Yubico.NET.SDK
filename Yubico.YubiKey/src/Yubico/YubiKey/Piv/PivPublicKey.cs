@@ -14,9 +14,6 @@
 
 using System;
 using System.Globalization;
-using Microsoft.Extensions.Logging;
-using Yubico.Core.Logging;
-using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -73,12 +70,6 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public class PivPublicKey
     {
-        protected const int EccTag = 0x86;
-        protected const int ModulusTag = 0x81;
-        protected const int ExponentTag = 0x82;
-        protected const int PublicKeyTag = 0x7F49;
-        protected static readonly ILogger Logger = Log.GetLogger<PivPublicKey>();
-
         /// <summary>
         /// The algorithm of the key in this object.
         /// </summary>
@@ -87,15 +78,11 @@ namespace Yubico.YubiKey.Piv
         /// </value>
         public PivAlgorithm Algorithm { get; protected set; }
 
-        public IPublicKeyParameters KeyParameters { get; protected set; } = null!;
-        protected KeyDefinition KeyDefinition { get; set; } = new();
         protected Memory<byte> PivEncodedKey { get; set; }
         protected Memory<byte> YubiKeyEncodedKey { get; set; }
-        protected Memory<byte> EncodedKey { get; set; }
-        protected ReadOnlyMemory<byte> PublicPoint { get; set; }
 
         /// <summary>
-        /// Contains the PIV TLV encoding of the public key. 
+        /// Contains the TLV encoding of the public key. 
         /// If there is no encoded public key, this will be a buffer of length 0.
         /// </summary>
         public ReadOnlyMemory<byte> PivEncodedPublicKey => PivEncodedKey;
@@ -117,19 +104,6 @@ namespace Yubico.YubiKey.Piv
             YubiKeyEncodedKey = Memory<byte>.Empty;
         }
 
-        public static PivPublicKey Create(IPublicKeyParameters keyParameters)
-        {
-            return keyParameters switch
-            {
-                RSAPublicKeyParameters rsaKey => PivRsaPublicKey.CreateFromPublicKey(rsaKey),
-                ECPublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
-                // Ed25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
-                // X25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
-                Curve25519PublicKeyParameters eccKey => PivEccPublicKey.CreateFromPublicKey(eccKey),
-                _ => throw new ArgumentException("Invalid key type", nameof(keyParameters))
-            };
-        }
-
         /// <summary>
         /// Create a new instance of a PivPublicKey from the given encoded value.
         /// </summary>
@@ -138,7 +112,7 @@ namespace Yubico.YubiKey.Piv
         /// <c>PivEccPublicKey</c>.
         /// </remarks>
         /// <param name="encodedPublicKey">
-        /// The PIV TLV encoding.
+        ///     The PIV TLV encoding.
         /// </param>
         /// <param name="algorithm"></param>
         /// <returns>
@@ -148,64 +122,23 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The key data supplied is not a supported encoding.
         /// </exception>
-        public static PivPublicKey Create(ReadOnlyMemory<byte> encodedPublicKey, PivAlgorithm algorithm)
+        public static PivPublicKey Create(ReadOnlyMemory<byte> encodedPublicKey, PivAlgorithm? algorithm = null)
         {
-            if (algorithm.IsEcc())
+            // Try to decode as an RSA public key. If that works, we're done. If
+            // not, try ECC. If that doesn't work, exception.
+            bool isCreated = PivRsaPublicKey.TryCreate(out var publicKeyObject, encodedPublicKey);
+            if (!isCreated)
             {
-                return PivEccPublicKey.CreateFromPivEncoding(encodedPublicKey, algorithm);
+                if (PivEccPublicKey.TryCreate(out publicKeyObject, encodedPublicKey, algorithm) == false)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPublicKeyData));
+                }
             }
 
-            if (algorithm.IsRsa())
-            {
-                return PivRsaPublicKey.CreateFromPivEncoding(encodedPublicKey);
-            }
-
-            throw new ArgumentException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.InvalidPublicKeyData));
+            return publicKeyObject;
         }
-
-        public static PivPublicKey Create(ReadOnlyMemory<byte> encodedPublicKey)
-        {
-            if (PivRsaPublicKey.CanCreate(encodedPublicKey))
-            {
-                return PivRsaPublicKey.CreateFromPivEncoding(encodedPublicKey);
-            }
-
-            if (PivEccPublicKey.CanCreate(encodedPublicKey))
-            {
-                return PivEccPublicKey.CreateFromPivEncoding(encodedPublicKey);
-            }
-
-            throw new ArgumentException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.InvalidPublicKeyData));
-        }
-        
-        public KeyDefinition GetKeyDefinition() => KeyDefinition;
-
-        public KeyType GetKeyType() => KeyDefinition.KeyType;
-
-        public ReadOnlyMemory<byte> GetPublicPoint() => PublicPoint;
-
-        public ReadOnlyMemory<byte> ExportSubjectPublicKeyInfo() => EncodedKey;
-
-        internal static bool IsValidEccTag(int peekTag) =>
-            peekTag switch
-            {
-                EccTag => true,
-                _ => false
-            };
-
-        internal static bool IsValidRsaTag(int peekTag) =>
-            peekTag switch
-            {
-                ModulusTag or
-                    ExponentTag
-                    => true,
-                _ => false
-            };
     }
 }

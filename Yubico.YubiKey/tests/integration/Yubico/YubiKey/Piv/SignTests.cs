@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.Piv
             int digestAlgorithm,
             int paddingScheme)
         {
-            int keySizeBits = algorithm.KeySizeBits();
+            int keySizeBits = keyType.GetKeyDefinition().LengthInBits;
             byte[] dataToSign = new byte[128];
             Random.Shared.NextBytes(dataToSign);
 

@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.Cryptography
     /// <summary>
     /// Base class for EC key parameters
     /// </summary>
-    public abstract class ECKeyParameters : IKeyParameters
+    public abstract class ECKeyParameters : IKeyParameters // TODO Should be removed if possible without breaking changes 
     {
         private KeyDefinition _keyDefinition { get; }
 

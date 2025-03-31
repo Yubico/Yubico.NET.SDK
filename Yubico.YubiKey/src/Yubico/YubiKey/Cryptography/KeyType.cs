@@ -33,3 +33,14 @@ public enum KeyType
     AES192,
     AES256
 }
+
+public static class KeyTypeExtensions
+{
+    public static string ToAlgorithmOid(this KeyType keyType) => KeyDefinitions.CryptoOids.GetOidsForKeyType(keyType).AlgorithmOid;    
+    public static string? ToCurveOid(this KeyType keyType) => KeyDefinitions.CryptoOids.GetOidsForKeyType(keyType).Curveoid;    
+    public static KeyDefinition GetKeyDefinition(this KeyType keyType) => KeyDefinitions.GetByKeyType(keyType);
+    public static bool IsEcKey(this KeyType keyType) => keyType.GetKeyDefinition().IsEcKey;
+    public static bool IsRsaKey(this KeyType keyType) => keyType.GetKeyDefinition().IsRsaKey;
+    public static bool IsSymmetricKey(this KeyType keyType) => keyType.GetKeyDefinition().IsSymmetricKey;
+    public static bool IsCoseKey(this KeyType keyType) => keyType.GetKeyDefinition().CoseKeyDefinition != null;
+}

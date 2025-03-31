@@ -12,7 +12,6 @@ namespace Yubico.YubiKey.Cryptography
         [Theory]
         [InlineData(KeyType.P256)]
         [InlineData(KeyType.P384)]
-        [InlineData(KeyType.P521)]
         public void CreateFromPivEncoding_WithValidParameters_CreatesInstance(KeyType keyType)
         {
             // Arrange

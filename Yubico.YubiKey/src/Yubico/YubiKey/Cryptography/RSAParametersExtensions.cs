@@ -52,9 +52,7 @@ public static class RSAParametersExtensions
     /// <returns>A new RSAParameters with normalized values</returns>
     public static RSAParameters NormalizeParameters(this RSAParameters parameters)
     {
-        // Clone the parameters
         var normalized = parameters.DeepCopy();
-        
         if (normalized.D == null || normalized.P == null || normalized.Q == null || 
             normalized.DP == null || normalized.DQ == null || normalized.InverseQ == null ||
             normalized.Modulus == null)
@@ -67,7 +65,6 @@ public static class RSAParametersExtensions
         int modulusLength = normalized.Modulus.Length;
         int halfLength = (modulusLength + 1) / 2; // Round up
         
-        // Ensure consistent component lengths
         normalized.D = PadToLength(normalized.D, modulusLength);
         normalized.P = PadToLength(normalized.P, halfLength);
         normalized.Q = PadToLength(normalized.Q, halfLength);
@@ -92,12 +89,11 @@ public static class RSAParametersExtensions
         
         if (data.Length > targetLength)
         {
-            // No need to trim - let Windows do its own validation in that case
             return data; 
         }
         
         // Pad with zeros at the beginning (most significant bytes)
-        var result = new byte[targetLength];
+        byte[] result = new byte[targetLength];
         int padding = targetLength - data.Length;
         System.Buffer.BlockCopy(data, 0, result, padding, data.Length);
         

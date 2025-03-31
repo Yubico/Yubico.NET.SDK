@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Cryptography
 
         public static KeyDefinition GetByRSALength(int keySizeBits)
         {
-            foreach (var keyDef in (KeyDefinition[]) [RSA1024, RSA2048, RSA3072, RSA4096])
+            foreach (var keyDef in GetRsaKeyDefinitions())
             {
                 // Allow small variations in key size
                 if (keySizeBits == keyDef.LengthInBits || Math.Abs(keySizeBits - keyDef.LengthInBits) <= 1)

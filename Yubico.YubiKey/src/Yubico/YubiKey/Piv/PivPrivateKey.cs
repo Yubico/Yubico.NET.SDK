@@ -15,7 +15,6 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -61,20 +60,8 @@ namespace Yubico.YubiKey.Piv
     /// </code>
     /// </para>
     /// </remarks>
-    // public class PivPrivateKey : IPrivateKeyParameters
     public class PivPrivateKey
     {
-        internal const int PrimePTag = 0x01;
-        internal const int PrimeQTag = 0x02;
-        internal const int ExponentPTag = 0x03;
-        internal const int ExponentQTag = 0x04;
-        internal const int CoefficientTag = 0x05;
-        internal const int EccTag = 0x06;
-        internal const int EccEd25519Tag = 0x7;
-        internal const int EccX25519Tag = 0x8;
-
-        protected Memory<byte> EncodedKey { get; set; }
-
         /// <summary>
         /// The algorithm of the key in this object.
         /// </summary>
@@ -83,13 +70,12 @@ namespace Yubico.YubiKey.Piv
         /// </value>
         public PivAlgorithm Algorithm { get; protected set; }
 
+        protected Memory<byte> EncodedKey { get; set; }
+
         /// <summary>
         /// Contains the TLV encoding of the private key.
         /// </summary>
         public ReadOnlyMemory<byte> EncodedPrivateKey => EncodedKey;
-        
-        protected KeyDefinition KeyDefinition { get; set; } = null!;
-        public IPrivateKeyParameters KeyParameters { get; protected set; } = null!;
 
         /// <summary>
         /// This builds an empty object. The <c>Algorithm</c> is <c>None</c> and
@@ -119,26 +105,31 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public static PivPrivateKey Create(ReadOnlyMemory<byte> encodedPrivateKey)
         {
-            if (encodedPrivateKey.IsEmpty)
+            byte tag = 0;
+            if (encodedPrivateKey.Length > 0)
             {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPrivateKeyData));
+                tag = encodedPrivateKey.Span[0];
             }
 
-            byte tag = encodedPrivateKey.Span[0];
-            return tag switch
+            switch (tag)
             {
-                _ when IsValidEccTag(tag)
-                    => PivEccPrivateKey.CreateEccPrivateKey(encodedPrivateKey),
-                _ when IsValidRsaTag(tag)
-                    => PivRsaPrivateKey.CreateRsaPrivateKey(encodedPrivateKey),
-                _ => throw new ArgumentException(
-                    string.Format(CultureInfo.CurrentCulture, ExceptionMessages.InvalidPrivateKeyData))
-            };
-        }
+                default:
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPrivateKeyData));
 
+                case PivConstants.PrivateECDsaTag:
+                    return PivEccPrivateKey.CreateEccPrivateKey(encodedPrivateKey);
+
+                case PivConstants.PrivateRSAPrimePTag:
+                case PivConstants.PrivateRSAPrimeQTag:
+                case PivConstants.PrivateRSAExponentPTag:
+                case PivConstants.PrivateRSAExponentQTag:
+                case PivConstants.PrivateRSACoefficientTag:
+                    return PivRsaPrivateKey.CreateRsaPrivateKey(encodedPrivateKey);
+            }
+        }
 
         /// <summary>
         /// Call on the object to clear (overwrite) any sensitive data it is
@@ -149,47 +140,5 @@ namespace Yubico.YubiKey.Piv
             CryptographicOperations.ZeroMemory(EncodedKey.Span);
             EncodedKey = Memory<byte>.Empty;
         }
-
-        public static PivPrivateKey Create(IPrivateKeyParameters privateKeyParameters)
-        {
-            return privateKeyParameters switch
-            {
-                RSAPrivateKeyParameters rsaKey => PivRsaPrivateKey.CreateFromPrivateKey(rsaKey),
-                ECPrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
-                Ed25519PrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
-                X25519PrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
-                Curve25519PrivateKeyParameters eccKey => PivEccPrivateKey.CreateFromPrivateKey(eccKey),
-                _ => throw new ArgumentException("Invalid key type", nameof(privateKeyParameters))
-            };
-        }
-
-        public KeyDefinition GetKeyDefinition() => KeyDefinition;  // TODO keep these?
-
-        public KeyType GetKeyType => KeyParameters.KeyDefinition.KeyType;  // TODO keep these?
-
-        public ReadOnlyMemory<byte> ExportPkcs8PrivateKey() => KeyParameters.EncodeToPkcs8();  // TODO keep these?
-
-        public ReadOnlyMemory<byte> GetPrivateKey() => KeyParameters.PrivateKey; // TODO keep these?
-        
-        internal static bool IsValidEccTag(int peekTag) =>
-            peekTag switch
-            {
-                EccTag or
-                    EccEd25519Tag or
-                    EccX25519Tag => true,
-                _ => false
-            };
-        
-        internal static bool IsValidRsaTag(int peekTag) =>
-            peekTag switch
-            {
-                PrimePTag or 
-                    PrimeQTag or 
-                    ExponentPTag or 
-                    ExponentQTag or 
-                    CoefficientTag => true,
-                _ => false
-            };
-
     }
 }

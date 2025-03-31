@@ -63,6 +63,24 @@ namespace Yubico.YubiKey.Cryptography
             Assert.Equal(parameters.Q.X, privateKeyParams.Parameters.Q.X);
             Assert.Equal(parameters.Q.Y, privateKeyParams.Parameters.Q.Y);
         }
+        
+        [Fact]
+        public void CreateFromParameters_WithValidParameters_CreatesInstance()
+        {
+            // Arrange
+            using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            var parameters = ecdsa.ExportParameters(true);
+
+            // Act
+            var privateKeyParams =
+                ECPrivateKeyParameters.CreateFromParameters(parameters);
+
+            // Assert
+            Assert.NotNull(privateKeyParams.Parameters.D);
+            Assert.Equal(parameters.D, privateKeyParams.Parameters.D);
+            Assert.Equal(parameters.Q.X, privateKeyParams.Parameters.Q.X);
+            Assert.Equal(parameters.Q.Y, privateKeyParams.Parameters.Q.Y);
+        }
 
         [Fact]
         public void Constructor_WithValidECParameters_CreatesInstance()

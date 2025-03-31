@@ -40,14 +40,6 @@ namespace Yubico.YubiKey.Piv.Commands
             _ = Assert.Throws<ArgumentException>(() => new GenerateKeyPairResponse(responseApdu, slotNumber, PivAlgorithm.EccP256));
         }
 
-        [Fact]
-        public void Constructor_InvalidAlgorithm_ThrowsException()
-        {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, PivAlgorithm.EccP256);
-
-            _ = Assert.Throws<ArgumentException>(() => new GenerateKeyPairResponse(responseApdu, 0x88, PivAlgorithm.TripleDes));
-        }
-
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]

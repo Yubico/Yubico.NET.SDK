@@ -129,6 +129,7 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">
         /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
+[Obsolete("Use other method")]
         public PivPublicKey GenerateKeyPair(
             byte slotNumber,
             PivAlgorithm algorithm,
@@ -143,6 +144,22 @@ namespace Yubico.YubiKey.Piv
             var response = Connection.SendCommand(command);
 
             return response.GetData();
+        }
+        
+        public IPublicKeyParameters GenerateKeyPair(
+            byte slotNumber,
+            KeyType keyType,
+            PivPinPolicy pinPolicy = PivPinPolicy.Default,
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        {
+            YubiKey.ThrowIfUnsupportedAlgorithm(keyType.GetPivAlgorithm());
+
+            RefreshManagementKeyAuthentication();
+
+            var command = new GenerateKeyPairCommand(slotNumber, keyType, pinPolicy, touchPolicy);
+            var response = Connection.SendCommand(command);
+
+            return KeyParametersPivHelper.CreatePublicParameters(response.Data, keyType);
         }
 
         /// <summary>
@@ -237,6 +254,7 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">
         /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
+        [Obsolete("Use IPivPrivateKey constructor instead")]
         public void ImportPrivateKey(
             byte slotNumber,
             PivPrivateKey privateKey,
@@ -247,13 +265,20 @@ namespace Yubico.YubiKey.Piv
             {
                 throw new ArgumentNullException(nameof(privateKey));
             }
-            
-            if (privateKey.KeyParameters == null) // To throw an ArgumentNullException here would be a breaking change
+
+            YubiKey.ThrowIfUnsupportedAlgorithm(privateKey.Algorithm);
+
+            if (ManagementKeyAuthenticated == false)
             {
-                throw new ArgumentException(nameof(privateKey.KeyParameters));
+                AuthenticateManagementKey();
             }
-            
-            ImportPrivateKey(slotNumber, privateKey.KeyParameters, pinPolicy, touchPolicy); // TODO Breaking? Check if its a breaking change
+
+            var command = new ImportAsymmetricKeyCommand(privateKey, slotNumber, pinPolicy, touchPolicy);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
         }
         
         /// <summary>
@@ -363,8 +388,12 @@ namespace Yubico.YubiKey.Piv
 
             RefreshManagementKeyAuthentication();
 
-            var pivPrivateKey = PivPrivateKey.Create(privateKey);
-            var command = new ImportAsymmetricKeyCommand(pivPrivateKey, slotNumber, pinPolicy, touchPolicy);
+            var command = new ImportAsymmetricKeyCommand(
+                privateKey.ToPivEncodedPrivateKey(), 
+                privateKey.KeyType,
+                slotNumber, 
+                pinPolicy, 
+                touchPolicy);
             var response = Connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
             {

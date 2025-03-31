@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Cryptography;
 /// <summary>
 /// A class that converts public key parameters to ASN.1 DER encoding.
 /// </summary>
-public static class AsnPublicKeyWriter
+internal static class AsnPublicKeyWriter
 {
     /// <summary>
     /// Converts a public point and key type to ASN.1 DER encoded format.
@@ -29,7 +29,7 @@ public static class AsnPublicKeyWriter
     /// <param name="publicPoint">The public key point as a byte array.</param>
     /// <param name="keyType">The type of the key.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
-    public static byte[] EncodeToSpki(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
+    public static byte[] EncodeToSubjectPublicKeyInfo(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
     {
         var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
         int coordinateLength = keyDefinition.LengthInBytes;
@@ -50,7 +50,7 @@ public static class AsnPublicKeyWriter
     /// <param name="modulus">The modulus of the RSA key as a byte array.</param>
     /// <param name="exponent">The exponent of the RSA key as a byte array.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
-    public static byte[] EncodeToSpki(
+    public static byte[] EncodeToSubjectPublicKeyInfo(
         ReadOnlyMemory<byte> modulus,
         ReadOnlyMemory<byte> exponent)
     {
@@ -63,7 +63,7 @@ public static class AsnPublicKeyWriter
         // Write modulus and exponent as INTEGER values
         byte[] modulusBytes = modulus.ToArray();
         modulusBytes = EnsurePositive(modulusBytes);
-        
+
         byte[] exponentBytes = exponent.ToArray();
         exponentBytes = EnsurePositive(exponentBytes);
 
@@ -104,7 +104,7 @@ public static class AsnPublicKeyWriter
     /// <remarks>
     /// Only public key parameters are supported. The method will throw an <see cref="ArgumentException"/> if any of the private key parameters are set.
     /// </remarks>
-    public static byte[] EncodeToSpki(RSAParameters parameters)
+    public static byte[] EncodeToSubjectPublicKeyInfo(RSAParameters parameters)
     {
         // Ensure parameters are only public
         if (parameters.D != null || parameters.P != null || parameters.Q != null ||
@@ -113,7 +113,7 @@ public static class AsnPublicKeyWriter
             throw new ArgumentException("Only public key parameters should be provided.");
         }
 
-        return EncodeToSpki(parameters.Modulus, parameters.Exponent);
+        return EncodeToSubjectPublicKeyInfo(parameters.Modulus, parameters.Exponent);
     }
 
     /// <summary>
@@ -121,7 +121,7 @@ public static class AsnPublicKeyWriter
     /// </summary>
     /// <param name="parameters">The EC public key parameters.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
-    public static byte[] EncodeToSpki(ECParameters parameters)
+    public static byte[] EncodeToSubjectPublicKeyInfo(ECParameters parameters)
     {
         // Ensure parameters are only public
         if (parameters.D != null)
@@ -133,7 +133,7 @@ public static class AsnPublicKeyWriter
         {
             throw new ArgumentException("EC point coordinates cannot be null.", nameof(parameters));
         }
-        
+
         if (parameters.Q.Y == null)
         {
             throw new ArgumentException("EC point coordinates cannot be null.", nameof(parameters));
@@ -170,7 +170,7 @@ public static class AsnPublicKeyWriter
 
         return writer.Encode();
     }
-    
+
     private static byte[] CreateCurve25519ToSpki(ReadOnlyMemory<byte> publicKey, KeyType keyType)
     {
         var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
@@ -179,79 +179,24 @@ public static class AsnPublicKeyWriter
             throw new ArgumentException("Curve OID is null.");
         }
 
-        if (keyDefinition.AlgorithmOid != KeyDefinitions.CryptoOids.X25519 && 
+        if (keyDefinition.AlgorithmOid != KeyDefinitions.CryptoOids.X25519 &&
             keyDefinition.AlgorithmOid != KeyDefinitions.CryptoOids.Ed25519)
         {
-            throw new ArgumentException("Invalid curve OID."); 
+            throw new ArgumentException("Invalid curve OID.");
         }
-        
+
         if (publicKey.Length != 32)
         {
             throw new ArgumentException("Curve25519 public key must be 32 bytes.");
         }
 
-        var writer = new AsnWriter(AsnEncodingRules.DER);
-
         // Start SubjectPublicKeyInfo SEQUENCE
+        var writer = new AsnWriter(AsnEncodingRules.DER);
         _ = writer.PushSequence();
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
         writer.WriteObjectIdentifier(keyDefinition.AlgorithmOid);
-        writer.PopSequence();
-
-        // Write subject public key as BIT STRING
-        writer.WriteBitString(publicKey.ToArray());
-
-        // End SubjectPublicKeyInfo SEQUENCE
-        writer.PopSequence();
-
-        return writer.Encode();
-    } 
-
-    private static byte[] CreateEd25519ToSpki(ReadOnlyMemory<byte> publicKey)
-    {
-        if (publicKey.Length != 32)
-        {
-            throw new ArgumentException("Ed25519 public key must be 32 bytes.");
-        }
-
-        // Write the complete ASN.1 structure for SubjectPublicKeyInfo
-        var writer = new AsnWriter(AsnEncodingRules.DER);
-
-        // Start SubjectPublicKeyInfo SEQUENCE
-        _ = writer.PushSequence();
-
-        // Algorithm Identifier SEQUENCE
-        _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.Ed25519);
-        writer.PopSequence();
-
-        // Write subject public key as BIT STRING
-        writer.WriteBitString(publicKey.ToArray());
-
-        // End SubjectPublicKeyInfo SEQUENCE
-        writer.PopSequence();
-
-        return writer.Encode();
-    } 
-
-    private static byte[] CreateX255519ToSpki(ReadOnlyMemory<byte> publicKey) 
-    {
-        if (publicKey.Length != 32)
-        {
-            throw new ArgumentException("X25519 public key must be 32 bytes.");
-        }
-
-        // Write the complete ASN.1 structure for SubjectPublicKeyInfo
-        var writer = new AsnWriter(AsnEncodingRules.DER);
-
-        // Start SubjectPublicKeyInfo SEQUENCE
-        _ = writer.PushSequence();
-
-        // Algorithm Identifier SEQUENCE
-        _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.X25519);
         writer.PopSequence();
 
         // Write subject public key as BIT STRING
@@ -273,7 +218,8 @@ public static class AsnPublicKeyWriter
         }
 
         // Expected length for uncompressed point: 1 + (coordinateSize * 2)
-        if (publicPoint.Length != 1 + (coordinateSize * 2))
+        bool isValidLength = publicPoint.Length == 1 + (coordinateSize * 2);
+        if (!isValidLength)
         {
             throw new ArgumentException(
                 $"Invalid EC public point size for the specified curve. Expected {1 + (coordinateSize * 2)} bytes.");
@@ -299,7 +245,7 @@ public static class AsnPublicKeyWriter
 
         return writer.Encode();
     }
-    
+
     // Ensures the integer value is treated as positive by adding a leading zero if needed
     private static byte[] EnsurePositive(byte[]? value)
     {
@@ -318,26 +264,5 @@ public static class AsnPublicKeyWriter
         }
 
         return value;
-    }
-}
-
-// Extension class to add methods to IPublicKeyParameters for ASN.1 DER encoding
-public static class PublicKeyParametersExtensions
-{
-    /// <summary>
-    /// Converts a public key parameter object to ASN.1 DER encoded format.
-    /// </summary>
-    /// <param name="parameters">The public key parameters.</param>
-    /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
-    public static byte[] ToEncodedKey(this IPublicKeyParameters parameters)
-    {
-        return parameters switch
-        {
-            RSAPublicKeyParameters rsaParams => AsnPublicKeyWriter.EncodeToSpki(rsaParams.Parameters),
-            ECPublicKeyParameters ecParams => AsnPublicKeyWriter.EncodeToSpki(ecParams.Parameters),
-            Ed25519PublicKeyParameters edParams => AsnPublicKeyWriter.EncodeToSpki(edParams.PublicPoint, KeyType.Ed25519),
-            X25519PublicKeyParameters x25519Params => AsnPublicKeyWriter.EncodeToSpki(x25519Params.PublicPoint, KeyType.X25519),
-            _ => throw new NotSupportedException($"Key type {parameters.GetType().Name} is not supported for encoding.")
-        };
     }
 }

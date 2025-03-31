@@ -24,25 +24,6 @@ namespace Yubico.YubiKey.Cryptography;
 public static class AsnPrivateKeyWriter
 {
     /// <summary>
-    /// Converts a private key and key type to ASN.1 DER encoded format in PKCS#8 structure.
-    /// </summary>
-    /// <param name="privateKey">The private key as a byte array.</param>
-    /// <param name="keyType">The type of the key.</param>
-    /// <returns>A byte array containing the ASN.1 DER encoded private key in PKCS#8 format.</returns>
-    public static byte[] EncodeToPkcs8(ReadOnlyMemory<byte> privateKey, KeyType keyType) // 
-    {
-        return keyType switch
-        {
-            KeyType.P256 => CreateEcEncodedKey(privateKey, KeyDefinitions.CryptoOids.P256, null),
-            KeyType.P384 => CreateEcEncodedKey(privateKey, KeyDefinitions.CryptoOids.P384, null),
-            KeyType.P521 => CreateEcEncodedKey(privateKey, KeyDefinitions.CryptoOids.P521, null),
-            KeyType.X25519 => CreateX25519EncodedKey(privateKey.Span),
-            KeyType.Ed25519 => CreateEd25519EncodedKey(privateKey.Span),
-            _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
-        };
-    }
-
-    /// <summary>
     /// Converts a private key and its corresponding public point to ASN.1 DER encoded format.
     /// </summary>
     /// <param name="privateKey">The private key as a byte array.</param>
@@ -56,17 +37,23 @@ public static class AsnPrivateKeyWriter
     {
         return keyType switch
         {
-            KeyType.P256 => CreateEcEncodedKey(
-                privateKey, KeyDefinitions.CryptoOids.P256, publicPoint),
-            KeyType.P384 => CreateEcEncodedKey(
-                privateKey, KeyDefinitions.CryptoOids.P384, publicPoint),
-            KeyType.P521 => CreateEcEncodedKey(
-                privateKey, KeyDefinitions.CryptoOids.P521, publicPoint),
-            KeyType.X25519 => CreateX25519EncodedKey(privateKey.Span),
-            KeyType.Ed25519 => CreateEd25519EncodedKey(privateKey.Span),
+            KeyType.P256 => EncodeECKey(privateKey, KeyDefinitions.CryptoOids.P256, publicPoint),
+            KeyType.P384 => EncodeECKey(privateKey, KeyDefinitions.CryptoOids.P384, publicPoint),
+            KeyType.P521 => EncodeECKey(privateKey, KeyDefinitions.CryptoOids.P521, publicPoint),
+            KeyType.X25519 => EncodeCurve25519Key(privateKey.Span, KeyDefinitions.CryptoOids.X25519),
+            KeyType.Ed25519 => EncodeCurve25519Key(privateKey.Span, KeyDefinitions.CryptoOids.Ed25519),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
         };
     }
+
+    /// <summary>
+    /// Converts a private key and key type to ASN.1 DER encoded format in PKCS#8 structure.
+    /// </summary>
+    /// <param name="privateKey">The private key as a byte array.</param>
+    /// <param name="keyType">The type of the key.</param>
+    /// <returns>A byte array containing the ASN.1 DER encoded private key in PKCS#8 format.</returns>
+    public static byte[] EncodeToPkcs8(ReadOnlyMemory<byte> privateKey, KeyType keyType) =>
+        EncodeToPkcs8(privateKey, null, keyType);
 
     /// <summary>
     /// Converts RSA private key parameters to ASN.1 DER encoded format.
@@ -76,10 +63,14 @@ public static class AsnPrivateKeyWriter
     public static byte[] EncodeToPkcs8(RSAParameters parameters)
     {
         // Ensure parameters include private key parts
-        if (parameters.D == null || parameters.P == null || parameters.Q == null ||
-            parameters.DP == null || parameters.DQ == null || parameters.InverseQ == null)
+        if (parameters.D == null ||
+            parameters.P == null ||
+            parameters.Q == null ||
+            parameters.DP == null ||
+            parameters.DQ == null ||
+            parameters.InverseQ == null)
         {
-            throw new ArgumentException("Private key parameters must be provided.");
+            throw new ArgumentException("All RSA Private key parameters must be provided.");
         }
 
         var rsaKeyWriter = new AsnWriter(AsnEncodingRules.DER);
@@ -88,23 +79,24 @@ public static class AsnPrivateKeyWriter
 
         rsaKeyWriter.WriteInteger(0);
 
-        rsaKeyWriter.WriteInteger(ProcessIntegerBytes(parameters.Modulus));
-        rsaKeyWriter.WriteInteger(ProcessIntegerBytes(parameters.Exponent));
-        rsaKeyWriter.WriteInteger(ProcessIntegerBytes(parameters.D));
-        rsaKeyWriter.WriteInteger(ProcessIntegerBytes(parameters.P));
-        rsaKeyWriter.WriteInteger(ProcessIntegerBytes(parameters.Q));
-        rsaKeyWriter.WriteInteger(ProcessIntegerBytes(parameters.DP));
-        rsaKeyWriter.WriteInteger(ProcessIntegerBytes(parameters.DQ));
-        rsaKeyWriter.WriteInteger(ProcessIntegerBytes(parameters.InverseQ));
+        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.Modulus));
+        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.Exponent));
+        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.D));
+        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.P));
+        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.Q));
+        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.DP));
+        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.DQ));
+        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.InverseQ));
 
         rsaKeyWriter.PopSequence();
 
         byte[] rsaKeyData = rsaKeyWriter.Encode();
 
+        // Start PrivateKeyInfo SEQUENCE
         var writer = new AsnWriter(AsnEncodingRules.DER);
-
         _ = writer.PushSequence();
 
+        // Version
         writer.WriteInteger(0);
 
         _ = writer.PushSequence();
@@ -150,18 +142,17 @@ public static class AsnPrivateKeyWriter
             publicPoint = uncompressedPoint;
         }
 
-        return CreateEcEncodedKey(privateKey, curveOid, publicPoint);
+        return EncodeECKey(privateKey, curveOid, publicPoint);
     }
 
     /// <summary>
     /// Creates an EC private key encoded in ASN.1 DER format.
     /// </summary>
-    private static byte[] CreateEcEncodedKey(
+    private static byte[] EncodeECKey(
         ReadOnlyMemory<byte> privateKey,
         string curveOid,
         ReadOnlyMemory<byte>? publicPoint)
     {
-        // First, create the EC private key structure
         var ecKeyWriter = new AsnWriter(AsnEncodingRules.DER);
 
         // Start ECPrivateKey SEQUENCE (RFC 5915)
@@ -170,7 +161,7 @@ public static class AsnPrivateKeyWriter
         // Version (1)
         ecKeyWriter.WriteInteger(1);
 
-        // Private key as OCTET STRING
+        // Private key
         ecKeyWriter.WriteOctetString(privateKey.ToArray());
 
         // [0] parameters (optional) - omitted since we include the OID in the AlgorithmIdentifier
@@ -189,10 +180,8 @@ public static class AsnPrivateKeyWriter
 
         byte[] ecKeyData = ecKeyWriter.Encode();
 
-        // Now create the PKCS#8 PrivateKeyInfo structure
+        // PKCS#8 PrivateKeyInfo structure
         var writer = new AsnWriter(AsnEncodingRules.DER);
-
-        // Start PrivateKeyInfo SEQUENCE
         _ = writer.PushSequence();
 
         // Version (0)
@@ -213,20 +202,27 @@ public static class AsnPrivateKeyWriter
         return writer.Encode();
     }
 
-    /// <summary>
-    /// Creates an Ed25519 private key encoded in ASN.1 DER format.
-    /// </summary>
-    private static byte[] CreateEd25519EncodedKey(ReadOnlySpan<byte> privateKey)
+    private static byte[] EncodeCurve25519Key(ReadOnlySpan<byte> privateKey, string curveOid)
     {
         if (privateKey.Length != 32)
         {
-            throw new ArgumentException("Ed25519 private key must be 32 bytes.");
+            throw new ArgumentException("Curve25519 key must be 32 bytes.");
         }
 
-        // For Ed25519, create a simple octet string for the private key
-        var octetWriter = new AsnWriter(AsnEncodingRules.DER);
-        octetWriter.WriteOctetString(privateKey.ToArray());
-        byte[] keyData = octetWriter.Encode();
+        if (curveOid == null)
+        {
+            throw new ArgumentException("Curve OID is null.");
+        }
+
+        if (curveOid is not (KeyDefinitions.CryptoOids.X25519 or KeyDefinitions.CryptoOids.Ed25519))
+        {
+            throw new ArgumentException("Curve OID is not supported.", nameof(curveOid));
+        }
+
+        if (curveOid == KeyDefinitions.CryptoOids.X25519)
+        {
+            AsnUtilities.VerifyX25519PrivateKey(privateKey);
+        }
 
         // Create the PKCS#8 PrivateKeyInfo structure
         var writer = new AsnWriter(AsnEncodingRules.DER);
@@ -239,115 +235,18 @@ public static class AsnPrivateKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.Ed25519);
+        writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 
         // PrivateKey as OCTET STRING
-        writer.WriteOctetString(keyData);
+        var privateKeyWriter = new AsnWriter(AsnEncodingRules.DER);
+        privateKeyWriter.WriteOctetString(privateKey);
+        ReadOnlySpan<byte> privateKeySpan = privateKeyWriter.Encode();
+        writer.WriteOctetString(privateKeySpan);
 
         // End PrivateKeyInfo SEQUENCE
         writer.PopSequence();
 
         return writer.Encode();
-    }
-
-    /// <summary>
-    /// Creates an X25519 private key encoded in ASN.1 DER format.
-    /// </summary>
-    private static byte[] CreateX25519EncodedKey(ReadOnlySpan<byte> privateKey)
-    {
-        if (privateKey.Length != 32)
-        {
-            throw new ArgumentException("X25519 private key must be 32 bytes.");
-        }
-
-        // For X25519, create a simple octet string for the private key
-        var octetWriter = new AsnWriter(AsnEncodingRules.DER);
-        octetWriter.WriteOctetString(privateKey.ToArray());
-        byte[] keyData = octetWriter.Encode();
-
-        // Create the PKCS#8 PrivateKeyInfo structure
-        var writer = new AsnWriter(AsnEncodingRules.DER);
-
-        // Start PrivateKeyInfo SEQUENCE
-        _ = writer.PushSequence();
-
-        // Version (0)
-        writer.WriteInteger(0);
-
-        // Algorithm Identifier SEQUENCE
-        _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.X25519);
-        writer.PopSequence();
-
-        // PrivateKey as OCTET STRING
-        writer.WriteOctetString(keyData);
-
-        // End PrivateKeyInfo SEQUENCE
-        writer.PopSequence();
-
-        return writer.Encode();
-    }
-
-    // Process integer bytes for ASN.1 DER encoding
-    // 1. Ensures the integer value is treated as positive by adding a leading zero if needed
-    // 2. Removes redundant leading zero bytes to avoid ASN.1 encoding errors
-    private static byte[] ProcessIntegerBytes(byte[]? value)
-    {
-        if (value == null || value.Length == 0)
-        {
-            return [];
-        }
-
-        // Make a copy to avoid modifying the original
-        byte[] result = value;
-
-        // First, trim any redundant leading zeros
-        int startIndex = 0;
-        while (startIndex < result.Length - 1 && result[startIndex] == 0)
-        {
-            startIndex++;
-        }
-
-        if (startIndex > 0)
-        {
-            byte[] trimmed = new byte[result.Length - startIndex];
-            Buffer.BlockCopy(result, startIndex, trimmed, 0, trimmed.Length);
-            result = trimmed;
-        }
-
-        // Then, check if we need to add a leading zero to ensure positive interpretation
-        if ((result[0] & 0x80) != 0)
-        {
-            byte[] padded = new byte[result.Length + 1];
-            padded[0] = 0; // Add leading zero
-            Buffer.BlockCopy(result, 0, padded, 1, result.Length);
-            return padded;
-        }
-
-        return result;
-    }
-}
-
-// Extension class to add methods to IPrivateKeyParameters for ASN.1 DER encoding
-public static class PrivateKeyParametersExtensions
-{
-    /// <summary>
-    /// Converts a private key parameter object to ASN.1 DER encoded format.
-    /// </summary>
-    /// <param name="parameters">The private key parameters.</param>
-    /// <returns>A byte array containing the ASN.1 DER encoded private key.</returns>
-    public static byte[] EncodeToPkcs8(this IPrivateKeyParameters parameters) // TODO keep?
-    {
-        return parameters switch
-        {
-            RSAPrivateKeyParameters rsaParams => AsnPrivateKeyWriter.EncodeToPkcs8(rsaParams.Parameters),
-            ECPrivateKeyParameters ecParams => AsnPrivateKeyWriter.EncodeToPkcs8(ecParams.Parameters),
-            Curve25519PrivateKeyParameters edParams when edParams.KeyType == KeyType.Ed25519 
-                => AsnPrivateKeyWriter.EncodeToPkcs8(edParams.PrivateKey, KeyType.Ed25519),
-            Curve25519PrivateKeyParameters x25519Params when x25519Params.KeyType == KeyType.X25519  
-                => AsnPrivateKeyWriter.EncodeToPkcs8(x25519Params.PrivateKey, KeyType.X25519),
-            _ => throw new NotSupportedException($"Key type {parameters.GetType().Name} is not supported for encoding.")
-        };
     }
 }

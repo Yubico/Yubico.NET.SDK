@@ -33,20 +33,20 @@ public interface IPrivateKeyParameters : IKeyParameters
     public void Clear();
 }
 
-public class EmptyPublicKeyParameters : IPublicKeyParameters
+internal class EmptyPublicKeyParameters : IPublicKeyParameters
 {
     public KeyDefinition KeyDefinition { get; } = new();
     public KeyType KeyType { get; }
-    public ReadOnlyMemory<byte> PublicPoint { get; }
+    public static ReadOnlyMemory<byte> PublicPoint => Array.Empty<byte>();
     public byte[] ExportSubjectPublicKeyInfo() => Array.Empty<byte>();
 }
 
-public class EmptyPrivateKeyParameters : IPrivateKeyParameters
+internal class EmptyPrivateKeyParameters : IPrivateKeyParameters
 {
-    public KeyDefinition KeyDefinition { get; } = new KeyDefinition();
+    public KeyDefinition KeyDefinition { get; } = new();
     public KeyType KeyType { get; }
     public byte[] ExportPkcs8PrivateKey() => Array.Empty<byte>();
 
-    public ReadOnlyMemory<byte> PrivateKey { get; }
-    public void Clear() => throw new NotImplementedException();
+    public static ReadOnlyMemory<byte> PrivateKey => Array.Empty<byte>();
+    public void Clear() { }
 }

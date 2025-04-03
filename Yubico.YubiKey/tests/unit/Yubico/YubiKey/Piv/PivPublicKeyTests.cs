@@ -205,6 +205,7 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(KeyType.P256)]
         [InlineData(KeyType.P384)]
+        [Obsolete("Obsolete")]
         public void EccConstructor_Components_BuildsEncoding(
             KeyType keyType)
         {
@@ -261,6 +262,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void EccConstructor_NullData_ThrowsExcpetion()
         {
             _ = Assert.Throws<ArgumentException>(() => new PivEccPublicKey(null));

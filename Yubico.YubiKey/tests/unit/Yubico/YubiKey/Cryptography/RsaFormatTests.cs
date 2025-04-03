@@ -229,6 +229,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2, RsaFormat.Sha256, 2048)]
         [InlineData(2, RsaFormat.Sha384, 2048)]
         [InlineData(2, RsaFormat.Sha512, 2048)]
+        [Obsolete("Obsolete")]
         public void Format_Sign_MatchesCSharp(int format, int digestAlgorithm, int keySize)
         {
             byte[] dataToSign = {
@@ -312,6 +313,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2, RsaFormat.Sha256, 2048)]
         [InlineData(2, RsaFormat.Sha384, 2048)]
         [InlineData(2, RsaFormat.Sha512, 2048)]
+        [Obsolete("Obsolete")]
         public void Parse_Sign_MatchesCSharp(int format, int digestAlgorithm, int keySize)
         {
             byte[] dataToSign = {
@@ -402,6 +404,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2, RsaFormat.Sha256, 2048)]
         [InlineData(2, RsaFormat.Sha384, 2048)]
         [InlineData(2, RsaFormat.Sha512, 2048)]
+        [Obsolete("Obsolete")]
         public void Format_Encrypt_MatchesCSharp(int format, int digestAlgorithm, int keySize)
         {
             byte[] dataToEncrypt = {
@@ -472,6 +475,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2, RsaFormat.Sha256, 2048)]
         [InlineData(2, RsaFormat.Sha384, 2048)]
         [InlineData(2, RsaFormat.Sha512, 2048)]
+        [Obsolete("Obsolete")]
         public void Parse_Encrypt_MatchesCSharp(int format, int digestAlgorithm, int keySize)
         {
             byte[] dataToEncrypt = {

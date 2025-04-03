@@ -119,12 +119,14 @@ namespace Yubico.YubiKey.TestUtilities
         // constructor will not build a key.
         // If the PEM is a private key, the constructor will build its own local
         // copy of a private key and a public key.
+        [Obsolete("Obsolete")]
         public KeyConverter(
             string pemKeyString) :
             this(pemKeyString.ToCharArray())
         {
         }
 
+        [Obsolete("Obsolete")]
         public KeyConverter(
             char[] pemKeyString)
         {
@@ -205,6 +207,7 @@ namespace Yubico.YubiKey.TestUtilities
         // the constructor will throw an exception.
         // If that arg is false, this constructor will build only a public key,
         // even if the ECDsa object contains the private key.
+        [Obsolete("Obsolete")]
         public KeyConverter(
             ECDsa eccObject,
             bool isPrivate)
@@ -687,6 +690,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Build the private key from the PRIVATE KEY PEM. If possible, build the
         // public key as well.
+        [Obsolete("Obsolete")]
         private void BuildPivPrivateKey(
             char[] pemKeyString)
         {
@@ -719,21 +723,10 @@ namespace Yubico.YubiKey.TestUtilities
                     BuildPivPublicKey(eccObject);
                     BuildPivPrivateKey(eccObject);
                 }
-                // else if (tag == 0x04)
-                // {
-                //     var keyDataRange = ^32..;
-                //     _pivPrivateKey = new PivEccPrivateKey(encodedKey.AsSpan()[keyDataRange], PivAlgorithm.EccEd25519);
-                //     // BuildPivPublicKey(eccObject); // TODO How do get this? I can get it from the file data. Possibly compute from the private key?
-                // }
-                // else if (tag == 0x03) // Not sure if this is correct. It appears ED and X keys share this byte
-                // {
-                //     var keyDataRange = ^32..;
-                //     _pivPrivateKey = new PivEccPrivateKey(encodedKey.AsSpan()[keyDataRange], PivAlgorithm.EccX25519);
-                //     // BuildPivPublicKey(eccObject); // TODO How do get this? I can get it from the file data. Possibly compute from the private key?
-                // }
             }
         }
         
+        [Obsolete("Obsolete")]
         private void BuildPivPublicKey(
             char[] pemKeyString)
         {
@@ -762,14 +755,6 @@ namespace Yubico.YubiKey.TestUtilities
 
                     BuildPivPublicKey(eccObject);
                 }
-                // else if (encodedKey[offset + 3] == 0x04) // Ed25519
-                // {
-                //     _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyType.Ed25519);
-                // }
-                // else if (encodedKey[offset + 3] == 0x03) // X25519
-                // {
-                //     _pivPublicKey = PivEccPublicKey.CreateFromPublicPoint(encodedKey.AsMemory()[^32..], KeyType.Ed25519);
-                // }
             }
         }
 
@@ -823,6 +808,7 @@ namespace Yubico.YubiKey.TestUtilities
             _pivPrivateKey = eccPriKey;
         }
 
+        [Obsolete("Obsolete")]
         private void BuildPivPublicKey(
             ECDsa eccObject)
         {

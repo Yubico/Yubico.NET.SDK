@@ -53,5 +53,5 @@ public class RSAPrivateKeyParameters : IPrivateKeyParameters
     }
 
     public static RSAPrivateKeyParameters CreateFromParameters(RSAParameters parameters) => new(parameters);
-    public static RSAPrivateKeyParameters Empty() => new RSAPrivateKeyParameters(new RSAParameters()); // Will crashg when look up key def..
+    internal static RSAPrivateKeyParameters Empty() => new RSAPrivateKeyParameters(new RSAParameters());
 }

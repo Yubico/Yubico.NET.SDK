@@ -82,7 +82,7 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The format of the public point is not supported.
         /// </exception>
-        // TODO Obsoloete this and replace with CreateFromPublicPoint
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use ECPublicKeyParameters or ECPrivateKeyParameters instead")]
         public PivEccPublicKey(ReadOnlySpan<byte> publicPoint, PivAlgorithm? algorithm = null)
         {
             if (!LoadEccPublicKey(publicPoint, algorithm))

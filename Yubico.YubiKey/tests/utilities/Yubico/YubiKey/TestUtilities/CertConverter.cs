@@ -140,6 +140,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Get the public key out of the cert. Return it as a PivPublicKey.
         // This method will return a new object, it will not return a reference.
+        [Obsolete("Obsolete")]
         public PivPublicKey GetPivPublicKey()
         {
             if (Algorithm.IsRsa())
@@ -151,9 +152,7 @@ namespace Yubico.YubiKey.TestUtilities
             
             if (Algorithm.IsEcc())
             {
-                // return PivEccPublicKey.CreateFromPublicPoint(_certificateObject.PublicKey.EncodedKeyValue.RawData, Algorithm.GetKeyType());
                 return new PivEccPublicKey(_certificateObject.PublicKey.EncodedKeyValue.RawData);
-
             }
             throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
         }

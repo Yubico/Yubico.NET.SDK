@@ -155,6 +155,7 @@ namespace Yubico.YubiKey.Piv
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
+        [Obsolete("Obsolete")]
         public void NoKeyInSlot_KeyAgree_Exception(
             StandardTestDevice testDeviceType)
         {

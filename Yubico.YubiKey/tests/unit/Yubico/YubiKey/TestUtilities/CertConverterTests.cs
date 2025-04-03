@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
@@ -29,6 +30,7 @@ namespace Yubico.YubiKey.TestUtilities
         [InlineData(KeyType.RSA4096)]
         [InlineData(KeyType.P256)]
         [InlineData(KeyType.P384)]
+        [Obsolete("Obsolete")]
         public void CertConverter_AllOperations_Succeed(KeyType keyType)
         {
             bool isValid = SampleKeyPairs.GetKeysAndCertPem(keyType, true, out var certPem, out _, out _);

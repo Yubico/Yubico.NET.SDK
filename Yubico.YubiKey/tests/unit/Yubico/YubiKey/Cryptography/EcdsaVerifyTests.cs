@@ -25,6 +25,7 @@ namespace Yubico.YubiKey.Cryptography
     public class EcdsaVerifyTests
     {
         [Fact]
+        [Obsolete("Obsolete")]
         public void PivKey_VerifyDigestedData_Succeeds()
         {
             var pubKey = new PivEccPublicKey(GetEncodedPoint());

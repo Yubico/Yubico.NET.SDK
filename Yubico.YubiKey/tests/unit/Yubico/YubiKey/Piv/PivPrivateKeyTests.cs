@@ -311,6 +311,7 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(KeyType.P256)]
         [InlineData(KeyType.P384)]
+        [Obsolete("Obsolete")]
         public void EccConstructor_BadPoint_ThrowsExcpetion(
             KeyType keyType)
         {

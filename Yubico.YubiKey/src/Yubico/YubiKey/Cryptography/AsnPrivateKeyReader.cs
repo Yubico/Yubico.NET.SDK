@@ -20,7 +20,7 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class AsnPrivateKeyReader
+internal class AsnPrivateKeyReader
 {
     public static IPrivateKeyParameters CreateKeyParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
@@ -47,7 +47,7 @@ public class AsnPrivateKeyReader
                     }
 
                     var rsaParameters = CreateRSAPrivateKeyParameters(seqPrivateKeyInfo);
-                    return new RSAPrivateKeyParameters(rsaParameters);
+                    return RSAPrivateKeyParameters.CreateFromParameters(rsaParameters);
                 }
             case KeyDefinitions.CryptoOids.ECDSA:
                 {
@@ -216,9 +216,7 @@ public class AsnPrivateKeyReader
 
         using var dValueHandle = new ZeroingMemoryHandle(seqEcPrivateKey.ReadOctetString());
 
-        // Get the public key if present (optional [1] tag)
         ECPoint point = default;
-
         // Check for optional parameters and public key
         while (seqEcPrivateKey.HasData)
         {

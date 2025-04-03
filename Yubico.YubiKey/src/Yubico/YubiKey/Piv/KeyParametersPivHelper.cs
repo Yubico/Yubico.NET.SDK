@@ -220,16 +220,18 @@ public static class KeyParametersPivHelper
 
         var rsaParameters = new RSAParameters
         {
-            // D = privateExponent,      // Private exponent
-            // Modulus = modulus,        // Modulus (n)
-            // Exponent = publicExponent, // Public exponent (e)
-            P = primeP.ToArray(), // First prime factor
-            Q = primeQ.ToArray(), // Second prime factor
-            DP = exponentP.ToArray(), // d mod (p-1)
-            DQ = exponentQ.ToArray(), // d mod (q-1)
-            InverseQ = coefficient.ToArray() // (q^-1) mod p
+            P = primeP.ToArray(),
+            Q = primeQ.ToArray(),
+            DP = exponentP.ToArray(),
+            DQ = exponentQ.ToArray(),
+            InverseQ = coefficient.ToArray(),
+            // The YubiKey only works with the CRT components of the private RSA key,
+            // that's why we set these values as empty.
+            D = Array.Empty<byte>(),
+            Modulus = Array.Empty<byte>(),
+            Exponent = Array.Empty<byte>(),
         };
 
-        return new RSAPrivateKeyParameters(rsaParameters);
+        return RSAPrivateKeyParameters.CreateFromParameters(rsaParameters);
     }
 }

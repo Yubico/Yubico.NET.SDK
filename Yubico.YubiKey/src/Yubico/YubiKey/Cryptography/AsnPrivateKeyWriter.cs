@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Cryptography;
 /// <summary>
 /// A class that converts private key parameters to ASN.1 DER encoding.
 /// </summary>
-public static class AsnPrivateKeyWriter
+internal static class AsnPrivateKeyWriter
 {
     /// <summary>
     /// Converts a private key and its corresponding public point to ASN.1 DER encoded format.
@@ -129,16 +129,15 @@ public static class AsnPrivateKeyWriter
 
         // Create public point if Q coordinates are available
         ReadOnlyMemory<byte>? publicPoint = null;
-        if (parameters.Q.X != null && parameters.Q.Y != null)
+        if (parameters.Q is { X: not null, Y: not null })
         {
             byte[] xCoordinate = parameters.Q.X;
             byte[] yCoordinate = parameters.Q.Y;
 
-            byte[] uncompressedPoint = new byte[1 + xCoordinate.Length + yCoordinate.Length];
-            uncompressedPoint[0] = 0x04; // Uncompressed point format
-            Buffer.BlockCopy(xCoordinate, 0, uncompressedPoint, 1, xCoordinate.Length);
-            Buffer.BlockCopy(yCoordinate, 0, uncompressedPoint, 1 + xCoordinate.Length, yCoordinate.Length);
-
+            Memory<byte> uncompressedPoint = new byte[1 + xCoordinate.Length + yCoordinate.Length];
+            uncompressedPoint.Span[0] = 0x04; // Uncompressed point format
+            xCoordinate.CopyTo(uncompressedPoint[1..]);
+            yCoordinate.CopyTo(uncompressedPoint[(1 + xCoordinate.Length)..]);
             publicPoint = uncompressedPoint;
         }
 
@@ -162,7 +161,7 @@ public static class AsnPrivateKeyWriter
         ecKeyWriter.WriteInteger(1);
 
         // Private key
-        ecKeyWriter.WriteOctetString(privateKey.ToArray());
+        ecKeyWriter.WriteOctetString(privateKey.Span);
 
         // [0] parameters (optional) - omitted since we include the OID in the AlgorithmIdentifier
 
@@ -170,15 +169,12 @@ public static class AsnPrivateKeyWriter
         if (publicPoint.HasValue)
         {
             ecKeyWriter.WriteBitString(
-                publicPoint.Value.ToArray(),
+                publicPoint.Value.Span,
                 0,
                 new Asn1Tag(TagClass.ContextSpecific, 1));
         }
-
-        // End ECPrivateKey SEQUENCE
         ecKeyWriter.PopSequence();
-
-        byte[] ecKeyData = ecKeyWriter.Encode();
+        using var ecPrivateKeyHandle = new ZeroingMemoryHandle(ecKeyWriter.Encode());
 
         // PKCS#8 PrivateKeyInfo structure
         var writer = new AsnWriter(AsnEncodingRules.DER);
@@ -193,10 +189,8 @@ public static class AsnPrivateKeyWriter
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 
-        // PrivateKey as OCTET STRING (contains the EC private key)
-        writer.WriteOctetString(ecKeyData);
-
-        // End PrivateKeyInfo SEQUENCE
+        // PrivateKey as OCTET STRING
+        writer.WriteOctetString(ecPrivateKeyHandle.Data);
         writer.PopSequence();
 
         return writer.Encode();

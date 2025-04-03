@@ -26,7 +26,6 @@ internal class ZeroingMemoryHandle : IDisposable, IReadOnlyCollection<byte>, IEn
     private readonly byte[] _data;
     private bool _disposed;
 
-    // Properties
     public int Length => _disposed ? 0 : _data.Length;
     public int Count => Length; // For IReadOnlyCollection
 

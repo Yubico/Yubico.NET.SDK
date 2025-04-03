@@ -24,7 +24,7 @@ public class RSAPrivateKeyParameters : IPrivateKeyParameters
     public KeyDefinition KeyDefinition => _keyDefinition;
     public KeyType KeyType => _keyDefinition.KeyType;
 
-    public RSAPrivateKeyParameters(RSAParameters parameters)
+    private RSAPrivateKeyParameters(RSAParameters parameters)
     {
         int keyLengthBits = parameters.DP?.Length * 8 * 2 ?? 0;
         

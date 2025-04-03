@@ -306,7 +306,7 @@ namespace Yubico.YubiKey.Piv.Commands
             PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
             _encodedKey = encodedKey;
-            _slotNumber = slotNumber;
+            SlotNumber = slotNumber;
             Algorithm = keyType.GetPivAlgorithm();
             PinPolicy = pinPolicy;
             TouchPolicy = touchPolicy;

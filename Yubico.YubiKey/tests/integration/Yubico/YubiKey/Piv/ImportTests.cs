@@ -103,8 +103,8 @@ namespace Yubico.YubiKey.Piv
             else
             {
                 var publicRSAParameters = slotMetadata.PublicKeyParameters as RSAPublicKeyParameters;
-                
                 Assert.NotNull(publicRSAParameters);
+                
                 var rsaParameters = testPublicKey.AsRSA().ExportParameters(false);
                 Assert.Equal(rsaParameters.Modulus, publicRSAParameters.Parameters.Modulus);
                 Assert.Equal(rsaParameters.Exponent, publicRSAParameters.Parameters.Exponent);

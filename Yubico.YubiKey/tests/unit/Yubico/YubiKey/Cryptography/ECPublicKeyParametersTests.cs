@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = ecdsa.ExportParameters(false);
 
             // Act
-            var publicKeyParams = new ECPublicKeyParameters(parameters);
+            var publicKeyParams = ECPublicKeyParameters.CreateFromParameters(parameters);
 
             // Assert
             Assert.Null(publicKeyParams.Parameters.D);
@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = ecdsa.ExportParameters(true);
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => new ECPublicKeyParameters(parameters));
+            var exception = Assert.Throws<ArgumentException>(() => ECPublicKeyParameters.CreateFromParameters(parameters));
             Assert.Equal("parameters", exception.ParamName);
             Assert.Contains("D value", exception.Message);
         }
@@ -121,7 +121,7 @@ namespace Yubico.YubiKey.Cryptography
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
             // Act
-            var publicKeyParams = new ECPublicKeyParameters(ecdsa);
+            var publicKeyParams = ECPublicKeyParameters.CreateFromParameters(ecdsa.ExportParameters(false));
 
             // Assert
             Assert.Null(publicKeyParams.Parameters.D);
@@ -135,7 +135,7 @@ namespace Yubico.YubiKey.Cryptography
             // Arrange
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
             var originalParams = ecdsa.ExportParameters(false);
-            var publicKeyParams = new ECPublicKeyParameters(originalParams);
+            var publicKeyParams = ECPublicKeyParameters.CreateFromParameters(originalParams);
 
             // Act - Modify original parameters
             Assert.NotNull(originalParams.Q.X);
@@ -155,7 +155,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-            var publicKeyParams = new ECPublicKeyParameters(ecdsa);
+            var publicKeyParams = ECPublicKeyParameters.CreateFromParameters(ecdsa.ExportParameters(false));
 
             // Act
             var publicPoint = publicKeyParams.PublicPoint;
@@ -184,19 +184,13 @@ namespace Yubico.YubiKey.Cryptography
             using var ecdsa = ECDsa.Create(ECCurve.CreateFromOid(Oid.FromOidValue(oid, OidGroup.PublicKeyAlgorithm)));
 
             // Act
-            var publicKeyParams = new ECPublicKeyParameters(ecdsa);
+            var publicKeyParams = ECPublicKeyParameters.CreateFromParameters(ecdsa.ExportParameters(false));
 
             // Assert
             Assert.Equal(oid, publicKeyParams.Parameters.Curve.Oid.Value);
             Assert.NotNull(publicKeyParams.Parameters.Q.X);
             Assert.NotNull(publicKeyParams.Parameters.Q.Y);
 
-        }
-
-        [Fact]
-        public void Constructor_WithNullECDsa_ThrowsArgumentNullException()
-        {
-            Assert.Throws<ArgumentNullException>(() => new ECPublicKeyParameters(null!));
         }
     }
 }

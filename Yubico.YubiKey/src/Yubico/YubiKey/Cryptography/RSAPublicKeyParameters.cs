@@ -24,6 +24,7 @@ public class RSAPublicKeyParameters : IPublicKeyParameters
     public KeyDefinition KeyDefinition => _keyDefinition;
     public KeyType KeyType => _keyDefinition.KeyType;
 
+    [Obsolete("Use factory methods instead")]
     public RSAPublicKeyParameters(RSAParameters parameters)
     {
         if (parameters.D != null || 
@@ -52,7 +53,9 @@ public class RSAPublicKeyParameters : IPublicKeyParameters
         return AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(Parameters);
     }
 
+    #pragma warning disable CS0618 // Type or member is obsolete
     public static RSAPublicKeyParameters CreateFromParameters(RSAParameters rsaParameters) => new(rsaParameters);
+    #pragma warning restore CS0618 // Type or member is obsolete
 
     public static IPublicKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
         AsnPublicKeyReader.CreateKeyParameters(encodedKey);

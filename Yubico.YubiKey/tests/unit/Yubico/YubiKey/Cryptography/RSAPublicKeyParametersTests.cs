@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = rsa.ExportParameters(false);
 
             // Act
-            var publicKeyParams = new RSAPublicKeyParameters(parameters);
+            var publicKeyParams = RSAPublicKeyParameters.CreateFromParameters(parameters);
 
             // Assert
             Assert.Null(publicKeyParams.Parameters.D);
@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = rsa.ExportParameters(true);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => new RSAPublicKeyParameters(parameters));
+            Assert.Throws<ArgumentException>(() => RSAPublicKeyParameters.CreateFromParameters(parameters));
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = rsa.ExportParameters(false);
 
             // Act
-            var publicKeyParams = new RSAPublicKeyParameters(parameters);
+            var publicKeyParams = RSAPublicKeyParameters.CreateFromParameters(parameters);
 
             // Assert
             Assert.Null(publicKeyParams.Parameters.D);
@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.Cryptography
             // Arrange
             using var rsa = RSA.Create(2048);
             var originalParams = rsa.ExportParameters(false);
-            var publicKeyParams = new RSAPublicKeyParameters(originalParams);
+            var publicKeyParams = RSAPublicKeyParameters.CreateFromParameters(originalParams);
 
             // Act - Modify original parameters
             Assert.NotNull(originalParams.Modulus);
@@ -103,7 +103,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = testPublicKey.AsRSA().ExportParameters(false);
             
             // Act
-            var publicKeyParams = new RSAPublicKeyParameters(parameters);
+            var publicKeyParams = RSAPublicKeyParameters.CreateFromParameters(parameters);
 
             // Act
             var subjectPublicKeyInfo = publicKeyParams.ExportSubjectPublicKeyInfo();
@@ -136,7 +136,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = rsa.ExportParameters(false);
 
             // Act
-            var publicKeyParams = new RSAPublicKeyParameters(parameters);
+            var publicKeyParams = RSAPublicKeyParameters.CreateFromParameters(parameters);
 
             // Assert
             Assert.Equal(keySize, rsa.KeySize);

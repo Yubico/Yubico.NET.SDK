@@ -54,7 +54,7 @@ internal class AsnPrivateKeyReader
                     string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
 
                     var ecParams = CreateECPrivateKeyParameters(seqPrivateKeyInfo, oidCurve);
-                    return new ECPrivateKeyParameters(ecParams);
+                    return ECPrivateKeyParameters.CreateFromParameters(ecParams);
                 }
             case KeyDefinitions.CryptoOids.X25519:
             case KeyDefinitions.CryptoOids.Ed25519:

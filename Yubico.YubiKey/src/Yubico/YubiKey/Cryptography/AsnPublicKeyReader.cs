@@ -31,8 +31,7 @@ internal class AsnPublicKeyReader
         byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
         if (unusedBitCount != 0)
         {
-            throw new CryptographicException(
-                "Invalid subject public key encoding"); // TODO Make into localized string?
+            throw new CryptographicException("Invalid subject public key encoding");
         }
 
         switch (oidAlgorithm)
@@ -85,7 +84,7 @@ internal class AsnPublicKeyReader
             Exponent = exponent.ToArray()
         };
 
-        return new RSAPublicKeyParameters(rsaParameters);
+        return RSAPublicKeyParameters.CreateFromParameters(rsaParameters);
     }
 
     private static ECPublicKeyParameters CreateECPublicKeyParameters(string curveOid, byte[] subjectPublicKey)
@@ -125,6 +124,6 @@ internal class AsnPublicKeyReader
             }
         };
 
-        return new ECPublicKeyParameters(ecParams);
+        return ECPublicKeyParameters.CreateFromParameters(ecParams);
     }
 }

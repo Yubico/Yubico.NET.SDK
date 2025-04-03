@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = ecdsa.ExportParameters(true);
 
             // Act
-            var privateKeyParams = new ECPrivateKeyParameters(parameters);
+            var privateKeyParams = ECPrivateKeyParameters.CreateFromParameters(parameters);
 
             // Assert
             Assert.NotNull(privateKeyParams.Parameters.D);
@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.Cryptography
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
             // Act
-            var privateKeyParams = new ECPrivateKeyParameters(ecdsa);
+            var privateKeyParams = ECPrivateKeyParameters.CreateFromParameters(ecdsa.ExportParameters(false));
 
             // Assert
             Assert.NotNull(privateKeyParams.Parameters.D);
@@ -122,7 +122,7 @@ namespace Yubico.YubiKey.Cryptography
             parameters.D = null;
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => new ECPrivateKeyParameters(parameters));
+            var exception = Assert.Throws<ArgumentException>(() => ECPrivateKeyParameters.CreateFromParameters(parameters));
             Assert.Equal("parameters", exception.ParamName);
             Assert.Contains("D value", exception.Message);
         }
@@ -133,7 +133,7 @@ namespace Yubico.YubiKey.Cryptography
             // Arrange
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
             var originalParams = ecdsa.ExportParameters(true);
-            var privateKeyParams = new ECPrivateKeyParameters(originalParams);
+            var privateKeyParams = ECPrivateKeyParameters.CreateFromParameters(originalParams);
 
             Assert.NotNull(originalParams.D);
             Assert.NotNull(originalParams.Q.X);
@@ -153,13 +153,6 @@ namespace Yubico.YubiKey.Cryptography
             Assert.NotEqual(originalParams.Q.Y[0], privateKeyParams.Parameters.Q.Y[0]);
         }
 
-        [Fact]
-        public void Constructor_WithNullECDsaObject_ThrowsArgumentNullException()
-        {
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => new ECPrivateKeyParameters(null!));
-        }
-
         [Theory]
         [InlineData("1.2.840.10045.3.1.7")] // NIST P-256
         [InlineData("1.3.132.0.34")] // NIST P-384
@@ -171,7 +164,7 @@ namespace Yubico.YubiKey.Cryptography
             using var ecdsa = ECDsa.Create(ECCurve.CreateFromOid(Oid.FromOidValue(oid, OidGroup.PublicKeyAlgorithm)));
 
             // Act
-            var privateKeyParams = new ECPrivateKeyParameters(ecdsa);
+            var privateKeyParams = ECPrivateKeyParameters.CreateFromParameters(ecdsa.ExportParameters(true));
 
             // Assert
             Assert.Equal(oid, privateKeyParams.Parameters.Curve.Oid.Value);

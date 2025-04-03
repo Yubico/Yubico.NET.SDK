@@ -50,6 +50,7 @@ namespace Yubico.YubiKey.Cryptography
         /// </remarks>
         /// <param name="parameters"></param>
         /// <exception cref="ArgumentException">Thrown when the parameters contain private key data (D value).</exception>
+        [Obsolete("Use factory methods instead")]
         public ECPublicKeyParameters(ECParameters parameters)
         {
             if (parameters.D != null)
@@ -69,6 +70,8 @@ namespace Yubico.YubiKey.Cryptography
         /// Initializes a new instance of the <see cref="ECPublicKeyParameters"/> class.
         /// </summary>
         /// <param name="ecdsa"></param>
+        [Obsolete("Use factory methods instead")]
+        // TODO The constructor should be private, but not possible to have to constructors with the same signature
         public ECPublicKeyParameters(ECDsa ecdsa)
         {
             if (ecdsa == null)
@@ -92,7 +95,9 @@ namespace Yubico.YubiKey.Cryptography
         [Obsolete("Use PublicPoint instead")]
         public ReadOnlyMemory<byte> GetBytes() => _publicPointBytes;
         
+        #pragma warning disable CS0618 // Type or member is obsolete
         public static ECPublicKeyParameters CreateFromParameters(ECParameters ecParameters) => new(ecParameters);
+        #pragma warning restore CS0618 // Type or member is obsolete
 
         public static IPublicKeyParameters CreateFromValue(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
         {

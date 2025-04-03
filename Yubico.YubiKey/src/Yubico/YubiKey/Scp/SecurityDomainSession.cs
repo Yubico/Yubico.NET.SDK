@@ -946,7 +946,7 @@ namespace Yubico.YubiKey.Scp
                 }
             };
 
-            return new ECPublicKeyParameters(ecParameters);
+            return ECPublicKeyParameters.CreateFromParameters(ecParameters);
         }
     }
 }

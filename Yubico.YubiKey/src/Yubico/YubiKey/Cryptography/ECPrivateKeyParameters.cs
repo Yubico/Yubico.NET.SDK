@@ -42,6 +42,7 @@ namespace Yubico.YubiKey.Cryptography
         /// the parameters from the ECParameters object.
         /// </remarks>
         /// <param name="parameters">The EC parameters.</param>
+        [Obsolete("Use factory methods instead")]
         public ECPrivateKeyParameters(ECParameters parameters)
         {
             if (parameters.D == null)
@@ -60,6 +61,8 @@ namespace Yubico.YubiKey.Cryptography
         /// It exports the parameters from the ECDsa object and deep copy the parameters from the ECParameters object.
         /// </remarks>
         /// <param name="ecdsaObject">The ECDsa object.</param>
+        [Obsolete("Use factory methods instead")]
+        // TODO The constructor should be private, but not possible to have to constructors with the same signature
         public ECPrivateKeyParameters(ECDsa ecdsaObject)
         {
             if (ecdsaObject == null)
@@ -83,9 +86,11 @@ namespace Yubico.YubiKey.Cryptography
         public static ECPrivateKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
         {
             var parameters = AsnPrivateKeyReader.CreateECParameters(encodedKey);
-            return new ECPrivateKeyParameters(parameters);
+            return CreateFromParameters(parameters);
         }
+        #pragma warning disable CS0618 // Type or member is obsolete.
         public static ECPrivateKeyParameters CreateFromParameters(ECParameters parameters) => new(parameters);
+        #pragma warning restore CS0618 // Type or member is obsolete
         public static ECPrivateKeyParameters CreateFromValue(
             ReadOnlyMemory<byte> privateValue,
             KeyType keyType)
@@ -108,7 +113,7 @@ namespace Yubico.YubiKey.Cryptography
             };
 
             var ecdsa = ECDsa.Create(parameters);
-            return new ECPrivateKeyParameters(ecdsa.ExportParameters(true));
+            return CreateFromParameters(ecdsa.ExportParameters(true));
         }
     }
 }

@@ -32,21 +32,14 @@ public class RSAPrivateKeyParameters : IPrivateKeyParameters
         _keyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits);
     }
 
-    public byte[] ExportPkcs8PrivateKey()
-    {
-        if (Parameters.D == null || 
-            Parameters.Exponent == null || 
-            Parameters.Modulus == null)
-        {
-            throw new InvalidOperationException("Cannot export private key, missing required parameters");
-        }
-        
-        return AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
-    }
-    
+    public byte[] ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
+
     public void Clear()
     {
+        CryptographicOperations.ZeroMemory(Parameters.Modulus);
+        CryptographicOperations.ZeroMemory(Parameters.Exponent);
         CryptographicOperations.ZeroMemory(Parameters.P);
+        CryptographicOperations.ZeroMemory(Parameters.Q);
         CryptographicOperations.ZeroMemory(Parameters.Q);
         CryptographicOperations.ZeroMemory(Parameters.DP);
         CryptographicOperations.ZeroMemory(Parameters.DQ);

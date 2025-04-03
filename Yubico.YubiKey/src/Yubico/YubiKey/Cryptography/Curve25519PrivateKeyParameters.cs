@@ -41,11 +41,8 @@ public class Curve25519PrivateKeyParameters : IPrivateKeyParameters
     public KeyDefinition KeyDefinition => _keyDefinition;
     public KeyType KeyType => _keyDefinition.KeyType;
     public ReadOnlyMemory<byte> PrivateKey => _privateKey;
-    public void Clear()
-    {
-        CryptographicOperations.ZeroMemory(_privateKey.Span);
-    }
-    
+    public void Clear() => CryptographicOperations.ZeroMemory(_privateKey.Span);
+
     public static Curve25519PrivateKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
     {
         var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
@@ -74,15 +71,15 @@ public class Curve25519PrivateKeyParameters : IPrivateKeyParameters
             throw new CryptographicException("Invalid Curve25519 private key");
         }
 
-        byte[] privateKey = seqPrivateKey.ReadOctetString();
+        using var privateKeyHandle = new ZeroingMemoryHandle(seqPrivateKey.ReadOctetString());
         seqPrivateKeyInfo.ThrowIfNotEmpty();
-        if (privateKey.Length != 32)
+        if (privateKeyHandle.Data.Length != 32)
         {
             throw new CryptographicException("Invalid Curve25519 private key: incorrect length");
         }
 
         var keyDefinition = KeyDefinitions.GetByOid(oidAlgorithm);
-        return new Curve25519PrivateKeyParameters(privateKey, keyDefinition);
+        return new Curve25519PrivateKeyParameters(privateKeyHandle.Data, keyDefinition);
 
     }
     public static Curve25519PrivateKeyParameters CreateFromValue(ReadOnlyMemory<byte> privateKey, KeyType keyType)

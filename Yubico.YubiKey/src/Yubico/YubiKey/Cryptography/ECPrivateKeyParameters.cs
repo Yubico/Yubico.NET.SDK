@@ -110,7 +110,5 @@ namespace Yubico.YubiKey.Cryptography
             var ecdsa = ECDsa.Create(parameters);
             return new ECPrivateKeyParameters(ecdsa.ExportParameters(true));
         }
-
-
     }
 }

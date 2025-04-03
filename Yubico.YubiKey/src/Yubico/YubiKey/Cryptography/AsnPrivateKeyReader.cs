@@ -198,128 +198,75 @@ public class AsnPrivateKeyReader
                     ExceptionMessages.UnsupportedAlgorithm));
         }
 
-        try
+        // Read private key octet string
+        using var privateKeyHandle = new ZeroingMemoryHandle(seqPrivateKeyInfo.ReadOctetString());
+        seqPrivateKeyInfo.ThrowIfNotEmpty();
+
+        // Parse the EC private key structure
+        var privateKeyReader = new AsnReader(privateKeyHandle.Data, AsnEncodingRules.BER);
+        var seqEcPrivateKey = privateKeyReader.ReadSequence();
+
+        // EC private key sequence: Version, privateKey, [0] parameters (optional), [1] publicKey (optional)
+        var ecVersion = seqEcPrivateKey.ReadInteger();
+        if (ecVersion != 1)
         {
-            // Read private key octet string
-            // byte[] privateKeyData = seqPrivateKeyInfo.ReadOctetString();
-            using var seqPrivateKeyInfoBuffer = new MemoryWiper(seqPrivateKeyInfo.ReadOctetString());
-            seqPrivateKeyInfo.ThrowIfNotEmpty();
+            throw new CryptographicException("Invalid EC private key format: unexpected version");
+        }
 
-            // Parse the EC private key structure
-            var privateKeyReader = new AsnReader(seqPrivateKeyInfoBuffer.Data, AsnEncodingRules.BER);
-            var seqEcPrivateKey = privateKeyReader.ReadSequence();
+        using var dValueHandle = new ZeroingMemoryHandle(seqEcPrivateKey.ReadOctetString());
 
-            // EC private key sequence: Version, privateKey, [0] parameters (optional), [1] publicKey (optional)
-            var ecVersion = seqEcPrivateKey.ReadInteger();
-            if (ecVersion != 1)
+        // Get the public key if present (optional [1] tag)
+        ECPoint point = default;
+
+        // Check for optional parameters and public key
+        while (seqEcPrivateKey.HasData)
+        {
+            var tag = seqEcPrivateKey.PeekTag();
+            if (tag is { TagValue: 1, TagClass: TagClass.ContextSpecific })
             {
-                throw new CryptographicException("Invalid EC private key format: unexpected version");
-            }
-
-            using var dValueBuffer = new MemoryWiper(seqEcPrivateKey.ReadOctetString());
-            // byte[] dValue = seqEcPrivateKey.ReadOctetString(); // TODO clear this memory
-
-            // Get the public key if present (optional [1] tag)
-            ECPoint point = default;
-
-            // Check for optional parameters and public key
-            while (seqEcPrivateKey.HasData)
-            {
-                var tag = seqEcPrivateKey.PeekTag();
-                if (tag is { TagValue: 1, TagClass: TagClass.ContextSpecific })
+                ReadOnlyMemory<byte> publicKeyBytes = seqEcPrivateKey.ReadBitString(out int unusedBits, tag);
+                if (unusedBits != 0)
                 {
-                    ReadOnlyMemory<byte> publicKeyBytes = seqEcPrivateKey.ReadBitString(out int unusedBits, tag);
-                    if (unusedBits != 0)
-                    {
-                        throw new CryptographicException("Invalid EC public key encoding");
-                    }
+                    throw new CryptographicException("Invalid EC public key encoding");
+                }
 
-                    // Process the public key point
-                    if (publicKeyBytes.Length > 0 && publicKeyBytes.Span[0] == 0x04) // Uncompressed point format
+                // Process the public key point
+                if (publicKeyBytes.Span[0] == 0x04) // Uncompressed point format
+                {
+                    int coordinateSize = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
+                    bool sizeIsValid = publicKeyBytes.Length == (2 * coordinateSize) + 1;
+                    if (sizeIsValid) // Format: 0x04 + X + Y
                     {
-                        int coordinateSize = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
-                        bool sizeIsValid = publicKeyBytes.Length == (2 * coordinateSize) + 1;
-                        if (sizeIsValid) // Format: 0x04 + X + Y
+                        byte[] xCoordinate = new byte[coordinateSize];
+                        byte[] yCoordinate = new byte[coordinateSize];
+
+                        publicKeyBytes.Slice(1, coordinateSize).CopyTo(xCoordinate);
+                        publicKeyBytes.Slice(1 + coordinateSize, coordinateSize).CopyTo(yCoordinate);
+
+                        point = new ECPoint
                         {
-                            byte[] xCoordinate = new byte[coordinateSize];
-                            byte[] yCoordinate = new byte[coordinateSize];
-
-                            publicKeyBytes.Slice(1, coordinateSize).CopyTo(xCoordinate);
-                            publicKeyBytes.Slice(1 + coordinateSize, coordinateSize).CopyTo(yCoordinate);
-
-                            point = new ECPoint
-                            {
-                                X = xCoordinate,
-                                Y = yCoordinate
-                            };
-                        }
+                            X = xCoordinate,
+                            Y = yCoordinate
+                        };
                     }
                 }
-                else
-                {
-                    // Skip other optional fields
-                    _ = seqEcPrivateKey.ReadEncodedValue();
-                }
             }
-
-            var curve = ECCurve.CreateFromValue(curveOid);
-            byte[] dValue = dValueBuffer.Data;
-            var ecParams = new ECParameters
+            else
             {
-                Curve = curve,
-                D = dValue,
-                Q = point
-            };
+                // Skip other optional fields
+                _ = seqEcPrivateKey.ReadEncodedValue();
+            }
+        }
 
-            return ecParams;
-        }
-        finally
+        var curve = ECCurve.CreateFromValue(curveOid);
+        byte[] dValue = dValueHandle.Data;
+        var ecParams = new ECParameters
         {
-            // CryptographicOperations.ZeroMemory(seqPrivateKeyInfo); // TODO();
-            // CryptographicOperations.ZeroMemory(dValue.GetBuffer()); // TODO();
-        }
+            Curve = curve,
+            D = dValue,
+            Q = point
+        };
+
+        return ecParams;
     }
 }
-
-public class MemoryWiper : IDisposable
-{
-    private byte[] _sourceData; 
-    private bool _disposed;
-
-    public byte[] Data => _disposed 
-        ? throw new ObjectDisposedException(nameof(MemoryWiper)) 
-        : _sourceData;
-    
-    public int Length => _disposed ? 0 : _sourceData?.Length ?? 0;
-
-    public MemoryWiper(byte[] data)
-    {
-        _sourceData = data ?? throw new ArgumentNullException(nameof(data));
-    }
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing && _sourceData != null)
-            {
-                // Clear the ORIGINAL array
-                CryptographicOperations.ZeroMemory(_sourceData);
-                _sourceData = null!;
-            }
-            _disposed = true;
-        }
-    }
-
-    ~MemoryWiper()
-    {
-        Dispose(false);
-    }
-}
-

@@ -275,7 +275,7 @@ public class AsnPrivateKeyReaderTests
     }
 
     [Fact]
-    public void FromEncodedKey_WithUnsupportedCurve_ThrowsNotSupportedException()
+    public void FromEncodedKey_WithUnsupportedCurve_ThrowsInvalidOperationException()
     {
         // Arrange
         var writer = new AsnWriter(AsnEncodingRules.DER);
@@ -297,11 +297,11 @@ public class AsnPrivateKeyReaderTests
         var unsupportedCurveKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<NotSupportedException>(() => AsnPrivateKeyReader.CreateKeyParameters(unsupportedCurveKeyDer));
+        Assert.Throws<InvalidOperationException>(() => AsnPrivateKeyReader.CreateKeyParameters(unsupportedCurveKeyDer));
     }
 
     [Fact]
-    public void FromEncodedKey_WithUnsupportedAlgorithm_ThrowsNotSupportedException()
+    public void FromEncodedKey_WithUnsupportedAlgorithm_ThrowsInvalidOperationException()
     {
         // Arrange
         var writer = new AsnWriter(AsnEncodingRules.DER);
@@ -323,7 +323,7 @@ public class AsnPrivateKeyReaderTests
         var unsupportedAlgorithmKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<NotSupportedException>(() => AsnPrivateKeyReader.CreateKeyParameters(unsupportedAlgorithmKeyDer));
+        Assert.Throws<InvalidOperationException>(() => AsnPrivateKeyReader.CreateKeyParameters(unsupportedAlgorithmKeyDer));
     }
 
     [Fact]

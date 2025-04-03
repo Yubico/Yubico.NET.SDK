@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.Cryptography
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
             // Act
-            var privateKeyParams = ECPrivateKeyParameters.CreateFromParameters(ecdsa.ExportParameters(false));
+            var privateKeyParams = ECPrivateKeyParameters.CreateFromParameters(ecdsa.ExportParameters(true));
 
             // Assert
             Assert.NotNull(privateKeyParams.Parameters.D);

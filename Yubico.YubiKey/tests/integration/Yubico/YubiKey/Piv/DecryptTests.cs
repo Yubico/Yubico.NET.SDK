@@ -40,13 +40,8 @@ namespace Yubico.YubiKey.Piv
                 0x5a, 0xa7, 0x94, 0xde, 0x68, 0x1b, 0xaa, 0x8b, 0x58, 0x95, 0x04, 0x22, 0xd6, 0xfc, 0x3f, 0xbc
             };
 
-            // _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.RSA1024, false, out _, out _, out var privateKeyPem);
-            // var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
-            // var pivPrivateKey = privateKey.GetPivPrivateKey();
-
             var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA1024);
             var privateKey = RSAPrivateKeyParameters.CreateFromPkcs8(testKey.EncodedKey);
-
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using var pivSession = new PivSession(testDevice);
@@ -82,21 +77,19 @@ namespace Yubico.YubiKey.Piv
                 0x21, 0x00, 0xC5, 0xCD, 0x80, 0x23, 0x17, 0x2D, 0xB0, 0xFE, 0x9D, 0xF0, 0x28, 0x6C, 0x50, 0xBD
             };
 
-            var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA1024);
+            var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
             var privateKey = RSAPrivateKeyParameters.CreateFromPkcs8(testKey.EncodedKey);
 
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            using var pivSession = new PivSession(testDevice);
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.ImportPrivateKey(0x87, privateKey, pinPolicy, PivTouchPolicy.Never);
+            pivSession.ImportPrivateKey(0x87, privateKey, pinPolicy, PivTouchPolicy.Never);
 
-                var decryptedData = pivSession.Decrypt(0x87, dataToDecrypt);
-                Assert.Equal(dataToDecrypt.Length, decryptedData.Length);
-            }
+            var decryptedData = pivSession.Decrypt(0x87, dataToDecrypt);
+            Assert.Equal(dataToDecrypt.Length, decryptedData.Length);
         }
 
         [Theory]

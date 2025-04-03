@@ -26,6 +26,17 @@ public class RSAPublicKeyParameters : IPublicKeyParameters
 
     public RSAPublicKeyParameters(RSAParameters parameters)
     {
+        if (parameters.D != null || 
+            parameters.P != null || 
+            parameters.Q != null ||
+            parameters.DP != null ||
+            parameters.DQ != null ||
+            parameters.InverseQ != null
+           )
+        {
+            throw new ArgumentException("Parameters must not contain private key data");
+        }
+        
         Parameters = parameters.DeepCopy();
         _keyDefinition = KeyDefinitions.GetByRSALength(parameters.Modulus.Length * 8);
     }

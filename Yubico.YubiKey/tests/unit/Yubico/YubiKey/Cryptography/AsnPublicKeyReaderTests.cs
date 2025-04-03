@@ -73,15 +73,8 @@ public class AsnPublicKeyReaderTests
         Assert.NotNull(ecParams.Parameters.Q.Y);
         
         // Verify curve matches expected
-        var expectedCurveName = keyType switch
-        {
-            KeyType.P256 => "nistP256",
-            KeyType.P384 => "nistP384",
-            KeyType.P521 => "nistP521",
-            _ => throw new ArgumentOutOfRangeException(nameof(keyType))
-        };
-        
-        Assert.Equal(expectedCurveName, ecParams.Parameters.Curve.Oid.FriendlyName);
+        var expectedCurveOid = keyType.GetKeyDefinition().CurveOid;
+        Assert.Equal(expectedCurveOid, ecParams.Parameters.Curve.Oid.Value);
         
         // Verify coordinate sizes
         var expectedCoordinateSize = keyType switch

@@ -15,6 +15,7 @@
 using System;
 using System.Formats.Asn1;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
@@ -259,7 +260,7 @@ public class AsnPrivateKeyReader
         }
 
         var curve = ECCurve.CreateFromValue(curveOid);
-        byte[] dValue = dValueHandle.Data;
+        byte[] dValue = dValueHandle.Data.ToArray();
         var ecParams = new ECParameters
         {
             Curve = curve,

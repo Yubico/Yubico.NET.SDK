@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.Piv
             var sharedSecret = pivSession.KeyAgree(0x85, publicKeyPeer);
 
             // Assert
-            byte[] publicPoint = metadata.PublicKeyParameters switch
+            var publicPoint = metadata.PublicKeyParameters switch
             {
                 ECPublicKeyParameters ecDsa => ecDsa.PublicPoint.ToArray(),
                 Curve25519PublicKeyParameters edDsa => edDsa.PublicPoint.ToArray(),
@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Piv
             }
             else
             {
-                var expectedSecretLength = (publicKeyPeer.KeyDefinition.LengthInBytes - 1) / 2;
+                var expectedSecretLength = publicKeyPeer.KeyDefinition.LengthInBytes;
                 Assert.Equal(expectedSecretLength, sharedSecret.Length);
             }
         }
@@ -99,29 +99,29 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             // Build the correspondent objects.
-            bool isValid = SampleKeyPairs.GetKeysAndCertPem(keyType, true, out _, out _, out var privateKeyPem);
+            var isValid = SampleKeyPairs.GetKeysAndCertPem(keyType, true, out _, out _, out var privateKeyPem);
             Assert.True(isValid);
             var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
 
-            PivPublicKey correspondentPub = privateKey.GetPivPublicKey();
+            var correspondentPub = privateKey.GetPivPublicKey();
             var correspondentEcc = (PivEccPublicKey)correspondentPub;
 
-            ECDsa ecDsaObject = privateKey.GetEccObject();
-            ECParameters ecParams = ecDsaObject.ExportParameters(true);
+            var ecDsaObject = privateKey.GetEccObject();
+            var ecParams = ecDsaObject.ExportParameters(true);
             var correspondentObject = ECDiffieHellman.Create(ecParams);
             privateKey.Clear();
 
             // Build the YubiKey objects.
             _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out _, out privateKeyPem);
             privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
-            PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
+            var pivPrivateKey = privateKey.GetPivPrivateKey();
 
             ecDsaObject = privateKey.GetEccObject();
             ecParams = ecDsaObject.ExportParameters(false);
             var eccObject = ECDiffieHellman.Create(ecParams);
             privateKey.Clear();
 
-            HashAlgorithmName hashAlgorithm = digestAlgorithm switch
+            var hashAlgorithm = digestAlgorithm switch
             {
                 RsaFormat.Sha256 => HashAlgorithmName.SHA256,
                 RsaFormat.Sha384 => HashAlgorithmName.SHA384,
@@ -130,9 +130,9 @@ namespace Yubico.YubiKey.Piv
             };
 
             // The correspondent computes the digest of the shared secret.
-            byte[] correspondentSecret = correspondentObject.DeriveKeyFromHash(eccObject.PublicKey, hashAlgorithm);
+            var correspondentSecret = correspondentObject.DeriveKeyFromHash(eccObject.PublicKey, hashAlgorithm);
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             // The YubiKey computes the shared secret.
             using (var pivSession = new PivSession(testDevice))
@@ -142,9 +142,9 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ImportPrivateKey(slotNumber, pivPrivateKey, PivPinPolicy.Always, PivTouchPolicy.Never);
 
-                byte[] sharedSecret = pivSession.KeyAgree(slotNumber, correspondentEcc);
+                var sharedSecret = pivSession.KeyAgree(slotNumber, correspondentEcc);
 
-                using HashAlgorithm digester = GetHashAlgorithm(digestAlgorithm);
+                using var digester = GetHashAlgorithm(digestAlgorithm);
                 digester.Initialize();
                 _ = digester.TransformFinalBlock(sharedSecret, 0, sharedSecret.Length);
 
@@ -161,9 +161,9 @@ namespace Yubico.YubiKey.Piv
         {
             _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.P384, false, out _, out var publicKeyPem, out _);
             var publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
-            PivPublicKey pivPublicKey = publicKey.GetPivPublicKey();
+            var pivPublicKey = publicKey.GetPivPublicKey();
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {

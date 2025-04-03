@@ -67,12 +67,10 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.P384, StandardTestDevice.Fw5)]
         [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
         [InlineData(KeyType.X25519, StandardTestDevice.Fw5)]
-        public void
-            ImportPrivateKey_with_PivPrivateKey_Succeeds_and_HasExpectedValues(
+        public void ImportPrivateKey_with_PrivateKeyParameters_Succeeds_and_HasExpectedValues(
                 KeyType keyType,
                 StandardTestDevice testDeviceType)
         {
-            
             // Arrange
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
@@ -84,7 +82,6 @@ namespace Yubico.YubiKey.Piv
 
             // Act
             using var pivSession = GetSession(testDevice);
-
             pivSession.ImportPrivateKey(PivSlot.Retired1, privateKey, expectedPinPolicy, expectedTouchPolicy);
 
             // Assert

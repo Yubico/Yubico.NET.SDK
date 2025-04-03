@@ -46,14 +46,12 @@ internal class AsnPrivateKeyReader
                         seqAlgorithmIdentifier.ThrowIfNotEmpty();
                     }
 
-                    var rsaParameters = CreateRSAPrivateKeyParameters(seqPrivateKeyInfo);
+                    var rsaParameters = CreateRSAParameters(pkcs8EncodedKey);
                     return RSAPrivateKeyParameters.CreateFromParameters(rsaParameters);
                 }
             case KeyDefinitions.CryptoOids.ECDSA:
                 {
-                    string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
-
-                    var ecParams = CreateECPrivateKeyParameters(seqPrivateKeyInfo, oidCurve);
+                    var ecParams = CreateECParameters(pkcs8EncodedKey);
                     return ECPrivateKeyParameters.CreateFromParameters(ecParams);
                 }
             case KeyDefinitions.CryptoOids.X25519:
@@ -85,7 +83,6 @@ internal class AsnPrivateKeyReader
         }
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
-
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
         if (oidAlgorithm != KeyDefinitions.CryptoOids.ECDSA)
         {
@@ -95,8 +92,8 @@ internal class AsnPrivateKeyReader
                     ExceptionMessages.UnsupportedAlgorithm));
         }
 
-        string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidCurve is not (
+        string curveOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        if (curveOid is not (
             KeyDefinitions.CryptoOids.P256 or
             KeyDefinitions.CryptoOids.P384 or
             KeyDefinitions.CryptoOids.P521))
@@ -107,104 +104,10 @@ internal class AsnPrivateKeyReader
                     ExceptionMessages.UnsupportedAlgorithm));
         }
 
-        return CreateECPrivateKeyParameters(seqPrivateKeyInfo, oidCurve);
-    }
-
-    public static RSAParameters CreateRSAParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
-    {
-        var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
-        var seqPrivateKeyInfo = reader.ReadSequence();
-
-        // PKCS#8 starts with a version (integer 0)
-        var version = seqPrivateKeyInfo.ReadInteger();
-        if (version != 0)
-        {
-            throw new CryptographicException("Invalid PKCS#8 private key format: unexpected version");
-        }
-
-        var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
-
-        string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != KeyDefinitions.CryptoOids.RSA)
-        {
-            throw new InvalidOperationException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.UnsupportedAlgorithm));
-        }
-
-        return CreateRSAPrivateKeyParameters(seqPrivateKeyInfo);
-    }
-
-    private static RSAParameters CreateRSAPrivateKeyParameters(AsnReader seqPrivateKeyInfo)
-    {
-        // Read private key octet string
-        ReadOnlyMemory<byte> privateKeyData = seqPrivateKeyInfo.ReadOctetString();
+        using var privateKeyInfoHandle = new ZeroingMemoryHandle(seqPrivateKeyInfo.ReadOctetString());
         seqPrivateKeyInfo.ThrowIfNotEmpty();
 
-        // Parse the RSA private key structure
-        var privateKeyReader = new AsnReader(privateKeyData, AsnEncodingRules.DER);
-        var seqRsaPrivateKey = privateKeyReader.ReadSequence();
-
-        // RSA private key sequence: Version, modulus, publicExponent, privateExponent, prime1, prime2, exponent1, exponent2, coefficient
-        var rsaVersion = seqRsaPrivateKey.ReadInteger();
-        if (rsaVersion != 0)
-        {
-            throw new CryptographicException("Invalid RSA private key format: unexpected version");
-        }
-
-        var modulus = seqRsaPrivateKey.ReadIntegerBytes();
-        var publicExponent = seqRsaPrivateKey.ReadIntegerBytes();
-        var privateExponent = seqRsaPrivateKey.ReadIntegerBytes();
-        var prime1 = seqRsaPrivateKey.ReadIntegerBytes();
-        var prime2 = seqRsaPrivateKey.ReadIntegerBytes();
-        var exponent1 = seqRsaPrivateKey.ReadIntegerBytes();
-        var exponent2 = seqRsaPrivateKey.ReadIntegerBytes();
-        var coefficient = seqRsaPrivateKey.ReadIntegerBytes();
-
-        // Remove leading zeros where needed
-        var modulusBytes = AsnUtilities.TrimLeadingZeroes(modulus.Span);
-        var exponentBytes = AsnUtilities.TrimLeadingZeroes(publicExponent.Span);
-        var dBytes = AsnUtilities.TrimLeadingZeroes(privateExponent.Span);
-        var p = AsnUtilities.TrimLeadingZeroes(prime1.Span);
-        var q = AsnUtilities.TrimLeadingZeroes(prime2.Span);
-        var dp = AsnUtilities.TrimLeadingZeroes(exponent1.Span);
-        var dq = AsnUtilities.TrimLeadingZeroes(exponent2.Span);
-        var inverseQ = AsnUtilities.TrimLeadingZeroes(coefficient.Span);
-
-        var rsaParameters = new RSAParameters
-        {
-            Modulus = modulusBytes.ToArray(),
-            Exponent = exponentBytes.ToArray(),
-            D = dBytes.ToArray(),
-            P = p.ToArray(),
-            Q = q.ToArray(),
-            DP = dp.ToArray(),
-            DQ = dq.ToArray(),
-            InverseQ = inverseQ.ToArray()
-        };
-
-        // Apply normalization for cross-platform compatibility
-        return rsaParameters.NormalizeParameters();
-    }
-
-    private static ECParameters CreateECPrivateKeyParameters(AsnReader seqPrivateKeyInfo, string curveOid)
-    {
-        if (curveOid is not (KeyDefinitions.CryptoOids.P256 or KeyDefinitions.CryptoOids.P384
-            or KeyDefinitions.CryptoOids.P521))
-        {
-            throw new InvalidOperationException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.UnsupportedAlgorithm));
-        }
-
-        // Read private key octet string
-        using var privateKeyHandle = new ZeroingMemoryHandle(seqPrivateKeyInfo.ReadOctetString());
-        seqPrivateKeyInfo.ThrowIfNotEmpty();
-
-        // Parse the EC private key structure
-        var privateKeyReader = new AsnReader(privateKeyHandle.Data, AsnEncodingRules.BER);
+        var privateKeyReader = new AsnReader(privateKeyInfoHandle.Data, AsnEncodingRules.BER);
         var seqEcPrivateKey = privateKeyReader.ReadSequence();
 
         // EC private key sequence: Version, privateKey, [0] parameters (optional), [1] publicKey (optional)
@@ -214,10 +117,10 @@ internal class AsnPrivateKeyReader
             throw new CryptographicException("Invalid EC private key format: unexpected version");
         }
 
-        using var dValueHandle = new ZeroingMemoryHandle(seqEcPrivateKey.ReadOctetString());
+        using var privateKeyHandle = new ZeroingMemoryHandle(seqEcPrivateKey.ReadOctetString());
 
-        ECPoint point = default;
         // Check for optional parameters and public key
+        ECPoint point = default;
         while (seqEcPrivateKey.HasData)
         {
             var tag = seqEcPrivateKey.PeekTag();
@@ -258,14 +161,73 @@ internal class AsnPrivateKeyReader
         }
 
         var curve = ECCurve.CreateFromValue(curveOid);
-        byte[] dValue = dValueHandle.Data.ToArray();
+        byte[] privateKey = privateKeyHandle.Data.ToArray();
         var ecParams = new ECParameters
         {
             Curve = curve,
-            D = dValue,
+            D = privateKey,
             Q = point
         };
 
         return ecParams;
+    }
+
+    public static RSAParameters CreateRSAParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    {
+        var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
+        var seqPrivateKeyInfo = reader.ReadSequence();
+
+        // PKCS#8 starts with a version (integer 0)
+        var version = seqPrivateKeyInfo.ReadInteger();
+        if (version != 0)
+        {
+            throw new CryptographicException("Invalid PKCS#8 private key format: unexpected version");
+        }
+
+        var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
+        string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        if (oidAlgorithm != KeyDefinitions.CryptoOids.RSA)
+        {
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.UnsupportedAlgorithm));
+        }
+
+        using var privateKeyDataHandle = new ZeroingMemoryHandle(seqPrivateKeyInfo.ReadOctetString());
+        seqPrivateKeyInfo.ThrowIfNotEmpty();
+
+        var privateKeyReader = new AsnReader(privateKeyDataHandle.Data, AsnEncodingRules.DER);
+        var seqRsaPrivateKey = privateKeyReader.ReadSequence();
+
+        // RSA private key sequence: Version, modulus, publicExponent, privateExponent, prime1, prime2, exponent1, exponent2, coefficient
+        var rsaVersion = seqRsaPrivateKey.ReadInteger();
+        if (rsaVersion != 0)
+        {
+            throw new CryptographicException("Invalid RSA private key format: unexpected version");
+        }
+
+        var modulus = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var publicExponent = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var privateExponent = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var prime1 = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var prime2 = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var exponent1 = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var exponent2 = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+        var coefficient = AsnUtilities.TrimLeadingZeroes(seqRsaPrivateKey.ReadIntegerBytes().Span);
+
+        var rsaParameters = new RSAParameters
+        {
+            Modulus = modulus.ToArray(),
+            Exponent = publicExponent.ToArray(),
+            D = privateExponent.ToArray(),
+            P = prime1.ToArray(),
+            Q = prime2.ToArray(),
+            DP = exponent1.ToArray(),
+            DQ = exponent2.ToArray(),
+            InverseQ = coefficient.ToArray()
+        };
+        
+        return rsaParameters.NormalizeParameters();
     }
 }

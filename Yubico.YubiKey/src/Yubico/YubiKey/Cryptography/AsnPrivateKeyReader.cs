@@ -63,7 +63,7 @@ internal class AsnPrivateKeyReader
                 }
         }
 
-        throw new NotSupportedException(
+        throw new InvalidOperationException(
             string.Format(
                 CultureInfo.CurrentCulture,
                 ExceptionMessages.UnsupportedAlgorithm));
@@ -89,7 +89,7 @@ internal class AsnPrivateKeyReader
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
         if (oidAlgorithm != KeyDefinitions.CryptoOids.ECDSA)
         {
-            throw new NotSupportedException(
+            throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.UnsupportedAlgorithm));
@@ -101,7 +101,7 @@ internal class AsnPrivateKeyReader
             KeyDefinitions.CryptoOids.P384 or
             KeyDefinitions.CryptoOids.P521))
         {
-            throw new NotSupportedException(
+            throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.UnsupportedAlgorithm));
@@ -127,7 +127,7 @@ internal class AsnPrivateKeyReader
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
         if (oidAlgorithm != KeyDefinitions.CryptoOids.RSA)
         {
-            throw new NotSupportedException(
+            throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.UnsupportedAlgorithm));
@@ -193,7 +193,7 @@ internal class AsnPrivateKeyReader
         if (curveOid is not (KeyDefinitions.CryptoOids.P256 or KeyDefinitions.CryptoOids.P384
             or KeyDefinitions.CryptoOids.P521))
         {
-            throw new NotSupportedException(
+            throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.UnsupportedAlgorithm));

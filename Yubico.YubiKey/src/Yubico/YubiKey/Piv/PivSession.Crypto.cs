@@ -143,11 +143,11 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">
         /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
-        public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign) // TODO Docs
+        public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
         {
             var signCommand = BuildSignCommand(slotNumber, dataToSign);
 
-            YubiKey.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm); //TODO Verify good 
+            YubiKey.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm);
 
             return PerformPrivateKeyOperation(
                 slotNumber,
@@ -400,7 +400,38 @@ namespace Yubico.YubiKey.Piv
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.IncorrectCiphertextLength));
         }
+        
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKeyParameters, IPrivateKeyParameters, ECPublicKeyParameters or ECPrivateKeyParameters instead")]
+        public byte[] KeyAgree(byte slotNumber, PivPublicKey correspondentPublicKey)
+        {
+            if (correspondentPublicKey is null)
+            {
+                throw new ArgumentNullException(nameof(correspondentPublicKey));
+            }
 
+            if (!correspondentPublicKey.Algorithm.IsEcc())
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidPublicKeyData));
+            }
+
+            byte[] publicPoint = ((PivEccPublicKey)correspondentPublicKey).PublicPoint.ToArray();
+
+            // This will verify the slot number and dataToSign length. If one or
+            // both are incorrect, the call will throw an exception.
+            var keyAgreeCommand = new AuthenticateKeyAgreeCommand(publicPoint, slotNumber, correspondentPublicKey.Algorithm);
+
+            return PerformPrivateKeyOperation(
+                slotNumber,
+                keyAgreeCommand,
+                keyAgreeCommand.Algorithm,
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.IncorrectEccKeyLength));
+        }
+        
         /// <summary>
         /// Perform Phase 2 of EC Diffie-Hellman Key Agreement using the private
         /// key in the given slot, and the corresponding party's public key.
@@ -485,36 +516,6 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="SecurityException">
         /// The remaining retries count indicates the PIN is blocked.
         /// </exception>
-        public byte[] KeyAgree(byte slotNumber, PivPublicKey correspondentPublicKey)
-        {
-            if (correspondentPublicKey is null)
-            {
-                throw new ArgumentNullException(nameof(correspondentPublicKey));
-            }
-
-            if (!correspondentPublicKey.Algorithm.IsEcc())
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPublicKeyData));
-            }
-
-            byte[] publicPoint = ((PivEccPublicKey)correspondentPublicKey).PublicPoint.ToArray();
-
-            // This will verify the slot number and dataToSign length. If one or
-            // both are incorrect, the call will throw an exception.
-            var keyAgreeCommand = new AuthenticateKeyAgreeCommand(publicPoint, slotNumber, correspondentPublicKey.Algorithm);
-
-            return PerformPrivateKeyOperation(
-                slotNumber,
-                keyAgreeCommand,
-                keyAgreeCommand.Algorithm,
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.IncorrectEccKeyLength));
-        }
-        
         public byte[] KeyAgree(byte slotNumber, IPublicKeyParameters correspondentPublicKey)
         {
             if (correspondentPublicKey is null)

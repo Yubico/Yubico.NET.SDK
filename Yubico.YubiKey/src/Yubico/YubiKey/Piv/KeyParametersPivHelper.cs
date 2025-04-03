@@ -48,35 +48,7 @@ public static class KeyParametersPivHelper
 
         return (T)pkp;
     }
-
-    // PIV TLV Encoding ---> IPublicKeyParameters
     
-    // Problem with this method is that we dont know if its a x25519 or ed25519 (or p256) as they share length
-    // public static T CreatePublicParametersFromPivEncoding<T>(ReadOnlyMemory<byte> pivEncodingBytes)
-    //     where T : IPublicKeyParameters
-    // {
-    //     if (pivEncodingBytes.IsEmpty)
-    //     {
-    //         throw new ArgumentException(
-    //             string.Format(
-    //                 CultureInfo.CurrentCulture,
-    //                 ExceptionMessages.InvalidPrivateKeyData));
-    //     }
-    //
-    //     // KeyType keyType = GetKeyType(pivEncodingBytes);
-    //     int tag = GetKeyTag(pivEncodingBytes);
-    //     IPublicKeyParameters pkp = tag switch
-    //     {
-    //         _ when PivConstants.IsValidPublicECTag(tag) && pivEncodingBytes.Length == 34 => CreatePublicCurve25519FromPivEncoding(pivEncodingBytes, KeyType.X25519), // temp
-    //         _ when PivConstants.IsValidPublicECTag(tag) => CreatePublicEcFromPivEncoding(pivEncodingBytes),
-    //         _ when PivConstants.IsValidPublicRSATag(tag) => CreatePublicRsaFromPivEncoding(pivEncodingBytes),
-    //         _ => throw new ArgumentException(
-    //             string.Format(CultureInfo.CurrentCulture, ExceptionMessages.InvalidPublicKeyData))
-    //     };
-    //
-    //     return (T)pkp;
-    // }
-
     public static IPublicKeyParameters CreatePublicParameters(ReadOnlyMemory<byte> value, KeyType keyType)
     {
         return keyType switch
@@ -92,19 +64,6 @@ public static class KeyParametersPivHelper
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.InvalidApduResponseData))
         };
-    }
-
-    private static int GetKeyTag(ReadOnlyMemory<byte> pivEncodingBytes)
-    {
-        var tlvReader = new TlvReader(pivEncodingBytes);
-        int tag = tlvReader.PeekTag(2);
-        if (tag == PivConstants.PublicKeyTag)
-        {
-            tlvReader = tlvReader.ReadNestedTlv(tag);
-            return tlvReader.PeekTag();
-        }
-
-        return pivEncodingBytes.Span[0];
     }
 
     public static RSAPublicKeyParameters CreatePublicRsaFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)

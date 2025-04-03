@@ -22,7 +22,6 @@ namespace Yubico.YubiKey.Piv
     [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class ImportTests
     {
-
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
         [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
@@ -32,7 +31,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.P384, StandardTestDevice.Fw5)]
         [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
         [InlineData(KeyType.X25519, StandardTestDevice.Fw5)]
-        public void Import_with_PrivateKeyParameters_Succeeds_and_HasExpectedValues( // TODO Should work, test again, but replace the parsers with the AsnKeyReader/Writer
+        [Obsolete("Obsolete")]
+        public void Import_with_PrivateKeyParameters_Succeeds_and_HasExpectedValues(
             KeyType keyType,
             StandardTestDevice testDeviceType)
         {
@@ -93,8 +93,7 @@ namespace Yubico.YubiKey.Piv
             Assert.Equal(expectedPinPolicy, slotMetadata.PinPolicy);
             Assert.Equal(expectedTouchPolicy, slotMetadata.TouchPolicy);
             
-            var keyDefinition = keyType.GetKeyDefinition();
-            if (keyDefinition.IsEcKey)
+            if (keyType.IsEcKey())
             {
                 var publicPoint = slotMetadata.PublicKeyParameters switch
                 {

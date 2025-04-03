@@ -93,6 +93,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void Constructor_ValidInputMgmtKey_NoKey()
         {
             byte[] testData = new byte[]
@@ -210,6 +211,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void Constructor_ValidInputPin_NoKey()
         {
             byte[] testData = new byte[]
@@ -377,6 +379,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void Constructor_ValidInputF9_CorrectKey()
         {
             int keyOffset = 14;
@@ -571,6 +574,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void Constructor_ValidInput9A_CorrectKey()
         {
             int keyOffset = 12;
@@ -670,6 +674,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void Constructor_NoData_NoKey()
         {
             byte[] testData = Array.Empty<byte>();

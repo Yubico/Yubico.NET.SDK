@@ -84,6 +84,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
         [Fact]
+        [Obsolete("Obsolete")]
         public void KeyAgree_NullPublicKey_Exception()
         {
             var yubiKey = new HollowYubiKeyDevice();
@@ -96,6 +97,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void KeyAgree_EmptyPublicKey_Exception()
         {
             var yubiKey = new HollowYubiKeyDevice();

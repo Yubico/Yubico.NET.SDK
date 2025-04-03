@@ -30,8 +30,25 @@ namespace Yubico.YubiKey.Piv
     {
         private const int PivCompressionTag = 0x71;
         private const int PivLrcTag = 0xFE;
+        
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKeyParameters, IPrivateKeyParameters, ECPublicKeyParameters or ECPrivateKeyParameters instead")]
+        public PivPublicKey GenerateKeyPair(
+            byte slotNumber,
+            PivAlgorithm algorithm,
+            PivPinPolicy pinPolicy = PivPinPolicy.Default,
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        {
+            YubiKey.ThrowIfUnsupportedAlgorithm(algorithm);
 
-        /// <summary>
+            RefreshManagementKeyAuthentication();
+
+            var command = new GenerateKeyPairCommand(slotNumber, algorithm, pinPolicy, touchPolicy);
+            var response = Connection.SendCommand(command);
+
+            return response.GetData();
+        }
+        
+                /// <summary>
         /// Generate a new key pair in the given slot.
         /// </summary>
         /// <remarks>
@@ -96,8 +113,8 @@ namespace Yubico.YubiKey.Piv
         /// <param name="slotNumber">
         /// The slot into which the key pair will be generated.
         /// </param>
-        /// <param name="algorithm">
-        /// The algorithm of the key to generate.
+        /// <param name="keyType">
+        /// The type of the key to generate.
         /// </param>
         /// <param name="pinPolicy">
         /// The PIN policy the key will have. If no argument is given, the policy
@@ -129,23 +146,6 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">
         /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
-[Obsolete("Use other method")]
-        public PivPublicKey GenerateKeyPair(
-            byte slotNumber,
-            PivAlgorithm algorithm,
-            PivPinPolicy pinPolicy = PivPinPolicy.Default,
-            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
-        {
-            YubiKey.ThrowIfUnsupportedAlgorithm(algorithm);
-
-            RefreshManagementKeyAuthentication();
-
-            var command = new GenerateKeyPairCommand(slotNumber, algorithm, pinPolicy, touchPolicy);
-            var response = Connection.SendCommand(command);
-
-            return response.GetData();
-        }
-        
         public IPublicKeyParameters GenerateKeyPair(
             byte slotNumber,
             KeyType keyType,
@@ -254,7 +254,7 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">
         /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
-        [Obsolete("Use IPivPrivateKey constructor instead")]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKeyParameters, IPrivateKeyParameters, ECPublicKeyParameters or ECPrivateKeyParameters instead")]
         public void ImportPrivateKey(
             byte slotNumber,
             PivPrivateKey privateKey,

@@ -128,7 +128,8 @@ namespace Yubico.YubiKey.Piv.Commands
         /// The algorithm specified is not a supported asymmetric algorithm.
         /// </exception>
         [Obsolete("Replaced by PublicKeyParameters.KeyType")] 
-        public PivAlgorithm Algorithm // TODO the algorithm is not returned by the generate key pair, so this is useless, its already known by the caller
+        public PivAlgorithm Algorithm 
+            // the algorithm is not returned by the generate key pair, so this is useless, its already known by the caller
         {
             get => _algorithm;
             set
@@ -160,7 +161,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <param name="algorithm">
         /// The algorithm (and key size) of the key pair generated.
         /// </param>
-        [Obsolete("Use other constructor")] // TODO check this out
+        [Obsolete("Use other constructor")]
         public GenerateKeyPairResponse(
             ResponseApdu responseApdu,
             byte slotNumber,

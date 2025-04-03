@@ -170,8 +170,11 @@ namespace Yubico.YubiKey.Piv
             Slot = slotNumber;
             RetryCount = -1;
             RetriesRemaining = -1;
-            PublicKey = new PivPublicKey();
             PublicKeyParameters = new EmptyPublicKeyParameters();
+
+            #pragma warning disable CS0618 // Type or member is obsolete
+            PublicKey = new PivPublicKey();
+            #pragma warning restore CS0618 // Type or member is obsolete
 
             // This will update the fields in this object
             ParseResponseData(responseData);
@@ -200,7 +203,6 @@ namespace Yubico.YubiKey.Piv
                         bool isKnownAlgorithm = Enum.IsDefined(typeof(PivAlgorithm), (PivAlgorithm)value.Span[0]);
                         Debug.Assert(isKnownAlgorithm);
                         Algorithm = (PivAlgorithm)value.Span[0];
-                        // KeyType = Algorithm.GetKeyType();
 
                         break;
 
@@ -243,10 +245,11 @@ namespace Yubico.YubiKey.Piv
 
                     case PublicTag:
                         // Public: public key partner to the private key in the slot
-                        PublicKey = PivPublicKey.Create(value, Algorithm); // Either remove, or dont throw when they try to createa a curve key, or allow creation of curve pivpublickeys
-                        // PublicKeyParameters = KeyParametersPivHelper.CreatePublicParametersFromPivEncoding<IPublicKeyParameters>(value);
-
                         PublicKeyParameters = KeyParametersPivHelper.CreatePublicParameters(value, Algorithm.GetKeyType());
+
+                        #pragma warning disable CS0618 // Type or member is obsolete
+                        PublicKey = PivPublicKey.Create(value, Algorithm);
+                        #pragma warning restore CS0618 // Type or member is obsolete
                         break;
                     case DefaultTag:
                         // Default: whether the PIN/PUK/Mgmt key is default or not
@@ -287,7 +290,7 @@ namespace Yubico.YubiKey.Piv
         /// Note that if a slot is empty, the Algorithm will be<br/>
         /// <c>PivAlgorithm.None</c>.
         /// </summary>
-        public PivAlgorithm Algorithm { get; private set; } // TODO Replace with KeyType
+        public PivAlgorithm Algorithm { get; private set; }
 
         /// <summary>
         /// If the key is PIN, PUK, or management, is it the default value?<br/>
@@ -311,7 +314,8 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// The public key associated with the private key in the given slot.
         /// </summary>
-        public PivPublicKey PublicKey { get; private set; } // TODO Obsolete
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKeyParameters, IPrivateKeyParameters, ECPublicKeyParameters or ECPrivateKeyParameters instead")]
+        public PivPublicKey PublicKey { get; private set; } 
         
         /// <summary>
         /// The public key associated with the private key in the given slot.

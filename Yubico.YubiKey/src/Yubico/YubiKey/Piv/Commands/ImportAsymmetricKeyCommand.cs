@@ -215,7 +215,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The <c>privateKey</c> argument does not contain a key.
         /// </exception>
-        [Obsolete("Use explicit constructor instead")]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKeyParameters, IPrivateKeyParameters, ECPublicKeyParameters or ECPrivateKeyParameters instead")]
         public ImportAsymmetricKeyCommand(
             PivPrivateKey privateKey,
             byte slotNumber,
@@ -274,7 +274,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The <c>privateKey</c> argument does not contain a key.
         /// </exception>
-        [Obsolete("Use explicit constructor instead")]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKeyParameters, IPrivateKeyParameters, ECPublicKeyParameters or ECPrivateKeyParameters instead")]
         public ImportAsymmetricKeyCommand(PivPrivateKey privateKey)
         {
             if (privateKey is null)

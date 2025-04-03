@@ -25,12 +25,6 @@ on things like conditions in this file.
   Settings that affect ALL projects, including test and reference assemblies.
   -->
   <PropertyGroup Label="Global C# language and build settings">
-
-    <!--
-    Use C# 8.0 features. This is likely the maximum language version that we can use while generating
-    .NETStandard 2.0 libraries. C# 9.0 requires the .NET 5 runtime. More research can be done at the time
-    of .NET 5 release to re-evaluate this statement.
-    -->
     <LangVersion>13.0</LangVersion>
 
     <!--
@@ -42,19 +36,7 @@ on things like conditions in this file.
     code maintainers to reason about null behavior in a much more consistent way.
     -->
     <Nullable>enable</Nullable>
-
-    <!--
-    We want to treat all warnings as errors. While most of this behavior is now controlled by .editorconfig
-    files, we still set this globally in case any error groups were missed.
-
-    Warnings contribute to technical debt of the project. Forcing us to deal with warnings in the here and
-    now helps prevent any future build-up. Likewise, updating to new compilers or analyzers should be done
-    deliberately. If any new errors or warnings are introduced as part of the upgrade, they should be
-    addressed as part of that commit.
-    -->
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-
+    
     <!--
     NU5105 is a warning about older clients not being able to understand SemVer 2.0. This warning is no longer
     relevant as everyone should be using the newer Nuget clients by now.
@@ -76,11 +58,24 @@ on things like conditions in this file.
     <AnalysisMode>Recommended</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
-
+  
+  <!--
+    Settings that affect production assemblies.
+  -->
   <PropertyGroup Label="Production assembly project settings" Condition="'$(IsProdProject)' == 'true'">
 
     <GeneratePackageOnBuild Condition="$(Configuration.Contains('WithDocs'))">true</GeneratePackageOnBuild>
-
+    <!--
+      We want to treat all warnings as errors. While most of this behavior is now controlled by .editorconfig
+      files, we still set this globally in case any error groups were missed.
+      
+      Warnings contribute to technical debt of the project. Forcing us to deal with warnings in the here and
+      now helps prevent any future build-up. Likewise, updating to new compilers or analyzers should be done
+      deliberately. If any new errors or warnings are introduced as part of the upgrade, they should be
+      addressed as part of that commit.
+    -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
   </PropertyGroup>
 
   <!--
@@ -114,7 +109,7 @@ on things like conditions in this file.
   </PropertyGroup>
 
   <!--
-  Settings that affect test projects.
+  Settings that affect TEST projects.
   -->
   <PropertyGroup Label="Test project settings" Condition="'$(IsTestProject)'=='true'">
 
@@ -122,16 +117,29 @@ on things like conditions in this file.
     Do not pack test projects in any of the NuGet packages.
     -->
     <IsPackable>false</IsPackable>
-
+    
+    <!--
+      We want to treat all warnings as errors. While most of this behavior is now controlled by .editorconfig
+      files, we still set this globally in case any error groups were missed.
+      
+      Warnings contribute to technical debt of the project. Forcing us to deal with warnings in the here and
+      now helps prevent any future build-up. Likewise, updating to new compilers or analyzers should be done
+      deliberately. If any new errors or warnings are introduced as part of the upgrade, they should be
+      addressed as part of that commit.
+    -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
   </PropertyGroup>
 
-  <PropertyGroup Label="Sample project settings" Condition="'$(IsSampleProject)'=='true'">
+  <!--
+    Settings that affect SAMPLE assemblies.
+  -->
+  <PropertyGroup Label="Sample project settings" Condition="'$(IsSampleCodeProject)'=='true'">
 
     <!--
     Do not pack sample projects in any of the NuGet packages.
     -->
     <IsPackable>false</IsPackable>
-
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
-
 </Project>

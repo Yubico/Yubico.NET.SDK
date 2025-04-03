@@ -45,7 +45,7 @@ limitations under the License. -->
     <IsTestProject Condition="!$(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase))">false</IsTestProject>
 
     <!--
-    A project is a SampleCode project if it it ends with Tests in the project name. For example:
+    A project is a SampleCode project if it it ends with SampleCode in the project name. For example:
     MyProject.SampleCode.csproj will pick up this property. MyProject.SampleCode.csproj will not.
     The filename convention is case Insensitive.
     -->

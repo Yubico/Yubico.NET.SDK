@@ -135,7 +135,8 @@ namespace Yubico.YubiKey.Cryptography
                 D = privateValue.ToArray(),
             };
 
-            return CreateFromParameters(parameters);
+            var ecdsa = ECDsa.Create(parameters);
+            return CreateFromParameters(ecdsa.ExportParameters(true));
         }
     }
 }

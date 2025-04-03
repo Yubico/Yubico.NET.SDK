@@ -40,7 +40,7 @@ public class RSAPrivateKeyParameters : IPrivateKeyParameters
         CryptographicOperations.ZeroMemory(Parameters.Exponent);
         CryptographicOperations.ZeroMemory(Parameters.P);
         CryptographicOperations.ZeroMemory(Parameters.Q);
-        CryptographicOperations.ZeroMemory(Parameters.Q);
+        CryptographicOperations.ZeroMemory(Parameters.D);
         CryptographicOperations.ZeroMemory(Parameters.DP);
         CryptographicOperations.ZeroMemory(Parameters.DQ);
         CryptographicOperations.ZeroMemory(Parameters.InverseQ);

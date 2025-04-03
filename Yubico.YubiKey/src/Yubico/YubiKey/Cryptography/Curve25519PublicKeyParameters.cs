@@ -21,25 +21,43 @@ namespace Yubico.YubiKey.Cryptography;
 
 public class Curve25519PublicKeyParameters : IPublicKeyParameters
 {
-    private KeyDefinition _keyDefinition { get; }
     private readonly Memory<byte> _publicPoint;
-    public KeyType KeyType => _keyDefinition.KeyType;
-    public KeyDefinition KeyDefinition => _keyDefinition;
+
+    public KeyDefinition KeyDefinition { get; }
+    public KeyType KeyType => KeyDefinition.KeyType;
     public ReadOnlyMemory<byte> PublicPoint => _publicPoint;
 
     private Curve25519PublicKeyParameters(
         ReadOnlyMemory<byte> publicPoint,
         KeyDefinition keyDefinition)
     {
-        _keyDefinition = keyDefinition;
+        KeyDefinition = keyDefinition;
         _publicPoint = new byte[publicPoint.Length];
 
         publicPoint.CopyTo(_publicPoint);
     }
-
+    
+    /// <summary>
+    /// Converts this public key to an ASN.1 DER encoded format (X.509 SubjectPublicKeyInfo).
+    /// </summary>
+    /// <returns>
+    /// A byte array containing the ASN.1 DER encoded public key.
+    /// </returns>
     public byte[] ExportSubjectPublicKeyInfo() =>
-        AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(_publicPoint, _keyDefinition.KeyType);
+        AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(_publicPoint, KeyDefinition.KeyType);
 
+    /// <summary>
+    /// Creates a new instance of <see cref="Curve25519PublicKeyParameters"/> from a DER-encoded public key.
+    /// </summary>
+    /// <param name="encodedKey">
+    /// The DER-encoded public key.
+    /// </param>
+    /// <returns>
+    /// A new instance of <see cref="Curve25519PublicKeyParameters"/>.
+    /// </returns>
+    /// <exception cref="CryptographicException">
+    /// Thrown if the public key is invalid.
+    /// </exception>
     public static Curve25519PublicKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
     {
         var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
@@ -57,10 +75,20 @@ public class Curve25519PublicKeyParameters : IPublicKeyParameters
         return CreateFromValue(subjectPublicKey, keyType);
     }
 
-    public static Curve25519PublicKeyParameters CreateFromValue(ReadOnlyMemory<byte> publicKey, KeyType keyType)
+    /// <summary>
+    /// Creates an instance of <see cref="Curve25519PublicKeyParameters"/> from the given
+    /// <paramref name="publicPoint"/> and <paramref name="keyType"/>.
+    /// </summary>
+    /// <param name="publicPoint">The raw public key data, formatted as an compressed point.</param>
+    /// <param name="keyType">The type of key this is.</param>
+    /// <returns>An instance of <see cref="Curve25519PublicKeyParameters"/>.</returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown if the public key data length is not valid.
+    /// </exception>
+    public static Curve25519PublicKeyParameters CreateFromValue(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
     {
         var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
-        if (publicKey.Length != keyDefinition.LengthInBytes)
+        if (publicPoint.Length != keyDefinition.LengthInBytes)
         {
             throw new ArgumentException(
                 string.Format(
@@ -68,6 +96,6 @@ public class Curve25519PublicKeyParameters : IPublicKeyParameters
                     ExceptionMessages.InvalidPublicKeyData));
         }
 
-        return new Curve25519PublicKeyParameters(publicKey, keyDefinition);
+        return new Curve25519PublicKeyParameters(publicPoint, keyDefinition);
     }
 }

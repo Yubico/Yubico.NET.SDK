@@ -245,7 +245,7 @@ namespace Yubico.YubiKey.Piv
 
                     case PublicTag:
                         // Public: public key partner to the private key in the slot
-                        PublicKeyParameters = KeyParametersPivHelper.CreatePublicParameters(value, Algorithm.GetKeyType());
+                        PublicKeyParameters = KeyParametersPivHelper.CreatePublicKeyParameters(value, Algorithm.GetKeyType());
 
                         #pragma warning disable CS0618 // Type or member is obsolete
                         PublicKey = PivPublicKey.Create(value, Algorithm);

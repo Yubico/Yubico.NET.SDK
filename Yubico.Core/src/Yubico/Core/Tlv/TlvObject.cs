@@ -31,7 +31,7 @@ namespace Yubico.Core.Tlv
         public int Tag { get; }
 
         /// <summary>
-        /// Returns the value.
+        /// Returns a copy of the value.
         /// </summary>
         public Memory<byte> Value => _bytes.Skip(_offset).Take(Length).ToArray();
 

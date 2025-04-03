@@ -50,7 +50,7 @@ public static class RSAParametersExtensions
     /// </summary>
     /// <param name="parameters">The RSA parameters to normalize</param>
     /// <returns>A new RSAParameters with normalized values</returns>
-    public static RSAParameters NormalizeParameters(this RSAParameters parameters)
+    internal static RSAParameters NormalizeParameters(this RSAParameters parameters)
     {
         var normalized = parameters.DeepCopy();
         if (normalized.D == null || normalized.P == null || normalized.Q == null || 

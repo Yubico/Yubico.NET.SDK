@@ -53,10 +53,31 @@ public class RSAPublicKeyParameters : IPublicKeyParameters
         return AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(Parameters);
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="RSAPublicKeyParameters"/> from the given
+    /// <paramref name="parameters"/>.
+    /// </summary>
+    /// <param name="parameters">
+    /// The RSA parameters containing the public key data.
+    /// </param>
+    /// <returns>
+    /// A new instance of <see cref="RSAPublicKeyParameters"/>.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown if the parameters contain private key data.
+    /// </exception>
     #pragma warning disable CS0618 // Type or member is obsolete
-    public static RSAPublicKeyParameters CreateFromParameters(RSAParameters rsaParameters) => new(rsaParameters);
+    public static RSAPublicKeyParameters CreateFromParameters(RSAParameters parameters) => new(parameters);
     #pragma warning restore CS0618 // Type or member is obsolete
 
+    /// <summary>
+    /// Creates a new instance of <see cref="IPublicKeyParameters"/> from a DER-encoded public key.
+    /// </summary>
+    /// <param name="encodedKey">The DER-encoded public key.</param>
+    /// <returns>A new instance of <see cref="IPublicKeyParameters"/>.</returns>
+    /// <exception cref="CryptographicException">
+    /// Thrown if the public key is invalid.
+    /// </exception>
     public static IPublicKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
         AsnPublicKeyReader.CreateKeyParameters(encodedKey);
 }

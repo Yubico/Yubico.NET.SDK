@@ -159,7 +159,7 @@ namespace Yubico.YubiKey.Piv
             var command = new GenerateKeyPairCommand(slotNumber, keyType, pinPolicy, touchPolicy);
             var response = Connection.SendCommand(command);
 
-            return KeyParametersPivHelper.CreatePublicParameters(response.Data, keyType);
+            return KeyParametersPivHelper.CreatePublicKeyParameters(response.Data, keyType);
         }
 
         /// <summary>

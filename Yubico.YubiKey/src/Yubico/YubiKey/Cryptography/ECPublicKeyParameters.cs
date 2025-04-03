@@ -23,8 +23,6 @@ namespace Yubico.YubiKey.Cryptography
     /// <remarks>
     /// This class encapsulates the parameters specific to EC public keys,
     /// ensuring that the key only contains necessary public key components.
-    /// It extends the base <see cref="ECKeyParameters"/> class with additional 
-    /// validation to prevent the inclusion of private key data.
     /// </remarks>
     public class ECPublicKeyParameters : IPublicKeyParameters
     {
@@ -86,6 +84,12 @@ namespace Yubico.YubiKey.Cryptography
             _publicPointBytes = [0x4, .. Parameters.Q.X, .. Parameters.Q.Y];
         }
 
+        /// <summary>
+        /// Converts this public key to an ASN.1 DER encoded format (X.509 SubjectPublicKeyInfo).
+        /// </summary>
+        /// <returns>
+        /// A byte array containing the ASN.1 DER encoded public key.
+        /// </returns>
         public byte[] ExportSubjectPublicKeyInfo() => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(Parameters);
 
         /// <summary>
@@ -96,21 +100,29 @@ namespace Yubico.YubiKey.Cryptography
         public ReadOnlyMemory<byte> GetBytes() => _publicPointBytes;
         
         #pragma warning disable CS0618 // Type or member is obsolete
-        public static ECPublicKeyParameters CreateFromParameters(ECParameters ecParameters) => new(ecParameters);
+        public static ECPublicKeyParameters CreateFromParameters(ECParameters parameters) => new(parameters);
         #pragma warning restore CS0618 // Type or member is obsolete
 
+        /// <summary>
+        /// Creates an instance of <see cref="ECPublicKeyParameters"/> from the given
+        /// <paramref name="publicPoint"/> and <paramref name="keyType"/>.
+        /// </summary>
+        /// <param name="publicPoint">The raw public key data, formatted as an compressed point.</param>
+        /// <param name="keyType">The type of key this is.</param>
+        /// <returns>An instance of <see cref="ECPublicKeyParameters"/>.</returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown if the key type is not a valid EC key.
+        /// </exception>
         public static IPublicKeyParameters CreateFromValue(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
         {
-            if (!keyType.IsEcKey() ||
-                keyType == KeyType.X25519 ||
-                keyType == KeyType.Ed25519)
+            var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
+            if (keyDefinition.AlgorithmOid is not KeyDefinitions.CryptoOids.ECDSA)
             {
                 throw new ArgumentException("Only P-256, P-384 and P-521 are supported.", nameof(keyType));
             }
 
-            var keyDef = KeyDefinitions.GetByKeyType(keyType);
-            int coordinateLength = keyDef.LengthInBytes;
-            var curve = ECCurve.CreateFromValue(keyDef.CurveOid);
+            int coordinateLength = keyDefinition.LengthInBytes;
+            var curve = ECCurve.CreateFromValue(keyDefinition.CurveOid);
             var ecParameters = new ECParameters
             {
                 Curve = curve,
@@ -124,6 +136,14 @@ namespace Yubico.YubiKey.Cryptography
             return CreateFromParameters(ecParameters);
         }
 
+        /// <summary>
+        /// Creates an instance of <see cref="IPublicKeyParameters"/> from a DER-encoded public key.
+        /// </summary>
+        /// <param name="encodedKey">The DER-encoded public key.</param>
+        /// <returns>An instance of <see cref="IPublicKeyParameters"/>.</returns>
+        /// <exception cref="CryptographicException">
+        /// Thrown if the public key is invalid.
+        /// </exception>
         public static IPublicKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
             AsnPublicKeyReader.CreateKeyParameters(encodedKey);
     }

@@ -19,21 +19,27 @@ namespace Yubico.YubiKey.Cryptography;
 
 public class RSAPrivateKeyParameters : IPrivateKeyParameters
 {
-    private KeyDefinition _keyDefinition { get; }
     public RSAParameters Parameters { get; }
-    public KeyDefinition KeyDefinition => _keyDefinition;
-    public KeyType KeyType => _keyDefinition.KeyType;
+    public KeyDefinition KeyDefinition { get; }
+    public KeyType KeyType => KeyDefinition.KeyType;
 
     private RSAPrivateKeyParameters(RSAParameters parameters)
     {
         int keyLengthBits = parameters.DP?.Length * 8 * 2 ?? 0;
         
-        Parameters = parameters.NormalizeParameters();
-        _keyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits);
+        Parameters = parameters.NormalizeParameters(); // TODO Clear
+        KeyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits);
     }
 
+    /// <summary>
+    /// Exports the RSA private key in PKCS#8 DER encoded format.
+    /// </summary>
+    /// <returns>A byte array containing the DER encoded private key.</returns>
     public byte[] ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
 
+    /// <summary>
+    /// Securely clears the RSA private key by zeroing out all parameters.
+    /// </summary>
     public void Clear()
     {
         CryptographicOperations.ZeroMemory(Parameters.Modulus);
@@ -46,12 +52,34 @@ public class RSAPrivateKeyParameters : IPrivateKeyParameters
         CryptographicOperations.ZeroMemory(Parameters.InverseQ);
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="RSAPrivateKeyParameters"/> from a DER-encoded
+    /// PKCS#8 private key.
+    /// </summary>
+    /// <param name="encodedKey">
+    /// The DER-encoded PKCS#8 private key.
+    /// </param>
+    /// <returns>
+    /// A new instance of <see cref="RSAPrivateKeyParameters"/>.
+    /// </returns>
+    /// <exception cref="CryptographicException">
+    /// Thrown if the private key is invalid.
+    /// </exception>
     public static RSAPrivateKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
     {
         var parameters = AsnPrivateKeyReader.CreateRSAParameters(encodedKey);
         return new RSAPrivateKeyParameters(parameters);
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="RSAPrivateKeyParameters"/> from the given
+    /// <paramref name="parameters"/>.
+    /// </summary>
+    /// <param name="parameters">
+    /// The RSA parameters containing the private key data.
+    /// </param>
+    /// <returns>
+    /// A new instance of <see cref="RSAPrivateKeyParameters"/>.
+    /// </returns>
     public static RSAPrivateKeyParameters CreateFromParameters(RSAParameters parameters) => new(parameters);
-    internal static RSAPrivateKeyParameters Empty() => new RSAPrivateKeyParameters(new RSAParameters());
 }

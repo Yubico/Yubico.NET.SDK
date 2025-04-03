@@ -66,7 +66,7 @@ public static class KeyParametersPivExtensions
     private static Memory<byte> EncodeECPrivateKeyParameters(ECPrivateKeyParameters parameters)
     {
         var tlvWriter = new TlvWriter();
-        tlvWriter.WriteValue(PivConstants.PrivateECDsaTag, parameters.PrivateKey.Span);
+        tlvWriter.WriteValue(PivConstants.PrivateECDsaTag, parameters.Parameters.D);
         return tlvWriter.Encode();
     }
 

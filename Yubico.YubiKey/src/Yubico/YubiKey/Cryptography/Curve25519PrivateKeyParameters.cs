@@ -20,33 +20,61 @@ namespace Yubico.YubiKey.Cryptography;
 
 public class Curve25519PrivateKeyParameters : IPrivateKeyParameters
 {
-    private KeyDefinition _keyDefinition { get; }
     private readonly Memory<byte> _privateKey;
+    
+    public KeyDefinition KeyDefinition { get; }
+    public KeyType KeyType => KeyDefinition.KeyType;
+    public ReadOnlyMemory<byte> PrivateKey => _privateKey;
+
     private Curve25519PrivateKeyParameters(
         ReadOnlyMemory<byte> privateKey,
-        KeyDefinition keyDefinition)
+        KeyType keyType)
     {
+        var keyDefinition = keyType.GetKeyDefinition();
         if (keyDefinition.AlgorithmOid == KeyDefinitions.CryptoOids.X25519)
         {
             AsnUtilities.VerifyX25519PrivateKey(privateKey.Span);
         }
 
         _privateKey = new byte[privateKey.Length];
-        _keyDefinition = keyDefinition;
+        KeyDefinition = keyDefinition;
 
         privateKey.CopyTo(_privateKey);
     }
     
+    /// <summary>
+    /// Exports the private key in PKCS#8 DER encoded format.
+    /// </summary>
+    /// <returns>The DER encoded private key.</returns>
     public byte[] ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(_privateKey, KeyType);
-    public KeyDefinition KeyDefinition => _keyDefinition;
-    public KeyType KeyType => _keyDefinition.KeyType;
-    public ReadOnlyMemory<byte> PrivateKey => _privateKey;
+
+    /// <summary>
+    /// Clears the private key.
+    /// </summary>
+    /// <remarks>
+    /// This method securely zeroes out the private key data.
+    /// </remarks>
     public void Clear() => CryptographicOperations.ZeroMemory(_privateKey.Span);
 
+    /// <summary>
+    /// Creates an instance of <see cref="Curve25519PrivateKeyParameters"/> from a PKCS#8
+    /// DER-encoded private key.
+    /// </summary>
+    /// <param name="encodedKey">
+    /// The DER-encoded private key.
+    /// </param>
+    /// <returns>
+    /// A new instance of <see cref="Curve25519PrivateKeyParameters"/>.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown if the algorithm OID is not X25519 or Ed25519.
+    /// </exception>
+    /// <exception cref="CryptographicException">
+    /// Thrown if the private key is invalid.
+    /// </exception>
     public static Curve25519PrivateKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
     {
         var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
-        
         var seqPrivateKeyInfo = reader.ReadSequence();
         var version = seqPrivateKeyInfo.ReadInteger();
         if (version != 0)
@@ -55,16 +83,17 @@ public class Curve25519PrivateKeyParameters : IPrivateKeyParameters
         }
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
-        string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != KeyDefinitions.CryptoOids.X25519 &&
-            oidAlgorithm != KeyDefinitions.CryptoOids.Ed25519)
+        string algorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        if (algorithmOid != KeyDefinitions.CryptoOids.X25519 &&
+            algorithmOid != KeyDefinitions.CryptoOids.Ed25519)
         {
             throw new ArgumentException(
                 "Invalid curve OID. Must be: " + KeyDefinitions.CryptoOids.X25519 + " or " +
                 KeyDefinitions.CryptoOids.Ed25519);
         }
 
-        var seqPrivateKey = new AsnReader(seqPrivateKeyInfo.ReadOctetString(), AsnEncodingRules.DER);
+        using var privateKeyDataHandle = new ZeroingMemoryHandle(seqPrivateKeyInfo.ReadOctetString());
+        var seqPrivateKey = new AsnReader(privateKeyDataHandle.Data, AsnEncodingRules.DER);
         var tag = seqPrivateKey.PeekTag();
         if (tag.TagValue != 4 || tag.TagClass != TagClass.Universal)
         {
@@ -78,13 +107,17 @@ public class Curve25519PrivateKeyParameters : IPrivateKeyParameters
             throw new CryptographicException("Invalid Curve25519 private key: incorrect length");
         }
 
-        var keyDefinition = KeyDefinitions.GetByOid(oidAlgorithm);
-        return new Curve25519PrivateKeyParameters(privateKeyHandle.Data, keyDefinition);
+        var keyDefinition = KeyDefinitions.GetByOid(algorithmOid);
+        return new Curve25519PrivateKeyParameters(privateKeyHandle.Data, keyDefinition.KeyType);
 
     }
-    public static Curve25519PrivateKeyParameters CreateFromValue(ReadOnlyMemory<byte> privateKey, KeyType keyType)
-    {
-        var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
-        return new Curve25519PrivateKeyParameters(privateKey, keyDefinition);
-    }
+    
+    /// <summary>
+    /// Creates an instance of <see cref="Curve25519PrivateKeyParameters"/> from the given
+    /// <paramref name="privateKey"/> and <paramref name="keyType"/>.
+    /// </summary>
+    /// <param name="privateKey">The raw private key data.</param>
+    /// <param name="keyType">The type of key this is.</param>
+    /// <returns>An instance of <see cref="Curve25519PrivateKeyParameters"/>.</returns>
+    public static Curve25519PrivateKeyParameters CreateFromValue(ReadOnlyMemory<byte> privateKey, KeyType keyType) => new(privateKey, keyType);
 }

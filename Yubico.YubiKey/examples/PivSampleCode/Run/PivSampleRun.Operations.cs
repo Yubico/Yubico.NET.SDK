@@ -712,8 +712,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             string[] menuItems = new string[] {
                 "RSA 1024",
                 "RSA 2048",
+                "RSA 3076",
+                "RSA 4096",
                 "ECC P-256",
-                "ECC P-384"
+                "ECC P-384",
+                "ECC Ed25519",
+                "ECC X25519"
             };
 
             int response = _menuObject.RunMenu("Which algorithm?", menuItems);
@@ -722,8 +726,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 0 => PivAlgorithm.Rsa1024,
                 1 => PivAlgorithm.Rsa2048,
-                2 => PivAlgorithm.EccP256,
-                3 => PivAlgorithm.EccP384,
+                2 => PivAlgorithm.Rsa3072,
+                3 => PivAlgorithm.Rsa4096,
+                4 => PivAlgorithm.EccP256,
+                5 => PivAlgorithm.EccP384,
+                6 => PivAlgorithm.EccEd25519,
+                7 => PivAlgorithm.EccX25519,
                 _ => PivAlgorithm.None,
             };
 

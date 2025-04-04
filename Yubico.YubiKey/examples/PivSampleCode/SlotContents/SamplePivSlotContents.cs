@@ -14,6 +14,7 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Sample.SharedCode;
 
@@ -32,6 +33,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public PivPublicKey PublicKey { get; set; }
 
+        //public IPublicKeyParameters PublicKeyParameters { get; set; }
+
         public CertificateRequest CertRequest { get; set; }
 
         private byte[] _certRequestDer;
@@ -45,7 +48,14 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public void PrintPublicKeyPem()
         {
-            char[] pubKeyPem = KeyConverter.GetPemFromPivPublicKey(PublicKey);
+            char[] pubKeyPem;
+
+            if (PublicKey.Algorithm.GetKeyType() == KeyType.X25519 || PublicKey.Algorithm.GetKeyType() == KeyType.Ed25519) {
+                var publicKeyParameters = KeyParametersPivHelper.CreatePublicKeyParameters(PublicKey.PivEncodedPublicKey, PublicKey.Algorithm.GetKeyType());
+                pubKeyPem = PemOperations.BuildPem("PUBLIC KEY", publicKeyParameters.ExportSubjectPublicKeyInfo());
+            } else {
+                pubKeyPem = KeyConverter.GetPemFromPivPublicKey(PublicKey);
+            }
             SampleMenu.WriteMessage(MessageType.Title, 0, "\n" + new string(pubKeyPem) + "\n");
         }
 

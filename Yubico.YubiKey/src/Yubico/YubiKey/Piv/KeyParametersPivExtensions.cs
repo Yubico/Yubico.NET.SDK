@@ -44,6 +44,10 @@ public static class KeyParametersPivExtensions
         };
     }
 
+    public static PivPublicKey ToPivPublicKey(this IPublicKeyParameters parameters) {
+        return PivPublicKey.Create(parameters.ToPivEncodedPublicKey(), parameters.KeyType.GetPivAlgorithm());
+    }
+
     private static Memory<byte> EncodeRSAPublicKeyParameters(RSAPublicKeyParameters parameters)
     {
         var rsaParameters = parameters.Parameters;

@@ -13,16 +13,18 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Numerics;
 using System.Security.Cryptography;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv;
 
+/// <summary>
+/// This class converts from a Piv Encoded Key to either instances of the common IPublicKeyParameters and IPrivateKeyParameters
+/// or concrete the concrete types that inherit these interfaces.
+/// </summary>
 public static class KeyParametersPivHelper
 {
     public static IPublicKeyParameters CreatePublicKeyParameters(ReadOnlyMemory<byte> pivEncodedKey, KeyType keyType) =>
@@ -40,32 +42,16 @@ public static class KeyParametersPivHelper
                     ExceptionMessages.InvalidApduResponseData))
         };
     
-    // TODO Is this needed?
-    public static IPrivateKeyParameters CreatePrivateKeyParameters(ReadOnlyMemory<byte> value, KeyType keyType) =>
-        keyType switch
-        {
-            KeyType.Ed25519 or KeyType.X25519 => KeyParametersPivHelper
-                .CreatePrivateCurve25519FromPivEncoding(value, keyType),
-            KeyType.P256 or KeyType.P384 or KeyType.P521 => KeyParametersPivHelper
-                .CreatePrivateEcFromPivEncoding(value),
-            KeyType.RSA1024 or KeyType.RSA2048 or KeyType.RSA3072 or KeyType.RSA4096 => KeyParametersPivHelper
-                .CreatePrivateRsaFromPivEncoding(value),
-            _ => throw new InvalidOperationException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.InvalidApduResponseData))
-        };
-
-    public static RSAPublicKeyParameters CreatePublicRsaFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
+    public static RSAPublicKeyParameters CreatePublicRsaFromPivEncoding(ReadOnlyMemory<byte> pivEncodedKey)
     {
-        var (modulus, exponent) = PivEncodingReader.GetPublicRSAValues(pivEncodingBytes);
+        var (modulus, exponent) = PivEncodingReader.GetPublicRSAValues(pivEncodedKey);
         var rsaParameters = new RSAParameters { Modulus = modulus.ToArray(), Exponent = exponent.ToArray() };
         return RSAPublicKeyParameters.CreateFromParameters(rsaParameters);
     }
 
-    public static ECPublicKeyParameters CreatePublicEcFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
+    public static ECPublicKeyParameters CreatePublicEcFromPivEncoding(ReadOnlyMemory<byte> pivEncodedKey)
     {
-        var publicPointData = PivEncodingReader.GetECPublicPointValues(pivEncodingBytes);
+        var publicPointData = PivEncodingReader.GetECPublicPointValues(pivEncodedKey);
         if (publicPointData.Span[0] != 0x4)
         {
             throw new ArgumentException(
@@ -93,17 +79,52 @@ public static class KeyParametersPivHelper
         return ECPublicKeyParameters.CreateFromParameters(parameters);
     }
 
-    public static Curve25519PublicKeyParameters CreatePublicCurve25519FromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes, KeyType keyType)
+    public static Curve25519PublicKeyParameters CreatePublicCurve25519FromPivEncoding(ReadOnlyMemory<byte> pivEncodedKey, KeyType keyType)
     {
-        var publicPoint = PivEncodingReader.GetECPublicPointValues(pivEncodingBytes);
+        var publicPoint = PivEncodingReader.GetECPublicPointValues(pivEncodedKey);
         return Curve25519PublicKeyParameters.CreateFromValue(publicPoint, keyType);
     }
     
+    // Private
+    
+    /// <summary>
+    /// Creates an instance of <see cref="IPrivateKeyParameters"/> from the
+    /// given PIV-encoded key.
+    /// </summary>
+    /// <remarks>
+    /// The created instance will be one of the following concrete types:
+    /// <list type="bullet">
+    /// <item><see cref="RSAPrivateKeyParameters"/></item>
+    /// <item><see cref="ECPrivateKeyParameters"/></item>
+    /// <item><see cref="Curve25519PrivateKeyParameters"/></item>
+    /// </list>
+    /// </remarks>
+    /// <param name="pivEncodedKey">The PIV-encoded key.</param>
+    /// <param name="keyType">The type of the key.</param>
+    /// <returns>An instance of <see cref="IPrivateKeyParameters"/>.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// The key type is not supported.
+    /// </exception>
+    public static IPrivateKeyParameters CreatePrivateKeyParameters(ReadOnlyMemory<byte> pivEncodedKey, KeyType keyType) =>
+        keyType switch
+        {
+            KeyType.Ed25519 or KeyType.X25519 => KeyParametersPivHelper
+                .CreatePrivateCurve25519FromPivEncoding(pivEncodedKey, keyType),
+            KeyType.P256 or KeyType.P384 or KeyType.P521 => KeyParametersPivHelper
+                .CreatePrivateEcFromPivEncoding(pivEncodedKey),
+            KeyType.RSA1024 or KeyType.RSA2048 or KeyType.RSA3072 or KeyType.RSA4096 => KeyParametersPivHelper
+                .CreatePrivateRsaFromPivEncoding(pivEncodedKey),
+            _ => throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.InvalidApduResponseData))
+        };
+
     public static Curve25519PrivateKeyParameters CreatePrivateCurve25519FromPivEncoding(
-        ReadOnlyMemory<byte> pivEncodingBytes, 
+        ReadOnlyMemory<byte> pivEncodedKey, 
         KeyType keyType)
     {
-        if (!TlvObject.TryParse(pivEncodingBytes.Span, out var tlv) || !PivConstants.IsValidPrivateECTag(tlv.Tag))
+        if (!TlvObject.TryParse(pivEncodedKey.Span, out var tlv) || !PivConstants.IsValidPrivateECTag(tlv.Tag))
         {
             throw new ArgumentException(
                 string.Format(
@@ -128,9 +149,9 @@ public static class KeyParametersPivHelper
         };
     }
 
-    public static ECPrivateKeyParameters CreatePrivateEcFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
+    public static ECPrivateKeyParameters CreatePrivateEcFromPivEncoding(ReadOnlyMemory<byte> pivEncodedKey)
     {
-        if (!TlvObject.TryParse(pivEncodingBytes.Span, out var tlv) || tlv.Tag != PivConstants.PrivateECDsaTag)
+        if (!TlvObject.TryParse(pivEncodedKey.Span, out var tlv) || tlv.Tag != PivConstants.PrivateECDsaTag)
         {
             throw new ArgumentException(
                 string.Format(
@@ -157,11 +178,11 @@ public static class KeyParametersPivHelper
         }
     }
 
-    public static RSAPrivateKeyParameters CreatePrivateRsaFromPivEncoding(ReadOnlyMemory<byte> pivEncodingBytes)
+    public static RSAPrivateKeyParameters CreatePrivateRsaFromPivEncoding(ReadOnlyMemory<byte> pivEncodedKey)
     {
         const int CrtComponentCount = 5;
 
-        var tlvReader = new TlvReader(pivEncodingBytes);
+        var tlvReader = new TlvReader(pivEncodedKey);
         var valueArray = new ReadOnlyMemory<byte>[CrtComponentCount];
 
         int index = 0;

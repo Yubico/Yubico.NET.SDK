@@ -56,20 +56,20 @@ jobs:
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
       - name: Build Yubico.NET.SDK.sln
-        run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity minimal Yubico.NET.SDK.sln
+        run: dotnet build --configuration Release --nologo --verbosity minimal Yubico.NET.SDK.sln
         
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Nuget Packages ReleaseWithDocs
+          name: Nuget Packages Release
           path: |
-            Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
-            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
+            Yubico.Core/src/bin/Release/*.nupkg
+            Yubico.YubiKey/src/bin/Release/*.nupkg
 
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Assemblies ReleaseWithDocs
+          name: Assemblies Release
           path: |
-            Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
-            Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
+            Yubico.Core/src/bin/Release/**/*.dll
+            Yubico.YubiKey/src/bin/Release/**/*.dll

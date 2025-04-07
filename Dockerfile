@@ -24,7 +24,7 @@ ARG GID=1000
 RUN addgroup -g ${GID} -S ynginx \
     && adduser -h /nonexistent -s /bin/false -G ynginx -S -H -u ${UID} ynginx
 
-COPY --chown=0:0 Yubico.YubiKey/docs/_site /usr/share/nginx/www/
+COPY --chown=0:0 docs/_site /usr/share/nginx/www/
 COPY --chown=0:0 nginx.conf /etc/nginx/nginx.conf
 
 USER ${UID}:${GID}

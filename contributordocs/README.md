@@ -21,7 +21,7 @@ source: https://github.com/dotnet/runtime/blob/71f9191846292b61a93de54a18bdcac38
 This repo includes several documents relevant to contributors, including coding guidelines, workflow, design docs,
 and helpful resources.
 
-For information about using the SDK, please refer to the [User's Manual](../Yubico.YubiKey/docs/users-manual/intro.md).
+For information about using the SDK, please refer to the [User's Manual](../docs/users-manual/intro.md).
 
 - [Getting started](./getting-started.md)
 - [Useful links](./useful-links.md)

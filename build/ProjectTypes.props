@@ -41,8 +41,8 @@ limitations under the License. -->
     MyProject.UnitTests.csproj will pick up this property. MyProject.UnitTest.csproj will not.
     The filename convention is case Insensitive.
     -->
-    <IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase))">true</IsTestProject>
-    <IsTestProject Condition="!$(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase))">false</IsTestProject>
+    <IsTestProject Condition="$(MSBuildProjectName.Contains('Test', StringComparison.OrdinalIgnoreCase))">true</IsTestProject>
+    <IsTestProject Condition="!$(MSBuildProjectName.Contains('Test', StringComparison.OrdinalIgnoreCase))">false</IsTestProject>
 
     <!--
     A project is a SampleCode project if it it ends with SampleCode in the project name. For example:

@@ -35,6 +35,11 @@ on:
         required: false
         default: false
         type: boolean
+      push-to-docs:
+        description: 'Push docs to internal GCP'
+        required: false
+        default: false
+        type: boolean
       version:
         description: 'Version'
         required: false
@@ -43,8 +48,6 @@ on:
   schedule:
     - cron: '0 0 * * *' # Every day at midnight
         
-
-
 jobs:
   run-tests:
     name: Run tests
@@ -86,71 +89,75 @@ jobs:
 
       # Build the project
       - name: Build Yubico.NET.SDK.sln
-        run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity minimal Yubico.NET.SDK.sln
+        run: dotnet pack --configuration Release --nologo --verbosity minimal Yubico.NET.SDK.sln
 
-      # Upload artifacts
-      - name: Save documentation artifacts
+      # Build the documentation
+      - name: Build docs
+        run: |
+          dotnet tool install --global docfx --version "2.*"
+          docfx docfx.json --logLevel warning --log docfx.log --warningsAsErrors
+
+      # Upload documentation log
+      - name: "Save build artifacts: Docs log"
+        uses: actions/upload-artifact@v4
+        with:
+          name: Documentation log
+          path: docfx.log
+          if-no-files-found: error
+
+      # Upload documentation
+      - name: "Save build artifacts: Docs"
         uses: actions/upload-artifact@v4
         with:
           name: Documentation
-          path: Yubico.YubiKey/docs/_site/
-
-      - name: Save build artifacts
+          path: docs/_site/
+          if-no-files-found: error
+          
+      # Upload NuGet packages
+      - name: "Save build artifacts: Nuget Packages"
         uses: actions/upload-artifact@v4
         with:
           name: Nuget Packages
           path: |
-            Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
-            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
+            Yubico.Core/src/bin/Release/*.nupkg
+            Yubico.YubiKey/src/bin/Release/*.nupkg
+          if-no-files-found: error
       
-      - name: Save build artifacts
+      # Upload symbols
+      - name: "Save build artifacts: Symbols Packages"
         uses: actions/upload-artifact@v4
         with:
           name: Symbols Packages
           path: |
-            Yubico.Core/src/bin/ReleaseWithDocs/*.snupkg
-            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.snupkg
-
-      - name: Save build artifacts
+            Yubico.Core/src/bin/Release/*.snupkg
+            Yubico.YubiKey/src/bin/Release/*.snupkg
+          if-no-files-found: error
+      
+      # Upload assemblies
+      - name: "Save build artifacts: Assemblies"
         uses: actions/upload-artifact@v4
         with:
           name: Assemblies
           path: |
-            Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
-            Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
-
+            Yubico.Core/src/bin/Release/**/*.dll
+            Yubico.YubiKey/src/bin/Release/**/*.dll
+          if-no-files-found: error
+      
+      # Generate artifact attestation
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
-            Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
-            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
-            Yubico.Core/src/bin/ReleaseWithDocs/*.snupkg
-            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.snupkg
-            Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
-            Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
-
-      # Package the OATH sample code source
-      - name: Save build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: OATH Sample Code
-          path: |
-            Yubico.YubiKey/examples/OathSampleCode
-            Yubico.YubiKey/examples/SharedSampleCode
-
-      # Package the PIV sample code source
-      - name: Save build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: PIV Sample Code
-          path: |
-            Yubico.YubiKey/examples/PivSampleCode
-            Yubico.YubiKey/examples/SharedSampleCode
+            Yubico.Core/src/bin/Release/*.nupkg
+            Yubico.YubiKey/src/bin/Release/*.nupkg
+            Yubico.Core/src/bin/Release/*.snupkg
+            Yubico.YubiKey/src/bin/Release/*.snupkg
+            Yubico.Core/src/bin/Release/**/*.dll
+            Yubico.YubiKey/src/bin/Release/**/*.dll
       
   upload-docs:
     name: Upload docs
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    if: ${{ github.event.inputs.push-to-docs == 'true' }}
     permissions:
       id-token: write
       contents: read
@@ -161,7 +168,7 @@ jobs:
     name: Publish to internal NuGet
     runs-on: windows-2019
     needs: build-artifacts
-    if: ${{ github.event.inputs.push-to-dev }}
+    if: ${{ github.event.inputs.push-to-dev == 'true' }}
     permissions:
       contents: read
       packages: write

@@ -160,7 +160,6 @@ namespace Yubico.YubiKey
                 _log.LogDebug(
                     "{Transport} transport is already active. No need to wait for reclaim.",
                     _device.LastActiveTransport);
-
                 return;
             }
 

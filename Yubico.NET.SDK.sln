@@ -366,8 +366,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{1B24E020-1
 		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\verify-pin.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\verify-pin.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.Core.IntegrationTests", "Yubico.Core\tests\integration\Yubico.Core.IntegrationTests.csproj", "{658F52EA-9825-4DE6-A998-E8A89C04CCA4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.Core.UnitTests", "Yubico.Core\tests\unit\Yubico.Core.UnitTests.csproj", "{F9BC6F4F-5D9B-4652-A22C-66C775A367F8}"
 EndProject
 Global
@@ -420,10 +418,6 @@ Global
 		{769A850B-DEA5-44AD-8F9B-30C72601D851}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{769A850B-DEA5-44AD-8F9B-30C72601D851}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{769A850B-DEA5-44AD-8F9B-30C72601D851}.Release|Any CPU.Build.0 = Release|Any CPU
-		{658F52EA-9825-4DE6-A998-E8A89C04CCA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{658F52EA-9825-4DE6-A998-E8A89C04CCA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{658F52EA-9825-4DE6-A998-E8A89C04CCA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{658F52EA-9825-4DE6-A998-E8A89C04CCA4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F9BC6F4F-5D9B-4652-A22C-66C775A367F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F9BC6F4F-5D9B-4652-A22C-66C775A367F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9BC6F4F-5D9B-4652-A22C-66C775A367F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -471,7 +465,6 @@ Global
 		{769A850B-DEA5-44AD-8F9B-30C72601D851} = {E7F9924F-227A-455F-B7AB-3352BAB6DA46}
 		{1962BE4F-D9C6-4705-A72B-BD6F6700EC78} = {8CE9438B-FEE8-47BF-B2DB-B5BA7A896774}
 		{1B24E020-1C2A-4A11-BC84-944F6D396861} = {2C7EFA92-1B47-4F5B-91B5-C130BDB19D93}
-		{658F52EA-9825-4DE6-A998-E8A89C04CCA4} = {45D2A3BE-5111-4890-8898-2D43DB658A40}
 		{F9BC6F4F-5D9B-4652-A22C-66C775A367F8} = {45D2A3BE-5111-4890-8898-2D43DB658A40}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

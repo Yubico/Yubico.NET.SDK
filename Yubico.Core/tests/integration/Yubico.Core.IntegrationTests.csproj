@@ -17,7 +17,6 @@ limitations under the License. -->
   <PropertyGroup>
     <AssemblyName>Yubico.Core.IntegrationTests</AssemblyName>
     <RootNamespace></RootNamespace>
-    <PackageId>Yubico.Core.IntegrationTests</PackageId>
 
     <TargetFrameworks>net8.0;net6.0;net47</TargetFrameworks>
     <AnalysisMode>Minimum</AnalysisMode>

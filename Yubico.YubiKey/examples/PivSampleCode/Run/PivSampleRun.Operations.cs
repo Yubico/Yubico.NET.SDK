@@ -16,7 +16,6 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Sample.SharedCode;
 
@@ -249,32 +248,19 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return RunInvalidEntry();
             }
 
-            if (!GetPemPrivateKey(algorithm, out string pemPrivateKey))
-            {
-                return false;
-            }
-            
-            if (!GetPemPublicKey(algorithm, out string pemPublicKey))
+            if (!GetPemPrivateKey(algorithm, out string pemKey))
             {
                 return false;
             }
 
-            // var pivPrivateKey = KeyConverter.GetPivPrivateKeyFromPem(pemKey.ToCharArray());
-            // var pivPublicKey = KeyConverter.GetPivPublicKeyFromPem(pemKey.ToCharArray());
-
-            var base64PrivateKey = GetBytesFromPem(pemPrivateKey);
-            var privateKeyParameters = Curve25519PrivateKeyParameters.CreateFromPkcs8(base64PrivateKey);
-            
-            var base64PublicKey = GetBytesFromPem(pemPublicKey);
-            var publicKeyParameters = Curve25519PublicKeyParameters.CreateFromPkcs8(base64PublicKey);
+            var pivPrivateKey = KeyConverter.GetPivPrivateKeyFromPem(pemKey.ToCharArray());
+            var pivPublicKey = KeyConverter.GetPivPublicKeyFromPem(pemKey.ToCharArray());
 
             if (KeyPairs.RunImportPrivateKey(
                 _yubiKeyChosen,
                 _keyCollector.SampleKeyCollectorDelegate,
-                privateKeyParameters,
-                publicKeyParameters,
-                // pivPrivateKey,
-                // pivPublicKey,
+                pivPrivateKey,
+                pivPublicKey,
                 slotNumber,
                 pinPolicy,
                 touchPolicy,
@@ -287,7 +273,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             return false;
         }
-        
+
         public static bool WriteImportCertMessage()
         {
             SampleMenu.WriteMessage(MessageType.Title, 0, "See the items/code for BuildSelfSignedCert and BuildCert");
@@ -317,19 +303,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // This sample code will use SHA-384 for EccP384, and SHA-256
             // for all other algorithms.
             var hashAlgorithm = HashAlgorithmName.SHA384;
-            
-            if (signSlotContents.Algorithm == PivAlgorithm.EccEd25519)
+            if (signSlotContents.Algorithm != PivAlgorithm.EccP384)
             {
-                hashAlgorithm = HashAlgorithmName.SHA512;
+                hashAlgorithm = HashAlgorithmName.SHA256;
             }
-            else
-            {
-                if (signSlotContents.Algorithm != PivAlgorithm.EccP384)
-                {
-                    hashAlgorithm = HashAlgorithmName.SHA256;
-                }
-            }
-
 
             byte[] dataToSign = GetArbitraryDataToSign();
 
@@ -937,90 +914,18 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         "3tD+iq9lgB+8QNDJP6C6KginR3H1jMNRPMvaNrQC/VBpse+1Z1t5pvo=\n" +
                         "-----END PRIVATE KEY-----";
                     break;
-                
-                
-                case PivAlgorithm.EccEd25519:
-                    pemKey = "-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIDuLFRxirWSFqyiMTPB65M4sWI+smRcCdyMEL8RtN7ib\n-----END PRIVATE KEY-----";
-                    break;
-                
-                case PivAlgorithm.EccX25519:
-                    pemKey =
-                        "-----BEGIN PRIVATE KEY-----\n" +
-                        "MC4CAQAwBQYDK2VuBCIEIGCCufpem+pMrhHcQwUvrUxh0KQ9zrNjuAVxM/E4d5hN\n" +
-                        "-----END PRIVATE KEY-----";
-                    break;
             }
 
             return true;
         }
 
-        private static bool GetPemPublicKey(
-            PivAlgorithm algorithm,
-            out string pemKey)
-        {
-            pemKey = null;
-
-            switch (algorithm)
-            {
-                default:
-                    return false;
-
-                case PivAlgorithm.Rsa1024:
-                case PivAlgorithm.Rsa2048:
-                case PivAlgorithm.EccP256:
-                case PivAlgorithm.EccP384:
-                    break;
-
-                case PivAlgorithm.EccEd25519:
-                    pemKey ="-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAvvmMviNf0LdUmfr5dVNZQaC79t3Ga7xTaD62d+icCtE=\n-----END PUBLIC KEY-----";
-                    break;
-                
-                case PivAlgorithm.EccX25519:
-                    pemKey =
-                        "-----BEGIN PUBLIC KEY-----\n" +
-                        "MCowBQYDK2VuAyEAyZ3Gl2lM1X9SVyAFjGi5skd28d9mQtJW1uf/zlrIhCU=\n" +
-                        "-----END PUBLIC KEY-----\n";
-                    break;
-            }
-
-            return true;
-        }
         private static byte[] GetArbitraryDataToSign()
         {
             string arbitraryData = "To demonstrate how to sign data we need data to sign. " +
                 "For this sample code, it doesn't really matter what the data is, " +
                 "so just return some arbitrary data.";
-            
-            arbitraryData = "Hello, Ed25519!";
-
 
             return System.Text.Encoding.ASCII.GetBytes(arbitraryData);
-        }
-        
-        private static byte[] GetBytesFromPem(
-            string pemData)
-        {
-            var base64 = StripPemHeaderFooter(pemData);
-            return Convert.FromBase64String(base64);
-        }
-        
-        private static string StripPemHeaderFooter(
-            string pemData)
-        {
-            var base64 = pemData
-                .Replace("-----BEGIN PUBLIC KEY-----", "")
-                .Replace("-----END PUBLIC KEY-----", "")
-                .Replace("-----BEGIN PRIVATE KEY-----", "")
-                .Replace("-----END PRIVATE KEY-----", "")
-                .Replace("-----BEGIN EC PRIVATE KEY-----", "")
-                .Replace("-----END EC PRIVATE KEY-----", "")
-                .Replace("-----BEGIN CERTIFICATE-----", "")
-                .Replace("-----END CERTIFICATE-----", "")
-                .Replace("-----BEGIN CERTIFICATE REQUEST-----", "")
-                .Replace("-----END CERTIFICATE REQUEST-----", "")
-                .Replace("\n", "")
-                .Trim();
-            return base64;
         }
     }
 }

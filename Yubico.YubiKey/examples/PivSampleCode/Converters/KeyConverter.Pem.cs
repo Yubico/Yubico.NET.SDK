@@ -81,7 +81,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // of the ECDsa object.
         public static AsymmetricAlgorithm GetDotNetFromPem(char[] pemKeyString, bool isPrivate)
         {
-            
             byte[] encodedKey = Array.Empty<byte>();
             var rsaParams = new RSAParameters();
             var eccParams = new ECParameters();

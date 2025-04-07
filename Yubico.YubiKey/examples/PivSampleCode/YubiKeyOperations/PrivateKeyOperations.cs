@@ -42,19 +42,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             int keySizeBits = keyAlgorithm.KeySizeBits();
 
             // Before signing the data, we need to digest it.
-            byte[] digest = dataToSign;
-            if (keyAlgorithm == PivAlgorithm.EccEd25519)
-            {
-                using (var pivSession = new PivSession(yubiKey))
-                {
-                    pivSession.KeyCollector = KeyCollectorDelegate;
-                    signature = pivSession.Sign(slotNumber, digest);
-                }
+            byte[] digest = MessageDigestOperations.ComputeMessageDigest(dataToSign, hashAlgorithm);
 
-                return true;
-            }
-
-            if (keyAlgorithm.IsEcc() && keyAlgorithm!= PivAlgorithm.EccEd25519)
+            if (keyAlgorithm.IsEcc())
             {
                 // If the key is ECC, the digested data must be exactly the key
                 // size. For example, if the key is EccP384, then the digest

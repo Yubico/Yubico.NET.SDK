@@ -14,8 +14,6 @@
 
 using System;
 using System.Security.Cryptography;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto.Signers;
 using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
@@ -48,24 +46,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             if (publicKey is null)
             {
                 throw new ArgumentNullException(nameof(publicKey));
-            }
-
-            if (publicKey.Algorithm is PivAlgorithm.EccEd25519)
-            {
-                // Create Ed25519 public key parameters
-                var withoutPivHeader = publicKey.YubiKeyEncodedPublicKey.Span[2..];
-                var ed25519key = new Ed25519PublicKeyParameters(withoutPivHeader);
-
-                // Verify the signature
-                var verifier = new Ed25519Signer();
-                verifier.Init(false, ed25519key); // false indicates verification mode
-                verifier.BlockUpdate(dataToVerify, 0, dataToVerify.Length);
-
-                bool isValid = verifier.VerifySignature(signature);
-
-                Console.WriteLine($"Signature (Base64): {Convert.ToBase64String(signature)}");
-                isVerified = isValid;
-                return isVerified;
             }
 
             using var asymObject = KeyConverter.GetDotNetFromPivPublicKey(publicKey);

@@ -14,6 +14,7 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
@@ -54,8 +55,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         public static bool RunImportPrivateKey(
             IYubiKeyDevice yubiKey,
             Func<KeyEntryData, bool> KeyCollectorDelegate,
-            PivPrivateKey privateKey,
-            PivPublicKey publicKey,
+            // PivPrivateKey privateKey,
+            // PivPublicKey publicKey,
+            IPrivateKeyParameters privateKey,
+            IPublicKeyParameters publicKey,
             byte slotNumber,
             PivPinPolicy pinPolicy,
             PivTouchPolicy touchPolicy,
@@ -82,13 +85,13 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 // The Import method does not need the public key, so we're
                 // building it with no public key. If you want, you can add the
                 // public key.
-                slotContents = new SamplePivSlotContents()
+                slotContents = new SamplePivSlotContents
                 {
                     SlotNumber = slotNumber,
-                    Algorithm = privateKey.Algorithm,
+                    Algorithm = privateKey.KeyType.GetPivAlgorithm(),
                     PinPolicy = pinPolicy,
                     TouchPolicy = touchPolicy,
-                    PublicKey = PivPublicKey.Create(publicKey.YubiKeyEncodedPublicKey),
+                    PublicKey = PivPublicKey.Create(publicKey.ToPivEncodedPublicKey(), publicKey.KeyType.GetPivAlgorithm()),
                 };
             }
 

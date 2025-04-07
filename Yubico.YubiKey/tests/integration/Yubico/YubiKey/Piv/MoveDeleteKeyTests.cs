@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Piv
 
             var (publicKey, privateKey) = TestKeys.GetKeyPair(expectedAlgorithm);
             var importedPrivateKey = AsnPrivateKeyReader.CreateKeyParameters(privateKey.EncodedKey);
-            var importedPublicKey = AsnPrivateKeyReader.CreateKeyParameters(publicKey.EncodedKey);
+            var importedPublicKey = AsnPublicKeyReader.CreateKeyParameters(publicKey.EncodedKey);
 
             pivSession.ImportPrivateKey(sourceSlot, importedPrivateKey);
 
@@ -90,7 +90,7 @@ namespace Yubico.YubiKey.Piv
             Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(sourceSlot));
 
             var destinationMetadata = pivSession.GetMetadata(destinationSlot);
-            Assert.Equal(importedPublicKey.ToPivEncodedPrivateKey(), destinationMetadata.PublicKeyParameters.ToPivEncodedPublicKey());
+            Assert.Equal(importedPublicKey.ToPivEncodedPublicKey(), destinationMetadata.PublicKeyParameters.ToPivEncodedPublicKey());
         }
 
         [SkippableTheory(typeof(NotSupportedException))]

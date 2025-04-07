@@ -32,8 +32,7 @@ limitations under the License. -->
   </ItemGroup>-->
 
   <ItemGroup>
-    <!-- <PackageReference Include="Yubico.YubiKey" Version="1.*-*" /> -->
-    <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
+    <PackageReference Include="Yubico.YubiKey" Version="1.*-*" />
   </ItemGroup>
 
 </Project>

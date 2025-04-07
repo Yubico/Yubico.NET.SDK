@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Piv;
 /// This class converts from a Piv Encoded Key to either instances of the common IPublicKeyParameters and IPrivateKeyParameters
 /// or concrete the concrete types that inherit these interfaces.
 /// </summary>
-public static class KeyParametersPivHelper
+internal static class KeyParametersPivHelper
 {
     public static IPublicKeyParameters CreatePublicKeyParameters(ReadOnlyMemory<byte> pivEncodedKey, KeyType keyType) =>
         keyType switch

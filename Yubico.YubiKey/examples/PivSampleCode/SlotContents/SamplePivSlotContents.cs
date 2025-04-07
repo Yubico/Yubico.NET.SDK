@@ -45,18 +45,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public void PrintPublicKeyPem()
         {
-            char[] pubKeyPem;
-
-            if (PublicKey.Algorithm is PivAlgorithm.EccX25519 or PivAlgorithm.EccEd25519) 
-            {
-                var publicKeyParameters = KeyParametersPivHelper.CreatePublicKeyParameters(
-                    PublicKey.PivEncodedPublicKey, 
-                    PublicKey.Algorithm.GetKeyType());
-                
-                pubKeyPem = PemOperations.BuildPem("PUBLIC KEY", publicKeyParameters.ExportSubjectPublicKeyInfo());
-            } else {
-                pubKeyPem = KeyConverter.GetPemFromPivPublicKey(PublicKey);
-            }
+            char[] pubKeyPem = KeyConverter.GetPemFromPivPublicKey(PublicKey);
             SampleMenu.WriteMessage(MessageType.Title, 0, "\n" + new string(pubKeyPem) + "\n");
         }
 

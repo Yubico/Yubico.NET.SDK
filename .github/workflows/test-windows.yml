@@ -26,6 +26,13 @@ jobs:
 
       - name: Configure Strong Name Bypass (According to Microsoft Docs)
         run: |
+          $snExe = "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\sn.exe"
+          
+          Write-Host "Running sn.exe -Vr * :::"
+          & $snExe -Vr *
+          
+          Write-Host "Running sn.exe -Vr *-Vl :::"
+          & $snExe -Vr *-Vl
           # According to the docs, we need to ensure the bypass feature is ENABLED
           # Create or update the registry key to enable strong name bypass (value 1)
           Write-Host "Enabling strong name bypass feature according to official Microsoft documentation..."
@@ -49,10 +56,171 @@ jobs:
           Set-Content -Path $configPath -Value $configContent
           Write-Host "Created app.config file to enable strong name bypass for the test project"
         shell: pwsh
+        
+      - name: Build Yubico.Core.IntegrationTests
+        run: dotnet build Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj --configuration Debug
       
-      - name: Build Yubico.Core
-        run: dotnet build Yubico.NET.SDK.sln --configuration Debug
+      - name: Verify Assembly Signing in Test Directory
+        run: |
+          Write-Host "== Examining Assembly in Test Directory =="
+          $testDirAssemblyPath = "Yubico.Core/tests/integration/bin/Debug/net47/Yubico.Core.dll"
+          
+          # Check if the assembly exists in test directory
+          if (Test-Path $testDirAssemblyPath) {
+            Write-Host "Yubico.Core.dll exists in test directory at $testDirAssemblyPath"
+          } else {
+            Write-Host "Yubico.Core.dll not found in test directory: $testDirAssemblyPath"
+            Get-ChildItem -Path "Yubico.Core/tests/integration/bin/Debug/net47" -Filter "*.dll" | ForEach-Object { Write-Host "Found: $($_.Name)" }
+          }
+          
+          # Verify strong name of the DLL in test directory
+          if (Test-Path $testDirAssemblyPath) {
+            $snVerify = & "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\sn.exe" -vf $testDirAssemblyPath
+            Write-Host "Test Directory Yubico.Core.dll Strong Name Verification: $snVerify"
+          
+            # Get assembly details
+            $assemblyDetails = & "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\sn.exe" -Tp $testDirAssemblyPath
+            Write-Host "Test Directory Yubico.Core.dll Details: $assemblyDetails"
+          }
+        shell: pwsh
+        
+      - name: Check Test Assembly
+        run: |
+          Write-Host "== Examining Test Assembly =="
+          $testAssemblyPath = "Yubico.Core/tests/integration/bin/Debug/net47/Yubico.Core.IntegrationTests.dll"
 
+          # Check if assembly exists
+          if (Test-Path $testAssemblyPath) {
+            Write-Host "Test assembly exists at $testAssemblyPath"
+          } else {
+            Write-Host "Test assembly not found at expected path"
+            Get-ChildItem -Path "Yubico.Core/tests/integration/bin" -Recurse -Filter "Yubico.Core.IntegrationTests.dll" | ForEach-Object { Write-Host "Found at: $($_.FullName)" }
+          }
+
+          # Verify test assembly signing
+          $snVerify = & "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\sn.exe" -vf $testAssemblyPath
+          Write-Host "Test Assembly Strong Name Verification: $snVerify"
+        shell: pwsh
+      
+      - name: Verify Strong Name Bypass Settings
+        run: |
+          Write-Host "== Strong Name Bypass Settings =="
+          
+          # Check registry values
+          Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\.NETFramework" -Name "AllowStrongNameBypass" -ErrorAction SilentlyContinue
+          Get-ItemProperty -Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework" -Name "AllowStrongNameBypass" -ErrorAction SilentlyContinue
+          
+          # Check if app.config exists and has correct content
+          $configPath = "Yubico.Core/tests/integration/app.config"
+          if (Test-Path $configPath) {
+            Write-Host "app.config exists:"
+            Get-Content $configPath
+          } else {
+            Write-Host "app.config doesn't exist at $configPath"
+          }
+          
+          # Check if environment variable is set
+          Write-Host "COMPLUS_EnableBypassTrustedAppStrongNames: $env:COMPLUS_EnableBypassTrustedAppStrongNames"
+        shell: pwsh
+        
+      - name: Check Assembly Dependencies
+        run: |
+          Write-Host "== Examining Dependencies =="
+          $testAssemblyPath = "Yubico.Core/tests/integration/bin/Debug/net47/Yubico.Core.IntegrationTests.dll"
+
+          # Use Assembly.LoadFile to get dependencies
+          Add-Type -AssemblyName System.Reflection
+
+          $script = @'
+          using System;
+          using System.Reflection;
+          using System.IO;
+
+          public class DependencyChecker {
+              public static void CheckDependencies(string assemblyPath) {
+                  try {
+                      Assembly assembly = Assembly.LoadFile(assemblyPath);
+                      Console.WriteLine($"Successfully loaded: {assembly.FullName}");
+
+                      AssemblyName[] referencedAssemblies = assembly.GetReferencedAssemblies();
+                      Console.WriteLine($"Referenced assemblies ({referencedAssemblies.Length}):");
+
+                      foreach (AssemblyName asmName in referencedAssemblies) {
+                          Console.WriteLine($"  {asmName.FullName}");
+                          try {
+                              Assembly.Load(asmName);
+                              Console.WriteLine($"    ✓ Successfully loaded");
+                          } catch (Exception ex) {
+                              Console.WriteLine($"    ✗ Failed to load: {ex.Message}");
+                          }
+                      }
+                  } catch (Exception ex) {
+                      Console.WriteLine($"Error loading assembly: {ex.Message}");
+                      Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                  }
+              }
+          }
+          '@
+
+          Add-Type -TypeDefinition $script
+
+          # Check test assembly and its dependencies
+          Write-Host "Checking test assembly dependencies..."
+          [DependencyChecker]::CheckDependencies($testAssemblyPath)
+        shell: pwsh
+
+      - name: Check Assembly Binding
+        run: |
+          Write-Host "== Checking Assembly Binding Configuration =="
+
+          # Create a simple program to check binding redirects
+          $progPath = "check-binding.cs"
+          $prog = @'
+          using System;
+          using System.Runtime.CompilerServices;
+
+          class Program
+          {
+              static void Main()
+              {
+                  AppDomain domain = AppDomain.CurrentDomain;
+
+                  // Hook assembly resolve event to see binding behavior
+                  domain.AssemblyResolve += (sender, args) => {
+                      Console.WriteLine($"Trying to resolve: {args.Name}");
+                      return null;
+                  };
+
+                  Console.WriteLine("Current AppDomain binding configuration:");
+                  Console.WriteLine($"ApplicationBase: {domain.SetupInformation.ApplicationBase}");
+                  Console.WriteLine($"PrivateBinPath: {domain.SetupInformation.PrivateBinPath}");
+                  Console.WriteLine($"ConfigurationFile: {domain.SetupInformation.ConfigurationFile}");
+
+                  try {
+                      Console.WriteLine("Attempting to load Yubico.Core...");
+                      var assembly = System.Reflection.Assembly.Load("Yubico.Core, Version=1.12.1.0, Culture=neutral, PublicKeyToken=fdb9ca4403bc032c");
+                      Console.WriteLine($"Successfully loaded: {assembly.FullName}");
+                  }
+                  catch (Exception ex) {
+                      Console.WriteLine($"Error loading assembly: {ex.GetType().Name}: {ex.Message}");
+                  }
+              }
+          }
+          '@
+
+          Set-Content -Path $progPath -Value $prog
+
+          # Compile and run the program
+          $outputPath = "check-binding.exe"
+          & "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\csc.exe" /out:$outputPath $progPath
+
+          # Run with the test project's configuration
+          $env:COMPLUS_EnableBypassTrustedAppStrongNames=1
+          Copy-Item "Yubico.Core/tests/integration/app.config" -Destination "$outputPath.config"
+          Write-Host "Running binding check..."
+          & $outputPath
+        shell: pwsh
+      
       - name: Test Yubico.Core Integration Tests (NET47)
         run: |
           # Set the environment variable for the current process
@@ -73,8 +241,6 @@ jobs:
       
       - name: Test Yubico.Core Integration tests (NET8)
         run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj -f net8.0 --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
-      
-
       
       - name: Upload Test Result Files
         uses: actions/upload-artifact@v4

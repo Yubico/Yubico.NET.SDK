@@ -478,7 +478,7 @@ namespace Yubico.Core.Tlv
                 var reader = new TlvReader(encoding);
                 Assert.Equal(bytesSize, reader.PeekLength());
 
-                var bytesAsHex = encoding[..9].Select(b => b.ToString("X2"));
+                var bytesAsHex = encoding.AsSpan()[..9].ToArray().Select(b => b.ToString("X2"));
                 PrettyPrint(bytesSize, bytesAsHex);
 
                 // Increase for next round

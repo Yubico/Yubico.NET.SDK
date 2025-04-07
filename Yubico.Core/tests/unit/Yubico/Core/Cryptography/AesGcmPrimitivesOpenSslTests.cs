@@ -55,6 +55,7 @@ namespace Yubico.Core.Cryptography
             Assert.True(isValid);
         }
 
+#if !NET47
         [SkippableFact(typeof(System.PlatformNotSupportedException))]
         public void Encrypt_Decrypt_Succeeds_RandomValues_Succeed()
         {
@@ -95,6 +96,9 @@ namespace Yubico.Core.Cryptography
             isValid = plaintext.AsSpan().SequenceEqual(decryptedData.AsSpan());
             Assert.True(isValid);
         }
+#else
+
+#endif
 
         private static byte[] GetKeyData(
             RandomNumberGenerator? random)

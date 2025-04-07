@@ -35,7 +35,12 @@ namespace Yubico.Core.Iso7816
         private static byte[] GenerateRandBytes(int length)
         {
             byte[] randBytes = new byte[length];
+#if NET6_0_OR_GREATER
             System.Security.Cryptography.RandomNumberGenerator.Fill(randBytes);
+#else
+            System.Security.Cryptography.RandomNumberGenerator.Create().GetBytes(randBytes);
+#endif
+
             return randBytes;
         }
 

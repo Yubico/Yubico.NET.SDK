@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
@@ -40,45 +39,48 @@ namespace Yubico.YubiKey.Piv
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var privateKeyParameters = AsnPrivateKeyReader.CreateKeyParameters(testPrivateKey.EncodedKey);
-            IPublicKeyParameters publicKeyPeer;
+            IPublicKeyParameters peerPublicKey;
+            var peerPrivateKeyEcParameters = new ECParameters();
+
             if (keyType is KeyType.X25519)
             {
                 var testSelectedPublicKeyPeer = TestKeys.GetTestPublicKey(keyType, 2);
-                publicKeyPeer = AsnPublicKeyReader.CreateKeyParameters(testSelectedPublicKeyPeer.EncodedKey);
+                peerPublicKey = Curve25519PublicKeyParameters.CreateFromPkcs8(testSelectedPublicKeyPeer.EncodedKey);
             }
             else
             {
-                var oid = keyType.ToCurveOid()!;
-                var curve = ECCurve.CreateFromValue(oid); 
-                publicKeyPeer = ECPublicKeyParameters.CreateFromParameters(ECDsa.Create(curve).ExportParameters(false));
+                var curve = ECCurve.CreateFromValue(keyType.ToCurveOid()!);
+                var ecDsa = ECDsa.Create(curve);
+                peerPrivateKeyEcParameters = ecDsa.ExportParameters(true);
+                var peerPublicKeyEcParameters = ecDsa.ExportParameters(false);
+                peerPublicKey = ECPublicKeyParameters.CreateFromParameters(peerPublicKeyEcParameters);
             }
 
+            // -> Import Private Key
             using var pivSession = GetSession(testDevice);
             pivSession.ImportPrivateKey(0x85, privateKeyParameters, pinPolicy, PivTouchPolicy.Never);
-            var metadata = pivSession.GetMetadata(0x85);
-            
+
             // Act
-            var sharedSecret = pivSession.KeyAgree(0x85, publicKeyPeer);
+            var yubikeySecret = pivSession.KeyAgree(0x85, peerPublicKey);
 
             // Assert
-            var publicPoint = metadata.PublicKeyParameters switch
-            {
-                ECPublicKeyParameters ecDsa => ecDsa.PublicPoint.ToArray(),
-                Curve25519PublicKeyParameters edDsa => edDsa.PublicPoint.ToArray(),
-                _ => throw new ArgumentException("Invalid public key type")
-            };
-            
-            Assert.Equal(testPublicKey.GetPublicPoint(), publicPoint);
             if (keyType is KeyType.X25519)
             {
+                // We have pre-generated shared secrets for X25519
                 const string keyAgreeFilename = "x25519_private_and_public2_shared_secret.bin";
                 var expectedSharedSecret = TestCrypto.ReadTestData(keyAgreeFilename);
-                Assert.Equal(expectedSharedSecret, sharedSecret);
+                Assert.Equal(expectedSharedSecret, yubikeySecret);
             }
             else
             {
-                var expectedSecretLength = publicKeyPeer.KeyDefinition.LengthInBytes;
-                Assert.Equal(expectedSecretLength, sharedSecret.Length);
+                // Perform ECDH using generated key and the imported YK public key
+                using var peerEcdh = ECDiffieHellman.Create(peerPrivateKeyEcParameters);
+                var yubiKeyParametersPublic = testPublicKey.AsECDsa().ExportParameters(false);
+                using var yubikeyEcdh = ECDiffieHellman.Create(yubiKeyParametersPublic);
+                var peerSecret = peerEcdh.DeriveRawSecretAgreement(yubikeyEcdh.PublicKey);
+                
+                Assert.Equal(yubikeySecret.Length, peerSecret.Length);
+                Assert.Equal(yubikeySecret, peerSecret);
             }
         }
 

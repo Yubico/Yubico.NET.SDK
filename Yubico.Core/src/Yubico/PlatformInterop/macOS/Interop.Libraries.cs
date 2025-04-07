@@ -14,10 +14,17 @@
 
 namespace Yubico.PlatformInterop
 {
+
     internal static partial class Libraries
     {
+#if NET8_0_OR_GREATER
+        internal const string CoreFoundation = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
+        internal const string IOKitFramework = "/System/Library/Frameworks/IOKit.framework/IOKit";
+        internal const string WinSCard = "/System/Library/Frameworks/PCSC.framework/PCSC";
+#else
         internal const string CoreFoundation = "CoreFoundation.framework/CoreFoundation";
         internal const string IOKitFramework = "IOKit.framework/IOKit";
         internal const string WinSCard = "PCSC.framework/PCSC";
     }
+#endif
 }

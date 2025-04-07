@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Piv
             var publicKeyParameters = pivSession.GenerateKeyPair(PivSlot.Retired12, KeyType.Ed25519);
 
             // Act
-            var signature = pivSession.Sign(PivSlot.Retired12, dataToSign, KeyType.Ed25519);
+            var signature = pivSession.Sign(PivSlot.Retired12, dataToSign);
 
             // -> Verify the signature
             var bouncyKeyParameters = GetBouncyKeyParameters(publicKeyParameters);
@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.P256)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.P384)]
-        public async Task Sign_with_RSAandECDsa_Succeeds(
+        public async Task Sign_with_RSAandECDsa_Succeeds( // TODO Tests are flaky
             StandardTestDevice testDeviceType,
             KeyType keyType)
         {
@@ -107,7 +107,7 @@ namespace Yubico.YubiKey.Piv
             var collectorObj = new Simple39KeyCollector();
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            var signature2 = pivSession.Sign(slotNumber, dataToSign, keyType);
+            var signature2 = pivSession.Sign(slotNumber, dataToSign);
             Assert.True(isValid);
             Assert.NotEmpty(signature2);
         }
@@ -230,7 +230,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                 pivSession.ImportPrivateKey(slotNumber, priKey.GetPivPrivateKey());
-                byte[] signature = pivSession.Sign(slotNumber, formattedData, keyType);
+                byte[] signature = pivSession.Sign(slotNumber, formattedData);
 
                 using RSA rsaPublic = pubKey.GetRsaObject();
                 bool isVerified = rsaPublic.VerifyData(dataToSign, signature, hashAlgorithm, padding);
@@ -283,7 +283,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ImportPrivateKey(slotNumber, priKey.GetPivPrivateKey());
 
-                byte[] signature = pivSession.Sign(slotNumber, digester.Hash, keyType);
+                byte[] signature = pivSession.Sign(slotNumber, digester.Hash);
 
                 bool isValid = ConvertEcdsaSignature(signature, digester.Hash!.Length, out byte[] rsSignature);
                 Assert.True(isValid);
@@ -338,7 +338,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ImportPrivateKey(slotNumber, privateKey);
 
-                byte[] signature = pivSession.Sign(slotNumber, digester.Hash, keyType);
+                byte[] signature = pivSession.Sign(slotNumber, digester.Hash);
 
                 bool isValid = ConvertEcdsaSignature(signature, digester.Hash!.Length, out byte[] rsSignature);
                 Assert.True(isValid);

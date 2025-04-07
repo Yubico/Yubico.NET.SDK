@@ -127,9 +127,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The algorithm specified is not a supported asymmetric algorithm.
         /// </exception>
-        [Obsolete("Replaced by PublicKeyParameters.KeyType")] 
         public PivAlgorithm Algorithm 
-            // the algorithm is not returned by the generate key pair, so this is useless, its already known by the caller
         {
             get => _algorithm;
             set
@@ -161,7 +159,6 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <param name="algorithm">
         /// The algorithm (and key size) of the key pair generated.
         /// </param>
-        [Obsolete("Use other constructor")]
         public GenerateKeyPairResponse(
             ResponseApdu responseApdu,
             byte slotNumber,
@@ -211,9 +208,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public PivPublicKey GetData() => // To change this to return IPublicKeyPArameters would be a brekaing change. But is it necessary? Can we still use
-            // the pivpublickey inside the piv app? yes we can, but we dont need the caller to know we are converting in the bg
-            // but in some times the caller is receiving a pivpublickey..
+        public PivPublicKey GetData() =>
             Status switch
             {
 #pragma warning disable CS0618 // Type or member is obsolete

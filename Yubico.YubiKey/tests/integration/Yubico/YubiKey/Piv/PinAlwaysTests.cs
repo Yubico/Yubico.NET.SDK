@@ -46,10 +46,10 @@ namespace Yubico.YubiKey.Piv
                     0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88
                 };
 
-                byte[] signature1 = pivSession.Sign(slotNumber, dataToSign, KeyType.P256);
+                byte[] signature1 = pivSession.Sign(slotNumber, dataToSign);
                 Assert.Equal(0x30, signature1[0]);
 
-                byte[] signature2 = pivSession.Sign(slotNumber, dataToSign, KeyType.P256);
+                byte[] signature2 = pivSession.Sign(slotNumber, dataToSign);
                 bool isSame = signature1.SequenceEqual(signature2);
                 Assert.False(isSame);
             }
@@ -80,10 +80,10 @@ namespace Yubico.YubiKey.Piv
                     0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88
                 };
 
-                byte[] signature1 = pivSession.Sign(slotNumber, dataToSign, KeyType.P256);
+                byte[] signature1 = pivSession.Sign(slotNumber, dataToSign);
                 Assert.Equal(0x30, signature1[0]);
 
-                byte[] signature2 = pivSession.Sign(slotNumber, dataToSign, KeyType.P256);
+                byte[] signature2 = pivSession.Sign(slotNumber, dataToSign);
                 bool isSame = signature1.SequenceEqual(signature2);
                 Assert.False(isSame);
             }

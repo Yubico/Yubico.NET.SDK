@@ -102,7 +102,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048, 0x95, RsaFormat.Sha256, 2, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA2048, 0x95, RsaFormat.Sha384, 2, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA2048, 0x95, RsaFormat.Sha512, 2, StandardTestDevice.Fw5)]
-        [Obsolete] // FIx later
+        [Obsolete] // TODO Fix later
         public void EncryptCSharp_Decrypt_Correct(KeyType keyType, byte slotNumber, int digestAlgorithm, int paddingScheme, StandardTestDevice testDeviceType)
         {
             var rsaPadding = RSAEncryptionPadding.Pkcs1;

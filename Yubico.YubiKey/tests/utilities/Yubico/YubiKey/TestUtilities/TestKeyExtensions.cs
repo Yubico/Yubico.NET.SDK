@@ -10,7 +10,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// Converts the key to a PIV private key format.
         /// </summary>
         /// <returns>PivPrivateKey instance</returns>
-        public static PivPrivateKey AsPivPrivateKey( // now we can renmove the parser reader classes
+        public static PivPrivateKey AsPivPrivateKey(
             this TestKey key)
         {
             var keyDefinition = key.KeyDefinition;
@@ -18,20 +18,20 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 var rsaPrivateKey = RSAPrivateKeyParameters.CreateFromPkcs8(key.EncodedKey);
                 var rsaPivEncodedKey = rsaPrivateKey.ToPivEncodedPrivateKey();
-                return PivPrivateKey.Create(rsaPivEncodedKey);
+                return PivPrivateKey.Create(rsaPivEncodedKey, keyDefinition.KeyType.GetPivAlgorithm());
             }
 
             if (keyDefinition is { IsEcKey: true, AlgorithmOid: KeyDefinitions.CryptoOids.ECDSA })
             {
                 var ecPrivateKey = ECPrivateKeyParameters.CreateFromPkcs8(key.EncodedKey);
                 var ecPivEncodedKey = ecPrivateKey.ToPivEncodedPrivateKey();
-                return PivPrivateKey.Create(ecPivEncodedKey);
+                return PivPrivateKey.Create(ecPivEncodedKey, keyDefinition.KeyType.GetPivAlgorithm());
             }
 
             // Curve25519
             var cvPrivateKey = Curve25519PrivateKeyParameters.CreateFromPkcs8(key.EncodedKey);
             var cvPivEncodedKey = cvPrivateKey.ToPivEncodedPrivateKey();
-            return PivPrivateKey.Create(cvPivEncodedKey);
+            return PivPrivateKey.Create(cvPivEncodedKey, keyDefinition.KeyType.GetPivAlgorithm());
         }
 
         /// <summary>
@@ -46,14 +46,14 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 var rsaPublicKey = RSAPublicKeyParameters.CreateFromPkcs8(key.EncodedKey);
                 var rsaPivEncodedKey = rsaPublicKey.ToPivEncodedPublicKey();
-                return PivPublicKey.Create(rsaPivEncodedKey);
+                return PivPublicKey.Create(rsaPivEncodedKey, key.KeyType.GetPivAlgorithm());
             }
 
             if (keyDefinition is { IsEcKey: true, AlgorithmOid: KeyDefinitions.CryptoOids.ECDSA })
             {
                 var ecPublicKey = ECPublicKeyParameters.CreateFromPkcs8(key.EncodedKey);
                 var ecPivEncodedKey = ecPublicKey.ToPivEncodedPublicKey();
-                return PivPublicKey.Create(ecPivEncodedKey);
+                return PivPublicKey.Create(ecPivEncodedKey, key.KeyType.GetPivAlgorithm());
             }
 
             // Curve25519

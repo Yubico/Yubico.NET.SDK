@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.TestUtilities
         {
             if (pivPublicKey.Algorithm != PivAlgorithm.None)
             {
-                _pivPublicKey = PivPublicKey.Create(pivPublicKey.PivEncodedPublicKey);
+                _pivPublicKey = PivPublicKey.Create(pivPublicKey.PivEncodedPublicKey, pivPublicKey.Algorithm);
             }
 
             SetProperties(true);
@@ -169,7 +169,7 @@ namespace Yubico.YubiKey.TestUtilities
         {
             if (pivPrivateKey.Algorithm != PivAlgorithm.None)
             {
-                _pivPrivateKey = PivPrivateKey.Create(pivPrivateKey.EncodedPrivateKey);
+                _pivPrivateKey = PivPrivateKey.Create(pivPrivateKey.EncodedPrivateKey, pivPrivateKey.Algorithm);
             }
 
             SetProperties(true);
@@ -348,17 +348,9 @@ namespace Yubico.YubiKey.TestUtilities
         // an ECC private key.
         public PivPublicKey GetPivPublicKey()
         {
-            // if (_pivPublicKey.Algorithm == PivAlgorithm.EccX25519)
-            // {
-            //     var testPublicKey = TestKeys.GetPublicKey(_pivPublicKey.Algorithm);
-            //     var last32Bytes = testPublicKey.KeyBytes.AsSpan()[^32..];
-            //     var pivPublicKey = new PivEccPublicKey(last32Bytes, KeyType.Ed25519);
-            //     return pivPublicKey;
-            // }
-
             if (_pivPublicKey.Algorithm != PivAlgorithm.None)
             {
-                return PivPublicKey.Create(_pivPublicKey.PivEncodedPublicKey);
+                return PivPublicKey.Create(_pivPublicKey.PivEncodedPublicKey, Algorithm);
             }
 
             if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 || _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
@@ -424,7 +416,7 @@ namespace Yubico.YubiKey.TestUtilities
 
             if (_pivPrivateKey.Algorithm != PivAlgorithm.None)
             {
-                return PivPrivateKey.Create(_pivPrivateKey.EncodedPrivateKey);
+                return PivPrivateKey.Create(_pivPrivateKey.EncodedPrivateKey, _pivPrivateKey.Algorithm);
             }
 
             throw new InvalidOperationException(

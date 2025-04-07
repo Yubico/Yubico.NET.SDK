@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Piv
         {
             ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
 
-            var keyObject = PivPublicKey.Create(keyData);
+            var keyObject = PivPublicKey.Create(keyData, keyType.GetPivAlgorithm());
 
             Assert.True(keyObject is PivPublicKey);
         }
@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.Piv
         {
             ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
 
-            var keyObject = PivPublicKey.Create(keyData);
+            var keyObject = PivPublicKey.Create(keyData, keyType.GetPivAlgorithm());
 
             Assert.NotNull(keyObject);
             Assert.Equal(keyType.GetPivAlgorithm(), keyObject.Algorithm);
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Piv
             ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
             ReadOnlyMemory<byte> encoding = GetCorrectEncoding(keyType);
 
-            var keyObject = PivPublicKey.Create(keyData);
+            var keyObject = PivPublicKey.Create(keyData, keyType.GetPivAlgorithm());
             Assert.NotNull(keyObject);
 
             ReadOnlyMemory<byte> getKeyData = keyObject.PivEncodedPublicKey;
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Piv
             ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
             ReadOnlyMemory<byte> encoding = GetCorrectMetadataEncoding(keyType);
 
-            var keyObject = PivPublicKey.Create(keyData);
+            var keyObject = PivPublicKey.Create(keyData, keyType.GetPivAlgorithm());
             Assert.NotNull(keyObject);
 
             ReadOnlyMemory<byte> getKeyData = keyObject.YubiKeyEncodedPublicKey;
@@ -120,7 +120,7 @@ namespace Yubico.YubiKey.Piv
             ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
             ReadOnlyMemory<byte> modulus = GetModulus(keyType);
 
-            var keyObject = PivPublicKey.Create(keyData);
+            var keyObject = PivPublicKey.Create(keyData, keyType.GetPivAlgorithm());
 
             Assert.NotNull(keyObject);
             Assert.True(keyObject is PivRsaPublicKey);
@@ -145,7 +145,7 @@ namespace Yubico.YubiKey.Piv
             ReadOnlyMemory<byte> keyData = SampleKeyPairs.GetPivPublicKey(keyType).PivEncodedPublicKey;
             ReadOnlyMemory<byte> exponent = GetExponent();
 
-            var keyObject = PivPublicKey.Create(keyData);
+            var keyObject = PivPublicKey.Create(keyData, keyType.GetPivAlgorithm());
 
             Assert.NotNull(keyObject);
             Assert.True(keyObject is PivRsaPublicKey);
@@ -168,7 +168,7 @@ namespace Yubico.YubiKey.Piv
             ReadOnlyMemory<byte> keyData = GetKeyData(keyType);
             ReadOnlyMemory<byte> publicPoint = GetPoint(keyType);
 
-            var keyObject = PivPublicKey.Create(keyData);
+            var keyObject = PivPublicKey.Create(keyData, keyType.GetPivAlgorithm());
 
             Assert.NotNull(keyObject);
             Assert.True(keyObject is PivEccPublicKey);
@@ -224,7 +224,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Create_NullData_ThrowsException()
         {
-            _ = Assert.Throws<ArgumentException>(() => PivPublicKey.Create(null));
+            _ = Assert.Throws<ArgumentException>(() => PivPublicKey.Create(null, PivAlgorithm.EccP256));
         }
 
         [Fact]
@@ -232,7 +232,7 @@ namespace Yubico.YubiKey.Piv
         {
             Memory<byte> keyData = GetKeyData(KeyType.P256);
             keyData.Span[0] = 0x84;
-            _ = Assert.Throws<ArgumentException>(() => PivPublicKey.Create(keyData));
+            _ = Assert.Throws<ArgumentException>(() => PivPublicKey.Create(keyData, KeyType.P256.GetPivAlgorithm()));
         }
 
         [Fact]
@@ -240,7 +240,7 @@ namespace Yubico.YubiKey.Piv
         {
             Memory<byte> keyData = GetKeyData(KeyType.RSA1024);
             Memory<byte> badData = keyData.Slice(keyData.Length - 6);
-            _ = Assert.Throws<ArgumentException>(() => PivPublicKey.Create(badData));
+            _ = Assert.Throws<ArgumentException>(() => PivPublicKey.Create(badData, PivAlgorithm.Rsa1024));
         }
 
         [Theory]
@@ -250,7 +250,7 @@ namespace Yubico.YubiKey.Piv
             KeyType keyType)
         {
             Memory<byte> keyData = GetBadEncoding(keyType);
-            _ = Assert.Throws<ArgumentException>(() => PivPublicKey.Create(keyData));
+            _ = Assert.Throws<ArgumentException>(() => PivPublicKey.Create(keyData, keyType.GetPivAlgorithm()));
         }
 
         [Fact]
@@ -275,7 +275,7 @@ namespace Yubico.YubiKey.Piv
             KeyType keyType)
         {
             Memory<byte> keyData = GetBadEncoding(keyType);
-            _ = Assert.Throws<ArgumentException>(() => PivPublicKey.Create(keyData));
+            _ = Assert.Throws<ArgumentException>(() => PivPublicKey.Create(keyData, keyType.GetPivAlgorithm()));
         }
 
         private static Memory<byte> GetModulus(

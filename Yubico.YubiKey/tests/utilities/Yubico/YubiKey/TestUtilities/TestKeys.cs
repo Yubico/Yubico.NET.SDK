@@ -291,7 +291,7 @@ namespace Yubico.YubiKey.TestUtilities
         public static TestKey GetTestPrivateKey(
             PivAlgorithm algorithm) => GetTestPrivateKey(algorithm.GetKeyType());
 
-        public static (TestKey publicKey, TestKey privateKey) GetKeyPair(
+        public static (TestKey testPublicKey, TestKey testPrivateKey) GetKeyPair(
             KeyType keyType) => (GetTestPublicKey(keyType), GetTestPrivateKey(keyType));
 
 

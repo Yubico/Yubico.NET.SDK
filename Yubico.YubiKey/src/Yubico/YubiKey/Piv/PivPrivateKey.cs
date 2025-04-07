@@ -94,8 +94,9 @@ namespace Yubico.YubiKey.Piv
         /// <c>PivEccPrivateKey</c>.
         /// </remarks>
         /// <param name="encodedPrivateKey">
-        /// The PIV TLV encoding.
+        ///     The PIV TLV encoding.
         /// </param>
+        /// <param name="pivAlgorithm"></param>
         /// <returns>
         /// An instance of a subclass of <c>PivPrivateKey</c>, the actual key
         /// represented by the encoding.
@@ -103,7 +104,7 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The key data supplied is not a supported encoding.
         /// </exception>
-        public static PivPrivateKey Create(ReadOnlyMemory<byte> encodedPrivateKey)
+        public static PivPrivateKey Create(ReadOnlyMemory<byte> encodedPrivateKey, PivAlgorithm? pivAlgorithm = null)
         {
             byte tag = 0;
             if (encodedPrivateKey.Length > 0)
@@ -119,14 +120,10 @@ namespace Yubico.YubiKey.Piv
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.InvalidPrivateKeyData));
 
-                case PivConstants.PrivateECDsaTag:
-                    return PivEccPrivateKey.CreateEccPrivateKey(encodedPrivateKey);
+                case var _ when PivConstants.IsValidPrivateECTag(tag):
+                    return PivEccPrivateKey.CreateEccPrivateKey(encodedPrivateKey, pivAlgorithm);
 
-                case PivConstants.PrivateRSAPrimePTag:
-                case PivConstants.PrivateRSAPrimeQTag:
-                case PivConstants.PrivateRSAExponentPTag:
-                case PivConstants.PrivateRSAExponentQTag:
-                case PivConstants.PrivateRSACoefficientTag:
+                case var _ when PivConstants.IsValidPrivateRSATag(tag):
                     return PivRsaPrivateKey.CreateRsaPrivateKey(encodedPrivateKey);
             }
         }

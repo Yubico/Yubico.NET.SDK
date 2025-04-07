@@ -66,7 +66,9 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The size of the private value is not supported by the YubiKey.
         /// </exception>
-        public PivEccPrivateKey(ReadOnlySpan<byte> privateValue, PivAlgorithm? algorithm = null)
+        public PivEccPrivateKey(
+            ReadOnlySpan<byte> privateValue, 
+            PivAlgorithm? algorithm = null)
         {
             if (algorithm.HasValue)
             {
@@ -83,8 +85,15 @@ namespace Yubico.YubiKey.Piv
                 };
             }
 
+            int tag = Algorithm switch
+            {
+                PivAlgorithm.EccEd25519 => PivConstants.PrivateECEd25519Tag,
+                PivAlgorithm.EccX25519 => PivConstants.PrivateECX25519Tag,
+                _ => PivConstants.PrivateECDsaTag
+            };
+            
             var tlvWriter = new TlvWriter();
-            tlvWriter.WriteValue(PivConstants.PrivateECDsaTag, privateValue);
+            tlvWriter.WriteValue(tag, privateValue);
             EncodedKey = tlvWriter.Encode();
             _privateValue = new Memory<byte>(privateValue.ToArray());
         }
@@ -94,19 +103,22 @@ namespace Yubico.YubiKey.Piv
         /// encoding.
         /// </summary>
         /// <param name="encodedPrivateKey">
-        /// The PIV TLV encoding.
+        ///     The PIV TLV encoding.
         /// </param>
+        /// <param name="pivAlgorithm"></param>
         /// <returns>
         /// A new instance of a PivEccPrivateKey object based on the encoding.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// The encoding of the private key is not supported.
         /// </exception>
-        public static PivEccPrivateKey CreateEccPrivateKey(ReadOnlyMemory<byte> encodedPrivateKey)
+        public static PivEccPrivateKey CreateEccPrivateKey(
+            ReadOnlyMemory<byte> encodedPrivateKey,
+            PivAlgorithm? pivAlgorithm)
         {
             var tlvReader = new TlvReader(encodedPrivateKey);
-
-            if (tlvReader.HasData == false || tlvReader.PeekTag() != PivConstants.PrivateECDsaTag)
+            int tag = tlvReader.PeekTag();
+            if (tlvReader.HasData == false || !PivConstants.IsValidPrivateECTag(tag))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -114,9 +126,8 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.InvalidPrivateKeyData));
             }
 
-            var value = tlvReader.ReadValue(PivConstants.PrivateECDsaTag);
-
-            return new PivEccPrivateKey(value.Span);
+            var value = tlvReader.ReadValue(tag);
+            return new PivEccPrivateKey(value.Span, pivAlgorithm);
         }
 
         /// <inheritdoc />

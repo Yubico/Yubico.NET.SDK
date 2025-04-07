@@ -109,7 +109,6 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(rsaParameters.Modulus, publicRSAParameters.Parameters.Modulus);
                 Assert.Equal(rsaParameters.Exponent, publicRSAParameters.Parameters.Exponent);
             }
-
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]

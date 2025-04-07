@@ -24,34 +24,79 @@ jobs:
       - name: Add local NuGet repository
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
+      - name: Build Yubico.Core
+        run: dotnet build Yubico.NET.SDK.sln --configuration Debug
+
       - name: Disable Strong Name Verification
         run: |
-          # Try to find sn.exe in common locations
-          $snPaths = @(
-            "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\sn.exe",
-            "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\sn.exe",
-            "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7.2 Tools\x64\sn.exe",
-            "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7.2 Tools\sn.exe",
-            "C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\x64\sn.exe",
-            "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\sn.exe",
-            "C:\Program Files (x86)\Microsoft SDKs\Windows\v6.0A\Bin\sn.exe"
+          # Find all Yubico assemblies and disable SN verification for all of them
+          # First, find the sn.exe tool
+          $snExe = $null
+          $possiblePaths = @(
+              "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7.2 Tools\x64\sn.exe",
+              "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\sn.exe"
           )
           
-          foreach ($path in $snPaths) {
-            if (Test-Path $path) {
-              Write-Host "Found sn.exe at: $path"
-              & $path -Vr "Yubico.Core/src/bin/Debug/net47/Yubico.Core.dll"
-              exit 0
-            }
+          foreach ($path in $possiblePaths) {
+              if (Test-Path $path) {
+                  $snExe = $path
+                  Write-Host "Found sn.exe at $snExe"
+                  break
+              }
           }
           
-          Write-Host "sn.exe not found in common locations, using generic command (may fail)"
-          sn -Vr "Yubico.Core/src/bin/Debug/net47/Yubico.Core.dll"
+          if ($null -eq $snExe) {
+              Write-Host "sn.exe not found in common locations, will try using the PATH"
+              $snExe = "sn.exe"
+          }
+          
+          # Disable verification for all Yubico assemblies by their PublicKeyToken
+          Write-Host "Disabling strong name verification for all assemblies"
+          & $snExe -Vr *,fdb9ca4403bc032c
+          & $snExe -Vr *
+          
+          # Also disable specific assemblies explicitly
+          $assembliesToDisable = @(
+              "Yubico.Core",
+              "Yubico.YubiKey"
+          )
+          
+          foreach ($assembly in $assembliesToDisable) {
+              Write-Host "Disabling strong name verification for $assembly"
+              & $snExe -Vr "$assembly,fdb9ca4403bc032c"
+          }
+          
+          # Use the registry approach as well (belt and suspenders)
+          $registryPaths = @(
+              "HKLM:\SOFTWARE\Microsoft\StrongName\Verification",
+              "HKLM:\SOFTWARE\Wow6432Node\Microsoft\StrongName\Verification"
+          )
+          
+          foreach ($regPath in $registryPaths) {
+              foreach ($assembly in $assembliesToDisable) {
+                  $keyPath = "$regPath\$assembly,fdb9ca4403bc032c"
+                  if (-not (Test-Path $keyPath)) {
+                      Write-Host "Creating registry key $keyPath"
+                      New-Item -Path $keyPath -Force | Out-Null
+                  }
+              }
+          }
+          
+          # Check if verification is disabled
+          Write-Host "Checking verification settings:"
+          & $snExe -Vl
         shell: pwsh
 
-      - name: Build Yubico.Core
-        run: dotnet build Yubico.Core/src/Yubico.Core.sln --configuration Debug
-
+      - name: Test Yubico.Core Integration Tests (NET47)
+        run: |
+          # Set environment variables for this specific run
+          $env:COMPLUS_DISABLESTRICTVERIFICATION=1
+          $env:COMPLUS_DISABLESTRONGNAMEVERIFICATION=1
+          
+          # Run the test with elevated permissions if possible
+          dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj -f net47 --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
+        shell: pwsh
+        
       - name: Test Yubico.YubiKey
         run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 
@@ -63,9 +108,6 @@ jobs:
 
       - name: Test Yubico.Core Integration tests (NET8)
         run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj -f net8.0 --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
-
-      - name: Test Yubico.Core Integration Tests (NET47)
-        run: dotnet test Yubico.Core/tests/integration/Yubico.Core.IntegrationTests.csproj -f net47 --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 
       - name: Upload Test Result Files
         uses: actions/upload-artifact@v4

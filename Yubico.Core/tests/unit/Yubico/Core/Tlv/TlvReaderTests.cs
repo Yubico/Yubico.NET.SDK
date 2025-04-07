@@ -17,7 +17,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace Yubico.Core.Tlv.UnitTests
+namespace Yubico.Core.Tlv
 {
     public class TlvReaderTests
     {

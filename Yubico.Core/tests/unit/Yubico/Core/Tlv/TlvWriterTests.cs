@@ -19,7 +19,7 @@ using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Yubico.Core.Tlv.UnitTests
+namespace Yubico.Core.Tlv
 {
     public class TlvWriterTests
     {
@@ -478,7 +478,7 @@ namespace Yubico.Core.Tlv.UnitTests
                 var reader = new TlvReader(encoding);
                 Assert.Equal(bytesSize, reader.PeekLength());
 
-                var bytesAsHex = encoding[..9].Select(b => b.ToString("X2"));
+                var bytesAsHex = encoding.AsSpan()[..9].ToArray().Select(b => b.ToString("X2"));
                 PrettyPrint(bytesSize, bytesAsHex);
 
                 // Increase for next round

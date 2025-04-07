@@ -16,7 +16,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
-namespace Yubico.Core.Tlv.UnitTests
+namespace Yubico.Core.Tlv
 {
     public class TlvExceptionTests
     {

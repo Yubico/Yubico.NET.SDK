@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Yubico.Core.Tlv.UnitTests
+namespace Yubico.Core.Tlv
 {
     public class TlvObjectTests
     {

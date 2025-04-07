@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Xunit;
 
-namespace Yubico.Core.Devices.Hid.UnitTests
+namespace Yubico.Core.Devices.Hid
 {
     public class HidTranslatorTests
     {
@@ -166,10 +166,18 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Originally, I hard-coded these, but I decided that it should do
             // this dynamically so that newly added keyboard layouts aren't left
             // out of these tests.
+            
+#if NET6_0_OR_GREATER
             foreach (KeyboardLayout layout in Enum.GetValues<KeyboardLayout>())
             {
                 yield return new object[] { layout, GetDataForKeyboard(layout) };
             }
+#else
+            foreach (KeyboardLayout layout in Enum.GetValues(typeof(KeyboardLayout)))
+            {
+                yield return new object[] { layout, GetDataForKeyboard(layout) };
+            }
+#endif
         }
 
         // This method gets an array of tuples with the character and HID usage

@@ -1,4 +1,4 @@
-﻿<!-- Copyright 2021 Yubico AB
+<!-- Copyright 2024 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,38 +15,29 @@ limitations under the License. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>Yubico.YubiKey.UnitTests</AssemblyName>
-    <PackageId>Yubico.YubiKey.UnitTests</PackageId>
+    <AssemblyName>Yubico.Core.IntegrationTests</AssemblyName>
     <RootNamespace></RootNamespace>
 
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
-
-    <AnalysisMode>AllDisabledByDefault</AnalysisMode>
-
+    <TargetFrameworks>net8.0;net6.0;net47</TargetFrameworks>
+    <AnalysisMode>Minimum</AnalysisMode>
     <!-- StrongName signing -->
-    <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must
-         be strong named, since it uses InternalsVisibleTo. -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  
-  <!-- Suppress TFM support build warnings for the net6.0 target -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-  </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
-    <ProjectReference Include="..\utilities\Yubico.YubiKey.TestUtilities.csproj" />
+    <ProjectReference Include="..\..\src\Yubico.Core.csproj" />
+    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
     <PackageReference Include="coverlet.collector" Version="6.0.2" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-    <PackageReference Include="xunit" Version="2.8.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="xunit" Version="2.4.1" Condition="'$(TargetFramework)' == 'net47'" />
+    <PackageReference Include="xunit" Version="2.8.1" Condition="'$(TargetFramework)' != 'net47'" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" Condition="'$(TargetFramework)' == 'net47'" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1" Condition="'$(TargetFramework)' != 'net47'" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
-    <PackageReference Include="Moq" Version="4.16.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json">
+    <None Update="xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

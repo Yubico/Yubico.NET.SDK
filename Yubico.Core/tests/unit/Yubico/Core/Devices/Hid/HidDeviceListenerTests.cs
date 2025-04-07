@@ -15,7 +15,7 @@
 using System;
 using Xunit;
 
-namespace Yubico.Core.Devices.Hid.UnitTests
+namespace Yubico.Core.Devices.Hid
 {
     class FakeHidDevice : IHidDevice
     {

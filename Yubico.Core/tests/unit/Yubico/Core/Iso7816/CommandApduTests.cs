@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Yubico.Core.Iso7816.UnitTests
+namespace Yubico.Core.Iso7816
 {
     public class CommandApduTests
     {
@@ -35,7 +35,12 @@ namespace Yubico.Core.Iso7816.UnitTests
         private static byte[] GenerateRandBytes(int length)
         {
             byte[] randBytes = new byte[length];
+#if NET6_0_OR_GREATER
             System.Security.Cryptography.RandomNumberGenerator.Fill(randBytes);
+#else
+            System.Security.Cryptography.RandomNumberGenerator.Create().GetBytes(randBytes);
+#endif
+
             return randBytes;
         }
 

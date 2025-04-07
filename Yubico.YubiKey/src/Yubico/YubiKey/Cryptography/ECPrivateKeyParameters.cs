@@ -120,7 +120,7 @@ namespace Yubico.YubiKey.Cryptography
             KeyType keyType)
         {
             var keyDefinition = keyType.GetKeyDefinition();
-            if (keyDefinition.AlgorithmOid is not KeyDefinitions.CryptoOids.ECDSA)
+            if (keyDefinition.AlgorithmOid is not KeyDefinitions.Oids.ECDSA)
             {
                 throw new ArgumentException("Only P-256, P-384 and P-521 are supported.", nameof(keyType));
             }

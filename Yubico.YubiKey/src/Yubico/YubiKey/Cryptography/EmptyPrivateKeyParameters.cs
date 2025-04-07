@@ -12,24 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Cryptography;
 
-/// <summary>
-/// Represents the type of a cryptographic key.
-/// </summary>
-public enum KeyType
+internal class EmptyPrivateKeyParameters : IPrivateKeyParameters
 {
-    P256,
-    P384,
-    P521,
-    X25519,
-    Ed25519,
-    RSA1024,
-    RSA2048,
-    RSA3072,
-    RSA4096,
-    TripleDes,
-    AES128,
-    AES192,
-    AES256
+    public KeyDefinition KeyDefinition { get; } = new();
+    public KeyType KeyType { get; }
+    public byte[] ExportPkcs8PrivateKey() => Array.Empty<byte>();
+
+    public static ReadOnlyMemory<byte> PrivateKey => Array.Empty<byte>();
+    public void Clear() { }
 }

@@ -12,41 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.YubiKey.Cryptography;
 
 public interface IKeyParameters
 {
     public KeyDefinition KeyDefinition { get; }
     public KeyType KeyType { get; }
-}
-
-public interface IPublicKeyParameters : IKeyParameters
-{
-    public byte[] ExportSubjectPublicKeyInfo();
-}
-
-public interface IPrivateKeyParameters : IKeyParameters
-{
-    public byte[] ExportPkcs8PrivateKey();
-    public void Clear();
-}
-
-internal class EmptyPublicKeyParameters : IPublicKeyParameters
-{
-    public KeyDefinition KeyDefinition { get; } = new();
-    public KeyType KeyType { get; }
-    public static ReadOnlyMemory<byte> PublicPoint => Array.Empty<byte>();
-    public byte[] ExportSubjectPublicKeyInfo() => Array.Empty<byte>();
-}
-
-internal class EmptyPrivateKeyParameters : IPrivateKeyParameters
-{
-    public KeyDefinition KeyDefinition { get; } = new();
-    public KeyType KeyType { get; }
-    public byte[] ExportPkcs8PrivateKey() => Array.Empty<byte>();
-
-    public static ReadOnlyMemory<byte> PrivateKey => Array.Empty<byte>();
-    public void Clear() { }
 }

@@ -38,7 +38,7 @@ internal class AsnPrivateKeyReader
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
         switch (oidAlgorithm)
         {
-            case KeyDefinitions.CryptoOids.RSA:
+            case KeyDefinitions.Oids.RSA:
                 {
                     if (seqAlgorithmIdentifier.HasData)
                     {
@@ -49,13 +49,13 @@ internal class AsnPrivateKeyReader
                     var rsaParameters = CreateRSAParameters(pkcs8EncodedKey);
                     return RSAPrivateKeyParameters.CreateFromParameters(rsaParameters);
                 }
-            case KeyDefinitions.CryptoOids.ECDSA:
+            case KeyDefinitions.Oids.ECDSA:
                 {
                     var ecParams = CreateECParameters(pkcs8EncodedKey);
                     return ECPrivateKeyParameters.CreateFromParameters(ecParams);
                 }
-            case KeyDefinitions.CryptoOids.X25519:
-            case KeyDefinitions.CryptoOids.Ed25519:
+            case KeyDefinitions.Oids.X25519:
+            case KeyDefinitions.Oids.Ed25519:
                 {
                     return Curve25519PrivateKeyParameters.CreateFromPkcs8(pkcs8EncodedKey);
                 }
@@ -84,7 +84,7 @@ internal class AsnPrivateKeyReader
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != KeyDefinitions.CryptoOids.ECDSA)
+        if (oidAlgorithm != KeyDefinitions.Oids.ECDSA)
         {
             throw new InvalidOperationException(
                 string.Format(
@@ -94,9 +94,9 @@ internal class AsnPrivateKeyReader
 
         string curveOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
         if (curveOid is not (
-            KeyDefinitions.CryptoOids.P256 or
-            KeyDefinitions.CryptoOids.P384 or
-            KeyDefinitions.CryptoOids.P521))
+            KeyDefinitions.Oids.P256 or
+            KeyDefinitions.Oids.P384 or
+            KeyDefinitions.Oids.P521))
         {
             throw new InvalidOperationException(
                 string.Format(
@@ -186,7 +186,7 @@ internal class AsnPrivateKeyReader
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != KeyDefinitions.CryptoOids.RSA)
+        if (oidAlgorithm != KeyDefinitions.Oids.RSA)
         {
             throw new InvalidOperationException(
                 string.Format(

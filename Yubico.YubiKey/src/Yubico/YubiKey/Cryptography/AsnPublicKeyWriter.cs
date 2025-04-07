@@ -35,9 +35,9 @@ internal static class AsnPublicKeyWriter
         int coordinateLength = keyDefinition.LengthInBytes;
         return keyType switch
         {
-            KeyType.P256 => CreateEcEncodedKey(publicPoint, KeyDefinitions.CryptoOids.P256, coordinateLength),
-            KeyType.P384 => CreateEcEncodedKey(publicPoint, KeyDefinitions.CryptoOids.P384, coordinateLength),
-            KeyType.P521 => CreateEcEncodedKey(publicPoint, KeyDefinitions.CryptoOids.P521, coordinateLength),
+            KeyType.P256 => CreateEcEncodedKey(publicPoint, KeyDefinitions.Oids.P256, coordinateLength),
+            KeyType.P384 => CreateEcEncodedKey(publicPoint, KeyDefinitions.Oids.P384, coordinateLength),
+            KeyType.P521 => CreateEcEncodedKey(publicPoint, KeyDefinitions.Oids.P521, coordinateLength),
             KeyType.X25519 => CreateCurve25519ToSpki(publicPoint, keyType),
             KeyType.Ed25519 => CreateCurve25519ToSpki(publicPoint, keyType),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
@@ -83,7 +83,7 @@ internal static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.RSA);
+        writer.WriteObjectIdentifier(KeyDefinitions.Oids.RSA);
         writer.WriteNull();
         writer.PopSequence();
 
@@ -158,7 +158,7 @@ internal static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.ECDSA);
+        writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 
@@ -179,8 +179,8 @@ internal static class AsnPublicKeyWriter
             throw new ArgumentException("Curve OID is null.");
         }
 
-        if (keyDefinition.AlgorithmOid != KeyDefinitions.CryptoOids.X25519 &&
-            keyDefinition.AlgorithmOid != KeyDefinitions.CryptoOids.Ed25519)
+        if (keyDefinition.AlgorithmOid != KeyDefinitions.Oids.X25519 &&
+            keyDefinition.AlgorithmOid != KeyDefinitions.Oids.Ed25519)
         {
             throw new ArgumentException("Invalid curve OID.");
         }
@@ -233,7 +233,7 @@ internal static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.ECDSA);
+        writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 

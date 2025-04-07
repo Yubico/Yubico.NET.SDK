@@ -65,7 +65,7 @@ internal static class KeyParametersPivHelper
         int coordinateLength = publicKeyData.Length / 2;
         var keyDefinition = KeyDefinitions
             .GetEcKeyDefinitions()
-            .Where(kd => kd.AlgorithmOid == KeyDefinitions.CryptoOids.ECDSA)
+            .Where(kd => kd.AlgorithmOid == KeyDefinitions.Oids.ECDSA)
             .Single(kd => kd.LengthInBytes == coordinateLength);
 
         byte[]? x = publicPointData.Span.Slice(1, keyDefinition.LengthInBytes).ToArray();
@@ -161,7 +161,7 @@ internal static class KeyParametersPivHelper
     
         var allowedKeyDefinitions = KeyDefinitions
             .GetEcKeyDefinitions()
-            .Where(kd => kd.AlgorithmOid == KeyDefinitions.CryptoOids.ECDSA);
+            .Where(kd => kd.AlgorithmOid == KeyDefinitions.Oids.ECDSA);
         try
         {
             var keyDefinition = allowedKeyDefinitions

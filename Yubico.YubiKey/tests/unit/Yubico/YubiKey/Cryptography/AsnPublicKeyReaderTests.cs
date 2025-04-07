@@ -107,7 +107,7 @@ public class AsnPublicKeyReaderTests
         var x25519Params = (Curve25519PublicKeyParameters)result;
         Assert.NotNull(x25519Params);
         Assert.Equal(32, x25519Params.PublicPoint.Length);
-        Assert.Equal(KeyDefinitions.CryptoOids.X25519, x25519Params.KeyDefinition.AlgorithmOid);
+        Assert.Equal(KeyDefinitions.Oids.X25519, x25519Params.KeyDefinition.AlgorithmOid);
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public class AsnPublicKeyReaderTests
         var ed25519Params = (Curve25519PublicKeyParameters)result;
         Assert.NotNull(ed25519Params);
         Assert.Equal(32, ed25519Params.PublicPoint.Length);
-        Assert.Equal(KeyDefinitions.CryptoOids.Ed25519, ed25519Params.KeyDefinition.AlgorithmOid);
+        Assert.Equal(KeyDefinitions.Oids.Ed25519, ed25519Params.KeyDefinition.AlgorithmOid);
     }
 
     [Fact]
@@ -164,7 +164,7 @@ public class AsnPublicKeyReaderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.RSA);
+                writer.WriteObjectIdentifier(KeyDefinitions.Oids.RSA);
                 writer.WriteNull();
             }
             
@@ -188,8 +188,8 @@ public class AsnPublicKeyReaderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.ECDSA);
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.P256);
+                writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
+                writer.WriteObjectIdentifier(KeyDefinitions.Oids.P256);
             }
             
             // Create EC point data with compressed format (0x03) instead of uncompressed (0x04)
@@ -218,7 +218,7 @@ public class AsnPublicKeyReaderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.ECDSA);
+                writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
                 // Use secp256k1 (Bitcoin curve) which isn't supported in the implementation
                 writer.WriteObjectIdentifier("1.3.132.0.10");
             }

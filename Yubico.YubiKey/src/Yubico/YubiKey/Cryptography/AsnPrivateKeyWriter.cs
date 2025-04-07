@@ -37,11 +37,11 @@ internal static class AsnPrivateKeyWriter
     {
         return keyType switch
         {
-            KeyType.P256 => EncodeECKey(privateKey, KeyDefinitions.CryptoOids.P256, publicPoint),
-            KeyType.P384 => EncodeECKey(privateKey, KeyDefinitions.CryptoOids.P384, publicPoint),
-            KeyType.P521 => EncodeECKey(privateKey, KeyDefinitions.CryptoOids.P521, publicPoint),
-            KeyType.X25519 => EncodeCurve25519Key(privateKey.Span, KeyDefinitions.CryptoOids.X25519),
-            KeyType.Ed25519 => EncodeCurve25519Key(privateKey.Span, KeyDefinitions.CryptoOids.Ed25519),
+            KeyType.P256 => EncodeECKey(privateKey, KeyDefinitions.Oids.P256, publicPoint),
+            KeyType.P384 => EncodeECKey(privateKey, KeyDefinitions.Oids.P384, publicPoint),
+            KeyType.P521 => EncodeECKey(privateKey, KeyDefinitions.Oids.P521, publicPoint),
+            KeyType.X25519 => EncodeCurve25519Key(privateKey.Span, KeyDefinitions.Oids.X25519),
+            KeyType.Ed25519 => EncodeCurve25519Key(privateKey.Span, KeyDefinitions.Oids.Ed25519),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
         };
     }
@@ -100,7 +100,7 @@ internal static class AsnPrivateKeyWriter
         writer.WriteInteger(0);
 
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.RSA);
+        writer.WriteObjectIdentifier(KeyDefinitions.Oids.RSA);
         writer.WriteNull();
         writer.PopSequence();
 
@@ -185,7 +185,7 @@ internal static class AsnPrivateKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.ECDSA);
+        writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 
@@ -208,12 +208,12 @@ internal static class AsnPrivateKeyWriter
             throw new ArgumentException("Curve OID is null.");
         }
 
-        if (curveOid is not (KeyDefinitions.CryptoOids.X25519 or KeyDefinitions.CryptoOids.Ed25519))
+        if (curveOid is not (KeyDefinitions.Oids.X25519 or KeyDefinitions.Oids.Ed25519))
         {
             throw new ArgumentException("Curve OID is not supported.", nameof(curveOid));
         }
 
-        if (curveOid == KeyDefinitions.CryptoOids.X25519)
+        if (curveOid == KeyDefinitions.Oids.X25519)
         {
             AsnUtilities.VerifyX25519PrivateKey(privateKey);
         }

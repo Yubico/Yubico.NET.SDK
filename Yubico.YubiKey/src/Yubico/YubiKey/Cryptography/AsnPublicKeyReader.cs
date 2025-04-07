@@ -36,7 +36,7 @@ internal class AsnPublicKeyReader
 
         switch (oidAlgorithm)
         {
-            case KeyDefinitions.CryptoOids.RSA:
+            case KeyDefinitions.Oids.RSA:
                 {
                     if (seqAlgorithmIdentifier.HasData)
                     {
@@ -46,16 +46,16 @@ internal class AsnPublicKeyReader
 
                     return CreateRSAPublicKeyParameters(subjectPublicKey);
                 }
-            case KeyDefinitions.CryptoOids.ECDSA:
+            case KeyDefinitions.Oids.ECDSA:
                 {
                     string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
                     return CreateECPublicKeyParameters(oidCurve, subjectPublicKey);
                 }
-            case KeyDefinitions.CryptoOids.X25519:
+            case KeyDefinitions.Oids.X25519:
                 {
                     return Curve25519PublicKeyParameters.CreateFromValue(subjectPublicKey, KeyType.X25519);
                 }
-            case KeyDefinitions.CryptoOids.Ed25519:
+            case KeyDefinitions.Oids.Ed25519:
                 {
                     return Curve25519PublicKeyParameters.CreateFromValue(subjectPublicKey, KeyType.Ed25519);
                 }
@@ -89,8 +89,8 @@ internal class AsnPublicKeyReader
 
     private static ECPublicKeyParameters CreateECPublicKeyParameters(string curveOid, byte[] subjectPublicKey)
     {
-        if (curveOid is not (KeyDefinitions.CryptoOids.P256 or KeyDefinitions.CryptoOids.P384
-            or KeyDefinitions.CryptoOids.P521))
+        if (curveOid is not (KeyDefinitions.Oids.P256 or KeyDefinitions.Oids.P384
+            or KeyDefinitions.Oids.P521))
         {
             throw new NotSupportedException(
                 string.Format(

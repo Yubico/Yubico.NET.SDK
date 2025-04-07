@@ -83,9 +83,9 @@ public class AsnPrivateKeyReaderTests
         // Verify curve matches expected
         var expectedCurveOid = keyType switch
         {
-            KeyType.P256 => KeyDefinitions.CryptoOids.P256,
-            KeyType.P384 => KeyDefinitions.CryptoOids.P384,
-            KeyType.P521 => KeyDefinitions.CryptoOids.P521,
+            KeyType.P256 => KeyDefinitions.Oids.P256,
+            KeyType.P384 => KeyDefinitions.Oids.P384,
+            KeyType.P521 => KeyDefinitions.Oids.P521,
             _ => throw new ArgumentOutOfRangeException(nameof(keyType))
         };
 
@@ -134,7 +134,7 @@ public class AsnPrivateKeyReaderTests
 
         var x25519Params = (Curve25519PrivateKeyParameters)result;
         Assert.Equal(32, x25519Params.PrivateKey.Length);
-        Assert.Equal(KeyDefinitions.CryptoOids.X25519, x25519Params.KeyDefinition.AlgorithmOid);
+        Assert.Equal(KeyDefinitions.Oids.X25519, x25519Params.KeyDefinition.AlgorithmOid);
     }
 
     // [Fact]
@@ -172,7 +172,7 @@ public class AsnPrivateKeyReaderTests
 
         var ed25519Params = (Curve25519PrivateKeyParameters)result;
         Assert.Equal(32, ed25519Params.PrivateKey.Length);
-        Assert.Equal(KeyDefinitions.CryptoOids.Ed25519, ed25519Params.KeyDefinition.AlgorithmOid);
+        Assert.Equal(KeyDefinitions.Oids.Ed25519, ed25519Params.KeyDefinition.AlgorithmOid);
     }
 
     [Fact]
@@ -186,7 +186,7 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.RSA);
+                writer.WriteObjectIdentifier(KeyDefinitions.Oids.RSA);
                 writer.WriteNull();
             }
 
@@ -210,7 +210,7 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.RSA);
+                writer.WriteObjectIdentifier(KeyDefinitions.Oids.RSA);
                 writer.WriteNull();
             }
 
@@ -251,8 +251,8 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.ECDSA);
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.P256);
+                writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
+                writer.WriteObjectIdentifier(KeyDefinitions.Oids.P256);
             }
 
             // Create invalid EC key with wrong version
@@ -285,7 +285,7 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.ECDSA);
+                writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
                 // Use secp256k1 (Bitcoin curve) which isn't supported in the implementation
                 writer.WriteObjectIdentifier("1.3.132.0.10");
             }
@@ -337,7 +337,7 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.X25519);
+                writer.WriteObjectIdentifier(KeyDefinitions.Oids.X25519);
             }
 
             // Write invalid X25519 key (should be 32 bytes)
@@ -361,7 +361,7 @@ public class AsnPrivateKeyReaderTests
 
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.CryptoOids.Ed25519);
+                writer.WriteObjectIdentifier(KeyDefinitions.Oids.Ed25519);
             }
 
             // Write invalid Ed25519 key (should be 32 bytes)

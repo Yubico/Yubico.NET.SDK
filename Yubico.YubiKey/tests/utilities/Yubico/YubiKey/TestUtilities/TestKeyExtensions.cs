@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.TestUtilities
                 return PivPrivateKey.Create(rsaPivEncodedKey, keyDefinition.KeyType.GetPivAlgorithm());
             }
 
-            if (keyDefinition is { IsEcKey: true, AlgorithmOid: KeyDefinitions.CryptoOids.ECDSA })
+            if (keyDefinition is { IsEcKey: true, AlgorithmOid: KeyDefinitions.Oids.ECDSA })
             {
                 var ecPrivateKey = ECPrivateKeyParameters.CreateFromPkcs8(key.EncodedKey);
                 var ecPivEncodedKey = ecPrivateKey.ToPivEncodedPrivateKey();
@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.TestUtilities
                 return PivPublicKey.Create(rsaPivEncodedKey, key.KeyType.GetPivAlgorithm());
             }
 
-            if (keyDefinition is { IsEcKey: true, AlgorithmOid: KeyDefinitions.CryptoOids.ECDSA })
+            if (keyDefinition is { IsEcKey: true, AlgorithmOid: KeyDefinitions.Oids.ECDSA })
             {
                 var ecPublicKey = ECPublicKeyParameters.CreateFromPkcs8(key.EncodedKey);
                 var ecPivEncodedKey = ecPublicKey.ToPivEncodedPublicKey();

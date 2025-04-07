@@ -48,8 +48,8 @@ namespace Yubico.YubiKey.Cryptography
         public void GetByOid_ValidOids_ReturnsCorrectDefinitions()
         {
             // Act & Assert
-            Assert.Equal(KeyDefinitions.P256, KeyDefinitions.GetByOid(KeyDefinitions.CryptoOids.P256));
-            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByOid(KeyDefinitions.CryptoOids.Ed25519));
+            Assert.Equal(KeyDefinitions.P256, KeyDefinitions.GetByOid(KeyDefinitions.Oids.P256));
+            Assert.Equal(KeyDefinitions.Ed25519, KeyDefinitions.GetByOid(KeyDefinitions.Oids.Ed25519));
         }
 
 
@@ -57,15 +57,15 @@ namespace Yubico.YubiKey.Cryptography
         public void GetByOid_P521_ReturnsCorrectDefinitions()
         {
             // Act & Assert
-            Assert.Equal(KeyDefinitions.P521, KeyDefinitions.GetByOid(KeyDefinitions.CryptoOids.P521));
-            Assert.Equal(66, KeyDefinitions.GetByOid(KeyDefinitions.CryptoOids.P521).LengthInBytes);
+            Assert.Equal(KeyDefinitions.P521, KeyDefinitions.GetByOid(KeyDefinitions.Oids.P521));
+            Assert.Equal(66, KeyDefinitions.GetByOid(KeyDefinitions.Oids.P521).LengthInBytes);
         }
 
         [Fact]
         public void GetByOid_RsaOid_ThrowsNotSupportedException()
         {
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => KeyDefinitions.GetByOid(KeyDefinitions.CryptoOids.RSA));
+            Assert.Throws<NotSupportedException>(() => KeyDefinitions.GetByOid(KeyDefinitions.Oids.RSA));
         }
 
         [Fact]

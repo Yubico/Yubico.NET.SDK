@@ -349,15 +349,15 @@ namespace Yubico.YubiKey.Cryptography
         {
             if (encodedPointLength == (KeyDefinitions.P256.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.CryptoOids.P256;
+                return KeyDefinitions.Oids.P256;
             }
             if (encodedPointLength == (KeyDefinitions.P384.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.CryptoOids.P384;
+                return KeyDefinitions.Oids.P384;
             }
             if (encodedPointLength == (KeyDefinitions.P521.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.CryptoOids.P521;
+                return KeyDefinitions.Oids.P521;
             }
 
             throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
@@ -458,10 +458,10 @@ namespace Yubico.YubiKey.Cryptography
         {
             return algorithm switch
             {
-                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.CryptoOids.P256,
-                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.CryptoOids.P256,
-                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.CryptoOids.P384,
-                CoseAlgorithmIdentifier.ES512 => KeyDefinitions.CryptoOids.P521,
+                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.Oids.P256,
+                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.Oids.P256,
+                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.Oids.P384,
+                CoseAlgorithmIdentifier.ES512 => KeyDefinitions.Oids.P521,
                 _ => throw new NotSupportedException(ExceptionMessages.UnsupportedAlgorithm)
             };
         }

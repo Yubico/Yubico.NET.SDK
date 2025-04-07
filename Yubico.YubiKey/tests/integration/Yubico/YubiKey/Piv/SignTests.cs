@@ -15,16 +15,48 @@
 using System;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Signers;
 using Xunit;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
+using ECPrivateKeyParameters = Yubico.YubiKey.Cryptography.ECPrivateKeyParameters;
 
 namespace Yubico.YubiKey.Piv
 {
     public class SignTests
     {
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
+        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Sign_WithEd25519_RandomData_Succeeds(
+            StandardTestDevice testDeviceType)
+        {
+            // Arrange
+            var dataToSign = new byte[3062];
+            Random.Shared.NextBytes(dataToSign);
+            
+            // -> Generate a Ed25519 key
+            using var pivSession = GetSession(testDeviceType);
+            var publicKeyParameters = pivSession.GenerateKeyPair(PivSlot.Retired12, KeyType.Ed25519);
+
+            // Act
+            var signature = pivSession.Sign(PivSlot.Retired12, dataToSign, KeyType.Ed25519);
+
+            // -> Verify the signature
+            var bouncyKeyParameters = GetBouncyKeyParameters(publicKeyParameters);
+            var verifier = new Ed25519Signer();
+            verifier.Init(false, bouncyKeyParameters);
+            verifier.BlockUpdate(dataToSign, 0, dataToSign.Length);
+
+            // Assert
+            var isValidSignature = verifier.VerifySignature(signature);
+            Assert.True(isValidSignature);
+        }
+
         [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA1024)]
@@ -33,14 +65,13 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096)]
         [InlineData(StandardTestDevice.Fw5, KeyType.P256)]
         [InlineData(StandardTestDevice.Fw5, KeyType.P384)]
-        [InlineData(StandardTestDevice.Fw5, KeyType.Ed25519)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA1024)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA2048)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA3072)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.P256)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.P384)]
-        public async ValueTask Sign_RandomData_Succeeds(
+        public async Task Sign_with_RSAandECDsa_Succeeds(
             StandardTestDevice testDeviceType,
             KeyType keyType)
         {
@@ -266,8 +297,8 @@ namespace Yubico.YubiKey.Piv
                 priKey.Clear();
             }
         }
-        
-        
+
+
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5, KeyType.P256, 0x94)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.P384, 0x95)]
@@ -365,9 +396,9 @@ namespace Yubico.YubiKey.Piv
             var testKey = TestKeys.GetTestPrivateKey(keyType);
             var privateKey = AsnPrivateKeyReader.CreateKeyParameters(testKey.EncodedKey);
             pivSession.ImportPrivateKey(slotNumber, privateKey, pinPolicy, touchPolicy);
-            
+
             await Task.Delay(200);
-            
+
             return true;
         }
 
@@ -414,6 +445,33 @@ namespace Yubico.YubiKey.Piv
             sValue.Span.CopyTo(sigAsSpan.Slice(integerLength + offset, sValue.Length));
 
             return true;
+        }
+        
+        private static Ed25519PublicKeyParameters GetBouncyKeyParameters(IPublicKeyParameters publicKeyParameters)
+        {
+            var bouncyEd25519PublicKey =
+                new Ed25519PublicKeyParameters(
+                    ((Curve25519PublicKeyParameters)publicKeyParameters).PublicPoint.ToArray());
+            return bouncyEd25519PublicKey;
+        }
+
+        private static PivSession GetSession(
+            StandardTestDevice testDeviceType)
+        {
+            PivSession? pivSession = null;
+            try
+            {
+                var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+                pivSession = new PivSession(testDevice);
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+                return pivSession;
+            }
+            catch
+            {
+                pivSession?.Dispose();
+                throw;
+            }
         }
     }
 }

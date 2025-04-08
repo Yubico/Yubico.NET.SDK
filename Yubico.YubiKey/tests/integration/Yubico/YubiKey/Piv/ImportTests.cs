@@ -15,6 +15,7 @@
 using System;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -27,12 +28,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P256, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, StandardTestDevice.Fw5)]
         [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
         [InlineData(KeyType.X25519, StandardTestDevice.Fw5)]
-        [Obsolete("Obsolete")]
-        public void Import_with_PrivateKeyParameters_Succeeds_and_HasExpectedValues(
+        public void ImportPrivateKey_with_PrivateKey_Succeeds_and_HasExpectedValues(
             KeyType keyType,
             StandardTestDevice testDeviceType)
         {
@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Piv
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             var testPivPublicKey = testPublicKey.AsPivPublicKey();
-            var keyParameters = AsnPrivateKeyReader.CreateKeyParameters(testPrivateKey.EncodedKey);
+            var keyParameters = AsnPrivateKeyReader.CreateKey(testPrivateKey.EncodedKey);
 
             const PivPinPolicy expectedPinPolicy = PivPinPolicy.Once;
             const PivTouchPolicy expectedTouchPolicy = PivTouchPolicy.Always;
@@ -50,65 +50,40 @@ namespace Yubico.YubiKey.Piv
             pivSession.ImportPrivateKey(PivSlot.Retired1, keyParameters, expectedPinPolicy, expectedTouchPolicy);
 
             // Assert
-            var slotMetadata = pivSession.GetMetadata(PivSlot.Retired1);
-            Assert.Equal(keyType.GetPivAlgorithm(), slotMetadata.Algorithm);
-            Assert.Equal(testPivPublicKey.YubiKeyEncodedPublicKey, slotMetadata.PublicKey.YubiKeyEncodedPublicKey);
-            Assert.Equal(testPivPublicKey.PivEncodedPublicKey, slotMetadata.PublicKeyParameters.ToPivEncodedPublicKey()); // Remove because eventually we dont want pivAlgorithm
-            Assert.Equal(expectedPinPolicy, slotMetadata.PinPolicy);
-            Assert.Equal(expectedTouchPolicy, slotMetadata.TouchPolicy);
-        }
+            var result = pivSession.GetMetadata(PivSlot.Retired1);
+            Assert.Equal(keyType.GetPivAlgorithm(), result.Algorithm);
+            Assert.Equal(keyType, result.PublicKeyParameters?.KeyType);
 
-        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P256, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P384, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.X25519, StandardTestDevice.Fw5)]
-        public void ImportPrivateKey_with_PrivateKeyParameters_Succeeds_and_HasExpectedValues(
-                KeyType keyType,
-                StandardTestDevice testDeviceType)
-        {
-            // Arrange
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
-
-            var privateKey = AsnPrivateKeyReader.CreateKeyParameters(testPrivateKey.EncodedKey);
-
-            const PivPinPolicy expectedPinPolicy = PivPinPolicy.Once;
-            const PivTouchPolicy expectedTouchPolicy = PivTouchPolicy.Always;
-
-            // Act
-            using var pivSession = GetSession(testDevice);
-            pivSession.ImportPrivateKey(PivSlot.Retired1, privateKey, expectedPinPolicy, expectedTouchPolicy);
-
-            // Assert
-            var slotMetadata = pivSession.GetMetadata(PivSlot.Retired1);
-            Assert.Equal(keyType.GetPivAlgorithm(), slotMetadata.Algorithm);
-            Assert.Equal(expectedPinPolicy, slotMetadata.PinPolicy);
-            Assert.Equal(expectedTouchPolicy, slotMetadata.TouchPolicy);
-            
-            if (keyType.IsEcKey())
+            if (keyType.IsEllipticCurve())
             {
-                var publicPoint = slotMetadata.PublicKeyParameters switch
+                var publicPoint = result.PublicKeyParameters switch
                 {
-                    ECPublicKeyParameters ecDsa => ecDsa.PublicPoint.ToArray(),
-                    Curve25519PublicKeyParameters edDsa => edDsa.PublicPoint.ToArray(),
+                    ECPublicKey ecDsa => ecDsa.PublicPoint.ToArray(),
+                    Curve25519PublicKey edDsa => edDsa.PublicPoint.ToArray(),
                     _ => throw new ArgumentException("Invalid public key type")
                 };
                 Assert.Equal(testPublicKey.GetPublicPoint(), publicPoint);
             }
             else
             {
-                var publicRSAParameters = slotMetadata.PublicKeyParameters as RSAPublicKeyParameters;
-                Assert.NotNull(publicRSAParameters);
+                var parameters = result.PublicKeyParameters as RSAPublicKey;
+                Assert.NotNull(parameters);
                 
                 var rsaParameters = testPublicKey.AsRSA().ExportParameters(false);
-                Assert.Equal(rsaParameters.Modulus, publicRSAParameters.Parameters.Modulus);
-                Assert.Equal(rsaParameters.Exponent, publicRSAParameters.Parameters.Exponent);
+                Assert.Equal(rsaParameters.Modulus, parameters.Parameters.Modulus);
+                Assert.Equal(rsaParameters.Exponent, parameters.Parameters.Exponent);
             }
+            
+#pragma warning disable CS0618 // Type or member is obsolete
+            Assert.Equal(testPivPublicKey.YubiKeyEncodedPublicKey, result.PublicKey.YubiKeyEncodedPublicKey);
+            var slotMetadataPublicKeyPiv = result.PublicKeyParameters?.EncodeAsPiv();
+            Assert.Equal(
+                testPivPublicKey.PivEncodedPublicKey, 
+                slotMetadataPublicKeyPiv ?? Array.Empty<byte>());
+#pragma warning restore CS0618 // Type or member is obsolete
+
+            Assert.Equal(expectedPinPolicy, result.PinPolicy);
+            Assert.Equal(expectedTouchPolicy, result.TouchPolicy);
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
@@ -117,7 +92,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [Obsolete("Replaced by IPrivateKeyParameters")] // TODO
+        [Obsolete("Replaced by IPrivateKey")] // TODO
         public void KeyAndCertImport(
             KeyType keyType,
             StandardTestDevice testDeviceType)

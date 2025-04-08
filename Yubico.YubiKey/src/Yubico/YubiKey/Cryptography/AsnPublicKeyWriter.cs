@@ -35,9 +35,9 @@ internal static class AsnPublicKeyWriter
         int coordinateLength = keyDefinition.LengthInBytes;
         return keyType switch
         {
-            KeyType.P256 => CreateEcEncodedKey(publicPoint, KeyDefinitions.Oids.P256, coordinateLength),
-            KeyType.P384 => CreateEcEncodedKey(publicPoint, KeyDefinitions.Oids.P384, coordinateLength),
-            KeyType.P521 => CreateEcEncodedKey(publicPoint, KeyDefinitions.Oids.P521, coordinateLength),
+            KeyType.ECP256 => CreateEcEncodedKey(publicPoint, Oids.ECP256, coordinateLength),
+            KeyType.ECP384 => CreateEcEncodedKey(publicPoint, Oids.ECP384, coordinateLength),
+            KeyType.ECP521 => CreateEcEncodedKey(publicPoint, Oids.ECP521, coordinateLength),
             KeyType.X25519 => CreateCurve25519ToSpki(publicPoint, keyType),
             KeyType.Ed25519 => CreateCurve25519ToSpki(publicPoint, keyType),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
@@ -62,10 +62,10 @@ internal static class AsnPublicKeyWriter
 
         // Write modulus and exponent as INTEGER values
         byte[] modulusBytes = modulus.ToArray();
-        modulusBytes = EnsurePositive(modulusBytes);
+        modulusBytes = AsnUtilities.EnsurePositive(modulusBytes);
 
         byte[] exponentBytes = exponent.ToArray();
-        exponentBytes = EnsurePositive(exponentBytes);
+        exponentBytes = AsnUtilities.EnsurePositive(exponentBytes);
 
         keySequenceWriter.WriteInteger(modulusBytes);
         keySequenceWriter.WriteInteger(exponentBytes);
@@ -83,7 +83,7 @@ internal static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.Oids.RSA);
+        writer.WriteObjectIdentifier(Oids.RSA);
         writer.WriteNull();
         writer.PopSequence();
 
@@ -106,9 +106,12 @@ internal static class AsnPublicKeyWriter
     /// </remarks>
     public static byte[] EncodeToSubjectPublicKeyInfo(RSAParameters parameters)
     {
-        // Ensure parameters are only public
-        if (parameters.D != null || parameters.P != null || parameters.Q != null ||
-            parameters.DP != null || parameters.DQ != null || parameters.InverseQ != null)
+        if (parameters.D != null ||
+            parameters.P != null ||
+            parameters.Q != null ||
+            parameters.DP != null ||
+            parameters.DQ != null ||
+            parameters.InverseQ != null)
         {
             throw new ArgumentException("Only public key parameters should be provided.");
         }
@@ -123,7 +126,6 @@ internal static class AsnPublicKeyWriter
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
     public static byte[] EncodeToSubjectPublicKeyInfo(ECParameters parameters)
     {
-        // Ensure parameters are only public
         if (parameters.D != null)
         {
             throw new ArgumentException("Only public key parameters should be provided.", nameof(parameters));
@@ -147,10 +149,10 @@ internal static class AsnPublicKeyWriter
 
         byte[] uncompressedPoint = new byte[1 + xCoordinate.Length + yCoordinate.Length];
         uncompressedPoint[0] = 0x04; // Uncompressed point format
-        Buffer.BlockCopy(xCoordinate, 0, uncompressedPoint, 1, xCoordinate.Length);
-        Buffer.BlockCopy(yCoordinate, 0, uncompressedPoint, 1 + xCoordinate.Length, yCoordinate.Length);
+        xCoordinate.CopyTo(uncompressedPoint, 1);
+        yCoordinate.CopyTo(uncompressedPoint, 1 + xCoordinate.Length);
 
-        // Write the complete ASN.1 structure for SubjectPublicKeyInfo
+        // Write ASN.1 structure for SubjectPublicKeyInfo
         var writer = new AsnWriter(AsnEncodingRules.DER);
 
         // Start SubjectPublicKeyInfo SEQUENCE
@@ -158,7 +160,7 @@ internal static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
+        writer.WriteObjectIdentifier(Oids.ECDSA);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 
@@ -173,14 +175,13 @@ internal static class AsnPublicKeyWriter
 
     private static byte[] CreateCurve25519ToSpki(ReadOnlyMemory<byte> publicKey, KeyType keyType)
     {
-        var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
+        var keyDefinition = keyType.GetKeyDefinition();
         if (keyDefinition.AlgorithmOid is null)
         {
             throw new ArgumentException("Curve OID is null.");
         }
 
-        if (keyDefinition.AlgorithmOid != KeyDefinitions.Oids.X25519 &&
-            keyDefinition.AlgorithmOid != KeyDefinitions.Oids.Ed25519)
+        if (!Oids.IsCurve25519Algorithm(keyDefinition.AlgorithmOid))
         {
             throw new ArgumentException("Invalid curve OID.");
         }
@@ -211,13 +212,11 @@ internal static class AsnPublicKeyWriter
     // Creates an EC encoded key from a public point (which should be in the format: 0x04 + X + Y for uncompressed form)
     private static byte[] CreateEcEncodedKey(ReadOnlyMemory<byte> publicPoint, string curveOid, int coordinateSize)
     {
-        // Validate the public point format
         if (publicPoint.Length == 0 || publicPoint.Span[0] != 0x04)
         {
             throw new ArgumentException("EC public point must be in uncompressed format (starting with 0x04).");
         }
 
-        // Expected length for uncompressed point: 1 + (coordinateSize * 2)
         bool isValidLength = publicPoint.Length == 1 + (coordinateSize * 2);
         if (!isValidLength)
         {
@@ -225,7 +224,7 @@ internal static class AsnPublicKeyWriter
                 $"Invalid EC public point size for the specified curve. Expected {1 + (coordinateSize * 2)} bytes.");
         }
 
-        // Write the complete ASN.1 structure for SubjectPublicKeyInfo
+        // Write ASN.1 structure for SubjectPublicKeyInfo
         var writer = new AsnWriter(AsnEncodingRules.DER);
 
         // Start SubjectPublicKeyInfo SEQUENCE
@@ -233,7 +232,7 @@ internal static class AsnPublicKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
+        writer.WriteObjectIdentifier(Oids.ECDSA);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 
@@ -244,25 +243,5 @@ internal static class AsnPublicKeyWriter
         writer.PopSequence();
 
         return writer.Encode();
-    }
-
-    // Ensures the integer value is treated as positive by adding a leading zero if needed
-    private static byte[] EnsurePositive(byte[]? value)
-    {
-        if (value == null || value.Length == 0)
-        {
-            return [];
-        }
-
-        // Check if the most significant bit is set, indicating a negative number in two's complement
-        if ((value[0] & 0x80) != 0)
-        {
-            byte[] padded = new byte[value.Length + 1];
-            padded[0] = 0; // Add leading zero
-            Buffer.BlockCopy(value, 0, padded, 1, value.Length);
-            return padded;
-        }
-
-        return value;
     }
 }

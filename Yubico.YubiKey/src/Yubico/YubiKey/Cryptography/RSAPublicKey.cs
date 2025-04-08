@@ -17,15 +17,33 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class RSAPublicKeyParameters : IPublicKeyParameters
+public sealed class RSAPublicKey : IPublicKey
 {
-    private KeyDefinition _keyDefinition { get; }
+    /// <summary>
+    /// Gets the RSA cryptographic parameters required for the private key operations.
+    /// </summary>
+    /// <value>
+    /// A structure containing RSA parameters, including Modulus, Exponent, D, P, Q, DP, DQ, and InverseQ values.
+    /// </value>
+    /// <remarks>
+    /// This property provides access to the fundamental mathematical components needed for RSA private key operations.
+    /// The parameters are used in cryptographic operations such as decryption and digital signature creation.
+    /// </remarks>
     public RSAParameters Parameters { get; }
-    public KeyDefinition KeyDefinition => _keyDefinition;
-    public KeyType KeyType => _keyDefinition.KeyType;
+    
+    /// <summary>
+    /// Gets the key definition associated with this RSA private key.
+    /// </summary>
+    /// <value>
+    /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
+    /// </value>
+    public KeyDefinition KeyDefinition  { get; }
+
+    /// <inheritdoc />
+    public KeyType KeyType => KeyDefinition.KeyType;
 
     [Obsolete("Use factory methods instead")]
-    public RSAPublicKeyParameters(RSAParameters parameters)
+    public RSAPublicKey(RSAParameters parameters)
     {
         if (parameters.D != null || 
             parameters.P != null || 
@@ -39,7 +57,7 @@ public class RSAPublicKeyParameters : IPublicKeyParameters
         }
         
         Parameters = parameters.DeepCopy();
-        _keyDefinition = KeyDefinitions.GetByRSALength(parameters.Modulus.Length * 8);
+        KeyDefinition = KeyDefinitions.GetByRSALength(parameters.Modulus.Length * 8);
     }
 
     public byte[] ExportSubjectPublicKeyInfo()
@@ -54,30 +72,30 @@ public class RSAPublicKeyParameters : IPublicKeyParameters
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="RSAPublicKeyParameters"/> from the given
+    /// Creates a new instance of <see cref="RSAPublicKey"/> from the given
     /// <paramref name="parameters"/>.
     /// </summary>
     /// <param name="parameters">
     /// The RSA parameters containing the public key data.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="RSAPublicKeyParameters"/>.
+    /// A new instance of <see cref="RSAPublicKey"/>.
     /// </returns>
     /// <exception cref="ArgumentException">
     /// Thrown if the parameters contain private key data.
     /// </exception>
     #pragma warning disable CS0618 // Type or member is obsolete
-    public static RSAPublicKeyParameters CreateFromParameters(RSAParameters parameters) => new(parameters);
+    public static RSAPublicKey CreateFromParameters(RSAParameters parameters) => new(parameters);
     #pragma warning restore CS0618 // Type or member is obsolete
 
     /// <summary>
-    /// Creates a new instance of <see cref="IPublicKeyParameters"/> from a DER-encoded public key.
+    /// Creates a new instance of <see cref="IPublicKey"/> from a DER-encoded public key.
     /// </summary>
     /// <param name="encodedKey">The DER-encoded public key.</param>
-    /// <returns>A new instance of <see cref="IPublicKeyParameters"/>.</returns>
+    /// <returns>A new instance of <see cref="IPublicKey"/>.</returns>
     /// <exception cref="CryptographicException">
     /// Thrown if the public key is invalid.
     /// </exception>
-    public static IPublicKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-        AsnPublicKeyReader.CreateKeyParameters(encodedKey);
+    public static IPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
+        AsnPublicKeyReader.CreateKey(encodedKey);
 }

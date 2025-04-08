@@ -19,6 +19,7 @@ using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Piv.Converters;
 using static Yubico.YubiKey.Cryptography.KeyDefinitions;
 
 namespace Yubico.YubiKey.Piv
@@ -31,7 +32,7 @@ namespace Yubico.YubiKey.Piv
         private const int PivCompressionTag = 0x71;
         private const int PivLrcTag = 0xFE;
         
-        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKeyParameters, IPrivateKeyParameters, ECPublicKeyParameters or ECPrivateKeyParameters instead")]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey, ECPublicKey or ECPrivateKeyParameters instead")]
         public PivPublicKey GenerateKeyPair(
             byte slotNumber,
             PivAlgorithm algorithm,
@@ -146,7 +147,7 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">
         /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
-        public IPublicKeyParameters GenerateKeyPair(
+        public IPublicKey GenerateKeyPair(
             byte slotNumber,
             KeyType keyType,
             PivPinPolicy pinPolicy = PivPinPolicy.Default,
@@ -159,7 +160,7 @@ namespace Yubico.YubiKey.Piv
             var command = new GenerateKeyPairCommand(slotNumber, keyType, pinPolicy, touchPolicy);
             var response = Connection.SendCommand(command);
 
-            return KeyParametersPivHelper.CreatePublicKeyParameters(response.Data, keyType);
+            return PivEncodingToKey.CreatePublicKey(response.Data, keyType);
         }
 
         /// <summary>
@@ -254,7 +255,7 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="NotSupportedException">
         /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
-        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKeyParameters, IPrivateKeyParameters, ECPublicKeyParameters or ECPrivateKeyParameters instead")]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey, ECPublicKey or ECPrivateKeyParameters instead")]
         public void ImportPrivateKey(
             byte slotNumber,
             PivPrivateKey privateKey,
@@ -375,7 +376,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ImportPrivateKey(
             byte slotNumber,
-            IPrivateKeyParameters privateKey,
+            IPrivateKey privateKey,
             PivPinPolicy pinPolicy = PivPinPolicy.Default,
             PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
@@ -389,7 +390,7 @@ namespace Yubico.YubiKey.Piv
             RefreshManagementKeyAuthentication();
 
             var command = new ImportAsymmetricKeyCommand(
-                privateKey.ToPivEncodedPrivateKey(), 
+                privateKey.EncodeAsPiv(), 
                 privateKey.KeyType,
                 slotNumber, 
                 pinPolicy, 

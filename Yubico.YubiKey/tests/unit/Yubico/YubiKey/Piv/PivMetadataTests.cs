@@ -525,7 +525,7 @@ namespace Yubico.YubiKey.Piv
 
             var pivMetadata = new PivMetadata(testData, 0x9A);
 
-            Assert.True(pivMetadata.Algorithm == KeyType.P256.GetPivAlgorithm());
+            Assert.True(pivMetadata.Algorithm == KeyType.ECP256.GetPivAlgorithm());
         }
 
         [Fact]

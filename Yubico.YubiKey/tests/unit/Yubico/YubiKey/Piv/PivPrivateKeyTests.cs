@@ -28,8 +28,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048)]
         [InlineData(KeyType.RSA3072)]
         [InlineData(KeyType.RSA4096)]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         public void Create_ReturnsPivPrivateKey(
             KeyType keyType)
         {
@@ -48,8 +48,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048)]
         [InlineData(KeyType.RSA3072)]
         [InlineData(KeyType.RSA4096)]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         public void Create_SetsAlgorithmCorrectly(
             KeyType keyType)
         {
@@ -65,8 +65,8 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(KeyType.RSA1024)]
         [InlineData(KeyType.RSA2048)]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         public void Create_SetsEncodedCorrectly(
             KeyType keyType)
         {
@@ -190,8 +190,8 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         public void CreateEcc_SetsPrivateValueCorrectly(
             KeyType keyType)
         {
@@ -239,8 +239,8 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         public void EccConstructor_Components_BuildsEncoding(
             KeyType keyType)
         {
@@ -265,7 +265,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Create_BadTag_ThrowsExcpetion()
         {
-            Memory<byte> keyData = GetKeyData(KeyType.P256);
+            Memory<byte> keyData = GetKeyData(KeyType.ECP256);
             keyData.Span[0] = 0x84;
             _ = Assert.Throws<ArgumentException>(() => PivPrivateKey.Create(keyData));
         }
@@ -309,8 +309,8 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         [Obsolete("Obsolete")]
         public void EccConstructor_BadPoint_ThrowsExcpetion(
             KeyType keyType)
@@ -325,8 +325,8 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(KeyType.RSA1024)]
         [InlineData(KeyType.RSA2048)]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         public void GetPivPrivateKey_FromPem(
             KeyType keyType)
         {
@@ -453,7 +453,7 @@ namespace Yubico.YubiKey.Piv
         private static Memory<byte> GetPrivateValue(
             KeyType keyType)
         {
-            if (!keyType.GetKeyDefinition().IsEcKey)
+            if (!keyType.IsEllipticCurve())
             {
                 return Memory<byte>.Empty;
             }
@@ -621,7 +621,7 @@ namespace Yubico.YubiKey.Piv
                 0x5A, 0x30, 0x25, 0x31, 0x23, 0x30, 0x21, 0x06, 0x03, 0x55, 0x04, 0x03, 0x0C, 0x1A, 0x59, 0x75,
                 0x62, 0x69, 0x4B, 0x65, 0x79, 0x20, 0x50, 0x49, 0x56, 0x20, 0x41, 0x74, 0x74, 0x65, 0x73, 0x74,
             }),
-            KeyType.P256 => new Memory<byte>(new byte[]
+            KeyType.ECP256 => new Memory<byte>(new byte[]
             {
                 0x06, 0x20,
                 0x0C, 0x3B, 0x19, 0x42, 0x63, 0x20, 0x8C, 0xA1, 0x2F, 0xEE, 0x1C, 0xB4, 0xD8, 0x81, 0x96, 0x9F,
@@ -698,7 +698,7 @@ namespace Yubico.YubiKey.Piv
                         "-----END PRIVATE KEY-----";
                     break;
 
-                case KeyType.P256:
+                case KeyType.ECP256:
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgFWkUnZ613jEzqIKn\n" +
@@ -707,7 +707,7 @@ namespace Yubico.YubiKey.Piv
                         "-----END PRIVATE KEY-----";
                     break;
 
-                case KeyType.P384:
+                case KeyType.ECP384:
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDCy4BfV3HHsGbmN1sL7\n" +
@@ -722,7 +722,7 @@ namespace Yubico.YubiKey.Piv
         }
         private static byte[] GetSubjectPrivateKeyInfo(
             KeyType keyType,
-            IPrivateKeyParameters privateKeyParameters)
+            IPrivateKey privateKeyParameters)
         {
             byte[] subjectPrivateKeyInfo;
             switch (keyType)
@@ -731,22 +731,22 @@ namespace Yubico.YubiKey.Piv
                 case KeyType.RSA2048:
                 case KeyType.RSA3072:
                 case KeyType.RSA4096:
-                    Assert.IsAssignableFrom<RSAPrivateKeyParameters>(privateKeyParameters);
-                    var rsa = RSA.Create(((RSAPrivateKeyParameters)privateKeyParameters).Parameters);
+                    Assert.IsAssignableFrom<RSAPrivateKey>(privateKeyParameters);
+                    var rsa = RSA.Create(((RSAPrivateKey)privateKeyParameters).Parameters);
                     subjectPrivateKeyInfo = rsa.ExportPkcs8PrivateKey();
                     break;
-                case KeyType.P256:
-                case KeyType.P384:
-                case KeyType.P521:
-                    Assert.IsAssignableFrom<ECPrivateKeyParameters>(privateKeyParameters);
-                    var ecDsa = ECDsa.Create(((ECPrivateKeyParameters)privateKeyParameters).Parameters);
+                case KeyType.ECP256:
+                case KeyType.ECP384:
+                case KeyType.ECP521:
+                    Assert.IsAssignableFrom<ECPrivateKey>(privateKeyParameters);
+                    var ecDsa = ECDsa.Create(((ECPrivateKey)privateKeyParameters).Parameters);
                     subjectPrivateKeyInfo = ecDsa.ExportPkcs8PrivateKey();
                     break;
                 case KeyType.Ed25519:
                 case KeyType.X25519:
-                    Assert.IsAssignableFrom<Curve25519PrivateKeyParameters>(privateKeyParameters);
+                    Assert.IsAssignableFrom<Curve25519PrivateKey>(privateKeyParameters);
                     subjectPrivateKeyInfo =
-                        ((Curve25519PrivateKeyParameters)privateKeyParameters).ExportPkcs8PrivateKey();
+                        ((Curve25519PrivateKey)privateKeyParameters).ExportPkcs8PrivateKey();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null);

@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Security.Cryptography;
 using Xunit;
-using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {
-    public class ECPublicKeyParametersTests
+    public class ECPublicKeyTests
     {
         
         [Theory]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         public void CreateFromPivEncoding_WithValidParameters_CreatesInstance(KeyType keyType)
         {
             // Arrange
@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.Cryptography
             var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
 
             // Act
-            var publicKeyParams = KeyParametersPivHelper.CreatePublicEcFromPivEncoding(pivPublicKeyEncoded);
+            var publicKeyParams = PivEncodingToKey.CreateECPublicKey(pivPublicKeyEncoded);
             var resultParameters = publicKeyParams.Parameters;
 
             // Assert
@@ -33,10 +33,10 @@ namespace Yubico.YubiKey.Cryptography
         
         
         [Theory]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
-        [InlineData(KeyType.P521)]
-        public void CreateECDsaFromPkcs8EncodedKey_WithValidParameters_CreatesInstance(KeyType keyType)
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [InlineData(KeyType.ECP521)]
+        public void CreateECDsaFromPkcs8EncodedKey_WithValidKey_CreatesInstance(KeyType keyType)
         {
             // Arrange
             var curve = ECCurve.CreateFromValue(KeyDefinitions.GetByKeyType(keyType).CurveOid!);
@@ -45,8 +45,8 @@ namespace Yubico.YubiKey.Cryptography
         
             // Act
             var publicKey = ecdsa.ExportSubjectPublicKeyInfo();
-            var publicKeyParams = ECPublicKeyParameters.CreateFromPkcs8(publicKey);
-            var ecPublicKeyParams = publicKeyParams as ECPublicKeyParameters;
+            var publicKeyParams = ECPublicKey.CreateFromPkcs8(publicKey);
+            var ecPublicKeyParams = publicKeyParams as ECPublicKey;
             Assert.NotNull(ecPublicKeyParams);
 
             // Assert
@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.Cryptography
         }
         
         [Theory]
-        [InlineData(KeyType.P256)]
+        [InlineData(KeyType.ECP256)]
         public void CreateFromValue_WithValidParameters_CreatesInstance(KeyType keyType)
         {
             // Arrange
@@ -63,8 +63,8 @@ namespace Yubico.YubiKey.Cryptography
             
             // Act
             var testPublicPoint = testPublicKey.GetPublicPoint();
-            var publicKeyParams = ECPublicKeyParameters.CreateFromValue(testPublicPoint, keyType);
-            var ecPublicKeyParams = publicKeyParams as ECPublicKeyParameters;
+            var publicKeyParams = ECPublicKey.CreateFromValue(testPublicPoint, keyType);
+            var ecPublicKeyParams = publicKeyParams as ECPublicKey;
             Assert.NotNull(ecPublicKeyParams);
 
             // Assert
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Cryptography
             // Act, Assert
             Assert.Throws<ArgumentException>(() =>
             {
-                ECPublicKeyParameters.CreateFromValue(testPublicPoint, keyType);
+                ECPublicKey.CreateFromValue(testPublicPoint, keyType);
             });
         }
         
@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = ecdsa.ExportParameters(false);
 
             // Act
-            var publicKeyParams = ECPublicKeyParameters.CreateFromParameters(parameters);
+            var publicKeyParams = ECPublicKey.CreateFromParameters(parameters);
 
             // Assert
             Assert.Null(publicKeyParams.Parameters.D);
@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = ecdsa.ExportParameters(true);
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => ECPublicKeyParameters.CreateFromParameters(parameters));
+            var exception = Assert.Throws<ArgumentException>(() => ECPublicKey.CreateFromParameters(parameters));
             Assert.Equal("parameters", exception.ParamName);
             Assert.Contains("D value", exception.Message);
         }
@@ -121,7 +121,7 @@ namespace Yubico.YubiKey.Cryptography
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
             // Act
-            var publicKeyParams = ECPublicKeyParameters.CreateFromParameters(ecdsa.ExportParameters(false));
+            var publicKeyParams = ECPublicKey.CreateFromParameters(ecdsa.ExportParameters(false));
 
             // Assert
             Assert.Null(publicKeyParams.Parameters.D);
@@ -135,7 +135,7 @@ namespace Yubico.YubiKey.Cryptography
             // Arrange
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
             var originalParams = ecdsa.ExportParameters(false);
-            var publicKeyParams = ECPublicKeyParameters.CreateFromParameters(originalParams);
+            var publicKeyParams = ECPublicKey.CreateFromParameters(originalParams);
 
             // Act - Modify original parameters
             Assert.NotNull(originalParams.Q.X);
@@ -155,7 +155,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-            var publicKeyParams = ECPublicKeyParameters.CreateFromParameters(ecdsa.ExportParameters(false));
+            var publicKeyParams = ECPublicKey.CreateFromParameters(ecdsa.ExportParameters(false));
 
             // Act
             var publicPoint = publicKeyParams.PublicPoint;
@@ -184,7 +184,7 @@ namespace Yubico.YubiKey.Cryptography
             using var ecdsa = ECDsa.Create(ECCurve.CreateFromOid(Oid.FromOidValue(oid, OidGroup.PublicKeyAlgorithm)));
 
             // Act
-            var publicKeyParams = ECPublicKeyParameters.CreateFromParameters(ecdsa.ExportParameters(false));
+            var publicKeyParams = ECPublicKey.CreateFromParameters(ecdsa.ExportParameters(false));
 
             // Assert
             Assert.Equal(oid, publicKeyParams.Parameters.Curve.Oid.Value);

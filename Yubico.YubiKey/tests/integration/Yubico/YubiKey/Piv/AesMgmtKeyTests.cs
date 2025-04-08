@@ -77,8 +77,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.AES192, 24, false)]
         [InlineData(KeyType.AES256, 32, true)]
         [InlineData(KeyType.AES256, 32, false)]
-        [InlineData(KeyType.TripleDes, 24, true)]
-        [InlineData(KeyType.TripleDes, 24, false)]
+        [InlineData(KeyType.TripleDES, 24, true)]
+        [InlineData(KeyType.TripleDES, 24, false)]
         public void ChangeMgmtKey_Auth_Succeeds(KeyType keyType, int keySize, bool mutualAuth)
         {
             if (!_runTest)
@@ -95,19 +95,19 @@ namespace Yubico.YubiKey.Piv
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(KeyType.TripleDes.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 pivSession.AuthenticateManagementKey(mutualAuth);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(KeyType.TripleDes.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(_yubiKey))
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(KeyType.TripleDes.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 pivSession.ChangeManagementKey(PivTouchPolicy.None, keyType.GetPivAlgorithm());
 
@@ -152,8 +152,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.AES192, 24, false)]
         [InlineData(KeyType.AES256, 32, true)]
         [InlineData(KeyType.AES256, 32, false)]
-        [InlineData(KeyType.TripleDes, 24, true)]
-        [InlineData(KeyType.TripleDes, 24, false)]
+        [InlineData(KeyType.TripleDES, 24, true)]
+        [InlineData(KeyType.TripleDES, 24, false)]
         public void ChangeMgmtKey_TryAuth_Succeeds(KeyType keyType, int keySize, bool mutualAuth)
         {
             if (!_runTest)
@@ -170,20 +170,20 @@ namespace Yubico.YubiKey.Piv
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(KeyType.TripleDes.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 bool isValid = pivSession.TryAuthenticateManagementKey(mutualAuth);
                 Assert.True(isValid);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(KeyType.TripleDes.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(_yubiKey))
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(KeyType.TripleDes.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 bool isValid = pivSession.TryChangeManagementKey(PivTouchPolicy.None, keyType.GetPivAlgorithm());
                 Assert.True(isValid);
@@ -218,8 +218,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.AES192, 24, false)]
         [InlineData(KeyType.AES256, 32, true)]
         [InlineData(KeyType.AES256, 32, false)]
-        [InlineData(KeyType.TripleDes, 24, true)]
-        [InlineData(KeyType.TripleDes, 24, false)]
+        [InlineData(KeyType.TripleDES, 24, true)]
+        [InlineData(KeyType.TripleDES, 24, false)]
         public void ChangeMgmtKey_TryAuthNoColl_Succeeds(KeyType keyType, int keySize, bool mutualAuth)
         {
             if (!_runTest)
@@ -235,20 +235,20 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(_yubiKey))
             {
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(KeyType.TripleDes.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 bool isValid =
                     pivSession.TryAuthenticateManagementKey(_currentKey.Slice(0, _currentKeyLength), mutualAuth);
                 Assert.True(isValid);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(KeyType.TripleDes.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(_yubiKey))
             {
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(KeyType.TripleDes.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 bool isValid = pivSession.TryChangeManagementKey(
                     _currentKey.Slice(0, _currentKeyLength),

@@ -15,11 +15,12 @@
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class RSAPrivateKeyParametersTests
+public class RsaPrivateKeyTests
 {
     [Fact]
     public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()
@@ -30,7 +31,7 @@ public class RSAPrivateKeyParametersTests
         var pivPrivateKeyEncoded = pivPrivateKey.EncodedPrivateKey;
 
         // Act
-        var privateKeyParams = KeyParametersPivHelper.CreatePrivateRsaFromPivEncoding(pivPrivateKeyEncoded);
+        var privateKeyParams = PivEncodingToKey.CreateRSAPrivateKey(pivPrivateKeyEncoded);
         var parameters = privateKeyParams.Parameters;
 
         // Assert
@@ -52,7 +53,7 @@ public class RSAPrivateKeyParametersTests
 
         // Act
         var privateKey = rsa.ExportPkcs8PrivateKey();
-        RSAPrivateKeyParameters privateKeyParams = RSAPrivateKeyParameters.CreateFromPkcs8(privateKey);
+        RSAPrivateKey privateKeyParams = RSAPrivateKey.CreateFromPkcs8(privateKey);
 
         // Assert
         Assert.Equal(parameters.Modulus, privateKeyParams.Parameters.Modulus);
@@ -73,7 +74,7 @@ public class RSAPrivateKeyParametersTests
         var parameters = rsa.ExportParameters(true);
         
         // Act
-        var privateKeyParams = RSAPrivateKeyParameters.CreateFromParameters(parameters);
+        var privateKeyParams = RSAPrivateKey.CreateFromParameters(parameters);
 
         // Assert
         Assert.Equal(parameters.Modulus, privateKeyParams.Parameters.Modulus);
@@ -103,7 +104,7 @@ public class RSAPrivateKeyParametersTests
         };
         
         // Act
-        var privateKeyParams = RSAPrivateKeyParameters.CreateFromParameters(crtParameters);
+        var privateKeyParams = RSAPrivateKey.CreateFromParameters(crtParameters);
 
         // Assert
         Assert.Equal(crtParameters.P, privateKeyParams.Parameters.P);

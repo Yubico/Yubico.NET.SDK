@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
                 };
-                var setCmd = new SetManagementKeyCommand(keyData, KeyType.TripleDes.GetPivAlgorithm());
+                var setCmd = new SetManagementKeyCommand(keyData, KeyType.TripleDES.GetPivAlgorithm());
 
                 SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
                 Assert.Equal(ResponseStatus.Success, setRsp.Status);

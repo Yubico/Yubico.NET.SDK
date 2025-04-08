@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Piv
             
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             _ = Assert.Throws<ArgumentNullException>(() => pivSession.KeyAgree(0x9a, (PivPublicKey)null!));
-            _ = Assert.Throws<ArgumentNullException>(() => pivSession.KeyAgree(0x9a, (IPublicKeyParameters)null!));
+            _ = Assert.Throws<ArgumentNullException>(() => pivSession.KeyAgree(0x9a, (IPublicKey)null!));
 #pragma warning restore CS8625 // Testing null input.
         }
 

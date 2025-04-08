@@ -92,27 +92,28 @@ namespace Yubico.YubiKey.Piv
                 { PivAlgorithm.TripleDes, new PivAlgorithmDefinition 
                     { Algorithm = PivAlgorithm.TripleDes, KeyDefinition = KeyDefinitions.TripleDes } },
                 { PivAlgorithm.None, new PivAlgorithmDefinition 
-                    { Algorithm = PivAlgorithm.None, KeyDefinition = null! } },
+                    { Algorithm = PivAlgorithm.None, KeyDefinition = new KeyDefinition() } },
                 { PivAlgorithm.Pin, new PivAlgorithmDefinition 
-                    { Algorithm = PivAlgorithm.Pin, KeyDefinition = null! } },
+                    { Algorithm = PivAlgorithm.Pin, KeyDefinition = new KeyDefinition() } },
             };
 
             // Create reverse mapping (KeyType to PivAlgorithm)
             _keyTypeToPivAlgorithmMap = new Dictionary<KeyType, PivAlgorithm>
             {
+                { KeyType.None, PivAlgorithm.None },
                 { KeyType.RSA1024, PivAlgorithm.Rsa1024 },
                 { KeyType.RSA2048, PivAlgorithm.Rsa2048 },
                 { KeyType.RSA3072, PivAlgorithm.Rsa3072 },
                 { KeyType.RSA4096, PivAlgorithm.Rsa4096 },
-                { KeyType.P256, PivAlgorithm.EccP256 },
-                { KeyType.P384, PivAlgorithm.EccP384 },
-                { KeyType.P521, PivAlgorithm.EccP521 },
+                { KeyType.ECP256, PivAlgorithm.EccP256 },
+                { KeyType.ECP384, PivAlgorithm.EccP384 },
+                { KeyType.ECP521, PivAlgorithm.EccP521 },
                 { KeyType.Ed25519, PivAlgorithm.EccEd25519 },
                 { KeyType.X25519, PivAlgorithm.EccX25519 },
                 { KeyType.AES128, PivAlgorithm.Aes128 },
                 { KeyType.AES192, PivAlgorithm.Aes192 },
                 { KeyType.AES256, PivAlgorithm.Aes256 },
-                { KeyType.TripleDes, PivAlgorithm.TripleDes },
+                { KeyType.TripleDES, PivAlgorithm.TripleDes },
             };
         }
 
@@ -143,22 +144,6 @@ namespace Yubico.YubiKey.Piv
                 : throw new NotSupportedException($"Unsupported algorithm: {algorithm}");
 
         /// <summary>
-        /// Converts a KeyType to its corresponding PivAlgorithm.
-        /// </summary>
-        /// <param name="keyType">The key type to convert.</param>
-        /// <returns>The corresponding PivAlgorithm.</returns>
-        /// <exception cref="NotSupportedException">Thrown when the key type is not supported by PIV.</exception>
-        public static PivAlgorithm GetPivAlgorithm(this KeyType keyType)
-        {
-            if (!_keyTypeToPivAlgorithmMap.TryGetValue(keyType, out var algorithm))
-            {
-                throw new NotSupportedException($"Unsupported key type: {keyType}");
-            }
-
-            return algorithm;
-        }
-
-        /// <summary>
         /// Converts a PivAlgorithm to its corresponding KeyType.
         /// </summary>
         /// <param name="pivAlgorithm">The PIV algorithm to convert.</param>
@@ -172,6 +157,22 @@ namespace Yubico.YubiKey.Piv
             }
 
             return definition.KeyDefinition.KeyType;
+        }
+        
+        /// <summary>
+        /// Converts a KeyType to its corresponding PivAlgorithm.
+        /// </summary>
+        /// <param name="keyType">The key type to convert.</param>
+        /// <returns>The corresponding PivAlgorithm.</returns>
+        /// <exception cref="NotSupportedException">Thrown when the key type is not supported by PIV.</exception>
+        public static PivAlgorithm GetPivAlgorithm(this KeyType keyType)
+        {
+            if (!_keyTypeToPivAlgorithmMap.TryGetValue(keyType, out var algorithm))
+            {
+                throw new NotSupportedException($"Unsupported key type: {keyType}");
+            }
+
+            return algorithm;
         }
 
         /// <summary>
@@ -299,11 +300,7 @@ namespace Yubico.YubiKey.Piv
         /// <returns>
         /// A boolean, true if the algorithm is RSA, and false otherwise.
         /// </returns>
-        public static bool IsRsa(this PivAlgorithm algorithm)
-        {
-            var keyDefinition = algorithm.GetPivKeyDefinition();
-            return keyDefinition is { KeyDefinition.IsRsaKey: true };
-        }
+        public static bool IsRsa(this PivAlgorithm algorithm) => algorithm.GetKeyType().IsRSA();
 
         /// <summary>
         /// Determines if the given algorithm is ECC.
@@ -329,9 +326,6 @@ namespace Yubico.YubiKey.Piv
         /// A boolean, true if the algorithm is ECC, and false otherwise.
         /// </returns>
         public static bool IsEcc(this PivAlgorithm algorithm)
-        {
-            var keyDefinition = algorithm.GetPivKeyDefinition();
-            return keyDefinition is { KeyDefinition.IsEcKey: true };
-        }
+            => algorithm.GetKeyType().IsEllipticCurve();
     }
 }

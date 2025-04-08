@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_Application_Piv()
         {
             var genPairCommand = new GenerateKeyPairCommand(
-              0x9C, KeyType.P256, PivPinPolicy.Always, PivTouchPolicy.Cached);
+              0x9C, KeyType.ECP256, PivPinPolicy.Always, PivTouchPolicy.Cached);
 
             YubiKeyApplication application = genPairCommand.Application;
 
@@ -79,7 +79,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_Property_SlotNum()
         {
             byte slotNumber = PivSlot.Signing;
-            KeyType keyType = KeyType.P256;
+            KeyType keyType = KeyType.ECP256;
             PivPinPolicy pinPolicy = PivPinPolicy.Always;
             PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
             var genPairCommand = new GenerateKeyPairCommand(slotNumber, keyType, pinPolicy, touchPolicy);
@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_Property_Algorithm()
         {
             byte slotNumber = PivSlot.Signing;
-            KeyType keyType = KeyType.P256;
+            KeyType keyType = KeyType.ECP256;
             PivPinPolicy pinPolicy = PivPinPolicy.Always;
             PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
             var genPairCommand = new GenerateKeyPairCommand(slotNumber, keyType, pinPolicy, touchPolicy);
@@ -107,7 +107,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_Property_PinPolicy()
         {
             byte slotNumber = PivSlot.Signing;
-            KeyType keyType = KeyType.P256;
+            KeyType keyType = KeyType.ECP256;
             PivPinPolicy pinPolicy = PivPinPolicy.Always;
             PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
             var genPairCommand = new GenerateKeyPairCommand(slotNumber, keyType, pinPolicy, touchPolicy);
@@ -121,7 +121,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_Property_TouchPolicy()
         {
             byte slotNumber = PivSlot.Signing;
-            KeyType keyType = KeyType.P256;
+            KeyType keyType = KeyType.ECP256;
             PivPinPolicy pinPolicy = PivPinPolicy.Always;
             PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
             var genPairCommand = new GenerateKeyPairCommand(slotNumber, keyType, pinPolicy, touchPolicy);
@@ -135,7 +135,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
             var genPairCommand = new GenerateKeyPairCommand(
-              0x9C, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.Never);
+              0x9C, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Never);
 
             Assert.True(genPairCommand is IYubiKeyCommand<GenerateKeyPairResponse>);
         }
@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(int cStyle)
         {
             CommandApdu cmdApdu = GetGenPairCommandApdu(
-              cStyle, 0x9C, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.Never);
+              cStyle, 0x9C, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Never);
 
             byte Cla = cmdApdu.Cla;
 
@@ -225,7 +225,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void CreateCommandApdu_GetNeProperty_ReturnsZero(int cStyle)
         {
             CommandApdu cmdApdu = GetGenPairCommandApdu(
-              cStyle, 0x9C, KeyType.P256, PivPinPolicy.Always, PivTouchPolicy.Never);
+              cStyle, 0x9C, KeyType.ECP256, PivPinPolicy.Always, PivTouchPolicy.Never);
 
             int Ne = cmdApdu.Ne;
 
@@ -239,7 +239,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void CreateCommandApdu_GetData_ReturnsCorrectPrefix(int cStyle)
         {
             CommandApdu cmdApdu = GetGenPairCommandApdu(
-                cStyle, 0x9D, KeyType.P384, PivPinPolicy.Default, PivTouchPolicy.Default);
+                cStyle, 0x9D, KeyType.ECP384, PivPinPolicy.Default, PivTouchPolicy.Default);
 
             ReadOnlyMemory<byte> data = cmdApdu.Data;
 
@@ -255,8 +255,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(1, KeyType.P256)]
-        [InlineData(2, KeyType.P384)]
+        [InlineData(1, KeyType.ECP256)]
+        [InlineData(2, KeyType.ECP384)]
         [InlineData(3, KeyType.RSA1024)]
         [InlineData(4, KeyType.RSA2048)]
         public void CreateCommandApdu_GetData_ReturnsCorrectAlg(int cStyle, KeyType keyType)
@@ -376,7 +376,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 0x90, 0x00 });
 
             var genPairCommand = new GenerateKeyPairCommand(
-                0x9C, KeyType.P256, PivPinPolicy.Once, PivTouchPolicy.Default);
+                0x9C, KeyType.ECP256, PivPinPolicy.Once, PivTouchPolicy.Default);
 
             GenerateKeyPairResponse response = genPairCommand.CreateResponseForApdu(responseApdu);
 

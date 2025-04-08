@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Piv
             };
 
             var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA1024);
-            var privateKey = RSAPrivateKeyParameters.CreateFromPkcs8(testKey.EncodedKey);
+            var privateKey = RSAPrivateKey.CreateFromPkcs8(testKey.EncodedKey);
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using var pivSession = new PivSession(testDevice);
@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Piv
             };
 
             var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
-            var privateKey = RSAPrivateKeyParameters.CreateFromPkcs8(testKey.EncodedKey);
+            var privateKey = RSAPrivateKey.CreateFromPkcs8(testKey.EncodedKey);
 
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 

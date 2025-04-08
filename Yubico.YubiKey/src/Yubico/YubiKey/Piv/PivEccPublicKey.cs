@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Yubico.Core.Tlv;
 
@@ -82,7 +83,7 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The format of the public point is not supported.
         /// </exception>
-        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKeyParameters, IPrivateKeyParameters, ECPublicKeyParameters or ECPrivateKeyParameters instead")]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey, ECPublicKey or ECPrivateKeyParameters instead")]
         public PivEccPublicKey(ReadOnlySpan<byte> publicPoint, PivAlgorithm? algorithm = null)
         {
             if (!LoadEccPublicKey(publicPoint, algorithm))
@@ -174,6 +175,12 @@ namespace Yubico.YubiKey.Piv
         {
             if (algorithm.HasValue)
             {
+                int expectedSize = GetExpectedSize(algorithm);
+                if(publicPoint.Length != expectedSize)
+                {
+                    return false;
+                }
+                
                 Algorithm = algorithm.Value;
             }
             else
@@ -214,6 +221,22 @@ namespace Yubico.YubiKey.Piv
             _publicPoint = new Memory<byte>(publicPoint.ToArray());
 
             return true;
+        }
+
+        private static int GetExpectedSize([DisallowNull] PivAlgorithm? algorithm)
+        {
+            if (algorithm == null)
+            {
+                throw new ArgumentNullException(nameof(algorithm));
+            }
+
+            int expectedSize = algorithm.Value.GetPivKeyDefinition().KeyDefinition.LengthInBytes;
+            if (algorithm.Value is PivAlgorithm.EccP256 or PivAlgorithm.EccP384)
+            {
+                return (expectedSize * 2) + 1;
+            }
+
+            return expectedSize;
         }
     }
 }

@@ -12,9 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Cryptography;
 
-public interface IPublicKeyParameters : IKeyParameters
+public interface IPublicKey : IKeyBase
 {
+    /// <summary>
+    /// Exports the public-key portion of the current key in the X.509 SubjectPublicKeyInfo format.
+    /// </summary>
+    /// <returns>
+    /// A byte array containing the X.509 SubjectPublicKeyInfo representation of the public-key portion of this key
+    /// </returns>
     public byte[] ExportSubjectPublicKeyInfo();
+}
+
+public static class IPublicKeyExtensions
+{
+    public static T Cast<T>(this IPublicKey key) where T : class, IPublicKey 
+        => key as T ?? throw new InvalidCastException($"Cannot cast {key.GetType()} to {typeof(T)}");
 }

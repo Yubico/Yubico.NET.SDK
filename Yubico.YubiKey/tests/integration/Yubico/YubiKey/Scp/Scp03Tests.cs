@@ -154,7 +154,7 @@ namespace Yubico.YubiKey.Scp
             using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
-            var publicKey = ECPublicKeyParameters.CreateFromParameters(ecdsa.ExportParameters(false));
+            var publicKey = ECPublicKey.CreateFromParameters(ecdsa.ExportParameters(false));
             session.PutKey(keyReference, publicKey, 0);
 
             // Verify the generated key was stored

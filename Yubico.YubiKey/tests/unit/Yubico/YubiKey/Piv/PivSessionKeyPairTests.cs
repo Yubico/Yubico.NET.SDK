@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Piv
             {
                 var simpleCollector = new SimpleKeyCollector(false);
                 pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-                _ = Assert.Throws<ArgumentException>(() => pivSession.GenerateKeyPair(0x81, KeyType.P256));
+                _ = Assert.Throws<ArgumentException>(() => pivSession.GenerateKeyPair(0x81, KeyType.ECP256));
             }
         }
 
@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.GenerateKeyPair(0x9A, KeyType.P256));
+                _ = Assert.Throws<InvalidOperationException>(() => pivSession.GenerateKeyPair(0x9A, KeyType.ECP256));
             }
         }
 
@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                _ = Assert.Throws<OperationCanceledException>(() => pivSession.GenerateKeyPair(0x9A, KeyType.P256));
+                _ = Assert.Throws<OperationCanceledException>(() => pivSession.GenerateKeyPair(0x9A, KeyType.ECP256));
             }
         }
 
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Piv
             {
                 var simpleCollector = new SimpleKeyCollector(false);
                 pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-                PivPrivateKey privateKey = SampleKeyPairs.GetPivPrivateKey(KeyType.P256);
+                PivPrivateKey privateKey = SampleKeyPairs.GetPivPrivateKey(KeyType.ECP256);
 
                 _ = Assert.Throws<ArgumentException>(() => pivSession.ImportPrivateKey(0x81, privateKey));
             }
@@ -123,7 +123,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                PivPrivateKey privateKey = SampleKeyPairs.GetPivPrivateKey(KeyType.P256);
+                PivPrivateKey privateKey = SampleKeyPairs.GetPivPrivateKey(KeyType.ECP256);
                 _ = Assert.Throws<InvalidOperationException>(() => pivSession.ImportPrivateKey(0x85, privateKey));
             }
         }
@@ -136,7 +136,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                PivPrivateKey privateKey = SampleKeyPairs.GetPivPrivateKey(KeyType.P256);
+                PivPrivateKey privateKey = SampleKeyPairs.GetPivPrivateKey(KeyType.ECP256);
                 _ = Assert.Throws<OperationCanceledException>(() => pivSession.ImportPrivateKey(0x85, privateKey));
             }
         }
@@ -218,7 +218,7 @@ namespace Yubico.YubiKey.Piv
             {
                 var simpleCollector = new SimpleKeyCollector(false);
                 pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-                _ = Assert.Throws<ArgumentException>(() => pivSession.GenerateKeyPair(0x81, KeyType.P256));
+                _ = Assert.Throws<ArgumentException>(() => pivSession.GenerateKeyPair(0x81, KeyType.ECP256));
             }
         }
 
@@ -229,7 +229,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.GenerateKeyPair(0x9A, KeyType.P256));
+                _ = Assert.Throws<InvalidOperationException>(() => pivSession.GenerateKeyPair(0x9A, KeyType.ECP256));
             }
         }
 
@@ -241,7 +241,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                _ = Assert.Throws<OperationCanceledException>(() => pivSession.GenerateKeyPair(0x9A, KeyType.P256));
+                _ = Assert.Throws<OperationCanceledException>(() => pivSession.GenerateKeyPair(0x9A, KeyType.ECP256));
             }
         }
 
@@ -253,8 +253,8 @@ namespace Yubico.YubiKey.Piv
             using var pivSession = new PivSession(yubiKey);
             var simpleCollector = new SimpleKeyCollector(false);
             pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-            var testKey = TestKeys.GetTestPrivateKey(KeyType.P256);
-            var privateKey = ECPrivateKeyParameters.CreateFromValue(testKey.GetPrivateKey(), KeyType.P256);
+            var testKey = TestKeys.GetTestPrivateKey(KeyType.ECP256);
+            var privateKey = ECPrivateKey.CreateFromValue(testKey.GetPrivateKey(), KeyType.ECP256);
 
             _ = Assert.Throws<ArgumentException>(() => pivSession.ImportPrivateKey(0x81, privateKey));
         }
@@ -267,7 +267,7 @@ namespace Yubico.YubiKey.Piv
             using var pivSession = new PivSession(yubiKey);
             var simpleCollector = new SimpleKeyCollector(false);
             pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-            IPrivateKeyParameters privateKey = null!;
+            IPrivateKey privateKey = null!;
             _ = Assert.Throws<ArgumentNullException>(() => pivSession.ImportPrivateKey(0x85, privateKey));
         }
 
@@ -279,7 +279,7 @@ namespace Yubico.YubiKey.Piv
             using var pivSession = new PivSession(yubiKey);
             var simpleCollector = new SimpleKeyCollector(false);
             pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-            var privateKey = new EmptyPrivateKeyParameters(); // TODO not sure of these
+            var privateKey = new EmptyPrivateKey();
 
             _ = Assert.Throws<ArgumentException>(() => pivSession.ImportPrivateKey(0x85, privateKey));
         }
@@ -290,8 +290,8 @@ namespace Yubico.YubiKey.Piv
             var yubiKey = new HollowYubiKeyDevice();
 
             using var pivSession = new PivSession(yubiKey);
-            var testKey = TestKeys.GetTestPrivateKey(KeyType.P256);
-            var privateKey = ECPrivateKeyParameters.CreateFromValue(testKey.GetPrivateKey(), KeyType.P256);
+            var testKey = TestKeys.GetTestPrivateKey(KeyType.ECP256);
+            var privateKey = ECPrivateKey.CreateFromValue(testKey.GetPrivateKey(), KeyType.ECP256);
             _ = Assert.Throws<InvalidOperationException>(() => pivSession.ImportPrivateKey(0x85, privateKey));
         }
 
@@ -303,8 +303,8 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                var testKey = TestKeys.GetTestPrivateKey(KeyType.P256);
-                var privateKey = ECPrivateKeyParameters.CreateFromValue(testKey.GetPrivateKey(), KeyType.P256);
+                var testKey = TestKeys.GetTestPrivateKey(KeyType.ECP256);
+                var privateKey = ECPrivateKey.CreateFromValue(testKey.GetPrivateKey(), KeyType.ECP256);
                 _ = Assert.Throws<OperationCanceledException>(() => pivSession.ImportPrivateKey(0x85, privateKey));
             }
         }

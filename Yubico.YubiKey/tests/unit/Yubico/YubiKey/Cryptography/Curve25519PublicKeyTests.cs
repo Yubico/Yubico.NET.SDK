@@ -17,7 +17,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class Curve25519PublicKeyParametersTests
+public class Curve25519PublicKeyTests
 {
     [Theory]
     [InlineData(KeyType.Ed25519)]
@@ -29,7 +29,7 @@ public class Curve25519PublicKeyParametersTests
         var testPublicPoint = testKey.GetPublicPoint();
 
         // Act
-        var publicKeyParams = Curve25519PublicKeyParameters.CreateFromValue(testPublicPoint, keyType); 
+        var publicKeyParams = Curve25519PublicKey.CreateFromValue(testPublicPoint, keyType); 
 
         // Assert
         Assert.NotNull(publicKeyParams);
@@ -40,14 +40,14 @@ public class Curve25519PublicKeyParametersTests
     [Theory]
     [InlineData(KeyType.Ed25519)]
     [InlineData(KeyType.X25519)]
-    public void CreateCurve25519FromPkcs8EncodedKey_WithValidParameters_CreatesInstance(KeyType keyType)
+    public void CreateCurve25519FromPkcs8EncodedKey_WithValidKey_CreatesInstance(KeyType keyType)
     {
         // Arrange
         var testPublicKey = TestKeys.GetTestPublicKey(keyType);
             
         // Act
-        var publicKeyParams = ECPublicKeyParameters.CreateFromPkcs8(testPublicKey.EncodedKey);
-        var ecPublicKeyParams = publicKeyParams as Curve25519PublicKeyParameters;
+        var publicKeyParams = ECPublicKey.CreateFromPkcs8(testPublicKey.EncodedKey);
+        var ecPublicKeyParams = publicKeyParams as Curve25519PublicKey;
         Assert.NotNull(ecPublicKeyParams);
 
         // Assert
@@ -64,7 +64,7 @@ public class Curve25519PublicKeyParametersTests
         var publicKey = testKey.GetPublicPoint();
 
         // Act
-        var publicKeyParams = Curve25519PublicKeyParameters.CreateFromPkcs8(testKey.EncodedKey); 
+        var publicKeyParams = Curve25519PublicKey.CreateFromPkcs8(testKey.EncodedKey); 
 
         // Assert
         Assert.NotNull(publicKeyParams);

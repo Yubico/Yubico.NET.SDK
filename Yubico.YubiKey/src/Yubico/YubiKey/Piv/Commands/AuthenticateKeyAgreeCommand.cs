@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -123,6 +124,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The correspondent public value is not the correct length.
         /// </exception>
+        [Obsolete("Use the constructor with the algorithm parameter instead.")]
         public AuthenticateKeyAgreeCommand(ReadOnlyMemory<byte> correspondentPublicKey, byte slotNumber)
         {
             DataTag = KeyAgreeTag;
@@ -139,8 +141,38 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.IncorrectEccKeyLength)),
             };
         }
-        
-        public AuthenticateKeyAgreeCommand(ReadOnlyMemory<byte> correspondentPublicKey, byte slotNumber, PivAlgorithm algorithm)
+
+        /// <summary>
+        /// Initializes a new instance of the AuthenticateKeyAgreeCommand class.
+        /// This command takes the slot number and the corresponding party's
+        /// public key.
+        /// </summary>
+        /// <remarks>
+        /// The slot number must be for a slot that holds an ECC private key. It
+        /// cannot be <c>F9</c> (the attestation key).
+        /// <para>
+        /// If the key that will be used to perform key agreement is ECC-P256,
+        /// then the correspondent public key data must be 65 bytes long. If the
+        /// key is ECC-P384, then the data must be 97 bytes long. See also the
+        /// User's Manual entry on
+        /// <xref href="UsersManualPivCommands#authenticate-key-agreement"> key
+        /// agreement </xref> in the PIV commands page.
+        /// </para>
+        /// </remarks>
+        /// <param name="correspondentPublicKey">
+        /// The public key that will be used to perform phase 2 of ECDH.
+        /// </param>
+        /// <param name="slotNumber">
+        /// The slot holding the private key to use.
+        /// </param>
+        /// <param name="algorithm"></param>
+        /// <exception cref="ArgumentException">
+        /// The correspondent public value is not the correct length.
+        /// </exception>
+        public AuthenticateKeyAgreeCommand(
+            ReadOnlyMemory<byte> correspondentPublicKey,
+            byte slotNumber,
+            PivAlgorithm algorithm)
         {
             DataTag = KeyAgreeTag;
             Data = correspondentPublicKey;

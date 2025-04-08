@@ -26,8 +26,8 @@ namespace Yubico.YubiKey.Piv
     public class CertTests
     {
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5, KeyType.P256)]
-        [InlineData(StandardTestDevice.Fw5, KeyType.P384)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP256)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP384)]
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048)]
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072)]
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096)]
@@ -53,8 +53,8 @@ namespace Yubico.YubiKey.Piv
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5, KeyType.P256)]
-        [InlineData(StandardTestDevice.Fw5, KeyType.P384)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP256)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP384)]
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA1024)]
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048)]
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072)]

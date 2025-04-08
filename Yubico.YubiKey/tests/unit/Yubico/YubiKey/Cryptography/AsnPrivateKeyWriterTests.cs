@@ -29,11 +29,11 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(parameters);
-        var decodedParams = AsnPrivateKeyReader.CreateKeyParameters(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreateKey(encoded);
 
         // Assert
-        Assert.IsType<RSAPrivateKeyParameters>(decodedParams);
-        var rsaParams = (RSAPrivateKeyParameters)decodedParams;
+        Assert.IsType<RSAPrivateKey>(decodedParams);
+        var rsaParams = (RSAPrivateKey)decodedParams;
 
         // Import the parameters into a new RSA instance for functional verification
         using var roundtrippedRsa = RSA.Create();
@@ -67,18 +67,18 @@ public class AsnPrivateKeyWriterTests
     }
 
     [Theory]
-    [InlineData(KeyType.P256)]
-    [InlineData(KeyType.P384)]
-    [InlineData(KeyType.P521)]
+    [InlineData(KeyType.ECP256)]
+    [InlineData(KeyType.ECP384)]
+    [InlineData(KeyType.ECP521)]
     public void ECDsaKeyRoundtrip_With_ECParameters_ShouldMatchOriginal(
         KeyType keyType)
     {
         // Arrange
         using var ecdsa = keyType switch
         {
-            KeyType.P256 => ECDsa.Create(ECCurve.NamedCurves.nistP256),
-            KeyType.P384 => ECDsa.Create(ECCurve.NamedCurves.nistP384),
-            KeyType.P521 => ECDsa.Create(ECCurve.NamedCurves.nistP521),
+            KeyType.ECP256 => ECDsa.Create(ECCurve.NamedCurves.nistP256),
+            KeyType.ECP384 => ECDsa.Create(ECCurve.NamedCurves.nistP384),
+            KeyType.ECP521 => ECDsa.Create(ECCurve.NamedCurves.nistP521),
             _ => throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null)
         };
 
@@ -86,11 +86,11 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(parameters);
-        var decodedParams = AsnPrivateKeyReader.CreateKeyParameters(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreateKey(encoded);
 
         // Assert
-        Assert.IsType<ECPrivateKeyParameters>(decodedParams);
-        var ecParams = (ECPrivateKeyParameters)decodedParams;
+        Assert.IsType<ECPrivateKey>(decodedParams);
+        var ecParams = (ECPrivateKey)decodedParams;
 
         // Import the parameters into a new ECDsa instance for functional verification
         using var roundtrippedEcdsa = ECDsa.Create();
@@ -123,18 +123,18 @@ public class AsnPrivateKeyWriterTests
     }
 
     [Theory]
-    [InlineData(KeyType.P256)]
-    [InlineData(KeyType.P384)]
-    [InlineData(KeyType.P521)]
+    [InlineData(KeyType.ECP256)]
+    [InlineData(KeyType.ECP384)]
+    [InlineData(KeyType.ECP521)]
     public void FromPrivateKeyAndPublicPoint_ECKeys_ShouldCreateValidEncoding(
         KeyType keyType)
     {
         // Arrange
         using var ecdsa = keyType switch
         {
-            KeyType.P256 => ECDsa.Create(ECCurve.NamedCurves.nistP256),
-            KeyType.P384 => ECDsa.Create(ECCurve.NamedCurves.nistP384),
-            KeyType.P521 => ECDsa.Create(ECCurve.NamedCurves.nistP521),
+            KeyType.ECP256 => ECDsa.Create(ECCurve.NamedCurves.nistP256),
+            KeyType.ECP384 => ECDsa.Create(ECCurve.NamedCurves.nistP384),
+            KeyType.ECP521 => ECDsa.Create(ECCurve.NamedCurves.nistP521),
             _ => throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null)
         };
 
@@ -150,11 +150,11 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(parameters.D!, publicPoint, keyType);
-        var decodedParams = AsnPrivateKeyReader.CreateKeyParameters(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreateKey(encoded);
 
         // Assert
-        Assert.IsType<ECPrivateKeyParameters>(decodedParams);
-        var decodedEcSkParams = (ECPrivateKeyParameters)decodedParams;
+        Assert.IsType<ECPrivateKey>(decodedParams);
+        var decodedEcSkParams = (ECPrivateKey)decodedParams;
 
         //      Import the parameters into a new ECDsa instance for functional verification
         using var roundtrippedEcdsa = ECDsa.Create();
@@ -184,11 +184,11 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(testEncodedKeyData, KeyType.Ed25519);
-        var decodedParams = AsnPrivateKeyReader.CreateKeyParameters(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreateKey(encoded);
 
         // Assert
-        Assert.IsType<Curve25519PrivateKeyParameters>(decodedParams);
-        var edParams = (Curve25519PrivateKeyParameters)decodedParams;
+        Assert.IsType<Curve25519PrivateKey>(decodedParams);
+        var edParams = (Curve25519PrivateKey)decodedParams;
 
         Assert.Equal(32, edParams.PrivateKey.Length);
         Assert.Equal(testEncodedKeyData, edParams.PrivateKey.ToArray());
@@ -207,11 +207,11 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(testEncodedKeyData, KeyType.X25519);
-        var decodedParams = AsnPrivateKeyReader.CreateKeyParameters(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreateKey(encoded);
 
         // Assert
-        Assert.IsType<Curve25519PrivateKeyParameters>(decodedParams);
-        var x25519Params = (Curve25519PrivateKeyParameters)decodedParams;
+        Assert.IsType<Curve25519PrivateKey>(decodedParams);
+        var x25519Params = (Curve25519PrivateKey)decodedParams;
 
         Assert.Equal(32, x25519Params.PrivateKey.Length);
         Assert.Equal(testEncodedKeyData, x25519Params.PrivateKey.ToArray());
@@ -250,9 +250,9 @@ public class AsnPrivateKeyWriterTests
     [InlineData(KeyType.RSA2048)]
     [InlineData(KeyType.RSA3072)]
     [InlineData(KeyType.RSA4096)]
-    [InlineData(KeyType.P256)]
-    [InlineData(KeyType.P384)]
-    [InlineData(KeyType.P521)]
+    [InlineData(KeyType.ECP256)]
+    [InlineData(KeyType.ECP384)]
+    [InlineData(KeyType.ECP521)]
     [InlineData(KeyType.Ed25519)]
     [InlineData(KeyType.X25519)]
     public void Roundtrip_WithTestKeys_VerifyFunctionalEquivalence(
@@ -262,22 +262,22 @@ public class AsnPrivateKeyWriterTests
         var testKey = TestKeys.GetTestPrivateKey(keyType);
 
         // Parse with AsnPrivateKeyReader to get the parameters
-        var privateKeyParameters = AsnPrivateKeyReader.CreateKeyParameters(testKey.EncodedKey);
+        var privateKeyParameters = AsnPrivateKeyReader.CreateKey(testKey.EncodedKey);
 
         // Re-encode using our writer
         byte[] reencoded;
         switch (privateKeyParameters)
         {
-            case RSAPrivateKeyParameters rsaParams:
+            case RSAPrivateKey rsaParams:
                 reencoded = AsnPrivateKeyWriter.EncodeToPkcs8(rsaParams.Parameters);
                 break;
-            case ECPrivateKeyParameters ecParams:
+            case ECPrivateKey ecParams:
                 reencoded = AsnPrivateKeyWriter.EncodeToPkcs8(ecParams.Parameters);
                 break;
-            case Curve25519PrivateKeyParameters { KeyType: KeyType.X25519 } cvParams:
+            case Curve25519PrivateKey { KeyType: KeyType.X25519 } cvParams:
                 reencoded = AsnPrivateKeyWriter.EncodeToPkcs8(cvParams.PrivateKey, KeyType.X25519);
                 break;
-            case Curve25519PrivateKeyParameters { KeyType: KeyType.Ed25519 } cvParams:
+            case Curve25519PrivateKey { KeyType: KeyType.Ed25519 } cvParams:
                     reencoded = AsnPrivateKeyWriter.EncodeToPkcs8(cvParams.PrivateKey, KeyType.Ed25519);
                 break;
             default:
@@ -286,7 +286,7 @@ public class AsnPrivateKeyWriterTests
         }
 
         // Parse again with AsnPrivateKeyReader
-        var roundTrippedParams = AsnPrivateKeyReader.CreateKeyParameters(reencoded);
+        var roundTrippedParams = AsnPrivateKeyReader.CreateKey(reencoded);
 
         // Assert by verifying key type and capabilities
         Assert.Equal(privateKeyParameters.GetType(), roundTrippedParams.GetType());
@@ -309,8 +309,8 @@ public class AsnPrivateKeyWriterTests
     public static class KeyEquivalenceTestHelper
     {
         public static void VerifyFunctionalEquivalence(
-            IPrivateKeyParameters originalParams,
-            IPrivateKeyParameters roundTrippedParams,
+            IPrivateKey originalParams,
+            IPrivateKey roundTrippedParams,
             KeyType keyType)
         {
             switch (keyType)
@@ -320,36 +320,22 @@ public class AsnPrivateKeyWriterTests
                 case KeyType.RSA3072:
                 case KeyType.RSA4096:
                     VerifyRsaFunctionalEquivalence(
-                        (RSAPrivateKeyParameters)originalParams,
-                        (RSAPrivateKeyParameters)roundTrippedParams);
+                        (RSAPrivateKey)originalParams,
+                        (RSAPrivateKey)roundTrippedParams);
                     break;
 
-                case KeyType.P256:
-                case KeyType.P384:
-                case KeyType.P521:
+                case KeyType.ECP256:
+                case KeyType.ECP384:
+                case KeyType.ECP521:
                     VerifyEcFunctionalEquivalence(
-                        (ECPrivateKeyParameters)originalParams,
-                        (ECPrivateKeyParameters)roundTrippedParams);
+                        (ECPrivateKey)originalParams,
+                        (ECPrivateKey)roundTrippedParams);
                     break;
-
-                // case KeyType.Ed25519: // TODO Keep the specific classes for ED and X or keep the Curve25519?
-                //     VerifyEd25519KeyEquivalence(
-                //         (EDsaPrivateKeyParameters)originalParams,
-                //         (EDsaPrivateKeyParameters)roundTrippedParams);
-                //     break;
-
-                // case KeyType.X25519:
-                //     VerifyX25519KeyEquivalence(
-                //         (ECX25519PrivateKeyParameters)originalParams,
-                //         (ECX25519PrivateKeyParameters)roundTrippedParams);
-                //     break;
-
                 case KeyType.Ed25519:
                 case KeyType.X25519:
-
                     VerifyEd25519KeyEquivalence(
-                        (Curve25519PrivateKeyParameters)originalParams,
-                        (Curve25519PrivateKeyParameters)roundTrippedParams);
+                        (Curve25519PrivateKey)originalParams,
+                        (Curve25519PrivateKey)roundTrippedParams);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null);
@@ -357,8 +343,8 @@ public class AsnPrivateKeyWriterTests
         }
 
         private static void VerifyRsaFunctionalEquivalence(
-            RSAPrivateKeyParameters originalParams,
-            RSAPrivateKeyParameters roundTrippedParams)
+            RSAPrivateKey originalParams,
+            RSAPrivateKey roundTrippedParams)
         {
             // Create two RSA instances with the parameters
             using var originalRsa = RSA.Create();
@@ -389,8 +375,8 @@ public class AsnPrivateKeyWriterTests
         }
 
         private static void VerifyEcFunctionalEquivalence(
-            ECPrivateKeyParameters originalParams,
-            ECPrivateKeyParameters roundTrippedParams)
+            ECPrivateKey originalParams,
+            ECPrivateKey roundTrippedParams)
         {
             // Create two ECDsa instances with the parameters
             using var originalEcdsa = ECDsa.Create();
@@ -432,8 +418,8 @@ public class AsnPrivateKeyWriterTests
         // }
 
         private static void VerifyEd25519KeyEquivalence(
-            Curve25519PrivateKeyParameters originalParams,
-            Curve25519PrivateKeyParameters roundTrippedParams)
+            Curve25519PrivateKey originalParams,
+            Curve25519PrivateKey roundTrippedParams)
         {
             var originalPrivateKey = originalParams.PrivateKey.ToArray();
             var roundTrippedPrivateKey = roundTrippedParams.PrivateKey.ToArray();

@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Piv
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            bool isValid = LoadAttestationPair(KeyType.P256, true, testDevice);
+            bool isValid = LoadAttestationPair(KeyType.ECP256, true, testDevice);
             Assert.True(isValid);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Piv
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            bool isValid = LoadAttestationPair(KeyType.P384, true, testDevice);
+            bool isValid = LoadAttestationPair(KeyType.ECP384, true, testDevice);
             Assert.True(isValid);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
@@ -78,8 +78,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P256, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, StandardTestDevice.Fw5)]
         public void AttestGenerated(KeyType keyType, StandardTestDevice testDeviceType)
         {
             byte[] slotNumbers = {
@@ -108,7 +108,7 @@ namespace Yubico.YubiKey.Piv
                 for (int index = 0; index < slotNumbers.Length; index++)
                 {
                     _ = pivSession.GenerateKeyPair(
-                        slotNumbers[index], KeyType.P256, PivPinPolicy.Never, PivTouchPolicy.Never);
+                        slotNumbers[index], KeyType.ECP256, PivPinPolicy.Never, PivTouchPolicy.Never);
 
                     X509Certificate2? cert = null;
                     try
@@ -128,8 +128,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P256, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, StandardTestDevice.Fw5)]
         public void LoadInvalidCert_Attest_ThrowsException(KeyType keyType, StandardTestDevice testDeviceType)
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
@@ -143,7 +143,7 @@ namespace Yubico.YubiKey.Piv
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            bool isValid = LoadAttestationPair(KeyType.P384, true, testDevice);
+            bool isValid = LoadAttestationPair(KeyType.ECP384, true, testDevice);
             Assert.True(isValid);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
@@ -220,7 +220,7 @@ namespace Yubico.YubiKey.Piv
                 X509Certificate2? cert = null;
                 try
                 {
-                    _ = pivSession.GenerateKeyPair(PivSlot.Authentication, KeyType.P256);
+                    _ = pivSession.GenerateKeyPair(PivSlot.Authentication, KeyType.ECP256);
                     cert = pivSession.CreateAttestationStatement(PivSlot.Authentication);
                 }
                 catch (InvalidOperationException exc)
@@ -241,7 +241,7 @@ namespace Yubico.YubiKey.Piv
 
         // Load a key and cert, but use the commands, so that the checks aren't
         // made and whatever key/cert pair is given is actually loaded.
-        private static bool LoadAttestationPairCommands(IPrivateKeyParameters privateKey, X509Certificate certObj, IYubiKeyDevice testDevice)
+        private static bool LoadAttestationPairCommands(IPrivateKey privateKey, X509Certificate certObj, IYubiKeyDevice testDevice)
         {
             if (testDevice is null)
             {

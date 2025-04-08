@@ -36,18 +36,18 @@ namespace Yubico.YubiKey.Scp
         /// The public key of the security domain which is used for key agreement between the off-card entity (OCE) and Yubikey (SCP11a/b/c).
         /// <remarks>'pkSdEcka' is short for Public Key Security Domain Elliptic Curve Key Agreement (Key)</remarks>
         /// </summary>
-        public ECPublicKeyParameters PkSdEcka { get; private set; }
+        public ECPublicKey PkSdEcka { get; private set; }
 
         /// <summary>
         /// The key reference of the off-card entity (OCE) (SCP11a/c).
         /// </summary>
         public KeyReference? OceKeyReference { get; private set; }
-
+        
         /// <summary>
         /// The secret key of the off-card entity (OCE) which is used for key agreement between the off-card entity and the YubiKey (SCP11a/c).
         /// <remarks>'skOceEcka' is short for Secret Key Off-Card Entity Elliptic Curve Key Agreement (Key)</remarks>
         /// </summary>
-        public ECPrivateKeyParameters? SkOceEcka { get; private set; }
+        public ECPrivateKey? SkOceEcka { get; private set; }
 
         /// <summary>
         /// The certificate chain, containing the public key for the off-card entity (OCE) (SCP11a/c).
@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Scp
         /// </remarks>
         /// <param name="keyReference">The key reference associated with the key parameters.</param>
         /// <param name="pkSdEcka">The public key of the security domain which is used for key agreement between the off-card entity (OCE) and Yubikey.</param>
-        public Scp11KeyParameters(KeyReference keyReference, ECPublicKeyParameters pkSdEcka) : base(keyReference)
+        public Scp11KeyParameters(KeyReference keyReference, ECPublicKey pkSdEcka) : base(keyReference)
         {
             if (keyReference.Id != ScpKeyIds.Scp11B)
             {
@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Scp
 
             PkSdEcka = pkSdEcka;
         }
-
+        
         /// <summary>
         /// Creates a new <see cref="Scp11KeyParameters"/> instance.
         /// This is used to initiate SCP11A and SCP11C connections.
@@ -84,9 +84,9 @@ namespace Yubico.YubiKey.Scp
         /// <param name="oceCertificates">The certificate chain, containing the public key for the off-card entity (OCE).</param>
         public Scp11KeyParameters(
             KeyReference keyReference,
-            ECPublicKeyParameters pkSdEcka,
+            ECPublicKey pkSdEcka,
             KeyReference oceKeyReference,
-            ECPrivateKeyParameters skOceEcka,
+            ECPrivateKey skOceEcka,
             IReadOnlyCollection<X509Certificate2> oceCertificates) : base(keyReference)
         {
             const byte validKidsMask = ScpKeyIds.Scp11A | ScpKeyIds.Scp11C;
@@ -106,6 +106,18 @@ namespace Yubico.YubiKey.Scp
             OceKeyReference = oceKeyReference;
             SkOceEcka = skOceEcka;
             OceCertificates = oceCertificates.ToList();
+        }
+        
+        [Obsolete("Obsolete, use constructor with ECPrivateKey instead", false)]
+        public Scp11KeyParameters(
+            KeyReference keyReference,
+            ECPublicKey pkSdEcka,
+            KeyReference oceKeyReference,
+            ECPrivateKeyParameters skOceEcka,
+            IReadOnlyCollection<X509Certificate2> oceCertificates) 
+            : this(keyReference, pkSdEcka, oceKeyReference, skOceEcka as ECPrivateKey, oceCertificates)
+        {
+
         }
 
         /// <summary>

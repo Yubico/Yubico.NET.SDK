@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Cryptography;
 
 internal class AsnPublicKeyReader
 {
-    public static IPublicKeyParameters CreateKeyParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    public static IPublicKey CreateKey(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
         var seqSubjectPublicKeyInfo = reader.ReadSequence();
@@ -36,7 +36,7 @@ internal class AsnPublicKeyReader
 
         switch (oidAlgorithm)
         {
-            case KeyDefinitions.Oids.RSA:
+            case Oids.RSA:
                 {
                     if (seqAlgorithmIdentifier.HasData)
                     {
@@ -44,20 +44,20 @@ internal class AsnPublicKeyReader
                         seqAlgorithmIdentifier.ThrowIfNotEmpty();
                     }
 
-                    return CreateRSAPublicKeyParameters(subjectPublicKey);
+                    return CreateRSAPublicKey(subjectPublicKey);
                 }
-            case KeyDefinitions.Oids.ECDSA:
+            case Oids.ECDSA:
                 {
                     string oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
-                    return CreateECPublicKeyParameters(oidCurve, subjectPublicKey);
+                    return CreateECPublicKey(oidCurve, subjectPublicKey);
                 }
-            case KeyDefinitions.Oids.X25519:
+            case Oids.X25519:
                 {
-                    return Curve25519PublicKeyParameters.CreateFromValue(subjectPublicKey, KeyType.X25519);
+                    return Curve25519PublicKey.CreateFromValue(subjectPublicKey, KeyType.X25519);
                 }
-            case KeyDefinitions.Oids.Ed25519:
+            case Oids.Ed25519:
                 {
-                    return Curve25519PublicKeyParameters.CreateFromValue(subjectPublicKey, KeyType.Ed25519);
+                    return Curve25519PublicKey.CreateFromValue(subjectPublicKey, KeyType.Ed25519);
                 }
         }
 
@@ -67,7 +67,7 @@ internal class AsnPublicKeyReader
                 ExceptionMessages.UnsupportedAlgorithm));
     }
 
-    private static RSAPublicKeyParameters CreateRSAPublicKeyParameters(byte[] subjectPublicKey)
+    private static RSAPublicKey CreateRSAPublicKey(byte[] subjectPublicKey)
     {
         var subjectPublicKeyReader = new AsnReader(subjectPublicKey, AsnEncodingRules.DER);
         var seqSubjectPublicKey = subjectPublicKeyReader.ReadSequence();
@@ -84,13 +84,12 @@ internal class AsnPublicKeyReader
             Exponent = exponent.ToArray()
         };
 
-        return RSAPublicKeyParameters.CreateFromParameters(rsaParameters);
+        return RSAPublicKey.CreateFromParameters(rsaParameters);
     }
 
-    private static ECPublicKeyParameters CreateECPublicKeyParameters(string curveOid, byte[] subjectPublicKey)
+    private static ECPublicKey CreateECPublicKey(string curveOid, byte[] subjectPublicKey)
     {
-        if (curveOid is not (KeyDefinitions.Oids.P256 or KeyDefinitions.Oids.P384
-            or KeyDefinitions.Oids.P521))
+        if (!Oids.IsECDsaCurve(curveOid))
         {
             throw new NotSupportedException(
                 string.Format(
@@ -106,6 +105,10 @@ internal class AsnPublicKeyReader
         }
 
         int coordinateSize = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
+        if (subjectPublicKey.Length != 1 + (2 * coordinateSize))
+        {
+            throw new CryptographicException("Invalid EC public key encoding");
+        }
         byte[] xCoordinate = new byte[coordinateSize];
         byte[] yCoordinate = new byte[coordinateSize];
 
@@ -124,6 +127,6 @@ internal class AsnPublicKeyReader
             }
         };
 
-        return ECPublicKeyParameters.CreateFromParameters(ecParams);
+        return ECPublicKey.CreateFromParameters(ecParams);
     }
 }

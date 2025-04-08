@@ -49,7 +49,7 @@ public static class RSAParametersExtensions
     /// This ensures compatibility with stricter platforms like Windows BCrypt while preserving the original key data.
     /// </summary>
     /// <param name="parameters">The RSA parameters to normalize</param>
-    /// <returns>A new RSAParameters with normalized values</returns>
+    /// <returns>A new (copied) RSAParameters with normalized values</returns>
     internal static RSAParameters NormalizeParameters(this RSAParameters parameters)
     {
         var normalized = parameters.DeepCopy();

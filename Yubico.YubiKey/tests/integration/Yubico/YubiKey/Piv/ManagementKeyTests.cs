@@ -69,11 +69,11 @@ namespace Yubico.YubiKey.Piv
             var mustBeAes = shouldBeAes && testDevice.IsFipsSeries;
             var defaultManagementKeyType = shouldBeAes
                 ? KeyType.AES192
-                : KeyType.TripleDes;
+                : KeyType.TripleDES;
 
             var alternativeManagementKeyType = !shouldBeAes
                 ? KeyType.AES192
-                : KeyType.TripleDes;
+                : KeyType.TripleDES;
 
             using var session = new PivSession(testDevice);
             session.KeyCollector = TestKeyCollectorDelegate;
@@ -84,7 +84,7 @@ namespace Yubico.YubiKey.Piv
             if (mustBeAes)
             {
                 Assert.Throws<InvalidOperationException>(
-                    () => session.ChangeManagementKey(PivTouchPolicy.None, KeyType.TripleDes.GetPivAlgorithm()));
+                    () => session.ChangeManagementKey(PivTouchPolicy.None, KeyType.TripleDES.GetPivAlgorithm()));
             }
             else
             {
@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.Piv
             var mustBeAes = shouldBeAes && testDevice.IsFipsSeries;
             var defaultManagementKeyType = shouldBeAes || mustBeAes
                 ? KeyType.AES192
-                : KeyType.TripleDes;
+                : KeyType.TripleDES;
 
             using var session = new PivSession(testDevice);
             session.KeyCollector = TestKeyCollectorDelegate;
@@ -123,7 +123,7 @@ namespace Yubico.YubiKey.Piv
             if (mustBeAes)
             {
                 Assert.Throws<InvalidOperationException>(
-                    () => session.ChangeManagementKey(PivTouchPolicy.None, KeyType.TripleDes.GetPivAlgorithm()));
+                    () => session.ChangeManagementKey(PivTouchPolicy.None, KeyType.TripleDES.GetPivAlgorithm()));
             }
         }
 
@@ -138,7 +138,7 @@ namespace Yubico.YubiKey.Piv
             var mustBeAes = shouldBeAes && testDevice.IsFipsSeries;
             var defaultManagementKeyType = shouldBeAes || mustBeAes
                 ? KeyType.AES192
-                : KeyType.TripleDes;
+                : KeyType.TripleDES;
 
             var isValid = false;
             var count = 10;

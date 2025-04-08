@@ -72,7 +72,13 @@ namespace Yubico.YubiKey.Piv
         {
             if (algorithm.HasValue)
             {
-                Algorithm = algorithm.Value;
+                int expectedSize = algorithm.Value.GetPivKeyDefinition().KeyDefinition.LengthInBytes;
+                if(privateValue.Length != expectedSize)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture, ExceptionMessages.InvalidPrivateKeyData));
+                }
             }
             else
             {

@@ -24,8 +24,8 @@ namespace Yubico.YubiKey.Piv.Commands
     public class ImportKeyCommandTestsObsolete
     {
         [Theory]
-        [InlineData(1, KeyType.P256)]
-        [InlineData(2, KeyType.P384)]
+        [InlineData(1, KeyType.ECP256)]
+        [InlineData(2, KeyType.ECP384)]
         [InlineData(3, KeyType.RSA1024)]
         [InlineData(4, KeyType.RSA2048)]
         public void ClassType_DerivedFromPivCommand_IsTrue(int cStyle, KeyType keyType)
@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.Piv.Commands
             _ = Assert.Throws<ArgumentException>(() => GetCommandObject(
                 cStyle,
                 slotNumber,
-                KeyType.P256,
+                KeyType.ECP256,
                 PivPinPolicy.Once,
                 PivTouchPolicy.Cached));
         }
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_NoSlotNumber_ThrowsException()
         {
-            PivPrivateKey keyData = GetKeyData(KeyType.P256);
+            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
             var cmd = new ImportAsymmetricKeyCommand(keyData)
             {
                 PinPolicy = PivPinPolicy.Always,
@@ -100,7 +100,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Application_Piv()
         {
-            PivPrivateKey keyData = GetKeyData(KeyType.P256);
+            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
             var importKeyCommand = new ImportAsymmetricKeyCommand(
                 keyData,
                 PivSlot.Retired19,
@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Property_SlotNum()
         {
-            PivPrivateKey keyData = GetKeyData(KeyType.P256);
+            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
             byte slotNumber = PivSlot.Retired20;
             PivPinPolicy pinPolicy = PivPinPolicy.Always;
             PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
@@ -137,7 +137,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Property_PinPolicy()
         {
-            PivPrivateKey keyData = GetKeyData(KeyType.P256);
+            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
             byte slotNumber = PivSlot.Retired20;
             PivPinPolicy pinPolicy = PivPinPolicy.Always;
             PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
@@ -157,7 +157,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Property_TouchPolicy()
         {
-            PivPrivateKey keyData = GetKeyData(KeyType.P256);
+            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
             byte slotNumber = PivSlot.Retired20;
             PivPinPolicy pinPolicy = PivPinPolicy.Always;
             PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
@@ -181,7 +181,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(int cStyle)
         {
             CommandApdu cmdApdu = GetImportKeyCommandApdu(
-                cStyle, 0x94, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                cStyle, 0x94, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Never);
 
             byte Cla = cmdApdu.Cla;
 
@@ -207,8 +207,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(1, KeyType.P256)]
-        [InlineData(2, KeyType.P384)]
+        [InlineData(1, KeyType.ECP256)]
+        [InlineData(2, KeyType.ECP384)]
         [InlineData(3, KeyType.RSA1024)]
         [InlineData(4, KeyType.RSA2048)]
         public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(int cStyle, KeyType keyType)
@@ -252,28 +252,28 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(1, KeyType.RSA1024, PivPinPolicy.None, PivTouchPolicy.None, 0)]
         [InlineData(2, KeyType.RSA2048, PivPinPolicy.None, PivTouchPolicy.Default, 0)]
-        [InlineData(3, KeyType.P256, PivPinPolicy.None, PivTouchPolicy.Never, 3)]
-        [InlineData(1, KeyType.P384, PivPinPolicy.None, PivTouchPolicy.Always, 3)]
+        [InlineData(3, KeyType.ECP256, PivPinPolicy.None, PivTouchPolicy.Never, 3)]
+        [InlineData(1, KeyType.ECP384, PivPinPolicy.None, PivTouchPolicy.Always, 3)]
         [InlineData(2, KeyType.RSA1024, PivPinPolicy.None, PivTouchPolicy.Cached, 3)]
         [InlineData(3, KeyType.RSA2048, PivPinPolicy.Default, PivTouchPolicy.None, 0)]
-        [InlineData(1, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.Default, 0)]
-        [InlineData(2, KeyType.P384, PivPinPolicy.Default, PivTouchPolicy.Never, 3)]
+        [InlineData(1, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Default, 0)]
+        [InlineData(2, KeyType.ECP384, PivPinPolicy.Default, PivTouchPolicy.Never, 3)]
         [InlineData(3, KeyType.RSA1024, PivPinPolicy.Default, PivTouchPolicy.Always, 3)]
         [InlineData(1, KeyType.RSA2048, PivPinPolicy.Default, PivTouchPolicy.Cached, 3)]
-        [InlineData(2, KeyType.P256, PivPinPolicy.Never, PivTouchPolicy.None, 3)]
-        [InlineData(3, KeyType.P384, PivPinPolicy.Never, PivTouchPolicy.Default, 3)]
+        [InlineData(2, KeyType.ECP256, PivPinPolicy.Never, PivTouchPolicy.None, 3)]
+        [InlineData(3, KeyType.ECP384, PivPinPolicy.Never, PivTouchPolicy.Default, 3)]
         [InlineData(1, KeyType.RSA1024, PivPinPolicy.Never, PivTouchPolicy.Never, 6)]
         [InlineData(2, KeyType.RSA2048, PivPinPolicy.Never, PivTouchPolicy.Always, 6)]
-        [InlineData(3, KeyType.P256, PivPinPolicy.Never, PivTouchPolicy.Cached, 6)]
-        [InlineData(1, KeyType.P384, PivPinPolicy.Once, PivTouchPolicy.None, 3)]
+        [InlineData(3, KeyType.ECP256, PivPinPolicy.Never, PivTouchPolicy.Cached, 6)]
+        [InlineData(1, KeyType.ECP384, PivPinPolicy.Once, PivTouchPolicy.None, 3)]
         [InlineData(2, KeyType.RSA1024, PivPinPolicy.Once, PivTouchPolicy.Default, 3)]
         [InlineData(3, KeyType.RSA2048, PivPinPolicy.Once, PivTouchPolicy.Never, 6)]
-        [InlineData(1, KeyType.P256, PivPinPolicy.Once, PivTouchPolicy.Always, 6)]
-        [InlineData(2, KeyType.P384, PivPinPolicy.Once, PivTouchPolicy.Cached, 6)]
+        [InlineData(1, KeyType.ECP256, PivPinPolicy.Once, PivTouchPolicy.Always, 6)]
+        [InlineData(2, KeyType.ECP384, PivPinPolicy.Once, PivTouchPolicy.Cached, 6)]
         [InlineData(3, KeyType.RSA1024, PivPinPolicy.Always, PivTouchPolicy.None, 3)]
         [InlineData(1, KeyType.RSA2048, PivPinPolicy.Always, PivTouchPolicy.Default, 3)]
-        [InlineData(2, KeyType.P256, PivPinPolicy.Always, PivTouchPolicy.Never, 6)]
-        [InlineData(3, KeyType.P384, PivPinPolicy.Always, PivTouchPolicy.Always, 6)]
+        [InlineData(2, KeyType.ECP256, PivPinPolicy.Always, PivTouchPolicy.Never, 6)]
+        [InlineData(3, KeyType.ECP384, PivPinPolicy.Always, PivTouchPolicy.Always, 6)]
         [InlineData(1, KeyType.RSA1024, PivPinPolicy.Always, PivTouchPolicy.Cached, 6)]
         public void CreateCommandApdu_GetNcProperty_ReturnsCorrect(
             int cStyle,
@@ -307,7 +307,7 @@ namespace Yubico.YubiKey.Piv.Commands
             CommandApdu cmdApdu = GetImportKeyCommandApdu(
                 cStyle,
                 0x8F,
-                KeyType.P256,
+                KeyType.ECP256,
                 PivPinPolicy.Always,
                 PivTouchPolicy.Never);
 
@@ -319,8 +319,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(1, KeyType.RSA1024)]
         [InlineData(2, KeyType.RSA2048)]
-        [InlineData(3, KeyType.P256)]
-        [InlineData(4, KeyType.P384)]
+        [InlineData(3, KeyType.ECP256)]
+        [InlineData(4, KeyType.ECP384)]
         public void CreateCommandApdu_GetData_ReturnsKeyData(int cStyle, KeyType keyType)
         {
             PivPrivateKey keyData = GetKeyData(keyType);
@@ -384,7 +384,7 @@ namespace Yubico.YubiKey.Piv.Commands
             PivPinPolicy pinPolicy,
             PivTouchPolicy touchPolicy)
         {
-            PivPrivateKey keyData = GetKeyData(KeyType.P256);
+            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
             byte[] pinData = new byte[] { 0xAA, 0x01, (byte)pinPolicy };
             byte[] touchData = new byte[] { 0xAB, 0x01, (byte)touchPolicy };
             var expected = new List<byte>(keyData.EncodedPrivateKey.ToArray());
@@ -399,7 +399,7 @@ namespace Yubico.YubiKey.Piv.Commands
             CommandApdu cmdApdu = GetImportKeyCommandApdu(
                 cStyle,
                 0x8F,
-                KeyType.P256,
+                KeyType.ECP256,
                 pinPolicy,
                 touchPolicy);
 
@@ -425,7 +425,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
-            PivPrivateKey keyData = GetKeyData(KeyType.P384);
+            PivPrivateKey keyData = GetKeyData(KeyType.ECP384);
             var importKeyCommand = new ImportAsymmetricKeyCommand(
                 keyData,
                 PivSlot.Retired18,
@@ -634,7 +634,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x29, 0x22, 0xe3, 0xe3, 0x53, 0xd9, 0xbd, 0xe2, 0xe9, 0x55, 0xb8, 0xd2, 0x07, 0x3a, 0x21, 0x29
                 }),
 
-            KeyType.P256 =>
+            KeyType.ECP256 =>
                 PivPrivateKey.Create(new byte[] {
                     0x06, 0x20,
                     0xba, 0x29, 0x7a, 0xc6, 0x64, 0x62, 0xef, 0x6c, 0xd0, 0x89, 0x76, 0x5c, 0xbd, 0x46, 0x52, 0x2b,

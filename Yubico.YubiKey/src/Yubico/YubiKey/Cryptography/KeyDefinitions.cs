@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Cryptography
     /// <summary>
     /// Provides definitions for cryptographic keys, including their types, lengths, and other properties.
     /// </summary>
-    public static class KeyDefinitions
+    public static partial class KeyDefinitions
     {
         private static readonly Dictionary<KeyType, KeyDefinition> AllDefinitions;
 
@@ -32,9 +32,9 @@ namespace Yubico.YubiKey.Cryptography
         {
             AllDefinitions = new Dictionary<KeyType, KeyDefinition>
             {
-                { KeyType.P256, P256 },
-                { KeyType.P384, P384 },
-                { KeyType.P521, P521 },
+                { KeyType.ECP256, P256 },
+                { KeyType.ECP384, P384 },
+                { KeyType.ECP521, P521 },
                 { KeyType.X25519, X25519 },
                 { KeyType.Ed25519, Ed25519 },
                 { KeyType.RSA1024, RSA1024 },
@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Cryptography
                 { KeyType.AES128, AES128 },
                 { KeyType.AES192, AES192 },
                 { KeyType.AES256, AES256 },
-                { KeyType.TripleDes, TripleDes },
+                { KeyType.TripleDES, TripleDes },
             };
         }
 
@@ -72,11 +72,11 @@ namespace Yubico.YubiKey.Cryptography
         {
             if (!AllDefinitions.TryGetValue(type, out var definition))
             {
-                throw new InvalidOperationException(
+                throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.UnsupportedAlgorithm,
-                        type));
+                        ExceptionMessages.UnsupportedAlgorithm),
+                    nameof(type));
             }
 
             return definition;
@@ -185,7 +185,7 @@ namespace Yubico.YubiKey.Cryptography
         ///  A collection of RSA key definitions.
         /// </returns>
         public static IReadOnlyCollection<KeyDefinition> GetRsaKeyDefinitions() =>
-            AllDefinitions.Values.Where(d => d.IsRsaKey).ToList();
+            AllDefinitions.Values.Where(d => d.IsRSA).ToList();
 
         /// <summary>
         /// Gets all elliptic curve (EC) key definitions.
@@ -194,108 +194,18 @@ namespace Yubico.YubiKey.Cryptography
         ///  A collection of EC key definitions.
         /// </returns>
         public static IReadOnlyCollection<KeyDefinition> GetEcKeyDefinitions() =>
-            AllDefinitions.Values.Where(d => d.IsEcKey).ToList();
-
-        /// <summary>
-        /// Contains OIDs for cryptographic algorithms used in key operations.
-        /// </summary>
-        public static class Oids
-        {
-            /// <summary>
-            /// RSA Encryption algorithm OID (PKCS#1)
-            /// </summary>
-            public const string RSA = "1.2.840.113549.1.1.1";
-
-            /// <summary>
-            /// Represents the general Elliptic Curve public key algorithm OID (ANSI X9.62)
-            /// </summary>
-            public const string ECDSA = "1.2.840.10045.2.1";
-
-            /// <summary>
-            /// Represents the OID for X25519 (Curve25519) used for key exchange
-            /// </summary>
-            public const string X25519 = "1.3.101.110";
-
-            /// <summary>
-            /// Represents the OID for Ed25519 (Edwards25519) used for signatures
-            /// </summary>
-            public const string Ed25519 = "1.3.101.112";
-
-            /// <summary>
-            /// Represents the OID for NIST P-256 curve (also known as secp256r1)
-            /// </summary>
-            public const string P256 = "1.2.840.10045.3.1.7";
-
-            /// <summary>
-            /// Represents the OID for NIST P-384 curve (also known as secp384r1)
-            /// </summary>
-            public const string P384 = "1.3.132.0.34";
-
-            /// <summary>
-            /// Represents the OID for NIST P-521 curve (also known as secp521r1)
-            /// </summary>
-            public const string P521 = "1.3.132.0.35";
-            
-            /// <summary>
-            /// Represents the OID for AES-128 in CBC mode
-            /// </summary>
-            public const string Aes128Cbc = "2.16.840.1.101.3.4.1.2";
-            
-            /// <summary>
-            /// Represents the OID for AES-192 in CBC mode
-            /// </summary>
-            public const string Aes192Cbc = "2.16.840.1.101.3.4.1.22";
-            
-            /// <summary>
-            /// Represents the OID for AES-256 in CBC mode
-            /// </summary>
-            public const string Aes256Cbc = "2.16.840.1.101.3.4.1.42";
-            
-            /// <summary>
-            /// Represents the OID for Triple DES in CBC mode
-            /// </summary>
-            public const string TripleDesCbc = "1.2.840.113549.3.7";
-
-            /// <summary>
-            /// Gets the algorithm and curve OIDs for a specific key type
-            /// </summary>
-            public static (string AlgorithmOid, string? Curveoid) GetOidsForKeyType(KeyType keyType)
-            {
-                return keyType switch
-                {
-                    KeyType.RSA1024 => (RSA, null),
-                    KeyType.RSA2048 => (RSA, null),
-                    KeyType.RSA3072 => (RSA, null),
-                    KeyType.RSA4096 => (RSA, null),
-
-                    KeyType.P256 => (EC: ECDSA, P256),
-                    KeyType.P384 => (EC: ECDSA, P384),
-                    KeyType.P521 => (EC: ECDSA, P521),
-
-                    KeyType.X25519 => (X25519, null),
-                    KeyType.Ed25519 => (Ed25519, null),
-                    
-                    KeyType.AES128 => (Aes128Cbc, null),
-                    KeyType.AES192 => (Aes192Cbc, null),
-                    KeyType.AES256 => (Aes256Cbc, null),
-                    KeyType.TripleDes => (TripleDesCbc, null),
-                    
-                    _ => throw new ArgumentException($"Unsupported key type: {keyType}")
-                };
-            }
-        }
+            AllDefinitions.Values.Where(d => d.IsEllipticCurve).ToList();
 
         /// <summary>
         /// Represents an EC key with a length of 256 bits.
         /// </summary>
         public static readonly KeyDefinition P256 = new KeyDefinition
         {
-            KeyType = KeyType.P256,
+            KeyType = KeyType.ECP256,
             LengthInBytes = 32,
             LengthInBits = 256,
             AlgorithmOid = Oids.ECDSA,
-            CurveOid = Oids.P256,
-            IsEcKey = true,
+            CurveOid = Oids.ECP256,
             CoseKeyDefinition = new CoseKeyDefinition
             {
                 Type = CoseKeyType.Ec2,
@@ -309,12 +219,11 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition P384 = new KeyDefinition
         {
-            KeyType = KeyType.P384,
+            KeyType = KeyType.ECP384,
             LengthInBytes = 48,
             LengthInBits = 384,
             AlgorithmOid = Oids.ECDSA,
-            CurveOid = Oids.P384,
-            IsEcKey = true,
+            CurveOid = Oids.ECP384,
             CoseKeyDefinition = new CoseKeyDefinition
             {
                 Type = CoseKeyType.Ec2,
@@ -328,12 +237,11 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition P521 = new KeyDefinition
         {
-            KeyType = KeyType.P521,
+            KeyType = KeyType.ECP521,
             LengthInBytes = 66,
             LengthInBits = 521,
             AlgorithmOid = Oids.ECDSA,
-            CurveOid = Oids.P521,
-            IsEcKey = true,
+            CurveOid = Oids.ECP521,
             CoseKeyDefinition = new CoseKeyDefinition
             {
                 Type = CoseKeyType.Ec2,
@@ -351,12 +259,11 @@ namespace Yubico.YubiKey.Cryptography
             LengthInBytes = 32,
             LengthInBits = 256,
             AlgorithmOid = Oids.X25519,
-            IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition
             {
                 Type = CoseKeyType.Okp,
                 CurveIdentifier = CoseEcCurve.X25519,
-                AlgorithmIdentifier = CoseAlgorithmIdentifier.ECDHwHKDF256 // Hmm? Really?
+                AlgorithmIdentifier = CoseAlgorithmIdentifier.ECDHwHKDF256
             }
         };
 
@@ -369,7 +276,6 @@ namespace Yubico.YubiKey.Cryptography
             LengthInBytes = 32,
             LengthInBits = 256,
             AlgorithmOid = Oids.Ed25519,
-            IsEcKey = true,
             CoseKeyDefinition = new CoseKeyDefinition
             {
                 Type = CoseKeyType.Okp,
@@ -387,7 +293,6 @@ namespace Yubico.YubiKey.Cryptography
             LengthInBytes = 128,
             LengthInBits = 1024,
             AlgorithmOid = Oids.RSA,
-            IsRsaKey = true
         };
 
         /// <summary>
@@ -399,7 +304,6 @@ namespace Yubico.YubiKey.Cryptography
             LengthInBytes = 256,
             LengthInBits = 2048,
             AlgorithmOid = Oids.RSA,
-            IsRsaKey = true
         };
 
         /// <summary>
@@ -411,7 +315,6 @@ namespace Yubico.YubiKey.Cryptography
             LengthInBytes = 384,
             LengthInBits = 3072,
             AlgorithmOid = Oids.RSA,
-            IsRsaKey = true
         };
 
         /// <summary>
@@ -423,7 +326,6 @@ namespace Yubico.YubiKey.Cryptography
             LengthInBytes = 512,
             LengthInBits = 4096,
             AlgorithmOid = Oids.RSA,
-            IsRsaKey = true
         };
 
         /// <summary>
@@ -434,8 +336,7 @@ namespace Yubico.YubiKey.Cryptography
             KeyType = KeyType.AES128,
             LengthInBytes = 16,
             LengthInBits = 128,
-            AlgorithmOid = Oids.Aes128Cbc,
-            IsSymmetricKey = true
+            AlgorithmOid = Oids.AES128Cbc,
         };
 
         /// <summary>
@@ -444,10 +345,9 @@ namespace Yubico.YubiKey.Cryptography
         public static readonly KeyDefinition AES192 = new KeyDefinition
         {
             KeyType = KeyType.AES192,
-            LengthInBytes = 24, 
+            LengthInBytes = 24,
             LengthInBits = 192,
-            AlgorithmOid = Oids.Aes192Cbc,
-            IsSymmetricKey = true
+            AlgorithmOid = Oids.AES192Cbc,
         };
 
         /// <summary>
@@ -458,8 +358,7 @@ namespace Yubico.YubiKey.Cryptography
             KeyType = KeyType.AES256,
             LengthInBytes = 32,
             LengthInBits = 256,
-            AlgorithmOid = Oids.Aes256Cbc,
-            IsSymmetricKey = true
+            AlgorithmOid = Oids.AES256Cbc,
         };
 
         /// <summary>
@@ -467,11 +366,10 @@ namespace Yubico.YubiKey.Cryptography
         /// </summary>
         public static readonly KeyDefinition TripleDes = new KeyDefinition
         {
-            KeyType = KeyType.TripleDes,
+            KeyType = KeyType.TripleDES,
             LengthInBytes = 24,
             LengthInBits = 192,
-            AlgorithmOid = Oids.TripleDesCbc,
-            IsSymmetricKey = true
+            AlgorithmOid = Oids.TripleDESCbc,
         };
     }
 
@@ -506,19 +404,24 @@ namespace Yubico.YubiKey.Cryptography
         public string? CurveOid { get; init; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the key is an elliptic curve (EC) key.
+        /// Indicates whether the key is an elliptic curve (EC) key.
         /// </summary>
-        public bool IsEcKey { get; init; }
+        public bool IsEllipticCurve => KeyType.IsEllipticCurve();
 
         /// <summary>
-        /// Gets or sets a value indicating whether the key is an RSA key.
+        /// Indicates whether the key is an RSA key.
         /// </summary>
-        public bool IsRsaKey { get; init; }
+        public bool IsRSA => KeyType.IsRSA();
 
         /// <summary>
-        /// Gets or sets a value indicating whether the key is a symmetric key.
+        /// Indicates whether the key is a symmetric key.
         /// </summary>
-        public bool IsSymmetricKey { get; init; }
+        public bool IsSymmetric => KeyType.IsSymmetric();
+
+        /// <summary>
+        /// Indicates whether the key is a asymmetric key.
+        /// </summary>
+        public bool IsAsymmetric => !IsSymmetric;
 
         /// <summary>
         /// Gets the name of the key, which is the string representation of the key type.
@@ -539,9 +442,6 @@ namespace Yubico.YubiKey.Cryptography
             LengthInBits == other.LengthInBits &&
             AlgorithmOid == other.AlgorithmOid &&
             CurveOid == other.CurveOid &&
-            IsEcKey == other.IsEcKey &&
-            IsRsaKey == other.IsRsaKey &&
-            IsSymmetricKey == other.IsSymmetricKey &&
             CoseKeyDefinition == other.CoseKeyDefinition;
 
         public override int GetHashCode()
@@ -552,9 +452,6 @@ namespace Yubico.YubiKey.Cryptography
             hashCode.Add(LengthInBits);
             hashCode.Add(AlgorithmOid);
             hashCode.Add(CurveOid);
-            hashCode.Add(IsEcKey);
-            hashCode.Add(IsRsaKey);
-            hashCode.Add(IsSymmetricKey);
             return hashCode.ToHashCode();
         }
     }

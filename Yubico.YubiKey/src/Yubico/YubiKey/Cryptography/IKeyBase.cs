@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.YubiKey.Cryptography;
 
-internal class EmptyPrivateKeyParameters : IPrivateKeyParameters
+public interface IKeyBase
 {
-    public KeyDefinition KeyDefinition { get; } = new();
+    /// <summary>
+    /// Gets the type of the cryptographic key.
+    /// </summary>
+    /// <value>
+    /// A <see cref="KeyType"/> value indicating the type of the key.
+    /// </value>
     public KeyType KeyType { get; }
-    public byte[] ExportPkcs8PrivateKey() => Array.Empty<byte>();
-
-    public static ReadOnlyMemory<byte> PrivateKey => Array.Empty<byte>();
-    public void Clear() { }
 }

@@ -12,10 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Cryptography;
 
-public interface IPrivateKeyParameters : IKeyParameters
+public interface IPrivateKey : IKeyBase, IDisposable
 {
+    /// <summary>
+    /// Exports the current key in the PKCS#8 PrivateKeyInfo format.
+    /// </summary>
+    /// <returns>
+    /// A byte array containing the PKCS#8 PrivateKeyInfo representation of this key.
+    /// </returns>
     public byte[] ExportPkcs8PrivateKey();
+    
+    /// <summary>
+    /// Clears the buffers containing private key data.
+    /// </summary>
     public void Clear();
+}
+
+public static class IPrivateKeyExtensions
+{
+    public static T Cast<T>(this IPrivateKey key) where T : class, IPrivateKey 
+        => key as T ?? throw new InvalidCastException($"Cannot cast {key.GetType()} to {typeof(T)}");
 }

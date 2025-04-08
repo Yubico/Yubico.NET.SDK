@@ -14,14 +14,13 @@
 
 using System;
 using System.Globalization;
+using System.Security.Cryptography;
 using Yubico.Core.Tlv;
 
-namespace Yubico.YubiKey.Piv;
+namespace Yubico.YubiKey.Piv.Converters;
 
-public static class PivEncodingReader
+internal static class PivEncodingReader
 {
-    
-    // Will read PIV public key data and return the modulus and exponent
     public static (ReadOnlyMemory<byte> Modulus, ReadOnlyMemory<byte> Exponent) GetPublicRSAValues(
         ReadOnlyMemory<byte> encodedPublicKey)
     {
@@ -83,5 +82,63 @@ public static class PivEncodingReader
 
         var publicPoint = tlvReader.ReadValue(PivConstants.PublicECTag);
         return publicPoint;
+    }
+
+    public static RSAParameters GetRSAParameters(ReadOnlyMemory<byte> pivEncodedKey)
+    {
+        const int CrtComponentCount = 5;
+
+        var tlvReader = new TlvReader(pivEncodedKey);
+        var valueArray = new ReadOnlyMemory<byte>[CrtComponentCount];
+
+        int index = 0;
+        for (; index < CrtComponentCount; index++)
+        {
+            valueArray[index] = ReadOnlyMemory<byte>.Empty;
+        }
+
+        index = 0;
+        while (index < CrtComponentCount)
+        {
+            if (tlvReader.HasData == false)
+            {
+                break;
+            }
+
+            int tag = tlvReader.PeekTag();
+            var temp = tlvReader.ReadValue(tag);
+            if (tag <= 0 || tag > CrtComponentCount)
+            {
+                continue;
+            }
+
+            if (valueArray[tag - 1].IsEmpty == false)
+            {
+                continue;
+            }
+
+            index++;
+            valueArray[tag - 1] = temp;
+        }
+
+        var primeP = valueArray[PivConstants.PrivateRSAPrimePTag - 1].Span;
+        var primeQ = valueArray[PivConstants.PrivateRSAPrimeQTag - 1].Span;
+        var exponentP = valueArray[PivConstants.PrivateRSAExponentPTag - 1].Span;
+        var exponentQ = valueArray[PivConstants.PrivateRSAExponentQTag - 1].Span;
+        var coefficient = valueArray[PivConstants.PrivateRSACoefficientTag - 1].Span;
+
+        return new RSAParameters
+        {
+            P = primeP.ToArray(),
+            Q = primeQ.ToArray(),
+            DP = exponentP.ToArray(),
+            DQ = exponentQ.ToArray(),
+            InverseQ = coefficient.ToArray(),
+            // The YubiKey only works with the CRT components of the private RSA key,
+            // that's why we set these values as empty.
+            D = Array.Empty<byte>(),
+            Modulus = Array.Empty<byte>(),
+            Exponent = Array.Empty<byte>(),
+        };
     }
 }

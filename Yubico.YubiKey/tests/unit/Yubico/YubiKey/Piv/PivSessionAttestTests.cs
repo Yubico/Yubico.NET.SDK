@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Piv
                 }
             };
 
-            var privateKey = new EmptyPrivateKeyParameters();
+            var privateKey = new EmptyPrivateKey();
 #pragma warning disable SYSLIB0026
             var cert = new X509Certificate2();
 #pragma warning restore SYSLIB0026
@@ -113,7 +113,7 @@ namespace Yubico.YubiKey.Piv
 
             using var pivSession = new PivSession(yubiKey);
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => pivSession.ReplaceAttestationKeyAndCertificate((IPrivateKeyParameters)null!, cert!));
+            _ = Assert.Throws<ArgumentNullException>(() => pivSession.ReplaceAttestationKeyAndCertificate((IPrivateKey)null!, cert!));
 #pragma warning restore CS8625 // testing a null input.
         }
 
@@ -131,7 +131,7 @@ namespace Yubico.YubiKey.Piv
             };
 
             var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
-            var privateKey = RSAPrivateKeyParameters.CreateFromPkcs8(testKey.EncodedKey);
+            var privateKey = RSAPrivateKey.CreateFromPkcs8(testKey.EncodedKey);
 
             using var pivSession = new PivSession(yubiKey);
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
@@ -140,7 +140,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
-        [Obsolete("Replaced by IPrivateKeyParameters")]
+        [Obsolete("Replaced by IPrivateKey")]
         public void ReplaceAttest_Rsa1024_ThrowsException()
         {
             var yubiKey = new HollowYubiKeyDevice(true)
@@ -174,7 +174,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(BadAttestationPairs.KeyRsa2048CertVersion1)]
         [InlineData(BadAttestationPairs.KeyEccP256CertVersion1)]
         [InlineData(BadAttestationPairs.KeyEccP384CertVersion1)]
-        [Obsolete("Replaced by IPrivateKeyParameters")]
+        [Obsolete("Replaced by IPrivateKey")]
         public void ReplaceAttest_Version1Cert_ThrowsException(int whichPair)
         {
             var yubiKey = new HollowYubiKeyDevice(true)
@@ -204,7 +204,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
-        [Obsolete("Replaced by IPrivateKeyParameters")]
+        [Obsolete("Replaced by IPrivateKey")]
         public void ReplaceAttest_BigName_ThrowsException()
         {
             var yubiKey = new HollowYubiKeyDevice(true)

@@ -28,20 +28,20 @@ public class AsnPublicKeyReaderTests
     [InlineData(KeyType.RSA2048)]
     [InlineData(KeyType.RSA3072)]
     [InlineData(KeyType.RSA4096)]
-    public void DecodeFromSpki_WithRsaPublicKey_ReturnsCorrectParameters(KeyType keyType)
+    public void DecodeFromSpki_WithRsaPublicKey_ReturnsCorrectKey(KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(keyType);
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreateKeyParameters(keyBytes);
+        var result = AsnPublicKeyReader.CreateKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<RSAPublicKeyParameters>(result);
+        Assert.IsType<RSAPublicKey>(result);
         
-        var rsaParams = (RSAPublicKeyParameters)result;
+        var rsaParams = (RSAPublicKey)result;
         Assert.NotNull(rsaParams.Parameters.Modulus);
         Assert.NotNull(rsaParams.Parameters.Exponent);
         
@@ -52,23 +52,23 @@ public class AsnPublicKeyReaderTests
     }
 
     [Theory]
-    [InlineData(KeyType.P256)]
-    [InlineData(KeyType.P384)]
-    [InlineData(KeyType.P521)]
-    public void DecodeFromSpki_WithEcPublicKey_ReturnsCorrectParameters(KeyType keyType)
+    [InlineData(KeyType.ECP256)]
+    [InlineData(KeyType.ECP384)]
+    [InlineData(KeyType.ECP521)]
+    public void DecodeFromSpki_WithEcPublicKey_ReturnsCorrectKey(KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(keyType);
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreateKeyParameters(keyBytes);
+        var result = AsnPublicKeyReader.CreateKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<ECPublicKeyParameters>(result);
+        Assert.IsType<ECPublicKey>(result);
         
-        var ecParams = (ECPublicKeyParameters)result;
+        var ecParams = (ECPublicKey)result;
         Assert.NotNull(ecParams.Parameters.Q.X);
         Assert.NotNull(ecParams.Parameters.Q.Y);
         
@@ -79,9 +79,9 @@ public class AsnPublicKeyReaderTests
         // Verify coordinate sizes
         var expectedCoordinateSize = keyType switch
         {
-            KeyType.P256 => 32,
-            KeyType.P384 => 48,
-            KeyType.P521 => 66,
+            KeyType.ECP256 => 32,
+            KeyType.ECP384 => 48,
+            KeyType.ECP521 => 66,
             _ => throw new ArgumentOutOfRangeException(nameof(keyType))
         };
         
@@ -91,43 +91,43 @@ public class AsnPublicKeyReaderTests
     }
 
     [Fact]
-    public void DecodeFromSpki_WithX25519PublicKey_ReturnsCorrectParameters()
+    public void DecodeFromSpki_WithX25519PublicKey_ReturnsCorrectKey()
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(KeyType.X25519);
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreateKeyParameters(keyBytes);
+        var result = AsnPublicKeyReader.CreateKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<Curve25519PublicKeyParameters>(result);
+        Assert.IsType<Curve25519PublicKey>(result);
         
-        var x25519Params = (Curve25519PublicKeyParameters)result;
+        var x25519Params = (Curve25519PublicKey)result;
         Assert.NotNull(x25519Params);
         Assert.Equal(32, x25519Params.PublicPoint.Length);
-        Assert.Equal(KeyDefinitions.Oids.X25519, x25519Params.KeyDefinition.AlgorithmOid);
+        Assert.Equal(Oids.X25519, x25519Params.KeyDefinition.AlgorithmOid);
     }
 
     [Fact]
-    public void DecodeFromSpki_WithEd25519PublicKey_ReturnsCorrectParameters()
+    public void DecodeFromSpki_WithEd25519PublicKey_ReturnsCorrectKey()
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(KeyType.Ed25519);
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreateKeyParameters(keyBytes);
+        var result = AsnPublicKeyReader.CreateKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<Curve25519PublicKeyParameters>(result);
+        Assert.IsType<Curve25519PublicKey>(result);
         
-        var ed25519Params = (Curve25519PublicKeyParameters)result;
+        var ed25519Params = (Curve25519PublicKey)result;
         Assert.NotNull(ed25519Params);
         Assert.Equal(32, ed25519Params.PublicPoint.Length);
-        Assert.Equal(KeyDefinitions.Oids.Ed25519, ed25519Params.KeyDefinition.AlgorithmOid);
+        Assert.Equal(Oids.Ed25519, ed25519Params.KeyDefinition.AlgorithmOid);
     }
 
     [Fact]
@@ -143,13 +143,13 @@ public class AsnPublicKeyReaderTests
             var keyBytes = testKey.EncodedKey;
 
             // Act
-            var result = AsnPublicKeyReader.CreateKeyParameters(keyBytes);
+            var result = AsnPublicKeyReader.CreateKey(keyBytes);
 
             // Assert
             Assert.NotNull(result);
-            Assert.IsType<RSAPublicKeyParameters>(result);
+            Assert.IsType<RSAPublicKey>(result);
             
-            var rsaParams = (RSAPublicKeyParameters)result;
+            var rsaParams = (RSAPublicKey)result;
             Assert.NotNull(rsaParams.Parameters.Modulus);
             Assert.NotNull(rsaParams.Parameters.Exponent);
         }
@@ -164,7 +164,7 @@ public class AsnPublicKeyReaderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.Oids.RSA);
+                writer.WriteObjectIdentifier(Oids.RSA);
                 writer.WriteNull();
             }
             
@@ -176,7 +176,7 @@ public class AsnPublicKeyReaderTests
         var invalidKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => AsnPublicKeyReader.CreateKeyParameters(invalidKeyDer));
+        Assert.Throws<CryptographicException>(() => AsnPublicKeyReader.CreateKey(invalidKeyDer));
     }
 
     [Fact]
@@ -188,8 +188,8 @@ public class AsnPublicKeyReaderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
-                writer.WriteObjectIdentifier(KeyDefinitions.Oids.P256);
+                writer.WriteObjectIdentifier(Oids.ECDSA);
+                writer.WriteObjectIdentifier(Oids.ECP256);
             }
             
             // Create EC point data with compressed format (0x03) instead of uncompressed (0x04)
@@ -206,7 +206,7 @@ public class AsnPublicKeyReaderTests
         var invalidKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => AsnPublicKeyReader.CreateKeyParameters(invalidKeyDer));
+        Assert.Throws<CryptographicException>(() => AsnPublicKeyReader.CreateKey(invalidKeyDer));
     }
 
     [Fact]
@@ -218,7 +218,7 @@ public class AsnPublicKeyReaderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
+                writer.WriteObjectIdentifier(Oids.ECDSA);
                 // Use secp256k1 (Bitcoin curve) which isn't supported in the implementation
                 writer.WriteObjectIdentifier("1.3.132.0.10");
             }
@@ -237,7 +237,7 @@ public class AsnPublicKeyReaderTests
         var unsupportedCurveKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<NotSupportedException>(() => AsnPublicKeyReader.CreateKeyParameters(unsupportedCurveKeyDer));
+        Assert.Throws<NotSupportedException>(() => AsnPublicKeyReader.CreateKey(unsupportedCurveKeyDer));
     }
 
     [Fact]
@@ -262,12 +262,12 @@ public class AsnPublicKeyReaderTests
         var unsupportedAlgorithmKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<NotSupportedException>(() => AsnPublicKeyReader.CreateKeyParameters(unsupportedAlgorithmKeyDer));
+        Assert.Throws<NotSupportedException>(() => AsnPublicKeyReader.CreateKey(unsupportedAlgorithmKeyDer));
     }
 
     [Theory]
     [InlineData(KeyType.RSA2048)]
-    [InlineData(KeyType.P256)]
+    [InlineData(KeyType.ECP256)]
     [InlineData(KeyType.Ed25519)]
     [InlineData(KeyType.X25519)]
     public void Roundtrip_WithTestKeys_ShouldRetainKeyProperties(KeyType keyType)
@@ -277,27 +277,27 @@ public class AsnPublicKeyReaderTests
         var keyBytes = testKey.EncodedKey;
         
         // Act - Parse it with AsnPublicKeyReader
-        var result = AsnPublicKeyReader.CreateKeyParameters(keyBytes);
+        var result = AsnPublicKeyReader.CreateKey(keyBytes);
         
         // Convert to encoded format (assuming extension method or AsnPublicKeyWriter exists)
         var encodedKey = result switch
         {
-            RSAPublicKeyParameters rsaParams => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(rsaParams.Parameters),
-            ECPublicKeyParameters ecParams => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(ecParams.Parameters),
-            Curve25519PublicKeyParameters x25519Params => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(x25519Params.PublicPoint, keyType),
+            RSAPublicKey rsaParams => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(rsaParams.Parameters),
+            ECPublicKey ecParams => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(ecParams.Parameters),
+            Curve25519PublicKey x25519Params => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(x25519Params.PublicPoint, keyType),
             _ => throw new NotSupportedException($"Unsupported key type: {result.GetType()}")
         };
         
         // Parse again
-        var result2 = AsnPublicKeyReader.CreateKeyParameters(encodedKey);
+        var result2 = AsnPublicKeyReader.CreateKey(encodedKey);
         
         // Assert - Check type consistency and common properties
         Assert.Equal(result.GetType(), result2.GetType());
         
         switch (result)
         {
-            case RSAPublicKeyParameters rsaParams1:
-                var rsaParams2 = (RSAPublicKeyParameters)result2;
+            case RSAPublicKey rsaParams1:
+                var rsaParams2 = (RSAPublicKey)result2;
                 Assert.Equal(
                     Convert.ToBase64String(rsaParams1.Parameters.Modulus!), 
                     Convert.ToBase64String(rsaParams2.Parameters.Modulus!));
@@ -306,8 +306,8 @@ public class AsnPublicKeyReaderTests
                     Convert.ToBase64String(rsaParams2.Parameters.Exponent!));
                 break;
                 
-            case ECPublicKeyParameters ecParams1:
-                var ecParams2 = (ECPublicKeyParameters)result2;
+            case ECPublicKey ecParams1:
+                var ecParams2 = (ECPublicKey)result2;
                 Assert.Equal(
                     ecParams1.Parameters.Curve.Oid.Value,
                     ecParams2.Parameters.Curve.Oid.Value);
@@ -319,8 +319,8 @@ public class AsnPublicKeyReaderTests
                     Convert.ToBase64String(ecParams2.Parameters.Q.Y!));
                 break;
                 
-            case Curve25519PublicKeyParameters cvParams:
-                var edParams2 = (Curve25519PublicKeyParameters)result2;
+            case Curve25519PublicKey cvParams:
+                var edParams2 = (Curve25519PublicKey)result2;
                 Assert.Equal(
                     Convert.ToBase64String(cvParams.PublicPoint.ToArray()), 
                     Convert.ToBase64String(edParams2.PublicPoint.ToArray()));
@@ -340,14 +340,14 @@ public class AsnPublicKeyReaderTests
         var publicKeyDer = rsaPublicKey.ExportSubjectPublicKeyInfo();
         
         // Act
-        var result = AsnPublicKeyReader.CreateKeyParameters(publicKeyDer);
+        var result = AsnPublicKeyReader.CreateKey(publicKeyDer);
         
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<RSAPublicKeyParameters>(result);
+        Assert.IsType<RSAPublicKey>(result);
         
         // Verify we can use the extracted key to verify signatures
-        var rsaParams = (RSAPublicKeyParameters)result;
+        var rsaParams = (RSAPublicKey)result;
         using var rsa = RSA.Create();
         rsa.ImportParameters(rsaParams.Parameters);
     }

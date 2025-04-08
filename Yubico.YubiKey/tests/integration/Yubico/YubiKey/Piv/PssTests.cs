@@ -97,8 +97,8 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(KeyType.RSA1024, 1024)]
         [InlineData(KeyType.RSA2048, 2048)]
-        [InlineData(KeyType.P256, 256)]
-        [InlineData(KeyType.P384, 384)]
+        [InlineData(KeyType.ECP256, 256)]
+        [InlineData(KeyType.ECP384, 384)]
         public void UseKeyConverter(KeyType keyType, int keySize)
         {
             _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out var publicPem, out var privatePem);

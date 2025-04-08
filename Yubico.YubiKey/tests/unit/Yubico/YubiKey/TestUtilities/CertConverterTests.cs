@@ -28,8 +28,8 @@ namespace Yubico.YubiKey.TestUtilities
         [InlineData(KeyType.RSA2048)]
         [InlineData(KeyType.RSA3072)]
         [InlineData(KeyType.RSA4096)]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         [Obsolete("Obsolete")]
         public void CertConverter_AllOperations_Succeed(KeyType keyType)
         {

@@ -493,7 +493,7 @@ namespace Yubico.YubiKey.TestUtilities
         // exception.
         public ECDsa GetEccObject()
         {
-            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.Oids.P256);
+            var eccCurve = ECCurve.CreateFromValue(Oids.ECP256);
             if (_pivPublicKey.Algorithm != PivAlgorithm.EccP256)
             {
                 if (_pivPublicKey.Algorithm != PivAlgorithm.EccP384)
@@ -504,7 +504,7 @@ namespace Yubico.YubiKey.TestUtilities
                             RequestedKeyMessage));
                 }
 
-                eccCurve = ECCurve.CreateFromValue(KeyDefinitions.Oids.P384);
+                eccCurve = ECCurve.CreateFromValue(Oids.ECP384);
             }
 
             var eccParams = new ECParameters

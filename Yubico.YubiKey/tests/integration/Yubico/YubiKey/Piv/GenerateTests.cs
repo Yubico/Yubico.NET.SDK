@@ -38,16 +38,16 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA4096)]
         [InlineData(KeyType.Ed25519)]
         [InlineData(KeyType.X25519)]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         [InlineData(KeyType.RSA1024, true)]
         [InlineData(KeyType.RSA2048, true)]
         [InlineData(KeyType.RSA3072, true)]
         [InlineData(KeyType.RSA4096, true)]
         [InlineData(KeyType.X25519, true)]
         [InlineData(KeyType.Ed25519, true)]
-        [InlineData(KeyType.P256, true)]
-        [InlineData(KeyType.P384, true)]
+        [InlineData(KeyType.ECP256, true)]
+        [InlineData(KeyType.ECP384, true)]
         public void SimpleGenerate(
             KeyType expectedAlgorithm,
             bool useScp03 = false)
@@ -74,7 +74,7 @@ namespace Yubico.YubiKey.Piv
             Assert.True(isValid);
         }
 
-        private static IPublicKeyParameters DoGenerate(
+        private static IPublicKey DoGenerate(
             IYubiKeyDevice yubiKey,
             byte slotNumber,
             KeyType keyType,
@@ -205,13 +205,13 @@ namespace Yubico.YubiKey.Piv
                 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
             },
 
-            KeyType.P256 => new byte[]
+            KeyType.ECP256 => new byte[]
             {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
                 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
             },
 
-            KeyType.P384 => new byte[]
+            KeyType.ECP384 => new byte[]
             {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
                 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,

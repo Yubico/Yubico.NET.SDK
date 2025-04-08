@@ -15,7 +15,6 @@
 using System;
 using System.Globalization;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -167,23 +166,6 @@ namespace Yubico.YubiKey.Piv.Commands
             SlotNumber = slotNumber;
             Algorithm = algorithm;
         }
-        
-        /// <summary>
-        /// Constructs a GenerateKeyPairResponse based on a ResponseApdu received from
-        /// the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The object containing the response APDU<br/>returned by the YubiKey.
-        /// </param>
-        /// <param name="slotNumber">
-        /// The slot for which the key pair was generated.
-        /// </param>
-        public GenerateKeyPairResponse(
-            ResponseApdu responseApdu,
-            byte slotNumber) : base(responseApdu)
-        {
-            SlotNumber = slotNumber;
-        }
 
         public Memory<byte> Data => ResponseApdu.Data.ToArray();
 
@@ -211,7 +193,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public PivPublicKey GetData() =>
             Status switch
             {
-                ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data),
+                ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data, Algorithm),
                 _ => throw new InvalidOperationException(StatusMessage),
             };
     }

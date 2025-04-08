@@ -267,7 +267,7 @@ namespace Yubico.YubiKey.Piv
                     ExceptionMessages.IncorrectCiphertextLength));
         }
         
-        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKeyParameters, IPrivateKeyParameters, ECPublicKeyParameters or ECPrivateKeyParameters instead")]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey, ECPublicKey or ECPrivateKeyParameters instead")]
         public byte[] KeyAgree(byte slotNumber, PivPublicKey correspondentPublicKey)
         {
             if (correspondentPublicKey is null)
@@ -382,7 +382,7 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="SecurityException">
         /// The remaining retries count indicates the PIN is blocked.
         /// </exception>
-        public byte[] KeyAgree(byte slotNumber, IPublicKeyParameters correspondentPublicKey)
+        public byte[] KeyAgree(byte slotNumber, IPublicKey correspondentPublicKey)
         {
             if (correspondentPublicKey is null)
             {
@@ -391,8 +391,8 @@ namespace Yubico.YubiKey.Piv
 
             byte[] publicPoint = correspondentPublicKey switch
             {
-                ECPublicKeyParameters ecDsa => ecDsa.PublicPoint.ToArray(),
-                Curve25519PublicKeyParameters edDsa when correspondentPublicKey.KeyDefinition.KeyType == KeyType.X25519 
+                ECPublicKey ecDsa => ecDsa.PublicPoint.ToArray(),
+                Curve25519PublicKey edDsa when correspondentPublicKey.KeyType == KeyType.X25519 
                     => edDsa.PublicPoint.ToArray(),
                 _ => throw new ArgumentException(
                     string.Format(

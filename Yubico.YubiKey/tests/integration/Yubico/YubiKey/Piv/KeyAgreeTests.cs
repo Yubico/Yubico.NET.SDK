@@ -25,11 +25,12 @@ namespace Yubico.YubiKey.Piv
     public class KeyAgreeTests
     {
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(KeyType.P256, PivPinPolicy.Always, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P256, PivPinPolicy.Never, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P384, PivPinPolicy.Always, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P384, PivPinPolicy.Never, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, PivPinPolicy.Always, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, PivPinPolicy.Never, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, PivPinPolicy.Always, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, PivPinPolicy.Never, StandardTestDevice.Fw5)]
         [InlineData(KeyType.X25519, PivPinPolicy.Never, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.X25519, PivPinPolicy.Always, StandardTestDevice.Fw5)]
         public void KeyAgree_Succeeds(
             KeyType keyType,
             PivPinPolicy pinPolicy,
@@ -38,14 +39,14 @@ namespace Yubico.YubiKey.Piv
             // Arrange
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            var privateKeyParameters = AsnPrivateKeyReader.CreateKeyParameters(testPrivateKey.EncodedKey);
-            IPublicKeyParameters peerPublicKey;
+            var privateKeyParameters = AsnPrivateKeyReader.CreateKey(testPrivateKey.EncodedKey);
+            IPublicKey peerPublicKey;
             var peerPrivateKeyEcParameters = new ECParameters();
 
             if (keyType is KeyType.X25519)
             {
                 var testSelectedPublicKeyPeer = TestKeys.GetTestPublicKey(keyType, 2);
-                peerPublicKey = Curve25519PublicKeyParameters.CreateFromPkcs8(testSelectedPublicKeyPeer.EncodedKey);
+                peerPublicKey = Curve25519PublicKey.CreateFromPkcs8(testSelectedPublicKeyPeer.EncodedKey);
             }
             else
             {
@@ -53,7 +54,7 @@ namespace Yubico.YubiKey.Piv
                 var ecDsa = ECDsa.Create(curve);
                 peerPrivateKeyEcParameters = ecDsa.ExportParameters(true);
                 var peerPublicKeyEcParameters = ecDsa.ExportParameters(false);
-                peerPublicKey = ECPublicKeyParameters.CreateFromParameters(peerPublicKeyEcParameters);
+                peerPublicKey = ECPublicKey.CreateFromParameters(peerPublicKeyEcParameters);
             }
 
             // -> Import Private Key
@@ -85,14 +86,14 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(KeyType.P256, 0x8a, RsaFormat.Sha1, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P256, 0x8a, RsaFormat.Sha256, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P256, 0x8a, RsaFormat.Sha384, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P256, 0x8a, RsaFormat.Sha512, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P384, 0x8b, RsaFormat.Sha1, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P384, 0x8b, RsaFormat.Sha256, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P384, 0x8b, RsaFormat.Sha384, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.P384, 0x8b, RsaFormat.Sha512, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, 0x8a, RsaFormat.Sha1, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, 0x8a, RsaFormat.Sha256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, 0x8a, RsaFormat.Sha384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, 0x8a, RsaFormat.Sha512, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, 0x8b, RsaFormat.Sha1, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, 0x8b, RsaFormat.Sha256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, 0x8b, RsaFormat.Sha384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, 0x8b, RsaFormat.Sha512, StandardTestDevice.Fw5)]
         [Obsolete("Fix later")] // TODO
         public void KeyAgree_MatchesCSharp(
             KeyType keyType,
@@ -161,7 +162,7 @@ namespace Yubico.YubiKey.Piv
         public void NoKeyInSlot_KeyAgree_Exception(
             StandardTestDevice testDeviceType)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.P384, false, out _, out var publicKeyPem, out _);
+            _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.ECP384, false, out _, out var publicKeyPem, out _);
             var publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
             var pivPublicKey = publicKey.GetPivPublicKey();
 

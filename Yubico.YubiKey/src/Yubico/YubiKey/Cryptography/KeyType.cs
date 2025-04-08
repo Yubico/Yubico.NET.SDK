@@ -19,16 +19,17 @@ namespace Yubico.YubiKey.Cryptography;
 /// </summary>
 public enum KeyType
 {
-    P256,
-    P384,
-    P521,
+    None,
+    ECP256,
+    ECP384,
+    ECP521,
     X25519,
     Ed25519,
     RSA1024,
     RSA2048,
     RSA3072,
     RSA4096,
-    TripleDes,
+    TripleDES,
     AES128,
     AES192,
     AES256

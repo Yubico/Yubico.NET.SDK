@@ -78,13 +78,13 @@ namespace Yubico.YubiKey.Piv
         // Verify that the mgmt key is the default.
         [Theory]
         [InlineData(PivPinOnlyMode.PinProtected, KeyType.AES128, PivPinOnlyMode.PinDerivedUnavailable)]
-        [InlineData(PivPinOnlyMode.PinDerived, KeyType.TripleDes, PivPinOnlyMode.PinProtectedUnavailable)]
+        [InlineData(PivPinOnlyMode.PinDerived, KeyType.TripleDES, PivPinOnlyMode.PinProtectedUnavailable)]
         [InlineData(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, KeyType.AES192, PivPinOnlyMode.None)]
         [InlineData(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, KeyType.AES128, PivPinOnlyMode.PinDerivedUnavailable)]
         public void ResetToNone_Success(
             PivPinOnlyMode mode, KeyType keyType, PivPinOnlyMode unavailable)
         {
-            if (!_alternateAlgorithm && keyType != KeyType.TripleDes)
+            if (!_alternateAlgorithm && keyType != KeyType.TripleDES)
             {
                 return;
             }
@@ -114,7 +114,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(_yubiKey))
             {
-                Assert.Equal(KeyType.TripleDes.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 bool isValid = pivSession.TryAuthenticateManagementKey(_defaultManagementKey);
                 Assert.True(isValid);
@@ -155,7 +155,7 @@ namespace Yubico.YubiKey.Piv
             {
                 pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.None, KeyType.TripleDes.GetPivAlgorithm());
+                pivSession.SetPinOnlyMode(PivPinOnlyMode.None, KeyType.TripleDES.GetPivAlgorithm());
 
                 PivPinOnlyMode expectedMode = GetExpectedMode(PivPinOnlyMode.None, unavailable);
                 PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
@@ -176,7 +176,7 @@ namespace Yubico.YubiKey.Piv
             {
                 pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.SetPinOnlyMode(mode, KeyType.TripleDes.GetPivAlgorithm());
+                pivSession.SetPinOnlyMode(mode, KeyType.TripleDES.GetPivAlgorithm());
             }
 
             using (var pivSession = new PivSession(_yubiKey))

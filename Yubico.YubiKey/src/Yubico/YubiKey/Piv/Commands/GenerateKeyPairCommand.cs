@@ -331,8 +331,8 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <inheritdoc />
         public GenerateKeyPairResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            #pragma warning disable CS0618 // Type or member is obsolete TODO handle obsolete methdo
+#pragma warning disable CS0618 // Type or member is obsolete TODO handle obsolete methdo
             new GenerateKeyPairResponse(responseApdu, SlotNumber, Algorithm);
-        #pragma warning restore CS0618 // Type or member is obsolete
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 }

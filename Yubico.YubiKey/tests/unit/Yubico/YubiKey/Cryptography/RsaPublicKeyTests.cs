@@ -3,11 +3,12 @@ using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {
-    public class RSAPublicKeyParametersTests
+    public class RsaPublicKeyTests
     {
         [Fact]
         public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()
@@ -18,7 +19,7 @@ namespace Yubico.YubiKey.Cryptography
             var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
 
             // Act
-            var publicKeyParams = KeyParametersPivHelper.CreatePublicRsaFromPivEncoding(pivPublicKeyEncoded);
+            var publicKeyParams = PivEncodingToKey.CreateRSAPublicKey(pivPublicKeyEncoded);
             var resultParameters = publicKeyParams.Parameters;
 
             // Assert
@@ -39,7 +40,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = rsa.ExportParameters(false);
 
             // Act
-            var publicKeyParams = RSAPublicKeyParameters.CreateFromParameters(parameters);
+            var publicKeyParams = RSAPublicKey.CreateFromParameters(parameters);
 
             // Assert
             Assert.Null(publicKeyParams.Parameters.D);
@@ -55,7 +56,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = rsa.ExportParameters(true);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => RSAPublicKeyParameters.CreateFromParameters(parameters));
+            Assert.Throws<ArgumentException>(() => RSAPublicKey.CreateFromParameters(parameters));
         }
 
         [Fact]
@@ -66,7 +67,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = rsa.ExportParameters(false);
 
             // Act
-            var publicKeyParams = RSAPublicKeyParameters.CreateFromParameters(parameters);
+            var publicKeyParams = RSAPublicKey.CreateFromParameters(parameters);
 
             // Assert
             Assert.Null(publicKeyParams.Parameters.D);
@@ -80,7 +81,7 @@ namespace Yubico.YubiKey.Cryptography
             // Arrange
             using var rsa = RSA.Create(2048);
             var originalParams = rsa.ExportParameters(false);
-            var publicKeyParams = RSAPublicKeyParameters.CreateFromParameters(originalParams);
+            var publicKeyParams = RSAPublicKey.CreateFromParameters(originalParams);
 
             // Act - Modify original parameters
             Assert.NotNull(originalParams.Modulus);
@@ -103,7 +104,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = testPublicKey.AsRSA().ExportParameters(false);
             
             // Act
-            var publicKeyParams = RSAPublicKeyParameters.CreateFromParameters(parameters);
+            var publicKeyParams = RSAPublicKey.CreateFromParameters(parameters);
 
             // Act
             var subjectPublicKeyInfo = publicKeyParams.ExportSubjectPublicKeyInfo();
@@ -136,7 +137,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = rsa.ExportParameters(false);
 
             // Act
-            var publicKeyParams = RSAPublicKeyParameters.CreateFromParameters(parameters);
+            var publicKeyParams = RSAPublicKey.CreateFromParameters(parameters);
 
             // Assert
             Assert.Equal(keySize, rsa.KeySize);

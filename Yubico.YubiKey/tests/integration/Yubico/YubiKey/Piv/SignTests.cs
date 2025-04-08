@@ -22,7 +22,6 @@ using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
-using ECPrivateKeyParameters = Yubico.YubiKey.Cryptography.ECPrivateKeyParameters;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -47,7 +46,7 @@ namespace Yubico.YubiKey.Piv
             var signature = pivSession.Sign(PivSlot.Retired12, dataToSign);
 
             // -> Verify the signature
-            var bouncyKeyParameters = GetBouncyKeyParameters(publicKeyParameters);
+            var bouncyKeyParameters = GetBouncyCastleKeyParameters(publicKeyParameters);
             var verifier = new Ed25519Signer();
             verifier.Init(false, bouncyKeyParameters);
             verifier.BlockUpdate(dataToSign, 0, dataToSign.Length);
@@ -63,14 +62,14 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048)]
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072)]
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096)]
-        [InlineData(StandardTestDevice.Fw5, KeyType.P256)]
-        [InlineData(StandardTestDevice.Fw5, KeyType.P384)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP256)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP384)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA1024)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA2048)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA3072)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096)]
-        [InlineData(StandardTestDevice.Fw5Fips, KeyType.P256)]
-        [InlineData(StandardTestDevice.Fw5Fips, KeyType.P384)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.ECP256)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.ECP384)]
         public async Task Sign_with_RSAandECDsa_Succeeds( // TODO Tests are flaky
             StandardTestDevice testDeviceType,
             KeyType keyType)
@@ -84,7 +83,7 @@ namespace Yubico.YubiKey.Piv
                 KeyType.RSA2048 => new byte[256],
                 KeyType.RSA3072 => new byte[384],
                 KeyType.RSA4096 => new byte[512],
-                KeyType.P256 => new byte[32],
+                KeyType.ECP256 => new byte[32],
                 _ => new byte[48],
             };
 
@@ -243,8 +242,8 @@ namespace Yubico.YubiKey.Piv
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5, KeyType.P256, 0x94)]
-        [InlineData(StandardTestDevice.Fw5Fips, KeyType.P384, 0x95)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP256, 0x94)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.ECP384, 0x95)]
         [Obsolete("Use the keyparameters method instead")]
         public void SignEcc_VerifyCSharp_CorrectObsolete(
             StandardTestDevice testDeviceType,
@@ -256,13 +255,13 @@ namespace Yubico.YubiKey.Piv
 
             var hashAlgorithm = keyType switch
             {
-                KeyType.P256 => HashAlgorithmName.SHA256,
+                KeyType.ECP256 => HashAlgorithmName.SHA256,
                 _ => HashAlgorithmName.SHA384,
             };
 
             using HashAlgorithm digester = keyType switch
             {
-                KeyType.P256 => CryptographyProviders.Sha256Creator(),
+                KeyType.ECP256 => CryptographyProviders.Sha256Creator(),
                 _ => CryptographyProviders.Sha384Creator(),
             };
 
@@ -300,8 +299,8 @@ namespace Yubico.YubiKey.Piv
 
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5, KeyType.P256, 0x94)]
-        [InlineData(StandardTestDevice.Fw5Fips, KeyType.P384, 0x95)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP256, 0x94)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.ECP384, 0x95)]
         public void SignEcc_VerifyCSharp_Correct(
             StandardTestDevice testDeviceType,
             KeyType keyType,
@@ -312,13 +311,13 @@ namespace Yubico.YubiKey.Piv
 
             var hashAlgorithm = keyType switch
             {
-                KeyType.P256 => HashAlgorithmName.SHA256,
+                KeyType.ECP256 => HashAlgorithmName.SHA256,
                 _ => HashAlgorithmName.SHA384,
             };
 
             using HashAlgorithm digester = keyType switch
             {
-                KeyType.P256 => CryptographyProviders.Sha256Creator(),
+                KeyType.ECP256 => CryptographyProviders.Sha256Creator(),
                 _ => CryptographyProviders.Sha384Creator(),
             };
 
@@ -326,7 +325,7 @@ namespace Yubico.YubiKey.Piv
 
             // _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out var pubKeyPem, out var priKeyPem);
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
-            var privateKey = ECPrivateKeyParameters.CreateFromPkcs8(testPrivateKey.EncodedKey);
+            var privateKey = ECPrivateKey.CreateFromPkcs8(testPrivateKey.EncodedKey);
             try
             {
                 IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
@@ -394,7 +393,7 @@ namespace Yubico.YubiKey.Piv
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
             var testKey = TestKeys.GetTestPrivateKey(keyType);
-            var privateKey = AsnPrivateKeyReader.CreateKeyParameters(testKey.EncodedKey);
+            var privateKey = AsnPrivateKeyReader.CreateKey(testKey.EncodedKey);
             pivSession.ImportPrivateKey(slotNumber, privateKey, pinPolicy, touchPolicy);
 
             await Task.Delay(200);
@@ -447,11 +446,11 @@ namespace Yubico.YubiKey.Piv
             return true;
         }
         
-        private static Ed25519PublicKeyParameters GetBouncyKeyParameters(IPublicKeyParameters publicKeyParameters)
+        private static Ed25519PublicKeyParameters GetBouncyCastleKeyParameters(IPublicKey publicKey)
         {
             var bouncyEd25519PublicKey =
                 new Ed25519PublicKeyParameters(
-                    ((Curve25519PublicKeyParameters)publicKeyParameters).PublicPoint.ToArray());
+                    ((Curve25519PublicKey)publicKey).PublicPoint.ToArray());
             return bouncyEd25519PublicKey;
         }
 

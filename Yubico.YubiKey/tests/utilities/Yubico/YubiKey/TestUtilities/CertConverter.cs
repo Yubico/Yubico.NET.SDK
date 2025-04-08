@@ -194,7 +194,7 @@ namespace Yubico.YubiKey.TestUtilities
                 {
                     throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
                 }
-                eccCurve = ECCurve.CreateFromValue(KeyDefinitions.Oids.P384);
+                eccCurve = ECCurve.CreateFromValue(Oids.ECP384);
             }
             var eccParams = new ECParameters
             {

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
@@ -36,6 +35,25 @@ internal static class AsnUtilities
     {
         var keyDef = KeyDefinitions.GetByOid(curveOid);
         return keyDef.LengthInBytes;
+    }
+
+    // Ensures the integer value is treated as positive by adding a leading zero if needed
+    public static byte[] EnsurePositive(byte[]? value)
+    {
+        if (value == null || value.Length == 0)
+        {
+            return [];
+        }
+        // Check if the most significant bit is set, indicating a negative number in two's complement
+        if ((value[0] & 0x80) != 0)
+        {
+            byte[] padded = new byte[value.Length + 1];
+            padded[0] = 0x0; // Add leading zero
+            Buffer.BlockCopy(value, 0, padded, 1, value.Length);
+            return padded;
+        }
+
+        return value;
     }
 
     public static Span<byte> GetIntegerBytes(Span<byte> value)

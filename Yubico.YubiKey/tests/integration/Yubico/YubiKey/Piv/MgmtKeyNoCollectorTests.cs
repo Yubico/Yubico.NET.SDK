@@ -42,8 +42,8 @@ namespace Yubico.YubiKey.Piv
             Assert.True(pivSession.ManagementKeyAuthenticated);
             Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated, pivSession.ManagementKeyAuthenticationResult);
 
-            var publicKey = pivSession.GenerateKeyPair(0x86, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.None);
-            Assert.Equal(KeyType.P256, publicKey.KeyType);
+            var publicKey = pivSession.GenerateKeyPair(0x86, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.None);
+            Assert.Equal(KeyType.ECP256, publicKey.KeyType);
         }
 
         [Theory]
@@ -72,8 +72,8 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated, pivSession.ManagementKeyAuthenticationResult);
 
-                var publicKey = pivSession.GenerateKeyPair(0x86, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.None);
-                Assert.Equal(KeyType.P256, publicKey.KeyType);
+                var publicKey = pivSession.GenerateKeyPair(0x86, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.None);
+                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
             }
 
             using (var pivSession = new PivSession(testDevice))
@@ -90,8 +90,8 @@ namespace Yubico.YubiKey.Piv
                 bool isValid = pivSession.TryAuthenticateManagementKey(newKey);
                 Assert.True(isValid);
 
-                var publicKey = pivSession.GenerateKeyPair(0x87, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.None);
-                Assert.Equal(KeyType.P256, publicKey.KeyType);
+                var publicKey = pivSession.GenerateKeyPair(0x87, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.None);
+                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
             }
         }
     }

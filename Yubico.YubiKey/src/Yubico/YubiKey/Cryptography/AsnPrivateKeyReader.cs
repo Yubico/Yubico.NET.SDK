@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Cryptography;
 
 internal class AsnPrivateKeyReader
 {
-    public static IPrivateKeyParameters CreateKeyParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    public static IPrivateKey CreateKey(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
         var seqPrivateKeyInfo = reader.ReadSequence();
@@ -38,7 +38,7 @@ internal class AsnPrivateKeyReader
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
         switch (oidAlgorithm)
         {
-            case KeyDefinitions.Oids.RSA:
+            case Oids.RSA:
                 {
                     if (seqAlgorithmIdentifier.HasData)
                     {
@@ -47,17 +47,17 @@ internal class AsnPrivateKeyReader
                     }
 
                     var rsaParameters = CreateRSAParameters(pkcs8EncodedKey);
-                    return RSAPrivateKeyParameters.CreateFromParameters(rsaParameters);
+                    return RSAPrivateKey.CreateFromParameters(rsaParameters);
                 }
-            case KeyDefinitions.Oids.ECDSA:
+            case Oids.ECDSA:
                 {
                     var ecParams = CreateECParameters(pkcs8EncodedKey);
-                    return ECPrivateKeyParameters.CreateFromParameters(ecParams);
+                    return ECPrivateKey.CreateFromParameters(ecParams);
                 }
-            case KeyDefinitions.Oids.X25519:
-            case KeyDefinitions.Oids.Ed25519:
+            case Oids.X25519:
+            case Oids.Ed25519:
                 {
-                    return Curve25519PrivateKeyParameters.CreateFromPkcs8(pkcs8EncodedKey);
+                    return Curve25519PrivateKey.CreateFromPkcs8(pkcs8EncodedKey);
                 }
         }
 
@@ -67,9 +67,47 @@ internal class AsnPrivateKeyReader
                 ExceptionMessages.UnsupportedAlgorithm));
     }
 
-    public static Curve25519PrivateKeyParameters CreateCurve25519Parameters(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
-        Curve25519PrivateKeyParameters.CreateFromPkcs8(pkcs8EncodedKey);
+    public static Curve25519PrivateKey CreateCurve25519Key(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
+        Curve25519PrivateKey.CreateFromPkcs8(pkcs8EncodedKey);
 
+    public static (byte[], KeyType) GetCurve25519PrivateKeyData(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    {
+        var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
+        var seqPrivateKeyInfo = reader.ReadSequence();
+        var version = seqPrivateKeyInfo.ReadInteger();
+        if (version != 0)
+        {
+            throw new CryptographicException("Invalid PKCS#8 private key format: unexpected version");
+        }
+
+        var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
+        string algorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
+        if (!Oids.IsCurve25519Algorithm(algorithmOid))
+        {
+            throw new ArgumentException(
+                "Invalid curve OID. Must be: " + Oids.X25519 + " or " +
+                Oids.Ed25519);
+        }
+
+        using var privateKeyDataHandle = new ZeroingMemoryHandle(seqPrivateKeyInfo.ReadOctetString());
+        var seqPrivateKey = new AsnReader(privateKeyDataHandle.Data, AsnEncodingRules.DER);
+        var tag = seqPrivateKey.PeekTag();
+        if (tag.TagValue != 4 || tag.TagClass != TagClass.Universal)
+        {
+            throw new CryptographicException("Invalid Curve25519 private key");
+        }
+
+        byte[] privateKey = seqPrivateKey.ReadOctetString();
+        if (privateKey.Length != 32)
+        {
+            throw new CryptographicException("Invalid Curve25519 private key: incorrect length");
+        }
+        seqPrivateKeyInfo.ThrowIfNotEmpty();
+
+
+        var keyDefinition = KeyDefinitions.GetByOid(algorithmOid);
+        return (privateKey, keyDefinition.KeyType);
+    }
     public static ECParameters CreateECParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
@@ -84,7 +122,7 @@ internal class AsnPrivateKeyReader
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != KeyDefinitions.Oids.ECDSA)
+        if (oidAlgorithm != Oids.ECDSA)
         {
             throw new InvalidOperationException(
                 string.Format(
@@ -94,9 +132,9 @@ internal class AsnPrivateKeyReader
 
         string curveOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
         if (curveOid is not (
-            KeyDefinitions.Oids.P256 or
-            KeyDefinitions.Oids.P384 or
-            KeyDefinitions.Oids.P521))
+            Oids.ECP256 or
+            Oids.ECP384 or
+            Oids.ECP521))
         {
             throw new InvalidOperationException(
                 string.Format(
@@ -160,16 +198,12 @@ internal class AsnPrivateKeyReader
             }
         }
 
-        var curve = ECCurve.CreateFromValue(curveOid);
-        byte[] privateKey = privateKeyHandle.Data.ToArray();
-        var ecParams = new ECParameters
+        return new ECParameters
         {
-            Curve = curve,
-            D = privateKey,
+            Curve = ECCurve.CreateFromValue(curveOid),
+            D = privateKeyHandle.Data.ToArray(),
             Q = point
         };
-
-        return ecParams;
     }
 
     public static RSAParameters CreateRSAParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
@@ -186,7 +220,7 @@ internal class AsnPrivateKeyReader
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
         string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != KeyDefinitions.Oids.RSA)
+        if (oidAlgorithm != Oids.RSA)
         {
             throw new InvalidOperationException(
                 string.Format(

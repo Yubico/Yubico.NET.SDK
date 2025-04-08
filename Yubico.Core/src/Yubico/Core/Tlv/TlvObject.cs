@@ -116,10 +116,9 @@ namespace Yubico.Core.Tlv
         }
         
         /// <inheritdoc cref="TlvObject.Parse(ReadOnlySpan{byte})"/> 
-        // public static TlvObject Parse(ReadOnlyMemory<byte> data) => Parse(data.Span);
-        
         public static bool TryParse(ReadOnlySpan<byte> data, [NotNullWhen(true)] out TlvObject? tlvObject)
         {
+            // Poor man's TryParse
             tlvObject = null;
             try
             {

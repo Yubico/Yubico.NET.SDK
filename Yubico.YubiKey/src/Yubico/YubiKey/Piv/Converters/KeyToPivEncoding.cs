@@ -17,33 +17,16 @@ using System.Globalization;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Piv;
+namespace Yubico.YubiKey.Piv.Converters;
 
-public static class KeyParametersPivExtensions
+/// <summary>
+/// This class contains methods to convert between the different key parameters and the PIV format.
+/// </summary>
+public static class KeyToPivEncoding
 {
-    public static Memory<byte> ToPivEncodedPrivateKey(this IPrivateKeyParameters parameters)
-    {
-        return parameters switch
-        {
-            ECPrivateKeyParameters p => EncodeECPrivateKeyParameters(p),
-            RSAPrivateKeyParameters p => EncodeRSAPrivateKeyParameters(p),
-            Curve25519PrivateKeyParameters p => EncodeCurve25519PrivateKeyParameters(p),
-            _ => throw new ArgumentException("Unsupported key type.", nameof(parameters))
-        };
-    }
+    #region PublicKeys
 
-    public static Memory<byte> ToPivEncodedPublicKey(this IPublicKeyParameters parameters)
-    {
-        return parameters switch
-        {
-            ECPublicKeyParameters p => EncodeECPublicKeyParameters(p),
-            RSAPublicKeyParameters p => EncodeRSAPublicKeyParameters(p),
-            Curve25519PublicKeyParameters p => EncodeCurve25519PublicKeyParameters(p),
-            _ => throw new ArgumentException("Unsupported key type.", nameof(parameters))
-        };
-    }
-
-    private static Memory<byte> EncodeRSAPublicKeyParameters(RSAPublicKeyParameters parameters)
+    public static Memory<byte> EncodeRSAPublicKey(RSAPublicKey parameters)
     {
         var rsaParameters = parameters.Parameters;
         var tlvWriter = new TlvWriter();
@@ -56,20 +39,40 @@ public static class KeyParametersPivExtensions
         return tlvWriter.Encode();
     }
 
-    private static Memory<byte> EncodeCurve25519PublicKeyParameters(Curve25519PublicKeyParameters parameters) =>
-        new TlvObject(PivConstants.PublicECTag, parameters.PublicPoint.Span).GetBytes();
+    public static Memory<byte> EncodeCurve25519PublicKey(Curve25519PublicKey parameters)
+    {
+        var tlvWriter = new TlvWriter();
+        using (tlvWriter.WriteNestedTlv(PivConstants.PublicKeyTag))
+        {
+            tlvWriter.WriteValue(PivConstants.PublicECTag, parameters.PublicPoint.Span);
+        }
 
-    private static Memory<byte> EncodeECPublicKeyParameters(ECPublicKeyParameters parameters) =>
-        new TlvObject(PivConstants.PublicECTag, parameters.PublicPoint.Span).GetBytes();
+        return tlvWriter.Encode();
+    }
 
-    private static Memory<byte> EncodeECPrivateKeyParameters(ECPrivateKeyParameters parameters)
+    public static Memory<byte> EncodeECPublicKey(ECPublicKey parameters)
+    {
+        var tlvWriter = new TlvWriter();
+        using (tlvWriter.WriteNestedTlv(PivConstants.PublicKeyTag))
+        {
+            tlvWriter.WriteValue(PivConstants.PublicECTag, parameters.PublicPoint.Span);
+        }
+
+        return tlvWriter.Encode();
+    }
+
+    #endregion
+
+    #region PrivateKeys
+
+    public static Memory<byte> EncodeECPrivateKey(ECPrivateKey parameters)
     {
         var tlvWriter = new TlvWriter();
         tlvWriter.WriteValue(PivConstants.PrivateECDsaTag, parameters.Parameters.D);
         return tlvWriter.Encode();
     }
 
-    private static Memory<byte> EncodeRSAPrivateKeyParameters(RSAPrivateKeyParameters parameters)
+    public static Memory<byte> EncodeRSAPrivateKey(RSAPrivateKey parameters)
     {
         var rsaParameters = parameters.Parameters;
         if (rsaParameters.P.Length != rsaParameters.Q.Length ||
@@ -92,7 +95,7 @@ public static class KeyParametersPivExtensions
         return tlvWriter.Encode();
     }
 
-    private static Memory<byte> EncodeCurve25519PrivateKeyParameters(Curve25519PrivateKeyParameters parameters)
+    public static Memory<byte> EncodeCurve25519PrivateKey(Curve25519PrivateKey parameters)
     {
         var tlvWriter = new TlvWriter();
         int typeTag = parameters.KeyType == KeyType.Ed25519
@@ -102,4 +105,6 @@ public static class KeyParametersPivExtensions
         tlvWriter.WriteValue(typeTag, parameters.PrivateKey.Span);
         return tlvWriter.Encode();
     }
+
+    #endregion
 }

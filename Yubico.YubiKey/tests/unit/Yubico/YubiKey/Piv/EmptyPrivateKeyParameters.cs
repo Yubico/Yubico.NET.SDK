@@ -13,13 +13,20 @@
 // limitations under the License.
 
 using System;
+using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Cryptography;
+namespace Yubico.YubiKey.Piv;
 
-internal class EmptyPublicKeyParameters : IPublicKeyParameters
+internal class EmptyPrivateKey: IPrivateKey
 {
     public KeyDefinition KeyDefinition { get; } = new();
     public KeyType KeyType { get; }
-    public static ReadOnlyMemory<byte> PublicPoint => Array.Empty<byte>();
-    public byte[] ExportSubjectPublicKeyInfo() => Array.Empty<byte>();
+    public byte[] ExportPkcs8PrivateKey() => Array.Empty<byte>();
+
+    public static ReadOnlyMemory<byte> PrivateKey => Array.Empty<byte>();
+    public void Clear() { }
+
+    public void Dispose()
+    {
+    }
 }

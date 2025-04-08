@@ -21,73 +21,14 @@ namespace Yubico.YubiKey.TestUtilities
 {
     public class TestKeysTests
     {
-        // [Theory]
-        // [InlineData(KeyType.RSA1024)]
-        // [InlineData(KeyType.RSA2048)]
-        // [InlineData(KeyType.RSA3072)]
-        // [InlineData(KeyType.RSA4096)]
-        // public void TestKey_GetModulusAndExponent_ReturnsCorrectValues(
-        //     KeyType keyType)
-        // {
-        //     var key = TestKeys.GetTestPublicKey(keyType);
-        //     Assert.NotNull(key);
-        //
-        //     var modulus = key.GetModulus();
-        //     var exponent = key.GetExponent();
-        //     Assert.NotNull(modulus);
-        //     Assert.NotNull(exponent);
-        //
-        //
-        //     byte[] expectedModulus, expectedExponent;
-        //     switch (keyType)
-        //     {
-        //         // TODO supply actual public key data, this is theprivate 
-        //         case KeyType.RSA1024:
-        //             expectedModulus =
-        //             [
-        //             ];
-        //             expectedExponent =
-        //             [
-        //             ];
-        //             break;
-        //         case KeyType.RSA2048:
-        //             expectedModulus =
-        //             [
-        //             ];
-        //             expectedExponent =
-        //             [
-        //             ];
-        //             break;
-        //         case KeyType.RSA3072:
-        //             expectedModulus =
-        //             [
-        //             ];
-        //             expectedExponent =
-        //             [
-        //             ];
-        //             break;
-        //         case KeyType.RSA4096:
-        //             expectedModulus =
-        //             [
-        //             ];
-        //             expectedExponent =
-        //             [
-        //             ];
-        //             break;
-        //
-        //         default:
-        //             throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null);
-        //     }
-        // }
-
         [Theory]
         // [InlineData(KeyType.RSA1024)]
         // [InlineData(KeyType.RSA2048)]
         // [InlineData(KeyType.RSA3072)]
         // [InlineData(KeyType.RSA4096)]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
-        [InlineData(KeyType.P521)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [InlineData(KeyType.ECP521)]
         [InlineData(KeyType.Ed25519)]
         [InlineData(KeyType.X25519)]
         public void TestKey_GetPublicKey_ReturnsCorrectPublicKey(
@@ -102,8 +43,7 @@ namespace Yubico.YubiKey.TestUtilities
             byte[] expectedPublicKey;
             switch (keyType)
             {
-                // Decide what to do with leading bytes..
-                case KeyType.P256:
+                case KeyType.ECP256:
                     expectedPublicKey =
                     [
                         // 0x00, // Decide what to do with leading bytes..
@@ -114,7 +54,7 @@ namespace Yubico.YubiKey.TestUtilities
                         0xAC
                     ];
                     break;
-                case KeyType.P384:
+                case KeyType.ECP384:
                     expectedPublicKey =
                     [
                         // 0x00,
@@ -127,7 +67,7 @@ namespace Yubico.YubiKey.TestUtilities
                         0x40
                     ];
                     break;
-                case KeyType.P521:
+                case KeyType.ECP521:
                     expectedPublicKey =
                     [
                         // 0x00,
@@ -170,9 +110,9 @@ namespace Yubico.YubiKey.TestUtilities
         // [InlineData(KeyType.RSA2048)]
         // [InlineData(KeyType.RSA3072)]
         // [InlineData(KeyType.RSA4096)]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
-        [InlineData(KeyType.P521)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [InlineData(KeyType.ECP521)]
         [InlineData(KeyType.Ed25519)]
         [InlineData(KeyType.X25519)]
         public void TestKey_GetPrivateKey_ReturnsCorrectPrivateKey(
@@ -187,14 +127,14 @@ namespace Yubico.YubiKey.TestUtilities
             byte[] expectedPrivateKey;
             switch (keyType)
             {
-                case KeyType.P256:
+                case KeyType.ECP256:
                     expectedPrivateKey =
                     [
                         0x54, 0x9D, 0x2A, 0x8A, 0x03, 0xE6, 0x2D, 0xC8, 0x29, 0xAD, 0xE4, 0xD6, 0x85, 0x0D, 0xB9, 0x56,
                         0x84, 0x75, 0x14, 0x7C, 0x59, 0xEF, 0x23, 0x8F, 0x12, 0x2A, 0x08, 0xCF, 0x55, 0x7C, 0xDB, 0x91
                     ];
                     break;
-                case KeyType.P384:
+                case KeyType.ECP384:
                     expectedPrivateKey =
                     [
                         0xC7, 0x5D, 0x6B, 0x6A, 0xD3, 0xD1, 0xBC, 0x59, 0x25, 0xEB, 0xE5, 0x89, 0x7C, 0x3D, 0x63, 0xC7,
@@ -204,7 +144,7 @@ namespace Yubico.YubiKey.TestUtilities
                         0xBD, 0x3F, 0xF2, 0x48, 0xB5, 0x7E, 0x92, 0xB9, 0xEA, 0x1B
                     ];
                     break;
-                case KeyType.P521:
+                case KeyType.ECP521:
                     expectedPrivateKey =
                     [
                         0x01, 0x5D, 0xDA, 0x2E, 0x0B, 0x56, 0x65, 0x38, 0xB9, 0x2D, 0x45, 0xDC, 0xAE, 0x1F, 0xC8, 0xB4,
@@ -242,9 +182,9 @@ namespace Yubico.YubiKey.TestUtilities
         [InlineData(KeyType.RSA2048)]
         [InlineData(KeyType.RSA3072)]
         [InlineData(KeyType.RSA4096)]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
-        [InlineData(KeyType.P521)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [InlineData(KeyType.ECP521)]
         [InlineData(KeyType.Ed25519)]
         [InlineData(KeyType.X25519)]
         public void TestKey_GetKeyDefinition_ReturnsCorrectDefintion(
@@ -280,7 +220,7 @@ namespace Yubico.YubiKey.TestUtilities
         [Fact]
         public void TestKey_LoadECDsa_CanReadPublicKey()
         {
-            var key = TestKeys.GetTestPublicKey(KeyType.P384);
+            var key = TestKeys.GetTestPublicKey(KeyType.ECP384);
 
             var ecKey = key.AsECDsa();
             Assert.NotNull(ecKey);
@@ -297,7 +237,7 @@ namespace Yubico.YubiKey.TestUtilities
         [Fact]
         public void TestKey_LoadRSA_ThrowsOnECKey()
         {
-            var key = TestKeys.GetTestPublicKey(KeyType.P384);
+            var key = TestKeys.GetTestPublicKey(KeyType.ECP384);
 
             Assert.Throws<InvalidOperationException>(() => key.AsRSA());
         }

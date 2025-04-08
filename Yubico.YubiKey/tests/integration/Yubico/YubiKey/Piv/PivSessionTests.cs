@@ -128,7 +128,7 @@ namespace Yubico.YubiKey.Piv
 
                 // This should fail, the mgmt key is not authenticated.
                 var genPairCommand = new GenerateKeyPairCommand(
-                    0x86, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                    0x86, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Never);
                 GenerateKeyPairResponse genPairResponse =
                     pivSession.Connection.SendCommand(genPairCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
@@ -142,7 +142,7 @@ namespace Yubico.YubiKey.Piv
                     pivSession.ManagementKeyAuthenticationResult);
 
                 genPairCommand = new GenerateKeyPairCommand(
-                    0x86, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                    0x86, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Never);
                 genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
 
                 collectorObj.KeyFlag = 1;
@@ -166,7 +166,7 @@ namespace Yubico.YubiKey.Piv
 
                 // This should fail, the mgmt key is not authenticated.
                 var genPairCommand = new GenerateKeyPairCommand(
-                    0x86, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                    0x86, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Never);
                 GenerateKeyPairResponse genPairResponse =
                     pivSession.Connection.SendCommand(genPairCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
@@ -179,7 +179,7 @@ namespace Yubico.YubiKey.Piv
                     pivSession.ManagementKeyAuthenticationResult);
 
                 genPairCommand = new GenerateKeyPairCommand(
-                    0x86, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                    0x86, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Never);
                 genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
                 Assert.Equal(ResponseStatus.Success, genPairResponse.Status);
 
@@ -192,7 +192,7 @@ namespace Yubico.YubiKey.Piv
                     pivSession.ManagementKeyAuthenticationResult);
 
                 genPairCommand = new GenerateKeyPairCommand(
-                    0x87, KeyType.P256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                    0x87, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Never);
                 genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
 
                 Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
@@ -436,7 +436,7 @@ namespace Yubico.YubiKey.Piv
         private static bool TryGenerate(PivSession pivSession, byte slotNumber, ResponseStatus expectedStatus)
         {
             var genPairCommand = new GenerateKeyPairCommand(
-                slotNumber, KeyType.P256, PivPinPolicy.Always, PivTouchPolicy.Never);
+                slotNumber, KeyType.ECP256, PivPinPolicy.Always, PivTouchPolicy.Never);
             GenerateKeyPairResponse genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
 
             return genPairResponse.Status == expectedStatus;

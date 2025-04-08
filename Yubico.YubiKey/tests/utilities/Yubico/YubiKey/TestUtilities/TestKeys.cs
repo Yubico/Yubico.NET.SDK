@@ -107,15 +107,16 @@ namespace Yubico.YubiKey.TestUtilities
     /// </summary>
     public class TestKey : TestCrypto
     {
-        // public readonly string Curve; // TODO KeyType?
-        public readonly KeyType KeyType;
         private readonly bool _isPrivate;
+        public readonly KeyType KeyType;
+        public KeyDefinition KeyDefinition { get; private set; }
+
 
         /// <summary>
         /// Loads a test key from the TestData directory.
         /// </summary>
         /// <param name="filePath">The path to the PEM file containing the key data</param>
-        /// <param name="curve">The curve or key type (e.g., "rsa2048", "secp256r1")</param>
+        /// <param name="keyType"></param>
         /// <param name="isPrivate">True for private key, false for public key</param>
         /// <returns>A TestKey instance representing the loaded key</returns>
         private TestKey(
@@ -123,13 +124,10 @@ namespace Yubico.YubiKey.TestUtilities
             KeyType keyType,
             bool isPrivate) : base(filePath)
         {
-            // Curve = curve;
             KeyDefinition = keyType.GetKeyDefinition();
             KeyType = keyType;
             _isPrivate = isPrivate;
         }
-
-        public KeyDefinition KeyDefinition { get; private set; }
 
         public KeyDefinition GetKeyDefinition() =>
             KeyDefinitions.GetByKeyType(KeyType);
@@ -154,12 +152,12 @@ namespace Yubico.YubiKey.TestUtilities
 
         public byte[] GetPublicPoint()
         {
-            var publicKeyParameters = AsnPublicKeyReader.CreateKeyParameters(EncodedKey);
+            var publicKeyParameters = AsnPublicKeyReader.CreateKey(EncodedKey);
             return publicKeyParameters switch
             {
-                ECPublicKeyParameters ecParams => ecParams.PublicPoint.ToArray(),
-                Curve25519PublicKeyParameters eDsaParams => eDsaParams.PublicPoint.ToArray(),
-                RSAPublicKeyParameters => throw new InvalidOperationException(
+                ECPublicKey ecParams => ecParams.PublicPoint.ToArray(),
+                Curve25519PublicKey eDsaParams => eDsaParams.PublicPoint.ToArray(),
+                RSAPublicKey => throw new InvalidOperationException(
                     "Use GetModulus() and GetExponent() instead for RSA keys"),
                 _ => throw new ArgumentOutOfRangeException(nameof(publicKeyParameters))
             };
@@ -167,12 +165,12 @@ namespace Yubico.YubiKey.TestUtilities
 
         public byte[] GetPrivateKey()
         {
-            var privateKeyParameters = AsnPrivateKeyReader.CreateKeyParameters(EncodedKey);
+            var privateKeyParameters = AsnPrivateKeyReader.CreateKey(EncodedKey);
             return privateKeyParameters switch
             {
-                ECPrivateKeyParameters ecParams => ecParams.Parameters.D!,
-                Curve25519PrivateKeyParameters cv25519 => cv25519.PrivateKey.ToArray(),
-                RSAPrivateKeyParameters => throw new InvalidOperationException("Use AsRSA() instead for RSA keys"),
+                ECPrivateKey ecParams => ecParams.Parameters.D!,
+                Curve25519PrivateKey cv25519 => cv25519.PrivateKey.ToArray(),
+                RSAPrivateKey => throw new InvalidOperationException("Use AsRSA() instead for RSA keys"),
                 _ => throw new ArgumentOutOfRangeException(nameof(privateKeyParameters))
             };
         }
@@ -184,7 +182,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <exception cref="InvalidOperationException">Thrown if the key is not an RSA key</exception>
         public RSA AsRSA()
         {
-            if (!KeyType.GetKeyDefinition().IsRsaKey)
+            if (!KeyType.IsRSA())
             {
                 throw new InvalidOperationException("Not an RSA key");
             }
@@ -202,7 +200,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <exception cref="InvalidOperationException">Thrown if the key is not an EC key</exception>
         public ECDsa AsECDsa()
         {
-            if (!KeyDefinition.IsEcKey)
+            if (!KeyType.IsEllipticCurve())
             {
                 throw new InvalidOperationException("Not an EC key");
             }

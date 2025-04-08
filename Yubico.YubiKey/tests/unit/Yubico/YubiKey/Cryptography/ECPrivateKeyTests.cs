@@ -3,23 +3,24 @@ using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {
-    public class ECPrivateKeyParametersTests
+    public class ECPrivateKeyTests
     {
         
         [Fact]
         public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()
         {
             // Arrange
-            var testKey = TestKeys.GetTestPrivateKey(KeyType.P256);
+            var testKey = TestKeys.GetTestPrivateKey(KeyType.ECP256);
             var pivPrivateKey = testKey.AsPivPrivateKey();
             var pivPrivateKeyEncoded = pivPrivateKey.EncodedPrivateKey;
 
             // Act
-            var privateKeyParams = KeyParametersPivHelper.CreatePrivateEcFromPivEncoding(pivPrivateKeyEncoded);
+            var privateKeyParams = PivEncodingToKey.CreateECPrivateKey(pivPrivateKeyEncoded);
             var parameters = privateKeyParams.Parameters;
 
             // Assert
@@ -36,7 +37,7 @@ namespace Yubico.YubiKey.Cryptography
 
             // Act
             var privateKey = ecdsa.ExportPkcs8PrivateKey();
-            var privateKeyParams = ECPrivateKeyParameters.CreateFromPkcs8(privateKey);
+            var privateKeyParams = ECPrivateKey.CreateFromPkcs8(privateKey);
 
             // Assert
             Assert.NotNull(privateKeyParams.Parameters.D);
@@ -54,7 +55,7 @@ namespace Yubico.YubiKey.Cryptography
 
             // Act
             var privateKeyParams =
-                ECPrivateKeyParameters.CreateFromValue(parameters.D!, KeyType.P256);
+                ECPrivateKey.CreateFromValue(parameters.D!, KeyType.ECP256);
 
             // Assert
             Assert.NotNull(privateKeyParams.Parameters.D);
@@ -72,7 +73,7 @@ namespace Yubico.YubiKey.Cryptography
 
             // Act
             var privateKeyParams =
-                ECPrivateKeyParameters.CreateFromParameters(parameters);
+                ECPrivateKey.CreateFromParameters(parameters);
 
             // Assert
             Assert.NotNull(privateKeyParams.Parameters.D);
@@ -89,7 +90,7 @@ namespace Yubico.YubiKey.Cryptography
             var parameters = ecdsa.ExportParameters(true);
 
             // Act
-            var privateKeyParams = ECPrivateKeyParameters.CreateFromParameters(parameters);
+            var privateKeyParams = ECPrivateKey.CreateFromParameters(parameters);
 
             // Assert
             Assert.NotNull(privateKeyParams.Parameters.D);
@@ -105,7 +106,7 @@ namespace Yubico.YubiKey.Cryptography
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
             // Act
-            var privateKeyParams = ECPrivateKeyParameters.CreateFromParameters(ecdsa.ExportParameters(true));
+            var privateKeyParams = ECPrivateKey.CreateFromParameters(ecdsa.ExportParameters(true));
 
             // Assert
             Assert.NotNull(privateKeyParams.Parameters.D);
@@ -122,7 +123,7 @@ namespace Yubico.YubiKey.Cryptography
             parameters.D = null;
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => ECPrivateKeyParameters.CreateFromParameters(parameters));
+            var exception = Assert.Throws<ArgumentException>(() => ECPrivateKey.CreateFromParameters(parameters));
             Assert.Equal("parameters", exception.ParamName);
             Assert.Contains("D value", exception.Message);
         }
@@ -133,7 +134,7 @@ namespace Yubico.YubiKey.Cryptography
             // Arrange
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
             var originalParams = ecdsa.ExportParameters(true);
-            var privateKeyParams = ECPrivateKeyParameters.CreateFromParameters(originalParams);
+            var privateKeyParams = ECPrivateKey.CreateFromParameters(originalParams);
 
             Assert.NotNull(originalParams.D);
             Assert.NotNull(originalParams.Q.X);
@@ -164,7 +165,7 @@ namespace Yubico.YubiKey.Cryptography
             using var ecdsa = ECDsa.Create(ECCurve.CreateFromOid(Oid.FromOidValue(oid, OidGroup.PublicKeyAlgorithm)));
 
             // Act
-            var privateKeyParams = ECPrivateKeyParameters.CreateFromParameters(ecdsa.ExportParameters(true));
+            var privateKeyParams = ECPrivateKey.CreateFromParameters(ecdsa.ExportParameters(true));
 
             // Assert
             Assert.Equal(oid, privateKeyParams.Parameters.Curve.Oid.Value);

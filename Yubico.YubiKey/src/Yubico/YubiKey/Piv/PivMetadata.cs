@@ -18,6 +18,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv.Converters;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -170,11 +171,10 @@ namespace Yubico.YubiKey.Piv
             Slot = slotNumber;
             RetryCount = -1;
             RetriesRemaining = -1;
-            PublicKeyParameters = new EmptyPublicKeyParameters();
 
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             PublicKey = new PivPublicKey();
-            #pragma warning restore CS0618 // Type or member is obsolete
+#pragma warning restore CS0618 // Type or member is obsolete
 
             // This will update the fields in this object
             ParseResponseData(responseData);
@@ -245,7 +245,7 @@ namespace Yubico.YubiKey.Piv
 
                     case PublicTag:
                         // Public: public key partner to the private key in the slot
-                        PublicKeyParameters = KeyParametersPivHelper.CreatePublicKeyParameters(value, Algorithm.GetKeyType());
+                        PublicKeyParameters = PivEncodingToKey.CreatePublicKey(value, Algorithm.GetKeyType());
 
                         #pragma warning disable CS0618 // Type or member is obsolete
                         PublicKey = PivPublicKey.Create(value, Algorithm);
@@ -314,13 +314,13 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// The public key associated with the private key in the given slot.
         /// </summary>
-        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKeyParameters, IPrivateKeyParameters, ECPublicKeyParameters or ECPrivateKeyParameters instead")]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey, ECPublicKey or ECPrivateKeyParameters instead")]
         public PivPublicKey PublicKey { get; private set; } 
         
         /// <summary>
         /// The public key associated with the private key in the given slot.
         /// </summary>
-        public IPublicKeyParameters PublicKeyParameters { get; private set; }
+        public IPublicKey? PublicKeyParameters { get; private set; }
 
         /// <summary>
         /// The total number of wrong PINs or PUKs that can be entered before the

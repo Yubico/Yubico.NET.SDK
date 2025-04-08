@@ -1,6 +1,7 @@
 using System;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.Piv.Converters;
 
 namespace Yubico.YubiKey.TestUtilities
 {
@@ -14,23 +15,22 @@ namespace Yubico.YubiKey.TestUtilities
             this TestKey key)
         {
             var keyDefinition = key.KeyDefinition;
-            if (keyDefinition.IsRsaKey)
+            if (keyDefinition.IsRSA)
             {
-                var rsaPrivateKey = RSAPrivateKeyParameters.CreateFromPkcs8(key.EncodedKey);
-                var rsaPivEncodedKey = rsaPrivateKey.ToPivEncodedPrivateKey();
+                var rsaPrivateKey = RSAPrivateKey.CreateFromPkcs8(key.EncodedKey);
+                var rsaPivEncodedKey = rsaPrivateKey.EncodeAsPiv();
                 return PivPrivateKey.Create(rsaPivEncodedKey, keyDefinition.KeyType.GetPivAlgorithm());
             }
 
-            if (keyDefinition is { IsEcKey: true, AlgorithmOid: KeyDefinitions.Oids.ECDSA })
+            if (keyDefinition is { IsEllipticCurve: true, AlgorithmOid: Oids.ECDSA })
             {
-                var ecPrivateKey = ECPrivateKeyParameters.CreateFromPkcs8(key.EncodedKey);
-                var ecPivEncodedKey = ecPrivateKey.ToPivEncodedPrivateKey();
+                var ecPrivateKey = ECPrivateKey.CreateFromPkcs8(key.EncodedKey);
+                var ecPivEncodedKey = ecPrivateKey.EncodeAsPiv();
                 return PivPrivateKey.Create(ecPivEncodedKey, keyDefinition.KeyType.GetPivAlgorithm());
             }
 
-            // Curve25519
-            var cvPrivateKey = Curve25519PrivateKeyParameters.CreateFromPkcs8(key.EncodedKey);
-            var cvPivEncodedKey = cvPrivateKey.ToPivEncodedPrivateKey();
+            var cvPrivateKey = Curve25519PrivateKey.CreateFromPkcs8(key.EncodedKey);
+            var cvPivEncodedKey = cvPrivateKey.EncodeAsPiv();
             return PivPrivateKey.Create(cvPivEncodedKey, keyDefinition.KeyType.GetPivAlgorithm());
         }
 
@@ -42,23 +42,22 @@ namespace Yubico.YubiKey.TestUtilities
             this TestKey key)
         {
             var keyDefinition = key.KeyDefinition;
-            if (keyDefinition.IsRsaKey)
+            if (keyDefinition.IsRSA)
             {
-                var rsaPublicKey = RSAPublicKeyParameters.CreateFromPkcs8(key.EncodedKey);
-                var rsaPivEncodedKey = rsaPublicKey.ToPivEncodedPublicKey();
+                var rsaPublicKey = RSAPublicKey.CreateFromPkcs8(key.EncodedKey);
+                var rsaPivEncodedKey = rsaPublicKey.EncodeAsPiv();
                 return PivPublicKey.Create(rsaPivEncodedKey, key.KeyType.GetPivAlgorithm());
             }
 
-            if (keyDefinition is { IsEcKey: true, AlgorithmOid: KeyDefinitions.Oids.ECDSA })
+            if (keyDefinition is { IsEllipticCurve: true, AlgorithmOid: Oids.ECDSA })
             {
-                var ecPublicKey = ECPublicKeyParameters.CreateFromPkcs8(key.EncodedKey);
-                var ecPivEncodedKey = ecPublicKey.ToPivEncodedPublicKey();
+                var ecPublicKey = ECPublicKey.CreateFromPkcs8(key.EncodedKey);
+                var ecPivEncodedKey = ecPublicKey.EncodeAsPiv();
                 return PivPublicKey.Create(ecPivEncodedKey, key.KeyType.GetPivAlgorithm());
             }
 
-            // Curve25519
-            var cvPublicKey = Curve25519PublicKeyParameters.CreateFromPkcs8(key.EncodedKey);
-            var cvPivEncodedKey = cvPublicKey.ToPivEncodedPublicKey();
+            var cvPublicKey = Curve25519PublicKey.CreateFromPkcs8(key.EncodedKey);
+            var cvPivEncodedKey = cvPublicKey.EncodeAsPiv();
             return PivPublicKey.Create(cvPivEncodedKey, keyDefinition.KeyType.GetPivAlgorithm());
         }
     }

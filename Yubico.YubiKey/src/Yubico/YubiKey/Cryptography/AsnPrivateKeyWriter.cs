@@ -37,11 +37,11 @@ internal static class AsnPrivateKeyWriter
     {
         return keyType switch
         {
-            KeyType.P256 => EncodeECKey(privateKey, KeyDefinitions.Oids.P256, publicPoint),
-            KeyType.P384 => EncodeECKey(privateKey, KeyDefinitions.Oids.P384, publicPoint),
-            KeyType.P521 => EncodeECKey(privateKey, KeyDefinitions.Oids.P521, publicPoint),
-            KeyType.X25519 => EncodeCurve25519Key(privateKey.Span, KeyDefinitions.Oids.X25519),
-            KeyType.Ed25519 => EncodeCurve25519Key(privateKey.Span, KeyDefinitions.Oids.Ed25519),
+            KeyType.ECP256 => EncodeECKey(privateKey, Oids.ECP256, publicPoint),
+            KeyType.ECP384 => EncodeECKey(privateKey, Oids.ECP384, publicPoint),
+            KeyType.ECP521 => EncodeECKey(privateKey, Oids.ECP521, publicPoint),
+            KeyType.X25519 => EncodeCurve25519Key(privateKey.Span, Oids.X25519),
+            KeyType.Ed25519 => EncodeCurve25519Key(privateKey.Span, Oids.Ed25519),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
         };
     }
@@ -100,7 +100,7 @@ internal static class AsnPrivateKeyWriter
         writer.WriteInteger(0);
 
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.Oids.RSA);
+        writer.WriteObjectIdentifier(Oids.RSA);
         writer.WriteNull();
         writer.PopSequence();
 
@@ -116,9 +116,9 @@ internal static class AsnPrivateKeyWriter
     /// </summary>
     /// <param name="parameters">The EC parameters including private key value.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded private key in PKCS#8 format.</returns>
+    /// <exception cref="ArgumentException">Thrown when the private key parameter D is null.</exception>
     public static byte[] EncodeToPkcs8(ECParameters parameters)
     {
-        // Ensure parameters include private key part
         if (parameters.D == null)
         {
             throw new ArgumentException("Private key parameter D must be provided.");
@@ -185,7 +185,7 @@ internal static class AsnPrivateKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(KeyDefinitions.Oids.ECDSA);
+        writer.WriteObjectIdentifier(Oids.ECDSA);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 
@@ -196,24 +196,24 @@ internal static class AsnPrivateKeyWriter
         return writer.Encode();
     }
 
-    private static byte[] EncodeCurve25519Key(ReadOnlySpan<byte> privateKey, string curveOid)
+    private static byte[] EncodeCurve25519Key(ReadOnlySpan<byte> privateKey, string algorithmOid)
     {
         if (privateKey.Length != 32)
         {
             throw new ArgumentException("Curve25519 key must be 32 bytes.");
         }
 
-        if (curveOid == null)
+        if (algorithmOid == null)
         {
             throw new ArgumentException("Curve OID is null.");
         }
 
-        if (curveOid is not (KeyDefinitions.Oids.X25519 or KeyDefinitions.Oids.Ed25519))
+        if (!Oids.IsCurve25519Algorithm(algorithmOid))
         {
-            throw new ArgumentException("Curve OID is not supported.", nameof(curveOid));
+            throw new ArgumentException("Algorithm OID is not supported.", nameof(algorithmOid));
         }
 
-        if (curveOid == KeyDefinitions.Oids.X25519)
+        if (algorithmOid == Oids.X25519)
         {
             AsnUtilities.VerifyX25519PrivateKey(privateKey);
         }
@@ -229,14 +229,15 @@ internal static class AsnPrivateKeyWriter
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(curveOid);
+        writer.WriteObjectIdentifier(algorithmOid);
         writer.PopSequence();
 
         // PrivateKey as OCTET STRING
         var privateKeyWriter = new AsnWriter(AsnEncodingRules.DER);
         privateKeyWriter.WriteOctetString(privateKey);
-        ReadOnlySpan<byte> privateKeySpan = privateKeyWriter.Encode();
-        writer.WriteOctetString(privateKeySpan);
+        
+        using var privateKeyBytesHandle = new ZeroingMemoryHandle(privateKeyWriter.Encode());
+        writer.WriteOctetString(privateKeyBytesHandle.Data);
 
         // End PrivateKeyInfo SEQUENCE
         writer.PopSequence();

@@ -17,17 +17,38 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class RSAPrivateKeyParameters : IPrivateKeyParameters
+public sealed class RSAPrivateKey : IPrivateKey
 {
+    private bool _disposed;
+
+    /// <summary>
+    /// Gets the RSA cryptographic parameters required for the private key operations.
+    /// </summary>
+    /// <value>
+    /// A structure containing RSA parameters, including Modulus, Exponent, D, P, Q, DP, DQ, and InverseQ values.
+    /// </value>
+    /// <remarks>
+    /// This property provides access to the fundamental mathematical components needed for RSA private key operations.
+    /// The parameters are used in cryptographic operations such as decryption and digital signature creation.
+    /// </remarks>
     public RSAParameters Parameters { get; }
+
+    /// <summary>
+    /// Gets the key definition associated with this RSA private key.
+    /// </summary>
+    /// <value>
+    /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
+    /// </value>
     public KeyDefinition KeyDefinition { get; }
+
+    /// <inheritdoc />
     public KeyType KeyType => KeyDefinition.KeyType;
 
-    private RSAPrivateKeyParameters(RSAParameters parameters)
+    private RSAPrivateKey(RSAParameters parameters)
     {
         int keyLengthBits = parameters.DP?.Length * 8 * 2 ?? 0;
         
-        Parameters = parameters.NormalizeParameters(); // TODO Clear
+        Parameters = parameters.NormalizeParameters();
         KeyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits);
     }
 
@@ -35,7 +56,11 @@ public class RSAPrivateKeyParameters : IPrivateKeyParameters
     /// Exports the RSA private key in PKCS#8 DER encoded format.
     /// </summary>
     /// <returns>A byte array containing the DER encoded private key.</returns>
-    public byte[] ExportPkcs8PrivateKey() => AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
+    public byte[] ExportPkcs8PrivateKey()
+    {
+        ThrowIfDisposed();
+        return AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
+    }
 
     /// <summary>
     /// Securely clears the RSA private key by zeroing out all parameters.
@@ -53,33 +78,66 @@ public class RSAPrivateKeyParameters : IPrivateKeyParameters
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="RSAPrivateKeyParameters"/> from a DER-encoded
+    /// Clears private key buffers and disposes the resources used by this instance.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+    
+    private void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                Clear();
+            }
+            
+            _disposed = true;
+        }
+    }
+
+    private void ThrowIfDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(Curve25519PrivateKey));
+        }
+    }
+
+    /// <summary>
+    /// Creates a new instance of <see cref="RSAPrivateKey"/> from a DER-encoded
     /// PKCS#8 private key.
     /// </summary>
     /// <param name="encodedKey">
     /// The DER-encoded PKCS#8 private key.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="RSAPrivateKeyParameters"/>.
+    /// A new instance of <see cref="RSAPrivateKey"/>.
     /// </returns>
     /// <exception cref="CryptographicException">
     /// Thrown if the private key is invalid.
     /// </exception>
-    public static RSAPrivateKeyParameters CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
+    /// <exception cref="NotSupportedException">
+    /// When the RSA key length is not supported.
+    /// </exception>
+    public static RSAPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
     {
         var parameters = AsnPrivateKeyReader.CreateRSAParameters(encodedKey);
-        return new RSAPrivateKeyParameters(parameters);
+        return new RSAPrivateKey(parameters);
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="RSAPrivateKeyParameters"/> from the given
+    /// Creates a new instance of <see cref="RSAPrivateKey"/> from the given
     /// <paramref name="parameters"/>.
     /// </summary>
     /// <param name="parameters">
     /// The RSA parameters containing the private key data.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="RSAPrivateKeyParameters"/>.
+    /// A new instance of <see cref="RSAPrivateKey"/>.
     /// </returns>
-    public static RSAPrivateKeyParameters CreateFromParameters(RSAParameters parameters) => new(parameters);
+    public static RSAPrivateKey CreateFromParameters(RSAParameters parameters) => new(parameters);
 }

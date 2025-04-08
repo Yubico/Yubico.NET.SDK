@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(0x99)]
         public void Constructor_BadSlotNumber_ThrowsException(byte slotNumber)
         {
-            _ = Assert.Throws<ArgumentException>(() => GetCommandObject(slotNumber, KeyType.P256));
+            _ = Assert.Throws<ArgumentException>(() => GetCommandObject(slotNumber, KeyType.ECP256));
         }
 
         [Theory]
@@ -76,8 +76,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(0x9A, KeyType.P256)]
-        [InlineData(0x9C, KeyType.P384)]
+        [InlineData(0x9A, KeyType.ECP256)]
+        [InlineData(0x9C, KeyType.ECP384)]
         [InlineData(0x82, KeyType.RSA1024)]
         [InlineData(0x83, KeyType.RSA2048)]
         public void Constructor_Property_SlotNum(byte slotNumber, KeyType keyType)
@@ -90,8 +90,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         [InlineData(KeyType.RSA1024)]
         [InlineData(KeyType.RSA2048)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(KeyType keyType)
@@ -104,8 +104,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         [InlineData(KeyType.RSA1024)]
         [InlineData(KeyType.RSA2048)]
         [InlineData(KeyType.RSA3072)]
@@ -120,8 +120,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         [InlineData(KeyType.RSA1024)]
         [InlineData(KeyType.RSA2048)]
         [InlineData(KeyType.RSA3072)]
@@ -136,8 +136,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(0x9D, KeyType.P256)]
-        [InlineData(0x9E, KeyType.P384)]
+        [InlineData(0x9D, KeyType.ECP256)]
+        [InlineData(0x9E, KeyType.ECP384)]
         [InlineData(0x92, KeyType.RSA1024)]
         [InlineData(0x93, KeyType.RSA2048)]
         public void CreateCommandApdu_GetP2Property_ReturnsSlotNum(byte slotNumber, KeyType keyType)
@@ -150,8 +150,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(KeyType.P256, 38)]
-        [InlineData(KeyType.P384, 54)]
+        [InlineData(KeyType.ECP256, 38)]
+        [InlineData(KeyType.ECP384, 54)]
         [InlineData(KeyType.RSA1024, 136)]
         [InlineData(KeyType.RSA2048, 266)]
         public void CreateCommandApdu_GetNcProperty_ReturnsCorrect(KeyType keyType, int expected)
@@ -164,8 +164,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         [InlineData(KeyType.RSA1024)]
         public void CreateCommandApdu_GetNeProperty_ReturnsZero(KeyType keyType)
         {
@@ -177,8 +177,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(KeyType.P256)]
-        [InlineData(KeyType.P384)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         [InlineData(KeyType.RSA1024)]
         [InlineData(KeyType.RSA2048)]
         public void CreateCommandApdu_GetData_ReturnsCorrect(KeyType keyType)
@@ -208,7 +208,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
 
-            AuthenticateSignCommand command = GetCommandObject(0x86, KeyType.P256);
+            AuthenticateSignCommand command = GetCommandObject(0x86, KeyType.ECP256);
 
             AuthenticateSignResponse response = command.CreateResponseForApdu(responseApdu);
 
@@ -259,12 +259,12 @@ namespace Yubico.YubiKey.Piv.Commands
 
                 case 5:
                 case 6:
-                    digest = PivCommandResponseTestData.GetDigestData(KeyType.P256);
+                    digest = PivCommandResponseTestData.GetDigestData(KeyType.ECP256);
                     break;
 
                 case 7:
                 case 8:
-                    digest = PivCommandResponseTestData.GetDigestData(KeyType.P384);
+                    digest = PivCommandResponseTestData.GetDigestData(KeyType.ECP384);
                     break;
             }
 
@@ -285,8 +285,8 @@ namespace Yubico.YubiKey.Piv.Commands
         private static byte[] GetDigestDataPrefix(KeyType keyType) => keyType switch
         {
             KeyType.RSA2048 => new byte[] { 0x7C, 0x82, 0x01, 0x06, 0x82, 0x00, 0x81, 0x82, 0x01, 0x00 },
-            KeyType.P256 => new byte[] { 0x7C, 0x24, 0x82, 0x00, 0x81, 0x20 },
-            KeyType.P384 => new byte[] { 0x7C, 0x34, 0x82, 0x00, 0x81, 0x30 },
+            KeyType.ECP256 => new byte[] { 0x7C, 0x24, 0x82, 0x00, 0x81, 0x20 },
+            KeyType.ECP384 => new byte[] { 0x7C, 0x34, 0x82, 0x00, 0x81, 0x30 },
             _ => new byte[] { 0x7C, 0x81, 0x85, 0x82, 0x00, 0x81, 0x81, 0x80 },
         };
     }

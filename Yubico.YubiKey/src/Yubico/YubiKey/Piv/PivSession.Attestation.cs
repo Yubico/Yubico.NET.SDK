@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.Piv
         /// It is possible to replace the attestation key and cert. In that case,
         /// the attestation statement created by this method will chain up to a
         /// different root.
-        /// See <see cref="ReplaceAttestationKeyAndCertificate(IPrivateKeyParameters, X509Certificate2)"/>. There are
+        /// See <see cref="ReplaceAttestationKeyAndCertificate(IPrivateKey, X509Certificate2)"/>. There are
         /// restrictions on the key and certificate. The documentation for the
         /// Replace method lists those restrictions.
         /// </para>
@@ -165,7 +165,7 @@ namespace Yubico.YubiKey.Piv
         /// It is possible to replace the attestation key and cert. In that case,
         /// the attestation statement created by this method will chain up to a
         /// different root.
-        /// See <see cref="ReplaceAttestationKeyAndCertificate(IPrivateKeyParameters, X509Certificate2)"/>.
+        /// See <see cref="ReplaceAttestationKeyAndCertificate(IPrivateKey, X509Certificate2)"/>.
         /// </para>
         /// </remarks>
         /// <returns>
@@ -328,7 +328,7 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        [Obsolete("User other method")]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey, ECPublicKey or ECPrivateKeyParameters instead")]
         public void ReplaceAttestationKeyAndCertificate(PivPrivateKey privateKey, X509Certificate2 certificate)
         {
             byte[] certDer = CheckVersionKeyAndCertRequirements(privateKey.Algorithm.GetKeyType(), certificate);
@@ -356,7 +356,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
         
-        public void ReplaceAttestationKeyAndCertificate(IPrivateKeyParameters privateKey, X509Certificate2 certificate)
+        public void ReplaceAttestationKeyAndCertificate(IPrivateKey privateKey, X509Certificate2 certificate)
         {
             if (privateKey is null)
             {

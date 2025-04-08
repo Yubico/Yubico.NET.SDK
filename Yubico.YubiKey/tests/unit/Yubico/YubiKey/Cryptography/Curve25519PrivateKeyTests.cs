@@ -19,7 +19,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class Curve25519PrivateKeyParametersTests
+public class Curve25519PrivateKeyTests
 {
     [Fact]
     public void CreateFromValue_CreatesInstance()
@@ -31,7 +31,7 @@ public class Curve25519PrivateKeyParametersTests
             var privateKey = testKey.GetPrivateKey();
 
             // Act
-            var privateKeyParams = Curve25519PrivateKeyParameters.CreateFromValue(privateKey, keyType); 
+            var privateKeyParams = Curve25519PrivateKey.CreateFromValue(privateKey, keyType); 
 
             // Assert
             Assert.NotNull(privateKeyParams);
@@ -50,7 +50,7 @@ public class Curve25519PrivateKeyParametersTests
             var privateKey = testKey.GetPrivateKey();
 
             // Act
-            var privateKeyParams = Curve25519PrivateKeyParameters.CreateFromPkcs8(testKey.EncodedKey); 
+            var privateKeyParams = Curve25519PrivateKey.CreateFromPkcs8(testKey.EncodedKey); 
 
             // Assert
             Assert.NotNull(privateKeyParams);
@@ -67,7 +67,7 @@ public class Curve25519PrivateKeyParametersTests
         var privateKey = testKey.GetPrivateKey();
 
         // Act
-        var privateKeyParams = Curve25519PrivateKeyParameters.CreateFromValue(privateKey, KeyType.X25519);
+        var privateKeyParams = Curve25519PrivateKey.CreateFromValue(privateKey, KeyType.X25519);
 
         // Assert
         Assert.NotNull(privateKeyParams);
@@ -94,7 +94,7 @@ public class Curve25519PrivateKeyParametersTests
         
         // Act & Assert
         Assert.Throws<CryptographicException>(() => 
-            Curve25519PrivateKeyParameters.CreateFromValue(invalidKey, KeyType.X25519));
+            Curve25519PrivateKey.CreateFromValue(invalidKey, KeyType.X25519));
     }
     
     [Fact]
@@ -113,6 +113,6 @@ public class Curve25519PrivateKeyParametersTests
         
         // Act & Assert
         Assert.Throws<CryptographicException>(() => 
-            Curve25519PrivateKeyParameters.CreateFromValue(invalidKey, KeyType.X25519));
+            Curve25519PrivateKey.CreateFromValue(invalidKey, KeyType.X25519));
     }
 }

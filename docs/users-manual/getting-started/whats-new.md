@@ -16,6 +16,28 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.13.x Releases
+
+### 1.13.0
+
+Release date: April 9th, 2025
+
+Features:
+
+- Curve25519 support has been added for PIV:
+ 
+   - Keys can now be imported or generated using the Ed25519 and X25519 algorithms. 
+   - The key agreement operation can be performed with an X25519 key.
+   - Digital signatures can now be created with a Ed25519 key.
+
+- Unit tests have been added for RSA-3072 and RSA-4096 keys.
+- Support for large APDUs has been improved:
+
+   - 
+
+
+Bug Fixes:
+
 ## 1.12.x Releases
 
 ### 1.12.1

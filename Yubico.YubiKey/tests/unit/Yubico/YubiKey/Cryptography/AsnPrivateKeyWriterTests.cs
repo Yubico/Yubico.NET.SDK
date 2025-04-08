@@ -29,7 +29,7 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(parameters);
-        var decodedParams = AsnPrivateKeyReader.CreateKey(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreatePrivateKey(encoded);
 
         // Assert
         Assert.IsType<RSAPrivateKey>(decodedParams);
@@ -86,7 +86,7 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(parameters);
-        var decodedParams = AsnPrivateKeyReader.CreateKey(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreatePrivateKey(encoded);
 
         // Assert
         Assert.IsType<ECPrivateKey>(decodedParams);
@@ -150,7 +150,7 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(parameters.D!, publicPoint, keyType);
-        var decodedParams = AsnPrivateKeyReader.CreateKey(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreatePrivateKey(encoded);
 
         // Assert
         Assert.IsType<ECPrivateKey>(decodedParams);
@@ -184,7 +184,7 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(testEncodedKeyData, KeyType.Ed25519);
-        var decodedParams = AsnPrivateKeyReader.CreateKey(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreatePrivateKey(encoded);
 
         // Assert
         Assert.IsType<Curve25519PrivateKey>(decodedParams);
@@ -207,7 +207,7 @@ public class AsnPrivateKeyWriterTests
 
         // Act
         var encoded = AsnPrivateKeyWriter.EncodeToPkcs8(testEncodedKeyData, KeyType.X25519);
-        var decodedParams = AsnPrivateKeyReader.CreateKey(encoded);
+        var decodedParams = AsnPrivateKeyReader.CreatePrivateKey(encoded);
 
         // Assert
         Assert.IsType<Curve25519PrivateKey>(decodedParams);
@@ -262,7 +262,7 @@ public class AsnPrivateKeyWriterTests
         var testKey = TestKeys.GetTestPrivateKey(keyType);
 
         // Parse with AsnPrivateKeyReader to get the parameters
-        var privateKeyParameters = AsnPrivateKeyReader.CreateKey(testKey.EncodedKey);
+        var privateKeyParameters = AsnPrivateKeyReader.CreatePrivateKey(testKey.EncodedKey);
 
         // Re-encode using our writer
         byte[] reencoded;
@@ -286,7 +286,7 @@ public class AsnPrivateKeyWriterTests
         }
 
         // Parse again with AsnPrivateKeyReader
-        var roundTrippedParams = AsnPrivateKeyReader.CreateKey(reencoded);
+        var roundTrippedParams = AsnPrivateKeyReader.CreatePrivateKey(reencoded);
 
         // Assert by verifying key type and capabilities
         Assert.Equal(privateKeyParameters.GetType(), roundTrippedParams.GetType());

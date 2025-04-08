@@ -35,11 +35,10 @@ internal static class AsnPublicKeyWriter
         int coordinateLength = keyDefinition.LengthInBytes;
         return keyType switch
         {
-            KeyType.ECP256 => CreateEcEncodedKey(publicPoint, Oids.ECP256, coordinateLength),
-            KeyType.ECP384 => CreateEcEncodedKey(publicPoint, Oids.ECP384, coordinateLength),
-            KeyType.ECP521 => CreateEcEncodedKey(publicPoint, Oids.ECP521, coordinateLength),
-            KeyType.X25519 => CreateCurve25519ToSpki(publicPoint, keyType),
-            KeyType.Ed25519 => CreateCurve25519ToSpki(publicPoint, keyType),
+            KeyType.ECP256 => EncodeECDsaPublicKey(publicPoint, Oids.ECP256, coordinateLength),
+            KeyType.ECP384 => EncodeECDsaPublicKey(publicPoint, Oids.ECP384, coordinateLength),
+            KeyType.ECP521 => EncodeECDsaPublicKey(publicPoint, Oids.ECP521, coordinateLength),
+            KeyType.X25519 or KeyType.Ed25519 => EncodeCurve25519PublicKey(publicPoint, keyType),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
         };
     }
@@ -173,7 +172,7 @@ internal static class AsnPublicKeyWriter
         return writer.Encode();
     }
 
-    private static byte[] CreateCurve25519ToSpki(ReadOnlyMemory<byte> publicKey, KeyType keyType)
+    private static byte[] EncodeCurve25519PublicKey(ReadOnlyMemory<byte> publicKey, KeyType keyType)
     {
         var keyDefinition = keyType.GetKeyDefinition();
         if (keyDefinition.AlgorithmOid is null)
@@ -209,8 +208,7 @@ internal static class AsnPublicKeyWriter
         return writer.Encode();
     }
 
-    // Creates an EC encoded key from a public point (which should be in the format: 0x04 + X + Y for uncompressed form)
-    private static byte[] CreateEcEncodedKey(ReadOnlyMemory<byte> publicPoint, string curveOid, int coordinateSize)
+    private static byte[] EncodeECDsaPublicKey(ReadOnlyMemory<byte> publicPoint, string curveOid, int coordinateSize)
     {
         if (publicPoint.Length == 0 || publicPoint.Span[0] != 0x04)
         {

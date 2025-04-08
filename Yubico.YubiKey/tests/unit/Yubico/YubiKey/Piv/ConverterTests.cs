@@ -46,7 +46,7 @@ public class ConverterTests
             PivEncodingToKey.CreatePublicKey(testPivPublicKey.PivEncodedPublicKey, keyType);
 
         // Convert from PivEncoding to PublicKey using Asn
-        var pkFromAsnReaderAndTestKey = AsnPublicKeyReader.CreateKey(testKey.EncodedKey);
+        var pkFromAsnReaderAndTestKey = AsnPublicKeyReader.CreatePublicKey(testKey.EncodedKey);
 
         Assert.Equal(testPivPublicKey.PivEncodedPublicKey, pkFromKeyConverter.EncodeAsPiv());
         Assert.Equal(testPivPublicKey.PivEncodedPublicKey, pkFromAsnReaderAndTestKey.EncodeAsPiv());

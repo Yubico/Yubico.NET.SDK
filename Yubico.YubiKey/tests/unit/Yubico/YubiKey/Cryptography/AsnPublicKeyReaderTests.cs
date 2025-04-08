@@ -35,7 +35,7 @@ public class AsnPublicKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreateKey(keyBytes);
+        var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
@@ -62,7 +62,7 @@ public class AsnPublicKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreateKey(keyBytes);
+        var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
@@ -98,7 +98,7 @@ public class AsnPublicKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreateKey(keyBytes);
+        var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
@@ -118,7 +118,7 @@ public class AsnPublicKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreateKey(keyBytes);
+        var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
@@ -143,7 +143,7 @@ public class AsnPublicKeyReaderTests
             var keyBytes = testKey.EncodedKey;
 
             // Act
-            var result = AsnPublicKeyReader.CreateKey(keyBytes);
+            var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
 
             // Assert
             Assert.NotNull(result);
@@ -176,7 +176,7 @@ public class AsnPublicKeyReaderTests
         var invalidKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => AsnPublicKeyReader.CreateKey(invalidKeyDer));
+        Assert.Throws<CryptographicException>(() => AsnPublicKeyReader.CreatePublicKey(invalidKeyDer));
     }
 
     [Fact]
@@ -206,7 +206,7 @@ public class AsnPublicKeyReaderTests
         var invalidKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => AsnPublicKeyReader.CreateKey(invalidKeyDer));
+        Assert.Throws<CryptographicException>(() => AsnPublicKeyReader.CreatePublicKey(invalidKeyDer));
     }
 
     [Fact]
@@ -237,7 +237,7 @@ public class AsnPublicKeyReaderTests
         var unsupportedCurveKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<NotSupportedException>(() => AsnPublicKeyReader.CreateKey(unsupportedCurveKeyDer));
+        Assert.Throws<NotSupportedException>(() => AsnPublicKeyReader.CreatePublicKey(unsupportedCurveKeyDer));
     }
 
     [Fact]
@@ -262,7 +262,7 @@ public class AsnPublicKeyReaderTests
         var unsupportedAlgorithmKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<NotSupportedException>(() => AsnPublicKeyReader.CreateKey(unsupportedAlgorithmKeyDer));
+        Assert.Throws<NotSupportedException>(() => AsnPublicKeyReader.CreatePublicKey(unsupportedAlgorithmKeyDer));
     }
 
     [Theory]
@@ -277,7 +277,7 @@ public class AsnPublicKeyReaderTests
         var keyBytes = testKey.EncodedKey;
         
         // Act - Parse it with AsnPublicKeyReader
-        var result = AsnPublicKeyReader.CreateKey(keyBytes);
+        var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
         
         // Convert to encoded format (assuming extension method or AsnPublicKeyWriter exists)
         var encodedKey = result switch
@@ -289,7 +289,7 @@ public class AsnPublicKeyReaderTests
         };
         
         // Parse again
-        var result2 = AsnPublicKeyReader.CreateKey(encodedKey);
+        var result2 = AsnPublicKeyReader.CreatePublicKey(encodedKey);
         
         // Assert - Check type consistency and common properties
         Assert.Equal(result.GetType(), result2.GetType());
@@ -340,7 +340,7 @@ public class AsnPublicKeyReaderTests
         var publicKeyDer = rsaPublicKey.ExportSubjectPublicKeyInfo();
         
         // Act
-        var result = AsnPublicKeyReader.CreateKey(publicKeyDer);
+        var result = AsnPublicKeyReader.CreatePublicKey(publicKeyDer);
         
         // Assert
         Assert.NotNull(result);

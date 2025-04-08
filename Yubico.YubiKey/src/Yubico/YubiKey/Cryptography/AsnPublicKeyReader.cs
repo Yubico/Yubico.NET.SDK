@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Cryptography;
 
 internal class AsnPublicKeyReader
 {
-    public static IPublicKey CreateKey(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    public static IPublicKey CreatePublicKey(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
         var seqSubjectPublicKeyInfo = reader.ReadSequence();

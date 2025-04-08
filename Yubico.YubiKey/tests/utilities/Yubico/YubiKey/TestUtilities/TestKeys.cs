@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         public byte[] GetPublicPoint()
         {
-            var publicKeyParameters = AsnPublicKeyReader.CreateKey(EncodedKey);
+            var publicKeyParameters = AsnPublicKeyReader.CreatePublicKey(EncodedKey);
             return publicKeyParameters switch
             {
                 ECPublicKey ecParams => ecParams.PublicPoint.ToArray(),
@@ -165,7 +165,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         public byte[] GetPrivateKey()
         {
-            var privateKeyParameters = AsnPrivateKeyReader.CreateKey(EncodedKey);
+            var privateKeyParameters = AsnPrivateKeyReader.CreatePrivateKey(EncodedKey);
             return privateKeyParameters switch
             {
                 ECPrivateKey ecParams => ecParams.Parameters.D!,

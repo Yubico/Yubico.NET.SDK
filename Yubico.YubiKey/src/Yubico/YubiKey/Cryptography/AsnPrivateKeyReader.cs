@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Cryptography;
 
 internal class AsnPrivateKeyReader
 {
-    public static IPrivateKey CreateKey(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    public static IPrivateKey CreatePrivateKey(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
         var seqPrivateKeyInfo = reader.ReadSequence();

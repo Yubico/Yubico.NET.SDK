@@ -161,7 +161,7 @@ namespace Yubico.YubiKey.Cryptography
         /// Thrown if the public key is invalid.
         /// </exception>
         public static IPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-            AsnPublicKeyReader.CreateKey(encodedKey);
+            AsnPublicKeyReader.CreatePublicKey(encodedKey);
     }
     
     [Obsolete("Use ECPublicKey instead", false)]

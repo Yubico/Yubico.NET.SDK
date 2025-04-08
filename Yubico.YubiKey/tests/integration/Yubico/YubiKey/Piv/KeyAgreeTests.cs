@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.Piv
             // Arrange
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            var privateKeyParameters = AsnPrivateKeyReader.CreateKey(testPrivateKey.EncodedKey);
+            var privateKeyParameters = AsnPrivateKeyReader.CreatePrivateKey(testPrivateKey.EncodedKey);
             IPublicKey peerPublicKey;
             var peerPrivateKeyEcParameters = new ECParameters();
 

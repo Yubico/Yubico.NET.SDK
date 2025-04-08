@@ -400,6 +400,24 @@ namespace Yubico.YubiKey {
                 return ResourceManager.GetString("DeviceTypeNotRecognized", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to A certificate was not able to parsed..
+        /// </summary>
+        internal static string FailedCompressingCertificate {
+            get {
+                return ResourceManager.GetString("FailedCompressingCertificate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to A certificate was not able to parsed..
+        /// </summary>
+        internal static string FailedDecompressingCertificate {
+            get {
+                return ResourceManager.GetString("FailedDecompressingCertificate", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to A certificate was not able to parsed..

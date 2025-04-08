@@ -119,6 +119,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, StandardTestDevice.Fw5)]
         [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
         public void CertImport(
             KeyType keyType,
@@ -137,6 +139,32 @@ namespace Yubico.YubiKey.Piv
             pivSession.ImportCertificate(0x90, cert!);
 
             var getCert = pivSession.GetCertificate(0x90);
+            Assert.True(getCert.Equals(cert));
+        }
+
+        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
+        public void ImportCompressedCert(KeyType keyType, StandardTestDevice testDeviceType)
+        {
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(keyType, out var cert, out var _);
+            Assert.True(isValid);
+
+            using var pivSession = new PivSession(testDevice);
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            pivSession.ImportCertificate(0x91, cert!, true);
+
+            var getCert = pivSession.GetCertificate(0x91);
             Assert.True(getCert.Equals(cert));
         }
 

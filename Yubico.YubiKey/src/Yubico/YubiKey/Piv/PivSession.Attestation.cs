@@ -17,6 +17,7 @@ using System.Globalization;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
@@ -88,7 +89,7 @@ namespace Yubico.YubiKey.Piv
         /// It is possible to replace the attestation key and cert. In that case,
         /// the attestation statement created by this method will chain up to a
         /// different root.
-        /// See <see cref="ReplaceAttestationKeyAndCertificate"/>). There are
+        /// See <see cref="ReplaceAttestationKeyAndCertificate(IPrivateKey, X509Certificate2)"/>. There are
         /// restrictions on the key and certificate. The documentation for the
         /// Replace method lists those restrictions.
         /// </para>
@@ -164,7 +165,7 @@ namespace Yubico.YubiKey.Piv
         /// It is possible to replace the attestation key and cert. In that case,
         /// the attestation statement created by this method will chain up to a
         /// different root.
-        /// See <see cref="ReplaceAttestationKeyAndCertificate"/>).
+        /// See <see cref="ReplaceAttestationKeyAndCertificate(IPrivateKey, X509Certificate2)"/>.
         /// </para>
         /// </remarks>
         /// <returns>
@@ -200,7 +201,36 @@ namespace Yubico.YubiKey.Piv
                     ExceptionMessages.NotSupportedByYubiKeyVersion));
         }
 
-        /// <summary>
+
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
+        public void ReplaceAttestationKeyAndCertificate(PivPrivateKey privateKey, X509Certificate2 certificate)
+        {
+            byte[] certDer = CheckVersionKeyAndCertRequirements(privateKey.Algorithm.GetKeyType(), certificate);
+
+            var tlvWriter = new TlvWriter();
+            using (tlvWriter.WriteNestedTlv(0x53))
+            {
+                tlvWriter.WriteValue(0x70, certDer);
+                tlvWriter.WriteByte(0x71, 0);
+                tlvWriter.WriteValue(0xfe, null);
+            }
+            byte[] encodedCert = tlvWriter.Encode();
+
+            ImportPrivateKey(PivSlot.Attestation, privateKey);
+
+            var command = new PutDataCommand(AttestationCertTag, encodedCert);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.CommandResponseApduUnexpectedResult,
+                        response.StatusWord.ToString("X4", CultureInfo.InvariantCulture)));
+            }
+        }
+        
+                /// <summary>
         /// Replace the attestation key and certificate.
         /// </summary>
         /// <remarks>
@@ -327,9 +357,19 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        public void ReplaceAttestationKeyAndCertificate(PivPrivateKey privateKey, X509Certificate2 certificate)
+        public void ReplaceAttestationKeyAndCertificate(IPrivateKey privateKey, X509Certificate2 certificate)
         {
-            byte[] certDer = CheckVersionKeyAndCertRequirements(privateKey, certificate);
+            if (privateKey is null)
+            {
+                throw new ArgumentNullException(nameof(privateKey));
+            }
+            
+            if (certificate is null)
+            {
+                throw new ArgumentNullException(nameof(certificate));
+            }
+            
+            byte[] certDer = CheckVersionKeyAndCertRequirements(privateKey.KeyType, certificate);
 
             var tlvWriter = new TlvWriter();
             using (tlvWriter.WriteNestedTlv(0x53))
@@ -362,7 +402,7 @@ namespace Yubico.YubiKey.Piv
         // This will throw an exception if a check fails, or if one or both
         // arguments are null, or the algorithm is unsupported.
         // Return the DER encoding of the certificate.
-        private byte[] CheckVersionKeyAndCertRequirements(PivPrivateKey privateKey, X509Certificate2 certificate)
+        private byte[] CheckVersionKeyAndCertRequirements(KeyType keyType, X509Certificate2 certificate)
         {
             if (!YubiKey.HasFeature(YubiKeyFeature.PivAttestation))
             {
@@ -372,46 +412,11 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.NotSupportedByYubiKeyVersion));
             }
 
-            if (privateKey is null)
-            {
-                throw new ArgumentNullException(nameof(privateKey));
-            }
-
-            int keySize = 256;
-            string algorithm = "ECC";
-            switch (privateKey.Algorithm)
-            {
-                case PivAlgorithm.Rsa2048:
-                    keySize = 2048;
-                    algorithm = "RSA";
-                    break;
-
-                case PivAlgorithm.Rsa3072:
-                    keySize = 3072;
-                    algorithm = "RSA";
-                    break;
-
-                case PivAlgorithm.Rsa4096:
-                    keySize = 4096;
-                    algorithm = "RSA";
-                    break;
-
-                case PivAlgorithm.EccP256:
-                    break;
-
-                case PivAlgorithm.EccP384:
-                    keySize = 384;
-                    break;
-
-                default:
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.UnsupportedAlgorithm));
-            }
+            var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
+            int keySize = keyDefinition.LengthInBytes;
 
             bool isValidCert = IsCert(certificate, out byte[] certDer);
-            isValidCert = IsCertSameAlgorithm(isValidCert, certificate, keySize, algorithm);
+            isValidCert = IsCertSameAlgorithm(isValidCert, certificate, keySize, keyType);
             isValidCert = IsCertNameAndValidity(isValidCert, certDer);
 
             if (isValidCert == false)
@@ -449,7 +454,7 @@ namespace Yubico.YubiKey.Piv
 
         // Does the cert in the object share the algorithm and key size?
         // If the input arg isValidCert is false, don't check, just return false;
-        private static bool IsCertSameAlgorithm(bool isValidCert, X509Certificate2 certificate, int keySize, string algorithm)
+        private static bool IsCertSameAlgorithm(bool isValidCert, X509Certificate2 certificate, int keySize, KeyType keyType)
         {
             bool returnValue = false;
 
@@ -463,7 +468,7 @@ namespace Yubico.YubiKey.Piv
                 // is given in bits, and the Length of the encoded key is given
                 // in bytes, compare ( 2 * (keySize / 8)) + 1.
                 // That's why the comparison is to (keySize / 4) + 1.
-                if (certificate.PublicKey.Oid.FriendlyName == algorithm)
+                if (certificate.PublicKey.Oid.Value == keyType.GetAlgorithmOid())
                 {
                     returnValue = keySize switch
                     {

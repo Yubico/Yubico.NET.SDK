@@ -14,6 +14,7 @@
 
 using System.Linq;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -36,7 +37,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.ResetApplication();
 
                 _ = pivSession.GenerateKeyPair(
-                    slotNumber, PivAlgorithm.EccP256, PivPinPolicy.Always, PivTouchPolicy.Never);
+                    slotNumber, KeyType.ECP256, PivPinPolicy.Always, PivTouchPolicy.Never);
 
                 byte[] dataToSign = {
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
@@ -70,7 +71,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.ResetApplication();
 
                 _ = pivSession.GenerateKeyPair(
-                    slotNumber, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                    slotNumber, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Never);
 
                 byte[] dataToSign = {
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,

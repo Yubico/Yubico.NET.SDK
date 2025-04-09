@@ -16,6 +16,7 @@ using System;
 using System.Security;
 using System.Security.Cryptography;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
 
@@ -423,19 +424,19 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinProtected, 0x83)]
-        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinDerived, 0x84)]
-        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x85)]
-        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinProtected, 0x86)]
-        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinDerived, 0x87)]
-        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x88)]
-        [InlineData(PivAlgorithm.Aes256, PivPinOnlyMode.PinProtected, 0x89)]
-        [InlineData(PivAlgorithm.Aes256, PivPinOnlyMode.PinDerived, 0x8A)]
-        [InlineData(PivAlgorithm.Aes256, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x8B)]
-        [InlineData(PivAlgorithm.TripleDes, PivPinOnlyMode.PinProtected, 0x8C)]
-        [InlineData(PivAlgorithm.TripleDes, PivPinOnlyMode.PinDerived, 0x8D)]
-        [InlineData(PivAlgorithm.TripleDes, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x8E)]
-        public void SetPinOnly_Algorithms_Success(PivAlgorithm algorithm, PivPinOnlyMode mode, byte slotNumber)
+        [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x83)]
+        [InlineData(KeyType.AES128, PivPinOnlyMode.PinDerived, 0x84)]
+        [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x85)]
+        [InlineData(KeyType.AES192, PivPinOnlyMode.PinProtected, 0x86)]
+        [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x87)]
+        [InlineData(KeyType.AES192, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x88)]
+        [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected, 0x89)]
+        [InlineData(KeyType.AES256, PivPinOnlyMode.PinDerived, 0x8A)]
+        [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x8B)]
+        [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinProtected, 0x8C)]
+        [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinDerived, 0x8D)]
+        [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x8E)]
+        public void SetPinOnly_Algorithms_Success(KeyType keyType, PivPinOnlyMode mode, byte slotNumber)
         {
             var specifiedCollector = new SpecifiedKeyCollector(
                 new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 },
@@ -451,7 +452,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                pivSession.SetPinOnlyMode(mode, algorithm);
+                pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
             }
 
             using (var pivSession = new PivSession(yubiKey))
@@ -481,17 +482,17 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(
-                    slotNumber, PivAlgorithm.EccP256);
+                var publicKey = pivSession.GenerateKeyPair(
+                    slotNumber, KeyType.ECP256);
 
-                Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
+                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
             }
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinProtected, 0x82)]
-        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinDerived, 0x83)]
-        public void SetPinOnly_ThenBoth_Success(PivAlgorithm algorithm, PivPinOnlyMode mode, byte slotNumber)
+        [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x82)]
+        [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x83)]
+        public void SetPinOnly_ThenBoth_Success(KeyType keyType, PivPinOnlyMode mode, byte slotNumber)
         {
             var specifiedCollector = new SpecifiedKeyCollector(
                 new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 },
@@ -509,10 +510,10 @@ namespace Yubico.YubiKey.Piv
 
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
-                pivSession.SetPinOnlyMode(mode, algorithm);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(yubiKey))
@@ -520,18 +521,18 @@ namespace Yubico.YubiKey.Piv
                 PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(mode, currentMode);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
 
-                pivSession.SetPinOnlyMode(newMode, algorithm);
+                pivSession.SetPinOnlyMode(newMode, keyType.GetPivAlgorithm());
 
                 Assert.True(pivSession.PinVerified);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(yubiKey))
@@ -548,19 +549,19 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(
-                    slotNumber, PivAlgorithm.EccP256);
+                var publicKey = pivSession.GenerateKeyPair(
+                    slotNumber, KeyType.ECP256);
 
-                Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
+                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
             }
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinProtected, 0x8F)]
-        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinDerived, 0x90)]
-        [InlineData(PivAlgorithm.Aes256, PivPinOnlyMode.PinProtected, 0x91)]
-        [InlineData(PivAlgorithm.TripleDes, PivPinOnlyMode.PinDerived, 0x92)]
-        public void SetPinOnly_ThenNewAlg_Success(PivAlgorithm algorithm, PivPinOnlyMode mode, byte slotNumber)
+        [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x8F)]
+        [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x90)]
+        [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected, 0x91)]
+        [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinDerived, 0x92)]
+        public void SetPinOnly_ThenNewAlg_Success(KeyType keyType, PivPinOnlyMode mode, byte slotNumber)
         {
             var specifiedCollector = new SpecifiedKeyCollector(
                 new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 },
@@ -568,12 +569,12 @@ namespace Yubico.YubiKey.Piv
                 new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
             );
 
-            PivAlgorithm newAlg = algorithm switch
+            KeyType newAlg = keyType switch
             {
-                PivAlgorithm.Aes128 => PivAlgorithm.Aes192,
-                PivAlgorithm.Aes192 => PivAlgorithm.Aes256,
-                PivAlgorithm.Aes256 => PivAlgorithm.TripleDes,
-                _ => PivAlgorithm.Aes128,
+                KeyType.AES128 => KeyType.AES192,
+                KeyType.AES192 => KeyType.AES256,
+                KeyType.AES256 => KeyType.TripleDES,
+                _ => KeyType.AES128,
             };
 
             using (var pivSession = new PivSession(yubiKey))
@@ -583,10 +584,10 @@ namespace Yubico.YubiKey.Piv
 
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
-                pivSession.SetPinOnlyMode(mode, algorithm);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(yubiKey))
@@ -594,18 +595,18 @@ namespace Yubico.YubiKey.Piv
                 PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(mode, currentMode);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
 
-                pivSession.SetPinOnlyMode(mode, newAlg);
+                pivSession.SetPinOnlyMode(mode, newAlg.GetPivAlgorithm());
 
                 Assert.True(pivSession.PinVerified);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(newAlg, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(newAlg.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(yubiKey))
@@ -622,18 +623,18 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(
-                    slotNumber, PivAlgorithm.EccP256);
+                var publicKey = pivSession.GenerateKeyPair(
+                    slotNumber, KeyType.ECP256);
 
-                Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
+                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
             }
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinProtected, 0x84)]
-        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinDerived, 0x85)]
-        [InlineData(PivAlgorithm.Aes256, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x86)]
-        public void SetPinOnly_ThenNone_Success(PivAlgorithm algorithm, PivPinOnlyMode mode, byte slotNumber)
+        [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x84)]
+        [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x85)]
+        [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x86)]
+        public void SetPinOnly_ThenNone_Success(KeyType keyType, PivPinOnlyMode mode, byte slotNumber)
         {
             var specifiedCollector = new SpecifiedKeyCollector(
                 new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 },
@@ -648,10 +649,10 @@ namespace Yubico.YubiKey.Piv
 
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
-                pivSession.SetPinOnlyMode(mode, algorithm);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(yubiKey))
@@ -668,22 +669,22 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(
-                    slotNumber, PivAlgorithm.EccP256);
+                var publicKey = pivSession.GenerateKeyPair(
+                    slotNumber, KeyType.ECP256);
 
-                Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
 
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.None, algorithm);
+                pivSession.SetPinOnlyMode(PivPinOnlyMode.None, keyType.GetPivAlgorithm());
 
                 Assert.True(pivSession.PinVerified);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
             using (var pivSession = new PivSession(yubiKey))

@@ -286,7 +286,7 @@ namespace Yubico.YubiKey.Scp
         /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
         /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other SCP related error
         /// described in the exception message.</exception>
-        public void PutKey(KeyReference keyReference, ECPrivateKeyParameters privateKeyParameters, int replaceKvn = 0)
+        public void PutKey(KeyReference keyReference, ECPrivateKey privateKeyParameters, int replaceKvn = 0)
         {
             Logger.LogInformation("Importing SCP11 private key into Key Reference: {KeyReference}", keyReference);
 
@@ -342,22 +342,26 @@ namespace Yubico.YubiKey.Scp
                 throw;
             }
         }
+        
+        [Obsolete("Obsolete, use PutKey(KeyReference, ECPrivateKey)", false)]
+        public void PutKey(KeyReference keyReference, ECPrivateKeyParameters privateKeyParameters, int replaceKvn = 0) 
+            => PutKey(keyReference, privateKeyParameters as ECPrivateKey, replaceKvn);
 
         /// <summary>
         /// Puts an EC public key onto the YubiKey using the Security Domain.
         /// </summary>
         /// <param name="keyReference">The key reference identifying where to store the key.</param>
-        /// <param name="publicKeyParameters">The EC public key parameters to store.</param>
+        /// <param name="publicKey">The EC public key parameters to store.</param>
         /// <param name="replaceKvn">The key version number to replace, or 0 for a new key (Default value is 0).</param>
         /// <exception cref="ArgumentException">Thrown when the public key is not of type SECP256R1.</exception>
         /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
         /// <exception cref="SecureChannelException">Thrown when the new key set's checksum failed to verify, or some other SCP related error
         /// described in the exception message.</exception>
-        public void PutKey(KeyReference keyReference, ECPublicKeyParameters publicKeyParameters, int replaceKvn = 0)
+        public void PutKey(KeyReference keyReference, ECPublicKey publicKey, int replaceKvn = 0)
         {
             Logger.LogInformation("Importing SCP11 public key into KeyReference: {KeyReference}", keyReference);
 
-            var pkParams = publicKeyParameters.Parameters;
+            var pkParams = publicKey.Parameters;
             if (pkParams.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
             {
                 throw new ArgumentException("Public key must be of type NIST P-256");
@@ -373,7 +377,7 @@ namespace Yubico.YubiKey.Scp
 
                 // Write the EC public key
                 var publicKeyTlvData =
-                    new TlvObject(EcPublicKeyKeyType, publicKeyParameters.GetBytes().Span).GetBytes();
+                    new TlvObject(EcPublicKeyKeyType, publicKey.PublicPoint.Span).GetBytes();
 
                 commandDataWriter.Write(publicKeyTlvData.ToArray());
 
@@ -402,7 +406,11 @@ namespace Yubico.YubiKey.Scp
                 throw;
             }
         }
-
+        
+        [Obsolete("Obsolete, use PutKey(KeyReference, ECPublicKey)", false)]
+        public void PutKey(KeyReference keyReference, ECPublicKeyParameters publicKey, int replaceKvn = 0) 
+            => PutKey(keyReference, publicKey as ECPublicKey, replaceKvn);
+        
         /// <summary>
         /// Delete one (or more) keys matching the specified criteria.
         /// </summary>
@@ -477,7 +485,7 @@ namespace Yubico.YubiKey.Scp
         /// <param name="replaceKvn">The key version number of the key set that should be replaced, or 0 to generate a new key pair.</param>
         /// <returns>The parameters of the generated key, including the curve and the public point.</returns>
         /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
-        public ECPublicKeyParameters GenerateEcKey(KeyReference keyReference, byte replaceKvn)
+        public ECPublicKey GenerateEcKey(KeyReference keyReference, byte replaceKvn)
         {
             Logger.LogInformation(
                 "Generating new key for {KeyReference}{ReplaceMessage}",
@@ -924,7 +932,7 @@ namespace Yubico.YubiKey.Scp
         /// <returns>An instance of EcPrivateKeyParameters with the nistP256 curve.</returns>
         /// <exception cref="ArgumentException">Thrown when the byte array is not in the expected format.
         /// Either the first byte is not 0x04, or the byte array is not 65 bytes long (Key must be of type NIST P-256).</exception>
-        private static ECPublicKeyParameters CreateECPublicKeyFromBytes(ReadOnlySpan<byte> bytes)
+        private static ECPublicKey CreateECPublicKeyFromBytes(ReadOnlySpan<byte> bytes)
         {
             if (bytes[0] != 0x04)
             {
@@ -946,7 +954,7 @@ namespace Yubico.YubiKey.Scp
                 }
             };
 
-            return new ECPublicKeyParameters(ecParameters);
+            return ECPublicKey.CreateFromParameters(ecParameters);
         }
     }
 }

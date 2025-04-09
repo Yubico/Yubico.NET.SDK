@@ -23,6 +23,7 @@ namespace Yubico.YubiKey.TestUtilities
     {
         // Perform raw RSA using the given public key. Create a new byte array
         // for the output.
+        [Obsolete("Obsolete")]
         public static bool CSharpRawRsaPublic(string pemPublicKey, byte[] dataToProcess, out byte[] processedData)
         {
             processedData = Array.Empty<byte>();
@@ -57,6 +58,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Perform raw RSA using the given private key. Create a new byte array
         // for the output.
+        [Obsolete("Obsolete")]
         public static bool CSharpRawRsaPrivate(string pemPrivateKey, byte[] dataToProcess, out byte[] processedData)
         {
             processedData = Array.Empty<byte>();

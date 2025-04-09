@@ -14,6 +14,7 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Commands
@@ -43,10 +44,10 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Aes128)]
-        [InlineData(PivAlgorithm.Aes192)]
-        [InlineData(PivAlgorithm.Aes256)]
-        public void AesKey_GetMetadata_CorrectAlgorithm(PivAlgorithm algorithm)
+        [InlineData(KeyType.AES128)]
+        [InlineData(KeyType.AES192)]
+        [InlineData(KeyType.AES256)]
+        public void AesKey_GetMetadata_CorrectAlgorithm(KeyType keyType)
         {
             if (!yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey))
             {
@@ -68,16 +69,16 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68
                 };
 
-                int keyLength = algorithm switch
+                int keyLength = keyType switch
                 {
-                    PivAlgorithm.Aes128 => 16,
-                    PivAlgorithm.Aes192 => 24,
+                    KeyType.AES128 => 16,
+                    KeyType.AES192 => 24,
                     _ => 32,
                 };
 
                 var mgmtKey = new ReadOnlyMemory<byte>(keyData, 0, keyLength);
 
-                var setCmd = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Never, algorithm);
+                var setCmd = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Never, keyType.GetPivAlgorithm());
 
                 SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
                 Assert.Equal(ResponseStatus.Success, setRsp.Status);
@@ -87,7 +88,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
                 PivMetadata metadata = getRsp.GetData();
-                Assert.Equal(algorithm, metadata.Algorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), metadata.Algorithm);
             }
         }
 

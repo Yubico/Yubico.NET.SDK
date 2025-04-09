@@ -14,6 +14,7 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
 
@@ -92,6 +93,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void Constructor_ValidInputMgmtKey_NoKey()
         {
             byte[] testData = new byte[]
@@ -209,6 +211,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void Constructor_ValidInputPin_NoKey()
         {
             byte[] testData = new byte[]
@@ -277,7 +280,7 @@ namespace Yubico.YubiKey.Piv
 
             var pivMetadata = new PivMetadata(testData, 0xF9);
 
-            Assert.True(pivMetadata.Algorithm == PivAlgorithm.Rsa2048);
+            Assert.True(pivMetadata.Algorithm == KeyType.RSA2048.GetPivAlgorithm());
         }
 
         [Fact]
@@ -376,6 +379,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void Constructor_ValidInputF9_CorrectKey()
         {
             int keyOffset = 14;
@@ -521,7 +525,7 @@ namespace Yubico.YubiKey.Piv
 
             var pivMetadata = new PivMetadata(testData, 0x9A);
 
-            Assert.True(pivMetadata.Algorithm == PivAlgorithm.EccP256);
+            Assert.True(pivMetadata.Algorithm == KeyType.ECP256.GetPivAlgorithm());
         }
 
         [Fact]
@@ -570,6 +574,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void Constructor_ValidInput9A_CorrectKey()
         {
             int keyOffset = 12;
@@ -669,6 +674,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void Constructor_NoData_NoKey()
         {
             byte[] testData = Array.Empty<byte>();

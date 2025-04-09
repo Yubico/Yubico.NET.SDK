@@ -15,7 +15,10 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Security.Cryptography;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv.Converters;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -156,7 +159,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivMetadata(ReadOnlyMemory<byte> responseData, byte slotNumber)
         {
-            if (PivSlot.IsValidSlotNumber(slotNumber) == false)
+            if (!PivSlot.IsValidSlotNumber(slotNumber))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -168,10 +171,18 @@ namespace Yubico.YubiKey.Piv
             Slot = slotNumber;
             RetryCount = -1;
             RetriesRemaining = -1;
+
+#pragma warning disable CS0618 // Type or member is obsolete
             PublicKey = new PivPublicKey();
+#pragma warning restore CS0618 // Type or member is obsolete
 
+            // This will update the fields in this object
+            ParseResponseData(responseData);
+        }
+
+        private void ParseResponseData(ReadOnlyMemory<byte> responseData)
+        {
             var tlvReader = new TlvReader(responseData);
-
             while (tlvReader.HasData)
             {
                 int tag = tlvReader.PeekTag();
@@ -233,12 +244,13 @@ namespace Yubico.YubiKey.Piv
                         break;
 
                     case PublicTag:
-                        // Public: public key partner to the private key in the
-                        // slot
-                        PublicKey = PivPublicKey.Create(value);
+                        // Public: public key partner to the private key in the slot
+                        PublicKeyParameters = PivKeyDecoder.CreatePublicKey(value, Algorithm.GetKeyType());
 
+                        #pragma warning disable CS0618 // Type or member is obsolete
+                        PublicKey = PivPublicKey.Create(value, Algorithm);
+                        #pragma warning restore CS0618 // Type or member is obsolete
                         break;
-
                     case DefaultTag:
                         // Default: whether the PIN/PUK/Mgmt key is default or not
                         // One byte, no more, no less.
@@ -302,7 +314,13 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// The public key associated with the private key in the given slot.
         /// </summary>
-        public PivPublicKey PublicKey { get; private set; }
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
+        public PivPublicKey PublicKey { get; private set; } 
+        
+        /// <summary>
+        /// The public key associated with the private key in the given slot.
+        /// </summary>
+        public IPublicKey? PublicKeyParameters { get; private set; }
 
         /// <summary>
         /// The total number of wrong PINs or PUKs that can be entered before the

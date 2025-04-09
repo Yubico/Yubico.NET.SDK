@@ -46,6 +46,7 @@ limitations under the License. -->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageReleaseNotes>https://github.com/Yubico/Yubico.NET.SDK/releases/latest</PackageReleaseNotes>
 
     <!-- StrongName signing -->
     <SignAssembly>true</SignAssembly>

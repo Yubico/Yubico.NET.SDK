@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.TestUtilities
@@ -22,20 +24,21 @@ namespace Yubico.YubiKey.TestUtilities
     public class CertConverterTests
     {
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        public void CertConverter_AllOperations_Succeed(PivAlgorithm algorithm)
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [Obsolete("Obsolete")]
+        public void CertConverter_AllOperations_Succeed(KeyType keyType)
         {
-            bool isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out var certPem, out _, out _);
+            bool isValid = SampleKeyPairs.GetKeysAndCertPem(keyType, true, out var certPem, out _, out _);
             Assert.True(isValid);
 
             var certConverter = new CertConverter(certPem!.ToCharArray());
 
-            Assert.Equal(certConverter.Algorithm, algorithm);
+            Assert.Equal(certConverter.Algorithm, keyType.GetPivAlgorithm());
 
             X509Certificate2 getCert = certConverter.GetCertObject();
             Assert.False(getCert.HasPrivateKey);
@@ -47,7 +50,7 @@ namespace Yubico.YubiKey.TestUtilities
             Assert.Equal('-', getPem[0]);
 
             PivPublicKey pubKey = certConverter.GetPivPublicKey();
-            Assert.Equal(algorithm, pubKey.Algorithm);
+            Assert.Equal(keyType.GetPivAlgorithm(), pubKey.Algorithm);
 
             if (certConverter.KeySize > 384)
             {

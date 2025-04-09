@@ -14,6 +14,7 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
@@ -67,7 +68,7 @@ namespace Yubico.YubiKey.Piv
             ResetPiv(_yubiKey);
         }
 
-        // Start with a ResetPiv. Then set to mode/algorithm. Then set the
+        // Start with a ResetPiv. Then set to mode/keyType. Then set the
         // appropriate mode to unavailable.
         // Verify the result of GetPinOnlyMode.
         // Now set the YubiKey to None.
@@ -76,14 +77,14 @@ namespace Yubico.YubiKey.Piv
         // is None.
         // Verify that the mgmt key is the default.
         [Theory]
-        [InlineData(PivPinOnlyMode.PinProtected, PivAlgorithm.Aes128, PivPinOnlyMode.PinDerivedUnavailable)]
-        [InlineData(PivPinOnlyMode.PinDerived, PivAlgorithm.TripleDes, PivPinOnlyMode.PinProtectedUnavailable)]
-        [InlineData(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, PivAlgorithm.Aes192, PivPinOnlyMode.None)]
-        [InlineData(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, PivAlgorithm.Aes128, PivPinOnlyMode.PinDerivedUnavailable)]
+        [InlineData(PivPinOnlyMode.PinProtected, KeyType.AES128, PivPinOnlyMode.PinDerivedUnavailable)]
+        [InlineData(PivPinOnlyMode.PinDerived, KeyType.TripleDES, PivPinOnlyMode.PinProtectedUnavailable)]
+        [InlineData(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, KeyType.AES192, PivPinOnlyMode.None)]
+        [InlineData(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, KeyType.AES128, PivPinOnlyMode.PinDerivedUnavailable)]
         public void ResetToNone_Success(
-            PivPinOnlyMode mode, PivAlgorithm algorithm, PivPinOnlyMode unavailable)
+            PivPinOnlyMode mode, KeyType keyType, PivPinOnlyMode unavailable)
         {
-            if (!_alternateAlgorithm && !(algorithm == PivAlgorithm.TripleDes))
+            if (!_alternateAlgorithm && keyType != KeyType.TripleDES)
             {
                 return;
             }
@@ -92,7 +93,7 @@ namespace Yubico.YubiKey.Piv
             {
                 pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.SetPinOnlyMode(mode, algorithm);
+                pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
 
                 SetUnavailable(pivSession, unavailable);
             }
@@ -108,12 +109,12 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(_yubiKey))
             {
                 pivSession.KeyCollector = _specifiedCollector.SpecifiedKeyCollectorDelegate;
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.None, algorithm);
+                pivSession.SetPinOnlyMode(PivPinOnlyMode.None, keyType.GetPivAlgorithm());
             }
 
             using (var pivSession = new PivSession(_yubiKey))
             {
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(KeyType.TripleDES.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 bool isValid = pivSession.TryAuthenticateManagementKey(_defaultManagementKey);
                 Assert.True(isValid);
@@ -154,7 +155,7 @@ namespace Yubico.YubiKey.Piv
             {
                 pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.None, PivAlgorithm.TripleDes);
+                pivSession.SetPinOnlyMode(PivPinOnlyMode.None, KeyType.TripleDES.GetPivAlgorithm());
 
                 PivPinOnlyMode expectedMode = GetExpectedMode(PivPinOnlyMode.None, unavailable);
                 PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
@@ -175,7 +176,7 @@ namespace Yubico.YubiKey.Piv
             {
                 pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.SetPinOnlyMode(mode, PivAlgorithm.TripleDes);
+                pivSession.SetPinOnlyMode(mode, KeyType.TripleDES.GetPivAlgorithm());
             }
 
             using (var pivSession = new PivSession(_yubiKey))

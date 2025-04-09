@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
@@ -144,9 +145,8 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
         {
-            // This will verify the slot number and dataToSign length. If one or
-            // both are incorrect, the call will throw an exception.
-            var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber);
+            var signCommand = BuildSignCommand(slotNumber, dataToSign);
+
             YubiKey.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm);
 
             return PerformPrivateKeyOperation(
@@ -266,7 +266,38 @@ namespace Yubico.YubiKey.Piv
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.IncorrectCiphertextLength));
         }
+        
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
+        public byte[] KeyAgree(byte slotNumber, PivPublicKey correspondentPublicKey)
+        {
+            if (correspondentPublicKey is null)
+            {
+                throw new ArgumentNullException(nameof(correspondentPublicKey));
+            }
 
+            if (!correspondentPublicKey.Algorithm.IsEcc())
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidPublicKeyData));
+            }
+
+            byte[] publicPoint = ((PivEccPublicKey)correspondentPublicKey).PublicPoint.ToArray();
+
+            // This will verify the slot number and dataToSign length. If one or
+            // both are incorrect, the call will throw an exception.
+            var keyAgreeCommand = new AuthenticateKeyAgreeCommand(publicPoint, slotNumber, correspondentPublicKey.Algorithm);
+
+            return PerformPrivateKeyOperation(
+                slotNumber,
+                keyAgreeCommand,
+                keyAgreeCommand.Algorithm,
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.IncorrectEccKeyLength));
+        }
+        
         /// <summary>
         /// Perform Phase 2 of EC Diffie-Hellman Key Agreement using the private
         /// key in the given slot, and the corresponding party's public key.
@@ -351,26 +382,27 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="SecurityException">
         /// The remaining retries count indicates the PIN is blocked.
         /// </exception>
-        public byte[] KeyAgree(byte slotNumber, PivPublicKey correspondentPublicKey)
+        public byte[] KeyAgree(byte slotNumber, IPublicKey correspondentPublicKey)
         {
             if (correspondentPublicKey is null)
             {
                 throw new ArgumentNullException(nameof(correspondentPublicKey));
             }
 
-            if (!correspondentPublicKey.Algorithm.IsEcc())
+            byte[] publicPoint = correspondentPublicKey switch
             {
-                throw new ArgumentException(
+                ECPublicKey ecDsa => ecDsa.PublicPoint.ToArray(),
+                Curve25519PublicKey edDsa when correspondentPublicKey.KeyType == KeyType.X25519 
+                    => edDsa.PublicPoint.ToArray(),
+                _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPublicKeyData));
-            }
-
-            byte[] publicPoint = ((PivEccPublicKey)correspondentPublicKey).PublicPoint.ToArray();
-
-            // This will verify the slot number and dataToSign length. If one or
-            // both are incorrect, the call will throw an exception.
-            var keyAgreeCommand = new AuthenticateKeyAgreeCommand(publicPoint, slotNumber);
+                        ExceptionMessages.InvalidPublicKeyData))
+            };
+            
+            var keyAgreeCommand = new AuthenticateKeyAgreeCommand(
+                publicPoint, slotNumber, 
+                correspondentPublicKey.KeyType.GetPivAlgorithm());
 
             return PerformPrivateKeyOperation(
                 slotNumber,
@@ -385,8 +417,10 @@ namespace Yubico.YubiKey.Piv
         // Agreement. Just pass in the actual command to run, along with some
         // other information.
         private byte[] PerformPrivateKeyOperation(
-            byte slotNumber, IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> commandToPerform,
-            PivAlgorithm algorithm, string algorithmExceptionMessage)
+            byte slotNumber,
+            IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> commandToPerform,
+            PivAlgorithm algorithm,
+            string algorithmExceptionMessage)
         {
             bool pinRequired = true;
 
@@ -477,6 +511,18 @@ namespace Yubico.YubiKey.Piv
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.IncompleteCommandInput));
+        }
+
+        private AuthenticateSignCommand BuildSignCommand(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
+        {
+            if (!YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
+            {
+                return new AuthenticateSignCommand(dataToSign, slotNumber);
+            }
+
+            var slotMetadata = GetMetadata(slotNumber);
+            var algorithm = slotMetadata.Algorithm;
+            return new AuthenticateSignCommand(dataToSign, slotNumber, algorithm);
         }
     }
 }

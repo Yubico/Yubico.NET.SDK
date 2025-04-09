@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -65,12 +66,12 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        public void GetData_ReturnsSharedSecret(PivAlgorithm algorithm)
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        public void GetData_ReturnsSharedSecret(KeyType keyType)
         {
-            byte[] sharedSecret = GetSharedSecret(algorithm);
-            ResponseApdu responseApdu = GetResponseApdu(algorithm);
+            byte[] sharedSecret = GetSharedSecret(keyType);
+            ResponseApdu responseApdu = GetResponseApdu(keyType);
 
             var response = new AuthenticateKeyAgreeResponse(responseApdu);
 
@@ -117,23 +118,23 @@ namespace Yubico.YubiKey.Piv.Commands
             _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
         }
 
-        private static ResponseApdu GetResponseApdu(PivAlgorithm algorithm)
+        private static ResponseApdu GetResponseApdu(KeyType keyType)
         {
-            byte[] apduData = GetResponseApduData(algorithm);
+            byte[] apduData = GetResponseApduData(keyType);
             return new ResponseApdu(apduData);
         }
 
-        // Get the data that makes up a response APDU for the given algorithm.
+        // Get the data that makes up a response APDU for the given keyType.
         // This will return the full APDU data:
         // 7C len 82 len sharedSecret 90 00
-        private static byte[] GetResponseApduData(PivAlgorithm algorithm)
+        private static byte[] GetResponseApduData(KeyType keyType)
         {
-            byte[] sharedSecret = GetSharedSecret(algorithm);
+            byte[] sharedSecret = GetSharedSecret(keyType);
             byte[] statusWord = new byte[] { 0x90, 0x00 };
 
-            byte[] prefix = algorithm switch
+            byte[] prefix = keyType switch
             {
-                PivAlgorithm.EccP384 => new byte[] { 0x7C, 0x32, 0x82, 0x30 },
+                KeyType.ECP384 => new byte[] { 0x7C, 0x32, 0x82, 0x30 },
 
                 _ => new byte[] { 0x7C, 0x22, 0x82, 0x20 },
             };
@@ -144,9 +145,9 @@ namespace Yubico.YubiKey.Piv.Commands
             return returnValue.ToArray<byte>();
         }
 
-        private static byte[] GetSharedSecret(PivAlgorithm algorithm) => algorithm switch
+        private static byte[] GetSharedSecret(KeyType keyType) => keyType switch
         {
-            PivAlgorithm.EccP384 => new byte[] {
+            KeyType.ECP384 => new byte[] {
                 0x60, 0x8C, 0x01, 0xA6, 0xDA, 0x36, 0xBA, 0xA0, 0xFE, 0xA5, 0x18, 0x16, 0x7E, 0xEA, 0x16, 0x51,
                 0xB1, 0x62, 0x58, 0xC5, 0x1A, 0x84, 0xEB, 0x9C, 0x12, 0x6C, 0x8E, 0x6A, 0x3E, 0x6C, 0x1B, 0x40,
                 0x03, 0x26, 0xA6, 0x79, 0x41, 0x78, 0xDA, 0xEE, 0x08, 0x9A, 0xDA, 0x89, 0xCC, 0xF9, 0x27, 0xF0

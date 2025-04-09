@@ -15,23 +15,25 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
+    [Obsolete] // FIx later, cert thing
     public class CertTests
     {
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP256)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP384)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096)]
-        public void GetCert_Succeeds(StandardTestDevice targetDevice, PivAlgorithm algorithm)
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP256)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP384)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096)]
+        public void GetCert_Succeeds(StandardTestDevice targetDevice, KeyType keyType)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out var certPem, out var _, out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, true, out var certPem, out var _, out var privateKeyPem);
 
             var certConverter = new CertConverter(certPem!.ToCharArray());
             var certificate = certConverter.GetCertObject();
@@ -51,15 +53,15 @@ namespace Yubico.YubiKey.Piv
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP256)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP384)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096)]
-        public void GetCert_NoAuth_Succeeds(StandardTestDevice targetDevice, PivAlgorithm algorithm)
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP256)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP384)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA1024)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096)]
+        public void GetCert_NoAuth_Succeeds(StandardTestDevice targetDevice, KeyType keyType)
         {
-            var isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out var certPem, out _, out var privateKeyPem);
+            var isValid = SampleKeyPairs.GetKeysAndCertPem(keyType, true, out var certPem, out _, out var privateKeyPem);
             Assert.True(isValid);
 
             var certConverter = new CertConverter(certPem!.ToCharArray());
@@ -75,7 +77,7 @@ namespace Yubico.YubiKey.Piv
             // Try to generate a key pair. This should not succeed because
             // the mgmt key has not been authenticated.
             var genPairCommand = new GenerateKeyPairCommand(
-                0x86, algorithm, PivPinPolicy.Default, PivTouchPolicy.Never);
+                0x86, keyType, PivPinPolicy.Default, PivTouchPolicy.Never);
             var genPairResponse =
                 pivSession.Connection.SendCommand(genPairCommand);
             // A generation success is a test failure.

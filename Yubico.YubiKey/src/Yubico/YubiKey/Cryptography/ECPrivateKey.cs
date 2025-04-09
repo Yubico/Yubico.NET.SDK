@@ -56,8 +56,7 @@ namespace Yubico.YubiKey.Cryptography
         /// </remarks>
         /// <param name="parameters">The EC parameters.</param>
         /// <exception cref="ArgumentException">Thrown when parameters do not contain D value.</exception>
-        [Obsolete("Use factory methods instead", false)]
-        public ECPrivateKey(ECParameters parameters)
+        protected ECPrivateKey(ECParameters parameters)
         {
             if (parameters.D == null)
             {
@@ -75,8 +74,7 @@ namespace Yubico.YubiKey.Cryptography
         /// It exports the parameters from the ECDsa object and deep copy the parameters from the ECParameters object.
         /// </remarks>
         /// <param name="ecdsaObject">The ECDsa object.</param>
-        [Obsolete("Use factory methods instead")]
-        public ECPrivateKey(ECDsa ecdsaObject)
+        protected ECPrivateKey(ECDsa ecdsaObject)
         {
             if (ecdsaObject == null)
             {

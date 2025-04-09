@@ -19,11 +19,11 @@ namespace Yubico.YubiKey.Cryptography
             var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
 
             // Act
-            var publicKeyParams = PivEncodingToKey.CreateRSAPublicKey(pivPublicKeyEncoded);
+            var publicKeyParams = PivKeyConverter.CreateRSAPublicKey(pivPublicKeyEncoded);
             var resultParameters = publicKeyParams.Parameters;
 
             // Assert
-            var testKeyParameters = testKey.AsRSA().ExportParameters(false); // Todo how is this working? We're not using the private key, aha, they are probably empty
+            var testKeyParameters = testKey.AsRSA().ExportParameters(false);
             Assert.Equal(testKeyParameters.D, resultParameters.D);
             Assert.Equal(testKeyParameters.DP, resultParameters.DP);
             Assert.Equal(testKeyParameters.DQ, resultParameters.DQ);

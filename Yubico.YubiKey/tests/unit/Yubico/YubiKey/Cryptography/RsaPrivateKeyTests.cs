@@ -31,7 +31,7 @@ public class RsaPrivateKeyTests
         var pivPrivateKeyEncoded = pivPrivateKey.EncodedPrivateKey;
 
         // Act
-        var privateKeyParams = PivEncodingToKey.CreateRSAPrivateKey(pivPrivateKeyEncoded);
+        var privateKeyParams = PivKeyConverter.CreateRSAPrivateKey(pivPrivateKeyEncoded);
         var parameters = privateKeyParams.Parameters;
 
         // Assert

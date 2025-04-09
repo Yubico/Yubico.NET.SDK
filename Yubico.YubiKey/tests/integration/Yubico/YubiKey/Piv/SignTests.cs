@@ -451,6 +451,7 @@ namespace Yubico.YubiKey.Piv
             var bouncyEd25519PublicKey =
                 new Ed25519PublicKeyParameters(
                     ((Curve25519PublicKey)publicKey).PublicPoint.ToArray());
+            
             return bouncyEd25519PublicKey;
         }
 

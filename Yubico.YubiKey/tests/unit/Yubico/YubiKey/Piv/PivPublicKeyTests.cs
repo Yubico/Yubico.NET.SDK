@@ -32,12 +32,61 @@ namespace Yubico.YubiKey.Piv
         {
             var testKey = TestKeys.GetTestPublicKey(keyType);
             var tlvPublicKey = testKey.AsPivPublicKey().PivEncodedPublicKey;
+            var pivPublicKey = PivPublicKey.Create(tlvPublicKey, keyType.GetPivAlgorithm());
+            Assert.NotNull(pivPublicKey);
 
-            var keyObject = PivPublicKey.Create(tlvPublicKey, keyType.GetPivAlgorithm());
-
-            Assert.True(keyObject is PivPublicKey);
+            if (keyType.IsEllipticCurve())
+            {
+                var pivPublicKeyAsEcc = pivPublicKey as PivEccPublicKey;
+                Assert.NotNull(pivPublicKeyAsEcc);
+                Assert.Equal(testKey.GetPublicPoint(),
+                    pivPublicKeyAsEcc.PublicPoint);
+            }
+            else
+            {
+                var pivPublicKeyAsRsa = pivPublicKey as PivRsaPublicKey;
+                Assert.NotNull(pivPublicKeyAsRsa);
+                Assert.Equal(testKey.GetModulus(),
+                    pivPublicKeyAsRsa.Modulus);
+                Assert.Equal(testKey.GetExponent(),
+                    pivPublicKeyAsRsa.PublicExponent);
+            }
         }
 
+        [Theory]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [InlineData(KeyType.ECP521)]
+        [Obsolete("Obsolete")]
+        public void Create_UsingECDsaKeys_ReturnsPivPublicKey(
+            KeyType keyType)
+        {
+            var ecDsa = ECDsa.Create(ECCurve.CreateFromValue(keyType.GetCurveOid()!));
+            var ecParameters = ecDsa.ExportParameters(false);
+
+            var publicPoint = (byte[]) [0x04, .. ecParameters.Q.X!, .. ecParameters.Q.Y!];
+            var pivEccPublicKey = new PivEccPublicKey(publicPoint, keyType.GetPivAlgorithm());
+
+            Assert.Equal(pivEccPublicKey.PublicPoint, publicPoint);
+            Assert.Equal(pivEccPublicKey.Algorithm.GetKeyType(), keyType);
+        }
+
+        [Theory]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [Obsolete("Obsolete")]
+        public void Create_UsingRSAKeys_ReturnsPivPublicKey(
+            KeyType keyType)
+        {
+            var rsa = RSA.Create(keyType.GetKeySizeBits());
+            var ecParameters = rsa.ExportParameters(false);
+
+            var pivEccPublicKey = new PivRsaPublicKey(ecParameters.Modulus, ecParameters.Exponent);
+
+            Assert.Equal(pivEccPublicKey.Modulus, ecParameters.Modulus);
+            Assert.Equal(pivEccPublicKey.PublicExponent, ecParameters.Exponent);
+            Assert.Equal(pivEccPublicKey.Algorithm.GetKeyType(), keyType);
+        }
 
         [Theory]
         [InlineData(KeyType.RSA1024)]

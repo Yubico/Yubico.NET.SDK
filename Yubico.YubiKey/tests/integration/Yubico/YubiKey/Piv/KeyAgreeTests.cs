@@ -50,7 +50,7 @@ namespace Yubico.YubiKey.Piv
             }
             else
             {
-                var curve = ECCurve.CreateFromValue(keyType.ToCurveOid()!);
+                var curve = ECCurve.CreateFromValue(keyType.GetCurveOid()!);
                 var ecDsa = ECDsa.Create(curve);
                 peerPrivateKeyEcParameters = ecDsa.ExportParameters(true);
                 var peerPublicKeyEcParameters = ecDsa.ExportParameters(false);

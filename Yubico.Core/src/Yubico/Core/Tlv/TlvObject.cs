@@ -16,6 +16,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace Yubico.Core.Tlv
 {
@@ -23,12 +24,12 @@ namespace Yubico.Core.Tlv
     /// Tag, length, Value structure that helps to parse APDU response data.
     /// This class handles BER-TLV encoded data with determinate length.
     /// </summary>
-    public class TlvObject
+    public sealed class TlvObject : IDisposable
     {
         /// <summary>
         /// Returns the tag.
         /// </summary>
-        public int Tag { get; }
+        public int Tag { get; private set; }
 
         /// <summary>
         /// Returns a copy of the value.
@@ -38,10 +39,11 @@ namespace Yubico.Core.Tlv
         /// <summary>
         /// Returns the length of the value.
         /// </summary>
-        public int Length { get; }
+        public int Length { get; private set; }
 
         private readonly byte[] _bytes;
         private readonly int _offset;
+        private bool _disposed;
 
         /// <summary>
         /// Creates a new TLV (Tag-Length-Value) object with the specified tag and value.
@@ -64,6 +66,7 @@ namespace Yubico.Core.Tlv
             }
 
             Tag = tag;
+            
             // Create a copy of the input value
             byte[] valueBuffer = value.ToArray();
             using var ms = new MemoryStream();
@@ -215,6 +218,21 @@ namespace Yubico.Core.Tlv
 #else
             return $"Tlv(0x{Tag:X}, {Length}, {BitConverter.ToString(Value.ToArray()).Replace("-", "")})";
 #endif
+        }
+
+        /// <summary>
+        /// Dispose the object and clears its buffers
+        /// </summary>
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+            CryptographicOperations.ZeroMemory(_bytes);
+            Length = 0;
+            Tag = 0;
+            _disposed = true;
         }
     }
 }

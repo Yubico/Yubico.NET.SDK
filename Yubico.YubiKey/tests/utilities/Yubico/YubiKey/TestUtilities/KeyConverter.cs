@@ -387,33 +387,6 @@ namespace Yubico.YubiKey.TestUtilities
         // not return a reference.
         public PivPrivateKey GetPivPrivateKey()
         {
-            // if (_pivPrivateKey.Algorithm == PivAlgorithm.EccEd25519) // This is the simple one
-            // {
-            //     var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
-            //     var last32Bytes = testPrivateKey.KeyBytes.AsSpan()[^32..];
-            //     var pivPrivateKey = new PivEccPrivateKey(last32Bytes.ToArray(), PivAlgorithm.EccEd25519);
-            //     return pivPrivateKey;
-            // }
-            //
-            // if (_pivPrivateKey.Algorithm == PivAlgorithm.EccX25519) // This is the simple one
-            // {
-            //     var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
-            //     var last32Bytes = testPrivateKey.KeyBytes.AsSpan()[^32..];
-            //     var pivPrivateKey = new PivEccPrivateKey(last32Bytes.ToArray(), PivAlgorithm.EccEd25519);
-            //     return pivPrivateKey;
-            // }
-            //
-            // if (_pivPrivateKey.Algorithm ==
-            //     PivAlgorithm
-            //         .EccEd25519) // This is good as well, but a bit too complex. However it could be used to replace keyconverter
-            // {
-            //     var testPrivateKey = TestKeys.GetPrivateKey(_pivPrivateKey.Algorithm);
-            //     var parser = new PrivateKeyInfoParser();
-            //     var keyInfo = parser.ParsePrivateKey<EdPrivateKeyInfo>(testPrivateKey.KeyBytes);
-            //     var pivPrivateKey = new PivEccPrivateKey(keyInfo.PrivateKey, _pivPrivateKey.Algorithm);
-            //     return pivPrivateKey;
-            // }
-
             if (_pivPrivateKey.Algorithm != PivAlgorithm.None)
             {
                 return PivPrivateKey.Create(_pivPrivateKey.EncodedPrivateKey, _pivPrivateKey.Algorithm);

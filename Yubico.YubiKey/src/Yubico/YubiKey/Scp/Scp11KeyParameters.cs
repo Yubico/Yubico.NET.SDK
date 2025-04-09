@@ -111,11 +111,11 @@ namespace Yubico.YubiKey.Scp
         [Obsolete("Obsolete, use constructor with ECPrivateKey instead", false)]
         public Scp11KeyParameters(
             KeyReference keyReference,
-            ECPublicKey pkSdEcka,
+            ECPublicKeyParameters pkSdEcka,
             KeyReference oceKeyReference,
             ECPrivateKeyParameters skOceEcka,
             IReadOnlyCollection<X509Certificate2> oceCertificates) 
-            : this(keyReference, pkSdEcka, oceKeyReference, skOceEcka as ECPrivateKey, oceCertificates)
+            : this(keyReference, pkSdEcka as ECPublicKey, oceKeyReference, skOceEcka as ECPrivateKey, oceCertificates)
         {
 
         }

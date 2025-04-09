@@ -201,7 +201,36 @@ namespace Yubico.YubiKey.Piv
                     ExceptionMessages.NotSupportedByYubiKeyVersion));
         }
 
-        /// <summary>
+
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
+        public void ReplaceAttestationKeyAndCertificate(PivPrivateKey privateKey, X509Certificate2 certificate)
+        {
+            byte[] certDer = CheckVersionKeyAndCertRequirements(privateKey.Algorithm.GetKeyType(), certificate);
+
+            var tlvWriter = new TlvWriter();
+            using (tlvWriter.WriteNestedTlv(0x53))
+            {
+                tlvWriter.WriteValue(0x70, certDer);
+                tlvWriter.WriteByte(0x71, 0);
+                tlvWriter.WriteValue(0xfe, null);
+            }
+            byte[] encodedCert = tlvWriter.Encode();
+
+            ImportPrivateKey(PivSlot.Attestation, privateKey);
+
+            var command = new PutDataCommand(AttestationCertTag, encodedCert);
+            var response = Connection.SendCommand(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.CommandResponseApduUnexpectedResult,
+                        response.StatusWord.ToString("X4", CultureInfo.InvariantCulture)));
+            }
+        }
+        
+                /// <summary>
         /// Replace the attestation key and certificate.
         /// </summary>
         /// <remarks>
@@ -328,34 +357,6 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
-        public void ReplaceAttestationKeyAndCertificate(PivPrivateKey privateKey, X509Certificate2 certificate)
-        {
-            byte[] certDer = CheckVersionKeyAndCertRequirements(privateKey.Algorithm.GetKeyType(), certificate);
-
-            var tlvWriter = new TlvWriter();
-            using (tlvWriter.WriteNestedTlv(0x53))
-            {
-                tlvWriter.WriteValue(0x70, certDer);
-                tlvWriter.WriteByte(0x71, 0);
-                tlvWriter.WriteValue(0xfe, null);
-            }
-            byte[] encodedCert = tlvWriter.Encode();
-
-            ImportPrivateKey(PivSlot.Attestation, privateKey);
-
-            var command = new PutDataCommand(AttestationCertTag, encodedCert);
-            var response = Connection.SendCommand(command);
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.CommandResponseApduUnexpectedResult,
-                        response.StatusWord.ToString("X4", CultureInfo.InvariantCulture)));
-            }
-        }
-        
         public void ReplaceAttestationKeyAndCertificate(IPrivateKey privateKey, X509Certificate2 certificate)
         {
             if (privateKey is null)

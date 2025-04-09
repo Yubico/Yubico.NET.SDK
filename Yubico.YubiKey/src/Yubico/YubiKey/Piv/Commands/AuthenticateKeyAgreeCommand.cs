@@ -124,7 +124,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The correspondent public value is not the correct length.
         /// </exception>
-        [Obsolete("Use the constructor with the algorithm parameter instead.")]
+        [Obsolete("Use the constructor with the algorithm parameter instead.", false)]
         public AuthenticateKeyAgreeCommand(ReadOnlyMemory<byte> correspondentPublicKey, byte slotNumber)
         {
             DataTag = KeyAgreeTag;

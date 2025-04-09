@@ -12,16 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
-using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class RsaPrivateKeyTests
+public class RSAPrivateKeyTests
 {
+    [Fact]
+    public void Dispose_DisposesResources()
+    {
+        // Arrange
+        using var rsa = RSA.Create(2048);
+        var parameters = rsa.ExportParameters(true);
+        var privateKey = RSAPrivateKey.CreateFromParameters(parameters);
+
+        // Act
+        privateKey.Dispose();
+
+        // Assert all bytes are zero
+        Assert.True(privateKey.Parameters.Modulus?.All(b => b == 0) ?? true);
+        Assert.True(privateKey.Parameters.Exponent?.All(b => b == 0) ?? true);
+        Assert.True(privateKey.Parameters.P?.All(b => b == 0) ?? true);
+        Assert.True(privateKey.Parameters.Q?.All(b => b == 0) ?? true);
+        Assert.True(privateKey.Parameters.DP?.All(b => b == 0) ?? true);
+        Assert.True(privateKey.Parameters.DQ?.All(b => b == 0) ?? true);
+        Assert.True(privateKey.Parameters.InverseQ?.All(b => b == 0) ?? true);
+    }
+
+
     [Fact]
     public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()
     {
@@ -43,7 +65,7 @@ public class RsaPrivateKeyTests
         Assert.Equal(parameters.DQ, privateKeyParams.Parameters.DQ);
         Assert.Equal(parameters.InverseQ, privateKeyParams.Parameters.InverseQ);
     }
-    
+
     [Fact]
     public void CreateFromPkcs8_WithValidParameters_CreatesInstance()
     {
@@ -65,14 +87,14 @@ public class RsaPrivateKeyTests
         Assert.Equal(parameters.DQ, privateKeyParams.Parameters.DQ);
         Assert.Equal(parameters.InverseQ, privateKeyParams.Parameters.InverseQ);
     }
-    
+
     [Fact]
     public void CreateFromRsaParameters_WithValidParameters_CreatesInstance()
     {
         // Arrange
         using var rsa = RSA.Create(2048);
         var parameters = rsa.ExportParameters(true);
-        
+
         // Act
         var privateKeyParams = RSAPrivateKey.CreateFromParameters(parameters);
 
@@ -84,10 +106,10 @@ public class RsaPrivateKeyTests
         Assert.Equal(parameters.DP, privateKeyParams.Parameters.DP);
         Assert.Equal(parameters.DQ, privateKeyParams.Parameters.DQ);
         Assert.Equal(parameters.InverseQ, privateKeyParams.Parameters.InverseQ);
-        
+
         Assert.Equal(rsa.ExportPkcs8PrivateKey(), privateKeyParams.ExportPkcs8PrivateKey());
     }
-    
+
     [Fact]
     public void CreateFromRsaParameters_WithCRTParameters_CreatesInstance()
     {
@@ -102,7 +124,7 @@ public class RsaPrivateKeyTests
             DQ = parameters.DQ,
             InverseQ = parameters.InverseQ
         };
-        
+
         // Act
         var privateKeyParams = RSAPrivateKey.CreateFromParameters(crtParameters);
 

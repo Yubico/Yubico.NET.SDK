@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
-using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
@@ -10,6 +9,20 @@ namespace Yubico.YubiKey.Cryptography
 {
     public class ECPrivateKeyTests
     {
+        [Fact]
+        public void Dispose_DisposesResources()
+        {
+            // Arrange
+            using var rsa = ECDsa.Create();
+            var parameters = rsa.ExportParameters(true);
+            var privateKey = ECPrivateKey.CreateFromParameters(parameters);
+
+            // Act
+            privateKey.Dispose();
+
+            // Assert all bytes are zero
+            Assert.True(privateKey.Parameters.D?.All(b => b == 0) ?? true);
+        }
         
         [Fact]
         public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()

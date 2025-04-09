@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
@@ -21,6 +22,20 @@ namespace Yubico.YubiKey.Cryptography;
 
 public class Curve25519PrivateKeyTests
 {
+    [Fact]
+    public void Dispose_DisposesResources()
+    {
+        // Arrange
+        var testKey = TestKeys.GetTestPrivateKey(KeyType.Ed25519);
+        var privateKey = Curve25519PrivateKey.CreateFromPkcs8(testKey.EncodedKey);
+
+        // Act
+        privateKey.Dispose();
+
+        // Assert all bytes are zero
+        Assert.True(privateKey.PrivateKey.ToArray().All(b => b == 0));
+    }
+    
     [Fact]
     public void CreateFromValue_CreatesInstance()
     {

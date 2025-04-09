@@ -231,12 +231,13 @@ namespace Yubico.YubiKey.Piv
             }
 
             int expectedSize = algorithm.Value.GetPivKeyDefinition().KeyDefinition.LengthInBytes;
-            if (algorithm.Value is PivAlgorithm.EccP256 or PivAlgorithm.EccP384)
+            if (algorithm.Value is PivAlgorithm.EccEd25519 or PivAlgorithm.EccX25519)
             {
-                return (expectedSize * 2) + 1;
+                return expectedSize;
             }
 
-            return expectedSize;
+            return (expectedSize * 2) + 1;
+
         }
     }
 }

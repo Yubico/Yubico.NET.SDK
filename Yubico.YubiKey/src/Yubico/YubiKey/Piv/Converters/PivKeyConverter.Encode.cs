@@ -20,12 +20,11 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.Piv.Converters;
 
 /// <summary>
-/// This class contains methods to convert between the different key parameters and the PIV format.
+/// This class converts from a Piv Encoded Key to either instances of the common IPublicKey and IPrivateKey
+/// or concrete the concrete types that inherit these interfaces.
 /// </summary>
-public static class KeyToPivEncoding
+internal partial class PivKeyConverter
 {
-    #region PublicKeys
-
     public static Memory<byte> EncodeRSAPublicKey(RSAPublicKey parameters)
     {
         var rsaParameters = parameters.Parameters;
@@ -60,10 +59,6 @@ public static class KeyToPivEncoding
 
         return tlvWriter.Encode();
     }
-
-    #endregion
-
-    #region PrivateKeys
 
     public static Memory<byte> EncodeECPrivateKey(ECPrivateKey parameters)
     {
@@ -105,6 +100,4 @@ public static class KeyToPivEncoding
         tlvWriter.WriteValue(typeTag, parameters.PrivateKey.Span);
         return tlvWriter.Encode();
     }
-
-    #endregion
 }

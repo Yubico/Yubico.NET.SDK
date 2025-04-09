@@ -21,111 +21,99 @@ namespace Yubico.YubiKey.Piv.Converters;
 
 internal static class PivEncodingReader
 {
+    // Works with both Piv Encoded and GetMetaData encoded keys (with or without leading Public Key Tag)
+    // public static (ReadOnlyMemory<byte> Modulus, ReadOnlyMemory<byte> Exponent) GetPublicRSAValues(
+    //     ReadOnlyMemory<byte> encodedPublicKey)
+    // {
+    //     var tlvReader = new TlvReader(encodedPublicKey);
+    //     int tag = tlvReader.PeekTag(2);
+    //     var rsaKeyEncoding = tag == PivConstants.PublicKeyTag 
+    //         ? tlvReader.ReadValue(PivConstants.PublicKeyTag) 
+    //         : encodedPublicKey;
+    //     
+    //     var publicKeyValues = TlvObjects.DecodeDictionary(rsaKeyEncoding.Span);
+    //     bool hasModulus = publicKeyValues.TryGetValue(PivConstants.PublicRSAModulusTag, out var modulus);
+    //     bool hasExponent = publicKeyValues.TryGetValue(PivConstants.PublicRSAExponentTag, out var exponent);
+    //     if (!hasModulus || !hasExponent)
+    //     {
+    //         throw new ArgumentException(
+    //             string.Format(
+    //                 CultureInfo.CurrentCulture,
+    //                 ExceptionMessages.InvalidPublicKeyData
+    //                 ));
+    //     }
+    //     return (modulus, exponent);
+    // }
+    
     public static (ReadOnlyMemory<byte> Modulus, ReadOnlyMemory<byte> Exponent) GetPublicRSAValues(
         ReadOnlyMemory<byte> encodedPublicKey)
     {
-        var tlvReader = new TlvReader(encodedPublicKey);
-        int tag = tlvReader.PeekTag(2);
-        if (tag == PivConstants.PublicKeyTag)
+        var tlvObject = TlvObject.Parse(encodedPublicKey.Span);
+        var rsaKeyEncoding = tlvObject.Tag == PivConstants.PublicKeyTag 
+            ? tlvObject.Value 
+            : encodedPublicKey;
+        
+        var publicKeyValues = TlvObjects.DecodeDictionary(rsaKeyEncoding.Span);
+        bool hasModulus = publicKeyValues.TryGetValue(PivConstants.PublicRSAModulusTag, out var modulus);
+        bool hasExponent = publicKeyValues.TryGetValue(PivConstants.PublicRSAExponentTag, out var exponent);
+        if (!hasModulus || !hasExponent)
         {
-            tlvReader = tlvReader.ReadNestedTlv(tag);
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.InvalidPublicKeyData
+                    ));
         }
-
-        var valueArray = new ReadOnlyMemory<byte>[2];
-
-        while (tlvReader.HasData)
-        {
-            tag = tlvReader.PeekTag();
-            int valueIndex = tag switch
-            {
-                PivConstants.PublicRSAModulusTag => 0,
-                PivConstants.PublicRSAExponentTag => 1,
-                _ => throw new ArgumentException(
-                    string.Format(CultureInfo.CurrentCulture, ExceptionMessages.InvalidPublicKeyData))
-            };
-
-            if (!valueArray[valueIndex].IsEmpty)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPublicKeyData)
-                    );
-            }
-
-            valueArray[valueIndex] = tlvReader.ReadValue(tag);
-        }
-
-        return (valueArray[0], valueArray[1]);
+        return (modulus, exponent);
     }
 
     // Will read PIV public key data and return the public point
     public static ReadOnlyMemory<byte> GetECPublicPointValues(ReadOnlyMemory<byte> encodedPublicKey)
     {
-        var tlvReader = new TlvReader(encodedPublicKey);
-
-        int tag = tlvReader.PeekTag(2);
-        if (tag == PivConstants.PublicKeyTag)
-        {
-            tlvReader = tlvReader.ReadNestedTlv(tag);
-        }
-
-        tag = tlvReader.PeekTag();
-        if (tag != PivConstants.PublicECTag)
+        var tlvObject = TlvObject.Parse(encodedPublicKey.Span);
+        var keyEncoding = tlvObject.Tag == PivConstants.PublicKeyTag
+            ? tlvObject.Value
+            : encodedPublicKey;
+        
+        var publicKeyValues = TlvObjects.DecodeDictionary(keyEncoding.Span);
+        bool hasPublicPoint = publicKeyValues.TryGetValue(PivConstants.PublicECTag, out var publicPoint);
+        if (!hasPublicPoint)
         {
             throw new ArgumentException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    ExceptionMessages.InvalidPublicKeyData)
-                );
+                    ExceptionMessages.InvalidPublicKeyData
+                    ));
         }
-
-        var publicPoint = tlvReader.ReadValue(PivConstants.PublicECTag);
         return publicPoint;
     }
 
     public static RSAParameters GetRSAParameters(ReadOnlyMemory<byte> pivEncodedKey)
     {
-        const int CrtComponentCount = 5;
-
-        var tlvReader = new TlvReader(pivEncodedKey);
-        var valueArray = new ReadOnlyMemory<byte>[CrtComponentCount];
-
-        int index = 0;
-        for (; index < CrtComponentCount; index++)
+        var tlvObject = TlvObject.Parse(pivEncodedKey.Span);
+        var keyEncoding = tlvObject.Tag == PivConstants.PublicKeyTag
+            ? tlvObject.Value
+            : pivEncodedKey;
+        
+        var rsaTlvValues = TlvObjects.DecodeDictionary(keyEncoding.Span);
+        if (!rsaTlvValues.ContainsKey(PivConstants.PrivateRSAPrimePTag) ||
+            !rsaTlvValues.ContainsKey(PivConstants.PrivateRSAPrimeQTag) ||
+            !rsaTlvValues.ContainsKey(PivConstants.PrivateRSAExponentPTag) ||
+            !rsaTlvValues.ContainsKey(PivConstants.PrivateRSAExponentQTag) ||
+            !rsaTlvValues.ContainsKey(PivConstants.PrivateRSACoefficientTag))
         {
-            valueArray[index] = ReadOnlyMemory<byte>.Empty;
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.InvalidPrivateKeyData
+                    ));
         }
-
-        index = 0;
-        while (index < CrtComponentCount)
-        {
-            if (tlvReader.HasData == false)
-            {
-                break;
-            }
-
-            int tag = tlvReader.PeekTag();
-            var temp = tlvReader.ReadValue(tag);
-            if (tag <= 0 || tag > CrtComponentCount)
-            {
-                continue;
-            }
-
-            if (valueArray[tag - 1].IsEmpty == false)
-            {
-                continue;
-            }
-
-            index++;
-            valueArray[tag - 1] = temp;
-        }
-
-        var primeP = valueArray[PivConstants.PrivateRSAPrimePTag - 1].Span;
-        var primeQ = valueArray[PivConstants.PrivateRSAPrimeQTag - 1].Span;
-        var exponentP = valueArray[PivConstants.PrivateRSAExponentPTag - 1].Span;
-        var exponentQ = valueArray[PivConstants.PrivateRSAExponentQTag - 1].Span;
-        var coefficient = valueArray[PivConstants.PrivateRSACoefficientTag - 1].Span;
+        
+        var primeP = rsaTlvValues[PivConstants.PrivateRSAPrimePTag].Span;
+        var primeQ = rsaTlvValues[PivConstants.PrivateRSAPrimeQTag].Span;
+        var exponentP = rsaTlvValues[PivConstants.PrivateRSAExponentPTag].Span;
+        var exponentQ = rsaTlvValues[PivConstants.PrivateRSAExponentQTag].Span;
+        var coefficient = rsaTlvValues[PivConstants.PrivateRSACoefficientTag].Span;
 
         return new RSAParameters
         {
@@ -134,6 +122,7 @@ internal static class PivEncodingReader
             DP = exponentP.ToArray(),
             DQ = exponentQ.ToArray(),
             InverseQ = coefficient.ToArray(),
+
             // The YubiKey only works with the CRT components of the private RSA key,
             // that's why we set these values as empty.
             D = Array.Empty<byte>(),

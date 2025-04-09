@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Piv.Converters;
 /// This class converts from a Piv Encoded Key to either instances of the common IPublicKey and IPrivateKey
 /// or concrete the concrete types that inherit these interfaces.
 /// </summary>
-internal static class PivEncodingToKey
+internal partial class PivKeyConverter
 {
     public static IPublicKey CreatePublicKey(ReadOnlyMemory<byte> pivEncodedKey, KeyType keyType) =>
         keyType switch
@@ -38,7 +38,7 @@ internal static class PivEncodingToKey
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.InvalidApduResponseData))
         };
-    
+
     public static RSAPublicKey CreateRSAPublicKey(ReadOnlyMemory<byte> pivEncodedKey)
     {
         var (modulus, exponent) = PivEncodingReader.GetPublicRSAValues(pivEncodedKey);
@@ -81,7 +81,7 @@ internal static class PivEncodingToKey
         var publicPoint = PivEncodingReader.GetECPublicPointValues(pivEncodedKey);
         return Curve25519PublicKey.CreateFromValue(publicPoint, keyType);
     }
-    
+
     /// <summary>
     /// Creates an instance of <see cref="IPrivateKey"/> from the
     /// given PIV-encoded key.
@@ -113,7 +113,7 @@ internal static class PivEncodingToKey
         };
 
     public static Curve25519PrivateKey CreateCurve25519PrivateKey(
-        ReadOnlyMemory<byte> pivEncodedKey, 
+        ReadOnlyMemory<byte> pivEncodedKey,
         KeyType keyType)
     {
         if (!TlvObject.TryParse(pivEncodedKey.Span, out var tlv) || !PivConstants.IsValidPrivateECTag(tlv.Tag))
@@ -125,15 +125,15 @@ internal static class PivEncodingToKey
         }
 
         using var privateValueHandle = new ZeroingMemoryHandle(tlv.Value.ToArray());
-    
+
         return tlv.Tag switch
         {
             PivConstants.PrivateECEd25519Tag when keyType == KeyType.Ed25519 => Curve25519PrivateKey.CreateFromValue(
                 privateValueHandle.Data, KeyType.Ed25519),
-            
+
             PivConstants.PrivateECX25519Tag when keyType == KeyType.X25519 => Curve25519PrivateKey.CreateFromValue(
                 privateValueHandle.Data, KeyType.X25519),
-            
+
             _ => throw new ArgumentException(
                 string.Format(
                     CultureInfo.CurrentCulture,
@@ -150,14 +150,16 @@ internal static class PivEncodingToKey
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.InvalidPrivateKeyData));
         }
-    
+
         var allowedKeyDefinitions = KeyDefinitions
             .GetEcKeyDefinitions()
             .Where(kd => kd.AlgorithmOid == Oids.ECDSA);
+
         try
         {
             var keyDefinition = allowedKeyDefinitions
                 .Single(kd => kd.LengthInBytes == tlv.Value.Span.Length);
+
             using var privateValueHandle = new ZeroingMemoryHandle(tlv.Value.ToArray());
             return ECPrivateKey.CreateFromValue(privateValueHandle.Data, keyDefinition.KeyType);
         }

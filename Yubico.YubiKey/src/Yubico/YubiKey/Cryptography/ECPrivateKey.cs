@@ -24,10 +24,8 @@ namespace Yubico.YubiKey.Cryptography
     /// This class encapsulates the parameters specific to EC private keys and
     /// contains the necessary private key data.
     /// </remarks>
-    public class ECPrivateKey : IPrivateKey
+    public class ECPrivateKey : PrivateKey
     {
-        private bool _disposed;
-
         /// <summary>
         /// Gets the Elliptic Curve parameters associated with this instance.
         /// </summary>
@@ -45,8 +43,8 @@ namespace Yubico.YubiKey.Cryptography
         /// </value>
         public KeyDefinition KeyDefinition { get; }
 
-        /// <inheritdoc/>
-        public KeyType KeyType => KeyDefinition.KeyType;
+        /// <inheritdoc />
+        public override KeyType KeyType => KeyDefinition.KeyType;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ECPrivateKey"/> class.
@@ -88,56 +86,20 @@ namespace Yubico.YubiKey.Cryptography
             Parameters = ecdsaObject.ExportParameters(true);
             KeyDefinition = KeyDefinitions.GetByOid(Parameters.Curve.Oid);
         }
-
+        
         /// <inheritdoc/>
-        public byte[] ExportPkcs8PrivateKey()
+        public override byte[] ExportPkcs8PrivateKey()
         {
             ThrowIfDisposed();
             return AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
         }
 
         /// <inheritdoc/>
-        public void Clear()
+        public override void Clear()
         {
             CryptographicOperations.ZeroMemory(Parameters.Q.Y);
             CryptographicOperations.ZeroMemory(Parameters.Q.X);
             CryptographicOperations.ZeroMemory(Parameters.D);
-        }
-
-        /// <summary>
-        /// Disposes the resources used by this instance.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Disposes the resources used by this instance.
-        /// </summary>
-        /// <param name="disposing">
-        /// True to release both managed and unmanaged resources; false to release only unmanaged resources.
-        /// </param>
-        private void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    Clear();
-                }
-                
-                _disposed = true;
-            }
-        }
-
-        private void ThrowIfDisposed()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(Curve25519PrivateKey));
-            }
         }
 
         /// <summary>

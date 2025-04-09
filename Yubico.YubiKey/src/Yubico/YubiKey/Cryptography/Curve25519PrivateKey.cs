@@ -17,13 +17,12 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public sealed class Curve25519PrivateKey : IPrivateKey
+public sealed class Curve25519PrivateKey : PrivateKey
 {
     private readonly Memory<byte> _privateKey;
-    private bool _disposed;
 
     /// <inheritdoc />
-    public KeyType KeyType => KeyDefinition.KeyType;
+    public override KeyType KeyType => KeyDefinition.KeyType;
     
     /// <summary>
     /// Gets the key definition associated with this RSA private key.
@@ -56,7 +55,7 @@ public sealed class Curve25519PrivateKey : IPrivateKey
     }
     
     /// <inheritdoc />
-    public byte[] ExportPkcs8PrivateKey() 
+    public override byte[] ExportPkcs8PrivateKey() 
     {
         ThrowIfDisposed();
         return AsnPrivateKeyWriter.EncodeToPkcs8(_privateKey, KeyType);
@@ -67,37 +66,9 @@ public sealed class Curve25519PrivateKey : IPrivateKey
     /// <remarks>
     /// This method securely zeroes out the private key data.
     /// </remarks>
-    public void Clear() => CryptographicOperations.ZeroMemory(_privateKey.Span);
+    public override void Clear() => CryptographicOperations.ZeroMemory(_privateKey.Span);
 
-    /// <summary>
-    /// Clears private key buffers and disposes the resources used by this instance.
-    /// </summary>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-    
-    void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                Clear();
-            }
-            
-            _disposed = true;
-        }
-    }
 
-    private void ThrowIfDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(Curve25519PrivateKey));
-        }
-    }
 
     /// <summary>
     /// Creates an instance of <see cref="Curve25519PrivateKey"/> from a PKCS#8

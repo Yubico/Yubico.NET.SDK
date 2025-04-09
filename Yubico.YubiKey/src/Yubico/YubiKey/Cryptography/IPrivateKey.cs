@@ -16,7 +16,7 @@ using System;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public interface IPrivateKey : IKeyBase, IDisposable
+public interface IPrivateKey : IKeyBase
 {
     /// <summary>
     /// Exports the current key in the PKCS#8 PrivateKeyInfo format.
@@ -25,15 +25,45 @@ public interface IPrivateKey : IKeyBase, IDisposable
     /// A byte array containing the PKCS#8 PrivateKeyInfo representation of this key.
     /// </returns>
     public byte[] ExportPkcs8PrivateKey();
-    
+
     /// <summary>
     /// Clears the buffers containing private key data.
     /// </summary>
     public void Clear();
 }
 
-public static class IPrivateKeyExtensions
+public abstract class PrivateKey : IPrivateKey, IDisposable
 {
-    public static T Cast<T>(this IPrivateKey key) where T : class, IPrivateKey 
-        => key as T ?? throw new InvalidCastException($"Cannot cast {key.GetType()} to {typeof(T)}");
+    private bool _disposed;
+
+    /// <inheritdoc /> 
+    public abstract KeyType KeyType { get; }
+
+    /// <inheritdoc />
+    public abstract byte[] ExportPkcs8PrivateKey();
+
+    /// <inheritdoc /> 
+    public abstract void Clear();
+
+    /// <summary>
+    /// Clears the private key data and disposes the object
+    /// </summary>
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            Clear();
+            _disposed = true;
+        }
+
+        GC.SuppressFinalize(this);
+    }
+
+    protected void ThrowIfDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(GetType().Name);
+        }
+    }
 }

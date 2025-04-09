@@ -15,6 +15,8 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv.Converters;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -60,8 +62,11 @@ namespace Yubico.YubiKey.Piv
     /// </code>
     /// </para>
     /// </remarks>
-    public class PivPrivateKey
+    public class PivPrivateKey : PrivateKey
     {
+        protected Memory<byte> EncodedKey { get; set; }
+        public override KeyType KeyType => Algorithm.GetKeyType();
+        
         /// <summary>
         /// The algorithm of the key in this object.
         /// </summary>
@@ -69,8 +74,6 @@ namespace Yubico.YubiKey.Piv
         /// RSA or ECC.
         /// </value>
         public PivAlgorithm Algorithm { get; protected set; }
-
-        protected Memory<byte> EncodedKey { get; set; }
 
         /// <summary>
         /// Contains the TLV encoding of the private key.
@@ -127,12 +130,15 @@ namespace Yubico.YubiKey.Piv
                     return PivRsaPrivateKey.CreateRsaPrivateKey(encodedPrivateKey);
             }
         }
+        
+        public override byte[] ExportPkcs8PrivateKey() =>
+            PivKeyConverter.CreatePrivateKey(EncodedPrivateKey, Algorithm.GetKeyType()).ExportPkcs8PrivateKey();
 
         /// <summary>
         /// Call on the object to clear (overwrite) any sensitive data it is
         /// holding.
         /// </summary>
-        public virtual void Clear()
+        public override void Clear()
         {
             CryptographicOperations.ZeroMemory(EncodedKey.Span);
             EncodedKey = Memory<byte>.Empty;

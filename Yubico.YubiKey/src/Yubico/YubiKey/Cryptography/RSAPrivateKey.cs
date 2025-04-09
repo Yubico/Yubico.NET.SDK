@@ -17,9 +17,8 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public sealed class RSAPrivateKey : IPrivateKey
+public sealed class RSAPrivateKey : PrivateKey
 {
-    private bool _disposed;
 
     /// <summary>
     /// Gets the RSA cryptographic parameters required for the private key operations.
@@ -40,9 +39,9 @@ public sealed class RSAPrivateKey : IPrivateKey
     /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
     /// </value>
     public KeyDefinition KeyDefinition { get; }
-
+    
     /// <inheritdoc />
-    public KeyType KeyType => KeyDefinition.KeyType;
+    public override KeyType KeyType => KeyDefinition.KeyType;
 
     private RSAPrivateKey(RSAParameters parameters)
     {
@@ -56,7 +55,7 @@ public sealed class RSAPrivateKey : IPrivateKey
     /// Exports the RSA private key in PKCS#8 DER encoded format.
     /// </summary>
     /// <returns>A byte array containing the DER encoded private key.</returns>
-    public byte[] ExportPkcs8PrivateKey()
+    public override byte[] ExportPkcs8PrivateKey()
     {
         ThrowIfDisposed();
         return AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
@@ -65,7 +64,7 @@ public sealed class RSAPrivateKey : IPrivateKey
     /// <summary>
     /// Securely clears the RSA private key by zeroing out all parameters.
     /// </summary>
-    public void Clear()
+    public override void Clear()
     {
         CryptographicOperations.ZeroMemory(Parameters.Modulus);
         CryptographicOperations.ZeroMemory(Parameters.Exponent);
@@ -75,36 +74,6 @@ public sealed class RSAPrivateKey : IPrivateKey
         CryptographicOperations.ZeroMemory(Parameters.DP);
         CryptographicOperations.ZeroMemory(Parameters.DQ);
         CryptographicOperations.ZeroMemory(Parameters.InverseQ);
-    }
-
-    /// <summary>
-    /// Clears private key buffers and disposes the resources used by this instance.
-    /// </summary>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-    
-    private void Dispose(bool disposing)
-    {
-        if (!_disposed)
-        {
-            if (disposing)
-            {
-                Clear();
-            }
-            
-            _disposed = true;
-        }
-    }
-
-    private void ThrowIfDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(Curve25519PrivateKey));
-        }
     }
 
     /// <summary>

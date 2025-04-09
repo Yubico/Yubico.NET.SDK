@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
@@ -21,13 +22,14 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Piv
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
+    [Obsolete("Use other method, fix later")] // TODO
     public class PssTests
     {
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
         public void Parse_FromRsaClass(StandardTestDevice testDeviceType)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out var publicKeyPem, out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.RSA1024, false, out _, out var publicKeyPem, out var privateKeyPem);
 
             var publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
             var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
@@ -93,21 +95,21 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024, 1024)]
-        [InlineData(PivAlgorithm.Rsa2048, 2048)]
-        [InlineData(PivAlgorithm.EccP256, 256)]
-        [InlineData(PivAlgorithm.EccP384, 384)]
-        public void UseKeyConverter(PivAlgorithm algorithm, int keySize)
+        [InlineData(KeyType.RSA1024, 1024)]
+        [InlineData(KeyType.RSA2048, 2048)]
+        [InlineData(KeyType.ECP256, 256)]
+        [InlineData(KeyType.ECP384, 384)]
+        public void UseKeyConverter(KeyType keyType, int keySize)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var publicPem, out var privatePem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out var publicPem, out var privatePem);
 
             var publicKey = new KeyConverter(publicPem!.ToCharArray());
-            Assert.Equal(algorithm, publicKey.Algorithm);
+            Assert.Equal(keyType.GetPivAlgorithm(), publicKey.Algorithm);
 
             var privateKey = new KeyConverter(privatePem!.ToCharArray());
-            Assert.Equal(algorithm, privateKey.Algorithm);
+            Assert.Equal(keyType.GetPivAlgorithm(), privateKey.Algorithm);
 
-            if (algorithm == PivAlgorithm.Rsa1024 || algorithm == PivAlgorithm.Rsa2048)
+            if (keyType == KeyType.RSA1024 || keyType == KeyType.RSA2048)
             {
                 using RSA rsaPublic = publicKey.GetRsaObject();
                 Assert.Equal(keySize, rsaPublic.KeySize);
@@ -124,7 +126,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             PivPublicKey convertedPub = privateKey.GetPivPublicKey();
-            Assert.Equal(algorithm, convertedPub.Algorithm);
+            Assert.Equal(keyType.GetPivAlgorithm(), convertedPub.Algorithm);
 
             char[]? publicPemArray = publicKey.GetPemKeyString();
             Assert.NotNull(publicPemArray);

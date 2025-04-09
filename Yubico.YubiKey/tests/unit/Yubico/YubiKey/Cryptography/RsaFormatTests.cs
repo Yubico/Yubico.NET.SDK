@@ -229,6 +229,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2, RsaFormat.Sha256, 2048)]
         [InlineData(2, RsaFormat.Sha384, 2048)]
         [InlineData(2, RsaFormat.Sha512, 2048)]
+        [Obsolete("Obsolete")]
         public void Format_Sign_MatchesCSharp(int format, int digestAlgorithm, int keySize)
         {
             byte[] dataToSign = {
@@ -247,9 +248,8 @@ namespace Yubico.YubiKey.Cryptography
                 _ => CryptographyProviders.Sha512Creator(),
             };
 
-            var algorithm = GetPivAlgorithmByKeySize(keySize);
-
-            HashAlgorithmName hashAlg = digestAlgorithm switch
+            var keyType = KeyDefinitions.GetByRSALength(keySize).KeyType;
+            var hashAlg = digestAlgorithm switch
             {
                 RsaFormat.Sha1 => HashAlgorithmName.SHA1,
                 RsaFormat.Sha256 => HashAlgorithmName.SHA256,
@@ -257,13 +257,13 @@ namespace Yubico.YubiKey.Cryptography
                 _ => HashAlgorithmName.SHA512,
             };
 
-            RSASignaturePadding padding = RSASignaturePadding.Pkcs1;
+            var padding = RSASignaturePadding.Pkcs1;
             if (format != 1)
             {
                 padding = RSASignaturePadding.Pss;
             }
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string? publicKeyPem, out string? privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out string? publicKeyPem, out string? privateKeyPem);
 
             try
             {
@@ -313,6 +313,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2, RsaFormat.Sha256, 2048)]
         [InlineData(2, RsaFormat.Sha384, 2048)]
         [InlineData(2, RsaFormat.Sha512, 2048)]
+        [Obsolete("Obsolete")]
         public void Parse_Sign_MatchesCSharp(int format, int digestAlgorithm, int keySize)
         {
             byte[] dataToSign = {
@@ -331,9 +332,8 @@ namespace Yubico.YubiKey.Cryptography
                 _ => CryptographyProviders.Sha512Creator(),
             };
 
-            PivAlgorithm algorithm = GetPivAlgorithmByKeySize(keySize);
-
-            HashAlgorithmName hashAlg = digestAlgorithm switch
+            var keyType = KeyDefinitions.GetByRSALength(keySize).KeyType;
+            var hashAlg = digestAlgorithm switch
             {
                 RsaFormat.Sha1 => HashAlgorithmName.SHA1,
                 RsaFormat.Sha256 => HashAlgorithmName.SHA256,
@@ -341,13 +341,13 @@ namespace Yubico.YubiKey.Cryptography
                 _ => HashAlgorithmName.SHA512,
             };
 
-            RSASignaturePadding padding = RSASignaturePadding.Pkcs1;
+            var padding = RSASignaturePadding.Pkcs1;
             if (format != 1)
             {
                 padding = RSASignaturePadding.Pss;
             }
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string? publicKeyPem, out string? privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out string? publicKeyPem, out string? privateKeyPem);
 
             try
             {
@@ -404,6 +404,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2, RsaFormat.Sha256, 2048)]
         [InlineData(2, RsaFormat.Sha384, 2048)]
         [InlineData(2, RsaFormat.Sha512, 2048)]
+        [Obsolete("Obsolete")]
         public void Format_Encrypt_MatchesCSharp(int format, int digestAlgorithm, int keySize)
         {
             byte[] dataToEncrypt = {
@@ -413,9 +414,8 @@ namespace Yubico.YubiKey.Cryptography
             KeyConverter? publicKey = null;
             KeyConverter? privateKey = null;
 
-            PivAlgorithm algorithm = GetPivAlgorithmByKeySize(keySize);
-
-            RSAEncryptionPadding padding = RSAEncryptionPadding.Pkcs1;
+            var keyType = KeyDefinitions.GetByRSALength(keySize).KeyType;
+            var padding = RSAEncryptionPadding.Pkcs1;
             if (format != 1)
             {
                 padding = digestAlgorithm switch
@@ -427,7 +427,7 @@ namespace Yubico.YubiKey.Cryptography
                 };
             }
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string? publicKeyPem, out string? privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out var publicKeyPem, out var privateKeyPem);
 
             try
             {
@@ -475,6 +475,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2, RsaFormat.Sha256, 2048)]
         [InlineData(2, RsaFormat.Sha384, 2048)]
         [InlineData(2, RsaFormat.Sha512, 2048)]
+        [Obsolete("Obsolete")]
         public void Parse_Encrypt_MatchesCSharp(int format, int digestAlgorithm, int keySize)
         {
             byte[] dataToEncrypt = {
@@ -484,9 +485,8 @@ namespace Yubico.YubiKey.Cryptography
             KeyConverter? publicKey = null;
             KeyConverter? privateKey = null;
 
-            PivAlgorithm algorithm = GetPivAlgorithmByKeySize(keySize);
-
-            RSAEncryptionPadding padding = RSAEncryptionPadding.Pkcs1;
+            var keyType = KeyDefinitions.GetByRSALength(keySize).KeyType;
+            var padding = RSAEncryptionPadding.Pkcs1;
             if (format != 1)
             {
                 padding = digestAlgorithm switch
@@ -498,7 +498,7 @@ namespace Yubico.YubiKey.Cryptography
                 };
             }
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var publicKeyPem, out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out var publicKeyPem, out var privateKeyPem);
             try
             {
                 publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
@@ -534,18 +534,6 @@ namespace Yubico.YubiKey.Cryptography
                 publicKey?.Clear();
                 privateKey?.Clear();
             }
-        }
-
-        private static PivAlgorithm GetPivAlgorithmByKeySize(int keySize)
-        {
-            return keySize switch
-            {
-                1024 => PivAlgorithm.Rsa1024,
-                2048 => PivAlgorithm.Rsa2048,
-                3072 => PivAlgorithm.Rsa3072,
-                4096 => PivAlgorithm.Rsa4096,
-                _ => throw new Exception("Unsupported")
-            };
         }
     }
 }

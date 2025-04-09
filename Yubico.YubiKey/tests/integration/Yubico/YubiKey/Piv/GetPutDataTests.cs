@@ -15,6 +15,7 @@
 using System;
 using Xunit;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.TestUtilities;
@@ -25,9 +26,10 @@ namespace Yubico.YubiKey.Piv
     {
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
+        [Obsolete] // FIx later
         public void Cert_Auth_Req(StandardTestDevice testDeviceType)
         {
-            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048,
+            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(KeyType.RSA2048,
                 out var cert, out var privateKey);
             Assert.True(isValid);
 

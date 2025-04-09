@@ -406,6 +406,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         ///     Moves a key from one slot to another.
         ///     The source slot must not be the <see cref="PivSlot.Attestation" />-slot and the destination slot must be empty.
+        ///     Any key except the attestation key can be moved from one slot to another.
         /// </summary>
         /// <remarks>
         ///     Internally this method attempts to authenticate to the Yubikey by calling
@@ -415,7 +416,7 @@ namespace Yubico.YubiKey.Piv
         /// <param name="destinationSlot">The target Yubikey slot for the key you want to move. This must be a valid slot number.</param>
         /// <exception cref="InvalidOperationException">
         ///     There is no <c>KeyCollector</c> loaded, the key provided was not a
-        ///     valid Triple-DES key, or the YubiKey had some other error, such as
+        ///     valid key, the slot contained an attestation key,  the or the YubiKey had some other error, such as
         ///     unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">

@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -85,11 +86,6 @@ namespace Yubico.YubiKey.Piv.Commands
     {
         private const int DataToDecryptTag = 0x81;
 
-        private const int Rsa1024BlockSize = 128;
-        private const int Rsa2048BlockSize = 256;
-        private const int Rsa3072BlockSize = 384;
-        private const int Rsa4096BlockSize = 512;
-
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private AuthenticateDecryptCommand()
@@ -130,17 +126,19 @@ namespace Yubico.YubiKey.Piv.Commands
             Data = dataToDecrypt;
             SlotNumber = slotNumber;
 
-            Algorithm = dataToDecrypt.Length switch
+            try
             {
-                Rsa1024BlockSize => PivAlgorithm.Rsa1024,
-                Rsa2048BlockSize => PivAlgorithm.Rsa2048,
-                Rsa3072BlockSize => PivAlgorithm.Rsa3072,
-                Rsa4096BlockSize => PivAlgorithm.Rsa4096,
-                _ => throw new ArgumentException(
+                var keyDefinition = KeyDefinitions.GetByRSALength(dataToDecrypt.Length * 8);
+                var keyType = keyDefinition.KeyType;
+                Algorithm = keyType.GetPivAlgorithm();
+            }
+            catch (NotSupportedException ex)
+            {
+                throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectCiphertextLength)),
-            };
+                        ExceptionMessages.IncorrectCiphertextLength), ex);
+            }
         }
 
         /// <inheritdoc />

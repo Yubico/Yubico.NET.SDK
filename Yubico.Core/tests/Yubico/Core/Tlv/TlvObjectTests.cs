@@ -22,6 +22,30 @@ namespace Yubico.Core.Tlv.UnitTests
     public class TlvObjectTests
     {
         [Fact]
+        public void Value_Property_Returns_Only_Value_Portion()
+        {
+            // Arrange
+            int tag = 0x7F49;
+            byte[] originalValue = [0x01, 0x02, 0x03, 0x04];
+            TlvObject tlv = new TlvObject(tag, originalValue);
+
+            // Get the full encoded bytes for reference
+            byte[] fullEncodedTlv = tlv.GetBytes().ToArray();
+
+            // Act
+            byte[] extractedValue = tlv.Value.ToArray();
+
+            // Assert
+
+            Assert.Equal(originalValue, extractedValue);
+            Assert.Equal(originalValue.Length, tlv.Length);
+            Assert.NotEqual(fullEncodedTlv, extractedValue);
+            Assert.True(fullEncodedTlv.Length > extractedValue.Length);
+            Assert.Equal(0x7F, fullEncodedTlv[0]);
+            Assert.Equal(0x49, fullEncodedTlv[1]);
+        }
+
+        [Fact]
         public void TestDoubleByteTags()
         {
             var tlv = TlvObject.Parse(new byte[] { 0x7F, 0x49, 0 });
@@ -74,7 +98,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TestUnwrapThrowsException()
         {
-            Assert.Throws<InvalidOperationException>(() => TlvObjects.UnpackValue(0x7F48, new byte[] { 0x7F, 0x49, 0 }));
+            Assert.Throws<InvalidOperationException>(() =>
+                TlvObjects.UnpackValue(0x7F48, new byte[] { 0x7F, 0x49, 0 }));
         }
 
         [Fact]
@@ -101,7 +126,7 @@ namespace Yubico.Core.Tlv.UnitTests
         public void DecodeMap_ValidInput_ReturnsCorrectDictionary()
         {
             var input = new byte[] { 0x01, 0x01, 0xFF, 0x02, 0x02, 0xAA, 0xBB };
-            var result = TlvObjects.DecodeMap(input);
+            var result = TlvObjects.DecodeDictionary(input);
 
             Assert.Equal(2, result.Count);
             Assert.Equal(new byte[] { 0xFF }, result[0x01].ToArray());
@@ -112,7 +137,7 @@ namespace Yubico.Core.Tlv.UnitTests
         public void DecodeMap_DuplicateTags_KeepsLastValue()
         {
             var input = new byte[] { 0x01, 0x01, 0xFF, 0x01, 0x01, 0xEE };
-            var result = TlvObjects.DecodeMap(input);
+            var result = TlvObjects.DecodeDictionary(input);
 
             Assert.Single(result);
             Assert.Equal(new byte[] { 0xEE }, result[0x01].ToArray());

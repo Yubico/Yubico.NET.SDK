@@ -13,8 +13,9 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -23,33 +24,79 @@ namespace Yubico.YubiKey.Piv
     public class ImportTests
     {
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(PivAlgorithm.Rsa1024, 0x86, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x9a, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.Rsa3072, 0x90, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.Rsa4096, 0x91, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP256, 0x88, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.EccP384, 0x89, StandardTestDevice.Fw5)]
-        public void SimpleImport(PivAlgorithm algorithm, byte slotNumber, StandardTestDevice testDeviceType)
+        [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.X25519, StandardTestDevice.Fw5)]
+        public void ImportPrivateKey_with_PrivateKey_Succeeds_and_HasExpectedValues(
+            KeyType keyType,
+            StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            // Arrange
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
+            var testPivPublicKey = testPublicKey.AsPivPublicKey();
+            var keyParameters = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
 
-            using var pivSession = new PivSession(testDevice);
-            var collectorObj = new Simple39KeyCollector();
-            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            const PivPinPolicy expectedPinPolicy = PivPinPolicy.Once;
+            const PivTouchPolicy expectedTouchPolicy = PivTouchPolicy.Always;
 
-            PivPrivateKey privateKey = SampleKeyPairs.GetPivPrivateKey(algorithm);
-            pivSession.ImportPrivateKey(slotNumber, privateKey);
+            // Act
+            using var pivSession = GetSession(testDevice);
+            pivSession.ImportPrivateKey(PivSlot.Retired1, keyParameters, expectedPinPolicy, expectedTouchPolicy);
+
+            // Assert
+            var result = pivSession.GetMetadata(PivSlot.Retired1);
+            Assert.Equal(keyType.GetPivAlgorithm(), result.Algorithm);
+            Assert.Equal(keyType, result.PublicKeyParameters?.KeyType);
+
+            if (keyType.IsEllipticCurve())
+            {
+                var publicPoint = result.PublicKeyParameters switch
+                {
+                    ECPublicKey ecDsa => ecDsa.PublicPoint.ToArray(),
+                    Curve25519PublicKey edDsa => edDsa.PublicPoint.ToArray(),
+                    _ => throw new ArgumentException("Invalid public key type")
+                };
+                Assert.Equal(testPublicKey.GetPublicPoint(), publicPoint);
+            }
+            else
+            {
+                var parameters = result.PublicKeyParameters as RSAPublicKey;
+                Assert.NotNull(parameters);
+                
+                var rsaParameters = testPublicKey.AsRSA().ExportParameters(false);
+                Assert.Equal(rsaParameters.Modulus, parameters.Parameters.Modulus);
+                Assert.Equal(rsaParameters.Exponent, parameters.Parameters.Exponent);
+            }
+            
+#pragma warning disable CS0618 // Type or member is obsolete
+            Assert.Equal(testPivPublicKey.YubiKeyEncodedPublicKey, result.PublicKey.YubiKeyEncodedPublicKey);
+            var slotMetadataPublicKeyPiv = result.PublicKeyParameters?.EncodeAsPiv();
+            Assert.Equal(
+                testPivPublicKey.PivEncodedPublicKey, 
+                slotMetadataPublicKeyPiv ?? Array.Empty<byte>());
+#pragma warning restore CS0618 // Type or member is obsolete
+
+            Assert.Equal(expectedPinPolicy, result.PinPolicy);
+            Assert.Equal(expectedTouchPolicy, result.TouchPolicy);
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(PivAlgorithm.Rsa1024, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.Rsa2048, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.Rsa3072, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.Rsa4096, StandardTestDevice.Fw5)]
-        public void KeyAndCertImport(PivAlgorithm algorithm, StandardTestDevice testDeviceType)
+        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
+        public void KeyAndCertImport(
+            KeyType keyType,
+            StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
             using var pivSession = new PivSession(testDevice);
@@ -59,24 +106,28 @@ namespace Yubico.YubiKey.Piv
             var collectorObj = new Simple39KeyCollector();
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            isValid = SampleKeyPairs.GetMatchingKeyAndCert(algorithm, out var cert, out var privateKey);
-            Assert.True(isValid);
+            var testPrivateKey = TestKeys.GetTestPrivateKey(keyType);
+            var testCert =TestKeys.GetTestCertificate(keyType);
+            var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
 
-            pivSession.ImportPrivateKey(0x90, privateKey!);
-            pivSession.ImportCertificate(0x90, cert!);
+            pivSession.ImportPrivateKey(0x90, privateKey);
+            pivSession.ImportCertificate(0x90, testCert.AsX509Certificate2()!);
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(PivAlgorithm.Rsa1024, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.Rsa2048, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.Rsa3072, StandardTestDevice.Fw5)]
-        [InlineData(PivAlgorithm.Rsa4096, StandardTestDevice.Fw5)]
-        public void CertImport(PivAlgorithm algorithm, StandardTestDevice testDeviceType)
+        [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
+        public void CertImport(
+            KeyType keyType,
+            StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(algorithm, out var cert, out var _);
+            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(keyType, out var cert, out var _);
             Assert.True(isValid);
 
             using var pivSession = new PivSession(testDevice);
@@ -84,6 +135,20 @@ namespace Yubico.YubiKey.Piv
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
             pivSession.ImportCertificate(0x90, cert!);
+
+            var getCert = pivSession.GetCertificate(0x90);
+            Assert.True(getCert.Equals(cert));
+        }
+
+        private static PivSession GetSession(
+            IYubiKeyDevice testDevice)
+        {
+            var pivSession = new PivSession(testDevice);
+            Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            return pivSession;
         }
     }
 }

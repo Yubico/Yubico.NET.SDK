@@ -14,190 +14,175 @@
 
 using System;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Signers;
 using Xunit;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.Scp;
-using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
     public class SignTests
     {
-        [SkippableTheory(typeof(DeviceNotFoundException))]
-
-        [InlineData(false, StandardTestDevice.Fw5, PivPinPolicy.Always)]
-        [InlineData(false, StandardTestDevice.Fw5, PivPinPolicy.Never)]
-        [InlineData(true, StandardTestDevice.Fw5, PivPinPolicy.Always)]
-        [InlineData(true, StandardTestDevice.Fw5, PivPinPolicy.Never)]
-        [InlineData(true, StandardTestDevice.Fw5Fips, PivPinPolicy.Always)]
-        [InlineData(true, StandardTestDevice.Fw5Fips, PivPinPolicy.Never)]
-        [InlineData(false, StandardTestDevice.Fw5Fips, PivPinPolicy.Always)]
-        [InlineData(false, StandardTestDevice.Fw5Fips, PivPinPolicy.Never)]
-        public void Sign_EccP256_Succeeds(bool useScp03, StandardTestDevice device, PivPinPolicy pinPolicy)
+        
+        [Trait(TraitTypes.Category, TestCategories.Simple)]
+        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Sign_WithEd25519_RandomData_Succeeds(
+            StandardTestDevice testDeviceType)
         {
-            byte[] dataToSign = {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
-                0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
-            };
+            // Arrange
+            var dataToSign = new byte[3062]; // APDU cannot be bigger than this
+            Random.Shared.NextBytes(dataToSign);
+            
+            // -> Generate a Ed25519 key
+            using var pivSession = GetSession(testDeviceType);
+            var publicKeyParameters = pivSession.GenerateKeyPair(PivSlot.Retired12, KeyType.Ed25519);
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(device);
+            // Act
+            var signature = pivSession.Sign(PivSlot.Retired12, dataToSign);
 
-            bool isValid = LoadKey(PivAlgorithm.EccP256, 0x89, pinPolicy, PivTouchPolicy.Never, testDevice);
-            Assert.True(isValid);
-            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            using var pivSession = useScp03
-                ? new PivSession(testDevice, Scp03KeyParameters.DefaultKey)
-                : new PivSession(testDevice);
+            // -> Verify the signature
+            var bouncyKeyParameters = GetBouncyCastleKeyParameters(publicKeyParameters);
+            var verifier = new Ed25519Signer();
+            verifier.Init(false, bouncyKeyParameters);
+            verifier.BlockUpdate(dataToSign, 0, dataToSign.Length);
 
-            var collectorObj = new Simple39KeyCollector();
-            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-            byte[] signature = pivSession.Sign(0x89, dataToSign);
-            if (signature.Length > 2)
-            {
-                Assert.Equal(0x30, signature[0]);
-            }
+            // Assert
+            var isValidSignature = verifier.VerifySignature(signature);
+            Assert.True(isValidSignature);
         }
 
         [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x86)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x87)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x87)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP256, 0x88)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x87)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP384, 0x89)]
-
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x86)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x87)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x87)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.EccP256, 0x88)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x87)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.EccP384, 0x89)]
-        public void Sign_RandomData_Succeeds(StandardTestDevice testDeviceType, PivAlgorithm algorithm, byte slotNumber)
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA1024)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP256)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP384)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA1024)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA2048)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA3072)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.ECP256)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.ECP384)]
+        public async Task Sign_with_RSAandECDsa_Succeeds( // TODO Tests are flaky
+            StandardTestDevice testDeviceType,
+            KeyType keyType)
         {
-            byte[] dataToSign = algorithm switch
+            const byte slotNumber = PivSlot.Retired12;
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            var dataToSign = keyType switch
             {
-                PivAlgorithm.Rsa1024 => new byte[128],
-                PivAlgorithm.Rsa2048 => new byte[256],
-                PivAlgorithm.Rsa3072 => new byte[384],
-                PivAlgorithm.Rsa4096 => new byte[512],
-                PivAlgorithm.EccP256 => new byte[32],
+                KeyType.RSA1024 => new byte[128],
+                KeyType.RSA2048 => new byte[256],
+                KeyType.RSA3072 => new byte[384],
+                KeyType.RSA4096 => new byte[512],
+                KeyType.ECP256 => new byte[32],
                 _ => new byte[48],
             };
 
             Random.Shared.NextBytes(dataToSign);
 
-            dataToSign[0] &= 0x7F;
-
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            bool isValid = LoadKey(algorithm, slotNumber, PivPinPolicy.Always, PivTouchPolicy.Never, testDevice);
+            var isValid = await ImportKey(keyType, slotNumber, PivPinPolicy.Never, PivTouchPolicy.Never, testDevice);
             Assert.True(isValid);
 
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var command = new AuthenticateSignCommand(dataToSign, slotNumber);
-                var response = pivSession.Connection.SendCommand(command);
+            using var pivSession = new PivSession(testDevice);
 
-                if (response.Status == ResponseStatus.Success)
-                {
-                    byte[] signature1 = response.GetData();
-                    Assert.NotEmpty(signature1);
-                }
+            // Sign using the command directly
+            var command = new AuthenticateSignCommand(dataToSign, slotNumber, keyType.GetPivAlgorithm());
+            var response = pivSession.Connection.SendCommand(command);
+            var signature1 = response.GetData();
 
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            Assert.Equal(ResponseStatus.Success, response.Status);
+            Assert.NotEmpty(signature1);
 
-                byte[] signature = pivSession.Sign(slotNumber, dataToSign);
-                Assert.True(isValid);
-                Assert.NotEmpty(signature);
-            }
+            // Sign using the PivSession
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            var signature2 = pivSession.Sign(slotNumber, dataToSign);
+            Assert.True(isValid);
+            Assert.NotEmpty(signature2);
         }
 
         [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 1)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 1)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 1)]
-
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 2)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 2)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 2)]
-
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 1)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 1)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 1)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 1)]
-
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 2)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 2)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 2)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 2)]
-
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha1, 1)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha256, 1)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha384, 1)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha512, 1)]
-
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha1, 2)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha256, 2)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha384, 2)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha512, 2)]
-
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha1, 1)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha256, 1)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha384, 1)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha512, 1)]
-
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha1, 2)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha256, 2)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha384, 2)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha512, 2)]
-
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 1)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 1)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 1)]
-
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 2)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 2)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 2)]
-
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 1)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 1)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 1)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 1)]
-
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 2)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 2)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 2)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 2)]
-
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha1, 1)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha256, 1)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha384, 1)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha512, 1)]
-
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha1, 2)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha256, 2)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha384, 2)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha512, 2)]
-
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha1, 1)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha256, 1)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha384, 1)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha512, 1)]
-
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha1, 2)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha256, 2)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha384, 2)]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha512, 2)]
-        public void SignRsa_VerifyCSharp_Correct(StandardTestDevice testDeviceType, PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm,
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA1024, 0x92, RsaFormat.Sha1, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA1024, 0x92, RsaFormat.Sha256, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA1024, 0x92, RsaFormat.Sha384, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA1024, 0x92, RsaFormat.Sha1, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA1024, 0x92, RsaFormat.Sha256, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA1024, 0x92, RsaFormat.Sha384, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA2048, 0x93, RsaFormat.Sha1, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA2048, 0x93, RsaFormat.Sha256, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA2048, 0x93, RsaFormat.Sha384, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA2048, 0x93, RsaFormat.Sha512, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA2048, 0x93, RsaFormat.Sha1, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA2048, 0x93, RsaFormat.Sha256, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA2048, 0x93, RsaFormat.Sha384, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA2048, 0x93, RsaFormat.Sha512, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA3072, 0x94, RsaFormat.Sha1, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA3072, 0x94, RsaFormat.Sha256, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA3072, 0x94, RsaFormat.Sha384, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA3072, 0x94, RsaFormat.Sha512, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA3072, 0x94, RsaFormat.Sha1, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA3072, 0x94, RsaFormat.Sha256, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA3072, 0x94, RsaFormat.Sha384, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA3072, 0x94, RsaFormat.Sha512, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096, 0x95, RsaFormat.Sha1, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096, 0x95, RsaFormat.Sha256, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096, 0x95, RsaFormat.Sha384, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096, 0x95, RsaFormat.Sha512, 1)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096, 0x95, RsaFormat.Sha1, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096, 0x95, RsaFormat.Sha256, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096, 0x95, RsaFormat.Sha384, 2)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.RSA4096, 0x95, RsaFormat.Sha512, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA1024, 0x92, RsaFormat.Sha1, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA1024, 0x92, RsaFormat.Sha256, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA1024, 0x92, RsaFormat.Sha384, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA1024, 0x92, RsaFormat.Sha1, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA1024, 0x92, RsaFormat.Sha256, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA1024, 0x92, RsaFormat.Sha384, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048, 0x93, RsaFormat.Sha1, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048, 0x93, RsaFormat.Sha256, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048, 0x93, RsaFormat.Sha384, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048, 0x93, RsaFormat.Sha512, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048, 0x93, RsaFormat.Sha1, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048, 0x93, RsaFormat.Sha256, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048, 0x93, RsaFormat.Sha384, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA2048, 0x93, RsaFormat.Sha512, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072, 0x94, RsaFormat.Sha1, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072, 0x94, RsaFormat.Sha256, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072, 0x94, RsaFormat.Sha384, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072, 0x94, RsaFormat.Sha512, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072, 0x94, RsaFormat.Sha1, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072, 0x94, RsaFormat.Sha256, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072, 0x94, RsaFormat.Sha384, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA3072, 0x94, RsaFormat.Sha512, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096, 0x95, RsaFormat.Sha1, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096, 0x95, RsaFormat.Sha256, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096, 0x95, RsaFormat.Sha384, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096, 0x95, RsaFormat.Sha512, 1)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096, 0x95, RsaFormat.Sha1, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096, 0x95, RsaFormat.Sha256, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096, 0x95, RsaFormat.Sha384, 2)]
+        [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096, 0x95, RsaFormat.Sha512, 2)]
+        [Obsolete("Use the keyparameters method instead")]
+        public void SignRsa_VerifyCSharp_Correct(
+            StandardTestDevice testDeviceType,
+            KeyType keyType,
+            byte slotNumber,
+            int digestAlgorithm,
             int paddingScheme)
         {
-            int keySizeBits = algorithm.KeySizeBits();
+            int keySizeBits = keyType.GetKeyDefinition().LengthInBits;
             byte[] dataToSign = new byte[128];
             Random.Shared.NextBytes(dataToSign);
 
@@ -231,7 +216,7 @@ namespace Yubico.YubiKey.Piv
                 _ => RSASignaturePadding.Pss,
             };
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var pubKeyPem, out var priKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out var pubKeyPem, out var priKeyPem);
             var pubKey = new KeyConverter(pubKeyPem!.ToCharArray());
             var priKey = new KeyConverter(priKeyPem!.ToCharArray());
 
@@ -258,31 +243,32 @@ namespace Yubico.YubiKey.Piv
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP256, 0x94)]
-        [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.EccP384, 0x95)]
-        public void SignEcc_VerifyCSharp_Correct(StandardTestDevice testDeviceType, PivAlgorithm algorithm, byte slotNumber)
+        [InlineData(StandardTestDevice.Fw5, KeyType.ECP256, 0x94)]
+        [InlineData(StandardTestDevice.Fw5Fips, KeyType.ECP384, 0x95)]
+        public void SignEcc_VerifyCSharp_Correct(
+            StandardTestDevice testDeviceType,
+            KeyType keyType,
+            byte slotNumber)
         {
             byte[] dataToSign = new byte[128];
             Random.Shared.NextBytes(dataToSign);
 
-            var hashAlgorithm = algorithm switch
+            var hashAlgorithm = keyType switch
             {
-                PivAlgorithm.EccP256 => HashAlgorithmName.SHA256,
+                KeyType.ECP256 => HashAlgorithmName.SHA256,
                 _ => HashAlgorithmName.SHA384,
             };
 
-            using HashAlgorithm digester = algorithm switch
+            using HashAlgorithm digester = keyType switch
             {
-                PivAlgorithm.EccP256 => CryptographyProviders.Sha256Creator(),
+                KeyType.ECP256 => CryptographyProviders.Sha256Creator(),
                 _ => CryptographyProviders.Sha384Creator(),
             };
 
             digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var pubKeyPem, out var priKeyPem);
-            var pubKey = new KeyConverter(pubKeyPem!.ToCharArray());
-            var priKey = new KeyConverter(priKeyPem!.ToCharArray());
-
+            var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
+            var privateKey = ECPrivateKey.CreateFromPkcs8(testPrivateKey.EncodedKey);
             try
             {
                 IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
@@ -292,20 +278,20 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.ImportPrivateKey(slotNumber, priKey.GetPivPrivateKey());
+                pivSession.ImportPrivateKey(slotNumber, privateKey);
 
                 byte[] signature = pivSession.Sign(slotNumber, digester.Hash);
 
                 bool isValid = ConvertEcdsaSignature(signature, digester.Hash!.Length, out byte[] rsSignature);
                 Assert.True(isValid);
 
-                using ECDsa eccPublic = pubKey.GetEccObject();
+                using ECDsa eccPublic = testPublicKey.AsECDsa();
                 bool isVerified = eccPublic.VerifyData(dataToSign, rsSignature, hashAlgorithm);
                 Assert.True(isVerified);
             }
             finally
             {
-                priKey.Clear();
+                privateKey.Clear();
             }
         }
 
@@ -313,9 +299,11 @@ namespace Yubico.YubiKey.Piv
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void NoKeyInSlot_Sign_Exception(StandardTestDevice testDeviceType)
+        public void NoKeyInSlot_Sign_Exception(
+            StandardTestDevice testDeviceType)
         {
-            byte[] dataToSign = {
+            byte[] dataToSign =
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20
             };
@@ -331,8 +319,12 @@ namespace Yubico.YubiKey.Piv
             _ = Assert.Throws<InvalidOperationException>(() => pivSession.Sign(0x9a, dataToSign));
         }
 
-        private static bool LoadKey(PivAlgorithm algorithm, byte slotNumber, PivPinPolicy pinPolicy,
-            PivTouchPolicy touchPolicy, IYubiKeyDevice testDevice)
+        private async static Task<bool> ImportKey(
+            KeyType keyType,
+            byte slotNumber,
+            PivPinPolicy pinPolicy,
+            PivTouchPolicy touchPolicy,
+            IYubiKeyDevice testDevice)
         {
             if (!testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv))
             {
@@ -343,14 +335,21 @@ namespace Yubico.YubiKey.Piv
             var collectorObj = new Simple39KeyCollector();
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            PivPrivateKey privateKey = SampleKeyPairs.GetPivPrivateKey(algorithm);
+            var testKey = TestKeys.GetTestPrivateKey(keyType);
+            var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testKey.EncodedKey);
             pivSession.ImportPrivateKey(slotNumber, privateKey, pinPolicy, touchPolicy);
+
+            await Task.Delay(200);
+
             return true;
         }
 
         // Convert from the DER SEQ { INT r, INT s } to r || s.
         // This is because the ECDsa class operates on only this form of the signature.
-        private static bool ConvertEcdsaSignature(byte[] signature, int integerLength, out byte[] rsSignature)
+        private static bool ConvertEcdsaSignature(
+            byte[] signature,
+            int integerLength,
+            out byte[] rsSignature)
         {
             rsSignature = new byte[2 * integerLength];
 
@@ -388,6 +387,34 @@ namespace Yubico.YubiKey.Piv
             sValue.Span.CopyTo(sigAsSpan.Slice(integerLength + offset, sValue.Length));
 
             return true;
+        }
+        
+        private static Ed25519PublicKeyParameters GetBouncyCastleKeyParameters(IPublicKey publicKey)
+        {
+            var bouncyEd25519PublicKey =
+                new Ed25519PublicKeyParameters(
+                    ((Curve25519PublicKey)publicKey).PublicPoint.ToArray());
+            
+            return bouncyEd25519PublicKey;
+        }
+
+        private static PivSession GetSession(
+            StandardTestDevice testDeviceType)
+        {
+            PivSession? pivSession = null;
+            try
+            {
+                var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+                pivSession = new PivSession(testDevice);
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+                return pivSession;
+            }
+            catch
+            {
+                pivSession?.Dispose();
+                throw;
+            }
         }
     }
 }

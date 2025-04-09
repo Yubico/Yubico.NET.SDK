@@ -16,11 +16,13 @@ using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
+    [Obsolete] // TODO
     public class CertSizeTests
     {
         [Theory]
@@ -32,7 +34,7 @@ namespace Yubico.YubiKey.Piv
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
             using X509Certificate2 caCert = GetCACert();
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out var pubKey, out var priKey);
+            _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.RSA2048, false, out _, out var pubKey, out var priKey);
             var convertPublic = new KeyConverter(pubKey!.ToCharArray());
             RSA dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey!.ToCharArray());
@@ -88,7 +90,7 @@ namespace Yubico.YubiKey.Piv
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
             using X509Certificate2 caCert = GetCACert();
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out var pubKey, out var priKey);
+            _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.RSA2048, false, out _, out var pubKey, out var priKey);
             var convertPublic = new KeyConverter(pubKey!.ToCharArray());
             RSA dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey!.ToCharArray());
@@ -132,7 +134,7 @@ namespace Yubico.YubiKey.Piv
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
             using X509Certificate2 caCert = GetCACert();
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out var pubKey, out var priKey);
+            _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.RSA2048, false, out _, out var pubKey, out var priKey);
             var convertPublic = new KeyConverter(pubKey!.ToCharArray());
             RSA dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey!.ToCharArray());
@@ -226,7 +228,7 @@ namespace Yubico.YubiKey.Piv
         private static X509Certificate2 GetCACert()
         {
             _ = SampleKeyPairs.GetKeysAndCertPem(
-                PivAlgorithm.Rsa2048, true, out var certPem, out _, out var privateKeyPem);
+                KeyType.RSA2048, true, out var certPem, out _, out var privateKeyPem);
 
             var cert = new CertConverter(certPem!.ToCharArray());
             X509Certificate2 certObj = cert.GetCertObject();

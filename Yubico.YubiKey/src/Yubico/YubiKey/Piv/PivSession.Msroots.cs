@@ -347,10 +347,7 @@ namespace Yubico.YubiKey.Piv
         // been validated.
         private void WriteMsrootsSpan(ReadOnlySpan<byte> contents, int maxLength)
         {
-            if (ManagementKeyAuthenticated == false)
-            {
-                AuthenticateManagementKey();
-            }
+            RefreshManagementKeyAuthentication();
 
             int offset = 0;
             byte[] buffer = new byte[maxLength + MaximumTlvLength];

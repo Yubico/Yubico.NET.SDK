@@ -14,8 +14,8 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -92,11 +92,10 @@ namespace Yubico.YubiKey.Piv.Commands
         //  keyData || PIN policy
         //  keyData || touch policy
         //  keyData
-        private const int maximumPolicyLength = 6;
-        private const int pinPolicyIndex = 2;
-        private const int pinPolicyCount = 3;
-        private const int touchPolicyIndex = 5;
-        private const int touchPolicyCount = 3;
+        private const int PinPolicyIndex = 2;
+        private const int PinPolicyLength = 3;
+        private const int TouchPolicyIndex = 5;
+        private const int TouchPolicyLength = 3;
 
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs. For this
@@ -108,8 +107,6 @@ namespace Yubico.YubiKey.Piv.Commands
         public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
         private byte _slotNumber;
-
-        private readonly PivPrivateKey _privateKey;
 
         /// <summary>
         /// The slot into which the key will be imported.
@@ -133,6 +130,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             ExceptionMessages.InvalidSlot,
                             value));
                 }
+
                 _slotNumber = value;
             }
         }
@@ -143,7 +141,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <value>
         /// The algorithm.
         /// </value>
-        public PivAlgorithm Algorithm { get; private set; }
+        public PivAlgorithm Algorithm { get; }
 
         /// <summary>
         /// The PIN policy the key will have. None is equivalent to Default.
@@ -161,8 +159,12 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </value>
         public PivTouchPolicy TouchPolicy { get; set; }
 
-        private readonly byte[] _policy = new byte[maximumPolicyLength] {
-            0xAA, 0x01, 0x00, 0xAB, 0x01, 0x00 };
+        private readonly byte[] _policy =
+        [
+            0xAA, 0x01, 0x00, 0xAB, 0x01, 0x00
+        ];
+
+        private readonly ReadOnlyMemory<byte> _encodedKey;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -213,6 +215,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The <c>privateKey</c> argument does not contain a key.
         /// </exception>
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
         public ImportAsymmetricKeyCommand(
             PivPrivateKey privateKey,
             byte slotNumber,
@@ -223,6 +226,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 throw new ArgumentNullException(nameof(privateKey));
             }
+
             if (privateKey.EncodedPrivateKey.IsEmpty)
             {
                 throw new ArgumentException(
@@ -230,12 +234,12 @@ namespace Yubico.YubiKey.Piv.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidPrivateKeyData));
             }
-
+            
+            _encodedKey = privateKey.EncodedPrivateKey;
             Algorithm = privateKey.Algorithm;
             SlotNumber = slotNumber;
             PinPolicy = pinPolicy;
             TouchPolicy = touchPolicy;
-            _privateKey = privateKey;
         }
 
         /// <summary>
@@ -270,12 +274,14 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The <c>privateKey</c> argument does not contain a key.
         /// </exception>
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
         public ImportAsymmetricKeyCommand(PivPrivateKey privateKey)
         {
             if (privateKey is null)
             {
                 throw new ArgumentNullException(nameof(privateKey));
             }
+
             if (privateKey.EncodedPrivateKey.IsEmpty)
             {
                 throw new ArgumentException(
@@ -284,27 +290,43 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.InvalidPrivateKeyData));
             }
 
-            Algorithm = privateKey.Algorithm;
             _slotNumber = 0;
+            _encodedKey = privateKey.EncodedPrivateKey;
+
+            Algorithm = privateKey.Algorithm;
             PinPolicy = PivPinPolicy.Default;
             TouchPolicy = PivTouchPolicy.Default;
-            _privateKey = privateKey;
+        }
+
+        public ImportAsymmetricKeyCommand(
+            ReadOnlyMemory<byte> encodedKey,
+            KeyType keyType,
+            byte slotNumber,
+            PivPinPolicy pinPolicy = PivPinPolicy.Default,
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        {
+            _encodedKey = encodedKey;
+            SlotNumber = slotNumber;
+            Algorithm = keyType.GetPivAlgorithm();
+            PinPolicy = pinPolicy;
+            TouchPolicy = touchPolicy;
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivImportAsymmetricInstruction,
-            P1 = (byte)Algorithm,
-            P2 = SlotNumber,
-            Data = BuildImportAsymmetricApduData(),
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivImportAsymmetricInstruction,
+                P1 = (byte)Algorithm,
+                P2 = SlotNumber,
+                Data = BuildImportAsymmetricApduData(),
+            };
 
         // Build a new byte array containing the key data and policy data.
         // Build it in such a way that there will be no "reallocation".
         private byte[] BuildImportAsymmetricApduData()
         {
-            if (PivSlot.IsValidSlotNumberForGenerate(_slotNumber) == false)
+            if (!PivSlot.IsValidSlotNumberForGenerate(_slotNumber))
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -313,34 +335,44 @@ namespace Yubico.YubiKey.Piv.Commands
                         _slotNumber));
             }
 
-            _policy[pinPolicyIndex] = (byte)PinPolicy;
-            _policy[touchPolicyIndex] = (byte)TouchPolicy;
+            int policyLength = 0;
+            _policy[PinPolicyIndex] = (byte)PinPolicy;
+            _policy[TouchPolicyIndex] = (byte)TouchPolicy;
 
-            int offset = _privateKey.EncodedPrivateKey.Length;
-            int length = offset + maximumPolicyLength;
-            byte[] apduData = new byte[length];
-            try
+            bool includeTouchPolicy = TouchPolicy != PivTouchPolicy.Default && TouchPolicy != PivTouchPolicy.None;
+            if (includeTouchPolicy)
             {
-                _privateKey.EncodedPrivateKey.CopyTo(apduData);
-                Array.Copy(_policy, 0, apduData, offset, maximumPolicyLength);
-
-                if (PinPolicy == PivPinPolicy.Default || PinPolicy == PivPinPolicy.None)
-                {
-                    Array.Copy(_policy, pinPolicyCount, apduData, offset, touchPolicyCount);
-                    length -= pinPolicyCount;
-                }
-                if (TouchPolicy == PivTouchPolicy.Default || TouchPolicy == PivTouchPolicy.None)
-                {
-                    length -= touchPolicyCount;
-                }
-
-                var returnValue = new Memory<byte>(apduData, 0, length);
-                return returnValue.ToArray();
+                policyLength += TouchPolicyLength;
             }
-            finally
+
+            bool includePinPolicy = PinPolicy != PivPinPolicy.Default && PinPolicy != PivPinPolicy.None;
+            if (includePinPolicy)
             {
-                CryptographicOperations.ZeroMemory(apduData);
+                policyLength += PinPolicyLength;
             }
+
+            int apduTotalLength = _encodedKey.Length + policyLength;
+            byte[] result = new byte[apduTotalLength];
+            Span<byte> resultSpan = result;
+
+            // Copy private key data
+            _encodedKey.Span.CopyTo(resultSpan);
+
+            // Write policy data
+            var policyDestination = resultSpan[_encodedKey.Length..];
+
+            if (includePinPolicy)
+            {
+                _policy.AsSpan(0, PinPolicyLength).CopyTo(policyDestination);
+                policyDestination = policyDestination[PinPolicyLength..];
+            }
+
+            if (includeTouchPolicy)
+            {
+                _policy.AsSpan(PinPolicyLength, TouchPolicyLength).CopyTo(policyDestination);
+            }
+
+            return result;
         }
 
         /// <inheritdoc />

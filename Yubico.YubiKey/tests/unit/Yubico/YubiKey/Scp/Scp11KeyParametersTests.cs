@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.Scp
         {
             // Arrange
             var keyRef = new KeyReference(ScpKeyIds.Scp11B, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
+            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
 
             // Act
             var keyParams = new Scp11KeyParameters(keyRef, pkSdEcka);
@@ -78,8 +78,8 @@ namespace Yubico.YubiKey.Scp
             // Arrange
             var keyRef = new KeyReference(keyId, 0x01);
             var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
-            var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
+            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+            var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
 
             // Act
             var keyParams = new Scp11KeyParameters(
@@ -109,8 +109,8 @@ namespace Yubico.YubiKey.Scp
             // Arrange
             var keyRef = new KeyReference(keyId, 0x01);
             var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
-            var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
+            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+            var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
 
             // Act
             Assert.Throws<ArgumentException>(() =>
@@ -132,8 +132,8 @@ namespace Yubico.YubiKey.Scp
             var keyRef =
                 new KeyReference(ScpKeyIds.Scp11B, 0x01); // SCP11b and these optional parameters should not work
             var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
-            var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
+            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+            var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.Scp
         {
             // Arrange
             var keyRef = new KeyReference(keyId, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
+            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
@@ -169,7 +169,7 @@ namespace Yubico.YubiKey.Scp
         {
             // Arrange
             var keyRef = new KeyReference(keyId, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
+            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
@@ -178,12 +178,13 @@ namespace Yubico.YubiKey.Scp
         }
 
         [Fact]
+        [Obsolete("Obsolete")]
         public void Dispose_ClearsPrivateKey()
         {
             // Arrange
             var keyRef = new KeyReference(ScpKeyIds.Scp11A, 0x01);
             var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
+            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
             var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
 
             var keyParams = new Scp11KeyParameters(
@@ -207,8 +208,8 @@ namespace Yubico.YubiKey.Scp
             // Arrange
             var keyRef = new KeyReference(ScpKeyIds.Scp11A, 0x01);
             var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = new ECPublicKeyParameters(_sdPublicKeyParams);
-            var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
+            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+            var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
 
             var keyParams = new Scp11KeyParameters(
                 keyRef,

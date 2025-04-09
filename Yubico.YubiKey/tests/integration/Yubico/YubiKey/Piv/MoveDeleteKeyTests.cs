@@ -14,6 +14,8 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -22,13 +24,13 @@ namespace Yubico.YubiKey.Piv
     public class MoveDeleteKeyTests
     {
         [SkippableTheory(typeof(NotSupportedException))]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        public void MoveKey_WithGenerate(PivAlgorithm expectedAlgorithm)
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        public void MoveKey_WithGenerate(KeyType expectedAlgorithm)
         {
             // Arrange
             const byte sourceSlot = PivSlot.Retired1;
@@ -43,7 +45,7 @@ namespace Yubico.YubiKey.Piv
 
             var generatedKeyPair = pivSession.GenerateKeyPair(sourceSlot, expectedAlgorithm, PivPinPolicy.None);
             var metadataForKeyPair = pivSession.GetMetadata(sourceSlot);
-            Assert.Equal(generatedKeyPair.YubiKeyEncodedPublicKey, metadataForKeyPair.PublicKey.YubiKeyEncodedPublicKey);
+            Assert.Equal(generatedKeyPair.EncodeAsPiv(), metadataForKeyPair.PublicKeyParameters?.EncodeAsPiv());
 
             // Act
             pivSession.MoveKey(sourceSlot, destinationSlot);
@@ -53,17 +55,17 @@ namespace Yubico.YubiKey.Piv
             Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(sourceSlot));
 
             var destinationMetadata = pivSession.GetMetadata(destinationSlot);
-            Assert.Equal(generatedKeyPair.PivEncodedPublicKey, destinationMetadata.PublicKey.PivEncodedPublicKey);
+            Assert.Equal(generatedKeyPair.EncodeAsPiv(), destinationMetadata.PublicKeyParameters?.EncodeAsPiv());
         }
 
         [SkippableTheory(typeof(NotSupportedException))]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        public void MoveKey_WithImportedKey(PivAlgorithm expectedAlgorithm)
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        public void MoveKey_WithImportedKey(KeyType expectedAlgorithm)
         {
             // Arrange
             const byte sourceSlot = PivSlot.Retired1;
@@ -75,8 +77,9 @@ namespace Yubico.YubiKey.Piv
 
             DeleteKeys(pivSession, sourceSlot, destinationSlot);
 
-            var importedPrivateKey = SampleKeyPairs.GetPivPrivateKey(expectedAlgorithm);
-            var importedPublicKey = SampleKeyPairs.GetPivPublicKey(expectedAlgorithm);
+            var (publicKey, privateKey) = TestKeys.GetKeyPair(expectedAlgorithm);
+            var importedPrivateKey = AsnPrivateKeyDecoder.CreatePrivateKey(privateKey.EncodedKey);
+            var importedPublicKey = AsnPublicKeyDecoder.CreatePublicKey(publicKey.EncodedKey);
 
             pivSession.ImportPrivateKey(sourceSlot, importedPrivateKey);
 
@@ -88,27 +91,28 @@ namespace Yubico.YubiKey.Piv
             Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(sourceSlot));
 
             var destinationMetadata = pivSession.GetMetadata(destinationSlot);
-            Assert.Equal(importedPublicKey.PivEncodedPublicKey, destinationMetadata.PublicKey.PivEncodedPublicKey);
+            Assert.Equal(importedPublicKey.EncodeAsPiv(), destinationMetadata.PublicKeyParameters?.EncodeAsPiv());
         }
 
         [SkippableTheory(typeof(NotSupportedException))]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        public void DeleteKey_WithImportedKey(PivAlgorithm expectedAlgorithm)
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        public void DeleteKey_WithImportedKey(KeyType expectedAlgorithm)
         {
             // Arrange
             const byte slotToDelete = PivSlot.Retired1;
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
 
             using var pivSession = new PivSession(testDevice);
             pivSession.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
 
-            var expectedKey = SampleKeyPairs.GetPivPrivateKey(expectedAlgorithm);
-            pivSession.ImportPrivateKey(slotToDelete, expectedKey);
+            var testPrivateKey = TestKeys.GetTestPrivateKey(expectedAlgorithm);
+            var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
+            pivSession.ImportPrivateKey(slotToDelete, privateKey);
 
             // Act
             pivSession.DeleteKey(slotToDelete);
@@ -118,16 +122,16 @@ namespace Yubico.YubiKey.Piv
             Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(slotToDelete));
         }
 
-        private static byte[] GetRandomDataBuffer(PivAlgorithm expectedAlgorithm)
+        private static byte[] GetRandomDataBuffer(KeyType expectedAlgorithm)
         {
             byte[] dataToSign = expectedAlgorithm switch
             {
-                PivAlgorithm.Rsa1024 => new byte[128],
-                PivAlgorithm.Rsa2048 => new byte[256],
-                PivAlgorithm.Rsa3072 => new byte[384],
-                PivAlgorithm.Rsa4096 => new byte[512],
-                PivAlgorithm.EccP256 => new byte[32],
-                PivAlgorithm.EccP384 => new byte[48],
+                KeyType.RSA1024 => new byte[128],
+                KeyType.RSA2048 => new byte[256],
+                KeyType.RSA3072 => new byte[384],
+                KeyType.RSA4096 => new byte[512],
+                KeyType.ECP256 => new byte[32],
+                KeyType.ECP384 => new byte[48],
                 _ => throw new ArgumentException("what are you trying to do")
             };
 

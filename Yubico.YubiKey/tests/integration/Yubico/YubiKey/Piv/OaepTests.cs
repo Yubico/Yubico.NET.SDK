@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
@@ -24,9 +25,10 @@ namespace Yubico.YubiKey.Piv
     {
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
+        [Obsolete("Fix later")] // TOdo
         public void Parse_FromRsaClass(StandardTestDevice testDeviceType)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out var publicKeyPem, out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.RSA1024, false, out _, out var publicKeyPem, out var privateKeyPem);
 
             var publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
             var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());

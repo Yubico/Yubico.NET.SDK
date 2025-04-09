@@ -15,6 +15,8 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv.Converters;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -60,15 +62,11 @@ namespace Yubico.YubiKey.Piv
     /// </code>
     /// </para>
     /// </remarks>
-    public class PivPrivateKey
+    public class PivPrivateKey : PrivateKey
     {
-        private const int primePTag = 0x01;
-        private const int primeQTag = 0x02;
-        private const int exponentPTag = 0x03;
-        private const int exponentQTag = 0x04;
-        private const int CoefficientTag = 0x05;
-        private const int EccTag = 0x06;
-
+        protected Memory<byte> EncodedKey { get; set; }
+        public override KeyType KeyType => Algorithm.GetKeyType();
+        
         /// <summary>
         /// The algorithm of the key in this object.
         /// </summary>
@@ -76,8 +74,6 @@ namespace Yubico.YubiKey.Piv
         /// RSA or ECC.
         /// </value>
         public PivAlgorithm Algorithm { get; protected set; }
-
-        protected Memory<byte> EncodedKey { get; set; }
 
         /// <summary>
         /// Contains the TLV encoding of the private key.
@@ -101,8 +97,9 @@ namespace Yubico.YubiKey.Piv
         /// <c>PivEccPrivateKey</c>.
         /// </remarks>
         /// <param name="encodedPrivateKey">
-        /// The PIV TLV encoding.
+        ///     The PIV TLV encoding.
         /// </param>
+        /// <param name="pivAlgorithm"></param>
         /// <returns>
         /// An instance of a subclass of <c>PivPrivateKey</c>, the actual key
         /// represented by the encoding.
@@ -110,7 +107,7 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The key data supplied is not a supported encoding.
         /// </exception>
-        public static PivPrivateKey Create(ReadOnlyMemory<byte> encodedPrivateKey)
+        public static PivPrivateKey Create(ReadOnlyMemory<byte> encodedPrivateKey, PivAlgorithm? pivAlgorithm = null)
         {
             byte tag = 0;
             if (encodedPrivateKey.Length > 0)
@@ -126,23 +123,22 @@ namespace Yubico.YubiKey.Piv
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.InvalidPrivateKeyData));
 
-                case EccTag:
-                    return PivEccPrivateKey.CreateEccPrivateKey(encodedPrivateKey);
+                case var _ when PivConstants.IsValidPrivateECTag(tag):
+                    return PivEccPrivateKey.CreateEccPrivateKey(encodedPrivateKey, pivAlgorithm);
 
-                case primePTag:
-                case primeQTag:
-                case exponentPTag:
-                case exponentQTag:
-                case CoefficientTag:
+                case var _ when PivConstants.IsValidPrivateRSATag(tag):
                     return PivRsaPrivateKey.CreateRsaPrivateKey(encodedPrivateKey);
             }
         }
+        
+        public override byte[] ExportPkcs8PrivateKey() =>
+            PivKeyDecoder.CreatePrivateKey(EncodedPrivateKey, Algorithm.GetKeyType()).ExportPkcs8PrivateKey();
 
         /// <summary>
         /// Call on the object to clear (overwrite) any sensitive data it is
         /// holding.
         /// </summary>
-        public virtual void Clear()
+        public override void Clear()
         {
             CryptographicOperations.ZeroMemory(EncodedKey.Span);
             EncodedKey = Memory<byte>.Empty;

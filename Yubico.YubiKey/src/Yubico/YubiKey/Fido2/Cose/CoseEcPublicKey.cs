@@ -270,7 +270,7 @@ namespace Yubico.YubiKey.Fido2.Cose
 
             var ecParams = new ECParameters
             {
-                Curve = ECCurve.CreateFromValue(definition.Oid),
+                Curve = ECCurve.CreateFromValue(definition.CurveOid),
                 Q = new ECPoint
                 {
                     X = _xCoordinate,

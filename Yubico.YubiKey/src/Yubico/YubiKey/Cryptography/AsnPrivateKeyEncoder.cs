@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Cryptography;
 /// <summary>
 /// A class that converts private key parameters to ASN.1 DER encoding.
 /// </summary>
-internal static class AsnPrivateKeyWriter
+internal static class AsnPrivateKeyEncoder
 {
     /// <summary>
     /// Converts a private key and its corresponding public point to ASN.1 DER encoded format.

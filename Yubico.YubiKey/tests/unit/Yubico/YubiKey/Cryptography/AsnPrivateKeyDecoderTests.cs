@@ -21,7 +21,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class AsnPrivateKeyReaderTests
+public class AsnPrivateKeyDecoderTests
 {
     [Theory]
     [InlineData(KeyType.RSA1024)]
@@ -36,7 +36,7 @@ public class AsnPrivateKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPrivateKeyReader.CreatePrivateKey(keyBytes);
+        var result = AsnPrivateKeyDecoder.CreatePrivateKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
@@ -71,7 +71,7 @@ public class AsnPrivateKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var privateKeyParameters = AsnPrivateKeyReader.CreatePrivateKey(keyBytes);
+        var privateKeyParameters = AsnPrivateKeyDecoder.CreatePrivateKey(keyBytes);
 
         // Assert
         Assert.NotNull(privateKeyParameters);
@@ -107,7 +107,7 @@ public class AsnPrivateKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPrivateKeyReader.CreatePrivateKey(keyBytes);
+        var result = AsnPrivateKeyDecoder.CreatePrivateKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
@@ -126,7 +126,7 @@ public class AsnPrivateKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPrivateKeyReader.CreatePrivateKey(keyBytes);
+        var result = AsnPrivateKeyDecoder.CreatePrivateKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
@@ -158,7 +158,7 @@ public class AsnPrivateKeyReaderTests
         var invalidKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => AsnPrivateKeyReader.CreatePrivateKey(invalidKeyDer));
+        Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreatePrivateKey(invalidKeyDer));
     }
 
     [Fact]
@@ -199,7 +199,7 @@ public class AsnPrivateKeyReaderTests
         var invalidKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => AsnPrivateKeyReader.CreatePrivateKey(invalidKeyDer));
+        Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreatePrivateKey(invalidKeyDer));
     }
 
     [Fact]
@@ -233,7 +233,7 @@ public class AsnPrivateKeyReaderTests
         var invalidKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => AsnPrivateKeyReader.CreatePrivateKey(invalidKeyDer));
+        Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreatePrivateKey(invalidKeyDer));
     }
 
     [Fact]
@@ -259,7 +259,7 @@ public class AsnPrivateKeyReaderTests
         var unsupportedCurveKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => AsnPrivateKeyReader.CreatePrivateKey(unsupportedCurveKeyDer));
+        Assert.Throws<InvalidOperationException>(() => AsnPrivateKeyDecoder.CreatePrivateKey(unsupportedCurveKeyDer));
     }
 
     [Fact]
@@ -285,7 +285,7 @@ public class AsnPrivateKeyReaderTests
         var unsupportedAlgorithmKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => AsnPrivateKeyReader.CreatePrivateKey(unsupportedAlgorithmKeyDer));
+        Assert.Throws<InvalidOperationException>(() => AsnPrivateKeyDecoder.CreatePrivateKey(unsupportedAlgorithmKeyDer));
     }
 
     [Fact]
@@ -309,7 +309,7 @@ public class AsnPrivateKeyReaderTests
         var invalidKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => AsnPrivateKeyReader.CreatePrivateKey(invalidKeyDer));
+        Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreatePrivateKey(invalidKeyDer));
     }
 
     [Fact]
@@ -333,7 +333,7 @@ public class AsnPrivateKeyReaderTests
         var invalidKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => AsnPrivateKeyReader.CreatePrivateKey(invalidKeyDer));
+        Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreatePrivateKey(invalidKeyDer));
     }
 
     // [Theory]
@@ -350,7 +350,7 @@ public class AsnPrivateKeyReaderTests
     //     var testEncodedKey = testKey.EncodedKey;
     //
     //     // Act
-    //     var privateKeyParameters = AsnPrivateKeyReader.DecodePkcs8EncodedKey(testEncodedKey);
+    //     var privateKeyParameters = AsnPrivateKeyDecoder.DecodePkcs8EncodedKey(testEncodedKey);
     //
     //     // Check that the encoded key matches the original input
     //     // Assert.Equal(
@@ -382,10 +382,10 @@ public class AsnPrivateKeyReaderTests
         var testEncodedKey = testKey.EncodedKey;
 
         // Act
-        var privateKeyParameters = AsnPrivateKeyReader.CreatePrivateKey(testEncodedKey);
+        var privateKeyParameters = AsnPrivateKeyDecoder.CreatePrivateKey(testEncodedKey);
         var exportedEncodedKey = privateKeyParameters.ExportPkcs8PrivateKey();
-        var decodedParams = AsnPrivateKeyReader.CreatePrivateKey(exportedEncodedKey);
-        AsnPrivateKeyWriterTests.KeyEquivalenceTestHelper.VerifyFunctionalEquivalence(privateKeyParameters, decodedParams, keyType);
+        var decodedParams = AsnPrivateKeyDecoder.CreatePrivateKey(exportedEncodedKey);
+        AsnPrivateKeyEncoderTests.KeyEquivalenceTestHelper.VerifyFunctionalEquivalence(privateKeyParameters, decodedParams, keyType);
     }
 
     [Fact]
@@ -397,8 +397,8 @@ public class AsnPrivateKeyReaderTests
         var publicKeyBytes = publicKey.EncodedKey;
 
         // Act
-        var privateParams = AsnPrivateKeyReader.CreatePrivateKey(privateKeyBytes);
-        var publicParams = AsnPublicKeyReader.CreatePublicKey(publicKeyBytes);
+        var privateParams = AsnPrivateKeyDecoder.CreatePrivateKey(privateKeyBytes);
+        var publicParams = AsnPublicKeyDecoder.CreatePublicKey(publicKeyBytes);
 
         // Assert
         Assert.IsType<RSAPrivateKey>(privateParams);

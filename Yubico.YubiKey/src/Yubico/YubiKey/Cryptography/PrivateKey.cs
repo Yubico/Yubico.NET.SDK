@@ -12,24 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Cryptography;
 
-public interface IPublicKey : IKeyBase
+public abstract class PrivateKey : IPrivateKey, IDisposable
 {
-    /// <summary>
-    /// Exports the public-key portion of the current key in the X.509 SubjectPublicKeyInfo format.
-    /// </summary>
-    /// <returns>
-    /// A byte array containing the X.509 SubjectPublicKeyInfo representation of the public-key portion of this key
-    /// </returns>
-    public byte[] ExportSubjectPublicKeyInfo();
-}
+    private bool _disposed;
 
-public abstract class PublicKey : IPublicKey
-{
-    /// <inheritdoc />
+    /// <inheritdoc /> 
     public abstract KeyType KeyType { get; }
-    
+
     /// <inheritdoc />
-    public abstract byte[] ExportSubjectPublicKeyInfo();
+    public abstract byte[] ExportPkcs8PrivateKey();
+
+    /// <inheritdoc /> 
+    public abstract void Clear();
+
+    /// <summary>
+    /// Clears the private key data and disposes the object
+    /// </summary>
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            Clear();
+            _disposed = true;
+        }
+
+        GC.SuppressFinalize(this);
+    }
+
+    protected void ThrowIfDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(GetType().Name);
+        }
+    }
 }

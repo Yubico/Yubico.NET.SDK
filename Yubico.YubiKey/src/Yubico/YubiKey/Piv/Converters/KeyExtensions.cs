@@ -37,10 +37,10 @@ public static class KeyExtensions
     {
         return parameters switch
         {
-            ECPublicKey p => PivKeyConverter.EncodeECPublicKey(p),
-            RSAPublicKey p => PivKeyConverter.EncodeRSAPublicKey(p),
-            Curve25519PublicKey p => PivKeyConverter.EncodeCurve25519PublicKey(p),
-            _ => throw new ArgumentException("Unsupported key type.", nameof(parameters))
+            ECPublicKey p => PivKeyEncoder.EncodeECPublicKey(p),
+            RSAPublicKey p => PivKeyEncoder.EncodeRSAPublicKey(p),
+            Curve25519PublicKey p => PivKeyEncoder.EncodeCurve25519PublicKey(p),
+            _ => throw new ArgumentException("The type conversion for the specified key type is not supported", nameof(parameters))
         };
     }
     
@@ -54,10 +54,10 @@ public static class KeyExtensions
     {
         return parameters switch
         {
-            ECPrivateKey p => PivKeyConverter.EncodeECPrivateKey(p),
-            RSAPrivateKey p => PivKeyConverter.EncodeRSAPrivateKey(p),
-            Curve25519PrivateKey p => PivKeyConverter.EncodeCurve25519PrivateKey(p),
-            _ => throw new ArgumentException("Unsupported key type.", nameof(parameters))
+            ECPrivateKey p => PivKeyEncoder.EncodeECPrivateKey(p),
+            RSAPrivateKey p => PivKeyEncoder.EncodeRSAPrivateKey(p),
+            Curve25519PrivateKey p => PivKeyEncoder.EncodeCurve25519PrivateKey(p),
+            _ => throw new ArgumentException("The type conversion for the specified key type is not supported", nameof(parameters))
         };
     }
 }

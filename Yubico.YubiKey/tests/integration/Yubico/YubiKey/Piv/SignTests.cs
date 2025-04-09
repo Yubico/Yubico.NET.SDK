@@ -393,7 +393,7 @@ namespace Yubico.YubiKey.Piv
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
             var testKey = TestKeys.GetTestPrivateKey(keyType);
-            var privateKey = AsnPrivateKeyReader.CreatePrivateKey(testKey.EncodedKey);
+            var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testKey.EncodedKey);
             pivSession.ImportPrivateKey(slotNumber, privateKey, pinPolicy, touchPolicy);
 
             await Task.Delay(200);

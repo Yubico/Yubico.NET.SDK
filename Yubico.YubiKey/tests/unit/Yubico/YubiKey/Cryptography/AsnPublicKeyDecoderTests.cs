@@ -21,7 +21,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public class AsnPublicKeyReaderTests
+public class AsnPublicKeyDecoderTests
 {
     [Theory]
     [InlineData(KeyType.RSA1024)]
@@ -35,7 +35,7 @@ public class AsnPublicKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
+        var result = AsnPublicKeyDecoder.CreatePublicKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
@@ -62,7 +62,7 @@ public class AsnPublicKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
+        var result = AsnPublicKeyDecoder.CreatePublicKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
@@ -98,7 +98,7 @@ public class AsnPublicKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
+        var result = AsnPublicKeyDecoder.CreatePublicKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
@@ -118,7 +118,7 @@ public class AsnPublicKeyReaderTests
         var keyBytes = testKey.EncodedKey;
 
         // Act
-        var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
+        var result = AsnPublicKeyDecoder.CreatePublicKey(keyBytes);
 
         // Assert
         Assert.NotNull(result);
@@ -143,7 +143,7 @@ public class AsnPublicKeyReaderTests
             var keyBytes = testKey.EncodedKey;
 
             // Act
-            var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
+            var result = AsnPublicKeyDecoder.CreatePublicKey(keyBytes);
 
             // Assert
             Assert.NotNull(result);
@@ -176,7 +176,7 @@ public class AsnPublicKeyReaderTests
         var invalidKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => AsnPublicKeyReader.CreatePublicKey(invalidKeyDer));
+        Assert.Throws<CryptographicException>(() => AsnPublicKeyDecoder.CreatePublicKey(invalidKeyDer));
     }
 
     [Fact]
@@ -206,7 +206,7 @@ public class AsnPublicKeyReaderTests
         var invalidKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => AsnPublicKeyReader.CreatePublicKey(invalidKeyDer));
+        Assert.Throws<CryptographicException>(() => AsnPublicKeyDecoder.CreatePublicKey(invalidKeyDer));
     }
 
     [Fact]
@@ -237,7 +237,7 @@ public class AsnPublicKeyReaderTests
         var unsupportedCurveKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<NotSupportedException>(() => AsnPublicKeyReader.CreatePublicKey(unsupportedCurveKeyDer));
+        Assert.Throws<NotSupportedException>(() => AsnPublicKeyDecoder.CreatePublicKey(unsupportedCurveKeyDer));
     }
 
     [Fact]
@@ -262,7 +262,7 @@ public class AsnPublicKeyReaderTests
         var unsupportedAlgorithmKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<NotSupportedException>(() => AsnPublicKeyReader.CreatePublicKey(unsupportedAlgorithmKeyDer));
+        Assert.Throws<NotSupportedException>(() => AsnPublicKeyDecoder.CreatePublicKey(unsupportedAlgorithmKeyDer));
     }
 
     [Theory]
@@ -276,20 +276,20 @@ public class AsnPublicKeyReaderTests
         var testKey = TestKeys.GetTestPublicKey(keyType);
         var keyBytes = testKey.EncodedKey;
         
-        // Act - Parse it with AsnPublicKeyReader
-        var result = AsnPublicKeyReader.CreatePublicKey(keyBytes);
+        // Act - Parse it with AsnPublicKeyDecoder
+        var result = AsnPublicKeyDecoder.CreatePublicKey(keyBytes);
         
-        // Convert to encoded format (assuming extension method or AsnPublicKeyWriter exists)
+        // Convert to encoded format (assuming extension method or AsnPublicKeyEncoder exists)
         var encodedKey = result switch
         {
-            RSAPublicKey rsaParams => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(rsaParams.Parameters),
-            ECPublicKey ecParams => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(ecParams.Parameters),
-            Curve25519PublicKey x25519Params => AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(x25519Params.PublicPoint, keyType),
+            RSAPublicKey rsaParams => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(rsaParams.Parameters),
+            ECPublicKey ecParams => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(ecParams.Parameters),
+            Curve25519PublicKey x25519Params => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(x25519Params.PublicPoint, keyType),
             _ => throw new NotSupportedException($"Unsupported key type: {result.GetType()}")
         };
         
         // Parse again
-        var result2 = AsnPublicKeyReader.CreatePublicKey(encodedKey);
+        var result2 = AsnPublicKeyDecoder.CreatePublicKey(encodedKey);
         
         // Assert - Check type consistency and common properties
         Assert.Equal(result.GetType(), result2.GetType());
@@ -340,7 +340,7 @@ public class AsnPublicKeyReaderTests
         var publicKeyDer = rsaPublicKey.ExportSubjectPublicKeyInfo();
         
         // Act
-        var result = AsnPublicKeyReader.CreatePublicKey(publicKeyDer);
+        var result = AsnPublicKeyDecoder.CreatePublicKey(publicKeyDer);
         
         // Assert
         Assert.NotNull(result);

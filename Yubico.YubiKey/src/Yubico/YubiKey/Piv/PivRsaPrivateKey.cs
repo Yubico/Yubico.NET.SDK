@@ -140,8 +140,10 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.InvalidPrivateKeyData)),
             };
 
-            if (primeQ.Length != primeP.Length || exponentP.Length != primeP.Length
-                || exponentQ.Length != primeP.Length || coefficient.Length != primeP.Length)
+            if (primeQ.Length != primeP.Length ||
+                exponentP.Length != primeP.Length || 
+                exponentQ.Length != primeP.Length || 
+                coefficient.Length != primeP.Length)
             {
                 throw new ArgumentException(
                     string.Format(

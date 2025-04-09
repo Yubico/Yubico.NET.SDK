@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.YubiKey.Cryptography;
 
 public interface IPrivateKey : IKeyBase
@@ -30,40 +28,4 @@ public interface IPrivateKey : IKeyBase
     /// Clears the buffers containing private key data.
     /// </summary>
     public void Clear();
-}
-
-public abstract class PrivateKey : IPrivateKey, IDisposable
-{
-    private bool _disposed;
-
-    /// <inheritdoc /> 
-    public abstract KeyType KeyType { get; }
-
-    /// <inheritdoc />
-    public abstract byte[] ExportPkcs8PrivateKey();
-
-    /// <inheritdoc /> 
-    public abstract void Clear();
-
-    /// <summary>
-    /// Clears the private key data and disposes the object
-    /// </summary>
-    public void Dispose()
-    {
-        if (!_disposed)
-        {
-            Clear();
-            _disposed = true;
-        }
-
-        GC.SuppressFinalize(this);
-    }
-
-    protected void ThrowIfDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(GetType().Name);
-        }
-    }
 }

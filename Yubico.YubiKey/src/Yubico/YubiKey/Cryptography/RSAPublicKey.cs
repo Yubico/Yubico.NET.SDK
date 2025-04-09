@@ -17,7 +17,7 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public sealed class RSAPublicKey : IPublicKey
+public sealed class RSAPublicKey : PublicKey
 {
     /// <summary>
     /// Gets the RSA cryptographic parameters required for the private key operations.
@@ -40,10 +40,9 @@ public sealed class RSAPublicKey : IPublicKey
     public KeyDefinition KeyDefinition  { get; }
 
     /// <inheritdoc />
-    public KeyType KeyType => KeyDefinition.KeyType;
+    public override KeyType KeyType => KeyDefinition.KeyType;
 
-    [Obsolete("Use factory methods instead")]
-    public RSAPublicKey(RSAParameters parameters)
+    private RSAPublicKey(RSAParameters parameters)
     {
         if (parameters.D != null || 
             parameters.P != null || 
@@ -60,7 +59,7 @@ public sealed class RSAPublicKey : IPublicKey
         KeyDefinition = KeyDefinitions.GetByRSALength(parameters.Modulus.Length * 8);
     }
 
-    public byte[] ExportSubjectPublicKeyInfo()
+    public override byte[] ExportSubjectPublicKeyInfo()
     {
         if (Parameters.Exponent == null ||
             Parameters.Modulus == null)
@@ -68,7 +67,7 @@ public sealed class RSAPublicKey : IPublicKey
             throw new InvalidOperationException("Cannot export public key, missing required parameters");
         }
 
-        return AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(Parameters);
+        return AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(Parameters);
     }
 
     /// <summary>
@@ -84,9 +83,7 @@ public sealed class RSAPublicKey : IPublicKey
     /// <exception cref="ArgumentException">
     /// Thrown if the parameters contain private key data.
     /// </exception>
-    #pragma warning disable CS0618 // Type or member is obsolete
     public static RSAPublicKey CreateFromParameters(RSAParameters parameters) => new(parameters);
-    #pragma warning restore CS0618 // Type or member is obsolete
 
     /// <summary>
     /// Creates a new instance of <see cref="IPublicKey"/> from a DER-encoded public key.
@@ -97,5 +94,5 @@ public sealed class RSAPublicKey : IPublicKey
     /// Thrown if the public key is invalid.
     /// </exception>
     public static IPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-        AsnPublicKeyReader.CreatePublicKey(encodedKey);
+        AsnPublicKeyDecoder.CreatePublicKey(encodedKey);
 }

@@ -19,7 +19,7 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-public sealed class Curve25519PublicKey : IPublicKey
+public sealed class Curve25519PublicKey : PublicKey
 {
     private readonly Memory<byte> _publicPoint;
 
@@ -32,7 +32,7 @@ public sealed class Curve25519PublicKey : IPublicKey
     public KeyDefinition KeyDefinition { get; }
 
     /// <inheritdoc />
-    public KeyType KeyType => KeyDefinition.KeyType;
+    public override KeyType KeyType => KeyDefinition.KeyType;
 
     /// <summary>
     /// Gets the bytes representing the public key coordinates as a compressed point.
@@ -59,8 +59,8 @@ public sealed class Curve25519PublicKey : IPublicKey
     /// <returns>
     /// A byte array containing the ASN.1 DER encoded public key.
     /// </returns>
-    public byte[] ExportSubjectPublicKeyInfo() =>
-        AsnPublicKeyWriter.EncodeToSubjectPublicKeyInfo(_publicPoint, KeyDefinition.KeyType);
+    public override byte[] ExportSubjectPublicKeyInfo() =>
+        AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(_publicPoint, KeyDefinition.KeyType);
 
     /// <summary>
     /// Creates a new instance of <see cref="Curve25519PublicKey"/> from a DER-encoded public key.

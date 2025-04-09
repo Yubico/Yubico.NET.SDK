@@ -78,8 +78,8 @@ namespace Yubico.YubiKey.Piv
             DeleteKeys(pivSession, sourceSlot, destinationSlot);
 
             var (publicKey, privateKey) = TestKeys.GetKeyPair(expectedAlgorithm);
-            var importedPrivateKey = AsnPrivateKeyReader.CreatePrivateKey(privateKey.EncodedKey);
-            var importedPublicKey = AsnPublicKeyReader.CreatePublicKey(publicKey.EncodedKey);
+            var importedPrivateKey = AsnPrivateKeyDecoder.CreatePrivateKey(privateKey.EncodedKey);
+            var importedPublicKey = AsnPublicKeyDecoder.CreatePublicKey(publicKey.EncodedKey);
 
             pivSession.ImportPrivateKey(sourceSlot, importedPrivateKey);
 
@@ -111,7 +111,7 @@ namespace Yubico.YubiKey.Piv
             pivSession.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
 
             var testPrivateKey = TestKeys.GetTestPrivateKey(expectedAlgorithm);
-            var privateKey = AsnPrivateKeyReader.CreatePrivateKey(testPrivateKey.EncodedKey);
+            var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
             pivSession.ImportPrivateKey(slotToDelete, privateKey);
 
             // Act

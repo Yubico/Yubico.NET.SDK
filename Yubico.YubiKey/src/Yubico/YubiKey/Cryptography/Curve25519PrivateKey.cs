@@ -58,7 +58,7 @@ public sealed class Curve25519PrivateKey : PrivateKey
     public override byte[] ExportPkcs8PrivateKey() 
     {
         ThrowIfDisposed();
-        return AsnPrivateKeyWriter.EncodeToPkcs8(_privateKey, KeyType);
+        return AsnPrivateKeyEncoder.EncodeToPkcs8(_privateKey, KeyType);
     }
     /// <summary>
     /// Clears the private key.
@@ -86,7 +86,7 @@ public sealed class Curve25519PrivateKey : PrivateKey
     /// <exception cref="CryptographicException">Thrown if privateKey does not match expected format.</exception>
     public static Curve25519PrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
-        (byte[] privateKey, var keyType) = AsnPrivateKeyReader.GetCurve25519PrivateKeyData(pkcs8EncodedKey);
+        (byte[] privateKey, var keyType) = AsnPrivateKeyDecoder.GetCurve25519PrivateKeyData(pkcs8EncodedKey);
         using var privateKeyHandle = new ZeroingMemoryHandle(privateKey);
         return new Curve25519PrivateKey(privateKeyHandle.Data, keyType);
     }

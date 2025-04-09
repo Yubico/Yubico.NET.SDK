@@ -23,11 +23,22 @@ namespace Yubico.YubiKey.Piv.Converters;
 /// This class converts from a Piv Encoded Key to either instances of the common IPublicKey and IPrivateKey
 /// or concrete the concrete types that inherit these interfaces.
 /// </summary>
-internal partial class PivKeyConverter
+internal class PivKeyEncoder
 {
-    public static Memory<byte> EncodeRSAPublicKey(RSAPublicKey parameters)
+    public static Memory<byte> EncodePublicKey(IPublicKey publicKey)
     {
-        var rsaParameters = parameters.Parameters;
+        return publicKey switch
+        {
+            Curve25519PublicKey curve25519PublicKey => EncodeCurve25519PublicKey(curve25519PublicKey),
+            ECPublicKey ecPublicKey => EncodeECPublicKey(ecPublicKey),
+            RSAPublicKey rsaPublicKey => EncodeRSAPublicKey(rsaPublicKey),
+            _ => throw new ArgumentException("Unsupported public key type."),
+        };
+    }
+    
+    public static Memory<byte> EncodeRSAPublicKey(RSAPublicKey publicKey)
+    {
+        var rsaParameters = publicKey.Parameters;
         var tlvWriter = new TlvWriter();
         using (tlvWriter.WriteNestedTlv(PivConstants.PublicKeyTag))
         {
@@ -38,38 +49,49 @@ internal partial class PivKeyConverter
         return tlvWriter.Encode();
     }
 
-    public static Memory<byte> EncodeCurve25519PublicKey(Curve25519PublicKey parameters)
+    public static Memory<byte> EncodeCurve25519PublicKey(Curve25519PublicKey publicKey)
     {
         var tlvWriter = new TlvWriter();
         using (tlvWriter.WriteNestedTlv(PivConstants.PublicKeyTag))
         {
-            tlvWriter.WriteValue(PivConstants.PublicECTag, parameters.PublicPoint.Span);
+            tlvWriter.WriteValue(PivConstants.PublicECTag, publicKey.PublicPoint.Span);
         }
 
         return tlvWriter.Encode();
     }
 
-    public static Memory<byte> EncodeECPublicKey(ECPublicKey parameters)
+    public static Memory<byte> EncodeECPublicKey(ECPublicKey publicKey)
     {
         var tlvWriter = new TlvWriter();
         using (tlvWriter.WriteNestedTlv(PivConstants.PublicKeyTag))
         {
-            tlvWriter.WriteValue(PivConstants.PublicECTag, parameters.PublicPoint.Span);
+            tlvWriter.WriteValue(PivConstants.PublicECTag, publicKey.PublicPoint.Span);
         }
 
         return tlvWriter.Encode();
     }
+    
+    public static Memory<byte> EncodePrivateKey(IPrivateKey publicKey)
+    {
+        return publicKey switch
+        {
+            Curve25519PrivateKey curve25519PrivateKey => EncodeCurve25519PrivateKey(curve25519PrivateKey),
+            ECPrivateKey ecPrivateKey => EncodeECPrivateKey(ecPrivateKey),
+            RSAPrivateKey rsaPrivateKey => EncodeRSAPrivateKey(rsaPrivateKey),
+            _ => throw new ArgumentException("Unsupported public key type."),
+        };
+    }
 
-    public static Memory<byte> EncodeECPrivateKey(ECPrivateKey parameters)
+    public static Memory<byte> EncodeECPrivateKey(ECPrivateKey privateKey)
     {
         var tlvWriter = new TlvWriter();
-        tlvWriter.WriteValue(PivConstants.PrivateECDsaTag, parameters.Parameters.D);
+        tlvWriter.WriteValue(PivConstants.PrivateECDsaTag, privateKey.Parameters.D);
         return tlvWriter.Encode();
     }
 
-    public static Memory<byte> EncodeRSAPrivateKey(RSAPrivateKey parameters)
+    public static Memory<byte> EncodeRSAPrivateKey(RSAPrivateKey privateKey)
     {
-        var rsaParameters = parameters.Parameters;
+        var rsaParameters = privateKey.Parameters;
         if (rsaParameters.P.Length != rsaParameters.Q.Length ||
             rsaParameters.DP.Length != rsaParameters.P.Length ||
             rsaParameters.DQ.Length != rsaParameters.P.Length ||
@@ -90,14 +112,14 @@ internal partial class PivKeyConverter
         return tlvWriter.Encode();
     }
 
-    public static Memory<byte> EncodeCurve25519PrivateKey(Curve25519PrivateKey parameters)
+    public static Memory<byte> EncodeCurve25519PrivateKey(Curve25519PrivateKey privateKey)
     {
         var tlvWriter = new TlvWriter();
-        int typeTag = parameters.KeyType == KeyType.Ed25519
+        int typeTag = privateKey.KeyType == KeyType.Ed25519
             ? PivConstants.PrivateECEd25519Tag
             : PivConstants.PrivateECX25519Tag;
 
-        tlvWriter.WriteValue(typeTag, parameters.PrivateKey.Span);
+        tlvWriter.WriteValue(typeTag, privateKey.PrivateKey.Span);
         return tlvWriter.Encode();
     }
 }

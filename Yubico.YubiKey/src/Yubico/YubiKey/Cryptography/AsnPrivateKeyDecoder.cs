@@ -20,7 +20,7 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-internal class AsnPrivateKeyReader
+internal class AsnPrivateKeyDecoder
 {
     public static IPrivateKey CreatePrivateKey(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
@@ -102,12 +102,13 @@ internal class AsnPrivateKeyReader
         {
             throw new CryptographicException("Invalid Curve25519 private key: incorrect length");
         }
-        seqPrivateKeyInfo.ThrowIfNotEmpty();
 
+        seqPrivateKeyInfo.ThrowIfNotEmpty();
 
         var keyDefinition = KeyDefinitions.GetByOid(algorithmOid);
         return (privateKey, keyDefinition.KeyType);
     }
+
     public static ECParameters CreateECParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
@@ -261,7 +262,7 @@ internal class AsnPrivateKeyReader
             DQ = exponent2.ToArray(),
             InverseQ = coefficient.ToArray()
         };
-        
+
         return rsaParameters.NormalizeParameters();
     }
 }

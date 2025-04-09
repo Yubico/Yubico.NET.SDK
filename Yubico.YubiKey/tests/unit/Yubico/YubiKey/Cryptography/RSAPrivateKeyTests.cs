@@ -15,8 +15,8 @@
 using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
+using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Piv.Converters;
-using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography;
 
@@ -43,27 +43,28 @@ public class RSAPrivateKeyTests
         Assert.True(privateKey.Parameters.InverseQ?.All(b => b == 0) ?? true);
     }
 
-
     [Fact]
     public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()
     {
         // Arrange
-        var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
-        var pivPrivateKey = testKey.AsPivPrivateKey();
-        var pivPrivateKeyEncoded = pivPrivateKey.EncodedPrivateKey;
+        using var rsa = RSA.Create(2048);
+        var testRsaParameters = rsa.ExportParameters(true);
+        var pivPrivateKey = new PivRsaPrivateKey(
+            testRsaParameters.P,
+            testRsaParameters.Q,
+            testRsaParameters.DP,
+            testRsaParameters.DQ,
+            testRsaParameters.InverseQ);
 
         // Act
-        var privateKeyParams = PivKeyConverter.CreateRSAPrivateKey(pivPrivateKeyEncoded);
-        var parameters = privateKeyParams.Parameters;
+        var rsaPrivateKey = PivKeyDecoder.CreateRSAPrivateKey(pivPrivateKey.EncodedPrivateKey);
 
         // Assert
-        Assert.Equal(parameters.Modulus, privateKeyParams.Parameters.Modulus);
-        Assert.Equal(parameters.Exponent, privateKeyParams.Parameters.Exponent);
-        Assert.Equal(parameters.P, privateKeyParams.Parameters.P);
-        Assert.Equal(parameters.Q, privateKeyParams.Parameters.Q);
-        Assert.Equal(parameters.DP, privateKeyParams.Parameters.DP);
-        Assert.Equal(parameters.DQ, privateKeyParams.Parameters.DQ);
-        Assert.Equal(parameters.InverseQ, privateKeyParams.Parameters.InverseQ);
+        Assert.Equal(testRsaParameters.P, rsaPrivateKey.Parameters.P);
+        Assert.Equal(testRsaParameters.Q, rsaPrivateKey.Parameters.Q);
+        Assert.Equal(testRsaParameters.DP, rsaPrivateKey.Parameters.DP);
+        Assert.Equal(testRsaParameters.DQ, rsaPrivateKey.Parameters.DQ);
+        Assert.Equal(testRsaParameters.InverseQ, rsaPrivateKey.Parameters.InverseQ);
     }
 
     [Fact]

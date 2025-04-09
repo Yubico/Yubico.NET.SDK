@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.Piv
         }
         
         public override byte[] ExportPkcs8PrivateKey() =>
-            PivKeyConverter.CreatePrivateKey(EncodedPrivateKey, Algorithm.GetKeyType()).ExportPkcs8PrivateKey();
+            PivKeyDecoder.CreatePrivateKey(EncodedPrivateKey, Algorithm.GetKeyType()).ExportPkcs8PrivateKey();
 
         /// <summary>
         /// Call on the object to clear (overwrite) any sensitive data it is

@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Piv.Converters;
 /// This class converts from a Piv Encoded Key to either instances of the common IPublicKey and IPrivateKey
 /// or concrete the concrete types that inherit these interfaces.
 /// </summary>
-internal partial class PivKeyConverter
+internal class PivKeyDecoder
 {
     public static IPublicKey CreatePublicKey(ReadOnlyMemory<byte> pivEncodedKey, KeyType keyType) =>
         keyType switch
@@ -174,7 +174,7 @@ internal partial class PivKeyConverter
 
     public static RSAPrivateKey CreateRSAPrivateKey(ReadOnlyMemory<byte> pivEncodedKey)
     {
-        var parameters = PivEncodingReader.GetRSAParameters(pivEncodedKey);
+        var parameters = PivEncodingReader.CreateRSAParameters(pivEncodedKey);
         return RSAPrivateKey.CreateFromParameters(parameters);
     }
 }

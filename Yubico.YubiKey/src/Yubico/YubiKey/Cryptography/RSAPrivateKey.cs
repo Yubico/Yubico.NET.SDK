@@ -58,7 +58,7 @@ public sealed class RSAPrivateKey : PrivateKey
     public override byte[] ExportPkcs8PrivateKey()
     {
         ThrowIfDisposed();
-        return AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
+        return AsnPrivateKeyEncoder.EncodeToPkcs8(Parameters);
     }
 
     /// <summary>
@@ -94,7 +94,7 @@ public sealed class RSAPrivateKey : PrivateKey
     /// </exception>
     public static RSAPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
     {
-        var parameters = AsnPrivateKeyReader.CreateRSAParameters(encodedKey);
+        var parameters = AsnPrivateKeyDecoder.CreateRSAParameters(encodedKey);
         return new RSAPrivateKey(parameters);
     }
 

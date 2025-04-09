@@ -91,7 +91,7 @@ namespace Yubico.YubiKey.Cryptography
         public override byte[] ExportPkcs8PrivateKey()
         {
             ThrowIfDisposed();
-            return AsnPrivateKeyWriter.EncodeToPkcs8(Parameters);
+            return AsnPrivateKeyEncoder.EncodeToPkcs8(Parameters);
         }
 
         /// <inheritdoc/>
@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.Cryptography
         /// </exception>
         public static ECPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
         {
-            var parameters = AsnPrivateKeyReader.CreateECParameters(encodedKey);
+            var parameters = AsnPrivateKeyDecoder.CreateECParameters(encodedKey);
             return CreateFromParameters(parameters);
         }
         

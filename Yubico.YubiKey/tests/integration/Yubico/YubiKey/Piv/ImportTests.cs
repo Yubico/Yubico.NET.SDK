@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Piv
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             var testPivPublicKey = testPublicKey.AsPivPublicKey();
-            var keyParameters = AsnPrivateKeyReader.CreatePrivateKey(testPrivateKey.EncodedKey);
+            var keyParameters = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
 
             const PivPinPolicy expectedPinPolicy = PivPinPolicy.Once;
             const PivTouchPolicy expectedTouchPolicy = PivTouchPolicy.Always;

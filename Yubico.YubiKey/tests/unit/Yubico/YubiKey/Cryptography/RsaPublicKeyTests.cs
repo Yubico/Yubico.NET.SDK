@@ -19,7 +19,7 @@ namespace Yubico.YubiKey.Cryptography
             var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
 
             // Act
-            var publicKeyParams = PivKeyConverter.CreateRSAPublicKey(pivPublicKeyEncoded);
+            var publicKeyParams = PivKeyDecoder.CreateRSAPublicKey(pivPublicKeyEncoded);
             var resultParameters = publicKeyParams.Parameters;
 
             // Assert

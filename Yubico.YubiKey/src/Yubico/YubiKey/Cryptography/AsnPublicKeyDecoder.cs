@@ -19,7 +19,7 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-internal class AsnPublicKeyReader
+internal class AsnPublicKeyDecoder
 {
     public static IPublicKey CreatePublicKey(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {

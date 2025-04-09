@@ -27,6 +27,7 @@ namespace Yubico.YubiKey.Piv
 {
     public class SignTests
     {
+        
         [Trait(TraitTypes.Category, TestCategories.Simple)]
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
@@ -35,7 +36,7 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             // Arrange
-            var dataToSign = new byte[3062];
+            var dataToSign = new byte[3062]; // APDU cannot be bigger than this
             Random.Shared.NextBytes(dataToSign);
             
             // -> Generate a Ed25519 key
@@ -244,63 +245,6 @@ namespace Yubico.YubiKey.Piv
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5, KeyType.ECP256, 0x94)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.ECP384, 0x95)]
-        [Obsolete("Use the keyparameters method instead")]
-        public void SignEcc_VerifyCSharp_CorrectObsolete(
-            StandardTestDevice testDeviceType,
-            KeyType keyType,
-            byte slotNumber)
-        {
-            byte[] dataToSign = new byte[128];
-            Random.Shared.NextBytes(dataToSign);
-
-            var hashAlgorithm = keyType switch
-            {
-                KeyType.ECP256 => HashAlgorithmName.SHA256,
-                _ => HashAlgorithmName.SHA384,
-            };
-
-            using HashAlgorithm digester = keyType switch
-            {
-                KeyType.ECP256 => CryptographyProviders.Sha256Creator(),
-                _ => CryptographyProviders.Sha384Creator(),
-            };
-
-            digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
-
-            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out var pubKeyPem, out var priKeyPem);
-            var pubKey = new KeyConverter(pubKeyPem!.ToCharArray());
-            var priKey = new KeyConverter(priKeyPem!.ToCharArray());
-
-            try
-            {
-                IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-                Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-
-                using var pivSession = new PivSession(testDevice);
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                pivSession.ImportPrivateKey(slotNumber, priKey.GetPivPrivateKey());
-
-                byte[] signature = pivSession.Sign(slotNumber, digester.Hash);
-
-                bool isValid = ConvertEcdsaSignature(signature, digester.Hash!.Length, out byte[] rsSignature);
-                Assert.True(isValid);
-
-                using ECDsa eccPublic = pubKey.GetEccObject();
-                bool isVerified = eccPublic.VerifyData(dataToSign, rsSignature, hashAlgorithm);
-                Assert.True(isVerified);
-            }
-            finally
-            {
-                priKey.Clear();
-            }
-        }
-
-
-        [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5, KeyType.ECP256, 0x94)]
-        [InlineData(StandardTestDevice.Fw5Fips, KeyType.ECP384, 0x95)]
         public void SignEcc_VerifyCSharp_Correct(
             StandardTestDevice testDeviceType,
             KeyType keyType,
@@ -323,7 +267,6 @@ namespace Yubico.YubiKey.Piv
 
             digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
 
-            // _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out var pubKeyPem, out var priKeyPem);
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             var privateKey = ECPrivateKey.CreateFromPkcs8(testPrivateKey.EncodedKey);
             try

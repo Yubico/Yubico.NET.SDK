@@ -90,7 +90,7 @@ internal class PivKeyDecoder
     /// The created instance will be one of the following concrete types:
     /// <list type="bullet">
     /// <item><see cref="RSAPrivateKey"/></item>
-    /// <item><see cref="ECPrivateKeyParameters"/></item>
+    /// <item><see cref="ECPrivateKey"/></item>
     /// <item><see cref="Curve25519PrivateKey"/></item>
     /// </list>
     /// </remarks>

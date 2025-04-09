@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.ECP384, PivPinPolicy.Never, StandardTestDevice.Fw5)]
         [InlineData(KeyType.X25519, PivPinPolicy.Never, StandardTestDevice.Fw5)]
         [InlineData(KeyType.X25519, PivPinPolicy.Always, StandardTestDevice.Fw5)]
-        public void KeyAgree_Succeeds(
+        public void KeyAgree_SharedSecret_IsValid(
             KeyType keyType,
             PivPinPolicy pinPolicy,
             StandardTestDevice testDeviceType)

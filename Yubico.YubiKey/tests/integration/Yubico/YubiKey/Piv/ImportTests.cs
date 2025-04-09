@@ -92,12 +92,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [Obsolete("Replaced by IPrivateKey")] // TODO
         public void KeyAndCertImport(
             KeyType keyType,
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
             using var pivSession = new PivSession(testDevice);
@@ -107,11 +106,12 @@ namespace Yubico.YubiKey.Piv
             var collectorObj = new Simple39KeyCollector();
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            isValid = SampleKeyPairs.GetMatchingKeyAndCert(keyType, out var cert, out var privateKey);
-            Assert.True(isValid);
+            var testPrivateKey = TestKeys.GetTestPrivateKey(keyType);
+            var testCert =TestKeys.GetTestCertificate(keyType);
+            var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
 
-            pivSession.ImportPrivateKey(0x90, privateKey!);
-            pivSession.ImportCertificate(0x90, cert!);
+            pivSession.ImportPrivateKey(0x90, privateKey);
+            pivSession.ImportCertificate(0x90, testCert.AsX509Certificate2()!);
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]

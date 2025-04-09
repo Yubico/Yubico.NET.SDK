@@ -151,11 +151,4 @@ public class ECPublicKey : PublicKey
     /// </exception>
     public static IPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
         AsnPublicKeyDecoder.CreatePublicKey(encodedKey);
-
-    /// <summary>
-    /// Gets the bytes representing the public key coordinates.
-    /// </summary>
-    /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the public key bytes with the format 0x04 || X || Y.</returns>
-    [Obsolete("Use PublicPoint instead")]
-    public ReadOnlyMemory<byte> GetBytes() => _publicPointBytes;
 }

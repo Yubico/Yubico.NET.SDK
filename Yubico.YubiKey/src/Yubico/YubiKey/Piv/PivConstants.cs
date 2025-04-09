@@ -27,7 +27,7 @@ internal static class PivConstants
     public const int PrivateRSAExponentQTag = 0x04;
     public const int PrivateRSACoefficientTag = 0x05;
 
-    public const int PublicECTag = 0x86;
+    public const int PublicECTag = 0x86; // P-256, P-384, P-521, Ed25519 and X25519
 
     public const int PrivateECDsaTag = 0x06; // P-256, P-384, P-521
     public const int PrivateECEd25519Tag = 0x7;

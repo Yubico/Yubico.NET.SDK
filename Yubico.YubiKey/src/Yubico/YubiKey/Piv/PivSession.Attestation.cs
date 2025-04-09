@@ -467,7 +467,7 @@ namespace Yubico.YubiKey.Piv
                 // is given in bits, and the Length of the encoded key is given
                 // in bytes, compare ( 2 * (keySize / 8)) + 1.
                 // That's why the comparison is to (keySize / 4) + 1.
-                if (certificate.PublicKey.Oid.Value == keyType.ToAlgorithmOid()) // TODO potential bug where FriendlyName can differ on OSs
+                if (certificate.PublicKey.Oid.Value == keyType.GetAlgorithmOid())
                 {
                     returnValue = keySize switch
                     {

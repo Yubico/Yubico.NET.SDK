@@ -402,7 +402,7 @@ namespace Yubico.YubiKey {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to A certificate compression failed..
+        ///   Looks up a localized string similar to Failed to compress certificate..
         /// </summary>
         internal static string FailedCompressingCertificate {
             get {
@@ -411,7 +411,7 @@ namespace Yubico.YubiKey {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to A certificate decompression failed..
+        ///   Looks up a localized string similar to Failed to decompress certificate..
         /// </summary>
         internal static string FailedDecompressingCertificate {
             get {
@@ -420,7 +420,7 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A certificate was not able to parsed..
+        ///   Looks up a localized string similar to Failed to parse certificate data..
         /// </summary>
         internal static string FailedParsingCertificate {
             get {

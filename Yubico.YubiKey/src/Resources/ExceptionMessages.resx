@@ -475,8 +475,14 @@
   <data name="Ctap2UnknownAttestationFormat" xml:space="preserve">
     <value>The attestation was provided in an unknown format and cannot be parsed.</value>
   </data>
+  <data name="FailedCompressingCertificate" xml:space="preserve">
+    <value>Failed to compress certificate.</value>
+  </data>
+  <data name="FailedDecompressingCertificate" xml:space="preserve">
+    <value>Failed to decompress certificate.</value>
+  </data>
   <data name="FailedParsingCertificate" xml:space="preserve">
-    <value>A certificate was not able to parsed.</value>
+    <value>Failed to parse certificate data.</value>
   </data>
   <data name="InvalidOtpChallengeResponseAlgorithm" xml:space="preserve">
     <value>The challenge / response algorithm specified is invalid.</value>

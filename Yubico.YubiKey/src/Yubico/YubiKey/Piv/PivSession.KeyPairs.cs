@@ -489,7 +489,7 @@ namespace Yubico.YubiKey.Piv
             byte[] certDer = certificate.GetRawCertData();
             if (compress)
             {
-                certInfo = 0x01;
+                certInfo = 0x01; // Indicates the certificate is compressed
                 try
                 {
                     certDer = Compress(certDer);
@@ -571,31 +571,32 @@ namespace Yubico.YubiKey.Piv
             var certData = TlvObjects.DecodeDictionary(responseData.Span);
 
             bool hasCertInfo = certData.TryGetValue(PivCertInfoTag, out var certInfo);
-            if (certData.TryGetValue(PivCertTag, out var certBytes))
+            if (!certData.TryGetValue(PivCertTag, out var certBytes))
             {
-                bool compressed = hasCertInfo && certInfo.Length > 0 &&
-                ((certInfo.Span[0] & 0x01) == 0x01);
-                if (compressed)
-                {
-                    try
-                    {
-                        certBytes = Decompress(certBytes.ToArray());
-                    }
-                    catch (Exception)
-                    {
-                        throw new InvalidOperationException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.FailedDecompressingCertificate));
-                    }
-                }
-                return new X509Certificate2(certBytes.ToArray());
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.FailedParsingCertificate));
             }
 
-            throw new InvalidOperationException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.FailedParsingCertificate));
+            byte[] certBytesCopy = certBytes.ToArray();
+            bool isCompressed = hasCertInfo && certInfo.Span[0] == 0x01;
+            if (!isCompressed)
+            {
+                return new X509Certificate2(certBytesCopy);
+            }
+
+            try
+            {
+                return new X509Certificate2(Decompress(certBytesCopy));
+            }
+            catch (Exception)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.FailedDecompressingCertificate));
+            }
         }
 
         // There is a DataTag to use when calling PUT DATA. To put a cert onto
@@ -635,9 +636,11 @@ namespace Yubico.YubiKey.Piv
         static private byte[] Compress(byte[] data)
         {
             using var compressedStream = new MemoryStream();
-            using var compressor = new GZipStream(compressedStream, CompressionLevel.Optimal);
-            compressor.Write(data, 0, data.Length);
-            compressor.Close();
+            using (var compressor = new GZipStream(compressedStream, CompressionLevel.Optimal))
+            {
+                compressor.Write(data, 0, data.Length);
+            }
+
             return compressedStream.ToArray();
         }
 
@@ -647,7 +650,7 @@ namespace Yubico.YubiKey.Piv
             using var decompressor = new GZipStream(dataStream, CompressionMode.Decompress);
             using var decompressedStream = new MemoryStream();
             decompressor.CopyTo(decompressedStream);
-            decompressor.Close();
+            
             return decompressedStream.ToArray();
         }
     }

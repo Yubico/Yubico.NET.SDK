@@ -99,15 +99,10 @@ namespace Yubico.YubiKey.Piv
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            using var pivSession = new PivSession(testDevice);
-            var isValid = PivSupport.ResetPiv(pivSession);
-            Assert.True(isValid);
-
-            var collectorObj = new Simple39KeyCollector();
-            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            using var pivSession = GetSession(testDevice);
 
             var testPrivateKey = TestKeys.GetTestPrivateKey(keyType);
-            var testCert =TestKeys.GetTestCertificate(keyType);
+            var testCert = TestKeys.GetTestCertificate(keyType);
             var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
 
             pivSession.ImportPrivateKey(0x90, privateKey);
@@ -129,17 +124,14 @@ namespace Yubico.YubiKey.Piv
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(keyType, out var cert, out var _);
-            Assert.True(isValid);
+            var testCertificate = TestKeys.GetTestCertificate(keyType);
+            var testX509Certificate = testCertificate.AsX509Certificate2();
 
-            using var pivSession = new PivSession(testDevice);
-            var collectorObj = new Simple39KeyCollector();
-            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            using var pivSession = GetSession(testDevice);
+            pivSession.ImportCertificate(0x90, testX509Certificate);
 
-            pivSession.ImportCertificate(0x90, cert!);
-
-            var getCert = pivSession.GetCertificate(0x90);
-            Assert.True(getCert.Equals(cert));
+            var resultCert = pivSession.GetCertificate(0x90);
+            Assert.True(resultCert.Equals(testX509Certificate));
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
@@ -155,19 +147,16 @@ namespace Yubico.YubiKey.Piv
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(keyType, out var cert, out var _);
-            Assert.True(isValid);
+            var testCertificate = TestKeys.GetTestCertificate(keyType);
+            var testX509Certificate = testCertificate.AsX509Certificate2();
 
-            using var pivSession = new PivSession(testDevice);
-            var collectorObj = new Simple39KeyCollector();
-            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            using var pivSession = GetSession(testDevice);
+            pivSession.ImportCertificate(0x91, testX509Certificate, true);
 
-            pivSession.ImportCertificate(0x91, cert!, true);
-
-            var getCert = pivSession.GetCertificate(0x91);
-            Assert.True(getCert.Equals(cert));
+            var resultCert = pivSession.GetCertificate(0x91);
+            Assert.True(resultCert.Equals(testX509Certificate));
         }
-
+        
         private static PivSession GetSession(
             IYubiKeyDevice testDevice)
         {

@@ -33,6 +33,16 @@ namespace Yubico.YubiKey.Piv
         private const int PivCertInfoTag = 0x71;
         private const int PivLrcTag = 0xFE;
         
+        /// <summary>
+        /// Indicates the certificate is not compressed
+        /// </summary>
+        private const byte UncompressedCert = 0;
+        
+        /// <summary>
+        /// Indicates the certificate is compressed
+        /// </summary>
+        private const byte CompressedCert = 1;
+        
         [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
         public PivPublicKey GenerateKeyPair(
             byte slotNumber,
@@ -483,13 +493,11 @@ namespace Yubico.YubiKey.Piv
 
             RefreshManagementKeyAuthentication();
 
-            var dataTag = GetCertDataTagFromSlotNumber(slotNumber);
-
-            byte certInfo = 0x00;
+            byte certInfo = UncompressedCert; 
             byte[] certDer = certificate.GetRawCertData();
             if (compress)
             {
-                certInfo = 0x01; // Indicates the certificate is compressed
+                certInfo = CompressedCert;
                 try
                 {
                     certDer = Compress(certDer);
@@ -504,7 +512,6 @@ namespace Yubico.YubiKey.Piv
             }
 
             var tlvWriter = new TlvWriter();
-
             using (tlvWriter.WriteNestedTlv(PivEncodingTag))
             {
                 tlvWriter.WriteValue(PivCertTag, certDer);
@@ -514,6 +521,7 @@ namespace Yubico.YubiKey.Piv
 
             byte[] encodedCert = tlvWriter.Encode();
 
+            var dataTag = GetCertDataTagFromSlotNumber(slotNumber);
             var command = new PutDataCommand((int)dataTag, encodedCert);
             var response = Connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
@@ -580,7 +588,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             byte[] certBytesCopy = certBytes.ToArray();
-            bool isCompressed = hasCertInfo && certInfo.Span[0] == 0x01;
+            bool isCompressed = hasCertInfo && certInfo.Length > 0 && certInfo.Span[0] == CompressedCert;
             if (!isCompressed)
             {
                 return new X509Certificate2(certBytesCopy);

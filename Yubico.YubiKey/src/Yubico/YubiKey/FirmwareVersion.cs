@@ -61,6 +61,36 @@ namespace Yubico.YubiKey
             Minor = minor;
             Patch = patch;
         }
+        
+        /// <summary>
+        /// Parse a string of the form "major.minor.patch"
+        /// </summary>
+        /// <param name="versionString"></param>
+        /// <returns>Returns a FirmwareVersion instance</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public static FirmwareVersion Parse(string versionString)
+        {
+            if (versionString is null)
+            {
+                throw new ArgumentNullException(nameof(versionString));
+            }
+            
+            string[] parts = versionString.Split('.');
+            if (parts.Length != 3)
+            {
+                throw new ArgumentException("Must include major.minor.patch", nameof(versionString));
+            }
+            
+            if (!byte.TryParse(parts[0], out byte major) ||
+                !byte.TryParse(parts[1], out byte minor) || 
+                !byte.TryParse(parts[2], out byte patch))
+            {
+                throw new ArgumentException("Major, minor and patch must be valid numbers", nameof(versionString));
+            }
+            
+            return new FirmwareVersion(major, minor, patch);
+        }
 
         public static bool operator >(FirmwareVersion left, FirmwareVersion right)
         {

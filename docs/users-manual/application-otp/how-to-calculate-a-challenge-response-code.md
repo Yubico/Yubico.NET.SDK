@@ -45,7 +45,7 @@ The response from a YubiKey can be received via one of three methods:
 
 1. [GetCode()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetCode%28System.Int32%29): returns a
    string object containing [six](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MinOtpDigits)
-   to [ten](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MaxOtpDigits) 32-bit integers. A 6-digit code
+   to [ten](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MaxOtpDigits) numeric digits. A 6-digit code
    will be returned by default unless a larger number is specified when calling this method (for
    example, ``GetCode(8)``).
 1. [GetDataBytes()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetDataBytes): returns a byte array.
@@ -109,7 +109,7 @@ var yubiKey = yubiKeyList.First();
 
 In this example, we send an HMAC-SHA1 challenge (``hmacChal``) to the short press slot of the YubiKey
 with [UseChallenge()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseChallenge%28System.Byte%5B%5D%29)
-and get the response as a string object containing eight 32-bit integers via ``GetCode()``.
+and get the response as a string object containing eight numeric digits via ``GetCode()``.
 
 In addition, we
 use [UseTouchNotifier()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTouchNotifier%28System.Action%29)

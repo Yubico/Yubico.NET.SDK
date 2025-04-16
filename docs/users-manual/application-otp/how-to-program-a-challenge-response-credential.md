@@ -66,8 +66,8 @@ result). Due to this truncation, it’s important to use the setting that will b
 code.
 
 > [!NOTE]
-> You can still use challenges smaller than 64 bytes without setting the short challenge mode by simply padding the end
-> of the challenge with zeros. Again, it’s important that both sides of the operation agree on the length of the
+> You can use challenges smaller than 64 bytes without setting the short challenge mode by padding the end
+> of the challenge with zeros. Regardless, both sides of the operation must agree on the length of the
 > challenge.
 
 ## Requiring touch
@@ -80,11 +80,10 @@ To enable this setting, add
 the [UseButton()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseButton(System.Boolean)) method to
 your ``ConfigureChallengeResponse()`` operation.
 
-> [!NOTE]
-> If a YubiKey has been configured to require a button touch, you must make sure to alert the user of this requirement
-> during a challenge-response operation. This can be accomplished by calling
-> the [UseTouchNotifier()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTouchNotifier(System.Action))
-> method when sending a challenge to a YubiKey via ``CalculateChallengeResponse()``.
+If a YubiKey has been configured to require a button touch, you must make sure to alert the user of this requirement
+during a challenge-response operation. This can be accomplished by calling
+the [UseTouchNotifier()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTouchNotifier(System.Action))
+method when sending a challenge to a YubiKey via ``CalculateChallengeResponse()``.
 
 ## ConfigureChallengeResponse examples
 

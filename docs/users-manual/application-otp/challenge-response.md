@@ -59,8 +59,7 @@ bytes of additional data are not important—they are merely added as padding so
 with a 16-byte key using the AES encryption algorithm (AES requires that data be encrypted in blocks of the same size as
 the encryption key). The resulting Yubico OTP (as a byte array) becomes the response.
 
-For HMAC-SHA1 challenge-response, an application will send the YubiKey a challenge of up to 64 bytes in size, which will be digested (
-hashed) with a 20-byte secret key, resulting in a 20-byte response (the HMAC-SHA1 hash value). Responses can be received 
+For HMAC-SHA1 challenge-response, an application will send the YubiKey a challenge of up to 64 bytes in size, which will be digested (hashed) with a 20-byte secret key, resulting in a 20-byte response (the HMAC-SHA1 hash value). Responses can be received 
 by an application as a byte array or a 6-10 digit numeric code. With HMAC-SHA1, the challenge can be either an 
 application-specified byte array or the current Unix time.
 
@@ -109,7 +108,7 @@ The SDK’s challenge-response functionality centers around the following two me
 
 ``ConfigureChallengeResponse()`` allows you to configure an OTP application slot on a YubiKey to receive a challenge
 from a host and process it based on a specific algorithm and secret key. ``CalculateChallengeResponse()`` allows a host
-to send a challenge to a YubiKey and then receive the response from the YubiKey.
+to send a challenge to a YubiKey and then receive its response.
 
 ### ConfigureChallengeResponse()
 
@@ -176,10 +175,10 @@ The SDK will throw an exception if you call both ``UseTotp()`` and ``UseChalleng
 > slot is configured to perform Yubico OTP, the challenge must
 > be [6 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.YubicoOtpChallengeSize) long. If the slot
 > is
-> configured for HMAC-SHA1, the HOTP challenge must
+> configured for HMAC-SHA1, the challenge must
 > be [64 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MaxHmacChallengeSize) long. However, if
 > the
-> slot has been configured with ``UseSmallChallenge()``, an HOTP challenge smaller than 64 bytes is acceptable. The
+> slot has been configured with ``UseSmallChallenge()``, a challenge smaller than 64 bytes is acceptable. The
 > SDK will throw an exception if the challenge size does not match the YubiKey slot's configuration.
 
 For a full list of the methods in the ``CalculateChallengeResponse`` class, see

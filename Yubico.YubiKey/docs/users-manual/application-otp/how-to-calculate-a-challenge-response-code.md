@@ -25,23 +25,21 @@ a [CalculateChallengeResponse](xref:Yubico.YubiKey.Otp.Operations.CalculateChall
 instantiated by calling the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession)
 instance.
 
-You can send three types of challenges to a YubiKey:
+You can send two types of challenges to a YubiKey:
 
-- [Yubico OTP](xref:OtpYubicoOtp)
-- [HMAC-based One-Time Password (HOTP)](https://datatracker.ietf.org/doc/html/rfc4226)
-- [Time-based One-Time Password (TOTP)](https://datatracker.ietf.org/doc/html/rfc6238)
+- an application-specified byte array (Yubico OTP and HMAC-SHA1)
+- the current Unix time (HMAC-SHA1 configurations only)
 
-The challenge type must align with the type of credential that the YubiKey was programmed with, otherwise an exception
-will occur. To send an HOTP or TOTP challenge, the key must be programmed with an HMAC-SHA1 credential. To send a
-Yubico OTP challenge, the key must be programmed with a Yubico OTP credential.
+The challenge type and size must align with the type of credential that the YubiKey was programmed with, otherwise an exception
+will be thrown.
 
-For HOTP and TOTP challenge-response, the YubiKey will digest the challenge with the HMAC-SHA1 credential that it
-was programmed with. The resulting code can then be compared to the code produced by the validation server via the same
-hashing operation. For Yubico OTP challenge-response, the YubiKey will encrypt the challenge using its Yubico OTP
-credential, producing a Yubico OTP. This OTP can then be decrypted by the validation server with the credential's secret
+For HMAC-SHA1 challenge-response, the YubiKey will digest the challenge with the HMAC-SHA1 credential that it
+was programmed with. The resulting hash value can then be compared to the hash value produced by the validation server via the HMAC-SHA1 algorithm. 
+For Yubico OTP challenge-response, the YubiKey will encrypt the challenge using its Yubico OTP
+credential, producing a Yubico OTP (as a byte array). This OTP can then be decrypted by the validation server with the credential's secret
 key.
 
-## Response code types
+## Response types
 
 The response from a YubiKey can be received via one of three methods:
 
@@ -54,7 +52,7 @@ The response from a YubiKey can be received via one of three methods:
 1. [GetDataInt()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetDataInt): returns a single 10-digit, 32-bit
    integer. The integer returned will represent the same code as ``GetCode(10)``.
 
-Any of these response methods can be used for HOTP and TOTP challenges. However, ``GetDataBytes()`` is the only
+Any of these response methods can be used for HMAC-SHA1 challenges. However, ``GetDataBytes()`` is the only
 compatible method for Yubico OTP challenges.
 
 ## Touch
@@ -79,18 +77,18 @@ When the YubiKey requires a touch, the SDK spawns your handler as a Task. There 
 
 Regardless of the challenge type, you must
 call [UseYubiOtp()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseYubiOtp%28System.Boolean%29) when
-sending a challenge with ``CalculateChallengeResponse()`` (more specifially, call ``UseYubiOtp(false)`` for HOTP and
-TOTP challenges or ``UseYubiOtp(true)`` for Yubico OTP challenges). There is no default setting; an exception will occur
+sending a challenge with ``CalculateChallengeResponse()`` Specifically, call ``UseYubiOtp(false)`` for HMAC-SHA1 challenges 
+or ``UseYubiOtp(true)`` for Yubico OTP challenges. There is no default setting; an exception will occur
 if you do not call ``UseYubiOtp()``.
 
 For Yubico OTP challenge-response, the challenge must be 6 bytes
 long ([YubicoOtpChallengeSize](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.YubicoOtpChallengeSize)).
-For HMAC SHA-1 challenge-response, the challenge must be 64 bytes
+For HMAC SHA-1 challenge-response, the application-specified challenge must be 64 bytes
 long ([MaxHmacChallengeSize](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MaxHmacChallengeSize)) unless
 the YubiKey was previously configured
 with [UseSmallChallenge()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseSmallChallenge%28System.Boolean%29).
 
-Additionally, for TOTP challenges, you can set the time period that the response code is valid for
+Additionally, for time-based HMAC-SHA1 challenges sent with [UseTotp()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTotp), you can set the time period that the response is valid for
 via [WithPeriod()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.WithPeriod%28System.Int32%29) (the
 default is 30 seconds).
 
@@ -109,7 +107,7 @@ var yubiKey = yubiKeyList.First();
 
 ### HMAC-SHA1 challenge-response example
 
-In this example, we send an HOTP challenge (``hmacChal``) to the short press slot of the YubiKey
+In this example, we send an HMAC-SHA1 challenge (``hmacChal``) to the short press slot of the YubiKey
 with [UseChallenge()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseChallenge%28System.Byte%5B%5D%29)
 and get the response as a string object containing eight 32-bit integers via ``GetCode()``.
 
@@ -121,7 +119,7 @@ configured with an HMAC-SHA1 credential for this operation to succeed.
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
 {
-  // The challenge, hmacChal, has been set elsewhere.
+  // The challenge, hmacChal, was set elsewhere.
   string result = otp.CalculateChallengeResponse(Slot.ShortPress)
     .UseChallenge(hmacChal)
     .UseYubiOtp(false)
@@ -142,7 +140,7 @@ The YubiKey's short press slot must be configured with a Yubico OTP credential f
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
 {
-  // The challenge, yOtpChal, has been set elsewhere.
+  // The challenge, yOtpChal, was set elsewhere.
   ReadOnlyMemory<byte> resp = otp.CalculateChallengeResponse(Slot.ShortPress)
     .UseChallenge(yOtpChal)
     .UseYubiOtp(true)
@@ -152,7 +150,7 @@ using (OtpSession otp = new OtpSession(yubiKey))
 }
 ```
 
-### TOTP challenge-response example
+### Time-based HMAC-SHA1 challenge-response example
 
 In this final example, we send a time-based challenge to the long press slot of the key
 with [UseTotp()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTotp) and get the response from the

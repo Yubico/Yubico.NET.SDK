@@ -32,9 +32,10 @@ Slots can be programmed with one of the following types of credentials:
 - [Yubico OTP](xref:OtpYubicoOtp)
 
 During a challenge-response operation, a slot programmed with an HMAC-SHA1 credential will digest the challenge with
-that credential via the HMAC-SHA1 algorithm, producing an HOTP code. If the slot was programmed with a Yubico OTP
+that credential via the HMAC-SHA1 algorithm, producing an HMAC-SHA1 hash value, which can be received by the application 
+as a byte array or 6-10 digit numeric code. If the slot was programmed with a Yubico OTP
 credential, the key will encrypt the challenge with that credential via the Yubico OTP algorithm, producing a Yubico
-OTP.
+OTP (as a byte array).
 
 ## Algorithm selection and key sizes
 
@@ -107,7 +108,7 @@ the button during a challenge-response operation.
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
 {
-  // The secret key, hmacKey, will have been set elsewhere.
+  // The secret key, hmacKey, was set elsewhere.
   otp.ConfigureChallengeResponse(Slot.ShortPress)
     .UseHmacSha1()
     .UseKey(hmacKey)
@@ -142,6 +143,5 @@ Otherwise, the operation will fail and throw the following exception:
 
 ```System.InvalidOperationException has been thrown. YubiKey Operation Failed. [Warning, state of non-volatile memory is unchanged.]```
 
-For more information on slot access codes, please
-see [How to set, reset, remove, and use slot access codes](xref:OtpSlotAccessCodes).
+For more information on slot access codes, see [How to set, reset, remove, and use slot access codes](xref:OtpSlotAccessCodes).
 

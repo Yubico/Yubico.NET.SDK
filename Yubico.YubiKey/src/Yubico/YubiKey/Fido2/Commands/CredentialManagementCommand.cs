@@ -184,7 +184,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             // The pinUvAuthToken is an encrypted value, so there's no need to
             // overwrite the array.
             byte[] authParam = authProtocol.AuthenticateUsingPinToken(pinUvAuthToken.ToArray(), message);
-            PinUvAuthParam = new ReadOnlyMemory<byte>(authParam, 0, 16);
+            PinUvAuthParam = new ReadOnlyMemory<byte>(authParam);
             PinUvAuthProtocol = authProtocol.Protocol;
         }
 

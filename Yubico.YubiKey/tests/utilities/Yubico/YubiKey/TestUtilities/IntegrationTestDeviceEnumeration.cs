@@ -116,7 +116,9 @@ namespace Yubico.YubiKey.TestUtilities
                 .FindByTransport(transport)
                 .Where(IsAllowedKey)
                 .ToList();
-return devices;
+            
+            return devices;
+            
             static bool IsAllowedKey(
                 IYubiKeyDevice key)
                 => key.SerialNumber == null ||

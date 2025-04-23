@@ -14,11 +14,10 @@
 
 // As long as we have the Libraries.Net47.cs class which holds the opposite preprocessor directive check,
 // this check is required - as having both at the same time is not possible.
+#if !NET47 
 
 using System;
 using System.Collections.Generic;
-
-#if !NET47 
 
 namespace Yubico.PlatformInterop
 {
@@ -41,10 +40,18 @@ namespace Yubico.PlatformInterop
     /// </remarks>
     internal static partial class Libraries
     {
-        private static bool _disposed;
-        private static readonly HashSet<UnmanagedDynamicLibrary> _loadedLibraries = new HashSet<UnmanagedDynamicLibrary>();
-        private static readonly object _libraryLock = new object();
+        static Libraries()
+        {
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => Dispose();
+            AppDomain.CurrentDomain.DomainUnload += (s, e) => Dispose();
+        }
         
+
+        private static readonly HashSet<UnmanagedDynamicLibrary> _loadedLibraries = new();
+        private static readonly object _libraryLock = new();
+
+        private static bool _disposed;
+
         /// <summary>
         /// The filename of the native shims library for modern .NET versions.
         /// </summary>
@@ -54,12 +61,6 @@ namespace Yubico.PlatformInterop
         /// The library should be properly packaged with the correct runtimes/* folder structure in the NuGet package.
         /// </remarks>
         internal const string NativeShims = "Yubico.NativeShims";
-
-        static Libraries()
-        {
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => Dispose();
-            AppDomain.CurrentDomain.DomainUnload += (s, e) => Dispose();
-        }
         
         /// <summary>
         /// No-op implementation for modern .NET versions.
@@ -85,7 +86,6 @@ namespace Yubico.PlatformInterop
                     throw new PlatformNotSupportedException("Current OS is not supported"); 
             }
         }
-        
         private static UnmanagedDynamicLibrary LoadAndTrack(string path)
         {
             var library = UnmanagedDynamicLibrary.Open(path);
@@ -96,7 +96,7 @@ namespace Yubico.PlatformInterop
             
             return library;
         }
-        
+
         public static void Dispose()
         {
             if (_disposed)

@@ -19,7 +19,7 @@ limitations under the License. -->
     <RootNamespace></RootNamespace>
     <PackageId>Yubico.Core.IntegrationTests</PackageId>
 
-    <TargetFrameworks>net8.0;net6.0;net47</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0;net47</TargetFrameworks>
     <AnalysisMode>Minimum</AnalysisMode>
     <!-- StrongName signing -->
     <SignAssembly>true</SignAssembly>

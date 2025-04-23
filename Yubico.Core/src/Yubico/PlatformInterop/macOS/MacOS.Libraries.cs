@@ -24,9 +24,9 @@ namespace Yubico.PlatformInterop
         internal const string CoreFoundation = "CoreFoundation.framework/CoreFoundation";
         internal const string IOKitFramework = "IOKit.framework/IOKit";
         internal const string WinSCard = "PCSC.framework/PCSC";
-        private static void LoadMacLibraries() => MacOSLibraryLoader.Initialize();
 
-        // public static void DisposeMacOS() => MacOSLibraryLoader.Dispose();
+#if !NET47
+        private static void LoadMacLibraries() => MacOSLibraryLoader.Initialize();
 
         private static class MacOSLibraryLoader
         {
@@ -85,5 +85,6 @@ namespace Yubico.PlatformInterop
                 return DefaultFrameworksPath;
             }
         }
+#endif
     }
 }

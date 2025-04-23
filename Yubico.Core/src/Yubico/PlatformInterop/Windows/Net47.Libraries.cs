@@ -23,8 +23,7 @@ namespace Yubico.PlatformInterop
     /// <summary>
     /// .NET Framework 4.7 specific implementation for native library management.
     /// </summary>
-    internal partial class Libraries : IDisposable
-    {
+    internal partial class Libraries {
         /// <summary>
         /// The filename of the native shims library for .NET Framework 4.7.
         /// </summary>
@@ -51,10 +50,12 @@ namespace Yubico.PlatformInterop
         /// The implementation details are handled in Libraries.Net47.cs.
         /// </remarks>
         public static void EnsureInitialized() => Net47Implementation.Initialize();
+        public static void Dispose() => Net47Implementation.Cleanup();
         
-        public void Dispose()
+        static Libraries()
         {
-            Net47Implementation.Cleanup();
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => Dispose();
+            AppDomain.CurrentDomain.DomainUnload += (s, e) => Dispose();
         }
 
         /// <summary>

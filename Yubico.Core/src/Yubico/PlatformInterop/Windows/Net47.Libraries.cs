@@ -23,7 +23,7 @@ namespace Yubico.PlatformInterop
     /// <summary>
     /// .NET Framework 4.7 specific implementation for native library management.
     /// </summary>
-    internal static partial class Libraries
+    internal partial class Libraries : IDisposable
     {
         /// <summary>
         /// The filename of the native shims library for .NET Framework 4.7.
@@ -52,14 +52,18 @@ namespace Yubico.PlatformInterop
         /// </remarks>
         public static void EnsureInitialized() => Net47Implementation.Initialize();
         
+        public void Dispose()
+        {
+            Net47Implementation.Cleanup();
+        }
+
         /// <summary>
         /// Encapsulates the .NET Framework 4.7 specific implementation details for native library management.
         /// This nested class handles the dynamic loading of architecture-specific (x86/x64) native libraries.
         /// </summary>
         private static class Net47Implementation
         {
-            // Handle to the loaded native library
-            private static UnmanagedDynamicLibrary? _nativeShims;
+            private static UnmanagedDynamicLibrary? _nativeShimsHandle;
 
             /// <summary>
             /// Gets the full path to the architecture-specific native library.
@@ -115,12 +119,23 @@ namespace Yubico.PlatformInterop
             /// </exception>
             private static void EnsureNativeShimsLoaded()
             {
-                if (_nativeShims != null)
+                if (_nativeShimsHandle != null)
                 {
                     return;
                 }
 
-                _nativeShims = UnmanagedDynamicLibrary.Open(NativeShimsPath);
+                _nativeShimsHandle = UnmanagedDynamicLibrary.Open(NativeShimsPath);
+            }
+            
+            internal static void Cleanup()
+            {
+                if (_nativeShimsHandle == null)
+                {
+                    return;
+                }
+
+                _nativeShimsHandle.Dispose();
+                _nativeShimsHandle = null;
             }
         }
     }

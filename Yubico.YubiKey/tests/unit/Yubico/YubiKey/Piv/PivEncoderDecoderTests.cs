@@ -34,19 +34,19 @@ public class PivEncoderDecoderTests
         KeyType keyType)
     {
         var testKey = TestKeys.GetTestPublicKey(keyType);
-        var testPublicKey = AsnPublicKeyDecoder.CreatePublicKey(testKey.EncodedKey);
-        var testPivPublicKey = testPublicKey.ConvertToPiv();
-        Assert.NotNull(testPivPublicKey);
+        var testPublicKey = testKey.GetPublicKey();
+        var testPivEncodedPublicKey = testPublicKey.EncodeAsPiv();
+        Assert.True(testPivEncodedPublicKey.Length > 0);
 
         // Convert from PivEncoding to PublicKey using Key Converter.
         var decodedPublicKey =
-            PivKeyDecoder.CreatePublicKey(testPivPublicKey.PivEncodedPublicKey, keyType);
+            PivKeyDecoder.CreatePublicKey(testPivEncodedPublicKey, keyType);
 
         // Convert from PivEncoding to PublicKey using Asn
         var pkFromAsnReaderAndTestKey = AsnPublicKeyDecoder.CreatePublicKey(testKey.EncodedKey);
 
-        Assert.Equal(testPivPublicKey.PivEncodedPublicKey, decodedPublicKey.EncodeAsPiv());
-        Assert.Equal(testPivPublicKey.PivEncodedPublicKey, pkFromAsnReaderAndTestKey.EncodeAsPiv());
+        Assert.Equal(testPivEncodedPublicKey, decodedPublicKey.EncodeAsPiv());
+        Assert.Equal(testPivEncodedPublicKey, pkFromAsnReaderAndTestKey.EncodeAsPiv());
 
         // Convert from PublicKey to PivEncoding and compare with test key
         switch (keyType)
@@ -55,7 +55,7 @@ public class PivEncoderDecoderTests
                 {
                     var pivKey =
                         PivKeyEncoder.EncodeECPublicKey(decodedPublicKey.Cast<ECPublicKey>());
-                    Assert.Equal(testPivPublicKey.PivEncodedPublicKey, pivKey);
+                    Assert.Equal(testPivEncodedPublicKey, pivKey);
                     break;
                 }
             case var _ when keyType.IsCurve25519():
@@ -63,7 +63,7 @@ public class PivEncoderDecoderTests
                     var pivKey =
                         PivKeyEncoder.EncodeCurve25519PublicKey(decodedPublicKey
                             .Cast<Curve25519PublicKey>());
-                    Assert.Equal(testPivPublicKey.PivEncodedPublicKey, pivKey);
+                    Assert.Equal(testPivEncodedPublicKey, pivKey);
                     break;
                 }
             case var _ when keyType.IsRSA():
@@ -71,7 +71,7 @@ public class PivEncoderDecoderTests
                     var pivKey =
                         PivKeyEncoder.EncodeRSAPublicKey(decodedPublicKey
                             .Cast<RSAPublicKey>());
-                    Assert.Equal(testPivPublicKey.PivEncodedPublicKey, pivKey);
+                    Assert.Equal(testPivEncodedPublicKey, pivKey);
                     break;
                 }
             default:
@@ -90,20 +90,19 @@ public class PivEncoderDecoderTests
         KeyType keyType)
     {
         var testKey = TestKeys.GetTestPublicKey(keyType);
-
-        // Get test key as PivPublicKey
-        var testPivPublicKey = testKey.AsPivPublicKey();
-        Assert.NotNull(testPivPublicKey);
+        var testPublicKey = testKey.GetPublicKey();
+        var testPivEncodedPublicKey = testPublicKey.EncodeAsPiv();
+        Assert.True(testPivEncodedPublicKey.Length > 0);
 
         // Convert from PivEncoding to PublicKey using Key Converter.
         var decodedPublicKey =
-            PivKeyDecoder.CreatePublicKey(testPivPublicKey.PivEncodedPublicKey, keyType);
+            PivKeyDecoder.CreatePublicKey(testPivEncodedPublicKey, keyType);
 
         // Convert from PivEncoding to PublicKey using Asn
         var pkFromAsnReaderAndTestKey = AsnPublicKeyDecoder.CreatePublicKey(testKey.EncodedKey);
 
-        Assert.Equal(testPivPublicKey.PivEncodedPublicKey, decodedPublicKey.EncodeAsPiv());
-        Assert.Equal(testPivPublicKey.PivEncodedPublicKey, pkFromAsnReaderAndTestKey.EncodeAsPiv());
+        Assert.Equal(testPivEncodedPublicKey, decodedPublicKey.EncodeAsPiv());
+        Assert.Equal(testPivEncodedPublicKey, pkFromAsnReaderAndTestKey.EncodeAsPiv());
 
         // Convert from PublicKey to PivEncoding and compare with test key
         switch (keyType)
@@ -113,14 +112,14 @@ public class PivEncoderDecoderTests
                     var pivKey =
                         PivKeyEncoder.EncodeCurve25519PublicKey(decodedPublicKey
                             .Cast<Curve25519PublicKey>());
-                    Assert.Equal(testPivPublicKey.PivEncodedPublicKey, pivKey);
+                    Assert.Equal(testPivEncodedPublicKey, pivKey);
                     break;
                 }
             case var _ when keyType.IsECDsa():
                 {
                     var pivKey =
                         PivKeyEncoder.EncodeECPublicKey(decodedPublicKey.Cast<ECPublicKey>());
-                    Assert.Equal(testPivPublicKey.PivEncodedPublicKey, pivKey);
+                    Assert.Equal(testPivEncodedPublicKey, pivKey);
                     break;
                 }
             case var _ when keyType.IsRSA():
@@ -128,7 +127,7 @@ public class PivEncoderDecoderTests
                     var pivKey =
                         PivKeyEncoder.EncodeRSAPublicKey(decodedPublicKey
                             .Cast<RSAPublicKey>());
-                    Assert.Equal(testPivPublicKey.PivEncodedPublicKey, pivKey);
+                    Assert.Equal(testPivEncodedPublicKey, pivKey);
                     break;
                 }
             default:

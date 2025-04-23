@@ -25,7 +25,7 @@ namespace Yubico.YubiKey
     /// Executes device wide reset and check that PINs are set to default values (where applicable).
     /// </summary>
     /// <remarks>
-    /// Device wide reset is only available on YubiKey Bio Multi-protocol Edition devices.
+    /// MockDevice wide reset is only available on YubiKey Bio Multi-protocol Edition devices.
     /// </remarks>
     public class DeviceResetTests
     {
@@ -37,8 +37,8 @@ namespace Yubico.YubiKey
         public void Reset()
         {
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Bio);
-            Skip.IfNot(testDevice.HasFeature(YubiKeyFeature.DeviceReset), "Device does not support DeviceReset.");
-            Skip.IfNot(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv), "Device does not support DeviceReset.");
+            Skip.IfNot(testDevice.HasFeature(YubiKeyFeature.DeviceReset), "MockDevice does not support DeviceReset.");
+            Skip.IfNot(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv), "MockDevice does not support DeviceReset.");
 
             testDevice.DeviceReset();
 

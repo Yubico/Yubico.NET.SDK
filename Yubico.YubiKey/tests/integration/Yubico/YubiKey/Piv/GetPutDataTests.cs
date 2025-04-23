@@ -29,11 +29,10 @@ namespace Yubico.YubiKey.Piv
         [Obsolete] // FIx later
         public void Cert_Auth_Req(StandardTestDevice testDeviceType)
         {
-            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(KeyType.RSA2048,
-                out var cert, out var privateKey);
-            Assert.True(isValid);
+            var cert = TestKeys.GetTestCertificate(KeyType.RSA2048).AsX509Certificate2();
+            var privateKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048).AsPrivateKey();
 
-            var certDer = cert!.GetRawCertData();
+            var certDer = cert.GetRawCertData();
             byte[] feData = { 0xFE, 0x00 };
             var tlvWriter = new TlvWriter();
             using (tlvWriter.WriteNestedTlv(0x53))

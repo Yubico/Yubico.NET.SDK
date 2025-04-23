@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Piv.Converters;
@@ -20,11 +21,13 @@ namespace Yubico.YubiKey.TestUtilities;
 
 public static class PivKeyExtensions
 {
-    public static RSAPrivateKey ConvertToGeneric(
+    [Obsolete("Obsolete")]
+    public static RSAPrivateKey ConvertToPivKeyLegacy(
         this PivRsaPrivateKey other) =>
         PivKeyDecoder.CreateRSAPrivateKey(other.EncodedPrivateKey);
     
-    public static PivRsaPrivateKey ConvertToPiv(
+    [Obsolete("Obsolete")]
+    public static PivRsaPrivateKey ConvertToPivKeyLegacy(
         this RSAPrivateKey other) =>
         PivRsaPrivateKey.CreateRsaPrivateKey(PivKeyEncoder.EncodeRSAPrivateKey(other));
     
@@ -32,11 +35,13 @@ public static class PivKeyExtensions
         this PivPrivateKey other) =>
         PivKeyDecoder.CreateRSAPrivateKey(other.EncodedPrivateKey);
     
-    public static PivPrivateKey ConvertToPiv(
+    [Obsolete("Obsolete")]
+    public static PivPrivateKey ConvertToPivKeyLegacy(
         this IPrivateKey other) =>
         PivPrivateKey.Create(PivKeyEncoder.EncodePrivateKey(other));
     
-    public static PivPublicKey ConvertToPiv(
+    [Obsolete("Obsolete")]
+    public static PivPublicKey ConvertToPivKeyLegacy(
         this IPublicKey other) =>
         PivPublicKey.Create(PivKeyEncoder.EncodePublicKey(other));
 }

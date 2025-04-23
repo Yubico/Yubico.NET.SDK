@@ -46,11 +46,8 @@ namespace Yubico.YubiKey.TestUtilities
         protected TestCrypto(
             string filePath)
         {
-            _pemStringFull = File
-                .ReadAllText(filePath)
-                .Replace("\n", "")
-                .Trim();
-            _bytes = GetBytesFromPem(_pemStringFull);
+            _pemStringFull = File.ReadAllText(filePath);
+            _bytes = PemHelper.GetBytesFromPem(_pemStringFull);
         }
 
         /// <summary>
@@ -69,36 +66,10 @@ namespace Yubico.YubiKey.TestUtilities
         /// Returns the Base64-encoded data without PEM headers and footers.
         /// </summary>
         /// <returns>Base64 string of the cryptographic data.</returns>
-        public string AsBase64String() => StripPemHeaderFooter(_pemStringFull);
+        public string AsBase64String() => PemHelper.AsBase64String(_pemStringFull);
 
         public static byte[] ReadTestData(
             string fileName) => File.ReadAllBytes(Path.Combine(TestDataDirectory, fileName));
-
-        private static byte[] GetBytesFromPem(
-            string pemData)
-        {
-            var base64 = StripPemHeaderFooter(pemData);
-            return Convert.FromBase64String(base64);
-        }
-
-        private static string StripPemHeaderFooter(
-            string pemData)
-        {
-            var base64 = pemData
-                .Replace("-----BEGIN PUBLIC KEY-----", "")
-                .Replace("-----END PUBLIC KEY-----", "")
-                .Replace("-----BEGIN PRIVATE KEY-----", "")
-                .Replace("-----END PRIVATE KEY-----", "")
-                .Replace("-----BEGIN EC PRIVATE KEY-----", "")
-                .Replace("-----END EC PRIVATE KEY-----", "")
-                .Replace("-----BEGIN CERTIFICATE-----", "")
-                .Replace("-----END CERTIFICATE-----", "")
-                .Replace("-----BEGIN CERTIFICATE REQUEST-----", "")
-                .Replace("-----END CERTIFICATE REQUEST-----", "")
-                .Replace("\n", "")
-                .Trim();
-            return base64;
-        }
     }
 
     /// <summary>
@@ -107,7 +78,6 @@ namespace Yubico.YubiKey.TestUtilities
     /// </summary>
     public class TestKey : TestCrypto
     {
-        private readonly bool _isPrivate;
         public readonly KeyType KeyType;
         public KeyDefinition KeyDefinition { get; private set; }
 
@@ -117,16 +87,13 @@ namespace Yubico.YubiKey.TestUtilities
         /// </summary>
         /// <param name="filePath">The path to the PEM file containing the key data</param>
         /// <param name="keyType"></param>
-        /// <param name="isPrivate">True for private key, false for public key</param>
         /// <returns>A TestKey instance representing the loaded key</returns>
         private TestKey(
             string filePath,
-            KeyType keyType,
-            bool isPrivate) : base(filePath)
+            KeyType keyType) : base(filePath)
         {
             KeyDefinition = keyType.GetKeyDefinition();
             KeyType = keyType;
-            _isPrivate = isPrivate;
         }
 
         public KeyDefinition GetKeyDefinition() =>
@@ -163,7 +130,7 @@ namespace Yubico.YubiKey.TestUtilities
             };
         }
 
-        public byte[] GetPrivateKey()
+        public byte[] GetPrivateKeyValue()
         {
             var privateKeyParameters = AsnPrivateKeyDecoder.CreatePrivateKey(EncodedKey);
             return privateKeyParameters switch
@@ -173,6 +140,36 @@ namespace Yubico.YubiKey.TestUtilities
                 RSAPrivateKey => throw new InvalidOperationException("Use AsRSA() instead for RSA keys"),
                 _ => throw new ArgumentOutOfRangeException(nameof(privateKeyParameters))
             };
+        }
+        
+        public IPrivateKey GetPrivateKey()
+        {
+            if (KeyDefinition.IsRSA)
+            {
+                return RSAPrivateKey.CreateFromPkcs8(EncodedKey);
+            }
+
+            if (KeyDefinition is { IsEllipticCurve: true, AlgorithmOid: Oids.ECDSA })
+            {
+                return ECPrivateKey.CreateFromPkcs8(EncodedKey);
+            }
+
+            return Curve25519PrivateKey.CreateFromPkcs8(EncodedKey);
+        }
+        
+        public IPublicKey GetPublicKey()
+        {
+            if (KeyDefinition.IsRSA)
+            {
+                return RSAPublicKey.CreateFromPkcs8(EncodedKey);
+            }
+
+            if (KeyDefinition is { IsEllipticCurve: true, AlgorithmOid: Oids.ECDSA })
+            {
+                return ECPublicKey.CreateFromPkcs8(EncodedKey);
+            }
+
+            return Curve25519PublicKey.CreateFromPkcs8(EncodedKey);
         }
 
         /// <summary>
@@ -228,7 +225,7 @@ namespace Yubico.YubiKey.TestUtilities
             var curveName = keyType.ToString().ToLower();
             var fileName = $"{curveName}_{(isPrivate ? "private" : "public")}{(index.HasValue ? $"_{index}" : "")}.pem";
             var filePath = Path.Combine(TestDataDirectory, fileName);
-            return new TestKey(filePath, keyType, isPrivate);
+            return new TestKey(filePath, keyType);
         }
     }
 

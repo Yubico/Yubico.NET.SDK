@@ -15,8 +15,9 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             var testKey = TestKeys.GetTestPublicKey(KeyType.RSA2048);
-            var pivPublicKey = testKey.AsPivPublicKey();
-            var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
+            // var pivPublicKey = testKey.AsPivPublicKey();
+            // var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
+            var pivPublicKeyEncoded = PivKeyEncoder.EncodeRSAPublicKey((testKey.GetPublicKey() as RSAPublicKey)!);
 
             // Act
             var publicKeyParams = PivKeyDecoder.CreateRSAPublicKey(pivPublicKeyEncoded);

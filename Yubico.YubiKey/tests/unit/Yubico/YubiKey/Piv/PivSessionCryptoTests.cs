@@ -20,7 +20,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
-    public class PivSessionCryptoTests
+    public class PivSessionCryptoTests : PivSessionUnitTestBase
     {
         [Fact]
         public void Sign_InvalidSlot_Exception()
@@ -29,13 +29,8 @@ namespace Yubico.YubiKey.Piv
             using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
             random.GetBytes(dataToSign);
             dataToSign[0] &= 0x7F;
-
-            var yubiKey = new HollowYubiKeyDevice();
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.Sign(0x81, dataToSign));
-            }
+            
+            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.Sign(0x81, dataToSign));
         }
 
         [Fact]
@@ -44,13 +39,8 @@ namespace Yubico.YubiKey.Piv
             byte[] dataToSign = new byte[127];
             using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
             random.GetBytes(dataToSign);
-
-            var yubiKey = new HollowYubiKeyDevice();
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.Sign(0x9a, dataToSign));
-            }
+            
+            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.Sign(0x9a, dataToSign));
         }
 
         [Fact]
@@ -60,13 +50,8 @@ namespace Yubico.YubiKey.Piv
             using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
             random.GetBytes(dataToDecrypt);
             dataToDecrypt[0] &= 0x7F;
-
-            var yubiKey = new HollowYubiKeyDevice();
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.Decrypt(0xf9, dataToDecrypt));
-            }
+            
+            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.Decrypt(0xf9, dataToDecrypt));
         }
 
         [Fact]
@@ -75,54 +60,30 @@ namespace Yubico.YubiKey.Piv
             byte[] dataToDecrypt = new byte[255];
             using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
             random.GetBytes(dataToDecrypt);
-
-            var yubiKey = new HollowYubiKeyDevice();
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.Decrypt(0x9a, dataToDecrypt));
-            }
+            
+            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.Decrypt(0x9a, dataToDecrypt));
         }
+
         [Fact]
-        [Obsolete("Obsolete")]
         public void KeyAgree_NullPublicKey_Exception()
         {
-            var yubiKey = new HollowYubiKeyDevice();
-            using var pivSession = new PivSession(yubiKey);
-            
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => pivSession.KeyAgree(0x9a, (PivPublicKey)null!));
-            _ = Assert.Throws<ArgumentNullException>(() => pivSession.KeyAgree(0x9a, (IPublicKey)null!));
-#pragma warning restore CS8625 // Testing null input.
+            _ = Assert.Throws<ArgumentNullException>(() => PivSessionMock.KeyAgree(0x9a, (IPublicKey)null!));
         }
 
         [Fact]
-        [Obsolete("Obsolete")]
         public void KeyAgree_EmptyPublicKey_Exception()
         {
-            var yubiKey = new HollowYubiKeyDevice();
-            var pivPublicKey = new PivPublicKey();
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.KeyAgree(0x9a, pivPublicKey));
-            }
+            var publicKey = new EmptyPublicKey();
+            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.KeyAgree(0x9a, publicKey));
         }
 
         [Fact]
-        [Obsolete("Obsolete")]
         public void KeyAgree_InvalidPublicKey_Exception()
         {
-            var yubiKey = new HollowYubiKeyDevice();
-
-            _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.RSA1024, false, out _, out var publicKeyPem, out _);
-            var publicKey = new KeyConverter(publicKeyPem!.Replace("\n", "").ToCharArray());
-            PivPublicKey pivPublicKey = publicKey.GetPivPublicKey();
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.KeyAgree(0x9a, pivPublicKey));
-            }
+            var testPublicKey = TestKeys.GetTestPublicKey(KeyType.RSA1024); // Cant be used for key agreement
+            var publicKey = testPublicKey.GetPublicKey();
+            
+            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.KeyAgree(0x9a, publicKey));
         }
     }
 }

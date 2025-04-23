@@ -47,7 +47,7 @@ namespace Yubico.PlatformInterop
 
         private void HandleEventFromListener(object? sender, SmartCardDeviceEventArgs eventArgs)
         {
-            _output.WriteLine("    eventArgs.Device = " + eventArgs.Device);
+            _output.WriteLine("    eventArgs.MockDevice = " + eventArgs.Device);
         }
 
         // This simulates a menu. There's no ReadLine (or some such) in XUnit, so

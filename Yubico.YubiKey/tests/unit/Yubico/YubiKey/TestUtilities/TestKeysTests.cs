@@ -121,7 +121,7 @@ namespace Yubico.YubiKey.TestUtilities
             var key = TestKeys.GetTestPrivateKey(keyType);
             Assert.NotNull(key);
 
-            var privateKey = key.GetPrivateKey();
+            var privateKey = key.GetPrivateKeyValue();
             Assert.NotNull(privateKey);
 
             byte[] expectedPrivateKey;

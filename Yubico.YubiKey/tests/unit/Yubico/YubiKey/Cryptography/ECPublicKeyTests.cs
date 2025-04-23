@@ -16,8 +16,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             var testKey = TestKeys.GetTestPublicKey(keyType);
-            var pivPublicKey = testKey.AsPivPublicKey();
-            var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
+            var pivPublicKeyEncoded = testKey.GetPublicKey().EncodeAsPiv();
 
             // Act
             var publicKeyParams = PivKeyDecoder.CreateECPublicKey(pivPublicKeyEncoded);
@@ -30,7 +29,6 @@ namespace Yubico.YubiKey.Cryptography
             Assert.Equal(testKeyParameters.Q.X, resultParameters.Q.X);
             Assert.Equal(testKeyParameters.Q.Y, resultParameters.Q.Y);
         }
-        
         
         [Theory]
         [InlineData(KeyType.ECP256)]

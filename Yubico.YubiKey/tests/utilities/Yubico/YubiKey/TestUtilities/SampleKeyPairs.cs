@@ -12,24 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.TestUtilities
 {
+    [Obsolete("obsolete")]
     public static class SampleKeyPairs
     {
-        public static bool GetMatchingKeyAndCert(
-            KeyType keyType,
-            out X509Certificate2? cert,
-            out PivPrivateKey? privateKey)
-        {
-            cert = TestKeys.GetTestCertificate(keyType).AsX509Certificate2();
-            privateKey = TestKeys.GetTestPrivateKey(keyType).AsPivPrivateKey();
-            return true;
-        }
-
         public static bool GetKeysAndCertPem(
             KeyType keyType,
             bool validAttest,
@@ -45,20 +36,6 @@ namespace Yubico.YubiKey.TestUtilities
             privateKey = testPrivKey.AsPemString();
             publicKey = testPubKey.AsPemString();
             return true;
-        }
-
-        public static PivPublicKey GetPivPublicKey(KeyType keyType)
-        {
-            return TestKeys
-                .GetTestPublicKey(keyType)
-                .AsPivPublicKey();
-        }
-
-        public static PivPrivateKey GetPivPrivateKey(KeyType keyType)
-        {
-            return TestKeys
-                .GetTestPrivateKey(keyType)
-                .AsPivPrivateKey();
         }
     }
 }

@@ -7,10 +7,15 @@ namespace Yubico.YubiKey.TestUtilities
 {
     public static class TestKeyExtensions
     {
+        public static IPrivateKey AsPrivateKey(this TestKey key) => key.GetPrivateKey();
+
+        public static IPublicKey AsPublicKey(this TestKey key) => key.GetPublicKey();
+        
         /// <summary>
         /// Converts the key to a PIV private key format.
         /// </summary>
         /// <returns>PivPrivateKey instance</returns>
+        [Obsolete("Obsolete")]
         public static PivPrivateKey AsPivPrivateKey(
             this TestKey key)
         {
@@ -38,6 +43,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// Converts the key to a PIV public key format.
         /// </summary>
         /// <returns>PivPublicKey instance</returns>
+        [Obsolete("Obsolete")]
         public static PivPublicKey AsPivPublicKey(
             this TestKey key)
         {

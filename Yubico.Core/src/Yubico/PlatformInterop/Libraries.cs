@@ -14,6 +14,10 @@
 
 // As long as we have the Libraries.Net47.cs class which holds the opposite preprocessor directive check,
 // this check is required - as having both at the same time is not possible.
+
+using System;
+using System.Collections.Generic;
+
 #if !NET47 
 
 namespace Yubico.PlatformInterop
@@ -37,6 +41,10 @@ namespace Yubico.PlatformInterop
     /// </remarks>
     internal static partial class Libraries
     {
+        private static bool _disposed;
+        private static readonly HashSet<UnmanagedDynamicLibrary> _loadedLibraries = new HashSet<UnmanagedDynamicLibrary>();
+        private static readonly object _libraryLock = new object();
+        
         /// <summary>
         /// The filename of the native shims library for modern .NET versions.
         /// </summary>
@@ -47,6 +55,12 @@ namespace Yubico.PlatformInterop
         /// </remarks>
         internal const string NativeShims = "Yubico.NativeShims";
 
+        static Libraries()
+        {
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => Dispose();
+            AppDomain.CurrentDomain.DomainUnload += (s, e) => Dispose();
+        }
+        
         /// <summary>
         /// No-op implementation for modern .NET versions.
         /// </summary>
@@ -54,7 +68,59 @@ namespace Yubico.PlatformInterop
         /// Library loading is handled automatically by the runtime.
         /// This method exists only for API compatibility with .NET Framework 4.7 code.
         /// </remarks>
-        public static void EnsureInitialized() { }
+        public static void EnsureInitialized()
+        {
+            switch (SdkPlatformInfo.OperatingSystem)
+            {
+                case SdkPlatform.Windows:
+                    LoadWindowsLibraries();
+                    return;
+                case SdkPlatform.MacOS:
+                    LoadMacLibraries();
+                    return;
+                case SdkPlatform.Linux:
+                    LoadLinuxLibraries();
+                    return;
+                default:
+                    throw new PlatformNotSupportedException("Current OS is not supported"); 
+            }
+        }
+        
+        private static UnmanagedDynamicLibrary LoadAndTrack(string path)
+        {
+            var library = UnmanagedDynamicLibrary.Open(path);
+            lock (_libraryLock)
+            {
+                _ = _loadedLibraries.Add(library);
+            }
+            
+            return library;
+        }
+        
+        public static void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+            
+            lock (_libraryLock)
+            {
+                foreach (UnmanagedDynamicLibrary? library in _loadedLibraries)
+                {
+                    try
+                    {
+                        library?.Dispose();
+                    }
+                    catch
+                    {
+                        // Suppress exceptions during cleanup
+                    }
+                }
+                _loadedLibraries.Clear();
+                _disposed = true;
+            }
+        }
     }
 }
 #endif

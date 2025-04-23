@@ -18,5 +18,14 @@ namespace Yubico.PlatformInterop
     {
         internal const string LinuxKernelLib = "libc.so.6";
         internal const string LinuxUdevLib = "libudev.so";
+
+        private static void LoadLinuxLibraries()
+        {
+        }
+
+        private static void DisposeLinux()
+        {
+            // throw new System.NotImplementedException();
+        }
     }
 }

@@ -23,43 +23,4 @@ namespace Yubico.PlatformInterop
 
         }
     }
-
-    internal sealed class SafeWindowsLibraryHandle : SafeLibraryHandle
-    {
-        // CA1419: Provide a parameterless constructor that is as visible as the
-        // containing type for concrete types derived from
-        // 'System.Runtime.InteropServices.SafeHandle'
-        public SafeWindowsLibraryHandle() : base()
-        {
-
-        }
-
-        protected override bool ReleaseHandle() => NativeMethods.FreeLibrary(handle);
-    }
-
-    internal sealed class SafeMacOSLibraryHandle : SafeLibraryHandle
-    {
-        // CA1419: Provide a parameterless constructor that is as visible as the
-        // containing type for concrete types derived from
-        // 'System.Runtime.InteropServices.SafeHandle'
-        public SafeMacOSLibraryHandle() : base()
-        {
-
-        }
-
-        protected override bool ReleaseHandle() => NativeMethods.mac_dlclose(handle) == 0;
-    }
-
-    internal sealed class SafeLinuxLibraryHandle : SafeLibraryHandle
-    {
-        // CA1419: Provide a parameterless constructor that is as visible as the
-        // containing type for concrete types derived from
-        // 'System.Runtime.InteropServices.SafeHandle'
-        public SafeLinuxLibraryHandle() : base()
-        {
-
-        }
-
-        protected override bool ReleaseHandle() => NativeMethods.linux_dlclose(handle) == 0;
-    }
 }

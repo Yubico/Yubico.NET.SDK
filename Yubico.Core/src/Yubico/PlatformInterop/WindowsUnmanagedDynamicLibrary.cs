@@ -20,7 +20,7 @@ namespace Yubico.PlatformInterop
     internal sealed class WindowsUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
     {
         public WindowsUnmanagedDynamicLibrary(string fileName) :
-            base(OpenLibrary(fileName))
+            base(OpenLibrary(fileName), fileName)
         {
 
         }
@@ -47,7 +47,7 @@ namespace Yubico.PlatformInterop
 
         private bool TryGetFunctionInternal<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
         {
-            IntPtr p = NativeMethods.GetProcAddress(_handle, functionName);
+            IntPtr p = NativeMethods.GetProcAddress(Handle, functionName);
 
             if (p != IntPtr.Zero)
             {

@@ -21,21 +21,28 @@ namespace Yubico.PlatformInterop
 {
     internal abstract class UnmanagedDynamicLibrary : IDisposable
     {
-        private bool disposedValue;
-        protected readonly SafeLibraryHandle _handle;
+        private bool _disposed;
+        protected readonly SafeLibraryHandle Handle;
+        private readonly string _fileName;
 
-        public static UnmanagedDynamicLibrary Open(string fileName) => SdkPlatformInfo.OperatingSystem switch
+        protected UnmanagedDynamicLibrary(SafeLibraryHandle handle, string fileName)
         {
-            SdkPlatform.Windows => new WindowsUnmanagedDynamicLibrary(fileName),
-            SdkPlatform.MacOS => new MacOSUnmanagedDynamicLibrary(fileName),
-            SdkPlatform.Linux => new LinuxUnmanagedDynamicLibrary(fileName),
-            _ => throw new PlatformNotSupportedException()
-        };
-
-        protected UnmanagedDynamicLibrary(SafeLibraryHandle handle)
-        {
-            _handle = handle;
+            Handle = handle;
+            _fileName = fileName;
         }
+
+        public override bool Equals(object? obj)
+        {   
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            var other = (UnmanagedDynamicLibrary)obj;
+            return string.Equals(_fileName, other._fileName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override int GetHashCode() => _fileName.GetHashCode();
 
         public void GetFunction<TDelegate>(string functionName, out TDelegate d) where TDelegate : class
         {
@@ -51,20 +58,8 @@ namespace Yubico.PlatformInterop
             Debug.Assert(temp is TDelegate);
             d = temp!;
         }
+
         public abstract bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class;
-
-        private void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    _handle.Dispose();
-                }
-
-                disposedValue = true;
-            }
-        }
 
         public void Dispose()
         {
@@ -72,5 +67,27 @@ namespace Yubico.PlatformInterop
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+        
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    Handle.Dispose();
+                }
+
+                _disposed = true;
+            }
+        }
+        
+        public static UnmanagedDynamicLibrary Open(string fileName) =>
+            SdkPlatformInfo.OperatingSystem switch
+            {
+                SdkPlatform.Windows => new WindowsUnmanagedDynamicLibrary(fileName),
+                SdkPlatform.MacOS => new MacOSUnmanagedDynamicLibrary(fileName),
+                SdkPlatform.Linux => new LinuxUnmanagedDynamicLibrary(fileName),
+                _ => throw new PlatformNotSupportedException()
+            };
     }
 }

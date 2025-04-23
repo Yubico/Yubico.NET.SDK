@@ -22,7 +22,7 @@ namespace Yubico.PlatformInterop
     internal sealed class LinuxUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
     {
         public LinuxUnmanagedDynamicLibrary(string fileName) :
-            base(OpenLibrary(fileName))
+            base(OpenLibrary(fileName), fileName)
         {
 
         }
@@ -43,7 +43,7 @@ namespace Yubico.PlatformInterop
 
         public override bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
         {
-            IntPtr p = NativeMethods.linux_dlsym(_handle, functionName);
+            IntPtr p = NativeMethods.linux_dlsym(Handle, functionName);
 
             if (p != IntPtr.Zero)
             {

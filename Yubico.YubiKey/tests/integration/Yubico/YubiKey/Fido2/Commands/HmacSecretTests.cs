@@ -19,7 +19,6 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
     public class HmacSecretTests : SimpleIntegrationTestConnection
     {
         private readonly byte[] _pin;
@@ -31,7 +30,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         private readonly AuthenticatorInfo _deviceInfo;
 
         public HmacSecretTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
             _pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 

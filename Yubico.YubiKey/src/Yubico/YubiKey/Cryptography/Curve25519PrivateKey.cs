@@ -68,8 +68,6 @@ public sealed class Curve25519PrivateKey : PrivateKey
     /// </remarks>
     public override void Clear() => CryptographicOperations.ZeroMemory(_privateKey.Span);
 
-
-
     /// <summary>
     /// Creates an instance of <see cref="Curve25519PrivateKey"/> from a PKCS#8
     /// DER-encoded private key.

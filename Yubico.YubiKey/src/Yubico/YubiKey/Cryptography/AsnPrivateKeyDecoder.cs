@@ -70,7 +70,7 @@ internal class AsnPrivateKeyDecoder
     public static Curve25519PrivateKey CreateCurve25519Key(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
         Curve25519PrivateKey.CreateFromPkcs8(pkcs8EncodedKey);
 
-    public static (byte[], KeyType) GetCurve25519PrivateKeyData(ReadOnlyMemory<byte> pkcs8EncodedKey)
+    public static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
         var seqPrivateKeyInfo = reader.ReadSequence();

@@ -23,7 +23,6 @@ public class ZeroingMemoryHandleTests
     public void Dispose_ShouldClearArrayContent()
     {
         byte[] privateKeyData = new byte[] { 10, 20, 30, 40, 50 };
-
         using (var secureData = new ZeroingMemoryHandle(privateKeyData))
         {
             Assert.Equal(new byte[] { 10, 20, 30, 40, 50 }, secureData.Data);

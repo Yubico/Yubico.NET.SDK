@@ -84,9 +84,9 @@ internal static class AsnUtilities
     /// <exception cref="CryptographicException">If the private key does not meet the bit clamping requirements.</exception>
     public static void VerifyX25519PrivateKey(ReadOnlySpan<byte> x25519PrivateKey)
     {
-        if ((x25519PrivateKey[0] & 0b111) != 0 || // Check that the 3 least significant bits are 0
-            (x25519PrivateKey[31] & 0x80) != 0 || // Check most significant bit is 0
-            (x25519PrivateKey[31] & 0x40) != 0x40) // Check second-most significant bit is 1
+        if ((x25519PrivateKey[0] & 0b111) != 0 || // Check that the 3 least significant bits are set
+            (x25519PrivateKey[31] & 0x80) != 0 || // Check most significant bit is set
+            (x25519PrivateKey[31] & 0x40) != 0x40) // Check second most significant bit not set
         {
             throw new CryptographicException("Invalid X25519 private key: improper bit clamping");
         }

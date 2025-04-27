@@ -18,6 +18,25 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.13.x Releases
 
+### 1.13.1
+
+Release date: April 28th, 2025
+
+This release mainly adresses an issue that was affecting FIDO2 on YubiKey 5.7.4 and greater as well as adds support for compressed certificates within the PIV application. It also contains miscellaneous and documentation updates. 
+
+Features: 
+- Support for compressed certificates in the PIV application [#219](https://github.com/Yubico/Yubico.NET.SDK/pull/219)
+- Ability to create a FirmwareVersion object through parsing a version string (e.g. 1.0.0) [#220](https://github.com/Yubico/Yubico.NET.SDK/pull/220)
+
+Bug Fixes: 
+- PinUvAuthParam was erroneously truncated which caused failures on multiple FIDO2 commands for YubiKey v 5.7.4 [#222](https://github.com/Yubico/Yubico.NET.SDK/pull/222)
+
+Documentation:
+- Updates to challenge-response documentation to improve clarity [#221](https://github.com/Yubico/Yubico.NET.SDK/pull/221)
+
+Miscellaneous:
+- Integration tests will now run on Bio USB C keys as well [a4c4df](https://github.com/Yubico/Yubico.NET.SDK/commit/a4c4df10047bedf507e4ce36b80ed5001b996b9a). 
+
 ### 1.13.0
 
 Release date: April 9th, 2025

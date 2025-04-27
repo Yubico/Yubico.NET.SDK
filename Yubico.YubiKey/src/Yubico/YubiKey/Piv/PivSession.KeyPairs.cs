@@ -14,13 +14,14 @@
 
 using System;
 using System.Globalization;
+using System.IO;
+using System.IO.Compression;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Converters;
-using static Yubico.YubiKey.Cryptography.KeyDefinitions;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -29,8 +30,18 @@ namespace Yubico.YubiKey.Piv
     // certificates associated with the private keys.
     public sealed partial class PivSession : IDisposable
     {
-        private const int PivCompressionTag = 0x71;
+        private const int PivCertInfoTag = 0x71;
         private const int PivLrcTag = 0xFE;
+        
+        /// <summary>
+        /// Indicates the certificate is not compressed
+        /// </summary>
+        private const byte UncompressedCert = 0;
+        
+        /// <summary>
+        /// Indicates the certificate is compressed
+        /// </summary>
+        private const byte CompressedCert = 1;
         
         [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
         public PivPublicKey GenerateKeyPair(
@@ -452,6 +463,9 @@ namespace Yubico.YubiKey.Piv
         /// <param name="certificate">
         /// The certificate to import into the YubiKey.
         /// </param>
+        /// <param name="compress">
+        /// If true the certificate will be compressed before being stored on the YubiKey.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <c>certificate</c> argument is <c>null</c>.
         /// </exception>
@@ -470,7 +484,7 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        public void ImportCertificate(byte slotNumber, X509Certificate2 certificate)
+        public void ImportCertificate(byte slotNumber, X509Certificate2 certificate, bool compress = false)
         {
             if (certificate is null)
             {
@@ -479,20 +493,35 @@ namespace Yubico.YubiKey.Piv
 
             RefreshManagementKeyAuthentication();
 
-            var dataTag = GetCertDataTagFromSlotNumber(slotNumber);
-
+            byte certInfo = UncompressedCert; 
             byte[] certDer = certificate.GetRawCertData();
-            var tlvWriter = new TlvWriter();
+            if (compress)
+            {
+                certInfo = CompressedCert;
+                try
+                {
+                    certDer = Compress(certDer);
+                }
+                catch (Exception)
+                {
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.FailedCompressingCertificate));
+                }
+            }
 
+            var tlvWriter = new TlvWriter();
             using (tlvWriter.WriteNestedTlv(PivEncodingTag))
             {
                 tlvWriter.WriteValue(PivCertTag, certDer);
-                tlvWriter.WriteByte(PivCompressionTag, 0);
+                tlvWriter.WriteByte(PivCertInfoTag, certInfo);
                 tlvWriter.WriteValue(PivLrcTag, null);
             }
 
             byte[] encodedCert = tlvWriter.Encode();
 
+            var dataTag = GetCertDataTagFromSlotNumber(slotNumber);
             var command = new PutDataCommand((int)dataTag, encodedCert);
             var response = Connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
@@ -546,22 +575,36 @@ namespace Yubico.YubiKey.Piv
             var response = Connection.SendCommand(command);
             var encodedCertData = response.GetData();
 
-            var tlvReader = new TlvReader(encodedCertData);
+            var responseData = TlvObjects.UnpackValue(PivEncodingTag, encodedCertData.Span);
+            var certData = TlvObjects.DecodeDictionary(responseData.Span);
 
-            bool isValid = tlvReader.TryReadNestedTlv(out var nestedReader, PivEncodingTag);
-            if (isValid)
+            bool hasCertInfo = certData.TryGetValue(PivCertInfoTag, out var certInfo);
+            if (!certData.TryGetValue(PivCertTag, out var certBytes))
             {
-                isValid = nestedReader.TryReadValue(out var certData, PivCertTag);
-                if (isValid)
-                {
-                    return new X509Certificate2(certData.ToArray());
-                }
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.FailedParsingCertificate));
             }
 
-            throw new InvalidOperationException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.FailedParsingCertificate));
+            byte[] certBytesCopy = certBytes.ToArray();
+            bool isCompressed = hasCertInfo && certInfo.Length > 0 && certInfo.Span[0] == CompressedCert;
+            if (!isCompressed)
+            {
+                return new X509Certificate2(certBytesCopy);
+            }
+
+            try
+            {
+                return new X509Certificate2(Decompress(certBytesCopy));
+            }
+            catch (Exception)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.FailedDecompressingCertificate));
+            }
         }
 
         // There is a DataTag to use when calling PUT DATA. To put a cert onto
@@ -587,15 +630,36 @@ namespace Yubico.YubiKey.Piv
                         slotNumber)),
             };
         }
-        
+
         private void RefreshManagementKeyAuthentication()
         {
             if (ManagementKeyAuthenticated)
             {
                 return;
             }
-            
+
             AuthenticateManagementKey();
+        }
+
+        static private byte[] Compress(byte[] data)
+        {
+            using var compressedStream = new MemoryStream();
+            using (var compressor = new GZipStream(compressedStream, CompressionLevel.Optimal))
+            {
+                compressor.Write(data, 0, data.Length);
+            }
+
+            return compressedStream.ToArray();
+        }
+
+        static private byte[] Decompress(byte[] data)
+        {
+            using var dataStream = new MemoryStream(data);
+            using var decompressor = new GZipStream(dataStream, CompressionMode.Decompress);
+            using var decompressedStream = new MemoryStream();
+            decompressor.CopyTo(decompressedStream);
+            
+            return decompressedStream.ToArray();
         }
     }
 }

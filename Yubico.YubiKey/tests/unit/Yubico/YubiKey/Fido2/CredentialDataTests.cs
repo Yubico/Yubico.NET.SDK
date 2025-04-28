@@ -19,6 +19,15 @@ namespace Yubico.YubiKey.Fido2
     public class CredentialDataTests
     {
         [Fact]
+        public void RawData_Is_Set()
+        {
+            byte[] encoding = GetSampleEncoding();
+            var cData = new MakeCredentialData(encoding);
+            Assert.Equal(encoding, cData.RawData);
+        }
+        
+        
+        [Fact]
         public void Decode_Format_Correct()
         {
             byte[] clientDataHash = new byte[] {

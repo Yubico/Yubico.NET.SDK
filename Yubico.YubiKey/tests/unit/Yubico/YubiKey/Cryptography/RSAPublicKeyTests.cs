@@ -14,9 +14,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             var testKey = TestKeys.GetTestPublicKey(KeyType.RSA2048);
-            // var pivPublicKey = testKey.AsPivPublicKey();
-            // var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
-            var pivPublicKeyEncoded = PivKeyEncoder.EncodeRSAPublicKey((testKey.GetPublicKey() as RSAPublicKey)!);
+            var pivPublicKeyEncoded = testKey.AsPublicKey().EncodeAsPiv();
 
             // Act
             var publicKeyParams = PivKeyDecoder.CreateRSAPublicKey(pivPublicKeyEncoded);
@@ -24,16 +22,29 @@ namespace Yubico.YubiKey.Cryptography
 
             // Assert
             var testKeyParameters = testKey.AsRSA().ExportParameters(false);
-            Assert.Equal(testKeyParameters.D, resultParameters.D);
-            Assert.Equal(testKeyParameters.DP, resultParameters.DP);
-            Assert.Equal(testKeyParameters.DQ, resultParameters.DQ);
-            Assert.Equal(testKeyParameters.InverseQ, resultParameters.InverseQ);
             Assert.Equal(testKeyParameters.Exponent, resultParameters.Exponent);
             Assert.Equal(testKeyParameters.Modulus, resultParameters.Modulus);
         }
+        
+        [Fact]
+        public void CreateFromPkcs8_WithValidParameters_CreatesInstance()
+        {
+            // Arrange
+            using var rsa = RSA.Create(2048);
+            var parameters = rsa.ExportParameters(true);
+            var publicKeyPkcs = rsa.ExportSubjectPublicKeyInfo();
+
+            // Act
+            var publicKey = RSAPublicKey.CreateFromPkcs8(publicKeyPkcs);
+
+            // Assert
+            Assert.Null(publicKey.Parameters.D);
+            Assert.Equal(parameters.Modulus, publicKey.Parameters.Modulus);
+            Assert.Equal(parameters.Exponent, publicKey.Parameters.Exponent);
+        }
 
         [Fact]
-        public void Constructor_WithValidPublicParameters_CreatesInstance()
+        public void CreateFromParameters_WithValidPublicParameters_CreatesInstance()
         {
             // Arrange
             using var rsa = RSA.Create(2048);
@@ -49,7 +60,7 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Fact]
-        public void Constructor_WithPrivateKeyData_ThrowsArgumentException()
+        public void CreateFromParameters_WithPrivateKeyData_ThrowsArgumentException()
         {
             // Arrange
             using var rsa = RSA.Create(2048);
@@ -60,7 +71,7 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Fact]
-        public void Constructor_WithRSA_CreatesValidInstance()
+        public void CreateFromParameters_WithRSA_CreatesValidInstance()
         {
             // Arrange
             using var rsa = RSA.Create(2048);
@@ -76,7 +87,7 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Fact]
-        public void Constructor_PerformsDeepCopy()
+        public void CreateFromParameters_PerformsDeepCopy()
         {
             // Arrange
             using var rsa = RSA.Create(2048);
@@ -97,7 +108,7 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Fact]
-        public void GetBytes_ReturnsCorrectFormat()
+        public void ExportSubjectPublicKeyInfo_ReturnsCorrectFormat()
         {
             // Arrange
             var testPublicKey = TestKeys.GetTestPublicKey(KeyType.RSA2048);
@@ -117,9 +128,9 @@ namespace Yubico.YubiKey.Cryptography
             Assert.Equal(testPublicKey.EncodedKey, subjectPublicKeyInfo);
 
             // Verify the bytes can be used to recreate the RSA key
-            var rsa2 = RSA.Create();
-            rsa2.ImportSubjectPublicKeyInfo(subjectPublicKeyInfo, out _);
-            var rsaParams2 = rsa2.ExportParameters(false);
+            using var rsa = RSA.Create();
+            rsa.ImportSubjectPublicKeyInfo(subjectPublicKeyInfo, out _);
+            var rsaParams2 = rsa.ExportParameters(false);
 
             Assert.True(publicKeyParams.Parameters.Modulus.AsSpan().SequenceEqual(rsaParams2.Modulus));
             Assert.True(publicKeyParams.Parameters.Exponent.AsSpan().SequenceEqual(rsaParams2.Exponent));
@@ -129,7 +140,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(1024)]
         [InlineData(2048)]
         [InlineData(4096)]
-        public void Constructor_WithDifferentKeySizes_CreatesValidInstance(
+        public void CreateFromParameters_WithDifferentKeySizes_CreatesValidInstance(
             int keySize)
         {
             // Arrange

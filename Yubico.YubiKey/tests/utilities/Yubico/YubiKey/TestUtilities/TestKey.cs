@@ -25,9 +25,9 @@ namespace Yubico.YubiKey.TestUtilities;
 /// </summary>
 public class TestKey : TestCrypto
 {
-    public readonly KeyType KeyType;
-    private readonly bool _isPrivate;
     public KeyDefinition KeyDefinition { get; }
+    public KeyType KeyType { get; }
+    private readonly bool _isPrivate;
 
     /// <summary>
     /// Loads a test key from the TestData directory.
@@ -83,19 +83,19 @@ public class TestKey : TestCrypto
             ? ECPublicKey.CreateFromPkcs8(EncodedKey).PublicPoint.ToArray()
             : Curve25519PublicKey.CreateFromPkcs8(EncodedKey).PublicPoint.ToArray();
     }
-    
-    public IPublicKey GetPublicKey()
+
+    public IPublicKey AsPublicKey()
     {
+        if (_isPrivate)
+        {
+            return Load(KeyType, false).AsPublicKey();
+        }
+        
         if (KeyDefinition.IsRSA)
         {
             return RSAPublicKey.CreateFromPkcs8(EncodedKey);
         }
-        
-        if (_isPrivate)
-        {
-            return Load(KeyType, false).GetPublicKey();
-        }
-        
+
         if (KeyDefinition is { IsEllipticCurve: true, AlgorithmOid: Oids.ECDSA })
         {
             return ECPublicKey.CreateFromPkcs8(EncodedKey);
@@ -121,7 +121,7 @@ public class TestKey : TestCrypto
             : Curve25519PrivateKey.CreateFromPkcs8(EncodedKey).PrivateKey.ToArray();
     }
 
-    public IPrivateKey GetPrivateKey()
+    public IPrivateKey AsPrivateKey()
     {
         if (KeyDefinition.IsRSA)
         {
@@ -129,7 +129,7 @@ public class TestKey : TestCrypto
         }
 
         return !_isPrivate
-            ? Load(KeyType, true).GetPrivateKey()
+            ? Load(KeyType, true).AsPrivateKey()
             : KeyDefinition is { IsEllipticCurve: true, AlgorithmOid: Oids.ECDSA }
                 ? ECPrivateKey.CreateFromPkcs8(EncodedKey)
                 : Curve25519PrivateKey.CreateFromPkcs8(EncodedKey);

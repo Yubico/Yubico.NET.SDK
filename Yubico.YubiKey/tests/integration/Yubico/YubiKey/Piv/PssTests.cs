@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
@@ -22,30 +21,29 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Piv
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
-    [Obsolete("Use other method, fix later")] // TODO
-    public class PssTests
+    public class PssTests : PivSessionIntegrationTestBase
     {
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        public void Parse_FromRsaClass(StandardTestDevice testDeviceType)
+        public void Parse_FromRsaClass(
+            StandardTestDevice testDeviceType)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.RSA1024, false, out _, out var publicKeyPem, out var privateKeyPem);
+            // Arrange
+            DeviceType = testDeviceType;
+            var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(KeyType.RSA1024);
 
-            var publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
-            var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
-
-            byte[] dataToSign = {
+            byte[] dataToSign =
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
             };
 
-            using RSA rsaPrivate = privateKey.GetRsaObject();
-            byte[] signature = rsaPrivate.SignData(
+            using var rsaPrivate = testPrivateKey.AsRSA();
+            var signature = rsaPrivate.SignData(
                 dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
-
             Assert.Equal(128, signature.Length);
 
-            bool isValid = CryptoSupport.CSharpRawRsaPublic(publicKeyPem, signature, out byte[] formattedData);
+            var isValid = CryptoSupport.CSharpRawRsaPublic(testPublicKey, signature, out var formattedData);
             Assert.True(isValid);
             Assert.Equal(128, formattedData.Length);
 
@@ -56,42 +54,33 @@ namespace Yubico.YubiKey.Piv
                 formattedData,
                 digester.Hash,
                 RsaFormat.Sha256,
-                out byte[] mPrimePlusH,
-                out bool isVerified);
+                out var mPrimePlusH,
+                out var isVerified);
 
             Assert.True(isValid);
             Assert.True(isVerified);
             Assert.Equal(104, mPrimePlusH.Length);
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            var collectorObj = new Simple39KeyCollector();
+            Session.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            isValid = Session.TryAuthenticateManagementKey(false);
+            Assert.True(isValid);
+            isValid = Session.TryVerifyPin();
+            Assert.True(isValid);
 
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-                isValid = pivSession.TryAuthenticateManagementKey(false);
-                Assert.True(isValid);
-                isValid = pivSession.TryVerifyPin();
-                Assert.True(isValid);
+            Session.ImportPrivateKey(0x86, testPrivateKey.AsPrivateKey());
 
-                PivPrivateKey pivPrivate = privateKey.GetPivPrivateKey();
-                pivSession.ImportPrivateKey(0x86, pivPrivate);
+            var yData = RsaFormat.FormatPkcs1Pss(digester.Hash, RsaFormat.Sha256, 1024);
+            var signCommand = new AuthenticateSignCommand(yData, 0x86);
+            var signResponse = Session.Connection.SendCommand(signCommand);
+            Assert.Equal(ResponseStatus.Success, signResponse.Status);
 
-                byte[] yData = RsaFormat.FormatPkcs1Pss(digester.Hash, RsaFormat.Sha256, 1024);
-                var signCommand = new AuthenticateSignCommand(yData, 0x86);
-                AuthenticateSignResponse signResponse = pivSession.Connection.SendCommand(signCommand);
-
-                Assert.Equal(ResponseStatus.Success, signResponse.Status);
-
-                byte[] ySignature = signResponse.GetData();
-
-                using RSA rsaPublic = publicKey.GetRsaObject();
-
-                isVerified = rsaPublic.VerifyData(dataToSign, ySignature, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
-                Assert.True(isVerified);
-            }
+            using var rsaPublic = testPublicKey.AsRSA();
+            var ySignature = signResponse.GetData();
+            isVerified =
+                rsaPublic.VerifyData(dataToSign, ySignature, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
+            Assert.True(isVerified);
         }
 
         [Theory]
@@ -99,50 +88,43 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048, 2048)]
         [InlineData(KeyType.ECP256, 256)]
         [InlineData(KeyType.ECP384, 384)]
-        public void UseKeyConverter(KeyType keyType, int keySize)
+        public void UseKeyConverter(
+            KeyType keyType,
+            int keySize)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out var publicPem, out var privatePem);
-
-            var publicKey = new KeyConverter(publicPem!.ToCharArray());
-            Assert.Equal(keyType.GetPivAlgorithm(), publicKey.Algorithm);
-
-            var privateKey = new KeyConverter(privatePem!.ToCharArray());
-            Assert.Equal(keyType.GetPivAlgorithm(), privateKey.Algorithm);
-
-            if (keyType == KeyType.RSA1024 || keyType == KeyType.RSA2048)
+            var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
+            if (keyType is KeyType.RSA1024 or KeyType.RSA2048)
             {
-                using RSA rsaPublic = publicKey.GetRsaObject();
+                using var rsaPublic = testPublicKey.AsRSA();
                 Assert.Equal(keySize, rsaPublic.KeySize);
-                using RSA rsaPrivate = privateKey.GetRsaObject();
+                using var rsaPrivate = testPrivateKey.AsRSA();
                 Assert.Equal(keySize, rsaPrivate.KeySize);
             }
             else
             {
-                using ECDsa eccPublic = publicKey.GetEccObject();
+                using var eccPublic = testPublicKey.AsECDsa();
                 Assert.Equal(keySize, eccPublic.KeySize);
 
-                using ECDsa eccPrivate = privateKey.GetEccObject();
+                using var eccPrivate = testPrivateKey.AsECDsa();
                 Assert.Equal(keySize, eccPrivate.KeySize);
             }
 
-            PivPublicKey convertedPub = privateKey.GetPivPublicKey();
-            Assert.Equal(keyType.GetPivAlgorithm(), convertedPub.Algorithm);
+            var convertedPub = testPrivateKey.AsPublicKey();
+            Assert.Equal(keyType, convertedPub.KeyType);
 
-            char[]? publicPemArray = publicKey.GetPemKeyString();
+            var publicPemArray = testPublicKey.AsPemString();
             Assert.NotNull(publicPemArray);
-            if (!(publicPemArray is null))
+            if (publicPemArray is not null)
             {
-                string pemStringPublic = new string(publicPemArray);
+                var pemStringPublic = new string(publicPemArray);
                 Assert.NotNull(pemStringPublic);
             }
 
-            char[]? privatePemArray = privateKey.GetPemKeyString();
+            var privatePemArray = testPublicKey.AsPemString();
             Assert.NotNull(privatePemArray);
-            if (!(privatePemArray is null))
-            {
-                string pemStringPrivate = new string(privatePemArray);
-                Assert.NotNull(pemStringPrivate);
-            }
+
+            var pemStringPrivate = new string(privatePemArray);
+            Assert.NotNull(pemStringPrivate);
         }
     }
 }

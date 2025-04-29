@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Piv
         public void KeyAgree_InvalidPublicKey_Exception()
         {
             var testPublicKey = TestKeys.GetTestPublicKey(KeyType.RSA1024); // Cant be used for key agreement
-            var publicKey = testPublicKey.GetPublicKey();
+            var publicKey = testPublicKey.AsPublicKey();
             
             _ = Assert.Throws<ArgumentException>(() => PivSessionMock.KeyAgree(0x9a, publicKey));
         }

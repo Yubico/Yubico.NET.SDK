@@ -7,9 +7,9 @@ namespace Yubico.YubiKey.TestUtilities
 {
     public static class TestKeyExtensions
     {
-        public static IPrivateKey AsPrivateKey(this TestKey key) => key.GetPrivateKey();
+        public static IPrivateKey AsPrivateKey(this TestKey key) => key.AsPrivateKey();
 
-        public static IPublicKey AsPublicKey(this TestKey key) => key.GetPublicKey();
+        public static IPublicKey AsPublicKey(this TestKey key) => key.AsPublicKey();
         
         /// <summary>
         /// Converts the key to a PIV private key format.

@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.TestUtilities
             var key = isPrivate ? TestKeys.GetTestPrivateKey(keyType) : TestKeys.GetTestPublicKey(keyType);
             Assert.NotNull(key);
 
-            var publicKey = key.GetPublicKey();
+            var publicKey = key.AsPublicKey();
             Assert.NotNull(publicKey);
         }
         
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.TestUtilities
             var key = isPrivate ? TestKeys.GetTestPrivateKey(keyType) : TestKeys.GetTestPublicKey(keyType);
             Assert.NotNull(key);
 
-            var publicKey = key.GetPrivateKey();
+            var publicKey = key.AsPrivateKey();
             Assert.NotNull(publicKey);
         }
         

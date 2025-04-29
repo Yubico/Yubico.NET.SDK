@@ -38,7 +38,7 @@ public class PivEncoderDecoderTests
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(keyType);
-        var testPublicKey = testKey.GetPublicKey();
+        var testPublicKey = testKey.AsPublicKey();
         var testPivEncodedPublicKey = testPublicKey.EncodeAsPiv();
         Assert.True(testPivEncodedPublicKey.Length > 0);
 
@@ -96,7 +96,7 @@ public class PivEncoderDecoderTests
     {
         // Arrange
         var testKey = TestKeys.GetTestPrivateKey(keyType);
-        var testPrivateKey = testKey.GetPrivateKey();
+        var testPrivateKey = testKey.AsPrivateKey();
         var testPivEncodedPrivateKey = testPrivateKey.EncodeAsPiv();
         Assert.True(testPivEncodedPrivateKey.Length > 0);
 

@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             var testKey = TestKeys.GetTestPrivateKey(KeyType.ECP256);
-            var pivPrivateKeyEncoded = testKey.GetPrivateKey().EncodeAsPiv();
+            var pivPrivateKeyEncoded = testKey.AsPrivateKey().EncodeAsPiv();
 
             // Act
             var privateKeyParams = PivKeyDecoder.CreateECPrivateKey(pivPrivateKeyEncoded);

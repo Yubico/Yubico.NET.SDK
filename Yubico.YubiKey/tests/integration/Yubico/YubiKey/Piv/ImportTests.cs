@@ -15,7 +15,6 @@
 using System;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -38,49 +37,22 @@ namespace Yubico.YubiKey.Piv
         {
             // Arrange
             DeviceType = testDeviceType;
-            
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
-            var publicKey = testPublicKey.GetPublicKey();
-            var testPivEncodedPublicKey = publicKey.EncodeAsPiv();
-            var keyParameters = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
+            var publicKey = testPublicKey.AsPublicKey();
+            var privateKey = testPrivateKey.AsPrivateKey();
 
             const PivPinPolicy expectedPinPolicy = PivPinPolicy.Once;
             const PivTouchPolicy expectedTouchPolicy = PivTouchPolicy.Always;
 
             // Act
-            
-            Session.ImportPrivateKey(PivSlot.Retired1, keyParameters, expectedPinPolicy, expectedTouchPolicy);
+            Session.ImportPrivateKey(PivSlot.Retired1, privateKey, expectedPinPolicy, expectedTouchPolicy);
 
             // Assert
             var resultMetadata = Session.GetMetadata(PivSlot.Retired1);
-            Assert.Equal(keyType.GetPivAlgorithm(), resultMetadata.Algorithm);
-            Assert.Equal(keyType, resultMetadata.PublicKeyParameters?.KeyType);
-
-            if (keyType.IsEllipticCurve()) // ecDsa or Curve25519
-            {
-                var publicPoint = resultMetadata.PublicKeyParameters switch
-                {
-                    ECPublicKey ecDsa => ecDsa.PublicPoint.ToArray(),
-                    Curve25519PublicKey edDsa => edDsa.PublicPoint.ToArray(),
-                    _ => throw new ArgumentException("Invalid public key type")
-                };
-                Assert.Equal(testPublicKey.GetPublicPoint(), publicPoint);
-            }
-            else // RSA
-            {
-                var parameters = resultMetadata.PublicKeyParameters as RSAPublicKey;
-                Assert.NotNull(parameters);
-                
-                var rsaParameters = testPublicKey.AsRSA().ExportParameters(false);
-                Assert.Equal(rsaParameters.Modulus, parameters.Parameters.Modulus);
-                Assert.Equal(rsaParameters.Exponent, parameters.Parameters.Exponent);
-            }
-            
             Assert.Equal(expectedPinPolicy, resultMetadata.PinPolicy);
             Assert.Equal(expectedTouchPolicy, resultMetadata.TouchPolicy);
-            
             Assert.Equal(publicKey.ExportSubjectPublicKeyInfo(), resultMetadata.PublicKeyParameters?.ExportSubjectPublicKeyInfo());
-            Assert.True(testPivEncodedPublicKey.Span.SequenceEqual(resultMetadata.PublicKeyParameters!.EncodeAsPiv().Span));
+            AssertKeyData(keyType, resultMetadata, testPrivateKey);
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
@@ -93,14 +65,22 @@ namespace Yubico.YubiKey.Piv
             KeyType keyType,
             StandardTestDevice testDeviceType)
         {
-            using var pivSession = GetSession(testDeviceType);
-
+            // Arrange
+            DeviceType = testDeviceType;
             var testPrivateKey = TestKeys.GetTestPrivateKey(keyType);
             var testCert = TestKeys.GetTestCertificate(keyType);
-            var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
+            var privateKey = testPrivateKey.AsPrivateKey();
+            
+            // Act
+            Session.ImportPrivateKey(0x90, privateKey);
+            Session.ImportCertificate(0x90, testCert.AsX509Certificate2());
+            
+            // Assert
+            var resultMetadata = Session.GetMetadata(0x90);
+            AssertKeyData(keyType, resultMetadata, testPrivateKey);
 
-            pivSession.ImportPrivateKey(0x90, privateKey);
-            pivSession.ImportCertificate(0x90, testCert.AsX509Certificate2());
+            var resultCert = Session.GetCertificate(0x90);
+            Assert.True(resultCert.Equals(testCert.AsX509Certificate2()));
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
@@ -120,17 +100,43 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.Ed25519, true)]
         public void ImportCertificate_ImportedCert_Equals_TestCert(
             KeyType keyType,
-            bool compressed,
-            StandardTestDevice testDeviceType = StandardTestDevice.Fw5)
+            bool compressed)
         {
             var testCertificate = TestKeys.GetTestCertificate(keyType);
             var testX509Certificate = testCertificate.AsX509Certificate2();
 
-            using var pivSession = GetSession(testDeviceType);
-            pivSession.ImportCertificate(0x90, testX509Certificate, compressed);
+            Session.ImportCertificate(0x90, testX509Certificate, compressed);
 
-            var resultCert = pivSession.GetCertificate(0x90);
+            var resultCert = Session.GetCertificate(0x90);
             Assert.True(resultCert.Equals(testX509Certificate));
+        }
+        
+        private static void AssertKeyData(KeyType keyType, PivMetadata resultMetadata, TestKey testPrivateKey)
+        {
+            Assert.Equal(keyType.GetPivAlgorithm(), resultMetadata.Algorithm);
+            
+            if (keyType.IsEllipticCurve())
+            {
+                var publicPoint = resultMetadata.PublicKeyParameters switch
+                {
+                    ECPublicKey ecDsa => ecDsa.PublicPoint.ToArray(),
+                    Curve25519PublicKey edDsa => edDsa.PublicPoint.ToArray(),
+                    _ => throw new ArgumentException("Invalid public key type")
+                };
+                Assert.Equal(testPrivateKey.GetPublicPoint(), publicPoint);
+            }
+            else if (keyType.IsRSA())
+            {
+                var parameters = resultMetadata.PublicKeyParameters as RSAPublicKey;
+                Assert.NotNull(parameters);
+                
+                var rsaParameters = testPrivateKey.AsRSA().ExportParameters(false);
+                Assert.Equal(rsaParameters.Modulus, parameters.Parameters.Modulus);
+                Assert.Equal(rsaParameters.Exponent, parameters.Parameters.Exponent);
+            }
+
+            var publicKey = TestKeyExtensions.AsPublicKey(TestKeys.GetTestPublicKey(keyType));
+            Assert.Equal(publicKey.ExportSubjectPublicKeyInfo(), resultMetadata.PublicKeyParameters?.ExportSubjectPublicKeyInfo());
         }
     }
 }

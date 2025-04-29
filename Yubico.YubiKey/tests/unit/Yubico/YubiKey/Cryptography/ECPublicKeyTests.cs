@@ -16,7 +16,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             var testKey = TestKeys.GetTestPublicKey(keyType);
-            var pivPublicKeyEncoded = testKey.GetPublicKey().EncodeAsPiv();
+            var pivPublicKeyEncoded = testKey.AsPublicKey().EncodeAsPiv();
 
             // Act
             var publicKeyParams = PivKeyDecoder.CreateECPublicKey(pivPublicKeyEncoded);

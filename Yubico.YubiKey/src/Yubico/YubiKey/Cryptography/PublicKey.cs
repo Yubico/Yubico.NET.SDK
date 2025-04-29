@@ -1,4 +1,4 @@
-// Copyright 2024 Yubico AB
+﻿// Copyright 2024 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -14,13 +14,11 @@
 
 namespace Yubico.YubiKey.Cryptography;
 
-public interface IPublicKey : IKeyBase
+public abstract class PublicKey : IPublicKey
 {
-    /// <summary>
-    /// Exports the public-key portion of the current key in the X.509 SubjectPublicKeyInfo format.
-    /// </summary>
-    /// <returns>
-    /// A byte array containing the X.509 SubjectPublicKeyInfo representation of the public-key portion of this key
-    /// </returns>
-    public byte[] ExportSubjectPublicKeyInfo();
+    /// <inheritdoc />
+    public abstract KeyType KeyType { get; }
+    
+    /// <inheritdoc />
+    public abstract byte[] ExportSubjectPublicKeyInfo();
 }

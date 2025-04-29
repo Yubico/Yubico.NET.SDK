@@ -2,13 +2,12 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
-using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {
-    public class RsaPublicKeyTests
+    public class RSAPublicKeyTests
     {
         [Fact]
         public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()

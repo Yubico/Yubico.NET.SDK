@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             // Arrange
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
 
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             var privateKeyParameters = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
@@ -102,7 +102,7 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             // Arrange
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             //  Build the peer objects.
             var (_, testPrivateKey) = TestKeys.GetKeyPair(keyType);
 
@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Piv
         public void NoKeyInSlot_KeyAgree_Exception(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             
             var testKey = TestKeys.GetTestPublicKey(KeyType.ECP384);
             var publicKey = TestKeyExtensions.AsPublicKey(testKey);

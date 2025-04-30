@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             // Arrange
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             var publicKey = testPublicKey.AsPublicKey();
             var privateKey = testPrivateKey.AsPrivateKey();
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             // Arrange
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             var testPrivateKey = TestKeys.GetTestPrivateKey(keyType);
             var testCert = TestKeys.GetTestCertificate(keyType);
             var privateKey = testPrivateKey.AsPrivateKey();

@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             // Arrange
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(KeyType.RSA1024);
 
             byte[] dataToSign =
@@ -61,9 +61,6 @@ namespace Yubico.YubiKey.Piv
             Assert.True(isVerified);
             Assert.Equal(104, mPrimePlusH.Length);
 
-
-            var collectorObj = new Simple39KeyCollector();
-            Session.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
             isValid = Session.TryAuthenticateManagementKey(false);
             Assert.True(isValid);
             isValid = Session.TryVerifyPin();

@@ -23,35 +23,30 @@ public class PivSessionIntegrationTestBase : IDisposable
 {
     private bool _disposed;
     private PivSession? _session;
-    protected StandardTestDevice DeviceType { get; set; } = StandardTestDevice.Fw5;
+    protected StandardTestDevice TestDeviceType { get; set; } = StandardTestDevice.Fw5;
     protected bool Authenticate { get; set; }
-    protected PivSession Session => _session ??= GetSession(DeviceType, Authenticate);
-    protected static Func<KeyEntryData, bool>? KeyCollector { get; set; }
+    protected PivSession Session => _session ??= GetSession(TestDeviceType, Authenticate);
+    public IYubiKeyDevice Device { get; set; }
 
-    protected static PivSession GetSession(
-        StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
-        bool authenticate = true)
+    protected PivSessionIntegrationTestBase()
     {
-        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-        return GetSessionInternal(testDevice, authenticate);
-    }
-    
-    protected static PivSession GetSessionScp(
-        StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
-        bool authenticate = true)
-    {
-        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-        return GetSessionInternal(testDevice, authenticate, Scp03KeyParameters.DefaultKey);
+        Device = IntegrationTestDeviceEnumeration.GetTestDevice(TestDeviceType);
+        Session.ResetApplication();
     }
 
-    // Implement IDisposable pattern correctly
+    ~PivSessionIntegrationTestBase()
+    {
+        Dispose(false);
+    }
+
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
-    protected virtual void Dispose(bool disposing)
+    protected virtual void Dispose(
+        bool disposing)
     {
         if (_disposed)
         {
@@ -60,26 +55,33 @@ public class PivSessionIntegrationTestBase : IDisposable
 
         if (disposing)
         {
-            // Dispose managed resources
-            _session?.ResetApplication();
+            // _session?.ResetApplication();
             _session?.Dispose();
             _session = null;
         }
 
-        // Dispose unmanaged resources (none in this case)
-
         _disposed = true;
     }
 
-    // Finalizer should only clean up unmanaged resources
-    ~PivSessionIntegrationTestBase()
+    protected PivSession GetSession(
+        StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
+        bool authenticate = true)
     {
-        Dispose(false);
+        // var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+        return GetSessionInternal(Device, authenticate);
+    }
+
+    protected PivSession GetSessionScp(
+        StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
+        bool authenticate = true)
+    {
+        // var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+        return GetSessionInternal(Device, authenticate, Scp03KeyParameters.DefaultKey);
     }
 
     private static PivSession GetSessionInternal(
         IYubiKeyDevice testDevice,
-        bool authenticate = true,
+        bool authenticate,
         Scp03KeyParameters? keyParameters = null)
     {
         Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
@@ -88,14 +90,10 @@ public class PivSessionIntegrationTestBase : IDisposable
         try
         {
             pivSession = new PivSession(testDevice, keyParameters);
-            if (KeyCollector == null)
+            if (pivSession.KeyCollector == null)
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-            }
-            else
-            {
-                pivSession.KeyCollector = KeyCollector;
             }
 
             if (authenticate)

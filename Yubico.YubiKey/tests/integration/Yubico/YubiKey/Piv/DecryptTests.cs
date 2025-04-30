@@ -103,7 +103,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048, 0x95, RsaFormat.Sha512, 2, StandardTestDevice.Fw5)]
         public void EncryptCSharp_Decrypt_Correct(KeyType keyType, byte slotNumber, int digestAlgorithm, int paddingScheme, StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             var privateKey = TestKeyExtensions.AsPrivateKey(testPrivateKey);
 

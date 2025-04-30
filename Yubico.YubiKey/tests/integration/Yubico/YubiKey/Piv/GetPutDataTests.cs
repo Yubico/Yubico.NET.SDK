@@ -21,6 +21,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class GetPutDataTests : PivSessionIntegrationTestBase
     {
         [SkippableTheory(typeof(DeviceNotFoundException))]
@@ -28,7 +29,7 @@ namespace Yubico.YubiKey.Piv
         public void Cert_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             var cert = TestKeys.GetTestCertificate(KeyType.RSA2048).AsX509Certificate2();
             var privateKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048).AsPrivateKey();
 
@@ -105,7 +106,7 @@ namespace Yubico.YubiKey.Piv
         public void Chuid_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             byte[] chuidData =
             {
                 0x53, 0x3b, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
@@ -166,7 +167,7 @@ namespace Yubico.YubiKey.Piv
         public void Capability_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             byte[] capabilityData =
             {
                 0x53, 0x33, 0xF0, 0x15, 0xA0, 0x00, 0x00, 0x01, 0x16, 0xFF, 0x02, 0x21, 0x08, 0x42, 0x10, 0x84,
@@ -235,7 +236,7 @@ namespace Yubico.YubiKey.Piv
         public void Discovery_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
 
             byte[] discoveryData =
             {
@@ -268,7 +269,7 @@ namespace Yubico.YubiKey.Piv
         public void Printed_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
 
             byte[] printedData =
             {
@@ -371,7 +372,7 @@ namespace Yubico.YubiKey.Piv
         public void Security_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
 
             byte[] securityData =
             {
@@ -432,7 +433,7 @@ namespace Yubico.YubiKey.Piv
         public void KeyHistory_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
 
             byte[] keyHistoryData =
             {
@@ -494,7 +495,7 @@ namespace Yubico.YubiKey.Piv
         public void Iris_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             byte[] irisData =
             {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
@@ -595,7 +596,7 @@ namespace Yubico.YubiKey.Piv
         public void Facial_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             byte[] facialData =
             {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
@@ -696,7 +697,7 @@ namespace Yubico.YubiKey.Piv
         public void Fingerprint_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             byte[] fingerprintData =
             {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
@@ -797,7 +798,7 @@ namespace Yubico.YubiKey.Piv
         public void Bitgt_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             byte[] bitgtData =
             {
                 0x7F, 0x61, 0x07, 0x02, 0x01, 0x01, 0x7F, 0x60, 0x01, 0x01
@@ -830,7 +831,7 @@ namespace Yubico.YubiKey.Piv
         public void SMSigner_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             byte[] smSignerData =
             {
                 0x53, 0x08, 0x70, 0x01, 0x11, 0x71, 0x01, 0x00, 0xFE, 0x00
@@ -892,7 +893,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void PCRef_Auth_Req(StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
 
             byte[] pcRefData =
             {
@@ -949,7 +950,7 @@ namespace Yubico.YubiKey.Piv
         public void AdminData_Auth_Req(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             byte[] adminData =
             {
                 0x53, 0x09, 0x80, 0x07, 0x81, 0x01, 0x00, 0x03, 0x02, 0x5C, 0x29

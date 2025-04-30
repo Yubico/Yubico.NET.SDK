@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             // Arrange
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
 
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(KeyType.RSA1024);
             byte[] dataToEncrypt =

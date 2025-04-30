@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.Piv
             KeyType keyType)
         {
             // Arrange
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             
             const byte slotNumber = PivSlot.Retired12;
             var dataToSign = keyType switch
@@ -168,7 +168,7 @@ namespace Yubico.YubiKey.Piv
             int paddingScheme)
         {
             // Arrange
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             var keySizeBits = keyType.GetKeyDefinition().LengthInBits;
@@ -225,7 +225,7 @@ namespace Yubico.YubiKey.Piv
             byte slotNumber)
         {
             // Arrange
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
             
             var dataToSign = new byte[128];
@@ -273,7 +273,7 @@ namespace Yubico.YubiKey.Piv
         public void NoKeyInSlot_Sign_Exception(
             StandardTestDevice testDeviceType)
         {
-            DeviceType = testDeviceType;
+            TestDeviceType = testDeviceType;
             byte[] dataToSign =
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,

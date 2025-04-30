@@ -19,6 +19,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Commands;
 
+[Trait(TraitTypes.Category, TestCategories.Simple)]
 public class PutDataCommandTests
 {
     [Theory]
@@ -27,7 +28,7 @@ public class PutDataCommandTests
         StandardTestDevice testDeviceType)
     {
         using var pivSession = GetSession(testDeviceType);
-        
+
         var tooLargeTlv = new TlvObject(0x53, new byte[10000]);
         var tlvBytes = tooLargeTlv.GetBytes();
         var command = new PutDataCommand(0x5F0000, tlvBytes);
@@ -52,19 +53,20 @@ public class PutDataCommandTests
         var validSizeTlv = new TlvObject(0x53, new byte[SmartCardMaxApduSizes.YK4_3]);
         var tlvBytes = validSizeTlv.GetBytes();
         var command = new PutDataCommand(0x5F0000, tlvBytes);
-        
+
         // Act
         var response = pivSession.Connection.SendCommand(command);
         var actualSize = command.CreateCommandApdu().AsByteArray().Length;
         Assert.Equal(3078, actualSize); // This is the current max APDU size of the YubiKey 5 series.
         Assert.Equal(ResponseStatus.Success, response.Status);
         Assert.Equal(SWConstants.Success, response.StatusWord);
-        
+
         // Cleanup
         pivSession.ResetApplication();
     }
 
-    private static PivSession GetSession(StandardTestDevice testDeviceType)
+    private static PivSession GetSession(
+        StandardTestDevice testDeviceType)
     {
         PivSession? pivSession = null;
         try

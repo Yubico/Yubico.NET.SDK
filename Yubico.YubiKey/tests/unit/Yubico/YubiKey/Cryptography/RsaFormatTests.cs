@@ -255,9 +255,6 @@ namespace Yubico.YubiKey.Cryptography
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
             };
 
-            KeyConverter? publicKey = null;
-            KeyConverter? privateKey = null;
-
             using HashAlgorithm digester = digestAlgorithm switch
             {
                 RsaFormat.Sha1 => CryptographyProviders.Sha1Creator(),
@@ -282,27 +279,19 @@ namespace Yubico.YubiKey.Cryptography
             }
 
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
-            try
-            {
-                _ = digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
-                var formattedData = format == 1
-                    ? RsaFormat.FormatPkcs1Sign(digester.Hash, digestAlgorithm, keySize)
-                    : RsaFormat.FormatPkcs1Pss(digester.Hash, digestAlgorithm, keySize);
+            _ = digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
+            var formattedData = format == 1
+                ? RsaFormat.FormatPkcs1Sign(digester.Hash, digestAlgorithm, keySize)
+                : RsaFormat.FormatPkcs1Pss(digester.Hash, digestAlgorithm, keySize);
 
-                var isValid =
-                    CryptoSupport.CSharpRawRsaPrivate(testPrivateKey, formattedData, out var signature);
-                Assert.True(isValid);
-                Assert.Equal(keySize / 8, formattedData.Length);
+            var isValid =
+                CryptoSupport.CSharpRawRsaPrivate(testPrivateKey, formattedData, out var signature);
+            Assert.True(isValid);
+            Assert.Equal(keySize / 8, formattedData.Length);
 
-                using var rsaPublic = testPublicKey.AsRSA();
-                isValid = rsaPublic.VerifyData(dataToSign, signature, hashAlg, padding);
-                Assert.True(isValid);
-            }
-            finally
-            {
-                publicKey?.Clear();
-                privateKey?.Clear();
-            }
+            using var rsaPublic = testPublicKey.AsRSA();
+            isValid = rsaPublic.VerifyData(dataToSign, signature, hashAlg, padding);
+            Assert.True(isValid);
         }
 
         [Theory]
@@ -332,9 +321,6 @@ namespace Yubico.YubiKey.Cryptography
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
             };
 
-            KeyConverter? publicKey = null;
-            KeyConverter? privateKey = null;
-
             using HashAlgorithm digester = digestAlgorithm switch
             {
                 RsaFormat.Sha1 => CryptographyProviders.Sha1Creator(),
@@ -359,45 +345,37 @@ namespace Yubico.YubiKey.Cryptography
             }
 
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
-            try
-            {
-                using var rsaPrivate = testPrivateKey.AsRSA();
-                var signature = rsaPrivate.SignData(dataToSign, hashAlg, padding);
-                Assert.Equal(keySize / 8, signature.Length);
+            using var rsaPrivate = testPrivateKey.AsRSA();
+            var signature = rsaPrivate.SignData(dataToSign, hashAlg, padding);
+            Assert.Equal(keySize / 8, signature.Length);
 
-                var isValid =
-                    CryptoSupport.CSharpRawRsaPublic(testPublicKey, signature, out var formattedData);
+            var isValid =
+                CryptoSupport.CSharpRawRsaPublic(testPublicKey, signature, out var formattedData);
+            Assert.True(isValid);
+            Assert.Equal(keySize / 8, formattedData.Length);
+
+            _ = digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
+
+            if (format == 1)
+            {
+                isValid = RsaFormat.TryParsePkcs1Verify(formattedData, out var digestAlg, out var digest);
+
                 Assert.True(isValid);
-                Assert.Equal(keySize / 8, formattedData.Length);
-
-                _ = digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
-
-                if (format == 1)
-                {
-                    isValid = RsaFormat.TryParsePkcs1Verify(formattedData, out var digestAlg, out var digest);
-
-                    Assert.True(isValid);
-                    Assert.Equal(digestAlgorithm, digestAlg);
-                    isValid = digest.SequenceEqual(digester.Hash!);
-                    Assert.True(isValid);
-                }
-                else
-                {
-                    isValid = RsaFormat.TryParsePkcs1Pss(
-                        formattedData,
-                        digester.Hash,
-                        digestAlgorithm,
-                        out var mPrimePlusH,
-                        out var isVerified);
-
-                    Assert.True(isValid);
-                    Assert.True(isVerified);
-                }
+                Assert.Equal(digestAlgorithm, digestAlg);
+                isValid = digest.SequenceEqual(digester.Hash!);
+                Assert.True(isValid);
             }
-            finally
+            else
             {
-                publicKey?.Clear();
-                privateKey?.Clear();
+                isValid = RsaFormat.TryParsePkcs1Pss(
+                    formattedData,
+                    digester.Hash,
+                    digestAlgorithm,
+                    out var mPrimePlusH,
+                    out var isVerified);
+
+                Assert.True(isValid);
+                Assert.True(isVerified);
             }
         }
 

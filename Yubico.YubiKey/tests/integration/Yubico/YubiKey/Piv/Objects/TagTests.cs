@@ -17,7 +17,7 @@ using Xunit;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv.Objects
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class TagTests

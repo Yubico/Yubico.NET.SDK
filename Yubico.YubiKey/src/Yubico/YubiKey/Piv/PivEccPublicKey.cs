@@ -46,6 +46,7 @@ namespace Yubico.YubiKey.Piv
     /// examine the encoding.
     /// </para>
     /// </remarks>
+    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
     public sealed class PivEccPublicKey : PivPublicKey
     {
         private const int EccP256PublicKeySize = 65;
@@ -83,7 +84,7 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The format of the public point is not supported.
         /// </exception>
-        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey, PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
         public PivEccPublicKey(ReadOnlySpan<byte> publicPoint, PivAlgorithm? algorithm = null)
         {
             if (!LoadEccPublicKey(publicPoint, algorithm))
@@ -213,9 +214,6 @@ namespace Yubico.YubiKey.Piv
             }
 
             PivEncodedKey = tlvWriter.Encode();
-
-            // The Metadate encoded key is the contents of the nested. So set
-            // that to be a slice of the EncodedKey.
             YubiKeyEncodedKey = PivEncodedKey[SliceIndex..];
 
             _publicPoint = new Memory<byte>(publicPoint.ToArray());

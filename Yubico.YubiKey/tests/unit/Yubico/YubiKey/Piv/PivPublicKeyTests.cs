@@ -20,8 +20,24 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
-    public class PivPublicKeyTests
+    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
+    public class PivPublicKeyTests // TODO add test to verify interface implementations
     {
+
+        [Fact]
+        public void ExportSubjectPublicKeyInfo_ReturnsSubjectPublicKeyInfo()
+        {
+            var testKey = TestKeys.GetTestPublicKey(KeyType.ECP256);
+            var tlvPublicKey = testKey.AsPivPublicKey();
+            var subjectPublicKeyInfo = tlvPublicKey.ExportSubjectPublicKeyInfo();
+            var ecPublicKey = ECPublicKey.CreateFromPkcs8(subjectPublicKeyInfo);
+            
+            Assert.Equal(KeyType.ECP256, tlvPublicKey.KeyType);
+            Assert.NotEmpty(subjectPublicKeyInfo); 
+            Assert.Equal(testKey.EncodedKey, subjectPublicKeyInfo);
+            Assert.Equal(subjectPublicKeyInfo, ecPublicKey.ExportSubjectPublicKeyInfo());
+        }
+        
         [Theory]
         [InlineData(KeyType.RSA1024)]
         [InlineData(KeyType.RSA2048)]

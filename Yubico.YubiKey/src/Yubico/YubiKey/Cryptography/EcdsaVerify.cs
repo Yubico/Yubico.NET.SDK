@@ -158,6 +158,7 @@ namespace Yubico.YubiKey.Cryptography
         /// <exception cref="ArgumentException">
         /// The key is not for a supported algorithm or curve, or is malformed.
         /// </exception>
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
         public EcdsaVerify(PivPublicKey pivPublicKey)
         {
             if (pivPublicKey is null)
@@ -170,6 +171,22 @@ namespace Yubico.YubiKey.Cryptography
                 : ReadOnlySpan<byte>.Empty;
 
             ECDsa = ConvertPublicKey(publicPointSpan.ToArray());
+        }
+        
+        // TODO Test
+        public EcdsaVerify(ECPublicKey publicKey)
+        {
+            if (publicKey is null)
+            {
+                throw new ArgumentNullException(nameof(publicKey));
+            }
+
+            if (!publicKey.KeyType.IsECDsa() || !publicKey.KeyType.IsCurve25519())
+            {
+                throw new ArgumentException("Invalid key type", nameof(publicKey));
+            }
+
+            ECDsa = ConvertPublicKey(publicKey.PublicPoint);
         }
 
         /// <summary>
@@ -331,7 +348,8 @@ namespace Yubico.YubiKey.Cryptography
 
         private static ECDsa ConvertPublicKey(ReadOnlyMemory<byte> encodedEccPoint)
         {
-            int minEncodedPointLength = (KeyDefinitions.P256.LengthInBytes * 2) + 1; // This is the minimum length for an encoded point on P-256 (0x04 || x || y)
+            // This is the minimum length for an encoded point on P-256 (0x04 || x || y)
+            int minEncodedPointLength = (KeyDefinitions.P256.LengthInBytes * 2) + 1;
             if (encodedEccPoint.Length < minEncodedPointLength || encodedEccPoint.Span[0] != EncodedPointTag)
             {
                 throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);

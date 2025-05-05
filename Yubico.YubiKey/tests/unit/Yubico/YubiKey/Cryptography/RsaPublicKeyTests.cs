@@ -15,7 +15,9 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             var testKey = TestKeys.GetTestPublicKey(KeyType.RSA2048);
+#pragma warning disable CS0618 // Type or member is obsolete
             var pivPublicKey = testKey.AsPivPublicKey();
+#pragma warning restore CS0618 // Type or member is obsolete
             var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
 
             // Act

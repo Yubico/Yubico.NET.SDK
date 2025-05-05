@@ -15,6 +15,7 @@
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
+#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Yubico.YubiKey.TestUtilities
 {

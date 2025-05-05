@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Piv
     /// of a point on the curve. So for ECC P-256, each coordinate is 32 bytes
     /// (256 bits), so the private value will be 32 bytes.
     /// </remarks>
-    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
+    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey, PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
     public sealed class PivEccPrivateKey : PivPrivateKey
     {
         private const int EccP256PrivateKeySize = 32;
@@ -132,7 +132,6 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The encoding of the private key is not supported.
         /// </exception>
-        [Obsolete("Obsolete")]
         public static PivEccPrivateKey CreateEccPrivateKey(
             ReadOnlyMemory<byte> encodedPrivateKey,
             PivAlgorithm? pivAlgorithm)

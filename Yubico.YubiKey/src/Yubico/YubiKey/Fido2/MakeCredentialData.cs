@@ -170,7 +170,7 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// This returns the raw CBOR encoded credential data from the YubiKey, as returned by the MakeCredential operation.
         /// </summary>
-        public ReadOnlyMemory<byte> RawCredentialData { get; private set; }
+        public ReadOnlyMemory<byte> RawData { get; private set; }
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -198,8 +198,8 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public MakeCredentialData(ReadOnlyMemory<byte> cborEncoding)
         {
-            RawCredentialData = cborEncoding;
-            var map = new CborMap<int>(RawCredentialData);
+            RawData = cborEncoding;
+            var map = new CborMap<int>(RawData);
             
             try
             {

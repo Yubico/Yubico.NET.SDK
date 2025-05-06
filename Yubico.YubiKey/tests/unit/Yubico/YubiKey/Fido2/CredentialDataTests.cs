@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encoding = GetSampleEncoding();
             var cData = new MakeCredentialData(encoding);
-            Assert.Equal(encoding, cData.RawCredentialData);
+            Assert.Equal(encoding, cData.RawData);
         }
         
         

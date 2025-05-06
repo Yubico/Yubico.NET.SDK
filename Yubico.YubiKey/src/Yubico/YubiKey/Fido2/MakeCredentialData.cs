@@ -166,7 +166,11 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public ReadOnlyMemory<byte>? LargeBlobKey { get; private set; }
 
-        public ReadOnlyMemory<byte> RawData { get; private set; }
+
+        /// <summary>
+        /// This returns the CBOR encoded raw response of the MakeCredential operation from the YubiKey
+        /// </summary>
+        public ReadOnlyMemory<byte> RawResponse { get; private set; }
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -194,10 +198,8 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public MakeCredentialData(ReadOnlyMemory<byte> cborEncoding)
         {
+            RawResponse = cborEncoding;
             var map = new CborMap<int>(cborEncoding);
-            byte[] rawData = new byte[cborEncoding.Length];
-            cborEncoding.CopyTo(rawData);
-            RawData = rawData;
             
             try
             {

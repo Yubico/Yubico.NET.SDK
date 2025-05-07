@@ -25,7 +25,7 @@ namespace Yubico.YubiKey
     /// Executes device wide reset and check that PINs are set to default values (where applicable).
     /// </summary>
     /// <remarks>
-    /// MockDevice wide reset is only available on YubiKey Bio Multi-protocol Edition devices.
+    /// Device wide reset is only available on YubiKey Bio Multi-protocol Edition devices.
     /// </remarks>
     public class DeviceResetTests
     {

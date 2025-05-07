@@ -106,7 +106,7 @@ namespace Yubico.YubiKey.Piv
             //  Build the peer objects.
             var (_, testPrivateKey) = TestKeys.GetKeyPair(keyType);
 
-            var peerPub = TestKeyExtensions.AsPublicKey(testPrivateKey);
+            var peerPub = testPrivateKey.AsPublicKey();
             var peerEcc = (ECPublicKey)peerPub;
 
             var ecDsaObject = testPrivateKey.AsECDsa(); // Wtf, these are the same keys

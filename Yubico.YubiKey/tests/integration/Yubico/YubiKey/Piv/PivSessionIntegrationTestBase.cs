@@ -65,19 +65,11 @@ public class PivSessionIntegrationTestBase : IDisposable
 
     protected PivSession GetSession(
         StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
-        bool authenticate = true)
-    {
-        // var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-        return GetSessionInternal(Device, authenticate);
-    }
+        bool authenticate = true) => GetSessionInternal(Device, authenticate);
 
     protected PivSession GetSessionScp(
         StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
-        bool authenticate = true)
-    {
-        // var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-        return GetSessionInternal(Device, authenticate, Scp03KeyParameters.DefaultKey);
-    }
+        bool authenticate = true) => GetSessionInternal(Device, authenticate, Scp03KeyParameters.DefaultKey);
 
     private static PivSession GetSessionInternal(
         IYubiKeyDevice testDevice,

@@ -283,18 +283,6 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                // if (SampleKeyPairs.GetKeysAndCertPem(keyType, isValidCert, out var certPem, out _, out var privateKeyPem) == false)
-                // {
-                //     return false;
-                // }
-
-                // var cert = new CertConverter(certPem!.ToCharArray());
-                // X509Certificate2 certObj = cert.GetCertObject();
-                // var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
-                // PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
-
-                // pivSession.ReplaceAttestationKeyAndCertificate(pivPrivateKey, certObj);
-                
                 var testCert = TestKeys.GetTestCertificate(keyType, isValidCert);
                 var testPrivKey = TestKeys.GetTestPrivateKey(keyType);
                 var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivKey.EncodedKey);

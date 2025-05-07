@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Piv
         /// Tests with devices without Bio Metadata are skipped.
         /// </remarks>
         /// <param name="testDeviceType"></param>
-        [SkippableTheory(typeof(NotSupportedException))]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5Bio)]
         public void BioMultiProtocol_Authenticate(
             StandardTestDevice testDeviceType)
@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.Piv
         /// Tests with devices without Bio Metadata are skipped.
         /// </remarks>
         /// <param name="testDeviceType"></param>
-        [SkippableTheory(typeof(NotSupportedException))]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5Bio)]
         public void BioMultiProtocol_AttemptsRemaining(
             StandardTestDevice testDeviceType)
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Piv
         /// Tests with devices without Bio Metadata are skipped.
         /// </remarks>
         /// <param name="testDeviceType"></param>
-        [SkippableTheory(typeof(NotSupportedException))]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5Bio)]
         public void BioMultiProtocol_TemporaryPin(
             StandardTestDevice testDeviceType)

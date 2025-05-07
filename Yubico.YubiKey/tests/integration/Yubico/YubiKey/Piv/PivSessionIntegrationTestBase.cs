@@ -26,11 +26,10 @@ public class PivSessionIntegrationTestBase : IDisposable
     protected StandardTestDevice TestDeviceType { get; set; } = StandardTestDevice.Fw5;
     protected bool Authenticate { get; set; }
     protected PivSession Session => _session ??= GetSession(TestDeviceType, Authenticate);
-    public IYubiKeyDevice Device { get; set; }
+    public IYubiKeyDevice Device => IntegrationTestDeviceEnumeration.GetTestDevice(TestDeviceType);
 
     protected PivSessionIntegrationTestBase()
     {
-        Device = IntegrationTestDeviceEnumeration.GetTestDevice(TestDeviceType);
         Session.ResetApplication();
     }
 

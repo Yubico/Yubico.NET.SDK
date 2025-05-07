@@ -91,7 +91,7 @@ namespace Yubico.YubiKey.Piv
         public void Auth_ThenWrongKey()
         {
             DoFailedAuth();
-            TryAuthenticate();
+            TryAuthenticate(true);
 
             Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
                 Session.ManagementKeyAuthenticationResult);

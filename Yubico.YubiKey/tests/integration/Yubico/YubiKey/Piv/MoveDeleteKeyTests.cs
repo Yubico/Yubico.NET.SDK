@@ -21,7 +21,7 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Piv
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class MoveDeleteKeyTests
+    public class MoveDeleteKeyTests : PivSessionIntegrationTestBase
     {
         [SkippableTheory(typeof(NotSupportedException))]
         [InlineData(KeyType.RSA1024)]
@@ -36,26 +36,20 @@ namespace Yubico.YubiKey.Piv
             const byte sourceSlot = PivSlot.Retired1;
             const byte destinationSlot = PivSlot.Retired20;
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
-            using var pivSession = new PivSession(testDevice);
-            var collectorObj = new Simple39KeyCollector();
-            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-            DeleteKeys(pivSession, sourceSlot, destinationSlot);
-
-            var generatedKeyPair = pivSession.GenerateKeyPair(sourceSlot, expectedAlgorithm, PivPinPolicy.None);
-            var metadataForKeyPair = pivSession.GetMetadata(sourceSlot);
-            Assert.Equal(generatedKeyPair.EncodeAsPiv(), metadataForKeyPair.PublicKeyParameters?.EncodeAsPiv());
+            DeleteKeys(Session, sourceSlot, destinationSlot);
+            var devicePublicKey = Session.GenerateKeyPair(sourceSlot, expectedAlgorithm, PivPinPolicy.None);
+            var devicePublicKeySpan = devicePublicKey.EncodeAsPiv().Span;
 
             // Act
-            pivSession.MoveKey(sourceSlot, destinationSlot);
+            Session.MoveKey(sourceSlot, destinationSlot);
+            var destinationMetadata = Session.GetMetadata(destinationSlot);
 
             // Assert
             // Moved key slot should now be empty
-            Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(sourceSlot));
-
-            var destinationMetadata = pivSession.GetMetadata(destinationSlot);
-            Assert.Equal(generatedKeyPair.EncodeAsPiv(), destinationMetadata.PublicKeyParameters?.EncodeAsPiv());
+            Assert.Throws<InvalidOperationException>(() => Session.GetMetadata(sourceSlot));
+            var movedPublicKey = destinationMetadata.PublicKeyParameters!.EncodeAsPiv().Span;
+            var isMoved = devicePublicKeySpan.SequenceEqual(movedPublicKey);
+            Assert.True(isMoved);
         }
 
         [SkippableTheory(typeof(NotSupportedException))]
@@ -70,28 +64,23 @@ namespace Yubico.YubiKey.Piv
             // Arrange
             const byte sourceSlot = PivSlot.Retired1;
             const byte destinationSlot = PivSlot.Retired20;
+            var testPrivateKey = TestKeys.GetTestPrivateKey(expectedAlgorithm);
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
-            using var pivSession = new PivSession(testDevice);
-            pivSession.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
+            DeleteKeys(Session, sourceSlot, destinationSlot);
 
-            DeleteKeys(pivSession, sourceSlot, destinationSlot);
-
-            var (publicKey, privateKey) = TestKeys.GetKeyPair(expectedAlgorithm);
-            var importedPrivateKey = AsnPrivateKeyDecoder.CreatePrivateKey(privateKey.EncodedKey);
-            var importedPublicKey = AsnPublicKeyDecoder.CreatePublicKey(publicKey.EncodedKey);
-
-            pivSession.ImportPrivateKey(sourceSlot, importedPrivateKey);
+            Session.ImportPrivateKey(sourceSlot, testPrivateKey.AsPrivateKey());
+            var devicePublicKey = Session.GetMetadata(sourceSlot);
 
             // Act
-            pivSession.MoveKey(sourceSlot, destinationSlot);
+            Session.MoveKey(sourceSlot, destinationSlot);
+            var destinationMetadata = Session.GetMetadata(destinationSlot);
 
             // Assert
             // Moved key slot should now be empty
-            Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(sourceSlot));
-
-            var destinationMetadata = pivSession.GetMetadata(destinationSlot);
-            Assert.Equal(importedPublicKey.EncodeAsPiv(), destinationMetadata.PublicKeyParameters?.EncodeAsPiv());
+            Assert.Throws<InvalidOperationException>(() => Session.GetMetadata(sourceSlot));
+            var movedPublicKey = devicePublicKey.PublicKeyParameters!.EncodeAsPiv().Span;
+            var isMoved = devicePublicKey.PublicKeyParameters!.EncodeAsPiv().Span.SequenceEqual(movedPublicKey);
+            Assert.True(isMoved);
         }
 
         [SkippableTheory(typeof(NotSupportedException))]
@@ -107,43 +96,22 @@ namespace Yubico.YubiKey.Piv
             const byte slotToDelete = PivSlot.Retired1;
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
 
-            using var pivSession = new PivSession(testDevice);
-            pivSession.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
-
             var testPrivateKey = TestKeys.GetTestPrivateKey(expectedAlgorithm);
             var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
-            pivSession.ImportPrivateKey(slotToDelete, privateKey);
+            Session.ImportPrivateKey(slotToDelete, privateKey);
 
             // Act
-            pivSession.DeleteKey(slotToDelete);
+            Session.DeleteKey(slotToDelete);
 
             // Assert
             // Key has been deleted and thus returns no data on the slot query
-            Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(slotToDelete));
+            Assert.Throws<InvalidOperationException>(() => Session.GetMetadata(slotToDelete));
         }
 
-        private static byte[] GetRandomDataBuffer(KeyType expectedAlgorithm)
+        private static void DeleteKeys(PivSession Session, byte sourceSlot, byte destinationSlot)
         {
-            byte[] dataToSign = expectedAlgorithm switch
-            {
-                KeyType.RSA1024 => new byte[128],
-                KeyType.RSA2048 => new byte[256],
-                KeyType.RSA3072 => new byte[384],
-                KeyType.RSA4096 => new byte[512],
-                KeyType.ECP256 => new byte[32],
-                KeyType.ECP384 => new byte[48],
-                _ => throw new ArgumentException("what are you trying to do")
-            };
-
-            Random.Shared.NextBytes(dataToSign);
-            dataToSign[0] &= 0x7F;
-            return dataToSign;
-        }
-
-        private static void DeleteKeys(PivSession pivSession, byte sourceSlot, byte destinationSlot)
-        {
-            pivSession.DeleteKey(sourceSlot);
-            pivSession.DeleteKey(destinationSlot);
+            Session.DeleteKey(sourceSlot);
+            Session.DeleteKey(destinationSlot);
         }
     }
 }

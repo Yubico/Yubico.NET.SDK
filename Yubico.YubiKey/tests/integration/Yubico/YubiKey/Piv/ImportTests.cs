@@ -112,14 +112,13 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
         [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
         [Obsolete()]
-        public void Import_KeyAndMatchingCer2t(
+        public void Import_with_PivEccPrivateKey_Succeeds(
             KeyType keyType,
             StandardTestDevice testDeviceType)
         {
             using var pivSession = GetSession(testDeviceType);
             var testPrivateKey = TestKeys.GetTestPrivateKey(keyType);
-            var piv = testPrivateKey.AsPivPrivateKey();
-            
+            var piv = new PivEccPrivateKey(testPrivateKey.GetPrivateKey(), keyType.GetPivAlgorithm());
             pivSession.ImportPrivateKey(0x90, piv);
         }
 

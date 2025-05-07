@@ -65,7 +65,7 @@ public class ZeroingMemoryHandleTests
                 // Simulate combining key and IV for an operation
                 for (int i = 0; i < 5; i++)
                 {
-                    resultData[i] = (byte)(keyHandle.Data[i] ^ ivHandle.Data[i]);
+                    resultData[i] = (byte)(keyHandle.Data.Span[i] ^ ivHandle.Data.Span[i]);
                 }
             }
 
@@ -148,14 +148,14 @@ public class ZeroingMemoryHandleTests
         Assert.All(sensitiveData, b => Assert.Equal(0, b));
     }
 
-// Mock processors for testing
+    // Mock processors for testing
     private static class FirstLayerProcessor
     {
         public static byte[] Process(ZeroingMemoryHandle handle)
         {
             // Simulate processing
             var result = new byte[handle.Data.Length];
-            Buffer.BlockCopy(handle.Data, 0, result, 0, handle.Data.Length);
+            handle.Data.CopyTo(result);
             return result;
         }
     }
@@ -167,7 +167,7 @@ public class ZeroingMemoryHandleTests
             // Simulate more processing
             for (int i = 0; i < originalHandle.Data.Length; i++)
             {
-                intermediateResult[i] ^= originalHandle.Data[i];
+                intermediateResult[i] ^= originalHandle.Data.Span[i];
             }
             return intermediateResult;
         }

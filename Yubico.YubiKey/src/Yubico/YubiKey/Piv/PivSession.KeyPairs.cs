@@ -400,9 +400,9 @@ namespace Yubico.YubiKey.Piv
 
             RefreshManagementKeyAuthentication();
 
-            var pivEncodedKey = privateKey.EncodeAsPiv();
+            using var pivEncodedKeyHandle = new ZeroingMemoryHandle(privateKey.EncodeAsPiv());
             var command = new ImportAsymmetricKeyCommand(
-                pivEncodedKey, 
+                pivEncodedKeyHandle.Data, 
                 privateKey.KeyType,
                 slotNumber, 
                 pinPolicy, 

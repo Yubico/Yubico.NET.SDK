@@ -37,8 +37,8 @@ namespace Yubico.YubiKey
         public void Reset()
         {
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Bio);
-            Skip.IfNot(testDevice.HasFeature(YubiKeyFeature.DeviceReset), "MockDevice does not support DeviceReset.");
-            Skip.IfNot(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv), "MockDevice does not support DeviceReset.");
+            Skip.IfNot(testDevice.HasFeature(YubiKeyFeature.DeviceReset), "Device does not support DeviceReset.");
+            Skip.IfNot(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv), "Device does not support DeviceReset.");
 
             testDevice.DeviceReset();
 

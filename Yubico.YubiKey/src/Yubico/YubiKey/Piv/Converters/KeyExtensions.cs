@@ -53,6 +53,7 @@ public static class KeyExtensions
     /// <param name="parameters">The private key parameters to encode.</param>
     /// <returns>A BER encoded byte array containing the encoded private key.</returns>
     /// <exception cref="ArgumentException">Thrown when the key type is not supported or when RSA key components have invalid lengths.</exception>
+    /// <remarks>This method returns a newly allocated array containing sensitive information.</remarks>
     public static Memory<byte> EncodeAsPiv(this IPrivateKey parameters) =>
         parameters switch
         {

@@ -63,6 +63,7 @@ namespace Yubico.YubiKey.TestUtilities
     // Build an object from a PivPublicKey object and get a PEM string or RSA or
     // ECDsa object.
     // It is also possible to get a public key from a private key.
+    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
     public class KeyConverter
     {
         private const string RequestedKeyMessage = "Requested key was unavailable.";
@@ -768,7 +769,9 @@ namespace Yubico.YubiKey.TestUtilities
             // var eccOid = eccParams.Curve.Oid.Value!;
             // var keyDefinition = KeyDefinitions.GetByOid(eccOid);
             // var eccPriKey = new PivEccPrivateKey(privateValue, keyDefinition.KeyType.GetPivAlgorithm());
+#pragma warning disable CS0618 // Type or member is obsolete
             var eccPriKey = new PivEccPrivateKey(privateValue);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             _pivPrivateKey = eccPriKey;
         }

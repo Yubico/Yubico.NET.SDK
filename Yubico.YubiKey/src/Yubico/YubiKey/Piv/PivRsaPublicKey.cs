@@ -59,6 +59,7 @@ namespace Yubico.YubiKey.Piv
     /// and public exponent, then examine the encoding.
     /// </para>
     /// </remarks>
+    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
     public sealed class PivRsaPublicKey : PivPublicKey
     {
         private readonly byte[] _exponentF4 = { 0x01, 0x00, 0x01 };

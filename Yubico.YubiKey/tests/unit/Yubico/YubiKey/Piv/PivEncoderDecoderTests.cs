@@ -92,7 +92,9 @@ public class PivEncoderDecoderTests
         var testKey = TestKeys.GetTestPublicKey(keyType);
 
         // Get test key as PivPublicKey
+#pragma warning disable CS0618 // Type or member is obsolete
         var testPivPublicKey = testKey.AsPivPublicKey();
+#pragma warning restore CS0618 // Type or member is obsolete
         Assert.NotNull(testPivPublicKey);
 
         // Convert from PivEncoding to PublicKey using Key Converter.

@@ -13,68 +13,26 @@
 // limitations under the License.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
-#pragma warning disable CA1710
-internal class ZeroingMemoryHandle : IDisposable, IReadOnlyCollection<byte>, IEnumerable<byte>
-#pragma warning restore CA1710
+internal class ZeroingMemoryHandle : IDisposable
 {
-    private readonly byte[] _data;
+    private readonly Memory<byte> _data;
     private bool _disposed;
-
     public int Length => _disposed ? 0 : _data.Length;
-    public int Count => Length; // For IReadOnlyCollection
+    public int Count => Length;
 
-    public byte this[int index] => _disposed 
-        ? throw new ObjectDisposedException(nameof(ZeroingMemoryHandle)) 
-        : _data[index];
-
-    public ZeroingMemoryHandle(byte[] data)
+    public ZeroingMemoryHandle(Memory<byte> data)
     {
-        _data = data ?? throw new ArgumentNullException(nameof(data));
+        _data = data;
     }
 
-    public ReadOnlySpan<byte> AsSpan() => _disposed 
-        ? ReadOnlySpan<byte>.Empty 
-        : _data.AsSpan();
-
-    public byte[] Data => _disposed 
+    public Memory<byte> Data => _disposed 
         ? throw new ObjectDisposedException(nameof(ZeroingMemoryHandle)) 
         : _data;
-
-    public void CopyTo(byte[] destination, int destinationIndex = 0)
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(ZeroingMemoryHandle));
-        }
-
-        Buffer.BlockCopy(_data, 0, destination, destinationIndex, _data.Length);
-    }
-
-    public ReadOnlySpan<byte> Slice(int start, int length) => _disposed 
-        ? ReadOnlySpan<byte>.Empty 
-        : _data.AsSpan(start, length);
-
-    public IEnumerator<byte> GetEnumerator()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(ZeroingMemoryHandle));
-        }
-
-        for (int i = 0; i < _data.Length; i++)
-        {
-            yield return _data[i];
-        }
-    }
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
+    
     public void Dispose()
     {
         if (_disposed)
@@ -82,7 +40,7 @@ internal class ZeroingMemoryHandle : IDisposable, IReadOnlyCollection<byte>, IEn
             return;
         }
 
-        CryptographicOperations.ZeroMemory(_data);
+        CryptographicOperations.ZeroMemory(_data.Span);
         _disposed = true;
         GC.SuppressFinalize(this);
     }

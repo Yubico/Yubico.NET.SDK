@@ -22,7 +22,7 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Piv
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class DecryptTests
+    public class DecryptTests : PivSessionIntegrationTestBase
     {
         [Theory]
         [InlineData(PivPinPolicy.Always, StandardTestDevice.Fw5)]
@@ -79,7 +79,6 @@ namespace Yubico.YubiKey.Piv
 
             var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
             var privateKey = RSAPrivateKey.CreateFromPkcs8(testKey.EncodedKey);
-
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using var pivSession = new PivSession(testDevice);
@@ -102,9 +101,12 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA2048, 0x95, RsaFormat.Sha256, 2, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA2048, 0x95, RsaFormat.Sha384, 2, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA2048, 0x95, RsaFormat.Sha512, 2, StandardTestDevice.Fw5)]
-        [Obsolete] // TODO Fix later
         public void EncryptCSharp_Decrypt_Correct(KeyType keyType, byte slotNumber, int digestAlgorithm, int paddingScheme, StandardTestDevice testDeviceType)
         {
+            TestDeviceType = testDeviceType;
+            var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
+            var privateKey = TestKeyExtensions.AsPrivateKey(testPrivateKey);
+
             var rsaPadding = RSAEncryptionPadding.Pkcs1;
             if (paddingScheme != 1)
             {
@@ -117,43 +119,20 @@ namespace Yubico.YubiKey.Piv
                 };
             }
 
-            var dataToEncrypt = new byte[16];
+            Span<byte> dataToEncrypt = stackalloc byte[16];
             GetArbitraryData(dataToEncrypt);
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out var pubKeyPem, out var priKeyPem);
-            var pubKey = new KeyConverter(pubKeyPem!.ToCharArray());
-            var priKey = new KeyConverter(priKeyPem!.ToCharArray());
-
-            using var rsaObject = pubKey.GetRsaObject();
+            using var rsaObject = testPublicKey.AsRSA();
             var encryptedData = rsaObject.Encrypt(dataToEncrypt, rsaPadding);
 
-            var pivPrivateKey = priKey.GetPivPrivateKey();
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            Session.ImportPrivateKey(slotNumber, privateKey, PivPinPolicy.Default, PivTouchPolicy.Never);
 
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            var formattedData = Session.Decrypt(slotNumber, encryptedData);
 
-                pivSession.ImportPrivateKey(slotNumber, pivPrivateKey, PivPinPolicy.Default, PivTouchPolicy.Never);
-
-                var formattedData = pivSession.Decrypt(slotNumber, encryptedData);
-
-                byte[] decryptedData;
-                bool isValid;
-                if (paddingScheme == 1)
-                {
-                    isValid = RsaFormat.TryParsePkcs1Decrypt(formattedData, out decryptedData);
-                }
-                else
-                {
-                    isValid = RsaFormat.TryParsePkcs1Oaep(formattedData, digestAlgorithm, out decryptedData);
-                }
-                Assert.True(isValid);
-
-                isValid = dataToEncrypt.SequenceEqual(decryptedData);
-                Assert.True(isValid);
-            }
+            Assert.True(paddingScheme == 1 
+                ? RsaFormat.TryParsePkcs1Decrypt(formattedData, out var decryptedData) 
+                : RsaFormat.TryParsePkcs1Oaep(formattedData, digestAlgorithm, out decryptedData));
+            Assert.True(dataToEncrypt.SequenceEqual(decryptedData));
         }
 
         [Theory]
@@ -177,7 +156,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         // Fill a byte array with "random" data. Up to 256 bytes.
-        private static void GetArbitraryData(byte[] bufferToFill)
+        private static void GetArbitraryData(Span<byte> bufferToFill)
         {
             byte[] arbitraryData = {
                 0x3E, 0xE8, 0xC1, 0xBE, 0xFB, 0x55, 0x48, 0x82, 0xE6, 0xAD, 0x9A, 0xBC, 0x84, 0x04, 0xF4, 0xA4,
@@ -197,14 +176,8 @@ namespace Yubico.YubiKey.Piv
                 0x8B, 0x1C, 0x84, 0x52, 0x7E, 0x02, 0x89, 0x9F, 0x58, 0x5C, 0xFF, 0xDB, 0x35, 0x48, 0xC3, 0x6E,
                 0xBC, 0x29, 0xFC, 0xE7, 0xAC, 0x3E, 0x44, 0xCC, 0xC4, 0x21, 0xFA, 0xCB, 0xAA, 0x98, 0x47, 0x5F
             };
-
-            var count = 256;
-            if (bufferToFill.Length < 256)
-            {
-                count = bufferToFill.Length;
-            }
-
-            Array.Copy(arbitraryData, 0, bufferToFill, 0, count);
+            
+            arbitraryData.AsSpan(0, bufferToFill.Length).CopyTo(bufferToFill);
         }
     }
 }

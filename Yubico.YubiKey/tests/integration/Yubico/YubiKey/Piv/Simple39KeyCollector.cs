@@ -50,11 +50,6 @@ namespace Yubico.YubiKey.Piv
 
         public bool Simple39KeyCollectorDelegate(KeyEntryData keyEntryData)
         {
-            if (keyEntryData is null)
-            {
-                return false;
-            }
-
             if (keyEntryData.IsRetry && RetryFlag == 0)
             {
                 if (!(keyEntryData.RetriesRemaining is null))

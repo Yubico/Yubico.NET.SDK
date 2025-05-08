@@ -19,6 +19,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class PinAlwaysTests
     {
         [Theory]

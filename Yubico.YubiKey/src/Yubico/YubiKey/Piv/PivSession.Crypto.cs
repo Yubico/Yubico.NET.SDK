@@ -389,11 +389,10 @@ namespace Yubico.YubiKey.Piv
                 throw new ArgumentNullException(nameof(correspondentPublicKey));
             }
 
-            byte[] publicPoint = correspondentPublicKey switch
+            var publicPoint = correspondentPublicKey switch
             {
-                ECPublicKey ecDsa => ecDsa.PublicPoint.ToArray(),
-                Curve25519PublicKey edDsa when correspondentPublicKey.KeyType == KeyType.X25519 
-                    => edDsa.PublicPoint.ToArray(),
+                ECPublicKey ecDsa => ecDsa.PublicPoint,
+                Curve25519PublicKey edDsa when correspondentPublicKey.KeyType == KeyType.X25519 => edDsa.PublicPoint,
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,

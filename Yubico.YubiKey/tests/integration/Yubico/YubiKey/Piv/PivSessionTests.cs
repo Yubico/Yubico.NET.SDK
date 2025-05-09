@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Linq;
-using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;

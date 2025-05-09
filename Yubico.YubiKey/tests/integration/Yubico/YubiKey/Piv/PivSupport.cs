@@ -22,11 +22,6 @@ namespace Yubico.YubiKey.Piv
     {
         public static bool ImportKey(PivSession pivSession, byte slotNumber)
         {
-            if (pivSession is null)
-            {
-                return false;
-            }
-
             if (pivSession.ManagementKeyAuthenticated == false)
             {
                 if (pivSession.TryAuthenticateManagementKey() == false)
@@ -87,22 +82,14 @@ namespace Yubico.YubiKey.Piv
 
         public static bool ResetPiv(PivSession pivSession)
         {
-            if (pivSession is null)
+            if (!BlockPinOrPuk(pivSession, PivSlot.Pin) || !BlockPinOrPuk(pivSession, PivSlot.Puk))
             {
                 return false;
             }
 
-            if (BlockPinOrPuk(pivSession, PivSlot.Pin))
-            {
-                if (BlockPinOrPuk(pivSession, PivSlot.Puk))
-                {
-                    var resetCommand = new ResetPivCommand();
-                    ResetPivResponse resetResponse = pivSession.Connection.SendCommand(resetCommand);
-                    return resetResponse.Status == ResponseStatus.Success;
-                }
-            }
-
-            return false;
+            var resetCommand = new ResetPivCommand();
+            ResetPivResponse resetResponse = pivSession.Connection.SendCommand(resetCommand);
+            return resetResponse.Status == ResponseStatus.Success;
         }
 
         private static bool BlockPinOrPuk(PivSession pivSession, byte slotNumber)

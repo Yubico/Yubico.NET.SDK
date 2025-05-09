@@ -26,17 +26,6 @@ namespace Yubico.YubiKey.Piv
     [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class MsrootsTests(ITestOutputHelper output) : PivSessionIntegrationTestBase
     {
-        override protected void Dispose(
-            bool disposing)
-        {
-            if (disposing)
-            {
-                Rng.Dispose();
-            }
-
-            base.Dispose(disposing);
-        }
-
         public RandomNumberGenerator Rng { get; set; } = RandomObjectUtility.GetRandomObject(null);
 
         [Theory]
@@ -238,6 +227,17 @@ namespace Yubico.YubiKey.Piv
             }
 
             return true;
+        }
+
+        override protected void Dispose(
+            bool disposing)
+        {
+            if (disposing)
+            {
+                Rng.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

@@ -26,25 +26,24 @@ namespace Yubico.YubiKey.Piv
         private readonly byte[] _pin;
         private readonly byte[] _puk;
 
-        public SpecifiedKeyCollector(byte[] pin, byte[] puk, byte[] mgmtKey)
+        public SpecifiedKeyCollector(
+            ReadOnlyMemory<byte> pin,
+            ReadOnlyMemory<byte> puk,
+            ReadOnlyMemory<byte> mgmtKey)
         {
             _pin = new byte[pin.Length];
-            Array.Copy(pin, 0, _pin, 0, pin.Length);
+            pin.CopyTo(_pin);
 
             _puk = new byte[puk.Length];
-            Array.Copy(puk, 0, _puk, 0, puk.Length);
+            puk.CopyTo(_puk);
 
             _mgmtKey = new byte[mgmtKey.Length];
-            Array.Copy(mgmtKey, 0, _mgmtKey, 0, mgmtKey.Length);
+            mgmtKey.CopyTo(_mgmtKey);
         }
 
-        public bool SpecifiedKeyCollectorDelegate(KeyEntryData keyEntryData)
+        public bool SpecifiedKeyCollectorDelegate(
+            KeyEntryData keyEntryData)
         {
-            if (keyEntryData is null)
-            {
-                return false;
-            }
-
             if (keyEntryData.IsRetry)
             {
                 return false;
@@ -64,17 +63,6 @@ namespace Yubico.YubiKey.Piv
                 case KeyEntryRequest.VerifyPivPin:
                     currentValue = _pin;
                     break;
-
-                //                case KeyEntryRequest.ChangePivPin:
-                //                    currentValue = CollectPin();
-                //                    newValue = CollectPin();
-                //                    break;
-                //
-                //                case KeyEntryRequest.ChangePivPuk:
-                //                    currentValue = CollectPuk();
-                //                    newValue = CollectPuk();
-                //                    break;
-                //
                 case KeyEntryRequest.ResetPivPinWithPuk:
                     currentValue = _puk;
                     newValue = _pin;
@@ -83,15 +71,6 @@ namespace Yubico.YubiKey.Piv
                 case KeyEntryRequest.AuthenticatePivManagementKey:
                     currentValue = _mgmtKey;
                     break;
-
-                    //                case KeyEntryRequest.ChangePivManagementKey:
-                    //                    if (keyEntryData.IsRetry == true)
-                    //                    {
-                    //                        return false;
-                    //                    }
-                    //                    currentValue = CollectMgmtKey();
-                    //                    newValue = CollectMgmtKey();
-                    //                    break;
             }
 
             if (newValue is null)

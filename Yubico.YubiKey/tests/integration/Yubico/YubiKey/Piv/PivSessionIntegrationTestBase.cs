@@ -14,6 +14,7 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.TestUtilities;
 
@@ -23,20 +24,40 @@ public class PivSessionIntegrationTestBase : IDisposable
 {
     private bool _disposed;
     private PivSession? _session;
+
+    protected ReadOnlyMemory<byte> DefaultPin = "123456"u8.ToArray();
+    protected ReadOnlyMemory<byte> DefaultPuk = "12345678"u8.ToArray();
+
+    protected readonly ReadOnlyMemory<byte> DefaultManagementKey = new byte[] // Both Aes and TDes
+    {
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+    };
+
+    protected KeyType DefaultManagementKeyType =>
+        Device.FirmwareVersion > FirmwareVersion.V5_7_0 ? KeyType.AES192 : KeyType.TripleDES;
+
     protected StandardTestDevice TestDeviceType { get; set; } = StandardTestDevice.Fw5;
-    protected bool Authenticate { get; set; }
-    protected PivSession Session => _session ??= GetSession(TestDeviceType, Authenticate);
-    public IYubiKeyDevice Device => IntegrationTestDeviceEnumeration.GetTestDevice(TestDeviceType);
+    protected PivSession Session => _session ??= GetSession(true);
+    protected IYubiKeyDevice Device => IntegrationTestDeviceEnumeration.GetTestDevice(TestDeviceType);
 
     protected PivSessionIntegrationTestBase()
     {
-        Session.ResetApplication();
+        using var session = GetSessionInternal(Device, false);
+        session.ResetApplication();
     }
 
     ~PivSessionIntegrationTestBase()
     {
         Dispose(false);
     }
+
+    protected PivSession GetSession(
+        bool authenticate = false) => GetSessionInternal(Device, authenticate);
+
+    protected PivSession GetSessionScp(
+        bool authenticate = false) => GetSessionInternal(Device, authenticate, Scp03KeyParameters.DefaultKey);
 
     public void Dispose()
     {
@@ -54,21 +75,12 @@ public class PivSessionIntegrationTestBase : IDisposable
 
         if (disposing)
         {
-            // _session?.ResetApplication();
             _session?.Dispose();
             _session = null;
         }
 
         _disposed = true;
     }
-
-    protected PivSession GetSession(
-        StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
-        bool authenticate = true) => GetSessionInternal(Device, authenticate);
-
-    protected PivSession GetSessionScp(
-        StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
-        bool authenticate = true) => GetSessionInternal(Device, authenticate, Scp03KeyParameters.DefaultKey);
 
     private static PivSession GetSessionInternal(
         IYubiKeyDevice testDevice,

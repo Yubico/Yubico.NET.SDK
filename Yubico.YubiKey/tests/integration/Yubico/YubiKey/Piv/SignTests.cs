@@ -36,15 +36,15 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             // Arrange
+            TestDeviceType = testDeviceType;
             var dataToSign = new byte[3062]; // APDU cannot be bigger than this
             Random.Shared.NextBytes(dataToSign);
 
             // -> Generate a Ed25519 key
-            using var pivSession = GetSession(testDeviceType);
-            var publicKeyParameters = pivSession.GenerateKeyPair(PivSlot.Retired12, KeyType.Ed25519);
+            var publicKeyParameters = Session.GenerateKeyPair(PivSlot.Retired12, KeyType.Ed25519);
 
             // Act
-            var signature = pivSession.Sign(PivSlot.Retired12, dataToSign);
+            var signature = Session.Sign(PivSlot.Retired12, dataToSign);
 
             // -> Verify the signature
             var bouncyKeyParameters = GetBouncyCastleKeyParameters(publicKeyParameters);
@@ -65,7 +65,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.ECP256)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.ECP384)]
         [InlineData(StandardTestDevice.Fw5Fips, KeyType.Ed25519)]
-        public async Task Sign_Succeeds(
+        public async Task Sign_EC_Succeeds(
             StandardTestDevice testDeviceType,
             KeyType keyType)
         {
@@ -160,7 +160,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096, 0x95, RsaFormat.Sha256, 2)]
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096, 0x95, RsaFormat.Sha384, 2)]
         [InlineData(StandardTestDevice.Fw5, KeyType.RSA4096, 0x95, RsaFormat.Sha512, 2)]
-        public void SignRsa_VerifyCSharp_Correct(
+        public void SignRSA_VerifyCSharp_Correct(
             StandardTestDevice testDeviceType,
             KeyType keyType,
             byte slotNumber,

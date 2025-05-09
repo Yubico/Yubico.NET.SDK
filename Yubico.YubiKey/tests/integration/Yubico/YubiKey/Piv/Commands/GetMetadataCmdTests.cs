@@ -29,10 +29,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void AesKey_GetMetadata_CorrectAlgorithm(
             KeyType keyType)
         {
-            if (!Device.HasFeature(YubiKeyFeature.PivAesManagementKey))
-            {
-                return;
-            }
+            Skip.If(!Device.HasFeature(YubiKeyFeature.PivAesManagementKey));
 
             using var pivSession = GetSession(authenticate: false);
             var isValid = pivSession.TryAuthenticateManagementKey();

@@ -37,11 +37,10 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             TestDeviceType = testDeviceType;
-            using var pivSession = GetSession(authenticate: false);
-            var connection = pivSession.Connection;
+            var connection = Session.Connection;
 
             Assert.True(VerifyUv(connection, false, false).IsEmpty);
-            Assert.False(pivSession.GetBioMetadata().HasTemporaryPin);
+            Assert.False(Session.GetBioMetadata().HasTemporaryPin);
 
             // check verified state
             Assert.True(VerifyUv(connection, false, true).IsEmpty);
@@ -67,11 +66,10 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             TestDeviceType = testDeviceType;
-            using var pivSession = GetSession(authenticate: false);
-            var connection = pivSession.Connection;
+            var connection = Session.Connection;
 
             VerifyUv(connection, false, false);
-            Assert.Equal(3, pivSession.GetBioMetadata().AttemptsRemaining);
+            Assert.Equal(3, Session.GetBioMetadata().AttemptsRemaining);
 
             var response = VerifyUv(connection, false, false, out int? attemptsRemaining);
             Assert.True(response.IsEmpty);
@@ -85,11 +83,11 @@ namespace Yubico.YubiKey.Piv
             response = VerifyUv(connection, false, false, out attemptsRemaining);
             Assert.True(response.IsEmpty);
             Assert.Equal(0, attemptsRemaining);
-            Assert.Equal(0, pivSession.GetBioMetadata().AttemptsRemaining);
+            Assert.Equal(0, Session.GetBioMetadata().AttemptsRemaining);
 
             // authenticate with PIN 
             Assert.Null(VerifyPin(connection));
-            Assert.Equal(3, pivSession.GetBioMetadata().AttemptsRemaining);
+            Assert.Equal(3, Session.GetBioMetadata().AttemptsRemaining);
         }
 
         /// <summary>
@@ -107,21 +105,20 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             TestDeviceType = testDeviceType;
-            using var pivSession = GetSession(authenticate: false);
-            var connection = pivSession.Connection;
-            var temporaryPin = VerifyUv(connection, true, false);
-            Assert.True(pivSession.GetBioMetadata().HasTemporaryPin);
+            var connection = Session.Connection;
+            VerifyUv(connection, true, false);
+            Assert.True(Session.GetBioMetadata().HasTemporaryPin);
 
             // use invalid temporary pin
             Assert.False(VerifyTemporaryPin(connection, "0102030405060708"u8.ToArray()));
-            Assert.False(pivSession.GetBioMetadata().HasTemporaryPin);
+            Assert.False(Session.GetBioMetadata().HasTemporaryPin);
 
-            temporaryPin = VerifyUv(connection, true, false);
+            var temporaryPin = VerifyUv(connection, true, false);
             Assert.False(temporaryPin.IsEmpty);
-            Assert.True(pivSession.GetBioMetadata().HasTemporaryPin);
+            Assert.True(Session.GetBioMetadata().HasTemporaryPin);
 
             Assert.True(VerifyTemporaryPin(connection, temporaryPin));
-            Assert.True(pivSession.GetBioMetadata().HasTemporaryPin);
+            Assert.True(Session.GetBioMetadata().HasTemporaryPin);
         }
 
         private ReadOnlyMemory<byte> VerifyUv(

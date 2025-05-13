@@ -20,11 +20,11 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.Piv.Converters;
 
 /// <summary>
-/// This class converts from a Piv Encoded Key to either instances of the common IPublicKey and IPrivateKey
-/// or concrete the concrete types that inherit these interfaces.
+/// This class converts from IPublicKey, IPrivateKey and implementations of either to a PIV-encoded key.
 /// </summary>
-internal class PivKeyEncoder
+internal static class PivKeyEncoder
 {
+    [Obsolete("KeyExtensions instead", false)]
     public static Memory<byte> EncodePublicKey(IPublicKey publicKey)
     {
         return publicKey switch
@@ -35,7 +35,7 @@ internal class PivKeyEncoder
             _ => throw new ArgumentException("Unsupported public key type."),
         };
     }
-    
+
     public static Memory<byte> EncodeRSAPublicKey(RSAPublicKey publicKey)
     {
         var rsaParameters = publicKey.Parameters;
@@ -70,17 +70,17 @@ internal class PivKeyEncoder
 
         return tlvWriter.Encode();
     }
-    
-    public static Memory<byte> EncodePrivateKey(IPrivateKey publicKey)
-    {
-        return publicKey switch
+
+    [Obsolete("KeyExtensions instead", false)]
+    public static Memory<byte> EncodePrivateKey(IPrivateKey publicKey) =>
+        publicKey switch
         {
             Curve25519PrivateKey curve25519PrivateKey => EncodeCurve25519PrivateKey(curve25519PrivateKey),
             ECPrivateKey ecPrivateKey => EncodeECPrivateKey(ecPrivateKey),
             RSAPrivateKey rsaPrivateKey => EncodeRSAPrivateKey(rsaPrivateKey),
+
             _ => throw new ArgumentException("Unsupported public key type."),
         };
-    }
 
     public static Memory<byte> EncodeECPrivateKey(ECPrivateKey privateKey)
     {

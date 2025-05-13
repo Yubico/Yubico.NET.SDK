@@ -11,6 +11,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// Converts the key to a PIV private key format.
         /// </summary>
         /// <returns>PivPrivateKey instance</returns>
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
         public static PivPrivateKey AsPivPrivateKey(
             this TestKey key)
         {
@@ -38,6 +39,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// Converts the key to a PIV public key format.
         /// </summary>
         /// <returns>PivPublicKey instance</returns>
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
         public static PivPublicKey AsPivPublicKey(
             this TestKey key)
         {

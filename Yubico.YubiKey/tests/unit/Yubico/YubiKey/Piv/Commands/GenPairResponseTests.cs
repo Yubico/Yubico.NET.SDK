@@ -141,7 +141,9 @@ namespace Yubico.YubiKey.Piv.Commands
             byte[] keyData = GetCorrectEncodingForAlgorithm(keyType);
 
             var response = new GenerateKeyPairResponse(responseApdu, 0x8F, keyType.GetPivAlgorithm());
+#pragma warning disable CS0618 // Type or member is obsolete
             PivPublicKey getData = response.GetData();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             var keyDataSpan = new ReadOnlySpan<byte>(keyData);
             bool compareResult = keyDataSpan.SequenceEqual(getData.PivEncodedPublicKey.Span);

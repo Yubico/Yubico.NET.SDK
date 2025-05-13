@@ -62,6 +62,7 @@ namespace Yubico.YubiKey.Piv
     /// </code>
     /// </para>
     /// </remarks>
+    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
     public class PivPrivateKey : PrivateKey
     {
         protected Memory<byte> EncodedKey { get; set; }
@@ -107,6 +108,8 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The key data supplied is not a supported encoding.
         /// </exception>
+        
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
         public static PivPrivateKey Create(ReadOnlyMemory<byte> encodedPrivateKey, PivAlgorithm? pivAlgorithm = null)
         {
             byte tag = 0;

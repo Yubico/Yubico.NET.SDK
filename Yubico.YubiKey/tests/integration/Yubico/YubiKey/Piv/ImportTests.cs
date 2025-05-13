@@ -38,7 +38,9 @@ namespace Yubico.YubiKey.Piv
         {
             // Arrange
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
+#pragma warning disable CS0618 // Type or member is obsolete
             var testPivPublicKey = testPublicKey.AsPivPublicKey();
+#pragma warning restore CS0618 // Type or member is obsolete
             var keyParameters = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
 
             const PivPinPolicy expectedPinPolicy = PivPinPolicy.Once;
@@ -103,6 +105,21 @@ namespace Yubico.YubiKey.Piv
 
             pivSession.ImportPrivateKey(0x90, privateKey);
             pivSession.ImportCertificate(0x90, testCert.AsX509Certificate2());
+        }
+        
+        
+        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
+        [Obsolete()]
+        public void Import_with_PivEccPrivateKey_Succeeds(
+            KeyType keyType,
+            StandardTestDevice testDeviceType)
+        {
+            using var pivSession = GetSession(testDeviceType);
+            var testPrivateKey = TestKeys.GetTestPrivateKey(keyType);
+            var piv = new PivEccPrivateKey(testPrivateKey.GetPrivateKey(), keyType.GetPivAlgorithm());
+            pivSession.ImportPrivateKey(0x90, piv);
         }
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]

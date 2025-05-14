@@ -22,13 +22,10 @@ namespace Yubico.YubiKey.Piv;
 
 public class PivSessionIntegrationTestBase : IDisposable
 {
-    private bool _disposed;
-    private PivSession? _session;
+    public static readonly ReadOnlyMemory<byte> DefaultPin = "123456"u8.ToArray();
+    public static readonly ReadOnlyMemory<byte> DefaultPuk = "12345678"u8.ToArray();
 
-    protected ReadOnlyMemory<byte> DefaultPin = "123456"u8.ToArray();
-    protected ReadOnlyMemory<byte> DefaultPuk = "12345678"u8.ToArray();
-
-    protected readonly ReadOnlyMemory<byte> DefaultManagementKey = new byte[] // Both Aes and TDes
+    public static readonly ReadOnlyMemory<byte> DefaultManagementKey = new byte[] // Both Aes and TDes
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -41,6 +38,9 @@ public class PivSessionIntegrationTestBase : IDisposable
     protected StandardTestDevice TestDeviceType { get; set; } = StandardTestDevice.Fw5;
     protected PivSession Session => _session ??= GetSession(true);
     protected IYubiKeyDevice Device => IntegrationTestDeviceEnumeration.GetTestDevice(TestDeviceType);
+
+    private bool _disposed;
+    private PivSession? _session;
 
     protected PivSessionIntegrationTestBase()
     {

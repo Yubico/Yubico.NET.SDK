@@ -142,7 +142,7 @@ namespace Yubico.YubiKey.Piv
             SetKeyFlag(0);
             var isChanged = Session.TryResetPin();
             Assert.True(isChanged);
-
+            
             isChanged = Session.TryChangePuk();
             Assert.True(isChanged);
 
@@ -238,11 +238,11 @@ namespace Yubico.YubiKey.Piv
             byte slotNumber,
             ResponseStatus expectedStatus,
             PivSession? session = null
-            )
+        )
         {
             var genPairCommand = new GenerateKeyPairCommand(
                 slotNumber, KeyType.ECP256, PivPinPolicy.Always, PivTouchPolicy.Never);
-            
+
             var sessionToUse = session ?? Session;
             var genPairResponse = sessionToUse.Connection.SendCommand(genPairCommand);
             var success = genPairResponse.Status == expectedStatus;

@@ -32,8 +32,6 @@ namespace Yubico.YubiKey.Piv
         {
             TestDeviceType = deviceType;
 
-            LoadAttestationPair(KeyType.ECP256, true);
-            
             _ = Assert.Throws<InvalidOperationException>(() =>
                 Session.CreateAttestationStatement(PivSlot.Authentication));
         }
@@ -44,15 +42,13 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice deviceType)
         {
             TestDeviceType = deviceType;
+            var privateKey = TestKeys.GetTestPrivateKey(KeyType.ECP384).AsPrivateKey();
 
-            LoadAttestationPair(KeyType.ECP384, true);
-            PivSupport.ResetPiv(Session);
+            Session.ImportPrivateKey(PivSlot.Retired1, privateKey);
 
-            var isValid = PivSupport.ImportKey(Session, PivSlot.Authentication);
-            Assert.True(isValid);
-
+            // Cannot attest to an imported key.
             _ = Assert.Throws<InvalidOperationException>(() =>
-                Session.CreateAttestationStatement(PivSlot.Authentication));
+                Session.CreateAttestationStatement(PivSlot.Retired1));
         }
 
         [Theory]
@@ -66,30 +62,20 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice deviceType)
         {
             TestDeviceType = deviceType;
-            byte[] slotNumbers =
+
+            const byte slotNumber = PivSlot.Retired1;
+            _ = Session.GenerateKeyPair(
+                slotNumber, keyType, PivPinPolicy.Never, PivTouchPolicy.Never);
+
+            X509Certificate2? cert = null;
+            try
             {
-                0x9A, 0x9C, 0x9D, 0x9E,
-                0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
-                0x90, 0x91, 0x92, 0x93, 0x94, 0x95
-            };
-
-            LoadAttestationPair(keyType, true);
-
-            foreach (var slotNumber in slotNumbers)
+                cert = Session.CreateAttestationStatement(slotNumber);
+                Assert.NotEqual(1, cert.Version);
+            }
+            finally
             {
-                _ = Session.GenerateKeyPair(
-                    slotNumber, KeyType.ECP256, PivPinPolicy.Never, PivTouchPolicy.Never);
-
-                X509Certificate2? cert = null;
-                try
-                {
-                    cert = Session.CreateAttestationStatement(slotNumber);
-                    Assert.NotEqual(1, cert.Version);
-                }
-                finally
-                {
-                    cert?.Dispose();
-                }
+                cert?.Dispose();
             }
         }
 
@@ -135,16 +121,18 @@ namespace Yubico.YubiKey.Piv
         [InlineData(BadAttestationPairs.KeyEccP256CertVersion1, StandardTestDevice.Fw5)]
         [InlineData(BadAttestationPairs.KeyEccP384CertVersion1, StandardTestDevice.Fw5)]
         [InlineData(BadAttestationPairs.KeyRsa2048CertBigName, StandardTestDevice.Fw5)]
-        public void UseBadAttestPair_CreateStatement_ThrowsInvalidOp(int whichPair, StandardTestDevice deviceType)
+        public void UseBadAttestPair_CreateStatement_ThrowsInvalidOp(
+            int whichPair,
+            StandardTestDevice deviceType)
         {
             TestDeviceType = deviceType;
             BadAttestationPairs.GetPair(whichPair, out var privateKeyPem, out var certPem);
-        
+
             var certObj = X509CertificateLoader.LoadCertificate(PemHelper.GetBytesFromPem(certPem));
             var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(PemHelper.GetBytesFromPem(privateKeyPem));
             var isValid = LoadAttestationPairCommands(privateKey, certObj);
             Assert.True(isValid);
-        
+
             isValid = AttestationShouldFail(BadAttestationPairs.KeyRsa1024CertValid);
             Assert.True(isValid);
         }
@@ -216,7 +204,7 @@ namespace Yubico.YubiKey.Piv
             var testCert = TestKeys.GetTestCertificate(keyType, isValidCert);
             var testPrivKey = TestKeys.GetTestPrivateKey(keyType);
             var privateKey = testPrivKey.AsPrivateKey();
-            
+
             Session.ReplaceAttestationKeyAndCertificate(privateKey, testCert.AsX509Certificate2());
         }
     }

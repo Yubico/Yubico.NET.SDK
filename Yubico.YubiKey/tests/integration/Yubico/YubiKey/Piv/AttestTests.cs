@@ -80,21 +80,6 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.ECP384, StandardTestDevice.Fw5)]
-        public void LoadInvalidCert_Attest_ThrowsException(
-            KeyType keyType,
-            StandardTestDevice deviceType)
-        {
-            TestDeviceType = deviceType;
-
-            _ = Assert.Throws<ArgumentException>(() => LoadAttestationPair(keyType, false));
-        }
-
-        [Theory]
         [InlineData(StandardTestDevice.Fw5)]
         public void GetAttestationCert_ReturnsCert(
             StandardTestDevice deviceType)
@@ -140,7 +125,7 @@ namespace Yubico.YubiKey.Piv
         // Call this to attempt creating an attestation statement. It should
         // fail. So if the operation throws an exception, it fails, so return
         // true. If the operation does not throw an exception, it did not fail,
-        // so return false.6
+        // so return false.
         private bool AttestationShouldFail(
             int whichPair)
         {

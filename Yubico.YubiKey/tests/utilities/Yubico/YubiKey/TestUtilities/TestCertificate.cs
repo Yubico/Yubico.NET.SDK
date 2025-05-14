@@ -46,6 +46,7 @@ public class TestCertificate : TestCrypto
     /// Loads a certificate from the TestData directory.
     /// </summary>
     /// <param name="curve">The curve or key type associated with the certificate</param>
+    /// <param name="keyType">keyType to load</param>
     /// <param name="isAttestation">True if loading an attestation certificate</param>
     /// <returns>A TestCertificate instance</returns>
     public static TestCertificate Load(

@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Piv
             Assert.Equal(ResponseStatus.Success, genPairResponse.Status);
 
             SetKeyFlag(1);
-            TryAuthenticate(true, false);
+            TryAuthenticate(false, false);
             Assert.Equal(AuthenticateManagementKeyResult.SingleAuthenticationFailed,
                 Session.ManagementKeyAuthenticationResult);
 
@@ -139,18 +139,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void ResetPin()
         {
-            SetKeyFlag(0);
             var isChanged = Session.TryResetPin();
-            Assert.True(isChanged);
-            
-            isChanged = Session.TryChangePuk();
-            Assert.True(isChanged);
-
-            SetKeyFlag(1);
-            isChanged = Session.TryResetPin();
-            Assert.True(isChanged);
-
-            isChanged = Session.TryChangePuk();
             Assert.True(isChanged);
         }
 

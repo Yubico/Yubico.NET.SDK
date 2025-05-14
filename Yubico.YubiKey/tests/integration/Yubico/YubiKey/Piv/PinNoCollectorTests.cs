@@ -23,7 +23,6 @@ namespace Yubico.YubiKey.Piv
     [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class PinNoCollectorTests : PivSessionIntegrationTestBase
     {
-
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
         public void VerifyPin_Sign_Succeeds(
@@ -54,7 +53,7 @@ namespace Yubico.YubiKey.Piv
 
             // Act
             var isValid = Session.TryVerifyPin(pin, out var retriesRemaining);
-            
+
             // Assert
             Assert.False(isValid);
             _ = Assert.NotNull(retriesRemaining);
@@ -94,24 +93,22 @@ namespace Yubico.YubiKey.Piv
         {
             // Arrange
             TestDeviceType = testDeviceType;
-            var newPuk = "gjH@5K!8"u8.ToArray();
-            var newPin = "1@$#5s!8"u8.ToArray();
 
             using (var pivSession = GetSession(authenticate: false))
             {
                 pivSession.ResetApplication();
-                var isValid = pivSession.TryChangePuk(DefaultPuk, newPuk, out var retriesRemaining);
+                var isValid = pivSession.TryChangePuk(DefaultPuk, ComplexPuk, out var retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
             }
 
             using (var pivSession = GetSession(authenticate: false))
             {
-                var isValid = pivSession.TryResetPin(newPuk, newPin, out var retriesRemaining);
+                var isValid = pivSession.TryResetPin(ComplexPuk, ComplexPin, out var retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
-                isValid = pivSession.TryVerifyPin(newPin, out retriesRemaining);
+                isValid = pivSession.TryVerifyPin(ComplexPin, out retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
@@ -135,27 +132,25 @@ namespace Yubico.YubiKey.Piv
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
-            var newPuk = "gjH@5K!8"u8.ToArray();
-            var newPin = "1@$#5s!8"u8.ToArray();
-            
+
             using (var pivSession = GetSession(authenticate: false))
             {
-                var isValid = pivSession.TryChangePin(DefaultPin, newPin, out var retriesRemaining);
+                var isValid = pivSession.TryChangePin(DefaultPin, ComplexPin, out var retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
-                isValid = pivSession.TryChangePuk(DefaultPuk, newPuk, out retriesRemaining);
+                isValid = pivSession.TryChangePuk(DefaultPuk, ComplexPuk, out retriesRemaining);
                 Assert.Null(retriesRemaining);
                 Assert.True(isValid);
             }
 
             using (var pivSession = GetSession(authenticate: false))
             {
-                var isValid = pivSession.TryVerifyPin(newPin, out var retriesRemaining);
+                var isValid = pivSession.TryVerifyPin(ComplexPin, out var retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
-                isValid = pivSession.TryResetPin(newPuk, DefaultPin, out retriesRemaining);
+                isValid = pivSession.TryResetPin(ComplexPuk, DefaultPin, out retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
             }
@@ -166,18 +161,19 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
-                isValid = pivSession.TryChangePin(DefaultPin, newPin, out retriesRemaining);
+                isValid = pivSession.TryChangePin(DefaultPin, ComplexPin, out retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
-                isValid = pivSession.TryVerifyPin(newPin, out retriesRemaining);
+                isValid = pivSession.TryVerifyPin(ComplexPin, out retriesRemaining);
                 Assert.Null(retriesRemaining);
                 Assert.True(isValid);
             }
 
             using (var pivSession = GetSession(authenticate: false))
             {
-                var isValid = pivSession.TryChangePinAndPukRetryCounts(mgmtKey, newPin, 7, 8, out var retriesRemaining);
+                var isValid =
+                    pivSession.TryChangePinAndPukRetryCounts(mgmtKey, ComplexPin, 7, 8, out var retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
@@ -185,11 +181,11 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
-                isValid = pivSession.TryResetPin(DefaultPuk, newPin, out retriesRemaining);
+                isValid = pivSession.TryResetPin(DefaultPuk, ComplexPin, out retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
-                isValid = pivSession.TryChangePin(newPin, DefaultPin, out retriesRemaining);
+                isValid = pivSession.TryChangePin(ComplexPin, DefaultPin, out retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
             }

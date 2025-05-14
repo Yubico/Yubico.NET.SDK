@@ -24,6 +24,8 @@ public class PivSessionIntegrationTestBase : IDisposable
 {
     public static readonly ReadOnlyMemory<byte> DefaultPin = "123456"u8.ToArray();
     public static readonly ReadOnlyMemory<byte> DefaultPuk = "12345678"u8.ToArray();
+    public static readonly ReadOnlyMemory<byte> ComplexPuk = "gjH@5K!8"u8.ToArray();
+    public static readonly ReadOnlyMemory<byte> ComplexPin = "1@$#5s!8"u8.ToArray();
 
     public static readonly ReadOnlyMemory<byte> DefaultManagementKey = new byte[] // Both Aes and TDes
     {

@@ -536,7 +536,7 @@ namespace Yubico.YubiKey.Scp
             byte[] pin;
             if (desiredDeviceType == StandardTestDevice.Fw5Fips)
             {
-                ScpTestUtilities.SetFipsApprovedCredentials(testDevice, YubiKeyApplication.Piv, keyParams);
+                ScpTestUtilities.SetFipsApprovedCredentials(testDevice, keyParams);
                 pin = ScpTestUtilities.FipsPin;
             }
             else

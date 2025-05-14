@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Piv
 {
     // This KeyCollector class can be used to provide the KeyCollector delegate
@@ -50,20 +52,17 @@ namespace Yubico.YubiKey.Piv
 
         public bool Simple39KeyCollectorDelegate(KeyEntryData keyEntryData)
         {
-            if (keyEntryData.IsRetry && RetryFlag == 0)
+            if (keyEntryData.IsRetry && 
+                RetryFlag == 0 && 
+                keyEntryData.RetriesRemaining is not null &&
+                keyEntryData.RetriesRemaining == 1)
             {
-                if (!(keyEntryData.RetriesRemaining is null))
-                {
-                    if (keyEntryData.RetriesRemaining == 1)
-                    {
-                        return false;
-                    }
-                }
+                return false;
             }
 
             bool isChange = false;
-            byte[] currentValue;
-            byte[]? newValue = null;
+            Memory<byte> currentValue;
+            Memory<byte>? newValue = null;
 
             switch (keyEntryData.Request)
             {
@@ -125,52 +124,35 @@ namespace Yubico.YubiKey.Piv
             {
                 if (KeyFlag != 0)
                 {
-                    currentValue[0] = 0x39;
+                    currentValue.Span[0] = 0x39;
                 }
 
-                keyEntryData.SubmitValue(currentValue);
+                keyEntryData.SubmitValue(currentValue.Span);
             }
             else
             {
                 if (KeyFlag != 0)
                 {
-                    currentValue[0] = 0x39;
+                    currentValue.Span[0] = 0x39;
                 }
                 else
                 {
-                    newValue[0] = 0x39;
+                    newValue.Value.Span[0] = 0x39;
                 }
 
-                keyEntryData.SubmitValues(currentValue, newValue);
+                keyEntryData.SubmitValues(currentValue.Span, newValue.Value.Span);
             }
 
             if (_setKeyFlagOnChange && isChange)
             {
-                if (KeyFlag == 0)
-                {
-                    KeyFlag = 1;
-                }
-                else
-                {
-                    KeyFlag = 1;
-                }
+                KeyFlag = 1;
             }
 
             return true;
         }
 
-        public static byte[] CollectPin() =>
-            new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-
-        public static byte[] CollectPuk() =>
-            new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
-
-        public static byte[] CollectMgmtKey() =>
-            new byte[]
-            {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            };
+        public static Memory<byte> CollectPin() => PivSessionIntegrationTestBase.DefaultPin.ToArray();
+        public static Memory<byte> CollectPuk() => PivSessionIntegrationTestBase.DefaultPuk.ToArray();
+        public static Memory<byte> CollectMgmtKey() => PivSessionIntegrationTestBase.DefaultManagementKey.ToArray();
     }
 }

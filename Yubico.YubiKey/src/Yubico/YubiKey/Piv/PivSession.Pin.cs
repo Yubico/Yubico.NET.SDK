@@ -288,20 +288,21 @@ namespace Yubico.YubiKey.Piv
             var response = Connection.SendCommand(command);
 
             PinVerified = response.Status == ResponseStatus.Success;
-            if (!PinVerified)
+            if (PinVerified)
             {
-                retriesRemaining = response.GetData();
-
-                if ((retriesRemaining ?? 1) == 0)
-                {
-                    throw new SecurityException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.NoMoreRetriesRemaining));
-                }
+                return true;
             }
 
-            return PinVerified;
+            retriesRemaining = response.GetData();
+            if ((retriesRemaining ?? 1) == 0)
+            {
+                throw new SecurityException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.NoMoreRetriesRemaining));
+            }
+
+            return false;
         }
 
         /// <summary>

@@ -22,8 +22,6 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
-    // All these tests will reset the PIV application, run, then reset the PIV
-    // application again.
     // All these tests will also use a random number generator with a specified
     // set of bytes, followed by 2048 random bytes. If you want to get only
     // random bytes, skip the first SpecifiedStart bytes (get a random object and
@@ -33,20 +31,51 @@ namespace Yubico.YubiKey.Piv
     {
         private const int SpecifiedStart = 72;
         private const int RandomTrailingCount = 2048;
-        readonly RandomObjectUtility replacement;
-        readonly private byte[] specifiedBytes;
+        readonly RandomObjectUtility _partiallyRandomGenerator;
+
+        private Span<byte> GetTripleDesKey_Strong_PrecomputedRandomBytes() => new byte[]
+        {
+            0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
+            0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
+            0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
+        };
+
+        private Span<byte> GetTripleDesKey_Weak_PrecomputedRandomBytes() => new byte[]
+        {
+            0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
+            0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
+            0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B
+        };
+
+        // 3DES key that is derived using a PIN of "123456" and a salt of the first 16 bytes.
+        private Span<byte> Get_DerivedKey_PrecomputedRandomBytes() => new byte[]
+        {
+            0xc9, 0xf4, 0x20, 0x5a, 0x29, 0x38, 0x1b, 0xb8,
+            0x60, 0x6b, 0xd4, 0xde, 0x18, 0xef, 0xf4, 0x3d,
+            0x43, 0x24, 0x87, 0x3e, 0x5e, 0xd2, 0xc1, 0xed
+        };
+
+        // Same as the weak 3DES key, but since it's AES it is allowed and not considered weak
+        private Span<byte> GetAesKey_PrecomputedRandomBytes() => new byte[]
+        {
+            0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
+            0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
+            0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B
+        };
+
+        private Span<byte> GetSalt_PrecomputedRandomBytes() => new byte[]
+        {
+            0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
+            0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B
+        };
 
         public PinOnlyWithResetTests()
         {
+            // The data in this array correspond to the getter fields above (Span<byte> Get_XXX_PrecomputedRandomBytes).
             // This buffer will hold the random bytes to return.
-            // The first 24 will be a weak 3DES key
-            // The first 16 can also be a salt.
-            // The second 24 will be a non-weak 3DES key.
-            // The third 24 bytes is the 3DES key that is derived using a PIN of
-            // "123456" and a salt of the first 16 bytes.
             // Then there will be 2048 random bytes.
-            specifiedBytes =
-            [
+            byte[] predefinedPrefixedBytes =
+                [
                 0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
                 0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
                 0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
@@ -59,11 +88,12 @@ namespace Yubico.YubiKey.Piv
             ];
 
             var randomBytes = new byte[SpecifiedStart + RandomTrailingCount];
-            using var random = RandomObjectUtility.GetRandomObject(null);
+            using var random = RandomNumberGenerator.Create();
             random.GetBytes(randomBytes);
 
-            Array.Copy(specifiedBytes, 0, randomBytes, 0, specifiedBytes.Length);
-            replacement = RandomObjectUtility.SetRandomProviderFixedBytes(randomBytes);
+            // Set the first 72 bytes with the predefined prefixed bytes so that we can anticipate the values in the tests.
+            predefinedPrefixedBytes.CopyTo(randomBytes.AsSpan());
+            _partiallyRandomGenerator = RandomObjectUtility.SetRandomProviderFixedBytes(randomBytes);
         }
 
         [Fact]
@@ -120,7 +150,7 @@ namespace Yubico.YubiKey.Piv
             var adminData = Session.ReadObject<AdminData>();
             Assert.NotNull(adminData.Salt);
 
-            var expected = GetSpecifiedSpan(0, 16);
+            var expected = GetSalt_PrecomputedRandomBytes();
             var result = (ReadOnlyMemory<byte>)adminData.Salt;
             var isValid = expected.SequenceEqual(result.Span);
             Assert.True(isValid);
@@ -196,34 +226,36 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void SetProtectThenDerive_CorrectMgmtKey()
         {
-            var expected1 = GetSpecifiedSpan(24, 24);
-            var expected2 = GetSpecifiedSpan(48, 24);
+            var expectedManagementKey = DefaultManagementKeyType == KeyType.AES192
+                ? GetAesKey_PrecomputedRandomBytes()
+                : GetTripleDesKey_Strong_PrecomputedRandomBytes();
+
+            var expectedRandomDerivedKey = Get_DerivedKey_PrecomputedRandomBytes();
             using (var pivSession = GetSession())
             {
                 // Act
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
 
+                // Assert
                 var pinProtect = pivSession.ReadObject<PinProtectedData>();
-                Assert.False(pinProtect.IsEmpty);
                 Assert.NotNull(pinProtect.ManagementKey);
-                var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
-                var isValid = expected1.SequenceEqual(result.Span);
+                var isValid = expectedManagementKey.SequenceEqual(pinProtect.ManagementKey.Value.Span);
                 Assert.True(isValid);
             }
 
             using (var pivSession = GetSession())
             {
                 // Act
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
-
+                pivSession.SetPinOnlyMode(PivPinOnlyMode
+                    .PinDerived); 
                 var mode = pivSession.GetPinOnlyMode();
                 Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
 
                 var pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
                 Assert.NotNull(pinProtect.ManagementKey);
-                var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
-                var isValid = expected2.SequenceEqual(result.Span);
+                var result = pinProtect.ManagementKey; 
+                var isValid = expectedRandomDerivedKey.SequenceEqual(result.Value!.Span);
                 Assert.True(isValid);
             }
         }
@@ -232,7 +264,9 @@ namespace Yubico.YubiKey.Piv
         public void SetProtect_ThenNone_CorrectMode()
         {
             // Arrange
-            var mgmtKey = GetSpecifiedSpan(24, 24);
+            var expectedManagementKey = DefaultManagementKeyType == KeyType.AES192
+                ? GetAesKey_PrecomputedRandomBytes()
+                : GetTripleDesKey_Strong_PrecomputedRandomBytes();
             using (var pivSession = GetSession())
             {
                 // Act
@@ -242,8 +276,8 @@ namespace Yubico.YubiKey.Piv
                 var pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
                 Assert.NotNull(pinProtect.ManagementKey);
-                // var isValid = mgmtKey.SequenceEqual(pinProtect.ManagementKey.Value.Span);
-                // Assert.True(isValid);
+                var isValid = expectedManagementKey.SequenceEqual(pinProtect.ManagementKey.Value.Span);
+                Assert.True(isValid);
             }
 
             var isBlocked = IsPukBlocked();
@@ -273,7 +307,7 @@ namespace Yubico.YubiKey.Piv
                 var specifiedCollector = new SpecifiedKeyCollector(
                     DefaultPin,
                     DefaultPuk,
-                    mgmtKey.ToArray());
+                    expectedManagementKey.ToArray());
                 pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
 
                 var mode = pivSession.GetPinOnlyMode();
@@ -541,11 +575,6 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        private Span<byte> GetSpecifiedSpan(
-            int offset,
-            int length) =>
-            specifiedBytes.AsSpan(offset, length);
-
         // If the PUK is blocked, return true.
         // If the PUK is not blocked, return false.
         // If there is any other error, throw an exception.
@@ -576,7 +605,7 @@ namespace Yubico.YubiKey.Piv
         {
             if (disposing)
             {
-                replacement.RestoreRandomProvider();
+                _partiallyRandomGenerator.RestoreRandomProvider();
             }
 
             base.Dispose(disposing);

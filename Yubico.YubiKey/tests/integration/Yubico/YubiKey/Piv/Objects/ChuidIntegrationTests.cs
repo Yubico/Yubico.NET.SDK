@@ -14,171 +14,111 @@
 
 using System;
 using Xunit;
-using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv.Objects
 {
-    public class ChuidIntegrationTests
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
+    public class ChuidIntegrationTests : PivSessionIntegrationTestBase
     {
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        public void ReadChuid_IsEmpty_Correct(StandardTestDevice testDeviceType)
+        public void ReadChuid_IsEmpty_Correct(
+            StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                pivSession.ResetApplication();
-
-                CardholderUniqueId chuid = pivSession.ReadObject<CardholderUniqueId>();
-
-                Assert.True(chuid.IsEmpty);
-            }
+            TestDeviceType = testDeviceType;
+            var chuid = Session.ReadObject<CardholderUniqueId>();
+            Assert.True(chuid.IsEmpty);
         }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        public void WriteThenReadChuid_Data_Correct(StandardTestDevice testDeviceType)
+        public void WriteThenReadChuid_Data_Correct(
+            StandardTestDevice testDeviceType)
         {
-            var expected = new ReadOnlySpan<byte>(new byte[] {
+            TestDeviceType = testDeviceType;
+            var expected = new ReadOnlySpan<byte>(new byte[]
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01
             });
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var chuid = Session.ReadObject<CardholderUniqueId>();
+            Assert.True(chuid.IsEmpty);
 
-            try
-            {
-                using (var pivSession = new PivSession(testDevice))
-                {
-                    var collectorObj = new Simple39KeyCollector();
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            chuid.SetGuid(expected);
+            Session.WriteObject(chuid);
 
-                    pivSession.ResetApplication();
+            chuid = Session.ReadObject<CardholderUniqueId>();
+            Assert.False(chuid.IsEmpty);
 
-                    CardholderUniqueId chuid = pivSession.ReadObject<CardholderUniqueId>();
-                    Assert.True(chuid.IsEmpty);
-
-                    chuid.SetGuid(expected);
-
-                    pivSession.WriteObject(chuid);
-
-                    chuid = pivSession.ReadObject<CardholderUniqueId>();
-                    Assert.False(chuid.IsEmpty);
-
-                    bool isValid = expected.SequenceEqual(chuid.GuidValue.Span);
-                    Assert.True(isValid);
-                }
-            }
-            finally
-            {
-                using (var pivSession = new PivSession(testDevice))
-                {
-                    pivSession.ResetApplication();
-                }
-            }
+            var isValid = expected.SequenceEqual(chuid.GuidValue.Span);
+            Assert.True(isValid);
         }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        public void AltTag_WriteThenReadChuid_Data_Correct(StandardTestDevice testDeviceType)
+        public void AltTag_WriteThenReadChuid_Data_Correct(
+            StandardTestDevice testDeviceType)
         {
-            var expected = new ReadOnlySpan<byte>(new byte[] {
+            var expected = new ReadOnlySpan<byte>(new byte[]
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01
             });
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            TestDeviceType = testDeviceType;
+            var chuid = Session.ReadObject<CardholderUniqueId>();
+            Assert.True(chuid.IsEmpty);
 
-            try
-            {
-                using (var pivSession = new PivSession(testDevice))
-                {
-                    var collectorObj = new Simple39KeyCollector();
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            chuid.SetGuid(expected);
+            chuid.DataTag = 0x5F0010;
 
-                    pivSession.ResetApplication();
+            Session.WriteObject(chuid);
 
-                    CardholderUniqueId chuid = pivSession.ReadObject<CardholderUniqueId>();
-                    Assert.True(chuid.IsEmpty);
+            chuid = Session.ReadObject<CardholderUniqueId>(0x5F0010);
+            Assert.False(chuid.IsEmpty);
 
-                    chuid.SetGuid(expected);
-                    chuid.DataTag = 0x5F0010;
-
-                    pivSession.WriteObject(chuid);
-
-                    chuid = pivSession.ReadObject<CardholderUniqueId>(0x5F0010);
-                    Assert.False(chuid.IsEmpty);
-
-                    bool isValid = expected.SequenceEqual(chuid.GuidValue.Span);
-                    Assert.True(isValid);
-                }
-            }
-            finally
-            {
-                using (var pivSession = new PivSession(testDevice))
-                {
-                    pivSession.ResetApplication();
-                }
-            }
+            var isValid = expected.SequenceEqual(chuid.GuidValue.Span);
+            Assert.True(isValid);
         }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        public void WriteEmpty_Correct(StandardTestDevice testDeviceType)
+        public void WriteEmpty_Correct(
+            StandardTestDevice testDeviceType)
         {
-            var expected = new ReadOnlySpan<byte>(new byte[] {
+            TestDeviceType = testDeviceType;
+
+            var expected = new ReadOnlySpan<byte>(new byte[]
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01
             });
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var emptyChuid = Session.ReadObject<CardholderUniqueId>();
+            Assert.True(emptyChuid.IsEmpty);
 
-            try
-            {
-                using (var pivSession = new PivSession(testDevice))
-                {
-                    var collectorObj = new Simple39KeyCollector();
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            // Write an empty object.
+            Session.WriteObject(emptyChuid);
 
-                    pivSession.ResetApplication();
+            // Make sure the contents are still empty.
+            var chuid = Session.ReadObject<CardholderUniqueId>();
+            Assert.True(chuid.IsEmpty);
 
-                    CardholderUniqueId emptyChuid = pivSession.ReadObject<CardholderUniqueId>();
-                    Assert.True(emptyChuid.IsEmpty);
+            // Now write a CHUID with data.
+            chuid.SetGuid(expected);
+            Session.WriteObject(chuid);
 
-                    // Write an empty object.
-                    pivSession.WriteObject(emptyChuid);
+            // Make sure that worked.
+            chuid = Session.ReadObject<CardholderUniqueId>();
+            Assert.False(chuid.IsEmpty);
+            var isValid = expected.SequenceEqual(chuid.GuidValue.Span);
+            Assert.True(isValid);
 
-                    // Make sure the contents are still empty.
-                    CardholderUniqueId chuid = pivSession.ReadObject<CardholderUniqueId>();
-                    Assert.True(chuid.IsEmpty);
+            // Now write an empty object.
+            Session.WriteObject(emptyChuid);
 
-                    // Now write a CHUID with data.
-                    chuid.SetGuid(expected);
-                    pivSession.WriteObject(chuid);
-
-                    // Make sure that worked.
-                    chuid = pivSession.ReadObject<CardholderUniqueId>();
-                    Assert.False(chuid.IsEmpty);
-                    bool isValid = expected.SequenceEqual(chuid.GuidValue.Span);
-                    Assert.True(isValid);
-
-                    // Now write an empty object.
-                    pivSession.WriteObject(emptyChuid);
-
-                    // Make sure the contents were unchanged.
-                    chuid = pivSession.ReadObject<CardholderUniqueId>();
-                    Assert.True(chuid.IsEmpty);
-                }
-            }
-            finally
-            {
-                using (var pivSession = new PivSession(testDevice))
-                {
-                    pivSession.ResetApplication();
-                }
-            }
+            // Make sure the contents were unchanged.
+            chuid = Session.ReadObject<CardholderUniqueId>();
+            Assert.True(chuid.IsEmpty);
         }
 
         [Theory]
@@ -193,36 +133,21 @@ namespace Yubico.YubiKey.Piv
         [InlineData(0x005FC10D, StandardTestDevice.Fw5)]
         [InlineData(0x005FC120, StandardTestDevice.Fw5)]
         [InlineData(0x005FFF01, StandardTestDevice.Fw5)]
-        public void Read_InvalidTag_Throws(int newTag, StandardTestDevice testDeviceType)
+        public void Read_InvalidTag_Throws(
+            int newTag,
+            StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                _ = Assert.Throws<ArgumentException>(() => pivSession.ReadObject<CardholderUniqueId>(newTag));
-            }
+            TestDeviceType = testDeviceType;
+            _ = Assert.Throws<ArgumentException>(() => Session.ReadObject<CardholderUniqueId>(newTag));
         }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        public void Write_NullArg_Throws(StandardTestDevice testDeviceType)
+        public void Write_NullArg_Throws(
+            StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                pivSession.ResetApplication();
-
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-                _ = Assert.Throws<ArgumentNullException>(() => pivSession.WriteObject(null));
-#pragma warning restore CS8625 // Suppressed so we can test a null input.
-            }
+            TestDeviceType = testDeviceType;
+            _ = Assert.Throws<ArgumentNullException>(() => Session.WriteObject(null!));
         }
     }
 }

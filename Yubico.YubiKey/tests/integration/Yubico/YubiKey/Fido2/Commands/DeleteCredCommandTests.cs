@@ -19,11 +19,11 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class DeleteCredCommandTests : SimpleIntegrationTestConnection
     {
         public DeleteCredCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
 

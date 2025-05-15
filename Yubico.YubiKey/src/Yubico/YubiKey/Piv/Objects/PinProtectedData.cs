@@ -142,7 +142,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (IsValidKeyLength(managementKey.Length))
             {
                 managementKey.CopyTo(_mgmtKey);
-                ManagementKey = _mgmtKey.Slice(0, managementKey.Length);
+                ManagementKey = _mgmtKey[..managementKey.Length];
                 return;
             }
 

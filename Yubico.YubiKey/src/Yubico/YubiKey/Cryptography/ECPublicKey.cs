@@ -99,7 +99,6 @@ public class ECPublicKey : PublicKey
 
     /// <inheritdoc />
     public override byte[] ExportSubjectPublicKeyInfo() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(Parameters);
-
     
     /// <summary>
     /// Creates an instance of <see cref="ECPublicKey"/> from the given <paramref name="parameters"/>.
@@ -118,7 +117,7 @@ public class ECPublicKey : PublicKey
     /// <exception cref="ArgumentException">
     /// Thrown if the key type is not a valid EC key.
     /// </exception>
-    public static IPublicKey CreateFromValue(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
+    public static ECPublicKey CreateFromValue(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
     {
         var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
         if (keyDefinition.AlgorithmOid is not Oids.ECDSA)
@@ -142,13 +141,13 @@ public class ECPublicKey : PublicKey
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="IPublicKey"/> from a DER-encoded public key.
+    /// Creates an instance of <see cref="ECPublicKey"/> from a DER-encoded public key.
     /// </summary>
     /// <param name="encodedKey">The DER-encoded public key.</param>
     /// <returns>An instance of <see cref="IPublicKey"/>.</returns>
     /// <exception cref="CryptographicException">
     /// Thrown if the public key is invalid.
     /// </exception>
-    public static IPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-        AsnPublicKeyDecoder.CreatePublicKey(encodedKey);
+    public static ECPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
+        (ECPublicKey)AsnPublicKeyDecoder.CreatePublicKey(encodedKey);
 }

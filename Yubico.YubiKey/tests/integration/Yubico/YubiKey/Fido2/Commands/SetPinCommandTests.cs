@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int Fido2AuthUv = 2;
 
         public SetPinCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
 

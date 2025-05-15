@@ -43,7 +43,7 @@ public class Curve25519PrivateKeyTests
         {
             // Arrange
             var testKey = TestKeys.GetTestPrivateKey(keyType);
-            var privateKey = testKey.GetPrivateKey();
+            var privateKey = testKey.GetPrivateKeyValue();
 
             // Act
             var privateKeyParams = Curve25519PrivateKey.CreateFromValue(privateKey, keyType); 
@@ -62,7 +62,7 @@ public class Curve25519PrivateKeyTests
         {
             // Arrange
             var testKey = TestKeys.GetTestPrivateKey(keyType);
-            var privateKey = testKey.GetPrivateKey();
+            var privateKey = testKey.GetPrivateKeyValue();
 
             // Act
             var privateKeyParams = Curve25519PrivateKey.CreateFromPkcs8(testKey.EncodedKey); 
@@ -79,7 +79,7 @@ public class Curve25519PrivateKeyTests
     {
         // Arrange
         var testKey = TestKeys.GetTestPrivateKey(KeyType.X25519);
-        var privateKey = testKey.GetPrivateKey();
+        var privateKey = testKey.GetPrivateKeyValue();
 
         // Act
         var privateKeyParams = Curve25519PrivateKey.CreateFromValue(privateKey, KeyType.X25519);

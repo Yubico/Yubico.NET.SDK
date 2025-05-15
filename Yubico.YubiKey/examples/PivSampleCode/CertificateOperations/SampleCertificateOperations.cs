@@ -497,7 +497,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             if (string.Equals(certificate.PublicKey.Oid.FriendlyName, "ECC", StringComparison.Ordinal))
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 var pivPub = new PivEccPublicKey(certificate.PublicKey.EncodedKeyValue.RawData);
+#pragma warning restore CS0618 // Type or member is obsolete
                 return KeyConverter.GetDotNetFromPivPublicKey(pivPub);
             }
 

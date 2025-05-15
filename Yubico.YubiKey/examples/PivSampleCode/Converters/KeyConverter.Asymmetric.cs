@@ -65,7 +65,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 offset += keySize + (keySize - eccParams.Q.Y.Length);
                 Array.Copy(eccParams.Q.Y, 0, point, offset, eccParams.Q.Y.Length);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 var eccPubKey = new PivEccPublicKey(point);
+#pragma warning restore CS0618 // Type or member is obsolete
                 return (PivPublicKey)eccPubKey;
             }
 

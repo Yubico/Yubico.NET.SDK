@@ -1347,7 +1347,33 @@ namespace Yubico.YubiKey.Piv
             // If error, throws exception.
             keyEntryData.RetriesRemaining = response.GetData();
 
-            return response.Status;
+            var status = response.Status;
+            switch (status)
+            {
+                case ResponseStatus.Success:
+                    Logger.LogInformation(
+                        slotNumber == PivSlot.Pin
+                            ? "The PIV PIN has been changed"
+                            : "The PIV PUK has been changed");
+
+                    break;
+                case ResponseStatus.ConditionsNotSatisfied:
+                    Logger.LogWarning(
+                        slotNumber == PivSlot.Pin
+                            ? "The PIV PIN does not meet the complexity requirements"
+                            : "The PIV PUK does not meet the complexity requirements");
+
+                    break;
+                default:
+                    Logger.LogError(
+                        slotNumber == PivSlot.Pin
+                            ? $"The PIV PIN could not be changed. Reason: {response.StatusMessage} (0x{response.StatusWord:X4})" 
+                            : $"The PIV PUK could not be changed. Reason: {response.StatusMessage} (0x{response.StatusWord:X4})");
+
+                    break;
+            }
+
+            return status;
         }
 
         // This is a delegate that implements the CommandResponse declaration of

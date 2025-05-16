@@ -299,6 +299,10 @@ namespace Yubico.YubiKey.Piv
         /// further documentation on this method.
         /// </para>
         /// </remarks>
+        /// <param name="mutualAuthentication">
+        /// If <c>true</c> the method will perform mutual authentication, if
+        /// <c>false</c>, only the application will authenticate to the YubiKey.
+        /// </param>
         /// <exception cref="InvalidOperationException">
         /// There is no <c>KeyCollector</c> loaded, the key provided was not a
         /// valid Triple-DES or AES key, or the YubiKey had some other error, such as
@@ -320,7 +324,7 @@ namespace Yubico.YubiKey.Piv
             Logger.LogInformation(
                 $"Authenticate the management key: {(mutualAuthentication ? "mutual" : "single")} auth.");
 
-            if (TryAuthenticateManagementKey(mutualAuthentication) == false)
+            if (!TryAuthenticateManagementKey(mutualAuthentication))
             {
                 throw new OperationCanceledException(
                     string.Format(
@@ -1009,11 +1013,12 @@ namespace Yubico.YubiKey.Piv
                 }
 
                 ManagementKeyAuthenticated = true;
+                return true; 
             }
 
             Logger.LogInformation($"Failed to authenticate management key. Message: {completeResponse.StatusMessage}");
 
-            return ManagementKeyAuthenticated;
+            return false;
         }
 
         private void RefreshManagementKeyAlgorithm() => ManagementKeyAlgorithm = GetManagementKeyAlgorithm();

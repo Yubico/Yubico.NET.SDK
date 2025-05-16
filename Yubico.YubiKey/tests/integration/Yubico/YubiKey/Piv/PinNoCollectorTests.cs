@@ -96,7 +96,6 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = GetSession(authenticate: false))
             {
-                pivSession.ResetApplication();
                 var isValid = pivSession.TryChangePuk(DefaultPuk, ComplexPuk, out var retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);

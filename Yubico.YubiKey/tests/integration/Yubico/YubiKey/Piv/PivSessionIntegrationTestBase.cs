@@ -22,12 +22,12 @@ namespace Yubico.YubiKey.Piv;
 
 public class PivSessionIntegrationTestBase : IDisposable
 {
-    public static readonly ReadOnlyMemory<byte> DefaultPin = "123456"u8.ToArray();
-    public static readonly ReadOnlyMemory<byte> DefaultPuk = "12345678"u8.ToArray();
-    public static readonly ReadOnlyMemory<byte> ComplexPuk = "gjH@5K!8"u8.ToArray();
-    public static readonly ReadOnlyMemory<byte> ComplexPin = "1@$#5s!8"u8.ToArray();
+    public static Memory<byte> DefaultPin => "123456"u8.ToArray();
+    public static Memory<byte> DefaultPuk => "12345678"u8.ToArray();
+    public static Memory<byte> ComplexPuk => "gjH@5K!8"u8.ToArray();
+    public static Memory<byte> ComplexPin => "1@$#5s!8"u8.ToArray();
 
-    public static readonly ReadOnlyMemory<byte> DefaultManagementKey = new byte[] // Both Aes and TDes
+    public static Memory<byte> DefaultManagementKey => new byte[] // Both Aes and TDes
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -38,6 +38,10 @@ public class PivSessionIntegrationTestBase : IDisposable
         Device.FirmwareVersion > FirmwareVersion.V5_7_0 ? KeyType.AES192 : KeyType.TripleDES;
 
     protected StandardTestDevice TestDeviceType { get; set; } = StandardTestDevice.Fw5;
+    
+    /// <summary>
+    /// Returns an authenticated PivSession.
+    /// </summary>
     protected PivSession Session => _session ??= GetSession(true);
     protected IYubiKeyDevice Device => IntegrationTestDeviceEnumeration.GetTestDevice(TestDeviceType);
 

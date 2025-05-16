@@ -151,8 +151,8 @@ namespace Yubico.YubiKey.Piv
             return true;
         }
 
-        public static Memory<byte> CollectPin() => PivSessionIntegrationTestBase.DefaultPin.ToArray();
-        public static Memory<byte> CollectPuk() => PivSessionIntegrationTestBase.DefaultPuk.ToArray();
-        public static Memory<byte> CollectMgmtKey() => PivSessionIntegrationTestBase.DefaultManagementKey.ToArray();
+        public static Memory<byte> CollectPin() => PivSessionIntegrationTestBase.DefaultPin;
+        public static Memory<byte> CollectPuk() => PivSessionIntegrationTestBase.DefaultPuk;
+        public static Memory<byte> CollectMgmtKey() => PivSessionIntegrationTestBase.DefaultManagementKey;
     }
 }

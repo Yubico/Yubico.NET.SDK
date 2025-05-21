@@ -31,7 +31,7 @@ The YubiKey Bio MPE is a special case. Given that the PIV and FIDO applications 
 
 ### DeviceReset() method
 
-Using the [DeviceReset()](xref:Yubico.YubiKey.YubiKeyDevice.DeviceReset) method is simple: connect to a YubiKey, then call the method on that key.
+Using the [DeviceReset()](xref:Yubico.YubiKey.YubiKeyDevice.DeviceReset) method is simple: [connect](xref:UsersManualMakingAConnection) to a YubiKey with the [YubiKeyDevice](xref:Yubico.YubiKey.YubiKeyDevice) class, then call the method on that key.
 
 To select the first available YubiKey connected to your host, use:
 
@@ -49,7 +49,22 @@ yubiKey.DeviceReset();
 
 ### DeviceResetCommand() 
 
+The device-wide reset can also be performed using the lower-level [DeviceResetCommand](xref:Yubico.YubiKey.Management.Commands.DeviceResetCommand) and [DeviceResetResponse](xref:Yubico.YubiKey.Management.Commands.DeviceResetResponse) classes (which is what the ``DeviceReset()`` method uses under the covers). 
 
+After connecting to a particular YubiKey with the ``YubiKeyDevice`` class as shown in the previous example, we need to set up an additional connection to the key's management application using the [IYubiKeyConnection](xref:Yubico.YubiKey.IYubiKeyConnection) class:
+
+```C#
+IYubiKeyConnection connection = yubiKey.Connect(YubiKeyApplication.Management);
+```
+
+Then send the ``DeviceResetCommand`` to the key:
+
+```C#
+DeviceResetCommand resetCommand = new DeviceResetCommand();
+DeviceResetResponse resetResponse = connection.SendCommand(resetCommand);
+```
+
+For error handling, check the ``IYubiKeyResponse`` interface's [Status](xref:Yubico.YubiKey.IYubiKeyResponse.Status) and [StatusMessage](xref:Yubico.YubiKey.IYubiKeyResponse.StatusMessage) properties. For general information on using the SDK's command classes, see [Commands](xref:UsersManualCommands).
 
 ### APDUs
 

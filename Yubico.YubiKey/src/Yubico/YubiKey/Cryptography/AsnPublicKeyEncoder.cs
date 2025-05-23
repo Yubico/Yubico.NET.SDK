@@ -100,19 +100,12 @@ internal static class AsnPublicKeyEncoder
     /// </summary>
     /// <param name="parameters">The RSA public key parameters.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
-    /// <remarks>
-    /// Only public key parameters are supported. The method will throw an <see cref="ArgumentException"/> if any of the private key parameters are set.
-    /// </remarks>
     public static byte[] EncodeToSubjectPublicKeyInfo(RSAParameters parameters)
     {
-        if (parameters.D != null ||
-            parameters.P != null ||
-            parameters.Q != null ||
-            parameters.DP != null ||
-            parameters.DQ != null ||
-            parameters.InverseQ != null)
+        if (parameters.Exponent == null ||
+            parameters.Modulus == null)
         {
-            throw new ArgumentException("Only public key parameters should be provided.");
+            throw new InvalidOperationException("Cannot export public key, missing required parameters");
         }
 
         return EncodeToSubjectPublicKeyInfo(parameters.Modulus, parameters.Exponent);
@@ -125,17 +118,7 @@ internal static class AsnPublicKeyEncoder
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
     public static byte[] EncodeToSubjectPublicKeyInfo(ECParameters parameters)
     {
-        if (parameters.D != null)
-        {
-            throw new ArgumentException("Only public key parameters should be provided.", nameof(parameters));
-        }
-
-        if (parameters.Q.X == null)
-        {
-            throw new ArgumentException("EC point coordinates cannot be null.", nameof(parameters));
-        }
-
-        if (parameters.Q.Y == null)
+        if (parameters.Q.X == null || parameters.Q.Y == null)
         {
             throw new ArgumentException("EC point coordinates cannot be null.", nameof(parameters));
         }

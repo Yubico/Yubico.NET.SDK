@@ -19,7 +19,6 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
     public class MakeCredBlobTests : NeedPinToken
     {
         private readonly byte[] _clientDataHash = {
@@ -46,7 +45,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         };
 
         public MakeCredBlobTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5, null)
         {
         }
 

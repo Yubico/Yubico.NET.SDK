@@ -20,8 +20,14 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
-    public class PivSessionAttestationTests
+    public class PivSessionAttestationTests : PivSessionUnitTestBase
     {
+        public PivSessionAttestationTests()
+        {
+            FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 3, Patch = 0 };
+            DeviceMock.AvailableUsbCapabilities = YubiKeyCapabilities.Piv;
+        }
+
         [Theory]
         [InlineData(PivSlot.Pin)]
         [InlineData(PivSlot.Puk)]
@@ -30,208 +36,91 @@ namespace Yubico.YubiKey.Piv
         [InlineData(0x96)]
         public void CreateAttest_BadSlot_ThrowsArgException(byte slotNumber)
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                FirmwareVersion =
-                {
-                    Major = 4,
-                    Minor = 3
-                },
-                AvailableUsbCapabilities = YubiKeyCapabilities.Piv
-            };
-
-            using var pivSession = new PivSession(yubiKey);
-            _ = Assert.Throws<ArgumentException>(() => pivSession.CreateAttestationStatement(slotNumber));
+            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.CreateAttestationStatement(slotNumber));
         }
 
         [Fact]
         public void CreateAttest_BadVersion_ThrowsNotSupportedException()
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                FirmwareVersion =
-                {
-                    Major = 4,
-                    Minor = 2
-                }
-            };
+            // Override firmware version for this specific test
+            FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 2, Patch = 0 };
 
-            using var pivSession = new PivSession(yubiKey);
-            _ = Assert.Throws<NotSupportedException>(() => pivSession.CreateAttestationStatement(0x9A));
+            _ = Assert.Throws<NotSupportedException>(() => PivSessionMock.CreateAttestationStatement(0x9A));
         }
 
         [Fact]
         public void GetAttest_BadVersion_ThrowsNotSupportedException()
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                FirmwareVersion =
-                {
-                    Major = 4,
-                    Minor = 2
-                }
-            };
+            // Override firmware version for this specific test
+            FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 2, Patch = 0 };
 
-            using var pivSession = new PivSession(yubiKey);
-            _ = Assert.Throws<NotSupportedException>(() => pivSession.GetAttestationCertificate());
+            _ = Assert.Throws<NotSupportedException>(() => PivSessionMock.GetAttestationCertificate());
         }
 
         [Fact]
         public void ReplaceAttest_BadVersion_ThrowsNotSupportedException()
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                FirmwareVersion =
-                {
-                    Major = 4,
-                    Minor = 2
-                }
-            };
+            // Override firmware version for this specific test
+            FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 2, Patch = 0 };
 
-            var privateKey = new EmptyPrivateKey();
+            var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
+            var privateKey = RSAPrivateKey.CreateFromPkcs8(testKey.EncodedKey);
+            
 #pragma warning disable SYSLIB0026
             var cert = new X509Certificate2();
 #pragma warning restore SYSLIB0026
-            using var pivSession = new PivSession(yubiKey);
-            _ = Assert.Throws<NotSupportedException>(() => pivSession.ReplaceAttestationKeyAndCertificate(privateKey, cert));
+
+            _ = Assert.Throws<NotSupportedException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate(privateKey, cert));
         }
 
         [Fact]
         public void ReplaceAttest_NullKey_ThrowsException()
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                FirmwareVersion =
-                {
-                    Major = 4,
-                    Minor = 3
-                },
-                AvailableUsbCapabilities = YubiKeyCapabilities.Piv
-            };
-            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(KeyType.RSA2048, out X509Certificate2? cert, out _);
-            Assert.True(isValid);
+            var cert = TestKeys.GetTestCertificate(KeyType.RSA2048).AsX509Certificate2();
 
-            using var pivSession = new PivSession(yubiKey);
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => pivSession.ReplaceAttestationKeyAndCertificate((IPrivateKey)null!, cert!));
-#pragma warning restore CS8625 // testing a null input.
+            _ = Assert.Throws<ArgumentNullException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate((IPrivateKey)null!, cert!));
         }
 
         [Fact]
         public void ReplaceAttest_NullCert_ThrowsException()
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                FirmwareVersion =
-                {
-                    Major = 4,
-                    Minor = 3
-                },
-                AvailableUsbCapabilities = YubiKeyCapabilities.Piv
-            };
-
             var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
             var privateKey = RSAPrivateKey.CreateFromPkcs8(testKey.EncodedKey);
 
-            using var pivSession = new PivSession(yubiKey);
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => pivSession.ReplaceAttestationKeyAndCertificate(privateKey, null));
-#pragma warning restore CS8625 // testing a null input.
+            _ = Assert.Throws<ArgumentNullException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate(privateKey, null!));
         }
 
         [Fact]
-        [Obsolete("Replaced by IPrivateKey")]
         public void ReplaceAttest_Rsa1024_ThrowsException()
         {
-            var yubiKey = new HollowYubiKeyDevice(true)
-            {
-                FirmwareVersion =
-                {
-                    Major = 4,
-                    Minor = 3
-                },
-                AvailableUsbCapabilities = YubiKeyCapabilities.Piv
-            };
+            BadAttestationPairs.GetPair(BadAttestationPairs.KeyRsa1024CertValid, out var privateKeyPem, out var certPem);
+            var badPrivateKey = RSAPrivateKey.CreateFromPkcs8(PemHelper.GetBytesFromPem(privateKeyPem));
+            var badCert = X509CertificateLoader.LoadCertificate(PemHelper.GetBytesFromPem(certPem));
 
-            BadAttestationPairs.GetPair(
-                BadAttestationPairs.KeyRsa1024CertValid, out var privateKeyPem, out var certPem);
-
-            var priKey = new KeyConverter(privateKeyPem.ToCharArray());
-            var pivPrivateKey = priKey.GetPivPrivateKey();
-
-            var certChars = certPem.ToCharArray();
-            var certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
-            var certObj = X509CertificateLoader.LoadCertificate(certDer);
-
-            using var pivSession = new PivSession(yubiKey);
-            var simpleCollector = new SimpleKeyCollector(false);
-            pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-
-            _ = Assert.Throws<ArgumentException>(() => pivSession.ReplaceAttestationKeyAndCertificate(pivPrivateKey, certObj));
+            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate(badPrivateKey, badCert));
         }
 
         [Theory]
         [InlineData(BadAttestationPairs.KeyRsa2048CertVersion1)]
         [InlineData(BadAttestationPairs.KeyEccP256CertVersion1)]
         [InlineData(BadAttestationPairs.KeyEccP384CertVersion1)]
-        [Obsolete("Replaced by IPrivateKey")]
         public void ReplaceAttest_Version1Cert_ThrowsException(int whichPair)
         {
-            var yubiKey = new HollowYubiKeyDevice(true)
-            {
-                FirmwareVersion =
-                {
-                    Major = 4,
-                    Minor = 3
-                },
-                AvailableUsbCapabilities = YubiKeyCapabilities.Piv
-            };
-
             BadAttestationPairs.GetPair(whichPair, out var privateKeyPem, out var certPem);
+            var badPrivateKey = AsnPrivateKeyDecoder.CreatePrivateKey(PemHelper.GetBytesFromPem(privateKeyPem));
+            var badCert = X509CertificateLoader.LoadCertificate(PemHelper.GetBytesFromPem(certPem));
 
-            var priKey = new KeyConverter(privateKeyPem.ToCharArray());
-            PivPrivateKey pivPrivateKey = priKey.GetPivPrivateKey();
-
-            var certChars = certPem.ToCharArray();
-            var certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
-            var certObj = X509CertificateLoader.LoadCertificate(certDer);
-
-            using var pivSession = new PivSession(yubiKey);
-            var simpleCollector = new SimpleKeyCollector(false);
-            pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-
-            _ = Assert.Throws<ArgumentException>(() => pivSession.ReplaceAttestationKeyAndCertificate(pivPrivateKey, certObj));
+            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate(badPrivateKey, badCert));
         }
 
         [Fact]
-        [Obsolete("Replaced by IPrivateKey")]
         public void ReplaceAttest_BigName_ThrowsException()
         {
-            var yubiKey = new HollowYubiKeyDevice(true)
-            {
-                FirmwareVersion =
-                {
-                    Major = 4,
-                    Minor = 3
-                },
-                AvailableUsbCapabilities = YubiKeyCapabilities.Piv
-            };
+            BadAttestationPairs.GetPair(BadAttestationPairs.KeyRsa2048CertBigName, out var privateKeyPem, out var certPem);
+            var badPrivateKey = RSAPrivateKey.CreateFromPkcs8(PemHelper.GetBytesFromPem(privateKeyPem));
+            var badCert = X509CertificateLoader.LoadCertificate(PemHelper.GetBytesFromPem(certPem));
 
-            BadAttestationPairs.GetPair(
-                BadAttestationPairs.KeyRsa2048CertBigName, out var privateKeyPem, out var certPem);
-
-            var priKey = new KeyConverter(privateKeyPem.ToCharArray());
-            PivPrivateKey pivPrivateKey = priKey.GetPivPrivateKey();
-
-            var certChars = certPem.ToCharArray();
-            var certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
-            var certObj = X509CertificateLoader.LoadCertificate(certDer);
-
-            using var pivSession = new PivSession(yubiKey);
-            var simpleCollector = new SimpleKeyCollector(false);
-            pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-
-            _ = Assert.Throws<ArgumentException>(() => pivSession.ReplaceAttestationKeyAndCertificate(pivPrivateKey, certObj));
+            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate(badPrivateKey, badCert));
         }
     }
 }

@@ -19,11 +19,10 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
     public class GetKeyAgreeCommandTests : SimpleIntegrationTestConnection
     {
         public GetKeyAgreeCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
 

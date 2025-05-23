@@ -15,115 +15,74 @@
 using System;
 using System.IO;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
-    public class PivSessionMsrootsTests
+    public class PivSessionMsrootsTests : PivSessionUnitTestBase
     {
         [Fact]
         public void Write_TooMuchData_ThrowsOutOfRangeException()
         {
-            var yubiKey = new HollowYubiKeyDevice();
             byte[] inputData = new byte[16000];
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<ArgumentOutOfRangeException>(() => pivSession.WriteMsroots(inputData));
-            }
+            _ = Assert.Throws<ArgumentOutOfRangeException>(() => PivSessionMock.WriteMsroots(inputData));
         }
 
         [Fact]
         public void Write_NoKeyCollector_ThrowsInvalidOpException()
         {
-            var yubiKey = new HollowYubiKeyDevice();
             byte[] inputData = new byte[100];
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.WriteMsroots(inputData));
-            }
+            PivSessionMock.KeyCollector = null;
+            _ = Assert.Throws<InvalidOperationException>(() => PivSessionMock.WriteMsroots(inputData));
         }
 
         [Fact]
         public void Write_KeyCollectorFalse_ThrowsCanceledException()
         {
-            var yubiKey = new HollowYubiKeyDevice();
             byte[] inputData = new byte[100];
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                _ = Assert.Throws<OperationCanceledException>(() => pivSession.WriteMsroots(inputData));
-            }
+            PivSessionMock.KeyCollector = ReturnFalseKeyCollectorDelegate;
+            _ = Assert.Throws<OperationCanceledException>(() => PivSessionMock.WriteMsroots(inputData));
         }
 
         [Fact]
         public void WriteStream_TooMuchData_ThrowsOutOfRangeException()
         {
-            var yubiKey = new HollowYubiKeyDevice();
             byte[] inputData = new byte[16000];
             var memStream = new MemoryStream(inputData);
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<ArgumentOutOfRangeException>(() => pivSession.WriteMsrootsStream(memStream));
-            }
+            _ = Assert.Throws<ArgumentOutOfRangeException>(() => PivSessionMock.WriteMsrootsStream(memStream));
         }
 
         [Fact]
         public void WriteStream_NoKeyCollector_ThrowsInvalidOpException()
         {
-            var yubiKey = new HollowYubiKeyDevice();
             byte[] inputData = new byte[100];
             var memStream = new MemoryStream(inputData);
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.WriteMsrootsStream(memStream));
-            }
+            PivSessionMock.KeyCollector = null;
+            _ = Assert.Throws<InvalidOperationException>(() => PivSessionMock.WriteMsrootsStream(memStream));
         }
 
         [Fact]
         public void WriteStream_KeyCollectorFalse_ThrowsCanceledException()
         {
-            var yubiKey = new HollowYubiKeyDevice();
             byte[] inputData = new byte[100];
             var memStream = new MemoryStream(inputData);
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                _ = Assert.Throws<OperationCanceledException>(() => pivSession.WriteMsrootsStream(memStream));
-            }
+            PivSessionMock.KeyCollector = ReturnFalseKeyCollectorDelegate;
+            _ = Assert.Throws<OperationCanceledException>(() => PivSessionMock.WriteMsrootsStream(memStream));
         }
 
         [Fact]
         public void Delete_NoKeyCollector_ThrowsInvalidOpException()
         {
-            var yubiKey = new HollowYubiKeyDevice();
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.DeleteMsroots());
-            }
+            PivSessionMock.KeyCollector = null;
+            _ = Assert.Throws<InvalidOperationException>(() => PivSessionMock.DeleteMsroots());
         }
 
         [Fact]
         public void Delete_KeyCollectorFalse_ThrowsCanceledException()
         {
-            var yubiKey = new HollowYubiKeyDevice();
-
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                _ = Assert.Throws<OperationCanceledException>(() => pivSession.DeleteMsroots());
-            }
+            PivSessionMock.KeyCollector = ReturnFalseKeyCollectorDelegate;
+            _ = Assert.Throws<OperationCanceledException>(() => PivSessionMock.DeleteMsroots());
         }
 
-        public static bool ReturnFalseKeyCollectorDelegate(KeyEntryData keyEntryData)
-        {
-            return false;
-        }
+        private static bool ReturnFalseKeyCollectorDelegate(KeyEntryData _) => false;
     }
 }

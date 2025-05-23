@@ -18,110 +18,54 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
-    public class AuthTests
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
+    public class AuthTests : PivSessionIntegrationTestBase
     {
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void VerifyPin_Blocked_ThrowsSecurityException(StandardTestDevice testDeviceType)
+        public AuthTests()
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
+            var collectorObj = new Simple39KeyCollector
             {
-                try
-                {
-                    var collectorObj = new Simple39KeyCollector
-                    {
-                        KeyFlag = 1,
-                        RetryFlag = 1
-                    };
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+                KeyFlag = 1,
+                RetryFlag = 1
+            };
 
-                    _ = Assert.Throws<SecurityException>(() => pivSession.VerifyPin());
-                }
-                finally
-                {
-                    pivSession.ResetApplication();
-                }
-            }
+            Session.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
         }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        public void ChangePin_Blocked_ThrowsSecurityException(StandardTestDevice testDeviceType)
+        public void VerifyPin_Blocked_ThrowsSecurityException(
+            StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                try
-                {
-                    var collectorObj = new Simple39KeyCollector
-                    {
-                        KeyFlag = 1,
-                        RetryFlag = 1
-                    };
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                    _ = Assert.Throws<SecurityException>(() => pivSession.ChangePin());
-                }
-                finally
-                {
-                    pivSession.ResetApplication();
-                }
-            }
+            TestDeviceType = testDeviceType;
+            _ = Assert.Throws<SecurityException>(() => Session.VerifyPin());
         }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        public void ChangePuk_Blocked_ThrowsSecurityException(StandardTestDevice testDeviceType)
+        public void ChangePin_Blocked_ThrowsSecurityException(
+            StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                try
-                {
-                    var collectorObj = new Simple39KeyCollector
-                    {
-                        KeyFlag = 1,
-                        RetryFlag = 1
-                    };
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                    _ = Assert.Throws<SecurityException>(() => pivSession.ChangePuk());
-                }
-                finally
-                {
-                    pivSession.ResetApplication();
-                }
-            }
+            TestDeviceType = testDeviceType;
+            _ = Assert.Throws<SecurityException>(() => Session.ChangePin());
         }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        public void ResetPin_Blocked_ThrowsSecurityException(StandardTestDevice testDeviceType)
+        public void ChangePuk_Blocked_ThrowsSecurityException(
+            StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            TestDeviceType = testDeviceType;
+            _ = Assert.Throws<SecurityException>(() => Session.ChangePuk());
+        }
 
-            using (var pivSession = new PivSession(testDevice))
-            {
-                try
-                {
-                    var collectorObj = new Simple39KeyCollector
-                    {
-                        KeyFlag = 1,
-                        RetryFlag = 1
-                    };
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                    _ = Assert.Throws<SecurityException>(() => pivSession.ResetPin());
-                }
-                finally
-                {
-                    pivSession.ResetApplication();
-                }
-            }
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ResetPin_Blocked_ThrowsSecurityException(
+            StandardTestDevice testDeviceType)
+        {
+            TestDeviceType = testDeviceType;
+            _ = Assert.Throws<SecurityException>(() => Session.ResetPin());
         }
     }
 }

@@ -190,7 +190,7 @@ internal static class AsnPrivateKeyEncoder
         writer.PopSequence();
 
         // PrivateKey as OCTET STRING
-        writer.WriteOctetString(ecPrivateKeyHandle.Data);
+        writer.WriteOctetString(ecPrivateKeyHandle.Data.Span);
         writer.PopSequence();
 
         return writer.Encode();
@@ -237,7 +237,7 @@ internal static class AsnPrivateKeyEncoder
         privateKeyWriter.WriteOctetString(privateKey);
         
         using var privateKeyBytesHandle = new ZeroingMemoryHandle(privateKeyWriter.Encode());
-        writer.WriteOctetString(privateKeyBytesHandle.Data);
+        writer.WriteOctetString(privateKeyBytesHandle.Data.Span);
 
         // End PrivateKeyInfo SEQUENCE
         writer.PopSequence();

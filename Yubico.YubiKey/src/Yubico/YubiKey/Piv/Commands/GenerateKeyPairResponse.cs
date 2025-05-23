@@ -85,7 +85,9 @@ namespace Yubico.YubiKey.Piv.Commands
     ///   PivPublicKey pubKey = generateKeyPairResponse.GetData();
     /// </code>
     /// </remarks>
+    #pragma warning disable CS0618 // Type or member is obsolete
     public class GenerateKeyPairResponse : PivResponse, IYubiKeyResponseWithData<PivPublicKey>
+    #pragma warning restore CS0618 // Type or member is obsolete
     {
         private byte _slotNumber;
         private PivAlgorithm _algorithm;
@@ -190,10 +192,14 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
+        #pragma warning disable CS0618 // Type or member is obsolete
         public PivPublicKey GetData() =>
+            #pragma warning restore CS0618 // Type or member is obsolete
             Status switch
             {
+                #pragma warning disable CS0618 // Type or member is obsolete
                 ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data, Algorithm),
+                #pragma warning restore CS0618 // Type or member is obsolete
                 _ => throw new InvalidOperationException(StatusMessage),
             };
     }

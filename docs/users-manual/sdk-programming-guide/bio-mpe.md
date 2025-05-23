@@ -49,7 +49,7 @@ yubiKey.DeviceReset();
 
 ### DeviceResetCommand() 
 
-The device-wide reset can also be performed using the lower-level [DeviceResetCommand](xref:Yubico.YubiKey.Management.Commands.DeviceResetCommand) and [DeviceResetResponse](xref:Yubico.YubiKey.Management.Commands.DeviceResetResponse) classes (which is what the ``DeviceReset()`` method uses under the covers). 
+The device-wide reset can also be performed using the lower-level [DeviceResetCommand](xref:Yubico.YubiKey.Management.Commands.DeviceResetCommand) and [DeviceResetResponse](xref:Yubico.YubiKey.Management.Commands.DeviceResetResponse) classes (which is what the ``DeviceReset()`` method implements under the covers). 
 
 After connecting to a particular YubiKey with the ``YubiKeyDevice`` class as shown in the previous example, we need to set up an additional connection to the key's management application using the [IYubiKeyConnection](xref:Yubico.YubiKey.IYubiKeyConnection) class:
 
@@ -64,15 +64,21 @@ DeviceResetCommand resetCommand = new DeviceResetCommand();
 DeviceResetResponse resetResponse = connection.SendCommand(resetCommand);
 ```
 
-For error handling, check the ``IYubiKeyResponse`` interface's [Status](xref:Yubico.YubiKey.IYubiKeyResponse.Status) and [StatusMessage](xref:Yubico.YubiKey.IYubiKeyResponse.StatusMessage) properties. For general information on using the SDK's command classes, see [Commands](xref:UsersManualCommands).
+For error handling, check the ``DeviceResetResponse`` instance's [Status](xref:Yubico.YubiKey.IYubiKeyResponse.Status) and [StatusMessage](xref:Yubico.YubiKey.IYubiKeyResponse.StatusMessage) properties. For general information on using the SDK's command classes, see [Commands](xref:UsersManualCommands).
 
 ### APDUs
+
+At the lowest level, the device-wide reset can be performed by sending a command [APDU](xref:UsersManualApdu) to a YubiKey and handling its response APDU (which is what the ``DeviceResetCommand`` and ``DeviceResetResponse`` implement under the covers). 
+
+The command APDU is simple, requiring the instruction ``1F`` with no additional data. 
 
 **Command APDU**:
 
 | CLA | INS | P1 | P2 |    Lc    |   Data   |    Le    |
 |:---:|:---:|:--:|:--:|:--------:|:--------:|:--------:| 
 | 00  | 1F  | 00 | 00 | (absent) | (absent) | (absent) |
+
+The response APDU returned from the key will only contain the status word.
 
 **Response APDU (success)**:
 
@@ -91,3 +97,5 @@ Data Length: 0
 |   Data    | SW1 | SW2 |
 |:---------:|:---:|:---:|
 | (no data) | 6f  | 00  |
+
+#### OpenSC example

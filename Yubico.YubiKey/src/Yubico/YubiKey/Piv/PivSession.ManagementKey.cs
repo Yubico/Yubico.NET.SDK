@@ -1013,7 +1013,7 @@ namespace Yubico.YubiKey.Piv
                 }
 
                 ManagementKeyAuthenticated = true;
-                return true; 
+                return true;
             }
 
             Logger.LogInformation($"Failed to authenticate management key. Message: {completeResponse.StatusMessage}");
@@ -1023,24 +1023,8 @@ namespace Yubico.YubiKey.Piv
 
         private void RefreshManagementKeyAlgorithm() => ManagementKeyAlgorithm = GetManagementKeyAlgorithm();
 
-        private PivAlgorithm GetManagementKeyAlgorithm()
-        {
-            if (!YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
-            {
-                // Assume default for version
-                return DefaultManagementKeyAlgorithm;
-            }
-
-            // Get current ManagementKeyAlgorithm from Yubikey metadata
-            var response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-
-            var metadata = response.GetData();
-            return metadata.Algorithm;
-        }
+        private PivAlgorithm GetManagementKeyAlgorithm() =>
+            GetMetadataInternal(PivSlot.Management)?.Algorithm ?? DefaultManagementKeyAlgorithm;
 
         // Verify that and that the given algorithm is allowed.
         // If checkMode is true, also check that the PIN-only mode is None.
@@ -1077,15 +1061,16 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.UnsupportedAlgorithm));
             }
         }
-        
+
         private bool IsValidManagementKeyAlgorithm(PivAlgorithm pivAlgorithm) =>
             pivAlgorithm switch
             {
                 PivAlgorithm.TripleDes => true, // Default for keys below fw version 5.7
-                PivAlgorithm.Aes128 or PivAlgorithm.Aes192 or PivAlgorithm.Aes256 => YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey),
+                PivAlgorithm.Aes128 or PivAlgorithm.Aes192 or PivAlgorithm.Aes256 => YubiKey.HasFeature(
+                    YubiKeyFeature.PivAesManagementKey),
                 _ => false
             };
-        
+
         private PivAlgorithm DefaultManagementKeyAlgorithm =>
             YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey) &&
             YubiKey.FirmwareVersion >= FirmwareVersion.V5_7_0

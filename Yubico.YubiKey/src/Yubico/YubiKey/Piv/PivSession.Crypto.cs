@@ -266,7 +266,7 @@ namespace Yubico.YubiKey.Piv
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.IncorrectCiphertextLength));
         }
-        
+
         [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
         public byte[] KeyAgree(byte slotNumber, PivPublicKey correspondentPublicKey)
         {
@@ -287,7 +287,8 @@ namespace Yubico.YubiKey.Piv
 
             // This will verify the slot number and dataToSign length. If one or
             // both are incorrect, the call will throw an exception.
-            var keyAgreeCommand = new AuthenticateKeyAgreeCommand(publicPoint, slotNumber, correspondentPublicKey.Algorithm);
+            var keyAgreeCommand = new AuthenticateKeyAgreeCommand(
+                publicPoint, slotNumber, correspondentPublicKey.Algorithm);
 
             return PerformPrivateKeyOperation(
                 slotNumber,
@@ -297,7 +298,7 @@ namespace Yubico.YubiKey.Piv
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.IncorrectEccKeyLength));
         }
-        
+
         /// <summary>
         /// Perform Phase 2 of EC Diffie-Hellman Key Agreement using the private
         /// key in the given slot, and the corresponding party's public key.
@@ -398,9 +399,9 @@ namespace Yubico.YubiKey.Piv
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidPublicKeyData))
             };
-            
+
             var keyAgreeCommand = new AuthenticateKeyAgreeCommand(
-                publicPoint, slotNumber, 
+                publicPoint, slotNumber,
                 correspondentPublicKey.KeyType.GetPivAlgorithm());
 
             return PerformPrivateKeyOperation(
@@ -430,16 +431,9 @@ namespace Yubico.YubiKey.Piv
             // to verify the PIN again.
             // If the PIN policy is Always, we need to verify the PIN.
 
-            // Metadata will give us our answer, but that feature is
-            // available only on YubiKeys beginning with version 5.3.
-            if (YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
+            var metadata = GetMetadataInternal(slotNumber);
+            if (metadata is not null)
             {
-                var metadataCommand = new GetMetadataCommand(slotNumber);
-                var metadataResponse = Connection.SendCommand(metadataCommand);
-
-                // If there is no key in the slot, this will throw an exception.
-                var metadata = metadataResponse.GetData();
-
                 // We know the algorithm based on the input data. Is it the
                 // algorithm of the key in the slot?
                 // We can make this check with metadata. Without metadata there's
@@ -514,14 +508,10 @@ namespace Yubico.YubiKey.Piv
 
         private AuthenticateSignCommand BuildSignCommand(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
         {
-            if (!YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
-            {
-                return new AuthenticateSignCommand(dataToSign, slotNumber);
-            }
-
-            var slotMetadata = GetMetadata(slotNumber);
-            var algorithm = slotMetadata.Algorithm;
-            return new AuthenticateSignCommand(dataToSign, slotNumber, algorithm);
+            var slotMetadata = GetMetadataInternal(slotNumber);
+            return slotMetadata is null 
+                ? new AuthenticateSignCommand(dataToSign, slotNumber) 
+                : new AuthenticateSignCommand(dataToSign, slotNumber, slotMetadata.Algorithm);
         }
     }
 }

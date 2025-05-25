@@ -107,6 +107,8 @@ namespace Yubico.YubiKey.Cryptography
 
             throw new NotSupportedException($"Unsupported RSA length: {keySizeBits}");
         }
+        
+        public static KeyDefinition GetByRSAModulusLength(byte[] modulus) => GetByRSALength(modulus.Length * 8);
 
         /// <summary>
         /// Gets a key definition by its curve type.
@@ -161,6 +163,12 @@ namespace Yubico.YubiKey.Cryptography
             {
                 throw new NotSupportedException(
                     "RSA keys are not supported by this method as all RSA keys share the same OID.");
+            }
+            
+            if (string.Equals(oid, Oids.ECDSA, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new NotSupportedException(
+                    "All ECDSA keys (P-256, P-384, P-521) share the same OID. Use the Curve OID instead.");
             }
 
             var keyDefinition = AllDefinitions.Values.FirstOrDefault(d => d.AlgorithmOid == oid || d.CurveOid == oid);

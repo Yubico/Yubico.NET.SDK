@@ -17,6 +17,7 @@ using System.Formats.Asn1;
 using System.Globalization;
 using System.Numerics;
 using System.Security;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
@@ -118,7 +119,6 @@ namespace Yubico.YubiKey.Piv
             // This call will throw an exception if there was a problem with
             // attestation (imported, invalid cert, etc.).
             return response.GetData();
-
         }
 
         /// <summary>
@@ -404,8 +404,7 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.NotSupportedByYubiKeyVersion));
             }
 
-            bool isValidCert = IsSupportedCert(certificate, keyType);
-            if (!isValidCert)
+            if (!IsSupportedCert(certificate, keyType))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -414,17 +413,46 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        // Is there really a cert in this variable? Is it > version 1?
-        // If so, set certDer to the DER encoding of the cert.
         private static bool IsSupportedCert(X509Certificate2 certificate, KeyType keyType)
         {
-            byte[] certDer = certificate.GetRawCertData();
+            string oidValue = certificate.PublicKey.Oid.Value;
+            bool isRsa = oidValue == Oids.RSA;
+            if (isRsa && certificate.PublicKey.Key.KeySize == KeyDefinitions.RSA1024.LengthInBits)
+            {
+                // RSA 1024 is not supported for attestation.
+                return false;
+            }
 
+            var certKeyType = oidValue switch
+            {
+                Oids.ECDSA => GetKeyTypeForECDsa(certificate.GetECDsaPublicKey()),
+                Oids.RSA => GetKeyTypeForRSA(certificate.GetRSAPublicKey()),
+                Oids.Ed25519 => KeyType.Ed25519,
+                _ => throw new ArgumentException($"Unsupported key type: {keyType}")
+            };
+
+            // var certKeyType = isRsa
+            //     ? KeyDefinitions.GetByRSALength(certificate.PublicKey.Key.KeySize).KeyType
+            //     : GetKeyTypeForECDsa(certificate);
+            bool isSameAlgorithm = certKeyType == keyType;
+            byte[] certDer = certificate.GetRawCertData();
             return certificate.Handle != IntPtr.Zero &&
                 certificate.Version > 1 &&
                 certDer.Length is > 0 and < MaximumCertDerLength &&
-                certificate.PublicKey.Oid.Value == keyType.GetAlgorithmOid() &&
+                isSameAlgorithm && 
                 IsValidCertNameAndValidity(certDer);
+        }
+
+        private static KeyType GetKeyTypeForECDsa(ECDsa ecdsa)
+        {
+            var parameters = ecdsa.ExportParameters(false);
+            return KeyDefinitions.GetByOid(parameters.Curve.Oid).KeyType;
+        }
+        
+        private static KeyType GetKeyTypeForRSA(RSA rsa)
+        {
+            var parameters = rsa.ExportParameters(false);
+            return KeyDefinitions.GetByRSAModulusLength(parameters.Modulus).KeyType;
         }
 
         private static bool IsValidCertNameAndValidity(byte[] certDer)
@@ -445,7 +473,8 @@ namespace Yubico.YubiKey.Piv
             var subject = seqTbsCert.ReadSequence();
             int subjectValue = GetSequenceLength(subject);
 
-            return validityValue < MaximumValidityValueLength && subjectValue < MaximumNameValueLength;
+            return validityValue < MaximumValidityValueLength && 
+                subjectValue < MaximumNameValueLength;
         }
 
         private static BigInteger? ReadVersion(AsnReader seqTbsCert)

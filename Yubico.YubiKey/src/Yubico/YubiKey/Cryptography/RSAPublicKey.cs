@@ -45,7 +45,7 @@ public sealed class RSAPublicKey : PublicKey
     private RSAPublicKey(RSAParameters parameters)
     {
         Parameters = parameters.DeepCopy();
-        KeyDefinition = KeyDefinitions.GetByRSALength(parameters.Modulus.Length * 8);
+        KeyDefinition = KeyDefinitions.GetByRSAModulusLength(parameters.Modulus);
     }
 
     /// <inheritdoc />

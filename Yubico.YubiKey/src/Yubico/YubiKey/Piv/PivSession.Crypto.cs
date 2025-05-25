@@ -434,20 +434,11 @@ namespace Yubico.YubiKey.Piv
             var metadata = GetMetadataInternal(slotNumber);
             if (metadata is not null)
             {
-                // We know the algorithm based on the input data. Is it the
-                // algorithm of the key in the slot?
-                // We can make this check with metadata. Without metadata there's
-                // no way to know until we try to perform the operation.
                 if (metadata.Algorithm != algorithm)
                 {
                     throw new ArgumentException(algorithmExceptionMessage);
                 }
-
-                // If the metadata says Never, then pinRequired is false.
-                // If the metadata says Once, and the PIN is verified, then the
-                // PIN is not required.
-                // The only other case is Always which means we set the
-                // pinRequired to true, but we init that variable to true.
+                
                 if (metadata.PinPolicy == PivPinPolicy.Never ||
                     (metadata.PinPolicy == PivPinPolicy.Once && PinVerified))
                 {

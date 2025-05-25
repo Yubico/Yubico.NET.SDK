@@ -293,8 +293,8 @@ namespace Yubico.YubiKey.Piv
                 return true;
             }
 
-            retriesRemaining = response.GetData();
-            if ((retriesRemaining ?? 1) == 0)
+            retriesRemaining = response.GetData() ?? 1;
+            if (retriesRemaining == 0)
             {
                 throw new SecurityException(
                     string.Format(

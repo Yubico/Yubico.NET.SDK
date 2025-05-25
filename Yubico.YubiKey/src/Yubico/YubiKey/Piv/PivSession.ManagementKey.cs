@@ -24,13 +24,6 @@ namespace Yubico.YubiKey.Piv
     // operations.
     public sealed partial class PivSession : IDisposable
     {
-        private static readonly Memory<byte> DefaultManagementKey = new byte[]
-        {
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-        };
-
         /// <summary>
         /// This specifies the algorithm of the management key.
         /// </summary>

@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Piv
                 return false;
             }
 
-            bool isChange = false;
+            var isChange = false;
             Memory<byte> currentValue;
             Memory<byte>? newValue = null;
 
@@ -70,10 +70,6 @@ namespace Yubico.YubiKey.Piv
                     return false;
 
                 case KeyEntryRequest.Release:
-                    if (!_setKeyFlagOnChange)
-                    {
-                        KeyFlag = 0;
-                    }
 
                     return true;
 

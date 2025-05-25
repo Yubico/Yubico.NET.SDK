@@ -56,27 +56,20 @@ namespace Yubico.YubiKey.Piv
         [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
         [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.ECP384, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
         public void AttestGenerated(
             KeyType keyType,
             StandardTestDevice deviceType)
         {
             TestDeviceType = deviceType;
-
             const byte slotNumber = PivSlot.Retired1;
-            _ = Session.GenerateKeyPair(
-                slotNumber, keyType, PivPinPolicy.Never, PivTouchPolicy.Never);
+            Session.GenerateKeyPair(slotNumber, keyType, PivPinPolicy.Never, PivTouchPolicy.Never);
 
-            X509Certificate2? cert = null;
-            try
-            {
-                cert = Session.CreateAttestationStatement(slotNumber);
-                Assert.NotEqual(1, cert.Version);
-            }
-            finally
-            {
-                cert?.Dispose();
-            }
+            // If this test fails, it's possible the attestation key or cert is missing or broken.
+            // In that case, run LoadAttestationPair(KeyType, true) to fix the problem.
+            var cert = Session.CreateAttestationStatement(slotNumber);
+            
+            Assert.NotEqual(1, cert.Version);
         }
 
         [Theory]
@@ -86,7 +79,7 @@ namespace Yubico.YubiKey.Piv
         {
             TestDeviceType = deviceType;
 
-            LoadAttestationPair(KeyType.ECP384, true);
+            LoadAttestationPair(KeyType.ECP256, true);
 
             X509Certificate2? cert = null;
             try

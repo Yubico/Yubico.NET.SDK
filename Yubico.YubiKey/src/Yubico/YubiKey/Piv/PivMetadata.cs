@@ -314,7 +314,8 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// The public key associated with the private key in the given slot.
         /// </summary>
-        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey, PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
+
         public PivPublicKey PublicKey { get; private set; } 
         
         /// <summary>

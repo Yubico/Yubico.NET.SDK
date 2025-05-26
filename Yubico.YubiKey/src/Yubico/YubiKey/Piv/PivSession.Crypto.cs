@@ -267,7 +267,8 @@ namespace Yubico.YubiKey.Piv
                     ExceptionMessages.IncorrectCiphertextLength));
         }
         
-        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey, PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
+
         public byte[] KeyAgree(byte slotNumber, PivPublicKey correspondentPublicKey)
         {
             if (correspondentPublicKey is null)

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
@@ -44,6 +45,7 @@ public class RSAPrivateKeyTests
     }
 
     [Fact]
+    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
     public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()
     {
         // Arrange

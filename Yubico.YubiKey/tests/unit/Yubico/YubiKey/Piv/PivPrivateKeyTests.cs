@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
@@ -21,8 +20,26 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
     public class PivPrivateKeyTests
     {
+        [Theory]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [InlineData(KeyType.Ed25519)]
+        public void Constructor_with_Algorithm_SetsAlgorithm(KeyType keyType)
+        {
+            var keyBytes = keyType switch
+            {
+                KeyType.ECP384 => new byte[48],
+                _ => new byte[32],
+            };
+            
+            var pk = new PivEccPrivateKey(keyBytes, keyType.GetPivAlgorithm());
+            Assert.Equal(keyType.GetPivAlgorithm(), pk.Algorithm);
+            Assert.Equal(keyType, pk.KeyType);
+        }
+        
         [Theory]
         [InlineData(KeyType.RSA1024)]
         [InlineData(KeyType.RSA2048)]
@@ -241,6 +258,7 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(KeyType.ECP256)]
         [InlineData(KeyType.ECP384)]
+        [Obsolete("Obsolete")]
         public void EccConstructor_Components_BuildsEncoding(
             KeyType keyType)
         {
@@ -305,7 +323,9 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void EccConstructor_NullData_ThrowsExcpetion()
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             _ = Assert.Throws<ArgumentException>(() => new PivEccPrivateKey(null));
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         [Theory]
@@ -382,7 +402,9 @@ namespace Yubico.YubiKey.Piv
                 offset = keySize - eccParams.D!.Length;
                 Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 var eccPriKey = new PivEccPrivateKey(privateValue);
+#pragma warning restore CS0618 // Type or member is obsolete
                 privateKey = (PivPrivateKey)eccPriKey;
             }
 

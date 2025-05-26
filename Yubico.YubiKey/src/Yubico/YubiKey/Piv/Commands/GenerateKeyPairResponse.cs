@@ -194,13 +194,12 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </exception>
         #pragma warning disable CS0618 // Type or member is obsolete
         public PivPublicKey GetData() =>
-            #pragma warning restore CS0618 // Type or member is obsolete
             Status switch
             {
-                #pragma warning disable CS0618 // Type or member is obsolete
                 ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data, Algorithm),
-                #pragma warning restore CS0618 // Type or member is obsolete
                 _ => throw new InvalidOperationException(StatusMessage),
             };
+        #pragma warning restore CS0618 // Type or member is obsolete
+            
     }
 }

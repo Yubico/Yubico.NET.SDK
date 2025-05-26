@@ -25,10 +25,17 @@ namespace Yubico.YubiKey.Piv
     {
         [Theory]
         [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
         [InlineData(KeyType.Ed25519)]
         public void Constructor_with_Algorithm_SetsAlgorithm(KeyType keyType)
         {
-            var pk = new PivEccPrivateKey(new byte[32], keyType.GetPivAlgorithm());
+            var keyBytes = keyType switch
+            {
+                KeyType.ECP384 => new byte[48],
+                _ => new byte[32],
+            };
+            
+            var pk = new PivEccPrivateKey(keyBytes, keyType.GetPivAlgorithm());
             Assert.Equal(keyType.GetPivAlgorithm(), pk.Algorithm);
             Assert.Equal(keyType, pk.KeyType);
         }

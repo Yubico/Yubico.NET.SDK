@@ -13,10 +13,12 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -28,12 +30,11 @@ namespace Yubico.YubiKey.Piv
     /// of a point on the curve. So for ECC P-256, each coordinate is 32 bytes
     /// (256 bits), so the private value will be 32 bytes.
     /// </remarks>
-    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey, PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
+    [Obsolete(
+        "Usage of PivEccPublic/PivEccPrivateKey, PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead",
+        false)]
     public sealed class PivEccPrivateKey : PivPrivateKey
     {
-        private const int EccP256PrivateKeySize = 32;
-        private const int EccP384PrivateKeySize = 48;
-
         private Memory<byte> _privateValue;
 
         // <summary>
@@ -70,12 +71,12 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use ECPublicKey, ECPrivateKey instead", false)]
         public PivEccPrivateKey(
-            ReadOnlySpan<byte> privateValue, 
+            ReadOnlySpan<byte> privateValue,
             PivAlgorithm? algorithm = null)
         {
             if (algorithm.HasValue)
             {
-                ValidateSize(privateValue, algorithm);
+                ValidateSize(privateValue, algorithm.Value);
                 Algorithm = algorithm.Value;
             }
             else
@@ -89,17 +90,17 @@ namespace Yubico.YubiKey.Piv
                 PivAlgorithm.EccX25519 => PivConstants.PrivateECX25519Tag,
                 _ => PivConstants.PrivateECDsaTag
             };
-            
+
             var tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(tag, privateValue);
             EncodedKey = tlvWriter.Encode();
             _privateValue = new Memory<byte>(privateValue.ToArray());
         }
 
-        private static void ValidateSize(ReadOnlySpan<byte> privateValue, [DisallowNull] PivAlgorithm? algorithm)
+        private static void ValidateSize(ReadOnlySpan<byte> privateValue, PivAlgorithm algorithm)
         {
-            int expectedSize = algorithm.Value.GetPivKeyDefinition().KeyDefinition.LengthInBytes;
-            if(privateValue.Length != expectedSize)
+            int expectedSize = algorithm.GetPivKeyDefinition().KeyDefinition.LengthInBytes;
+            if (privateValue.Length != expectedSize)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -109,13 +110,16 @@ namespace Yubico.YubiKey.Piv
 
         private static PivAlgorithm GetBySize(ReadOnlySpan<byte> privateValue)
         {
-            return privateValue.Length switch
+            int privateValueSize = privateValue.Length;
+            var allowed = new List<KeyDefinition> { KeyDefinitions.P256, KeyDefinitions.P384 };
+            if (allowed.SingleOrDefault(kd => kd.LengthInBytes == privateValueSize) is { } keyDefinition)
             {
-                EccP256PrivateKeySize => PivAlgorithm.EccP256,
-                EccP384PrivateKeySize => PivAlgorithm.EccP384,
-                _ => throw new ArgumentException(string.Format(
-                    CultureInfo.CurrentCulture, ExceptionMessages.InvalidPrivateKeyData))
-            };
+                return keyDefinition.GetPivKeyDefinition().Algorithm;
+            }
+
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.CurrentCulture, ExceptionMessages.InvalidPrivateKeyData));
         }
 
         /// <summary>

@@ -18,36 +18,55 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.13.x Releases
 
+### 1.13.1
+
+Release date: April 28th, 2025
+
+This release mainly adresses an issue that was affecting FIDO2 on YubiKey 5.7.4 and greater as well as adds support for compressed certificates within the PIV application. It also contains miscellaneous and documentation updates. 
+
+Features: 
+- Support for compressed certificates in the PIV application [#219](https://github.com/Yubico/Yubico.NET.SDK/pull/219)
+- Ability to create a FirmwareVersion object through parsing a version string (e.g. 1.0.0) [#220](https://github.com/Yubico/Yubico.NET.SDK/pull/220)
+
+Bug Fixes: 
+- PinUvAuthParam was erroneously truncated which caused failures on multiple FIDO2 commands for YubiKey v 5.7.4 [#222](https://github.com/Yubico/Yubico.NET.SDK/pull/222)
+
+Documentation:
+- Updates to challenge-response documentation to improve clarity [#221](https://github.com/Yubico/Yubico.NET.SDK/pull/221)
+
+Miscellaneous:
+- Integration tests will now run on Bio USB C keys as well [a4c4df](https://github.com/Yubico/Yubico.NET.SDK/commit/a4c4df10047bedf507e4ce36b80ed5001b996b9a). 
+
 ### 1.13.0
 
 Release date: April 9th, 2025
 
 Features:
 
-- Curve25519 support has been added for PIV [#210](https://github.com/Yubico/Yubico.NET.SDK/pull/210):
+- Curve25519 support has been added for PIV [(#210)](https://github.com/Yubico/Yubico.NET.SDK/pull/210):
  
    - Keys can now be imported or generated using the Ed25519 and X25519 algorithms. 
    - The key agreement operation can be performed with an X25519 key.
    - Digital signatures can now be created with a Ed25519 key.
    - New related unit tests have been added.
 
-- Unit tests have been added for RSA-3072 and RSA-4096 keys [#197](https://github.com/Yubico/Yubico.NET.SDK/pull/197).
+- Unit tests have been added for RSA-3072 and RSA-4096 keys. [(#197)](https://github.com/Yubico/Yubico.NET.SDK/pull/197)
 
-- Support for large APDUs has been improved [#208](https://github.com/Yubico/Yubico.NET.SDK/pull/208):
+- Support for large APDUs has been improved [(#208)](https://github.com/Yubico/Yubico.NET.SDK/pull/208):
 
-   - When sending large APDU commands to a YubiKey via the smartcard connection, the CommandChainingTransform will now throw an exception when the cumulative APDU data (sent in chunks of up to 255 bytes) exceeds the max APDU size for the given YubiKey (varies based on firmware version; see SmartCardMaxApduSizes).
+   - When sending large APDU commands to a YubiKey via the smartcard connection, the CommandChainingTransform will now throw an exception when the cumulative APDU data (sent in chunks of up to 255 bytes) exceeds the max APDU size for the given YubiKey (varies based on firmware version; see [SmartCardMaxApduSizes](xref:Yubico.YubiKey.SmartCardMaxApduSizes)).
 
-- Support for Ed25519 and P384 credentials has been added for FIDO [#186](https://github.com/Yubico/Yubico.NET.SDK/pull/186).
+- Support for Ed25519 and P384 credentials has been added for FIDO. [(#186)](https://github.com/Yubico/Yubico.NET.SDK/pull/186)
 
-- Ubuntu runners have been upgraded from version 20.04 to 22.04 to support the compilation of Yubico.NativeShims [#188](https://github.com/Yubico/Yubico.NET.SDK/pull/188).
+- Ubuntu runners have been upgraded from version 20.04 to 22.04 to support the compilation of Yubico.NativeShims. [(#188)](https://github.com/Yubico/Yubico.NET.SDK/pull/188)
 
 Bug Fixes:
 
-- The default logger now only writes output for the "Error" log level unless another level is specified [#185](https://github.com/Yubico/Yubico.NET.SDK/pull/185). Previously, the logger wrote output for all log levels, which could become overly long and difficult to evaluate.
+- The default logger now only writes output for the "Error" log level unless another level is specified. Previously, the logger wrote output for all log levels, which could become overly long and difficult to evaluate. [(#185)](https://github.com/Yubico/Yubico.NET.SDK/pull/185)
 
 Miscellaneous: 
 
-- The [License](https://github.com/Yubico/Yubico.NET.SDK/blob/develop/LICENSE.txt) was updated to remove the information for the AesCmac.cs file from the Bouncy Castle library [#196](https://github.com/Yubico/Yubico.NET.SDK/pull/196).
+- The [License](https://github.com/Yubico/Yubico.NET.SDK/blob/develop/LICENSE.txt) was updated to remove the information for the AesCmac.cs file from the Bouncy Castle library. [(#196)](https://github.com/Yubico/Yubico.NET.SDK/pull/196)
 
 ## 1.12.x Releases
 

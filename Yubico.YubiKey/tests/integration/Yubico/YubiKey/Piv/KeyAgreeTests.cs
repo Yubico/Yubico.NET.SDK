@@ -107,16 +107,13 @@ namespace Yubico.YubiKey.Piv
             var (_, testPrivateKey) = TestKeys.GetKeyPair(keyType);
 
             var peerPub = testPrivateKey.AsPublicKey();
-            var peerEcc = (ECPublicKey)peerPub;
-
-            var ecDsaObject = testPrivateKey.AsECDsa(); // Wtf, these are the same keys
-            var ecParams = ecDsaObject.ExportParameters(true);
-            using var peerEcdh = ECDiffieHellman.Create(ecParams);
+            var ecDsaObject = testPrivateKey.AsECDsa(); // Should ideally be different keys
+            var ecParamsPrivate = ecDsaObject.ExportParameters(true);
+            using var peerEcdh = ECDiffieHellman.Create(ecParamsPrivate);
 
             //  Build the YubiKey objects.
-            ecDsaObject = testPrivateKey.AsECDsa(); // Wtf, these are the same keys
-            ecParams = ecDsaObject.ExportParameters(false);
-            using var ecdh = ECDiffieHellman.Create(ecParams);
+            var ecParamsPublic = ecDsaObject.ExportParameters(false); // This should be the key from the Yubikey
+            using var ecdh = ECDiffieHellman.Create(ecParamsPublic);
 
             var hashAlgorithm = digestAlgorithm switch
             {
@@ -132,14 +129,14 @@ namespace Yubico.YubiKey.Piv
             // The YubiKey computes the shared secret.
             Session.ImportPrivateKey(slotNumber, testPrivateKey.AsPrivateKey(), PivPinPolicy.Always,
                 PivTouchPolicy.Never);
-            var sharedSecret = Session.KeyAgree(slotNumber, peerEcc);
+            
+            var sharedSecret = Session.KeyAgree(slotNumber, peerPub);
 
             using var digester = GetHashAlgorithm(digestAlgorithm);
             digester.Initialize();
             _ = digester.TransformFinalBlock(sharedSecret, 0, sharedSecret.Length);
 
-            Assert.True(
-                peerSecret.SequenceEqual(digester.Hash!));
+            Assert.True(peerSecret.SequenceEqual(digester.Hash!));
         }
 
         [Theory]

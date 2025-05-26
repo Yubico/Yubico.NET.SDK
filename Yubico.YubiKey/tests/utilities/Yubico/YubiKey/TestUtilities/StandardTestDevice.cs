@@ -17,6 +17,11 @@ namespace Yubico.YubiKey.TestUtilities
     public enum StandardTestDevice
     {
         /// <summary>
+        /// Any version
+        /// </summary>
+        Any,
+     
+        /// <summary>
         /// Major version 3, USB A keychain, not FIPS
         /// </summary>
         Fw3,

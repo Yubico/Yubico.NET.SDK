@@ -51,11 +51,11 @@ namespace Yubico.YubiKey.Piv
                 Session.CreateAttestationStatement(PivSlot.Retired1));
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5Fips)]
         [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
         public void AttestGenerated(
             KeyType keyType,
@@ -63,7 +63,8 @@ namespace Yubico.YubiKey.Piv
         {
             TestDeviceType = deviceType;
             const byte slotNumber = PivSlot.Retired1;
-            Session.GenerateKeyPair(slotNumber, keyType, PivPinPolicy.Never, PivTouchPolicy.Never);
+            
+            Session.GenerateKeyPair(slotNumber, keyType);
 
             // If this test fails, it's possible the attestation key or cert is missing or broken.
             // In that case, run LoadAttestationPair(KeyType, true) to fix the problem.

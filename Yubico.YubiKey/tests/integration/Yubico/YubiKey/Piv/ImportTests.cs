@@ -138,5 +138,21 @@ namespace Yubico.YubiKey.Piv
             var publicKey = TestKeyExtensions.AsPublicKey(TestKeys.GetTestPublicKey(keyType));
             Assert.Equal(publicKey.ExportSubjectPublicKeyInfo(), resultMetadata.PublicKeyParameters?.ExportSubjectPublicKeyInfo());
         }
+        
+        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
+        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
+        [Obsolete("Legacy test", false)]
+        public void Import_with_PivEccPrivateKey_Succeeds(
+            KeyType keyType,
+            StandardTestDevice testDeviceType)
+        {
+            TestDeviceType = testDeviceType;
+            using var pivSession = GetSession();
+            
+            var testPrivateKey = TestKeys.GetTestPrivateKey(keyType);
+            var piv = new PivEccPrivateKey(testPrivateKey.GetPrivateKeyValue(), keyType.GetPivAlgorithm());
+            pivSession.ImportPrivateKey(0x90, piv);
+        }
     }
 }

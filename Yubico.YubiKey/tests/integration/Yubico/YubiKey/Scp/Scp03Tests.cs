@@ -388,9 +388,9 @@ namespace Yubico.YubiKey.Scp
 
             if (desiredDeviceType == StandardTestDevice.Fw5Fips)
             {
-                ScpTestUtilities.SetFipsApprovedCredentials(pivSession);
+                FipsTestUtilities.SetFipsApprovedCredentials(pivSession);
 
-                var isVerified = pivSession.TryVerifyPin(ScpTestUtilities.FipsPin, out _);
+                var isVerified = pivSession.TryVerifyPin(FipsTestUtilities.FipsPin, out _);
                 Assert.True(isVerified);
             }
             else
@@ -536,8 +536,8 @@ namespace Yubico.YubiKey.Scp
             byte[] pin;
             if (desiredDeviceType == StandardTestDevice.Fw5Fips)
             {
-                ScpTestUtilities.SetFipsApprovedCredentials(testDevice, keyParams);
-                pin = ScpTestUtilities.FipsPin;
+                FipsTestUtilities.SetFipsApprovedCredentials(testDevice, keyParams);
+                pin = FipsTestUtilities.FipsPin;
             }
             else
             {

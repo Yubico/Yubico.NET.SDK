@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
-using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.Scp;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Piv
 {
-    public static class ScpTestUtilities
+    public static class FipsTestUtilities
     {
         public static readonly byte[] FipsPin = {
             0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
@@ -39,9 +38,9 @@ namespace Yubico.YubiKey.Scp
             session.ResetApplication();
             session.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
 
-            session.TryChangePin(Simple39KeyCollector.CollectPin(), FipsPin, out _);
-            session.TryChangePuk(Simple39KeyCollector.CollectPuk(), FipsPuk, out _);
-            session.TryChangeManagementKey(Simple39KeyCollector.CollectMgmtKey(), FipsManagementKey, PivTouchPolicy.Always);
+            session.TryChangePin(PivSessionIntegrationTestBase.DefaultPin, FipsPin, out _);
+            session.TryChangePuk(PivSessionIntegrationTestBase.DefaultPuk, FipsPuk, out _);
+            session.TryChangeManagementKey(PivSessionIntegrationTestBase.DefaultManagementKey, FipsManagementKey, PivTouchPolicy.Always);
             Assert.True(session.TryVerifyPin(FipsPin, out _));
         }
 

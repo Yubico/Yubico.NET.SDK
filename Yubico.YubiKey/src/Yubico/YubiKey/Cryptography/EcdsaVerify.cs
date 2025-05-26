@@ -173,7 +173,6 @@ namespace Yubico.YubiKey.Cryptography
             ECDsa = ConvertPublicKey(publicPointSpan.ToArray());
         }
         
-        // TODO Test
         public EcdsaVerify(ECPublicKey publicKey)
         {
             if (publicKey is null)
@@ -181,7 +180,7 @@ namespace Yubico.YubiKey.Cryptography
                 throw new ArgumentNullException(nameof(publicKey));
             }
 
-            if (!publicKey.KeyType.IsECDsa() || !publicKey.KeyType.IsCurve25519())
+            if (!publicKey.KeyType.IsECDsa())
             {
                 throw new ArgumentException("Invalid key type", nameof(publicKey));
             }

@@ -18,6 +18,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
@@ -60,7 +61,7 @@ namespace Yubico.YubiKey.Piv
             return response.GetData();
         }
         
-                /// <summary>
+        /// <summary>
         /// Generate a new key pair in the given slot.
         /// </summary>
         /// <remarks>
@@ -164,12 +165,19 @@ namespace Yubico.YubiKey.Piv
             PivPinPolicy pinPolicy = PivPinPolicy.Default,
             PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
+            Logger.LogInformation("Generating key pair.");
+            
             YubiKey.ThrowIfUnsupportedAlgorithm(keyType.GetPivAlgorithm());
 
             RefreshManagementKeyAuthentication();
 
             var command = new GenerateKeyPairCommand(slotNumber, keyType, pinPolicy, touchPolicy);
             var response = Connection.SendCommand(command);
+            
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException("Error generating key pair: " + response);
+            }
 
             return PivKeyDecoder.CreatePublicKey(response.Data, keyType);
         }

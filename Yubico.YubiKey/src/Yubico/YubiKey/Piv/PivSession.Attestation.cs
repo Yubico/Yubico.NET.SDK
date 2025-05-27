@@ -431,9 +431,6 @@ namespace Yubico.YubiKey.Piv
                 _ => throw new ArgumentException($"Unsupported key type: {keyType}")
             };
 
-            // var certKeyType = isRsa
-            //     ? KeyDefinitions.GetByRSALength(certificate.PublicKey.Key.KeySize).KeyType
-            //     : GetKeyTypeForECDsa(certificate);
             bool isSameAlgorithm = certKeyType == keyType;
             byte[] certDer = certificate.GetRawCertData();
             return certificate.Handle != IntPtr.Zero &&

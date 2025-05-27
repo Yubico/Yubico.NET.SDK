@@ -45,13 +45,13 @@ namespace Yubico.YubiKey.Fido2
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void SetLargeBlob_Succeeds()
         {
-            // bool isValid = Fido2ResetForTest.DoReset(_testDevice.SerialNumber);
-            // Assert.True(isValid);
+            bool isValid = Fido2ResetForTest.DoReset(_testDevice.SerialNumber);
+            Assert.True(isValid);
 
             using (var fido2Session = new Fido2Session(_testDevice))
             {
                 fido2Session.KeyCollector = Fido2ResetForTest.ResetForTestKeyCollectorDelegate;
-                var isValid = fido2Session.TrySetPin(new ReadOnlyMemory<byte>(_pin));
+                isValid = fido2Session.TrySetPin(new ReadOnlyMemory<byte>(_pin));
                 Assert.True(isValid);
 
                 var user1 = new UserEntity(new byte[] { 1, 2, 3, 4 })

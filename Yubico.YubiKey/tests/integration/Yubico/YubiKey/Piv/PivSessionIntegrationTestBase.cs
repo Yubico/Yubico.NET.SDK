@@ -25,8 +25,8 @@ public class PivSessionIntegrationTestBase : IDisposable
 {
     public static Memory<byte> DefaultPin => "123456"u8.ToArray();
     public static Memory<byte> DefaultPuk => "12345678"u8.ToArray();
-    public static Memory<byte> ComplexPuk => "gjH@5K!8"u8.ToArray();
-    public static Memory<byte> ComplexPin => "1@$#5s!8"u8.ToArray();
+    public static Memory<byte> ComplexPuk => "11234567"u8.ToArray();
+    public static Memory<byte> ComplexPin => "12234567"u8.ToArray();
 
     public static Memory<byte> DefaultManagementKey => new byte[] // Both Aes and TDes
     {
@@ -41,24 +41,6 @@ public class PivSessionIntegrationTestBase : IDisposable
         0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x12,
         0x23, 0x34, 0x45, 0x56, 0x67, 0x78, 0x89, 0x9A
     };
-
-    // public void SetFipsApprovedCredentials(PivSession? session)
-    // {
-    //     session ??= Session;
-    //     session.TryChangePin(DefaultPin, ComplexPin, out _);
-    //     session.TryChangePuk(DefaultPuk, ComplexPuk, out _);
-    //     session.TryChangeManagementKey(DefaultManagementKey, ComplexManagementKey, PivTouchPolicy.Always);
-    //     Assert.True(session.TryVerifyPin(ComplexPin, out _));
-    // }
-
-    // public void SetFipsApprovedCredentials(
-    //     IYubiKeyDevice? device,
-    //     ScpKeyParameters parameters)
-    // {
-    //     device ??= Device;
-    //     using var session = new PivSession(device, parameters);
-    //     SetFipsApprovedCredentials(session);
-    // }
 
     protected KeyType DefaultManagementKeyType =>
         Device.FirmwareVersion > FirmwareVersion.V5_7_0 ? KeyType.AES192 : KeyType.TripleDES;

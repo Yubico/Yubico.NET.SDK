@@ -123,6 +123,8 @@ namespace Yubico.YubiKey.Piv
 
             return true;
         }
+        
+        public static SimpleKeyCollector Create(bool allowRetry) => new (allowRetry);
 
         public static byte[] CollectPin() => _pin;
 

@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Fido2
     [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class CredMgmtTests : IClassFixture<BioFido2Fixture>
     {
-        private readonly BioFido2Fixture _bioFido2Fixture;
+        private readonly BioFido2Fixture _bioFido2Fixture; // This test should be able to run without a bio key
 
         public CredMgmtTests(BioFido2Fixture bioFido2Fixture)
         {

@@ -22,7 +22,7 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Piv
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class KeyAgreeTests
+    public class KeyAgreeTests : PivSessionIntegrationTestBase
     {
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
         [InlineData(KeyType.ECP256, PivPinPolicy.Always, StandardTestDevice.Fw5)]
@@ -37,8 +37,9 @@ namespace Yubico.YubiKey.Piv
             StandardTestDevice testDeviceType)
         {
             // Arrange
+            TestDeviceType = testDeviceType;
+
             var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(keyType);
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var privateKeyParameters = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
             IPublicKey peerPublicKey;
             var peerPrivateKeyEcParameters = new ECParameters();
@@ -58,11 +59,10 @@ namespace Yubico.YubiKey.Piv
             }
 
             // -> Import Private Key
-            using var pivSession = GetSession(testDevice);
-            pivSession.ImportPrivateKey(0x85, privateKeyParameters, pinPolicy, PivTouchPolicy.Never);
+            Session.ImportPrivateKey(0x85, privateKeyParameters, pinPolicy, PivTouchPolicy.Never);
 
             // Act
-            var yubikeySecret = pivSession.KeyAgree(0x85, peerPublicKey);
+            var yubikeySecret = Session.KeyAgree(0x85, peerPublicKey);
 
             // Assert
             if (keyType is KeyType.X25519)
@@ -79,7 +79,7 @@ namespace Yubico.YubiKey.Piv
                 var yubiKeyParametersPublic = testPublicKey.AsECDsa().ExportParameters(false);
                 using var yubikeyEcdh = ECDiffieHellman.Create(yubiKeyParametersPublic);
                 var peerSecret = peerEcdh.DeriveRawSecretAgreement(yubikeyEcdh.PublicKey);
-                
+
                 Assert.Equal(yubikeySecret.Length, peerSecret.Length);
                 Assert.Equal(yubikeySecret, peerSecret);
             }
@@ -101,28 +101,19 @@ namespace Yubico.YubiKey.Piv
             int digestAlgorithm,
             StandardTestDevice testDeviceType)
         {
-            // Build the correspondent objects.
-            var isValid = SampleKeyPairs.GetKeysAndCertPem(keyType, true, out _, out _, out var privateKeyPem);
-            Assert.True(isValid);
-            var privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
+            // Arrange
+            TestDeviceType = testDeviceType;
+            //  Build the peer objects.
+            var (_, testPrivateKey) = TestKeys.GetKeyPair(keyType);
 
-            var correspondentPub = privateKey.GetPivPublicKey();
-            var correspondentEcc = (PivEccPublicKey)correspondentPub;
+            var peerPub = testPrivateKey.AsPublicKey();
+            var ecDsaObject = testPrivateKey.AsECDsa(); // Should ideally be different keys
+            var ecParamsPrivate = ecDsaObject.ExportParameters(true);
+            using var peerEcdh = ECDiffieHellman.Create(ecParamsPrivate);
 
-            var ecDsaObject = privateKey.GetEccObject();
-            var ecParams = ecDsaObject.ExportParameters(true);
-            var correspondentObject = ECDiffieHellman.Create(ecParams);
-            privateKey.Clear();
-
-            // Build the YubiKey objects.
-            _ = SampleKeyPairs.GetKeysAndCertPem(keyType, false, out _, out _, out privateKeyPem);
-            privateKey = new KeyConverter(privateKeyPem!.ToCharArray());
-            var pivPrivateKey = privateKey.GetPivPrivateKey();
-
-            ecDsaObject = privateKey.GetEccObject();
-            ecParams = ecDsaObject.ExportParameters(false);
-            var eccObject = ECDiffieHellman.Create(ecParams);
-            privateKey.Clear();
+            //  Build the YubiKey objects.
+            var ecParamsPublic = ecDsaObject.ExportParameters(false); // This should be the key from the Yubikey
+            using var ecdh = ECDiffieHellman.Create(ecParamsPublic);
 
             var hashAlgorithm = digestAlgorithm switch
             {
@@ -132,51 +123,34 @@ namespace Yubico.YubiKey.Piv
                 _ => HashAlgorithmName.SHA1,
             };
 
-            // The correspondent computes the digest of the shared secret.
-            var correspondentSecret = correspondentObject.DeriveKeyFromHash(eccObject.PublicKey, hashAlgorithm);
-
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            // The peer computes the digest of the shared secret.
+            var peerSecret = peerEcdh.DeriveKeyFromHash(ecdh.PublicKey, hashAlgorithm);
 
             // The YubiKey computes the shared secret.
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            Session.ImportPrivateKey(slotNumber, testPrivateKey.AsPrivateKey(), PivPinPolicy.Always,
+                PivTouchPolicy.Never);
+            
+            var sharedSecret = Session.KeyAgree(slotNumber, peerPub);
 
-                pivSession.ImportPrivateKey(slotNumber, pivPrivateKey, PivPinPolicy.Always, PivTouchPolicy.Never);
+            using var digester = GetHashAlgorithm(digestAlgorithm);
+            digester.Initialize();
+            _ = digester.TransformFinalBlock(sharedSecret, 0, sharedSecret.Length);
 
-                var sharedSecret = pivSession.KeyAgree(slotNumber, correspondentEcc);
-
-                using var digester = GetHashAlgorithm(digestAlgorithm);
-                digester.Initialize();
-                _ = digester.TransformFinalBlock(sharedSecret, 0, sharedSecret.Length);
-
-                isValid = correspondentSecret.SequenceEqual(digester.Hash!);
-                Assert.True(isValid);
-            }
+            Assert.True(peerSecret.SequenceEqual(digester.Hash!));
         }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        [Obsolete("Obsolete")]
         public void NoKeyInSlot_KeyAgree_Exception(
             StandardTestDevice testDeviceType)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(KeyType.ECP384, false, out _, out var publicKeyPem, out _);
-            var publicKey = new KeyConverter(publicKeyPem!.ToCharArray());
-            var pivPublicKey = publicKey.GetPivPublicKey();
-
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                pivSession.ResetApplication();
-
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.KeyAgree(0x9a, pivPublicKey));
-            }
+            TestDeviceType = testDeviceType;
+            
+            var testKey = TestKeys.GetTestPublicKey(KeyType.ECP384);
+            var publicKey = TestKeyExtensions.AsPublicKey(testKey);
+            
+            Session.ResetApplication();
+            _ = Assert.Throws<InvalidOperationException>(() => Session.KeyAgree(0x9a, publicKey));
         }
 
         private static HashAlgorithm GetHashAlgorithm(
@@ -187,14 +161,5 @@ namespace Yubico.YubiKey.Piv
             RsaFormat.Sha512 => CryptographyProviders.Sha512Creator(),
             _ => CryptographyProviders.Sha1Creator(),
         };
-
-        private static PivSession GetSession(
-            IYubiKeyDevice testDevice)
-        {
-            var pivSession = new PivSession(testDevice);
-            var collectorObj = new Simple39KeyCollector();
-            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-            return pivSession;
-        }
     }
 }

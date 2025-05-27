@@ -75,20 +75,20 @@ public class RSAPrivateKeyTests
         // Arrange
         using var rsa = RSA.Create(2048);
         var parameters = rsa.ExportParameters(true);
+        var privateKeyPkcs = rsa.ExportPkcs8PrivateKey();
 
         // Act
-        var privateKey = rsa.ExportPkcs8PrivateKey();
-        RSAPrivateKey privateKeyParams = RSAPrivateKey.CreateFromPkcs8(privateKey);
+        var privateKey = RSAPrivateKey.CreateFromPkcs8(privateKeyPkcs);
 
         // Assert
-        Assert.Equal(parameters.Modulus, privateKeyParams.Parameters.Modulus);
-        Assert.Equal(parameters.Exponent, privateKeyParams.Parameters.Exponent);
-        Assert.Equal(parameters.P, privateKeyParams.Parameters.P);
-        Assert.Equal(parameters.Q, privateKeyParams.Parameters.Q);
-        Assert.Equal(parameters.D, privateKeyParams.Parameters.D);
-        Assert.Equal(parameters.DP, privateKeyParams.Parameters.DP);
-        Assert.Equal(parameters.DQ, privateKeyParams.Parameters.DQ);
-        Assert.Equal(parameters.InverseQ, privateKeyParams.Parameters.InverseQ);
+        Assert.Equal(parameters.Modulus, privateKey.Parameters.Modulus);
+        Assert.Equal(parameters.Exponent, privateKey.Parameters.Exponent);
+        Assert.Equal(parameters.P, privateKey.Parameters.P);
+        Assert.Equal(parameters.Q, privateKey.Parameters.Q);
+        Assert.Equal(parameters.D, privateKey.Parameters.D);
+        Assert.Equal(parameters.DP, privateKey.Parameters.DP);
+        Assert.Equal(parameters.DQ, privateKey.Parameters.DQ);
+        Assert.Equal(parameters.InverseQ, privateKey.Parameters.InverseQ);
     }
 
     [Fact]
@@ -99,18 +99,18 @@ public class RSAPrivateKeyTests
         var parameters = rsa.ExportParameters(true);
 
         // Act
-        var privateKeyParams = RSAPrivateKey.CreateFromParameters(parameters);
+        var privateKey = RSAPrivateKey.CreateFromParameters(parameters);
 
         // Assert
-        Assert.Equal(parameters.Modulus, privateKeyParams.Parameters.Modulus);
-        Assert.Equal(parameters.Exponent, privateKeyParams.Parameters.Exponent);
-        Assert.Equal(parameters.P, privateKeyParams.Parameters.P);
-        Assert.Equal(parameters.Q, privateKeyParams.Parameters.Q);
-        Assert.Equal(parameters.DP, privateKeyParams.Parameters.DP);
-        Assert.Equal(parameters.DQ, privateKeyParams.Parameters.DQ);
-        Assert.Equal(parameters.InverseQ, privateKeyParams.Parameters.InverseQ);
+        Assert.Equal(parameters.Modulus, privateKey.Parameters.Modulus);
+        Assert.Equal(parameters.Exponent, privateKey.Parameters.Exponent);
+        Assert.Equal(parameters.P, privateKey.Parameters.P);
+        Assert.Equal(parameters.Q, privateKey.Parameters.Q);
+        Assert.Equal(parameters.DP, privateKey.Parameters.DP);
+        Assert.Equal(parameters.DQ, privateKey.Parameters.DQ);
+        Assert.Equal(parameters.InverseQ, privateKey.Parameters.InverseQ);
 
-        Assert.Equal(rsa.ExportPkcs8PrivateKey(), privateKeyParams.ExportPkcs8PrivateKey());
+        Assert.Equal(rsa.ExportPkcs8PrivateKey(), privateKey.ExportPkcs8PrivateKey());
     }
 
     [Fact]
@@ -129,13 +129,13 @@ public class RSAPrivateKeyTests
         };
 
         // Act
-        var privateKeyParams = RSAPrivateKey.CreateFromParameters(crtParameters);
+        var privateKey = RSAPrivateKey.CreateFromParameters(crtParameters);
 
         // Assert
-        Assert.Equal(crtParameters.P, privateKeyParams.Parameters.P);
-        Assert.Equal(crtParameters.Q, privateKeyParams.Parameters.Q);
-        Assert.Equal(crtParameters.DP, privateKeyParams.Parameters.DP);
-        Assert.Equal(crtParameters.DQ, privateKeyParams.Parameters.DQ);
-        Assert.Equal(crtParameters.InverseQ, privateKeyParams.Parameters.InverseQ);
+        Assert.Equal(crtParameters.P, privateKey.Parameters.P);
+        Assert.Equal(crtParameters.Q, privateKey.Parameters.Q);
+        Assert.Equal(crtParameters.DP, privateKey.Parameters.DP);
+        Assert.Equal(crtParameters.DQ, privateKey.Parameters.DQ);
+        Assert.Equal(crtParameters.InverseQ, privateKey.Parameters.InverseQ);
     }
 }

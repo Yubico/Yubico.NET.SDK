@@ -44,21 +44,11 @@ public sealed class RSAPublicKey : PublicKey
 
     private RSAPublicKey(RSAParameters parameters)
     {
-        if (parameters.D != null || 
-            parameters.P != null || 
-            parameters.Q != null ||
-            parameters.DP != null ||
-            parameters.DQ != null ||
-            parameters.InverseQ != null
-           )
-        {
-            throw new ArgumentException("Parameters must not contain private key data");
-        }
-        
         Parameters = parameters.DeepCopy();
-        KeyDefinition = KeyDefinitions.GetByRSALength(parameters.Modulus.Length * 8);
+        KeyDefinition = KeyDefinitions.GetByRSAModulusLength(parameters.Modulus);
     }
 
+    /// <inheritdoc />
     public override byte[] ExportSubjectPublicKeyInfo()
     {
         if (Parameters.Exponent == null ||
@@ -83,7 +73,21 @@ public sealed class RSAPublicKey : PublicKey
     /// <exception cref="ArgumentException">
     /// Thrown if the parameters contain private key data.
     /// </exception>
-    public static RSAPublicKey CreateFromParameters(RSAParameters parameters) => new(parameters);
+    public static RSAPublicKey CreateFromParameters(RSAParameters parameters)
+    {
+        if (parameters.D != null || 
+            parameters.P != null || 
+            parameters.Q != null ||
+            parameters.DP != null ||
+            parameters.DQ != null ||
+            parameters.InverseQ != null
+           )
+        {
+            throw new ArgumentException("Parameters must not contain private key data");
+        }
+        
+        return new RSAPublicKey(parameters);
+    }
 
     /// <summary>
     /// Creates a new instance of <see cref="IPublicKey"/> from a DER-encoded public key.
@@ -93,6 +97,6 @@ public sealed class RSAPublicKey : PublicKey
     /// <exception cref="CryptographicException">
     /// Thrown if the public key is invalid.
     /// </exception>
-    public static IPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-        AsnPublicKeyDecoder.CreatePublicKey(encodedKey);
+    public static RSAPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
+        (RSAPublicKey)AsnPublicKeyDecoder.CreatePublicKey(encodedKey);
 }

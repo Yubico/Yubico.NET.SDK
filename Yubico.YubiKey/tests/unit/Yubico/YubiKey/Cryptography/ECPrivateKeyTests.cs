@@ -29,10 +29,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             var testKey = TestKeys.GetTestPrivateKey(KeyType.ECP256);
-#pragma warning disable CS0618 // Type or member is obsolete
-            var pivPrivateKey = testKey.AsPivPrivateKey();
-#pragma warning restore CS0618 // Type or member is obsolete
-            var pivPrivateKeyEncoded = pivPrivateKey.EncodedPrivateKey;
+            var pivPrivateKeyEncoded = testKey.AsPrivateKey().EncodeAsPiv();
 
             // Act
             var privateKeyParams = PivKeyDecoder.CreateECPrivateKey(pivPrivateKeyEncoded);

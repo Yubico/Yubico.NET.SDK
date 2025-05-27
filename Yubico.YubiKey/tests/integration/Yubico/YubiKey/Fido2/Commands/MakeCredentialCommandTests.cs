@@ -19,11 +19,11 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class MakeCredentialCommandTests : NeedPinToken
     {
         public MakeCredentialCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5, null)
         {
         }
 

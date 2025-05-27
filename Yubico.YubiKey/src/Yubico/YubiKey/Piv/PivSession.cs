@@ -231,6 +231,7 @@ namespace Yubico.YubiKey.Piv
                 KeyCollector = null;
                 ResetAuthenticationStatus();
             }
+
             base.Dispose(disposing);
         }
 
@@ -280,18 +281,11 @@ namespace Yubico.YubiKey.Piv
         {
             Logger.LogInformation("GetMetadata for slot number {SlotNumber:X2}.", slotNumber);
 
-            if (!YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
-            {
+            return GetMetadataInternal(slotNumber) ??
                 throw new NotSupportedException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.NotSupportedByYubiKeyVersion));
-            }
-
-            var command = new GetMetadataCommand(slotNumber);
-            var response = Connection.SendCommand(command);
-
-            return response.GetData();
         }
 
         /// <summary>
@@ -570,6 +564,18 @@ namespace Yubico.YubiKey.Piv
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.ApplicationResetFailure));
+        }
+        
+        private PivMetadata? GetMetadataInternal(byte slotNumber)
+        {
+            if (!YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
+            {
+                return null;
+            }
+
+            var command = new GetMetadataCommand(slotNumber);
+            var response = Connection.SendCommand(command);
+            return response.GetData();
         }
     }
 }

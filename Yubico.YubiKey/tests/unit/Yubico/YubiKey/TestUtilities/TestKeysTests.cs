@@ -22,6 +22,86 @@ namespace Yubico.YubiKey.TestUtilities
     public class TestKeysTests
     {
         [Theory]
+        [InlineData(KeyType.ECP256, false)]
+        [InlineData(KeyType.ECP256, true)]
+        [InlineData(KeyType.ECP384, false)]
+        [InlineData(KeyType.ECP384, true)]
+        [InlineData(KeyType.ECP521, false)]
+        [InlineData(KeyType.ECP521, true)]
+        [InlineData(KeyType.Ed25519, false)]
+        [InlineData(KeyType.Ed25519, true)]
+        [InlineData(KeyType.X25519, false)]
+        [InlineData(KeyType.X25519, true)]
+        public void TestKey_GetPublicKey(KeyType keyType, bool isPrivate)
+        {
+            var key = isPrivate ? TestKeys.GetTestPrivateKey(keyType) : TestKeys.GetTestPublicKey(keyType);
+            Assert.NotNull(key);
+
+            var publicKey = key.AsPublicKey();
+            Assert.NotNull(publicKey);
+        }
+        
+        [Theory]
+        [InlineData(KeyType.ECP256, false)]
+        [InlineData(KeyType.ECP256, true)]
+        [InlineData(KeyType.ECP384, false)]
+        [InlineData(KeyType.ECP384, true)]
+        [InlineData(KeyType.ECP521, false)]
+        [InlineData(KeyType.ECP521, true)]
+        [InlineData(KeyType.Ed25519, false)]
+        [InlineData(KeyType.Ed25519, true)]
+        [InlineData(KeyType.X25519, false)]
+        [InlineData(KeyType.X25519, true)]
+        public void TestKey_GetPrivateKey(KeyType keyType, bool isPrivate)
+        {
+            var key = isPrivate ? TestKeys.GetTestPrivateKey(keyType) : TestKeys.GetTestPublicKey(keyType);
+            Assert.NotNull(key);
+
+            var publicKey = key.AsPrivateKey();
+            Assert.NotNull(publicKey);
+        }
+        
+        [Theory]
+        [InlineData(KeyType.ECP256, false)]
+        [InlineData(KeyType.ECP256, true)]
+        [InlineData(KeyType.ECP384, false)]
+        [InlineData(KeyType.ECP384, true)]
+        [InlineData(KeyType.ECP521, false)]
+        [InlineData(KeyType.ECP521, true)]
+        [InlineData(KeyType.Ed25519, false)]
+        [InlineData(KeyType.Ed25519, true)]
+        [InlineData(KeyType.X25519, false)]
+        [InlineData(KeyType.X25519, true)]
+        public void TestKey_GetPublicPoint(KeyType keyType, bool isPrivate)
+        {
+            var key = isPrivate ? TestKeys.GetTestPrivateKey(keyType) : TestKeys.GetTestPublicKey(keyType);
+            Assert.NotNull(key);
+
+            var publicKey = key.GetPublicPoint();
+            Assert.NotNull(publicKey);
+        }
+        
+        [Theory]
+        [InlineData(KeyType.ECP256, false)]
+        [InlineData(KeyType.ECP256, true)]
+        [InlineData(KeyType.ECP384, false)]
+        [InlineData(KeyType.ECP384, true)]
+        [InlineData(KeyType.ECP521, false)]
+        [InlineData(KeyType.ECP521, true)]
+        [InlineData(KeyType.Ed25519, false)]
+        [InlineData(KeyType.Ed25519, true)]
+        [InlineData(KeyType.X25519, false)]
+        [InlineData(KeyType.X25519, true)]
+        public void TestKey_GetPrivateValue(KeyType keyType, bool isPrivate)
+        {
+            var key = isPrivate ? TestKeys.GetTestPrivateKey(keyType) : TestKeys.GetTestPublicKey(keyType);
+            Assert.NotNull(key);
+
+            var publicKey = key.GetPrivateKeyValue();
+            Assert.NotNull(publicKey);
+        }
+        
+        [Theory]
         // [InlineData(KeyType.RSA1024)]
         // [InlineData(KeyType.RSA2048)]
         // [InlineData(KeyType.RSA3072)]
@@ -121,7 +201,7 @@ namespace Yubico.YubiKey.TestUtilities
             var key = TestKeys.GetTestPrivateKey(keyType);
             Assert.NotNull(key);
 
-            var privateKey = key.GetPrivateKey();
+            var privateKey = key.GetPrivateKeyValue();
             Assert.NotNull(privateKey);
 
             byte[] expectedPrivateKey;

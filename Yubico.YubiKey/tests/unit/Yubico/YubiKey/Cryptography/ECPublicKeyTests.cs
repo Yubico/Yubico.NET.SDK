@@ -16,10 +16,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             // Arrange
             var testKey = TestKeys.GetTestPublicKey(keyType);
-#pragma warning disable CS0618 // Type or member is obsolete
-            var pivPublicKey = testKey.AsPivPublicKey();
-#pragma warning restore CS0618 // Type or member is obsolete
-            var pivPublicKeyEncoded = pivPublicKey.PivEncodedPublicKey;
+            var pivPublicKeyEncoded = testKey.AsPublicKey().EncodeAsPiv();
 
             // Act
             var publicKeyParams = PivKeyDecoder.CreateECPublicKey(pivPublicKeyEncoded);
@@ -32,7 +29,6 @@ namespace Yubico.YubiKey.Cryptography
             Assert.Equal(testKeyParameters.Q.X, resultParameters.Q.X);
             Assert.Equal(testKeyParameters.Q.Y, resultParameters.Q.Y);
         }
-        
         
         [Theory]
         [InlineData(KeyType.ECP256)]

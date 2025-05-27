@@ -214,21 +214,25 @@ namespace Yubico.YubiKey.TestUtilities
         // If the object already has something saved, this method will do nothing.
         public void ReplaceRandomProvider()
         {
-            if (_original is null)
+            if (_original is not null)
             {
-                _original = CryptographyProviders.RngCreator;
-                CryptographyProviders.RngCreator = CreateFixedBytesRng;
+                return;
             }
+
+            _original = CryptographyProviders.RngCreator;
+            CryptographyProviders.RngCreator = CreateFixedBytesRng;
         }
 
         // Restore the global random creation method to the original provider.
         public void RestoreRandomProvider()
         {
-            if (!(_original is null))
+            if (_original is null)
             {
-                CryptographyProviders.RngCreator = _original;
-                _original = null;
+                return;
             }
+
+            CryptographyProviders.RngCreator = _original;
+            _original = null;
         }
 
         // Create a new instance of the Mock RandomNumberGenerator that returns

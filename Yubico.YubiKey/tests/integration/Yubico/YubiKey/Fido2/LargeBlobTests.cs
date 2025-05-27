@@ -20,7 +20,6 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
-    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
     [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class LargeBlobTests
     {
@@ -39,7 +38,7 @@ namespace Yubico.YubiKey.Fido2
 
         public LargeBlobTests()
         {
-            _testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Bio);
+            _testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
         }
 
         //This test requires user interaction to reset the FIDO2 application.

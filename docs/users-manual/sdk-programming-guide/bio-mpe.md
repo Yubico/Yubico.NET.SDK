@@ -18,6 +18,7 @@ limitations under the License. -->
 
 # YubiKey Bio Multi-protocol Edition considerations and quirks
 
+YubiKey Bio Multi-protocol Edition (MPE) keys possess some unique attributes that require special consideration when using the .NET YubiKey SDK compared to other YubiKeys with FIDO and PIV capabilities. This page details these differences and how to manage them.
 
 ## Shared PIN, no PUK
 

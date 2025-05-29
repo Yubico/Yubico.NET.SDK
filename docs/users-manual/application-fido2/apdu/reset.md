@@ -28,6 +28,9 @@ The data consists of the CTAP Command Byte and the CBOR encoding of the
 command's parameters. In this case, the CTAP Command Byte is `07`,
 which is the command "`authenticatorReset`". There are no command parameters.
 
+> [!NOTE]
+> The FIDO reset command APDU can be used with YubiKey Bio Multi-protocol Edition keys *only if* the FIDO application is not "blocked" (check the key's [ResetBlocked](xref:Yubico.YubiKey.YubiKeyDevice.ResetBlocked) property to confirm). Otherwise, the [device-wide reset](xref:UsersManualBioMpe#resetting-a-yubikey-bio-mpe) must be used instead. 
+
 ### Response APDU info
 
 #### Response APDU for a successful reset

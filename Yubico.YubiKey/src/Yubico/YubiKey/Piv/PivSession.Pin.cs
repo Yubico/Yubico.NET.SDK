@@ -921,6 +921,9 @@ namespace Yubico.YubiKey.Piv
         /// See the <see cref="TryChangePuk()"/> method for further documentation
         /// on this method.
         /// </para>
+        /// <para>
+        /// Note: YubiKey Bio Multi-protocol Edition (MPE) keys do not have a PUK. 
+        /// </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">
         /// There is no <c>KeyCollector</c> loaded, or the YubiKey had some other
@@ -1139,8 +1142,11 @@ namespace Yubico.YubiKey.Piv
         /// on this method.
         /// </para>
         /// <para>
-        /// If the PUK is blocked, this method will not execute. Note that if a
+        /// If the PUK is blocked, this method will not execute. If a
         /// YubiKey is configured PIN-only, the PUK will be blocked.
+        /// </para>
+        /// <para>
+        /// Note: YubiKey Bio Multi-protocol Edition (MPE) keys do not have a PUK. 
         /// </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">

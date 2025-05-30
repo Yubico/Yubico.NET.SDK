@@ -14,6 +14,8 @@ limitations under the License. -->
 
 ## Reset the PIV application
 
+Available for all YubiKeys with the PIV application except for YubiKey Bio Multi-protocol Edition (MPE) keys. For YubiKey Bio MPE, use the [device-wide reset](xref:UsersManualBioMpe#resetting-a-yubikey-bio-mpe) instead. 
+
 ### Command APDU Info
 
 | CLA | INS | P1 | P2 |    Lc    |   Data   |    Le    |

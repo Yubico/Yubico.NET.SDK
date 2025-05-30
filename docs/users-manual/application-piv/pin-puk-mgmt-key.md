@@ -125,6 +125,9 @@ deletes the keys in all PIV slots and resets the PIN, PUK, and management key to
 defaults. Note that this has no effect on the other YubiKey applications (OTP, FIDO,
 etc.).
 
+> [!NOTE]
+> ``PivSession.Reset()`` cannot be used with YubiKey Bio Multi-protocol Edition (MPE) keys — use the [device-wide reset](xref:UsersManualBioMpe#resetting-a-yubikey-bio-mpe) instead. YubiKey Bio MPE keys also do not have PUKs, so it is not possible to unblock a blocked PIN. See [YubiKey Bio Multi-protocol Edition considerations and quirks](xref:UsersManualBioMpe#) for more information. 
+
 The management key cannot be blocked. If an attacker wants to try to break your management
 key, they can try a brute-force attack (with a Triple-DES it is a modified brute-force
 attack), which means trying every possible key until "stumbling" onto the correct one.

@@ -17,10 +17,18 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Management.Commands
 {
     /// <summary>
-    /// Execute device reset.
+    /// Execute the device-wide reset. 
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// Resets ALL YubiKey applications (including FIDO and PIV) on the key to factory settings. This type of reset is only available on YubiKey Bio Multi-protocol Edition keys.
+    /// </para>
+    /// <para>
+    /// A reset will delete all FIDO2 credentials, fingerprints, and associated information, remove the shared PIN, delete all PIV keys and certificates from PIV slots (except the F9 attestation slot), remove any information added to the PIV data elements, and set the PIV PUK and management key back to their factory default states.
+    /// </para>
+    /// <para>
     /// This class has a corresponding partner class <see cref="DeviceResetResponse"/>
+    /// </para>
     /// </remarks>
     public class DeviceResetCommand : IYubiKeyCommand<DeviceResetResponse>
     {

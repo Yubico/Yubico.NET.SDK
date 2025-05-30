@@ -17,7 +17,7 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// Reset the YubiKey's PIV application
+    /// Reset the YubiKey's PIV application.
     /// </summary>
     /// <remarks>
     /// The partner Response class is <see cref="ResetPivResponse"/>.
@@ -63,6 +63,9 @@ namespace Yubico.YubiKey.Piv.Commands
     ///       // Handle error
     ///   }
     /// </code>
+    /// <para>
+    /// This command does not work with YubiKey Bio Multi-protocol Edition (MPE) keys. For MPE keys, use <see cref="Yubico.YubiKey.Management.Commands.DeviceResetCommand"/> instead.
+    /// </para>
     /// </remarks>
     public sealed class ResetPivCommand : IYubiKeyCommand<ResetPivResponse>
     {

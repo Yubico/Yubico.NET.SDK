@@ -29,6 +29,9 @@ However, there are some caveats:
   higer-level `Fido2Session` method for performing the entire operation. Instead, you must
   send a series of lower-level commands described below.
 
+> [!NOTE]
+> The individual FIDO reset can be used with YubiKey Bio Multi-protocol Edition keys *only if* the FIDO application is not "blocked" (check the key's [ResetBlocked](xref:Yubico.YubiKey.YubiKeyDevice.ResetBlocked) property to confirm). Otherwise, the [device-wide reset](xref:UsersManualBioMpe#resetting-a-yubikey-bio-mpe) must be used instead. 
+
 ## Steps
 
 Resetting the FIDO2 application is something you hope you never need to do. Generally, the

@@ -36,6 +36,9 @@ The PIN can be composed of any ASCII character, but PUK composition depends on t
 The data is therefore 16 bytes, current value (possibly padded) followed by the new
 value (possibly padded).
 
+> [!NOTE]
+> YubiKey Bio Multi-protocol Edition (MPE) keys [do not have a PUK](xref:UsersManualBioMpe). 
+
 ### Response APDU Info
 
 #### Response APDU for CHANGE REFERENCE DATA (success)

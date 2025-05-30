@@ -77,6 +77,9 @@ namespace Yubico.YubiKey.Piv.Commands
     ///   CryptographicOperations.ZeroMemory(puk);
     ///   CryptographicOperations.ZeroMemory(newPuk);
     /// </code>
+    /// <para>
+    /// Note: YubiKey Bio Multi-protocol Edition (MPE) keys do not have a PUK. 
+    /// </para>
     /// </remarks>
     public sealed class ChangeReferenceDataCommand : IYubiKeyCommand<ChangeReferenceDataResponse>
     {

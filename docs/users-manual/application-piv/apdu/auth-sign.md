@@ -97,7 +97,7 @@ The signature is returned encoded as follows,
 
   For example, with RSA-2048, the signature will be
 
-  7C 82 01 04 82 828 01 00 <256-byte signature>
+  7C 82 01 04 82 82 01 00 <256-byte signature>
 
   With ECC-P256, the signature will be
 

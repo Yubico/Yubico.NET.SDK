@@ -262,7 +262,7 @@ namespace Yubico.YubiKey
 
         private static YubiKeyDeviceInfo DefaultInfo() => YubiKeyDeviceInfo.CreateFromResponseData([]);
 
-        private static YubiKeyDeviceInfo DeviceInfoFor(int tag, byte[] deviceInfoData, FirmwareVersion? version = null, VersionQualifier? versionQualifier = null)
+        private static YubiKeyDeviceInfo DeviceInfoFor(int tag, byte[] deviceInfoData, FirmwareVersion? version = null)
         {
             if (deviceInfoData.Length == 0)
             {

@@ -62,14 +62,10 @@ internal class VersionQualifier
     /// <exception cref="ArgumentNullException"></exception>
     public VersionQualifier(FirmwareVersion firmwareVersion, VersionQualifierType type, long iteration)
     {
-        if (iteration < 0)
+        if (iteration < 0 || iteration > uint.MaxValue)
         {
-            throw new ArgumentOutOfRangeException(nameof(iteration), "Iteration must be a non-negative value.");
-        }
-
-        if (iteration > uint.MaxValue)
-        {
-            throw new ArgumentOutOfRangeException(nameof(iteration), "Iteration must be less than or equal to int.MaxValue.");
+            throw new ArgumentOutOfRangeException(nameof(iteration),
+                $"Iteration must be between 0 and {uint.MaxValue}.");
         }
 
         FirmwareVersion = firmwareVersion ?? throw new ArgumentNullException(nameof(firmwareVersion));

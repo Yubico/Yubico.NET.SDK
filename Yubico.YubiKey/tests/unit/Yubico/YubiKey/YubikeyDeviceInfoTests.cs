@@ -280,7 +280,6 @@ namespace Yubico.YubiKey
                 SetVersionTag(tag, version, tlvs);
             }
 
-            SetVersionQualifierTag(versionQualifier, tlvs);
 
             return YubiKeyDeviceInfo.CreateFromResponseData(tlvs); //We're testing this method
         }
@@ -296,25 +295,6 @@ namespace Yubico.YubiKey
             {
                 tlvs.Add(versionTag, versionAsBytes);
             }
-        }
-
-        private static void SetVersionQualifierTag(VersionQualifier? versionQualifier, Dictionary<int, ReadOnlyMemory<byte>> tlvs)
-        {
-            if (versionQualifier is null)
-            {
-                return;
-            }
-
-            var tlvVq = TlvObjects.EncodeMany(
-                new TlvObject(0x01, VersionToBytes(versionQualifier.FirmwareVersion)),
-                new TlvObject(0x02, [(byte)versionQualifier.Type]),
-                new TlvObject(0x03, [0, 0, 0, (byte)versionQualifier.Iteration]));
-
-            var tlvVqLength = tlvVq.Length;
-            Debug.WriteLine($"VersionQualifier TLV length: {tlvVqLength}");
-
-            const byte versionQualifierTag = 0x019;
-            tlvs.Add(versionQualifierTag, tlvVq);
         }
 
         private static byte[] VersionToBytes(FirmwareVersion version) => [version.Major, version.Minor, version.Patch];

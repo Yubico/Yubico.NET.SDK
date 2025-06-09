@@ -56,6 +56,8 @@
     href: sdk-programming-guide/device-notifications.md
   - name: PIN complexity policy
     href: sdk-programming-guide/pin-complexity-policy.md
+  - name: YubiKey Bio Multi-protocol Edition considerations and quirks
+    href: sdk-programming-guide/bio-mpe.md
   - name: Maintaining compatibility
     href: sdk-programming-guide/appcompat.md
 

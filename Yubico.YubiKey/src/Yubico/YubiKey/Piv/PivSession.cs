@@ -364,7 +364,7 @@ namespace Yubico.YubiKey.Piv
         ///         PUK, then call on the YubiKey to reset.
         ///     </para>
         ///     <para>
-        ///         Before attempting to reset a YubiKey Bio Multi-protocol Edition key with ResetApplication(), verify that the PIV application is not blocked from using this method by checking the <see cref="IYubiKeyDeviceInfo.ResetBlocked"/> property. If the application is blocked, use <see cref="IYubiKeyDevice.DeviceReset"/>.
+        ///         This method does not work with YubiKey Bio Multi-protocol Edition (MPE) keys. For MPE keys, use <see cref="IYubiKeyDevice.DeviceReset"/> instead.
         ///     </para>
         /// </remarks>
         /// <exception cref="SecurityException">

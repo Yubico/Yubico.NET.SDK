@@ -568,7 +568,10 @@ only recovery is to [Reset the PIV application](#reset-the-piv-application).
 
 ### Available
 
-All YubiKeys with the PIV application.
+All YubiKeys with the PIV application. 
+
+> [!NOTE]
+> YubiKey Bio Multi-protocol Edition (MPE) keys [do not have a PUK](xref:UsersManualBioMpe). 
 
 ### SDK Classes
 
@@ -705,7 +708,7 @@ If the PUK is blocked, the only recovery is to
 
 ### Available
 
-All YubiKeys with the PIV application.
+All YubiKeys with the PIV application except for YubiKey Bio Multi-protocol Edition (MPE) keys, which [do not have a PUK](xref:UsersManualBioMpe). 
 
 ### SDK Classes
 
@@ -1636,7 +1639,7 @@ This command will be accepted only if the PIN and PUK are both blocked.
 
 ### Available
 
-All YubiKeys with the PIV application.
+All YubiKeys with the PIV application except for YubiKey Bio Multi-protocol Edition (MPE) keys. For YubiKey Bio MPE, use the [device-wide reset](xref:UsersManualBioMpe#resetting-a-yubikey-bio-mpe) instead. 
 
 ### SDK Classes
 

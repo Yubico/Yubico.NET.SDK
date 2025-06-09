@@ -14,6 +14,8 @@ limitations under the License. -->
 
 ## Reset retry (recover the PIN)
 
+Available for all YubiKeys with the PIV application except for YubiKey Bio Multi-protocol Edition (MPE) keys, which [do not have a PUK](xref:UsersManualBioMpe). 
+
 ### Command APDU Info
 
 | CLA | INS | P1 | P2 | Lc |           Data            |    Le    |

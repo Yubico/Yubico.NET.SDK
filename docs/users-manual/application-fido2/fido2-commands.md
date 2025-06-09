@@ -626,6 +626,9 @@ presence (touch).
 
 All YubiKeys with the FIDO2 application.
 
+> [!NOTE]
+> The FIDO2 ResetCommand can be used with YubiKey Bio Multi-protocol Edition keys *only if* the FIDO application is not "blocked" (check the key's [ResetBlocked](xref:Yubico.YubiKey.YubiKeyDevice.ResetBlocked) property to confirm). Otherwise, the [device-wide reset](xref:UsersManualBioMpe#resetting-a-yubikey-bio-mpe) must be used instead. 
+
 ### SDK classes
 
 [ResetCommand](xref:Yubico.YubiKey.Fido2.Commands.ResetCommand)

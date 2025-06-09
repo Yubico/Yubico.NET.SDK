@@ -294,15 +294,15 @@ namespace Yubico.YubiKey
 
                 if (!data.TryGetValue(TAG_VERSION, out var firmwareVersionBytes))
                 {
-                    throw new ArgumentException("TODO.");
+                    throw new ArgumentException("Missing TLV field: TAG_VERSION.");
                 }
                 if (!data.TryGetValue(TAG_TYPE, out var versionTypeBytes))
                 {
-                    throw new ArgumentException("TODO.");
+                    throw new ArgumentException("Missing TLV field: TAG_TYPE.");
                 }
                 if (!data.TryGetValue(TAG_ITERATION, out var iterationBytes))
                 {
-                    throw new ArgumentException("TODO.");
+                    throw new ArgumentException("Missing TLV field: TAG_ITERATION.");
                 }
 
                 var qualifierVersion = FirmwareVersion.FromBytes(firmwareVersionBytes.Span);

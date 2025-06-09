@@ -101,8 +101,7 @@ namespace Yubico.PlatformInterop
                 {
                     try
                     {
-                        // Verify platform
-                        bool isWindows = SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows;
+                        var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);  
                         if (!isWindows)
                         {
                             return (false, "SdkPlatformInfo.OperatingSystem did not indicate Windows platform");
@@ -115,7 +114,6 @@ namespace Yubico.PlatformInterop
                             return (false, "Failed to create BigNum instance on Windows");
                         }
 
-                        // Clean up
                         bigNum.Dispose();
 
                         return (true, "Successfully called native library function on Windows");
@@ -125,12 +123,11 @@ namespace Yubico.PlatformInterop
                         return (false, $"Error accessing Windows native library: {ex.Message}");
                     }
                 },
-                // Linux verification
                 () =>
                 {
                     try
                     {
-                        bool isLinux = SdkPlatformInfo.OperatingSystem == SdkPlatform.Linux;
+                        var isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);  
                         if (!isLinux)
                         {
                             return (false, "SdkPlatformInfo.OperatingSystem did not indicate Linux platform");
@@ -143,7 +140,6 @@ namespace Yubico.PlatformInterop
                             return (false, "Failed to create BigNum instance on Linux");
                         }
 
-                        // Clean up
                         bigNum.Dispose();
 
                         return (true, "Successfully called native library function on Linux");
@@ -153,14 +149,11 @@ namespace Yubico.PlatformInterop
                         return (false, $"Error accessing Linux native library: {ex.Message}");
                     }
                 },
-                // macOS verification
                 () =>
                 {
                     try
                     {
-                        // Verify platform
-                        bool isMacOS = SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS;
-
+                        var isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);  
                         if (!isMacOS)
                         {
                             return (false, "SdkPlatformInfo.OperatingSystem did not indicate macOS platform");
@@ -173,7 +166,6 @@ namespace Yubico.PlatformInterop
                             return (false, "Failed to create BigNum instance on macOS");
                         }
 
-                        // Clean up
                         bigNum.Dispose();
 
                         return (true, "Successfully called native library function on macOS");

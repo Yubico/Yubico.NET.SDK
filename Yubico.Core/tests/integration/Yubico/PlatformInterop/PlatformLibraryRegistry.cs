@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Yubico.PlatformInterop
@@ -31,34 +30,34 @@ namespace Yubico.PlatformInterop
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return new[]
-                {
+                return
+                [
                     Libraries.CfgMgr,
                     Libraries.Hid,
                     Libraries.Kernel32
-                };
+                ];
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return new[]
-                {
+                return
+                [
                     Libraries.LinuxKernelLib,
                     Libraries.LinuxUdevLib
-                };
+                ];
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                return new[]
-                {
+                return
+                [
                     Libraries.CoreFoundation,
                     Libraries.IOKitFramework,
                     Libraries.WinSCard
-                };
+                ];
             }
 
-            return Array.Empty<string>();
+            return [];
         }
 
         /// <summary>

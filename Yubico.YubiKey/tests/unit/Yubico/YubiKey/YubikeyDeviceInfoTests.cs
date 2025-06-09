@@ -14,8 +14,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Xunit;
 using Yubico.Core.Buffers;
+using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey
 {
@@ -55,7 +57,7 @@ namespace Yubico.YubiKey
         public void CreateFromResponseData_Returns_ExpectedSerialNumber()
         {
             const int serialNumberTag = 0x02;
-            Assert.Null(DeviceInfoFor(serialNumberTag).SerialNumber);
+            Assert.Null(DefaultInfo().SerialNumber);
             Assert.Equal(123456789, DeviceInfoFor(serialNumberTag, FromHex("075BCD15")).SerialNumber);
         }
 
@@ -88,7 +90,7 @@ namespace Yubico.YubiKey
         public void CreateFromResponseData_Returns_ExpectedConfigurationLocked()
         {
             const int configurationLockedTag = 0x0a;
-            Assert.False(DeviceInfoFor(configurationLockedTag).ConfigurationLocked);
+            Assert.False(DefaultInfo().ConfigurationLocked);
             Assert.True(DeviceInfoFor(configurationLockedTag, FromHex("01")).ConfigurationLocked);
             Assert.False(DeviceInfoFor(configurationLockedTag, FromHex("00")).ConfigurationLocked);
         }
@@ -97,7 +99,7 @@ namespace Yubico.YubiKey
         public void CreateFromResponseData_Returns_ExpectedFipsSeries()
         {
             const int formFactorTag = 0x04;
-            Assert.False(DeviceInfoFor(formFactorTag).IsFipsSeries);
+            Assert.False(DefaultInfo().IsFipsSeries);
             Assert.True(DeviceInfoFor(formFactorTag, FromHex("80"), FirmwareVersion.V5_4_2).IsFipsSeries);
             Assert.True(DeviceInfoFor(formFactorTag, FromHex("C0"), FirmwareVersion.V5_4_2).IsFipsSeries);
             Assert.False(DeviceInfoFor(formFactorTag, FromHex("40"), FirmwareVersion.V5_4_2).IsFipsSeries);
@@ -107,7 +109,7 @@ namespace Yubico.YubiKey
         public void CreateFromResponseData_Returns_ExpectedIsSkySeries()
         {
             const int formFactorTag = 0x04;
-            Assert.False(DeviceInfoFor(formFactorTag).IsSkySeries);
+            Assert.False(DefaultInfo().IsSkySeries);
             Assert.True(DeviceInfoFor(formFactorTag, FromHex("40")).IsSkySeries);
             Assert.True(DeviceInfoFor(formFactorTag, FromHex("C0")).IsSkySeries);
             Assert.False(DeviceInfoFor(formFactorTag, FromHex("80")).IsSkySeries);
@@ -119,7 +121,7 @@ namespace Yubico.YubiKey
             const int partNumberTag = 0x13;
 
             // Valid UTF-8
-            Assert.Null(DeviceInfoFor(partNumberTag).PartNumber);
+            Assert.Null(DefaultInfo().PartNumber);
             Assert.Equal("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=+-", DeviceInfoFor(partNumberTag, FromHex("6162636465666768696A6B6C6D6E6F707172737475767778797A4142434445464748494A4B4C4D4E4F505152535455565758595A303132333435363738395F3D2B2D")).PartNumber);
             Assert.Equal("ÖÄÅöäåěščřžýáíúůĚŠČŘŽÝÁÍÚŮ", DeviceInfoFor(partNumberTag, FromHex("C396C384C385C3B6C3A4C3A5C49BC5A1C48DC599C5BEC3BDC3A1C3ADC3BAC5AFC49AC5A0C48CC598C5BDC39DC381C38DC39AC5AE")).PartNumber);
             Assert.Equal("😀", DeviceInfoFor(partNumberTag, FromHex("F09F9880")).PartNumber);
@@ -139,7 +141,7 @@ namespace Yubico.YubiKey
         public void CreateFromResponseData_Returns_ExpectedPinComplexity()
         {
             const int pinComplexityTag = 0x16;
-            Assert.False(DeviceInfoFor(pinComplexityTag).IsPinComplexityEnabled);
+            Assert.False(DefaultInfo().IsPinComplexityEnabled);
             Assert.False(DeviceInfoFor(pinComplexityTag, FromHex("00")).IsPinComplexityEnabled);
             Assert.True(DeviceInfoFor(pinComplexityTag, FromHex("01")).IsPinComplexityEnabled);
         }
@@ -148,7 +150,7 @@ namespace Yubico.YubiKey
         public void CreateFromResponseData_Returns_ExpectedResetBlocked()
         {
             const int resetBlockedTag = 0x18;
-            Assert.Equal(YubiKeyCapabilities.None, DeviceInfoFor(resetBlockedTag).ResetBlocked);
+            Assert.Equal(YubiKeyCapabilities.None, DefaultInfo().ResetBlocked);
             Assert.Equal(YubiKeyCapabilities.Oath | YubiKeyCapabilities.Fido2,
                 DeviceInfoFor(resetBlockedTag, FromHex("0220")).ResetBlocked);
         }
@@ -157,7 +159,7 @@ namespace Yubico.YubiKey
         public void CreateFromResponseData_Returns_ExpectedTemplateStorageVersion()
         {
             const int templateStorageVersionTag = 0x20;
-            Assert.Null(DeviceInfoFor(templateStorageVersionTag).TemplateStorageVersion);
+            Assert.Null(DefaultInfo().TemplateStorageVersion);
             Assert.Equal(new TemplateStorageVersion(5, 6, 6),
                 DeviceInfoFor(templateStorageVersionTag, FromHex("050606")).TemplateStorageVersion);
         }
@@ -166,36 +168,156 @@ namespace Yubico.YubiKey
         public void CreateFromResponseData_Returns_ExpectedImageProcessorVersion()
         {
             const int imageProcessorVersionTag = 0x21;
-            Assert.Null(DeviceInfoFor(imageProcessorVersionTag).ImageProcessorVersion);
+            Assert.Null(DefaultInfo().ImageProcessorVersion);
             Assert.Equal(new ImageProcessorVersion(7, 0, 5),
                 DeviceInfoFor(imageProcessorVersionTag, FromHex("070005")).ImageProcessorVersion);
         }
 
-        private static YubiKeyDeviceInfo DeviceInfoFor(int tag, FirmwareVersion? version = null) =>
-            DeviceInfoFor(tag, Array.Empty<byte>());
-
-        private static YubiKeyDeviceInfo DeviceInfoFor(int tag, byte[] data, FirmwareVersion? version = null)
+        [Fact]
+        public void CreateFromResponseData_WithEmptyData_SetsQualifierCorrectly()
         {
-            byte[] versionAsBytes = version is { }
+            var deviceInfo = DefaultInfo();
+            Assert.Equal(DefaultVersionQualifier, deviceInfo.VersionQualifier);
+
+            deviceInfo.VersionQualifier = new VersionQualifier(FirmwareVersion.V5_7_2, VersionQualifierType.Alpha, 15);
+            deviceInfo.FirmwareVersion = FirmwareVersion.V3_1_0;
+
+            Assert.Equal("5.7.2.alpha.15", deviceInfo.VersionQualifier.ToString());
+            Assert.Equal("3.1.0", deviceInfo.FirmwareVersion.ToString());
+        }
+
+        [Fact]
+        public void ParseVersionQualifier_VariousScenarios_ParsesCorrectly()
+        {
+            // Default version and qualifier
+            var info = InfoOfVersion(null, null);
+            Assert.Equal(DefaultVersion, info.FirmwareVersion);
+            Assert.Equal(new VersionQualifier(DefaultVersion, VersionQualifierType.Final, 0), info.VersionQualifier);
+            Assert.Equal("2.2.2", info.VersionName);
+
+            // No qualifier provided
+            info = InfoOfVersion(FromHex("030403"), null);
+            Assert.Equal(new FirmwareVersion(3, 4, 3), info.FirmwareVersion);
+            Assert.Equal(new VersionQualifier(new FirmwareVersion(3, 4, 3), VersionQualifierType.Final, 0), info.VersionQualifier);
+            Assert.Equal("3.4.3", info.VersionName);
+
+            // ALPHA version qualifier
+            info = InfoOfVersion(FromHex("000001"), FromHex("0103050403020100030400000000"));
+            Assert.Equal(new FirmwareVersion(5, 4, 3), info.FirmwareVersion);
+            Assert.Equal("5.4.3.alpha.0", info.VersionQualifier.ToString());
+            Assert.Equal("5.4.3.alpha.0", info.VersionName);
+
+            // BETA version qualifier
+            info = InfoOfVersion(FromHex("000001"), FromHex("01030507080201010304000000e9"));
+            Assert.Equal(new FirmwareVersion(5, 7, 8), info.FirmwareVersion);
+            Assert.Equal("5.7.8.beta.233", info.VersionQualifier.ToString());
+            Assert.Equal("5.7.8.beta.233", info.VersionName);
+
+            // FINAL version qualifier
+            info = InfoOfVersion(FromHex("050404"), FromHex("0103050404020102030400000005"));
+            Assert.Equal(new FirmwareVersion(5, 4, 4), info.FirmwareVersion);
+            Assert.Equal("5.4.4.final.5", info.VersionQualifier.ToString());
+            Assert.Equal("5.4.4", info.VersionName);
+
+            info = InfoOfVersion(FromHex("050709"), FromHex("01030507090201020304FFFFFFFF"));
+            Assert.Equal(new FirmwareVersion(5, 7, 9), info.FirmwareVersion);
+            Assert.Equal("5.7.9.final.4294967295", info.VersionQualifier.ToString());
+            Assert.Equal("5.7.9", info.VersionName);
+
+            info = InfoOfVersion(FromHex("05070A"), FromHex("010305070A020102030480000000"));
+            Assert.Equal(new FirmwareVersion(5, 7, 10), info.FirmwareVersion);
+            Assert.Equal("5.7.10.final.2147483648", info.VersionQualifier.ToString());
+            Assert.Equal("5.7.10", info.VersionName);
+
+            info = InfoOfVersion(FromHex("05070B"), FromHex("010305070B02010203047FFFFFFF"));
+            Assert.Equal(new FirmwareVersion(5, 7, 11), info.FirmwareVersion);
+            Assert.Equal("5.7.11.final.2147483647", info.VersionQualifier.ToString());
+            Assert.Equal("5.7.11", info.VersionName);
+        }
+
+        private static readonly FirmwareVersion DefaultVersion = new(2, 2, 2);
+        private static readonly VersionQualifier DefaultVersionQualifier = new(new FirmwareVersion(), VersionQualifierType.Final, 0);
+
+        private static YubiKeyDeviceInfo InfoOfVersion(byte[]? versionBytes, byte[]? qualifierBytes)
+        {
+            var tlvs = new Dictionary<int, ReadOnlyMemory<byte>>();
+
+            if (versionBytes != null)
+            {
+                tlvs.Add(0x05, versionBytes);
+            }
+            else
+            {
+                tlvs.Add(0x05, new byte[] { 2, 2, 2 }); // Default version
+            }
+
+            if (qualifierBytes != null)
+            {
+                tlvs.Add(0x19, qualifierBytes);
+            }
+
+
+            return YubiKeyDeviceInfo.CreateFromResponseData(tlvs);
+        }
+
+        private static YubiKeyDeviceInfo DefaultInfo() => YubiKeyDeviceInfo.CreateFromResponseData([]);
+
+        private static YubiKeyDeviceInfo DeviceInfoFor(int tag, byte[] deviceInfoData, FirmwareVersion? version = null, VersionQualifier? versionQualifier = null)
+        {
+            if (deviceInfoData.Length == 0)
+            {
+                return YubiKeyDeviceInfo.CreateFromResponseData([]);
+            }
+
+            var tlvs = new Dictionary<int, ReadOnlyMemory<byte>> { { tag, deviceInfoData } };
+            const byte versionTag = 0x5;
+            if (tag == versionTag)
+            {
+                // No need to set version info as its already set
+            }
+            else
+            {
+                SetVersionTag(tag, version, tlvs);
+            }
+
+            SetVersionQualifierTag(versionQualifier, tlvs);
+
+            return YubiKeyDeviceInfo.CreateFromResponseData(tlvs); //We're testing this method
+        }
+
+        private static void SetVersionTag(int tag, FirmwareVersion? version, Dictionary<int, ReadOnlyMemory<byte>> tlvs)
+        {
+            byte[] versionAsBytes = version is not null
                 ? VersionToBytes(version)
                 : VersionToBytes(FirmwareVersion.V2_2_0);
 
-            var tlvs = new Dictionary<int, ReadOnlyMemory<byte>> { { tag, data } };
-            const int versionTag = 0x5;
+            const byte versionTag = 0x5;
             if (tag != versionTag)
             {
                 tlvs.Add(versionTag, versionAsBytes);
             }
-
-            YubiKeyDeviceInfo info = data.Length == 0
-                ? new YubiKeyDeviceInfo()
-                : YubiKeyDeviceInfo.CreateFromResponseData(tlvs); //We're testing this method
-
-            return info;
         }
 
-        private static byte[] VersionToBytes(FirmwareVersion version) =>
-            new[] { version.Major, version.Minor, version.Patch };
+        private static void SetVersionQualifierTag(VersionQualifier? versionQualifier, Dictionary<int, ReadOnlyMemory<byte>> tlvs)
+        {
+            if (versionQualifier is null)
+            {
+                return;
+            }
+
+            var tlvVq = TlvObjects.EncodeMany(
+                new TlvObject(0x01, VersionToBytes(versionQualifier.FirmwareVersion)),
+                new TlvObject(0x02, [(byte)versionQualifier.Type]),
+                new TlvObject(0x03, [0, 0, 0, (byte)versionQualifier.Iteration]));
+
+            var tlvVqLength = tlvVq.Length;
+            Debug.WriteLine($"VersionQualifier TLV length: {tlvVqLength}");
+
+            const byte versionQualifierTag = 0x019;
+            tlvs.Add(versionQualifierTag, tlvVq);
+        }
+
+        private static byte[] VersionToBytes(FirmwareVersion version) => [version.Major, version.Minor, version.Patch];
 
         private static byte[] FromHex(string? hex) => hex != null ? Base16.DecodeText(hex) : Array.Empty<byte>();
     }

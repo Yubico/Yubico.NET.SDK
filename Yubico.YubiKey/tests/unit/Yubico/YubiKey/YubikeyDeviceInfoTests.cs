@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 using Yubico.Core.Buffers;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey
 {

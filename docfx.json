@@ -34,7 +34,7 @@
   ],
   "build": {
     "sitemap": {
-      "baseUrl": "https://docs.yubico.com/yesdk/",
+      "baseUrl": "https://docs.yubico.com/yesdk",
       "changefreq": "monthly"
     },
     "content": [
@@ -68,8 +68,15 @@
     "output": "./docs/_site/",
     "globalMetadataFiles": [],
     "globalMetadata": {
-      "_appFaviconPath": "images/favicon.ico",
-      "_enableSearch": false
+      "_googleAnalyticsTagId": "6195355",
+      "_appFaviconPath": "./images/favicon.ico",
+      "_enableSearch": false,
+      "_appName" : "Yubico",
+      "_lang": "en",
+      "_gitContribute": {
+        "repo":"https://github.com/Yubico/Yubico.NET.SDK",
+        "branch":"develop"
+      }
     },
     "fileMetadataFiles": [],
     "template": ["default", "./docs/yubikeysdk-template"],

@@ -79,11 +79,6 @@ namespace Yubico.YubiKey
             Assert.Equal(qualifier1, qualifier2);
             Assert.Equal(qualifier1.GetHashCode(), qualifier2.GetHashCode());
             Assert.NotEqual(qualifier1, qualifier3);
-            // Hash codes are not guaranteed to be different for non-equal objects,
-            // but for these specific inputs, they likely will be.
-            // If this assertion fails, it might not indicate a bug in GetHashCode itself,
-            // as long as the Equals contract is maintained.
-            // Assert.NotEqual(qualifier1.GetHashCode(), qualifier3.GetHashCode());
         }
 
         [Fact]

@@ -307,7 +307,7 @@ namespace Yubico.YubiKey
 
                 var qualifierVersion = FirmwareVersion.FromBytes(firmwareVersionBytes.Span);
                 var versionType = (VersionQualifierType)versionTypeBytes.Span[0];
-                uint iteration = BinaryPrimitives.ReadUInt32BigEndian(iterationBytes.Span);
+                long iteration = BinaryPrimitives.ReadUInt32BigEndian(iterationBytes.Span);
 
                 deviceInfo.VersionQualifier = new VersionQualifier(
                     qualifierVersion,

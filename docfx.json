@@ -70,7 +70,7 @@
     "globalMetadata": {
       "_googleAnalyticsTagId": "6195355",
       "_appFaviconPath": "./images/favicon.ico",
-      "_enableSearch": false,
+      "_enableSearch": true,
       "_appName" : "Yubico",
       "_appLogoPath" : "./images/yubico-circle-y-mark-white.png",
       "_lang": "en",

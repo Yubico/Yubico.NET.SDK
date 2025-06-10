@@ -61,7 +61,7 @@ namespace Yubico.YubiKey
             Minor = minor;
             Patch = patch;
         }
-        
+
         /// <summary>
         /// Parse a string of the form "major.minor.patch"
         /// </summary>
@@ -75,21 +75,42 @@ namespace Yubico.YubiKey
             {
                 throw new ArgumentNullException(nameof(versionString));
             }
-            
+
             string[] parts = versionString.Split('.');
             if (parts.Length != 3)
             {
                 throw new ArgumentException("Must include major.minor.patch", nameof(versionString));
             }
-            
+
             if (!byte.TryParse(parts[0], out byte major) ||
-                !byte.TryParse(parts[1], out byte minor) || 
+                !byte.TryParse(parts[1], out byte minor) ||
                 !byte.TryParse(parts[2], out byte patch))
             {
                 throw new ArgumentException("Major, minor and patch must be valid numbers", nameof(versionString));
             }
-            
+
             return new FirmwareVersion(major, minor, patch);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="FirmwareVersion"/> from a byte array.
+        /// The byte array must contain exactly three bytes, representing the major, minor, and patch versions.
+        /// </summary>
+        /// <param name="bytes">A byte array containing the version information.</param>
+        /// <returns>A <see cref="FirmwareVersion"/> instance.</returns>
+        /// <exception cref="ArgumentException">Thrown if the byte array does not contain exactly three bytes.</exception>
+        /// <remarks>
+        /// The first byte represents the major version, the second byte represents the minor version,
+        /// and the third byte represents the patch version.
+        /// </remarks>
+        public static FirmwareVersion FromBytes(ReadOnlySpan<byte> bytes)
+        {
+            if (bytes.Length != 3)
+            {
+                throw new ArgumentException("Invalid length of data");
+            }
+
+            return new FirmwareVersion(bytes[0], bytes[1], bytes[2]);
         }
 
         public static bool operator >(FirmwareVersion left, FirmwareVersion right)

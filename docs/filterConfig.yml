@@ -16,3 +16,6 @@ apiRules:
   - exclude:
       uidRegex: ^System\.*
       type: Type
+  - exclude:
+      hasAttribute:
+        uid: System.ObsoleteAttribute

@@ -34,7 +34,7 @@
   ],
   "build": {
     "sitemap": {
-      "baseUrl": "https://dotnet.github.io/docfx",
+      "baseUrl": "https://docs.yubico.com/yesdk/",
       "changefreq": "monthly"
     },
     "content": [

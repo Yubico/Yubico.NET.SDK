@@ -72,6 +72,7 @@
       "_appFaviconPath": "./images/favicon.ico",
       "_enableSearch": false,
       "_appName" : "Yubico",
+      "_appLogoPath" : "./images/yubico-circle-y-mark-white.png",
       "_lang": "en",
       "_gitContribute": {
         "repo":"https://github.com/Yubico/Yubico.NET.SDK",
@@ -79,7 +80,7 @@
       }
     },
     "fileMetadataFiles": [],
-    "template": ["default", "./docs/yubikeysdk-template"],
+    "template": ["default", "modern", "docs/custom-template"],
     "postProcessors": ["ExtractSearchIndex"],
     "disableGitFeatures": false
   }

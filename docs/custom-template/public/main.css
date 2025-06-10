@@ -1,0 +1,121 @@
+/* =============================================================================
+   DOCFX CUSTOM STYLES
+   ============================================================================= */
+
+/* Logo styling */
+#logo {
+  width: 50px;
+  height: 50px;
+  margin-right: 16px;
+}
+
+/* Navigation */
+#navbar > ul > li:nth-child(1) > a {
+  display: none;
+}
+
+/* Navbar - consolidated styling */
+.navbar {
+  --bs-navbar-bg: #8CC041 !important;
+  --bs-navbar-color: #E0E0E0 !important;
+  --bs-navbar-hover-color: rgba(255, 255, 255, 0.8) !important;
+  --bs-navbar-active-color: #E0E0E0 !important;
+  --bs-navbar-brand-color: #E0E0E0 !important;
+  --bs-navbar-brand-hover-color: rgba(255, 255, 255, 0.8) !important;
+  --bs-navbar-toggler-color: #E0E0E0 !important;
+  background-color: #8CC041 !important;
+}
+
+/* Navbar text and interactive elements */
+.navbar .nav-link,
+.navbar .navbar-brand,
+.navbar .btn,
+.navbar .dropdown-toggle,
+.navbar .bi {
+  color: #E0E0E0 !important;
+}
+
+.navbar .nav-link.active {
+  font-weight: 600;
+}
+
+.navbar .form-control {
+  color: #E0E0E0 !important;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.navbar .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+header.bg-body {
+  background-color: #8CC041 !important;
+}
+
+/* Breadcrumb */
+.breadcrumb:has(li:first-child:last-child) {
+  display: none;
+}
+
+/* API Documentation elements */
+.namespace-name,
+.assembly-name {
+  display: block;
+  font-size: 14px;
+  color: rgb(94, 94, 94);
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.namespace-name {
+  margin-top: 20px;
+}
+
+.assembly-name {
+  margin-bottom: 30px;
+}
+
+/* Code blocks */
+.codewrapper .language {
+  color: rgb(23, 23, 23);
+  border: 1px solid rgb(227, 227, 227);
+  border-bottom: 0;
+  background-color: rgb(242, 242, 242);
+  padding: 2px 16px;
+  font-size: 12px;
+}
+
+.codewrapper pre {
+  border: 1px solid rgb(227, 227, 227);
+  border-radius: 0;
+  background-color: rgb(250, 250, 250);
+}
+
+/* Class inheritance */
+.derivedClasses {
+  margin-top: 20px;
+}
+
+.derivedClasses-label {
+  font-weight: 600;
+}
+
+.derivedClasses dd {
+  display: block;
+  margin-inline-start: 20px;
+}
+
+/* Member info tables */
+.memberinfo {
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.memberinfo td:first-child {
+  width: 30%;
+}
+
+.memberinfo thead {
+  background-color: #f2f2f2;
+}

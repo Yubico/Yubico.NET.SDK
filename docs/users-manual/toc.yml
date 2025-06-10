@@ -25,6 +25,35 @@
     - name: What's new in the SDK?
       href: getting-started/whats-new.md
 
+- name: SDK programming guide
+  items:
+    - name: Making a connection
+      href: sdk-programming-guide/making-a-connection.md
+    - name: Threads
+      href: sdk-programming-guide/threads.md
+    - name: Delegates (callbacks) in the SDK
+      href: sdk-programming-guide/delegates-in-sdk.md
+    - name: The KeyCollector and alternatives
+      href: sdk-programming-guide/key-collector.md
+    - name: The KeyCollector and touch
+      href: sdk-programming-guide/key-collector-touch.md
+    - name: Providing alternate cryptographic implementations
+      href: sdk-programming-guide/alternate-crypto.md
+    - name: Sensitive data
+      href: sdk-programming-guide/sensitive-data.md
+    - name: Secure Channel Protocol (SCP03, SCP11)
+      href: sdk-programming-guide/secure-channel-protocol.md
+    - name: Commands
+      href: sdk-programming-guide/commands.md
+    - name: Device notifications
+      href: sdk-programming-guide/device-notifications.md
+    - name: PIN complexity policy
+      href: sdk-programming-guide/pin-complexity-policy.md
+    - name: YubiKey Bio Multi-protocol Edition considerations and quirks
+      href: sdk-programming-guide/bio-mpe.md
+    - name: Maintaining compatibility
+      href: sdk-programming-guide/appcompat.md
+
 - name: YubiKey reference
   items:
     - name: Physical interfaces
@@ -380,36 +409,7 @@
         - name: Interacting with a YubiHSM 2
           href: application-yubihsm-auth/interacting-yubihsm-2.md
 
-- name: SDK programming guide
-  items:
-    - name: Making a connection
-      href: sdk-programming-guide/making-a-connection.md
-    - name: Threads
-      href: sdk-programming-guide/threads.md
-    - name: Delegates (callbacks) in the SDK
-      href: sdk-programming-guide/delegates-in-sdk.md
-    - name: The KeyCollector and alternatives
-      href: sdk-programming-guide/key-collector.md
-    - name: The KeyCollector and touch
-      href: sdk-programming-guide/key-collector-touch.md
-    - name: Providing alternate cryptographic implementations
-      href: sdk-programming-guide/alternate-crypto.md
-    - name: Sensitive data
-      href: sdk-programming-guide/sensitive-data.md
-    - name: Secure Channel Protocol (SCP03, SCP11)
-      href: sdk-programming-guide/secure-channel-protocol.md
-    - name: Commands
-      href: sdk-programming-guide/commands.md
-    - name: Device notifications
-      href: sdk-programming-guide/device-notifications.md
-    - name: PIN complexity policy
-      href: sdk-programming-guide/pin-complexity-policy.md
-    - name: YubiKey Bio Multi-protocol Edition considerations and quirks
-      href: sdk-programming-guide/bio-mpe.md
-    - name: Maintaining compatibility
-      href: sdk-programming-guide/appcompat.md
-
-- name: "Supporting routines"
+- name: Supporting routines
   homepage: support/support-overview.md
   items:
     - name: TLV

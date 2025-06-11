@@ -152,12 +152,12 @@ Bug fixes:
 
 Miscellaneous:
 - The way that YubiKey device info is read by the SDK has changed, and as a result, the following GetDeviceInfo command classes have been deprecated ([#91](https://github.com/Yubico/Yubico.NET.SDK/pull/91)): 
-  - [Yubico.YubiKey.Management.Commands.GetDeviceInfoCommand](xref:Yubico.YubiKey.Management.Commands.GetDeviceInfoCommand)
-  - [Yubico.YubiKey.Otp.Commands.GetDeviceInfoCommand](xref:Yubico.YubiKey.Otp.Commands.GetDeviceInfoCommand)
-  - [Yubico.YubiKey.U2f.Commands.GetDeviceInfoCommand](xref:Yubico.YubiKey.U2f.Commands.GetDeviceInfoCommand)
-  - [Yubico.YubiKey.Management.Commands.GetDeviceInfoResponse](xref:Yubico.YubiKey.Management.Commands.GetDeviceInfoResponse)
-  - [Yubico.YubiKey.Otp.Commands.GetDeviceInfoResponse](xref:Yubico.YubiKey.Otp.Commands.GetDeviceInfoResponse)
-  - [Yubico.YubiKey.U2f.Commands.GetDeviceInfoResponse](xref:Yubico.YubiKey.U2f.Commands.GetDeviceInfoResponse)
+  - `Yubico.YubiKey.Management.Commands.GetDeviceInfoCommand`
+  - `Yubico.YubiKey.Otp.Commands.GetDeviceInfoCommand`
+  - `Yubico.YubiKey.U2f.Commands.GetDeviceInfoCommand`
+  - `Yubico.YubiKey.Management.Commands.GetDeviceInfoResponse`
+  - `Yubico.YubiKey.Otp.Commands.GetDeviceInfoResponse`
+  - `Yubico.YubiKey.U2f.Commands.GetDeviceInfoResponse`
 - Integration test guardrails have been added to ensure tests are done only on specified keys. ([#100](https://github.com/Yubico/Yubico.NET.SDK/pull/100)).
 - Unit tests were run on all platforms in CI ([#80](https://github.com/Yubico/Yubico.NET.SDK/pull/80)).
 
@@ -260,8 +260,8 @@ Features:
   class.
 
 - **SCP03 architecture**. The process for building an SCP03 connection was updated.
-  The previous method ([Yubico.YubiKey.YubiKeyDeviceExtensions.WithScp03()](xref:Yubico.YubiKey.YubiKeyDeviceExtensions.WithScp03%28Yubico.YubiKey.YubiKeyDevice%2CYubico.YubiKey.Scp03.StaticKeys%29)) is now deprecated, and
-  the new method ([Yubico.YubiKey.IYubiKeyDevice.ConnectScp03()](xref:Yubico.YubiKey.IYubiKeyDevice.ConnectScp03%28Yubico.YubiKey.YubiKeyApplication%2CYubico.YubiKey.Scp03.StaticKeys%29)) simply requires passing in the SCP03 key set to the
+  The previous method (`Yubico.YubiKey.YubiKeyDeviceExtensions.WithScp03()`) is now deprecated, and
+  the new method (`Yubico.YubiKey.IYubiKeyDevice.ConnectScp03()` simply requires passing in the SCP03 key set to the
   PivSession constructor. It is also possible to build an
   IYubiKeyConnection that uses SCP03 via [Yubico.YubiKey.Piv.PivSession()](xref:Yubico.YubiKey.Piv.PivSession.%23ctor%28Yubico.YubiKey.IYubiKeyDevice%2CYubico.YubiKey.Scp03.StaticKeys%29).
 

@@ -112,7 +112,7 @@ YubiKey-formatted private key to a `PrivateKeyInfo` or PEM format.
 Unfortunately, PIV does not define its own format of encoding private keys, although
 Yubico has defined an encoding that is very similar to the PIV public key format.
 However, the SDK's PIV application APIs that work with a private keys require them to be
-instances of the [PivPrivateKey](xref:Yubico.YubiKey.Piv.PivPrivateKey) class.
+instances of the `PivPrivateKey` class.
 Hence, when importing a private key into a YubiKey, your application will need to be able
 to "convert" from `PrivateKeyInfo` or PEM to `PivPrivateKey`.
 

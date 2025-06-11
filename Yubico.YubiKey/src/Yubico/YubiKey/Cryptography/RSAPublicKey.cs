@@ -104,6 +104,13 @@ public sealed class RSAPublicKey : PublicKey
     /// <exception cref="CryptographicException">
     /// Thrown if the public key is invalid.
     /// </exception>
+    public static RSAPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> encodedKey) =>
+        AsnPublicKeyDecoder
+            .CreatePublicKey(encodedKey)
+            .Cast<RSAPublicKey>();
+
+
+    [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
     public static RSAPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-        (RSAPublicKey)AsnPublicKeyDecoder.CreatePublicKey(encodedKey);
+        CreateFromSubjectPublicKeyInfo(encodedKey);
 }

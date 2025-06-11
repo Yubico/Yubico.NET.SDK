@@ -148,6 +148,12 @@ public class ECPublicKey : PublicKey
     /// <exception cref="CryptographicException">
     /// Thrown if the public key is invalid.
     /// </exception>
+    public static ECPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> encodedKey) =>
+        AsnPublicKeyDecoder
+            .CreatePublicKey(encodedKey)
+            .Cast<ECPublicKey>();
+
+    [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
     public static ECPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-        (ECPublicKey)AsnPublicKeyDecoder.CreatePublicKey(encodedKey);
+    CreateFromSubjectPublicKeyInfo(encodedKey);
 }

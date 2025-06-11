@@ -82,22 +82,10 @@ public sealed class Curve25519PublicKey : PublicKey
     /// <exception cref="CryptographicException">
     /// Thrown if the public key is invalid.
     /// </exception>
-    public static Curve25519PublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
-    {
-        var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
-        var seqSubjectPublicKeyInfo = reader.ReadSequence();
-        var seqAlgorithmIdentifier = seqSubjectPublicKeyInfo.ReadSequence();
-
-        string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
-        if (unusedBitCount != 0)
-        {
-            throw new CryptographicException("Invalid public key encoding");
-        }
-
-        var keyType = KeyDefinitions.GetKeyTypeByOid(oidAlgorithm);
-        return CreateFromValue(subjectPublicKey, keyType);
-    }
+    public static Curve25519PublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+        AsnPublicKeyDecoder
+            .CreatePublicKey(subjectPublicKeyInfo)
+            .Cast<Curve25519PublicKey>();
 
     /// <summary>
     /// Creates an instance of <see cref="Curve25519PublicKey"/> from the given
@@ -122,4 +110,8 @@ public sealed class Curve25519PublicKey : PublicKey
 
         return new Curve25519PublicKey(publicPoint, keyDefinition);
     }
+
+    [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
+    public static Curve25519PublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
+        CreateFromSubjectPublicKeyInfo(encodedKey);
 }

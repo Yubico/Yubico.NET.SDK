@@ -70,16 +70,16 @@ public sealed class Curve25519PublicKey : PublicKey
         AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(_publicPoint, KeyDefinition.KeyType);
 
     /// <summary>
-    /// Creates a new instance of <see cref="Curve25519PublicKey"/> from a DER-encoded public key.
+    /// Creates a new instance of <see cref="Curve25519PublicKey"/> from a DER-encoded SubjectPublicKeyInfo.
     /// </summary>
     /// <param name="subjectPublicKeyInfo">
-    /// The DER-encoded public key.
+    /// The DER-encoded SubjectPublicKeyInfo.
     /// </param>
     /// <returns>
     /// A new instance of <see cref="Curve25519PublicKey"/>.
     /// </returns>
     /// <exception cref="CryptographicException">
-    /// Thrown if the public key is invalid.
+    /// Thrown if the subjectPublicKeyInfo is invalid.
     /// </exception>
     public static Curve25519PublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
         AsnPublicKeyDecoder
@@ -111,6 +111,6 @@ public sealed class Curve25519PublicKey : PublicKey
     }
 
     [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
-    public static Curve25519PublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-        CreateFromSubjectPublicKeyInfo(encodedKey);
+    public static Curve25519PublicKey CreateFromPkcs8(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+        CreateFromSubjectPublicKeyInfo(subjectPublicKeyInfo);
 }

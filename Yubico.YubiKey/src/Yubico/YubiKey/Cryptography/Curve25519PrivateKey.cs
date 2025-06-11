@@ -78,10 +78,10 @@ public sealed class Curve25519PrivateKey : PrivateKey
 
     /// <summary>
     /// Creates an instance of <see cref="Curve25519PrivateKey"/> from a PKCS#8
-    /// DER-encoded private key.
+    /// ASN.1 DER-encoded private key.
     /// </summary>
     /// <param name="pkcs8EncodedKey">
-    /// The DER-encoded private key.
+    /// The ASN.1 DER-encoded private key.
     /// </param>
     /// <returns>
     /// A new instance of <see cref="Curve25519PrivateKey"/>.

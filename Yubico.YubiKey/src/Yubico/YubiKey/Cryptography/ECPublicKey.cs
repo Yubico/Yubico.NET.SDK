@@ -141,19 +141,19 @@ public class ECPublicKey : PublicKey
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="ECPublicKey"/> from a DER-encoded public key.
+    /// Creates an instance of <see cref="ECPublicKey"/> from a DER-encoded SubjectPublicKeyInfo.
     /// </summary>
-    /// <param name="encodedKey">The DER-encoded public key.</param>
+    /// <param name="subjectPublicKeyInfo">The DER-encoded SubjectPublicKeyInfo.</param>
     /// <returns>An instance of <see cref="IPublicKey"/>.</returns>
     /// <exception cref="CryptographicException">
-    /// Thrown if the public key is invalid.
+    /// Thrown if the subjectPublicKeyInfo is invalid.
     /// </exception>
-    public static ECPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> encodedKey) =>
+    public static ECPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
         AsnPublicKeyDecoder
-            .CreatePublicKey(encodedKey)
+            .CreatePublicKey(subjectPublicKeyInfo)
             .Cast<ECPublicKey>();
 
     [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
-    public static ECPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-    CreateFromSubjectPublicKeyInfo(encodedKey);
+    public static ECPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+    CreateFromSubjectPublicKeyInfo(subjectPublicKeyInfo);
 }

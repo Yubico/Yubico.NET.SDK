@@ -97,20 +97,20 @@ public sealed class RSAPublicKey : PublicKey
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="IPublicKey"/> from a DER-encoded public key.
+    /// Creates a new instance of <see cref="IPublicKey"/> from ASN.1 DER-encoded SubjectPublicKeyInfo.
     /// </summary>
-    /// <param name="encodedKey">The DER-encoded public key.</param>
+    /// <param name="subjectPublicKeyInfo">The DER-encoded SubjectPublicKeyInfo.</param>
     /// <returns>A new instance of <see cref="IPublicKey"/>.</returns>
     /// <exception cref="CryptographicException">
     /// Thrown if the public key is invalid.
     /// </exception>
-    public static RSAPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> encodedKey) =>
+    public static RSAPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
         AsnPublicKeyDecoder
-            .CreatePublicKey(encodedKey)
+            .CreatePublicKey(subjectPublicKeyInfo)
             .Cast<RSAPublicKey>();
 
 
     [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
-    public static RSAPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-        CreateFromSubjectPublicKeyInfo(encodedKey);
+    public static RSAPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+        CreateFromSubjectPublicKeyInfo(subjectPublicKeyInfo);
 }

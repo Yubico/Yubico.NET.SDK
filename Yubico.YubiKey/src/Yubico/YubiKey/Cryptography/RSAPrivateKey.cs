@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Cryptography;
 /// </summary>
 /// <remarks>
 /// This class encapsulates the parameters specific to RSA private keys 
-/// and provides factory methods for creating instances from EC parameters
+/// and provides factory methods for creating instances from RSA parameters
 /// or DER-encoded data.
 /// </remarks>
 public sealed class RSAPrivateKey : PrivateKey

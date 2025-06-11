@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Formats.Asn1;
 using System.Globalization;
 using System.Security.Cryptography;
 
@@ -60,7 +59,7 @@ public sealed class Curve25519PublicKey : PublicKey
 
         publicPoint.CopyTo(_publicPoint);
     }
-    
+
     /// <summary>
     /// Converts this public key to an ASN.1 DER encoded format (X.509 SubjectPublicKeyInfo).
     /// </summary>
@@ -73,7 +72,7 @@ public sealed class Curve25519PublicKey : PublicKey
     /// <summary>
     /// Creates a new instance of <see cref="Curve25519PublicKey"/> from a DER-encoded public key.
     /// </summary>
-    /// <param name="encodedKey">
+    /// <param name="subjectPublicKeyInfo">
     /// The DER-encoded public key.
     /// </param>
     /// <returns>

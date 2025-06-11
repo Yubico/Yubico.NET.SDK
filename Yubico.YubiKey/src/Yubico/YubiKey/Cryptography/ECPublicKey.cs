@@ -99,7 +99,7 @@ public class ECPublicKey : PublicKey
 
     /// <inheritdoc />
     public override byte[] ExportSubjectPublicKeyInfo() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(Parameters);
-    
+
     /// <summary>
     /// Creates an instance of <see cref="ECPublicKey"/> from the given <paramref name="parameters"/>.
     /// </summary>

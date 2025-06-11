@@ -37,14 +37,14 @@ public sealed class RSAPublicKey : PublicKey
     /// The parameters are used in cryptographic operations such as decryption and digital signature creation.
     /// </remarks>
     public RSAParameters Parameters { get; }
-    
+
     /// <summary>
     /// Gets the key definition associated with this RSA private key.
     /// </summary>
     /// <value>
     /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
     /// </value>
-    public KeyDefinition KeyDefinition  { get; }
+    public KeyDefinition KeyDefinition { get; }
 
     /// <inheritdoc />
     public override KeyType KeyType => KeyDefinition.KeyType;
@@ -82,8 +82,8 @@ public sealed class RSAPublicKey : PublicKey
     /// </exception>
     public static RSAPublicKey CreateFromParameters(RSAParameters parameters)
     {
-        if (parameters.D != null || 
-            parameters.P != null || 
+        if (parameters.D != null ||
+            parameters.P != null ||
             parameters.Q != null ||
             parameters.DP != null ||
             parameters.DQ != null ||
@@ -92,7 +92,7 @@ public sealed class RSAPublicKey : PublicKey
         {
             throw new ArgumentException("Parameters must not contain private key data");
         }
-        
+
         return new RSAPublicKey(parameters);
     }
 

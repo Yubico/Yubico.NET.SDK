@@ -47,14 +47,14 @@ public sealed class RSAPrivateKey : PrivateKey
     /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
     /// </value>
     public KeyDefinition KeyDefinition { get; }
-    
+
     /// <inheritdoc />
     public override KeyType KeyType => KeyDefinition.KeyType;
 
     private RSAPrivateKey(RSAParameters parameters)
     {
         int keyLengthBits = parameters.DP?.Length * 8 * 2 ?? 0;
-        
+
         Parameters = parameters.NormalizeParameters();
         KeyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits);
     }

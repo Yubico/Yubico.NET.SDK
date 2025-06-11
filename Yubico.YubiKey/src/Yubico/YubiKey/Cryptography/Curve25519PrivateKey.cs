@@ -45,7 +45,7 @@ public sealed class Curve25519PrivateKey : PrivateKey
     /// </summary>
     /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the private scalar value.</returns>
     public ReadOnlyMemory<byte> PrivateKey => _privateKey;
-    
+
     private Curve25519PrivateKey(
         ReadOnlyMemory<byte> privateKey,
         KeyType keyType)
@@ -61,9 +61,9 @@ public sealed class Curve25519PrivateKey : PrivateKey
 
         privateKey.CopyTo(_privateKey);
     }
-    
+
     /// <inheritdoc />
-    public override byte[] ExportPkcs8PrivateKey() 
+    public override byte[] ExportPkcs8PrivateKey()
     {
         ThrowIfDisposed();
         return AsnPrivateKeyEncoder.EncodeToPkcs8(_privateKey, KeyType);
@@ -96,7 +96,7 @@ public sealed class Curve25519PrivateKey : PrivateKey
         using var privateKeyHandle = new ZeroingMemoryHandle(privateKey);
         return new Curve25519PrivateKey(privateKeyHandle.Data, keyType);
     }
-    
+
     /// <summary>
     /// Creates an instance of <see cref="Curve25519PrivateKey"/> from the given
     /// <paramref name="privateKey"/> and <paramref name="keyType"/>.

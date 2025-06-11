@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Cryptography
         /// An <see cref="ECParameters"/> structure containing the curve parameters, key, and other
         /// cryptographic elements needed for EC operations.
         /// </value>
-        public ECParameters Parameters { get;}
+        public ECParameters Parameters { get; }
 
         /// <summary>
         /// Gets the key definition associated with this RSA private key.
@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Cryptography
             Parameters = ecdsaObject.ExportParameters(true);
             KeyDefinition = KeyDefinitions.GetByOid(Parameters.Curve.Oid);
         }
-        
+
         /// <inheritdoc/>
         public override byte[] ExportPkcs8PrivateKey()
         {
@@ -116,10 +116,9 @@ namespace Yubico.YubiKey.Cryptography
         public static ECPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
         {
             var parameters = AsnPrivateKeyDecoder.CreateECParameters(encodedKey);
+
             return CreateFromParameters(parameters);
         }
-        
-        #pragma warning disable CS0618 // Type or member is obsolete.
 
         /// <summary>
         /// Creates an instance of <see cref="ECPrivateKey"/> from the given <paramref name="parameters"/>.
@@ -127,7 +126,6 @@ namespace Yubico.YubiKey.Cryptography
         /// <param name="parameters">The parameters to create the key from.</param>
         /// <returns>An instance of <see cref="ECPrivateKey"/>.</returns>
         public static ECPrivateKey CreateFromParameters(ECParameters parameters) => new(parameters);
-        #pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// Creates a new instance of <see cref="ECPrivateKey"/> from the given

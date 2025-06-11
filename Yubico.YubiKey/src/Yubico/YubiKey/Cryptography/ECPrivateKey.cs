@@ -21,8 +21,9 @@ namespace Yubico.YubiKey.Cryptography
     /// Represents the parameters for an Elliptic Curve (EC) private key.
     /// </summary>
     /// <remarks>
-    /// This class encapsulates the parameters specific to EC private keys and
-    /// contains the necessary private key data.
+    /// This class encapsulates the parameters specific to EC private keys
+    /// and provides factory methods for creating instances from EC parameters
+    /// or DER-encoded data.
     /// </remarks>
     public class ECPrivateKey : PrivateKey
     {
@@ -119,6 +120,12 @@ namespace Yubico.YubiKey.Cryptography
         }
         
         #pragma warning disable CS0618 // Type or member is obsolete.
+
+        /// <summary>
+        /// Creates an instance of <see cref="ECPrivateKey"/> from the given <paramref name="parameters"/>.
+        /// </summary>
+        /// <param name="parameters">The parameters to create the key from.</param>
+        /// <returns>An instance of <see cref="ECPrivateKey"/>.</returns>
         public static ECPrivateKey CreateFromParameters(ECParameters parameters) => new(parameters);
         #pragma warning restore CS0618 // Type or member is obsolete
 

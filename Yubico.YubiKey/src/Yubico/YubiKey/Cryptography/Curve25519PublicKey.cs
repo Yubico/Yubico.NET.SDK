@@ -19,6 +19,14 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
+/// <summary>
+/// Represents a Curve25519 public key.
+/// </summary>
+/// <remarks>
+/// This sealed class encapsulates Curve25519 public key data as a compressed point
+/// and supports both Ed25519 and X25519 key types.
+/// It also provides factory methods for creating instances from public point values or DER-encoded data.
+/// </remarks>
 public sealed class Curve25519PublicKey : PublicKey
 {
     private readonly Memory<byte> _publicPoint;

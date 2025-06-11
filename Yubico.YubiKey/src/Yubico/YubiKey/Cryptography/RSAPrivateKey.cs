@@ -17,6 +17,14 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
+/// <summary>
+/// Represents the parameters for an RSA private key.
+/// </summary>
+/// <remarks>
+/// This class encapsulates the parameters specific to RSA private keys 
+/// and provides factory methods for creating instances from EC parameters
+/// or DER-encoded data.
+/// </remarks>
 public sealed class RSAPrivateKey : PrivateKey
 {
 

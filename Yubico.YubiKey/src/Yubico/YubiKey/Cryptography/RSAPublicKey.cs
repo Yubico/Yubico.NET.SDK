@@ -17,6 +17,13 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
+/// <summary>
+/// Represents an RSA public key.
+/// </summary>
+/// <remarks>
+/// This sealed class encapsulates RSA public key parameters (Modulus and Exponent)
+/// and provides factory methods for creating instances from RSA parameters or DER-encoded data.
+/// </remarks>
 public sealed class RSAPublicKey : PublicKey
 {
     /// <summary>

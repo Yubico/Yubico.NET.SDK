@@ -16,6 +16,17 @@ using System;
 
 namespace Yubico.YubiKey.Cryptography;
 
+/// <summary>
+/// Abstract base class for private key implementations.
+/// </summary>
+/// <remarks>
+/// This class implements the standard .NET disposal pattern to ensure secure cleanup
+/// of sensitive cryptographic material and provides disposal state checking for derived classes.
+/// <para>
+/// Concrete implementations include <see cref="ECPrivateKey"/>, <see cref="RSAPrivateKey"/> and <see cref="Curve25519PrivateKey"/>,
+/// each providing algorithm-specific key handling and cryptographic operations.
+/// </para>
+/// </remarks>
 public abstract class PrivateKey : IPrivateKey, IDisposable
 {
     private bool _disposed;
@@ -43,6 +54,17 @@ public abstract class PrivateKey : IPrivateKey, IDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Throws an <see cref="ObjectDisposedException"/> if this instance has been disposed.
+    /// </summary>
+    /// <exception cref="ObjectDisposedException">
+    /// Thrown when this method is called after the object has been disposed.
+    /// </exception>
+    /// <remarks>
+    /// This method should be called at the beginning of all public methods and properties
+    /// in derived classes to prevent operations on disposed cryptographic key material.
+    /// The exception message includes the concrete type name for debugging purposes.
+    /// </remarks>
     protected void ThrowIfDisposed()
     {
         if (_disposed)

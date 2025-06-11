@@ -18,11 +18,11 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKey.Cryptography;
 
 /// <summary>
-/// Represents the parameters for an Elliptic Curve (EC) public key.
+/// Represents an Elliptic Curve (EC) public key.
 /// </summary>
 /// <remarks>
-/// This class encapsulates the parameters specific to EC public keys,
-/// ensuring that the key only contains necessary public key components.
+/// This class encapsulates EC public key parameters and provides cryptographic operations
+/// for NIST elliptic curves and provides factory methods for creating instances from EC parameters or DER-encoded data.
 /// </remarks>
 public class ECPublicKey : PublicKey
 {

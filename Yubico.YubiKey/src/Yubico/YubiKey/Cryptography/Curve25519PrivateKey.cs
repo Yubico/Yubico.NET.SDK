@@ -17,13 +17,21 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
+/// <summary>
+/// Represents a Curve25519 private key.
+/// </summary>
+/// <remarks>
+/// This sealed class encapsulates Curve25519 private key data and supports
+/// both Ed25519 and X25519 cryptographic operations.
+/// It also provides factory methods for creating instances from private key values or DER-encoded data.
+/// </remarks>
 public sealed class Curve25519PrivateKey : PrivateKey
 {
     private readonly Memory<byte> _privateKey;
 
     /// <inheritdoc />
     public override KeyType KeyType => KeyDefinition.KeyType;
-    
+
     /// <summary>
     /// Gets the key definition associated with this RSA private key.
     /// </summary>

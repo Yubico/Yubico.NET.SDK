@@ -14,6 +14,14 @@
 
 namespace Yubico.YubiKey.Cryptography;
 
+/// <summary>
+/// Defines the contract for cryptographic private keys.
+/// </summary>
+/// <remarks>
+/// This interface extends <see cref="IKeyBase"/> to include private key-specific operations
+/// for PKCS#8 export and secure memory cleanup.
+/// Known implementations include <see cref="ECPrivateKey"/>, <see cref="RSAPrivateKey"/> and <see cref="Curve25519PrivateKey"/>,.
+/// </remarks>
 public interface IPrivateKey : IKeyBase
 {
     /// <summary>

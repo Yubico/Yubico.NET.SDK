@@ -50,19 +50,19 @@ namespace Yubico.YubiKey.TestUtilities
             var keyDefinition = key.KeyDefinition;
             if (keyDefinition.IsRSA)
             {
-                var rsaPublicKey = RSAPublicKey.CreateFromPkcs8(key.EncodedKey);
+                var rsaPublicKey = RSAPublicKey.CreateFromSubjectPublicKeyInfo(key.EncodedKey);
                 var rsaPivEncodedKey = rsaPublicKey.EncodeAsPiv();
                 return PivPublicKey.Create(rsaPivEncodedKey, key.KeyType.GetPivAlgorithm());
             }
 
             if (keyDefinition is { IsEllipticCurve: true, AlgorithmOid: Oids.ECDSA })
             {
-                var ecPublicKey = ECPublicKey.CreateFromPkcs8(key.EncodedKey);
+                var ecPublicKey = ECPublicKey.CreateFromSubjectPublicKeyInfo(key.EncodedKey);
                 var ecPivEncodedKey = ecPublicKey.EncodeAsPiv();
                 return PivPublicKey.Create(ecPivEncodedKey, key.KeyType.GetPivAlgorithm());
             }
 
-            var cvPublicKey = Curve25519PublicKey.CreateFromPkcs8(key.EncodedKey);
+            var cvPublicKey = Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(key.EncodedKey);
             var cvPivEncodedKey = cvPublicKey.EncodeAsPiv();
             return PivPublicKey.Create(cvPivEncodedKey, keyDefinition.KeyType.GetPivAlgorithm());
         }

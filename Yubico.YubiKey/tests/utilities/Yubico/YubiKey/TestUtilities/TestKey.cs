@@ -80,8 +80,8 @@ public class TestKey : TestCrypto
         }
 
         return KeyDefinition is { IsEllipticCurve: true, AlgorithmOid: Oids.ECDSA }
-            ? ECPublicKey.CreateFromPkcs8(EncodedKey).PublicPoint.ToArray()
-            : Curve25519PublicKey.CreateFromPkcs8(EncodedKey).PublicPoint.ToArray();
+            ? ECPublicKey.CreateFromSubjectPublicKeyInfo(EncodedKey).PublicPoint.ToArray()
+            : Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(EncodedKey).PublicPoint.ToArray();
     }
 
     public IPublicKey AsPublicKey()
@@ -93,15 +93,15 @@ public class TestKey : TestCrypto
         
         if (KeyDefinition.IsRSA)
         {
-            return RSAPublicKey.CreateFromPkcs8(EncodedKey);
+            return RSAPublicKey.CreateFromSubjectPublicKeyInfo(EncodedKey);
         }
 
         if (KeyDefinition is { IsEllipticCurve: true, AlgorithmOid: Oids.ECDSA })
         {
-            return ECPublicKey.CreateFromPkcs8(EncodedKey);
+            return ECPublicKey.CreateFromSubjectPublicKeyInfo(EncodedKey);
         }
 
-        return Curve25519PublicKey.CreateFromPkcs8(EncodedKey);
+        return Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(EncodedKey);
     }
 
     public byte[] GetPrivateKeyValue()

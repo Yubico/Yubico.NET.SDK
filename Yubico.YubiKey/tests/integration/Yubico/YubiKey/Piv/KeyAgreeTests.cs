@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Piv
             if (keyType is KeyType.X25519)
             {
                 var testSelectedPublicKeyPeer = TestKeys.GetTestPublicKey(keyType, 2);
-                peerPublicKey = Curve25519PublicKey.CreateFromPkcs8(testSelectedPublicKeyPeer.EncodedKey);
+                peerPublicKey = Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(testSelectedPublicKeyPeer.EncodedKey);
             }
             else
             {

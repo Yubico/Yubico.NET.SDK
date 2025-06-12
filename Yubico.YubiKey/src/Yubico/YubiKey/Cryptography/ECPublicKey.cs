@@ -18,11 +18,11 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKey.Cryptography;
 
 /// <summary>
-/// Represents the parameters for an Elliptic Curve (EC) public key.
+/// Represents an Elliptic Curve (EC) public key.
 /// </summary>
 /// <remarks>
-/// This class encapsulates the parameters specific to EC public keys,
-/// ensuring that the key only contains necessary public key components.
+/// This class encapsulates EC public key parameters and provides cryptographic operations
+/// for NIST elliptic curves and provides factory methods for creating instances from EC parameters or DER-encoded data.
 /// </remarks>
 public class ECPublicKey : PublicKey
 {
@@ -99,7 +99,7 @@ public class ECPublicKey : PublicKey
 
     /// <inheritdoc />
     public override byte[] ExportSubjectPublicKeyInfo() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(Parameters);
-    
+
     /// <summary>
     /// Creates an instance of <see cref="ECPublicKey"/> from the given <paramref name="parameters"/>.
     /// </summary>
@@ -141,13 +141,19 @@ public class ECPublicKey : PublicKey
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="ECPublicKey"/> from a DER-encoded public key.
+    /// Creates an instance of <see cref="ECPublicKey"/> from a DER-encoded SubjectPublicKeyInfo.
     /// </summary>
-    /// <param name="encodedKey">The DER-encoded public key.</param>
+    /// <param name="subjectPublicKeyInfo">The DER-encoded SubjectPublicKeyInfo.</param>
     /// <returns>An instance of <see cref="IPublicKey"/>.</returns>
     /// <exception cref="CryptographicException">
-    /// Thrown if the public key is invalid.
+    /// Thrown if the subjectPublicKeyInfo is invalid.
     /// </exception>
-    public static ECPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-        (ECPublicKey)AsnPublicKeyDecoder.CreatePublicKey(encodedKey);
+    public static ECPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+        AsnPublicKeyDecoder
+            .CreatePublicKey(subjectPublicKeyInfo)
+            .Cast<ECPublicKey>();
+
+    [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
+    public static ECPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+    CreateFromSubjectPublicKeyInfo(subjectPublicKeyInfo);
 }

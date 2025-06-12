@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Cryptography
         
             // Act
             var publicKey = ecdsa.ExportSubjectPublicKeyInfo();
-            var publicKeyParams = ECPublicKey.CreateFromPkcs8(publicKey);
+            var publicKeyParams = ECPublicKey.CreateFromSubjectPublicKeyInfo(publicKey);
             var ecPublicKeyParams = publicKeyParams as ECPublicKey;
             Assert.NotNull(ecPublicKeyParams);
 

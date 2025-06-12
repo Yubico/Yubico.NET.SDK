@@ -111,9 +111,9 @@ All YubiKeys with the FIDO U2F application.
 
 ### SDK classes
 
-[GetDeviceInfoCommand](xref:Yubico.YubiKey.U2f.Commands.GetDeviceInfoCommand)
+[GetPagedDeviceInfoCommand](xref:Yubico.YubiKey.U2f.Commands.GetPagedDeviceInfoCommand)
 
-[GetDeviceInfoResponse](xref:Yubico.YubiKey.U2f.Commands.GetDeviceInfoResponse)
+[GetPagedDeviceInfoResponse](xref:Yubico.YubiKey.U2f.Commands.GetPagedDeviceInfoResponse)
 
 ### Input
 

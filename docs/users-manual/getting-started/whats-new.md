@@ -263,7 +263,7 @@ Features:
   The previous method (`Yubico.YubiKey.YubiKeyDeviceExtensions.WithScp03()`) is now deprecated, and
   the new method (`Yubico.YubiKey.IYubiKeyDevice.ConnectScp03()` simply requires passing in the SCP03 key set to the
   PivSession constructor. It is also possible to build an
-  IYubiKeyConnection that uses SCP03 via [Yubico.YubiKey.Piv.PivSession()](xref:Yubico.YubiKey.Piv.PivSession.%23ctor%28Yubico.YubiKey.IYubiKeyDevice%2CYubico.YubiKey.Scp03.StaticKeys%29).
+  IYubiKeyConnection that uses SCP03 via `Yubico.YubiKey.Piv.PivSession()`.
 
 - **SCP03 documentation**. The User's Manual article on SCP03 was
   updated to provide more comprehensive information.

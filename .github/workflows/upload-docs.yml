@@ -37,7 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     # Define an output for this job
     outputs:
-      image-tag: ${{ steps.push_image.outputs.tag }}
+      image-tag: ${{ steps.push_image.outputs.imagetag }}
+      image-hash: ${{ steps.push_image.outputs.imagehash }}
     steps:
       # Checkout the local repository as we need the Dockerfile and other things even for this step.
       - uses: actions/checkout@v4
@@ -69,4 +70,5 @@ jobs:
           docker tag "${IMAGE_NAME}:${{ github.sha }}" "${FULL_IMAGE_TAG}"
           docker push "${FULL_IMAGE_TAG}"
           # Use GITHUB_OUTPUT to make the full tag available to the job and workflow
-          echo "tag=${FULL_IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "imagetag=${FULL_IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "imagehash=${{ github.sha }}" >> $GITHUB_OUTPUT

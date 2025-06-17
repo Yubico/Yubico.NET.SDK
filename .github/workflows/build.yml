@@ -199,7 +199,7 @@ jobs:
   build-summary:
     name: Build summary
     runs-on: ubuntu-latest
-    needs: [build-artifacts, publish-internal, upload-docs]
+    needs: [build-artifacts, publish-internal, upload-docs, run-tests]
     if: always()
     steps:
       - name: Generate build summary

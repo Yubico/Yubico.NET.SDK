@@ -14,8 +14,13 @@
 
 name: Upload documentation to GCP
 
-on: 
+on:
   workflow_call:
+    # Define an output for this reusable workflow
+    outputs:
+      image-tag:
+        description: "The full tag of the pushed documentation Docker image"
+        value: ${{ jobs.upload_docs.outputs.image-tag }}
 
 permissions:
   id-token: write
@@ -30,6 +35,9 @@ env:
 jobs:
   upload_docs:
     runs-on: ubuntu-latest
+    # Define an output for this job
+    outputs:
+      image-tag: ${{ steps.push_image.outputs.tag }}
     steps:
       # Checkout the local repository as we need the Dockerfile and other things even for this step.
       - uses: actions/checkout@v4
@@ -44,7 +52,7 @@ jobs:
       - name: Docker build
         run: |
           docker build -t "${IMAGE_NAME}:${{ github.sha }}" .
-      
+
       # Authenticate to Google Cloud
       - name: Authenticate
         uses: google-github-actions/auth@v2
@@ -54,8 +62,11 @@ jobs:
 
       # Push our docker image to GCP
       - name: Push Docker image
+        id: push_image # Add an ID to reference this step's outputs
         run: |
           gcloud auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
-          docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
-          docker push "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
-          echo "New image tag: ${{ github.sha }}"
+          FULL_IMAGE_TAG="${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
+          docker tag "${IMAGE_NAME}:${{ github.sha }}" "${FULL_IMAGE_TAG}"
+          docker push "${FULL_IMAGE_TAG}"
+          # Use GITHUB_OUTPUT to make the full tag available to the job and workflow
+          echo "tag=${FULL_IMAGE_TAG}" >> $GITHUB_OUTPUT

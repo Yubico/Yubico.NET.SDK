@@ -69,7 +69,6 @@ jobs:
       contents: read
       packages: read
       attestations: write
-    # Add an outputs section to the job to pass artifact IDs
     outputs:
       docs-log-id: ${{ steps.docs-log-upload.outputs.artifact-id }}
       docs-id: ${{ steps.docs-upload.outputs.artifact-id }}
@@ -77,7 +76,6 @@ jobs:
       symbols-packages-id: ${{ steps.symbols-upload.outputs.artifact-id }}
       assemblies-id: ${{ steps.assemblies-upload.outputs.artifact-id }}
     steps:
-      # Checkout the local repository
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
@@ -186,7 +184,6 @@ jobs:
       packages: write
     steps:
       - uses: actions/download-artifact@v4
-        id: download
         with:
           name: Nuget Packages
       - run: |
@@ -199,7 +196,7 @@ jobs:
   build-summary:
     name: Build summary
     runs-on: ubuntu-latest
-    needs: [build-artifacts, publish-internal, upload-docs, run-tests]
+    needs: [run-tests, build-artifacts, publish-internal, upload-docs]
     if: always()
     steps:
       - name: Generate build summary
@@ -210,7 +207,7 @@ jobs:
           UPLOAD_DOCS_RESULT: ${{ needs.upload-docs.result }}
           PUBLISH_INTERNAL_RESULT: ${{ needs.publish-internal.result }}
           DOCS_IMAGE_TAG: ${{ needs.upload-docs.outputs.image-tag }}
-          DOCS_IMAGE_HASH: ${{ needs.upload-docs.outputs.image-hash}}
+          DOCS_IMAGE_HASH: ${{ needs.upload-docs.outputs.image-hash }}
           
           # Pass artifact IDs from the build-artifacts job outputs
           DOCS_LOG_ID: ${{ needs.build-artifacts.outputs.docs-log-id }}
@@ -248,9 +245,10 @@ jobs:
           # Conditionally add the Docker image tag to the summary
           if [ "${{ env.UPLOAD_DOCS_RESULT }}" == "success" ]; then
             echo "### Documentation Docker Image" >> $GITHUB_STEP_SUMMARY
-            echo "A new documentation Docker image was pushed with the tag:" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "${{ env.DOCS_IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
-              echo "${{ env.DOCS_IMAGE_HASH }}" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "A new documentation Docker image was pushed." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Attribute | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Image Tag** | \`${{ env.DOCS_IMAGE_TAG }}\` |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Image Hash** | \`${{ env.DOCS_IMAGE_HASH }}\` |" >> $GITHUB_STEP_SUMMARY
           fi

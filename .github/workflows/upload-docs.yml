@@ -1,4 +1,4 @@
-# Copyright 2021 Yubico AB
+# Copyright 2025 Yubico AB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ on:
       image-tag:
         description: "The full tag of the pushed documentation Docker image"
         value: ${{ jobs.upload_docs.outputs.image-tag }}
+      image-hash:
+        description: "The image hash of the pushed documentation Docker image"
+        value: ${{ jobs.upload_docs.outputs.image-hash }}
 
 permissions:
   id-token: write

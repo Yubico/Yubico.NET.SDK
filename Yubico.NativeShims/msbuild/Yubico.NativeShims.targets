@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <!-- Arm64 -->
-    <ItemGroup Condition="'$(Platform)' == 'arm64'">
+    <ItemGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64' OR '$(Platform)' == 'arm64'">
         <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-arm64\native\Yubico.NativeShims.dll">
             <Link>arm64\Yubico.NativeShims.dll</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

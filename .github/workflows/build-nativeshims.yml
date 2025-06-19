@@ -131,7 +131,7 @@ jobs:
           $repo.SetAttribute("url","$env:GITHUB_REPO_URL")
           $repo.SetAttribute("type","git")
           $nuspec.package.metadata.AppendChild($repo)
-          $repo.SetAttribute("url","$env:GITHUB_REPO_URL")
+          $nuspec.package.metadata.version = "$env:PACKAGE_VERSION"
           $nuspec.Save("Yubico.NativeShims.nuspec")
           cat Yubico.NativeShims.nuspec
       - run: nuget pack Yubico.NativeShims.nuspec
@@ -162,7 +162,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: Yubico.NativeShims.nupkg
+          name: NuGet Package NativeShims
       - run: |
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
           dotnet nuget push Yubico.NativeShims.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}

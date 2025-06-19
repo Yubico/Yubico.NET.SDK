@@ -1,4 +1,4 @@
-// Copyright 2023 Yubico AB
+﻿// Copyright 2023 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System;
-using Moq;
+using NSubstitute;
 using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.InterIndustry.Commands;
@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Pipelines
 {
     public class ScpApduTransformTests
     {
-        private readonly Mock<IApduTransform> _previous = new Mock<IApduTransform>();
+        private readonly IApduTransform _previous = Substitute.For<IApduTransform>();
         private readonly Scp03KeyParameters _scp03KeyParams = Scp03KeyParameters.DefaultKey;
 
         [Fact]
@@ -37,14 +37,14 @@ namespace Yubico.YubiKey.Pipelines
         public void Constructor_NullKeyParameters_ThrowsArgumentNullException()
         {
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => new ScpApduTransform(_previous.Object, null!));
+            Assert.Throws<ArgumentNullException>(() => new ScpApduTransform(_previous, null!));
         }
 
         [Fact]
         public void Constructor_ValidParameters_CreatesInstance()
         {
             // Act
-            var transform = new ScpApduTransform(_previous.Object, _scp03KeyParams);
+            var transform = new ScpApduTransform(_previous, _scp03KeyParams);
 
             // Assert
             Assert.NotNull(transform);
@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.Pipelines
         public void EncryptDataFunc_BeforeSetup_ThrowsInvalidOperationException()
         {
             // Arrange
-            var transform = new ScpApduTransform(_previous.Object, _scp03KeyParams);
+            var transform = new ScpApduTransform(_previous, _scp03KeyParams);
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => transform.EncryptDataFunc);
@@ -65,7 +65,7 @@ namespace Yubico.YubiKey.Pipelines
         public void Invoke_ExemptedCommands_BypassEncoding()
         {
             // Arrange
-            var transform = new ScpApduTransform(_previous.Object, _scp03KeyParams);
+            var transform = new ScpApduTransform(_previous, _scp03KeyParams);
 
             var testCases = new[]
             {
@@ -88,10 +88,10 @@ namespace Yubico.YubiKey.Pipelines
 
             foreach (var testCase in testCases)
             {
-                _previous.Setup(p => p.Invoke(
-                    It.IsAny<CommandApdu>(),
-                    It.IsAny<Type>(),
-                    It.IsAny<Type>()))
+                _previous.Invoke(
+                    Arg.Any<CommandApdu>(),
+                    Arg.Any<Type>(),
+                    Arg.Any<Type>())
                     .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }));
 
                 // Act
@@ -101,10 +101,10 @@ namespace Yubico.YubiKey.Pipelines
                     testCase.ResponseType);
 
                 // Assert that the previous pipeline was called (which is the one that doesn't do encoding)
-                _previous.Verify(p => p.Invoke(
-                    It.IsAny<CommandApdu>(),
+                _previous.Received().Invoke(
+                    Arg.Any<CommandApdu>(),
                     testCase.CommandType,
-                    testCase.ResponseType), Times.Once);
+                    testCase.ResponseType);
 
                 _previous.Reset();
             }
@@ -121,7 +121,7 @@ namespace Yubico.YubiKey.Pipelines
         public void Dispose_MultipleCalls_DoesNotThrow()
         {
             // Arrange
-            var transform = new ScpApduTransform(_previous.Object, _scp03KeyParams);
+            var transform = new ScpApduTransform(_previous, _scp03KeyParams);
 
             // Act & Assert
             transform.Dispose();
@@ -132,13 +132,13 @@ namespace Yubico.YubiKey.Pipelines
         public void Cleanup_CallsUnderlyingPipelineCleanup()
         {
             // Arrange
-            var transform = new ScpApduTransform(_previous.Object, _scp03KeyParams);
+            var transform = new ScpApduTransform(_previous, _scp03KeyParams);
 
             // Act
             transform.Cleanup();
 
             // Assert
-            _previous.Verify(p => p.Cleanup(), Times.Once);
+            _previous.Received().Cleanup();
         }
     }
 }

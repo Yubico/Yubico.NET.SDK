@@ -15,7 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Moq;
+using NSubstitute;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -27,36 +27,36 @@ namespace Yubico.YubiKey.Pipelines
         public void Cleanup_Called_CallsNextTransformCleanupMethod()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object);
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new CommandChainingTransform(mockTransform);
 
             // Act
             transform.Cleanup();
 
             // Assert
-            mockTransform.Verify(x => x.Cleanup(), Times.Once());
+            mockTransform.Received().Cleanup();
         }
 
         [Fact]
         public void Setup_Called_CallsNextTransformSetupMethod()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object);
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new CommandChainingTransform(mockTransform);
 
             // Act
             transform.Setup();
 
             // Assert
-            mockTransform.Verify(x => x.Setup(), Times.Once());
+            mockTransform.Received().Setup();
         }
 
         [Fact]
         public void Invoke_NullCommandApdu_ThrowsArgumentNullException()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object);
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new CommandChainingTransform(mockTransform);
 
             // Act
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
@@ -71,8 +71,8 @@ namespace Yubico.YubiKey.Pipelines
         public void Invoke_CommandApduWithoutData_InvokesNextTransformWithSameApdu()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object);
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new CommandChainingTransform(mockTransform);
             var commandApdu = new CommandApdu();
 
             // Act
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Pipelines
             // Assert
             mockTransform.Verify(
                 x =>
-                    x.Invoke(It.Is<CommandApdu>(a => a == commandApdu), It.IsAny<Type>(), It.IsAny<Type>()));
+                    x.Invoke(Arg.Is<CommandApdu>(a => a == commandApdu), Arg.Any<Type>(), Arg.Any<Type>()));
         }
 
         [Fact]
@@ -89,12 +89,11 @@ namespace Yubico.YubiKey.Pipelines
         {
             // Arrange
             var expectedResponse = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var mockTransform = new Mock<IApduTransform>();
-            _ = mockTransform
-                .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
+            var mockTransform = Substitute.For<IApduTransform>();
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(expectedResponse);
 
-            var transform = new CommandChainingTransform(mockTransform.Object);
+            var transform = new CommandChainingTransform(mockTransform);
             var commandApdu = new CommandApdu();
 
             // Act
@@ -108,8 +107,8 @@ namespace Yubico.YubiKey.Pipelines
         public void Invoke_CommandApduWithSmallData_InvokesNextTransformWithSameApdu()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object);
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new CommandChainingTransform(mockTransform);
             var commandApdu = new CommandApdu { Data = new byte[] { 0, 1, 2, 3 } };
 
             // Act
@@ -118,7 +117,7 @@ namespace Yubico.YubiKey.Pipelines
             // Assert
             mockTransform.Verify(
                 x =>
-                    x.Invoke(It.Is<CommandApdu>(a => a == commandApdu), It.IsAny<Type>(), It.IsAny<Type>()));
+                    x.Invoke(Arg.Is<CommandApdu>(a => a == commandApdu), Arg.Any<Type>(), Arg.Any<Type>()));
         }
 
         [Fact]
@@ -126,12 +125,11 @@ namespace Yubico.YubiKey.Pipelines
         {
             // Arrange
             var expectedResponse = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var mockTransform = new Mock<IApduTransform>();
-            _ = mockTransform
-                .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
+            var mockTransform = Substitute.For<IApduTransform>();
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(expectedResponse);
 
-            var transform = new CommandChainingTransform(mockTransform.Object);
+            var transform = new CommandChainingTransform(mockTransform);
             var commandApdu = new CommandApdu { Data = new byte[] { 0, 1, 2, 3 } };
 
             // Act
@@ -147,12 +145,11 @@ namespace Yubico.YubiKey.Pipelines
             var observedCla = new List<byte>();
 
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object) { MaxChunkSize = 4 };
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
             var commandApdu = new CommandApdu { Data = Enumerable.Repeat<byte>(0xFF, 16).ToArray() };
 
-            _ = mockTransform
-                .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
                 .Callback<CommandApdu, Type, Type>((a, b, c) => observedCla.Add(a.Cla));
 
@@ -169,8 +166,8 @@ namespace Yubico.YubiKey.Pipelines
             var observedApdus = new List<CommandApdu>();
 
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object) { MaxChunkSize = 4 };
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
             var commandApdu = new CommandApdu
             {
                 Ins = 1,
@@ -179,8 +176,7 @@ namespace Yubico.YubiKey.Pipelines
                 Data = Enumerable.Repeat<byte>(0xFF, 16).ToArray()
             };
 
-            _ = mockTransform
-                .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
                 .Callback<CommandApdu, Type, Type>((a, b, c) => observedApdus.Add(a));
 
@@ -202,15 +198,14 @@ namespace Yubico.YubiKey.Pipelines
             var observedApdus = new List<byte[]>();
 
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object) { MaxChunkSize = 4 };
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
             var commandApdu = new CommandApdu
             {
                 Data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
             };
 
-            _ = mockTransform
-                .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
                 .Callback<CommandApdu, Type, Type>((a, b, c) => observedApdus.Add(a.Data.ToArray()));
 
@@ -229,15 +224,14 @@ namespace Yubico.YubiKey.Pipelines
             var observedApdus = new List<byte[]>();
 
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform.Object) { MaxChunkSize = 4 };
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
             var commandApdu = new CommandApdu
             {
                 Data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
             };
 
-            _ = mockTransform
-                .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(new ResponseApdu([], 0x6700))
                 .Callback<CommandApdu, Type, Type>((a, b, c) =>
                 {

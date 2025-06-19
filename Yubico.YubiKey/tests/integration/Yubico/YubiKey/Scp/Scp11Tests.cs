@@ -77,11 +77,11 @@ namespace Yubico.YubiKey.Scp
             session.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
             if (desiredDeviceType == StandardTestDevice.Fw5Fips)
             {
-                ScpTestUtilities.SetFipsApprovedCredentials(session);
+                FipsTestUtilities.SetFipsApprovedCredentials(session);
             }
 
-            var result = session.GenerateKeyPair(PivSlot.Retired12, PivAlgorithm.EccP256, PivPinPolicy.Always);
-            Assert.Equal(PivAlgorithm.EccP256, result.Algorithm);
+            var result = session.GenerateKeyPair(PivSlot.Retired12, KeyType.ECP256, PivPinPolicy.Always);
+            Assert.Equal(KeyType.ECP256, result.KeyType);
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
@@ -177,7 +177,9 @@ namespace Yubico.YubiKey.Scp
             var leaf = certificateList.Last();
             // Remember to verify the cert chain
             var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!;
-            var keyParams = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(ecDsaPublicKey));
+            var keyParams = new Scp11KeyParameters(
+                keyReference, 
+                ECPublicKey.CreateFromParameters(ecDsaPublicKey.ExportParameters(false)));
 
             using (var session = new SecurityDomainSession(testDevice, keyParams))
             {
@@ -201,10 +203,12 @@ namespace Yubico.YubiKey.Scp
             {
                 // Generate a new EC key on the host and import via PutKey
                 var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-                var privateKey = new ECPrivateKeyParameters(ecdsa);
+                var privateKey = ECPrivateKey.CreateFromParameters(ecdsa.ExportParameters(true));
                 session.PutKey(keyReference, privateKey, 0);
 
-                keyParameters = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(ecdsa));
+                keyParameters = new Scp11KeyParameters(
+                    keyReference,
+                    ECPublicKey.CreateFromParameters(ecdsa.ExportParameters(false)));
             }
 
             using (var _ = new SecurityDomainSession(testDevice, keyParameters))
@@ -453,7 +457,9 @@ namespace Yubico.YubiKey.Scp
             }
 
             // Put Oce Keys
-            var ocePublicKey = new ECPublicKeyParameters(oceCerts.Ca.PublicKey.GetECDsaPublicKey()!);
+            var ocePublicKey = ECPublicKey.CreateFromParameters(
+                oceCerts.Ca.PublicKey.GetECDsaPublicKey()!.ExportParameters(false)
+                );
             session.PutKey(oceRef, ocePublicKey, 0);
 
             // Get Oce subject key identifier
@@ -472,9 +478,9 @@ namespace Yubico.YubiKey.Scp
             // Now we have the EC private key parameters and cert chain
             return new Scp11KeyParameters(
                 sessionRef,
-                new ECPublicKeyParameters(newPublicKey.Parameters),
+                ECPublicKey.CreateFromParameters(newPublicKey.Parameters),
                 oceRef,
-                new ECPrivateKeyParameters(privateKey),
+                ECPrivateKey.CreateFromParameters(privateKey),
                 certChain
             );
         }
@@ -645,7 +651,7 @@ namespace Yubico.YubiKey.Scp
 
             var leaf = certificateList.Last();
             var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!;
-            var keyParams = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(ecDsaPublicKey));
+            var keyParams = new Scp11KeyParameters(keyReference, ECPublicKey.CreateFromParameters(ecDsaPublicKey.ExportParameters(false)));
 
             return keyParams;
         }

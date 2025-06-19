@@ -25,6 +25,7 @@ namespace Yubico.YubiKey.Cryptography
     public class EcdsaVerifyTests
     {
         [Fact]
+        [Obsolete("Obsolete")]
         public void PivKey_VerifyDigestedData_Succeeds()
         {
             var pubKey = new PivEccPublicKey(GetEncodedPoint());
@@ -49,10 +50,10 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Theory]
-        [InlineData(KeyDefinitions.KeyType.P256)]
-        [InlineData(KeyDefinitions.KeyType.P384)]
-        [InlineData(KeyDefinitions.KeyType.P521)]
-        public void CoseKey_VerifyDigestedData_WithMultipleCurves_Succeeds(KeyDefinitions.KeyType keyType)
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [InlineData(KeyType.ECP521)]
+        public void CoseKey_VerifyDigestedData_WithMultipleCurves_Succeeds(KeyType keyType)
         {
             // Arrange
             (var ecCurve, var coseCurve) = GetCurves(keyType);
@@ -90,7 +91,7 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ECDsa_VerifyDigestedData_Succeeds()
         {
-            var eccCurve = ECCurve.CreateFromValue(KeyDefinitions.KeyOids.P256);
+            var eccCurve = ECCurve.CreateFromValue(Oids.ECP256);
             var eccParams = new ECParameters
             {
                 Curve = (ECCurve)eccCurve
@@ -110,10 +111,10 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Theory]
-        [InlineData(KeyDefinitions.KeyType.P256)]
-        [InlineData(KeyDefinitions.KeyType.P384)]
-        [InlineData(KeyDefinitions.KeyType.P521)]
-        public void ECDsa_VerifyDigestedData_WithIeeeFormat_Succeeds(KeyDefinitions.KeyType keyType)
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [InlineData(KeyType.ECP521)]
+        public void ECDsa_VerifyDigestedData_WithIeeeFormat_Succeeds(KeyType keyType)
         {
             // Arrange
             (var ecCurve, _) = GetCurves(keyType);
@@ -134,10 +135,10 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Theory]
-        [InlineData(KeyDefinitions.KeyType.P256)]
-        [InlineData(KeyDefinitions.KeyType.P384)]
-        [InlineData(KeyDefinitions.KeyType.P521)]
-        public void ECDsa_VerifyDigestedData_WithDerFormat_Succeeds(KeyDefinitions.KeyType keyType)
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [InlineData(KeyType.ECP521)]
+        public void ECDsa_VerifyDigestedData_WithDerFormat_Succeeds(KeyType keyType)
         {
             // Arrange
             (var ecCurve, _) = GetCurves(keyType);
@@ -158,10 +159,10 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         [Theory]
-        [InlineData(KeyDefinitions.KeyType.P256)]
-        [InlineData(KeyDefinitions.KeyType.P384)]
-        [InlineData(KeyDefinitions.KeyType.P521)]
-        public void ECDsa_VerifyData_WithDerFormat_Succeeds(KeyDefinitions.KeyType keyType)
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [InlineData(KeyType.ECP521)]
+        public void ECDsa_VerifyData_WithDerFormat_Succeeds(KeyType keyType)
         {
             // Arrange
             (var ecCurve, _) = GetCurves(keyType);
@@ -169,9 +170,9 @@ namespace Yubico.YubiKey.Cryptography
             var pubKey = ECDsa.Create(ecCurve);
             HashAlgorithm hashAlgorithm = keyType switch
             {
-                KeyDefinitions.KeyType.P256 => CryptographyProviders.Sha256Creator(),
-                KeyDefinitions.KeyType.P384 => CryptographyProviders.Sha384Creator(),
-                KeyDefinitions.KeyType.P521 => CryptographyProviders.Sha512Creator(),
+                KeyType.ECP256 => CryptographyProviders.Sha256Creator(),
+                KeyType.ECP384 => CryptographyProviders.Sha384Creator(),
+                KeyType.ECP521 => CryptographyProviders.Sha512Creator(),
                 _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm),
             };
 
@@ -205,21 +206,21 @@ namespace Yubico.YubiKey.Cryptography
             byte[] yCoord = GetY();
 
             byte[] encoding = new byte[xCoord.Length + yCoord.Length + 1];
-            encoding[0] = 4;
+            encoding[0] = 0x4;
             Array.Copy(xCoord, 0, encoding, 1, xCoord.Length);
             Array.Copy(yCoord, 0, encoding, xCoord.Length + 1, yCoord.Length);
 
             return encoding;
         }
 
-        private static (ECCurve ecCurve, CoseEcCurve coseCurve) GetCurves(KeyDefinitions.KeyType keyType)
+        private static (ECCurve ecCurve, CoseEcCurve coseCurve) GetCurves(KeyType keyType)
         {
             var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
-            var (eccCurve, coseCurve) = keyDefinition.Type switch
+            var (eccCurve, coseCurve) = keyDefinition.KeyType switch
             {
-                KeyDefinitions.KeyType.P256 => (ECCurve.NamedCurves.nistP256, CoseEcCurve.P256),
-                KeyDefinitions.KeyType.P384 => (ECCurve.NamedCurves.nistP384, CoseEcCurve.P384),
-                KeyDefinitions.KeyType.P521 => (ECCurve.NamedCurves.nistP521, CoseEcCurve.P521),
+                KeyType.ECP256 => (ECCurve.NamedCurves.nistP256, CoseEcCurve.P256),
+                KeyType.ECP384 => (ECCurve.NamedCurves.nistP384, CoseEcCurve.P384),
+                KeyType.ECP521 => (ECCurve.NamedCurves.nistP521, CoseEcCurve.P521),
                 _ => throw new ArgumentException("Unknown curve")
             };
 

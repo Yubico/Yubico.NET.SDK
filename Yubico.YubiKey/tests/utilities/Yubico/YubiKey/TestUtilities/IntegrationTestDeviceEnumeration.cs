@@ -43,17 +43,11 @@ namespace Yubico.YubiKey.TestUtilities
     {
 
         private const string YUBIKEY_INTEGRATIONTEST_ALLOWED_KEYS_VAR_NAME = "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS";
-
-
         private static readonly Lazy<IntegrationTestDeviceEnumeration> LazyInstance =
             new Lazy<IntegrationTestDeviceEnumeration>(() => new IntegrationTestDeviceEnumeration());
 
-
         private readonly string _allowlistFileName = $"{YUBIKEY_INTEGRATIONTEST_ALLOWED_KEYS_VAR_NAME}.txt";
         private readonly string? _configDirectory;
-        public readonly HashSet<string> AllowedSerialNumbers;
-
-
         private string SetupMessage => "In order to prevent you from accidentally wiping your own important keys," +
                     "you must add your allow-listed Yubikeys serial number to either the environment variable " +
                     $"'{YUBIKEY_INTEGRATIONTEST_ALLOWED_KEYS_VAR_NAME}' or to the file {_allowlistFileName} at {AllowListFilePath}\n" +
@@ -63,6 +57,7 @@ namespace Yubico.YubiKey.TestUtilities
         private string AllowListFilePath => Path.Combine(_configDirectory ?? DefaultDirectory, _allowlistFileName);
         private static IntegrationTestDeviceEnumeration Instance => LazyInstance.Value;
         private static string DefaultDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Yubico");
+        public readonly HashSet<string> AllowedSerialNumbers;
 
         public IntegrationTestDeviceEnumeration(string? configDirectory = null)
         {
@@ -112,11 +107,13 @@ namespace Yubico.YubiKey.TestUtilities
         public static IList<IYubiKeyDevice> GetTestDevices(
             Transport transport = Transport.All)
         {
-            return YubiKeyDevice
+            var devices = YubiKeyDevice
                 .FindByTransport(transport)
                 .Where(IsAllowedKey)
                 .ToList();
-
+            
+            return devices;
+            
             static bool IsAllowedKey(
                 IYubiKeyDevice key)
                 => key.SerialNumber == null ||

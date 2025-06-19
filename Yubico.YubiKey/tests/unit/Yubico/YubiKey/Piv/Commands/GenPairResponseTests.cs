@@ -15,6 +15,7 @@
 using System;
 using Xunit;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -35,30 +36,22 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(0x11)]
         public void Constructor_InvalidSlot_ThrowsException(byte slotNumber)
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, PivAlgorithm.EccP256);
+            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, KeyType.ECP256);
 
-            _ = Assert.Throws<ArgumentException>(() => new GenerateKeyPairResponse(responseApdu, slotNumber, PivAlgorithm.EccP256));
-        }
-
-        [Fact]
-        public void Constructor_InvalidAlgorithm_ThrowsException()
-        {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, PivAlgorithm.EccP256);
-
-            _ = Assert.Throws<ArgumentException>(() => new GenerateKeyPairResponse(responseApdu, 0x88, PivAlgorithm.TripleDes));
+            _ = Assert.Throws<ArgumentException>(() => new GenerateKeyPairResponse(responseApdu, slotNumber, PivAlgorithm.Rsa2048));
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        public void GetData_InvalidKeyData_ThrowsException(PivAlgorithm algorithm)
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        public void GetData_InvalidKeyData_ThrowsException(KeyType keyType)
         {
-            ResponseApdu responseApdu = GetBadDataResponseApdu(algorithm);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x88, algorithm);
+            ResponseApdu responseApdu = GetBadDataResponseApdu(keyType);
+            var response = new GenerateKeyPairResponse(responseApdu, 0x88, keyType.GetPivAlgorithm());
             _ = Assert.Throws<ArgumentException>(() => response.GetData());
         }
 
@@ -68,8 +61,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(ResponseStatus.Failed, SWConstants.FunctionNotSupported)]
         public void Constructor_SetsStatusWordCorrectly(ResponseStatus responseStatus, short expectedStatusWord)
         {
-            ResponseApdu responseApdu = GetResponseApdu(responseStatus, PivAlgorithm.EccP384);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x89, PivAlgorithm.EccP384);
+            ResponseApdu responseApdu = GetResponseApdu(responseStatus, KeyType.ECP384);
+            var response = new GenerateKeyPairResponse(responseApdu, 0x89, KeyType.ECP384.GetPivAlgorithm());
 
             short StatusWord = response.StatusWord;
 
@@ -82,31 +75,14 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(ResponseStatus.Failed)]
         public void Constructor_SetsStatusCorrectly(ResponseStatus responseStatus)
         {
-            ResponseApdu responseApdu = GetResponseApdu(responseStatus, PivAlgorithm.EccP256);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x8A, PivAlgorithm.EccP256);
+            ResponseApdu responseApdu = GetResponseApdu(responseStatus, KeyType.ECP256);
+            var response = new GenerateKeyPairResponse(responseApdu, 0x8A, KeyType.ECP256.GetPivAlgorithm());
 
             ResponseStatus Status = response.Status;
 
             Assert.Equal(responseStatus, Status);
         }
-
-        [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        public void Constructor_SetsAlgorithmCorrectly(PivAlgorithm algorithm)
-        {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, algorithm);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x8B, algorithm);
-
-            PivAlgorithm getAlgorithm = response.Algorithm;
-
-            Assert.Equal(algorithm, getAlgorithm);
-        }
-
+        
         [Theory]
         [InlineData(PivSlot.Authentication)]
         [InlineData(PivSlot.Signing)]
@@ -114,8 +90,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivSlot.Retired20)]
         public void Constructor_SetsSlotNumCorrectly(byte slotNumber)
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, PivAlgorithm.Rsa2048);
-            var response = new GenerateKeyPairResponse(responseApdu, slotNumber, PivAlgorithm.Rsa2048);
+            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, KeyType.RSA2048);
+            var response = new GenerateKeyPairResponse(responseApdu, slotNumber, KeyType.RSA2048.GetPivAlgorithm());
 
             byte getSlotNumber = response.SlotNumber;
 
@@ -123,49 +99,51 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        public void GetData_FailResponse_ThrowsException(PivAlgorithm algorithm)
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        public void GetData_FailResponse_ThrowsException(KeyType keyType)
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Failed, algorithm);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x8E, algorithm);
+            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Failed, keyType);
+            var response = new GenerateKeyPairResponse(responseApdu, 0x8E, keyType.GetPivAlgorithm());
 
             _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        public void GetData_AuthenticationRequiredResponse_ThrowsException(PivAlgorithm algorithm)
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        public void GetData_AuthenticationRequiredResponse_ThrowsException(KeyType keyType)
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.AuthenticationRequired, algorithm);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x8E, algorithm);
+            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.AuthenticationRequired, keyType);
+            var response = new GenerateKeyPairResponse(responseApdu, 0x8E, keyType.GetPivAlgorithm());
 
             _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        public void GetData_ReturnsCorrectData(PivAlgorithm algorithm)
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        public void GetData_ReturnsCorrectData(KeyType keyType) // TODO Make test for CUrve keys
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, algorithm);
-            byte[] keyData = GetCorrectEncodingForAlgorithm(algorithm);
+            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, keyType);
+            byte[] keyData = GetCorrectEncodingForAlgorithm(keyType);
 
-            var response = new GenerateKeyPairResponse(responseApdu, 0x8F, algorithm);
+            var response = new GenerateKeyPairResponse(responseApdu, 0x8F, keyType.GetPivAlgorithm());
+#pragma warning disable CS0618 // Type or member is obsolete
             PivPublicKey getData = response.GetData();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             var keyDataSpan = new ReadOnlySpan<byte>(keyData);
             bool compareResult = keyDataSpan.SequenceEqual(getData.PivEncodedPublicKey.Span);
@@ -173,13 +151,13 @@ namespace Yubico.YubiKey.Piv.Commands
             Assert.True(compareResult);
         }
 
-        // If ResponseStatus is Success, build a response for the algorithm. If
-        // the algorithm is not supported, use Rsa1024.
-        // If ResponseStatus is AuthenticationRequired, ignore algorithm, build
+        // If ResponseStatus is Success, build a response for the keyType. If
+        // the keyType is not supported, use Rsa1024.
+        // If ResponseStatus is AuthenticationRequired, ignore keyType, build
         // the response of 6982.
-        // If ResponseStatus is Failed, ignore algorithm, build the response of
+        // If ResponseStatus is Failed, ignore keyType, build the response of
         // 6A81.
-        private static ResponseApdu GetResponseApdu(ResponseStatus responseStatus, PivAlgorithm algorithm)
+        private static ResponseApdu GetResponseApdu(ResponseStatus responseStatus, KeyType keyType)
         {
             byte[] responseData;
 
@@ -196,16 +174,16 @@ namespace Yubico.YubiKey.Piv.Commands
                     break;
 
                 case ResponseStatus.Success:
-                    responseData = BuildResponseForAlgorithm(algorithm);
+                    responseData = BuildResponseForAlgorithm(keyType);
                     break;
             }
 
             return new ResponseApdu(responseData);
         }
 
-        private static byte[] BuildResponseForAlgorithm(PivAlgorithm algorithm)
+        private static byte[] BuildResponseForAlgorithm(KeyType keyType)
         {
-            byte[] encoding = GetCorrectEncodingForAlgorithm(algorithm);
+            byte[] encoding = GetCorrectEncodingForAlgorithm(keyType);
             byte[] returnValue = new byte[encoding.Length + 2];
             Array.Copy(encoding, returnValue, encoding.Length);
             returnValue[encoding.Length] = 0x90;
@@ -214,11 +192,11 @@ namespace Yubico.YubiKey.Piv.Commands
             return returnValue;
         }
 
-        private static byte[] GetCorrectEncodingForAlgorithm(PivAlgorithm algorithm)
+        private static byte[] GetCorrectEncodingForAlgorithm(KeyType keyType)
         {
-            return algorithm switch
+            return keyType switch
             {
-                PivAlgorithm.Rsa2048 => new byte[] {
+                KeyType.RSA2048 => new byte[] {
                     0x7F, 0x49, 0x82, 0x01, 0x09,
                         0x81, 0x82, 0x01, 0x00,
                             0xF1, 0x50, 0xBE, 0xFB, 0xB0, 0x9C, 0xAD, 0xFE,
@@ -255,7 +233,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             0x6B, 0xDD, 0x7B, 0x56, 0x2A, 0x3B, 0xE7, 0xE9,
                         0x82, 0x03, 0x01, 0x00, 0x01
                 },
-                PivAlgorithm.EccP256 => new byte[] {
+                KeyType.ECP256 => new byte[] {
                     0x7F, 0x49, 0x43,
                         0x86, 0x41, 0x04, 0xC4, 0x17, 0x7F, 0x2B, 0x96,
                             0x8F, 0x9C, 0x00, 0x0C, 0x4F, 0x3D, 0x2B, 0x88,
@@ -267,7 +245,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             0x0E, 0x3F, 0x21, 0x13, 0x29, 0xC5, 0x98, 0x56,
                             0x07, 0xB5, 0x26
                 },
-                PivAlgorithm.EccP384 => new byte[] {
+                KeyType.ECP384 => new byte[] {
                     0x7F, 0x49, 0x63,
                         0x86, 0x61, 0x04, 0xD5, 0x8A, 0xFF, 0x00, 0x3E,
                             0x88, 0xFB, 0xC1, 0xE1, 0xF8, 0x37, 0x8E, 0x9D,
@@ -311,11 +289,11 @@ namespace Yubico.YubiKey.Piv.Commands
         // data that is not in the correct form.
         // For example, return a TLV that is RSA: modulus || expo | modulus, or
         // ECC that is point || point.
-        private static ResponseApdu GetBadDataResponseApdu(PivAlgorithm algorithm)
+        private static ResponseApdu GetBadDataResponseApdu(KeyType keyType)
         {
-            byte[] responseData = algorithm switch
+            byte[] responseData = keyType switch
             {
-                PivAlgorithm.Rsa2048 => new byte[] {
+                KeyType.RSA2048 => new byte[] {
                     0x7F, 0x49, 0x82, 0x01, 0x04,
                         0x81, 0x82, 0x01, 0x00,
                             0xF1, 0x50, 0xBE, 0xFB, 0xB0, 0x9C, 0xAD, 0xFE,
@@ -352,7 +330,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             0x6B, 0xDD, 0x7B, 0x56, 0x2A, 0x3B, 0xE7, 0xE9,
                         0x90, 0x00
                 },
-                PivAlgorithm.EccP256 => new byte[] {
+                KeyType.ECP256 => new byte[] {
                     0x7F, 0x49, 0x44,
                         0x86, 0x42,
                             0x04, 0xC4, 0x17, 0x7F, 0x2B, 0x96, 0x8F, 0x9C,
@@ -366,7 +344,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             0x26, 0x11,
                         0x90, 0x00
                 },
-                PivAlgorithm.EccP384 => new byte[] {
+                KeyType.ECP384 => new byte[] {
                     0x7F, 0x49, 0x62,
                         0x86, 0x60,
                             0xD5, 0x8A, 0xFF, 0x00, 0x3E, 0x88, 0xFB, 0xC1,

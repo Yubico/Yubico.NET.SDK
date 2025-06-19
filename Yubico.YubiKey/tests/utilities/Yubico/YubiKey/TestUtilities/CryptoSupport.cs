@@ -15,7 +15,7 @@
 using System;
 using System.Numerics;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.TestUtilities
 {
@@ -23,20 +23,15 @@ namespace Yubico.YubiKey.TestUtilities
     {
         // Perform raw RSA using the given public key. Create a new byte array
         // for the output.
-        public static bool CSharpRawRsaPublic(string pemPublicKey, byte[] dataToProcess, out byte[] processedData)
+        public static bool CSharpRawRsaPublic(TestKey rsaTestKey, byte[] dataToProcess, out byte[] processedData)
         {
-            processedData = Array.Empty<byte>();
-            var publicKey = new KeyConverter(pemPublicKey.ToCharArray());
-            using RSA rsaObject = publicKey.GetRsaObject();
-
-            int bufferLength = 128;
-            if (publicKey.Algorithm == PivAlgorithm.Rsa2048)
-            {
-                bufferLength = 256;
-            }
-
-            RSAParameters rsaParams = rsaObject.ExportParameters(false);
-            byte[] temp = Array.Empty<byte>();
+            using var rsaObject = rsaTestKey.AsRSA();
+            
+            var rsaParams = rsaObject.ExportParameters(false);
+            var bufferLength = rsaTestKey.KeyType == KeyType.RSA2048 ? 256 : 128;
+            processedData = [];
+            byte[] temp = [];
+            
             try
             {
                 var value = new BigInteger(dataToProcess, true, true);
@@ -57,20 +52,14 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Perform raw RSA using the given private key. Create a new byte array
         // for the output.
-        public static bool CSharpRawRsaPrivate(string pemPrivateKey, byte[] dataToProcess, out byte[] processedData)
+        public static bool CSharpRawRsaPrivate(TestKey rsaTestKey, byte[] dataToProcess, out byte[] processedData)
         {
-            processedData = Array.Empty<byte>();
-            var privateKey = new KeyConverter(pemPrivateKey.ToCharArray());
-            using RSA rsaObject = privateKey.GetRsaObject();
-
-            int bufferLength = 128;
-            if (privateKey.Algorithm == PivAlgorithm.Rsa2048)
-            {
-                bufferLength = 256;
-            }
-
-            RSAParameters rsaParams = rsaObject.ExportParameters(true);
-            byte[] temp = Array.Empty<byte>();
+            using var rsaObject = rsaTestKey.AsRSA();
+            
+            var rsaParams = rsaObject.ExportParameters(true);
+            var bufferLength = rsaTestKey.KeyType == KeyType.RSA2048 ? 256 : 128;
+            processedData = [];
+            byte[] temp = [];
 
             try
             {
@@ -95,7 +84,7 @@ namespace Yubico.YubiKey.TestUtilities
         // If the inputArray is too long, strip any leading 00 bytes. If there
         // are not enough leading 00 bytes to strip, return false.
         // Id the inputArray is too short, prepend 00 bytes.
-        public static bool ToFixedLengthArray(byte[] inputArray, int fixedLength, out byte[] outputArray)
+        private static bool ToFixedLengthArray(byte[] inputArray, int fixedLength, out byte[] outputArray)
         {
             outputArray = new byte[fixedLength];
 
@@ -105,15 +94,16 @@ namespace Yubico.YubiKey.TestUtilities
             }
             else
             {
-                int count = inputArray.Length - fixedLength;
-
-                for (int index = 0; index < count; index++)
+                var count = inputArray.Length - fixedLength;
+                for (var index = 0; index < count; index++)
                 {
-                    if (inputArray[index] != 0)
+                    if (inputArray[index] == 0)
                     {
-                        outputArray = Array.Empty<byte>();
-                        return false;
+                        continue;
                     }
+
+                    outputArray = [];
+                    return false;
                 }
 
                 Array.Copy(inputArray, count, outputArray, 0, fixedLength);

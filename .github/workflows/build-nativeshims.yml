@@ -32,7 +32,7 @@ on:
 jobs:
   build-windows:
     name: Build Windows
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - run: |
@@ -115,7 +115,7 @@ jobs:
       contents: read
       packages: read
       attestations: write
-    runs-on: windows-2019
+    runs-on: windows-2022
     needs: [build-windows, build-linux-amd64, build-linux-arm64, build-macos]
     env:
       PACKAGE_VERSION: ${{ github.event.inputs.version != '' && github.event.inputs.version || '1.0.0' }}
@@ -131,7 +131,7 @@ jobs:
           $repo.SetAttribute("url","$env:GITHUB_REPO_URL")
           $repo.SetAttribute("type","git")
           $nuspec.package.metadata.AppendChild($repo)
-          $repo.SetAttribute("url","$env:GITHUB_REPO_URL")
+          $nuspec.package.metadata.version = "$env:PACKAGE_VERSION"
           $nuspec.Save("Yubico.NativeShims.nuspec")
           cat Yubico.NativeShims.nuspec
       - run: nuget pack Yubico.NativeShims.nuspec
@@ -153,7 +153,7 @@ jobs:
 
   publish-internal:
     name: Publish to internal NuGet
-    runs-on: windows-2019
+    runs-on: windows-2022
     needs: pack
     environment: Internal NuGet feed
     permissions:
@@ -162,7 +162,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: Yubico.NativeShims.nupkg
+          name: NuGet Package NativeShims
       - run: |
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
           dotnet nuget push Yubico.NativeShims.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}

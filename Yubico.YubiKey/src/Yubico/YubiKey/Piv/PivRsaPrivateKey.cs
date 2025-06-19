@@ -49,49 +49,35 @@ namespace Yubico.YubiKey.Piv
     /// then then examine the encoding.
     /// </para>
     /// </remarks>
+    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
     public sealed class PivRsaPrivateKey : PivPrivateKey
     {
-        private const int PrimePTag = 0x01;
-        private const int PrimeQTag = 0x02;
-        private const int ExponentPTag = 0x03;
-        private const int ExponentQTag = 0x04;
-        private const int CoefficientTag = 0x05;
-        private const int Rsa1024CrtBlockSize = 64;
-        private const int Rsa2048CrtBlockSize = 128;
-        private const int Rsa3072CrtBlockSize = 192;
-        private const int Rsa4096CrtBlockSize = 256;
-        private const int CrtComponentCount = 5;
-
         private Memory<byte> _primeP;
+        private Memory<byte> _primeQ;
+        private Memory<byte> _exponentP;
+        private Memory<byte> _exponentQ;
+        private Memory<byte> _coefficient;
 
         /// <summary>
         /// Contains the prime p portion of the RSA private key.
         /// </summary>
         public ReadOnlySpan<byte> PrimeP => _primeP.Span;
-
-        private Memory<byte> _primeQ;
-
+        
         /// <summary>
         /// Contains the prime q portion of the RSA private key.
         /// </summary>
         public ReadOnlySpan<byte> PrimeQ => _primeQ.Span;
-
-        private Memory<byte> _exponentP;
-
+        
         /// <summary>
         /// Contains the exponent p portion of the RSA private key.
         /// </summary>
         public ReadOnlySpan<byte> ExponentP => _exponentP.Span;
-
-        private Memory<byte> _exponentQ;
-
+        
         /// <summary>
         /// Contains the exponent q portion of the RSA private key.
         /// </summary>
         public ReadOnlySpan<byte> ExponentQ => _exponentQ.Span;
-
-        private Memory<byte> _coefficient;
-
+        
         /// <summary>
         /// Contains the coefficient portion of the RSA private key.
         /// </summary>
@@ -138,20 +124,27 @@ namespace Yubico.YubiKey.Piv
             ReadOnlySpan<byte> exponentQ,
             ReadOnlySpan<byte> coefficient)
         {
+            const int RSA1024CrtBlockSize = 64;
+            const int RSA2048CrtBlockSize = 128;
+            const int RSA3072CrtBlockSize = 192;
+            const int RSA4096CrtBlockSize = 256;
+            
             Algorithm = primeP.Length switch
             {
-                Rsa1024CrtBlockSize => PivAlgorithm.Rsa1024,
-                Rsa2048CrtBlockSize => PivAlgorithm.Rsa2048,
-                Rsa3072CrtBlockSize => PivAlgorithm.Rsa3072,
-                Rsa4096CrtBlockSize => PivAlgorithm.Rsa4096,
+                RSA1024CrtBlockSize => PivAlgorithm.Rsa1024,
+                RSA2048CrtBlockSize => PivAlgorithm.Rsa2048,
+                RSA3072CrtBlockSize => PivAlgorithm.Rsa3072,
+                RSA4096CrtBlockSize => PivAlgorithm.Rsa4096,
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidPrivateKeyData)),
             };
 
-            if (primeQ.Length != primeP.Length || exponentP.Length != primeP.Length
-                || exponentQ.Length != primeP.Length || coefficient.Length != primeP.Length)
+            if (primeQ.Length != primeP.Length ||
+                exponentP.Length != primeP.Length || 
+                exponentQ.Length != primeP.Length || 
+                coefficient.Length != primeP.Length)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -159,19 +152,19 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.InvalidPrivateKeyData));
             }
 
-            var tlvWriter = new TlvWriter();
-            tlvWriter.WriteValue(PrimePTag, primeP);
-            tlvWriter.WriteValue(PrimeQTag, primeQ);
-            tlvWriter.WriteValue(ExponentPTag, exponentP);
-            tlvWriter.WriteValue(ExponentQTag, exponentQ);
-            tlvWriter.WriteValue(CoefficientTag, coefficient);
-            EncodedKey = tlvWriter.Encode();
-
             _primeP = new Memory<byte>(primeP.ToArray());
             _primeQ = new Memory<byte>(primeQ.ToArray());
             _exponentP = new Memory<byte>(exponentP.ToArray());
             _exponentQ = new Memory<byte>(exponentQ.ToArray());
             _coefficient = new Memory<byte>(coefficient.ToArray());
+            
+            var tlvWriter = new TlvWriter();
+            tlvWriter.WriteValue(PivConstants.PrivateRSAPrimePTag, primeP);
+            tlvWriter.WriteValue(PivConstants.PrivateRSAPrimeQTag, primeQ);
+            tlvWriter.WriteValue(PivConstants.PrivateRSAExponentPTag, exponentP);
+            tlvWriter.WriteValue(PivConstants.PrivateRSAExponentQTag, exponentQ);
+            tlvWriter.WriteValue(PivConstants.PrivateRSACoefficientTag, coefficient);
+            EncodedKey = tlvWriter.Encode();
         }
 
         /// <summary>
@@ -186,6 +179,8 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         public static PivRsaPrivateKey CreateRsaPrivateKey(ReadOnlyMemory<byte> encodedPrivateKey)
         {
+            const int CrtComponentCount = 5;
+
             var tlvReader = new TlvReader(encodedPrivateKey);
             var valueArray = new ReadOnlyMemory<byte>[CrtComponentCount];
 
@@ -219,11 +214,11 @@ namespace Yubico.YubiKey.Piv
             }
 
             return new PivRsaPrivateKey(
-                valueArray[PrimePTag - 1].Span,
-                valueArray[PrimeQTag - 1].Span,
-                valueArray[ExponentPTag - 1].Span,
-                valueArray[ExponentQTag - 1].Span,
-                valueArray[CoefficientTag - 1].Span);
+                valueArray[PivConstants.PrivateRSAPrimePTag - 1].Span,
+                valueArray[PivConstants.PrivateRSAPrimeQTag - 1].Span,
+                valueArray[PivConstants.PrivateRSAExponentPTag - 1].Span,
+                valueArray[PivConstants.PrivateRSAExponentQTag - 1].Span,
+                valueArray[PivConstants.PrivateRSACoefficientTag - 1].Span);
         }
 
         /// <inheritdoc />

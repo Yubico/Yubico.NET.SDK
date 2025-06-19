@@ -11,7 +11,7 @@
       "disableGitFeatures": true,
       "disableDefaultFilter": false,
       "namespaceLayout": "flattened",
-      "memberLayout": "separatePages",
+      "memberLayout": "samePage",
       "filter": "./docs/filterConfig.yml",
       "output": "./docs/core-api",
       "properties": { "TargetFramework": "netstandard2.0" }
@@ -26,7 +26,7 @@
       "disableGitFeatures": true,
       "disableDefaultFilter": false,
       "namespaceLayout": "flattened",
-      "memberLayout": "separatePages",
+      "memberLayout": "samePage",
       "filter": "./docs/filterConfig.yml",
       "output": "./docs/yubikey-api",
       "properties": { "TargetFramework": "netstandard2.0" }
@@ -34,7 +34,7 @@
   ],
   "build": {
     "sitemap": {
-      "baseUrl": "https://dotnet.github.io/docfx",
+      "baseUrl": "https://docs.yubico.com/yesdk",
       "changefreq": "monthly"
     },
     "content": [
@@ -68,11 +68,19 @@
     "output": "./docs/_site/",
     "globalMetadataFiles": [],
     "globalMetadata": {
-      "_appFaviconPath": "images/favicon.ico",
-      "_enableSearch": false
+      "_googleAnalyticsTagId": "G-WLE96T8XZ3",
+      "_appFaviconPath": "./images/favicon.ico",
+      "_enableSearch": true,
+      "_appName" : "Yubico",
+      "_appLogoPath" : "./images/yubico-circle-y-mark-white.png",
+      "_lang": "en",
+      "_gitContribute": {
+        "repo":"https://github.com/Yubico/Yubico.NET.SDK",
+        "branch":"develop"
+      }
     },
     "fileMetadataFiles": [],
-    "template": ["default", "./docs/yubikeysdk-template"],
+    "template": ["default", "modern", "docs/custom-template"],
     "postProcessors": ["ExtractSearchIndex"],
     "disableGitFeatures": false
   }

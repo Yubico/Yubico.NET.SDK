@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _slotNumber;
             set
             {
-                if (PivSlot.IsValidSlotNumberForSigning(value) == false)
+                if (!PivSlot.IsValidSlotNumberForSigning(value))
                 {
                     throw new ArgumentException(
                         string.Format(
@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </exception>
         public CommandApdu CreateCommandApdu()
         {
-            if (PivSlot.IsValidSlotNumberForSigning(_slotNumber) == false)
+            if (!PivSlot.IsValidSlotNumberForSigning(_slotNumber))
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -161,7 +161,7 @@ namespace Yubico.YubiKey.Piv.Commands
                         _slotNumber));
             }
 
-            return new CommandApdu()
+            return new CommandApdu
             {
                 Ins = AttestInstruction,
                 P1 = SlotNumber,

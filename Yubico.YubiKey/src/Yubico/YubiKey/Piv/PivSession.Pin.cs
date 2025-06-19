@@ -288,20 +288,21 @@ namespace Yubico.YubiKey.Piv
             var response = Connection.SendCommand(command);
 
             PinVerified = response.Status == ResponseStatus.Success;
-            if (!PinVerified)
+            if (PinVerified)
             {
-                retriesRemaining = response.GetData();
-
-                if ((retriesRemaining ?? 1) == 0)
-                {
-                    throw new SecurityException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.NoMoreRetriesRemaining));
-                }
+                return true;
             }
 
-            return PinVerified;
+            retriesRemaining = response.GetData() ?? 1;
+            if (retriesRemaining == 0)
+            {
+                throw new SecurityException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.NoMoreRetriesRemaining));
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -921,6 +922,9 @@ namespace Yubico.YubiKey.Piv
         /// See the <see cref="TryChangePuk()"/> method for further documentation
         /// on this method.
         /// </para>
+        /// <para>
+        /// Note: YubiKey Bio Multi-protocol Edition (MPE) keys do not have a PUK. 
+        /// </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">
         /// There is no <c>KeyCollector</c> loaded, or the YubiKey had some other
@@ -1139,8 +1143,11 @@ namespace Yubico.YubiKey.Piv
         /// on this method.
         /// </para>
         /// <para>
-        /// If the PUK is blocked, this method will not execute. Note that if a
+        /// If the PUK is blocked, this method will not execute. If a
         /// YubiKey is configured PIN-only, the PUK will be blocked.
+        /// </para>
+        /// <para>
+        /// Note: YubiKey Bio Multi-protocol Edition (MPE) keys do not have a PUK. 
         /// </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">
@@ -1346,7 +1353,33 @@ namespace Yubico.YubiKey.Piv
             // If error, throws exception.
             keyEntryData.RetriesRemaining = response.GetData();
 
-            return response.Status;
+            var status = response.Status;
+            switch (status)
+            {
+                case ResponseStatus.Success:
+                    Logger.LogInformation(
+                        slotNumber == PivSlot.Pin
+                            ? "The PIV PIN has been changed"
+                            : "The PIV PUK has been changed");
+
+                    break;
+                case ResponseStatus.ConditionsNotSatisfied:
+                    Logger.LogWarning(
+                        slotNumber == PivSlot.Pin
+                            ? "The PIV PIN does not meet the complexity requirements"
+                            : "The PIV PUK does not meet the complexity requirements");
+
+                    break;
+                default:
+                    Logger.LogError(
+                        slotNumber == PivSlot.Pin
+                            ? $"The PIV PIN could not be changed. Reason: {response.StatusMessage} (0x{response.StatusWord:X4})" 
+                            : $"The PIV PUK could not be changed. Reason: {response.StatusMessage} (0x{response.StatusWord:X4})");
+
+                    break;
+            }
+
+            return status;
         }
 
         // This is a delegate that implements the CommandResponse declaration of

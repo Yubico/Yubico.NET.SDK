@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Piv
 {
     // This KeyCollector class can be used to provide the KeyCollector delegate
@@ -22,17 +24,21 @@ namespace Yubico.YubiKey.Piv
     public class Simple39KeyCollector
     {
         private static bool _setKeyFlagOnChange;
+        public static bool _useComplexCreds;
 
         // If the caller sets the input arg to true, then when the call asks for
         // Change, return the old and new, then set KeyFlag to the opposite of
         // what it currently is.
         // For false, then this returns old and new, but does nothing to KeyFlag.
         // If there is no arg, that's false.
-        public Simple39KeyCollector(bool setKeyFlagOnChange = false)
+        public Simple39KeyCollector(
+            bool setKeyFlagOnChange = false,
+            bool useComplexCreds = false)
         {
             KeyFlag = 0;
             RetryFlag = 0;
             _setKeyFlagOnChange = setKeyFlagOnChange;
+            _useComplexCreds = useComplexCreds;
         }
 
         // If KeyFlag is set to 0, the current PIN, PUK, or key returned will be
@@ -48,27 +54,20 @@ namespace Yubico.YubiKey.Piv
         // PUK. This way we can block the PIN or PUK for testing purposes.
         public int RetryFlag { get; set; }
 
-        public bool Simple39KeyCollectorDelegate(KeyEntryData keyEntryData)
+        public bool Simple39KeyCollectorDelegate(
+            KeyEntryData keyEntryData)
         {
-            if (keyEntryData is null)
+            if (keyEntryData.IsRetry &&
+                RetryFlag == 0 &&
+                keyEntryData.RetriesRemaining is not null &&
+                keyEntryData.RetriesRemaining == 1)
             {
                 return false;
             }
 
-            if (keyEntryData.IsRetry && RetryFlag == 0)
-            {
-                if (!(keyEntryData.RetriesRemaining is null))
-                {
-                    if (keyEntryData.RetriesRemaining == 1)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            bool isChange = false;
-            byte[] currentValue;
-            byte[]? newValue = null;
+            var isChange = false;
+            Memory<byte> currentValue;
+            Memory<byte>? newValue = null;
 
             switch (keyEntryData.Request)
             {
@@ -76,32 +75,27 @@ namespace Yubico.YubiKey.Piv
                     return false;
 
                 case KeyEntryRequest.Release:
-                    if (!_setKeyFlagOnChange)
-                    {
-                        KeyFlag = 0;
-                    }
-
                     return true;
 
                 case KeyEntryRequest.VerifyPivPin:
-                    currentValue = CollectPin();
+                    currentValue = CollectPin(_useComplexCreds);
                     break;
 
                 case KeyEntryRequest.ChangePivPin:
-                    currentValue = CollectPin();
-                    newValue = CollectPin();
+                    currentValue = CollectPin(_useComplexCreds);
+                    newValue = CollectPin(_useComplexCreds);
                     isChange = true;
                     break;
 
                 case KeyEntryRequest.ChangePivPuk:
-                    currentValue = CollectPuk();
-                    newValue = CollectPuk();
+                    currentValue = CollectPuk(_useComplexCreds);
+                    newValue = CollectPuk(_useComplexCreds);
                     isChange = true;
                     break;
 
                 case KeyEntryRequest.ResetPivPinWithPuk:
-                    currentValue = CollectPuk();
-                    newValue = CollectPin();
+                    currentValue = CollectPuk(_useComplexCreds);
+                    newValue = CollectPin(_useComplexCreds);
                     isChange = true;
                     break;
 
@@ -111,7 +105,7 @@ namespace Yubico.YubiKey.Piv
                         return false;
                     }
 
-                    currentValue = CollectMgmtKey();
+                    currentValue = CollectMgmtKey(_useComplexCreds);
                     break;
 
                 case KeyEntryRequest.ChangePivManagementKey:
@@ -120,8 +114,8 @@ namespace Yubico.YubiKey.Piv
                         return false;
                     }
 
-                    currentValue = CollectMgmtKey();
-                    newValue = CollectMgmtKey();
+                    currentValue = CollectMgmtKey(_useComplexCreds);
+                    newValue = CollectMgmtKey(_useComplexCreds);
                     isChange = true;
                     break;
             }
@@ -130,52 +124,46 @@ namespace Yubico.YubiKey.Piv
             {
                 if (KeyFlag != 0)
                 {
-                    currentValue[0] = 0x39;
+                    currentValue.Span[0] = 0x39;
                 }
 
-                keyEntryData.SubmitValue(currentValue);
+                keyEntryData.SubmitValue(currentValue.Span);
             }
             else
             {
                 if (KeyFlag != 0)
                 {
-                    currentValue[0] = 0x39;
+                    currentValue.Span[0] = 0x39;
                 }
                 else
                 {
-                    newValue[0] = 0x39;
+                    newValue.Value.Span[0] = 0x39;
                 }
 
-                keyEntryData.SubmitValues(currentValue, newValue);
+                keyEntryData.SubmitValues(currentValue.Span, newValue.Value.Span);
             }
 
             if (_setKeyFlagOnChange && isChange)
             {
-                if (KeyFlag == 0)
-                {
-                    KeyFlag = 1;
-                }
-                else
-                {
-                    KeyFlag = 1;
-                }
+                KeyFlag = 1;
             }
 
             return true;
         }
 
-        public static byte[] CollectPin() =>
-            new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+        public static Memory<byte> CollectPin(
+            bool useComplex) => useComplex
+            ? PivSessionIntegrationTestBase.ComplexPin
+            : PivSessionIntegrationTestBase.DefaultPin;
 
-        public static byte[] CollectPuk() =>
-            new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
+        public static Memory<byte> CollectPuk(
+            bool useComplex) => useComplex
+            ? PivSessionIntegrationTestBase.ComplexPuk
+            : PivSessionIntegrationTestBase.DefaultPuk;
 
-        public static byte[] CollectMgmtKey() =>
-            new byte[]
-            {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            };
+        public static Memory<byte> CollectMgmtKey(
+            bool useComplex) => useComplex
+            ? PivSessionIntegrationTestBase.ComplexManagementKey
+            : PivSessionIntegrationTestBase.DefaultManagementKey;
     }
 }

@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
@@ -144,9 +145,8 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
         {
-            // This will verify the slot number and dataToSign length. If one or
-            // both are incorrect, the call will throw an exception.
-            var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber);
+            var signCommand = BuildSignCommand(slotNumber, dataToSign);
+
             YubiKey.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm);
 
             return PerformPrivateKeyOperation(
@@ -267,6 +267,38 @@ namespace Yubico.YubiKey.Piv
                     ExceptionMessages.IncorrectCiphertextLength));
         }
 
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use IPublicKey, IPrivateKey instead", false)]
+        public byte[] KeyAgree(byte slotNumber, PivPublicKey correspondentPublicKey)
+        {
+            if (correspondentPublicKey is null)
+            {
+                throw new ArgumentNullException(nameof(correspondentPublicKey));
+            }
+
+            if (!correspondentPublicKey.Algorithm.IsEcc())
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidPublicKeyData));
+            }
+
+            byte[] publicPoint = ((PivEccPublicKey)correspondentPublicKey).PublicPoint.ToArray();
+
+            // This will verify the slot number and dataToSign length. If one or
+            // both are incorrect, the call will throw an exception.
+            var keyAgreeCommand = new AuthenticateKeyAgreeCommand(
+                publicPoint, slotNumber, correspondentPublicKey.Algorithm);
+
+            return PerformPrivateKeyOperation(
+                slotNumber,
+                keyAgreeCommand,
+                keyAgreeCommand.Algorithm,
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.IncorrectEccKeyLength));
+        }
+
         /// <summary>
         /// Perform Phase 2 of EC Diffie-Hellman Key Agreement using the private
         /// key in the given slot, and the corresponding party's public key.
@@ -351,26 +383,26 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="SecurityException">
         /// The remaining retries count indicates the PIN is blocked.
         /// </exception>
-        public byte[] KeyAgree(byte slotNumber, PivPublicKey correspondentPublicKey)
+        public byte[] KeyAgree(byte slotNumber, IPublicKey correspondentPublicKey)
         {
             if (correspondentPublicKey is null)
             {
                 throw new ArgumentNullException(nameof(correspondentPublicKey));
             }
 
-            if (!correspondentPublicKey.Algorithm.IsEcc())
+            var publicPoint = correspondentPublicKey switch
             {
-                throw new ArgumentException(
+                ECPublicKey ecDsa => ecDsa.PublicPoint,
+                Curve25519PublicKey edDsa when correspondentPublicKey.KeyType == KeyType.X25519 => edDsa.PublicPoint,
+                _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPublicKeyData));
-            }
+                        ExceptionMessages.InvalidPublicKeyData))
+            };
 
-            byte[] publicPoint = ((PivEccPublicKey)correspondentPublicKey).PublicPoint.ToArray();
-
-            // This will verify the slot number and dataToSign length. If one or
-            // both are incorrect, the call will throw an exception.
-            var keyAgreeCommand = new AuthenticateKeyAgreeCommand(publicPoint, slotNumber);
+            var keyAgreeCommand = new AuthenticateKeyAgreeCommand(
+                publicPoint, slotNumber,
+                correspondentPublicKey.KeyType.GetPivAlgorithm());
 
             return PerformPrivateKeyOperation(
                 slotNumber,
@@ -385,8 +417,10 @@ namespace Yubico.YubiKey.Piv
         // Agreement. Just pass in the actual command to run, along with some
         // other information.
         private byte[] PerformPrivateKeyOperation(
-            byte slotNumber, IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> commandToPerform,
-            PivAlgorithm algorithm, string algorithmExceptionMessage)
+            byte slotNumber,
+            IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> commandToPerform,
+            PivAlgorithm algorithm,
+            string algorithmExceptionMessage)
         {
             bool pinRequired = true;
 
@@ -397,30 +431,14 @@ namespace Yubico.YubiKey.Piv
             // to verify the PIN again.
             // If the PIN policy is Always, we need to verify the PIN.
 
-            // Metadata will give us our answer, but that feature is
-            // available only on YubiKeys beginning with version 5.3.
-            if (YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
+            var metadata = GetMetadataInternal(slotNumber);
+            if (metadata is not null)
             {
-                var metadataCommand = new GetMetadataCommand(slotNumber);
-                var metadataResponse = Connection.SendCommand(metadataCommand);
-
-                // If there is no key in the slot, this will throw an exception.
-                var metadata = metadataResponse.GetData();
-
-                // We know the algorithm based on the input data. Is it the
-                // algorithm of the key in the slot?
-                // We can make this check with metadata. Without metadata there's
-                // no way to know until we try to perform the operation.
                 if (metadata.Algorithm != algorithm)
                 {
                     throw new ArgumentException(algorithmExceptionMessage);
                 }
-
-                // If the metadata says Never, then pinRequired is false.
-                // If the metadata says Once, and the PIN is verified, then the
-                // PIN is not required.
-                // The only other case is Always which means we set the
-                // pinRequired to true, but we init that variable to true.
+                
                 if (metadata.PinPolicy == PivPinPolicy.Never ||
                     (metadata.PinPolicy == PivPinPolicy.Once && PinVerified))
                 {
@@ -477,6 +495,14 @@ namespace Yubico.YubiKey.Piv
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.IncompleteCommandInput));
+        }
+
+        private AuthenticateSignCommand BuildSignCommand(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
+        {
+            var slotMetadata = GetMetadataInternal(slotNumber);
+            return slotMetadata is null 
+                ? new AuthenticateSignCommand(dataToSign, slotNumber) 
+                : new AuthenticateSignCommand(dataToSign, slotNumber, slotMetadata.Algorithm);
         }
     }
 }

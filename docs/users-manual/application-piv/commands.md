@@ -568,7 +568,10 @@ only recovery is to [Reset the PIV application](#reset-the-piv-application).
 
 ### Available
 
-All YubiKeys with the PIV application.
+All YubiKeys with the PIV application. 
+
+> [!NOTE]
+> YubiKey Bio Multi-protocol Edition (MPE) keys [do not have a PUK](xref:UsersManualBioMpe). 
 
 ### SDK Classes
 
@@ -705,7 +708,7 @@ If the PUK is blocked, the only recovery is to
 
 ### Available
 
-All YubiKeys with the PIV application.
+All YubiKeys with the PIV application except for YubiKey Bio Multi-protocol Edition (MPE) keys, which [do not have a PUK](xref:UsersManualBioMpe). 
 
 ### SDK Classes
 
@@ -880,21 +883,22 @@ For example, if using PKCS 1 v 1.5, before calling, build the following block.
 
   For a 2048-bit key, the block is 256 bytes long (the leading 00 byte is one of the 256).
 
-  If the digest algorithm is SHA-256, the DER of the DigestInfo will be 49 bytes long:
+  If the digest algorithm is SHA-256, the DER of the DigestInfo will be 51 bytes long:
 
-  30 2f
-     30 0b
+  30 31
+     30 0d
         06 09
            60 86 48 01 65 03 04 02 01
+        05 00
      04 20
         <32-byte digest>
 
   The block to pass to the YubiKey will be
 
-  00 01 FF FF ... FF 00 \<49-byte DER of DigestInfo\>
+  00 01 FF FF ... FF 00 \<51-byte DER of DigestInfo\>
         ^          ^
         |          |
-        -------------- 204 bytes of 0xFF
+        -------------- 202 bytes of 0xFF
 ```
 
 PSS (Probabilistic Signature Scheme) is much more complicated. If you want to learn how to
@@ -1636,7 +1640,7 @@ This command will be accepted only if the PIN and PUK are both blocked.
 
 ### Available
 
-All YubiKeys with the PIV application.
+All YubiKeys with the PIV application except for YubiKey Bio Multi-protocol Edition (MPE) keys. For YubiKey Bio MPE, use the [device-wide reset](xref:UsersManualBioMpe#resetting-a-yubikey-bio-mpe) instead. 
 
 ### SDK Classes
 

@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -65,16 +66,16 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        public void GetData_ReturnsSignature(PivAlgorithm algorithm)
+        [InlineData(KeyType.ECP256)]
+        [InlineData(KeyType.ECP384)]
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        public void GetData_ReturnsSignature(KeyType keyType)
         {
-            byte[] sigData = GetSignatureData(algorithm);
-            ResponseApdu responseApdu = GetResponseApdu(algorithm);
+            byte[] sigData = GetSignatureData(keyType);
+            ResponseApdu responseApdu = GetResponseApdu(keyType);
 
             var response = new AuthenticateSignResponse(responseApdu);
 
@@ -109,27 +110,27 @@ namespace Yubico.YubiKey.Piv.Commands
             _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
         }
 
-        private static ResponseApdu GetResponseApdu(PivAlgorithm algorithm)
+        private static ResponseApdu GetResponseApdu(KeyType keyType)
         {
-            byte[] apduData = GetResponseApduData(algorithm);
+            byte[] apduData = GetResponseApduData(keyType);
             return new ResponseApdu(apduData);
         }
 
-        // Get the data that makes up a response APDU for the given algorithm.
+        // Get the data that makes up a response APDU for the given keyType.
         // This will return the full APDU data:
         // 7C len 82 len signature 90 00
-        private static byte[] GetResponseApduData(PivAlgorithm algorithm)
+        private static byte[] GetResponseApduData(KeyType keyType)
         {
-            byte[] sigData = GetSignatureData(algorithm);
+            byte[] sigData = GetSignatureData(keyType);
             byte[] statusWord = new byte[] { 0x90, 0x00 };
 
-            byte[] prefix = algorithm switch
+            byte[] prefix = keyType switch
             {
-                PivAlgorithm.Rsa2048 => new byte[] { 0x7C, 0x82, 0x01, 0x04, 0x82, 0x82, 0x01, 0x00 },
+                KeyType.RSA2048 => new byte[] { 0x7C, 0x82, 0x01, 0x04, 0x82, 0x82, 0x01, 0x00 },
 
-                PivAlgorithm.EccP256 => new byte[] { 0x7C, 0x48, 0x82, 0x46 },
+                KeyType.ECP256 => new byte[] { 0x7C, 0x48, 0x82, 0x46 },
 
-                PivAlgorithm.EccP384 => new byte[] { 0x7C, 0x69, 0x82, 0x67 },
+                KeyType.ECP384 => new byte[] { 0x7C, 0x69, 0x82, 0x67 },
 
                 _ => new byte[] { 0x7C, 0x81, 0x83, 0x82, 0x81, 0x80 },
             };
@@ -140,9 +141,9 @@ namespace Yubico.YubiKey.Piv.Commands
             return returnValue.ToArray<byte>();
         }
 
-        private static byte[] GetSignatureData(PivAlgorithm algorithm) => algorithm switch
+        private static byte[] GetSignatureData(KeyType keyType) => keyType switch
         {
-            PivAlgorithm.Rsa2048 => new byte[]
+            KeyType.RSA2048 => new byte[]
             {
                 0x05, 0xA4, 0x60, 0x64, 0x7D, 0x4C, 0x0B, 0x8F, 0x48, 0x2D, 0xC5, 0x50, 0x1D, 0x9D, 0x1F, 0xD2,
                 0xCC, 0x7A, 0x14, 0x74, 0x66, 0x1D, 0xE9, 0x6A, 0x1E, 0x0A, 0xD9, 0x39, 0x5E, 0x1F, 0x0F, 0xFD,
@@ -162,7 +163,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 0x03, 0x26, 0xA6, 0x79, 0x41, 0x78, 0xDA, 0xEE, 0x08, 0x9A, 0xDA, 0x89, 0xCC, 0xF9, 0x27, 0xF0
             },
 
-            PivAlgorithm.EccP256 => new byte[]
+            KeyType.ECP256 => new byte[]
             {
                 0x30, 0x44, 0x02, 0x20, 0x53, 0x9A, 0xED, 0xC2, 0x2C, 0x09, 0x3A, 0x93, 0x2C, 0x31, 0x58, 0x57,
                 0xF1, 0x99, 0x74, 0xD3, 0x3F, 0x14, 0x36, 0x07, 0xCB, 0x52, 0xBE, 0x41, 0x7C, 0x05, 0xF0, 0xB7,
@@ -171,7 +172,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 0x2B, 0x96, 0x93, 0x29, 0xAA, 0x9F
             },
 
-            PivAlgorithm.EccP384 => new byte[]
+            KeyType.ECP384 => new byte[]
             {
                 0x30, 0x65, 0x02, 0x31, 0x00, 0xB0, 0xEE, 0x6C, 0x57, 0x8A, 0xB5, 0x44, 0x13, 0x5C, 0x6C, 0x8A,
                 0x0D, 0xF5, 0x1F, 0xBC, 0x8E, 0x46, 0xB0, 0x4B, 0x0C, 0xAB, 0xB2, 0xFD, 0x81, 0x5C, 0x67, 0xE8,

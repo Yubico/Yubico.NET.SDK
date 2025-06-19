@@ -13,8 +13,10 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace Yubico.Core.Tlv
 {
@@ -22,25 +24,26 @@ namespace Yubico.Core.Tlv
     /// Tag, length, Value structure that helps to parse APDU response data.
     /// This class handles BER-TLV encoded data with determinate length.
     /// </summary>
-    public class TlvObject
+    public sealed class TlvObject : IDisposable
     {
         /// <summary>
         /// Returns the tag.
         /// </summary>
-        public int Tag { get; }
+        public int Tag { get; private set; }
 
         /// <summary>
-        /// Returns the value.
+        /// Returns a copy of the value.
         /// </summary>
         public Memory<byte> Value => _bytes.Skip(_offset).Take(Length).ToArray();
 
         /// <summary>
         /// Returns the length of the value.
         /// </summary>
-        public int Length { get; }
+        public int Length { get; private set; }
 
         private readonly byte[] _bytes;
         private readonly int _offset;
+        private bool _disposed;
 
         /// <summary>
         /// Creates a new TLV (Tag-Length-Value) object with the specified tag and value.
@@ -63,6 +66,7 @@ namespace Yubico.Core.Tlv
             }
 
             Tag = tag;
+            
             // Create a copy of the input value
             byte[] valueBuffer = value.ToArray();
             using var ms = new MemoryStream();
@@ -113,6 +117,22 @@ namespace Yubico.Core.Tlv
             ReadOnlySpan<byte> buffer = data;
             return ParseFrom(ref buffer);
         }
+        
+        /// <inheritdoc cref="TlvObject.Parse(ReadOnlySpan{byte})"/> 
+        public static bool TryParse(ReadOnlySpan<byte> data, [NotNullWhen(true)] out TlvObject? tlvObject)
+        {
+            // Poor man's TryParse
+            tlvObject = null;
+            try
+            {
+                tlvObject = ParseFrom(ref data);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// Parses a TLV from a BER-TLV encoded byte array.
@@ -126,6 +146,11 @@ namespace Yubico.Core.Tlv
         /// <exception cref="ArgumentException">Thrown if the buffer does not contain a valid TLV.</exception>
         internal static TlvObject ParseFrom(ref ReadOnlySpan<byte> buffer)
         {
+            if (buffer.Length == 0)
+            {
+                throw new ArgumentException("Insufficient data for tag");
+            }
+            
             // The first byte of the TLV is the tag.
             int tag = buffer[0];
 
@@ -193,6 +218,21 @@ namespace Yubico.Core.Tlv
 #else
             return $"Tlv(0x{Tag:X}, {Length}, {BitConverter.ToString(Value.ToArray()).Replace("-", "")})";
 #endif
+        }
+
+        /// <summary>
+        /// Dispose the object and clears its buffers
+        /// </summary>
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+            CryptographicOperations.ZeroMemory(_bytes);
+            Length = 0;
+            Tag = 0;
+            _disposed = true;
         }
     }
 }

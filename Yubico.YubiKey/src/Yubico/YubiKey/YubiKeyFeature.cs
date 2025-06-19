@@ -281,5 +281,10 @@ namespace Yubico.YubiKey
         ///     Allows temporarily disabling NFC until the next time the YubiKey is powered over USB.
         /// </summary>
         ManagementNfcRestricted,
+        
+        /// <summary>
+        /// Support for the PIV Curve25519 key type.
+        /// </summary>
+        PivCurve25519
     }
 }

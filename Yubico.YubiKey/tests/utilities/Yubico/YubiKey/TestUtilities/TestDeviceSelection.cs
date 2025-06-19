@@ -89,22 +89,22 @@ namespace Yubico.YubiKey.TestUtilities
                 StandardTestDevice.Fw4Fips => SelectDevice(4, isFipsSeries: true),
                 StandardTestDevice.Fw5 => SelectDevice(5),
                 StandardTestDevice.Fw5Fips => SelectDevice(5, isFipsSeries: true),
-                StandardTestDevice.Fw5Bio => SelectDevice(5, formFactor: FormFactor.UsbABiometricKeychain),
+                StandardTestDevice.Fw5Bio => SelectDevice(5,  [FormFactor.UsbCBiometricKeychain, FormFactor.UsbABiometricKeychain]),
+                StandardTestDevice.Any => devices.First(),
                 _ => throw new ArgumentException("Invalid test device value.", nameof(testDeviceType)),
             };
 
             IYubiKeyDevice SelectDevice(
                 int majorVersion,
-                FormFactor? formFactor = null,
+                IEnumerable<FormFactor>? formFactors = null,
                 bool isFipsSeries = false)
             {
                 IYubiKeyDevice device = null!;
                 try
                 {
-                    bool MatchingDeviceSelector(
-                        IYubiKeyDevice d) =>
+                    bool MatchingDeviceSelector(IYubiKeyDevice d) =>
                         d.FirmwareVersion.Major == majorVersion &&
-                        (formFactor is null || d.FormFactor == formFactor) &&
+                        (formFactors is null || formFactors.Contains(d.FormFactor)) &&
                         d.IsFipsSeries == isFipsSeries;
 
                     device = devicesVersionFiltered.First(MatchingDeviceSelector);

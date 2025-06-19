@@ -15,24 +15,26 @@
 using System;
 using System.Security.Cryptography;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class AesMgmtKeyTests : IDisposable
+    public class AesMgmtKeyTests : PivSessionIntegrationTestBase
     {
         private readonly Memory<byte> _currentKey;
         private readonly byte[] _currentKeyBytes;
         private readonly Memory<byte> _newKey;
         private readonly byte[] _newKeyBytes;
-        private readonly bool _runTest;
-        private readonly IYubiKeyDevice _yubiKey;
         private int _currentKeyLength;
         private int _newKeyLength;
+        private KeyType DefaultMgmtKeyType { get; }
 
         public AesMgmtKeyTests()
         {
+            Skip.If(!Device.HasFeature(YubiKeyFeature.PivAesManagementKey));
+
             _currentKeyBytes = new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -42,251 +44,213 @@ namespace Yubico.YubiKey.Piv
             };
             _newKeyBytes = new byte[32];
 
-            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
-            {
-                random.GetBytes(_newKeyBytes);
-            }
+            using var random = RandomObjectUtility.GetRandomObject(null);
+            random.GetBytes(_newKeyBytes);
 
             _currentKey = new Memory<byte>(_currentKeyBytes);
             _newKey = new Memory<byte>(_newKeyBytes);
             _currentKeyLength = 24;
             _newKeyLength = 32;
 
-            _yubiKey = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
-            if (_yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey))
-            {
-                _runTest = true;
-
-                ResetPiv(_yubiKey);
-            }
-        }
-
-        public void Dispose()
-        {
-            if (_runTest)
-            {
-                ResetPiv(_yubiKey);
-            }
+            DefaultMgmtKeyType = Device.FirmwareVersion >= FirmwareVersion.V5_7_0 ? KeyType.AES192 : KeyType.TripleDES;
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Aes128, 16, true)]
-        [InlineData(PivAlgorithm.Aes128, 16, false)]
-        [InlineData(PivAlgorithm.Aes192, 24, true)]
-        [InlineData(PivAlgorithm.Aes192, 24, false)]
-        [InlineData(PivAlgorithm.Aes256, 32, true)]
-        [InlineData(PivAlgorithm.Aes256, 32, false)]
-        [InlineData(PivAlgorithm.TripleDes, 24, true)]
-        [InlineData(PivAlgorithm.TripleDes, 24, false)]
-        public void ChangeMgmtKey_Auth_Succeeds(PivAlgorithm algorithm, int keySize, bool mutualAuth)
+        [InlineData(KeyType.AES128, 16, true)]
+        [InlineData(KeyType.AES128, 16, false)]
+        [InlineData(KeyType.AES192, 24, true)]
+        [InlineData(KeyType.AES192, 24, false)]
+        [InlineData(KeyType.AES256, 32, true)]
+        [InlineData(KeyType.AES256, 32, false)]
+        [InlineData(KeyType.TripleDES, 24, true)]
+        [InlineData(KeyType.TripleDES, 24, false)]
+        public void ChangeMgmtKey_Auth_Succeeds(
+            KeyType keyType,
+            int keySize,
+            bool mutualAuth)
         {
-            if (!_runTest)
-            {
-                return;
-            }
-
-            AuthenticateManagementKeyResult expectedResult = mutualAuth
+            var expectedResult = mutualAuth
                 ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
                 : AuthenticateManagementKeyResult.SingleAuthenticated;
 
             SetKeyLengths(24, keySize);
-            using (var pivSession = new PivSession(_yubiKey))
+            using (var pivSession = GetSession(authenticate: false))
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(DefaultMgmtKeyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 pivSession.AuthenticateManagementKey(mutualAuth);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(DefaultMgmtKeyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
-            using (var pivSession = new PivSession(_yubiKey))
+            using (var pivSession = GetSession(authenticate: false))
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(DefaultMgmtKeyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
-                pivSession.ChangeManagementKey(PivTouchPolicy.None, algorithm);
+                pivSession.ChangeManagementKey(PivTouchPolicy.None, keyType.GetPivAlgorithm());
 
                 // The Change call will always use mutual auth.
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
                     pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
-
-                // start temp
-                //                pivSession.AuthenticateManagementKey(mutualAuth);
-                //
-                //                var setCmd = new SetManagementKeyCommand(
-                //                    _newKey.Slice(0, keySize), PivTouchPolicy.Never, algorithm);
-                //
-                //                SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
-                //                Assert.Equal(ResponseStatus.Success, setRsp.Status);
-                //                Assert.True(pivSession.ManagementKeyAuthenticated);
-                //                Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
-                // end temp
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 SwapKeys();
             }
 
-            using (var pivSession = new PivSession(_yubiKey))
+            using (var pivSession = GetSession(authenticate: false))
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 pivSession.AuthenticateManagementKey(mutualAuth);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Aes128, 16, true)]
-        [InlineData(PivAlgorithm.Aes128, 16, false)]
-        [InlineData(PivAlgorithm.Aes192, 24, true)]
-        [InlineData(PivAlgorithm.Aes192, 24, false)]
-        [InlineData(PivAlgorithm.Aes256, 32, true)]
-        [InlineData(PivAlgorithm.Aes256, 32, false)]
-        [InlineData(PivAlgorithm.TripleDes, 24, true)]
-        [InlineData(PivAlgorithm.TripleDes, 24, false)]
-        public void ChangeMgmtKey_TryAuth_Succeeds(PivAlgorithm algorithm, int keySize, bool mutualAuth)
+        [InlineData(KeyType.AES128, 16, true)]
+        [InlineData(KeyType.AES128, 16, false)]
+        [InlineData(KeyType.AES192, 24, true)]
+        [InlineData(KeyType.AES192, 24, false)]
+        [InlineData(KeyType.AES256, 32, true)]
+        [InlineData(KeyType.AES256, 32, false)]
+        [InlineData(KeyType.TripleDES, 24, true)]
+        [InlineData(KeyType.TripleDES, 24, false)]
+        public void ChangeMgmtKey_TryAuth_Succeeds(
+            KeyType keyType,
+            int keySize,
+            bool mutualAuth)
         {
-            if (!_runTest)
-            {
-                return;
-            }
-
-            AuthenticateManagementKeyResult expectedResult = mutualAuth
+            var expectedResult = mutualAuth
                 ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
                 : AuthenticateManagementKeyResult.SingleAuthenticated;
 
             SetKeyLengths(24, keySize);
-            using (var pivSession = new PivSession(_yubiKey))
+            using (var pivSession = GetSession(authenticate: false))
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(DefaultManagementKeyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
-                bool isValid = pivSession.TryAuthenticateManagementKey(mutualAuth);
+                var isValid = pivSession.TryAuthenticateManagementKey(mutualAuth);
                 Assert.True(isValid);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(DefaultManagementKeyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
-            using (var pivSession = new PivSession(_yubiKey))
+            using (var pivSession = GetSession(authenticate: false))
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(DefaultManagementKeyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
-                bool isValid = pivSession.TryChangeManagementKey(PivTouchPolicy.None, algorithm);
+                var isValid = pivSession.TryChangeManagementKey(PivTouchPolicy.None, keyType.GetPivAlgorithm());
                 Assert.True(isValid);
 
                 // The Change call will always use mutual auth.
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
                     pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 SwapKeys();
             }
 
-            using (var pivSession = new PivSession(_yubiKey))
+            using (var pivSession = GetSession(authenticate: false))
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
-                bool isValid = pivSession.TryAuthenticateManagementKey(mutualAuth);
+                var isValid = pivSession.TryAuthenticateManagementKey(mutualAuth);
                 Assert.True(isValid);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Aes128, 16, true)]
-        [InlineData(PivAlgorithm.Aes128, 16, false)]
-        [InlineData(PivAlgorithm.Aes192, 24, true)]
-        [InlineData(PivAlgorithm.Aes192, 24, false)]
-        [InlineData(PivAlgorithm.Aes256, 32, true)]
-        [InlineData(PivAlgorithm.Aes256, 32, false)]
-        [InlineData(PivAlgorithm.TripleDes, 24, true)]
-        [InlineData(PivAlgorithm.TripleDes, 24, false)]
-        public void ChangeMgmtKey_TryAuthNoColl_Succeeds(PivAlgorithm algorithm, int keySize, bool mutualAuth)
+        [InlineData(KeyType.AES128, 16, true)]
+        [InlineData(KeyType.AES128, 16, false)]
+        [InlineData(KeyType.AES192, 24, true)]
+        [InlineData(KeyType.AES192, 24, false)]
+        [InlineData(KeyType.AES256, 32, true)]
+        [InlineData(KeyType.AES256, 32, false)]
+        [InlineData(KeyType.TripleDES, 24, true)]
+        [InlineData(KeyType.TripleDES, 24, false)]
+        public void ChangeMgmtKey_TryAuthNoColl_Succeeds(
+            KeyType keyType,
+            int keySize,
+            bool mutualAuth)
         {
-            if (!_runTest)
-            {
-                return;
-            }
-
-            AuthenticateManagementKeyResult expectedResult = mutualAuth
+            var expectedResult = mutualAuth
                 ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
                 : AuthenticateManagementKeyResult.SingleAuthenticated;
 
             SetKeyLengths(24, keySize);
-            using (var pivSession = new PivSession(_yubiKey))
+            using (var pivSession = GetSession(authenticate: false))
             {
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(DefaultManagementKeyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
-                bool isValid =
+                var isValid =
                     pivSession.TryAuthenticateManagementKey(_currentKey.Slice(0, _currentKeyLength), mutualAuth);
                 Assert.True(isValid);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(DefaultManagementKeyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
 
-            using (var pivSession = new PivSession(_yubiKey))
+            using (var pivSession = GetSession(authenticate: false))
             {
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(DefaultManagementKeyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
-                bool isValid = pivSession.TryChangeManagementKey(
+                var isValid = pivSession.TryChangeManagementKey(
                     _currentKey.Slice(0, _currentKeyLength),
                     _newKey.Slice(0, _newKeyLength),
                     PivTouchPolicy.None,
-                    algorithm);
+                    keyType.GetPivAlgorithm());
                 Assert.True(isValid);
 
                 // The Change call will always use mutual auth.
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
                     pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
                 SwapKeys();
             }
 
-            using (var pivSession = new PivSession(_yubiKey))
+            using (var pivSession = GetSession(authenticate: false))
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
-                bool isValid =
+                var isValid =
                     pivSession.TryAuthenticateManagementKey(_currentKey.Slice(0, _currentKeyLength), mutualAuth);
                 Assert.True(isValid);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
-                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
             }
         }
 
-        public bool AesMgmtKeyTestsKeyCollectorDelegate(KeyEntryData keyEntryData)
+        private bool AesMgmtKeyTestsKeyCollectorDelegate(
+            KeyEntryData keyEntryData)
         {
-            if (keyEntryData is null)
-            {
-                return false;
-            }
-
             if (keyEntryData.IsRetry)
             {
                 return false;
@@ -301,13 +265,13 @@ namespace Yubico.YubiKey.Piv
                     break;
 
                 case KeyEntryRequest.AuthenticatePivManagementKey:
-                    keyEntryData.SubmitValue(_currentKey.Slice(0, _currentKeyLength).Span);
+                    keyEntryData.SubmitValue(_currentKey[.._currentKeyLength].Span);
                     break;
 
                 case KeyEntryRequest.ChangePivManagementKey:
                     keyEntryData.SubmitValues(
-                        _currentKey.Slice(0, _currentKeyLength).Span,
-                        _newKey.Slice(0, _newKeyLength).Span);
+                        _currentKey[.._currentKeyLength].Span,
+                        _newKey[.._newKeyLength].Span);
                     break;
             }
 
@@ -318,28 +282,20 @@ namespace Yubico.YubiKey.Piv
         // swap the lengths.
         private void SwapKeys()
         {
-            byte[] swapBuffer = new byte[32];
+            var swapBuffer = new byte[32];
             Array.Copy(_currentKeyBytes, swapBuffer, 32);
             Array.Copy(_newKeyBytes, _currentKeyBytes, 32);
             Array.Copy(swapBuffer, _newKeyBytes, 32);
 
-            int swapLength = _currentKeyLength;
-            _currentKeyLength = _newKeyLength;
-            _newKeyLength = swapLength;
+            (_currentKeyLength, _newKeyLength) = (_newKeyLength, _currentKeyLength);
         }
 
-        private void SetKeyLengths(int currentKeyLength, int newKeyLength)
+        private void SetKeyLengths(
+            int currentKeyLength,
+            int newKeyLength)
         {
             _currentKeyLength = currentKeyLength;
             _newKeyLength = newKeyLength;
-        }
-
-        private static void ResetPiv(IYubiKeyDevice yubiKey)
-        {
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                pivSession.ResetApplication();
-            }
         }
     }
 }

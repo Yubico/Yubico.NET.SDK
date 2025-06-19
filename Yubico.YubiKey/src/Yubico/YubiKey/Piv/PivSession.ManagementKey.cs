@@ -71,12 +71,6 @@ namespace Yubico.YubiKey.Piv
         /// </remarks>
         public AuthenticateManagementKeyResult ManagementKeyAuthenticationResult { get; private set; }
 
-        private PivAlgorithm DefaultManagementKeyAlgorithm =>
-            YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey) &&
-            YubiKey.FirmwareVersion >= FirmwareVersion.V5_7_0
-                ? PivAlgorithm.Aes192
-                : PivAlgorithm.TripleDes;
-
         /// <summary>
         /// Try to authenticate the management key.
         /// </summary>
@@ -278,7 +272,7 @@ namespace Yubico.YubiKey.Piv
             {
                 keyEntryData.Clear();
 
-                if (!(KeyCollector is null))
+                if (KeyCollector is not null)
                 {
                     keyEntryData.Request = KeyEntryRequest.Release;
                     _ = KeyCollector(keyEntryData);
@@ -298,6 +292,10 @@ namespace Yubico.YubiKey.Piv
         /// further documentation on this method.
         /// </para>
         /// </remarks>
+        /// <param name="mutualAuthentication">
+        /// If <c>true</c> the method will perform mutual authentication, if
+        /// <c>false</c>, only the application will authenticate to the YubiKey.
+        /// </param>
         /// <exception cref="InvalidOperationException">
         /// There is no <c>KeyCollector</c> loaded, the key provided was not a
         /// valid Triple-DES or AES key, or the YubiKey had some other error, such as
@@ -319,7 +317,7 @@ namespace Yubico.YubiKey.Piv
             Logger.LogInformation(
                 $"Authenticate the management key: {(mutualAuthentication ? "mutual" : "single")} auth.");
 
-            if (TryAuthenticateManagementKey(mutualAuthentication) == false)
+            if (!TryAuthenticateManagementKey(mutualAuthentication))
             {
                 throw new OperationCanceledException(
                     string.Format(
@@ -656,7 +654,8 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            Logger.LogInformation("Try to change the management key, touch policy = {TouchPolicy}, algorithm = {PivALgorithm}.",
+            Logger.LogInformation(
+                "Try to change the management key, touch policy = {TouchPolicy}, algorithm = {PivALgorithm}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
@@ -668,7 +667,7 @@ namespace Yubico.YubiKey.Piv
 
             try
             {
-                if (TryAuthenticateWithKeyCollector(true, keyEntryData) == false)
+                if (!TryAuthenticateWithKeyCollector(true, keyEntryData))
                 {
                     return false;
                 }
@@ -691,10 +690,9 @@ namespace Yubico.YubiKey.Piv
             finally
             {
                 keyEntryData.Clear();
-
                 keyEntryData.Request = KeyEntryRequest.Release;
 
-                if (!(KeyCollector is null))
+                if (KeyCollector is not null)
                 {
                     _ = KeyCollector(keyEntryData);
                 }
@@ -766,10 +764,11 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            Logger.LogInformation("Change the management key, touch policy = {TouchPolicy}, algorithm = {PivAlgorithm}.",
+            Logger.LogInformation(
+                "Change the management key, touch policy = {TouchPolicy}, algorithm = {PivAlgorithm}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
-            if (TryChangeManagementKey(touchPolicy, newKeyAlgorithm) == false)
+            if (!TryChangeManagementKey(touchPolicy, newKeyAlgorithm))
             {
                 throw new OperationCanceledException(
                     string.Format(
@@ -828,9 +827,10 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        public bool TryChangeManagementKey(ReadOnlyMemory<byte> currentKey,
-                                           ReadOnlyMemory<byte> newKey,
-                                           PivTouchPolicy touchPolicy = PivTouchPolicy.Default) =>
+        public bool TryChangeManagementKey(
+            ReadOnlyMemory<byte> currentKey,
+            ReadOnlyMemory<byte> newKey,
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Default) =>
             TryChangeManagementKey(currentKey, newKey, touchPolicy, DefaultManagementKeyAlgorithm);
 
         /// <summary>
@@ -890,10 +890,11 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        public bool TryChangeManagementKey(ReadOnlyMemory<byte> currentKey,
-                                           ReadOnlyMemory<byte> newKey,
-                                           PivTouchPolicy touchPolicy,
-                                           PivAlgorithm newKeyAlgorithm)
+        public bool TryChangeManagementKey(
+            ReadOnlyMemory<byte> currentKey,
+            ReadOnlyMemory<byte> newKey,
+            PivTouchPolicy touchPolicy,
+            PivAlgorithm newKeyAlgorithm)
         {
             CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
 
@@ -902,10 +903,11 @@ namespace Yubico.YubiKey.Piv
 
         // Try to change the management key, even if the YubiKey is set to
         // PIN-derived.
-        private bool TryForcedChangeManagementKey(ReadOnlyMemory<byte> currentKey,
-                                                  ReadOnlyMemory<byte> newKey,
-                                                  PivTouchPolicy touchPolicy,
-                                                  PivAlgorithm newKeyAlgorithm)
+        private bool TryForcedChangeManagementKey(
+            ReadOnlyMemory<byte> currentKey,
+            ReadOnlyMemory<byte> newKey,
+            PivTouchPolicy touchPolicy,
+            PivAlgorithm newKeyAlgorithm)
         {
             if (TryAuthenticateManagementKey(currentKey, true))
             {
@@ -974,9 +976,10 @@ namespace Yubico.YubiKey.Piv
         // if the auth succeeds.
         // If auth works, return true, otherwise, return false.
         // Throw an exception if the YubiKey fails to auth.
-        private bool TryAuthenticateManagementKey(bool mutualAuthentication,
-                                                  ReadOnlySpan<byte> mgmtKey,
-                                                  PivAlgorithm algorithm)
+        private bool TryAuthenticateManagementKey(
+            bool mutualAuthentication,
+            ReadOnlySpan<byte> mgmtKey,
+            PivAlgorithm algorithm)
         {
             var initCommand = new InitializeAuthenticateManagementKeyCommand(mutualAuthentication, algorithm);
             var initResponse = Connection.SendCommand(initCommand);
@@ -1003,33 +1006,18 @@ namespace Yubico.YubiKey.Piv
                 }
 
                 ManagementKeyAuthenticated = true;
+                return true;
             }
 
             Logger.LogInformation($"Failed to authenticate management key. Message: {completeResponse.StatusMessage}");
 
-            return ManagementKeyAuthenticated;
+            return false;
         }
 
         private void RefreshManagementKeyAlgorithm() => ManagementKeyAlgorithm = GetManagementKeyAlgorithm();
 
-        private PivAlgorithm GetManagementKeyAlgorithm()
-        {
-            if (!YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
-            {
-                // Assume default for version
-                return DefaultManagementKeyAlgorithm;
-            }
-
-            // Get current ManagementKeyAlgorithm from Yubikey metadata
-            var response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-
-            var metadata = response.GetData();
-            return metadata.Algorithm;
-        }
+        private PivAlgorithm GetManagementKeyAlgorithm() =>
+            GetMetadataInternal(PivSlot.Management)?.Algorithm ?? DefaultManagementKeyAlgorithm;
 
         // Verify that and that the given algorithm is allowed.
         // If checkMode is true, also check that the PIN-only mode is None.
@@ -1058,26 +1046,28 @@ namespace Yubico.YubiKey.Piv
                 }
             }
 
-            bool isValid = IsValid(algorithm);
-            if (!isValid)
+            if (!IsValidManagementKeyAlgorithm(algorithm))
             {
                 throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.UnsupportedAlgorithm));
             }
-
-            return;
-
-            bool IsValid(PivAlgorithm pa) =>
-                pa switch
-                {
-                    PivAlgorithm.TripleDes => true, // Default for keys below fw version 5.7
-                    PivAlgorithm.Aes128 => YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey),
-                    PivAlgorithm.Aes192 => YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey),
-                    PivAlgorithm.Aes256 => YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey),
-                    _ => false
-                };
         }
+
+        private bool IsValidManagementKeyAlgorithm(PivAlgorithm pivAlgorithm) =>
+            pivAlgorithm switch
+            {
+                PivAlgorithm.TripleDes => true, // Default for keys below fw version 5.7
+                PivAlgorithm.Aes128 or PivAlgorithm.Aes192 or PivAlgorithm.Aes256 => YubiKey.HasFeature(
+                    YubiKeyFeature.PivAesManagementKey),
+                _ => false
+            };
+
+        private PivAlgorithm DefaultManagementKeyAlgorithm =>
+            YubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey) &&
+            YubiKey.FirmwareVersion >= FirmwareVersion.V5_7_0
+                ? PivAlgorithm.Aes192
+                : PivAlgorithm.TripleDes;
     }
 }

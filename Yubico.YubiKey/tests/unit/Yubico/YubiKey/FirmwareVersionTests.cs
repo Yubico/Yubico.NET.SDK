@@ -21,6 +21,38 @@ namespace Yubico.YubiKey
     public class FirmwareVersionTests
     {
         [Fact]
+        public void Parse_GivenValidString_ReturnsFirmwareVersion()
+        {
+            // Arrange
+            
+            string validString = "1.2.3";
+            
+            // Act
+            
+            var fw = FirmwareVersion.Parse(validString);
+            
+            // Assert
+            
+            Assert.Equal(1, fw.Major);
+            Assert.Equal(2, fw.Minor);
+            Assert.Equal(3, fw.Patch);
+        }
+        
+        
+        [Fact]
+        public void Parse_GivenInvalidString_ThrowsArgumentException()
+        {
+            // Arrange
+            
+            string invalidString = "1.2";
+            
+            // Act & Assert
+            
+            Assert.Throws<ArgumentException>(() => FirmwareVersion.Parse(invalidString));
+        }
+        
+        
+        [Fact]
         public void Major_GetSet_Succeeds()
         {
             var fw = new FirmwareVersion();

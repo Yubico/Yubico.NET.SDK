@@ -16,6 +16,58 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.13.x Releases
+
+### 1.13.1
+
+Release date: April 28th, 2025
+
+This release mainly adresses an issue that was affecting FIDO2 on YubiKey 5.7.4 and greater as well as adds support for compressed certificates within the PIV application. It also contains miscellaneous and documentation updates. 
+
+Features: 
+- Support for compressed certificates in the PIV application [#219](https://github.com/Yubico/Yubico.NET.SDK/pull/219)
+- Ability to create a FirmwareVersion object through parsing a version string (e.g. 1.0.0) [#220](https://github.com/Yubico/Yubico.NET.SDK/pull/220)
+
+Bug Fixes: 
+- PinUvAuthParam was erroneously truncated which caused failures on multiple FIDO2 commands for YubiKey v 5.7.4 [#222](https://github.com/Yubico/Yubico.NET.SDK/pull/222)
+
+Documentation:
+- Updates to challenge-response documentation to improve clarity [#221](https://github.com/Yubico/Yubico.NET.SDK/pull/221)
+
+Miscellaneous:
+- Integration tests will now run on Bio USB C keys as well [a4c4df](https://github.com/Yubico/Yubico.NET.SDK/commit/a4c4df10047bedf507e4ce36b80ed5001b996b9a). 
+
+### 1.13.0
+
+Release date: April 9th, 2025
+
+Features:
+
+- Curve25519 support has been added for PIV [(#210)](https://github.com/Yubico/Yubico.NET.SDK/pull/210):
+ 
+   - Keys can now be imported or generated using the Ed25519 and X25519 algorithms. 
+   - The key agreement operation can be performed with an X25519 key.
+   - Digital signatures can now be created with a Ed25519 key.
+   - New related unit tests have been added.
+
+- Unit tests have been added for RSA-3072 and RSA-4096 keys. [(#197)](https://github.com/Yubico/Yubico.NET.SDK/pull/197)
+
+- Support for large APDUs has been improved [(#208)](https://github.com/Yubico/Yubico.NET.SDK/pull/208):
+
+   - When sending large APDU commands to a YubiKey via the smartcard connection, the CommandChainingTransform will now throw an exception when the cumulative APDU data (sent in chunks of up to 255 bytes) exceeds the max APDU size for the given YubiKey (varies based on firmware version; see [SmartCardMaxApduSizes](xref:Yubico.YubiKey.SmartCardMaxApduSizes)).
+
+- Support for Ed25519 and P384 credentials has been added for FIDO. [(#186)](https://github.com/Yubico/Yubico.NET.SDK/pull/186)
+
+- Ubuntu runners have been upgraded from version 20.04 to 22.04 to support the compilation of Yubico.NativeShims. [(#188)](https://github.com/Yubico/Yubico.NET.SDK/pull/188)
+
+Bug Fixes:
+
+- The default logger now only writes output for the "Error" log level unless another level is specified. Previously, the logger wrote output for all log levels, which could become overly long and difficult to evaluate. [(#185)](https://github.com/Yubico/Yubico.NET.SDK/pull/185)
+
+Miscellaneous: 
+
+- The [License](https://github.com/Yubico/Yubico.NET.SDK/blob/develop/LICENSE.txt) was updated to remove the information for the AesCmac.cs file from the Bouncy Castle library. [(#196)](https://github.com/Yubico/Yubico.NET.SDK/pull/196)
+
 ## 1.12.x Releases
 
 ### 1.12.1
@@ -100,12 +152,12 @@ Bug fixes:
 
 Miscellaneous:
 - The way that YubiKey device info is read by the SDK has changed, and as a result, the following GetDeviceInfo command classes have been deprecated ([#91](https://github.com/Yubico/Yubico.NET.SDK/pull/91)): 
-  - [Yubico.YubiKey.Management.Commands.GetDeviceInfoCommand](xref:Yubico.YubiKey.Management.Commands.GetDeviceInfoCommand)
-  - [Yubico.YubiKey.Otp.Commands.GetDeviceInfoCommand](xref:Yubico.YubiKey.Otp.Commands.GetDeviceInfoCommand)
-  - [Yubico.YubiKey.U2f.Commands.GetDeviceInfoCommand](xref:Yubico.YubiKey.U2f.Commands.GetDeviceInfoCommand)
-  - [Yubico.YubiKey.Management.Commands.GetDeviceInfoResponse](xref:Yubico.YubiKey.Management.Commands.GetDeviceInfoResponse)
-  - [Yubico.YubiKey.Otp.Commands.GetDeviceInfoResponse](xref:Yubico.YubiKey.Otp.Commands.GetDeviceInfoResponse)
-  - [Yubico.YubiKey.U2f.Commands.GetDeviceInfoResponse](xref:Yubico.YubiKey.U2f.Commands.GetDeviceInfoResponse)
+  - `Yubico.YubiKey.Management.Commands.GetDeviceInfoCommand`
+  - `Yubico.YubiKey.Otp.Commands.GetDeviceInfoCommand`
+  - `Yubico.YubiKey.U2f.Commands.GetDeviceInfoCommand`
+  - `Yubico.YubiKey.Management.Commands.GetDeviceInfoResponse`
+  - `Yubico.YubiKey.Otp.Commands.GetDeviceInfoResponse`
+  - `Yubico.YubiKey.U2f.Commands.GetDeviceInfoResponse`
 - Integration test guardrails have been added to ensure tests are done only on specified keys. ([#100](https://github.com/Yubico/Yubico.NET.SDK/pull/100)).
 - Unit tests were run on all platforms in CI ([#80](https://github.com/Yubico/Yubico.NET.SDK/pull/80)).
 
@@ -208,10 +260,10 @@ Features:
   class.
 
 - **SCP03 architecture**. The process for building an SCP03 connection was updated.
-  The previous method ([Yubico.YubiKey.YubiKeyDeviceExtensions.WithScp03()](xref:Yubico.YubiKey.YubiKeyDeviceExtensions.WithScp03%28Yubico.YubiKey.YubiKeyDevice%2CYubico.YubiKey.Scp03.StaticKeys%29)) is now deprecated, and
-  the new method ([Yubico.YubiKey.IYubiKeyDevice.ConnectScp03()](xref:Yubico.YubiKey.IYubiKeyDevice.ConnectScp03%28Yubico.YubiKey.YubiKeyApplication%2CYubico.YubiKey.Scp03.StaticKeys%29)) simply requires passing in the SCP03 key set to the
+  The previous method (`Yubico.YubiKey.YubiKeyDeviceExtensions.WithScp03()`) is now deprecated, and
+  the new method (`Yubico.YubiKey.IYubiKeyDevice.ConnectScp03()` simply requires passing in the SCP03 key set to the
   PivSession constructor. It is also possible to build an
-  IYubiKeyConnection that uses SCP03 via [Yubico.YubiKey.Piv.PivSession()](xref:Yubico.YubiKey.Piv.PivSession.%23ctor%28Yubico.YubiKey.IYubiKeyDevice%2CYubico.YubiKey.Scp03.StaticKeys%29).
+  IYubiKeyConnection that uses SCP03 via `Yubico.YubiKey.Piv.PivSession()`.
 
 - **SCP03 documentation**. The User's Manual article on SCP03 was
   updated to provide more comprehensive information.

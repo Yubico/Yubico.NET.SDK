@@ -14,7 +14,9 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -90,13 +92,6 @@ namespace Yubico.YubiKey.Piv.Commands
     {
         private const byte DigestTag = 0x81;
 
-        private const int Rsa1024DigestDataLength = 128;
-        private const int Rsa2048DigestDataLength = 256;
-        private const int Rsa3072DigestDataLength = 384;
-        private const int Rsa4096DigestDataLength = 512;
-        private const int EccP256DigestDataLength = 32;
-        private const int EccP384DigestDataLength = 48;
-
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private AuthenticateSignCommand()
@@ -166,25 +161,87 @@ namespace Yubico.YubiKey.Piv.Commands
             DataTag = DigestTag;
             Data = digestData;
             SlotNumber = slotNumber;
+            Algorithm = GetPivAlgorithm(digestData);
+        }
 
-            // Determine the algorithm based on the length of the digest data.
-            // Currently, the length of the data must be 128 (RSA-1024), 256
-            // (RSA-2048), 384 (RSA-3072), 512 (RSA-4096), 32 (ECC-P256), or 48 (ECC-P384).
-            // Return the PivAlgorithm, or if the length is not supported, throw an
-            // exception.
-            Algorithm = digestData.Length switch
+        private static PivAlgorithm GetPivAlgorithm(ReadOnlyMemory<byte> digestData)
+        {
+            if (KeyDefinitions.All.Values
+                    .Where(k => k.IsRSA || k.IsEllipticCurve)
+                    .Where(k => !k.KeyType.IsCurve25519())
+                    .SingleOrDefault(k => k.LengthInBytes == digestData.Length) is { } keyDefinition)
             {
-                Rsa1024DigestDataLength => PivAlgorithm.Rsa1024,
-                Rsa2048DigestDataLength => PivAlgorithm.Rsa2048,
-                Rsa3072DigestDataLength => PivAlgorithm.Rsa3072,
-                Rsa4096DigestDataLength => PivAlgorithm.Rsa4096,
-                EccP256DigestDataLength => PivAlgorithm.EccP256,
-                EccP384DigestDataLength => PivAlgorithm.EccP384,
-                _ => throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectDigestLength)),
-            };
+                return keyDefinition.KeyType.GetPivAlgorithm();
+            }
+
+            throw new ArgumentException(
+                string.Format(CultureInfo.CurrentCulture, ExceptionMessages.IncorrectDigestLength));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the AuthenticateSignCommand class. This
+        /// command takes the slot number and the (possibly formatted) digest of
+        /// the data to sign.
+        /// </summary>
+        /// <remarks>
+        /// The slot number must be for a slot that holds an asymmetric key and
+        /// can perform arbitrary signing, which is all asymmetric key slots other
+        /// than <c>F9</c>. See the User's Manual
+        /// <xref href="UsersManualPivSlots"> entry on PIV slots </xref>,
+        /// <xref href="UsersManualPivCommands#authenticate-sign"> entry on signing </xref>,
+        /// and <see cref="PivSlot"/>.
+        /// <para>
+        /// The digest data is formatted if RSA. If the key that will be used to
+        /// sign is RSA-1024, the digest data must be 128 (1024 bits) bytes
+        /// long. If the key is RSA-2048, then the digest data must be 256 bytes
+        /// (2048 bits) long. If the key is RSA-3072, then the digest data must be 384 bytes
+        /// (3072 bits) long. If the key is RSA-4096, then the digest data must be 512 bytes
+        /// (4096 bits) long. See also the User's Manual entry on
+        /// <xref href="UsersManualPivCommands#authenticate-sign"> signing </xref>
+        /// in the PIV commands page.
+        /// </para>
+        /// <para>
+        /// For ECC, the digest data is not formatted, it is simply the output of
+        /// the message digest algorithm. If the key that will be used to sign is
+        /// ECC-P256, then the digest data must be 32 bytes (256 bits) long. You
+        /// will likely use SHA-256, which is the algorithm specified in the PIV
+        /// standard. If the key is ECC-P384, then the digest data must be 48
+        /// bytes (384 bits) long. You will likely use SHA-384, which is the
+        /// algorithm specified in the PIV standard.
+        /// </para>
+        /// <para>
+        /// Note that if the result of the digest has leading 00 bytes, you leave
+        /// those bytes in the <c>digestData</c>. For example:
+        /// </para>
+        /// <code>
+        ///  If the result of the SHA-256 digest is
+        ///    00 00 87 A9 31 ... 7C
+        ///  then you pass in 32 bytes:
+        ///    00 00 87 A9 31 ... 7C
+        ///  Do not strip the leading 00 bytes and pass in only 30 bytes (87 A9 ... 7C).
+        /// </code>
+        /// <para>
+        /// If you are signing with ECC and you use a digest algorithm that
+        /// produces smaller output (not recommended, but if you do), prepend 00
+        /// bytes to make sure the length of data passed in is the correct length.
+        /// </para>
+        /// </remarks>
+        /// <param name="digestData">
+        /// The message digest of the data to sign, formatted, if RSA.
+        /// </param>
+        /// <param name="slotNumber">
+        /// The slot holding the private key to use.
+        /// </param>
+        /// <param name="algorithm">The algorithm of the key to use.</param>
+        /// <exception cref="ArgumentException">
+        /// The data to sign (formatted digest) is not the correct length.
+        /// </exception>
+        public AuthenticateSignCommand(ReadOnlyMemory<byte> digestData, byte slotNumber, PivAlgorithm algorithm)
+        {
+            DataTag = DigestTag;
+            Data = digestData;
+            SlotNumber = slotNumber;
+            Algorithm = algorithm;
         }
 
         /// <inheritdoc />

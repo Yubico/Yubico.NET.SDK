@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -65,14 +66,14 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        public void GetData_ReturnsDecrypted(PivAlgorithm algorithm)
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        public void GetData_ReturnsDecrypted(KeyType keyType)
         {
-            byte[] decryptedData = GetDecryptedData(algorithm);
-            ResponseApdu responseApdu = GetResponseApdu(algorithm);
+            byte[] decryptedData = GetDecryptedData(keyType);
+            ResponseApdu responseApdu = GetResponseApdu(keyType);
 
             var response = new AuthenticateDecryptResponse(responseApdu);
 
@@ -97,13 +98,13 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        public void GetData_Success_NoExceptionThrown(PivAlgorithm algorithm)
+        [InlineData(KeyType.RSA1024)]
+        [InlineData(KeyType.RSA2048)]
+        [InlineData(KeyType.RSA3072)]
+        [InlineData(KeyType.RSA4096)]
+        public void GetData_Success_NoExceptionThrown(KeyType keyType)
         {
-            ResponseApdu responseApdu = GetResponseApdu(algorithm);
+            ResponseApdu responseApdu = GetResponseApdu(keyType);
 
             var response = new AuthenticateDecryptResponse(responseApdu);
 
@@ -141,23 +142,23 @@ namespace Yubico.YubiKey.Piv.Commands
 #pragma warning restore CS8625
         }
 
-        private static ResponseApdu GetResponseApdu(PivAlgorithm algorithm)
+        private static ResponseApdu GetResponseApdu(KeyType keyType)
         {
-            byte[] apduData = GetResponseApduData(algorithm);
+            byte[] apduData = GetResponseApduData(keyType);
             return new ResponseApdu(apduData);
         }
 
-        // Get the data that makes up a response APDU for the given algorithm.
+        // Get the data that makes up a response APDU for the given keyType.
         // This will return the full APDU data:
         // 7C len 82 len decryptedData 90 00
-        private static byte[] GetResponseApduData(PivAlgorithm algorithm)
+        private static byte[] GetResponseApduData(KeyType keyType)
         {
-            byte[] decryptedData = GetDecryptedData(algorithm);
+            byte[] decryptedData = GetDecryptedData(keyType);
             byte[] statusWord = new byte[] { 0x90, 0x00 };
 
-            byte[] prefix = algorithm switch
+            byte[] prefix = keyType switch
             {
-                PivAlgorithm.Rsa2048 => new byte[] { 0x7C, 0x82, 0x01, 0x04, 0x82, 0x82, 0x01, 0x00 },
+                KeyType.RSA2048 => new byte[] { 0x7C, 0x82, 0x01, 0x04, 0x82, 0x82, 0x01, 0x00 },
 
                 _ => new byte[] { 0x7C, 0x81, 0x83, 0x82, 0x81, 0x80 },
             };
@@ -168,9 +169,9 @@ namespace Yubico.YubiKey.Piv.Commands
             return returnValue.ToArray<byte>();
         }
 
-        private static byte[] GetDecryptedData(PivAlgorithm algorithm) => algorithm switch
+        private static byte[] GetDecryptedData(KeyType keyType) => keyType switch
         {
-            PivAlgorithm.Rsa2048 => new byte[] {
+            KeyType.RSA2048 => new byte[] {
                 0x05, 0xA4, 0x60, 0x64, 0x7D, 0x4C, 0x0B, 0x8F, 0x48, 0x2D, 0xC5, 0x50, 0x1D, 0x9D, 0x1F, 0xD2,
                 0xCC, 0x7A, 0x14, 0x74, 0x66, 0x1D, 0xE9, 0x6A, 0x1E, 0x0A, 0xD9, 0x39, 0x5E, 0x1F, 0x0F, 0xFD,
                 0x94, 0xB6, 0xA9, 0x98, 0x84, 0x52, 0xD1, 0xC4, 0xC1, 0x40, 0x1A, 0x5B, 0xCA, 0x32, 0xC0, 0xE9,

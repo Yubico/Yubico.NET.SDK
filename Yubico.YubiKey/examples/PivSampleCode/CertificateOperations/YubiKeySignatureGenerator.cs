@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         }
 
         // Return the public key as an instance of PublicKey.
-        protected override PublicKey BuildPublicKey()
+        protected override System.Security.Cryptography.X509Certificates.PublicKey BuildPublicKey()
         {
             return _defaultGenerator.PublicKey;
         }

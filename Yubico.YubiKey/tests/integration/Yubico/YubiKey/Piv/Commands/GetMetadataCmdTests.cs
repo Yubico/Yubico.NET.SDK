@@ -14,89 +14,53 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
-    // All these tests will reset the PIV application, run, then reset the PIV
-    // application again.
-    public class GetMetadataCmdTests : IDisposable
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
+    public class GetMetadataCmdTests : PivSessionIntegrationTestBase
     {
-        private readonly IYubiKeyDevice yubiKey;
-
-        public GetMetadataCmdTests()
-        {
-            yubiKey = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
-
-            if (yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey))
-            {
-                ResetPiv(yubiKey);
-            }
-        }
-
-        public void Dispose()
-        {
-            if (yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey))
-            {
-                ResetPiv(yubiKey);
-            }
-        }
-
         [Theory]
-        [InlineData(PivAlgorithm.Aes128)]
-        [InlineData(PivAlgorithm.Aes192)]
-        [InlineData(PivAlgorithm.Aes256)]
-        public void AesKey_GetMetadata_CorrectAlgorithm(PivAlgorithm algorithm)
+        [InlineData(KeyType.AES128)]
+        [InlineData(KeyType.AES192)]
+        [InlineData(KeyType.AES256)]
+        public void AesKey_GetMetadata_CorrectAlgorithm(
+            KeyType keyType)
         {
-            if (!yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey))
+            Skip.If(!Device.HasFeature(YubiKeyFeature.PivAesManagementKey));
+
+            using var pivSession = GetSession(authenticate: false);
+            var isValid = pivSession.TryAuthenticateManagementKey();
+            Assert.True(isValid);
+
+            byte[] keyData =
             {
-                return;
-            }
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+                0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
+                0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
+                0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68
+            };
 
-            using (var pivSession = new PivSession(yubiKey))
+            var keyLength = keyType switch
             {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+                KeyType.AES128 => 16,
+                KeyType.AES192 => 24,
+                _ => 32,
+            };
 
-                bool isValid = pivSession.TryAuthenticateManagementKey();
-                Assert.True(isValid);
+            var setCmd = new SetManagementKeyCommand(keyData.AsMemory()[..keyLength], PivTouchPolicy.Never,
+                keyType.GetPivAlgorithm());
+            var setRsp = pivSession.Connection.SendCommand(setCmd);
+            Assert.Equal(ResponseStatus.Success, setRsp.Status);
 
-                byte[] keyData = {
-                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-                    0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
-                    0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
-                    0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68
-                };
+            var getCmd = new GetMetadataCommand(PivSlot.Management);
+            var getRsp = pivSession.Connection.SendCommand(getCmd);
+            Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
-                int keyLength = algorithm switch
-                {
-                    PivAlgorithm.Aes128 => 16,
-                    PivAlgorithm.Aes192 => 24,
-                    _ => 32,
-                };
-
-                var mgmtKey = new ReadOnlyMemory<byte>(keyData, 0, keyLength);
-
-                var setCmd = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Never, algorithm);
-
-                SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
-                Assert.Equal(ResponseStatus.Success, setRsp.Status);
-
-                var getCmd = new GetMetadataCommand(PivSlot.Management);
-                GetMetadataResponse getRsp = pivSession.Connection.SendCommand(getCmd);
-                Assert.Equal(ResponseStatus.Success, getRsp.Status);
-
-                PivMetadata metadata = getRsp.GetData();
-                Assert.Equal(algorithm, metadata.Algorithm);
-            }
-        }
-
-        private static void ResetPiv(IYubiKeyDevice yubiKey)
-        {
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                pivSession.ResetApplication();
-            }
+            var metadata = getRsp.GetData();
+            Assert.Equal(keyType.GetPivAlgorithm(), metadata.Algorithm);
         }
     }
 }

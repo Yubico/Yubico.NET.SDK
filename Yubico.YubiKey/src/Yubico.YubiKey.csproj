@@ -45,6 +45,7 @@ limitations under the License. -->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageReleaseNotes>https://github.com/Yubico/Yubico.NET.SDK/releases/latest</PackageReleaseNotes>
     <!-- StrongName signing -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
@@ -118,6 +119,7 @@ limitations under the License. -->
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="System.Formats.Asn1" Version="9.0.3" />
 
     <!-- Remove ExcludeAssets once the package supports netcoreapp and net462 properly -->
     <PackageReference Include="System.Formats.Cbor" Version="7.0.0" ExcludeAssets="buildtransitive" />

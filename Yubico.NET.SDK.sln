@@ -251,7 +251,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "contributordocs", "contribu
 		contributordocs\allowed-dotnet-things-and-versions.md = contributordocs\allowed-dotnet-things-and-versions.md
 		contributordocs\code-flow-and-pull-requests.md = contributordocs\code-flow-and-pull-requests.md
 		contributordocs\getting-started.md = contributordocs\getting-started.md
-		contributordocs\polyfills.md = contributordocs\polyfills.md
 		contributordocs\README.md = contributordocs\README.md
 		contributordocs\testing.md = contributordocs\testing.md
 		contributordocs\useful-links.md = contributordocs\useful-links.md

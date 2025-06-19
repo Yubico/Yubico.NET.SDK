@@ -14,10 +14,9 @@
 
 using System;
 using Xunit;
-using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv.Objects
 {
     [Trait(TraitTypes.Category, TestCategories.Simple)]
     public class CccIntegrationTests

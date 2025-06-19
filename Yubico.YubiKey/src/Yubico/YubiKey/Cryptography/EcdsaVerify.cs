@@ -158,6 +158,7 @@ namespace Yubico.YubiKey.Cryptography
         /// <exception cref="ArgumentException">
         /// The key is not for a supported algorithm or curve, or is malformed.
         /// </exception>
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
         public EcdsaVerify(PivPublicKey pivPublicKey)
         {
             if (pivPublicKey is null)
@@ -170,6 +171,21 @@ namespace Yubico.YubiKey.Cryptography
                 : ReadOnlySpan<byte>.Empty;
 
             ECDsa = ConvertPublicKey(publicPointSpan.ToArray());
+        }
+        
+        public EcdsaVerify(ECPublicKey publicKey)
+        {
+            if (publicKey is null)
+            {
+                throw new ArgumentNullException(nameof(publicKey));
+            }
+
+            if (!publicKey.KeyType.IsECDsa())
+            {
+                throw new ArgumentException("Invalid key type", nameof(publicKey));
+            }
+
+            ECDsa = ConvertPublicKey(publicKey.PublicPoint);
         }
 
         /// <summary>
@@ -331,7 +347,8 @@ namespace Yubico.YubiKey.Cryptography
 
         private static ECDsa ConvertPublicKey(ReadOnlyMemory<byte> encodedEccPoint)
         {
-            int minEncodedPointLength = (KeyDefinitions.P256.LengthInBytes * 2) + 1; // This is the minimum length for an encoded point on P-256 (0x04 || x || y)
+            // This is the minimum length for an encoded point on P-256 (0x04 || x || y)
+            int minEncodedPointLength = (KeyDefinitions.P256.LengthInBytes * 2) + 1;
             if (encodedEccPoint.Length < minEncodedPointLength || encodedEccPoint.Span[0] != EncodedPointTag)
             {
                 throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
@@ -349,15 +366,15 @@ namespace Yubico.YubiKey.Cryptography
         {
             if (encodedPointLength == (KeyDefinitions.P256.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.KeyOids.P256;
+                return Oids.ECP256;
             }
             if (encodedPointLength == (KeyDefinitions.P384.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.KeyOids.P384;
+                return Oids.ECP384;
             }
             if (encodedPointLength == (KeyDefinitions.P521.LengthInBytes * 2) + 1)
             {
-                return KeyDefinitions.KeyOids.P521;
+                return Oids.ECP521;
             }
 
             throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
@@ -458,10 +475,10 @@ namespace Yubico.YubiKey.Cryptography
         {
             return algorithm switch
             {
-                CoseAlgorithmIdentifier.ES256 => KeyDefinitions.KeyOids.P256,
-                CoseAlgorithmIdentifier.ECDHwHKDF256 => KeyDefinitions.KeyOids.P256,
-                CoseAlgorithmIdentifier.ES384 => KeyDefinitions.KeyOids.P384,
-                CoseAlgorithmIdentifier.ES512 => KeyDefinitions.KeyOids.P521,
+                CoseAlgorithmIdentifier.ES256 => Oids.ECP256,
+                CoseAlgorithmIdentifier.ECDHwHKDF256 => Oids.ECP256,
+                CoseAlgorithmIdentifier.ES384 => Oids.ECP384,
+                CoseAlgorithmIdentifier.ES512 => Oids.ECP521,
                 _ => throw new NotSupportedException(ExceptionMessages.UnsupportedAlgorithm)
             };
         }

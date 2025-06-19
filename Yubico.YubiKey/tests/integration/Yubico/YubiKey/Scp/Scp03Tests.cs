@@ -154,7 +154,7 @@ namespace Yubico.YubiKey.Scp
             using var session = new SecurityDomainSession(testDevice, Scp03KeyParameters.DefaultKey);
             using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
-            var publicKey = new ECPublicKeyParameters(ecdsa);
+            var publicKey = ECPublicKey.CreateFromParameters(ecdsa.ExportParameters(false));
             session.PutKey(keyReference, publicKey, 0);
 
             // Verify the generated key was stored
@@ -388,9 +388,9 @@ namespace Yubico.YubiKey.Scp
 
             if (desiredDeviceType == StandardTestDevice.Fw5Fips)
             {
-                ScpTestUtilities.SetFipsApprovedCredentials(pivSession);
+                FipsTestUtilities.SetFipsApprovedCredentials(pivSession);
 
-                var isVerified = pivSession.TryVerifyPin(ScpTestUtilities.FipsPin, out _);
+                var isVerified = pivSession.TryVerifyPin(FipsTestUtilities.FipsPin, out _);
                 Assert.True(isVerified);
             }
             else
@@ -536,8 +536,8 @@ namespace Yubico.YubiKey.Scp
             byte[] pin;
             if (desiredDeviceType == StandardTestDevice.Fw5Fips)
             {
-                ScpTestUtilities.SetFipsApprovedCredentials(testDevice, YubiKeyApplication.Piv, keyParams);
-                pin = ScpTestUtilities.FipsPin;
+                FipsTestUtilities.SetFipsApprovedCredentials(testDevice, keyParams);
+                pin = FipsTestUtilities.FipsPin;
             }
             else
             {

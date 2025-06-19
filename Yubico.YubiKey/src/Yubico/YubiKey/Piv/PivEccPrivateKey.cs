@@ -13,9 +13,12 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -27,12 +30,11 @@ namespace Yubico.YubiKey.Piv
     /// of a point on the curve. So for ECC P-256, each coordinate is 32 bytes
     /// (256 bits), so the private value will be 32 bytes.
     /// </remarks>
+    [Obsolete(
+        "Usage of PivEccPublic/PivEccPrivateKey, PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead",
+        false)]
     public sealed class PivEccPrivateKey : PivPrivateKey
     {
-        private const int EccTag = 0x06;
-        private const int EccP256PrivateKeySize = 32;
-        private const int EccP384PrivateKeySize = 48;
-
         private Memory<byte> _privateValue;
 
         // <summary>
@@ -63,25 +65,61 @@ namespace Yubico.YubiKey.Piv
         /// <param name="privateValue">
         /// The private value to use to build the object.
         /// </param>
+        /// <param name="algorithm">The algorithm used, if empty, it will be determined at best effort.</param>
         /// <exception cref="ArgumentException">
         /// The size of the private value is not supported by the YubiKey.
         /// </exception>
-        public PivEccPrivateKey(ReadOnlySpan<byte> privateValue)
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey is deprecated. Use ECPublicKey, ECPrivateKey instead", false)]
+        public PivEccPrivateKey(
+            ReadOnlySpan<byte> privateValue,
+            PivAlgorithm? algorithm = null)
         {
-            Algorithm = privateValue.Length switch
+            if (algorithm.HasValue)
             {
-                EccP256PrivateKeySize => PivAlgorithm.EccP256,
-                EccP384PrivateKeySize => PivAlgorithm.EccP384,
-                _ => throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPrivateKeyData)),
+                ValidateSize(privateValue, algorithm.Value);
+                Algorithm = algorithm.Value;
+            }
+            else
+            {
+                Algorithm = GetBySize(privateValue);
+            }
+
+            int tag = Algorithm switch
+            {
+                PivAlgorithm.EccEd25519 => PivConstants.PrivateECEd25519Tag,
+                PivAlgorithm.EccX25519 => PivConstants.PrivateECX25519Tag,
+                _ => PivConstants.PrivateECDsaTag
             };
 
             var tlvWriter = new TlvWriter();
-            tlvWriter.WriteValue(EccTag, privateValue);
+            tlvWriter.WriteValue(tag, privateValue);
             EncodedKey = tlvWriter.Encode();
             _privateValue = new Memory<byte>(privateValue.ToArray());
+        }
+
+        private static void ValidateSize(ReadOnlySpan<byte> privateValue, PivAlgorithm algorithm)
+        {
+            int expectedSize = algorithm.GetPivKeyDefinition().KeyDefinition.LengthInBytes;
+            if (privateValue.Length != expectedSize)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture, ExceptionMessages.InvalidPrivateKeyData));
+            }
+        }
+
+        private static PivAlgorithm GetBySize(ReadOnlySpan<byte> privateValue)
+        {
+            int privateValueSize = privateValue.Length;
+            var allowed = new List<KeyDefinition> { KeyDefinitions.P256, KeyDefinitions.P384 };
+            if (allowed.SingleOrDefault(kd => kd.LengthInBytes == privateValueSize) is { } keyDefinition)
+            {
+                return keyDefinition.GetPivKeyDefinition().Algorithm;
+            }
+
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.CurrentCulture, ExceptionMessages.InvalidPrivateKeyData));
         }
 
         /// <summary>
@@ -89,19 +127,22 @@ namespace Yubico.YubiKey.Piv
         /// encoding.
         /// </summary>
         /// <param name="encodedPrivateKey">
-        /// The PIV TLV encoding.
+        ///     The PIV TLV encoding.
         /// </param>
+        /// <param name="pivAlgorithm"></param>
         /// <returns>
         /// A new instance of a PivEccPrivateKey object based on the encoding.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// The encoding of the private key is not supported.
         /// </exception>
-        public static PivEccPrivateKey CreateEccPrivateKey(ReadOnlyMemory<byte> encodedPrivateKey)
+        public static PivEccPrivateKey CreateEccPrivateKey(
+            ReadOnlyMemory<byte> encodedPrivateKey,
+            PivAlgorithm? pivAlgorithm)
         {
             var tlvReader = new TlvReader(encodedPrivateKey);
-
-            if (tlvReader.HasData == false || tlvReader.PeekTag() != EccTag)
+            int tag = tlvReader.PeekTag();
+            if (tlvReader.HasData == false || !PivConstants.IsValidPrivateECTag(tag))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -109,9 +150,8 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.InvalidPrivateKeyData));
             }
 
-            var value = tlvReader.ReadValue(EccTag);
-
-            return new PivEccPrivateKey(value.Span);
+            var value = tlvReader.ReadValue(tag);
+            return new PivEccPrivateKey(value.Span, pivAlgorithm);
         }
 
         /// <inheritdoc />

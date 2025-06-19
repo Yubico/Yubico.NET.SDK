@@ -170,7 +170,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = KeyCollectorDelegate;
+#pragma warning disable CS0618 // Type or member is obsolete
                 computedSecret = pivSession.KeyAgree(slotNumber, correspondentPublicKey);
+#pragma warning restore CS0618 // Type or member is obsolete
             }
 
             return true;

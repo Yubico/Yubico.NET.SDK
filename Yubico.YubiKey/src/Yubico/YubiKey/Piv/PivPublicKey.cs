@@ -14,6 +14,8 @@
 
 using System;
 using System.Globalization;
+using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv.Converters;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -68,7 +70,8 @@ namespace Yubico.YubiKey.Piv
     /// without the nested <c>7F49</c> tag.
     /// </para>
     /// </remarks>
-    public class PivPublicKey
+    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey, PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
+    public class PivPublicKey : PublicKey
     {
         /// <summary>
         /// The algorithm of the key in this object.
@@ -77,6 +80,8 @@ namespace Yubico.YubiKey.Piv
         /// RSA or ECC.
         /// </value>
         public PivAlgorithm Algorithm { get; protected set; }
+
+        public override KeyType KeyType => Algorithm.GetKeyType();
 
         protected Memory<byte> PivEncodedKey { get; set; }
         protected Memory<byte> YubiKeyEncodedKey { get; set; }
@@ -112,8 +117,9 @@ namespace Yubico.YubiKey.Piv
         /// <c>PivEccPublicKey</c>.
         /// </remarks>
         /// <param name="encodedPublicKey">
-        /// The PIV TLV encoding.
+        ///     The PIV TLV encoding.
         /// </param>
+        /// <param name="algorithm"></param>
         /// <returns>
         /// An instance of a subclass of <c>PivPublicKey</c>, the actual key
         /// represented by the encoding.
@@ -121,23 +127,30 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentException">
         /// The key data supplied is not a supported encoding.
         /// </exception>
-        public static PivPublicKey Create(ReadOnlyMemory<byte> encodedPublicKey)
+        public static PivPublicKey Create(ReadOnlyMemory<byte> encodedPublicKey, PivAlgorithm? algorithm = null)
         {
-            // Try to decode as an RSA public key. If that works, we're done. If
-            // not, try ECC. If that doesn't work, exception.
             bool isCreated = PivRsaPublicKey.TryCreate(out var publicKeyObject, encodedPublicKey);
-            if (!isCreated)
+            if (isCreated)
             {
-                if (PivEccPublicKey.TryCreate(out publicKeyObject, encodedPublicKey) == false)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPublicKeyData));
-                }
+                return publicKeyObject;
             }
 
-            return publicKeyObject;
+            isCreated = PivEccPublicKey.TryCreate(out publicKeyObject, encodedPublicKey, algorithm);
+            if (isCreated)
+            {
+                return publicKeyObject;
+            }
+
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.InvalidPublicKeyData));
+        }
+
+        public override byte[] ExportSubjectPublicKeyInfo()
+        {
+            var publicKey = PivKeyDecoder.CreatePublicKey(PivEncodedPublicKey, Algorithm.GetKeyType());
+            return publicKey.ExportSubjectPublicKeyInfo();
         }
     }
 }

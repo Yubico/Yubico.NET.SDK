@@ -23,293 +23,221 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
-    public class MsrootsTests
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
+    public class MsrootsTests(ITestOutputHelper output) : PivSessionIntegrationTestBase
     {
-        private readonly ITestOutputHelper _output;
-
-        public MsrootsTests(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+        public RandomNumberGenerator Rng { get; set; } = RandomObjectUtility.GetRandomObject(null);
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
-        public void SimplePutDataCommand(StandardTestDevice testDeviceType)
+        public void SimplePutDataCommand(
+            StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-                bool isValid = pivSession.TryAuthenticateManagementKey();
-                Assert.True(isValid);
-
-                pivSession.ResetApplication();
-
-                isValid = pivSession.TryAuthenticateManagementKey();
-                Assert.True(isValid);
-
-                byte[] putData = { 0x53, 0x04, 0x11, 0x22, 0x33, 0x44 };
-                for (int index = 0; index < 5; index++)
-                {
-                    var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                    PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
-                    Assert.Equal(ResponseStatus.Success, putResponse.Status);
-                }
-
-                putData = new byte[] { 0x53, 0x00 };
-                for (int index = 0; index < 5; index++)
-                {
-                    var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                    PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
-                    Assert.Equal(ResponseStatus.Success, putResponse.Status);
-                }
-
-                putData = new byte[] { 0x53, 0x05, 0x11, 0x22, 0x33, 0x44, 0x55 };
-                for (int index = 0; index < 5; index++)
-                {
-                    var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                    PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
-                    Assert.Equal(ResponseStatus.Success, putResponse.Status);
-                }
-
-                putData = new byte[] { 0x53, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
-                for (int index = 0; index < 5; index++)
-                {
-                    var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                    PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
-                    Assert.Equal(ResponseStatus.Success, putResponse.Status);
-                }
-            }
-        }
-
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void WriteDataSession(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                pivSession.ResetApplication();
-
-                byte[] putData = { 0x11, 0x22, 0x33, 0x44 };
-                pivSession.WriteMsroots(putData);
-
-                pivSession.WriteMsroots(ReadOnlySpan<byte>.Empty);
-
-                putData = new byte[] { 0x53, 0x05, 0x11, 0x22, 0x33, 0x44, 0x55 };
-                pivSession.WriteMsroots(putData);
-
-                putData = new byte[] { 0x53, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
-                pivSession.WriteMsroots(putData);
-            }
-        }
-
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void WriteDataSessionBig(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-
-            using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var versionCommand = new VersionCommand();
-                VersionResponse versionResponse = pivSession.Connection.SendCommand(versionCommand);
-                Assert.Equal(ResponseStatus.Success, versionResponse.Status);
-
-                FirmwareVersion versionNumber = versionResponse.GetData();
-
-                //                int maxLength = 10175;
-                int maxLength = 10150;
-                if (versionNumber.Major >= 4)
-                {
-                    //                    maxLength = 15295;
-                    maxLength = 14000;
-                }
-
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                pivSession.ResetApplication();
-
-                byte[] putData = new byte[maxLength];
-                rng.GetBytes(putData, 0, putData.Length);
-
-                pivSession.WriteMsroots(putData);
-
-                pivSession.WriteMsroots(ReadOnlySpan<byte>.Empty);
-
-                rng.GetBytes(putData, 0, putData.Length);
-                var memStream = new MemoryStream(putData);
-                pivSession.WriteMsrootsStream(memStream);
-
-                rng.GetBytes(putData, 0, putData.Length);
-                memStream = new MemoryStream(putData);
-                pivSession.WriteMsrootsStream(memStream);
-            }
-        }
-
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void WriteReadMsroots_ByteArray(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-
-            using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                Assert.NotNull(pivSession.Connection);
-
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                pivSession.DeleteMsroots();
-
-                int currentLength = 6000;
-                byte[] arbitraryData = new byte[currentLength];
-                rng.GetBytes(arbitraryData, 0, arbitraryData.Length);
-
-                pivSession.WriteMsroots(arbitraryData);
-
-                byte[] getData = pivSession.ReadMsroots();
-                Assert.True(getData.Length == currentLength);
-
-                bool compareResult = getData.SequenceEqual(arbitraryData);
-
-                Assert.True(compareResult);
-
-                pivSession.DeleteMsroots();
-                getData = pivSession.ReadMsroots();
-                Assert.True(getData.Length == 0);
-            }
-        }
-
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void WriteReadMsroots_Stream(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-
-            using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                Assert.NotNull(pivSession.Connection);
-
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                pivSession.DeleteMsroots();
-
-                int currentLength = 6000;
-                byte[] arbitraryData = new byte[currentLength];
-                rng.GetBytes(arbitraryData, 0, arbitraryData.Length);
-
-                pivSession.WriteMsroots(arbitraryData);
-
-                Stream getData = pivSession.ReadMsrootsStream();
-                var binReader = new BinaryReader(getData);
-                byte[] theData = binReader.ReadBytes((int)getData.Length);
-                Assert.True(theData.Length == currentLength);
-
-                bool compareResult = theData.SequenceEqual(arbitraryData);
-
-                Assert.True(compareResult);
-
-                pivSession.DeleteMsroots();
-                getData = pivSession.ReadMsrootsStream();
-                Assert.True(getData.Length == 0);
-            }
-        }
-
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void WriteMsroots_Commands(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-
-            using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
-
-            using (var pivSession = new PivSession(testDevice))
-            {
-                Assert.NotNull(pivSession.Connection);
-
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                for (int bufferSize = 2806; bufferSize <= 2808; bufferSize++)
-                {
-                    _output.WriteLine("buffer size: {0}", bufferSize);
-
-                    pivSession.ResetApplication();
-
-                    bool isValid = pivSession.TryAuthenticateManagementKey();
-                    Assert.True(isValid);
-
-                    byte[] putData = new byte[bufferSize];
-                    rng.GetBytes(putData, 0, putData.Length);
-                    int dataLength = bufferSize - 4;
-                    putData[0] = 0x53;
-                    putData[1] = 0x82;
-                    putData[2] = (byte)(dataLength >> 8);
-                    putData[3] = (byte)dataLength;
-                    dataLength = bufferSize - 8;
-                    putData[4] = 0x83;
-                    putData[5] = 0x82;
-                    putData[6] = (byte)(dataLength >> 8);
-                    putData[7] = (byte)dataLength;
-
-                    isValid = DoWriteAndWrite(pivSession, putData);
-                    Assert.True(isValid);
-                }
-            }
-        }
-
-        private static bool DoWriteAndWrite(PivSession pivSession, byte[] putData)
-        {
-            for (int index = 0; index < 5; index++)
+            TestDeviceType = testDeviceType;
+            var isValid = Session.TryAuthenticateManagementKey();
+            Assert.True(isValid);
+
+            byte[] putData = { 0x53, 0x04, 0x11, 0x22, 0x33, 0x44 };
+            for (var index = 0; index < 5; index++)
             {
                 var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
+                var putResponse = Session.Connection.SendCommand(putCommand);
+                Assert.Equal(ResponseStatus.Success, putResponse.Status);
+            }
+
+            putData = new byte[] { 0x53, 0x00 };
+            for (var index = 0; index < 5; index++)
+            {
+                var putCommand = new PutDataCommand(0x005fff11 + index, putData);
+                var putResponse = Session.Connection.SendCommand(putCommand);
+                Assert.Equal(ResponseStatus.Success, putResponse.Status);
+            }
+
+            putData = new byte[] { 0x53, 0x05, 0x11, 0x22, 0x33, 0x44, 0x55 };
+            for (var index = 0; index < 5; index++)
+            {
+                var putCommand = new PutDataCommand(0x005fff11 + index, putData);
+                var putResponse = Session.Connection.SendCommand(putCommand);
+                Assert.Equal(ResponseStatus.Success, putResponse.Status);
+            }
+
+            putData = new byte[] { 0x53, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+            for (var index = 0; index < 5; index++)
+            {
+                var putCommand = new PutDataCommand(0x005fff11 + index, putData);
+                var putResponse = Session.Connection.SendCommand(putCommand);
+                Assert.Equal(ResponseStatus.Success, putResponse.Status);
+            }
+        }
+
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteDataSession(
+            StandardTestDevice testDeviceType)
+        {
+            TestDeviceType = testDeviceType;
+            byte[] putData = { 0x11, 0x22, 0x33, 0x44 };
+            Session.WriteMsroots(putData);
+
+            Session.WriteMsroots(ReadOnlySpan<byte>.Empty);
+
+            putData = new byte[] { 0x53, 0x05, 0x11, 0x22, 0x33, 0x44, 0x55 };
+            Session.WriteMsroots(putData);
+
+            putData = new byte[] { 0x53, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+            Session.WriteMsroots(putData);
+        }
+
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteDataSessionBig(
+            StandardTestDevice testDeviceType)
+        {
+            TestDeviceType = testDeviceType;
+
+            var versionCommand = new VersionCommand();
+            var versionResponse = Session.Connection.SendCommand(versionCommand);
+            Assert.Equal(ResponseStatus.Success, versionResponse.Status);
+
+            var versionNumber = versionResponse.GetData();
+            var maxLength = 10150;
+            if (versionNumber.Major >= 4)
+            {
+                maxLength = 14000;
+            }
+
+            var putData = new byte[maxLength];
+            Rng.GetBytes(putData, 0, putData.Length);
+
+            Session.WriteMsroots(putData);
+            Session.WriteMsroots(ReadOnlySpan<byte>.Empty);
+
+            Rng.GetBytes(putData, 0, putData.Length);
+            var memStream = new MemoryStream(putData);
+            Session.WriteMsrootsStream(memStream);
+
+            Rng.GetBytes(putData, 0, putData.Length);
+            memStream = new MemoryStream(putData);
+            Session.WriteMsrootsStream(memStream);
+        }
+
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteReadMsroots_ByteArray(
+            StandardTestDevice testDeviceType)
+        {
+            TestDeviceType = testDeviceType;
+            Session.DeleteMsroots();
+
+            var currentLength = 6000;
+            var arbitraryData = new byte[currentLength];
+            Rng.GetBytes(arbitraryData, 0, arbitraryData.Length);
+
+            Session.WriteMsroots(arbitraryData);
+            var getData = Session.ReadMsroots();
+            Assert.True(getData.Length == currentLength);
+
+            var compareResult = getData.SequenceEqual(arbitraryData);
+            Assert.True(compareResult);
+
+            Session.DeleteMsroots();
+            getData = Session.ReadMsroots();
+            Assert.Empty(getData);
+        }
+
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteReadMsroots_Stream(
+            StandardTestDevice testDeviceType)
+        {
+            TestDeviceType = testDeviceType;
+            const int currentLength = 6000;
+
+            var arbitraryData = new byte[currentLength];
+            Rng.GetBytes(arbitraryData, 0, arbitraryData.Length);
+            Session.DeleteMsroots();
+            Session.WriteMsroots(arbitraryData);
+
+            var getData = Session.ReadMsrootsStream();
+            var binReader = new BinaryReader(getData);
+            var theData = binReader.ReadBytes((int)getData.Length);
+            Assert.Equal(currentLength, theData.Length);
+            Assert.True(theData.SequenceEqual(arbitraryData));
+
+            Session.DeleteMsroots();
+            getData = Session.ReadMsrootsStream();
+            Assert.Equal(0, getData.Length);
+        }
+
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteMsroots_Commands(
+            StandardTestDevice testDeviceType)
+        {
+            TestDeviceType = testDeviceType;
+            for (var bufferSize = 2806; bufferSize <= 2808; bufferSize++)
+            {
+                output.WriteLine("buffer size: {0}", bufferSize);
+
+                var isValid = Session.TryAuthenticateManagementKey();
+                Assert.True(isValid);
+
+                var putData = new byte[bufferSize];
+                Rng.GetBytes(putData, 0, putData.Length);
+                var dataLength = bufferSize - 4;
+                putData[0] = 0x53;
+                putData[1] = 0x82;
+                putData[2] = (byte)(dataLength >> 8);
+                putData[3] = (byte)dataLength;
+                dataLength = bufferSize - 8;
+                putData[4] = 0x83;
+                putData[5] = 0x82;
+                putData[6] = (byte)(dataLength >> 8);
+                putData[7] = (byte)dataLength;
+
+                isValid = DoWriteAndWrite(Session, putData);
+                Assert.True(isValid);
+            }
+        }
+
+        private static bool DoWriteAndWrite(
+            PivSession Session,
+            byte[] putData)
+        {
+            for (var index = 0; index < 5; index++)
+            {
+                var putCommand = new PutDataCommand(0x005fff11 + index, putData);
+                var putResponse = Session.Connection.SendCommand(putCommand);
                 Assert.Equal(ResponseStatus.Success, putResponse.Status);
             }
 
             byte[] noData = { 0x53, 0x00 };
-            for (int index = 0; index < 5; index++)
+            for (var index = 0; index < 5; index++)
             {
                 var putCommand = new PutDataCommand(0x005fff11 + index, noData);
-                PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
+                var putResponse = Session.Connection.SendCommand(putCommand);
                 Assert.Equal(ResponseStatus.Success, putResponse.Status);
             }
 
-            for (int index = 0; index < 5; index++)
+            for (var index = 0; index < 5; index++)
             {
                 var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
+                var putResponse = Session.Connection.SendCommand(putCommand);
                 Assert.Equal(ResponseStatus.Success, putResponse.Status);
             }
 
             return true;
+        }
+
+        override protected void Dispose(
+            bool disposing)
+        {
+            if (disposing)
+            {
+                Rng.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

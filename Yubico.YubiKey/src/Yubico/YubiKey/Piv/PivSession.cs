@@ -231,6 +231,7 @@ namespace Yubico.YubiKey.Piv
                 KeyCollector = null;
                 ResetAuthenticationStatus();
             }
+
             base.Dispose(disposing);
         }
 
@@ -280,18 +281,11 @@ namespace Yubico.YubiKey.Piv
         {
             Logger.LogInformation("GetMetadata for slot number {SlotNumber:X2}.", slotNumber);
 
-            if (!YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
-            {
+            return GetMetadataInternal(slotNumber) ??
                 throw new NotSupportedException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.NotSupportedByYubiKeyVersion));
-            }
-
-            var command = new GetMetadataCommand(slotNumber);
-            var response = Connection.SendCommand(command);
-
-            return response.GetData();
         }
 
         /// <summary>
@@ -370,7 +364,7 @@ namespace Yubico.YubiKey.Piv
         ///         PUK, then call on the YubiKey to reset.
         ///     </para>
         ///     <para>
-        ///         Before attempting to reset a YubiKey Bio Multi-protocol Edition key with ResetApplication(), verify that the PIV application is not blocked from using this method by checking the <see cref="IYubiKeyDeviceInfo.ResetBlocked"/> property. If the application is blocked, use <see cref="IYubiKeyDevice.DeviceReset"/>.
+        ///         This method does not work with YubiKey Bio Multi-protocol Edition (MPE) keys. For MPE keys, use <see cref="IYubiKeyDevice.DeviceReset"/> instead.
         ///     </para>
         /// </remarks>
         /// <exception cref="SecurityException">
@@ -406,6 +400,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         ///     Moves a key from one slot to another.
         ///     The source slot must not be the <see cref="PivSlot.Attestation" />-slot and the destination slot must be empty.
+        ///     Any key except the attestation key can be moved from one slot to another.
         /// </summary>
         /// <remarks>
         ///     Internally this method attempts to authenticate to the Yubikey by calling
@@ -415,7 +410,7 @@ namespace Yubico.YubiKey.Piv
         /// <param name="destinationSlot">The target Yubikey slot for the key you want to move. This must be a valid slot number.</param>
         /// <exception cref="InvalidOperationException">
         ///     There is no <c>KeyCollector</c> loaded, the key provided was not a
-        ///     valid Triple-DES key, or the YubiKey had some other error, such as
+        ///     valid key, the slot contained an attestation key,  the or the YubiKey had some other error, such as
         ///     unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
@@ -569,6 +564,18 @@ namespace Yubico.YubiKey.Piv
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.ApplicationResetFailure));
+        }
+        
+        private PivMetadata? GetMetadataInternal(byte slotNumber)
+        {
+            if (!YubiKey.HasFeature(YubiKeyFeature.PivMetadata))
+            {
+                return null;
+            }
+
+            var command = new GetMetadataCommand(slotNumber);
+            var response = Connection.SendCommand(command);
+            return response.GetData();
         }
     }
 }

@@ -85,9 +85,10 @@ namespace Yubico.YubiKey.Piv.Commands
     ///   PivPublicKey pubKey = generateKeyPairResponse.GetData();
     /// </code>
     /// </remarks>
+    #pragma warning disable CS0618 // Type or member is obsolete
     public class GenerateKeyPairResponse : PivResponse, IYubiKeyResponseWithData<PivPublicKey>
+    #pragma warning restore CS0618 // Type or member is obsolete
     {
-        // These are needed so we can make the check on the set of the property.
         private byte _slotNumber;
         private PivAlgorithm _algorithm;
 
@@ -105,7 +106,7 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _slotNumber;
             set
             {
-                if (PivSlot.IsValidSlotNumberForGenerate(value) == false)
+                if (!PivSlot.IsValidSlotNumberForGenerate(value))
                 {
                     throw new ArgumentException(
                         string.Format(
@@ -113,6 +114,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             ExceptionMessages.InvalidSlot,
                             value));
                 }
+
                 _slotNumber = value;
             }
         }
@@ -126,18 +128,21 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The algorithm specified is not a supported asymmetric algorithm.
         /// </exception>
-        public PivAlgorithm Algorithm
+        public PivAlgorithm Algorithm 
         {
             get => _algorithm;
             set
             {
-                if (value.IsValidAlgorithmForGenerate() == false)
+                var keyDefinitionKeyType = value.GetPivKeyDefinition();
+                bool supportsKeyGeneration = keyDefinitionKeyType is { SupportsKeyGeneration: true };
+                if (!supportsKeyGeneration)
                 {
                     throw new ArgumentException(
                         string.Format(
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.InvalidAlgorithm));
                 }
+
                 _algorithm = value;
             }
         }
@@ -155,12 +160,16 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <param name="algorithm">
         /// The algorithm (and key size) of the key pair generated.
         /// </param>
-        public GenerateKeyPairResponse(ResponseApdu responseApdu, byte slotNumber, PivAlgorithm algorithm) :
-            base(responseApdu)
+        public GenerateKeyPairResponse(
+            ResponseApdu responseApdu,
+            byte slotNumber,
+            PivAlgorithm algorithm) : base(responseApdu)
         {
             SlotNumber = slotNumber;
             Algorithm = algorithm;
         }
+
+        public Memory<byte> Data => ResponseApdu.Data.ToArray();
 
         /// <summary>
         /// Gets the public key from the YubiKey response.
@@ -183,10 +192,14 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public PivPublicKey GetData() => Status switch
-        {
-            ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data),
-            _ => throw new InvalidOperationException(StatusMessage),
-        };
+        #pragma warning disable CS0618 // Type or member is obsolete
+        public PivPublicKey GetData() =>
+            Status switch
+            {
+                ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data, Algorithm),
+                _ => throw new InvalidOperationException(StatusMessage),
+            };
+        #pragma warning restore CS0618 // Type or member is obsolete
+            
     }
 }

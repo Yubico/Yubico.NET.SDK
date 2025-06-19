@@ -33,7 +33,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 pivSession.KeyCollector = KeyCollectorDelegate;
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 var pivPublicKey = pivSession.GenerateKeyPair(slotNumber, algorithm, pinPolicy, touchPolicy);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 // At this point you will likely want to save the public key and
                 // other information. For this sample, we're simply going to
@@ -74,7 +76,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 pivSession.KeyCollector = KeyCollectorDelegate;
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 pivSession.ImportPrivateKey(slotNumber, privateKey, pinPolicy, touchPolicy);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 // At this point you will likely want to save the public key and
                 // other information. For this sample, we're simply going to

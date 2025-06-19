@@ -79,9 +79,10 @@ namespace Yubico.YubiKey.Pipelines
             _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
             // Assert
-            mockTransform.Verify(
-                x =>
-                    x.Invoke(Arg.Is<CommandApdu>(a => a == commandApdu), Arg.Any<Type>(), Arg.Any<Type>()));
+            mockTransform.Received(1).Invoke(
+                Arg.Is<CommandApdu>(a => a == commandApdu), 
+                Arg.Any<Type>(), 
+                Arg.Any<Type>());
         }
 
         [Fact]
@@ -115,9 +116,10 @@ namespace Yubico.YubiKey.Pipelines
             _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
             // Assert
-            mockTransform.Verify(
-                x =>
-                    x.Invoke(Arg.Is<CommandApdu>(a => a == commandApdu), Arg.Any<Type>(), Arg.Any<Type>()));
+            mockTransform.Received(1).Invoke(
+                Arg.Is<CommandApdu>(a => a == commandApdu),
+                Arg.Any<Type>(),
+                Arg.Any<Type>());
         }
 
         [Fact]
@@ -151,8 +153,11 @@ namespace Yubico.YubiKey.Pipelines
 
             _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
-                .Callback<CommandApdu, Type, Type>((a, b, c) => observedCla.Add(a.Cla));
-
+                .AndDoes(callInfo =>
+                {
+                    var apdu = callInfo.ArgAt<CommandApdu>(0);
+                    observedCla.Add(apdu.Cla);
+                });
             // Act
             _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
@@ -178,7 +183,11 @@ namespace Yubico.YubiKey.Pipelines
 
             _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
-                .Callback<CommandApdu, Type, Type>((a, b, c) => observedApdus.Add(a));
+                .AndDoes(callInfo =>
+                {
+                    var apdu = callInfo.ArgAt<CommandApdu>(0);
+                    observedApdus.Add(apdu);
+                });
 
             // Act
             _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
@@ -207,8 +216,11 @@ namespace Yubico.YubiKey.Pipelines
 
             _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
-                .Callback<CommandApdu, Type, Type>((a, b, c) => observedApdus.Add(a.Data.ToArray()));
-
+                .AndDoes(callInfo =>
+                {
+                    var apdu = callInfo.ArgAt<CommandApdu>(0);
+                    observedApdus.Add(apdu.Data.ToArray());
+                });
             // Act
             _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
@@ -217,7 +229,7 @@ namespace Yubico.YubiKey.Pipelines
             Assert.Equal(new byte[] { 5, 6, 7, 8 }, observedApdus[1]);
             Assert.Equal(new byte[] { 9, 10 }, observedApdus[2]);
         }
-        
+
         [Fact]
         public void Invoke_CommandApduWithLargeDataBuffer_DoesntProcessAllBytes()
         {
@@ -233,9 +245,10 @@ namespace Yubico.YubiKey.Pipelines
 
             _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(new ResponseApdu([], 0x6700))
-                .Callback<CommandApdu, Type, Type>((a, b, c) =>
+                .AndDoes(callInfo =>
                 {
-                    observedApdus.Add(a.Data.ToArray());
+                    var apdu = callInfo.ArgAt<CommandApdu>(0);
+                    observedApdus.Add(apdu.Data.ToArray());
                 });
 
             // Act

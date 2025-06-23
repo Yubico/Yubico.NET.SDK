@@ -106,7 +106,7 @@ namespace Yubico.YubiKey.Pipelines
                     testCase.CommandType,
                     testCase.ResponseType);
 
-                _previous.Reset();
+                _previous.ClearReceivedCalls();
             }
         }
 

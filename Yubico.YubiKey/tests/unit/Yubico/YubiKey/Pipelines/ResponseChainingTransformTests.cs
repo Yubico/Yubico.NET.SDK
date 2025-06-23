@@ -78,8 +78,7 @@ namespace Yubico.YubiKey.Pipelines
             _ = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
-            mockTransform.Verify(x =>
-                x.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>()), Times.Once());
+            mockTransform.Received(1).Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>());
         }
 
         [Fact]
@@ -124,16 +123,14 @@ namespace Yubico.YubiKey.Pipelines
             var response1 = new ResponseApdu(new byte[] { SW1Constants.BytesAvailable, 0x00 });
             var response2 = new ResponseApdu(new byte[] { SW1Constants.Success, 0x00 });
             _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
-                .Returns(response1)
-                .Returns(response2);
+                .Returns(response1, response2);
             var transform = new ResponseChainingTransform(mockTransform);
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+            _ = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
-            mockTransform.Verify(x =>
-                x.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>()), Times.Exactly(2));
+            mockTransform.Received(2).Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>());
         }
 
         [Fact]
@@ -146,16 +143,14 @@ namespace Yubico.YubiKey.Pipelines
             var response1 = new ResponseApdu(new byte[] { SW1Constants.BytesAvailable, 0x00 });
             var response2 = new ResponseApdu(new byte[] { SW1Constants.Success, 0x00 });
             _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
-                .Returns(response1)
-                .Returns(response2);
+                .Returns(response1, response2);
             var transform = new ResponseChainingTransform(mockTransform);
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+            _ = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
-            mockTransform.Verify(x =>
-                x.Invoke(Arg.Is<CommandApdu>(c => c.Ins == expectedIns), Arg.Any<Type>(), Arg.Any<Type>()), Times.Once);
+            mockTransform.Received(1).Invoke(Arg.Is<CommandApdu>(c => c.Ins == expectedIns), Arg.Any<Type>(), Arg.Any<Type>());
         }
 
         [Fact]
@@ -167,8 +162,7 @@ namespace Yubico.YubiKey.Pipelines
             var response2 = new ResponseApdu(new byte[] { 5, 6, 7, 8, SW1Constants.Success, 0x00 });
             byte[] expectedData = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
             _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
-                .Returns(response1)
-                .Returns(response2);
+                .Returns(response1, response2);
             var transform = new ResponseChainingTransform(mockTransform);
 
             // Act
@@ -186,8 +180,7 @@ namespace Yubico.YubiKey.Pipelines
             var response1 = new ResponseApdu(new byte[] { SW1Constants.BytesAvailable, 0x00 });
             var response2 = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
             _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
-                .Returns(response1)
-                .Returns(response2);
+                .Returns(response1, response2);
             var transform = new ResponseChainingTransform(mockTransform);
 
             // Act

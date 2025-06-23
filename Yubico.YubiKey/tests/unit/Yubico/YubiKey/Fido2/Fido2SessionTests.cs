@@ -1,4 +1,4 @@
-﻿// Copyright 2022 Yubico AB
+// Copyright 2022 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Fido2
             var mockConnection = Substitute.For<IYubiKeyConnection>();
             var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
-            _ = mockConnection.SendCommand(Arg.Any<IYubiKeyCommand<IYubiKeyResponse>>())
+            _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
                 .Returns(mockResponse);
 
             _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
@@ -60,13 +60,13 @@ namespace Yubico.YubiKey.Fido2
             var mockConnection = Substitute.For<IYubiKeyConnection>();
             var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
-            _ = mockConnection.SendCommand(Arg.Any<IYubiKeyCommand<IYubiKeyResponse>>())
+            _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
                 .Returns(mockResponse);
 
             _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
                 .Returns(mockConnection);
 
-            var session = new Fido2Session(mockYubiKey);
+            _ = new Fido2Session(mockYubiKey);
 
             mockYubiKey.Received().Connect(YubiKeyApplication.Fido2);
         }
@@ -78,13 +78,13 @@ namespace Yubico.YubiKey.Fido2
             var mockConnection = Substitute.For<IYubiKeyConnection>();
             var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
-            _ = mockConnection.SendCommand(Arg.Any<IYubiKeyCommand<IYubiKeyResponse>>())
+            _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
                 .Returns(mockResponse);
 
             _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
                 .Returns(mockConnection);
 
-            var session = new Fido2Session(mockYubiKey);
+            _ = new Fido2Session(mockYubiKey);
 
             mockConnection.Received().SendCommand(Arg.Any<GetInfoCommand>());
         }

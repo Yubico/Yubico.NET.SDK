@@ -151,7 +151,7 @@ namespace Yubico.YubiKey.TestUtilities
                 ThrowDeviceNotFoundException("No matching YubiKey found", devices);
             }
 
-            return device;
+            return device!;
         }
 
         [DoesNotReturn]

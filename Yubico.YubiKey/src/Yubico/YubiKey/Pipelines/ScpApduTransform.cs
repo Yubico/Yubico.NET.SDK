@@ -129,7 +129,7 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         [DoesNotReturn]
-        private T ThrowIfUninitialized<T>() => throw new InvalidOperationException($"{nameof(Scp.ScpState)} has not been initialized. The Setup method must be called.");
+        private static T ThrowIfUninitialized<T>() => throw new InvalidOperationException($"{nameof(Scp.ScpState)} has not been initialized. The Setup method must be called.");
 
         private static bool ShouldNotEncode(Type commandType)
         {

@@ -14,7 +14,7 @@
 
 using System;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Yubico.Core.Logging
@@ -49,14 +49,14 @@ namespace Yubico.Core.Logging
         public void ManualLoggerFactory_SettingInstance_OverridesDefaultFactory()
         {
             // Arrange
-            var mockLoggerFactory = new Mock<ILoggerFactory>();
-            Log.Instance = mockLoggerFactory.Object;
+            var mockLoggerFactory = Substitute.For<ILoggerFactory>();
+            Log.Instance = mockLoggerFactory;
 
             // Act
             ILoggerFactory actualFactory = Log.Instance;
 
             // Assert
-            Assert.Same(mockLoggerFactory.Object, actualFactory);
+            Assert.Same(mockLoggerFactory, actualFactory);
         }
 
         // Ensure that LoggerFactory can be replaced manually using the Instance property.
@@ -65,16 +65,16 @@ namespace Yubico.Core.Logging
         public void Legacy_ManualLoggerFactory_SettingInstance_OverridesDefaultFactory()
         {
             // Arrange
-            var mockLoggerFactory = new Mock<ILoggerFactory>();
+            var mockLoggerFactory = Substitute.For<ILoggerFactory>();
 #pragma warning disable CS0618 // Type or member is obsolete
-            Log.LoggerFactory = mockLoggerFactory.Object;
+            Log.LoggerFactory = mockLoggerFactory;
 #pragma warning restore CS0618 // Type or member is obsolete
 
             // Act
             ILoggerFactory actualFactory = Log.Instance;
 
             // Assert
-            Assert.Same(mockLoggerFactory.Object, actualFactory);
+            Assert.Same(mockLoggerFactory, actualFactory);
         }
     }
 }

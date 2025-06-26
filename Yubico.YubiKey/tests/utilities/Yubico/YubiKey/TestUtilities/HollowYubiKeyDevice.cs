@@ -78,6 +78,11 @@ namespace Yubico.YubiKey.TestUtilities
         /// <inheritdoc />
         public FirmwareVersion FirmwareVersion { get; set; }
 
+        public VersionQualifier VersionQualifier { get; }
+        public string VersionName => VersionQualifier.Type == VersionQualifierType.Final
+            ? FirmwareVersion.ToString()
+            : VersionQualifier.ToString();
+
         /// <inheritdoc />
         public TemplateStorageVersion TemplateStorageVersion { get; set; }
 
@@ -113,6 +118,8 @@ namespace Yubico.YubiKey.TestUtilities
             // We initialize this to zeros, but if you need a version,
             // the setter is public. HollowConnection takes a version
             // and feeds it back in the ReadStatusCommand.
+            
+            VersionQualifier = new VersionQualifier();
             FirmwareVersion = new FirmwareVersion
             {
                 Major = 0,

@@ -59,6 +59,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(testDevice))
             {
+                pivSession.ResetApplication();
                 try
                 {
                     var collectorObj = new Simple39KeyCollector();

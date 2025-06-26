@@ -31,67 +31,73 @@ namespace Yubico.YubiKey
         #region IYubiKeyDeviceInfo
 
         /// <inheritdoc />
-        public YubiKeyCapabilities AvailableUsbCapabilities => _yubiKeyInfo.AvailableUsbCapabilities;
+        public YubiKeyCapabilities AvailableUsbCapabilities => _yubiKeyDeviceInfo.AvailableUsbCapabilities;
 
         /// <inheritdoc />
-        public YubiKeyCapabilities EnabledUsbCapabilities => _yubiKeyInfo.EnabledUsbCapabilities;
+        public YubiKeyCapabilities EnabledUsbCapabilities => _yubiKeyDeviceInfo.EnabledUsbCapabilities;
 
         /// <inheritdoc />
-        public YubiKeyCapabilities AvailableNfcCapabilities => _yubiKeyInfo.AvailableNfcCapabilities;
+        public YubiKeyCapabilities AvailableNfcCapabilities => _yubiKeyDeviceInfo.AvailableNfcCapabilities;
 
         /// <inheritdoc />
-        public YubiKeyCapabilities EnabledNfcCapabilities => _yubiKeyInfo.EnabledNfcCapabilities;
+        public YubiKeyCapabilities EnabledNfcCapabilities => _yubiKeyDeviceInfo.EnabledNfcCapabilities;
 
         /// <inheritdoc />
-        public YubiKeyCapabilities FipsApproved => _yubiKeyInfo.FipsApproved;
+        public YubiKeyCapabilities FipsApproved => _yubiKeyDeviceInfo.FipsApproved;
 
         /// <inheritdoc />
-        public YubiKeyCapabilities FipsCapable => _yubiKeyInfo.FipsCapable;
+        public YubiKeyCapabilities FipsCapable => _yubiKeyDeviceInfo.FipsCapable;
 
         /// <inheritdoc />
-        public YubiKeyCapabilities ResetBlocked => _yubiKeyInfo.ResetBlocked;
+        public YubiKeyCapabilities ResetBlocked => _yubiKeyDeviceInfo.ResetBlocked;
 
         /// <inheritdoc />
-        public bool IsNfcRestricted => _yubiKeyInfo.IsNfcRestricted;
+        public bool IsNfcRestricted => _yubiKeyDeviceInfo.IsNfcRestricted;
 
         /// <inheritdoc />
-        public string? PartNumber => _yubiKeyInfo.PartNumber;
+        public string? PartNumber => _yubiKeyDeviceInfo.PartNumber;
 
         /// <inheritdoc />
-        public bool IsPinComplexityEnabled => _yubiKeyInfo.IsPinComplexityEnabled;
+        public bool IsPinComplexityEnabled => _yubiKeyDeviceInfo.IsPinComplexityEnabled;
 
         /// <inheritdoc />
-        public int? SerialNumber => _yubiKeyInfo.SerialNumber;
+        public int? SerialNumber => _yubiKeyDeviceInfo.SerialNumber;
 
         /// <inheritdoc />
-        public bool IsFipsSeries => _yubiKeyInfo.IsFipsSeries;
+        public bool IsFipsSeries => _yubiKeyDeviceInfo.IsFipsSeries;
 
         /// <inheritdoc />
-        public bool IsSkySeries => _yubiKeyInfo.IsSkySeries;
+        public bool IsSkySeries => _yubiKeyDeviceInfo.IsSkySeries;
 
         /// <inheritdoc />
-        public FormFactor FormFactor => _yubiKeyInfo.FormFactor;
+        public FormFactor FormFactor => _yubiKeyDeviceInfo.FormFactor;
 
         /// <inheritdoc />
-        public FirmwareVersion FirmwareVersion => _yubiKeyInfo.FirmwareVersion;
+        public FirmwareVersion FirmwareVersion => _yubiKeyDeviceInfo.FirmwareVersion;
+        
+        /// <inheritdoc />
+        public VersionQualifier VersionQualifier => _yubiKeyDeviceInfo.VersionQualifier;
+        
+        /// <inheritdoc />
+        public string VersionName => _yubiKeyDeviceInfo.VersionName;
 
         /// <inheritdoc />
-        public TemplateStorageVersion? TemplateStorageVersion => _yubiKeyInfo.TemplateStorageVersion;
+        public TemplateStorageVersion? TemplateStorageVersion => _yubiKeyDeviceInfo.TemplateStorageVersion;
 
         /// <inheritdoc />
-        public ImageProcessorVersion? ImageProcessorVersion => _yubiKeyInfo.ImageProcessorVersion;
+        public ImageProcessorVersion? ImageProcessorVersion => _yubiKeyDeviceInfo.ImageProcessorVersion;
 
         /// <inheritdoc />
-        public int AutoEjectTimeout => _yubiKeyInfo.AutoEjectTimeout;
+        public int AutoEjectTimeout => _yubiKeyDeviceInfo.AutoEjectTimeout;
 
         /// <inheritdoc />
-        public byte ChallengeResponseTimeout => _yubiKeyInfo.ChallengeResponseTimeout;
+        public byte ChallengeResponseTimeout => _yubiKeyDeviceInfo.ChallengeResponseTimeout;
 
         /// <inheritdoc />
-        public DeviceFlags DeviceFlags => _yubiKeyInfo.DeviceFlags;
+        public DeviceFlags DeviceFlags => _yubiKeyDeviceInfo.DeviceFlags;
 
         /// <inheritdoc />
-        public bool ConfigurationLocked => _yubiKeyInfo.ConfigurationLocked;
+        public bool ConfigurationLocked => _yubiKeyDeviceInfo.ConfigurationLocked;
 
         #endregion
 
@@ -109,7 +115,7 @@ namespace Yubico.YubiKey
         private ISmartCardDevice? _smartCardDevice;
         private IHidDevice? _hidFidoDevice;
         private IHidDevice? _hidKeyboardDevice;
-        private IYubiKeyDeviceInfo _yubiKeyInfo;
+        private IYubiKeyDeviceInfo _yubiKeyDeviceInfo;
 
         private ConnectionFactory ConnectionFactory =>
             new ConnectionFactory(
@@ -149,9 +155,9 @@ namespace Yubico.YubiKey
         /// Constructs a <see cref="YubiKeyDevice"/> instance.
         /// </summary>
         /// <param name="device">A valid device; either a smart card, keyboard, or FIDO device.</param>
-        /// <param name="info">The YubiKey device information that describes the device.</param>
+        /// <param name="deviceInfo">The YubiKey device information that describes the device.</param>
         /// <exception cref="ArgumentException">An unrecognized device type was given.</exception>
-        public YubiKeyDevice(IDevice device, IYubiKeyDeviceInfo info)
+        public YubiKeyDevice(IDevice device, IYubiKeyDeviceInfo deviceInfo)
         {
             switch (device)
             {
@@ -170,7 +176,7 @@ namespace Yubico.YubiKey
 
             _log.LogInformation("Created a YubiKeyDevice based on the {Transport} transport.", LastActiveTransport);
 
-            _yubiKeyInfo = info;
+            _yubiKeyDeviceInfo = deviceInfo;
             IsNfcDevice = _smartCardDevice?.IsNfcTransport() ?? false;
             LastActiveTransport = GetTransportIfOnlyDevice();
         }
@@ -192,7 +198,7 @@ namespace Yubico.YubiKey
             _hidFidoDevice = hidFidoDevice;
             _hidKeyboardDevice = hidKeyboardDevice;
 
-            _yubiKeyInfo = yubiKeyDeviceInfo;
+            _yubiKeyDeviceInfo = yubiKeyDeviceInfo;
             IsNfcDevice = smartCardDevice?.IsNfcTransport() ?? false;
             LastActiveTransport = GetTransportIfOnlyDevice(); // Must be after setting the three device fields.
         }
@@ -228,13 +234,13 @@ namespace Yubico.YubiKey
             MergeDevice(device);
 
             // Then merge the YubiKey device information / metadata
-            if (_yubiKeyInfo is YubiKeyDeviceInfo first && info is YubiKeyDeviceInfo second)
+            if (_yubiKeyDeviceInfo is YubiKeyDeviceInfo first && info is YubiKeyDeviceInfo second)
             {
-                _yubiKeyInfo = first.Merge(second);
+                _yubiKeyDeviceInfo = first.Merge(second);
             }
             else
             {
-                _yubiKeyInfo = info;
+                _yubiKeyDeviceInfo = info;
             }
         }
 

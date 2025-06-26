@@ -20,33 +20,33 @@ namespace Yubico.Core.Devices.Hid.UnitTests
     {
         private static IHidDDevice GetMockedDevice()
         {
-            var mock = new Mock<IHidDDevice>();
-            return mock.Object;
+            var mock = Substitute.For<IHidDDevice>();
+            return mock;
         }
 
         private static byte[] GetFeatureReport() => Hex.HexToBytes("000102030405060708090A0B0C0D0E0F");
         private static byte[] GetInputReport() => Hex.HexToBytes("0001020304050607");
         private static byte[] GetOutputReport() => Hex.HexToBytes("00010203");
 
-        private static Mock<IHidDDevice> GetMockedFeatureDevice()
+        private static IHidDDevice GetMockedFeatureDevice()
         {
-            var mock = new Mock<IHidDDevice>();
-            _ = mock.Setup(hdd => hdd.FeatureReportByteLength).Returns(16);
-            _ = mock.Setup(hdd => hdd.InputReportByteLength).Throws(new Exception());
+            var mock = Substitute.For<IHidDDevice>();
+            _ = mock.When(hdd => hdd.FeatureReportByteLength).Returns(16);
+            _ = mock.InputReportByteLength).Throws(new Exception());
             _ = mock.Setup(hdd => hdd.OutputReportByteLength).Throws(new Exception());
-            _ = mock.Setup(hdd => hdd.GetInputReport()).Throws(new Exception());
-            _ = mock.Setup(hdd => hdd.GetFeatureReport()).Returns(GetFeatureReport());
+            _ = mock.Setup(hdd => hdd.GetInputReport()).Throw(new Exception());
+            _ = mock.When(hdd => hdd.GetFeatureReport().Returns(GetFeatureReport());
             return mock;
         }
 
-        private static Mock<IHidDDevice> GetMockedIODevice()
+        private static IHidDDevice GetMockedIODevice()
         {
-            var mock = new Mock<IHidDDevice>();
-            _ = mock.Setup(hdd => hdd.InputReportByteLength).Returns(8);
-            _ = mock.Setup(hdd => hdd.OutputReportByteLength).Returns(4);
-            _ = mock.Setup(hdd => hdd.FeatureReportByteLength).Throws(new Exception());
-            _ = mock.Setup(hdd => hdd.GetFeatureReport()).Throws(new Exception());
-            _ = mock.Setup(hdd => hdd.GetInputReport()).Returns(GetInputReport());
+            var mock = Substitute.For<IHidDDevice>();
+            _ = mock.InputReportByteLength.Returns(8);
+            _ = mock.OutputReportByteLength.Returns(4);
+            _ = mock.FeatureReportByteLength).Throws(new Exception());
+            _ = mock.Setup(hdd => hdd.GetFeatureReport()).Throw(new Exception());
+            _ = mock.Setup(hdd => hdd.GetInputReport().Returns(GetInputReport());
             return mock;
         }
 
@@ -59,34 +59,34 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [Fact]
         public void Constructor_GivenFeatureDevice_CallsOpenFeatureConnection()
         {
-            Mock<IHidDDevice> mock = GetMockedFeatureDevice();
-            using var hc = new HidFeatureReportConnection(mock.Object);
-            mock.Verify(hdd => hdd.OpenFeatureConnection(), Times.Once());
+            IHidDDevice mock = GetMockedFeatureDevice();
+            using var hc = new HidFeatureReportConnection(mock);
+            mock.Received().OpenFeatureConnection();
         }
 
         [Fact]
         public void Constructor_GivenFeatureDevice_SetsInputReportSize()
         {
-            Mock<IHidDDevice> mock = GetMockedFeatureDevice();
-            using var hc = new HidFeatureReportConnection(mock.Object);
+            IHidDDevice mock = GetMockedFeatureDevice();
+            using var hc = new HidFeatureReportConnection(mock);
 
-            Assert.Equal(hc.InputReportSize, mock.Object.FeatureReportByteLength);
+            Assert.Equal(hc.InputReportSize, mock.FeatureReportByteLength);
         }
 
         [Fact]
         public void Constructor_GivenFeatureDevice_SetsOutputReportSize()
         {
-            Mock<IHidDDevice> mock = GetMockedFeatureDevice();
-            using var hc = new HidFeatureReportConnection(mock.Object);
+            IHidDDevice mock = GetMockedFeatureDevice();
+            using var hc = new HidFeatureReportConnection(mock);
 
-            Assert.Equal(hc.OutputReportSize, mock.Object.FeatureReportByteLength);
+            Assert.Equal(hc.OutputReportSize, mock.FeatureReportByteLength);
         }
 
         [Fact]
         public void SetReport_GivenNullReport_ThrowsArgumentNullException()
         {
-            Mock<IHidDDevice> mock = GetMockedFeatureDevice();
-            using var hc = new HidFeatureReportConnection(mock.Object);
+            IHidDDevice mock = GetMockedFeatureDevice();
+            using var hc = new HidFeatureReportConnection(mock);
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             _ = Assert.Throws<ArgumentNullException>(() => hc.SetReport(null));
@@ -96,78 +96,78 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [Fact]
         public void SetReport_GivenFeatureReports_CallsSetFeatureReport()
         {
-            Mock<IHidDDevice> mock = GetMockedFeatureDevice();
-            using var hc = new HidFeatureReportConnection(mock.Object);
+            IHidDDevice mock = GetMockedFeatureDevice();
+            using var hc = new HidFeatureReportConnection(mock);
 
             hc.SetReport(GetFeatureReport());
 
-            mock.Verify(hdd => hdd.SetFeatureReport(IsSeqEqual(GetFeatureReport())), Times.Once());
+            mock.Received().SetFeatureReport(IsSeqEqual(GetFeatureReport()));
         }
 
         [Fact]
         public void GetReport_GivenFeatureReports_CallsGetFeatureReport()
         {
-            Mock<IHidDDevice> mock = GetMockedFeatureDevice();
-            using var hc = new HidFeatureReportConnection(mock.Object);
+            IHidDDevice mock = GetMockedFeatureDevice();
+            using var hc = new HidFeatureReportConnection(mock);
 
             byte[] report = hc.GetReport();
 
-            mock.Verify(hdd => hdd.GetFeatureReport(), Times.Once());
+            mock.Received().GetFeatureReport();
             Assert.Equal(GetFeatureReport(), report);
         }
 
         [Fact]
         public void Constructor_GivenIODevice_CallsOpenIOConnection()
         {
-            Mock<IHidDDevice> mock = GetMockedIODevice();
-            using var hc = new HidIOReportConnection(mock.Object);
-            mock.Verify(hdd => hdd.OpenIOConnection(), Times.Once());
+            IHidDDevice mock = GetMockedIODevice();
+            using var hc = new HidIOReportConnection(mock);
+            mock.Received().OpenIOConnection();
         }
 
         [Fact]
         public void Constructor_GivenIODevice_SetsInputReportSize()
         {
-            Mock<IHidDDevice> mock = GetMockedIODevice();
-            using var hc = new HidIOReportConnection(mock.Object);
+            IHidDDevice mock = GetMockedIODevice();
+            using var hc = new HidIOReportConnection(mock);
 
-            Assert.Equal(hc.InputReportSize, mock.Object.InputReportByteLength);
+            Assert.Equal(hc.InputReportSize, mock.InputReportByteLength);
         }
 
         [Fact]
         public void Constructor_GivenIODevice_SetsOutputReportSize()
         {
-            Mock<IHidDDevice> mock = GetMockedIODevice();
-            using var hc = new HidIOReportConnection(mock.Object);
+            IHidDDevice mock = GetMockedIODevice();
+            using var hc = new HidIOReportConnection(mock);
 
-            Assert.Equal(hc.OutputReportSize, mock.Object.OutputReportByteLength);
+            Assert.Equal(hc.OutputReportSize, mock.OutputReportByteLength);
         }
 
         [Fact]
         public void SetReport_GivenIOReports_CallsSetOutputReport()
         {
-            Mock<IHidDDevice> mock = GetMockedIODevice();
-            using var hc = new HidIOReportConnection(mock.Object);
+            IHidDDevice mock = GetMockedIODevice();
+            using var hc = new HidIOReportConnection(mock);
 
             hc.SetReport(GetOutputReport());
 
-            mock.Verify(hdd => hdd.SetOutputReport(IsSeqEqual(GetOutputReport())), Times.Once());
+            mock.Received().SetOutputReport(IsSeqEqual(GetOutputReport()));
         }
 
         [Fact]
         public void GetReport_GivenIOReports_CallsGetInputReport()
         {
-            Mock<IHidDDevice> mock = GetMockedIODevice();
-            using var hc = new HidIOReportConnection(mock.Object);
+            IHidDDevice mock = GetMockedIODevice();
+            using var hc = new HidIOReportConnection(mock);
 
             byte[] report = hc.GetReport();
 
-            mock.Verify(hdd => hdd.GetInputReport(), Times.Once());
+            mock.Received().GetInputReport();
             Assert.Equal(GetInputReport(), report);
         }
 
         private static byte[] IsSeqEqual(byte[] val)
         {
-            return It.Is<byte[]>(b => b.SequenceEqual(val));
+            return Arg.Is<byte[]>(b => b.SequenceEqual(val));
         }
     }
 #endif

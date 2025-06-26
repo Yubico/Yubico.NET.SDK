@@ -15,10 +15,10 @@ generate_rsa() {
     openssl req -new -key rsa${bits}_private.pem -out rsa${bits}.csr -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=rsa${bits}.example.com"
 
     # Generate self-signed certificate
-    openssl x509 -req -in rsa${bits}.csr -signkey rsa${bits}_private.pem -out rsa${bits}_cert.pem
+    openssl x509 -req -days 36500 -in rsa${bits}.csr -signkey rsa${bits}_private.pem -out rsa${bits}_cert.pem
 
     # Generate certificate with attestation
-    openssl x509 -req -in rsa${bits}.csr -signkey rsa${bits}_private.pem -out rsa${bits}_cert_attest.pem \
+    openssl x509 -req -days 36500 -in rsa${bits}.csr -signkey rsa${bits}_private.pem -out rsa${bits}_cert_attest.pem \
         -extfile <(printf "keyUsage=digitalSignature,keyEncipherment\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid:always,issuer\nbasicConstraints=CA:TRUE")
 }
 
@@ -44,23 +44,35 @@ generate_ec() {
 
         # Generate public key
         openssl pkey -in ${curve,,}_private.pem -pubout -out ${curve,,}_public.pem
+        
+        if [[ $curve == "ED25519" ]]; then
+          # Generate CSR
+          openssl req -new -key ${curve,,}_private.pem -out ${curve,,}.csr -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=${curve,,}.example.com"
+      
+          # Generate self-signed certificate
+          openssl x509 -req -days 36500 -in ${curve,,}.csr -signkey ${curve,,}_private.pem -out ec${curve,,}_cert.pem
+      
+          # Generate certificate with attestation
+          openssl x509 -req -days 36500 -in ${curve,,}.csr -signkey ${curve,,}_private.pem -out ec${curve,,}_cert_attest.pem \
+              -extfile <(printf "keyUsage=digitalSignature,keyEncipherment\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid:always,issuer\nbasicConstraints=CA:TRUE")
+        fi
     else
         # Generate private key in PKCS8 format
-        openssl ecparam -name $curve_param -genkey | openssl pkcs8 -topk8 -nocrypt -out ${curve,,}_private.pem
+        openssl ecparam -name $curve_param -genkey | openssl pkcs8 -topk8 -nocrypt -out ec${curve,,}_private.pem
 
         # Generate public key
-        openssl ec -in ${curve,,}_private.pem -pubout -out ${curve,,}_public.pem
+        openssl ec -in ${curve,,}_private.pem -pubout -out ec${curve,,}_public.pem
+        
+        # Generate CSR
+        openssl req -new -key ${curve,,}_private.pem -out ${curve,,}.csr -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=${curve,,}.example.com"
+    
+        # Generate self-signed certificate
+        openssl x509 -req -days 36500 -in ${curve,,}.csr -signkey ${curve,,}_private.pem -out ec${curve,,}_cert.pem
+    
+        # Generate certificate with attestation
+        openssl x509 -req -days 36500 -in ${curve,,}.csr -signkey ${curve,,}_private.pem -out ec${curve,,}_cert_attest.pem \
+            -extfile <(printf "keyUsage=digitalSignature,keyEncipherment\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid:always,issuer\nbasicConstraints=CA:TRUE")
     fi
-
-    # Generate CSR
-    openssl req -new -key ${curve,,}_private.pem -out ${curve,,}.csr -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=${curve,,}.example.com"
-
-    # Generate self-signed certificate
-    openssl x509 -req -in ${curve,,}.csr -signkey ${curve,,}_private.pem -out ${curve,,}_cert.pem
-
-    # Generate certificate with attestation
-    openssl x509 -req -in ${curve,,}.csr -signkey ${curve,,}_private.pem -out ${curve,,}_cert_attest.pem \
-        -extfile <(printf "keyUsage=digitalSignature,keyEncipherment\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid:always,issuer\nbasicConstraints=CA:TRUE")
 }
 
 # Create directory for keys and certificates

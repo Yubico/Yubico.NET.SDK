@@ -53,17 +53,16 @@ data is 192 bits long, but because of the "parity bits", only 168 bits supply th
 strength. In addition, because of certain attacks on Triple-DES, the actual effective bit
 strength of a key is 112.
 
-The YubiKey is manufactured with the standard default PIN, PUK, and managment key values:
+The YubiKey is manufactured with the following default PIN, PUK, and management key values:
 
 * PIN: "123456"
 * PUK: "12345678"
-* Management Key: (Firmware Version 5.6 and below: Triple-DES / 5.7 and above: AES-192),
-  0x010203040506070801020304050607080102030405060708\
-  0102030405060708 three times
+* Management Key: "010203040506070801020304050607080102030405060708"
 
-Note that the PIV standard specifies these default/initial values. For firmware 5.4 YubiKeys that allow AES, the default
-management key is Triple-DES. For firmware 5.7 and above
-YubiKeys, the default management key is AES-192.
+Note that the PIV standard specifies these default values. And while the management key value is 
+consistent across YubiKeys, the management key *algorithm* depends on a key's firmware version.
+For firmware 5.6 and earlier, the default management key algorithm is Triple-DES; for firmware 
+5.7 and later, the default algorithm is AES-192.
 
 Upon receipt of the YubiKey, it is a good idea to change the PIN, PUK, and management key from the default values. See
 [PivSession.TryChangePin](xref:Yubico.YubiKey.Piv.PivSession.TryChangePin%2a), [PivSession.TryChangePuk](xref:Yubico.YubiKey.Piv.PivSession.TryChangePuk),
@@ -125,6 +124,9 @@ YubiKey's PIV application. At this point, all you can do is reset the PIV applic
 deletes the keys in all PIV slots and resets the PIN, PUK, and management key to their
 defaults. Note that this has no effect on the other YubiKey applications (OTP, FIDO,
 etc.).
+
+> [!NOTE]
+> ``PivSession.Reset()`` cannot be used with YubiKey Bio Multi-protocol Edition (MPE) keys — use the [device-wide reset](xref:UsersManualBioMpe#resetting-a-yubikey-bio-mpe) instead. YubiKey Bio MPE keys also do not have PUKs, so it is not possible to unblock a blocked PIN. See [YubiKey Bio Multi-protocol Edition considerations and quirks](xref:UsersManualBioMpe#) for more information. 
 
 The management key cannot be blocked. If an attacker wants to try to break your management
 key, they can try a brute-force attack (with a Triple-DES it is a modified brute-force

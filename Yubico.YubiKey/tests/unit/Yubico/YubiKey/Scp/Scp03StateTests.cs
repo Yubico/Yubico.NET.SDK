@@ -1,5 +1,5 @@
-using System;
-using Moq;
+﻿using System;
+using NSubstitute;
 using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
@@ -16,54 +16,54 @@ namespace Yubico.YubiKey.Scp
 
         public Scp03StateTests()
         {
-            var parent = new Mock<IApduTransform>();
+            var parent = Substitute.For<IApduTransform>();
             var keyParams = Scp03KeyParameters.DefaultKey;
             var hostChallenge = new byte[8];
             var cardChallenge = new byte[8];
 
             ResponseData = GetFakeResponseApduData(hostChallenge, cardChallenge);
 
-            parent.Setup(p => p.Invoke(
-                    It.IsAny<CommandApdu>(),
+            parent.Invoke(
+                    Arg.Any<CommandApdu>(),
                     typeof(InitializeUpdateCommand),
-                    typeof(InitializeUpdateResponse)))
+                    typeof(InitializeUpdateResponse))
                 .Returns(new ResponseApdu(ResponseData));
 
-            parent.Setup(p => p.Invoke(
-                    It.IsAny<CommandApdu>(),
+            parent.Invoke(
+                    Arg.Any<CommandApdu>(),
                     typeof(ExternalAuthenticateCommand),
-                    typeof(ExternalAuthenticateResponse)))
+                    typeof(ExternalAuthenticateResponse))
                 .Returns(new ResponseApdu(ResponseData));
 
             // Act
-            State = Scp03State.CreateScpState(parent.Object, keyParams, hostChallenge);
+            State = Scp03State.CreateScpState(parent, keyParams, hostChallenge);
         }
 
         [Fact]
         public void CreateScpState_ValidParameters_InitializesCorrectly()
         {
             // Arrange
-            var parent = new Mock<IApduTransform>();
+            var parent = Substitute.For<IApduTransform>();
             var keyParams = Scp03KeyParameters.DefaultKey;
             var hostChallenge = new byte[8];
             var cardChallenge = new byte[8];
 
             var responseApduData = GetFakeResponseApduData(hostChallenge, cardChallenge);
 
-            parent.Setup(p => p.Invoke(
-                    It.IsAny<CommandApdu>(),
+            parent.Invoke(
+                    Arg.Any<CommandApdu>(),
                     typeof(InitializeUpdateCommand),
-                    typeof(InitializeUpdateResponse)))
+                    typeof(InitializeUpdateResponse))
                 .Returns(new ResponseApdu(responseApduData));
 
-            parent.Setup(p => p.Invoke(
-                    It.IsAny<CommandApdu>(),
+            parent.Invoke(
+                    Arg.Any<CommandApdu>(),
                     typeof(ExternalAuthenticateCommand),
-                    typeof(ExternalAuthenticateResponse)))
+                    typeof(ExternalAuthenticateResponse))
                 .Returns(new ResponseApdu(responseApduData));
 
             // Act
-            var state = Scp03State.CreateScpState(parent.Object, keyParams, hostChallenge);
+            var state = Scp03State.CreateScpState(parent, keyParams, hostChallenge);
 
             // Assert
             Assert.NotNull(state);
@@ -86,12 +86,12 @@ namespace Yubico.YubiKey.Scp
         public void CreateScpState_NullKeyParams_ThrowsArgumentNullException()
         {
             // Arrange
-            var pipeline = new Mock<IApduTransform>();
+            var pipeline = Substitute.For<IApduTransform>();
             byte[] hostChallenge = new byte[8];
 
             // Act & Assert
             Assert.Throws<ArgumentNullException>(() =>
-                Scp03State.CreateScpState(pipeline.Object, null!, hostChallenge));
+                Scp03State.CreateScpState(pipeline, null!, hostChallenge));
         }
 
         [Fact]

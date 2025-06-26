@@ -252,7 +252,7 @@ The next sections will detail specific key management and protocol details for b
 
 ### Static keys structure
 
-SCP03 relies on a set of shared, secret, symmetric cryptographic keys. Each key set consists of three 16-byte AES-128 keys encapsulated in the [`StaticKeys`](xref:Yubico.YubiKey.Scp03.StaticKeys) class:
+SCP03 relies on a set of shared, secret, symmetric cryptographic keys. Each key set consists of three 16-byte AES-128 keys encapsulated in the [`StaticKeys`](xref:Yubico.YubiKey.Scp.StaticKeys) class:
 
 - Channel encryption key (Key-ENC)
 - Channel MAC key (Key-MAC) 

@@ -2,6 +2,7 @@ name: 🐞 Bug
 description: File a bug/issue.
 title: "[BUG] <title>"
 labels: ["bug"]
+type: Bug
 projects: []
 assignees: []
 body:

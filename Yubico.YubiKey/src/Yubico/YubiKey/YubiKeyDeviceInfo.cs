@@ -18,6 +18,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey
 {
@@ -73,8 +75,15 @@ namespace Yubico.YubiKey
         /// <inheritdoc />
         public FormFactor FormFactor { get; set; }
 
+        public string VersionName => VersionQualifier.Type == VersionQualifierType.Final
+            ? FirmwareVersion.ToString()
+            : VersionQualifier.ToString();
+
         /// <inheritdoc />
         public FirmwareVersion FirmwareVersion { get; set; }
+
+        /// <inheritdoc />
+        internal VersionQualifier VersionQualifier { get; set; }
 
         /// <inheritdoc />
         public TemplateStorageVersion? TemplateStorageVersion { get; set; }
@@ -109,6 +118,7 @@ namespace Yubico.YubiKey
         public YubiKeyDeviceInfo()
         {
             FirmwareVersion = new FirmwareVersion();
+            VersionQualifier = new VersionQualifier(FirmwareVersion, VersionQualifierType.Final, 0);
         }
 
         /// <summary>
@@ -191,6 +201,10 @@ namespace Yubico.YubiKey
                         };
 
                         break;
+
+                    case YubikeyDeviceManagementTags.VersionQualifierTag:
+                        // This tag is handled later in the method.
+                        break;
                     case YubikeyDeviceManagementTags.AutoEjectTimeoutTag:
                         deviceInfo.AutoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(value);
                         break;
@@ -261,6 +275,55 @@ namespace Yubico.YubiKey
 
             deviceInfo.IsSkySeries |= skySeriesFlag;
 
+            if (!responseApduData.TryGetValue(YubikeyDeviceManagementTags.VersionQualifierTag, out var versionQualifierBytes))
+            {
+                deviceInfo.VersionQualifier = new VersionQualifier(deviceInfo.FirmwareVersion, VersionQualifierType.Final, 0);
+            }
+            else
+            {
+                if (versionQualifierBytes.Length != 0x0E)
+                {
+                    throw new ArgumentException("Invalid data length.");
+                }
+
+                const byte TAG_VERSION = 0x01;
+                const byte TAG_TYPE = 0x02;
+                const byte TAG_ITERATION = 0x03;
+
+                var data = TlvObjects.DecodeDictionary(versionQualifierBytes.Span);
+
+                if (!data.TryGetValue(TAG_VERSION, out var firmwareVersionBytes))
+                {
+                    throw new ArgumentException("Missing TLV field: TAG_VERSION.");
+                }
+                if (!data.TryGetValue(TAG_TYPE, out var versionTypeBytes))
+                {
+                    throw new ArgumentException("Missing TLV field: TAG_TYPE.");
+                }
+                if (!data.TryGetValue(TAG_ITERATION, out var iterationBytes))
+                {
+                    throw new ArgumentException("Missing TLV field: TAG_ITERATION.");
+                }
+
+                var qualifierVersion = FirmwareVersion.FromBytes(firmwareVersionBytes.Span);
+                var versionType = (VersionQualifierType)versionTypeBytes.Span[0];
+                long iteration = BinaryPrimitives.ReadUInt32BigEndian(iterationBytes.Span);
+
+                deviceInfo.VersionQualifier = new VersionQualifier(
+                    qualifierVersion,
+                    versionType,
+                    iteration);
+            }
+
+            bool isFinalVersion = deviceInfo.VersionQualifier.Type == VersionQualifierType.Final;
+            if (!isFinalVersion)
+            {
+                var Logger = Core.Logging.Log.GetLogger<YubiKeyDeviceInfo>();
+                Logger.LogDebug("Overriding behavioral version with {FirmwareString}", deviceInfo.VersionQualifier.FirmwareVersion);
+            }
+
+            var computedVersion = isFinalVersion ? deviceInfo.FirmwareVersion : deviceInfo.VersionQualifier.FirmwareVersion;
+            deviceInfo.FirmwareVersion = computedVersion;
             return deviceInfo;
         }
 
@@ -308,6 +371,10 @@ namespace Yubico.YubiKey
                 FirmwareVersion = FirmwareVersion != new FirmwareVersion()
                     ? FirmwareVersion
                     : second.FirmwareVersion,
+
+                VersionQualifier = VersionQualifier != new VersionQualifier()
+                    ? VersionQualifier
+                    : second.VersionQualifier,
 
                 AutoEjectTimeout = DeviceFlags.HasFlag(DeviceFlags.TouchEject)
                     ? AutoEjectTimeout

@@ -29,12 +29,12 @@ public class Curve25519PublicKeyTests
         var testPublicPoint = testKey.GetPublicPoint();
 
         // Act
-        var publicKeyParams = Curve25519PublicKey.CreateFromValue(testPublicPoint, keyType); 
+        var publicKey = Curve25519PublicKey.CreateFromValue(testPublicPoint, keyType); 
 
         // Assert
-        Assert.NotNull(publicKeyParams);
-        Assert.Equal(testPublicPoint, publicKeyParams.PublicPoint);
-        Assert.Equal(testKey.GetKeyDefinition(), publicKeyParams.KeyDefinition);
+        Assert.NotNull(publicKey);
+        Assert.Equal(testPublicPoint, publicKey.PublicPoint);
+        Assert.Equal(testKey.GetKeyDefinition(), publicKey.KeyDefinition);
     }
 
     [Theory]
@@ -46,12 +46,11 @@ public class Curve25519PublicKeyTests
         var testPublicKey = TestKeys.GetTestPublicKey(keyType);
             
         // Act
-        var publicKeyParams = ECPublicKey.CreateFromPkcs8(testPublicKey.EncodedKey);
-        var ecPublicKeyParams = publicKeyParams as Curve25519PublicKey;
-        Assert.NotNull(ecPublicKeyParams);
+        var publicKey = Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(testPublicKey.EncodedKey);
+        Assert.NotNull(publicKey);
 
         // Assert
-        Assert.Equal(testPublicKey.GetPublicPoint(), ecPublicKeyParams.PublicPoint);
+        Assert.Equal(testPublicKey.GetPublicPoint(), publicKey.PublicPoint);
     }
     
     [Theory]
@@ -61,14 +60,14 @@ public class Curve25519PublicKeyTests
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(keyType);
-        var publicKey = testKey.GetPublicPoint();
+        var testPublicPoint = testKey.GetPublicPoint();
 
         // Act
-        var publicKeyParams = Curve25519PublicKey.CreateFromPkcs8(testKey.EncodedKey); 
+        var publicKey = Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(testKey.EncodedKey); 
 
         // Assert
-        Assert.NotNull(publicKeyParams);
-        Assert.Equal(publicKey, publicKeyParams.PublicPoint);
-        Assert.Equal(testKey.GetKeyDefinition(), publicKeyParams.KeyDefinition);
+        Assert.NotNull(publicKey);
+        Assert.Equal(testPublicPoint, publicKey.PublicPoint);
+        Assert.Equal(testKey.GetKeyDefinition(), publicKey.KeyDefinition);
     }
 }

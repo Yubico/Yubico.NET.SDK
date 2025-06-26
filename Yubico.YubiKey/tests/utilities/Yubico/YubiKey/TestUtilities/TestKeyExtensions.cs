@@ -7,10 +7,15 @@ namespace Yubico.YubiKey.TestUtilities
 {
     public static class TestKeyExtensions
     {
+        public static IPrivateKey AsPrivateKey(this TestKey key) => key.AsPrivateKey();
+
+        public static IPublicKey AsPublicKey(this TestKey key) => key.AsPublicKey();
+        
         /// <summary>
         /// Converts the key to a PIV private key format.
         /// </summary>
         /// <returns>PivPrivateKey instance</returns>
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
         public static PivPrivateKey AsPivPrivateKey(
             this TestKey key)
         {
@@ -38,25 +43,26 @@ namespace Yubico.YubiKey.TestUtilities
         /// Converts the key to a PIV public key format.
         /// </summary>
         /// <returns>PivPublicKey instance</returns>
+        [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
         public static PivPublicKey AsPivPublicKey(
             this TestKey key)
         {
             var keyDefinition = key.KeyDefinition;
             if (keyDefinition.IsRSA)
             {
-                var rsaPublicKey = RSAPublicKey.CreateFromPkcs8(key.EncodedKey);
+                var rsaPublicKey = RSAPublicKey.CreateFromSubjectPublicKeyInfo(key.EncodedKey);
                 var rsaPivEncodedKey = rsaPublicKey.EncodeAsPiv();
                 return PivPublicKey.Create(rsaPivEncodedKey, key.KeyType.GetPivAlgorithm());
             }
 
             if (keyDefinition is { IsEllipticCurve: true, AlgorithmOid: Oids.ECDSA })
             {
-                var ecPublicKey = ECPublicKey.CreateFromPkcs8(key.EncodedKey);
+                var ecPublicKey = ECPublicKey.CreateFromSubjectPublicKeyInfo(key.EncodedKey);
                 var ecPivEncodedKey = ecPublicKey.EncodeAsPiv();
                 return PivPublicKey.Create(ecPivEncodedKey, key.KeyType.GetPivAlgorithm());
             }
 
-            var cvPublicKey = Curve25519PublicKey.CreateFromPkcs8(key.EncodedKey);
+            var cvPublicKey = Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(key.EncodedKey);
             var cvPivEncodedKey = cvPublicKey.EncodeAsPiv();
             return PivPublicKey.Create(cvPivEncodedKey, keyDefinition.KeyType.GetPivAlgorithm());
         }

@@ -140,7 +140,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </remarks>
         public GetMetadataCommand()
         {
-            _slotNumber = 0;
+            
         }
 
         /// <inheritdoc />

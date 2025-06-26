@@ -26,100 +26,62 @@ namespace Yubico.YubiKey.Piv.Commands
     // random bytes, skip the first SpecifiedStart bytes (get a random object and
     // generate that many bytes).
     [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class AuthMgmtKeyCmdTests : IDisposable
+    public class AuthMgmtKeyCmdTests : PivSessionIntegrationTestBase
     {
-        private readonly IYubiKeyDevice yubiKey;
-
-        public AuthMgmtKeyCmdTests()
-        {
-            yubiKey = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
-            ResetPiv(yubiKey);
-        }
-
-        public void Dispose()
-        {
-            ResetPiv(yubiKey);
-        }
-
         [Fact]
         public void AuthKey_Default_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
+            byte[] mgmtKey =
             {
-                return;
-            }
+                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+            };
 
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                byte[] mgmtKey = {
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-                };
+            var initCmd = new InitializeAuthenticateManagementKeyCommand(false, DefaultManagementKeyType.GetPivAlgorithm());
+            var initRsp = Session.Connection.SendCommand(initCmd);
+            Assert.Equal(ResponseStatus.Success, initRsp.Status);
 
-                var initCmd = new InitializeAuthenticateManagementKeyCommand(false, KeyType.TripleDES.GetPivAlgorithm());
-                InitializeAuthenticateManagementKeyResponse initRsp = pivSession.Connection.SendCommand(initCmd);
-                Assert.Equal(ResponseStatus.Success, initRsp.Status);
+            var completeCmd = new CompleteAuthenticateManagementKeyCommand(initRsp, mgmtKey);
+            var completeRsp = Session.Connection.SendCommand(completeCmd);
 
-                var completeCmd = new CompleteAuthenticateManagementKeyCommand(initRsp, mgmtKey);
-                CompleteAuthenticateManagementKeyResponse completeRsp = pivSession.Connection.SendCommand(completeCmd);
-
-                Assert.Equal(ResponseStatus.Success, completeRsp.Status);
-            }
+            Assert.Equal(ResponseStatus.Success, completeRsp.Status);
         }
 
         [Fact]
         public void AuthKey_Aes_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
+            byte[] mgmtKey =
             {
-                return;
-            }
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+                0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
+                0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
+            };
 
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                byte[] defaultKey = {
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-                };
-                byte[] mgmtKey = {
-                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-                    0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
-                    0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
-                };
+            // TODO this test only works with 5.4.3 and lower
+            var initCmd = new InitializeAuthenticateManagementKeyCommand(true, DefaultManagementKeyType.GetPivAlgorithm());
+            var initRsp = Session.Connection.SendCommand(initCmd);
+            Assert.Equal(ResponseStatus.Success, initRsp.Status);
 
-                var initCmd = new InitializeAuthenticateManagementKeyCommand(true, KeyType.TripleDES.GetPivAlgorithm()); // TODO this test only works with 5.4.3 and lower
-                InitializeAuthenticateManagementKeyResponse initRsp = pivSession.Connection.SendCommand(initCmd);
-                Assert.Equal(ResponseStatus.Success, initRsp.Status);
+            var completeCmd = new CompleteAuthenticateManagementKeyCommand(initRsp, DefaultManagementKey.Span);
+            var completeRsp = Session.Connection.SendCommand(completeCmd);
 
-                var completeCmd = new CompleteAuthenticateManagementKeyCommand(initRsp, defaultKey);
-                CompleteAuthenticateManagementKeyResponse completeRsp = pivSession.Connection.SendCommand(completeCmd);
+            Assert.Equal(ResponseStatus.Success, completeRsp.Status);
 
-                Assert.Equal(ResponseStatus.Success, completeRsp.Status);
+            var setCmd =
+                new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Never, KeyType.AES192.GetPivAlgorithm());
 
-                var setCmd = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Never, KeyType.AES192.GetPivAlgorithm());
+            var setRsp = Session.Connection.SendCommand(setCmd);
+            Assert.Equal(ResponseStatus.Success, setRsp.Status);
 
-                SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
-                Assert.Equal(ResponseStatus.Success, setRsp.Status);
+            initCmd = new InitializeAuthenticateManagementKeyCommand(true, KeyType.AES192.GetPivAlgorithm());
+            initRsp = Session.Connection.SendCommand(initCmd);
+            Assert.Equal(ResponseStatus.Success, initRsp.Status);
 
-                initCmd = new InitializeAuthenticateManagementKeyCommand(true, KeyType.AES192.GetPivAlgorithm());
-                initRsp = pivSession.Connection.SendCommand(initCmd);
-                Assert.Equal(ResponseStatus.Success, initRsp.Status);
+            completeCmd = new CompleteAuthenticateManagementKeyCommand(initRsp, mgmtKey);
+            completeRsp = Session.Connection.SendCommand(completeCmd);
 
-                completeCmd = new CompleteAuthenticateManagementKeyCommand(initRsp, mgmtKey);
-                completeRsp = pivSession.Connection.SendCommand(completeCmd);
-
-                Assert.Equal(ResponseStatus.Success, completeRsp.Status);
-            }
-        }
-
-        private static void ResetPiv(IYubiKeyDevice yubiKey)
-        {
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                pivSession.ResetApplication();
-            }
+            Assert.Equal(ResponseStatus.Success, completeRsp.Status);
         }
     }
 }

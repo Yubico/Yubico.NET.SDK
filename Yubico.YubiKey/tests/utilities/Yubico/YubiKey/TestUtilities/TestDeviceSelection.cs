@@ -90,6 +90,7 @@ namespace Yubico.YubiKey.TestUtilities
                 StandardTestDevice.Fw5 => SelectDevice(5),
                 StandardTestDevice.Fw5Fips => SelectDevice(5, isFipsSeries: true),
                 StandardTestDevice.Fw5Bio => SelectDevice(5,  [FormFactor.UsbCBiometricKeychain, FormFactor.UsbABiometricKeychain]),
+                StandardTestDevice.Any => devices.First(),
                 _ => throw new ArgumentException("Invalid test device value.", nameof(testDeviceType)),
             };
 
@@ -150,7 +151,7 @@ namespace Yubico.YubiKey.TestUtilities
                 ThrowDeviceNotFoundException("No matching YubiKey found", devices);
             }
 
-            return device;
+            return device!;
         }
 
         [DoesNotReturn]

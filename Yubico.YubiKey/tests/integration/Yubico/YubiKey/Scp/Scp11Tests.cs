@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Scp
             session.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
             if (desiredDeviceType == StandardTestDevice.Fw5Fips)
             {
-                ScpTestUtilities.SetFipsApprovedCredentials(session);
+                FipsTestUtilities.SetFipsApprovedCredentials(session);
             }
 
             var result = session.GenerateKeyPair(PivSlot.Retired12, KeyType.ECP256, PivPinPolicy.Always);

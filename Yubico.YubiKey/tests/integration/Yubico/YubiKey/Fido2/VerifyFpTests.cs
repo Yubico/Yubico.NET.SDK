@@ -20,12 +20,11 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
-    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
     [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class VerifyFpTests : SimpleIntegrationTestConnection
     {
         public VerifyFpTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
 

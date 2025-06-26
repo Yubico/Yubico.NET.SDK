@@ -16,8 +16,8 @@ namespace Yubico.PlatformInterop
 {
     internal static partial class Libraries
     {
-        internal const string CoreFoundation = "CoreFoundation.framework/CoreFoundation";
-        internal const string IOKitFramework = "IOKit.framework/IOKit";
-        internal const string WinSCard = "PCSC.framework/PCSC";
+        internal const string CoreFoundation = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
+        internal const string IOKitFramework = "/System/Library/Frameworks/IOKit.framework/IOKit";
+        internal const string WinSCard = "/System/Library/Frameworks/PCSC.framework/PCSC";
     }
 }

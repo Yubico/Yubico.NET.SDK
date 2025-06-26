@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
@@ -167,6 +166,12 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public ReadOnlyMemory<byte>? LargeBlobKey { get; private set; }
 
+
+        /// <summary>
+        /// This returns the raw CBOR encoded credential data from the YubiKey, as returned by the MakeCredential operation.
+        /// </summary>
+        public ReadOnlyMemory<byte> RawData { get; }
+
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private MakeCredentialData()
@@ -193,10 +198,11 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public MakeCredentialData(ReadOnlyMemory<byte> cborEncoding)
         {
+            RawData = cborEncoding;
+            var map = new CborMap<int>(RawData);
+            
             try
             {
-                var map = new CborMap<int>(cborEncoding);
-
                 Format = map.ReadTextString(KeyFormat);
                 AuthenticatorData = new AuthenticatorData(map.ReadByteString(KeyAuthData));
                 if (!(AuthenticatorData.CredentialPublicKey is CoseEcPublicKey)

@@ -29,10 +29,6 @@ during the reconfiguration operation.
 > ```System.InvalidOperationException has been thrown.```
 > ```YubiKey Operation Failed. [Warning, state of non-volatile memory is unchanged.]```
 
-So for example, let's say that the short press slot of a key was configured with a Yubico OTP credential and a slot
-access code. If you want to reconfigure the slot with an OATH HOTP credential, you will have to provide the slot's
-access code when calling ``ConfigureHotp()``.
-
 Access codes can only be set, reset, or removed during another slot configuration operation:
 
 - [ConfigureYubicoOtp()](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureYubicoOtp%28Yubico.YubiKey.Otp.Slot%29)
@@ -40,6 +36,9 @@ Access codes can only be set, reset, or removed during another slot configuratio
 - [ConfigureChallengeResponse()](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureChallengeResponse%28Yubico.YubiKey.Otp.Slot%29)
 - [ConfigureStaticPassword()](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureStaticPassword%28Yubico.YubiKey.Otp.Slot%29)
 - [UpdateSlot()](xref:Yubico.YubiKey.Otp.OtpSession.UpdateSlot%28Yubico.YubiKey.Otp.Slot%29)
+
+For example, to configure the YubiKey's Long Press (2) slot with a _new_ HOTP credential and prevent unauthorized removal, invoke the ``ConfigureHotp()`` function and provide a slot access code to protect the configuration.
+Conversely, if you would like to protect an _existing_ slot configuration such as the factory-programmed Yubico OTP (YubiOTP) on the Short Press (1) slot, invoke the ``updateSlot()`` function to set the slot access code.
 
 > [!NOTE]
 > If a slot is configured with an access code,
@@ -75,7 +74,7 @@ var yubiKey = yubiKeyList.First();
 
 ## Exampe: set a slot access code
 
-To set a slot's access code when no access code is present,
+To set a slot's access code during slot programming when no access code is present,
 call [SetNewAccessCode()](xref:Yubico.YubiKey.Otp.Operations.OperationBase%601.SetNewAccessCode%28Yubico.YubiKey.Otp.SlotAccessCode%29)
 during a slot configuration operation, and provide the access code as a ``SlotAccessCode`` object. Prior to the
 configuration operation, initialize the ``SlotAccessCode`` object by passing it the access code
@@ -98,7 +97,7 @@ using (OtpSession otp = new OtpSession(yubiKey))
 
 ## Example: reset a slot access code
 
-To reset a slot's access code, you must provide the current access code
+To reset a slot's access code during slot programming, you must provide the current access code
 with [UseCurrentAccessCode()](xref:Yubico.YubiKey.Otp.Operations.OperationBase%601.UseCurrentAccessCode%28Yubico.YubiKey.Otp.SlotAccessCode%29)
 followed by the new access code with ``SetNewAccessCode()``:
 
@@ -185,7 +184,7 @@ using (OtpSession otp = new OtpSession(yubiKey))
 }
 ```
 
-In this example, the slot is now configured with a Yubico OTP credential and is still protected by the same access
+In this example, the slot is now (re)configured with a Yubico OTP credential and is still protected by the same access
 code (``currentAccessCode``).
 
 ## Deleting a slot configuration when an access code is present

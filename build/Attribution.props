@@ -22,6 +22,7 @@ Sets repository-wide attribution settings such as Authors, Company, and copyrigh
   <PropertyGroup Label="Common attribution properties">
     <Authors>Yubico AB</Authors>
     <Company>Yubico AB</Company>
+    <Copyright>Copyright (c) Yubico $([System.DateTime]::Now.Year)</Copyright>
   </PropertyGroup>
 
 </Project>

@@ -24,23 +24,23 @@ Release date: July 3rd, 2025
 
 Features:
 
-- The Yubico.NET.SDK repository now includes the GitHub dependabot to automate dependency updates for the ``nuget`` and ``dotnet-sdk`` package ecosystems. ([#244](https://github.com/Yubico/Yubico.NET.SDK/pull/244))
+- A new ``RawData`` property, which exposes raw CBOR-encoded data, has been added to the FIDO2 ``MakeCredentialData`` class. ([#225](https://github.com/Yubico/Yubico.NET.SDK/pull/225))
+
+- A new ``VersionQualifier`` has been added for handling YubiKey firmware (by version number, type, and iteration). The ``YubiKeyDeviceInfo`` class has also been updated to support ``VersionQualifier``. ([#240](https://github.com/Yubico/Yubico.NET.SDK/pull/240))
 
 - The GitHub Actions workflows have been updated to use the ``windows-2022`` runner instead of ``windows-2019``, which ensures compatibility with newer environments and improves the consistency of the build and publish pipelines. ([#242](https://github.com/Yubico/Yubico.NET.SDK/pull/242))
-
-- A new ``RawData`` property, which exposes raw CBOR-encoded data, has been added to the FIDO2 ``MakeCredentialData`` class. ([#225](https://github.com/Yubico/Yubico.NET.SDK/pull/225))
 
 Documentation:
 
 - The documentation site has been updated with a new search bar, light/dark mode, new styling, and a modified table of contents. ([#241](https://github.com/Yubico/Yubico.NET.SDK/pull/241))
 
-- New documentation covering the YubiKey Bio Multi-protocol Edition and its quirks, including the DeviceReset() method, has been added. ([#237](https://github.com/Yubico/Yubico.NET.SDK/pull/237))
+- New documentation covering the YubiKey Bio Multi-protocol Edition and its quirks, including the ``DeviceReset()`` method, has been added. ([#237](https://github.com/Yubico/Yubico.NET.SDK/pull/237))
 
 - A discrepancy in the documentation on attestation statement generation has been fixed. ([#236](https://github.com/Yubico/Yubico.NET.SDK/pull/236))
 
 - The documentation covering the default management key value and algorithm has been clarified. ([#233](https://github.com/Yubico/Yubico.NET.SDK/pull/233))
 
-- The DER encoding details in the documentation on the PIV AuthenticateSignCommand() have been corrected. ([#239](https://github.com/Yubico/Yubico.NET.SDK/pull/239))
+- The DER encoding details in the documentation on the PIV ``AuthenticateSignCommand()`` have been corrected. ([#239](https://github.com/Yubico/Yubico.NET.SDK/pull/239))
 
 Bug Fixes:
 
@@ -48,9 +48,21 @@ Bug Fixes:
 
 - An ongoing [dotnet issue](https://github.com/dotnet/runtime/issues/112080) that has broken the resolution of core libraries on macOS 15 prevented the SDK from locating important dependencies on Mac when using .NET8 and above. To fix macOS and .NET compatibility with the SDK, the ``CoreFoundation``, ``IOKitFramework``, and ``WinSCard`` constants have been updated to use absolute paths (``/System/Library/Frameworks/...``) instead of relative paths (``.framework/...``) to align with macOS system conventions. ([#255](https://github.com/Yubico/Yubico.NET.SDK/pull/255))
 
+- Use of the deprecated ``PivPrivateKey`` and ``PivPublicKey`` types when importing into the new PIV methods is now handled correctly (by throwing an exception). ([#231](https://github.com/Yubico/Yubico.NET.SDK/pull/231))
+
+- An issue affecting the use of the RSA-3072 and RSA-4096 algorithms with attestation certificates has been fixed. ([#230](https://github.com/Yubico/Yubico.NET.SDK/pull/230))
+
+Dependencies:
+
+- The Yubico.NET.SDK repository now includes the GitHub dependabot to automate dependency updates for the ``nuget`` and ``dotnet-sdk`` package ecosystems. ([#244](https://github.com/Yubico/Yubico.NET.SDK/pull/244))
+
+- Several dependencies across the Core (Yubico.Core.csproj), Integration Tests (Yubico.YubiKey.IntegrationTests.csproj), Sandbox (Yubico.YubiKey.TestApp.csproj), Unit Tests (Yubico.YubiKey.UnitTests.csproj), and Utilities (Yubico.YubiKey.TestUtilities.csproj) projects have been updated to newer versions. ([#256](https://github.com/Yubico/Yubico.NET.SDK/pull/256), [#254](https://github.com/Yubico/Yubico.NET.SDK/pull/254), [#250](https://github.com/Yubico/Yubico.NET.SDK/pull/250))
+
 Deprecations:
 
 - ``PivEccPublic``, ``PivEccPrivateKey``, ``PivRsaPublic``, and ``PivRsaPrivateKey`` have been marked as obsolete. Use implementations of ``ECPublicKey``, ``ECPrivateKey``, ``RSAPublicKey``, and ``RSAPrivateKey`` instead. ([#231](https://github.com/Yubico/Yubico.NET.SDK/pull/231))
+
+- The ``CreateFromPkcs8`` methods in the ``Curve25519PublicKey``, ``ECPublicKey``, and ``RSAPublicKey`` classes have been marked as obsolete and replaced with new ``CreateFromSubjectPublicKeyInfo`` methods. ([#243](https://github.com/Yubico/Yubico.NET.SDK/pull/243))
 
 ### 1.13.1
 

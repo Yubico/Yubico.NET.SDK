@@ -30,6 +30,11 @@ for external milestones.
 
   <PropertyGroup Label="Versions for all projects">
 
+    <!-- 
+    Common version for both projects. Can be overridden by the below properties if needed 
+    -->
+    <CommonVersion>1.13.2</CommonVersion>
+
     <!--
     Yubico.Core project
 
@@ -43,7 +48,7 @@ for external milestones.
 
     This project can, and should, use pre-release suffixes for development milestones.
     -->
-    <YubicoCoreVersion>1.13.1</YubicoCoreVersion>
+    <YubicoCoreVersion>$(CommonVersion)</YubicoCoreVersion>
 
     <!--
     Yubico.Authenticator project
@@ -57,6 +62,6 @@ for external milestones.
 
     This project can, and should, use pre-release suffixes for development milestones.
     -->
-    <YubicoYubiKeyVersion>1.13.1</YubicoYubiKeyVersion>
+    <YubicoYubiKeyVersion>$(CommonVersion)</YubicoYubiKeyVersion>
   </PropertyGroup>
 </Project>

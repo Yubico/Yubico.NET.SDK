@@ -20,7 +20,7 @@ namespace Yubico.YubiKey;
 /// Represents the type of version qualifier for a firmware version.
 /// The version qualifier type indicates whether the version is an Alpha, Beta, or Final release.
 /// </summary>
-internal enum VersionQualifierType : byte
+public enum VersionQualifierType : byte
 {
     Alpha = 0x00,
     Beta = 0x01,
@@ -32,12 +32,13 @@ internal enum VersionQualifierType : byte
 /// A version qualifier typically includes the firmware version, a type (such as Alpha, Beta, or Final),
 /// and an iteration number.
 /// </summary>
-internal class VersionQualifier
+public class VersionQualifier
 {
     /// <summary>
     /// Represents the firmware version associated with this qualifier.
     /// </summary>
     public FirmwareVersion FirmwareVersion { get; }
+
     /// <summary>
     /// Represents the type of version qualifier, such as Alpha, Beta, or Final.
     /// </summary>
@@ -62,9 +63,10 @@ internal class VersionQualifier
     /// <exception cref="ArgumentNullException"></exception>
     public VersionQualifier(FirmwareVersion firmwareVersion, VersionQualifierType type, long iteration)
     {
-        if (iteration < 0 || iteration > uint.MaxValue)
+        if (iteration is < 0 or > uint.MaxValue)
         {
-            throw new ArgumentOutOfRangeException(nameof(iteration),
+            throw new ArgumentOutOfRangeException(
+                nameof(iteration),
                 $"Iteration must be between 0 and {uint.MaxValue}.");
         }
 
@@ -82,13 +84,18 @@ internal class VersionQualifier
     {
         FirmwareVersion = new FirmwareVersion();
         Type = VersionQualifierType.Final;
-        Iteration = 0;
     }
 
+    /// <summary>
+    ///  Returns a string that represents the current <see cref="VersionQualifier"/>.
+    /// </summary>
     public override string ToString() => $"{FirmwareVersion}.{Type.ToString().ToLowerInvariant()}.{Iteration}";
-    public override bool Equals(object obj) => obj is VersionQualifier other &&
-            FirmwareVersion.Equals(other.FirmwareVersion) &&
-            Type == other.Type &&
-            Iteration == other.Iteration;
+
+    public override bool Equals(object? obj) =>
+        obj is VersionQualifier other &&
+        FirmwareVersion.Equals(other.FirmwareVersion) &&
+        Type == other.Type &&
+        Iteration == other.Iteration;
+
     public override int GetHashCode() => HashCode.Combine(FirmwareVersion, Type, Iteration);
 }

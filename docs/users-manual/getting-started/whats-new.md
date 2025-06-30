@@ -24,9 +24,9 @@ Release date: July 3rd, 2025
 
 Features:
 
-- A new ``RawData`` property, which exposes raw CBOR-encoded data, has been added to the FIDO2 ``MakeCredentialData`` class. ([#225](https://github.com/Yubico/Yubico.NET.SDK/pull/225))
+- A new ``RawData`` property, which exposes raw CBOR-encoded data that can be more easily passed to third party tools for parsing, has been added to the FIDO2 ``MakeCredentialData`` class. ([#225](https://github.com/Yubico/Yubico.NET.SDK/pull/225))
 
-- A new ``VersionQualifier`` has been added for handling YubiKey firmware (by version number, type, and iteration). The ``YubiKeyDeviceInfo`` class has also been updated to support ``VersionQualifier``. ([#240](https://github.com/Yubico/Yubico.NET.SDK/pull/240))
+- A new ``VersionQualifier`` has been added for handling YubiKey firmware (by version number, type, and iteration), which enables apps built with the SDK to distinguish between standard production YubiKeys and release candidate (RC) YubiKeys. The ``YubiKeyDeviceInfo`` class has also been updated to support ``VersionQualifier``. ([#240](https://github.com/Yubico/Yubico.NET.SDK/pull/240))
 
 - The GitHub Actions workflows have been updated to use the ``windows-2022`` runner instead of ``windows-2019``, which ensures compatibility with newer environments and improves the consistency of the build and publish pipelines. ([#242](https://github.com/Yubico/Yubico.NET.SDK/pull/242))
 

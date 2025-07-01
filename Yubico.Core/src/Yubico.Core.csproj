@@ -19,7 +19,7 @@ limitations under the License. -->
     <RootNamespace></RootNamespace>
 
     <!-- Multi-target build -->
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net47</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net48</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <!-- Suppressed warnings-->

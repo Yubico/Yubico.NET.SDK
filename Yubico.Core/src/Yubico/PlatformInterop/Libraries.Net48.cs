@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if NET47
+#if NET48
 
 using System;
 using System.IO;
@@ -48,15 +48,15 @@ namespace Yubico.PlatformInterop
         /// </exception>
         /// <remarks>
         /// This method must be called before any P/Invoke calls are made.
-        /// The implementation details are handled in Libraries.Net47.cs.
+        /// The implementation details are handled in Libraries.Net48.cs.
         /// </remarks>
-        public static void EnsureInitialized() => Net47Implementation.Initialize();
+        public static void EnsureInitialized() => Net48Implementation.Initialize();
         
         /// <summary>
         /// Encapsulates the .NET Framework 4.7 specific implementation details for native library management.
         /// This nested class handles the dynamic loading of architecture-specific (x86/x64) native libraries.
         /// </summary>
-        private static class Net47Implementation
+        private static class Net48Implementation
         {
             // Handle to the loaded native library
             private static UnmanagedDynamicLibrary? _nativeShims;

@@ -20,7 +20,7 @@ limitations under the License. -->
     As of 2020, netstandard2.0 allows us to reach the widest audience while providing a large
     enough set of the .NET library to be productive.
     -->
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net47</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net48</TargetFrameworks>
 
     <RootNamespace></RootNamespace>
 
@@ -130,8 +130,8 @@ limitations under the License. -->
 
   </ItemGroup>
 
-  <!-- This is in order to use the HttpUtility.ParseQueryString in .NET47 -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+  <!-- This is in order to use the HttpUtility.ParseQueryString in .net48 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
     <Reference Include="System.Web" />
   </ItemGroup>
 

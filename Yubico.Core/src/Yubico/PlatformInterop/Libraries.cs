@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// As long as we have the Libraries.Net47.cs class which holds the opposite preprocessor directive check,
+// As long as we have the Libraries.Net48.cs class which holds the opposite preprocessor directive check,
 // this check is required - as having both at the same time is not possible.
-#if !NET47 
+#if !NET48 
 
 namespace Yubico.PlatformInterop
 {

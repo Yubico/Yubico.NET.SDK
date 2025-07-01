@@ -38,7 +38,7 @@ Access codes can only be set, modified, or removed during one of the following s
 - [ConfigureStaticPassword()](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureStaticPassword%28Yubico.YubiKey.Otp.Slot%29)
 - [UpdateSlot()](xref:Yubico.YubiKey.Otp.OtpSession.UpdateSlot%28Yubico.YubiKey.Otp.Slot%29)
 
-Therefore, the **only** way to modify a slot access code that doesn't result in the reconfiguration of the slot's current cryptographic credential is to use ``UpdateSlot()``. However, calling ``UpdateSlot()`` will revert a number of other slot settings (such as ``SetAppendCarriageReturn()``) to their default states unless otherwise specified during the operation. See [How to update slot settings](xref:OtpUpdateSlot) for more information.
+Of these options, the **only** method that allows you to configure a slot access code without changing the slot's current cryptographic credential is ``UpdateSlot()``. However, calling ``UpdateSlot()`` will revert a number of other slot settings (such as ``SetAppendCarriageReturn()``) to their default states unless otherwise specified during the operation. See [How to update slot settings](xref:OtpUpdateSlot) for more information.
 
 > [!NOTE]
 > If a slot is configured with an access code,

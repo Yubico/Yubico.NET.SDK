@@ -26,6 +26,45 @@ The Yubico .NET SDK supports importing and exporting private keys in standard fo
 - **EC keys**: NIST P-256, P-384 curves
 - **Curve25519 keys**: Ed25519 (signing), X25519 (key agreement)
 
+## Private key encoding basics
+
+One of the unfortunate problems of public key cryptography is the myriad ways to represent private keys. Part of this is due to the fact that different algorithms have different elements.
+
+For example, an RSA private key can consist of three, five, or eight integers:
+
+| 3-integer RSA key | 5-integer RSA key | 8-integer RSA key |
+|-------------------|-------------------|-------------------|
+| modulus           | prime P           | modulus           |
+| public exponent   | prime Q           | public exponent   |
+| private exponent  | exponent P        | private exponent  |
+|                   | exponent Q        | prime P           |
+|                   | coefficient       | prime Q           |
+|                   |                   | exponent P        |
+|                   |                   | exponent Q        |
+|                   |                   | coefficient       |
+
+On the other hand, an "Fp" Elliptic Curve (EC) private key consists of the following elements:
+
+| EC private key component | EC private key subcomponent |
+|--------------------------|-----------------------------|
+| curve                    | prime                       |
+|                          | order                       |
+|                          | coefficients (a, b, c)      |
+|                          | base point (x, y)           |
+| public point             | x coordinate                |
+|                          | y coordinate                |
+| private value            |                             |
+
+Standard curves (such as NIST P-256) can be represented by an object identifier (OID), public point (x,y), and a private value. In some cases, just the OID and private value are needed as the public point can be computed from the curve parameters and private value.
+
+There is more than one standard that defines how to represent public keys. The most common definitions are ``PrivateKeyInfo`` from PKCS #8 (Public Key Cryptography Standard #8) and PEM (Privacy-Enhanced Mail). PKCS #8 is now an internet standard ([RFC 5208](https://tools.ietf.org/html/rfc5208)). PEM ([RFC 7468](https://tools.ietf.org/html/rfc7468)) was created to describe how to use public key cryptography to build secure email, but it has elements that turned out to be useful to cryptography in general, including its representation of keys.
+
+Fortunately, there is some overlap. The vast majority of applications will use the PKCS #8  ``PrivateKeyInfo`` or the PEM "PRIVATE KEY" (which wraps a ``PrivateKeyInfo``).
+
+``PrivateKeyInfo`` is popular because it contains algorithm information in addition to the actual key data. That is, a private key in this format contains an ``AlgorithmIdentifier`` specifying the algorithm and any parameters as well as the key data specific to that algorithm.
+
+There are C# classes that will build or parse these structures, although it will still require some work on your part. This page will show how to build a private key object the YubiKey can read from ``PrivateKeyInfo`` and PEM formats. Note that a YubiKey will never return a private key, so there will be no need to convert from a YubiKey-formatted private key to a PrivateKeyInfo or PEM format.
+
 ## Factory methods
 
 ### RSA private keys

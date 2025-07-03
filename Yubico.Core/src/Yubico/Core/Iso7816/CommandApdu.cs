@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -327,5 +327,7 @@ namespace Yubico.Core.Iso7816
 
             return leField;
         }
+
+        public override string ToString() => $"CLA: 0x{Cla:X2} INS: 0x{Ins:X2} P1: 0x{P1:X2} P2: 0x{P2:X2} Lc: {Nc} Le: {Ne} Data: {Data.Length} bytes";
     }
 }

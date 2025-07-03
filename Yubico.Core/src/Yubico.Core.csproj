@@ -1,4 +1,4 @@
-﻿<!-- Copyright 2021 Yubico AB
+﻿<!-- Copyright 2025 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,17 +37,19 @@ limitations under the License. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <!-- NuGet properties -->
-    <Description>
-      Yubico.Core is a support library used by other .NET Yubico libraries. You should likely never need to consume this package directly, as it will be included with other libraries.
-    </Description>
+    <PackageId>Yubico.Core</PackageId>
+    <Description>Yubico.Core is a support library used by other .NET Yubico libraries. You should likely never need to consume this package directly, as it will be included with other libraries.</Description>
     <PackageIcon>yubico-circle-y-mark.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageReleaseNotes>https://github.com/Yubico/Yubico.NET.SDK/releases/latest</PackageReleaseNotes>
+    <PackageTags>yubikey;security;authentication;multifactor;mfa;twofactor;cryptography;hardware-token;fido;fido2;u2f;security-key;passwordless;smartcard;pki;usb-security</PackageTags>
+    
+    <!-- Debug Symbols !-->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageReleaseNotes>https://github.com/Yubico/Yubico.NET.SDK/releases/latest</PackageReleaseNotes>
-
+    
     <!-- StrongName signing -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
@@ -114,9 +116,9 @@ limitations under the License. -->
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <!-- Before updating PolySharp, we should do some due dilligence on the update -->

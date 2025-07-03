@@ -26,7 +26,7 @@ The Yubico .NET SDK supports importing and exporting private keys in standard fo
 - **EC keys**: NIST P-256, P-384 curves
 - **Curve25519 keys**: Ed25519 (signing), X25519 (key agreement)
 
-## Private key encoding basics
+## Private key formats
 
 One of the unfortunate problems of public key cryptography is the myriad ways to represent private keys. Part of this is due to the fact that different algorithms have different elements.
 
@@ -57,7 +57,7 @@ On the other hand, an "Fp" Elliptic Curve (EC) private key consists of the follo
 
 Standard curves (such as NIST P-256) can be represented by an object identifier (OID), public point (x,y), and a private value. In some cases, just the OID and private value are needed as the public point can be computed from the curve parameters and private value.
 
-There is more than one standard that defines how to represent public keys. The most common definitions are ``PrivateKeyInfo`` from PKCS #8 (Public Key Cryptography Standard #8) and PEM (Privacy-Enhanced Mail). PKCS #8 is now an internet standard ([RFC 5208](https://tools.ietf.org/html/rfc5208)). PEM ([RFC 7468](https://tools.ietf.org/html/rfc7468)) was created to describe how to use public key cryptography to build secure email, but it has elements that turned out to be useful to cryptography in general, including its representation of keys.
+There is more than one standard that defines how to represent private keys. The most common definitions are ``PrivateKeyInfo`` from PKCS #8 (Public Key Cryptography Standard #8) and PEM (Privacy-Enhanced Mail). PKCS #8 is now an internet standard ([RFC 5208](https://tools.ietf.org/html/rfc5208)). PEM ([RFC 7468](https://tools.ietf.org/html/rfc7468)) was created to describe how to use public key cryptography to build secure email, but it has elements that turned out to be useful to cryptography in general, including its representation of keys.
 
 Fortunately, there is some overlap. The vast majority of applications will use the PKCS #8  ``PrivateKeyInfo`` or the PEM "PRIVATE KEY" (which wraps a ``PrivateKeyInfo``).
 

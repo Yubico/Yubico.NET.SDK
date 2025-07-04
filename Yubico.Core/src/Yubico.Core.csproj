@@ -19,7 +19,7 @@ limitations under the License. -->
     <RootNamespace></RootNamespace>
 
     <!-- Multi-target build -->
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net47</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net472</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <!-- Suppressed warnings-->
@@ -127,7 +127,6 @@ limitations under the License. -->
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Memory" Version="4.6.3" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
     <!-- The wildcard version tag allows us to include the latest minor and pre-release versions -->
     <PackageReference Include="Yubico.NativeShims" Version="1.*-*" />

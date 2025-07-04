@@ -12,7 +12,7 @@
         </description>
         <readme>docs/readme.md</readme>
         <dependencies>
-            <group targetFramework=".NETFramework4.7" />
+            <group targetFramework=".NETFramework4.7.2" />
             <group targetFramework="netstandard2.0" />
         </dependencies>
     </metadata>
@@ -32,9 +32,9 @@
         <file src="linux-arm64/libYubico.NativeShims.so" target="runtimes/linux-arm64/native/libYubico.NativeShims.so" />
 
         <!-- Support files -->
-        <file src="msbuild/Yubico.NativeShims.targets" target="build/net47/Yubico.NativeShims.targets" />
-        <file src="msbuild/Yubico.NativeShims.targets" target="buildTransitive/net47/Yubico.NativeShims.targets" />
-        <file src="msbuild/_._" target="lib/net47/_._" />
+        <file src="msbuild/Yubico.NativeShims.targets" target="build/net472/Yubico.NativeShims.targets" />
+        <file src="msbuild/Yubico.NativeShims.targets" target="buildTransitive/net472/Yubico.NativeShims.targets" />
+        <file src="msbuild/_._" target="lib/net472/_._" />
         <file src="msbuild/_._" target="lib/netstandard20/_._" />
         <file src="readme.md" target="docs/" />
     </files>

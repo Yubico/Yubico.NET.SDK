@@ -14,7 +14,7 @@
 
 // As long as we have the Libraries.Net48.cs class which holds the opposite preprocessor directive check,
 // this check is required - as having both at the same time is not possible.
-#if !NET48 
+#if !NET47 
 
 namespace Yubico.PlatformInterop
 {

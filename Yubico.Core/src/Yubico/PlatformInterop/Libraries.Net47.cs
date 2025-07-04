@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if NET48
+#if NET47
 
 using System;
 using System.IO;

@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Pipelines
                 var responseApdu = _nextTransform.Invoke(command, commandType, responseType);
                 var readStatusResponse = new ReadStatusResponse(responseApdu);
                 var otpStatus = readStatusResponse.GetData();
-                byte nextSequence = otpStatus.SequenceNumber;
+                int nextSequence = otpStatus.SequenceNumber;
 
                 // If we see the sequence number change, we can assume that the configuration was applied successfully. Otherwise
                 // we just invent an error in the response.
@@ -82,7 +82,7 @@ namespace Yubico.YubiKey.Pipelines
 
         public void Cleanup() => _nextTransform.Cleanup();
         
-        private static bool IsValidSequenceProgression(int beforeSequence, int nextSequence, OtpStatus afterStatus)
+        internal static bool IsValidSequenceProgression(int beforeSequence, int nextSequence, OtpStatus afterStatus)
         {
             const int configStatusMask = 0x1F;
 

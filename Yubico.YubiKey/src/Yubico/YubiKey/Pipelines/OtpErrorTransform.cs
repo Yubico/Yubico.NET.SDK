@@ -16,6 +16,7 @@ using System;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Otp.Commands;
 
 namespace Yubico.YubiKey.Pipelines
@@ -57,25 +58,36 @@ namespace Yubico.YubiKey.Pipelines
             try
             {
                 var responseApdu = _nextTransform.Invoke(command, commandType, responseType);
-                int afterSequence = new ReadStatusResponse(responseApdu).GetData().SequenceNumber;
-                int expectedSequence = (beforeSequence + 1) % 0x100;
+                var readStatusResponse = new ReadStatusResponse(responseApdu);
+                var otpStatus = readStatusResponse.GetData();
+                byte nextSequence = otpStatus.SequenceNumber;
 
                 // If we see the sequence number change, we can assume that the configuration was applied successfully. Otherwise
                 // we just invent an error in the response.
-                return afterSequence != expectedSequence
-                    ? new ResponseApdu(responseApdu.Data.ToArray(), SWConstants.WarningNvmUnchanged)
-                    : responseApdu;
+                return IsValidSequenceProgression(beforeSequence, nextSequence, otpStatus)
+                    ? responseApdu
+                    : FailedApdu(responseApdu.Data.ToArray());
             }
             catch (KeyboardConnectionException e)
             {
                 _logger.LogWarning(e, "Handling keyboard connection exception. Translating to APDU response.");
 
-                return new ResponseApdu(Array.Empty<byte>(), SWConstants.WarningNvmUnchanged);
+                return FailedApdu([]);
             }
+
+            static ResponseApdu FailedApdu(byte[] data) => new(data, SWConstants.WarningNvmUnchanged);
         }
 
         public void Setup() => _nextTransform.Setup();
 
         public void Cleanup() => _nextTransform.Cleanup();
+        
+        private static bool IsValidSequenceProgression(int beforeSequence, int nextSequence, OtpStatus afterStatus)
+        {
+            const int configStatusMask = 0x1F;
+
+            return nextSequence == beforeSequence + 1 ||  // Normal increment
+                (beforeSequence > 0 && nextSequence == 0 && (afterStatus.TouchLevel & configStatusMask) == 0); // When deleting the "last" slot
+        }
     }
 }

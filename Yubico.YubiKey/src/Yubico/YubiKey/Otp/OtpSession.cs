@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Otp
         /// <param name="keyParameters">An instance of <see cref="Scp03KeyParameters"/> containing the
         /// parameters for the SCP03 key. If <see langword="null"/>, the default parameters will be used. </param>
         public OtpSession(IYubiKeyDevice yubiKey, ScpKeyParameters? keyParameters = null)
-            : base(Log.GetLogger<OathSession>(), yubiKey, YubiKeyApplication.Otp, keyParameters)
+            : base(Log.GetLogger<OtpSession>(), yubiKey, YubiKeyApplication.Otp, keyParameters)
         {
             // Getting the OTP status allows the user to read the OTP status on the OtpSession object.
             _otpStatus = Connection.SendCommand(new ReadStatusCommand()).GetData();

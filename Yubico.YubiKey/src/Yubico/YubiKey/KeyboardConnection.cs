@@ -14,7 +14,6 @@
 
 using System;
 using Yubico.Core.Devices.Hid;
-using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Pipelines;
 
 namespace Yubico.YubiKey

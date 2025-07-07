@@ -15,7 +15,6 @@
 using System;
 using System.Globalization;
 using Yubico.Core.Logging;
-using Yubico.YubiKey.Oath;
 using Yubico.YubiKey.Otp.Commands;
 using Yubico.YubiKey.Otp.Operations;
 using Yubico.YubiKey.Scp;

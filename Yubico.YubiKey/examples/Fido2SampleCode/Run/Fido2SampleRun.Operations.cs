@@ -18,6 +18,7 @@ using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Fido2.Commands;
@@ -32,7 +33,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
     // make the appropriate calls to perform the operation selected.
     public partial class Fido2SampleRun
     {
-        public bool RunMenuItem(Fido2MainMenuItem menuItem)
+        public async Task<bool> RunMenuItem(Fido2MainMenuItem menuItem)
         {
             if (menuItem >= Fido2MainMenuItem.MakeCredential
                 && menuItem < Fido2MainMenuItem.Reset)
@@ -42,37 +43,57 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     "\n---This sample uses the SDK's automatic authentication (see the User's Manual)---\n");
             }
 
-            return menuItem switch
+            switch (menuItem)
             {
-                Fido2MainMenuItem.Exit => false,
-                // Find all currently connected YubiKeys that can communicate
-                // over the HID FIDO protocol. This is the protocol used to
-                // communicate with the Fido2 application.
-                // Using Transport.HidFido finds all YubiKeys connected via USB.
-                Fido2MainMenuItem.ListYubiKeys => ListYubiKeys.RunListYubiKeys(Transport.HidFido),
-                Fido2MainMenuItem.ChooseYubiKey => RunChooseYubiKey(),
-                Fido2MainMenuItem.SetPin => RunSetPin(),
-                Fido2MainMenuItem.ChangePin => RunChangePin(),
-                Fido2MainMenuItem.VerifyPin => RunVerifyPin(),
-                Fido2MainMenuItem.VerifyUv => RunVerifyUv(),
-                Fido2MainMenuItem.MakeCredential => RunMakeCredential(),
-                Fido2MainMenuItem.GetAssertion => RunGetAssertions(),
-                Fido2MainMenuItem.ListCredentials => RunListCredentials(),
-                Fido2MainMenuItem.UpdateCredentialUserInfo => RunUpdateCredentialUserInfo(),
-                Fido2MainMenuItem.DeleteCredential => RunDeleteCredential(),
-                Fido2MainMenuItem.RetrieveLargeBlobData => RunRetrieveLargeBlobData(),
-                Fido2MainMenuItem.StoreLargeBlobData => RunStoreLargeBlobData(),
-                Fido2MainMenuItem.DeleteLargeBlobData => RunDeleteLargeBlobData(),
-                Fido2MainMenuItem.GetBioInfo => RunGetBioInfo(),
-                Fido2MainMenuItem.EnrollFingerprint => RunEnrollFingerprint(),
-                Fido2MainMenuItem.SetBioTemplateFriendlyName => RunSetBioTemplateFriendlyName(),
-                Fido2MainMenuItem.RemoveBioEnrollment => RunRemoveBioEnrollment(),
-                Fido2MainMenuItem.EnableEnterpriseAttestation => RunEnableEnterpriseAttestation(),
-                Fido2MainMenuItem.ToggleAlwaysUv => RunToggleAlwaysUv(),
-                Fido2MainMenuItem.SetPinConfig => RunSetPinConfig(),
-                Fido2MainMenuItem.Reset => RunReset(),
-                _ => RunUnimplementedOperation(),
-            };
+                case Fido2MainMenuItem.Exit:
+                    return false;
+                case Fido2MainMenuItem.ListYubiKeys:
+                    return await Task.FromResult(ListYubiKeys.RunListYubiKeys(Transport.HidFido));
+                case Fido2MainMenuItem.ChooseYubiKey:
+                    return await Task.FromResult(RunChooseYubiKey());
+                case Fido2MainMenuItem.SetPin:
+                    return await Task.FromResult(RunSetPin());
+                case Fido2MainMenuItem.ChangePin:
+                    return await Task.FromResult(RunChangePin());
+                case Fido2MainMenuItem.VerifyPin:
+                    return await Task.FromResult(RunVerifyPin());
+                case Fido2MainMenuItem.VerifyUv:
+                    return await Task.FromResult(RunVerifyUv());
+                case Fido2MainMenuItem.MakeCredential:
+                    return await Task.FromResult(RunMakeCredential());
+                case Fido2MainMenuItem.GetAssertion:
+                    return await Task.FromResult(RunGetAssertions());
+                case Fido2MainMenuItem.ListCredentials:
+                    return await Task.FromResult(RunListCredentials());
+                case Fido2MainMenuItem.UpdateCredentialUserInfo:
+                    return await Task.FromResult(RunUpdateCredentialUserInfo());
+                case Fido2MainMenuItem.DeleteCredential:
+                    return await Task.FromResult(RunDeleteCredential());
+                case Fido2MainMenuItem.RetrieveLargeBlobData:
+                    return await Task.FromResult(RunRetrieveLargeBlobData());
+                case Fido2MainMenuItem.StoreLargeBlobData:
+                    return await Task.FromResult(RunStoreLargeBlobData());
+                case Fido2MainMenuItem.DeleteLargeBlobData:
+                    return await Task.FromResult(RunDeleteLargeBlobData());
+                case Fido2MainMenuItem.GetBioInfo:
+                    return await Task.FromResult(RunGetBioInfo());
+                case Fido2MainMenuItem.EnrollFingerprint:
+                    return await Task.FromResult(RunEnrollFingerprint());
+                case Fido2MainMenuItem.SetBioTemplateFriendlyName:
+                    return await Task.FromResult(RunSetBioTemplateFriendlyName());
+                case Fido2MainMenuItem.RemoveBioEnrollment:
+                    return await Task.FromResult(RunRemoveBioEnrollment());
+                case Fido2MainMenuItem.EnableEnterpriseAttestation:
+                    return await Task.FromResult(RunEnableEnterpriseAttestation());
+                case Fido2MainMenuItem.ToggleAlwaysUv:
+                    return await Task.FromResult(RunToggleAlwaysUv());
+                case Fido2MainMenuItem.SetPinConfig:
+                    return await Task.FromResult(RunSetPinConfig());
+                case Fido2MainMenuItem.Reset:
+                    return await RunResetAsync();
+                default:
+                    return await Task.FromResult(RunUnimplementedOperation());
+            }
         }
 
         public static bool RunInvalidEntry()
@@ -87,7 +108,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             return true;
         }
 
-        public bool RunReset()
+        public async Task<bool> RunResetAsync()
         {
             string versionNumber = _yubiKeyChosen.FirmwareVersion.ToString();
 
@@ -141,7 +162,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             // This means we need to worry about asynchronous operations, and the
             // EventHandler delegates must have access to the serial number.
             // So we're going to use a separate class to handle this.
-            var fido2Reset = new Fido2Reset(_yubiKeyChosen.SerialNumber);
+            /*var fido2Reset = new Fido2Reset(_yubiKeyChosen.SerialNumber);
             var status = fido2Reset.RunFido2Reset(_keyCollector.Fido2SampleKeyCollectorDelegate);
             if (status == ResponseStatus.Success)
             {
@@ -150,7 +171,9 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             else
             {
                 SampleMenu.WriteMessage(MessageType.Title, 0, "\nFIDO2 application NOT reset.\n");
-            }
+            }*/
+            var resetService = new Fido2ResetService();
+            await resetService.PerformResetAsync();
 
             return true;
         }

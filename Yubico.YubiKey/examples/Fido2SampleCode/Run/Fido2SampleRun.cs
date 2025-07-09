@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 // and return true.
                 if (DefaultChooseYubiKey(menuItem))
                 {
-                    if (!RunMenuItem(menuItem))
+                    if (!RunMenuItem(menuItem).GetAwaiter().GetResult())
                     {
                         menuItem = Fido2MainMenuItem.Exit;
                     }

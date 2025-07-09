@@ -55,6 +55,8 @@ There are C# classes that will build or parse these structures, although it will
 
 ## Factory methods
 
+PIV defines its own format of encoding public keys. However, the SDK's PIV application APIs that work with public keys require them to be instances of the ``PublicKey`` class. Hence, your application will need to be able to "convert" between ``SubjectPublicKeyInfo`` and ``PublicKey``.
+
 ### RSA public keys
 
 ```csharp

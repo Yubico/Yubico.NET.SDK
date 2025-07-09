@@ -67,6 +67,8 @@ There are C# classes that will build or parse these structures, although it will
 
 ## Factory methods
 
+PIV does not define its own format of encoding private keys, but Yubico has defined an encoding that is very similar to the PIV public key format. However, the SDK's PIV application APIs that work with  private keys require them to be instances of the ``PrivateKey`` class. Hence, when importing a private key into a YubiKey, your application will need to be able to "convert" from ``PrivateKeyInfo`` or PEM to ``PrivateKey``.
+
 ### RSA private keys
 
 ```csharp
@@ -166,6 +168,61 @@ string base64Data = pemData
 byte[] pkcs8Bytes = Convert.FromBase64String(base64Data);
 IPrivateKey privateKey = RSAPrivateKey.CreateFromPkcs8(pkcs8Bytes); // or ECPrivateKey, etc.
 ```
+
+> [!NOTE]
+> When importing a private key in PEM format, there are a number of possible header and footer combinations, including the following:
+>
+> ``` 
+>    -----BEGIN PRIVATE KEY-----
+>    -----END PRIVATE KEY-----
+> 
+>    -----BEGIN RSA PRIVATE KEY-----
+>    -----END RSA PRIVATE KEY-----
+> 
+>    -----BEGIN EC PRIVATE KEY-----
+>    -----END EC PRIVATE KEY-----
+> ```
+
+### Determining the algorithm when importing a private key in PEM format
+
+To build a PrivateKey when importing from PEM, you will need to first determine the private key algorithm. Once you know the algorithm, you can use the appropriate C# class to read the encoded data (for example, ``RSAPrivateKey``, ``ECPrivateKey``, or ``Curve25519PrivateKey`` ).
+
+The algorithm is specified in the key data itself. However, the .NET Base Class Library does not have a class that can parse ``PrivateKeyInfo`` and build the appropriate object. The only methods that can read this encoding are in classes for the specific algorithms. That is, the RSA class can read PrivateKeyInfo only if the input data is an RSA key, the ECDsa class can read it only if the input data is an ECC key, etc.
+
+One possible workaround would be to supply the encoded key to the RSA class and if it works, we have an RSA key. If it does not work, give the encoded key to the ECDsa class. However, if the RSA class gets an encoded key that is not RSA, it throws an exception, and using exceptions to determine code flow is not best practice.
+
+To determine the algorithm of an imported key, we need to open up the encoding and read the object identifier (OID) of the ``AlgorithmIdentifier``. And to find the OID, we need to decode the DER encoding of ``PrivateKeyInfo``.
+
+``PrivateKeyInfo`` is defined as:
+
+```csharp
+PrivateKeyInfo ::= SEQUENCE {
+        version                   Version,
+        privateKeyAlgorithm       AlgorithmIdentifier,
+        privateKey                PrivateKey,
+        attributes           [0]  IMPLICIT Attributes OPTIONAL }
+
+Version ::= INTEGER
+
+AlgorithmIdentifier ::=  SEQUENCE  {
+        algorithm                 OBJECT IDENTIFIER,
+        parameter                 ANY DEFINED BY algorithm OPTIONAL  }
+
+
+```
+
+This means that the DER encoding will look something like the following:
+
+```csharp
+    30 len  // the len octets might be one, two, or three bytes long.
+       02 01 00
+       30 len
+          06 len
+             OID bytes
+         etc.
+```
+
+In this example, to get to the OID, we need to read the first ``30 len``, then the INTEGER, then the second ``30 len``, then the ``06 len``.
 
 ## Secure memory handling
 

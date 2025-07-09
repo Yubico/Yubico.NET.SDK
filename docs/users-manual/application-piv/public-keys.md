@@ -102,6 +102,8 @@ Curve25519PublicKey x25519Key = Curve25519PublicKey.CreateFromValue(publicPoint,
 
 ## Generating key pairs
 
+When you generate a new key pair in a YubiKey's PIV application, you are given the public key, which is returned as an instance of the ``PublicKey`` class. From this class, you can obtain important information about the key, including ``KeyDefinition`` and ``KeyType``. Depending on the specific class, ``Parameters`` (EC and RSA) and ``PublicPoint`` (EC and Curve25519) are also included.
+
 ```csharp
 using var pivSession = new PivSession(yubiKey);
 pivSession.KeyCollector = yourKeyCollector;
@@ -166,6 +168,54 @@ string base64Data = pemData
 byte[] spkiBytes = Convert.FromBase64String(base64Data);
 IPublicKey publicKey = RSAPublicKey.CreateFromSubjectPublicKeyInfo(spkiBytes); // or ECPublicKey, etc.
 ```
+
+> [!NOTE]
+> When importing a public key in PEM format, there are a number of possible header and footer combinations, including the following:
+>
+> ``` 
+>    -----BEGIN PUBLIC KEY-----
+>    -----END PUBLIC KEY-----
+> 
+>    -----BEGIN RSA PUBLIC KEY-----
+>    -----END RSA PUBLIC KEY-----
+> 
+>    -----BEGIN EC PUBLIC KEY-----
+>    -----END EC PUBLIC KEY-----
+> ```
+
+### Determining the algorithm when importing a public key in PEM format
+
+If you have a byte array that contains the ``SubjectPublicKeyInfo``, and you want to build a ``PublicKey``, you will need to first determine the public key algorithm. Once you know the algorithm, you can use the appropriate C# class to read the encoded data (for example, ``RSAPublicKey``, ``ECPublicKey``, or ``Curve25519PublicKey`` ).
+
+The algorithm is specified in the key data itself. However, the .NET Base Class Library does not have a class that can parse ``SubjectPublicKeyInfo`` and build the appropriate object. The only methods that can read this encoding are in classes for the specific algorithms. That is, the RSA class can read ``SubjectPublicKeyInfo`` only if the input data is an RSA key, the ECDsa class can read it only if the input data is an ECC key, etc.
+
+One possible workaround would be to supply the encoded key to the RSA class and if it works, we have an RSA key. If it does not work, give the encoded key to the ECDsa class. However, if the RSA class gets an encoded key that is not RSA, it throws an exception, and using exceptions to determine code flow is not best practice.
+
+To determine the algorithm of an imported key, we need to open up the encoding and read the object identifier (OID) of the ``AlgorithmIdentifier``. And to find the OID, we need to decode the DER encoding of ``SubjectPublicKeyInfo``.
+
+``SubjectPublicKeyInfo`` is defined as:
+
+```csharp
+SubjectPublicKeyInfo ::=  SEQUENCE  {
+     algorithm            AlgorithmIdentifier,
+     subjectPublicKey     BIT STRING  }
+
+AlgorithmIdentifier ::=  SEQUENCE  {
+     algorithm            OBJECT IDENTIFIER,
+     parameter            ANY DEFINED BY algorithm OPTIONAL  }
+```
+
+This means that the DER encoding will look something like the following:
+
+```csharp
+    30 len // The len octets might be one, two, or three bytes long.
+       30 len
+          06 len
+             OID bytes
+         etc.
+```
+
+To get to the OID, we need to read the first ``30 len``, then the second ``30 len``, then the ``06 len``.
 
 ## Error handling
 

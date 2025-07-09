@@ -187,7 +187,7 @@ IPrivateKey privateKey = RSAPrivateKey.CreateFromPkcs8(pkcs8Bytes); // or ECPriv
 
 To build a PrivateKey when importing from PEM, you will need to first determine the private key algorithm. Once you know the algorithm, you can use the appropriate C# class to read the encoded data (for example, ``RSAPrivateKey``, ``ECPrivateKey``, or ``Curve25519PrivateKey`` ).
 
-The algorithm is specified in the key data itself. However, the .NET Base Class Library does not have a class that can parse ``PrivateKeyInfo`` and build the appropriate object. The only methods that can read this encoding are in classes for the specific algorithms. That is, the RSA class can read PrivateKeyInfo only if the input data is an RSA key, the ECDsa class can read it only if the input data is an ECC key, etc.
+The algorithm is specified in the key data itself. However, the .NET Base Class Library does not have a class that can parse ``PrivateKeyInfo`` and build the appropriate object. The only methods that can read this encoding are in classes for the specific algorithms. That is, the RSA class can read ``PrivateKeyInfo`` only if the input data is an RSA key, the ECDsa class can read it only if the input data is an ECC key, etc.
 
 One possible workaround would be to supply the encoded key to the RSA class and if it works, we have an RSA key. If it does not work, give the encoded key to the ECDsa class. However, if the RSA class gets an encoded key that is not RSA, it throws an exception, and using exceptions to determine code flow is not best practice.
 
@@ -214,7 +214,7 @@ AlgorithmIdentifier ::=  SEQUENCE  {
 This means that the DER encoding will look something like the following:
 
 ```csharp
-    30 len  // the len octets might be one, two, or three bytes long.
+    30 len  // The len octets might be one, two, or three bytes long.
        02 01 00
        30 len
           06 len

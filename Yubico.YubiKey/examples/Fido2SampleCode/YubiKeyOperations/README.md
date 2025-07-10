@@ -2,13 +2,13 @@
 
 This document provides a guide for developers on how to reliably implement the FIDO2 Reset functionality in a .NET application using the Yubico.NET.SDK. A FIDO2 reset is a sensitive hardware operation that requires a robust, user-friendly implementation to avoid failure and user confusion.
 
-This guide refers to the `Fido2ResetService.cs` class as a reference implementation that embodies these best practices.
+This guide refers to the refactored `Fido2Reset.cs` class as a reference implementation that embodies these best practices.
 
 ## Core Challenges of FIDO2 Reset
 
 A successful FIDO2 reset involves more than a single API call. Developers must handle three primary challenges:
 
-1.  **Hardware Re-enumeration**: The reset process requires the user to physically unplug and re-insert the YubiKey. Your application must be able to reliably detect the exact moment the device becomes available to the operating system again. A simple, synchronous check is prone to race conditions.
+1.  **Hardware Re-enumeration**: The reset process requires the user to physically unplug and re-insert the YubiKey. Your application must be able to reliably detect the exact moment the device becomes available to the operating system again. A simple, synchronous check is prone to race conditions, especially on macOS.
 
 2.  **The 10-Second Window**: The YubiKey requires the `ResetCommand` to be sent within a short time window (approximately 10 seconds) after it powers on. Failing to meet this window will cause the operation to fail.
 
@@ -24,37 +24,31 @@ To overcome these challenges, your implementation should follow these architectu
 
 **The Solution:** Use the `Yubico.YubiKey.DeviceExtensions.YubiKeyDeviceListener`. This class hooks directly into the operating system's hardware events, allowing for immediate notification when a YubiKey is inserted. This is the most reliable way to meet the timing requirement.
 
-Our reference `Fido2ResetService.cs` accomplishes this with a helper method that converts the event into an awaitable `Task`.
+Our reference `Fido2Reset.cs` accomplishes this by using a `TaskCompletionSource` which is completed by the `YubiKeyInserted` event handler. This converts the event into an awaitable `Task`.
 
-**Reference Implementation (`Fido2ResetService.cs`):**
+**Reference Implementation (`Fido2Reset.cs`):**
 ```csharp
 private async Task<IYubiKeyDevice?> WaitForYubiKeyArrival(TimeSpan timeout)
 {
-    YubiKeyDeviceListener yubiKeyDeviceListener = YubiKeyDeviceListener.Instance;
-    var tcs = new TaskCompletionSource<IYubiKeyDevice?>();
+    _tcs = new TaskCompletionSource<IYubiKeyDevice?>();
 
-    // This event handler will complete our Task when a YubiKey arrives.
-    void DeviceArrivedHandler(object? sender, YubiKeyDeviceEventArgs eventArgs)
+    // Await the event (which completes the TCS) or a timeout, whichever comes first.
+    Task completedTask = await Task.WhenAny(_tcs.Task, Task.Delay(timeout));
+
+    if (completedTask == _tcs.Task)
     {
-        yubiKeyDeviceListener.Arrived -= DeviceArrivedHandler;
-        tcs.TrySetResult(eventArgs.Device);
+        return await _tcs.Task;
     }
+    
+    return null; // Timeout occurred
+}
 
-    yubiKeyDeviceListener.Arrived += DeviceArrivedHandler;
-
-    // Await the event or a timeout, whichever comes first.
-    Task completedTask = await Task.WhenAny(tcs.Task, Task.Delay(timeout));
-
-    yubiKeyDeviceListener.Arrived -= DeviceArrivedHandler;
-
-    if (completedTask == tcs.Task)
-    {
-        return await tcs.Task;
-    }
-    else
-    {
-        return null; // Timeout occurred
-    }
+private void YubiKeyInserted(object? sender, YubiKeyDeviceEventArgs eventArgs)
+{
+    // ... (verification logic) ...
+    
+    // Complete with the correct device to signal success.
+    _tcs?.TrySetResult(eventArgs.Device);
 }
 ```
 
@@ -62,26 +56,29 @@ private async Task<IYubiKeyDevice?> WaitForYubiKeyArrival(TimeSpan timeout)
 
 **The Problem:** A user might accidentally insert a different YubiKey than the one they removed. Proceeding with the reset would be a destructive action on the wrong device.
 
-**The Solution:** After detecting a re-inserted key, always compare its `SerialNumber` to the serial number of the key that was originally removed.
+**The Solution:** In the `YubiKeyInserted` event handler, before completing the task, always compare the `SerialNumber` of the arriving device to the serial number of the key that was originally removed.
 
-**Reference Implementation (`Fido2ResetService.cs`):**
+**Reference Implementation (`Fido2Reset.cs`):**
 ```csharp
-// Store the original serial number before starting the process.
-int originalSerialNumber = yubiKey.SerialNumber;
-
-// ... after WaitForYubiKeyArrival returns reinsertedKey ...
-
-if (reinsertedKey is null)
+private void YubiKeyInserted(object? sender, YubiKeyDeviceEventArgs eventArgs)
 {
-    // Handle timeout...
-    return;
-}
+    int serialNumberInserted = eventArgs.Device.SerialNumber ?? 0;
 
-// VERIFY THE SERIAL NUMBER
-if (reinsertedKey.SerialNumber != originalSerialNumber)
-{
-    WriteError($"Incorrect YubiKey. Expected {originalSerialNumber}, but found {reinsertedKey.SerialNumber}.");
-    return;
+    if (serialNumberInserted != _originalSerialNumber)
+    {
+        SampleMenu.WriteMessage(
+            MessageType.Special, 0,
+            $"Incorrect YubiKey inserted. Expected S/N: {_originalSerialNumber}, but found S/N: {serialNumberInserted}.");
+        
+        // Complete with null to indicate failure.
+        _tcs?.TrySetResult(null);
+        return;
+    }
+    
+    SampleMenu.WriteMessage(MessageType.Title, 0, $"\nCorrect YubiKey inserted (S/N: {serialNumberInserted}).");
+    
+    // Complete with the correct device to signal success.
+    _tcs?.TrySetResult(eventArgs.Device);
 }
 ```
 
@@ -91,28 +88,29 @@ if (reinsertedKey.SerialNumber != originalSerialNumber)
 
 **The Solution:** Always capture the `ResetResponse` object returned from the `SendCommand` method. Check its `Status` property to determine the outcome.
 
-**Reference Implementation (`Fido2ResetService.cs`):**
+**Reference Implementation (`Fido2Reset.cs`):**
 ```csharp
-using (IYubiKeyConnection fidoConnection = reinsertedKey.Connect(YubiKeyApplication.Fido2))
+using IYubiKeyConnection fidoConnection = reinsertedKey.Connect(YubiKeyApplication.Fido2);
+
+var resetCommand = new ResetCommand();
+ResetResponse response = fidoConnection.SendCommand(resetCommand);
+
+// Check the status of the response to handle user touch.
+switch (response.Status)
 {
-    var resetCommand = new ResetCommand();
-    ResetResponse response = fidoConnection.SendCommand(resetCommand);
+    case ResponseStatus.Success:
+        SampleMenu.WriteMessage(MessageType.Special, 0, "\nFIDO2 application has been successfully reset.");
+        break;
 
-    // Check the status of the response to handle user touch.
-    switch (response.Status)
-    {
-        case ResponseStatus.Success:
-            WriteSuccess("FIDO2 application has been successfully reset.");
-            break;
+    case ResponseStatus.ConditionsNotSatisfied:
+        _keyCollector(new KeyEntryData { Request = KeyEntryRequest.TouchRequest });
+        break;
 
-        case ResponseStatus.ConditionsNotSatisfied:
-            WriteSuccess("Command sent. Please touch the flashing contact on your YubiKey NOW to complete the reset.");
-            break;
-
-        default:
-            WriteError($"The FIDO2 reset failed. The YubiKey returned an error: {response.StatusMessage}");
-            break;
-    }
+    default:
+        SampleMenu.WriteMessage(
+            MessageType.Special, 0,
+            $"\nThe FIDO2 reset failed. The YubiKey returned an error: {response.StatusMessage}");
+        break;
 }
 ```
 
@@ -122,8 +120,7 @@ using (IYubiKeyConnection fidoConnection = reinsertedKey.Connect(YubiKeyApplicat
 
 **The Solution:** Guide the user through each phase of the operation.
 * Tell the user when to remove the key.
-* Use a visual indicator (like a spinner) to show the app is waiting.
 * Tell the user when to re-insert the key.
-* Give the final, explicit instruction to touch the key based on the command response.
+* Use the `KeyCollector` delegate to give the final, explicit instruction to touch the key based on the command response.
 
 By adhering to these best practices, your development team can build a FIDO2 reset feature that is not only functional but also robust, reliable, and user-friendly.

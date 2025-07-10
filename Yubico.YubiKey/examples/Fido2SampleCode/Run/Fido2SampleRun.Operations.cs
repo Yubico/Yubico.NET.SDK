@@ -162,18 +162,23 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             // This means we need to worry about asynchronous operations, and the
             // EventHandler delegates must have access to the serial number.
             // So we're going to use a separate class to handle this.
-            /*var fido2Reset = new Fido2Reset(_yubiKeyChosen.SerialNumber);
-            var status = fido2Reset.RunFido2Reset(_keyCollector.Fido2SampleKeyCollectorDelegate);
-            if (status == ResponseStatus.Success)
+            var fido2Reset = new Fido2Reset(
+                _yubiKeyChosen.SerialNumber, 
+                _keyCollector.Fido2SampleKeyCollectorDelegate);
+
+            // The RunFido2Reset method takes no arguments and returns a bool.
+            bool wasSuccessful = await fido2Reset.RunFido2Reset();
+
+            if (wasSuccessful)
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0, "\nFIDO2 application successfully reset.\n");
+                SampleMenu.WriteMessage(MessageType.Title, 0, "\nFIDO2 reset process completed.\n");
             }
             else
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0, "\nFIDO2 application NOT reset.\n");
-            }*/
-            var resetService = new Fido2ResetService();
-            await resetService.PerformResetAsync();
+                SampleMenu.WriteMessage(MessageType.Title, 0, "\nFIDO2 reset process failed or was canceled.\n");
+            }
+            /*var resetService = new Fido2ResetService();
+            await resetService.PerformResetAsync();*/
 
             return true;
         }

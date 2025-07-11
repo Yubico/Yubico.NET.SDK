@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Piv
             if (keyType is KeyType.X25519)
             {
                 var testSelectedPublicKeyPeer = TestKeys.GetTestPublicKey(keyType, 2);
-                peerPublicKey = Curve25519PublicKey.CreateFromPkcs8(testSelectedPublicKeyPeer.EncodedKey);
+                peerPublicKey = Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(testSelectedPublicKeyPeer.EncodedKey);
             }
             else
             {

@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Cryptography
             var publicKeyPkcs = rsa.ExportSubjectPublicKeyInfo();
 
             // Act
-            var publicKey = RSAPublicKey.CreateFromPkcs8(publicKeyPkcs);
+            var publicKey = RSAPublicKey.CreateFromSubjectPublicKeyInfo(publicKeyPkcs);
 
             // Assert
             Assert.Null(publicKey.Parameters.D);

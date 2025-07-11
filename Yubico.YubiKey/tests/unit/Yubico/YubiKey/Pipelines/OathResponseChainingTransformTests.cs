@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System;
-using Moq;
+using NSubstitute;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -25,36 +25,36 @@ namespace Yubico.YubiKey.Pipelines
         public void Cleanup_Called_CallsNextTransformCleanupMethod()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new OathResponseChainingTransform(mockTransform.Object);
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new OathResponseChainingTransform(mockTransform);
 
             // Act
             transform.Cleanup();
 
             // Assert
-            mockTransform.Verify(x => x.Cleanup(), Times.Once());
+            mockTransform.Received().Cleanup();
         }
 
         [Fact]
         public void Setup_Called_CallsNextTransformSetupMethod()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new OathResponseChainingTransform(mockTransform.Object);
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new OathResponseChainingTransform(mockTransform);
 
             // Act
             transform.Setup();
 
             // Assert
-            mockTransform.Verify(x => x.Setup(), Times.Once());
+            mockTransform.Received().Setup();
         }
 
         [Fact]
         public void Invoke_NullArgument_ThrowsArgumentNullException()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            var transform = new OathResponseChainingTransform(mockTransform.Object);
+            var mockTransform = Substitute.For<IApduTransform>();
+            var transform = new OathResponseChainingTransform(mockTransform);
 
             // Act
 #pragma warning disable CS8625 // JUSTIFICATION: Null argument test case
@@ -69,30 +69,27 @@ namespace Yubico.YubiKey.Pipelines
         public void Invoke_Called_CallsNextTransformInvokeMethod()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
-            _ = mockTransform
-                .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
+            var mockTransform = Substitute.For<IApduTransform>();
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }));
-            var transform = new OathResponseChainingTransform(mockTransform.Object);
+            var transform = new OathResponseChainingTransform(mockTransform);
 
             // Act
             _ = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
-            mockTransform.Verify(x =>
-                x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()), Times.Once());
+            mockTransform.Received(1).Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>());
         }
 
         [Fact]
         public void Invoke_SuccessfulResponseApdu_ReturnsResponse()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
+            var mockTransform = Substitute.For<IApduTransform>();
             var expectedResponse = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            _ = mockTransform
-                .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(expectedResponse);
-            var transform = new OathResponseChainingTransform(mockTransform.Object);
+            var transform = new OathResponseChainingTransform(mockTransform);
 
             // Act
             ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
@@ -105,12 +102,11 @@ namespace Yubico.YubiKey.Pipelines
         public void Invoke_FailedResponseApdu_ReturnsResponse()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
+            var mockTransform = Substitute.For<IApduTransform>();
             var expectedResponse = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
-            _ = mockTransform
-                .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
                 .Returns(expectedResponse);
-            var transform = new OathResponseChainingTransform(mockTransform.Object);
+            var transform = new OathResponseChainingTransform(mockTransform);
 
             // Act
             ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
@@ -123,21 +119,18 @@ namespace Yubico.YubiKey.Pipelines
         public void Invoke_BytesAvailableThenSuccess_CallsInvokeTwice()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
+            var mockTransform = Substitute.For<IApduTransform>();
             var response1 = new ResponseApdu(new byte[] { SW1Constants.BytesAvailable, 0x00 });
             var response2 = new ResponseApdu(new byte[] { SW1Constants.Success, 0x00 });
-            _ = mockTransform
-                .SetupSequence(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
-                .Returns(response1)
-                .Returns(response2);
-            var transform = new OathResponseChainingTransform(mockTransform.Object);
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
+                .Returns(response1, response2);
+            var transform = new OathResponseChainingTransform(mockTransform);
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+            _ = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
-            mockTransform.Verify(x =>
-                x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()), Times.Exactly(2));
+            mockTransform.Received(2).Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>());
         }
 
         [Fact]
@@ -146,36 +139,31 @@ namespace Yubico.YubiKey.Pipelines
             byte expectedIns = 0xA5;
 
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
+            var mockTransform = Substitute.For<IApduTransform>();
             var response1 = new ResponseApdu(new byte[] { SW1Constants.BytesAvailable, 0x00 });
             var response2 = new ResponseApdu(new byte[] { SW1Constants.Success, 0x00 });
-            _ = mockTransform
-                .SetupSequence(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
-                .Returns(response1)
-                .Returns(response2);
-            var transform = new OathResponseChainingTransform(mockTransform.Object);
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
+                .Returns(response1, response2);
+            var transform = new OathResponseChainingTransform(mockTransform);
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+            _ = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
-            mockTransform.Verify(x =>
-                x.Invoke(It.Is<CommandApdu>(c => c.Ins == expectedIns), It.IsAny<Type>(), It.IsAny<Type>()), Times.Once);
+            mockTransform.Received(1).Invoke(Arg.Is<CommandApdu>(c => c.Ins == expectedIns), Arg.Any<Type>(), Arg.Any<Type>());
         }
 
         [Fact]
         public void Invoke_BytesAvailble_ConcatsAllBuffers()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
+            var mockTransform = Substitute.For<IApduTransform>();
             var response1 = new ResponseApdu(new byte[] { 1, 2, 3, 4, SW1Constants.BytesAvailable, 0x00 });
             var response2 = new ResponseApdu(new byte[] { 5, 6, 7, 8, SW1Constants.Success, 0x00 });
             byte[] expectedData = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
-            _ = mockTransform
-                .SetupSequence(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
-                .Returns(response1)
-                .Returns(response2);
-            var transform = new OathResponseChainingTransform(mockTransform.Object);
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
+                .Returns(response1, response2);
+            var transform = new OathResponseChainingTransform(mockTransform);
 
             // Act
             ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
@@ -188,14 +176,12 @@ namespace Yubico.YubiKey.Pipelines
         public void Invoke_BytesAvailable_ReturnsLastStatusWord()
         {
             // Arrange
-            var mockTransform = new Mock<IApduTransform>();
+            var mockTransform = Substitute.For<IApduTransform>();
             var response1 = new ResponseApdu(new byte[] { SW1Constants.BytesAvailable, 0x00 });
             var response2 = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
-            _ = mockTransform
-                .SetupSequence(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
-                .Returns(response1)
-                .Returns(response2);
-            var transform = new OathResponseChainingTransform(mockTransform.Object);
+            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
+                .Returns(response1, response2);
+            var transform = new OathResponseChainingTransform(mockTransform);
 
             // Act
             ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));

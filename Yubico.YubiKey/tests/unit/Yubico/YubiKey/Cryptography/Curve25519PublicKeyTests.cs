@@ -1,4 +1,4 @@
-// Copyright 2024 Yubico AB
+// Copyright 2025 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class Curve25519PublicKeyTests
         var testPublicKey = TestKeys.GetTestPublicKey(keyType);
             
         // Act
-        var publicKey = Curve25519PublicKey.CreateFromPkcs8(testPublicKey.EncodedKey);
+        var publicKey = Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(testPublicKey.EncodedKey);
         Assert.NotNull(publicKey);
 
         // Assert
@@ -63,7 +63,7 @@ public class Curve25519PublicKeyTests
         var testPublicPoint = testKey.GetPublicPoint();
 
         // Act
-        var publicKey = Curve25519PublicKey.CreateFromPkcs8(testKey.EncodedKey); 
+        var publicKey = Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(testKey.EncodedKey); 
 
         // Assert
         Assert.NotNull(publicKey);

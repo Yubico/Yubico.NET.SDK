@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ namespace Yubico.PlatformInterop
 {
     internal static partial class Libraries
     {
-        internal const string CoreFoundation = "CoreFoundation.framework/CoreFoundation";
-        internal const string IOKitFramework = "IOKit.framework/IOKit";
-        internal const string WinSCard = "PCSC.framework/PCSC";
+        internal const string CoreFoundation = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
+        internal const string IOKitFramework = "/System/Library/Frameworks/IOKit.framework/IOKit";
+        internal const string WinSCard = "/System/Library/Frameworks/PCSC.framework/PCSC";
     }
 }

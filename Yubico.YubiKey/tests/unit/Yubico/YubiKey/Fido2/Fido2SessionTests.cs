@@ -1,4 +1,4 @@
-﻿// Copyright 2022 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System;
-using Moq;
+using NSubstitute;
 using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.Commands;
@@ -38,19 +38,17 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         void Constructor_ValidYubiKeyDevice_Succeeds()
         {
-            var mockYubiKey = new Mock<IYubiKeyDevice>();
-            var mockConnection = new Mock<IYubiKeyConnection>();
+            var mockYubiKey = Substitute.For<IYubiKeyDevice>();
+            var mockConnection = Substitute.For<IYubiKeyConnection>();
             var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
-            _ = mockConnection
-                .Setup(c => c.SendCommand(It.IsAny<IYubiKeyCommand<IYubiKeyResponse>>()))
+            _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
                 .Returns(mockResponse);
 
-            _ = mockYubiKey
-                .Setup(k => k.Connect(YubiKeyApplication.Fido2))
-                .Returns(mockConnection.Object);
+            _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
+                .Returns(mockConnection);
 
-            var session = new Fido2Session(mockYubiKey.Object);
+            var session = new Fido2Session(mockYubiKey);
 
             Assert.NotNull(session);
         }
@@ -58,41 +56,37 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         void Constructor_GivenValidYubiKeyDevice_ConnectsToFido2Application()
         {
-            var mockYubiKey = new Mock<IYubiKeyDevice>();
-            var mockConnection = new Mock<IYubiKeyConnection>();
+            var mockYubiKey = Substitute.For<IYubiKeyDevice>();
+            var mockConnection = Substitute.For<IYubiKeyConnection>();
             var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
-            _ = mockConnection
-                .Setup(c => c.SendCommand(It.IsAny<IYubiKeyCommand<IYubiKeyResponse>>()))
+            _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
                 .Returns(mockResponse);
 
-            _ = mockYubiKey
-                .Setup(k => k.Connect(YubiKeyApplication.Fido2))
-                .Returns(mockConnection.Object);
+            _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
+                .Returns(mockConnection);
 
-            var session = new Fido2Session(mockYubiKey.Object);
+            _ = new Fido2Session(mockYubiKey);
 
-            mockYubiKey.Verify(k => k.Connect(YubiKeyApplication.Fido2), Times.Once);
+            mockYubiKey.Received().Connect(YubiKeyApplication.Fido2);
         }
 
         [Fact]
         void GetAuthenticatorInfo_SendsGetInfoCommand()
         {
-            var mockYubiKey = new Mock<IYubiKeyDevice>();
-            var mockConnection = new Mock<IYubiKeyConnection>();
+            var mockYubiKey = Substitute.For<IYubiKeyDevice>();
+            var mockConnection = Substitute.For<IYubiKeyConnection>();
             var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
-            _ = mockConnection
-                .Setup(c => c.SendCommand(It.IsAny<IYubiKeyCommand<IYubiKeyResponse>>()))
+            _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
                 .Returns(mockResponse);
 
-            _ = mockYubiKey
-                .Setup(k => k.Connect(YubiKeyApplication.Fido2))
-                .Returns(mockConnection.Object);
+            _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
+                .Returns(mockConnection);
 
-            var session = new Fido2Session(mockYubiKey.Object);
+            _ = new Fido2Session(mockYubiKey);
 
-            mockConnection.Verify(c => c.SendCommand(It.IsAny<GetInfoCommand>()));
+            mockConnection.Received().SendCommand(Arg.Any<GetInfoCommand>());
         }
     }
 }

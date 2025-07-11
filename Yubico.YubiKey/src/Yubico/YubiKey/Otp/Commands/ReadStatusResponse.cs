@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Otp.Commands
                 ShortPressRequiresTouch = (responseApduSpan[4] & ShortPressTouchMask) != 0,
                 LongPressRequiresTouch = (responseApduSpan[4] & LongPressTouchMask) != 0,
                 LedBehaviorInverted = (responseApduSpan[4] & LedInvertedMask) != 0,
-                TouchLevel = responseApduSpan[5],
+                TouchLevel = responseApduSpan[5]
             };
         }
     }

@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -90,6 +90,19 @@ namespace Yubico.YubiKey
         /// The version of the firmware currently running on the YubiKey.
         /// </summary>
         public FirmwareVersion FirmwareVersion { get; }
+        
+        /// <summary>
+        /// Represents a version qualifier for a firmware version.
+        /// A version qualifier typically includes the firmware version, a type (such as Alpha, Beta, or Final),
+        /// and an iteration number.
+        /// </summary>
+        public VersionQualifier VersionQualifier { get; }
+        
+        /// <summary>
+        /// A string representation of the firmware version currently running on the YubiKey
+        /// which may include a version qualifier.
+        /// </summary>
+        public string VersionName { get; }
 
         /// <summary>
         /// The version of the chip/firmware storing the fingerprints (the second

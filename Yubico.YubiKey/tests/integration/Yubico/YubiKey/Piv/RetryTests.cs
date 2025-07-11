@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(testDevice))
             {
+                pivSession.ResetApplication();
                 try
                 {
                     var collectorObj = new Simple39KeyCollector();

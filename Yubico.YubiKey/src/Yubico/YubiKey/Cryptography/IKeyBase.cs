@@ -1,4 +1,4 @@
-// Copyright 2024 Yubico AB
+// Copyright 2025 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -14,6 +14,13 @@
 
 namespace Yubico.YubiKey.Cryptography;
 
+/// <summary>
+/// Defines the base contract for all cryptographic keys, providing key type identification.
+/// </summary>
+/// <remarks>
+/// This interface serves as the foundation for both public and private key abstractions,
+/// enabling polymorphic key type handling across different cryptographic algorithms.
+/// </remarks>
 public interface IKeyBase
 {
     /// <summary>

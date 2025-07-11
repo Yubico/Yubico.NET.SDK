@@ -1,4 +1,4 @@
-// Copyright 2024 Yubico AB
+// Copyright 2025 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -17,6 +17,13 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
+/// <summary>
+/// Represents an RSA public key.
+/// </summary>
+/// <remarks>
+/// This sealed class encapsulates RSA public key parameters (Modulus and Exponent)
+/// and provides factory methods for creating instances from RSA parameters or DER-encoded data.
+/// </remarks>
 public sealed class RSAPublicKey : PublicKey
 {
     /// <summary>
@@ -30,14 +37,14 @@ public sealed class RSAPublicKey : PublicKey
     /// The parameters are used in cryptographic operations such as decryption and digital signature creation.
     /// </remarks>
     public RSAParameters Parameters { get; }
-    
+
     /// <summary>
     /// Gets the key definition associated with this RSA private key.
     /// </summary>
     /// <value>
     /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
     /// </value>
-    public KeyDefinition KeyDefinition  { get; }
+    public KeyDefinition KeyDefinition { get; }
 
     /// <inheritdoc />
     public override KeyType KeyType => KeyDefinition.KeyType;
@@ -75,8 +82,8 @@ public sealed class RSAPublicKey : PublicKey
     /// </exception>
     public static RSAPublicKey CreateFromParameters(RSAParameters parameters)
     {
-        if (parameters.D != null || 
-            parameters.P != null || 
+        if (parameters.D != null ||
+            parameters.P != null ||
             parameters.Q != null ||
             parameters.DP != null ||
             parameters.DQ != null ||
@@ -85,18 +92,25 @@ public sealed class RSAPublicKey : PublicKey
         {
             throw new ArgumentException("Parameters must not contain private key data");
         }
-        
+
         return new RSAPublicKey(parameters);
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="IPublicKey"/> from a DER-encoded public key.
+    /// Creates a new instance of <see cref="IPublicKey"/> from ASN.1 DER-encoded SubjectPublicKeyInfo.
     /// </summary>
-    /// <param name="encodedKey">The DER-encoded public key.</param>
+    /// <param name="subjectPublicKeyInfo">The DER-encoded SubjectPublicKeyInfo.</param>
     /// <returns>A new instance of <see cref="IPublicKey"/>.</returns>
     /// <exception cref="CryptographicException">
     /// Thrown if the public key is invalid.
     /// </exception>
-    public static RSAPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey) =>
-        (RSAPublicKey)AsnPublicKeyDecoder.CreatePublicKey(encodedKey);
+    public static RSAPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+        AsnPublicKeyDecoder
+            .CreatePublicKey(subjectPublicKeyInfo)
+            .Cast<RSAPublicKey>();
+
+
+    [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
+    public static RSAPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+        CreateFromSubjectPublicKeyInfo(subjectPublicKeyInfo);
 }

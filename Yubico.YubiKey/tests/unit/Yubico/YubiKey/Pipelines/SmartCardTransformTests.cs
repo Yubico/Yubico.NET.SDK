@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System;
-using Moq;
+using NSubstitute;
 using Xunit;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;
@@ -34,8 +34,8 @@ namespace Yubico.YubiKey.Pipelines
         public void Cleanup_DoesNothing()
         {
             // Arrange
-            var mockConnection = new Mock<ISmartCardConnection>();
-            var transform = new SmartCardTransform(mockConnection.Object);
+            var mockConnection = Substitute.For<ISmartCardConnection>();
+            var transform = new SmartCardTransform(mockConnection);
 
             // Act
             Exception? exception = Record.Exception(() => transform.Cleanup());
@@ -48,32 +48,30 @@ namespace Yubico.YubiKey.Pipelines
         public void Invoke_GivenCommandApdu_CallsTrasmitWithExactApdu()
         {
             // Arrange
-            var mockConnection = new Mock<ISmartCardConnection>();
-            _ = mockConnection
-                .Setup(m => m.Transmit(AnyCommandApdu()))
+            var mockConnection = Substitute.For<ISmartCardConnection>();
+            _ = mockConnection.Transmit(AnyCommandApdu())
                 .Returns(SuccessResponse());
 
-            var transform = new SmartCardTransform(mockConnection.Object);
+            var transform = new SmartCardTransform(mockConnection);
             var expectedApdu = new CommandApdu();
 
             // Act
             _ = transform.Invoke(expectedApdu, typeof(object), typeof(object));
 
             // Assert
-            mockConnection.Verify(m => m.Transmit(It.Is<CommandApdu>(a => a == expectedApdu)));
+            mockConnection.Received().Transmit(Arg.Is<CommandApdu>(a => a == expectedApdu));
         }
 
         [Fact]
         public void Invoke_GivenCommandApdu_ReturnsExactResponseFromTransmit()
         {
             // Arrange
-            var mockConnection = new Mock<ISmartCardConnection>();
+            var mockConnection = Substitute.For<ISmartCardConnection>();
             ResponseApdu expectedResponse = SuccessResponse();
-            _ = mockConnection
-                .Setup(m => m.Transmit(AnyCommandApdu()))
+            _ = mockConnection.Transmit(AnyCommandApdu())
                 .Returns(expectedResponse);
 
-            var transform = new SmartCardTransform(mockConnection.Object);
+            var transform = new SmartCardTransform(mockConnection);
 
             // Act
             ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
@@ -83,7 +81,7 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         private static CommandApdu AnyCommandApdu() =>
-            It.IsAny<CommandApdu>();
+            Arg.Any<CommandApdu>();
 
         private static ResponseApdu SuccessResponse() =>
             new ResponseApdu(new byte[] { 0x90, 0x00 });

@@ -1,4 +1,4 @@
-// Copyright 2024 Yubico AB
+// Copyright 2025 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ namespace Yubico.YubiKey.Cryptography
     /// Represents the parameters for an Elliptic Curve (EC) private key.
     /// </summary>
     /// <remarks>
-    /// This class encapsulates the parameters specific to EC private keys and
-    /// contains the necessary private key data.
+    /// This class encapsulates the parameters specific to EC private keys
+    /// and provides factory methods for creating instances from EC parameters
+    /// or DER-encoded data.
     /// </remarks>
     public class ECPrivateKey : PrivateKey
     {
@@ -33,7 +34,7 @@ namespace Yubico.YubiKey.Cryptography
         /// An <see cref="ECParameters"/> structure containing the curve parameters, key, and other
         /// cryptographic elements needed for EC operations.
         /// </value>
-        public ECParameters Parameters { get;}
+        public ECParameters Parameters { get; }
 
         /// <summary>
         /// Gets the key definition associated with this RSA private key.
@@ -84,7 +85,7 @@ namespace Yubico.YubiKey.Cryptography
             Parameters = ecdsaObject.ExportParameters(true);
             KeyDefinition = KeyDefinitions.GetByOid(Parameters.Curve.Oid);
         }
-        
+
         /// <inheritdoc/>
         public override byte[] ExportPkcs8PrivateKey()
         {
@@ -115,12 +116,16 @@ namespace Yubico.YubiKey.Cryptography
         public static ECPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
         {
             var parameters = AsnPrivateKeyDecoder.CreateECParameters(encodedKey);
+
             return CreateFromParameters(parameters);
         }
-        
-        #pragma warning disable CS0618 // Type or member is obsolete.
+
+        /// <summary>
+        /// Creates an instance of <see cref="ECPrivateKey"/> from the given <paramref name="parameters"/>.
+        /// </summary>
+        /// <param name="parameters">The parameters to create the key from.</param>
+        /// <returns>An instance of <see cref="ECPrivateKey"/>.</returns>
         public static ECPrivateKey CreateFromParameters(ECParameters parameters) => new(parameters);
-        #pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// Creates a new instance of <see cref="ECPrivateKey"/> from the given

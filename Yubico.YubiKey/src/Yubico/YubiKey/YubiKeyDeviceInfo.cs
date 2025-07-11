@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey
@@ -75,6 +76,7 @@ namespace Yubico.YubiKey
         /// <inheritdoc />
         public FormFactor FormFactor { get; set; }
 
+        /// <inheritdoc />
         public string VersionName => VersionQualifier.Type == VersionQualifierType.Final
             ? FirmwareVersion.ToString()
             : VersionQualifier.ToString();
@@ -83,7 +85,7 @@ namespace Yubico.YubiKey
         public FirmwareVersion FirmwareVersion { get; set; }
 
         /// <inheritdoc />
-        internal VersionQualifier VersionQualifier { get; set; }
+        public VersionQualifier VersionQualifier { get; set; }
 
         /// <inheritdoc />
         public TemplateStorageVersion? TemplateStorageVersion { get; set; }
@@ -269,12 +271,24 @@ namespace Yubico.YubiKey
                 }
             }
 
+            SetFipsSeries(deviceInfo, fipsSeriesFlag);
+            SetSkySeries(deviceInfo, skySeriesFlag);
+            SetFirmwareVersionAndQualifier(responseApduData, deviceInfo);
+            
+            return deviceInfo;
+        }
+
+        private static void SetSkySeries(YubiKeyDeviceInfo deviceInfo, bool skySeriesFlag) => deviceInfo.IsSkySeries |= skySeriesFlag;
+
+        private static void SetFipsSeries(YubiKeyDeviceInfo deviceInfo, bool fipsSeriesFlag)
+        {
             deviceInfo.IsFipsSeries = deviceInfo.FirmwareVersion >= _fipsFlagInclusiveLowerBound
                 ? fipsSeriesFlag
                 : deviceInfo.IsFipsVersion;
+        }
 
-            deviceInfo.IsSkySeries |= skySeriesFlag;
-
+        private static void SetFirmwareVersionAndQualifier(Dictionary<int, ReadOnlyMemory<byte>> responseApduData, YubiKeyDeviceInfo deviceInfo)
+        {
             if (!responseApduData.TryGetValue(YubikeyDeviceManagementTags.VersionQualifierTag, out var versionQualifierBytes))
             {
                 deviceInfo.VersionQualifier = new VersionQualifier(deviceInfo.FirmwareVersion, VersionQualifierType.Final, 0);
@@ -286,21 +300,21 @@ namespace Yubico.YubiKey
                     throw new ArgumentException("Invalid data length.");
                 }
 
-                const byte TAG_VERSION = 0x01;
-                const byte TAG_TYPE = 0x02;
-                const byte TAG_ITERATION = 0x03;
+                const byte tagVersion = 0x01;
+                const byte tagType = 0x02;
+                const byte tagIteration = 0x03;
 
                 var data = TlvObjects.DecodeDictionary(versionQualifierBytes.Span);
 
-                if (!data.TryGetValue(TAG_VERSION, out var firmwareVersionBytes))
+                if (!data.TryGetValue(tagVersion, out var firmwareVersionBytes))
                 {
                     throw new ArgumentException("Missing TLV field: TAG_VERSION.");
                 }
-                if (!data.TryGetValue(TAG_TYPE, out var versionTypeBytes))
+                if (!data.TryGetValue(tagType, out var versionTypeBytes))
                 {
                     throw new ArgumentException("Missing TLV field: TAG_TYPE.");
                 }
-                if (!data.TryGetValue(TAG_ITERATION, out var iterationBytes))
+                if (!data.TryGetValue(tagIteration, out var iterationBytes))
                 {
                     throw new ArgumentException("Missing TLV field: TAG_ITERATION.");
                 }
@@ -318,13 +332,15 @@ namespace Yubico.YubiKey
             bool isFinalVersion = deviceInfo.VersionQualifier.Type == VersionQualifierType.Final;
             if (!isFinalVersion)
             {
-                var Logger = Core.Logging.Log.GetLogger<YubiKeyDeviceInfo>();
-                Logger.LogDebug("Overriding behavioral version with {FirmwareString}", deviceInfo.VersionQualifier.FirmwareVersion);
+                var logger = Log.GetLogger<YubiKeyDeviceInfo>();
+                logger.LogDebug("Overriding behavioral version with {FirmwareString}", deviceInfo.VersionQualifier.FirmwareVersion);
             }
 
-            var computedVersion = isFinalVersion ? deviceInfo.FirmwareVersion : deviceInfo.VersionQualifier.FirmwareVersion;
-            deviceInfo.FirmwareVersion = computedVersion;
-            return deviceInfo;
+            var finalVersion = isFinalVersion 
+                ? deviceInfo.FirmwareVersion 
+                : deviceInfo.VersionQualifier.FirmwareVersion;
+            
+            deviceInfo.FirmwareVersion = finalVersion;
         }
 
         private static string? GetPartNumber(ReadOnlySpan<byte> valueSpan)
@@ -372,7 +388,7 @@ namespace Yubico.YubiKey
                     ? FirmwareVersion
                     : second.FirmwareVersion,
 
-                VersionQualifier = VersionQualifier != new VersionQualifier()
+                VersionQualifier = !Equals(VersionQualifier, new VersionQualifier())
                     ? VersionQualifier
                     : second.VersionQualifier,
 

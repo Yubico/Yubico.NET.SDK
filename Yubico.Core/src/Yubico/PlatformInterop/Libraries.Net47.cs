@@ -1,4 +1,4 @@
-﻿// Copyright 2024 Yubico AB
+﻿// Copyright 2025 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Yubico.PlatformInterop
 {
@@ -72,9 +73,13 @@ namespace Yubico.PlatformInterop
             private static string NativeShimsPath =>
                 Path.Combine(
                     AppDomain.CurrentDomain.BaseDirectory,
-                    Environment.Is64BitProcess
-                        ? "x64"
-                        : "x86",
+                    RuntimeInformation.OSArchitecture switch
+                    {
+                        Architecture.X86 => "x86",
+                        Architecture.X64 => "x64",
+                        Architecture.Arm64 => "arm64",
+                        var unsupportedArch  => throw new ArgumentOutOfRangeException($"Architecture {unsupportedArch } is not supported!")
+                    },
                     NativeShims);
             
             /// <summary>

@@ -1,4 +1,4 @@
-// Copyright 2024 Yubico AB
+// Copyright 2025 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -17,13 +17,21 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
+/// <summary>
+/// Represents a Curve25519 private key.
+/// </summary>
+/// <remarks>
+/// This sealed class encapsulates Curve25519 private key data and supports
+/// both Ed25519 and X25519 cryptographic operations.
+/// It also provides factory methods for creating instances from private key values or DER-encoded data.
+/// </remarks>
 public sealed class Curve25519PrivateKey : PrivateKey
 {
     private readonly Memory<byte> _privateKey;
 
     /// <inheritdoc />
     public override KeyType KeyType => KeyDefinition.KeyType;
-    
+
     /// <summary>
     /// Gets the key definition associated with this RSA private key.
     /// </summary>
@@ -37,7 +45,7 @@ public sealed class Curve25519PrivateKey : PrivateKey
     /// </summary>
     /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the private scalar value.</returns>
     public ReadOnlyMemory<byte> PrivateKey => _privateKey;
-    
+
     private Curve25519PrivateKey(
         ReadOnlyMemory<byte> privateKey,
         KeyType keyType)
@@ -53,9 +61,9 @@ public sealed class Curve25519PrivateKey : PrivateKey
 
         privateKey.CopyTo(_privateKey);
     }
-    
+
     /// <inheritdoc />
-    public override byte[] ExportPkcs8PrivateKey() 
+    public override byte[] ExportPkcs8PrivateKey()
     {
         ThrowIfDisposed();
         return AsnPrivateKeyEncoder.EncodeToPkcs8(_privateKey, KeyType);
@@ -70,10 +78,10 @@ public sealed class Curve25519PrivateKey : PrivateKey
 
     /// <summary>
     /// Creates an instance of <see cref="Curve25519PrivateKey"/> from a PKCS#8
-    /// DER-encoded private key.
+    /// ASN.1 DER-encoded private key.
     /// </summary>
     /// <param name="pkcs8EncodedKey">
-    /// The DER-encoded private key.
+    /// The ASN.1 DER-encoded private key.
     /// </param>
     /// <returns>
     /// A new instance of <see cref="Curve25519PrivateKey"/>.
@@ -88,7 +96,7 @@ public sealed class Curve25519PrivateKey : PrivateKey
         using var privateKeyHandle = new ZeroingMemoryHandle(privateKey);
         return new Curve25519PrivateKey(privateKeyHandle.Data, keyType);
     }
-    
+
     /// <summary>
     /// Creates an instance of <see cref="Curve25519PrivateKey"/> from the given
     /// <paramref name="privateKey"/> and <paramref name="keyType"/>.

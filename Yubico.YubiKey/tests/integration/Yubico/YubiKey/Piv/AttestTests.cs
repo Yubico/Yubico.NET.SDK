@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -51,11 +51,12 @@ namespace Yubico.YubiKey.Piv
                 Session.CreateAttestationStatement(PivSlot.Retired1));
         }
 
-        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [SkippableTheory(typeof(DeviceNotFoundException), typeof(NotSupportedException))]
+        [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
         [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5Fips)]
+        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
         [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
         public void AttestGenerated(
             KeyType keyType,

@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         [DoesNotReturn]
-        private T ThrowIfUninitialized<T>() => throw new InvalidOperationException($"{nameof(Scp.ScpState)} has not been initialized. The Setup method must be called.");
+        private static T ThrowIfUninitialized<T>() => throw new InvalidOperationException($"{nameof(Scp.ScpState)} has not been initialized. The Setup method must be called.");
 
         private static bool ShouldNotEncode(Type commandType)
         {

@@ -1,4 +1,4 @@
-// Copyright 2024 Yubico AB
+// Copyright 2025 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -13,12 +13,19 @@
 // limitations under the License.
 
 using System;
-using System.Formats.Asn1;
 using System.Globalization;
 using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography;
 
+/// <summary>
+/// Represents a Curve25519 public key.
+/// </summary>
+/// <remarks>
+/// This sealed class encapsulates Curve25519 public key data as a compressed point
+/// and supports both Ed25519 and X25519 key types.
+/// It also provides factory methods for creating instances from public point values or DER-encoded data.
+/// </remarks>
 public sealed class Curve25519PublicKey : PublicKey
 {
     private readonly Memory<byte> _publicPoint;
@@ -52,7 +59,7 @@ public sealed class Curve25519PublicKey : PublicKey
 
         publicPoint.CopyTo(_publicPoint);
     }
-    
+
     /// <summary>
     /// Converts this public key to an ASN.1 DER encoded format (X.509 SubjectPublicKeyInfo).
     /// </summary>
@@ -63,33 +70,21 @@ public sealed class Curve25519PublicKey : PublicKey
         AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(_publicPoint, KeyDefinition.KeyType);
 
     /// <summary>
-    /// Creates a new instance of <see cref="Curve25519PublicKey"/> from a DER-encoded public key.
+    /// Creates a new instance of <see cref="Curve25519PublicKey"/> from a DER-encoded SubjectPublicKeyInfo.
     /// </summary>
-    /// <param name="encodedKey">
-    /// The DER-encoded public key.
+    /// <param name="subjectPublicKeyInfo">
+    /// The DER-encoded SubjectPublicKeyInfo.
     /// </param>
     /// <returns>
     /// A new instance of <see cref="Curve25519PublicKey"/>.
     /// </returns>
     /// <exception cref="CryptographicException">
-    /// Thrown if the public key is invalid.
+    /// Thrown if the subjectPublicKeyInfo is invalid.
     /// </exception>
-    public static Curve25519PublicKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
-    {
-        var reader = new AsnReader(encodedKey, AsnEncodingRules.DER);
-        var seqSubjectPublicKeyInfo = reader.ReadSequence();
-        var seqAlgorithmIdentifier = seqSubjectPublicKeyInfo.ReadSequence();
-
-        string oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        byte[] subjectPublicKey = seqSubjectPublicKeyInfo.ReadBitString(out int unusedBitCount);
-        if (unusedBitCount != 0)
-        {
-            throw new CryptographicException("Invalid public key encoding");
-        }
-
-        var keyType = KeyDefinitions.GetKeyTypeByOid(oidAlgorithm);
-        return CreateFromValue(subjectPublicKey, keyType);
-    }
+    public static Curve25519PublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+        AsnPublicKeyDecoder
+            .CreatePublicKey(subjectPublicKeyInfo)
+            .Cast<Curve25519PublicKey>();
 
     /// <summary>
     /// Creates an instance of <see cref="Curve25519PublicKey"/> from the given
@@ -114,4 +109,8 @@ public sealed class Curve25519PublicKey : PublicKey
 
         return new Curve25519PublicKey(publicPoint, keyDefinition);
     }
+
+    [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
+    public static Curve25519PublicKey CreateFromPkcs8(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
+        CreateFromSubjectPublicKeyInfo(subjectPublicKeyInfo);
 }

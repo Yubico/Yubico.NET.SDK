@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 // Wait for CheckReinsert to complete, or else the task times out.
                 // If it returns false, the YubiKey was not reinserted within the
                 // time limit, so return false.
-                if (!reinsert.Wait(ReinsertTimeoutSeconds * 1000))
+                if (!reinsert.Wait(ReinsertTimeoutSeconds * 1000)) // Reinsert the YubiKey at this step.
                 {
                     return ResponseStatus.ConditionsNotSatisfied;
                 }

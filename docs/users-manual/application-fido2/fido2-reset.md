@@ -51,7 +51,7 @@ To perform a FIDO2 reset, complete the following:
 
 ## Sample code
 
-The [FIDO2 sample program](https://github.com/Yubico/Yubico.NET.SDK/tree/main/Yubico.YubiKey/examples/Fido2SampleCode) (located under Yubico.YubiKey/examples/Fido2SampleCode/) contains a [class](https://github.com/Yubico/Yubico.NET.SDK/blob/main/Yubico.YubiKey/examples/Fido2SampleCode/YubiKeyOperations/Fido2Reset.cs) (/Fido2SampleCode/YubiKeyOperations/Fido2Reset.cs) that demonstrates how to execute the FIDO2 reset steps. This includes code for:
+The [FIDO2 sample program](https://github.com/Yubico/Yubico.NET.SDK/tree/develop/Yubico.YubiKey/examples/Fido2SampleCode) (located under Yubico.YubiKey/examples/Fido2SampleCode/) contains a [class](https://github.com/Yubico/Yubico.NET.SDK/blob/develop/Yubico.YubiKey/examples/Fido2SampleCode/YubiKeyOperations/Fido2Reset.cs) (/Fido2SampleCode/YubiKeyOperations/Fido2Reset.cs) that demonstrates how to execute the FIDO2 reset steps. This includes code for:
 
 - creating a listener to determine when the YubiKey is removed and reinserted
 - notifying the user to remove, reinsert, and touch the YubiKey

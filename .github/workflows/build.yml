@@ -86,13 +86,12 @@ jobs:
         if: ${{ github.event.inputs.version && (contains(github.event.inputs.version, 'prerelease') || contains(github.event.inputs.version, 'alpha') || contains(github.event.inputs.version, 'beta') || contains(github.event.inputs.version, 'rc')) }}
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
-      - name: Modify version for internal builds
-        if: ${{ github.event.inputs.push-to-dev == 'true' }}
+      - name: Set build version
+        if: ${{ github.event.inputs.version }}
         run: |
           $file = gci ./build/Versions.props
           $versionProp = [xml](gc $file.FullName)
-          $versionProp.Project.PropertyGroup.YubicoCoreVersion = "${{ github.event.inputs.version }}"
-          $versionProp.Project.PropertyGroup.YubicoYubiKeyVersion = "${{ github.event.inputs.version }}"
+          $versionProp.Project.PropertyGroup.CommonVersion = "${{ github.event.inputs.version }}"
           $versionProp.Save($file.FullName)
 
       # Build the project

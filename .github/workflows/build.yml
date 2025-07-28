@@ -80,7 +80,10 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: "./global.json"
-      - name: Add local NuGet repository
+
+      # Add local NuGet repository so that we can use internal pre-release versions
+      - name: Add local NuGet repository for prerelease versions
+        if: ${{ github.event.inputs.version && (contains(github.event.inputs.version, 'prerelease') || contains(github.event.inputs.version, 'alpha') || contains(github.event.inputs.version, 'beta') || contains(github.event.inputs.version, 'rc')) }}
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
       - name: Modify version for internal builds

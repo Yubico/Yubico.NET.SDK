@@ -51,7 +51,7 @@ namespace Yubico.PlatformInterop
         /// The implementation details are handled in Libraries.Net47.cs.
         /// </remarks>
         public static void EnsureInitialized() => Net47Implementation.Initialize();
-        
+
         /// <summary>
         /// Encapsulates the .NET Framework 4.7 specific implementation details for native library management.
         /// This nested class handles the dynamic loading of architecture-specific (x86/x64) native libraries.
@@ -73,15 +73,16 @@ namespace Yubico.PlatformInterop
             private static string NativeShimsPath =>
                 Path.Combine(
                     AppDomain.CurrentDomain.BaseDirectory,
-                    RuntimeInformation.OSArchitecture switch
+                    (RuntimeInformation.OSArchitecture, Environment.Is64BitProcess) switch
                     {
-                        Architecture.X86 => "x86",
-                        Architecture.X64 => "x64",
-                        Architecture.Arm64 => "arm64",
-                        var unsupportedArch  => throw new ArgumentOutOfRangeException($"Architecture {unsupportedArch } is not supported!")
+                        { OSArchitecture: Architecture.X86 } or { OSArchitecture: Architecture.X64, Is64BitProcess: false } => "x86",
+                        { OSArchitecture: Architecture.X64, Is64BitProcess: true } => "x64",
+                        { OSArchitecture: Architecture.Arm64 } => "arm64",
+                        var unsupportedArch => throw new ArgumentOutOfRangeException(
+                            $"Architecture {unsupportedArch} is not supported!")
                     },
                     NativeShims);
-            
+
             /// <summary>
             /// Initializes the native library for the current architecture.
             /// </summary>
@@ -99,7 +100,7 @@ namespace Yubico.PlatformInterop
                 {
                     throw new DllNotFoundException(
                         $"Failed to load native library from {NativeShimsPath}. " +
-                        $"Ensure the correct {(Environment.Is64BitProcess ? "x64" : "x86")} version is present.", 
+                        $"Ensure the correct {(Environment.Is64BitProcess ? "x64" : "x86")} version is present.",
                         ex);
                 }
             }

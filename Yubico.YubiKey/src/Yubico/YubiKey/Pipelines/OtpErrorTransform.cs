@@ -41,14 +41,15 @@ namespace Yubico.YubiKey.Pipelines
             if (commandType == typeof(ReadStatusCommand) ||
                 responseType != typeof(ReadStatusResponse))
             {
-                return InvokeCommand(command, commandType, responseType);
+                return _nextTransform.Invoke(command, commandType, responseType);
             }
 
             // Otherwise we assume this to be a command that applies a config (and therefore looks for a status response).
             // In order to detect failures, we grab the status structure before applying said command so that we have a
             // sequence number to compare to.
             var beforeStatus = GetCurrentStatus();
-            var responseApdu = InvokeCommand(command, commandType, responseType, out var afterStatus);
+            var responseApdu = _nextTransform.Invoke(command, commandType, responseType);
+            var afterStatus = ReadStatus(responseApdu);
 
             try
             {
@@ -62,7 +63,7 @@ namespace Yubico.YubiKey.Pipelines
             {
                 _logger.LogWarning(e, "Handling keyboard connection exception. Translating to APDU response.");
 
-                return CreateFailedApdu([]);
+                return CreateFailedApdu();
             }
         }
 
@@ -83,20 +84,6 @@ namespace Yubico.YubiKey.Pipelines
             return normalIncrement || validReset;
         }
 
-        private ResponseApdu InvokeCommand(
-            CommandApdu commandApdu,
-            Type commandType,
-            Type responseType,
-            out OtpStatus afterStatus)
-        {
-            var responseApdu = _nextTransform.Invoke(commandApdu, commandType, responseType);
-            afterStatus = ReadStatus(responseApdu);
-            return responseApdu;
-        }
-
-        private ResponseApdu InvokeCommand(CommandApdu commandApdu, Type commandType, Type responseType) =>
-            _nextTransform.Invoke(commandApdu, commandType, responseType);
-
         private OtpStatus GetCurrentStatus()
         {
             var command = new ReadStatusCommand();
@@ -105,9 +92,7 @@ namespace Yubico.YubiKey.Pipelines
                 typeof(ReadStatusCommand),
                 typeof(ReadStatusResponse));
 
-            return command
-                .CreateResponseForApdu(responseApdu)
-                .GetData();
+            return ReadStatus(responseApdu);
         }
 
         private static OtpStatus ReadStatus(ResponseApdu responseApdu)
@@ -117,6 +102,6 @@ namespace Yubico.YubiKey.Pipelines
             return afterStatus;
         }
 
-        private static ResponseApdu CreateFailedApdu(byte[] data) => new(data, SWConstants.WarningNvmUnchanged);
+        private static ResponseApdu CreateFailedApdu(byte[]? data = null) => new(data ?? [], SWConstants.WarningNvmUnchanged);
     }
 }

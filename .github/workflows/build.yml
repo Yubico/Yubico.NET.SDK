@@ -96,7 +96,7 @@ jobs:
 
       # Build the project
       - name: Build Yubico.NET.SDK.sln
-        run: dotnet pack --configuration Release --nologo --verbosity minimal --treatWarningsAsErrors Yubico.NET.SDK.sln 
+        run: dotnet pack --configuration Release --nologo --verbosity minimal -p:treatWarningsAsErrors=true Yubico.NET.SDK.sln 
 
       # Build the documentation
       - name: Build docs

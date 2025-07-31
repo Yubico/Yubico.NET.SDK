@@ -75,9 +75,9 @@ namespace Yubico.PlatformInterop
                     AppDomain.CurrentDomain.BaseDirectory,
                     (RuntimeInformation.OSArchitecture, Environment.Is64BitProcess) switch
                     {
-                        { OSArchitecture: Architecture.X86 } or { OSArchitecture: Architecture.X64, Is64BitProcess: false } => "x86",
-                        { OSArchitecture: Architecture.X64, Is64BitProcess: true } => "x64",
-                        { OSArchitecture: Architecture.Arm64 } => "arm64",
+                        (Architecture.X86, _) or (Architecture.X64, false) => "x86",
+                        (Architecture.X64, true) => "x64",
+                        (Architecture.Arm64, _) => "arm64",
                         var unsupportedArch => throw new ArgumentOutOfRangeException(
                             $"Architecture {unsupportedArch} is not supported!")
                     },

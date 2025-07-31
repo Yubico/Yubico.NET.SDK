@@ -81,9 +81,9 @@ jobs:
         with:
           global-json-file: "./global.json"
 
-      # Add local NuGet repository so that we can use internal pre-release versions
-      - name: Add local NuGet repository for prerelease versions
-        if: ${{ github.event.inputs.version && (contains(github.event.inputs.version, 'prerelease') || contains(github.event.inputs.version, 'alpha') || contains(github.event.inputs.version, 'beta') || contains(github.event.inputs.version, 'rc')) }}
+      # Add local NuGet repository if version is not a plain release (i.e., has a suffix, e.g., -prerelease)
+      - name: Add local NuGet repository for non-release versions
+        if: ${{ github.event.inputs.version && (contains(github.event.inputs.version, '-')) }}
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
       - name: Set build version

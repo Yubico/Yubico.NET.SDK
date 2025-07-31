@@ -80,21 +80,23 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: "./global.json"
-      - name: Add local NuGet repository
+
+      # Add local NuGet repository so that we can use internal pre-release versions
+      - name: Add local NuGet repository for prerelease versions
+        if: ${{ github.event.inputs.version && (contains(github.event.inputs.version, 'prerelease') || contains(github.event.inputs.version, 'alpha') || contains(github.event.inputs.version, 'beta') || contains(github.event.inputs.version, 'rc')) }}
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
-      - name: Modify version for internal builds
-        if: ${{ github.event.inputs.push-to-dev == 'true' }}
+      - name: Set build version
+        if: ${{ github.event.inputs.version }}
         run: |
           $file = gci ./build/Versions.props
           $versionProp = [xml](gc $file.FullName)
-          $versionProp.Project.PropertyGroup.YubicoCoreVersion = "${{ github.event.inputs.version }}"
-          $versionProp.Project.PropertyGroup.YubicoYubiKeyVersion = "${{ github.event.inputs.version }}"
+          $versionProp.Project.PropertyGroup.CommonVersion = "${{ github.event.inputs.version }}"
           $versionProp.Save($file.FullName)
 
       # Build the project
       - name: Build Yubico.NET.SDK.sln
-        run: dotnet pack --configuration Release --nologo --verbosity minimal Yubico.NET.SDK.sln
+        run: dotnet pack --configuration Release --nologo --verbosity minimal --treatWarningsAsErrors Yubico.NET.SDK.sln 
 
       # Build the documentation
       - name: Build docs

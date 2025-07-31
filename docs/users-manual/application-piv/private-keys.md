@@ -273,8 +273,8 @@ catch (ArgumentException ex)
 - [RFC 5208](https://tools.ietf.org/html/rfc5208) - PKCS#8 Private Key format
 - [RFC 7748](https://tools.ietf.org/html/rfc7748) - Curve25519 and Curve448
 - [RFC 7468](https://tools.ietf.org/html/rfc7468) - PEM encoding
-- [SDK PIV integration tests](https://github.com/Yubico/Yubico.NET.SDK/tree/main/Yubico.YubiKey/tests/integration/Yubico/YubiKey/Piv)
+- [SDK PIV integration tests](https://github.com/Yubico/Yubico.NET.SDK/tree/HEAD/Yubico.YubiKey/tests/integration/Yubico/YubiKey/Piv)
 - SDK unit tests for additional usage examples
-  - [Curve25519PrivateKeyTests](https://github.com/Yubico/Yubico.NET.SDK/blob/main/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Cryptography/Curve25519PrivateKeyTests.cs)
-  - [ECPrivateKeyTests](https://github.com/Yubico/Yubico.NET.SDK/blob/main/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Cryptography/ECPrivateKeyTests.cs)
-  - [RSAPrivateKeyTests](https://github.com/Yubico/Yubico.NET.SDK/blob/main/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Cryptography/RSAPrivateKeyTests.cs)
+  - [Curve25519PrivateKeyTests](https://github.com/Yubico/Yubico.NET.SDK/blob/HEAD/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Cryptography/Curve25519PrivateKeyTests.cs)
+  - [ECPrivateKeyTests](https://github.com/Yubico/Yubico.NET.SDK/blob/HEAD/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Cryptography/ECPrivateKeyTests.cs)
+  - [RSAPrivateKeyTests](https://github.com/Yubico/Yubico.NET.SDK/blob/HEAD/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Cryptography/RSAPrivateKeyTests.cs)

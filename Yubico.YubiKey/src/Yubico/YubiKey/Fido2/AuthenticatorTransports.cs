@@ -42,18 +42,18 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The string identifier that specifies the USB transport is supported.
         /// </summary>
-        public static readonly string Usb = "usb";
+        public const string Usb = "usb";
 
         /// <summary>
         /// The string identifier that specifies the NFC transport is supported.
         /// </summary>
-        public static readonly string Nfc = "nfc";
+        public const string Nfc = "nfc";
 
         /// <summary>
         /// The string identifier that specifies the bluetooth transport is
         /// supported.
         /// </summary>
-        public static readonly string Bluetooth = "ble";
+        public const string Bluetooth = "ble";
 
         /// <summary>
         /// The string identifier that specifies a hybrid transport is supported.
@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Fido2
         /// mechanisms. This supports, for example, authentication on a desktop
         /// computer using a smartphone.
         /// </summary>
-        public static readonly string Hybrid = "hybrid";
+        public const string Hybrid = "hybrid";
 
         /// <summary>
         /// The string identifier that specifies an internal transport is
@@ -71,6 +71,6 @@ namespace Yubico.YubiKey.Fido2
         /// platform authenticator. These authenticators are not removable from
         /// the client device.
         /// </summary>
-        public static readonly string Internal = "internal";
+        public const string Internal = "internal";
     }
 }

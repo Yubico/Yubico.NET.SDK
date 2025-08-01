@@ -41,7 +41,6 @@ namespace Yubico.YubiKey.Fido2
 
         private const int MaxAttestationMapCount = 3;
 
-        private const string PackedString = "packed";
         private const string AlgString = "alg";
         private const string SigString = "sig";
         private const string X5cString = "x5c";
@@ -244,7 +243,7 @@ namespace Yubico.YubiKey.Fido2
         {
             var attestCborMap = map.ReadMap<string>(KeyAttestationStatement);
             EncodedAttestationStatement = attestCborMap.Encoded;
-            if (!Format.Equals(PackedString, StringComparison.Ordinal) || !attestCborMap.Contains(AlgString) ||
+            if (!Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal) || !attestCborMap.Contains(AlgString) ||
                 !attestCborMap.Contains(SigString) ||
                 attestCborMap.Count > MaxAttestationMapCount ||
                 (attestCborMap.Count == MaxAttestationMapCount && !attestCborMap.Contains(X5cString)))

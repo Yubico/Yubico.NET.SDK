@@ -16,183 +16,186 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# Private keys
+# Private key handling
 
-You will likely need to know how to read or format private keys only if you will be
-importing private keys onto a YubiKey. See, for example, the PIV operation
-[Import Private Key](xref:Yubico.YubiKey.Piv.PivSession.ImportPrivateKey%2a).
+The Yubico .NET SDK supports importing and exporting private keys in standard formats using type-safe factory methods. All private key classes implement `IPrivateKey` and provide secure memory handling.
 
-# Encoded Private Key
+## Supported key types
 
-One of the unfortunate problems of public key cryptography is the myriad ways to represent
-private keys. Part of this is natural, due to the fact that different algorithms have
-different elements. For example, an RSA private key can consist of three integers:
+- **RSA keys**: 1024, 2048, 3072, 4096-bit
+- **EC keys**: NIST P-256, P-384 curves
+- **Curve25519 keys**: Ed25519 (signing), X25519 (key agreement)
 
-* modulus
-* public exponent
-* private exponent
+## Private key formats
 
-or it can consist of five integers
+One of the unfortunate problems of public key cryptography is the myriad ways to represent private keys. Part of this is due to the fact that different algorithms have different elements.
 
-* prime P
-* prime Q
-* exponent P
-* exponent Q
-* coefficient
+For example, an RSA private key can consist of three, five, or eight integers:
 
-or it can consist of all eight integers
+| 3-integer RSA key | 5-integer RSA key | 8-integer RSA key |
+|-------------------|-------------------|-------------------|
+| modulus           | prime P           | modulus           |
+| public exponent   | prime Q           | public exponent   |
+| private exponent  | exponent P        | private exponent  |
+|                   | exponent Q        | prime P           |
+|                   | coefficient       | prime Q           |
+|                   |                   | exponent P        |
+|                   |                   | exponent Q        |
+|                   |                   | coefficient       |
 
-* modulus
-* public exponent
-* private exponent
-* prime P
-* prime Q
-* exponent P
-* exponent Q
-* coefficient
+On the other hand, an "Fp" Elliptic Curve (EC) private key consists of the following elements:
 
-while an "Fp" Elliptic Curve (EC) private key consists of
+| EC private key component | EC private key subcomponent |
+|--------------------------|-----------------------------|
+| curve                    | prime                       |
+|                          | order                       |
+|                          | coefficients (a, b, c)      |
+|                          | base point (x, y)           |
+| public point             | x coordinate                |
+|                          | y coordinate                |
+| private value            |                             |
 
-* curve
-    * prime
-    * order
-    * coefficients
-        * a
-        * b
-        * c
-    * base point
-        * x-coordinate
-        * y-coordinate
-* public point
-    * x-coordinate
-    * y-coordinate
-* private value
+Standard curves (such as NIST P-256) can be represented by an object identifier (OID), public point (x,y), and a private value. In some cases, just the OID and private value are needed as the public point can be computed from the curve parameters and private value.
 
-If the curve is a standard one (such as NIST P-256), then it can be represented by an
-object identifier (OID).
+There is more than one standard that defines how to represent private keys. The most common definitions are ``PrivateKeyInfo`` from PKCS #8 (Public Key Cryptography Standard #8) and PEM (Privacy-Enhanced Mail). PKCS #8 is now an internet standard ([RFC 5208](https://tools.ietf.org/html/rfc5208)). PEM ([RFC 7468](https://tools.ietf.org/html/rfc7468)) was created to describe how to use public key cryptography to build secure email, but it has elements that turned out to be useful to cryptography in general, including its representation of keys.
 
-* OID
-* public point
-    * x-coordinate
-    * y-coordinate
-* private value
+Fortunately, there is some overlap. The vast majority of applications will use the PKCS #8  ``PrivateKeyInfo`` or the PEM "PRIVATE KEY" (which wraps a ``PrivateKeyInfo``).
 
-or even only
+``PrivateKeyInfo`` is popular because it contains algorithm information in addition to the actual key data. That is, a private key in this format contains an ``AlgorithmIdentifier`` specifying the algorithm and any parameters as well as the key data specific to that algorithm.
 
-* OID
-* private value
+There are C# classes that will build or parse these structures, although it will still require some work on your part. This page will show how to build a private key object the YubiKey can read from ``PrivateKeyInfo`` and PEM formats. Note that a YubiKey will never return a private key, so there will be no need to convert from a YubiKey-formatted private key to a PrivateKeyInfo or PEM format.
 
-The public point can be computed from the curve parameters and private value.
+## Factory methods
 
-There are standards that have defined ways to represent public keys, but unfortunately
-there are more than one. The most common definitions are `PrivateKeyInfo` from PKCS #8
-("Public Key Cryptography Standard" number 8 is now an internet standard: RFC 5208) and
-PEM (Privacy-Enhanced Mail, a standard that originally described how to use public key
-cryptography to build secure email, but has elements that turned out to be useful,
-including representation of keys).
+PIV does not define its own format of encoding private keys, but Yubico has defined an encoding that is very similar to the PIV public key format. However, the SDK's PIV application APIs that work with  private keys require them to be instances of the ``PrivateKey`` class. Hence, when importing a private key into a YubiKey, your application will need to be able to "convert" from ``PrivateKeyInfo`` or PEM to ``PrivateKey``.
 
-Fortunately, there is some overlap. The vast majority of applications will use
-
-* `PrivateKeyInfo`
-* PEM "PRIVATE KEY" (this wraps a `PrivateKeyInfo`)
-
-The reason `PrivateKeyInfo` is popular is that it contains algorithm information in
-addition to the actual key data. That is, a private key in this format contains an
-`AlgorithmIdentifier` specifying the algorithm and any parameters, as well as the key data
-specific to that algorithm.
-
-In addition, there are C# classes that will build or parse these structures, although
-it will still require some work on your part. This article will describe how to build a
-private key object the YubiKey can read from `PrivateKeyInfo` and PEM formats. Note that a
-YubiKey will never return a private key, so there will be no need to convert from a
-YubiKey-formatted private key to a `PrivateKeyInfo` or PEM format.
-
-## PIV private keys
-
-Unfortunately, PIV does not define its own format of encoding private keys, although
-Yubico has defined an encoding that is very similar to the PIV public key format.
-However, the SDK's PIV application APIs that work with a private keys require them to be
-instances of the `PivPrivateKey` class.
-Hence, when importing a private key into a YubiKey, your application will need to be able
-to "convert" from `PrivateKeyInfo` or PEM to `PivPrivateKey`.
-
-### From PEM to YubiKey
-
-Suppose you have a key in PEM format and need it as a `PivPrivateKey`. There are a number
-of PEM formats. You know what the format is by its header and footer. For example, here
-are a number of PEM header/footer private key combinations.
-
-```
-   -----BEGIN PRIVATE KEY-----
-   -----END PRIVATE KEY-----
-
-   -----BEGIN RSA PRIVATE KEY-----
-   -----END RSA PRIVATE KEY-----
-
-   -----BEGIN EC PRIVATE KEY-----
-   -----END EC PRIVATE KEY-----
-```
-
-This article deals only with `-----BEGIN PRIVATE KEY-----`.
-
-To convert from PEM to `PivPrivateKey`, first extract the `PrivateKeyInfo`, then convert
-the `PrivateKeyInfo` to `PivPublicKey`. That conversion is described in the next section.
+### RSA private keys
 
 ```csharp
-// This method extracts the DER encoding of PrivateKeyInfo from the PEM
-// PRIVATE KEY.
-// For example,
-//   byte[] privateKeyInfo = GetPrivateKeyInfo(pemKey);
-//
-public static byte[] GetPrivateKeyInfo(string pemKey)
+// From PKCS#8 PrivateKeyInfo format
+byte[] pkcs8Bytes = // your PKCS#8 encoded key
+RSAPrivateKey rsaKey = RSAPrivateKey.CreateFromPkcs8(pkcs8Bytes);
+
+// From RSA parameters
+using var rsa = RSA.Create(2048);
+RSAParameters parameters = rsa.ExportParameters(true);
+RSAPrivateKey rsaKey = RSAPrivateKey.CreateFromParameters(parameters);
+
+// From CRT parameters only
+var crtParameters = new RSAParameters
 {
-    // Isolate the Base64.
-    string b64EncodedKey = pemKey
-        .Replace("-----BEGIN PRIVATE KEY-----\n", null)
-        .Replace("\n-----END PRIVATE KEY-----", null);
-
-    // Get the DER of the PrivateKeyInfo.
-    return Convert.FromBase64String(b64EncodedKey);
-}
+    P = // prime P,
+    Q = // prime Q,
+    DP = // exponent P,
+    DQ = // exponent Q,
+    InverseQ = // coefficient
+};
+RSAPrivateKey rsaKey = RSAPrivateKey.CreateFromParameters(crtParameters);
 ```
 
-### From `PrivateKeyInfo` to YubiKey
+### EC private keys
 
-If you have a byte array that contains the `PrivateKeyInfo`, and want to build a
-`PivPrivateKey`, you will need to first determine the algorithm. Once you know the
-algorithm of the key, you can use the appropriate C# class to read the encoded data.
-Remember, the algorithm of the key is specified in the key data itself.
+```csharp
+// From PKCS#8 PrivateKeyInfo format
+byte[] pkcs8Bytes = // your PKCS#8 encoded key
+ECPrivateKey ecKey = ECPrivateKey.CreateFromPkcs8(pkcs8Bytes);
 
-Note that the .NET Base Class Library does not have a class that can parse
-`PrivateKeyInfo` for either RSA or ECC and build the appropriate object. The only methods
-that can read this encoding are in classes for the specific algorithms. That is, the `RSA`
-class can read `PrivateKeyInfo` only if the input data is an RSA key, and the `ECDsa`
-class can read it only if the input data is an ECC key.
+// From EC parameters
+using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+ECParameters parameters = ecdsa.ExportParameters(true);
+ECPrivateKey ecKey = ECPrivateKey.CreateFromParameters(parameters);
 
-One possible workaround would be to supply the encoded key to the `RSA` class and if it
-works, we have an RSA key. If it does not work, give the encoded key to the `ECDsa` class.
-However, if the `RSA` class gets an encoded key that is not RSA, it throws an exception.
-That is, we would have to use exceptions to determine code flow, which is never a good
-idea.
-
-Hence, we need to open up the encoding ourselves and read the `AlgorithmIdentifier`.
-Actually, we will only need to read a part of the `AlgorithmIdentifier`, the object
-identifier (OID). Furthermore, because the YubiKey only supports RSA and ECC, and with ECC
-the only curves are P-256 and P-384, we will be able to determine which algorithm by
-looking at only one particular byte of the OID.
-
-In order to find the OID, we will need to decode the DER encoding of `PrivateKeyInfo`.
-Actually, we will only need to decode part of it.
-
-Unfortunately, the C# language does not have any publicly available classes to read DER
-encodings. There are indeed ASN.1/DER classes in the C# language, but they were not made
-public until .NET 5.0.
-
-But we can write a simple helper routine to read what we need.
-
-First, `PrivateKeyInfo` is defined as
-
+// From private scalar value
+ReadOnlyMemory<byte> privateValue = // your private scalar
+ECPrivateKey ecKey = ECPrivateKey.CreateFromValue(privateValue, KeyType.ECP256);
 ```
+
+### Curve25519 private keys
+
+```csharp
+// From PKCS#8 PrivateKeyInfo format
+byte[] pkcs8Bytes = // your PKCS#8 encoded key
+Curve25519PrivateKey ed25519Key = Curve25519PrivateKey.CreateFromPkcs8(pkcs8Bytes);
+
+// From private key bytes
+ReadOnlyMemory<byte> privateKeyBytes = // your 32-byte private key
+Curve25519PrivateKey ed25519Key = Curve25519PrivateKey.CreateFromValue(privateKeyBytes, KeyType.Ed25519);
+Curve25519PrivateKey x25519Key = Curve25519PrivateKey.CreateFromValue(privateKeyBytes, KeyType.X25519);
+```
+
+## Importing to YubiKey
+
+```csharp
+using var pivSession = new PivSession(yubiKey);
+pivSession.KeyCollector = yourKeyCollector;
+pivSession.AuthenticateManagementKey();
+
+// Import any IPrivateKey implementation
+pivSession.ImportPrivateKey(
+    PivSlot.Authentication,
+    privateKey,
+    PivPinPolicy.Once,
+    PivTouchPolicy.Never);
+```
+
+## Exporting private keys
+
+```csharp
+// Export to PKCS#8 format
+byte[] pkcs8Bytes = rsaKey.ExportPkcs8PrivateKey();
+byte[] pkcs8Bytes = ecKey.ExportPkcs8PrivateKey();
+
+// Access key-specific properties
+RSAParameters rsaParams = rsaKey.Parameters;
+ECParameters ecParams = ecKey.Parameters;
+ReadOnlyMemory<byte> curve25519Bytes = curve25519Key.PrivateKey;
+```
+
+## PEM format conversion
+
+```csharp
+// Export to PEM format
+byte[] pkcs8Bytes = privateKey.ExportPkcs8PrivateKey();
+string pemKey = "-----BEGIN PRIVATE KEY-----\n" +
+                Convert.ToBase64String(pkcs8Bytes, Base64FormattingOptions.InsertLineBreaks) +
+                "\n-----END PRIVATE KEY-----";
+
+// Import from PEM format
+string pemData = // your PEM PRIVATE KEY
+string base64Data = pemData
+    .Replace("-----BEGIN PRIVATE KEY-----\n", "")
+    .Replace("\n-----END PRIVATE KEY-----", "");
+byte[] pkcs8Bytes = Convert.FromBase64String(base64Data);
+IPrivateKey privateKey = RSAPrivateKey.CreateFromPkcs8(pkcs8Bytes); // or ECPrivateKey, etc.
+```
+
+> [!NOTE]
+> When importing a private key in PEM format, there are a number of possible header and footer combinations, including the following:
+>
+> ``` 
+>    -----BEGIN PRIVATE KEY-----
+>    -----END PRIVATE KEY-----
+> 
+>    -----BEGIN RSA PRIVATE KEY-----
+>    -----END RSA PRIVATE KEY-----
+> 
+>    -----BEGIN EC PRIVATE KEY-----
+>    -----END EC PRIVATE KEY-----
+> ```
+
+### Determining the algorithm when importing a private key in PEM format
+
+To build a PrivateKey when importing from PEM, you will need to first determine the private key algorithm. Once you know the algorithm, you can use the appropriate C# class to read the encoded data (for example, ``RSAPrivateKey``, ``ECPrivateKey``, or ``Curve25519PrivateKey`` ).
+
+The algorithm is specified in the key data itself. However, the .NET Base Class Library does not have a class that can parse ``PrivateKeyInfo`` and build the appropriate object. The only methods that can read this encoding are in classes for the specific algorithms. That is, the RSA class can read ``PrivateKeyInfo`` only if the input data is an RSA key, the ECDsa class can read it only if the input data is an ECC key, etc.
+
+One possible workaround would be to supply the encoded key to the RSA class and if it works, we have an RSA key. If it does not work, give the encoded key to the ECDsa class. However, if the RSA class gets an encoded key that is not RSA, it throws an exception, and using exceptions to determine code flow is not best practice.
+
+To determine the algorithm of an imported key, we need to open up the encoding and read the object identifier (OID) of the ``AlgorithmIdentifier``. And to find the OID, we need to decode the DER encoding of ``PrivateKeyInfo``.
+
+``PrivateKeyInfo`` is defined as:
+
+```csharp
 PrivateKeyInfo ::= SEQUENCE {
         version                   Version,
         privateKeyAlgorithm       AlgorithmIdentifier,
@@ -204,138 +207,74 @@ Version ::= INTEGER
 AlgorithmIdentifier ::=  SEQUENCE  {
         algorithm                 OBJECT IDENTIFIER,
         parameter                 ANY DEFINED BY algorithm OPTIONAL  }
-```
 
-What this means is that the DER encoding will look something like this:
 
 ```
-    30 len
+
+This means that the DER encoding will look something like the following:
+
+```csharp
+    30 len  // The len octets might be one, two, or three bytes long.
        02 01 00
        30 len
           06 len
              OID bytes
          etc.
-
-    where the len octets might be one, two, or three bytes long.
 ```
 
-To get to the OID, we just need to read the first `30 len`, then the INTEGER, then the
-second `30 len`, then the `06 len`. Here's a method that can read the tag and length
-octets (and optionally the value) of a DER element.
+In this example, to get to the OID, we need to read the first ``30 len``, then the INTEGER, then the second ``30 len``, then the ``06 len``.
+
+## Secure memory handling
+
+All private key classes implement secure cleanup and disposal patterns:
 
 ```csharp
-// Read the tag in the buffer at the given offset. Then read the length
-// octet(s). If the readValue argument is false, return the offset into
-// the buffer where the value begins. If the readValue argument is true,
-// skip the value (that will be length octets) and return the offset into
-// the buffer where the next TLV begins.
-// If the length octets are invalid, return -1.
-public static int ReadTagLen(byte[] buffer, int offset, bool readValue)
+// Using disposable pattern (recommended)
+using (var privateKey = RSAPrivateKey.CreateFromPkcs8(pkcs8Bytes))
 {
-    // Make sure there are enough bytes to read.
-    if ((offset < 0) || (buffer.Length < offset + 2))
-    {
-        return -1;
-    }
+    // Use the private key
+    pivSession.ImportPrivateKey(PivSlot.Authentication, privateKey, PivPinPolicy.Once, PivTouchPolicy.Never);
+} // Sensitive data automatically cleared
 
-    // Skip the tag, look at the first length octet.
-    // If the length is 0x7F or less, the length is one octet.
-    // If the length octet is 0x80, that's BER and we shouldn't see it.
-    // Otherwise the length octet should be 81, 82, or 83 (technically it
-    // could be 84 or higher, but this method does not support anything
-    // beyond 83). This says the length is the next 1, 2, or 3 octets.
-    int length = buffer[offset + 1];
-    int increment = 2;
-    if ((length == 0x80) || (length > 0x83))
-    {
-        return -1;
-    }
-    if (length > 0x80)
-    {
-        int count = length & 0xf;
-        if (buffer.Length < offset + increment + count)
-        {
-            return -1;
-        }
-        increment += count;
-        length = 0;
-        while (count > 0)
-        {
-            length <<= 8;
-            length += (int)buffer[offset + increment - count] & 0xFF;
-            count--;
-        }
-    }
-
-    if (readValue)
-    {
-        if (buffer.Length < offset + increment + length)
-        {
-            return -1;
-        }
-
-        increment += length;
-    }
-
-    return offset + increment;
+// Explicit cleanup
+ECPrivateKey privateKey = null;
+try
+{
+    privateKey = ECPrivateKey.CreateFromPkcs8(pkcs8Bytes);
+    // Use the private key
+}
+finally
+{
+    privateKey?.Clear(); // Securely zero sensitive data
 }
 ```
 
-Using this support routine, we can now extract the algorithm from `PrivateKeyInfo`.
+## Error handling
+
+Factory methods validate input and may throw exceptions:
 
 ```csharp
-// This method builds a new PivPublicKey from privateKeyInfo
-//
-PivPrivateKey GetPivPrivateKey(byte[] privateKeyInfo)
+try
 {
-    PivPrivateKey privateKey;
-
-    // Skip the encoding to get to the OID.
-    int offset = ReadTagLen(privateKeyInfo, 0, false);
-    offset = ReadTagLen(privateKeyInfo, offset, true);
-    offset = ReadTagLen(privateKeyInfo, offset, false);
-    offset = ReadTagLen(privateKeyInfo, offset, false);
-
-    // encodedKey[offset] is where the OID begins.
-    //   RSA: 2A 86 48 86 F7 0D 01 01 01
-    //   ECC: 2A 86 48 CE 3D 02 01
-    // For this sample code, we'll look at oid[3], if it's 86, RSA,
-    // otherwise ECC. If it's something else, we'll get an exception.
-    if (encodedKey[offset + 3] == 0x86)
-    {
-        var rsaObject = RSA.Create();
-        rsaObject.ImportPkcs8PrivateKey(encodedKey, out _);
-
-        // We need to get the private key elements. Those can be
-        // found in the RSAParameters class.
-        RSAParameters rsaParams = rsaObject.ExportParameters(true);
-
-        var rsaPriKey = new PivRsaPrivateKey(
-            rsaParams.P,
-            rsaParams.Q,
-            rsaParams.DP,
-            rsaParams.DQ,
-            rsaParams.InverseQ);
-        privateKey = (PivPrivateKey)rsaPriKey;
-    }
-    else
-    {
-        var eccObject = ECDsa.Create();
-        eccObject.ImportPkcs8PrivateKey(encodedKey, out _);
-        // The KeySize gives the bit size, we want the byte size.
-        int keySize = eccObject.KeySize / 8;
-
-        // We need to build the private value and it must be exactly the
-        // keySize.
-        ECParameters eccParams = eccObject.ExportParameters(true);
-        byte[] privateValue = new byte[keySize];
-        offset = keySize - eccParams.D.Length;
-        Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
-
-        var eccPriKey = new PivEccPrivateKey(privateValue);
-        privateKey = (PivPrivateKey)eccPriKey;
-    }
-
-    return privateKey;
+    var privateKey = Curve25519PrivateKey.CreateFromValue(keyBytes, KeyType.X25519);
+}
+catch (CryptographicException ex)
+{
+    // Handle invalid key format or bit clamping violations
+}
+catch (ArgumentException ex)
+{
+    // Handle invalid parameters or key type mismatches
 }
 ```
+
+## References
+
+- [RFC 5208](https://tools.ietf.org/html/rfc5208) - PKCS#8 Private Key format
+- [RFC 7748](https://tools.ietf.org/html/rfc7748) - Curve25519 and Curve448
+- [RFC 7468](https://tools.ietf.org/html/rfc7468) - PEM encoding
+- [SDK PIV integration tests](https://github.com/Yubico/Yubico.NET.SDK/tree/HEAD/Yubico.YubiKey/tests/integration/Yubico/YubiKey/Piv)
+- SDK unit tests for additional usage examples
+  - [Curve25519PrivateKeyTests](https://github.com/Yubico/Yubico.NET.SDK/blob/HEAD/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Cryptography/Curve25519PrivateKeyTests.cs)
+  - [ECPrivateKeyTests](https://github.com/Yubico/Yubico.NET.SDK/blob/HEAD/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Cryptography/ECPrivateKeyTests.cs)
+  - [RSAPrivateKeyTests](https://github.com/Yubico/Yubico.NET.SDK/blob/HEAD/Yubico.YubiKey/tests/unit/Yubico/YubiKey/Cryptography/RSAPrivateKeyTests.cs)

@@ -86,11 +86,11 @@ namespace Yubico.YubiKey
         {
             string scpType = keyParameters switch
             {
-                Scp03KeyParameters _ when application == YubiKeyApplication.Oath && yubiKey.HasFeature(YubiKeyFeature.Scp03Oath)
+                Scp03KeyParameters when application == YubiKeyApplication.Oath && yubiKey.HasFeature(YubiKeyFeature.Scp03Oath)
                     => "SCP03",
-                Scp03KeyParameters _ when yubiKey.HasFeature(YubiKeyFeature.Scp03)
+                Scp03KeyParameters when yubiKey.HasFeature(YubiKeyFeature.Scp03)
                     => "SCP03",
-                Scp11KeyParameters _ when yubiKey.HasFeature(YubiKeyFeature.Scp11)
+                Scp11KeyParameters when yubiKey.HasFeature(YubiKeyFeature.Scp11)
                     => "SCP11",
                 null => string.Empty,
                 _ => throw new InvalidOperationException("The YubiKey does not support the requested SCP connection.")

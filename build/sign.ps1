@@ -202,8 +202,8 @@ function Process-ZipPackage {
         Get-ChildItem -Path $extractPath -Recurse -Filter "*.nuspec" |
         ForEach-Object { 
             Write-Host "        📥 Packing: $($_.Name)"
-            $output = & $NuGetPath pack $_.FullName -OutputDirectory $Directories.Packages 2>&1
-            
+            $output = & $NuGetPath pack $_.FullName -OutputDirectory $Directories.Packages -p TreatWarningsAsErrors=true 2>&1
+
             if ($LASTEXITCODE -ne 0) {
                 $output | ForEach-Object { Write-Host $_ }
                 throw "Packing failed for file: $($_.FullName)"

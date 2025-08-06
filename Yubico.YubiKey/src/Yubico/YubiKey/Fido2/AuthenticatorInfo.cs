@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
 using System.Linq;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -332,8 +333,8 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="AuthenticatorTransports"/> class, which contains the
         /// standard-defined transport strings.
         /// </summary>
-        public IReadOnlyList<string> TransportsForReset { get;  } = new List<string>();
-        
+        public IReadOnlyList<string> TransportsForReset { get; } = new List<string>();
+
         /// <summary>
         /// ???
         /// </summary>
@@ -397,7 +398,7 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 MaximumMessageSize = (int?)cborMap.ReadOptional<int>(KeyMaxMsgSize);
-                
+
                 if (cborMap.Contains(KeyPinUvAuthProtocols))
                 {
                     PinUvAuthProtocols = ParsePinUvAuthProtocols(cborMap);
@@ -405,7 +406,7 @@ namespace Yubico.YubiKey.Fido2
 
                 MaximumCredentialCountInList = (int?)cborMap.ReadOptional<int>(KeyMaxCredentialCountInList);
                 MaximumCredentialIdLength = (int?)cborMap.ReadOptional<int>(KeyMaxCredentialIdLength);
-                
+
                 if (cborMap.Contains(KeyTransports))
                 {
                     Transports = cborMap.ReadArray<string>(KeyTransports);
@@ -438,14 +439,24 @@ namespace Yubico.YubiKey.Fido2
                     VendorPrototypeConfigCommands = ParseVendorPrototypeConfigCommands(cborMap);
                 }
 
-                AttestationFormats = cborMap.Contains(KeyAttestationFormats) ? cborMap.ReadArray<string>(KeyAttestationFormats) : [];
-                UvCountSinceLastPinEntry = (int?)cborMap.ReadOptional<int>(KeyUvCountSinceLastPinEntry);
-                LongTouchForReset = (bool?)cborMap.ReadOptional<bool>(KeyLongTouchForReset) ?? false;
-                EncIdentifier = cborMap.Contains(KeyEncIdentifier) ? cborMap.ReadByteString(KeyEncIdentifier) : null;
-                TransportsForReset = cborMap.Contains(KeyTransportsForReset) ? cborMap.ReadArray<string>(KeyTransportsForReset) : [];
+                AttestationFormats = cborMap.Contains(KeyAttestationFormats)
+                    ? cborMap.ReadArray<string>(KeyAttestationFormats)
+                    : [];
+
+                UvCountSinceLastPinEntry = cborMap.Contains(KeyUvCountSinceLastPinEntry)
+                    ? cborMap.ReadInt32(KeyUvCountSinceLastPinEntry)
+                    : null;
+                LongTouchForReset = cborMap.Contains(KeyLongTouchForReset) && cborMap.ReadBoolean(KeyLongTouchForReset);
+                EncIdentifier = cborMap.Contains(KeyEncIdentifier)
+                    ? cborMap.ReadByteString(KeyEncIdentifier)
+                    : null;
+                TransportsForReset = cborMap.Contains(KeyTransportsForReset)
+                    ? cborMap.ReadArray<string>(KeyTransportsForReset)
+                    : [];
+
                 PinComplexityPolicy = (bool?)cborMap.ReadOptional<bool>(KeyPinComplexityPolicy);
-                PinComplexityPolicyUrl = (string?)cborMap.ReadOptional<string>(KeyPinComplexityPolicyUrl); 
-                
+                PinComplexityPolicyUrl = (string?)cborMap.ReadOptional<string>(KeyPinComplexityPolicyUrl);
+
                 const int defaultMaxPinLength = 63;
                 MaximumPinLength = (int?)cborMap.ReadOptional<int>(KeyMaxPinLength) ?? defaultMaxPinLength;
             }
@@ -479,13 +490,13 @@ namespace Yubico.YubiKey.Fido2
 
                 return int64List;
             }
-            
-            List<Tuple<string,CoseAlgorithmIdentifier>> ParseAlgorithms(CborMap<int> cborMap)
+
+            List<Tuple<string, CoseAlgorithmIdentifier>> ParseAlgorithms(CborMap<int> cborMap)
             {
                 var entries = cborMap.ReadArray<CborMap<string>>(KeyAlgorithms);
                 var algorithms = (
                     from entry in entries
-                    let currentType = entry.ReadTextString(ParameterHelpers.TagType) 
+                    let currentType = entry.ReadTextString(ParameterHelpers.TagType)
                     let currentAlg = (CoseAlgorithmIdentifier)entry.ReadInt32(ParameterHelpers.TagAlg)
                     select new Tuple<string, CoseAlgorithmIdentifier>(currentType, currentAlg)
                     ).ToList();
@@ -496,11 +507,30 @@ namespace Yubico.YubiKey.Fido2
             List<PinUvAuthProtocol> ParsePinUvAuthProtocols(CborMap<int> cborMap)
             {
                 var temp = cborMap.ReadArray<int>(KeyPinUvAuthProtocols);
-                var translator = new List<PinUvAuthProtocol>(temp.Count);
-                translator.AddRange(temp.Select(t => (PinUvAuthProtocol)t));
+                var uvAuthProtocols = new List<PinUvAuthProtocol>(temp.Count);
+                uvAuthProtocols.AddRange(temp.Select(t => (PinUvAuthProtocol)t));
 
-                return translator;
+                return uvAuthProtocols;
             }
+        }
+        
+        // Find out the difference between
+        private ReadOnlyMemory<byte>? GetIdentifier(ReadOnlyMemory<byte> persistentUvAuthToken)
+        {
+            if (EncIdentifier is null)
+            {
+                return null;
+            }
+            
+            Span<byte> iv = stackalloc byte[16];
+            Span<byte> ct = stackalloc byte[EncIdentifier.Value.Length];
+            Span<byte> salt = stackalloc byte[32];
+            EncIdentifier.Value.Span[..16].CopyTo(iv);
+            EncIdentifier.Value.Span[16..ct.Length].CopyTo(ct);
+
+            var key = HkdfUtilities.DeriveKey(persistentUvAuthToken.Span, "encIdentifier"u8, salt, 32);
+            var result = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);
+            return result;
         }
 
         /// <summary>
@@ -554,4 +584,5 @@ namespace Yubico.YubiKey.Fido2
         /// </remarks>
         public bool IsExtensionSupported(string extension) => Extensions?.Contains(extension) == true;
     }
+    
 }

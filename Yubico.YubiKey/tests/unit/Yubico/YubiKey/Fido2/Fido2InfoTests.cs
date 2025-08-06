@@ -30,6 +30,7 @@ namespace Yubico.YubiKey.Fido2
         {
             var fido2Info = new AuthenticatorInfo(GetSampleEncoded());
             Assert.NotNull(fido2Info);
+            Assert.NotNull(fido2Info.EncIdentifier);
         }
 
         [Fact]

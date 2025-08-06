@@ -433,5 +433,17 @@ namespace Yubico.YubiKey.Fido2.Cbor
                     throw new InvalidOperationException(ExceptionMessages.TypeNotSupported);
             }
         }
+
+        public bool TryGetValue(TKey key, out ReadOnlyMemory<byte> result)
+        {
+            result = default;
+            if (!Contains(key))
+            {
+                return false;
+            }
+
+            result = ReadByteString(key);
+            return true;
+        }
     }
 }

@@ -173,11 +173,11 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             // Call HKDF-SHA-256 twice, each time producing 32 bytes.
 
             // HKDF is two steps:
-            //  Extract, where HMAC-SHA-256(salt, IKM) produces the PRK.
+            //  Extract, where HMAC-SHA-256(salt, input keying material (IKM)) produces the pseudorandom key (PRK).
             //    salt is a 32-byte buffer containing only 00 bytes
             //    and IKM is the input, in this case buffer.
             //    For this round, the salt is the HMAC key
-            //  Expand, where a sequence of HMAC operations will produce OKM.
+            //  Expand, where a sequence of HMAC operations will produce the output keying material (OKM).
             //    in this case, because the output of HMAC-SHA-256 is 32 bytes
             //    long and the requested length is 32, there will be only one
             //    HMAC operation:

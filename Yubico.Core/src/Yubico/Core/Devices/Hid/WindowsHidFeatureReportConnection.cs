@@ -22,7 +22,7 @@ namespace Yubico.Core.Devices.Hid
         // The SDK device instance that created this connection instance.
         private readonly WindowsHidDevice _device;
         // The underlying Windows HID device used for communication.
-        private IHidDDevice HidDDevice { get; set; }
+        private readonly HidDDevice _hidDDevice;
 
         public int InputReportSize { get; private set; }
         public int OutputReportSize { get; private set; }

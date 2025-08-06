@@ -384,60 +384,85 @@ namespace Yubico.YubiKey.Fido2
             try
             {
                 var cborMap = new CborMap<int>(cborEncoding);
+
                 Versions = cborMap.ReadArray<string>(KeyVersions);
                 Aaguid = cborMap.ReadByteString(KeyAaguid);
 
-                if (cborMap.Contains(KeyExtensions))
-                {
-                    Extensions = cborMap.ReadArray<string>(KeyExtensions);
-                }
+                Extensions = cborMap.Contains(KeyExtensions)
+                    ? cborMap.ReadArray<string>(KeyExtensions)
+                    : null;
 
-                if (cborMap.Contains(KeyOptions))
-                {
-                    Options = cborMap.ReadMap<string>(KeyOptions).AsDictionary<bool>();
-                }
+                Options = cborMap.Contains(KeyOptions)
+                    ? cborMap.ReadMap<string>(KeyOptions).AsDictionary<bool>()
+                    : null;
 
-                MaximumMessageSize = (int?)cborMap.ReadOptional<int>(KeyMaxMsgSize);
+                MaximumMessageSize = cborMap.Contains(KeyMaxMsgSize)
+                    ? cborMap.ReadInt32(KeyMaxMsgSize)
+                    : null;
 
-                if (cborMap.Contains(KeyPinUvAuthProtocols))
-                {
-                    PinUvAuthProtocols = ParsePinUvAuthProtocols(cborMap);
-                }
+                PinUvAuthProtocols = cborMap.Contains(KeyPinUvAuthProtocols)
+                    ? ParsePinUvAuthProtocols(cborMap)
+                    : null;
 
-                MaximumCredentialCountInList = (int?)cborMap.ReadOptional<int>(KeyMaxCredentialCountInList);
-                MaximumCredentialIdLength = (int?)cborMap.ReadOptional<int>(KeyMaxCredentialIdLength);
+                MaximumCredentialCountInList = cborMap.Contains(KeyMaxCredentialCountInList)
+                    ? cborMap.ReadInt32(KeyMaxCredentialCountInList)
+                    : null;
 
-                if (cborMap.Contains(KeyTransports))
-                {
-                    Transports = cborMap.ReadArray<string>(KeyTransports);
-                }
+                MaximumCredentialIdLength = cborMap.Contains(KeyMaxCredentialIdLength)
+                    ? cborMap.ReadInt32(KeyMaxCredentialIdLength)
+                    : null;
 
-                if (cborMap.Contains(KeyAlgorithms))
-                {
-                    Algorithms = ParseAlgorithms(cborMap);
-                }
+                Transports = cborMap.Contains(KeyTransports)
+                    ? cborMap.ReadArray<string>(KeyTransports)
+                    : null;
 
-                MaximumSerializedLargeBlobArray = (int?)cborMap.ReadOptional<int>(KeyMaxSerializedLargeBlobArray);
-                ForcePinChange = (bool?)cborMap.ReadOptional<bool>(KeyForcePinChange);
-                MinimumPinLength = (int?)cborMap.ReadOptional<int>(KeyMinPinLength);
-                FirmwareVersion = (int?)cborMap.ReadOptional<int>(KeyFirmwareVersion);
-                MaximumCredentialBlobLength = (int?)cborMap.ReadOptional<int>(KeyMaxCredBlobLength);
-                MaximumRpidsForSetMinPinLength = (int?)cborMap.ReadOptional<int>(KeyMaxRpidsForSetMinPinLength);
-                PreferredPlatformUvAttempts = (int?)cborMap.ReadOptional<int>(KeyPreferredPlatformUvAttempts);
-                UvModality = (int?)cborMap.ReadOptional<int>(KeyUvModality);
+                Algorithms = cborMap.Contains(KeyAlgorithms)
+                    ? ParseAlgorithms(cborMap)
+                    : null;
 
-                if (cborMap.Contains(KeyCertifications))
-                {
-                    var certCborMap = cborMap.ReadMap<string>(KeyCertifications);
-                    Certifications = certCborMap.AsDictionary<int>();
-                }
+                MaximumSerializedLargeBlobArray = cborMap.Contains(KeyMaxSerializedLargeBlobArray)
+                    ? cborMap.ReadInt32(KeyMaxSerializedLargeBlobArray)
+                    : null;
 
-                RemainingDiscoverableCredentials = (int?)cborMap.ReadOptional<int>(KeyRemainingDiscoverableCredentials);
+                ForcePinChange = cborMap.Contains(KeyForcePinChange)
+                    ? cborMap.ReadBoolean(KeyForcePinChange)
+                    : null;
 
-                if (cborMap.Contains(KeyVendorPrototypeConfigCommands))
-                {
-                    VendorPrototypeConfigCommands = ParseVendorPrototypeConfigCommands(cborMap);
-                }
+                MinimumPinLength = cborMap.Contains(KeyMinPinLength)
+                    ? cborMap.ReadInt32(KeyMinPinLength)
+                    : null;
+
+                FirmwareVersion = cborMap.Contains(KeyFirmwareVersion)
+                    ? cborMap.ReadInt32(KeyFirmwareVersion)
+                    : null;
+
+                MaximumCredentialBlobLength = cborMap.Contains(KeyMaxCredBlobLength)
+                    ? cborMap.ReadInt32(KeyMaxCredBlobLength)
+                    : null;
+
+                MaximumRpidsForSetMinPinLength = cborMap.Contains(KeyMaxRpidsForSetMinPinLength)
+                    ? cborMap.ReadInt32(KeyMaxRpidsForSetMinPinLength)
+                    : null;
+
+                PreferredPlatformUvAttempts = cborMap.Contains(KeyPreferredPlatformUvAttempts)
+                    ? cborMap.ReadInt32(KeyPreferredPlatformUvAttempts)
+                    : null;
+
+                UvModality = cborMap.Contains(KeyUvModality)
+                    ? cborMap.ReadInt32(KeyUvModality)
+                    : null;
+
+                Certifications = cborMap.Contains(KeyCertifications)
+                    ? cborMap.ReadMap<string>(KeyCertifications).AsDictionary<int>()
+                    : null;
+
+                RemainingDiscoverableCredentials = cborMap.Contains(KeyRemainingDiscoverableCredentials)
+                    ? cborMap.ReadInt32(KeyRemainingDiscoverableCredentials)
+                    : null;
+
+                VendorPrototypeConfigCommands = cborMap.Contains(KeyVendorPrototypeConfigCommands)
+                    ? ParseVendorPrototypeConfigCommands(cborMap)
+                    : null;
 
                 AttestationFormats = cborMap.Contains(KeyAttestationFormats)
                     ? cborMap.ReadArray<string>(KeyAttestationFormats)
@@ -446,19 +471,28 @@ namespace Yubico.YubiKey.Fido2
                 UvCountSinceLastPinEntry = cborMap.Contains(KeyUvCountSinceLastPinEntry)
                     ? cborMap.ReadInt32(KeyUvCountSinceLastPinEntry)
                     : null;
+
                 LongTouchForReset = cborMap.Contains(KeyLongTouchForReset) && cborMap.ReadBoolean(KeyLongTouchForReset);
+
                 EncIdentifier = cborMap.Contains(KeyEncIdentifier)
                     ? cborMap.ReadByteString(KeyEncIdentifier)
                     : null;
+
                 TransportsForReset = cborMap.Contains(KeyTransportsForReset)
                     ? cborMap.ReadArray<string>(KeyTransportsForReset)
                     : [];
 
-                PinComplexityPolicy = (bool?)cborMap.ReadOptional<bool>(KeyPinComplexityPolicy);
-                PinComplexityPolicyUrl = (string?)cborMap.ReadOptional<string>(KeyPinComplexityPolicyUrl);
+                PinComplexityPolicy = cborMap.Contains(KeyPinComplexityPolicy)
+                    ? cborMap.ReadBoolean(KeyPinComplexityPolicy)
+                    : null;
 
-                const int defaultMaxPinLength = 63;
-                MaximumPinLength = (int?)cborMap.ReadOptional<int>(KeyMaxPinLength) ?? defaultMaxPinLength;
+                PinComplexityPolicyUrl = cborMap.Contains(KeyPinComplexityPolicyUrl)
+                    ? cborMap.ReadTextString(KeyPinComplexityPolicyUrl)
+                    : null;
+
+                MaximumPinLength = cborMap.Contains(KeyMaxPinLength)
+                    ? cborMap.ReadInt32(KeyMaxPinLength)
+                    : 63;
             }
             catch (CborContentException cborException)
             {
@@ -513,15 +547,14 @@ namespace Yubico.YubiKey.Fido2
                 return uvAuthProtocols;
             }
         }
-        
-        // Find out the difference between
-        private ReadOnlyMemory<byte>? GetIdentifier(ReadOnlyMemory<byte> persistentUvAuthToken)
+
+        public ReadOnlyMemory<byte>? GetIdentifier(ReadOnlyMemory<byte> persistentUvAuthToken)
         {
             if (EncIdentifier is null)
             {
                 return null;
             }
-            
+
             Span<byte> iv = stackalloc byte[16];
             Span<byte> ct = stackalloc byte[EncIdentifier.Value.Length];
             Span<byte> salt = stackalloc byte[32];
@@ -584,5 +617,4 @@ namespace Yubico.YubiKey.Fido2
         /// </remarks>
         public bool IsExtensionSupported(string extension) => Extensions?.Contains(extension) == true;
     }
-    
 }

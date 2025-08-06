@@ -25,5 +25,11 @@ namespace Yubico.Core
         /// Default is false / shared.
         /// </summary>
         public const string OpenSmartCardHandlesExclusively = nameof(OpenSmartCardHandlesExclusively);
+        
+        /// <summary>
+        /// If set to true, Yubico.Core will attempt to open HID handles exclusively. False will open shared.
+        /// Default is false / shared.
+        /// </summary>
+        public const string OpenHidHandlesExclusively = nameof(OpenHidHandlesExclusively);
     }
 }

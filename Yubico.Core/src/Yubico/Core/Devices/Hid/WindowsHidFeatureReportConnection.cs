@@ -21,6 +21,7 @@ namespace Yubico.Core.Devices.Hid
     {
         // The SDK device instance that created this connection instance.
         private readonly WindowsHidDevice _device;
+        
         // The underlying Windows HID device used for communication.
         private readonly HidDDevice _hidDDevice;
 
@@ -30,20 +31,20 @@ namespace Yubico.Core.Devices.Hid
         internal WindowsHidFeatureReportConnection(WindowsHidDevice device, string path)
         {
             _device = device;
-            HidDDevice = new HidDDevice(path);
+            _hidDDevice = new HidDDevice(path);
             SetupConnection();
         }
 
         private void SetupConnection()
         {
-            HidDDevice.OpenFeatureConnection();
-            InputReportSize = HidDDevice.FeatureReportByteLength;
-            OutputReportSize = HidDDevice.FeatureReportByteLength;
+            _hidDDevice.OpenFeatureConnection();
+            InputReportSize = _hidDDevice.FeatureReportByteLength;
+            OutputReportSize = _hidDDevice.FeatureReportByteLength;
         }
 
         public byte[] GetReport()
         {
-            byte[] data = HidDDevice.GetFeatureReport();
+            byte[] data = _hidDDevice.GetFeatureReport();
 
             _device.LogDeviceAccessTime();
 
@@ -52,23 +53,23 @@ namespace Yubico.Core.Devices.Hid
 
         public void SetReport(byte[] report)
         {
-            HidDDevice.SetFeatureReport(report);
+            _hidDDevice.SetFeatureReport(report);
             _device.LogDeviceAccessTime();
         }
 
         #region IDisposable Support
-        private bool disposedValue; // To detect redundant calls
+        private bool _disposedValue; // To detect redundant calls
 
         private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
-                    HidDDevice.Dispose();
+                    _hidDDevice.Dispose();
                 }
 
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

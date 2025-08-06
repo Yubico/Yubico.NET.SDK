@@ -131,13 +131,12 @@ namespace Yubico.Core.Devices.SmartCard
 
             try
             {
-                SCARD_SHARE shareMode = SCARD_SHARE.SHARED;
-
-                if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesExclusively, out bool enabled) &&
-                    enabled)
-                {
-                    shareMode = SCARD_SHARE.EXCLUSIVE;
-                }
+                SCARD_SHARE shareMode = 
+                    AppContext.TryGetSwitch(
+                            CoreCompatSwitches.OpenSmartCardHandlesExclusively, 
+                            out bool isEnabled) && isEnabled
+                        ? SCARD_SHARE.EXCLUSIVE
+                        : SCARD_SHARE.SHARED;
 
                 result = SCardConnect(
                     context,

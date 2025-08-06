@@ -21,9 +21,9 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Fido2
 {
     [Trait(TraitTypes.Category, TestCategories.Elevated)]
-    public class VerifyFpTests : SimpleIntegrationTestConnection
+    public class VerifyTests : SimpleIntegrationTestConnection
     {
-        public VerifyFpTests()
+        public VerifyTests()
             : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
@@ -37,6 +37,35 @@ namespace Yubico.YubiKey.Fido2
                 fido2Session.VerifyUv(PinUvAuthTokenPermissions.GetAssertion, "rp12");
                 Assert.NotNull(fido2Session.AuthProtocol);
             }
+        }
+        
+        [SkippableFact(typeof(DeviceNotFoundException))]
+        public void VerifyPin_WithPermissions_Pcmr_Succeeds()
+        {
+            using var fido2Session = new Fido2Session(Device);
+            
+            fido2Session.KeyCollector = LocalKeyCollector;
+            fido2Session.VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly, "rp12");
+            Assert.NotNull(fido2Session.AuthToken);
+
+            var persistentUvAuthToken = fido2Session.AuthToken.Value;
+            var identifier = fido2Session.AuthenticatorInfo.GetIdentifier(persistentUvAuthToken); // TODO How know if the decryption was successful?
+            Assert.NotNull(identifier);
+            Assert.NotEmpty(identifier.Value.ToArray());
+        }
+        
+        [SkippableFact(typeof(DeviceNotFoundException))]
+        public void VerifyUv_WithPermissions_Pcmr_Succeeds()
+        {
+            using var fido2Session = new Fido2Session(Device);
+            
+            fido2Session.KeyCollector = LocalKeyCollector;
+            fido2Session.VerifyUv(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly, "rp12");
+            Assert.NotNull(fido2Session.AuthToken);
+
+            var identifier = fido2Session.AuthenticatorInfo.GetIdentifier(fido2Session.AuthToken.Value);
+            Assert.NotNull(identifier);
+            Assert.NotEmpty(identifier.Value.ToArray());
         }
 
         private bool LocalKeyCollector(KeyEntryData arg)

@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Fido2
     public class Fido2InfoTests
     {
         [Fact]
-        public void Decode_Test()
+        public void Decode_Test() // TODO 
         {
             var fido2Info = new AuthenticatorInfo(GetSampleEncoded());
             Assert.NotNull(fido2Info);
@@ -740,16 +740,15 @@ namespace Yubico.YubiKey.Fido2
                 .Entry(22, new[] { AttestationFormats.Packed }) // Attestation formats
                 .Entry(23, 0) // UvCountSinceLastPinEntry
                 .Entry(24, true) // LongTouchForReset
-                .Entry(25, "Example.com"u8.ToArray()) // EncIdentifier
+                .Entry(25, "encIdentifierBytes"u8.ToArray()) // EncIdentifier
                 .Entry(26, new[] { AuthenticatorTransports.Usb }) // TransportsForReset
                 .Entry(27, true) // PinComplexityPolicy
-                .Entry(28, "Example.com") // PinComplexityPolicyUrl
+                .Entry(28, "Example.com"u8.ToArray()) // PinComplexityPolicyUrl
                 .Entry(29, 33); // MaxPinLength
-
 
             var encoded = cborMapWriter.Encode();
 #pragma warning disable IDE0059
-            var stringEncoded = Convert.ToHexString(encoded);
+            var stringEncoded = Convert.ToHexString(encoded); // TODO remove at end of PR
 #pragma warning restore IDE0059
             return encoded;
         }

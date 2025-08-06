@@ -65,7 +65,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         ExceptionMessages.Ctap2MissingRequiredField));
             }
 
-            return (ReadOnlyMemory<byte>)clientPinData.PinUvAuthToken;
+            return clientPinData.PinUvAuthToken.Value;
         }
     }
 }

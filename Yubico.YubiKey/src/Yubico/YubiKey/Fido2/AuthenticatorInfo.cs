@@ -307,6 +307,7 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// The maximum length of a PIN (in bytes) that the authenticator supports.
+        /// Default value is 63, which is the maximum length of a PIN in Unicode code points.
         /// </summary>
         public int MaximumPinLength { get; }
 
@@ -316,7 +317,7 @@ namespace Yubico.YubiKey.Fido2
         /// If <c>false</c>, the authenticator is not enforcing a PIN complexity policy
         /// If <c>null</c>, the authenticator does not support this feature.
         /// </summary>
-        public string? PinComplexityPolicyUrl { get; }
+        public ReadOnlyMemory<byte> PinComplexityPolicyUrl { get; }
 
         /// <summary>
         /// If present, indicates whether the authenticator is enforcing an additional current PIN complexity policy beyond minPINLength.
@@ -487,9 +488,9 @@ namespace Yubico.YubiKey.Fido2
                     : null;
 
                 PinComplexityPolicyUrl = cborMap.Contains(KeyPinComplexityPolicyUrl)
-                    ? cborMap.ReadTextString(KeyPinComplexityPolicyUrl)
+                    ? cborMap.ReadByteString(KeyPinComplexityPolicyUrl)
                     : null;
-
+                
                 MaximumPinLength = cborMap.Contains(KeyMaxPinLength)
                     ? cborMap.ReadInt32(KeyMaxPinLength)
                     : 63;
@@ -561,7 +562,7 @@ namespace Yubico.YubiKey.Fido2
             EncIdentifier.Value.Span[..16].CopyTo(iv);
             EncIdentifier.Value.Span[16..ct.Length].CopyTo(ct);
 
-            var key = HkdfUtilities.DeriveKey(persistentUvAuthToken.Span, "encIdentifier"u8, salt, 32);
+            var key = HkdfUtilities.DeriveKey(persistentUvAuthToken.Span, "encIdentifier"u8, salt, 16);
             var result = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);
             return result;
         }

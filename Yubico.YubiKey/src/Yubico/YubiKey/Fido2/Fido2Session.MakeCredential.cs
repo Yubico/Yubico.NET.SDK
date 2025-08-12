@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.Fido2
 
                 try
                 {
-                    currentToken.CopyTo(token.AsMemory());
+                    currentToken.CopyTo(token);
                     parameters.Protocol = AuthProtocol.Protocol;
                     parameters.PinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(
                         token, 0, currentToken.Length, clientDataHash);

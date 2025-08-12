@@ -314,13 +314,7 @@ namespace Yubico.YubiKey.Fido2
 
             _log.LogInformation("Enumerate credentials for relying party: " + relyingParty.Id + ".");
 
-            var currentToken = GetAuthToken(
-                false, PinUvAuthTokenPermissions.CredentialManagement, relyingParty.Id);
-
-            using var digester = CryptographyProviders.Sha256Creator();
-            digester.Initialize();
-            byte[] utf = Encoding.UTF8.GetBytes(relyingParty.Id);
-            byte[] digest = digester.ComputeHash(utf);
+            var currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.CredentialManagement, relyingParty.Id);
 
             var command = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol)
             {

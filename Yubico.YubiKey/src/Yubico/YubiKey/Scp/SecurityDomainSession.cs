@@ -250,7 +250,7 @@ namespace Yubico.YubiKey.Scp
                 var encryptedKey = EncryptData(key);
 
                 // Write key structure
-                var tlvData = new TlvObject(AesKeyType, encryptedKey.Span.ToArray()).GetBytes();
+                var tlvData = new TlvObject(AesKeyType, encryptedKey.Span).GetBytes();
                 dataWriter.Write(tlvData.ToArray());
 
                 // Write KCV

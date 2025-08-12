@@ -104,6 +104,7 @@ limitations under the License. -->
   </ItemGroup>
 
   <ItemGroup Label="Package references specific to Yubico.YubiKey.dll">
+    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>

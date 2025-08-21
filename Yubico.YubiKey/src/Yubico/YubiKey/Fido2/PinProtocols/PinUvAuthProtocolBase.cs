@@ -157,7 +157,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         {
             // This can be called only if there is currently nothing in the
             // object.
-            if (!(PlatformPublicKey is null))
+            if (PlatformPublicKey is not null)
             {
                 throw new InvalidOperationException(
                     string.Format(

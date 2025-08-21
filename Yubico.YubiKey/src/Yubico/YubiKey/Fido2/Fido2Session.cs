@@ -153,7 +153,7 @@ namespace Yubico.YubiKey.Fido2
         /// getting a copy of the info and using it throughout.
         /// </para>
         /// </remarks>
-        public AuthenticatorInfo AuthenticatorInfo => _authenticatorInfo ?? SetAndReturnAuthenticatorInfoField();
+        public AuthenticatorInfo AuthenticatorInfo => _authenticatorInfo ??= GetAuthenticatorInfoInternal();
 
         // The default constructor is explicitly defined to show that we do not want it used.
         private Fido2Session()
@@ -213,12 +213,10 @@ namespace Yubico.YubiKey.Fido2
         // Get the AuthenticatorInfo and return it. In addition, set the
         // _authenticatorInfo field with the info so that is is no longer
         // necessary to call the command.
-        private AuthenticatorInfo SetAndReturnAuthenticatorInfoField()
+        private AuthenticatorInfo GetAuthenticatorInfoInternal()
         {
             var response = Connection.SendCommand(new GetInfoCommand());
-            _authenticatorInfo = response.GetData();
-
-            return _authenticatorInfo;
+            return response.GetData();
         }
 
         private static CtapStatus GetCtapError(IYubiKeyResponse r) => (CtapStatus)(r.StatusWord & 0xFF);

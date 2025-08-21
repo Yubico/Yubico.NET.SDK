@@ -219,13 +219,13 @@ namespace Yubico.YubiKey.Fido2
             return response.GetData();
         }
 
+        private bool OptionPresent(string key) =>
+            AuthenticatorInfo.Options != null && AuthenticatorInfo.Options.ContainsKey(key);
+
+        private bool OptionEnabled(string key) =>
+            OptionPresent(key) && AuthenticatorInfo.Options![key];
+
         private static CtapStatus GetCtapError(IYubiKeyResponse r) => (CtapStatus)(r.StatusWord & 0xFF);
-
-        private static bool OptionPresent(AuthenticatorInfo info, string key) =>
-            info.Options != null && info.Options.ContainsKey(key);
-
-        private static bool OptionEnabled(AuthenticatorInfo info, string key) =>
-            OptionPresent(info, key) && info.Options![key];
 
         /// <inheritdoc />
         public void Dispose()

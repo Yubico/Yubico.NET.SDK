@@ -557,10 +557,10 @@ namespace Yubico.YubiKey.Fido2
             }
 
             Span<byte> iv = stackalloc byte[16];
-            Span<byte> ct = stackalloc byte[EncIdentifier.Value.Length];
+            Span<byte> ct = stackalloc byte[16];
             Span<byte> salt = stackalloc byte[32];
             EncIdentifier.Value.Span[..16].CopyTo(iv);
-            EncIdentifier.Value.Span[16..ct.Length].CopyTo(ct);
+            EncIdentifier.Value.Span[16..].CopyTo(ct);
 
             var key = HkdfUtilities.DeriveKey(persistentUvAuthToken.Span, "encIdentifier"u8, salt, 16);
             var result = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);

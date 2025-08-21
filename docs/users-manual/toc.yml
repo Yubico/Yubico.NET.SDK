@@ -115,7 +115,7 @@
               href: application-otp/how-to-delete-a-slot-configuration.md
             - name: How to swap slot configurations
               href: application-otp/how-to-swap-slot-configs.md
-            - name: How to set, reset, remove, and use slot access codes
+            - name: How to set, modify, remove, and use slot access codes
               href: application-otp/how-to-slot-access-codes.md
         - name: OTP commands and APDUs
           href: application-otp/otp-commands.md

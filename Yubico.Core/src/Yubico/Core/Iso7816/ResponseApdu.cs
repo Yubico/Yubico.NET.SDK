@@ -85,5 +85,7 @@ namespace Yubico.Core.Iso7816
             SW2 = (byte)(sw & 0xFF);
             Data = dataWithoutSW.ToArray();
         }
+
+        public override string ToString() => $"SW1: 0x{SW1:X2} SW2: 0x{SW2:X2} Data: {Data.Span.Length} bytes";
     }
 }

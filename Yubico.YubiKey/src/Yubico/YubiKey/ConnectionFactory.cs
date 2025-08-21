@@ -120,7 +120,7 @@ namespace Yubico.YubiKey
                 return new KeyboardConnection(_hidKeyboardDevice);
             }
 
-            bool isFidoApplication = application == YubiKeyApplication.Fido2 || application == YubiKeyApplication.FidoU2f;
+            bool isFidoApplication = application is YubiKeyApplication.Fido2 or YubiKeyApplication.FidoU2f;
             if (_hidFidoDevice != null && isFidoApplication)
             {
                 _log.LogDebug("Connecting via the FIDO interface.");

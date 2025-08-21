@@ -317,11 +317,6 @@ namespace Yubico.YubiKey.Fido2
             var currentToken = GetAuthToken(
                 false, PinUvAuthTokenPermissions.CredentialManagement, relyingParty.Id);
 
-            using var digester = CryptographyProviders.Sha256Creator();
-            digester.Initialize();
-            byte[] utf = Encoding.UTF8.GetBytes(relyingParty.Id);
-            byte[] digest = digester.ComputeHash(utf);
-
             var command = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol)
             {
                 IsPreview = isPreview

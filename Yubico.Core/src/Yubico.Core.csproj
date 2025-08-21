@@ -19,7 +19,7 @@ limitations under the License. -->
     <RootNamespace></RootNamespace>
 
     <!-- Multi-target build -->
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net47</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net472</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <!-- Suppressed warnings-->
@@ -117,10 +117,10 @@ limitations under the License. -->
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.6" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <!-- Before updating PolySharp, we should do some due dilligence on the update -->
     <PackageReference Include="PolySharp" Version="1.15.0" AllowUpdates="false">
@@ -128,7 +128,6 @@ limitations under the License. -->
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Memory" Version="4.6.3" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
     <!-- The wildcard version tag allows us to include the latest minor and pre-release versions -->
     <PackageReference Include="Yubico.NativeShims" Version="1.*-*" />

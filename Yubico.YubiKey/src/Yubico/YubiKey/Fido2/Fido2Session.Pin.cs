@@ -295,12 +295,10 @@ namespace Yubico.YubiKey.Fido2
             // FIDO2 version 2.0, but we will do this with 2.1 as well.
             // If there is a relying party but no permissions, throw an
             // exception.
-            if (allPermissions == PinUvAuthTokenPermissions.None)
+            if (allPermissions == PinUvAuthTokenPermissions.None &&
+                rpId is not null)
             {
-                if (!(rpId is null))
-                {
-                    throw new ArgumentException(ExceptionMessages.Fido2PermsMissing);
-                }
+                throw new ArgumentException(ExceptionMessages.Fido2PermsMissing);
             }
             else
             {
@@ -378,7 +376,7 @@ namespace Yubico.YubiKey.Fido2
             // if we're on a YubiKey that supports permissions, the AuthToken
             // might be a PinToken and might work. We'll let the caller decide if
             // it works or not. If not, they'll call again with a force of true.
-            if (!forceNewToken && !(AuthToken is null))
+            if (!forceNewToken && AuthToken is not null)
             {
                 return AuthToken.Value;
             }

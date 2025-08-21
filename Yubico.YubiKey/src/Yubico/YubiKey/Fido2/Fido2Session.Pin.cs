@@ -1022,7 +1022,7 @@ namespace Yubico.YubiKey.Fido2
             _log.LogInformation("Try to verify PIN (use supplied PIN).");
             IYubiKeyCommand<GetPinUvAuthTokenResponse> command;
 
-            if (!OptionEnabled(AuthenticatorInfo, "clientPin"))
+            if (!OptionEnabled("clientPin"))
             {
                 throw new InvalidOperationException(ExceptionMessages.Fido2NoPin);
             }
@@ -1040,7 +1040,7 @@ namespace Yubico.YubiKey.Fido2
             }
             else
             {
-                if (!OptionEnabled(AuthenticatorInfo, "pinUvAuthToken"))
+                if (!OptionEnabled("pinUvAuthToken"))
                 {
                     throw new InvalidOperationException(ExceptionMessages.Fido2PermsNotSupported);
                 }
@@ -1055,9 +1055,8 @@ namespace Yubico.YubiKey.Fido2
             var response = Connection.SendCommand(command);
             if (response.Status == ResponseStatus.Success)
             {
-                AuthToken = response.GetData();
-                AuthTokenPermissions = permissions;
-                AuthTokenRelyingPartyId = relyingPartyId;
+                // Checked for this above
+                UpdateAuthToken(permissions!.Value, relyingPartyId, response);
 
                 retriesRemaining = null;
                 rebootRequired = null;
@@ -1076,6 +1075,16 @@ namespace Yubico.YubiKey.Fido2
             }
 
             throw new Fido2Exception(response.StatusMessage);
+        }
+
+        private void UpdateAuthToken(
+            PinUvAuthTokenPermissions permissions,
+            string? relyingPartyId,
+            GetPinUvAuthTokenResponse response)
+        {
+            AuthToken = response.GetData();
+            AuthTokenPermissions = permissions;
+            AuthTokenRelyingPartyId = relyingPartyId;
         }
 
         /// <summary>
@@ -1273,9 +1282,7 @@ namespace Yubico.YubiKey.Fido2
                     status = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : response.CtapStatus;
                     if (status == CtapStatus.Ok)
                     {
-                        AuthToken = response.GetData();
-                        AuthTokenPermissions = permissions;
-                        AuthTokenRelyingPartyId = relyingPartyId;
+                        UpdateAuthToken(permissions, relyingPartyId, response);
                     }
                     else if (status == CtapStatus.UvInvalid)
                     {

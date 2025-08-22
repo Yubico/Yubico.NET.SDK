@@ -69,6 +69,7 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// </remarks>
         public ReadOnlyMemory<byte>? AuthToken { get; private set; }
+        public ReadOnlyMemory<byte>? AuthTokenPersistent { get; private set; }
 
         /// <summary>
         /// The set of permissions associated with the <see cref="AuthToken"/>.
@@ -367,8 +368,10 @@ namespace Yubico.YubiKey.Fido2
         // CTAP2_ERR_UNSUPPORTED_OPTION or possibly something else, and so the
         // method operating would have already thrown an exception and will not
         // call this method.
-        private ReadOnlyMemory<byte> GetAuthToken(
-            bool forceNewToken, PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
+        internal ReadOnlyMemory<byte> GetAuthToken(
+            bool forceNewToken,
+            PinUvAuthTokenPermissions permissions,
+            string? relyingPartyId = null)
         {
             // If the caller is willing to use the existing AuthToken (force is
             // false), and it exists, return it.
@@ -435,6 +438,7 @@ namespace Yubico.YubiKey.Fido2
         {
             _log.LogInformation("Clear Auth Token.");
             AuthToken = null;
+            AuthTokenPersistent = null;
             AuthTokenPermissions = null;
             AuthTokenRelyingPartyId = null;
         }
@@ -1029,16 +1033,8 @@ namespace Yubico.YubiKey.Fido2
 
             ObtainSharedSecret();
 
-            if (!permissions.HasValue || permissions == PinUvAuthTokenPermissions.None)
-            {
-                if (!string.IsNullOrEmpty(relyingPartyId))
-                {
-                    throw new ArgumentException(ExceptionMessages.Fido2PermsMissing);
-                }
-
-                command = new GetPinTokenCommand(AuthProtocol, currentPin);
-            }
-            else
+            // Create command, modern
+            if (permissions.HasValue && permissions != PinUvAuthTokenPermissions.None)
             {
                 if (!OptionEnabled("pinUvAuthToken"))
                 {
@@ -1051,11 +1047,22 @@ namespace Yubico.YubiKey.Fido2
                     permissions.Value,
                     relyingPartyId);
             }
+            else // Create command, legacy
+            {
+                if (!string.IsNullOrEmpty(relyingPartyId))
+                {
+                    throw new ArgumentException(ExceptionMessages.Fido2PermsMissing);
+                }
 
+                command = new GetPinTokenCommand(AuthProtocol, currentPin);
+            }
+
+            // Issue command
             var response = Connection.SendCommand(command);
+
+            // Check response status
             if (response.Status == ResponseStatus.Success)
             {
-                // Checked for this above
                 UpdateAuthToken(permissions!.Value, relyingPartyId, response);
 
                 retriesRemaining = null;
@@ -1082,9 +1089,16 @@ namespace Yubico.YubiKey.Fido2
             string? relyingPartyId,
             GetPinUvAuthTokenResponse response)
         {
-            AuthToken = response.GetData();
-            AuthTokenPermissions = permissions;
-            AuthTokenRelyingPartyId = relyingPartyId;
+            if (permissions == PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly)
+            {
+                AuthTokenPersistent = response.GetData();
+            }
+            else
+            {
+                AuthToken = response.GetData();
+                AuthTokenRelyingPartyId = relyingPartyId;
+                AuthTokenPermissions = permissions;
+            }
         }
 
         /// <summary>
@@ -1412,7 +1426,7 @@ namespace Yubico.YubiKey.Fido2
         {
             if (KeyCollector is null)
             {
-                throw new InvalidOperationException(ExceptionMessages.MissingKeyCollector);
+                 throw new InvalidOperationException(ExceptionMessages.MissingKeyCollector);
             }
 
             return KeyCollector;

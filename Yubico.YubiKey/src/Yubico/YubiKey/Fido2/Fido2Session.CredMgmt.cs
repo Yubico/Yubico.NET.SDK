@@ -14,10 +14,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
@@ -85,10 +82,7 @@ namespace Yubico.YubiKey.Fido2
             _log.LogInformation("Get credential metadata.");
 
             bool isPreview = CredMgmtGetIsPreview();
-
-            var currentToken = GetAuthToken(
-                false, PinUvAuthTokenPermissions.CredentialManagement, null);
-
+            var currentToken = GetReadOnlyCredMgmtToken();
             var command = new GetCredentialMetadataCommand(currentToken, AuthProtocol)
             {
                 IsPreview = isPreview
@@ -121,7 +115,7 @@ namespace Yubico.YubiKey.Fido2
                 AuthTokenRelyingPartyId = null;
                 try
                 {
-                    currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
+                    // currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
                     command = new GetCredentialMetadataCommand(currentToken, AuthProtocol)
                     {
                         IsPreview = isPreview
@@ -180,10 +174,7 @@ namespace Yubico.YubiKey.Fido2
             _log.LogInformation("Enumerate relying parties.");
 
             bool isPreview = CredMgmtGetIsPreview();
-
-            var currentToken = GetAuthToken(
-                false, PinUvAuthTokenPermissions.CredentialManagement, null);
-
+            var currentToken = GetReadOnlyCredMgmtToken();
             var command = new EnumerateRpsBeginCommand(currentToken, AuthProtocol)
             {
                 IsPreview = isPreview
@@ -310,13 +301,10 @@ namespace Yubico.YubiKey.Fido2
                 throw new ArgumentNullException(nameof(relyingParty));
             }
 
-            bool isPreview = CredMgmtGetIsPreview();
-
             _log.LogInformation("Enumerate credentials for relying party: " + relyingParty.Id + ".");
 
-            var currentToken = GetAuthToken(
-                false, PinUvAuthTokenPermissions.CredentialManagement, relyingParty.Id);
-
+            bool isPreview = CredMgmtGetIsPreview();
+            var currentToken = GetReadOnlyCredMgmtToken();
             var command = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol)
             {
                 IsPreview = isPreview
@@ -542,6 +530,16 @@ namespace Yubico.YubiKey.Fido2
             }
 
             throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+        }
+
+        private ReadOnlyMemory<byte> GetReadOnlyCredMgmtToken()
+        {
+            return AuthTokenPersistent is not null
+                ? AuthTokenPersistent.Value
+                : GetAuthToken(
+                    forceNewToken: false,
+                    permissions: PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly,
+                    relyingPartyId: null);
         }
     }
 }

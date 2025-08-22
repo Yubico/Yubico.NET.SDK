@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
+
 using System.Text;
 using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
@@ -23,6 +25,8 @@ namespace Yubico.YubiKey.Fido2
     [Trait(TraitTypes.Category, TestCategories.Elevated)]
     public class VerifyTests : SimpleIntegrationTestConnection
     {
+        public int LocalKeyCollectorVerifyPinCalls { get; private set; }
+
         public VerifyTests()
             : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
@@ -38,27 +42,29 @@ namespace Yubico.YubiKey.Fido2
                 Assert.NotNull(fido2Session.AuthProtocol);
             }
         }
-        
+
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void VerifyPin_WithPermissions_Pcmr_Succeeds()
         {
             using var fido2Session = new Fido2Session(Device);
-            
+
             fido2Session.KeyCollector = LocalKeyCollector;
             fido2Session.VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly, "rp12");
-            Assert.NotNull(fido2Session.AuthToken);
+            Assert.NotNull(fido2Session.AuthTokenPersistent);
 
-            var persistentUvAuthToken = fido2Session.AuthToken.Value;
-            var identifier = fido2Session.AuthenticatorInfo.GetIdentifier(persistentUvAuthToken); // TODO How know if the decryption was successful?
+            var persistentUvAuthTokenEnc = fido2Session.AuthTokenPersistent.Value.ToArray();
+            var pPuat = fido2Session.AuthProtocol.Decrypt(persistentUvAuthTokenEnc, 0, 48);
+
+            var identifier = fido2Session.AuthenticatorInfo.GetIdentifier(pPuat);
             Assert.NotNull(identifier);
-            Assert.NotEmpty(identifier.Value.ToArray());
+            Assert.NotEmpty(identifier.Value.ToArray()); //01D9DF3D8FBF69C597CE4BFE175602DD 
         }
-        
+
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void VerifyUv_WithPermissions_Pcmr_Succeeds()
         {
             using var fido2Session = new Fido2Session(Device);
-            
+
             fido2Session.KeyCollector = LocalKeyCollector;
             fido2Session.VerifyUv(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly, "rp12");
             Assert.NotNull(fido2Session.AuthToken);
@@ -76,7 +82,8 @@ namespace Yubico.YubiKey.Fido2
                     Console.WriteLine("YubiKey requires touch");
                     break;
                 case KeyEntryRequest.VerifyFido2Pin:
-                    arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
+                    ++LocalKeyCollectorVerifyPinCalls;
+                    arg.SubmitValue(Encoding.UTF8.GetBytes("11234567"));
                     break;
                 case KeyEntryRequest.VerifyFido2Uv:
                     Console.WriteLine("Fingerprint requested.");

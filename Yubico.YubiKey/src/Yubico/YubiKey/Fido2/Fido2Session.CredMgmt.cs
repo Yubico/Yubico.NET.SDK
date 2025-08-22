@@ -207,7 +207,7 @@ namespace Yubico.YubiKey.Fido2
                 AuthTokenRelyingPartyId = null;
                 try
                 {
-                    currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
+                    // currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
                     command = new EnumerateRpsBeginCommand(currentToken, AuthProtocol)
                     {
                         IsPreview = isPreview
@@ -325,11 +325,11 @@ namespace Yubico.YubiKey.Fido2
                 // specified as the RP of interest. If there's currently no RP in
                 // the permissions, leave it blank. If there is, set it to what
                 // the caller specified.
-                if (!(AuthTokenRelyingPartyId is null))
+                if (AuthTokenRelyingPartyId is not null)
                 {
                     AuthTokenRelyingPartyId = relyingParty.Id;
                 }
-                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
+                // currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
                 command = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol)
                 {
                     IsPreview = isPreview
@@ -537,7 +537,7 @@ namespace Yubico.YubiKey.Fido2
             return AuthTokenPersistent is not null
                 ? AuthTokenPersistent.Value
                 : GetAuthToken(
-                    forceNewToken: false,
+                    forceNewToken: true,
                     permissions: PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly,
                     relyingPartyId: null);
         }

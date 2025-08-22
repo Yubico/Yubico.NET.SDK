@@ -174,7 +174,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             // in the standard). Both of them generate a new P-256 EC key pair.
             // If we ever support a different protocol that uses a different
             // algorithm, override this method.
-            if (!(authenticatorPublicKey is CoseEcPublicKey))
+            if (authenticatorPublicKey is not CoseEcPublicKey)
             {
                 throw new ArgumentException(
                     string.Format(

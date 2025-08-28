@@ -18,7 +18,7 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.14.x Releases
 
-### 1.14.1
+### 1.14.0
 
 Release date: September 17th, 2025
 
@@ -30,7 +30,7 @@ Features:
 
 - The NuGet package metadata has been updated for the ``Yubico.Core.csproj`` and ``Yubico.YubiKey.csproj`` files to improve discoverability, consistency, and clarity. The updates include new ``PackageId`` and ``PackageTags`` fields as well as a reorganized ``PackageReleaseNotes`` field. ([#265](https://github.com/Yubico/Yubico.NET.SDK/pull/265))
 
-- ``ToString`` overrides have been introduced in the ``CommandApdu`` and ``ResponseApdu`` classes to provide a human-readable string representation of their internal state. These changes improve debugging and logging of APDUs. ([#270](https://github.com/Yubico/Yubico.NET.SDK/pull/270))
+- ``ToString`` overrides have been introduced in the [CommandApdu](xref:Yubico.Core.Iso7816.CommandApdu) and [ResponseApdu](xref:Yubico.Core.Iso7816.ResponseApdu) classes to provide a human-readable string representation of their internal state. These changes improve debugging and logging of APDUs. ([#270](https://github.com/Yubico/Yubico.NET.SDK/pull/270))
 
 Bug Fixes:
 
@@ -42,13 +42,13 @@ Bug Fixes:
 
 Documentation:
 
-- The FIDO2 reset documentation has been updated to fix an error in the instructions and clarify timeout durations. ([#278](https://github.com/Yubico/Yubico.NET.SDK/pull/278))
+- The [FIDO2 reset](xref:Fido2Reset) documentation has been updated to fix an error in the instructions and clarify timeout durations. ([#278](https://github.com/Yubico/Yubico.NET.SDK/pull/278))
 
-- The documentation on slot access codes has been updated to improve clarity and examples. ([#268](https://github.com/Yubico/Yubico.NET.SDK/pull/268))
+- The documentation on [slot access codes](xref:OtpSlotAccessCodes) has been updated to improve clarity and examples. ([#268](https://github.com/Yubico/Yubico.NET.SDK/pull/268))
 
-- The documentation on PIV public and private keys has been updated with new sample code demonstrating how to use the latest factory methods. ([#245](https://github.com/Yubico/Yubico.NET.SDK/pull/245), [#272](https://github.com/Yubico/Yubico.NET.SDK/pull/272))
+- The documentation on PIV [public](xref:UsersManualPublicKeys) and [private](xref:UsersManualPrivateKeys) keys has been updated with new sample code demonstrating how to use the latest factory methods. ([#245](https://github.com/Yubico/Yubico.NET.SDK/pull/245), [#272](https://github.com/Yubico/Yubico.NET.SDK/pull/272))
 
-- The documentation for the ``UseFastTrigger`` method has been updated to clarify information on behavior and applicability. ([#294](https://github.com/Yubico/Yubico.NET.SDK/pull/294))
+- The documentation for the [UseFastTrigger](xref:Yubico.YubiKey.Otp.OtpSettings%601.UseFastTrigger%28System.Boolean%29) method has been updated to clarify information on behavior and applicability. ([#294](https://github.com/Yubico/Yubico.NET.SDK/pull/294))
 
 - All hardcoded links to the Yubico.NET.SDK GitHub repository have been updated to point to the HEAD branch. This ensures that links to sample code point to the latest version of that code. ([#286](https://github.com/Yubico/Yubico.NET.SDK/pull/286), [#279](https://github.com/Yubico/Yubico.NET.SDK/pull/279))
 

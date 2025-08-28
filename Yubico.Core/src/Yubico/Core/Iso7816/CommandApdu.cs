@@ -328,6 +328,9 @@ namespace Yubico.Core.Iso7816
             return leField;
         }
 
+        /// <summary>
+        /// Prints CLA, INS, P1, P2, Lc, Le, and the length of the Data field in a formatted string.
+        /// </summary>
         public override string ToString() => $"CLA: 0x{Cla:X2} INS: 0x{Ins:X2} P1: 0x{P1:X2} P2: 0x{P2:X2} Lc: {Nc} Le: {Ne} Data: {Data.Length} bytes";
     }
 }

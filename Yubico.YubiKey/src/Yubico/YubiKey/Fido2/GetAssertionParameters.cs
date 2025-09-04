@@ -175,8 +175,8 @@ namespace Yubico.YubiKey.Fido2
                 .Entry(TagRp, RelyingParty.Id)
                 .Entry(TagClientDataHash, ClientDataHash)
                 .OptionalEntry<IReadOnlyList<ICborEncode>>(TagAllowList, CborHelpers.EncodeArrayOfObjects, AllowList)
-                .OptionalEntry(TagExtensions, ParameterHelpers.EncodeKeyValues, Extensions) // TODO verify
-                .OptionalEntry(TagOptions, ParameterHelpers.EncodeKeyValues, Options) // TODO verify
+                .OptionalEntry(TagExtensions, ParameterHelpers.EncodeKeyValues, Extensions)
+                .OptionalEntry(TagOptions, ParameterHelpers.EncodeKeyValues, Options)
                 .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
                 .OptionalEntry(TagProtocol, (int?)Protocol)
                 .Encode();

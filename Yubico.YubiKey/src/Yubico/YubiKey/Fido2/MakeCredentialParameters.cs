@@ -435,7 +435,7 @@ namespace Yubico.YubiKey.Fido2
             }
             
             var credBlob = new CredBlob(credBlobValue);
-            AddExtension(Fido2ExtensionKeys.CredBlob, credBlob); // todo verify
+            AddExtension(Fido2ExtensionKeys.CredBlob, credBlob);
         }
 
         /// <summary>
@@ -725,8 +725,8 @@ namespace Yubico.YubiKey.Fido2
             // The encoding is key/value where the key is "credProtect" and the
             // value is an unsigned int (major type 0). The only three possible
             // values are 1, 2, or 3, so the encoding is simply 0x01, 02,or 03.
-            // AddExtension(Fido2ExtensionKeys.CredProtect, new byte[] { (byte)credProtectPolicy }); // TODO use AddExtension<T>
-            AddExtension(Fido2ExtensionKeys.CredProtect, (byte)credProtectPolicy); // TODO Verify
+            // AddExtension(Fido2ExtensionKeys.CredProtect, new byte[] { (byte)credProtectPolicy });
+            AddExtension(Fido2ExtensionKeys.CredProtect, (byte)credProtectPolicy);
         }
 
         /// <inheritdoc cref="AddCredProtectExtension(CredProtectPolicy,bool,AuthenticatorInfo)"/>

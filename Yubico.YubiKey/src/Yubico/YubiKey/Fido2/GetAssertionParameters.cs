@@ -168,7 +168,7 @@ namespace Yubico.YubiKey.Fido2
         {
             if (_hmacSecretEncoding is not null)
             {
-                AddExtension(Fido2ExtensionKeys.HmacSecret, _hmacSecretEncoding); // TODO use AddExtensionBase
+                AddExtension(Fido2ExtensionKeys.HmacSecret, _hmacSecretEncoding);
             }
 
             return new CborMapWriter<int>()

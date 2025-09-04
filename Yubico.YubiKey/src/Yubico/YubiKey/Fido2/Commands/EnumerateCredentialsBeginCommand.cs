@@ -69,7 +69,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <param name="authProtocol">
         ///     The Auth Protocol used to build the Auth Token.
         /// </param>
-        /// <param name="decryptAuthToken">TODO</param>
+        /// <param name="decryptAuthToken">If true, the <c>pinUvAuthToken</c> is assumed encrypted,
+        /// and thus the SDK will attempt to decrypt it before passing it to the YubiKey.
+        /// If false, no decryption will be attempted.</param>
         public EnumerateCredentialsBeginCommand(
             RelyingParty relyingParty,
             ReadOnlyMemory<byte> pinUvAuthToken,

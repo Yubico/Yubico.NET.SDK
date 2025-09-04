@@ -56,7 +56,31 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(plaintext));
             }
+            
             if (length < BlockSize || length % BlockSize != 0 || offset + length > plaintext.Length)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.IncorrectPlaintextLength));
+            }
+
+            return Encrypt(plaintext.AsMemory(offset, length));
+        }
+
+        /// <inheritdoc />
+        public override byte[] Encrypt(ReadOnlyMemory<byte> plaintext)
+        {
+            if (EncryptionKey is null)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidCallOrder));
+            }
+            
+            int length = plaintext.Length;
+            if (length < BlockSize || length % BlockSize != 0 )
             {
                 throw new ArgumentException(
                     string.Format(
@@ -72,7 +96,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
 
             using var aesTransform = aes.CreateEncryptor();
             byte[] encryptedData = new byte[length];
-            _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, 0);
+            _ = aesTransform.TransformBlock(plaintext.ToArray(), 0, length, encryptedData, 0);
 
             return encryptedData;
         }
@@ -92,7 +116,30 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(ciphertext));
             }
+            
             if (length == 0 || length % BlockSize != 0 || offset + length > ciphertext.Length)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.IncorrectCiphertextLength));
+            }
+
+            return Decrypt(ciphertext.AsMemory(offset, length));
+        }
+        
+        /// <inheritdoc />
+        public override byte[] Decrypt(ReadOnlyMemory<byte> ciphertext)
+        {
+            if (EncryptionKey is null)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidCallOrder));
+            }
+            int length = ciphertext.Length;
+            if (length == 0 || length % BlockSize != 0)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -108,7 +155,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
 
             using var aesTransform = aes.CreateDecryptor();
             byte[] decryptedData = new byte[length];
-            _ = aesTransform.TransformBlock(ciphertext, offset, length, decryptedData, 0);
+            _ = aesTransform.TransformBlock(ciphertext.ToArray(), 0, length, decryptedData, 0);
 
             return decryptedData;
         }
@@ -133,7 +180,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         }
 
         /// <inheritdoc />
-        protected override byte[] Authenticate(byte[] keyData, byte[] message)
+        public override byte[] Authenticate(byte[] keyData, byte[] message)
         {
             using var hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
             hmacSha256.Key = keyData;
@@ -141,15 +188,15 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         }
 
         /// <inheritdoc />
-        protected override void DeriveKeys(byte[] buffer)
+        protected override void DeriveKeys(byte[] sharedSecret)
         {
-            if (buffer is null)
+            if (sharedSecret is null)
             {
-                throw new ArgumentNullException(nameof(buffer));
+                throw new ArgumentNullException(nameof(sharedSecret));
             }
 
             using var sha256 = CryptographyProviders.Sha256Creator();
-            _ = sha256.TransformFinalBlock(buffer, 0, buffer.Length);
+            _ = sha256.TransformFinalBlock(sharedSecret, 0, sharedSecret.Length);
             if (sha256.Hash.Length != KeyLength)
             {
                 throw new InvalidOperationException(

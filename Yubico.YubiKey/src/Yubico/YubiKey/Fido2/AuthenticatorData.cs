@@ -347,7 +347,7 @@ namespace Yubico.YubiKey.Fido2
                 return [];
             }
 
-            bool hasHmacMcSecret = hmacSecretBytes?.SequenceEqual(CborHelpers.CborTrue) == true;
+            bool hasHmacMcSecret = hmacSecretBytes?.SequenceEqual(CborExtensions.CborTrue) == true;
             if (hasHmacMcSecret && Extensions?.TryGetValue(Fido2ExtensionKeys.HmacSecretMc, out hmacSecretBytes) != true)
             {
                 return [];

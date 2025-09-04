@@ -159,52 +159,5 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             return cbor.Encode();
         }
-
-        public static byte[] CborTrue = [0xF5];
-        public static byte[] CborFalse = [0xF4];
-        
-        public static byte[] ToCbor(this bool value) => value ? CborTrue : CborFalse;
-
-        public static byte[] ToCbor(this string value)
-        {
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteTextString(value);
-            return cbor.Encode();
-        }
-
-        public static byte[] ToCbor(this int value)
-        {
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteInt32(value);
-            return cbor.Encode();
-        }
-
-        public static byte[] ToCbor(this uint value)
-        {
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteUInt32(value);
-            return cbor.Encode();
-        }
-        
-        public static byte[] ToCbor(this long value)
-        {
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteInt64(value);
-            return cbor.Encode();
-        }
-        
-        public static byte[] ToCbor(this ulong value)
-        {
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteUInt64(value);
-            return cbor.Encode();
-        }
-        
-        public static byte[] ToCbor(this byte[] value)
-        {
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cbor.WriteByteString(value);
-            return cbor.Encode();
-        }
     }
 }

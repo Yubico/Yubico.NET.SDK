@@ -33,10 +33,8 @@ namespace Yubico.YubiKey.Fido2
     /// Then pass that object to the <c>GetAssertion</c> method or command.
     /// </para>
     /// </remarks>
-    public partial class GetAssertionParameters : ICborEncode
+    public class GetAssertionParameters : AuthenticatorOperationParameters<GetAssertionParameters>
     {
-        // These are the CBOR tags for the elements that make up the encoded
-        // GetAssertionParameters.
         private const int TagRp = 1;
         private const int TagClientDataHash = 2;
         private const int TagAllowList = 3;
@@ -44,10 +42,12 @@ namespace Yubico.YubiKey.Fido2
         private const int TagOptions = 5;
         private const int TagPinUvAuth = 6;
         private const int TagProtocol = 7;
+        
+        private ReadOnlyMemory<byte>? _salt1;
+        private ReadOnlyMemory<byte>? _salt2;
+        private byte[]? _hmacSecretEncoding;
 
         private List<CredentialId>? _allowList;
-        private Dictionary<string, byte[]>? _extensions;
-        private Dictionary<string, bool>? _options;
 
         /// <summary>
         /// The relying party's ID, along with an optional descriptive string.
@@ -70,41 +70,6 @@ namespace Yubico.YubiKey.Fido2
         /// To add an entry to the list, call <see cref="AllowCredential"/>.
         /// </remarks>
         public IReadOnlyList<CredentialId>? AllowList => _allowList;
-
-        /// <summary>
-        /// The list of extensions. This is an optional parameter, so it can be
-        /// null.
-        /// </summary>
-        /// <remarks>
-        /// To add an entry to the list, call <see cref="AddExtension"/>.
-        /// <para>
-        /// Each extension is a key/value pair. All keys are strings, but each
-        /// extension has its own definition of a value. It could be an int, or
-        /// it could be a map containing a string and a boolean,. It is the
-        /// caller's responsibility to encode the value.
-        /// </para>
-        /// <para>
-        /// For each value, the standard (or the vendor in the case of
-        /// vendor-defined extensions) will define the structure of the value.
-        /// From that structure the value can be encoded following CBOR rules.
-        /// The result of the encoding the value is what is stored in this
-        /// dictionary.
-        /// </para>
-        /// </remarks>
-        public IReadOnlyDictionary<string, byte[]>? Extensions => _extensions;
-
-        /// <summary>
-        /// The list of authenticator options. Each standard-defined option is a
-        /// key/value pair, where the key is a string and the value is a boolean.
-        /// This is an optional parameter, so it can be null.
-        /// </summary>
-        /// <remarks>
-        /// To add options, call <see cref="AddOption"/>.
-        /// The standard lists two option keys: "up" and "uv". Any other option
-        /// on a YubiKey will yield an error. In addition, YubiKeys that are not
-        /// BIO series will not allow "uv".
-        /// </remarks>
-        public IReadOnlyDictionary<string, bool>? Options => _options;
 
         /// <summary>
         /// The result of calling the PinProtocol's method
@@ -198,78 +163,289 @@ namespace Yubico.YubiKey.Fido2
         public void AllowCredential(CredentialId credentialId) => _allowList =
             ParameterHelpers.AddToList<CredentialId>(credentialId, _allowList);
 
-        /// <summary>
-        /// Add an entry to the extensions list. Once an entry is added to the
-        /// list, it is not possible to remove it.
-        /// </summary>
-        /// <remarks>
-        /// If there is no list yet when this method is called, one will be
-        /// created. That is, even if the <see cref="Extensions"/> is null, you
-        /// can call the method to add an entry.
-        /// <para>
-        /// Each extension is a key/value pair. For each extension the key is a
-        /// string (such as "credProtect" or "hmac-secret"). However, each value
-        /// is different. There will be a definition of the value that
-        /// accompanies each key. It will be possible to encode that definition
-        /// using the rules of CBOR. The caller supplies the key and the encoded
-        /// value.
-        /// </para>
-        /// </remarks>
-        /// <param name="extensionKey">
-        /// The key of key/value to add.
-        /// </param>
-        /// <param name="encodedValue">
-        /// The CBOR-encoded value of key/value to add.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// The <c>extensionKey</c> or <c>encodedValue</c> arg is null.
-        /// </exception>
-        public void AddExtension(string extensionKey, byte[] encodedValue) => _extensions =
-            ParameterHelpers.AddKeyValue<byte[]>(extensionKey, encodedValue, _extensions);
-
-        /// <summary>
-        /// Add an entry to the list of options. Once an entry is added to the
-        /// list, it is not possible to remove it.
-        /// </summary>
-        /// <remarks>
-        /// If the <c>Options</c> list already contains an entry with the given
-        /// <c>optionKey</c>, this method will replace it.
-        /// <para>
-        /// The standard lists two option keys: "up" and "uv". Any other option
-        /// on a YubiKey will yield an error. In addition, YubiKeys that are not
-        /// BIO series will not allow "uv".
-        /// </para>
-        /// </remarks>
-        /// <param name="optionKey">
-        /// The option to add. This is the key of the option key/value pair.
-        /// </param>
-        /// <param name="optionValue">
-        /// The value this option will possess.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// The <c>optionKey</c> arg is null.
-        /// </exception>
-        public void AddOption(string optionKey, bool optionValue) => _options =
-            ParameterHelpers.AddKeyValue<bool>(optionKey, optionValue, _options);
-
         /// <inheritdoc/>
-        public byte[] CborEncode()
+        public override byte[] CborEncode()
         {
-            if (!(_hmacSecretEncoding is null))
+            if (_hmacSecretEncoding is not null)
             {
-                // This replaces the existing extension, if there's already one
-                // in the list.
-                AddExtension(KeyHmacSecret, _hmacSecretEncoding);
+                AddExtension(Fido2ExtensionKeys.HmacSecret, _hmacSecretEncoding); // TODO use AddExtensionBase
             }
 
             return new CborMapWriter<int>()
                 .Entry(TagRp, RelyingParty.Id)
                 .Entry(TagClientDataHash, ClientDataHash)
                 .OptionalEntry<IReadOnlyList<ICborEncode>>(TagAllowList, CborHelpers.EncodeArrayOfObjects, AllowList)
-                .OptionalEntry<Dictionary<string, byte[]>>(TagExtensions, ParameterHelpers.EncodeKeyValues<byte[]>, _extensions)
-                .OptionalEntry<Dictionary<string, bool>>(TagOptions, ParameterHelpers.EncodeKeyValues<bool>, _options)
+                .OptionalEntry(TagExtensions, ParameterHelpers.EncodeKeyValues, Extensions) // TODO verify
+                .OptionalEntry(TagOptions, ParameterHelpers.EncodeKeyValues, Options) // TODO verify
                 .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
                 .OptionalEntry(TagProtocol, (int?)Protocol)
+                .Encode();
+        }
+
+
+        /// <summary>
+        /// Specify that the YubiKey should return the credBlob with the
+        /// assertion. Once this extension is added to this object, it is not
+        /// possible to remove it.
+        /// </summary>
+        /// <remarks>
+        /// Because this extension is used more often, a dedicated method is
+        /// provided as a convenience. Note that the credBlob extension is
+        /// valid only for discoverable credentials.
+        /// <para>
+        /// If there is no credBlob stored with the credential, then the YubiKey
+        /// will simply not return anything. It is not an error.
+        /// </para>
+        /// <para>
+        /// The credBlob data will be with the assertion returned. It will be in
+        /// the <see cref="GetAssertionData.AuthenticatorData"/> and
+        /// can be retrieved using
+        /// <see cref="AuthenticatorData.GetCredBlobExtension"/>
+        /// </para>
+        /// <para>
+        /// Note that there will be a credBlob only if the credential was made
+        /// with the "credBlob" extension. See
+        /// <see cref="MakeCredentialParameters.AddCredBlobExtension"/>.
+        /// </para>
+        /// </remarks>
+        public void RequestCredBlobExtension() =>
+            AddExtension(Fido2ExtensionKeys.CredBlob, true);
+
+        /// <summary>
+        /// Requests the third-party payment status of a credential during an assertion.
+        /// </summary>
+        /// <remarks>
+        /// If the credential was created with the third-party payment extension enabled, the authenticator
+        /// will return `true` for this extension in the assertion response. Otherwise, it will return `false`.
+        /// </remarks>
+        public void RequestThirdPartyPayment() =>
+            AddExtension(Fido2ExtensionKeys.ThirdPartyPayment, true);
+
+        /// <summary>
+        /// Specify that the YubiKey should return the "hmac-secret" with the
+        /// assertion. Provide the salt (or salts) to use, which must be exactly
+        /// 32 bytes long. Once this extension is added to this object, it is not
+        /// possible to remove it, although it is possible to "change" the salt
+        /// by calling this method again with a different salt.
+        /// </summary>
+        /// <remarks>
+        /// Because this extension is used more often, a dedicated method is
+        /// provided as a convenience. Note that the hmac-secret extension is
+        /// valid for both discoverable and non-discoverable credentials.
+        /// <para>
+        /// Note that there will be an hmac-secret only if the credential was made
+        /// with the "hmac-secret" extension. See
+        /// <see cref="MakeCredentialParameters.AddHmacSecretExtension"/>.
+        /// If the "hmac-secret" extension was not specified when making the
+        /// credential, then the YubiKey will simply not return anything. It is
+        /// not an error.
+        /// </para>
+        /// <para>
+        /// If you are getting assertions using
+        /// <see cref="Fido2Session.GetAssertions"/>, calling this method is
+        /// sufficient, the SDK will take care of everything else needed to get
+        /// the hmac-secret extension.
+        /// <code language="csharp">
+        ///        var gaParams = new GetAssertionParameters(relyingParty, clientDataHash);
+        ///        gaParams.RequestHmacSecretExtension(salt);
+        ///        IReadOnlyList&lt;GetAssertionData&gt; assertions = fido2.GetAssertions(gaParams);
+        /// </code>
+        /// </para>
+        /// <para>
+        /// But if you are getting assertions using the
+        /// <see cref="Commands.GetAssertionCommand"/>, then you must call
+        /// <see cref="EncodeHmacSecretExtension"/> with an appropriate instance
+        /// of <see cref="PinProtocols.PinUvAuthProtocolBase"/> for which the
+        /// <see cref="PinProtocols.PinUvAuthProtocolBase.Encapsulate"/> method
+        /// has been successfully called. If the HmacSecret extension is not
+        /// encoded, then it will not be sent to the YubiKey, and the value will
+        /// not be returned.
+        /// <code language="csharp">
+        ///        var pinProtocol = new PinUvAuthProtocolTwo();
+        ///
+        ///        var keyAgreeCmd = new new GetKeyAgreementCommand(PinProtocol.Protocol);
+        ///        GetKeyAgreementResponse keyAgreeRsp = Connection.SendCommand(keyAgreeCmd);
+        ///        CoseEcPublicKey authenticatorPublicKey = keyAgreeRsp.GetData();
+        ///
+        ///        pinProtocol.Encapsulate(authenticatorPublicKey);
+        ///
+        ///        var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(
+        ///            protocol, currentPin, PinUvAuthTokenPermissions.GetAssertion, null);
+        ///        GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
+        ///        ReadOnlyMemory&lt;byte&gt; pinToken = getTokenRsp.GetData();
+        ///        byte[] pinUvAuthParam = pinProtocol.AuthenticateUsingPinToken(
+        ///            pinToken, clientDataHash);
+        ///
+        ///        var gaParams = new GetAssertionParameters(relyingParty, clientDataHash);
+        ///        gaParams.Protocol = protocol.Protocol;
+        ///        gaParams.PinUvAuthParam = pinUvAuthParam;
+        ///        gaParams.AddOption("up", true);
+        ///        gaParams.RequestHmacSecretExtension(salt);
+        ///        gaParams.EncodeHmacSecretExtension(pinProtocol);
+        ///
+        ///        var cmd = new GetAssertionCommand(gaParams);
+        ///        GetAssertionResponse rsp = connection.SendCommand(cmd);
+        ///        GetAssertionData assertion = rsp.GetData();
+        /// </code>
+        /// </para>
+        /// <para>
+        /// The caller supplies a 32-byte salt which will be combined with the
+        /// YubiKey's secret stored with the credential to produce the output. A
+        /// second 32-byte salt is optional, but if provided, the YubiKey will
+        /// build a second result. The standard indicates that the second secret
+        /// is to be used when a secret rolls over.
+        /// </para>
+        /// <para>
+        /// The hmac-secret data will be returned with the assertion. The result
+        /// is returned in the
+        /// <see cref="GetAssertionData.AuthenticatorData"/> and can be
+        /// retrieved using
+        /// <see cref="AuthenticatorData.GetHmacSecretExtension"/>
+        /// </para>
+        /// <para>
+        /// References to the salt inputs will be stored in this object. If there
+        /// is already salt data in the object, this method will replace the
+        /// previous references with the new ones. It will also delete any
+        /// encoding (see <see cref="EncodeHmacSecretExtension"/>).
+        /// </para>
+        /// <para>
+        /// If an invalid salt is passed in, this method will throw an exception.
+        /// In the unlikely event that you are replacing a salt, and you catch
+        /// the exception and use the <c>GetAssertionParameters</c> object
+        /// anyway, the previous salt which was being replaced will be removed as
+        /// well. If <c>salt1</c> is invalid, both previous salts will be
+        /// removed. For example, if there is a valid "salt1" and "salt2" in the
+        /// object, and you call this method with a valid salt1 and an invalid
+        /// salt2, then the original salt1 would be replaced and the original
+        /// salt2 would be removed. If you catch the exception and get an
+        /// assertion with this parameter object, only one hmac-secret value
+        /// would be returned, one based on <c>salt1</c>.
+        /// </para>
+        /// </remarks>
+        /// <param name="salt1">
+        /// The salt the YubiKey will use in combination with the stored secret
+        /// to build the resulting value.
+        /// </param>
+        /// <param name="salt2">
+        /// An optional second salt the YubiKey can use in combination with the
+        /// stored secret to build a second value. If no arg is given, the
+        /// default of null will be used (the YubiKey will not build a second
+        /// result).
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// Either <c>salt1</c> is not exactly 32 bytes, or <c>salt2</c> is not
+        /// null and is not exactly 32 bytes.
+        /// </exception>
+        public void RequestHmacSecretExtension(
+            ReadOnlyMemory<byte> salt1, ReadOnlyMemory<byte>? salt2 = null)
+        {
+            if (salt1.Length != HmacSecret.HmacSecretSaltLength)
+            {
+                throw new ArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt1));
+            }
+
+            if (salt2.HasValue && salt2.Value.Length != HmacSecret.HmacSecretSaltLength)
+            {
+                throw new ArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt2));
+            }
+
+            _hmacSecretEncoding = null;
+            _salt1 = salt1;
+            _salt2 = salt2;
+        }
+
+        /// <summary>
+        /// Encode the "hmac-secret" extension. This call will be valid only if
+        /// the <see cref="RequestHmacSecretExtension"/> has been called, and the
+        /// <see cref="PinProtocols.PinUvAuthProtocolBase.Encapsulate"/> method
+        /// has been successfully called. The hmac-secret extension must be
+        /// encoded before calling the <see cref="Commands.GetAssertionCommand"/>.
+        /// &gt; [!NOTE]
+        /// &gt; If you use <see cref="Fido2Session.GetAssertions"/> to get any
+        /// &gt; assertion, you do not need to call this method.
+        /// </summary>
+        /// <remarks>
+        /// If you want the hmac-secret extension value returned along with the
+        /// assertion, then call the <c>RequestHmacSecretExtension</c> method
+        /// with a salt. If you will be using the <c>GetAssertionCommand</c> to
+        /// get the assertion, then you must call this method to encode the
+        /// extension. The <c>authProtocol</c> you supply must be an object for
+        /// which the
+        /// <see cref="PinProtocols.PinUvAuthProtocolBase.Encapsulate"/> method
+        /// has been called.
+        /// <para>
+        /// If the <c>RequestHmacSecretExtension</c> method has not been called,
+        /// this method will do nothing. If it has been called, but the
+        /// <c>authProtocol</c> has not been encapsulated, this method will throw
+        /// an exception.
+        /// </para>
+        /// <para>
+        /// The result of this method is stored inside this object. If there is
+        /// already an encoded hmac-secret extension in the object, this method
+        /// will build a new one and replace the old one. This might be necessary
+        /// if a new authenticator public key is retrieved since the last time
+        /// this method has been called.
+        /// </para>
+        /// <para>
+        /// See also the documentation for the
+        /// <see cref="RequestHmacSecretExtension"/> method, which also includes
+        /// some code samples.
+        /// </para>
+        /// </remarks>
+        /// <param name="authProtocol">
+        /// An instance of one of the subclasses of <c>PinUvAuthProtocolBase</c>,
+        /// for which the <c>Encapsulate</c> method has been called.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>authProtocol</c> arg is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The Encapsulate method for the <c>authProtocol</c> has not been
+        /// called.
+        /// </exception>
+        public void EncodeHmacSecretExtension(PinUvAuthProtocolBase authProtocol)
+        {
+            if (_salt1 is null)
+            {
+                return;
+            }
+
+            if (authProtocol is null)
+            {
+                throw new ArgumentNullException(nameof(authProtocol));
+                
+            }
+            
+            if (authProtocol.EncryptionKey is null || authProtocol.PlatformPublicKey is null)
+            {
+                throw new InvalidOperationException(ExceptionMessages.Fido2NotEncapsulated);
+            }
+
+            // The encoded hmac-secret request info is the following
+            //   A4
+            //      01 platform key-agree key
+            //      02 encrypted salt: either E(salt1) or E(salt1 || salt2)
+            //      03 authenticate (shared secret, encrypted salt)
+            //      04 pin protocol (an int, either 1 or 2)
+            // Begin by encrypting the salt or salts.
+            byte[] dataToEncrypt = new byte[2 * HmacSecret.HmacSecretSaltLength];
+            int dataToEncryptLength = HmacSecret.HmacSecretSaltLength;
+
+            _salt1.Value.CopyTo(dataToEncrypt.AsMemory());
+            if (_salt2 is not null)
+            {
+                _salt2.Value.CopyTo(dataToEncrypt.AsMemory()[HmacSecret.HmacSecretSaltLength..]);
+                dataToEncryptLength += HmacSecret.HmacSecretSaltLength;
+            }
+
+            byte[] encryptedSalt = authProtocol.Encrypt(dataToEncrypt, 0, dataToEncryptLength);
+            byte[] authenticatedSalt = authProtocol.Authenticate(encryptedSalt);
+
+            _hmacSecretEncoding = new CborMapWriter<int>()
+                .Entry(HmacSecret.TagKeyAgreeKey, authProtocol.PlatformPublicKey)
+                .Entry(HmacSecret.TagEncryptedSalt, encryptedSalt.AsMemory())
+                .Entry(HmacSecret.TagAuthenticatedSalt, authenticatedSalt.AsMemory())
+                .Entry(HmacSecret.TagPinProtocol, (int)authProtocol.Protocol)
                 .Encode();
         }
     }

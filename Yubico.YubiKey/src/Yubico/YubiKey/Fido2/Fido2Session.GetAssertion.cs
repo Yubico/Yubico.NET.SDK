@@ -127,7 +127,7 @@ namespace Yubico.YubiKey.Fido2
 
                 // If the hmac-secret extension was not requested, this call will
                 // do nothing.
-                parameters.EncodeHmacSecretExtension(AuthProtocol);
+                parameters.EncodeHmacSecretExtension(AuthProtocol); // TODO wtf, spaghetti code99
 
                 var response = RunGetAssertion(parameters, keyCollector, out var ctapStatus);
 

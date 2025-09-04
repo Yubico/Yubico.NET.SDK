@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The attestation statement format identifier.
         /// </summary>
-        public string Format { get; private set; }
+        public string Format { get; }
 
         /// <summary>
         /// The object that contains both the encoded authenticator data, which
@@ -59,25 +59,8 @@ namespace Yubico.YubiKey.Fido2
         /// Save the public key in this object and use it to verify assertions
         /// returned by calling <c>GetAssertion</c>.
         /// </remarks>
-        public AuthenticatorData AuthenticatorData { get; private set; }
-
-        /// <summary>
-        /// The list of extensions. This is an optional value and can be null.
-        /// </summary>
-        /// <remarks>
-        /// Each extension is a key/value pair. All keys are strings, but each
-        /// extension has its own definition of a value. It could be an int, or
-        /// it could be a map containing a string and a boolean,. It is the
-        /// caller's responsibility to decode the value.
-        /// <para>
-        /// For each value, the standard (or the vendor in the case of
-        /// vendor-defined extensions) will define the structure of the value.
-        /// From that structure the value can be decoded following CBOR rules.
-        /// The encoded value is what is stored in this dictionary.
-        /// </para>
-        /// </remarks>
-        public IReadOnlyDictionary<string, byte[]>? Extensions { get; private set; }
-
+        public AuthenticatorData AuthenticatorData { get; }
+        
         /// <summary>
         /// The algorithm used to create the attestation statement.
         /// </summary>
@@ -204,17 +187,19 @@ namespace Yubico.YubiKey.Fido2
             {
                 Format = map.ReadTextString(KeyFormat);
                 AuthenticatorData = new AuthenticatorData(map.ReadByteString(KeyAuthData));
-                if (!(AuthenticatorData.CredentialPublicKey is CoseEcPublicKey)
+                if (AuthenticatorData.CredentialPublicKey is not CoseEcPublicKey
                     || AuthenticatorData.CredentialPublicKey.Type != CoseKeyType.Ec2
                     || !map.Contains(KeyAttestationStatement)
                     || !ReadAttestation(map))
                 {
                     throw new Ctap2DataException(ExceptionMessages.Ctap2UnknownAttestationFormat);
                 }
+                
                 if (map.Contains(KeyEnterpriseAttestation))
                 {
                     EnterpriseAttestation = map.ReadBoolean(KeyEnterpriseAttestation);
                 }
+                
                 if (map.Contains(KeyLargeBlob))
                 {
                     LargeBlobKey = map.ReadByteString(KeyLargeBlob);

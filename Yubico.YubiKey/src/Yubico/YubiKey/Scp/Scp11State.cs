@@ -22,6 +22,7 @@ using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Scp.Commands;
+using Yubico.YubiKey.Utilities;
 
 namespace Yubico.YubiKey.Scp
 {
@@ -207,9 +208,9 @@ namespace Yubico.YubiKey.Scp
             // Yubikey Public Key + Host Private Key
             byte[] keyAgreementSecond = ecdhObject.ComputeSharedSecret(pkSdEcka, skOceEcka.D);
 
-            byte[] keyMaterial = MergeArrays(keyAgreementFirst, keyAgreementSecond);
-            byte[] keyAgreementData = MergeArrays(hostAuthenticateTlvEncodedData, epkSdEckaTlvEncodedData);
-            byte[] sharedInfo = MergeArrays(keyUsage, keyType, keyLen);
+            byte[] keyMaterial = keyAgreementFirst.Concat(keyAgreementSecond);
+            byte[] keyAgreementData = hostAuthenticateTlvEncodedData.Concat(epkSdEckaTlvEncodedData);
+            byte[] sharedInfo = keyUsage.Concat(keyType, keyLen);
 
             const int keyCount = 4;
             var keys = new List<byte[]>(keyCount);
@@ -348,22 +349,6 @@ namespace Yubico.YubiKey.Scp
                         $"Security operation failed. Status: {responseSecurityOperation.SW:X4}");
                 }
             }
-        }
-
-        /// <summary>
-        /// Combines multiple byte arrays into a single array.
-        /// </summary>
-        /// <param name="values">The arrays to merge.</param>
-        /// <returns>A new array containing all input arrays concatenated in sequence.</returns>
-        private static byte[] MergeArrays(params ReadOnlyMemory<byte>[] values)
-        {
-            using var memoryStream = new MemoryStream();
-            foreach (var bytes in values)
-            {
-                memoryStream.Write(bytes.Span.ToArray(), 0, bytes.Length);
-            }
-
-            return memoryStream.ToArray();
         }
     }
 }

@@ -498,7 +498,7 @@ namespace Yubico.YubiKey.Fido2
                 PinComplexityPolicyUrl = cborMap.Contains(KeyPinComplexityPolicyUrl)
                     ? cborMap.ReadByteString(KeyPinComplexityPolicyUrl)
                     : null;
-                
+
                 MaximumPinLength = cborMap.Contains(KeyMaxPinLength)
                     ? cborMap.ReadInt32(KeyMaxPinLength)
                     : 63;
@@ -573,13 +573,18 @@ namespace Yubico.YubiKey.Fido2
                 return null;
             }
 
+            if (persistentUvAuthToken.Length == 0)
+            {
+                return null;
+            }
+
             Span<byte> iv = stackalloc byte[16];
             Span<byte> ct = stackalloc byte[16];
             Span<byte> salt = stackalloc byte[32];
             EncIdentifier.Value.Span[..16].CopyTo(iv);
             EncIdentifier.Value.Span[16..].CopyTo(ct);
 
-            var key = HkdfUtilities.DeriveKey(persistentUvAuthToken.Span,  salt, "encIdentifier"u8,16);
+            var key = HkdfUtilities.DeriveKey(persistentUvAuthToken.Span, salt, "encIdentifier"u8, 16);
             var decryptedIdentifier = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);
             return decryptedIdentifier;
         }

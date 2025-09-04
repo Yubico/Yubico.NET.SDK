@@ -40,6 +40,8 @@ Bug Fixes:
 
 - The ``OtpSession`` logger initialization has been updated to use the correct logger. ([#275](https://github.com/Yubico/Yubico.NET.SDK/pull/275))
 
+- The detection logic for ``NativeShimsPath`` has been improved, ensuring that 32-bit processes on 64-bit systems are correctly mapped to the "x86" directory. ([#284](https://github.com/Yubico/Yubico.NET.SDK/pull/284))
+
 Documentation:
 
 - The [FIDO2 reset](xref:Fido2Reset) documentation has been updated to fix an error in the instructions and clarify timeout durations. ([#278](https://github.com/Yubico/Yubico.NET.SDK/pull/278))

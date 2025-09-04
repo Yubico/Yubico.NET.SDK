@@ -58,5 +58,22 @@ namespace Yubico.YubiKey.Fido2.Cbor
             Assert.Equal("foo", m.ReadTextString("b"));
             Assert.Equal("bar", m.ReadTextString("xyz"));
         }
+        
+        [Fact]
+        public void ToCbor_succeeds()
+        {
+            Assert.Equal(new byte[] { 0xf5 }, true.ToCbor());
+            Assert.Equal(new byte[] { 0xf4 }, false.ToCbor());
+            Assert.Equal(new byte[] { 0x64, 0x74, 0x65, 0x73, 0x74 }, "test".ToCbor());
+            Assert.Equal(new byte[] { 0x00 }, 0.ToCbor());
+            Assert.Equal(new byte[] { 0x01 }, 1.ToCbor());
+            Assert.Equal(new byte[] { 0x0a }, 10.ToCbor());
+            Assert.Equal(new byte[] { 0x17 }, 23.ToCbor());
+            Assert.Equal(new byte[] { 0x18, 0x18 }, 24.ToCbor());
+            Assert.Equal(new byte[] { 0x18, 0x19 }, 25.ToCbor());
+            Assert.Equal(new byte[] { 0x18, 0xfe }, 254.ToCbor());
+            Assert.Equal(new byte[] { 0x19, 0x01, 0x00 }, 256.ToCbor());
+            Assert.Equal(new byte[] { 0x1a, 0x00, 0x01, 0x11, 0x70 }, 70000.ToCbor());
+        }
     }
 }

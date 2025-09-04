@@ -77,20 +77,48 @@ public abstract class AuthenticatorOperationParameters<T> : ICborEncode
     /// <exception cref="ArgumentNullException">
     /// The <c>extensionKey</c> or <c>encodedValue</c> arg is null.
     /// </exception>
-    public void AddExtension<T2>(string extensionKey, T2 value) // breaking change, the old method required callers to convert to cbor themselves, this does it for them, so will result in double encoding
+    public void AddExtension<T2>(string extensionKey, T2 value) 
     { 
-        // might have to do an overload here to take in a custom item which says its cbor encoded or not
         Guard.IsNotNull(value, nameof(value));
 
         _extensions[extensionKey] = value switch
         {
-            byte[] byteArray => byteArray,
+            byte[] byteArray => byteArray, // Assume already encoded
+            ReadOnlyMemory<byte> romValue => romValue.ToArray(), // Assume already encoded
             bool boolValue => boolValue.ToCbor(),
             int intValue => intValue.ToCbor(),
+            byte byteValue => byteValue.ToCbor(),
             string stringValue => stringValue.ToCbor(),
             ICborEncode cborEncode => cborEncode.CborEncode(),
             _ => throw new ArgumentException(ExceptionMessages.Ctap2CborUnexpectedValue, nameof(value))
         };
+    }
+
+    /// <summary>
+    /// Add an entry to the extensions list.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Each extension is a key/value pair. For each extension the key is a
+    /// string (such as "credProtect" or "hmac-secret"). However, each value
+    /// is different. There will be a definition of the value that
+    /// goes with each key. It will be possible to encode that definition
+    /// using the rules of CBOR. The caller supplies the key and the encoded value.
+    /// </para>
+    /// </remarks>
+    /// <param name="extensionKey">
+    /// The key of key/value to add.
+    /// </param>
+    /// <param name="encodedBytes">
+    /// The CBOR-encoded value of key/value to add.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// The <c>extensionKey</c> or <c>encodedValue</c> arg is null.
+    /// </exception>
+    public void AddExtension(string extensionKey, byte[] encodedBytes)
+    { 
+        Guard.IsNotNull(encodedBytes, nameof(encodedBytes));
+        _extensions[extensionKey] = encodedBytes;
     }
 
     /// <summary>

@@ -21,9 +21,9 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Fido2
 {
     [Trait(TraitTypes.Category, TestCategories.Elevated)]
-    public class VerifyFpTests : SimpleIntegrationTestConnection
+    public class VerifyTests : SimpleIntegrationTestConnection
     {
-        public VerifyFpTests()
+        public VerifyTests()
             : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Fido2
                     Console.WriteLine("YubiKey requires touch");
                     break;
                 case KeyEntryRequest.VerifyFido2Pin:
-                    arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
+                    arg.SubmitValue(Encoding.UTF8.GetBytes("11234567"));
                     break;
                 case KeyEntryRequest.VerifyFido2Uv:
                     Console.WriteLine("Fingerprint requested.");

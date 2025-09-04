@@ -25,7 +25,8 @@ namespace Yubico.YubiKey.Fido2
     [Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
     public class MakeCredentialGetAssertionTests
     {
-        static readonly byte[] _clientDataHash = {
+        static readonly byte[] _clientDataHash =
+        {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
         };
@@ -37,9 +38,6 @@ namespace Yubico.YubiKey.Fido2
         public void MakeCredential_NonDiscoverable_GetAssertion_Succeeds()
         {
             IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
-
-            bool isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
-            Assert.True(isValid);
 
             using (var fido2 = new Fido2Session(yubiKeyDevice))
             {
@@ -61,18 +59,16 @@ namespace Yubico.YubiKey.Fido2
                     ClientDataHash = _clientDataHash
                 };
 
-                MakeCredentialData mcData = fido2.MakeCredential(mcParams);
-
+                var mcData = fido2.MakeCredential(mcParams);
                 Assert.True(mcData.VerifyAttestation(_clientDataHash));
 
                 // Call GetAssertion
                 var gaParams = new GetAssertionParameters(_rp, _clientDataHash);
-
+                gaParams.RequestThirdPartyPayment();
                 gaParams.AllowCredential(mcData.AuthenticatorData.CredentialId!);
 
-                IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
-
-                GetAssertionData assertion = Assert.Single(assertions);
+                var assertions = fido2.GetAssertions(gaParams);
+                var assertion = Assert.Single(assertions);
                 Assert.Equal(1, assertion.NumberOfCredentials);
                 // Assert.Equal() Failure: Values differ
                 // Expected: 1
@@ -138,7 +134,9 @@ namespace Yubico.YubiKey.Fido2
             {
                 // Set up a key collector
                 fido2.KeyCollector = KeyCollector;
-                int startCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!; //RemainingDiscoverableCredentials is NULL on my two keys I tried with (USBA 5.4.3 Keychain and Nano)
+                int startCount =
+                    (int)fido2.AuthenticatorInfo
+                        .RemainingDiscoverableCredentials!;
 
                 // Fido app was reset above, so set and confirm a pin (hardcoded in KeyCollector)
                 fido2.SetPin();
@@ -309,7 +307,8 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        private bool KeyCollector(KeyEntryData arg)
+        private bool KeyCollector(
+            KeyEntryData arg)
         {
             switch (arg.Request)
             {
@@ -318,7 +317,7 @@ namespace Yubico.YubiKey.Fido2
                     break;
                 case KeyEntryRequest.VerifyFido2Pin:
                 case KeyEntryRequest.SetFido2Pin:
-                    arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
+                    arg.SubmitValue("11234567"u8.ToArray());
                     break;
                 case KeyEntryRequest.VerifyFido2Uv:
                     Console.WriteLine("Bio touch needed.");

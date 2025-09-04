@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
@@ -83,12 +81,14 @@ namespace Yubico.YubiKey.Fido2
             Assert.True(credList.Count == count - 1);
         }
 
+        [SkippableFact(typeof(DeviceNotFoundException))]
+
         private bool LocalKeyCollector(KeyEntryData arg)
         {
             switch (arg.Request)
             {
                 case KeyEntryRequest.VerifyFido2Pin:
-                    arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
+                    arg.SubmitValue(Encoding.UTF8.GetBytes("11234567"));
                     break;
                 case KeyEntryRequest.VerifyFido2Uv:
                     Console.WriteLine("Fingerprint requested.");

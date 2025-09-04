@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using CommunityToolkit.Diagnostics;
 using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cose;
@@ -165,10 +166,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                         ExceptionMessages.InvalidCallOrder));
             }
 
-            if (authenticatorPublicKey is null)
-            {
-                throw new ArgumentNullException(nameof(authenticatorPublicKey));
-            }
+            Guard.IsNotNull(authenticatorPublicKey, nameof(authenticatorPublicKey));
 
             // Currently, only protocol 1 and 2 are supported (the only protocols
             // in the standard). Both of them generate a new P-256 EC key pair.
@@ -408,11 +406,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// </exception>
         public byte[] AuthenticateUsingPinToken(byte[] pinToken, byte[] message)
         {
-            if (pinToken is null)
-            {
-                throw new ArgumentNullException(nameof(pinToken));
-            }
-
+            Guard.IsNotNull(pinToken, nameof(pinToken));
             return AuthenticateUsingPinToken(pinToken, 0, pinToken.Length, message);
         }
 
@@ -452,20 +446,10 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// </exception>
         public virtual byte[] AuthenticateUsingPinToken(byte[] pinToken, int offset, int length, byte[] message)
         {
-            if (pinToken is null)
-            {
-                throw new ArgumentNullException(nameof(pinToken));
-            }
-            if (message is null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
+            Guard.IsNotNull(pinToken, nameof(pinToken));
+            Guard.IsNotNull(message, nameof(message));
 
             byte[] tokenKey = Decrypt(pinToken, offset, length);
-            #pragma warning disable IDE0059
-            // A411A7F94090A8DDA345865D34C8C1FE7DC22BECBDBB3AE02DA11E75F48B4ADA
-            string tokenBytesHex = BitConverter.ToString(tokenKey).Replace("-", string.Empty);
-            #pragma warning restore IDE0059
             try
             {
                 return Authenticate(tokenKey, message);

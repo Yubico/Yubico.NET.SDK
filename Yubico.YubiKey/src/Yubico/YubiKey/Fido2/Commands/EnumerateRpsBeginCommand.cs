@@ -54,15 +54,18 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// Constructs a new instance of <see cref="EnumerateRpsBeginCommand"/>.
         /// </summary>
         /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
+        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        ///     key.
         /// </param>
         /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
+        ///     The Auth Protocol used to build the Auth Token.
         /// </param>
+        /// <param name="decryptAuthToken">TODO</param>
         public EnumerateRpsBeginCommand(
-            ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
-            : base(new CredentialManagementCommand(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol))
+            ReadOnlyMemory<byte> pinUvAuthToken,
+            PinUvAuthProtocolBase authProtocol,
+            bool decryptAuthToken = true)
+            : base(new CredentialManagementCommand(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol, decryptAuthToken))
         {
         }
 

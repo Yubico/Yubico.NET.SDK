@@ -60,21 +60,23 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// Constructs a new instance of <see cref="EnumerateCredentialsBeginCommand"/>.
         /// </summary>
         /// <param name="relyingParty">
-        /// The relying party for which the credential enumeration is requested.
+        ///     The relying party for which the credential enumeration is requested.
         /// </param>
         /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
+        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        ///     key.
         /// </param>
         /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
+        ///     The Auth Protocol used to build the Auth Token.
         /// </param>
+        /// <param name="decryptAuthToken">TODO</param>
         public EnumerateCredentialsBeginCommand(
             RelyingParty relyingParty,
             ReadOnlyMemory<byte> pinUvAuthToken,
-            PinUvAuthProtocolBase authProtocol)
+            PinUvAuthProtocolBase authProtocol,
+            bool decryptAuthToken = true)
             : base(new CredentialManagementCommand(
-            SubCmdEnumerateCredsBegin, EncodeParams(relyingParty), pinUvAuthToken, authProtocol))
+            SubCmdEnumerateCredsBegin, EncodeParams(relyingParty), pinUvAuthToken, authProtocol, decryptAuthToken))
         {
         }
 

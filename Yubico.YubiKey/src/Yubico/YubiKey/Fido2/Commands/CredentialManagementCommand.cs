@@ -159,9 +159,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <param name="authProtocol">
         /// The Auth Protocol used to build the Auth Token.
         /// </param>
+        /// <param name="decryptAuthToken">TODO</param>
         public CredentialManagementCommand(
-            int subCommand, byte[]? subCommandParams,
-            ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
+            int subCommand,
+            byte[]? subCommandParams,
+            ReadOnlyMemory<byte> pinUvAuthToken,
+            PinUvAuthProtocolBase authProtocol,
+            bool decryptAuthToken = true)
         {
             if (authProtocol is null)
             {
@@ -183,8 +187,11 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             // The pinUvAuthToken is an encrypted value, so there's no need to
             // overwrite the array.
-            byte[] authParam = authProtocol.AuthenticateUsingPinToken(pinUvAuthToken.ToArray(), message);
-            PinUvAuthParam = new ReadOnlyMemory<byte>(authParam);
+            byte[] authParam = decryptAuthToken
+                ? authProtocol.AuthenticateUsingPinToken(pinUvAuthToken.ToArray(), message)
+                : authProtocol.Authenticate(pinUvAuthToken.ToArray(), message);
+
+            PinUvAuthParam = authParam;
             PinUvAuthProtocol = authProtocol.Protocol;
         }
 
@@ -194,10 +201,14 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <param name="subCommand">
         /// The byte representing the subcommand to execute.
         /// </param>
-        public CredentialManagementCommand(int subCommand)
+        /// <param name="protocol"></param>
+        public CredentialManagementCommand(
+            int subCommand,
+            PinUvAuthProtocol protocol = PinProtocols.PinUvAuthProtocol.ProtocolTwo)
         {
             SubCommand = subCommand;
             _encodedParams = null;
+            _protocol = (int)protocol;
             PinUvAuthProtocol = null;
             PinUvAuthParam = null;
         }
@@ -268,7 +279,9 @@ namespace Yubico.YubiKey.Fido2.Commands
                 throw new Ctap2DataException(ExceptionMessages.CborLengthMismatch);
             }
 
-            data[0] = isPreview ? CmdCredentialMgmtPreview : CmdAuthenticatorCredMgmt;
+            data[0] = isPreview
+                ? CmdCredentialMgmtPreview
+                : CmdAuthenticatorCredMgmt;
 
             return new CommandApdu()
             {

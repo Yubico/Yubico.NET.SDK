@@ -548,7 +548,7 @@ namespace Yubico.YubiKey.Fido2
                 throw new ArgumentNullException(nameof(authenticatorInfo));
             }
 
-            if (!authenticatorInfo.Extensions?.Contains<string>(Fido2ExtensionKeys.HmacSecret) == true)
+            if (!authenticatorInfo.Extensions?.Contains<string>(Fido2ExtensionKeys.HmacSecretMc) == true)
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
@@ -568,6 +568,39 @@ namespace Yubico.YubiKey.Fido2
             _salt2 = salt2;
         }
 
+        /// <summary>
+        /// Encode the "hmac-secret" extension. This should be called before issuing the
+        /// <see cref="Commands.MakeCredentialCommand"/>. The call will be valid only if
+        /// the <see cref="AddHmacSecretMcExtension"/> has been called, and the
+        /// <see cref="PinProtocols.PinUvAuthProtocolBase.Encapsulate"/> method
+        /// has been successfully called. 
+        /// &gt; [!NOTE]
+        /// &gt; If you use <see cref="Fido2Session.MakeCredential"/> you do not need to call this method.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// If the <c>AddHmacSecretMcExtension</c> method has not been called,
+        /// this method will do nothing. If it has been called, but the
+        /// <c>authProtocol</c> has not been encapsulated, this method will throw
+        /// an exception.
+        /// </para>
+        /// <para>
+        /// The result of this method is returned in the <see cref="MakeCredentialData"/>
+        /// <see cref="AuthenticatorData"/>
+        /// and can be retrieved using <see cref="AuthenticatorData.GetHmacSecretExtension"/>
+        /// </para>
+        /// </remarks>
+        /// <param name="authProtocol">
+        /// An instance of one of the subclasses of <c>PinUvAuthProtocolBase</c>,
+        /// for which the <c>Encapsulate</c> method has been called.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>authProtocol</c> arg is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The Encapsulate method for the <c>authProtocol</c> has not been
+        /// called.
+        /// </exception>
         public void EncodeHmacSecretExtension(PinUvAuthProtocolBase authProtocol)
         {
             if (_salt1 is null)
@@ -725,7 +758,6 @@ namespace Yubico.YubiKey.Fido2
             // The encoding is key/value where the key is "credProtect" and the
             // value is an unsigned int (major type 0). The only three possible
             // values are 1, 2, or 3, so the encoding is simply 0x01, 02,or 03.
-            // AddExtension(Fido2ExtensionKeys.CredProtect, new byte[] { (byte)credProtectPolicy });
             AddExtension(Fido2ExtensionKeys.CredProtect, (byte)credProtectPolicy);
         }
 
@@ -735,32 +767,6 @@ namespace Yubico.YubiKey.Fido2
             AuthenticatorInfo authenticatorInfo) =>
             AddCredProtectExtension(credProtectPolicy, true, authenticatorInfo);
 
-        // /// <summary>
-        // /// Add an entry to the list of options.
-        // /// </summary>
-        // /// <remarks>
-        // /// If the <c>Options</c> list already contains an entry with the given
-        // /// <c>optionKey</c>, this method will replace it.
-        // /// <para>
-        // /// Note that the standard specifies valid option keys. Currently they
-        // /// are "rk", "up", and "uv". This method will accept any key given and
-        // /// pass it to the YubiKey. If an invalid key is used, the YubiKey will
-        // /// return an error.
-        // /// </para>
-        // /// </remarks>
-        // /// <param name="optionKey">
-        // /// The option to add. This is the key of the option key/value pair.
-        // /// </param>
-        // /// <param name="optionValue">
-        // /// The value this option will possess.
-        // /// </param>
-        // /// <exception cref="ArgumentNullException">
-        // /// The <c>optionKey</c> arg is null.
-        // /// </exception>
-        // public void AddOption(string optionKey, bool optionValue) =>
-        //     _options =
-        //         ParameterHelpers.AddKeyValue<bool>(optionKey, optionValue, _options);
-
         /// <inheritdoc/>
         public override byte[] CborEncode() =>
             new CborMapWriter<int>()
@@ -769,8 +775,8 @@ namespace Yubico.YubiKey.Fido2
                 .Entry(TagUserEntity, UserEntity)
                 .Entry(TagAlgorithmsList, EncodeAlgorithms, this)
                 .OptionalEntry<IReadOnlyList<ICborEncode>>(TagExcludeList, CborHelpers.EncodeArrayOfObjects, ExcludeList)
-                .OptionalEntry(TagExtensions, ParameterHelpers.EncodeKeyValues, Extensions) // TODO verify
-                .OptionalEntry(TagOptions, ParameterHelpers.EncodeKeyValues, Options) // TODO verify
+                .OptionalEntry(TagExtensions, ParameterHelpers.EncodeKeyValues, Extensions)
+                .OptionalEntry(TagOptions, ParameterHelpers.EncodeKeyValues, Options)
                 .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
                 .OptionalEntry(TagProtocol, (int?)Protocol)
                 .OptionalEntry(TagEnterpriseAttestation, (int?)EnterpriseAttestation)

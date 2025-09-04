@@ -29,13 +29,10 @@ public class FidoSessionIntegrationTestBase : IDisposable
     };
 
     protected GetAssertionParameters GetAssertionParameters = new(Rp, ClientDataHash);
-
     public static Memory<byte> SimplePin => "123456"u8.ToArray();
     public static Memory<byte> ComplexPin => "11234567"u8.ToArray();
     public static Memory<byte> ComplexPin2 => "12234567"u8.ToArray();
-
     public static readonly byte[] ClientDataHash = "12345678123456781234567812345678"u8.ToArray();
-
     public static readonly RelyingParty Rp = new("demo.yubico.com")
     {
         Name = "demo.yubico.com"

@@ -246,65 +246,63 @@ namespace Yubico.YubiKey.Fido2
             bool isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
             Assert.True(isValid);
 
-            using (var fido2Session = new Fido2Session(yubiKeyDevice))
+            using var fido2Session = new Fido2Session(yubiKeyDevice);
+            // Set up a key collector
+            fido2Session.KeyCollector = KeyCollector;
+
+            // Fido app was reset above, so set and confirm a pin (hardcoded in KeyCollector)
+            fido2Session.SetPin();
+            fido2Session.VerifyPin();
+
+            // Note that Name is a required value
+            var user = new UserEntity(new byte[] { 1, 2, 3, 4 })
             {
-                // Set up a key collector
-                fido2Session.KeyCollector = KeyCollector;
+                Name = "Name",
+                DisplayName = "DisplayName",
+            };
 
-                // Fido app was reset above, so set and confirm a pin (hardcoded in KeyCollector)
-                fido2Session.SetPin();
-                fido2Session.VerifyPin();
+            var mcParams = new MakeCredentialParameters(_rp, user)
+            {
+                ClientDataHash = _clientDataHash
+            };
 
-                // Note that Name is a required value
-                var user = new UserEntity(new byte[] { 1, 2, 3, 4 })
-                {
-                    Name = "Name",
-                    DisplayName = "DisplayName",
-                };
+            var isExtensionSupported = fido2Session.AuthenticatorInfo.Extensions?.Contains("credProtect") ?? false;
 
-                var mcParams = new MakeCredentialParameters(_rp, user)
-                {
-                    ClientDataHash = _clientDataHash
-                };
+            // If this fails, the yubikey used doesn't have the proper support level expected for the test
+            // For expectExtensionSupported==true, the key must have FW 5.2.0 or later
+            // For expectExtensionSupported==false, the key must have FW before 5.2.0
+            Assert.Equal(expectExtensionSupported, isExtensionSupported);
 
-                var isExtensionSupported = fido2Session.AuthenticatorInfo.Extensions?.Contains("credProtect") ?? false;
-
-                // If this fails, the yubikey used doesn't have the proper support level expected for the test
-                // For expectExtensionSupported==true, the key must have FW 5.2.0 or later
-                // For expectExtensionSupported==false, the key must have FW before 5.2.0
-                Assert.Equal(expectExtensionSupported, isExtensionSupported);
-
-                // Act
-                try
-                {
-                    mcParams.AddCredProtectExtension(
-                        credProtectPolicy,
-                        enforceCredProtectPolicy,
-                        fido2Session.AuthenticatorInfo!);
-                }
-                catch (NotSupportedException)
-                {
-                    // This shouldn't fail for Optional, even if the key doesn't support the
-                    // extension, so ensure that's not what was set
-                    Assert.NotEqual(CredProtectPolicy.UserVerificationOptional, credProtectPolicy);
-                    Assert.False(isExtensionSupported);
-                    return;
-                }
-
-                // Verify
-                // The call to set the extension should always succeed under any of these conditions
-                Assert.True(
-                    !enforceCredProtectPolicy
-                    || isExtensionSupported
-                    || credProtectPolicy == CredProtectPolicy.UserVerificationOptional);
-
-                Assert.Equal(expectExtensionSupported, mcParams.Extensions?.ContainsKey("credProtect") ?? false);
-
-                MakeCredentialData mcData = fido2Session.MakeCredential(mcParams);
-
-                CredProtectPolicy cpPolicy = mcData.AuthenticatorData.GetCredProtectExtension();
-                Assert.Equal(expectExtensionSupported ? credProtectPolicy : CredProtectPolicy.None, cpPolicy);
+            // Act
+            try
+            {
+                mcParams.AddCredProtectExtension(
+                    credProtectPolicy,
+                    enforceCredProtectPolicy,
+                    fido2Session.AuthenticatorInfo!);
             }
+            catch (NotSupportedException)
+            {
+                // This shouldn't fail for Optional, even if the key doesn't support the
+                // extension, so ensure that's not what was set
+                Assert.NotEqual(CredProtectPolicy.UserVerificationOptional, credProtectPolicy);
+                Assert.False(isExtensionSupported);
+                return;
+            }
+
+            // Verify
+            // The call to set the extension should always succeed under any of these conditions
+            Assert.True(
+                !enforceCredProtectPolicy
+                || isExtensionSupported
+                || credProtectPolicy == CredProtectPolicy.UserVerificationOptional);
+
+            Assert.Equal(expectExtensionSupported, mcParams.Extensions?.ContainsKey("credProtect") ?? false);
+
+            MakeCredentialData mcData = fido2Session.MakeCredential(mcParams);
+
+            CredProtectPolicy cpPolicy = mcData.AuthenticatorData.GetCredProtectExtension();
+            Assert.Equal(expectExtensionSupported ? credProtectPolicy : CredProtectPolicy.None, cpPolicy);
         }
 
         private bool KeyCollector(

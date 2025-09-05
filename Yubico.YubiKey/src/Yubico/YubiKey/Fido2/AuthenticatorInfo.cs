@@ -325,7 +325,7 @@ namespace Yubico.YubiKey.Fido2
         /// If <c>false</c>, the authenticator is not enforcing a PIN complexity policy.
         /// If <c>null</c>, the authenticator does not support this feature.
         /// </summary>
-        public bool? PinComplexityPolicy { get; set; }
+        public bool? PinComplexityPolicy { get; }
 
         /// <summary>
         /// List of transports that support the reset command.

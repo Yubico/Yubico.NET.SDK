@@ -16,7 +16,7 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Formats.Cbor;
-using System.Linq;
+using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -227,12 +227,12 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public byte[] GetCredBlobExtension()
         {
-            if (Extensions?.TryGetValue(Fido2ExtensionKeys.CredBlob, out byte[] encodedValue) != true)
+            if (!TryGetExtensionData(Fido2ExtensionKeys.CredBlob, out var encodedData))
             {
                 return Array.Empty<byte>();
             }
 
-            var cborReader = new CborReader(encodedValue, CborConformanceMode.Ctap2Canonical);
+            var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
             return cborReader.ReadByteString();
 
         }
@@ -250,12 +250,12 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public bool GetThirdPartyPaymentExtension()
         {
-            if (Extensions?.TryGetValue(Fido2ExtensionKeys.ThirdPartyPayment, out byte[]? encodedValue) != true)
+            if (!TryGetExtensionData(Fido2ExtensionKeys.ThirdPartyPayment, out var encodedData))
             {
                 return false;
             }
 
-            var cborReader = new CborReader(encodedValue, CborConformanceMode.Ctap2Canonical);
+            var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
             return cborReader.ReadBoolean();
         }
 
@@ -276,12 +276,12 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public int? GetMinPinLengthExtension()
         {
-            if (Extensions?.TryGetValue(Fido2ExtensionKeys.MinPinLength, out byte[] encodedValue) != true)
+            if (!TryGetExtensionData(Fido2ExtensionKeys.MinPinLength, out var encodedData))
             {
                 return null;
             }
 
-            var cborReader = new CborReader(encodedValue, CborConformanceMode.Ctap2Canonical);
+            var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
             return cborReader.ReadInt32();
 
         }
@@ -303,7 +303,7 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// <para>
         /// The caller must supply the
-        /// <see cref="PinProtocols.PinUvAuthProtocolBase"/> used to create the
+        /// <see cref="PinUvAuthProtocolBase"/> used to create the
         /// <c>GetAssertion</c> parameters.
         /// </para>
         /// <para>
@@ -337,23 +337,20 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public byte[] GetHmacSecretExtension(PinUvAuthProtocolBase authProtocol)
         {
-            if (authProtocol is null)
+            Guard.IsNotNull(authProtocol, nameof(authProtocol));
+
+            if (!TryGetExtensionData(Fido2ExtensionKeys.HmacSecret, out var encodedData))
             {
-                throw new ArgumentNullException(nameof(authProtocol));
-            }
-            
-            if (Extensions?.TryGetValue(Fido2ExtensionKeys.HmacSecret, out byte[] hmacSecretBytes) != true)
-            {
-                return [];
+                return Array.Empty<byte>();
             }
 
-            bool hasHmacMcSecret = hmacSecretBytes?[0] == CborHelpers.True;
-            if (hasHmacMcSecret && Extensions?.TryGetValue(Fido2ExtensionKeys.HmacSecretMc, out hmacSecretBytes) != true)
+            bool hasHmacMcSecret = encodedData.Span[0] == CborHelpers.True;
+            if (hasHmacMcSecret && !TryGetExtensionData(Fido2ExtensionKeys.HmacSecretMc, out encodedData))
             {
-                return [];
+                return Array.Empty<byte>();
             }
-            
-            var cborReader = new CborReader(hmacSecretBytes, CborConformanceMode.Ctap2Canonical);
+
+            var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
             byte[] encryptedData = cborReader.ReadByteString();
 
             return authProtocol.Decrypt(encryptedData);
@@ -377,19 +374,39 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public CredProtectPolicy GetCredProtectExtension()
         {
-            if (Extensions?.TryGetValue(Fido2ExtensionKeys.CredProtect, out byte[] encodedValue) == true)
+            if (!TryGetExtensionData(Fido2ExtensionKeys.CredProtect, out var encodedValue))
             {
-                if (encodedValue.Length == 1 &&
-                    encodedValue[0] >= 1 &&
-                    encodedValue[0] <= 3)
-                {
-                    return (CredProtectPolicy)encodedValue[0];
-                }
+                return CredProtectPolicy.None;
+            }
 
+            if (encodedValue.Length != 1 ||
+                encodedValue.Span[0] < 1 ||
+                encodedValue.Span[0] > 3)
+            {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
             }
 
-            return CredProtectPolicy.None;
+            return (CredProtectPolicy)encodedValue.Span[0];
+        }
+
+        private bool TryGetExtensionData(string extensionKey, out Memory<byte> encodedValue)
+        {
+            Guard.IsNotNullOrEmpty(extensionKey, nameof(extensionKey));
+
+            if (Extensions is null)
+            {
+                encodedValue = Array.Empty<byte>();
+                return false;
+            }
+
+            if (Extensions.TryGetValue(extensionKey, out byte[] value) != true)
+            {
+                encodedValue = Array.Empty<byte>();
+                return false;
+            }
+
+            encodedValue = value;
+            return true;
         }
     }
 }

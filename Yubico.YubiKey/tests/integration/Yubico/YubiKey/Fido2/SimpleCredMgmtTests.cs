@@ -80,9 +80,7 @@ namespace Yubico.YubiKey.Fido2
             Assert.NotNull(credList);
             Assert.True(credList.Count == count - 1);
         }
-
-        [SkippableFact(typeof(DeviceNotFoundException))]
-
+        
         private bool LocalKeyCollector(KeyEntryData arg)
         {
             switch (arg.Request)

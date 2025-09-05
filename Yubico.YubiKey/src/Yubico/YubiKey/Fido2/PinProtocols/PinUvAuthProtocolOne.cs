@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Cryptography;
 
 
@@ -28,10 +29,8 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
     {
         private const int KeyLength = 32;
         private const int BlockSize = 16;
-
         private bool _disposed;
-
-        private readonly byte[] _keyData = new byte[KeyLength];
+        private readonly byte[] _aesEncKey = new byte[KeyLength];
 
         /// <summary>
         /// Constructs a new instance of <see cref="PinUvAuthProtocolOne"/>.
@@ -44,27 +43,8 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <inheritdoc />
         public override byte[] Encrypt(byte[] plaintext, int offset, int length)
         {
-            if (EncryptionKey is null)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidCallOrder));
-            }
-
-            if (plaintext is null)
-            {
-                throw new ArgumentNullException(nameof(plaintext));
-            }
+            Guard.IsNotNull(plaintext, nameof(plaintext));
             
-            if (length < BlockSize || length % BlockSize != 0 || offset + length > plaintext.Length)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectPlaintextLength));
-            }
-
             return Encrypt(plaintext.AsMemory(offset, length));
         }
 
@@ -92,7 +72,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
             aes.IV = new byte[BlockSize];
-            aes.Key = _keyData;
+            aes.Key = _aesEncKey;
 
             using var aesTransform = aes.CreateEncryptor();
             byte[] encryptedData = new byte[length];
@@ -104,26 +84,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <inheritdoc />
         public override byte[] Decrypt(byte[] ciphertext, int offset, int length)
         {
-            if (EncryptionKey is null)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidCallOrder));
-            }
-
-            if (ciphertext is null)
-            {
-                throw new ArgumentNullException(nameof(ciphertext));
-            }
-            
-            if (length == 0 || length % BlockSize != 0 || offset + length > ciphertext.Length)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectCiphertextLength));
-            }
+            Guard.IsNotNull(ciphertext, nameof(ciphertext));
 
             return Decrypt(ciphertext.AsMemory(offset, length));
         }
@@ -138,6 +99,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
+
             int length = ciphertext.Length;
             if (length == 0 || length % BlockSize != 0)
             {
@@ -151,11 +113,12 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
             aes.IV = new byte[BlockSize];
-            aes.Key = _keyData;
+            aes.Key = _aesEncKey;
 
             using var aesTransform = aes.CreateDecryptor();
             byte[] decryptedData = new byte[length];
-            _ = aesTransform.TransformBlock(ciphertext.ToArray(), 0, length, decryptedData, 0);
+            _ = aesTransform.TransformBlock(
+                ciphertext.ToArray(), 0, length, decryptedData, 0);
 
             return decryptedData;
         }
@@ -171,29 +134,27 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                         ExceptionMessages.InvalidCallOrder));
             }
 
-            if (message is null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
+            Guard.IsNotNull(message, nameof(message));
 
-            return Authenticate(_keyData, message);
+            return Authenticate(_aesEncKey, message);
         }
 
         /// <inheritdoc />
         public override byte[] Authenticate(byte[] keyData, byte[] message)
         {
+            Guard.IsNotNull(keyData, nameof(keyData));
+            Guard.HasSizeEqualTo(keyData, KeyLength, nameof(keyData));
+            
             using var hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
+            
             hmacSha256.Key = keyData;
-            return hmacSha256.ComputeHash(message).AsMemory(0, 16).ToArray();
+            return hmacSha256.ComputeHash(message).AsSpan(0, 16).ToArray();
         }
 
         /// <inheritdoc />
         protected override void DeriveKeys(byte[] sharedSecret)
         {
-            if (sharedSecret is null)
-            {
-                throw new ArgumentNullException(nameof(sharedSecret));
-            }
+            Guard.IsNotNull(sharedSecret, nameof(sharedSecret));
 
             using var sha256 = CryptographyProviders.Sha256Creator();
             _ = sha256.TransformFinalBlock(sharedSecret, 0, sharedSecret.Length);
@@ -205,9 +166,9 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                         ExceptionMessages.CryptographyProviderFailure));
             }
 
-            Array.Copy(sha256.Hash, _keyData, KeyLength);
-            EncryptionKey = new ReadOnlyMemory<byte>(_keyData);
-            AuthenticationKey = new ReadOnlyMemory<byte>(_keyData);
+            Array.Copy(sha256.Hash, _aesEncKey, KeyLength);
+            EncryptionKey = _aesEncKey;
+            AuthenticationKey = _aesEncKey;
         }
 
         /// <summary>
@@ -219,7 +180,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 if (disposing)
                 {
-                    CryptographicOperations.ZeroMemory(_keyData);
+                    CryptographicOperations.ZeroMemory(_aesEncKey);
                 }
 
                 _disposed = true;

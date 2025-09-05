@@ -14,9 +14,9 @@
 
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Cryptography;
 
 
@@ -35,9 +35,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         private const byte TrailingByte = 0x01;
         private const string InfoAes = "CTAP2 AES key";
         private const string InfoHmac = "CTAP2 HMAC key";
-
         private bool _disposed;
-
         private readonly byte[] _aesEncKey = new byte[KeyLength];
         private readonly byte[] _hmacAuthKey = new byte[KeyLength];
 
@@ -52,18 +50,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <inheritdoc />
         public override byte[] Encrypt(byte[] plaintext, int offset, int length)
         {
-            if (plaintext is null)
-            {
-                throw new ArgumentNullException(nameof(plaintext));
-            }
-            
-            if (plaintext.Length == 0 || plaintext.Length % BlockSize != 0 || offset + length > plaintext.Length)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectPlaintextLength));
-            }
+            Guard.IsNotNull(plaintext, nameof(plaintext));
             
             return Encrypt(plaintext.AsMemory(offset, length));
         }
@@ -78,7 +65,6 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
-            
             
             if (plaintext.Length == 0 || plaintext.Length % BlockSize != 0)
             {
@@ -109,33 +95,22 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <inheritdoc />
         public override byte[] Decrypt(byte[] ciphertext, int offset, int length)
         {
-            if (ciphertext is null)
-            {
-                throw new ArgumentNullException(nameof(ciphertext));
-            }
-
-            if (length < 2 * BlockSize || length % BlockSize != 0 || offset + length > ciphertext.Length)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectCiphertextLength));
-            }
+            Guard.IsNotNull(ciphertext, nameof(ciphertext));
 
             return Decrypt(ciphertext.AsMemory(offset, length));
         }
         
+        /// <inheritdoc />
         public override byte[] Decrypt(ReadOnlyMemory<byte> ciphertext)
         {
-            bool encKeyNotSet = _aesEncKey.Length != KeyLength || _aesEncKey.All(b => b == 0x00);
-            if (encKeyNotSet)
+            if (EncryptionKey is null)
             {
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
-
+            
             // The first BlockSize bytes are the IV, so there should be at least
             // 2 blocks.
             if (ciphertext.Length < 2 * BlockSize || ciphertext.Length % BlockSize != 0)
@@ -174,10 +149,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                         ExceptionMessages.InvalidCallOrder));
             }
 
-            if (message is null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
+            Guard.IsNotNull(message, nameof(message));
 
             return Authenticate(_hmacAuthKey, message);
         }
@@ -185,6 +157,9 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <inheritdoc />
         public override byte[] Authenticate(byte[] keyData, byte[] message)
         {
+            Guard.IsNotNull(message, nameof(message));
+            Guard.IsNotNull(keyData, nameof(keyData));
+            
             using var hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
             hmacSha256.Key = keyData;
             return hmacSha256.ComputeHash(message);
@@ -193,10 +168,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <inheritdoc />
         protected override void DeriveKeys(byte[] sharedSecret)
         {
-            if (sharedSecret is null)
-            {
-                throw new ArgumentNullException(nameof(sharedSecret));
-            }
+            Guard.IsNotNull(sharedSecret, nameof(sharedSecret));
 
             // Derive 64 bytes.
             // Call HKDF-SHA-256 twice, each time producing 32 bytes.

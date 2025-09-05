@@ -27,8 +27,8 @@ namespace Yubico.YubiKey.Fido2;
 /// <seealso cref="MakeCredentialParameters"/>
 /// <seealso cref="GetAssertionParameters"/>
 /// </summary>
-public abstract class AuthenticatorOperationParameters<T> : ICborEncode 
-    where T : AuthenticatorOperationParameters<T>
+public abstract class AuthenticatorOperationParameters<TOperationParameters> : ICborEncode 
+    where TOperationParameters : AuthenticatorOperationParameters<TOperationParameters>
 {
     private readonly Dictionary<string, byte[]> _extensions = [];
     private readonly Dictionary<string, bool> _options = [];
@@ -77,7 +77,7 @@ public abstract class AuthenticatorOperationParameters<T> : ICborEncode
     /// <exception cref="ArgumentNullException">
     /// The <c>extensionKey</c> or <c>encodedValue</c> arg is null.
     /// </exception>
-    public void AddExtension<T2>(string extensionKey, T2 value) 
+    public void AddExtension<TValue>(string extensionKey, TValue value) 
     { 
         Guard.IsNotNull(value, nameof(value));
 

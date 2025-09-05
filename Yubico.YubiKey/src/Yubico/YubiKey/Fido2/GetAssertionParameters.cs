@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
@@ -181,7 +182,6 @@ namespace Yubico.YubiKey.Fido2
                 .OptionalEntry(TagProtocol, (int?)Protocol)
                 .Encode();
         }
-
 
         /// <summary>
         /// Specify that the YubiKey should return the credBlob with the
@@ -410,11 +410,7 @@ namespace Yubico.YubiKey.Fido2
                 return;
             }
 
-            if (authProtocol is null)
-            {
-                throw new ArgumentNullException(nameof(authProtocol));
-                
-            }
+            Guard.IsNotNull(authProtocol, nameof(authProtocol));
             
             if (authProtocol.EncryptionKey is null || authProtocol.PlatformPublicKey is null)
             {

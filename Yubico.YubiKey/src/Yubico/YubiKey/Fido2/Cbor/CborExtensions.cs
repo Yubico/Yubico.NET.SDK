@@ -17,10 +17,10 @@ using System.Formats.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Cbor;
 
-public static class CborExtensions
+internal static class CborExtensions
 {
-    public readonly static byte[] CborTrue = [0xF5];
-    public readonly static byte[] CborFalse = [0xF4];
+    public readonly static byte[] CborTrue = [CborHelpers.True];
+    public readonly static byte[] CborFalse = [CborHelpers.False];
         
     public static byte[] ToCbor(this bool value) => value ? CborTrue : CborFalse;
 

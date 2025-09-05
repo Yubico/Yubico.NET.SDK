@@ -23,6 +23,9 @@ namespace Yubico.YubiKey.Fido2.Cbor
     /// </summary>
     internal static class CborHelpers
     {
+        public const byte True = 0xF5;
+        public const byte False = 0xF4;
+        
         // Use this delegate to pass in an encoding function (rather than the
         // entire object) for WriteEncodedValue.
         // If there is nothing to encode (e.g. localData is null), then return an

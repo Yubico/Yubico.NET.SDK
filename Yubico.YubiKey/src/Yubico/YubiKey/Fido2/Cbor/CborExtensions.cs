@@ -58,19 +58,4 @@ internal static class CborExtensions
         cbor.WriteByteString(value);
         return cbor.Encode();
     }
-    
-    [CLSCompliant(false)]
-    public static byte[] ToCbor(this ulong value)
-    {
-        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-        cbor.WriteUInt64(value);
-        return cbor.Encode();
-    }
-    [CLSCompliant(false)]
-    public static byte[] ToCbor(this uint value)
-    {
-        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-        cbor.WriteUInt32(value);
-        return cbor.Encode();
-    }
 }

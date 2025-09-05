@@ -94,20 +94,6 @@ public class CborExtensionsTests
         Assert.Equal(expected, result);
     }
 
-    [Theory]
-    [InlineData(0U, new byte[] { 0x00 })]
-    [InlineData(1000U, new byte[] { 0x19, 0x03, 0xE8 })]
-    [InlineData(uint.MaxValue, new byte[] { 0x1A, 0xFF, 0xFF, 0xFF, 0xFF })]
-    public void ToCbor_UInt_ReturnsCorrectEncoding(
-        uint input,
-        byte[] expected)
-    {
-        // Act
-        var result = input.ToCbor();
-
-        // Assert
-        Assert.Equal(expected, result);
-    }
 
     [Theory]
     [InlineData(0L, new byte[] { 0x00 })]
@@ -116,20 +102,6 @@ public class CborExtensionsTests
     [InlineData(long.MaxValue, new byte[] { 0x1B, 0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF })]
     public void ToCbor_Long_ReturnsCorrectEncoding(
         long input,
-        byte[] expected)
-    {
-        // Act
-        var result = input.ToCbor();
-
-        // Assert
-        Assert.Equal(expected, result);
-    }
-
-    [Theory]
-    [InlineData(0UL, new byte[] { 0x00 })]
-    [InlineData(18446744073709551615UL, new byte[] { 0x1B, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF })]
-    public void ToCbor_ULong_ReturnsCorrectEncoding(
-        ulong input,
         byte[] expected)
     {
         // Act

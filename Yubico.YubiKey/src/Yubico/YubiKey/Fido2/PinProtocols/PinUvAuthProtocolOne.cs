@@ -141,22 +141,30 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
 
         /// <inheritdoc />
         public override byte[] Authenticate(byte[] keyData, byte[] message)
+        => Authenticate(keyData.AsMemory(), message.AsMemory());
+
+        /// <inheritdoc/>
+        public override byte[] Authenticate(ReadOnlyMemory<byte> keyData, ReadOnlyMemory<byte> message)
         {
             Guard.IsNotNull(keyData, nameof(keyData));
             Guard.HasSizeEqualTo(keyData, KeyLength, nameof(keyData));
+            byte[] keyBytes = keyData.ToArray();
+            byte[] messageBytes = message.ToArray();
             
             using var hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
-            
-            hmacSha256.Key = keyData;
-            return hmacSha256.ComputeHash(message).AsSpan(0, 16).ToArray();
+
+            hmacSha256.Key = keyBytes;
+            return hmacSha256.ComputeHash(messageBytes).AsSpan(0, 16).ToArray();
         }
 
         /// <inheritdoc />
         protected override void DeriveKeys(byte[] sharedSecret)
         {
             Guard.IsNotNull(sharedSecret, nameof(sharedSecret));
+            Guard.IsEqualTo(sharedSecret.Length, KeyLength, nameof(sharedSecret.Length));
 
             using var sha256 = CryptographyProviders.Sha256Creator();
+
             _ = sha256.TransformFinalBlock(sharedSecret, 0, sharedSecret.Length);
             if (sha256.Hash.Length != KeyLength)
             {
@@ -167,6 +175,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             }
 
             Array.Copy(sha256.Hash, _aesEncKey, KeyLength);
+
             EncryptionKey = _aesEncKey;
             AuthenticationKey = _aesEncKey;
         }

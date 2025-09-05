@@ -110,7 +110,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
-            
+
             // The first BlockSize bytes are the IV, so there should be at least
             // 2 blocks.
             if (ciphertext.Length < 2 * BlockSize || ciphertext.Length % BlockSize != 0)
@@ -156,19 +156,28 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
 
         /// <inheritdoc />
         public override byte[] Authenticate(byte[] keyData, byte[] message)
+        => Authenticate(keyData.AsMemory(), message.AsMemory());
+
+        /// <inheritdoc/>
+        public override byte[] Authenticate(ReadOnlyMemory<byte> keyData, ReadOnlyMemory<byte> message)
         {
             Guard.IsNotNull(message, nameof(message));
             Guard.IsNotNull(keyData, nameof(keyData));
+
+            byte[] keyBytes = keyData.ToArray();
+            byte[] messageBytes = message.ToArray();
             
             using var hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
-            hmacSha256.Key = keyData;
-            return hmacSha256.ComputeHash(message);
+
+            hmacSha256.Key = keyBytes;
+            return hmacSha256.ComputeHash(messageBytes);
         }
 
         /// <inheritdoc />
         protected override void DeriveKeys(byte[] sharedSecret)
         {
             Guard.IsNotNull(sharedSecret, nameof(sharedSecret));
+            Guard.IsEqualTo(sharedSecret.Length, KeyLength, nameof(sharedSecret.Length));
 
             // Derive 64 bytes.
             // Call HKDF-SHA-256 twice, each time producing 32 bytes.
@@ -191,12 +200,13 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             //  with the "AES" info to get the _aesKey.
 
             byte[] prk = Array.Empty<byte>();
+            byte[] salt = new byte[SaltLength];
 
             try
             {
                 // Extract.
-                byte[] salt = new byte[SaltLength];
                 using var hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
+
                 hmacSha256.Key = salt;
                 prk = hmacSha256.ComputeHash(sharedSecret);
 

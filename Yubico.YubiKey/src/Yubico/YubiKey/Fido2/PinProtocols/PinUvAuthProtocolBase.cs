@@ -373,13 +373,33 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
 
         /// <summary>
         /// Returns the result of computing HMAC-SHA-256 on the given message
+        /// using the provided <c>keyData</c>. With protocol 1, the result is the
+        /// first 16 bytes of the HMAC, and with protocol 2 it is the entire
+        /// 32-byte result.
+        /// </summary>
+        /// <param name="keyData">
+        /// The key to use to authenticate.
+        /// </param>
+        /// <param name="message">
+        /// The data to be authenticated.
+        /// </param>
+        /// <returns>
+        /// A new byte array containing the authentication result.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>keyData</c> or <c>message</c> argument is null.
+        /// </exception>
+        public abstract byte[] Authenticate(ReadOnlyMemory<byte> keyData, ReadOnlyMemory<byte> message);
+
+        /// <summary>
+        /// Returns the result of computing HMAC-SHA-256 on the given message
         /// using the <c>pinToken</c> as the key. With protocol 1, the result is
         /// the first 16 bytes of the HMAC, and with protocol 2 it is the entire
         /// 32-byte result.
         /// </summary>
         /// <remarks>
         /// It is possible to obtain the PIN token by calling the command
-        /// <see cref="Yubico.YubiKey.Fido2.Commands.GetPinTokenCommand"/>. The
+        /// <see cref="Commands.GetPinTokenCommand"/>. The
         /// YubiKey will return the PIN token encrypted using the shared secret.
         /// <para>
         /// Pass that encrypted PIN token to this method as the first argument.
@@ -405,10 +425,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <see cref="Encapsulate"/> method has not been called.
         /// </exception>
         public byte[] AuthenticateUsingPinToken(byte[] pinToken, byte[] message)
-        {
-            Guard.IsNotNull(pinToken, nameof(pinToken));
-            return AuthenticateUsingPinToken(pinToken, 0, pinToken.Length, message);
-        }
+        => AuthenticateUsingPinToken(pinToken.AsMemory(), message.AsMemory());
 
         /// <summary>
         /// Returns the result of computing HMAC-SHA-256 on the given message
@@ -445,11 +462,47 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <see cref="Encapsulate"/> method has not been called.
         /// </exception>
         public virtual byte[] AuthenticateUsingPinToken(byte[] pinToken, int offset, int length, byte[] message)
+        => AuthenticateUsingPinToken(pinToken.AsMemory(offset, length), message.AsMemory());
+
+        /// <summary>
+        /// Returns the result of computing HMAC-SHA-256 on the given message
+        /// using the <c>pinToken</c> as the key. With protocol 1, the result is
+        /// the first 16 bytes of the HMAC, and with protocol 2 it is the entire
+        /// 32-byte result.
+        /// </summary>
+        /// <remarks>
+        /// It is possible to obtain the PIN token by calling the command
+        /// <see cref="Commands.GetPinTokenCommand"/>. The
+        /// YubiKey will return the PIN token encrypted using the shared secret.
+        /// <para>
+        /// Pass that encrypted PIN token to this method as the first argument.
+        /// This method will decrypt the PIN token using the <c>EncryptionKey</c>
+        /// and then perform the authentication on the <c>message</c>.
+        /// </para>
+        /// </remarks>
+        /// <param name="pinToken">
+        /// The PIN token returned by the YubiKey. This is the encrypted value,
+        /// do not decrypt it.
+        /// </param>
+        /// <param name="message">
+        /// The data to be authenticated.
+        /// </param>
+        /// <returns>
+        /// A new byte array containing the authentication result.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>pinToken</c> or <c>message</c> argument is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The object has been created or initialized, but the
+        /// <see cref="Encapsulate"/> method has not been called.
+        /// </exception>
+        public byte[] AuthenticateUsingPinToken(ReadOnlyMemory<byte> pinToken, ReadOnlyMemory<byte> message)
         {
             Guard.IsNotNull(pinToken, nameof(pinToken));
             Guard.IsNotNull(message, nameof(message));
 
-            byte[] tokenKey = Decrypt(pinToken, offset, length);
+            byte[] tokenKey = Decrypt(pinToken);
             try
             {
                 return Authenticate(tokenKey, message);

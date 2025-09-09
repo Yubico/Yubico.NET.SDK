@@ -346,12 +346,13 @@ namespace Yubico.YubiKey.Fido2
         /// </param>
         public void AddMinPinLengthExtension(AuthenticatorInfo authenticatorInfo)
         {
+            Guard.IsNotNull(authenticatorInfo);
             if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.MinPinLength))
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
 
-            AddExtension(Fido2ExtensionKeys.MinPinLength, true); // verify
+            AddExtension(Fido2ExtensionKeys.MinPinLength, true);
         }
 
         /// <summary>

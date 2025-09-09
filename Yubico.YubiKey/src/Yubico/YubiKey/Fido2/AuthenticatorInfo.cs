@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
@@ -586,6 +587,8 @@ namespace Yubico.YubiKey.Fido2
 
             var key = HkdfUtilities.DeriveKey(persistentUvAuthToken.Span, salt, "encIdentifier"u8, 16);
             var decryptedIdentifier = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);
+            CryptographicOperations.ZeroMemory(key.Span);
+
             return decryptedIdentifier;
         }
 

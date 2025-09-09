@@ -30,8 +30,8 @@ internal static class HkdfUtilities
     /// <param name="contextInfo">Optional context information (info).</param>
     /// <param name="length">The desired length of the output key material (OKM).
     ///     If not specified, defaults to 32 bytes.</param>
-    /// <returns>A ReadOnlyMemory&lt;byte&gt; containing the derived key.</returns>
-    public static ReadOnlyMemory<byte> DeriveKey(
+    /// <returns>A Memory&lt;byte&gt; containing the derived key.</returns>
+    public static Memory<byte> DeriveKey(
         ReadOnlySpan<byte> inputKeyMaterial,
         ReadOnlySpan<byte> salt = default,
         ReadOnlySpan<byte> contextInfo = default,
@@ -58,7 +58,7 @@ internal static class HkdfUtilities
         return hmac.ComputeHash(inputKeyMaterial.ToArray());
     }
 
-    private static ReadOnlyMemory<byte> HkdfExpand(
+    private static Memory<byte> HkdfExpand(
         ReadOnlyMemory<byte> pseudoRandomKey,
         ReadOnlySpan<byte> contextInfo,
         int length)

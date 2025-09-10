@@ -136,7 +136,7 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         Assert.True(remainingCredentialCount2 > 0);
 
         // Trigger internal PersistenUvAuthToken reset
-        Session.TryChangePin(ComplexPin, ComplexPin);
+        Session.TryChangePin(TestPinDefault, TestPinDefault);
 
         // Should require pin
         var (_, remainingCredentialCount3) = Session.GetCredentialMetadata();
@@ -350,7 +350,7 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         PinUvAuthProtocolTwo protocol,
         PinUvAuthTokenPermissions permissions)
     {
-        var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, ComplexPin, permissions, null);
+        var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, TestPinDefault, permissions, null);
         var getTokenRsp = connection.SendCommand(getTokenCmd);
         Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
         return getTokenRsp.GetData();

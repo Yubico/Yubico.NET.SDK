@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Numerics;
 using Xunit;
 using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.TestUtilities;
@@ -29,9 +30,9 @@ public class FidoSessionIntegrationTestBase : IDisposable
     };
 
     protected GetAssertionParameters GetAssertionParameters = new(Rp, ClientDataHash);
-    public static Memory<byte> SimplePin => "123456"u8.ToArray();
-    public static Memory<byte> ComplexPin => "11234567"u8.ToArray();
-    public static Memory<byte> ComplexPin2 => "12234567"u8.ToArray();
+    public static Memory<byte> TestPinSimple => "123456"u8.ToArray();
+    public static Memory<byte> TestPinDefault => "11234567"u8.ToArray();
+    public static Memory<byte> TestPin2 => "12234567"u8.ToArray();
     public static readonly byte[] ClientDataHash = "12345678123456781234567812345678"u8.ToArray();
     public static readonly RelyingParty Rp = new("demo.yubico.com")
     {
@@ -63,8 +64,8 @@ public class FidoSessionIntegrationTestBase : IDisposable
 
     protected FidoSessionIntegrationTestBase()
     {
-        KeyCollector = new TestKeyCollector(UseComplexCreds);
-        using var session = GetSessionInternal(Device, UseComplexCreds);
+        KeyCollector = new TestKeyCollector();
+        using var session = GetSessionInternal(Device);
         
         MakeCredentialParameters.AddOption(AuthenticatorOptions.rk, true);
 
@@ -77,7 +78,7 @@ public class FidoSessionIntegrationTestBase : IDisposable
     }
 
     protected Fido2Session GetSession(
-        ReadOnlyMemory<byte>? ppuat = null) => GetSessionInternal(Device, UseComplexCreds, ppuat);
+        ReadOnlyMemory<byte>? ppuat = null) => GetSessionInternal(Device, ppuat);
 
     public void Dispose()
     {
@@ -104,7 +105,6 @@ public class FidoSessionIntegrationTestBase : IDisposable
 
     private Fido2Session GetSessionInternal(
         IYubiKeyDevice testDevice,
-        bool useComplexCreds,
         ReadOnlyMemory<byte>? ppuat = null,
         Scp03KeyParameters? keyParameters = null)
     {
@@ -119,7 +119,7 @@ public class FidoSessionIntegrationTestBase : IDisposable
 
             if (session.AuthenticatorInfo.ForcePinChange == true)
             {
-                session.TrySetPin(useComplexCreds ? ComplexPin : SimplePin);
+                session.TrySetPin(TestPinDefault);
             }
 
             session.KeyCollector = KeyCollector.HandleRequest;

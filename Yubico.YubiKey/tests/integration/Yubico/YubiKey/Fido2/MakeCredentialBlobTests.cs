@@ -22,74 +22,52 @@ namespace Yubico.YubiKey.Fido2
 {
     public class MakeCredentialBlobTests
     {
+
         [Fact]
         [Trait(TraitTypes.Category, TestCategories.Elevated)]
         public void CredBlobExtension_Correct()
         {
-            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
-            IYubiKeyConnection connection = yubiKeyDevice.Connect(YubiKeyApplication.Fido2);
+            var yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
+            var connection = yubiKeyDevice.Connect(YubiKeyApplication.Fido2);
 
             var getInfoCmd = new GetInfoCommand();
-            GetInfoResponse getInfoRsp = connection.SendCommand(getInfoCmd);
+            var getInfoRsp = connection.SendCommand(getInfoCmd);
             Assert.Equal(ResponseStatus.Success, getInfoRsp.Status);
-            AuthenticatorInfo authInfo = getInfoRsp.GetData();
+
+            var authInfo = getInfoRsp.GetData();
             Assert.Equal(32, authInfo.MaximumCredentialBlobLength); /* Assert.Equal() Failure: Values differExpected: 32 Actual: null */
 
-            int maxCredBlobLength = authInfo.MaximumCredentialBlobLength ?? 0;
-            Assert.NotNull(authInfo.Extensions);
-            if (!(authInfo.Extensions is null))
-            {
-                bool isValid = authInfo.Extensions.Contains<string>("credBlob") && maxCredBlobLength > 0;
-                Assert.True(isValid);
-            }
+            var maxCredBlobLength = authInfo.MaximumCredentialBlobLength ?? 0;
+            var isValid = authInfo.IsExtensionSupported("credBlob") && maxCredBlobLength > 0;
+            Assert.True(isValid);
         }
 
         [Fact]
         public void MakeCredentialCommand_Succeeds()
         {
-            var pin = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
+            var yubiKey = YubiKeyDevice.FindAll().First();
 
-            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+            using var fido2Session = new Fido2Session(yubiKey);
 
-            using (var fido2Session = new Fido2Session(yubiKey))
-            {
-                _ = fido2Session.TrySetPin(pin);
-                bool isValid = fido2Session.TryVerifyPin(pin, null, null, out int? retriesRemaining, out bool? reboot);
-                Assert.True(isValid);
+            var isValid = fido2Session.TryVerifyPin(FidoSessionIntegrationTestBase.TestPinDefault, null, null, out var retriesRemaining, out var reboot);
+            Assert.True(isValid);
+            Assert.True(fido2Session.AuthenticatorInfo.IsExtensionSupported("largeBlobKey"));
 
-                isValid = SupportsLargeBlobs(fido2Session.AuthenticatorInfo);
-                Assert.True(isValid); /*Xunit.Sdk.TrueException
-Assert.True() Failure
-Expected: True
-Actual:   False*/
+            isValid = GetParams(fido2Session, out var makeParams);
+            Assert.True(isValid);
 
-                isValid = GetParams(fido2Session, out MakeCredentialParameters makeParams);
-                Assert.True(isValid);
-            }
-        }
+            var keyCollector = new TestKeyCollector();
+            fido2Session.KeyCollector = keyCollector.HandleRequest;
 
-        private bool SupportsLargeBlobs(AuthenticatorInfo authenticatorInfo)
-        {
-            if (!(authenticatorInfo.Extensions is null))
-            {
-                if (authenticatorInfo.Extensions.Contains<string>("largeBlobs"))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            var mcData = fido2Session.MakeCredential(makeParams);
+            Assert.True(mcData.VerifyAttestation(FidoSessionIntegrationTestBase.ClientDataHash));
         }
 
         private bool GetParams(
             Fido2Session fido2Session,
             out MakeCredentialParameters makeParams)
         {
-            byte[] clientDataHash =
-            {
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
-            };
+
             byte[] arbitraryData =
             {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A
@@ -114,10 +92,10 @@ Actual:   False*/
             }
 
             var token = (ReadOnlyMemory<byte>)fido2Session.AuthToken;
-            byte[] pinUvAuthParam = fido2Session.AuthProtocol.AuthenticateUsingPinToken(
-                token.ToArray(), clientDataHash);
+            var pinUvAuthParam = fido2Session.AuthProtocol.AuthenticateUsingPinToken(
+                token.ToArray(), FidoSessionIntegrationTestBase.ClientDataHash);
 
-            makeParams.ClientDataHash = clientDataHash;
+            makeParams.ClientDataHash = FidoSessionIntegrationTestBase.ClientDataHash;
             makeParams.Protocol = fido2Session.AuthProtocol.Protocol;
             makeParams.PinUvAuthParam = pinUvAuthParam;
 

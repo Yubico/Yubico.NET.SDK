@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Text;
 using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.TestUtilities;
@@ -21,47 +19,16 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Fido2
 {
     [Trait(TraitTypes.Category, TestCategories.Elevated)]
-    public class VerifyTests : SimpleIntegrationTestConnection
+    [Trait(TraitTypes.Category, TestCategories.RequiresSetup)]
+    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
+    public class VerifyTests : FidoSessionIntegrationTestBase
     {
-        public VerifyTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
-        {
-        }
-
+        // Requires a biometric-capable YubiKey with a fingerprint enrolled.
+        // Also requires that the PIN is set to the default value.
         [SkippableFact(typeof(DeviceNotFoundException))]
-        public void VerifyUv_Succeeds()
+        public void VerifyUv_Succeed()
         {
-            using (var fido2Session = new Fido2Session(Device))
-            {
-                fido2Session.KeyCollector = LocalKeyCollector;
-                fido2Session.VerifyUv(PinUvAuthTokenPermissions.GetAssertion, "rp12");
-                Assert.NotNull(fido2Session.AuthProtocol);
-            }
-        }
-
-        private bool LocalKeyCollector(KeyEntryData arg)
-        {
-            switch (arg.Request)
-            {
-                case KeyEntryRequest.TouchRequest:
-                    Console.WriteLine("YubiKey requires touch");
-                    break;
-                case KeyEntryRequest.VerifyFido2Pin:
-                    arg.SubmitValue(Encoding.UTF8.GetBytes("11234567"));
-                    break;
-                case KeyEntryRequest.VerifyFido2Uv:
-                    Console.WriteLine("Fingerprint requested.");
-                    break;
-                case KeyEntryRequest.EnrollFingerprint:
-                    Console.WriteLine("Fingerprint sample requested.");
-                    break;
-                case KeyEntryRequest.Release:
-                    break;
-                default:
-                    throw new NotSupportedException("Not supported by this test");
-            }
-
-            return true;
+            Session.VerifyUv(PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, "relyingParty1");
         }
     }
 }

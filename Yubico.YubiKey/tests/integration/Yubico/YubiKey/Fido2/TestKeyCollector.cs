@@ -20,7 +20,7 @@ using Xunit;
 
 namespace Yubico.YubiKey.Fido2;
 
-public class TestKeyCollector(bool useComplexCreds = false)
+public class TestKeyCollector()
 {
     public List<KeyEntryRequest> CapturedRequests { get; } = [];
 
@@ -32,22 +32,30 @@ public class TestKeyCollector(bool useComplexCreds = false)
         switch (data.Request)
         {
             case KeyEntryRequest.VerifyFido2Pin:
-            case KeyEntryRequest.SetFido2Pin:
-                data.SubmitValue(useComplexCreds
-                    ? FidoSessionIntegrationTestBase.ComplexPin.Span
-                    : FidoSessionIntegrationTestBase.SimplePin.Span);
-                break;
-
-            case KeyEntryRequest.ChangeFido2Pin:
-                if (data.IsRetry)
+                if (data.IsRetry && data.RetriesRemaining >= 1)
                 {
-                    data.SubmitValues(FidoSessionIntegrationTestBase.SimplePin.Span,
-                        FidoSessionIntegrationTestBase.ComplexPin.Span);
+                    
+                    data.SubmitValue(FidoSessionIntegrationTestBase.TestPin2.Span);
                 }
                 else
                 {
-                    data.SubmitValues(FidoSessionIntegrationTestBase.ComplexPin.Span,
-                        FidoSessionIntegrationTestBase.SimplePin.Span);
+                    data.SubmitValue(FidoSessionIntegrationTestBase.TestPinDefault.Span);
+                }
+                break;
+            case KeyEntryRequest.SetFido2Pin:
+                data.SubmitValue(FidoSessionIntegrationTestBase.TestPinDefault.Span);
+                break;
+
+            case KeyEntryRequest.ChangeFido2Pin:
+                if (data.IsRetry && data.RetriesRemaining >= 1)
+                {
+                    data.SubmitValues(FidoSessionIntegrationTestBase.TestPin2.Span,
+                        FidoSessionIntegrationTestBase.TestPinDefault.Span);
+                }
+                else
+                {
+                    data.SubmitValues(FidoSessionIntegrationTestBase.TestPinDefault.Span,
+                        FidoSessionIntegrationTestBase.TestPin2.Span);
                 }
 
                 break;
@@ -58,6 +66,10 @@ public class TestKeyCollector(bool useComplexCreds = false)
             case KeyEntryRequest.TouchRequest:
                 Debug.Assert(true, "Touch requested");
                 Console.WriteLine("YubiKey requires touch");
+                break;
+            case KeyEntryRequest.VerifyFido2Uv:
+                Debug.Assert(true, "Fingerprint requested");
+                Console.WriteLine("Fingerprint requested.");
                 break;
 
             default:

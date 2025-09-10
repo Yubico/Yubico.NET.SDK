@@ -168,7 +168,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             ResponseStatus status;
             do
             {
-                var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(_protocol, FidoSessionIntegrationTestBase.ComplexPin, permissions, rpId);
+                var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(_protocol, FidoSessionIntegrationTestBase.TestPinDefault, permissions, rpId);
                 var getTokenRsp = Connection.SendCommand(getTokenCmd);
                 if (getTokenRsp.Status == ResponseStatus.Success)
                 {
@@ -181,7 +181,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                     return false;
                 }
 
-                var setPinCmd = new SetPinCommand(_protocol, FidoSessionIntegrationTestBase.ComplexPin);
+                var setPinCmd = new SetPinCommand(_protocol, FidoSessionIntegrationTestBase.TestPinDefault);
                 var setPinRsp = Connection.SendCommand(setPinCmd);
                 status = setPinRsp.Status;
 

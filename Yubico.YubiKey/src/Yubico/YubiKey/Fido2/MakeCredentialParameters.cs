@@ -724,16 +724,15 @@ namespace Yubico.YubiKey.Fido2
                 return;
             }
 
-            if (enforceCredProtectPolicy && credProtectPolicy != CredProtectPolicy.UserVerificationOptional)
-            {
-                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
-            }
-
             Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
-            
             if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.CredProtect))
             {
-                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+                if (enforceCredProtectPolicy && credProtectPolicy != CredProtectPolicy.UserVerificationOptional)
+                {
+                    throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+                }
+
+                return;
             }
 
             // The encoding is key/value where the key is "credProtect" and the

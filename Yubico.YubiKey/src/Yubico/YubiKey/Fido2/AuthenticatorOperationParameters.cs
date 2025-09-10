@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Formats.Cbor;
 using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Fido2.Cbor;
 
@@ -77,21 +78,29 @@ public abstract class AuthenticatorOperationParameters<TOperationParameters> : I
     /// <exception cref="ArgumentNullException">
     /// The <c>extensionKey</c> or <c>encodedValue</c> arg is null.
     /// </exception>
-    public void AddExtension<TValue>(string extensionKey, TValue value) 
-    { 
+    public void AddExtension<TValue>(string extensionKey, TValue value)
+    {
+        Guard.IsNotNullOrWhiteSpace(extensionKey, nameof(extensionKey));
         Guard.IsNotNull(value, nameof(value));
 
         _extensions[extensionKey] = value switch
         {
             byte[] byteArray => byteArray, // Assume already encoded
             ReadOnlyMemory<byte> romValue => romValue.ToArray(), // Assume already encoded
-            bool boolValue => boolValue.ToCbor(),
-            int intValue => intValue.ToCbor(),
-            byte byteValue => byteValue.ToCbor(),
-            string stringValue => stringValue.ToCbor(),
+            bool boolValue => boolValue ? [CborHelpers.True] : [CborHelpers.False],
+            int intValue => EncodeValue(cbor => cbor.WriteInt32(intValue)),
+            byte byteValue => EncodeValue(cbor => cbor.WriteInt32(byteValue)),
+            string stringValue => EncodeValue(cbor => cbor.WriteTextString(stringValue)),
             ICborEncode cborEncode => cborEncode.CborEncode(),
             _ => throw new ArgumentException(ExceptionMessages.Ctap2CborUnexpectedValue, nameof(value))
         };
+        
+        static byte[] EncodeValue(Action<CborWriter> writeAction)
+        {
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            writeAction(cbor);
+            return cbor.Encode();
+        }
     }
 
     /// <summary>

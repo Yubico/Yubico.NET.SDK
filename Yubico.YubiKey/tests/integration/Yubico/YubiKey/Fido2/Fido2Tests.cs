@@ -19,7 +19,7 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         ReadOnlyMemory<byte>? identifier1;
 
         // First run
-        using (var session = GetSession())
+        using (var session = GetSession(minFw: FirmwareVersion.V5_8_0))
         {
             identifier1 = session.AuthenticatorIdentifier;
             Assert.True(identifier1.HasValue);
@@ -43,7 +43,7 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         ReadOnlyMemory<byte>? ppuat;
 
         // First run
-        using (var session = GetSession())
+        using (var session = GetSession(minFw: FirmwareVersion.V5_8_0))
         {
             session.VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
             Assert.NotNull(session.AuthTokenPersistent);
@@ -56,7 +56,7 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         }
 
         // Second run, reuse ppuat
-        using (var session = GetSession(ppuat.Value))
+        using (var session = GetSession(persistentPinUvAuthToken: ppuat.Value))
         {
             session.VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
             Assert.NotNull(session.AuthTokenPersistent);
@@ -80,22 +80,23 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         byte[] persistentPinUvAuthToken;
 
         // Test GetCredentialMetadata
-        using (var session = GetSession())
+        using (var session = GetSession(minFw: FirmwareVersion.V5_8_0))
         {
             Assert.Null(session.AuthTokenPersistent);
 
             // Will require pin
             session.VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
+
             Assert.NotNull(session.AuthTokenPersistent);
-            KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 1);
+            Assert.Equal(1, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin));
 
             // Clear the key collector (to test missing ability to generate new tokens)
             session.KeyCollector = null;
 
             // Will not require pin
-            var (_, remainingCredentialCount) = session.GetCredentialMetadata();
-            Assert.True(remainingCredentialCount > 0);
-            KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 1); // Should be unchanged
+            _ = session.GetCredentialMetadata();
+
+            Assert.Equal(1, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin)); // Should be unchanged
 
             // Save for later
             persistentPinUvAuthToken = session.AuthTokenPersistent!.Value.ToArray();
@@ -104,14 +105,13 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         // Reset the call count for the next test
         KeyCollector.ResetRequestCounts();
 
-        // Reusing stored PPUAT
-        using (var session = GetSession(persistentPinUvAuthToken))
+        // Reusing stored persistentPinUvAuthToken
+        using (var session = GetSession(persistentPinUvAuthToken: persistentPinUvAuthToken))
         {
             // Should not require pin
-            var (_, remainingCredentialCount) = session.GetCredentialMetadata();
-            KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 0);
+            _ = session.GetCredentialMetadata();
 
-            Assert.True(remainingCredentialCount > 0);
+            Assert.Equal(0, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin));
         }
     }
 
@@ -122,49 +122,46 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
 
         // Should require pin
         Session.VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
+
         Assert.NotNull(Session.AuthTokenPersistent);
-        KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 1);
+        Assert.Equal(1, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin));
 
         // Should NOT require pin
-        var (_, remainingCredentialCount) = Session.GetCredentialMetadata();
-        KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 1); // Should be unchanged
-        Assert.True(remainingCredentialCount > 0);
+        _ = Session.GetCredentialMetadata();
+        Assert.Equal(1, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin)); // Should be unchanged
 
         // Should NOT require pin
-        var (_, remainingCredentialCount2) = Session.GetCredentialMetadata();
-        KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 1); // Should be unchanged
-        Assert.True(remainingCredentialCount2 > 0);
+        _ = Session.GetCredentialMetadata();
+        Assert.Equal(1, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin)); // Should be unchanged
 
         // Trigger internal PersistenUvAuthToken reset
-        Session.TryChangePin(TestPinDefault, TestPinDefault);
+        Session.TryChangePin(TestPin1, TestPin1);
 
         // Should require pin
-        var (_, remainingCredentialCount3) = Session.GetCredentialMetadata();
-        Assert.True(remainingCredentialCount3 > 0);
-        KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 2); // Will have changed, as we did set the pin,
-        // requiring reset of persistent token
+        _ = Session.GetCredentialMetadata();
+        Assert.Equal(2, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin)); // Will have changed, as we did set the pin,requiring reset of persistent token
     }
 
     [SkippableFact(typeof(DeviceNotFoundException))]
     public void CredentialManagement_Succeeds_WithRO_Token()
     {
         // Test GetCredentialMetadata
-        using (var session = GetSession())
+        using (var session = GetSession(minFw: FirmwareVersion.V5_8_0))
         {
             Assert.Null(session.AuthTokenPersistent);
 
             // Will require pin
             session.VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
+
             Assert.NotNull(session.AuthTokenPersistent);
-            KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 1);
+            Assert.Equal(1, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin));
 
             // Clear the key collector (to test missing ability to generate new tokens)
             session.KeyCollector = null;
 
             // Will not require pin
-            var (_, remainingCredentialCount) = session.GetCredentialMetadata();
-            Assert.True(remainingCredentialCount > 0);
-            KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 1); // Should be unchanged
+            _ = session.GetCredentialMetadata();
+            Assert.Equal(1, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin)); // Should be unchanged
         }
 
         // Reset the call count for the next test
@@ -177,15 +174,16 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
 
             // Will require pin
             session.VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
+
             Assert.NotNull(session.AuthTokenPersistent);
-            KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 1);
+            Assert.Equal(1, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin));
 
             // Clear the key collector (to test missing ability to generate new tokens)
             session.KeyCollector = null;
 
             // Will not require pin
             _ = session.EnumerateRelyingParties();
-            KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 1); // Should be unchanged
+            Assert.Equal(1, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin)); // Should be unchanged
         }
 
         // Reset the call count for the next test
@@ -198,15 +196,18 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
 
             // Will require pin
             session.VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
+
             Assert.NotNull(session.AuthTokenPersistent);
-            KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 1);
+            Assert.Equal(1, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin));
 
             // Clear the key collector (to test missing ability to generate new tokens)
             session.KeyCollector = null;
 
             // Will not require pin
             var cred = session.EnumerateCredentialsForRelyingParty("demo.yubico.com").FirstOrDefault();
-            KeyCollector.VerifyRequestCount(KeyEntryRequest.VerifyFido2Pin, 1); // Should be unchanged
+
+            Assert.NotNull(cred);
+            Assert.Equal(1, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin)); // Should be unchanged
 
             // Send command to delete credential with RO token (fails)
             var response = session.Connection.SendCommand(new DeleteCredentialCommand(
@@ -226,6 +227,7 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
     {
         var protocol = new PinUvAuthProtocolTwo();
         var publicKey = GetAuthenticatorPublicKey(Connection, protocol);
+
         protocol.Encapsulate(publicKey);
         var persistentPinUvAuthToken = useEncryptedToken
             ? GetReadOnlyPinToken(Connection, protocol, decryptToken: false).ToArray()
@@ -260,24 +262,26 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
 
     [SkippableFact(typeof(DeviceNotFoundException))]
     [Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
-    public void Extensions_ThirdPartyPayment()
+    public void Extensions_MakeCredential_ThirdPartyPayment()
     {
         var isSupported = Session.AuthenticatorInfo.IsExtensionSupported("thirdPartyPayment");
         Skip.IfNot(isSupported);
 
         MakeCredentialParameters.AddThirdPartyPaymentExtension();
-        _ = Session.MakeCredential(MakeCredentialParameters);
+        var makeCredentialData = Session.MakeCredential(MakeCredentialParameters);
 
         GetAssertionParameters.RequestThirdPartyPayment();
+        GetAssertionParameters.AllowCredential(makeCredentialData.AuthenticatorData.CredentialId!);
         var assertions = Session.GetAssertions(GetAssertionParameters);
-        
-        Assert.NotEmpty(assertions);
+
+        Assert.Single(assertions);
+        Assert.NotNull(assertions.First().AuthenticatorData.Extensions);
         Assert.True(assertions.First().AuthenticatorData.GetThirdPartyPaymentExtension());
     }
 
     [SkippableFact(typeof(DeviceNotFoundException))]
     [Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
-    public void Extensions_HmacSecretMc_OneSalt_Succeeds()
+    public void Extensions_MakeCredential_HmacSecretMc_OneSalt_Succeeds()
     {
         var isSupported = Session.AuthenticatorInfo.IsExtensionSupported("hmac-secret-mc");
         Skip.IfNot(isSupported);
@@ -290,18 +294,18 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
 
         MakeCredentialParameters.AddHmacSecretMcExtension(Session.AuthenticatorInfo, salt1);
         var makeCredentialData = Session.MakeCredential(MakeCredentialParameters);
-        
+
         Assert.NotNull(makeCredentialData.AuthenticatorData.Extensions);
         Assert.True(makeCredentialData.AuthenticatorData.Extensions.ContainsKey("hmac-secret"));
         Assert.True(makeCredentialData.AuthenticatorData.Extensions.ContainsKey("hmac-secret-mc"));
         Assert.NotEmpty(makeCredentialData.AuthenticatorData.Extensions["hmac-secret"]);
         Assert.NotEmpty(makeCredentialData.AuthenticatorData.Extensions["hmac-secret-mc"]);
-        
+
         var hmacSecretOutput = makeCredentialData.AuthenticatorData.GetHmacSecretExtension(Session.AuthProtocol);
         Assert.NotNull(hmacSecretOutput);
         Assert.Equal(32, hmacSecretOutput.Length);
     }
-    
+
     [SkippableFact(typeof(DeviceNotFoundException))]
     [Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
     public void Extensions_HmacSecretMc_TwoSalts_Succeeds()
@@ -314,16 +318,16 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
         ];
-        
+
         MakeCredentialParameters.AddHmacSecretMcExtension(Session.AuthenticatorInfo, salt1, salt1);
         var makeCredentialData = Session.MakeCredential(MakeCredentialParameters);
-        
+
         Assert.NotNull(makeCredentialData.AuthenticatorData.Extensions);
         Assert.True(makeCredentialData.AuthenticatorData.Extensions.ContainsKey("hmac-secret"));
         Assert.True(makeCredentialData.AuthenticatorData.Extensions.ContainsKey("hmac-secret-mc"));
         Assert.NotEmpty(makeCredentialData.AuthenticatorData.Extensions["hmac-secret"]);
         Assert.NotEmpty(makeCredentialData.AuthenticatorData.Extensions["hmac-secret-mc"]);
-        
+
         var hmacSecretOutput = makeCredentialData.AuthenticatorData.GetHmacSecretExtension(Session.AuthProtocol);
         Assert.NotNull(hmacSecretOutput);
         Assert.Equal(64, hmacSecretOutput.Length);
@@ -350,7 +354,7 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         PinUvAuthProtocolTwo protocol,
         PinUvAuthTokenPermissions permissions)
     {
-        var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, TestPinDefault, permissions, null);
+        var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, TestPin1, permissions, null);
         var getTokenRsp = connection.SendCommand(getTokenCmd);
         Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
         return getTokenRsp.GetData();

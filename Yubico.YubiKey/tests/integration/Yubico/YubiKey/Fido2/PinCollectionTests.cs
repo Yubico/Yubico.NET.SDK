@@ -29,16 +29,16 @@ namespace Yubico.YubiKey.Fido2
             Session.ChangePin();
             Session.VerifyPin();
 
-            var isValid = Session.TryChangePin(TestPinDefault, TestPin2);
+            var isValid = Session.TryChangePin(TestPin1, TestPin2);
             Assert.False(isValid);
 
-            isValid = Session.TryChangePin(TestPin2, TestPinDefault);
+            isValid = Session.TryChangePin(TestPin2, TestPin1);
             Assert.True(isValid);
 
             isValid = Session.TryVerifyPin(TestPin2, null, null, out _, out _);
             Assert.False(isValid);
 
-            isValid = Session.TryVerifyPin(TestPinDefault, null, null, out _, out _);
+            isValid = Session.TryVerifyPin(TestPin1, null, null, out _, out _);
             Assert.True(isValid);
         }
 
@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Fido2
         public void InvalidPinFollowedByValidPin_Succeeds()
         {
             var invalidPin = "000000"u8.ToArray();
-            var validPin = TestPinDefault.ToArray();
+            var validPin = TestPin1.ToArray();
 
             var success = Session.TryVerifyPin(invalidPin, PinUvAuthTokenPermissions.CredentialManagement, "", out _, out _);
             Assert.False(success);

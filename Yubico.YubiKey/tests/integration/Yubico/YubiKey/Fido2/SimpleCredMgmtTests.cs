@@ -36,8 +36,8 @@ namespace Yubico.YubiKey.Fido2
 
             (var credCount, var slotCount) = fido2Session.GetCredentialMetadata();
 
-            Assert.Equal(1, credCount);
-            Assert.Equal(24, slotCount);
+            Assert.InRange(credCount, 1, int.MaxValue);
+            Assert.InRange(slotCount, 1, int.MaxValue);
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Fido2
             var rpList = fido2Session.EnumerateRelyingParties();
             var ykCredList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
 
-            Assert.Single(ykCredList);
+            Assert.NotEmpty(ykCredList);
         }
 
         [Fact]

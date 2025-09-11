@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 {
     public class NeedPinToken : SimpleIntegrationTestConnection
     {
-        private readonly byte[] _pin = FidoSessionIntegrationTestBase.TestPinDefault.ToArray();
+        private readonly byte[] _pin = FidoSessionIntegrationTestBase.TestPin1.ToArray();
 
         protected NeedPinToken(YubiKeyApplication application, StandardTestDevice device)
             : base(application, device)

@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Numerics;
 using Xunit;
-using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2;
@@ -30,8 +28,7 @@ public class FidoSessionIntegrationTestBase : IDisposable
     };
 
     protected GetAssertionParameters GetAssertionParameters = new(Rp, ClientDataHash);
-    public static Memory<byte> TestPinSimple => "123456"u8.ToArray();
-    public static Memory<byte> TestPinDefault => "11234567"u8.ToArray();
+    public static Memory<byte> TestPin1 => "11234567"u8.ToArray();
     public static Memory<byte> TestPin2 => "12234567"u8.ToArray();
     public static readonly byte[] ClientDataHash = "12345678123456781234567812345678"u8.ToArray();
     public static readonly RelyingParty Rp = new("demo.yubico.com")
@@ -54,22 +51,35 @@ public class FidoSessionIntegrationTestBase : IDisposable
     protected Fido2Session Session => _session ??= GetSession();
     protected IYubiKeyConnection Connection => _connection ??= Device.Connect(YubiKeyApplication.Fido2);
     protected IYubiKeyDevice Device => _device ??= IntegrationTestDeviceEnumeration.GetTestDevice(TestDeviceType);
-    protected TestKeyCollector KeyCollector;
+    protected TestKeyCollector KeyCollector = new();
 
     private bool _disposed;
     private IYubiKeyDevice? _device;
     private Fido2Session? _session;
     private IYubiKeyConnection? _connection;
-    private bool UseComplexCreds => Device.IsFipsSeries || Device.IsPinComplexityEnabled;
 
     protected FidoSessionIntegrationTestBase()
     {
-        KeyCollector = new TestKeyCollector();
-        using var session = GetSessionInternal(Device);
-        
-        MakeCredentialParameters.AddOption(AuthenticatorOptions.rk, true);
+        // Clean up any existing credentials for a fresh start
+        try
+        {
+            using var session = GetSession();
 
-        // Might need reset logic
+            var relyingParties = session.EnumerateRelyingParties();
+            foreach (var rp in relyingParties)
+            {
+                var credentials = session.EnumerateCredentialsForRelyingParty(rp);
+                foreach (var cred in credentials)
+                {
+                    session.DeleteCredential(cred.CredentialId);
+                }
+            }
+        }
+        catch (Ctap2DataException)
+        {
+            // Ignore errors related to non-existent credentials
+        }
+
     }
 
     ~FidoSessionIntegrationTestBase()
@@ -78,7 +88,51 @@ public class FidoSessionIntegrationTestBase : IDisposable
     }
 
     protected Fido2Session GetSession(
-        ReadOnlyMemory<byte>? ppuat = null) => GetSessionInternal(Device, ppuat);
+        StandardTestDevice deviceType = StandardTestDevice.Fw5,
+        FirmwareVersion? minFw = null,
+        Transport? transport = Transport.All,
+        ReadOnlyMemory<byte>? persistentPinUvAuthToken = null)
+    {
+        deviceType = TestDeviceType == StandardTestDevice.Any
+            ? deviceType
+            : TestDeviceType;
+
+        minFw ??= FirmwareVersion.V5_4_3;
+        transport ??= Transport.All;
+
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(
+            deviceType,
+            transport.Value,
+            minFw);
+
+        Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Fido2));
+
+        Fido2Session? session = null;
+        try
+        {
+            session = persistentPinUvAuthToken is null
+                ? new Fido2Session(testDevice)
+                : new Fido2Session(testDevice, persistentPinUvAuthToken);
+
+            session.KeyCollector = KeyCollector.HandleRequest;
+
+            if (session.AuthenticatorInfo.ForcePinChange == true ||
+                session.AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.clientPin) == OptionValue.False)
+            {
+                session.TrySetPin(TestPin1);
+            }
+
+            var isValid = session.TryVerifyPin(TestPin1, permissions: Commands.PinUvAuthTokenPermissions.CredentialManagement, null, out _, out _);
+            Assert.True(isValid, "Pin was incorrect. Please reset the key and try again.");
+
+            return session;
+        }
+        catch
+        {
+            session?.Dispose();
+            throw;
+        }
+    }
 
     public void Dispose()
     {
@@ -101,36 +155,6 @@ public class FidoSessionIntegrationTestBase : IDisposable
         }
 
         _disposed = true;
-    }
-
-    private Fido2Session GetSessionInternal(
-        IYubiKeyDevice testDevice,
-        ReadOnlyMemory<byte>? ppuat = null,
-        Scp03KeyParameters? keyParameters = null)
-    {
-        Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Fido2));
-
-        Fido2Session? session = null;
-        try
-        {
-            session = ppuat is null
-                ? new Fido2Session(testDevice)
-                : new Fido2Session(testDevice, ppuat);
-
-            if (session.AuthenticatorInfo.ForcePinChange == true)
-            {
-                session.TrySetPin(TestPinDefault);
-            }
-
-            session.KeyCollector = KeyCollector.HandleRequest;
-
-            return session;
-        }
-        catch
-        {
-            session?.Dispose();
-            throw;
-        }
     }
 
     #endregion

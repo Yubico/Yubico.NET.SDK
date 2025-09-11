@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Fido2
 
             using var fido2Session = new Fido2Session(yubiKey);
 
-            var isValid = fido2Session.TryVerifyPin(FidoSessionIntegrationTestBase.TestPinDefault, null, null, out var retriesRemaining, out var reboot);
+            var isValid = fido2Session.TryVerifyPin(FidoSessionIntegrationTestBase.TestPin1, null, null, out var retriesRemaining, out var reboot);
             Assert.True(isValid);
             Assert.True(fido2Session.AuthenticatorInfo.IsExtensionSupported("largeBlobKey"));
 

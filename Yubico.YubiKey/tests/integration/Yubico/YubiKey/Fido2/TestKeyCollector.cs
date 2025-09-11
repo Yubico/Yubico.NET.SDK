@@ -34,27 +34,27 @@ public class TestKeyCollector()
             case KeyEntryRequest.VerifyFido2Pin:
                 if (data.IsRetry && data.RetriesRemaining >= 1)
                 {
-                    
+
                     data.SubmitValue(FidoSessionIntegrationTestBase.TestPin2.Span);
                 }
                 else
                 {
-                    data.SubmitValue(FidoSessionIntegrationTestBase.TestPinDefault.Span);
+                    data.SubmitValue(FidoSessionIntegrationTestBase.TestPin1.Span);
                 }
                 break;
             case KeyEntryRequest.SetFido2Pin:
-                data.SubmitValue(FidoSessionIntegrationTestBase.TestPinDefault.Span);
+                data.SubmitValue(FidoSessionIntegrationTestBase.TestPin1.Span);
                 break;
 
             case KeyEntryRequest.ChangeFido2Pin:
                 if (data.IsRetry && data.RetriesRemaining >= 1)
                 {
                     data.SubmitValues(FidoSessionIntegrationTestBase.TestPin2.Span,
-                        FidoSessionIntegrationTestBase.TestPinDefault.Span);
+                        FidoSessionIntegrationTestBase.TestPin1.Span);
                 }
                 else
                 {
-                    data.SubmitValues(FidoSessionIntegrationTestBase.TestPinDefault.Span,
+                    data.SubmitValues(FidoSessionIntegrationTestBase.TestPin1.Span,
                         FidoSessionIntegrationTestBase.TestPin2.Span);
                 }
 
@@ -78,20 +78,18 @@ public class TestKeyCollector()
 
         return true;
     }
-    
+
     public void ResetRequestCounts() => CapturedRequests.Clear();
-    
+
     public void VerifyRequestSequence(
         params KeyEntryRequest[] expectedSequence)
     {
         Assert.Equal(expectedSequence, CapturedRequests);
     }
 
-    public void VerifyRequestCount(
-        KeyEntryRequest request,
-        int expectedCount)
+    public int RequestCount(
+        KeyEntryRequest request)
     {
-        var actualCount = CapturedRequests.Count(r => r == request);
-        Assert.Equal(expectedCount, actualCount);
+        return CapturedRequests.Count(r => r == request);
     }
 }

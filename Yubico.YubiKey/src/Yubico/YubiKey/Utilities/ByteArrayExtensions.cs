@@ -25,14 +25,8 @@ internal static class ByteArrayExtensions
         {
             return (byte[])arr.Clone();
         }
-
-        var memories = new ReadOnlyMemory<byte>[others.Length];
-        for (int i = 0; i < others.Length; i++)
-        {
-            memories[i] = others[i]; 
-        }
-        
-        return ConcatCore(arr, memories);
+       
+        return ConcatCore(arr, Array.ConvertAll(others, item => (ReadOnlyMemory<byte>)item));
     }
     
 
@@ -47,6 +41,7 @@ internal static class ByteArrayExtensions
         byte[] result = new byte[totalLength];
         arr.CopyTo(result);
         other.CopyTo(result.AsSpan(arr.Length));
+        
         return result;
     }
     

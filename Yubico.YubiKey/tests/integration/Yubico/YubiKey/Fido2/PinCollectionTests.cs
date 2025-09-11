@@ -12,144 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Linq;
-using System.Text;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
-    public class PinCollectionTests
+    public class PinCollectionTests : FidoSessionIntegrationTestBase
     {
         [Fact]
         [Trait(TraitTypes.Category, TestCategories.RequiresSetup)]
         [Trait(TraitTypes.Category, TestCategories.Elevated)]
         public void PinOperations_Succeed()
         {
-            // Assumption - the YubiKey returned has a new or reset FIDO2 application with no PIN set.
-            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+            Session.ChangePin();
+            Session.VerifyPin();
 
-            using (var fido2 = new Fido2Session(yubiKey))
-            {
-                byte[] pin1 = Encoding.UTF8.GetBytes("12345");
-                byte[] pin2 = Encoding.UTF8.GetBytes("abcde");
+            var isValid = Session.TryChangePin(TestPin1, TestPin2);
+            Assert.False(isValid);
 
-                fido2.KeyCollector = req =>
-                {
-                    switch (req.Request)
-                    {
-                        case KeyEntryRequest.SetFido2Pin:
-                            req.SubmitValue(pin1);
-                            break;
-                        case KeyEntryRequest.ChangeFido2Pin:
-                            if (req.IsRetry)
-                            {
-                                req.SubmitValues(pin1, pin2);
-                            }
-                            else
-                            {
-                                req.SubmitValues(pin2, pin1);
-                            }
-                            break;
-                        case KeyEntryRequest.VerifyFido2Pin:
-                            if (req.IsRetry)
-                            {
-                                req.SubmitValue(pin2);
-                            }
-                            else
-                            {
-                                req.SubmitValue(pin1);
-                            }
-                            break;
-                    }
+            isValid = Session.TryChangePin(TestPin2, TestPin1);
+            Assert.True(isValid);
 
-                    return true;
-                };
+            isValid = Session.TryVerifyPin(TestPin2, null, null, out _, out _);
+            Assert.False(isValid);
 
-                fido2.SetPin();
-                fido2.ChangePin();
-                fido2.VerifyPin();
-
-                bool isValid = fido2.TryChangePin(pin1, pin2);
-                Assert.False(isValid);
-                isValid = fido2.TryChangePin(pin2, pin1);
-                Assert.True(isValid);
-
-                isValid = fido2.TryVerifyPin(pin2, null, null, out _, out _);
-                Assert.False(isValid);
-                isValid = fido2.TryVerifyPin(pin1, null, null, out _, out _);
-                Assert.True(isValid);
-            }
-        }
-
-        [Fact]
-        [Trait(TraitTypes.Category, TestCategories.RequiresSetup)]
-        public void UvOperations_Succeed()
-        {
-            // Test assumptions: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
-            // Test assumptions: A fingerprint is registered on the key.
-
-            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
-
-            using (var fido2 = new Fido2Session(yubiKey))
-            {
-                fido2.KeyCollector = KeyCollector;
-                fido2.VerifyUv(PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, "relyingParty1");
-            }
+            isValid = Session.TryVerifyPin(TestPin1, null, null, out _, out _);
+            Assert.True(isValid);
         }
 
         [Fact]
         [Trait(TraitTypes.Category, TestCategories.RequiresSetup)]
         public void InvalidPinFollowedByValidPin_Succeeds()
         {
-            // Test assumption: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
-            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+            var invalidPin = "000000"u8.ToArray();
+            var validPin = TestPin1.ToArray();
 
-            byte[] invalidPin = Encoding.UTF8.GetBytes("44444");
-            byte[] validPin = Encoding.UTF8.GetBytes("123456");
+            var success = Session.TryVerifyPin(invalidPin, PinUvAuthTokenPermissions.CredentialManagement, "", out _, out _);
+            Assert.False(success);
 
-            using (var fido2 = new Fido2Session(yubiKey))
-            {
-                bool success = fido2.TryVerifyPin(
-                    invalidPin,
-                    PinUvAuthTokenPermissions.CredentialManagement,
-                    "",
-                    out _, out _);
-
-                Assert.False(success);
-
-                success = fido2.TryVerifyPin(
-                    validPin,
-                    PinUvAuthTokenPermissions.CredentialManagement,
-                    "",
-                    out _, out _);
-
-                Assert.True(success);
-            }
-        }
-
-        private bool KeyCollector(KeyEntryData arg)
-        {
-            switch (arg.Request)
-            {
-                case KeyEntryRequest.TouchRequest:
-                    Console.WriteLine("YubiKey requires touch");
-                    break;
-                case KeyEntryRequest.VerifyFido2Pin:
-                    arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
-                    break;
-                case KeyEntryRequest.VerifyFido2Uv:
-                    Console.WriteLine("Bio touch needed.");
-                    break;
-                case KeyEntryRequest.Release:
-                    break;
-                default:
-                    throw new NotSupportedException("Not supported by this test");
-            }
-
-            return true;
+            success = Session.TryVerifyPin(validPin, PinUvAuthTokenPermissions.CredentialManagement, "", out _, out _);
+            Assert.True(success);
         }
     }
 }

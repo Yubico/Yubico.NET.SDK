@@ -322,9 +322,7 @@ namespace Yubico.YubiKey.TestUtilities
                     return true;
 
                 case KeyEntryRequest.VerifyFido2Pin:
-                    ReadOnlyMemory<byte> toSubmit =
-                        pin ?? new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
-                    keyEntryData.SubmitValue(toSubmit.Span);
+                    keyEntryData.SubmitValue("11234567"u8);
                     return true;
 
                 case KeyEntryRequest.TouchRequest:

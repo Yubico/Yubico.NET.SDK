@@ -17,6 +17,8 @@ using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -28,27 +30,35 @@ namespace Yubico.YubiKey.Fido2
     /// </summary>
     public class AuthenticatorInfo
     {
-        private const int KeyVersions = 1;
-        private const int KeyExtensions = 2;
-        private const int KeyAaguid = 3;
-        private const int KeyOptions = 4;
-        private const int KeyMaxMsgSize = 5;
-        private const int KeyPinUvAuthProtocols = 6;
-        private const int KeyMaxCredentialCountInList = 7;
-        private const int KeyMaxCredentialIdLength = 8;
-        private const int KeyTransports = 9;
-        private const int KeyAlgorithms = 10;
-        private const int KeyMaxSerializedLargeBlobArray = 11;
-        private const int KeyForcePinChange = 12;
-        private const int KeyMinPinLength = 13;
-        private const int KeyFirmwareVersion = 14;
-        private const int KeyMaxCredBlobLength = 15;
-        private const int KeyMaxRpidsForSetMinPinLength = 16;
-        private const int KeyPreferredPlatformUvAttempts = 17;
-        private const int KeyUvModality = 18;
-        private const int KeyCertifications = 19;
-        private const int KeyRemainingDiscoverableCredentials = 20;
-        private const int KeyVendorPrototypeConfigCommands = 21;
+        private const int KeyVersions = 0x01;
+        private const int KeyExtensions = 0x02;
+        private const int KeyAaguid = 0x03;
+        private const int KeyOptions = 0x04;
+        private const int KeyMaxMsgSize = 0x05;
+        private const int KeyPinUvAuthProtocols = 0x06;
+        private const int KeyMaxCredentialCountInList = 0x07;
+        private const int KeyMaxCredentialIdLength = 0x08;
+        private const int KeyTransports = 0x09;
+        private const int KeyAlgorithms = 0x0A;
+        private const int KeyMaxSerializedLargeBlobArray = 0x0B;
+        private const int KeyForcePinChange = 0x0C;
+        private const int KeyMinPinLength = 0x0D;
+        private const int KeyFirmwareVersion = 0x0E;
+        private const int KeyMaxCredBlobLength = 0x0F;
+        private const int KeyMaxRpidsForSetMinPinLength = 0x10;
+        private const int KeyPreferredPlatformUvAttempts = 0x11;
+        private const int KeyUvModality = 0x12;
+        private const int KeyCertifications = 0x13;
+        private const int KeyRemainingDiscoverableCredentials = 0x14;
+        private const int KeyVendorPrototypeConfigCommands = 0x15;
+        private const int KeyAttestationFormats = 0x16;
+        private const int KeyUvCountSinceLastPinEntry = 0x17;
+        private const int KeyLongTouchForReset = 0x18;
+        private const int KeyEncIdentifier = 0x19;
+        private const int KeyTransportsForReset = 0x1A;
+        private const int KeyPinComplexityPolicy = 0x1B;
+        private const int KeyPinComplexityPolicyUrl = 0x1C;
+        private const int KeyMaxPinLength = 0x1D;
 
         /// <summary>
         /// An <see cref="Aaguid"/> is defined in the standard as 16 bytes, no
@@ -92,8 +102,6 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public const string Version21 = "FIDO_2_1";
 
-        private readonly byte[] _aaguid;
-
         /// <summary>
         /// List of version strings of CTAP supported by the authenticator.
         /// This is a REQUIRED value.
@@ -114,14 +122,14 @@ namespace Yubico.YubiKey.Fido2
         ///    }
         /// </code>
         /// </remarks>
-        public IReadOnlyList<string> Versions { get; private set; }
+        public IReadOnlyList<string> Versions { get; }
 
         /// <summary>
         /// List of extension strings of CTAP supported by the authenticator.
         /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public IReadOnlyList<string>? Extensions { get; private set; }
+        public IReadOnlyList<string>? Extensions { get; }
 
         /// <summary>
         /// The AAGUID, unique to the authenticator and model.
@@ -136,7 +144,7 @@ namespace Yubico.YubiKey.Fido2
         /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public IReadOnlyDictionary<string, bool>? Options { get; private set; }
+        public IReadOnlyDictionary<string, bool>? Options { get; }
 
         /// <summary>
         /// The maximum size, in bytes, of a message sent to the YubiKey.
@@ -144,7 +152,7 @@ namespace Yubico.YubiKey.Fido2
         /// will be null. The standard specifies a default of 1024
         /// (see the field <see cref="DefaultMaximumMessageSize"/>).
         /// </summary>
-        public int? MaximumMessageSize { get; private set; }
+        public int? MaximumMessageSize { get; }
 
         /// <summary>
         /// List of PIN/UV Auth Protocols the YubiKey supports. They are given in
@@ -152,7 +160,7 @@ namespace Yubico.YubiKey.Fido2
         /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public IReadOnlyList<PinUvAuthProtocol>? PinUvAuthProtocols { get; private set; }
+        public IReadOnlyList<PinUvAuthProtocol>? PinUvAuthProtocols { get; }
 
         /// <summary>
         /// The maximum number of credentials in the CredentialID list. Note that
@@ -161,21 +169,24 @@ namespace Yubico.YubiKey.Fido2
         /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public int? MaximumCredentialCountInList { get; private set; }
+        public int? MaximumCredentialCountInList { get; }
 
         /// <summary>
         /// The maximum length of a CredentialID.
         /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public int? MaximumCredentialIdLength { get; private set; }
+        public int? MaximumCredentialIdLength { get; }
 
         /// <summary>
         /// List of transport strings of CTAP supported by the authenticator.
         /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
+        /// Valid values are defined in the
+        /// <see cref="AuthenticatorTransports"/> class, which contains the
+        /// standard-defined transport strings.
         /// </summary>
-        public IReadOnlyList<string>? Transports { get; private set; }
+        public IReadOnlyList<string>? Transports { get; }
 
         /// <summary>
         /// The list of supported algorithms for credential generation. This is
@@ -189,7 +200,7 @@ namespace Yubico.YubiKey.Fido2
         /// curve. This is the pair
         /// "public-key"/<c>CoseAlgorithmIdentifier.ES256</c>.
         /// </remarks>
-        public IReadOnlyList<Tuple<string, CoseAlgorithmIdentifier>>? Algorithms { get; private set; }
+        public IReadOnlyList<Tuple<string, CoseAlgorithmIdentifier>>? Algorithms { get; }
 
         /// <summary>
         /// The maximum size, in bytes, of the serialized large-blob array that
@@ -272,7 +283,7 @@ namespace Yubico.YubiKey.Fido2
         /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public IReadOnlyDictionary<string, int>? Certifications { get; private set; }
+        public IReadOnlyDictionary<string, int>? Certifications { get; }
 
         /// <summary>
         /// The estimated number of additional discoverable credentials that can
@@ -294,6 +305,66 @@ namespace Yubico.YubiKey.Fido2
         /// integer. These numbers are to be random values.
         /// </remarks>
         public IReadOnlyList<long>? VendorPrototypeConfigCommands { get; }
+
+        /// <summary>
+        /// The maximum length of a PIN (in bytes) that the authenticator supports.
+        /// Default value is 63, which is the maximum length of a PIN in Unicode code points.
+        /// </summary>
+        public int MaximumPinLength { get; }
+
+        /// <summary>
+        /// If present, a URL that the platform can use to provide the user more information about the enforced PIN policy.
+        /// If <c>true</c>, the authenticator is enforcing a PIN complexity policy.
+        /// If <c>false</c>, the authenticator is not enforcing a PIN complexity policy
+        /// If <c>null</c>, the authenticator does not support this feature.
+        /// </summary>
+        public ReadOnlyMemory<byte> PinComplexityPolicyUrl { get; }
+
+        /// <summary>
+        /// If present, indicates whether the authenticator is enforcing an additional current PIN complexity policy beyond minPINLength.
+        /// If <c>true</c>, the authenticator is enforcing a PIN complexity policy.
+        /// If <c>false</c>, the authenticator is not enforcing a PIN complexity policy.
+        /// If <c>null</c>, the authenticator does not support this feature.
+        /// </summary>
+        public bool? PinComplexityPolicy { get; }
+
+        /// <summary>
+        /// List of transports that support the reset command.
+        /// For example, an authenticator may choose not to support this command over NFC
+        /// Valid values are defined in the
+        /// <see cref="AuthenticatorTransports"/> class, which contains the
+        /// standard-defined transport strings.
+        /// </summary>
+        public IReadOnlyList<string> TransportsForReset { get; } = new List<string>();
+
+        /// <summary>
+        /// If present, an encrypted identifier that the platform can use to identify the authenticator across resets.
+        /// The platform must use the persistent UV auth token as input to decrypt the identifier.
+        /// If <c>null</c>, the authenticator does not support this feature.
+        /// The encrypted identifier is 32 bytes: the first 16 bytes are the IV,
+        /// and the second 16 bytes are the ciphertext.
+        /// The encryption algorithm is AES-128-CBC.
+        /// The key is derived from the persistent UV auth token using HKDF-SHA-256
+        /// with the info string "encIdentifier" and a salt of 32 bytes of 0x00.
+        /// The plaintext is 16 bytes.
+        /// </summary>
+        public ReadOnlyMemory<byte>? EncIdentifier { get; }
+
+        /// <summary>
+        /// If <c>true</c>, the authenticator requires a 10-second touch for reset.
+        /// If <c>false</c>, the authenticator does not require a 10-second touch for reset.
+        /// </summary>
+        public bool LongTouchForReset { get; }
+
+        /// <summary>
+        /// If present, the number of internal User Verification operations since the last pin entry including all failed attempts. 
+        /// </summary>
+        public int? UvCountSinceLastPinEntry { get; }
+
+        /// <summary>
+        /// A list of <see cref="Yubico.YubiKey.Fido2.AttestationFormats"/>  supported by the authenticator.
+        /// </summary>
+        public IReadOnlyList<string> AttestationFormats { get; } = new List<string>();
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -325,70 +396,113 @@ namespace Yubico.YubiKey.Fido2
                 var cborMap = new CborMap<int>(cborEncoding);
 
                 Versions = cborMap.ReadArray<string>(KeyVersions);
-                _aaguid = cborMap.ReadByteString(KeyAaguid).ToArray();
-                Aaguid = new ReadOnlyMemory<byte>(_aaguid);
-                if (cborMap.Contains(KeyExtensions))
-                {
-                    Extensions = cborMap.ReadArray<string>(KeyExtensions);
-                }
-                if (cborMap.Contains(KeyOptions))
-                {
-                    var optionsCborMap = cborMap.ReadMap<string>(KeyOptions);
-                    Options = optionsCborMap.AsDictionary<bool>();
-                }
-                MaximumMessageSize = (int?)cborMap.ReadOptional<int>(KeyMaxMsgSize);
-                if (cborMap.Contains(KeyPinUvAuthProtocols))
-                {
-                    var temp = cborMap.ReadArray<int>(KeyPinUvAuthProtocols);
-                    var translator = new List<PinUvAuthProtocol>(temp.Count);
-                    for (int index = 0; index < temp.Count; index++)
-                    {
-                        translator.Add((PinUvAuthProtocol)temp[index]);
-                    }
-                    PinUvAuthProtocols = translator;
-                }
-                MaximumCredentialCountInList = (int?)cborMap.ReadOptional<int>(KeyMaxCredentialCountInList);
-                MaximumCredentialIdLength = (int?)cborMap.ReadOptional<int>(KeyMaxCredentialIdLength);
-                if (cborMap.Contains(KeyTransports))
-                {
-                    Transports = (IReadOnlyList<string>)cborMap.ReadArray<string>(KeyTransports);
-                }
-                if (cborMap.Contains(KeyAlgorithms))
-                {
-                    ReadAlgorithms(cborMap);
-                }
-                MaximumSerializedLargeBlobArray = (int?)cborMap.ReadOptional<int>(KeyMaxSerializedLargeBlobArray);
-                ForcePinChange = (bool?)cborMap.ReadOptional<bool>(KeyForcePinChange);
-                MinimumPinLength = (int?)cborMap.ReadOptional<int>(KeyMinPinLength);
-                FirmwareVersion = (int?)cborMap.ReadOptional<int>(KeyFirmwareVersion);
-                MaximumCredentialBlobLength = (int?)cborMap.ReadOptional<int>(KeyMaxCredBlobLength);
-                MaximumRpidsForSetMinPinLength = (int?)cborMap.ReadOptional<int>(KeyMaxRpidsForSetMinPinLength);
-                PreferredPlatformUvAttempts = (int?)cborMap.ReadOptional<int>(KeyPreferredPlatformUvAttempts);
-                UvModality = (int?)cborMap.ReadOptional<int>(KeyUvModality);
-                if (cborMap.Contains(KeyCertifications))
-                {
-                    var certCborMap = cborMap.ReadMap<string>(KeyCertifications);
-                    Certifications = certCborMap.AsDictionary<int>();
-                }
-                RemainingDiscoverableCredentials = (int?)cborMap.ReadOptional<int>(KeyRemainingDiscoverableCredentials);
-                if (cborMap.Contains(KeyVendorPrototypeConfigCommands))
-                {
-                    var intList = cborMap.ReadArray<object>(KeyVendorPrototypeConfigCommands);
-                    var int64List = new List<long>(intList.Count);
-                    for (int index = 0; index < intList.Count; index++)
-                    {
-                        object? currentValue = CborMap<int>.ConvertValue<long>(intList[index]);
-                        if (currentValue is long currentValue64)
-                        {
-                            int64List.Add(currentValue64);
-                        }
-                        else
-                        {
-                            int64List.Add(0);
-                        }
-                    }
-                    VendorPrototypeConfigCommands = int64List;
-                }
+                Aaguid = cborMap.ReadByteString(KeyAaguid);
+
+                Extensions = cborMap.Contains(KeyExtensions)
+                    ? cborMap.ReadArray<string>(KeyExtensions)
+                    : null;
+
+                Options = cborMap.Contains(KeyOptions)
+                    ? cborMap.ReadMap<string>(KeyOptions).AsDictionary<bool>()
+                    : null;
+
+                MaximumMessageSize = cborMap.Contains(KeyMaxMsgSize)
+                    ? cborMap.ReadInt32(KeyMaxMsgSize)
+                    : null;
+
+                PinUvAuthProtocols = cborMap.Contains(KeyPinUvAuthProtocols)
+                    ? ParsePinUvAuthProtocols(cborMap)
+                    : null;
+
+                MaximumCredentialCountInList = cborMap.Contains(KeyMaxCredentialCountInList)
+                    ? cborMap.ReadInt32(KeyMaxCredentialCountInList)
+                    : null;
+
+                MaximumCredentialIdLength = cborMap.Contains(KeyMaxCredentialIdLength)
+                    ? cborMap.ReadInt32(KeyMaxCredentialIdLength)
+                    : null;
+
+                Transports = cborMap.Contains(KeyTransports)
+                    ? cborMap.ReadArray<string>(KeyTransports)
+                    : null;
+
+                Algorithms = cborMap.Contains(KeyAlgorithms)
+                    ? ParseAlgorithms(cborMap)
+                    : null;
+
+                MaximumSerializedLargeBlobArray = cborMap.Contains(KeyMaxSerializedLargeBlobArray)
+                    ? cborMap.ReadInt32(KeyMaxSerializedLargeBlobArray)
+                    : null;
+
+                ForcePinChange = cborMap.Contains(KeyForcePinChange)
+                    ? cborMap.ReadBoolean(KeyForcePinChange)
+                    : null;
+
+                MinimumPinLength = cborMap.Contains(KeyMinPinLength)
+                    ? cborMap.ReadInt32(KeyMinPinLength)
+                    : null;
+
+                FirmwareVersion = cborMap.Contains(KeyFirmwareVersion)
+                    ? cborMap.ReadInt32(KeyFirmwareVersion)
+                    : null;
+
+                MaximumCredentialBlobLength = cborMap.Contains(KeyMaxCredBlobLength)
+                    ? cborMap.ReadInt32(KeyMaxCredBlobLength)
+                    : null;
+
+                MaximumRpidsForSetMinPinLength = cborMap.Contains(KeyMaxRpidsForSetMinPinLength)
+                    ? cborMap.ReadInt32(KeyMaxRpidsForSetMinPinLength)
+                    : null;
+
+                PreferredPlatformUvAttempts = cborMap.Contains(KeyPreferredPlatformUvAttempts)
+                    ? cborMap.ReadInt32(KeyPreferredPlatformUvAttempts)
+                    : null;
+
+                UvModality = cborMap.Contains(KeyUvModality)
+                    ? cborMap.ReadInt32(KeyUvModality)
+                    : null;
+
+                Certifications = cborMap.Contains(KeyCertifications)
+                    ? cborMap.ReadMap<string>(KeyCertifications).AsDictionary<int>()
+                    : null;
+
+                RemainingDiscoverableCredentials = cborMap.Contains(KeyRemainingDiscoverableCredentials)
+                    ? cborMap.ReadInt32(KeyRemainingDiscoverableCredentials)
+                    : null;
+
+                VendorPrototypeConfigCommands = cborMap.Contains(KeyVendorPrototypeConfigCommands)
+                    ? ParseVendorPrototypeConfigCommands(cborMap)
+                    : null;
+
+                AttestationFormats = cborMap.Contains(KeyAttestationFormats)
+                    ? cborMap.ReadArray<string>(KeyAttestationFormats)
+                    : [];
+
+                UvCountSinceLastPinEntry = cborMap.Contains(KeyUvCountSinceLastPinEntry)
+                    ? cborMap.ReadInt32(KeyUvCountSinceLastPinEntry)
+                    : null;
+
+                LongTouchForReset = cborMap.Contains(KeyLongTouchForReset) && cborMap.ReadBoolean(KeyLongTouchForReset);
+
+                EncIdentifier = cborMap.Contains(KeyEncIdentifier)
+                    ? cborMap.ReadByteString(KeyEncIdentifier)
+                    : null;
+
+                TransportsForReset = cborMap.Contains(KeyTransportsForReset)
+                    ? cborMap.ReadArray<string>(KeyTransportsForReset)
+                    : [];
+
+                PinComplexityPolicy = cborMap.Contains(KeyPinComplexityPolicy)
+                    ? cborMap.ReadBoolean(KeyPinComplexityPolicy)
+                    : null;
+
+                PinComplexityPolicyUrl = cborMap.Contains(KeyPinComplexityPolicyUrl)
+                    ? cborMap.ReadByteString(KeyPinComplexityPolicyUrl)
+                    : null;
+
+                MaximumPinLength = cborMap.Contains(KeyMaxPinLength)
+                    ? cborMap.ReadInt32(KeyMaxPinLength)
+                    : 63;
             }
             catch (CborContentException cborException)
             {
@@ -398,6 +512,84 @@ namespace Yubico.YubiKey.Fido2
                         ExceptionMessages.InvalidFido2Info),
                     cborException);
             }
+
+            return;
+
+            List<long> ParseVendorPrototypeConfigCommands(CborMap<int> cborMap)
+            {
+                var intList = cborMap.ReadArray<object>(KeyVendorPrototypeConfigCommands);
+                var int64List = new List<long>(intList.Count);
+                for (int index = 0; index < intList.Count; index++)
+                {
+                    object? currentValue = CborMap<int>.ConvertValue<long>(intList[index]);
+                    if (currentValue is long currentValue64)
+                    {
+                        int64List.Add(currentValue64);
+                    }
+                    else
+                    {
+                        int64List.Add(0);
+                    }
+                }
+
+                return int64List;
+            }
+
+            List<Tuple<string, CoseAlgorithmIdentifier>> ParseAlgorithms(CborMap<int> cborMap)
+            {
+                var entries = cborMap.ReadArray<CborMap<string>>(KeyAlgorithms);
+                var algorithms = (
+                    from entry in entries
+                    let currentType = entry.ReadTextString(ParameterHelpers.TagType)
+                    let currentAlg = (CoseAlgorithmIdentifier)entry.ReadInt32(ParameterHelpers.TagAlg)
+                    select new Tuple<string, CoseAlgorithmIdentifier>(currentType, currentAlg)
+                    ).ToList();
+
+                return algorithms;
+            }
+
+            List<PinUvAuthProtocol> ParsePinUvAuthProtocols(CborMap<int> cborMap)
+            {
+                var temp = cborMap.ReadArray<int>(KeyPinUvAuthProtocols);
+                var uvAuthProtocols = new List<PinUvAuthProtocol>(temp.Count);
+                uvAuthProtocols.AddRange(temp.Select(t => (PinUvAuthProtocol)t));
+
+                return uvAuthProtocols;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the identifier derived from the encrypted identifier, using the provided persistent UV authentication token.
+        /// </summary>
+        /// <param name="persistentUvAuthToken">
+        /// The persistent UV authentication token used to derive the key for decryption.
+        /// </param>
+        /// <returns>
+        /// The decrypted identifier as a read-only memory block of bytes, or null if the encrypted identifier is not set.
+        /// </returns>
+        public ReadOnlyMemory<byte>? GetIdentifier(ReadOnlyMemory<byte> persistentUvAuthToken)
+        {
+            if (EncIdentifier is null)
+            {
+                return null;
+            }
+
+            if (persistentUvAuthToken.Length == 0)
+            {
+                return null;
+            }
+
+            Span<byte> iv = stackalloc byte[16];
+            Span<byte> ct = stackalloc byte[16];
+            Span<byte> salt = stackalloc byte[32];
+            EncIdentifier.Value.Span[..16].CopyTo(iv);
+            EncIdentifier.Value.Span[16..].CopyTo(ct);
+
+            var key = HkdfUtilities.DeriveKey(persistentUvAuthToken.Span, salt, "encIdentifier"u8, 16);
+            var decryptedIdentifier = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);
+            CryptographicOperations.ZeroMemory(key.Span);
+
+            return decryptedIdentifier;
         }
 
         /// <summary>
@@ -424,18 +616,12 @@ namespace Yubico.YubiKey.Fido2
         /// An <c>OptionValue</c> enum that specifies the option as either
         /// <c>True</c>, <c>False</c>, <c>NotSupported</c>, or <c>Unknown</c>.
         /// </returns>
-        public OptionValue GetOptionValue(string option)
-        {
-            if (!(Options is null))
-            {
-                if (Options.ContainsKey(option))
-                {
-                    return Options[option] ? OptionValue.True : OptionValue.False;
-                }
-            }
-
-            return AuthenticatorOptions.GetDefaultOptionValue(option);
-        }
+        public OptionValue GetOptionValue(string option) =>
+            Options?.TryGetValue(option, out bool value) == true
+                ? value
+                    ? OptionValue.True
+                    : OptionValue.False
+                : AuthenticatorOptions.GetDefaultOptionValue(option);
 
         /// <summary>
         /// Determine if the given <c>extension</c> is listed in this
@@ -455,47 +641,6 @@ namespace Yubico.YubiKey.Fido2
         /// return <c>false</c>.
         /// </para>
         /// </remarks>
-        public bool IsExtensionSupported(string extension)
-        {
-            if (!(Extensions is null))
-            {
-                if (Extensions.Contains(extension))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        // We've checked, the KeyAlgorithms is in cborMap.
-        // The value is an array.
-        // Each entry in the array is a map.
-        // Each map should be the same, two elements
-        //   key/value     "alg"/<int>
-        //   key/value     "type"/<string>
-        // The return from ReadArray will be a List, the list of entries.
-        // Because each entry is a map, the return from ReadArray will be the
-        // type returned by the CborMap, which is the type returned by processing
-        // a map, namely an IDictionary.
-        // Look in this map to find the entry for "alg" and collect the value.
-        // Look in this map to find the entry for "type" and collect the value.
-        // Now build a Tuple out of the two values and add it to the Algorithms
-        // list.
-        private void ReadAlgorithms(CborMap<int> cborMap)
-        {
-            var algorithms = new List<Tuple<string, CoseAlgorithmIdentifier>>();
-
-            var entries = cborMap.ReadArray<CborMap<string>>(KeyAlgorithms);
-            for (int index = 0; index < entries.Count; index++)
-            {
-                string currentType = entries[index].ReadTextString(ParameterHelpers.TagType);
-                var currentAlg = (CoseAlgorithmIdentifier)entries[index].ReadInt32(ParameterHelpers.TagAlg);
-
-                algorithms.Add(new Tuple<string, CoseAlgorithmIdentifier>(currentType, currentAlg));
-            }
-
-            Algorithms = algorithms;
-        }
+        public bool IsExtensionSupported(string extension) => Extensions?.Contains(extension) == true;
     }
 }

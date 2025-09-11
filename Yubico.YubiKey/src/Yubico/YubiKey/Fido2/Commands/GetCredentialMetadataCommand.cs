@@ -51,10 +51,22 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <param name="authProtocol">
         /// The Auth Protocol used to build the Auth Token.
         /// </param>
+        /// <param name="decryptAuthToken">If true, the <c>pinUvAuthToken</c> is assumed encrypted,
+        /// and thus the SDK will attempt to decrypt it before passing it to the YubiKey.
+        /// If false, no decryption will be attempted.</param>
         public GetCredentialMetadataCommand(
-            ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
-            : base(new CredentialManagementCommand(SubCmdGetMetadata, null, pinUvAuthToken, authProtocol))
+            ReadOnlyMemory<byte> pinUvAuthToken,
+            PinUvAuthProtocolBase authProtocol,
+            bool decryptAuthToken = true)
+            : base(
+                new CredentialManagementCommand(
+                    SubCmdGetMetadata,
+                    null,
+                    pinUvAuthToken,
+                    authProtocol,
+                    decryptAuthToken))
         {
+            
         }
 
         /// <inheritdoc />

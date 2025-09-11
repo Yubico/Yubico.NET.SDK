@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
     /// encode itself and to take the output of that encoding and simply copy it
     /// into the full structure.
     /// </remarks>
-    internal interface ICborEncode
+    public interface ICborEncode
     {
         /// <summary>
         /// Return a new byte array that is the object encoded following the

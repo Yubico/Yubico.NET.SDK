@@ -48,14 +48,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The response indicates there was an error, so there is no data to
         /// return.
         /// </exception>
-        public MakeCredentialData GetData()
-        {
-            if (Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(StatusMessage);
-            }
-
-            return new MakeCredentialData(ResponseApdu.Data);
-        }
+        public MakeCredentialData GetData() => Status == ResponseStatus.Success 
+            ? new MakeCredentialData(ResponseApdu.Data) 
+            : throw new InvalidOperationException(StatusMessage);
     }
+    
 }

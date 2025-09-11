@@ -488,7 +488,7 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// The token is fetched if it does not already exist or if the caller explicitly requests a new token.
-        /// The YubiKey must support and return the `encIdentifier` in its `getInfo` response.
+        /// The YubiKey must support and return the `encIdentifier` in its `getInfo` response (YubiKeys v5.8.0 and later).
         /// <para>
         /// The token obtained is tied to the permission
         /// <see cref="PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly"/>

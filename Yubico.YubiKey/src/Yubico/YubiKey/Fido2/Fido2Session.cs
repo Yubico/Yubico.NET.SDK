@@ -167,7 +167,7 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// <para>
         /// A valid and active persistent PIN/UV Authentication Token (<c>persistentPinUvAuthToken</c>) is required to decrypt the identifier.
-        /// The authenticator must also support and return the `encIdentifier` in its `getInfo` response.
+        /// The authenticator must also support and return the `encIdentifier` in its `getInfo` response (YubiKeys v5.8.0 and later).
         /// </para>
         /// </remarks>
         /// <returns>

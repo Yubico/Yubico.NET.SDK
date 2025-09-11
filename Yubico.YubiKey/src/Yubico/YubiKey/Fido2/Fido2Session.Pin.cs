@@ -1028,9 +1028,11 @@ namespace Yubico.YubiKey.Fido2
 
             ObtainSharedSecret();
 
-            var command = permissions.HasValue && permissions != PinUvAuthTokenPermissions.None
-                ? GetPinUvAuthTokenUsingPin(currentPin, permissions.Value, relyingPartyId)
-                : GetPinToken(currentPin, relyingPartyId);
+            var command = permissions.HasValue &&
+                permissions != PinUvAuthTokenPermissions.None &&
+                OptionEnabled(AuthenticatorOptions.pinUvAuthToken)
+                    ? GetPinUvAuthTokenUsingPin(currentPin, permissions.Value, relyingPartyId)
+                    : GetPinToken(currentPin, relyingPartyId);
 
             var response = Connection.SendCommand(command);
             if (response.Status == ResponseStatus.Success)
@@ -1073,7 +1075,7 @@ namespace Yubico.YubiKey.Fido2
             PinUvAuthTokenPermissions permissions,
             string? relyingPartyId)
         {
-            if (!OptionEnabled("pinUvAuthToken"))
+            if (!OptionEnabled(AuthenticatorOptions.pinUvAuthToken))
             {
                 throw new InvalidOperationException(ExceptionMessages.Fido2PermsNotSupported);
             }
@@ -1264,8 +1266,8 @@ namespace Yubico.YubiKey.Fido2
             string? relyingPartyId,
             out string statusMessage)
         {
-            if (AuthenticatorInfo.GetOptionValue("pinUvAuthToken") != OptionValue.True
-                || AuthenticatorInfo.GetOptionValue("uv") != OptionValue.True)
+            if (AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.pinUvAuthToken) != OptionValue.True
+                || AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.uv) != OptionValue.True)
             {
                 statusMessage = "";
                 return CtapStatus.UnsupportedOption;

@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.YubiKey.Utilities;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -43,10 +44,10 @@ namespace Yubico.YubiKey.Fido2
         private const int TagOptions = 5;
         private const int TagPinUvAuth = 6;
         private const int TagProtocol = 7;
-        
+
         private ReadOnlyMemory<byte>? _salt1;
         private ReadOnlyMemory<byte>? _salt2;
-        private byte[]? _hmacSecretEncoding;
+        private Memory<byte>? _hmacSecretEncoding;
 
         private List<CredentialId>? _allowList;
 
@@ -163,25 +164,6 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void AllowCredential(CredentialId credentialId) => _allowList =
             ParameterHelpers.AddToList<CredentialId>(credentialId, _allowList);
-
-        /// <inheritdoc/>
-        public override byte[] CborEncode()
-        {
-            if (_hmacSecretEncoding is not null)
-            {
-                AddExtension(Fido2ExtensionKeys.HmacSecret, _hmacSecretEncoding);
-            }
-
-            return new CborMapWriter<int>()
-                .Entry(TagRp, RelyingParty.Id)
-                .Entry(TagClientDataHash, ClientDataHash)
-                .OptionalEntry<IReadOnlyList<ICborEncode>>(TagAllowList, CborHelpers.EncodeArrayOfObjects, AllowList)
-                .OptionalEntry(TagExtensions, ParameterHelpers.EncodeKeyValues, Extensions)
-                .OptionalEntry(TagOptions, ParameterHelpers.EncodeKeyValues, Options)
-                .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
-                .OptionalEntry(TagProtocol, (int?)Protocol)
-                .Encode();
-        }
 
         /// <summary>
         /// Specify that the YubiKey should return the credBlob with the
@@ -339,12 +321,12 @@ namespace Yubico.YubiKey.Fido2
         public void RequestHmacSecretExtension(
             ReadOnlyMemory<byte> salt1, ReadOnlyMemory<byte>? salt2 = null)
         {
-            if (salt1.Length != HmacSecret.HmacSecretSaltLength)
+            if (salt1.Length != HmacSecretConstants.HmacSecretSaltLength)
             {
                 throw new ArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt1));
             }
 
-            if (salt2.HasValue && salt2.Value.Length != HmacSecret.HmacSecretSaltLength)
+            if (salt2.HasValue && salt2.Value.Length != HmacSecretConstants.HmacSecretSaltLength)
             {
                 throw new ArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt2));
             }
@@ -410,39 +392,20 @@ namespace Yubico.YubiKey.Fido2
                 return;
             }
 
-            Guard.IsNotNull(authProtocol, nameof(authProtocol));
-            
-            if (authProtocol.EncryptionKey is null || authProtocol.PlatformPublicKey is null)
-            {
-                throw new InvalidOperationException(ExceptionMessages.Fido2NotEncapsulated);
-            }
-
-            // The encoded hmac-secret request info is the following
-            //   A4
-            //      01 platform key-agree key
-            //      02 encrypted salt: either E(salt1) or E(salt1 || salt2)
-            //      03 authenticate (shared secret, encrypted salt)
-            //      04 pin protocol (an int, either 1 or 2)
-            // Begin by encrypting the salt or salts.
-            byte[] dataToEncrypt = new byte[2 * HmacSecret.HmacSecretSaltLength];
-            int dataToEncryptLength = HmacSecret.HmacSecretSaltLength;
-
-            _salt1.Value.CopyTo(dataToEncrypt.AsMemory());
-            if (_salt2 is not null)
-            {
-                _salt2.Value.CopyTo(dataToEncrypt.AsMemory()[HmacSecret.HmacSecretSaltLength..]);
-                dataToEncryptLength += HmacSecret.HmacSecretSaltLength;
-            }
-
-            byte[] encryptedSalt = authProtocol.Encrypt(dataToEncrypt, 0, dataToEncryptLength);
-            byte[] authenticatedSalt = authProtocol.Authenticate(encryptedSalt);
-
-            _hmacSecretEncoding = new CborMapWriter<int>()
-                .Entry(HmacSecret.TagKeyAgreeKey, authProtocol.PlatformPublicKey)
-                .Entry(HmacSecret.TagEncryptedSalt, encryptedSalt.AsMemory())
-                .Entry(HmacSecret.TagAuthenticatedSalt, authenticatedSalt.AsMemory())
-                .Entry(HmacSecret.TagPinProtocol, (int)authProtocol.Protocol)
-                .Encode();
+            _hmacSecretEncoding = HmacSecretExtension.Encode(authProtocol, _salt1.Value, _salt2);
+            AddExtension(Fido2ExtensionKeys.HmacSecret, _hmacSecretEncoding);
         }
+
+        /// <inheritdoc/>
+        public override byte[] CborEncode()
+            => new CborMapWriter<int>()
+                .Entry(TagRp, RelyingParty.Id)
+                .Entry(TagClientDataHash, ClientDataHash)
+                .OptionalEntry<IReadOnlyList<ICborEncode>>(TagAllowList, CborHelpers.EncodeArrayOfObjects, AllowList)
+                .OptionalEntry(TagExtensions, ParameterHelpers.EncodeKeyValues, Extensions)
+                .OptionalEntry(TagOptions, ParameterHelpers.EncodeKeyValues, Options)
+                .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
+                .OptionalEntry(TagProtocol, (int?)Protocol)
+                .Encode();
     }
 }

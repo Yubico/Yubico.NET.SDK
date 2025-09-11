@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Fido2
 
         private ReadOnlyMemory<byte>? _salt1;
         private ReadOnlyMemory<byte>? _salt2;
-        private byte[]? _hmacSecretEncoding;
+        private Memory<byte>? _hmacSecretEncoding;
 
         /// <summary>
         /// The original <c>clientDataHash</c> that was provided by the client.
@@ -540,12 +540,12 @@ namespace Yubico.YubiKey.Fido2
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
 
-            if (salt1.Length != HmacSecret.HmacSecretSaltLength)
+            if (salt1.Length != HmacSecretConstants.HmacSecretSaltLength)
             {
                 throw new ArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt1));
             }
 
-            if (salt2.HasValue && salt2.Value.Length != HmacSecret.HmacSecretSaltLength)
+            if (salt2.HasValue && salt2.Value.Length != HmacSecretConstants.HmacSecretSaltLength)
             {
                 throw new ArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt2));
             }
@@ -595,26 +595,7 @@ namespace Yubico.YubiKey.Fido2
                 return;
             }
 
-            Guard.IsNotNull(authProtocol, nameof(authProtocol));
-
-            if (authProtocol.EncryptionKey is null || authProtocol.PlatformPublicKey is null)
-            {
-                throw new InvalidOperationException(ExceptionMessages.Fido2NotEncapsulated);
-            }
-
-            var dataToEncrypt = _salt2.HasValue
-                ? _salt1.Value.Concat(_salt2.Value)
-                : _salt1.Value;
-
-            byte[] encryptedSalt = authProtocol.Encrypt(dataToEncrypt);
-            byte[] authenticatedSalt = authProtocol.Authenticate(encryptedSalt);
-
-            _hmacSecretEncoding = new CborMapWriter<int>()
-                .Entry(HmacSecret.TagKeyAgreeKey, authProtocol.PlatformPublicKey)
-                .Entry(HmacSecret.TagEncryptedSalt, encryptedSalt.AsMemory())
-                .Entry(HmacSecret.TagAuthenticatedSalt, authenticatedSalt.AsMemory())
-                .Entry(HmacSecret.TagPinProtocol, (int)authProtocol.Protocol)
-                .Encode();
+            _hmacSecretEncoding = HmacSecretExtension.Encode(authProtocol, _salt1.Value, _salt2);
 
             AddExtension(Fido2ExtensionKeys.HmacSecret, true);
             AddExtension(Fido2ExtensionKeys.HmacSecretMc, _hmacSecretEncoding);

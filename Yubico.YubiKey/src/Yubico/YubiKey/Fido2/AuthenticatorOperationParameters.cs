@@ -87,6 +87,7 @@ public abstract class AuthenticatorOperationParameters<TOperationParameters> : I
         {
             byte[] byteArray => byteArray, // Assume already encoded
             ReadOnlyMemory<byte> romValue => romValue.ToArray(), // Assume already encoded
+            Memory<byte> memValue => memValue.ToArray(), // Assume already encoded
             bool boolValue => boolValue ? [CborHelpers.True] : [CborHelpers.False],
             int intValue => EncodeValue(cbor => cbor.WriteInt32(intValue)),
             byte byteValue => EncodeValue(cbor => cbor.WriteInt32(byteValue)),

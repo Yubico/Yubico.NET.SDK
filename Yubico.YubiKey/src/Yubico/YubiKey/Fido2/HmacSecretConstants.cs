@@ -17,7 +17,7 @@ namespace Yubico.YubiKey.Fido2
     /// <summary>
     /// Contains constant values for the hmac-secret extension.
     /// </summary>
-    internal static class HmacSecret
+    internal static class HmacSecretConstants
     {
         internal const int TagKeyAgreeKey = 1;
         internal const int TagEncryptedSalt = 2;

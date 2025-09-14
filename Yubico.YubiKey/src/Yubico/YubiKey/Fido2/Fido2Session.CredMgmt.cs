@@ -14,10 +14,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
@@ -26,6 +23,30 @@ namespace Yubico.YubiKey.Fido2
     // Management operations.
     public sealed partial class Fido2Session
     {
+        private Memory<byte>? _authTokenPersistent;
+
+        /// <summary>
+        /// The Persistent PinUvAuthToken (PPUAT) which can be set by the user or returned by the SDK, to later be reused for read only operations within credential management.
+        /// <remarks>
+        /// Note: this is the decrypted PPUAT. The SDK will dispose of this when the Fido2Session is disposed.
+        /// </remarks>
+        /// See <see cref="PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly"/> for more information.
+        /// </summary>
+        public ReadOnlyMemory<byte>? AuthTokenPersistent
+        {
+            get
+            {
+                if (_authTokenPersistent is null ||
+                    _authTokenPersistent?.Length == 0 ||
+                    !_authTokenPersistent.HasValue)
+                {
+                    return null;
+                }
+
+                return _authTokenPersistent.Value;
+            }
+        }
+
         /// <summary>
         /// This performs the <c>getCredsMetadata</c> subcommand of the
         /// <c>authenticatorCredentialManagement</c> command. It gets
@@ -85,11 +106,8 @@ namespace Yubico.YubiKey.Fido2
             _log.LogInformation("Get credential metadata.");
 
             bool isPreview = CredMgmtGetIsPreview();
-
-            var currentToken = GetAuthToken(
-                false, PinUvAuthTokenPermissions.CredentialManagement, null);
-
-            var command = new GetCredentialMetadataCommand(currentToken, AuthProtocol)
+            var currentToken = GetPreferredCredMgmtToken();
+            var command = new GetCredentialMetadataCommand(currentToken.Value, AuthProtocol, decryptAuthToken: currentToken.IsEncrypted)
             {
                 IsPreview = isPreview
             };
@@ -101,31 +119,18 @@ namespace Yubico.YubiKey.Fido2
             // to try again, error or no error.
             if (response.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                // Get Metadata is an odd one. The standard says that the RpId is
-                // optional with CredentialManagement. Except the standard also
-                // says it is not possible to get metadata if the RpId is
-                // present. So to guarantee a null RpId when we get the AuthToken
-                // now, yet have the RpId be the same as it was at the beginning,
-                // we'll save the AuthTokenRelyingPartyId, set the property to
-                // null, get the AuthToken, perform the operation, then restore
-                // the AuthTokenRelyingPartyId. But that's not enough. Suppose
-                // the current permissions include something that requires RpId.
-                // If we just add "cm" we won't be able to get a token, so we
-                // need to make sure the permissions only say "cm". So we'll have
-                // to save (and then restore) the AuthTokenPermissions as well.
-                // Note that this method adds "cm", so make sure the original
-                // restored includes this.
                 var savePermissions = AuthTokenPermissions;
                 string? saveRpId = AuthTokenRelyingPartyId;
                 AuthTokenPermissions = null;
                 AuthTokenRelyingPartyId = null;
                 try
                 {
-                    currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
-                    command = new GetCredentialMetadataCommand(currentToken, AuthProtocol)
+                    currentToken = GetPreferredCredMgmtToken(requestNewToken: true);
+                    command = new GetCredentialMetadataCommand(currentToken.Value, AuthProtocol, decryptAuthToken: currentToken.IsEncrypted)
                     {
                         IsPreview = isPreview
                     };
+
                     response = Connection.SendCommand(command);
                 }
                 finally
@@ -180,47 +185,27 @@ namespace Yubico.YubiKey.Fido2
             _log.LogInformation("Enumerate relying parties.");
 
             bool isPreview = CredMgmtGetIsPreview();
-
-            var currentToken = GetAuthToken(
-                false, PinUvAuthTokenPermissions.CredentialManagement, null);
-
-            var command = new EnumerateRpsBeginCommand(currentToken, AuthProtocol)
+            var currentToken = GetPreferredCredMgmtToken();
+            var command = new EnumerateRpsBeginCommand(currentToken.Value, AuthProtocol, decryptAuthToken: currentToken.IsEncrypted)
             {
                 IsPreview = isPreview
             };
-            var response = Connection.SendCommand(command);
 
-            // If the error is PinAuthInvalid, try again.
-            // If the result is not PinAuthInvalid, we know we're not going
-            // to try again, error or no error.
+            var response = Connection.SendCommand(command);
             if (response.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                // EnumerateRPs is an odd one. The standard says that the
-                // RpId is optional with CredentialManagement. Except the
-                // standard also says it is not possible to enumerate RPs if the
-                // RpId is present. So to guarantee a null RpId when we get the
-                // AuthToken now, yet have the RpId be the same as it was at the
-                // beginning, we'll save the AuthTokenRelyingPartyId, set the
-                // property to null, get the AuthToken, perform the operation,
-                // then restore the AuthTokenRelyingPartyId. But that's not
-                // enough. Suppose the current permissions include something that
-                // requires RpId. If we just add "cm" we won't be able to get a
-                // token, so we need to make sure the permissions only say "cm".
-                // So we'll have to save (and then restore) the
-                // AuthTokenPermissions as well.
-                // Note that this method adds "cm", so make sure the original
-                // restored includes this.
                 var savePermissions = AuthTokenPermissions;
                 string? saveRpId = AuthTokenRelyingPartyId;
                 AuthTokenPermissions = null;
                 AuthTokenRelyingPartyId = null;
                 try
                 {
-                    currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
-                    command = new EnumerateRpsBeginCommand(currentToken, AuthProtocol)
+                    currentToken = GetPreferredCredMgmtToken(requestNewToken: true);
+                    command = new EnumerateRpsBeginCommand(currentToken.Value, AuthProtocol, decryptAuthToken: currentToken.IsEncrypted)
                     {
                         IsPreview = isPreview
                     };
+
                     response = Connection.SendCommand(command);
                 }
                 finally
@@ -230,15 +215,11 @@ namespace Yubico.YubiKey.Fido2
                 }
             }
 
-            // If the response is NoCredentials, return an empty list.
             if (response.CtapStatus == CtapStatus.NoCredentials)
             {
                 return new List<RelyingParty>();
             }
 
-            // This will return the data or throw an exception. We either have
-            // the data, have an error other than PinAuthInvalid, or we do have
-            // the error PinAuthInvalid but only after trying twice.
             (int rpCount, var firstRp) = response.GetData();
 
             var returnValue = new List<RelyingParty>(rpCount)
@@ -246,12 +227,11 @@ namespace Yubico.YubiKey.Fido2
                 firstRp
             };
 
-            // Get the rest of the RPs. The EnumerateRpsGetNextCommand does not
-            // need the AuthToken.
             var nextCmd = new EnumerateRpsGetNextCommand()
             {
                 IsPreview = isPreview
             };
+
             for (int index = 1; index < rpCount; index++)
             {
                 var nextResponse = Connection.SendCommand(nextCmd);
@@ -310,51 +290,34 @@ namespace Yubico.YubiKey.Fido2
                 throw new ArgumentNullException(nameof(relyingParty));
             }
 
-            bool isPreview = CredMgmtGetIsPreview();
-
             _log.LogInformation("Enumerate credentials for relying party: " + relyingParty.Id + ".");
 
-            var currentToken = GetAuthToken(
-                false, PinUvAuthTokenPermissions.CredentialManagement, relyingParty.Id);
-
-            using var digester = CryptographyProviders.Sha256Creator();
-            digester.Initialize();
-            byte[] utf = Encoding.UTF8.GetBytes(relyingParty.Id);
-            byte[] digest = digester.ComputeHash(utf);
-
-            var command = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol)
+            bool isPreview = CredMgmtGetIsPreview();
+            var currentToken = GetPreferredCredMgmtToken();
+            var command = new EnumerateCredentialsBeginCommand(
+                relyingParty, currentToken.Value, AuthProtocol, decryptAuthToken: currentToken.IsEncrypted)
             {
                 IsPreview = isPreview
             };
-            var response = Connection.SendCommand(command);
 
-            // If the error is PinAuthInvalid, try again.
-            // If the result is not PinAuthInvalid, we know we're not going
-            // to try again, error or no error.
+            var response = Connection.SendCommand(command);
             if (response.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                // In order to enumerate the credentials, we need the relying
-                // party. The standard specifies the RpIdHash as the way to
-                // specify the RP. But there is also the possibility that the
-                // permissions lists an RP. The standard says that the RpId is
-                // optional with the CredentialManagement permission. However, if
-                // it is given, the RP in the permissions must match the RP
-                // specified as the RP of interest. If there's currently no RP in
-                // the permissions, leave it blank. If there is, set it to what
-                // the caller specified.
-                if (!(AuthTokenRelyingPartyId is null))
+                if (AuthTokenRelyingPartyId is not null)
                 {
                     AuthTokenRelyingPartyId = relyingParty.Id;
                 }
-                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
-                command = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol)
+
+                currentToken = GetPreferredCredMgmtToken(requestNewToken: true);
+                command = new EnumerateCredentialsBeginCommand(
+                    relyingParty, currentToken.Value, AuthProtocol, decryptAuthToken: currentToken.IsEncrypted)
                 {
                     IsPreview = isPreview
                 };
+
                 response = Connection.SendCommand(command);
             }
 
-            // If the response is NoCredentials, return an empty list.
             if (response.CtapStatus == CtapStatus.NoCredentials)
             {
                 return new List<CredentialUserInfo>();
@@ -376,6 +339,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 IsPreview = isPreview
             };
+
             for (int index = 1; index < credCount; index++)
             {
                 var nextResponse = Connection.SendCommand(nextCmd);
@@ -427,11 +391,8 @@ namespace Yubico.YubiKey.Fido2
             {
                 IsPreview = isPreview
             };
-            var response = Connection.SendCommand(command);
 
-            // If the error is PinAuthInvalid, try again.
-            // If the result is not PinAuthInvalid, we know we're not going
-            // to try again, error or no error.
+            var response = Connection.SendCommand(command);
             if (response.CtapStatus == CtapStatus.PinAuthInvalid)
             {
                 currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
@@ -439,10 +400,10 @@ namespace Yubico.YubiKey.Fido2
                 {
                     IsPreview = isPreview
                 };
+
                 response = Connection.SendCommand(command);
             }
 
-            // If the response is Success, we're done.
             if (response.Status == ResponseStatus.Success || response.CtapStatus == CtapStatus.NoCredentials)
             {
                 // After a credential has been deleted, the number of
@@ -502,15 +463,10 @@ namespace Yubico.YubiKey.Fido2
         {
             _log.LogInformation("Update user information.");
 
-            var currentToken = GetAuthToken(
-                false, PinUvAuthTokenPermissions.CredentialManagement, null);
+            var currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.CredentialManagement, null);
 
             var command = new UpdateUserInfoCommand(credentialId, newUserInfo, currentToken, AuthProtocol);
             var response = Connection.SendCommand(command);
-
-            // If the error is PinAuthInvalid, try again.
-            // If the result is not PinAuthInvalid, we know we're not going
-            // to try again, error or no error.
             if (response.CtapStatus == CtapStatus.PinAuthInvalid)
             {
                 currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
@@ -518,20 +474,39 @@ namespace Yubico.YubiKey.Fido2
                 response = Connection.SendCommand(command);
             }
 
-            // If the response is Success, we're done.
             if (response.Status == ResponseStatus.Success)
             {
                 return;
             }
 
-            // If the response is not Success, throw an exception.
             throw new Fido2Exception(response.StatusMessage);
         }
 
-        // Determine if the YubiKey supports "credMgmt or "CredentialMgmtPreview".
-        // If it supports "credMgmt", then return false.
-        // If it supports only "CredentialMgmtPreview", return true.
-        // If it supports neither, throw an exception.
+        /// <summary>
+        /// Retrieves a persistent PIN/UV authentication token to be used with
+        /// FIDO2 credential management operations that require read-only access.
+        /// </summary>
+        /// <remarks>
+        /// The token is fetched if it does not already exist or if the caller explicitly requests a new token.
+        /// The YubiKey must support and return the `encIdentifier` in its `getInfo` response (YubiKeys v5.8.0 and later).
+        /// <para>
+        /// The token obtained is tied to the permission
+        /// <see cref="PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly"/>
+        /// and is used to authenticate operations requiring read-only credential
+        /// management.
+        /// </para>
+        /// <para>
+        /// If a token is already available and `requestNewToken` parameter is set to
+        /// `false`, the current token will be returned. Otherwise, a UV verification
+        /// process will be initiated to generate a new token.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// A <c>ReadOnlyMemory</c> object containing the persistent PIN/UV
+        /// authentication token, or <c>null</c> if the operation is unsuccessful.
+        /// </returns>
+        public ReadOnlyMemory<byte>? GetPersistentPinUvAuthToken() => GetReadOnlyCredMgmtToken(requestNewToken: true);
+
         private bool CredMgmtGetIsPreview()
         {
             var cmValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.credMgmt);
@@ -548,5 +523,40 @@ namespace Yubico.YubiKey.Fido2
 
             throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
         }
+
+        private AuthToken GetPreferredCredMgmtToken(bool requestNewToken = false)
+        {
+            var readOnlyToken = GetReadOnlyCredMgmtToken(requestNewToken);
+            if (readOnlyToken is not null)
+            {
+                return new AuthToken(readOnlyToken.Value, PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly, false, null);
+            }
+
+            var fullToken = GetAuthToken(requestNewToken, PinUvAuthTokenPermissions.CredentialManagement, null);
+            return new AuthToken(fullToken, PinUvAuthTokenPermissions.CredentialManagement, true, null);
+        }
+
+        // This is only supported on YubiKeys that support the encIdentifier (v5.8.0 and later).
+        // If the YubiKey does not support it, this will always return null.
+        private ReadOnlyMemory<byte>? GetReadOnlyCredMgmtToken(bool requestNewToken = false)
+        {
+            if (AuthTokenPersistent is not null && !requestNewToken)
+            {
+                return AuthTokenPersistent;
+            }
+
+            // The methods used below will set/reset the AuthTokenPersistent
+            var resultUv = DoVerifyUv(
+                PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly, null, out string _);
+
+            if (resultUv != CtapStatus.Ok)
+            {
+                VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
+            }
+
+            return AuthTokenPersistent;
+        }
     }
+    internal readonly record struct AuthToken(ReadOnlyMemory<byte> Value, PinUvAuthTokenPermissions Permissions, bool IsEncrypted, string? RelyingPartyId);
 }
+

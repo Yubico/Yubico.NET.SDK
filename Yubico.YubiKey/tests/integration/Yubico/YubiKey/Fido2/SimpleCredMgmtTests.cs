@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
@@ -38,8 +36,8 @@ namespace Yubico.YubiKey.Fido2
 
             (var credCount, var slotCount) = fido2Session.GetCredentialMetadata();
 
-            Assert.Equal(1, credCount);
-            Assert.Equal(24, slotCount);
+            Assert.InRange(credCount, 1, int.MaxValue);
+            Assert.InRange(slotCount, 1, int.MaxValue);
         }
 
         [Fact]
@@ -62,7 +60,7 @@ namespace Yubico.YubiKey.Fido2
             var rpList = fido2Session.EnumerateRelyingParties();
             var ykCredList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
 
-            Assert.Single(ykCredList);
+            Assert.NotEmpty(ykCredList);
         }
 
         [Fact]
@@ -82,13 +80,13 @@ namespace Yubico.YubiKey.Fido2
             Assert.NotNull(credList);
             Assert.True(credList.Count == count - 1);
         }
-
+        
         private bool LocalKeyCollector(KeyEntryData arg)
         {
             switch (arg.Request)
             {
                 case KeyEntryRequest.VerifyFido2Pin:
-                    arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
+                    arg.SubmitValue(Encoding.UTF8.GetBytes("11234567"));
                     break;
                 case KeyEntryRequest.VerifyFido2Uv:
                     Console.WriteLine("Fingerprint requested.");

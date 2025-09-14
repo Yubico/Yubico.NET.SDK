@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
@@ -153,7 +154,36 @@ namespace Yubico.YubiKey.Fido2
         /// getting a copy of the info and using it throughout.
         /// </para>
         /// </remarks>
-        public AuthenticatorInfo AuthenticatorInfo => _authenticatorInfo ?? SetAndReturnAuthenticatorInfoField();
+        public AuthenticatorInfo AuthenticatorInfo => _authenticatorInfo ??= GetAuthenticatorInfoInternal();
+
+        /// <summary>
+        /// Retrieves and decrypts the authenticator's unique 128-bit device identifier.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method leverages the <c>encIdentifier</c> value obtained from the authenticator's
+        /// <c>authenticatorGetInfo</c> response. The <c>encIdentifier</c> is an encrypted byte string
+        /// containing a device identifier that is unique to the authenticator.
+        /// </para>
+        /// <para>
+        /// A valid and active persistent PIN/UV Authentication Token (<c>persistentPinUvAuthToken</c>) is required to decrypt the identifier.
+        /// The authenticator must also support and return the `encIdentifier` in its `getInfo` response (YubiKeys v5.8.0 and later).
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// A byte array containing the decrypted 128-bit (16-byte) unique device identifier.
+        /// Returns null or throws an exception if the identifier cannot be decrypted (e.g., if the PPUAT is invalid or the <c>encIdentifier</c> is missing).
+        /// </returns>
+        public ReadOnlyMemory<byte>? AuthenticatorIdentifier
+        {
+            get
+            {
+                var ppuat = GetReadOnlyCredMgmtToken();
+                return ppuat.HasValue 
+                    ? AuthenticatorInfo.GetIdentifier(ppuat.Value) 
+                    : null;
+            }
+        }
 
         // The default constructor is explicitly defined to show that we do not want it used.
         private Fido2Session()
@@ -178,10 +208,12 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="yubiKeyDevice">
         /// The object that represents the actual YubiKey on which the FIDO2 operations should be performed.
         /// </param>
+        /// <param name="persistentPinUvAuthToken">If supplied, will be used for credential management read-only operations
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <paramref name="yubiKeyDevice"/> argument is <c>null</c>.
         /// </exception>
-        public Fido2Session(IYubiKeyDevice yubiKeyDevice)
+        public Fido2Session(IYubiKeyDevice yubiKeyDevice, ReadOnlyMemory<byte>? persistentPinUvAuthToken = null)
         {
             if (yubiKeyDevice is null)
             {
@@ -195,6 +227,9 @@ namespace Yubico.YubiKey.Fido2
             Connection = yubiKeyDevice.Connect(YubiKeyApplication.Fido2);
 
             AuthProtocol = GetPreferredPinProtocol();
+            _authTokenPersistent = persistentPinUvAuthToken.HasValue
+                ? persistentPinUvAuthToken.Value.ToArray()
+                : new Memory<byte>();
         }
 
         /// <summary>
@@ -205,29 +240,20 @@ namespace Yubico.YubiKey.Fido2
         /// An <see cref="AuthenticatorInfo"/> instance containing information provided by the YubiKey.
         /// </returns>
         [Obsolete("The GetAuthenticatorInfo method is deprecated, please use the AuthenticatorInfo property instead.")]
-        public AuthenticatorInfo GetAuthenticatorInfo()
-        {
-            return AuthenticatorInfo;
-        }
-
-        // Get the AuthenticatorInfo and return it. In addition, set the
-        // _authenticatorInfo field with the info so that is is no longer
-        // necessary to call the command.
-        private AuthenticatorInfo SetAndReturnAuthenticatorInfoField()
+        public AuthenticatorInfo GetAuthenticatorInfo() => AuthenticatorInfo;
+        
+        private AuthenticatorInfo GetAuthenticatorInfoInternal()
         {
             var response = Connection.SendCommand(new GetInfoCommand());
-            _authenticatorInfo = response.GetData();
-
-            return _authenticatorInfo;
+            return response.GetData();
         }
 
+        private bool OptionPresent(string key) =>
+            AuthenticatorInfo.Options != null && AuthenticatorInfo.Options.ContainsKey(key);
+
+        private bool OptionEnabled(string key) => OptionPresent(key) && AuthenticatorInfo.Options![key];
+
         private static CtapStatus GetCtapError(IYubiKeyResponse r) => (CtapStatus)(r.StatusWord & 0xFF);
-
-        private static bool OptionPresent(AuthenticatorInfo info, string key) =>
-            info.Options != null && info.Options.ContainsKey(key);
-
-        private static bool OptionEnabled(AuthenticatorInfo info, string key) =>
-            OptionPresent(info, key) && info.Options![key];
 
         /// <inheritdoc />
         public void Dispose()
@@ -238,6 +264,11 @@ namespace Yubico.YubiKey.Fido2
             }
 
             Connection.Dispose();
+            if (_authTokenPersistent.HasValue)
+            {
+                CryptographicOperations.ZeroMemory(_authTokenPersistent.Value.Span);
+                _authTokenPersistent = null;
+            }
 
             if (_disposeAuthProtocol)
             {

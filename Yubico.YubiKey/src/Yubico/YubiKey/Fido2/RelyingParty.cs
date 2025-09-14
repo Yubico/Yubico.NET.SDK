@@ -194,7 +194,7 @@ namespace Yubico.YubiKey.Fido2
 
             cbor.WriteTextString(TagId);
             cbor.WriteTextString(Id);
-            if (!(Name is null))
+            if (Name is not null)
             {
                 cbor.WriteTextString(TagName);
                 cbor.WriteTextString(Name);
@@ -203,5 +203,7 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteEndMap();
             return cbor.Encode();
         }
+
+        public static implicit operator RelyingParty(string id) => new(id);
     }
 }

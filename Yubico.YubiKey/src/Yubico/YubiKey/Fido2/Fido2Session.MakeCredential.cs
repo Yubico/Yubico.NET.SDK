@@ -119,8 +119,9 @@ namespace Yubico.YubiKey.Fido2
                     CryptographicOperations.ZeroMemory(token);
                 }
 
+                parameters.EncodeHmacSecretExtension(AuthProtocol);
+                
                 var response = RunMakeCredential(parameters, keyCollector, out var ctapStatus);
-
                 switch (ctapStatus)
                 {
                     case CtapStatus.Ok:

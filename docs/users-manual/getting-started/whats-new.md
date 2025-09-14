@@ -24,6 +24,16 @@ Release date: September 17th, 2025
 
 Features:
 
+- Support has been added for the following CTAP 2.2 and YubiKey firmware version 5.8 features ([#299](https://github.com/Yubico/Yubico.NET.SDK/pull/299)):
+
+  - Persistent PinUvAuthToken (PPUAT)
+
+  - ThirdPartyPayment extension: The SDK now supports the ThirdPartyPayment extension, which enables YubiKeys to be used for cross-domain credentials without redirects, as required by Secure Payment Confirmation (SPC) workflows. Use the GetThirdPartyPaymentExtension method to check for and return the status of the ThirdPartyPayment extension.
+
+  - hmac-secret-mc extension: The SDK now supports the hmac-secret-mc extension, which enables PRF (Pseudo-Random Function) during MakeCredential(). ``GetHmacSecretExtension`` now handles both hmac-secret and hmac-secret-mc extensions when extracting and decrypting secrets.
+
+  - Additional ``AuthenticatorInfo`` properties: The SDK now supports parsing of several new AuthenticatorInfo properties, which are returned when calling the GetInfoCommand(). Properties include ``KeyAttestationFormats``, ``KeyUvCountSinceLastPinEntry``, ``KeyLongTouchForReset``, ``KeyEncIdentifier``, ``KeyTransportsForReset``, ``KeyPinComplexityPolicy``, ``KeyPinComplexityPolicyUrl``, and ``KeyMaxPinLength``.
+
 - The SDK has been updated to target .NET Framework 4.7.2, which provides broad reliability, security, and performance improvements. ([#274](https://github.com/Yubico/Yubico.NET.SDK/pull/274))
 
 - A ``FailedApdu`` helper method has been added to the ``OtpErrorTransform`` pipeline to streamline the creation of failed APDU responses. Additionally, the sequence validation logic of the ``OtpErrorTransform`` pipeline has been updated to handle edge cases more effectively. ([#276](https://github.com/Yubico/Yubico.NET.SDK/pull/276))
@@ -31,6 +41,10 @@ Features:
 - The NuGet package metadata has been updated for the ``Yubico.Core.csproj`` and ``Yubico.YubiKey.csproj`` files to improve discoverability, consistency, and clarity. The updates include new ``PackageId`` and ``PackageTags`` fields as well as a reorganized ``PackageReleaseNotes`` field. ([#265](https://github.com/Yubico/Yubico.NET.SDK/pull/265))
 
 - ``ToString`` overrides have been introduced in the [CommandApdu](xref:Yubico.Core.Iso7816.CommandApdu) and [ResponseApdu](xref:Yubico.Core.Iso7816.ResponseApdu) classes to provide a human-readable string representation of their internal state. These changes improve debugging and logging of APDUs. ([#270](https://github.com/Yubico/Yubico.NET.SDK/pull/270))
+
+- A new HkdfUtilities class has been added to the SDK. This class implements HKDF key derivation using HMAC-SHA256, as specified in RFC 5869, providing a reusable and standards-compliant key derivation utility. ([#299](https://github.com/Yubico/Yubico.NET.SDK/pull/299))
+
+- Support has been added for decrypting the ``encIdentifier`` and presenting the identifier within the Fido2Session via GetIdentifier.
 
 Bug Fixes:
 

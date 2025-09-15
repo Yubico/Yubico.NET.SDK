@@ -26,13 +26,13 @@ Features:
 
 - Support has been added for the following CTAP 2.2 and YubiKey firmware version 5.8 features ([#299](https://github.com/Yubico/Yubico.NET.SDK/pull/299)):
 
-  - Persistent PinUvAuthToken (PPUAT)
+  - Persistent PinUvAuthToken (PPUAT): The [GetPersistentPinUvAuthToken()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetPersistentPinUvAuthToken) method has been added to retrieve PPUATs for use with read-only FIDO2 credential management operations, including [EnumerateRelyingParties()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateRelyingParties), [EnumerateCredentialsForRelyingParty()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateCredentialsForRelyingParty%28Yubico.YubiKey.Fido2.RelyingParty%29), and [GetCredentialMetadata()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata). PPUATs enable applications to list discoverable credentials from YubiKeys without requiring repeated PIN entry.
 
-  - ThirdPartyPayment extension: The SDK now supports the ThirdPartyPayment extension, which enables YubiKeys to be used for cross-domain credentials without redirects, as required by Secure Payment Confirmation (SPC) workflows. Use the GetThirdPartyPaymentExtension method to check for and return the status of the ThirdPartyPayment extension.
+  - thirdPartyPayment extension: The [GetThirdPartyPaymentExtension](xref:Yubico.YubiKey.Fido2.AuthenticatorData.GetThirdPartyPaymentExtension) method has been added to check for and return the status of the thirdPartyPayment extension. The thirdPartyPayment extension enables YubiKeys to be used for cross-domain credentials without redirects, as required by Secure Payment Confirmation (SPC) workflows.
 
-  - hmac-secret-mc extension: The SDK now supports the hmac-secret-mc extension, which enables PRF (Pseudo-Random Function) during MakeCredential(). ``GetHmacSecretExtension`` now handles both hmac-secret and hmac-secret-mc extensions when extracting and decrypting secrets.
+  - hmac-secret-mc extension: [GetHmacSecretExtension](xref:Yubico.YubiKey.Fido2.AuthenticatorData.GetHmacSecretExtension%28Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase%29) now handles both hmac-secret and hmac-secret-mc extensions when extracting and decrypting secrets. The hmac-secret-mc extension enables PRF (Pseudo-Random Function) during [MakeCredential()](xref:Yubico.YubiKey.Fido2.Fido2Session.MakeCredential%28Yubico.YubiKey.Fido2.MakeCredentialParameters%29).
 
-  - Additional ``AuthenticatorInfo`` properties: The SDK now supports parsing of several new AuthenticatorInfo properties, which are returned when calling the GetInfoCommand(). Properties include ``KeyAttestationFormats``, ``KeyUvCountSinceLastPinEntry``, ``KeyLongTouchForReset``, ``KeyEncIdentifier``, ``KeyTransportsForReset``, ``KeyPinComplexityPolicy``, ``KeyPinComplexityPolicyUrl``, and ``KeyMaxPinLength``.
+  - Additional ``AuthenticatorInfo`` properties: The SDK now supports parsing of several new [AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo) properties, which are returned when calling the [GetInfoCommand()](xref:Yubico.YubiKey.Fido2.Commands.GetInfoCommand). Properties include ``AttestationFormats``, ``UvCountSinceLastPinEntry``, ``LongTouchForReset``, ``EncIdentifier``, ``TransportsForReset``, ``PinComplexityPolicy``, ``PinComplexityPolicyUrl``, and ``MaxPinLength``.
 
 - The SDK has been updated to target .NET Framework 4.7.2, which provides broad reliability, security, and performance improvements. ([#274](https://github.com/Yubico/Yubico.NET.SDK/pull/274))
 
@@ -42,9 +42,7 @@ Features:
 
 - ``ToString`` overrides have been introduced in the [CommandApdu](xref:Yubico.Core.Iso7816.CommandApdu) and [ResponseApdu](xref:Yubico.Core.Iso7816.ResponseApdu) classes to provide a human-readable string representation of their internal state. These changes improve debugging and logging of APDUs. ([#270](https://github.com/Yubico/Yubico.NET.SDK/pull/270))
 
-- A new HkdfUtilities class has been added to the SDK. This class implements HKDF key derivation using HMAC-SHA256, as specified in RFC 5869, providing a reusable and standards-compliant key derivation utility. ([#299](https://github.com/Yubico/Yubico.NET.SDK/pull/299))
-
-- Support has been added for decrypting the ``encIdentifier`` and presenting the identifier within the Fido2Session via GetIdentifier.
+- A new internal ``HkdfUtilities`` class has been added to the SDK. This class implements HKDF key derivation using HMAC-SHA256, as specified in RFC 5869, providing a reusable and standards-compliant key derivation utility. ([#299](https://github.com/Yubico/Yubico.NET.SDK/pull/299))
 
 Bug Fixes:
 

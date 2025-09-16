@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -322,9 +322,7 @@ namespace Yubico.YubiKey.TestUtilities
                     return true;
 
                 case KeyEntryRequest.VerifyFido2Pin:
-                    ReadOnlyMemory<byte> toSubmit =
-                        pin ?? new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
-                    keyEntryData.SubmitValue(toSubmit.Span);
+                    keyEntryData.SubmitValue("11234567"u8);
                     return true;
 
                 case KeyEntryRequest.TouchRequest:

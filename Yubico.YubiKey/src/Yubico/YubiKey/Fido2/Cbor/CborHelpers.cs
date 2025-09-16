@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ namespace Yubico.YubiKey.Fido2.Cbor
     /// </summary>
     internal static class CborHelpers
     {
+        public const byte True = 0xF5;
+        public const byte False = 0xF4;
+        
         // Use this delegate to pass in an encoding function (rather than the
         // entire object) for WriteEncodedValue.
         // If there is nothing to encode (e.g. localData is null), then return an
@@ -116,6 +119,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 cbor.WriteTextString(currentString);
             }
+
             cbor.WriteEndArray();
 
             return cbor.Encode();
@@ -153,6 +157,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 cbor.WriteEncodedValue(cborEncode.CborEncode());
             }
+
             cbor.WriteEndArray();
 
             return cbor.Encode();

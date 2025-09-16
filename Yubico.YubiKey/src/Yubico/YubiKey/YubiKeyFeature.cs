@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -285,6 +285,11 @@ namespace Yubico.YubiKey
         /// <summary>
         /// Support for the PIV Curve25519 key type.
         /// </summary>
-        PivCurve25519
+        PivCurve25519,
+
+        /// <summary>
+        /// Support for the FIDO2 CTAP2.2 standard.
+        /// </summary>
+        FidoCtap22
     }
 }

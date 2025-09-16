@@ -1,4 +1,4 @@
-// Copyright 2023 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public BioModality GetBioModality()
         {
-            _log.LogInformation("Get BioModality.");
+            Logger.LogInformation("Get BioModality.");
 
             var cmd = new GetBioModalityCommand();
             var response = Connection.SendCommand(cmd);
@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public FingerprintSensorInfo GetFingerprintSensorInfo()
         {
-            _log.LogInformation("Get fingerprint sensor info.");
+            Logger.LogInformation("Get fingerprint sensor info.");
 
             var cmd = new GetFingerprintSensorInfoCommand();
             var rsp = Connection.SendCommand(cmd);
@@ -229,7 +229,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public TemplateInfo EnrollFingerprint(string? friendlyName, int? timeoutMilliseconds)
         {
-            _log.LogInformation("Try to enroll a fingerprint.");
+            Logger.LogInformation("Try to enroll a fingerprint.");
 
             var keyCollector = EnsureKeyCollector();
 

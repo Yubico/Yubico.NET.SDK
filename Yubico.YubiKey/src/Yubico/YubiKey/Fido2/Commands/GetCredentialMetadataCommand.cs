@@ -1,4 +1,4 @@
-// Copyright 2023 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -52,13 +52,47 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The Auth Protocol used to build the Auth Token.
         /// </param>
         public GetCredentialMetadataCommand(
-            ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
-            : base(new CredentialManagementCommand(SubCmdGetMetadata, null, pinUvAuthToken, authProtocol))
+            ReadOnlyMemory<byte> pinUvAuthToken,
+            PinUvAuthProtocolBase authProtocol)
+            : base(
+                new CredentialManagementCommand(
+                    SubCmdGetMetadata,
+                    null,
+                    pinUvAuthToken,
+                    authProtocol))
+        {
+
+        }
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="GetCredentialMetadataCommand"/> with a pre-computed PIN/UV auth param.
+        /// </summary>
+        /// <param name="pinUvAuthParam">
+        ///     The pre-computed PIN/UV auth param for this command.
+        /// </param>
+        /// <param name="protocol">
+        ///     The PIN/UV protocol version used to compute the auth param.
+        /// </param>
+        public GetCredentialMetadataCommand(
+            ReadOnlyMemory<byte> pinUvAuthParam,
+            PinUvAuthProtocol protocol)
+            : base(new CredentialManagementCommand(SubCmdGetMetadata, null, pinUvAuthParam, protocol))
         {
         }
 
         /// <inheritdoc />
         public GetCredentialMetadataResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new GetCredentialMetadataResponse(responseApdu);
+
+        /// <summary>
+        /// Creates the authentication message for this command, consisting of only the subcommand byte.
+        /// </summary>
+        /// <returns>
+        /// The message to be used for PIN/UV authentication.
+        /// </returns>
+        public static byte[] GetAuthenticationMessage()
+        {
+            return new byte[] { SubCmdGetMetadata };
+        }
     }
 }

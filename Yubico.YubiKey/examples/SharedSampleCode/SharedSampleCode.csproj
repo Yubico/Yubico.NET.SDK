@@ -1,4 +1,4 @@
-﻿<!-- Copyright 2021 Yubico AB
+﻿<!-- Copyright 2025 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,16 +23,9 @@ limitations under the License. -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>@(NoWarn);NU5105;NU5104</NoWarn>
   </PropertyGroup>
-
-  <!--
-  To test against local YubiKey library changes, uncomment the following line and adjust the path as needed 
-  and comment out the Yubico.YubiKey PackageReference line below that references the wildcard version (which would then be fetched from the NuGet servers).
+  
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
-  </ItemGroup>-->
-
-  <ItemGroup>
-    <PackageReference Include="Yubico.YubiKey" Version="1.*-*" />
   </ItemGroup>
-
+  
 </Project>

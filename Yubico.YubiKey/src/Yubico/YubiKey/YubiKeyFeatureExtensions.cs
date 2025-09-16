@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -255,6 +255,10 @@ namespace Yubico.YubiKey
                 YubiKeyFeature.OathSha512 =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V4_3_4
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath),
+
+                YubiKeyFeature.FidoCtap22 =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_8_0
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Fido2),
 
                 _ => throw new ArgumentException(
                     string.Format(

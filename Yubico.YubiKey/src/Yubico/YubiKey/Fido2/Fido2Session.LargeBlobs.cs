@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public SerializedLargeBlobArray GetSerializedLargeBlobArray()
         {
-            _log.LogInformation("Get the current large blob array.");
+            Logger.LogInformation("Get the current large blob array.");
 
             // Does the YubiKey support Large Blobs?
             if (AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.largeBlobs) != OptionValue.True)
@@ -221,7 +221,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void SetSerializedLargeBlobArray(SerializedLargeBlobArray serializedLargeBlobArray)
         {
-            _log.LogInformation("Set the YubiKey with a new large blob array.");
+            Logger.LogInformation("Set the YubiKey with a new large blob array.");
 
             if (serializedLargeBlobArray is null)
             {

@@ -1,4 +1,4 @@
-# Copyright 2021 Yubico AB
+# Copyright 2025 Yubico AB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,7 +52,8 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Add local NuGet repository
+      # Add local NuGet repository so that we can use internal pre-release versions
+      - name: Add local NuGet repository for prerelease versions
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
       - name: Build Yubico.NET.SDK.sln

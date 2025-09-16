@@ -1,4 +1,4 @@
-// Copyright 2023 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -53,6 +55,22 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </summary>
         public EnumerateCredentialsGetNextCommand()
             : base(new CredentialManagementCommand(SubCmdGetEnumerateCredsGetNext))
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="EnumerateCredentialsGetNextCommand"/> with a pre-computed PIN/UV auth param.
+        /// </summary>
+        /// <param name="pinUvAuthParam">
+        ///     The pre-computed PIN/UV auth param for this command.
+        /// </param>
+        /// <param name="protocol">
+        ///     The PIN/UV protocol version used to compute the auth param.
+        /// </param>
+        public EnumerateCredentialsGetNextCommand(
+            ReadOnlyMemory<byte> pinUvAuthParam,
+            PinUvAuthProtocol protocol)
+            : base(new CredentialManagementCommand(SubCmdGetEnumerateCredsGetNext, null, pinUvAuthParam, protocol))
         {
         }
 

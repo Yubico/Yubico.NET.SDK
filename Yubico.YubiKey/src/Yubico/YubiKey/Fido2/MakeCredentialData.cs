@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ namespace Yubico.YubiKey.Fido2
 
         private const int MaxAttestationMapCount = 3;
 
-        private const string PackedString = "packed";
         private const string AlgString = "alg";
         private const string SigString = "sig";
         private const string X5cString = "x5c";
@@ -49,7 +48,7 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The attestation statement format identifier.
         /// </summary>
-        public string Format { get; private set; }
+        public string Format { get; }
 
         /// <summary>
         /// The object that contains both the encoded authenticator data, which
@@ -60,25 +59,8 @@ namespace Yubico.YubiKey.Fido2
         /// Save the public key in this object and use it to verify assertions
         /// returned by calling <c>GetAssertion</c>.
         /// </remarks>
-        public AuthenticatorData AuthenticatorData { get; private set; }
-
-        /// <summary>
-        /// The list of extensions. This is an optional value and can be null.
-        /// </summary>
-        /// <remarks>
-        /// Each extension is a key/value pair. All keys are strings, but each
-        /// extension has its own definition of a value. It could be an int, or
-        /// it could be a map containing a string and a boolean,. It is the
-        /// caller's responsibility to decode the value.
-        /// <para>
-        /// For each value, the standard (or the vendor in the case of
-        /// vendor-defined extensions) will define the structure of the value.
-        /// From that structure the value can be decoded following CBOR rules.
-        /// The encoded value is what is stored in this dictionary.
-        /// </para>
-        /// </remarks>
-        public IReadOnlyDictionary<string, byte[]>? Extensions { get; private set; }
-
+        public AuthenticatorData AuthenticatorData { get; }
+        
         /// <summary>
         /// The algorithm used to create the attestation statement.
         /// </summary>
@@ -205,17 +187,19 @@ namespace Yubico.YubiKey.Fido2
             {
                 Format = map.ReadTextString(KeyFormat);
                 AuthenticatorData = new AuthenticatorData(map.ReadByteString(KeyAuthData));
-                if (!(AuthenticatorData.CredentialPublicKey is CoseEcPublicKey)
+                if (AuthenticatorData.CredentialPublicKey is not CoseEcPublicKey
                     || AuthenticatorData.CredentialPublicKey.Type != CoseKeyType.Ec2
                     || !map.Contains(KeyAttestationStatement)
                     || !ReadAttestation(map))
                 {
                     throw new Ctap2DataException(ExceptionMessages.Ctap2UnknownAttestationFormat);
                 }
+                
                 if (map.Contains(KeyEnterpriseAttestation))
                 {
                     EnterpriseAttestation = map.ReadBoolean(KeyEnterpriseAttestation);
                 }
+                
                 if (map.Contains(KeyLargeBlob))
                 {
                     LargeBlobKey = map.ReadByteString(KeyLargeBlob);
@@ -244,7 +228,7 @@ namespace Yubico.YubiKey.Fido2
         {
             var attestCborMap = map.ReadMap<string>(KeyAttestationStatement);
             EncodedAttestationStatement = attestCborMap.Encoded;
-            if (!Format.Equals(PackedString, StringComparison.Ordinal) || !attestCborMap.Contains(AlgString) ||
+            if (!Format.Equals(AttestationFormats.Packed, StringComparison.Ordinal) || !attestCborMap.Contains(AlgString) ||
                 !attestCborMap.Contains(SigString) ||
                 attestCborMap.Count > MaxAttestationMapCount ||
                 (attestCborMap.Count == MaxAttestationMapCount && !attestCborMap.Contains(X5cString)))

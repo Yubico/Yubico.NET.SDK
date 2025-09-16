@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 using System;
 using System.Globalization;
 using Yubico.Core.Logging;
-using Yubico.YubiKey.Oath;
 using Yubico.YubiKey.Otp.Commands;
 using Yubico.YubiKey.Otp.Operations;
 using Yubico.YubiKey.Scp;
@@ -77,7 +76,7 @@ namespace Yubico.YubiKey.Otp
         /// <param name="keyParameters">An instance of <see cref="Scp03KeyParameters"/> containing the
         /// parameters for the SCP03 key. If <see langword="null"/>, the default parameters will be used. </param>
         public OtpSession(IYubiKeyDevice yubiKey, ScpKeyParameters? keyParameters = null)
-            : base(Log.GetLogger<OathSession>(), yubiKey, YubiKeyApplication.Otp, keyParameters)
+            : base(Log.GetLogger<OtpSession>(), yubiKey, YubiKeyApplication.Otp, keyParameters)
         {
             // Getting the OTP status allows the user to read the OTP status on the OtpSession object.
             _otpStatus = Connection.SendCommand(new ReadStatusCommand()).GetData();

@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -64,13 +64,13 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(theKey));
             }
+            
             if (theValue is null)
             {
                 throw new ArgumentNullException(nameof(theValue));
             }
 
-            var returnDictionary =
-                currentDictionary is null ? new Dictionary<string, TValue>() : currentDictionary;
+            var returnDictionary = currentDictionary ?? new Dictionary<string, TValue>();
 
             // If the key already exists, replace the current value in the
             // dictionary with this one.

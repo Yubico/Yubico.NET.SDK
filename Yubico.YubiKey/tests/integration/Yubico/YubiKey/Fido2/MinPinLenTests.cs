@@ -1,4 +1,4 @@
-// Copyright 2023 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ namespace Yubico.YubiKey.Fido2
             switch (arg.Request)
             {
                 case KeyEntryRequest.VerifyFido2Pin:
-                    arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
+                    arg.SubmitValue(Encoding.UTF8.GetBytes("11234567"));
                     break;
                 case KeyEntryRequest.VerifyFido2Uv:
                     Console.WriteLine("Fingerprint requested.");

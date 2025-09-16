@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -85,5 +85,10 @@ namespace Yubico.Core.Iso7816
             SW2 = (byte)(sw & 0xFF);
             Data = dataWithoutSW.ToArray();
         }
+
+        /// <summary>
+        /// Prints SW1, SW2, and the length of the Data field in a formatted string.
+        /// </summary>
+        public override string ToString() => $"SW1: 0x{SW1:X2} SW2: 0x{SW2:X2} Data: {Data.Span.Length} bytes";
     }
 }

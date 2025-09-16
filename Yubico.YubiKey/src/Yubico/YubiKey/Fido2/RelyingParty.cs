@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -194,7 +194,7 @@ namespace Yubico.YubiKey.Fido2
 
             cbor.WriteTextString(TagId);
             cbor.WriteTextString(Id);
-            if (!(Name is null))
+            if (Name is not null)
             {
                 cbor.WriteTextString(TagName);
                 cbor.WriteTextString(Name);
@@ -203,5 +203,7 @@ namespace Yubico.YubiKey.Fido2
             cbor.WriteEndMap();
             return cbor.Encode();
         }
+
+        public static implicit operator RelyingParty(string id) => new(id);
     }
 }

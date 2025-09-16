@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -163,7 +163,7 @@ namespace Yubico.YubiKey.Fido2
                 NumberOfCredentials = (int?)map.ReadOptional<int>(KeyNumberCredentials);
                 UserSelected = (bool?)map.ReadOptional<bool>(KeyUserSelected);
                 _keyData = (byte[]?)map.ReadOptional<byte[]>(KeyLargeBlobKey);
-                if (!(_keyData is null))
+                if (_keyData is not null)
                 {
                     LargeBlobKey = new ReadOnlyMemory<byte>(_keyData);
                 }

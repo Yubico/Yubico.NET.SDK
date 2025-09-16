@@ -1,4 +1,4 @@
-﻿// Copyright 2022 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.Security.Cryptography;
+using CommunityToolkit.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
@@ -64,42 +66,9 @@ namespace Yubico.YubiKey.Fido2
     /// and ultimately release the connection to the YubiKey.
     /// </para>
     /// </remarks>
-    public sealed partial class Fido2Session : IDisposable
+    public sealed partial class Fido2Session : ApplicationSession
     {
-        private readonly ILogger _log = Log.GetLogger<Fido2Session>();
-        private bool _disposed;
         private AuthenticatorInfo? _authenticatorInfo;
-
-        /// <summary>
-        /// The object that represents the connection to the YubiKey. Most applications can ignore this, but it can be
-        /// used to call command classes and send APDUs directly to the YubiKey during advanced scenarios.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Most common FIDO2 operations can be done using the various methods contained on the <see cref="Fido2Session"/>
-        /// class. There are some cases where you will need to issue a very specific command that is otherwise not
-        /// available to you using the session's methods.
-        /// </para>
-        /// <para>
-        /// This property gives you direct access to the existing connection to the YubiKey using the
-        /// <see cref="IYubiKeyConnection"/> interface. To send your own commands, call the
-        /// <see cref="IYubiKeyConnection.SendCommand{TResponse}"/> method like in the following example:
-        /// <example lang="C#">
-        /// var yubiKey = FindYubiKey();
-        ///
-        /// using (var fido2 = new Fido2Session(yubiKey))
-        /// {
-        ///     var command = new ClientPinCommand(){ /* Set properties to your needs */ };
-        ///
-        ///     // Sends a command to the FIDO2 application
-        ///     var response = fido2.Connection.SendCommand(command);
-        ///
-        ///     /* Read and handle the response */
-        /// }
-        /// </example>
-        /// </para>
-        /// </remarks>
-        public IYubiKeyConnection Connection { get; }
 
         /// <summary>
         /// A callback that this class will call when it needs the YubiKey
@@ -153,12 +122,35 @@ namespace Yubico.YubiKey.Fido2
         /// getting a copy of the info and using it throughout.
         /// </para>
         /// </remarks>
-        public AuthenticatorInfo AuthenticatorInfo => _authenticatorInfo ?? SetAndReturnAuthenticatorInfoField();
+        public AuthenticatorInfo AuthenticatorInfo => _authenticatorInfo ??= GetAuthenticatorInfoInternal();
 
-        // The default constructor is explicitly defined to show that we do not want it used.
-        private Fido2Session()
+        /// <summary>
+        /// Retrieves and decrypts the authenticator's unique 128-bit device identifier.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method leverages the <c>encIdentifier</c> value obtained from the authenticator's
+        /// <c>authenticatorGetInfo</c> response. The <c>encIdentifier</c> is an encrypted byte string
+        /// containing a device identifier that is unique to the authenticator.
+        /// </para>
+        /// <para>
+        /// A valid and active persistent PIN/UV Authentication Token (<c>persistentPinUvAuthToken</c>) is required to decrypt the identifier.
+        /// The authenticator must also support and return the `encIdentifier` in its `getInfo` response (YubiKeys v5.8.0 and later).
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// A byte array containing the decrypted 128-bit (16-byte) unique device identifier.
+        /// Returns null or throws an exception if the identifier cannot be decrypted (e.g., if the PPUAT is invalid or the <c>encIdentifier</c> is missing).
+        /// </returns>
+        public ReadOnlyMemory<byte>? AuthenticatorIdentifier
         {
-            throw new NotImplementedException();
+            get
+            {
+                var ppuat = GetReadOnlyCredMgmtToken();
+                return ppuat.HasValue
+                    ? AuthenticatorInfo.GetIdentifier(ppuat.Value)
+                    : null;
+            }
         }
 
         /// <summary>
@@ -175,26 +167,27 @@ namespace Yubico.YubiKey.Fido2
         ///     }
         /// </code>
         /// </remarks>
-        /// <param name="yubiKeyDevice">
+        /// <param name="yubiKey">
         /// The object that represents the actual YubiKey on which the FIDO2 operations should be performed.
         /// </param>
+        /// <param name="persistentPinUvAuthToken">If supplied, will be used for credential management read-only operations
+        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// The <paramref name="yubiKeyDevice"/> argument is <c>null</c>.
+        /// The <paramref name="yubiKey"/> argument is <c>null</c>.
         /// </exception>
-        public Fido2Session(IYubiKeyDevice yubiKeyDevice)
+        public Fido2Session(IYubiKeyDevice yubiKey, ReadOnlyMemory<byte>? persistentPinUvAuthToken = null)
+            : base(Log.GetLogger<Fido2Session>(), yubiKey, YubiKeyApplication.Fido2, keyParameters: null)
         {
-            if (yubiKeyDevice is null)
-            {
-                throw new ArgumentNullException(nameof(yubiKeyDevice));
-            }
+            Guard.IsNotNull(yubiKey, nameof(yubiKey));
 
-            _log.LogInformation(
+            Logger.LogInformation(
                 "Establishing a new FIDO2 session for YubiKey {SerialNumber}.",
-                yubiKeyDevice.SerialNumber);
-
-            Connection = yubiKeyDevice.Connect(YubiKeyApplication.Fido2);
+                yubiKey.SerialNumber);
 
             AuthProtocol = GetPreferredPinProtocol();
+            _authTokenPersistent = persistentPinUvAuthToken.HasValue
+                ? persistentPinUvAuthToken.Value.ToArray()
+                : new Memory<byte>();
         }
 
         /// <summary>
@@ -205,47 +198,43 @@ namespace Yubico.YubiKey.Fido2
         /// An <see cref="AuthenticatorInfo"/> instance containing information provided by the YubiKey.
         /// </returns>
         [Obsolete("The GetAuthenticatorInfo method is deprecated, please use the AuthenticatorInfo property instead.")]
-        public AuthenticatorInfo GetAuthenticatorInfo()
-        {
-            return AuthenticatorInfo;
-        }
+        public AuthenticatorInfo GetAuthenticatorInfo() => AuthenticatorInfo;
 
-        // Get the AuthenticatorInfo and return it. In addition, set the
-        // _authenticatorInfo field with the info so that is is no longer
-        // necessary to call the command.
-        private AuthenticatorInfo SetAndReturnAuthenticatorInfoField()
+        private AuthenticatorInfo GetAuthenticatorInfoInternal()
         {
             var response = Connection.SendCommand(new GetInfoCommand());
-            _authenticatorInfo = response.GetData();
-
-            return _authenticatorInfo;
+            return response.GetData();
         }
+
+        private bool OptionPresent(string key) =>
+            AuthenticatorInfo.Options != null && AuthenticatorInfo.Options.ContainsKey(key);
+
+        private bool OptionEnabled(string key) => OptionPresent(key) && AuthenticatorInfo.Options![key];
 
         private static CtapStatus GetCtapError(IYubiKeyResponse r) => (CtapStatus)(r.StatusWord & 0xFF);
 
-        private static bool OptionPresent(AuthenticatorInfo info, string key) =>
-            info.Options != null && info.Options.ContainsKey(key);
-
-        private static bool OptionEnabled(AuthenticatorInfo info, string key) =>
-            OptionPresent(info, key) && info.Options![key];
-
         /// <inheritdoc />
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (_disposed)
+            if (disposing)
             {
-                return;
+                Logger.LogInformation("Disposing of the FIDO2 session.");
+
+                if (_authTokenPersistent.HasValue)
+                {
+                    CryptographicOperations.ZeroMemory(_authTokenPersistent.Value.Span);
+                    _authTokenPersistent = null;
+                }
+
+                if (_disposeAuthProtocol)
+                {
+                    AuthProtocol.Dispose();
+                }
+
+                KeyCollector = null;
             }
 
-            Connection.Dispose();
-
-            if (_disposeAuthProtocol)
-            {
-                AuthProtocol.Dispose();
-            }
-
-            KeyCollector = null;
-            _disposed = true;
+            base.Dispose(disposing);
         }
     }
 }

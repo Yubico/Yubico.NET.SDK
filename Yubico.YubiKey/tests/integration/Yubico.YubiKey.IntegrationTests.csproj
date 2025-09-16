@@ -1,4 +1,4 @@
-﻿<!-- Copyright 2021 Yubico AB
+﻿<!-- Copyright 2025 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ limitations under the License. -->
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
     <PackageReference Include="System.Formats.Asn1" Version="9.0.6" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.5.23" />

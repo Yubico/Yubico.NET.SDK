@@ -1,4 +1,4 @@
-// Copyright 2023 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class ConfigCommandTests : NeedPinToken
     {
         public ConfigCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
 

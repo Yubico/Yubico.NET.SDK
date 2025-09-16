@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Fido2
     /// </para>
     /// <para>
     /// When specifying an option (e.g.,
-    /// see <see cref="MakeCredentialParameters.Options"/> of the
+    /// see <see cref="AuthenticatorOperationParameters{T}.Options"/> of the
     /// <c>MakeCredentialParameters</c> class) provide the string and boolean.
     /// You can use this class to specify the string (the key of key/value). This
     /// might be helpful if you rely on IDE features such as autocompletion or

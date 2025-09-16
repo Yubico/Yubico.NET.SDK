@@ -1,4 +1,4 @@
-// Copyright 2024 Yubico AB
+// Copyright 2025 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -30,9 +30,13 @@ namespace Yubico.YubiKey
     {
         /// <summary>
         /// The object that represents the connection to the YubiKey. Most
-        /// applications will ignore this, but it can be used to call Commands
+        /// applications will ignore this, but it can be used to issue commands
         /// directly.
         /// </summary>
+        /// <remarks> This property gives you direct access to the existing connection to the YubiKey using the
+        /// <see cref="IYubiKeyConnection"/> interface. To send your own commands, call the
+        /// <see cref="IYubiKeyConnection.SendCommand{TResponse}"/>
+        /// </remarks>
         public IYubiKeyConnection Connection { get; protected set; }
 
         /// <summary>
@@ -86,11 +90,11 @@ namespace Yubico.YubiKey
         {
             string scpType = keyParameters switch
             {
-                Scp03KeyParameters _ when application == YubiKeyApplication.Oath && yubiKey.HasFeature(YubiKeyFeature.Scp03Oath)
+                Scp03KeyParameters when application == YubiKeyApplication.Oath && yubiKey.HasFeature(YubiKeyFeature.Scp03Oath)
                     => "SCP03",
-                Scp03KeyParameters _ when yubiKey.HasFeature(YubiKeyFeature.Scp03)
+                Scp03KeyParameters when yubiKey.HasFeature(YubiKeyFeature.Scp03)
                     => "SCP03",
-                Scp11KeyParameters _ when yubiKey.HasFeature(YubiKeyFeature.Scp11)
+                Scp11KeyParameters when yubiKey.HasFeature(YubiKeyFeature.Scp11)
                     => "SCP11",
                 null => string.Empty,
                 _ => throw new InvalidOperationException("The YubiKey does not support the requested SCP connection.")

@@ -1,4 +1,4 @@
-﻿<!-- Copyright 2021 Yubico AB
+﻿<!-- Copyright 2025 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ limitations under the License. -->
     As of 2020, netstandard2.0 allows us to reach the widest audience while providing a large
     enough set of the .NET library to be productive.
     -->
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net47</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net472</TargetFrameworks>
 
     <RootNamespace></RootNamespace>
 
@@ -36,16 +36,19 @@ limitations under the License. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <!-- NuGet properties -->
-    <Description>
-      Yubico.YubiKey is the official .NET library for integrating with the YubiKey hardware authenticator. This library supports both macOS and Windows operating systems.
-    </Description>
+    <PackageId>Yubico.YubiKey</PackageId>
+    <Description>Yubico.YubiKey is the official .NET library for integrating with the YubiKey hardware authenticator. This library supports both macOS and Windows operating systems.</Description>
     <PackageIcon>yubico-circle-y-mark.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageReleaseNotes>https://github.com/Yubico/Yubico.NET.SDK/releases/latest</PackageReleaseNotes>
+    <PackageTags>yubikey;security;authentication;multifactor;mfa;twofactor;cryptography;hardware-token;fido;fido2;u2f;security-key;passwordless;smartcard;pki;usb-security</PackageTags>
+
+    <!-- Debug Symbols !-->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageReleaseNotes>https://github.com/Yubico/Yubico.NET.SDK/releases/latest</PackageReleaseNotes>
+    
     <!-- StrongName signing -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
@@ -101,12 +104,13 @@ limitations under the License. -->
   </ItemGroup>
 
   <ItemGroup Label="Package references specific to Yubico.YubiKey.dll">
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.6" />
+    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.6" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 
     <PackageReference Include="Nullable" Version="1.3.1">
@@ -122,13 +126,13 @@ limitations under the License. -->
     <PackageReference Include="System.Formats.Asn1" Version="9.0.3" />
 
     <!-- Remove ExcludeAssets once the package supports netcoreapp and net462 properly -->
-    <PackageReference Include="System.Formats.Cbor" Version="7.0.0" ExcludeAssets="buildtransitive" />
+    <PackageReference Include="System.Formats.Cbor" Version="9.0.6" ExcludeAssets="buildtransitive" />
     <ProjectReference Include="..\..\Yubico.Core\src\Yubico.Core.csproj" />
 
   </ItemGroup>
 
-  <!-- This is in order to use the HttpUtility.ParseQueryString in .NET47 -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+  <!-- This is in order to use the HttpUtility.ParseQueryString in .net472 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
     <Reference Include="System.Web" />
   </ItemGroup>
 

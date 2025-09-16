@@ -1,4 +1,4 @@
-// Copyright 2023 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -72,9 +72,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             var credentialManagementData = _response.GetData();
 
-            if (!(credentialManagementData.RelyingParty is null)
-                && !(credentialManagementData.RelyingPartyIdHash is null)
-                && !(credentialManagementData.TotalRelyingPartyCount is null))
+            if (credentialManagementData.RelyingParty is not null
+                && credentialManagementData.RelyingPartyIdHash is not null
+                && credentialManagementData.TotalRelyingPartyCount is not null)
             {
                 if (credentialManagementData.RelyingParty.IsMatchingRelyingPartyId(credentialManagementData.RelyingPartyIdHash.Value))
                 {

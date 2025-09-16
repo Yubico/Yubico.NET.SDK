@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         ExceptionMessages.Ctap2MissingRequiredField));
             }
 
-            return (ReadOnlyMemory<byte>)clientPinData.PinUvAuthToken;
+            return clientPinData.PinUvAuthToken.Value;
         }
     }
 }

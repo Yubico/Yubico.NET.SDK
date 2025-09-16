@@ -1,4 +1,4 @@
-// Copyright 2024 Yubico AB
+// Copyright 2025 Yubico AB
 // 
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ namespace Yubico.YubiKey
                 return new KeyboardConnection(_hidKeyboardDevice);
             }
 
-            bool isFidoApplication = application == YubiKeyApplication.Fido2 || application == YubiKeyApplication.FidoU2f;
+            bool isFidoApplication = application is YubiKeyApplication.Fido2 or YubiKeyApplication.FidoU2f;
             if (_hidFidoDevice != null && isFidoApplication)
             {
                 _log.LogDebug("Connecting via the FIDO interface.");

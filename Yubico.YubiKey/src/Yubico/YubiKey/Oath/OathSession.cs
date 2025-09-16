@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -14,9 +14,7 @@
 
 using System;
 using System.Globalization;
-using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
-using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Oath.Commands;
 using Yubico.YubiKey.Scp;
 
@@ -83,7 +81,7 @@ namespace Yubico.YubiKey.Oath
             : base(Log.GetLogger<OathSession>(), yubiKey, YubiKeyApplication.Oath, keyParameters)
         {
 
-            if (!(Connection.SelectApplicationData is OathApplicationData data))
+            if (Connection.SelectApplicationData is not OathApplicationData data)
             {
                 throw new InvalidOperationException(nameof(Connection.SelectApplicationData));
             }

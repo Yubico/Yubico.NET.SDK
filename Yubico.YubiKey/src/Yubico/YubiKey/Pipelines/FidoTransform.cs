@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -211,7 +211,7 @@ namespace Yubico.YubiKey.Pipelines
             byte[] responseInitPacket = _hidConnection.GetReport();
             while (responseInitPacket[4] == (CtapHidKeepAliveCmd | 0b1000_0000))
             {
-                if (!(QueryCancel is null) && QueryCancel(commandByte))
+                if (QueryCancel is not null && QueryCancel(commandByte))
                 {
                     _hidConnection.SetReport(
                         ConstructInitPacket(channelId, CtapHidCancelCmd, ReadOnlySpan<byte>.Empty, 0));

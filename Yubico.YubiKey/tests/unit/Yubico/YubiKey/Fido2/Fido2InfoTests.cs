@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -14,8 +14,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Formats.Cbor;
 using System.Linq;
 using Xunit;
+using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
@@ -24,9 +26,18 @@ namespace Yubico.YubiKey.Fido2
     public class Fido2InfoTests
     {
         [Fact]
+        public void Decode_AuthenticatorInfo()
+        {
+            var fido2Info = new AuthenticatorInfo(GetSampleEncoded());
+            Assert.NotNull(fido2Info);
+            Assert.NotNull(fido2Info.EncIdentifier);
+        }
+
+        [Fact]
         public void Decode_RepeatKey_Throws()
         {
-            byte[] encodedData = new byte[] {
+            byte[] encodedData = new byte[]
+            {
                 0xa4, 0x01, 0x81, 0x66, 0x55, 0x32, 0x46, 0x5f, 0x56, 0x32, 0x01, 0x81, 0x68, 0x46, 0x49, 0x44,
                 0x4f, 0x5f, 0x32, 0x5f, 0x30, 0x11, 0x01, 0x14, 0x02
             };
@@ -37,7 +48,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Versions_Correct()
         {
-            string[] correctStrings = new string[] {
+            string[] correctStrings = new string[]
+            {
                 "U2F_V2",
                 "FIDO_2_0",
                 "FIDO_2_1_PRE"
@@ -54,7 +66,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Extensions_Correct()
         {
-            string[] correctStrings = new string[] {
+            string[] correctStrings = new string[]
+            {
                 "credProtect",
                 "hmac-secret"
             };
@@ -67,6 +80,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 return;
             }
+
             bool isValid = CompareStringLists(correctStrings, fido2Info.Extensions);
 
             Assert.True(isValid);
@@ -84,7 +98,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Aaguid_Correct()
         {
-            byte[] correctValue = new byte[] {
+            byte[] correctValue = new byte[]
+            {
                 0x2f, 0xc0, 0x57, 0x9f, 0x81, 0x13, 0x47, 0xea, 0xb1, 0x16, 0xbb, 0x5a, 0x8d, 0xb9, 0x20, 0x2a
             };
 
@@ -99,10 +114,12 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Options_Correct()
         {
-            string[] correctKeys = new string[] {
+            string[] correctKeys = new string[]
+            {
                 "rk", "up", "plat", "clientPin", "credentialMgmtPreview"
             };
-            bool[] correctValues = new bool[] {
+            bool[] correctValues = new bool[]
+            {
                 true, true, false, false, true
             };
 
@@ -168,7 +185,8 @@ namespace Yubico.YubiKey.Fido2
         public void Decode_PinUvAuthProtocols_Correct()
         {
             // These must be in the correct order.
-            var correctValues = new PinUvAuthProtocol[] {
+            var correctValues = new PinUvAuthProtocol[]
+            {
                 PinUvAuthProtocol.ProtocolTwo,
                 PinUvAuthProtocol.ProtocolOne,
             };
@@ -245,7 +263,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Transports_Correct()
         {
-            string[] correctStrings = new string[] {
+            string[] correctStrings = new string[]
+            {
                 "usb",
                 "nfc"
             };
@@ -258,6 +277,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 return;
             }
+
             bool isValid = CompareStringLists(correctStrings, fido2Info.Transports);
 
             Assert.True(isValid);
@@ -275,11 +295,13 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Algorithms_Correct()
         {
-            var correctAlgs = new CoseAlgorithmIdentifier[] {
+            var correctAlgs = new CoseAlgorithmIdentifier[]
+            {
                 CoseAlgorithmIdentifier.ES256,
                 CoseAlgorithmIdentifier.EdDSA
             };
-            string[] correctTypes = new string[] {
+            string[] correctTypes = new string[]
+            {
                 "public-key",
                 "public-key"
             };
@@ -472,10 +494,12 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Certifications_Correct()
         {
-            string[] correctKeys = new string[] {
+            string[] correctKeys = new string[]
+            {
                 "FIDO"
             };
-            int[] correctValues = new int[] {
+            int[] correctValues = new int[]
+            {
                 2
             };
 
@@ -579,7 +603,9 @@ namespace Yubico.YubiKey.Fido2
         [InlineData("credentialMgmtPreview", OptionValue.NotSupported)]
         [InlineData("setMinPINLength", OptionValue.NotSupported)]
         [InlineData("alwaysUv", OptionValue.NotSupported)]
-        public void GetOptionValue_ReturnsCorrect(string option, OptionValue expectedValue)
+        public void GetOptionValue_ReturnsCorrect(
+            string option,
+            OptionValue expectedValue)
         {
             OptionValue returnedValue = AuthenticatorOptions.GetDefaultOptionValue(option);
             Assert.Equal(expectedValue, returnedValue);
@@ -588,7 +614,9 @@ namespace Yubico.YubiKey.Fido2
         [Theory]
         [InlineData("madeUpExtension", false)]
         [InlineData("credProtect", true)]
-        public void Extensions_IsSupported_Correct(string extension, bool expectedValue)
+        public void Extensions_IsSupported_Correct(
+            string extension,
+            bool expectedValue)
         {
             byte[] encodedData = GetSampleEncoded();
 
@@ -597,12 +625,15 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(expectedValue, isSupported);
         }
 
-        private static bool CompareLongLists(long[] correctInts, IReadOnlyList<long>? candidate)
+        private static bool CompareLongLists(
+            long[] correctInts,
+            IReadOnlyList<long>? candidate)
         {
             if (candidate is null)
             {
                 return false;
             }
+
             if (correctInts.Length != candidate.Count)
             {
                 return false;
@@ -619,7 +650,9 @@ namespace Yubico.YubiKey.Fido2
             return true;
         }
 
-        private static bool CompareStringLists(string[] correctStrings, IReadOnlyList<string> candidate)
+        private static bool CompareStringLists(
+            string[] correctStrings,
+            IReadOnlyList<string> candidate)
         {
             if (correctStrings.Length != candidate.Count)
             {
@@ -639,106 +672,82 @@ namespace Yubico.YubiKey.Fido2
 
         internal static byte[] GetSampleEncoded()
         {
-            //                b5
-            //                  01
-            //                    83
-            //                      66  55 32 46 5f 56 32
-            //                      68  46 49 44 4f 5f 32 5f 30
-            //                      6c  46 49 44 4f 5f 32 5f 31 5f 50 52 45
-            //                  02
-            //                    82
-            //                      6b  63 72 65 64 50 72 6f 74 65 63 74
-            //                      6b  68 6d 61 63 2d 73 65 63 72 65 74
-            //                  03
-            //                    50
-            //                      2f c0 57 9f 81 13 47 ea b1 16 bb 5a 8d b9 20 2a
-            //                  04
-            //                    a5
-            //                      62  72 6b
-            //                       f5  // (true)
-            //                      62  75 70
-            //                       f5  // (true)
-            //                      64  70 6c 61 74
-            //                       f4  // (false)
-            //                      69  63 6c 69 65 6e 74 50 69 6e
-            //                       f4  // (false)
-            //                      75  63 72 65 64 65 6e 74 69 61 6c 4d 67 6d 74 50 72
-            //                          65 76 69 65 77
-            //                       f5  // (true)
-            //                  05
-            //                    19  04 b0
-            //                  06
-            //                    82
-            //                      02
-            //                      01
-            //                  07
-            //                    08
-            //                  08
-            //                    18  80
-            //                  09
-            //                    82
-            //                      63  6e 66 63
-            //                      63  75 73 62
-            //                  0a
-            //                    82
-            //                      a2
-            //                        63  61 6c 67
-            //                         26  // (-7) (P-256)
-            //                        64  74 79 70 65
-            //                         6a  70 75 62 6c 69 63 2d 6b 65 79
-            //                      a2
-            //                        63  61 6c 67
-            //                         27  // (-8) (Ed25519)
-            //                        64  74 79 70 65
-            //                         6a  70 75 62 6c 69 63 2d 6b 65 79
-            //                  0b
-            //                    19  07 D0
-            //                  0c  f5
-            //                  0d
-            //                    04
-            //                  0e
-            //                    1a 00 05 04 03
-            //                  0f  18 24
-            //                  10  08
-            //                  11  01
-            //                  12  02
-            //                  13
-            //                    a1
-            //                       64  46 49 44 4f
-            //                        02
-            //                  14 02
-            //                  15 82
-            //                        1b
-            //                           9d 06 19 f9 4a 0e e5 81
-            //                        1a
-            //                           80 00 00 00
-            byte[] encodedData = new byte[] {
-                0xb5, 0x01, 0x83, 0x66, 0x55, 0x32, 0x46, 0x5f, 0x56, 0x32, 0x68, 0x46, 0x49, 0x44, 0x4f, 0x5f,
-                0x32, 0x5f, 0x30, 0x6c, 0x46, 0x49, 0x44, 0x4f, 0x5f, 0x32, 0x5f, 0x31, 0x5f, 0x50, 0x52, 0x45,
-                0x02, 0x82, 0x6b, 0x63, 0x72, 0x65, 0x64, 0x50, 0x72, 0x6f, 0x74, 0x65, 0x63, 0x74, 0x6b, 0x68,
-                0x6d, 0x61, 0x63, 0x2d, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x03, 0x50, 0x2f, 0xc0, 0x57, 0x9f,
-                0x81, 0x13, 0x47, 0xea, 0xb1, 0x16, 0xbb, 0x5a, 0x8d, 0xb9, 0x20, 0x2a, 0x04, 0xa5, 0x62, 0x72,
-                0x6b, 0xf5, 0x62, 0x75, 0x70, 0xf5, 0x64, 0x70, 0x6c, 0x61, 0x74, 0xf4, 0x69, 0x63, 0x6c, 0x69,
-                0x65, 0x6e, 0x74, 0x50, 0x69, 0x6e, 0xf4, 0x75, 0x63, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69,
-                0x61, 0x6c, 0x4d, 0x67, 0x6d, 0x74, 0x50, 0x72, 0x65, 0x76, 0x69, 0x65, 0x77, 0xf5, 0x05, 0x19,
-                0x04, 0xb0, 0x06, 0x82, 0x02, 0x01, 0x07, 0x08, 0x08, 0x18, 0x80, 0x09, 0x82, 0x63, 0x6e, 0x66,
-                0x63, 0x63, 0x75, 0x73, 0x62, 0x0a, 0x82, 0xa2, 0x63, 0x61, 0x6c, 0x67, 0x26, 0x64, 0x74, 0x79,
-                0x70, 0x65, 0x6a, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x2d, 0x6b, 0x65, 0x79, 0xa2, 0x63, 0x61,
-                0x6c, 0x67, 0x27, 0x64, 0x74, 0x79, 0x70, 0x65, 0x6a, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x2d,
-                0x6b, 0x65, 0x79, 0x0b, 0x19, 0x07, 0xD0, 0x0c, 0xf5, 0x0d, 0x04, 0x0e, 0x1a, 0x00, 0x05, 0x04,
-                0x03, 0x0f, 0x18, 0x24, 0x10, 0x08, 0x11, 0x01, 0x12, 0x02, 0x13, 0xa1, 0x64, 0x46, 0x49, 0x44,
-                0x4f, 0x02, 0x14, 0x02, 0x15, 0x82, 0x1b, 0x4d, 0x06, 0x19, 0xf9, 0x4a, 0x0e, 0xe5, 0x81,
-                0x1a, 0x80, 0x00, 0x00, 0x00
-            };
-            //            0x4f, 0x02, 0x14, 0x02, 0x15, 0x82, 0x1b, 0x1d, 0x06, 0x19, 0xf9, 0x4a, 0x0e, 0xe5, 0x81, 0x07
-            //            0x4f, 0x02, 0x14, 0x02, 0x15, 0x82, 0x1b, 0x9d, 0x06, 0x19, 0xf9, 0x4a, 0x0e, 0xe5, 0x81,
+            var cw = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
+            var cborMapWriter = new CborMapWriter<int>(cw)
+                .Entry(1, new [] // Versions
+                {
+                    "U2F_V2",
+                    "FIDO_2_0",
+                    "FIDO_2_1_PRE"
+                })
+                .Entry(2, new [] // Extensions
+                {
+                    "credProtect",
+                    "hmac-secret",
+                })
+                .Entry(3, Convert.FromHexString("2FC0579F811347EAB116BB5A8DB9202A")) // Aaguid
+                .Entry(4, new Dictionary<string, bool> // Options
+                {
+                    { "rk", true },
+                    { "up", true },
+                    { "plat", false },
+                    { "clientPin", false },
+                    { "credentialMgmtPreview", true }
+                })
+                .Entry(5, 1200) // Maximum message size
+                .Entry(6, new[] // PinUvAuthProtocols
+                {
+                    (int)PinUvAuthProtocol.ProtocolTwo,
+                    (int)PinUvAuthProtocol.ProtocolOne
+                })
+                .Entry(7, 8) // Maximum credential count in list
+                .Entry(8, 128) // Maximum credential ID length
+                .Entry(9, new [] // Transports
+                {
+                    "nfc",
+                    "usb"
+                })
+                .Entry(10, new Dictionary<string, object?>[] // Algorithms
+                {
+                    new()
+                    {
+                        { "type", "public-key" },
+                        { "alg", (int)CoseAlgorithmIdentifier.ES256 }
+                    },
+                    new()
+                    {
+                        { "type", "public-key" },
+                        { "alg", (int)CoseAlgorithmIdentifier.EdDSA }
+                    }
+                })
+                .Entry(11, 2000) // Maximum serialized large blob array
+                .Entry(12, true) // Force PIN change
+                .Entry(13, 4) // Minimum PIN length
+                .Entry(14, 0x00050403) // Firmware version
+                .Entry(15, 36) // Maximum credential blob length
+                .Entry(16, 8) // Maximum RPID length for SetMinPinLength
+                .Entry(17, 1) // Preferred platform UV attempts
+                .Entry(18, 2) // UV modality
+                .Entry(19, new Dictionary<string, int> // Certifications
+                {
+                    { "FIDO", 2 }
+                })
+                .Entry(20, 2) // Remaining discoverable credentials
+                .Entry(21, new [] // vendorPrototypeConfigCommands
+                {
+                    0x4d0619f94a0ee581, 0x0000000080000000
+                })
+                .Entry(22, new[] { AttestationFormats.Packed }) // Attestation formats
+                .Entry(23, 0) // UvCountSinceLastPinEntry
+                .Entry(24, true) // LongTouchForReset
+                .Entry(25, "encIdentifierBytes"u8.ToArray()) // EncIdentifier
+                .Entry(26, new[] { AuthenticatorTransports.Usb }) // TransportsForReset
+                .Entry(27, true) // PinComplexityPolicy
+                .Entry(28, "Example.com"u8.ToArray()) // PinComplexityPolicyUrl
+                .Entry(29, 33); // MaxPinLength
 
-            // Return a new object so the caller can change data (to test errors
-            // e.g.) if desired.
-            byte[] returnValue = new byte[encodedData.Length];
-            Array.Copy(encodedData, returnValue, encodedData.Length);
-
-            return returnValue;
+            var encoded = cborMapWriter.Encode();
+            return encoded;
         }
 
         private static byte[] GetMinimumEncoded()
@@ -753,7 +762,8 @@ namespace Yubico.YubiKey.Fido2
             //                    50
             //                      2f c0 57 9f 81 13 47 ea b1 16 bb 5a 8d b9 20 2a
 
-            byte[] encodedData = new byte[] {
+            byte[] encodedData = new byte[]
+            {
                 0xa2, 0x01, 0x83, 0x66, 0x55, 0x32, 0x46, 0x5f, 0x56, 0x32, 0x68, 0x46, 0x49, 0x44, 0x4f, 0x5f,
                 0x32, 0x5f, 0x30, 0x6c, 0x46, 0x49, 0x44, 0x4f, 0x5f, 0x32, 0x5f, 0x31, 0x5f, 0x50, 0x52, 0x45,
                 0x03, 0x50, 0x2f, 0xc0, 0x57, 0x9f, 0x81, 0x13, 0x47, 0xea, 0xb1, 0x16, 0xbb, 0x5a, 0x8d, 0xb9,

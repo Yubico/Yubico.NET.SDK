@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 
 using System;
 using Yubico.Core.Devices.Hid;
-using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Pipelines;
 
 namespace Yubico.YubiKey

@@ -1,4 +1,4 @@
-﻿// Copyright 2022 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public IReadOnlyList<GetAssertionData> GetAssertions(GetAssertionParameters parameters)
         {
-            _log.LogInformation("Get assertions.");
+            Logger.LogInformation("Get assertions.");
 
             if (parameters is null)
             {

@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Cbor
@@ -42,22 +43,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             _cbor = cbor;
             _cbor.WriteStartMap(null);
-        }
-
-        private void WriteKey(TKey key)
-        {
-            if (key is int intKey)
-            {
-                _cbor.WriteInt32(intKey);
-            }
-            else if (key is string strKey)
-            {
-                _cbor.WriteTextString(strKey);
-            }
-            else
-            {
-                throw new ArgumentException("Unsupported key type.");
-            }
         }
 
         public CborMapWriter<TKey> Entry(TKey key, string value)
@@ -99,13 +84,103 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             return this;
         }
+        
+        
+        public CborMapWriter<TKey> Entry(TKey key, ReadOnlySpan<string> values)
+        {
+            WriteKey(key);
+            _cbor.WriteStartArray(values.Length);
+            foreach (string value in values)
+            {
+                _cbor.WriteTextString(value);
+            }
+
+            _cbor.WriteEndArray();
+
+            return this;
+        }
+
+        public CborMapWriter<TKey> Entry(TKey key, ReadOnlySpan<int> values)
+        {
+            WriteKey(key);
+            _cbor.WriteStartArray(values.Length);
+            foreach (int value in values)
+            {
+                _cbor.WriteInt32(value);
+            }
+
+            _cbor.WriteEndArray();
+
+            return this;
+        }
+
+        public CborMapWriter<TKey> Entry(TKey key, ReadOnlySpan<long> values)
+        {
+            WriteKey(key);
+            _cbor.WriteStartArray(values.Length);
+            foreach (long value in values)
+            {
+                _cbor.WriteInt64(value);
+            }
+
+            _cbor.WriteEndArray();
+
+            return this;
+        }
+
+        public CborMapWriter<TKey> Entry<TKey2, TValue>(TKey key, IReadOnlyDictionary<TKey2, TValue> values)
+        {
+            WriteKey(key);
+            _cbor.WriteStartMap(values.Count);
+            foreach (var entry in values)
+            {
+                WriteEntry(entry.Key, entry.Value);
+            }
+
+            _cbor.WriteEndMap();
+
+            return this;
+        }
+
+        public CborMapWriter<TKey> Entry<TKey2, TValue>(TKey key, (TKey2, TValue)[] values)
+        {
+            WriteKey(key);
+            _cbor.WriteStartMap(values.Length);
+            foreach (var entry in values)
+            {
+                WriteEntry(entry.Item1, entry.Item2);
+            }
+
+            _cbor.WriteEndMap();
+
+            return this;
+        }
+        
+        public CborMapWriter<TKey> Entry(int key, Dictionary<string, object?>[] values)
+        {
+            WriteKey(key);
+            _cbor.WriteStartArray(values.Length);
+            foreach (var item in values)
+            {
+                _cbor.WriteStartMap(item.Count);
+                foreach (var entry in item)
+                {
+                    WriteEntry(entry.Key, entry.Value);
+                }
+                _cbor.WriteEndMap();
+            }
+            _cbor.WriteEndArray();
+
+            return this;
+        }
 
         // If the Encoder writes out an empty array, this will throw an
         // exception.
-        public CborMapWriter<TKey> Entry<T>(TKey key, CborHelpers.CborEncodeDelegate<T> Encoder, T? localData) where T : class
+        public CborMapWriter<TKey> Entry<T>(TKey key, CborHelpers.CborEncodeDelegate<T> encoder, T? localData)
+            where T : class
         {
             WriteKey(key);
-            _cbor.WriteEncodedValue(Encoder(localData));
+            _cbor.WriteEncodedValue(encoder(localData));
 
             return this;
         }
@@ -152,7 +227,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
         public CborMapWriter<TKey> OptionalEntry(TKey key, ICborEncode? value)
         {
-            if (!(value is null))
+            if (value is not null)
             {
                 return Entry(key, value);
             }
@@ -163,9 +238,10 @@ namespace Yubico.YubiKey.Fido2.Cbor
         // An encoder is always provided. If the return value is an empty
         // byte array, then treat it as an option not exercised, that is,
         // don't write anything out.
-        public CborMapWriter<TKey> OptionalEntry<T>(TKey key, CborHelpers.CborEncodeDelegate<T> Encoder, T? localData) where T : class
+        public CborMapWriter<TKey> OptionalEntry<T>(TKey key, CborHelpers.CborEncodeDelegate<T> encoder, T? localData)
+            where T : class
         {
-            byte[] encoding = Encoder(localData);
+            byte[] encoding = encoder(localData);
             if (encoding.Length != 0)
             {
                 WriteKey(key);
@@ -174,13 +250,55 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             return this;
         }
-
+        
         public void EndMap() => _cbor.WriteEndMap();
 
         public byte[] Encode()
         {
             _cbor.WriteEndMap();
             return _cbor.Encode();
+        }
+        
+        private void WriteKey(object? key)
+        {
+            switch (key)
+            {
+                case int intKey:
+                    _cbor.WriteInt32(intKey);
+                    break;
+                case string strKey:
+                    _cbor.WriteTextString(strKey);
+                    break;
+                default:
+                    throw new ArgumentException("Unsupported key type.");
+            }
+        }
+
+        private void WriteEntry<T, TValue>(T key, TValue value)
+        {
+            WriteKey(key);
+            WriteValue(value);
+        }
+
+        private void WriteValue<TValue>(TValue value)
+        {
+            switch (value)
+            {
+                case string strValue:
+                    _cbor.WriteTextString(strValue);
+                    break;
+                case int intValue:
+                    _cbor.WriteInt32(intValue);
+                    break;
+                case bool boolValue:
+                    _cbor.WriteBoolean(boolValue);
+                    break;
+                case ReadOnlyMemory<byte> byteStringValue:
+                    _cbor.WriteByteString(byteStringValue.Span);
+                    break;
+                default:
+                    throw new ArgumentException("Unsupported value type.");
+            }
         }
     }
 }

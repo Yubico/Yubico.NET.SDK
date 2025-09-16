@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ namespace Yubico.YubiKey
         internal static readonly FirmwareVersion V5_6_3 = new FirmwareVersion(5, 6, 3);
         internal static readonly FirmwareVersion V5_7_0 = new FirmwareVersion(5, 7, 0);
         internal static readonly FirmwareVersion V5_7_2 = new FirmwareVersion(5, 7, 2);
+        internal static readonly FirmwareVersion V5_8_0 = new FirmwareVersion(5, 8, 0);
 
         #endregion
 

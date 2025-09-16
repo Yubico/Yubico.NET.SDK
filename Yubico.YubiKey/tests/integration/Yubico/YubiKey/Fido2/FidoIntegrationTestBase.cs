@@ -14,6 +14,7 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2;
@@ -79,7 +80,8 @@ public class FidoSessionIntegrationTestBase : IDisposable
         {
             // Ignore errors related to non-existent credentials
         }
-
+        
+        KeyCollector.ResetRequestCounts();
     }
 
     ~FidoSessionIntegrationTestBase()
@@ -88,7 +90,7 @@ public class FidoSessionIntegrationTestBase : IDisposable
     }
 
     protected Fido2Session GetSession(
-        StandardTestDevice deviceType = StandardTestDevice.Fw5,
+        StandardTestDevice deviceType = StandardTestDevice.Any,
         FirmwareVersion? minFw = null,
         Transport? transport = Transport.All,
         ReadOnlyMemory<byte>? persistentPinUvAuthToken = null)
@@ -122,7 +124,7 @@ public class FidoSessionIntegrationTestBase : IDisposable
                 session.TrySetPin(TestPin1);
             }
 
-            var isValid = session.TryVerifyPin(TestPin1, permissions: Commands.PinUvAuthTokenPermissions.CredentialManagement, null, out _, out _);
+            var isValid = session.TryVerifyPin(TestPin1, permissions: PinUvAuthTokenPermissions.CredentialManagement, null, out _, out _);
             Assert.True(isValid, "Pin was incorrect. Please reset the key and try again.");
 
             return session;

@@ -159,15 +159,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <param name="authProtocol">
         /// The Auth Protocol used to build the Auth Token.
         /// </param>
-        /// <param name="decryptAuthToken">If true, the <c>pinUvAuthToken</c> is assumed encrypted,
-        /// and thus the SDK will attempt to decrypt it before passing it to the YubiKey.
-        /// If false, no decryption will be attempted.</param>
         public CredentialManagementCommand(
             int subCommand,
             byte[]? subCommandParams,
             ReadOnlyMemory<byte> pinUvAuthToken,
-            PinUvAuthProtocolBase authProtocol,
-            bool decryptAuthToken = true)
+            PinUvAuthProtocolBase authProtocol)
         {
             if (authProtocol is null)
             {
@@ -189,9 +185,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             // The pinUvAuthToken is an encrypted value, so there's no need to
             // overwrite the array.
-            byte[] authParam = decryptAuthToken
-                ? authProtocol.AuthenticateUsingPinToken(pinUvAuthToken.ToArray(), message)
-                : authProtocol.Authenticate(pinUvAuthToken.ToArray(), message);
+            byte[] authParam = authProtocol.AuthenticateUsingPinToken(pinUvAuthToken, message);
 
             PinUvAuthParam = authParam;
             PinUvAuthProtocol = authProtocol.Protocol;
@@ -213,6 +207,35 @@ namespace Yubico.YubiKey.Fido2.Commands
             _protocol = (int)protocol;
             PinUvAuthProtocol = null;
             PinUvAuthParam = null;
+        }
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="CredentialManagementCommand"/> with a pre-computed PIN/UV auth param.
+        /// </summary>
+        /// <param name="subCommand">
+        /// The byte representing the subcommand to execute.
+        /// </param>
+        /// <param name="subCommandParams">
+        /// The parameters needed in order to execute the subcommand. Not all
+        /// subcommands have parameters, so this can be null.
+        /// </param>
+        /// <param name="pinUvAuthParam">
+        /// The pre-computed PIN/UV auth param for this command.
+        /// </param>
+        /// <param name="protocol">
+        /// The PIN/UV protocol version used to compute the auth param.
+        /// </param>
+        public CredentialManagementCommand(
+            int subCommand,
+            byte[]? subCommandParams,
+            ReadOnlyMemory<byte> pinUvAuthParam,
+            PinUvAuthProtocol protocol)
+        {
+            SubCommand = subCommand;
+            _encodedParams = subCommandParams;
+            _protocol = (int)protocol;
+            PinUvAuthParam = pinUvAuthParam;
+            PinUvAuthProtocol = protocol;
         }
 
         /// <summary>

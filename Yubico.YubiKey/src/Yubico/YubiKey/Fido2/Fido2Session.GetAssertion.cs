@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public IReadOnlyList<GetAssertionData> GetAssertions(GetAssertionParameters parameters)
         {
-            _log.LogInformation("Get assertions.");
+            Logger.LogInformation("Get assertions.");
 
             if (parameters is null)
             {

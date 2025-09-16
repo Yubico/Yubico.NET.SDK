@@ -69,22 +69,57 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <param name="authProtocol">
         ///     The Auth Protocol used to build the Auth Token.
         /// </param>
-        /// <param name="decryptAuthToken">If true, the <c>pinUvAuthToken</c> is assumed encrypted,
-        /// and thus the SDK will attempt to decrypt it before passing it to the YubiKey.
-        /// If false, no decryption will be attempted.</param>
         public EnumerateCredentialsBeginCommand(
             RelyingParty relyingParty,
             ReadOnlyMemory<byte> pinUvAuthToken,
-            PinUvAuthProtocolBase authProtocol,
-            bool decryptAuthToken = true)
+            PinUvAuthProtocolBase authProtocol)
             : base(new CredentialManagementCommand(
-            SubCmdEnumerateCredsBegin, EncodeParams(relyingParty), pinUvAuthToken, authProtocol, decryptAuthToken))
+            SubCmdEnumerateCredsBegin, EncodeParams(relyingParty), pinUvAuthToken, authProtocol))
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="EnumerateCredentialsBeginCommand"/> with a pre-computed PIN/UV auth param.
+        /// </summary>
+        /// <param name="relyingParty">
+        ///     The relying party for which the credential enumeration is requested.
+        /// </param>
+        /// <param name="pinUvAuthParam">
+        ///     The pre-computed PIN/UV auth param for this command.
+        /// </param>
+        /// <param name="protocol">
+        ///     The PIN/UV protocol version used to compute the auth param.
+        /// </param>
+        public EnumerateCredentialsBeginCommand(
+            RelyingParty relyingParty,
+            ReadOnlyMemory<byte> pinUvAuthParam,
+            PinUvAuthProtocol protocol)
+            : base(new CredentialManagementCommand(
+            SubCmdEnumerateCredsBegin, EncodeParams(relyingParty), pinUvAuthParam, protocol))
         {
         }
 
         /// <inheritdoc />
         public EnumerateCredentialsBeginResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new EnumerateCredentialsBeginResponse(responseApdu);
+
+        /// <summary>
+        /// Creates the authentication message for this command, consisting of the subcommand byte plus encoded parameters.
+        /// </summary>
+        /// <param name="relyingParty">
+        /// The relying party for which the credential enumeration is requested.
+        /// </param>
+        /// <returns>
+        /// The message to be used for PIN/UV authentication.
+        /// </returns>
+        public static byte[] GetAuthenticationMessage(RelyingParty relyingParty)
+        {
+            byte[] encodedParams = EncodeParams(relyingParty);
+            byte[] message = new byte[1 + encodedParams.Length];
+            message[0] = SubCmdEnumerateCredsBegin;
+            encodedParams.CopyTo(message, 1);
+            return message;
+        }
 
         // This method encodes the parameters. For
         // EnumerateCredentialsBeginCommand, the parameters consist of only the

@@ -189,7 +189,6 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] message = EnumerateRpsBeginCommand.GetAuthenticationMessage();
             byte[] authParam = AuthProtocol.Authenticate(currentToken.Value, message);
-
             var command = new EnumerateRpsBeginCommand(authParam, AuthProtocol.Protocol)
             {
                 IsPreview = isPreview

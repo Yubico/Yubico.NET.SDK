@@ -80,7 +80,8 @@ public class FidoSessionIntegrationTestBase : IDisposable
         {
             // Ignore errors related to non-existent credentials
         }
-
+        
+        KeyCollector.ResetRequestCounts();
     }
 
     ~FidoSessionIntegrationTestBase()

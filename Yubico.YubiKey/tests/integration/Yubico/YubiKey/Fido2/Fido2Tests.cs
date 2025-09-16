@@ -8,8 +8,10 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2;
 
+// These test should be able to run without a bio key, although might fail
+// on incorrect pin-verify assumptions
 [Trait(TraitTypes.Category, TestCategories.Elevated)]
-public class Fido2Tests : FidoSessionIntegrationTestBase
+public class Fido2Tests : FidoSessionIntegrationTestBase 
 {
     #region AuthenticatorInfo
 
@@ -151,6 +153,11 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
     [SkippableFact(typeof(DeviceNotFoundException))]
     public void CredentialManagement_Succeeds_WithRO_Token()
     {
+        // Create a credential to enumerate
+        MakeCredentialParameters.AddOption(AuthenticatorOptions.rk, true);
+        Session.MakeCredential(MakeCredentialParameters);
+        KeyCollector.ResetRequestCounts();
+
         // Test GetCredentialMetadata
         using (var session = GetSession(minFw: FirmwareVersion.V5_8_0))
         {
@@ -228,9 +235,13 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
     [SkippableTheory(typeof(DeviceNotFoundException))]
     [InlineData(false)]
     [InlineData(true)]
-    public void CredentialManagement_with_commands_Succeeds_WithRO_Token(
-        bool useEncryptedToken)
+    public void CredentialManagement_with_commands_Succeeds_WithRO_Token(bool useEncryptedToken)
     {
+        // Arrange
+        //  Create a credential to enumerate
+        MakeCredentialParameters.AddOption(AuthenticatorOptions.rk, true);
+        Session.MakeCredential(MakeCredentialParameters);
+                
         var protocol = new PinUvAuthProtocolTwo();
         var publicKey = GetAuthenticatorPublicKey(Connection, protocol);
 
@@ -239,7 +250,7 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
             ? GetReadOnlyPinToken(Connection, protocol, decryptToken: false).ToArray()
             : GetReadOnlyPinToken(Connection, protocol, decryptToken: true).ToArray();
 
-        // RO token should work
+        // Enumerate with PPUAT token should work
         EnumerateRpsBeginCommand enumRpsCommand;
         if (useEncryptedToken)
         {
@@ -251,30 +262,31 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
             byte[] authParam = protocol.Authenticate(persistentPinUvAuthToken, message);
             enumRpsCommand = new EnumerateRpsBeginCommand(authParam, protocol.Protocol);
         }
+
+        // Act
         var enumRpsResponse = Connection.SendCommand(enumRpsCommand);
         Assert.Equal(ResponseStatus.Success, enumRpsResponse.Status);
 
         var (totalRelyingPartyCount, relyingParty) = enumRpsResponse.GetData();
         Assert.Equal("demo.yubico.com", relyingParty.Id);
-        Assert.True(totalRelyingPartyCount >= 1);
+        Assert.Equal(1, totalRelyingPartyCount);
 
-        // RO token should work again
+        // Enumerate with PPUAT token should work again
         EnumerateCredentialsBeginCommand enumCreds;
         if (useEncryptedToken)
         {
-            // Use old constructor with encrypted token and protocol for authentication
             enumCreds = new EnumerateCredentialsBeginCommand(relyingParty, persistentPinUvAuthToken, protocol);
         }
         else
         {
-            // Compute auth param manually for unencrypted token
             byte[] message = EnumerateCredentialsBeginCommand.GetAuthenticationMessage(relyingParty);
             byte[] authParam = protocol.Authenticate(persistentPinUvAuthToken, message);
             enumCreds = new EnumerateCredentialsBeginCommand(relyingParty, authParam, protocol.Protocol);
         }
-        var enumCresResponse = Connection.SendCommand(enumCreds);
 
+        var enumCresResponse = Connection.SendCommand(enumCreds);
         Assert.Equal(ResponseStatus.Success, enumCresResponse.Status);
+
         var (credentialCount, _) = enumCresResponse.GetData();
         Assert.Equal(1, credentialCount);
     }

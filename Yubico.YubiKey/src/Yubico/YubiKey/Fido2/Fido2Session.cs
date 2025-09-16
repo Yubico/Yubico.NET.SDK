@@ -184,8 +184,6 @@ namespace Yubico.YubiKey.Fido2
                 "Establishing a new FIDO2 session for YubiKey {SerialNumber}.",
                 yubiKey.SerialNumber);
 
-            // Connection = yubiKey.Connect(YubiKeyApplication.Fido2);
-
             AuthProtocol = GetPreferredPinProtocol();
             _authTokenPersistent = persistentPinUvAuthToken.HasValue
                 ? persistentPinUvAuthToken.Value.ToArray()

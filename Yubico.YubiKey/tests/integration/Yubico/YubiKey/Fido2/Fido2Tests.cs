@@ -75,6 +75,12 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
     #region CredentialManagement
 
     [SkippableFact(typeof(DeviceNotFoundException))]
+    public void GetMetadata_Succeeds()
+    {
+        _ = Session.GetCredentialMetadata();
+    }
+
+    [SkippableFact(typeof(DeviceNotFoundException))]
     public void CredentialManagement_ReuseTokenFromPreviousSession_Succeeds()
     {
         byte[] persistentPinUvAuthToken;
@@ -234,8 +240,17 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
             : GetReadOnlyPinToken(Connection, protocol, decryptToken: true).ToArray();
 
         // RO token should work
-        var enumRpsCommand =
-            new EnumerateRpsBeginCommand(persistentPinUvAuthToken, protocol, decryptAuthToken: useEncryptedToken);
+        EnumerateRpsBeginCommand enumRpsCommand;
+        if (useEncryptedToken)
+        {
+            enumRpsCommand = new EnumerateRpsBeginCommand(persistentPinUvAuthToken, protocol);
+        }
+        else
+        {
+            byte[] message = EnumerateRpsBeginCommand.GetAuthenticationMessage();
+            byte[] authParam = protocol.Authenticate(persistentPinUvAuthToken, message);
+            enumRpsCommand = new EnumerateRpsBeginCommand(authParam, protocol.Protocol);
+        }
         var enumRpsResponse = Connection.SendCommand(enumRpsCommand);
         Assert.Equal(ResponseStatus.Success, enumRpsResponse.Status);
 
@@ -244,11 +259,19 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         Assert.True(totalRelyingPartyCount >= 1);
 
         // RO token should work again
-        var enumCreds = new EnumerateCredentialsBeginCommand(
-            relyingParty.Id,
-            persistentPinUvAuthToken,
-            protocol,
-            decryptAuthToken: useEncryptedToken);
+        EnumerateCredentialsBeginCommand enumCreds;
+        if (useEncryptedToken)
+        {
+            // Use old constructor with encrypted token and protocol for authentication
+            enumCreds = new EnumerateCredentialsBeginCommand(relyingParty, persistentPinUvAuthToken, protocol);
+        }
+        else
+        {
+            // Compute auth param manually for unencrypted token
+            byte[] message = EnumerateCredentialsBeginCommand.GetAuthenticationMessage(relyingParty);
+            byte[] authParam = protocol.Authenticate(persistentPinUvAuthToken, message);
+            enumCreds = new EnumerateCredentialsBeginCommand(relyingParty, authParam, protocol.Protocol);
+        }
         var enumCresResponse = Connection.SendCommand(enumCreds);
 
         Assert.Equal(ResponseStatus.Success, enumCresResponse.Status);

@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public MakeCredentialData MakeCredential(MakeCredentialParameters parameters)
         {
-            _log.LogInformation("Make credential.");
+            Logger.LogInformation("Make credential.");
 
             if (parameters is null)
             {

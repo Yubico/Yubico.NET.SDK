@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Get version parameter
+VERSION=$1
+
 # Set environment variables
 export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \
     VCPKG_FORCE_SYSTEM_BINARIES=1 \
@@ -57,11 +60,10 @@ rm -rf "$build_dir"
 mkdir -p "$build_dir"
 
 echo "Building for arm64-linux ..."
-cmake -S . -B "$build_dir" \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-    -DVCPKG_TARGET_TRIPLET="arm64-linux" \
-    -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="$(pwd)/cmake/aarch64-linux-gnu.toolchain.cmake" \
-    -DOPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux
+CMAKE_ARGS="-S . -B $build_dir -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=arm64-linux -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$(pwd)/cmake/aarch64-linux-gnu.toolchain.cmake -DOPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux"
+if [ ! -z "$VERSION" ]; then
+    CMAKE_ARGS="$CMAKE_ARGS -DPROJECT_VERSION=$VERSION"
+fi
+cmake $CMAKE_ARGS
 
 cmake --build "$build_dir" -- -j $(nproc)

@@ -39,6 +39,18 @@ jobs:
           echo 'Running build script: Windows'
           cd Yubico.NativeShims
           & ./build-windows.ps1
+      - name: Set version
+        if: github.event.inputs.version
+        shell: pwsh
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          # Update CMakeLists.txt
+          (Get-Content Yubico.NativeShims/CMakeLists.txt) -replace 'project\(Yubico.NativeShims VERSION [^)]+\)', "project(Yubico.NativeShims VERSION $version)" | Set-Content Yubico.NativeShims/CMakeLists.txt
+          # Update vcpkg.json
+          $vcpkg = Get-Content Yubico.NativeShims/vcpkg.json -Raw | ConvertFrom-Json
+          $vcpkg.version = $version
+          $vcpkg | ConvertTo-Json | Set-Content Yubico.NativeShims/vcpkg.json
+          echo "Set version to $version"
       - uses: actions/upload-artifact@v4
         with:
           name: win-x64
@@ -71,6 +83,15 @@ jobs:
           echo 'Running build script: Linux (amd64)'
           cd Yubico.NativeShims
           sh ./build-linux-amd64.sh
+      - name: Set version
+        if: github.event.inputs.version
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          # Update CMakeLists.txt
+          sed -i "s/project(Yubico.NativeShims VERSION [^)]*)/project(Yubico.NativeShims VERSION $VERSION)/" Yubico.NativeShims/CMakeLists.txt
+          # Update vcpkg.json
+          jq --arg v "$VERSION" '.version = $v' Yubico.NativeShims/vcpkg.json > tmp.json && mv tmp.json Yubico.NativeShims/vcpkg.json
+          echo "Set version to $VERSION"
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x64
@@ -85,6 +106,15 @@ jobs:
           echo 'Running build script: Linux (arm64)'
           cd Yubico.NativeShims
           sh ./build-linux-arm64.sh
+      - name: Set version
+        if: github.event.inputs.version
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          # Update CMakeLists.txt
+          sed -i "s/project(Yubico.NativeShims VERSION [^)]*)/project(Yubico.NativeShims VERSION $VERSION)/" Yubico.NativeShims/CMakeLists.txt
+          # Update vcpkg.json
+          jq --arg v "$VERSION" '.version = $v' Yubico.NativeShims/vcpkg.json > tmp.json && mv tmp.json Yubico.NativeShims/vcpkg.json
+          echo "Set version to $VERSION"
       - uses: actions/upload-artifact@v4
         with:
           name: linux-arm64
@@ -99,6 +129,15 @@ jobs:
           echo 'Running build script: macOS'
           cd Yubico.NativeShims
           sh ./build-macOS.sh
+      - name: Set version
+        if: github.event.inputs.version
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          # Update CMakeLists.txt
+          sed -i "s/project(Yubico.NativeShims VERSION [^)]*)/project(Yubico.NativeShims VERSION $VERSION)/" Yubico.NativeShims/CMakeLists.txt
+          # Update vcpkg.json
+          jq --arg v "$VERSION" '.version = $v' Yubico.NativeShims/vcpkg.json > tmp.json && mv tmp.json Yubico.NativeShims/vcpkg.json
+          echo "Set version to $VERSION"
       - uses: actions/upload-artifact@v4
         with:
           name: osx-x64

@@ -16,6 +16,58 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.14.x Releases
+
+### 1.14.0
+
+Release date: September 17th, 2025
+
+Features:
+
+- Support has been added for the following CTAP 2.2 and YubiKey firmware version 5.8 features ([#299](https://github.com/Yubico/Yubico.NET.SDK/pull/299)):
+
+  - Persistent PinUvAuthToken (PPUAT): The [GetPersistentPinUvAuthToken()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetPersistentPinUvAuthToken) method has been added to retrieve PPUATs for use with read-only FIDO2 credential management operations, including [EnumerateRelyingParties()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateRelyingParties), [EnumerateCredentialsForRelyingParty()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateCredentialsForRelyingParty%28Yubico.YubiKey.Fido2.RelyingParty%29), and [GetCredentialMetadata()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata). PPUATs enable applications to list discoverable credentials from YubiKeys without requiring repeated PIN entry.
+
+  - thirdPartyPayment extension: The [GetThirdPartyPaymentExtension](xref:Yubico.YubiKey.Fido2.AuthenticatorData.GetThirdPartyPaymentExtension) method has been added to check for and return the status of the thirdPartyPayment extension. The thirdPartyPayment extension enables YubiKeys to be used for cross-domain credentials without redirects, as required by Secure Payment Confirmation (SPC) workflows.
+
+  - hmac-secret-mc extension: [GetHmacSecretExtension](xref:Yubico.YubiKey.Fido2.AuthenticatorData.GetHmacSecretExtension%28Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase%29) now handles both hmac-secret and hmac-secret-mc extensions when extracting and decrypting secrets. The hmac-secret-mc extension enables PRF (Pseudo-Random Function) during [MakeCredential()](xref:Yubico.YubiKey.Fido2.Fido2Session.MakeCredential%28Yubico.YubiKey.Fido2.MakeCredentialParameters%29).
+
+  - Additional ``AuthenticatorInfo`` properties: The SDK now supports parsing of several new [AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo) properties, which are returned when calling the [GetInfoCommand()](xref:Yubico.YubiKey.Fido2.Commands.GetInfoCommand). Properties include ``AttestationFormats``, ``UvCountSinceLastPinEntry``, ``LongTouchForReset``, ``EncIdentifier``, ``TransportsForReset``, ``PinComplexityPolicy``, ``PinComplexityPolicyUrl``, and ``MaxPinLength``.
+
+- The SDK has been updated to target .NET Framework 4.7.2, which provides broad reliability, security, and performance improvements. ([#274](https://github.com/Yubico/Yubico.NET.SDK/pull/274))
+
+- The NuGet package metadata has been updated for the ``Yubico.Core.csproj`` and ``Yubico.YubiKey.csproj`` files to improve discoverability, consistency, and clarity. The updates include new ``PackageId`` and ``PackageTags`` fields as well as a reorganized ``PackageReleaseNotes`` field. ([#265](https://github.com/Yubico/Yubico.NET.SDK/pull/265))
+
+- ``ToString`` overrides have been introduced in the [CommandApdu](xref:Yubico.Core.Iso7816.CommandApdu) and [ResponseApdu](xref:Yubico.Core.Iso7816.ResponseApdu) classes to provide a human-readable string representation of their internal state. These changes improve debugging and logging of APDUs. ([#270](https://github.com/Yubico/Yubico.NET.SDK/pull/270))
+
+Bug Fixes:
+
+- Previously, [DeleteSlot()](xref:Yubico.YubiKey.Otp.OtpSession.DeleteSlot%28Yubico.YubiKey.Otp.Slot%29) and [DeleteSlotConfiguration()](xref:Yubico.YubiKey.Otp.OtpSession.DeleteSlotConfiguration%28Yubico.YubiKey.Otp.Slot%29) would throw an exception when the slot configuration was successfully removed as intended. This has been fixed so that no exception occurs following a successful ``DeleteSlot()`` or ``DeleteSlotConfiguration()`` operation. ([#276](https://github.com/Yubico/Yubico.NET.SDK/pull/276))
+
+- Prerelease versions of Yubico packages are now prevented from being referenced into published NuGet packages. This fixes an issue where a prerelease version of Yubico.NativeShims was incorrectly referenced by Yubico.Core. ([#282](https://github.com/Yubico/Yubico.NET.SDK/pull/282))
+
+- The ``OtpSession`` logger initialization has been updated to use the correct logger. ([#275](https://github.com/Yubico/Yubico.NET.SDK/pull/275))
+
+- The detection logic for ``NativeShimsPath`` has been improved, ensuring that 32-bit processes on 64-bit systems are correctly mapped to the "x86" directory. ([#284](https://github.com/Yubico/Yubico.NET.SDK/pull/284))
+
+Documentation:
+
+- The [FIDO2 reset](xref:Fido2Reset) documentation has been updated to fix an error in the instructions and clarify timeout durations. ([#278](https://github.com/Yubico/Yubico.NET.SDK/pull/278))
+
+- The documentation on [slot access codes](xref:OtpSlotAccessCodes) has been updated to improve clarity and examples. ([#268](https://github.com/Yubico/Yubico.NET.SDK/pull/268))
+
+- The documentation on PIV [public](xref:UsersManualPublicKeys) and [private](xref:UsersManualPrivateKeys) keys has been updated with new sample code demonstrating how to use the latest factory methods. ([#245](https://github.com/Yubico/Yubico.NET.SDK/pull/245), [#272](https://github.com/Yubico/Yubico.NET.SDK/pull/272))
+
+- The documentation for the [UseFastTrigger](xref:Yubico.YubiKey.Otp.OtpSettings%601.UseFastTrigger%28System.Boolean%29) method has been updated to clarify information on behavior and applicability. ([#294](https://github.com/Yubico/Yubico.NET.SDK/pull/294))
+
+- All hardcoded links to the Yubico.NET.SDK GitHub repository have been updated to point to the HEAD branch. This ensures that links to sample code point to the latest version of that code. ([#286](https://github.com/Yubico/Yubico.NET.SDK/pull/286), [#279](https://github.com/Yubico/Yubico.NET.SDK/pull/279))
+
+- An [SDK overview](https://github.com/Yubico/Yubico.NET.SDK/blob/develop/.github/copilot-instructions.md) designed to help the Copilot coding agent work more efficiently has been added to the Yubico.NET.SDK GitHub repository. ([#296](https://github.com/Yubico/Yubico.NET.SDK/pull/296))
+
+Dependencies:
+
+- Several dependencies across the Yubico.YubiKey and Yubico.Core projects have been updated to the latest versions. ([#274](https://github.com/Yubico/Yubico.NET.SDK/pull/274))
+
 ## 1.13.x Releases
 
 ### 1.13.2

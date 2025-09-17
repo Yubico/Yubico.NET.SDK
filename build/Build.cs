@@ -6,7 +6,7 @@
 // dotnet run build.cs -- --nuget-feed-path "C:\LocalNuGet"
 //
 // To run in CI (e.g., GitHub Actions):
-// dotnet run build.cs -- --version "1.2.3-ci.${{ github.run_number }}" --nuget-feed-name "GPR"
+// dotnet run build.cs -- --package-version "1.2.3-ci.${{ github.run_number }}" --nuget-feed-name "GPR"
 //
 // build.cs - An automated and CI-aware CS-Script to build the Yubico.NET.SDK.
 
@@ -15,14 +15,14 @@ using System.CommandLine;
 using System.Xml.Linq;
 
 // --- 1. Define Command-Line Interface ---
-var versionOption = new Option<string?>("--version");
+var versionOption = new Option<string?>("--package-version");
 var feedNameOption = new Option<string>("--nuget-feed-name")
 {
-    DefaultValueFactory = _ => "LocalNuGetFeed"
+    DefaultValueFactory = _ => "Yubico.NET.SDK-LocalNuGet"
 };
 var feedPathOption = new Option<string>("--nuget-feed-path")
 {
-    DefaultValueFactory = _ => Path.Combine(Path.GetTempPath(), "Yubico.LocalNuGet")
+    DefaultValueFactory = _ => Path.Combine(Path.GetTempPath(), "Yubico.NET.SDK-LocalNuGet")
 };
 var includeDocsOption = new Option<bool>("--include-docs");
 var dryRunOption = new Option<bool>("--dry-run");
@@ -47,94 +47,67 @@ rootCommand.SetAction(async (parseResult) =>
 
 await rootCommand.Parse(args).InvokeAsync();
 
-
-// --- 2. Main Build Logic ---
+#region Main Build Logic
 async Task ExecuteBuild(string? version, string feedName, string? feedPath, bool includeDocs, bool dryRun, bool clean)
 {
     bool isCi = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
-    string rootDir = GetRepositoryRoot();
+    string rootDir = Utils_GetRepositoryRoot();
     string solutionFile = Path.Combine(rootDir, "Yubico.NET.SDK.sln");
     string versionPropsFile = Path.Combine(rootDir, "build", "Versions.props");
     string[] packagePaths = { "Yubico.Core/src/bin/Release/*.nupkg", "Yubico.YubiKey/src/bin/Release/*.nupkg" };
 
-    WriteHeader("Yubico.NET.SDK Build");
-    WriteInfo($"CI Environment: {isCi}");
+    Utils_WriteHeader("Yubico.NET.SDK Build");
+    Utils_WriteInfo($"CI Environment: {isCi}");
 
     try
     {
-        await TestPrerequisites(solutionFile, feedName, feedPath, isCi);
-        SetBuildVersion(version, versionPropsFile);
-        InvokeCleanBuild(clean, packagePaths, rootDir);
-        await InvokeBuildSolution(solutionFile);
+        await Step_TestPrerequisites(solutionFile, feedName, feedPath, isCi);
+        Step_SetBuildVersion(version, versionPropsFile);
+        Step_CleanBuild(clean, packagePaths, rootDir);
+        await Step_BuildSolution(solutionFile);
 
-        var packages = GetBuildArtifacts(packagePaths, rootDir);
-        await PublishToFeed(packages, feedName, dryRun);
-        ShowBuildSummary(packages, version, feedName, dryRun);
+        var packages = Utils_GetBuildArtifacts(packagePaths, rootDir);
+        await Step_PublishToFeed(packages, feedName, dryRun);
+        Utils_ShowBuildSummary(packages, version, feedName, dryRun);
     }
     catch (Exception ex)
     {
-        WriteError($"Build failed: {ex.Message}");
+        Utils_WriteError($"Build failed: {ex.Message}");
         Environment.Exit(1);
     }
     finally
     {
-        RestoreBuildVersion(version, versionPropsFile);
+        Step_RestoreBuildVersion(version, versionPropsFile);
     }
 }
+#endregion
 
-
-// --- 3. Build Steps & Helper Methods ---
-
-async Task TestPrerequisites(string solutionFile, string feedName, string? feedPath, bool isCi)
+#region Build Steps
+async Task Step_TestPrerequisites(string solutionFile, string feedName, string? feedPath, bool isCi)
 {
-    WriteHeader("Checking Prerequisites");
+    Utils_WriteHeader("Checking Prerequisites");
     if (!File.Exists(solutionFile))
     {
         throw new FileNotFoundException($"Solution file not found: {solutionFile}");
     }
 
-    WriteStep("Checking .NET SDK");
-    _ = await RunCommand("dotnet", "--version");
+    Utils_WriteStep("Checking .NET SDK");
+    _ = await Utils_RunCommand("dotnet", "--version");
 
-    WriteStep("Checking NuGet feed configuration");
+    Utils_WriteStep("Checking NuGet feed configuration");
     if (isCi)
     {
-        WriteInfo("✓ Skipping local feed setup in CI environment.");
+        Utils_WriteInfo("✓ Skipping local feed setup in CI environment.");
     }
     else
     {
-        await InitializeLocalNuGetFeed(feedName, feedPath!);
+        await Helper_InitializeLocalNuGetFeed(feedName, feedPath!);
     }
 }
 
-async Task InitializeLocalNuGetFeed(string feedName, string feedPath)
+void Step_CleanBuild(bool clean, string[] packagePatterns, string rootDir)
 {
-    if (string.IsNullOrWhiteSpace(feedPath))
-    {
-        // This should not happen due to the default value factory, but we'll keep it for safety.
-        feedPath = Path.Combine(Path.GetTempPath(), "Yubico.NET.SDK-LocalNuGet");
-    }
-
-    string sources = await RunCommand("dotnet", "nuget list source", captureOutput: true);
-    if (sources.Contains(feedName))
-    {
-        WriteInfo($"✓ NuGet source '{feedName}' is already configured.");
-        return;
-    }
-
-    if (!Directory.Exists(feedPath))
-    {
-        WriteInfo($"Creating directory: {feedPath}");
-        _ = Directory.CreateDirectory(feedPath);
-    }
-
-    _ = await RunCommand("dotnet", $"nuget add source \"{feedPath}\" --name \"{feedName}\"");
-    WriteInfo($"✓ Local NuGet feed '{feedName}' created at '{feedPath}'.");
-}
-
-void InvokeCleanBuild(bool clean, string[] packagePatterns, string rootDir)
-{
-    WriteHeader("Cleaning Build Artifacts");
+    Utils_WriteHeader("Cleaning Build Artifacts");
     foreach (string pattern in packagePatterns)
     {
         string fullPattern = Path.Combine(rootDir, pattern);
@@ -150,11 +123,12 @@ void InvokeCleanBuild(bool clean, string[] packagePatterns, string rootDir)
             File.Delete(file);
         }
     }
-    WriteInfo("✓ Old NuGet packages cleaned.");
+
+    Utils_WriteInfo("✓ Old NuGet packages cleaned.");
 
     if (clean)
     {
-        WriteStep("Performing full clean (bin/obj)");
+        Utils_WriteStep("Performing full clean (bin/obj)");
         foreach (string dir in Directory.EnumerateDirectories(rootDir, "bin", SearchOption.AllDirectories))
         {
             Directory.Delete(dir, recursive: true);
@@ -164,21 +138,98 @@ void InvokeCleanBuild(bool clean, string[] packagePatterns, string rootDir)
             Directory.Delete(dir, recursive: true);
         }
 
-        WriteStep("Clearing NuGet cache");
-        RunCommand("dotnet", "nuget locals all --clear").Wait();
-        WriteInfo("✓ Full clean completed.");
+        Utils_WriteStep("Clearing NuGet cache");
+        Utils_RunCommand("dotnet", "nuget locals all --clear").Wait();
+        Utils_WriteInfo("✓ Full clean completed.");
     }
 }
 
-async Task InvokeBuildSolution(string solutionFile)
+async Task Step_BuildSolution(string solutionFile)
 {
-    WriteHeader("Building Solution");
-    _ = await RunCommand("dotnet", $"pack \"{solutionFile}\" --configuration Release --nologo --verbosity minimal");
+    Utils_WriteHeader("Building Solution");
+    _ = await Utils_RunCommand("dotnet", $"pack \"{solutionFile}\" --configuration Release --nologo --verbosity minimal");
 }
 
-List<string> GetBuildArtifacts(string[] packagePatterns, string rootDir)
+void Step_SetBuildVersion(string? version, string versionPropsFile)
 {
-    WriteHeader("Collecting Build Artifacts");
+    if (string.IsNullOrEmpty(version))
+    {
+        return;
+    }
+    Utils_WriteHeader($"Setting Custom Version: {version}");
+    string backupFile = $"{versionPropsFile}.backup";
+    if (File.Exists(backupFile))
+    {
+        File.Delete(backupFile);
+    }
+    File.Copy(versionPropsFile, backupFile, overwrite: true);
+    var doc = XDocument.Load(versionPropsFile);
+    doc.Descendants("YubicoCoreVersion").FirstOrDefault()?.SetValue(version);
+    doc.Descendants("YubicoYubiKeyVersion").FirstOrDefault()?.SetValue(version);
+    doc.Save(versionPropsFile);
+    Utils_WriteInfo($"✓ Updated version to: {version}");
+}
+
+async Task Step_PublishToFeed(List<string> packages, string feedName, bool dryRun)
+{
+    if (dryRun)
+    {
+        Utils_WriteHeader($"DRY RUN: Would Publish to '{feedName}'");
+        packages.ForEach(p => Utils_WriteInfo($"  - {Path.GetFileName(p)}"));
+        return;
+    }
+
+    Utils_WriteHeader($"Publishing to '{feedName}'");
+    foreach (string package in packages)
+    {
+        _ = await Utils_RunCommand("dotnet", $"nuget push \"{package}\" --source \"{feedName}\" --skip-duplicate");
+    }
+}
+
+void Step_RestoreBuildVersion(string? version, string versionPropsFile)
+{
+    string backupFile = $"{versionPropsFile}.backup";
+    if (string.IsNullOrEmpty(version) || !File.Exists(backupFile))
+    {
+        return;
+    }
+    Utils_WriteStep("Restoring original version file");
+    File.Move(backupFile, versionPropsFile, overwrite: true);
+    Utils_WriteInfo("✓ Version file restored.");
+}
+
+#endregion
+
+#region Helper and Utility Functions
+async Task Helper_InitializeLocalNuGetFeed(string feedName, string feedPath)
+{
+    if (string.IsNullOrWhiteSpace(feedPath))
+    {
+        throw new ArgumentException(
+            "Feed path must be specified for local NuGet feed." +
+            " Use --nuget-feed-path to set a custom path.", nameof(feedPath));
+    }
+
+    string sources = await Utils_RunCommand("dotnet", "nuget list source", captureOutput: true);
+    if (sources.Contains(feedName))
+    {
+        Utils_WriteInfo($"✓ NuGet source '{feedName}' is already configured.");
+        return;
+    }
+
+    if (!Directory.Exists(feedPath))
+    {
+        Utils_WriteInfo($"Creating directory: {feedPath}");
+        _ = Directory.CreateDirectory(feedPath);
+    }
+
+    _ = await Utils_RunCommand("dotnet", $"nuget add source \"{feedPath}\" --name \"{feedName}\"");
+    Utils_WriteInfo($"✓ Local NuGet feed '{feedName}' created at '{feedPath}'.");
+}
+
+List<string> Utils_GetBuildArtifacts(string[] packagePatterns, string rootDir)
+{
+    Utils_WriteHeader("Collecting Build Artifacts");
     var packages = new List<string>();
     foreach (string pattern in packagePatterns)
     {
@@ -193,7 +244,7 @@ List<string> GetBuildArtifacts(string[] packagePatterns, string rootDir)
         foreach (string file in Directory.GetFiles(dir, filePattern))
         {
             packages.Add(file);
-            WriteInfo($"✓ Found: {Path.GetFileName(file)}");
+            Utils_WriteInfo($"✓ Found: {Path.GetFileName(file)}");
         }
     }
     if (packages.Count == 0)
@@ -203,83 +254,33 @@ List<string> GetBuildArtifacts(string[] packagePatterns, string rootDir)
     return packages;
 }
 
-async Task PublishToFeed(List<string> packages, string feedName, bool dryRun)
+void Utils_ShowBuildSummary(List<string> packages, string? version, string feedName, bool dryRun)
 {
-    if (dryRun)
-    {
-        WriteHeader($"DRY RUN: Would Publish to '{feedName}'");
-        packages.ForEach(p => WriteInfo($"  - {Path.GetFileName(p)}"));
-        return;
-    }
-
-    WriteHeader($"Publishing to '{feedName}'");
-    foreach (string package in packages)
-    {
-        _ = await RunCommand("dotnet", $"nuget push \"{package}\" --source \"{feedName}\" --skip-duplicate");
-    }
-}
-
-// --- Versioning ---
-void SetBuildVersion(string? version, string versionPropsFile)
-{
-    if (string.IsNullOrEmpty(version))
-    {
-        return;
-    }
-    WriteHeader($"Setting Custom Version: {version}");
-    string backupFile = $"{versionPropsFile}.backup";
-    if (File.Exists(backupFile))
-    {
-        File.Delete(backupFile);
-    }
-    File.Copy(versionPropsFile, backupFile, overwrite: true);
-    var doc = XDocument.Load(versionPropsFile);
-    doc.Descendants("YubicoCoreVersion").FirstOrDefault()?.SetValue(version);
-    doc.Descendants("YubicoYubiKeyVersion").FirstOrDefault()?.SetValue(version);
-    doc.Save(versionPropsFile);
-    WriteInfo($"✓ Updated version to: {version}");
-}
-
-void RestoreBuildVersion(string? version, string versionPropsFile)
-{
-    string backupFile = $"{versionPropsFile}.backup";
-    if (string.IsNullOrEmpty(version) || !File.Exists(backupFile))
-    {
-        return;
-    }
-    WriteStep("Restoring original version file");
-    File.Move(backupFile, versionPropsFile, overwrite: true);
-    WriteInfo("✓ Version file restored.");
-}
-
-// --- Utilities ---
-void ShowBuildSummary(List<string> packages, string? version, string feedName, bool dryRun)
-{
-    WriteHeader("Build Summary");
+    Utils_WriteHeader("Build Summary");
     if (!string.IsNullOrEmpty(version))
     {
-        WriteInfo($"Version: {version}");
+        Utils_WriteInfo($"Version: {version}");
     }
 
     Console.WriteLine("\nPackages Built:");
     packages.ForEach(p =>
     {
         var fi = new FileInfo(p);
-        WriteInfo($"  📦 {fi.Name} ({Math.Round(fi.Length / 1024.0, 2)} KB)");
+        Utils_WriteInfo($"  📦 {fi.Name} ({Math.Round(fi.Length / 1024.0, 2)} KB)");
     });
 
     Console.WriteLine();
     if (dryRun)
     {
-        WriteInfo("🔍 DRY RUN completed - no packages were published.");
+        Utils_WriteInfo("🔍 DRY RUN completed - no packages were published.");
     }
     else
     {
-        WriteInfo($"✅ Build completed and published to '{feedName}'!");
+        Utils_WriteInfo($"✅ Build completed and published to '{feedName}'!");
     }
 }
 
-string GetRepositoryRoot()
+string Utils_GetRepositoryRoot()
 {
     var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
     while (dir != null && !Directory.Exists(Path.Combine(dir.FullName, ".git")))
@@ -289,18 +290,18 @@ string GetRepositoryRoot()
     return dir?.FullName ?? throw new DirectoryNotFoundException("Could not find the repository root.");
 }
 
-void WriteHeader(string m) 
-{ 
+void Utils_WriteHeader(string m)
+{
     const string separator = "==================================================";
-    Console.ForegroundColor = ConsoleColor.Cyan; 
-    Console.WriteLine($"\n{separator}\n{m}\n{separator}"); 
-    Console.ResetColor(); 
+    Console.ForegroundColor = ConsoleColor.Cyan;
+    Console.WriteLine($"\n{separator}\n{m}\n{separator}");
+    Console.ResetColor();
 }
-void WriteStep(string m) { Console.ForegroundColor = ConsoleColor.Green; Console.WriteLine($"\n>>> {m}"); Console.ResetColor(); }
-void WriteInfo(string m) => Console.WriteLine(m);
-void WriteError(string m) { Console.ForegroundColor = ConsoleColor.Red; Console.Error.WriteLine(m); Console.ResetColor(); }
+void Utils_WriteStep(string m) { Console.ForegroundColor = ConsoleColor.Green; Console.WriteLine($"\n>>> {m}"); Console.ResetColor(); }
+void Utils_WriteInfo(string m) => Console.WriteLine(m);
+void Utils_WriteError(string m) { Console.ForegroundColor = ConsoleColor.Red; Console.Error.WriteLine(m); Console.ResetColor(); }
 
-async Task<string> RunCommand(string command, string args, bool captureOutput = false)
+async Task<string> Utils_RunCommand(string command, string args, bool captureOutput = false)
 {
     var process = new Process
     {
@@ -316,7 +317,7 @@ async Task<string> RunCommand(string command, string args, bool captureOutput = 
     };
 
     var outputBuilder = new System.Text.StringBuilder();
-    
+
     process.OutputDataReceived += (s, e) =>
     {
         if (e.Data is not null)
@@ -327,29 +328,30 @@ async Task<string> RunCommand(string command, string args, bool captureOutput = 
             }
             else
             {
-                WriteInfo(e.Data);
+                Utils_WriteInfo(e.Data);
             }
         }
     };
-    
+
     process.ErrorDataReceived += (s, e) =>
     {
         if (e.Data is not null)
         {
-            WriteError(e.Data);
+            Utils_WriteError(e.Data);
         }
     };
-    
+
     _ = process.Start();
     process.BeginOutputReadLine();
     process.BeginErrorReadLine();
-    
+
     await process.WaitForExitAsync();
-    
+
     if (process.ExitCode != 0)
     {
         throw new InvalidOperationException($"Command '{command} {args}' failed with exit code {process.ExitCode}");
     }
-    
+
     return outputBuilder.ToString();
 }
+#endregion

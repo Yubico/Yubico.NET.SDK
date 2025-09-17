@@ -36,13 +36,9 @@ Features:
 
 - The SDK has been updated to target .NET Framework 4.7.2, which provides broad reliability, security, and performance improvements. ([#274](https://github.com/Yubico/Yubico.NET.SDK/pull/274))
 
-- A ``FailedApdu`` helper method has been added to the ``OtpErrorTransform`` pipeline to streamline the creation of failed APDU responses. Additionally, the sequence validation logic of the ``OtpErrorTransform`` pipeline has been updated to handle edge cases more effectively. ([#276](https://github.com/Yubico/Yubico.NET.SDK/pull/276))
-
 - The NuGet package metadata has been updated for the ``Yubico.Core.csproj`` and ``Yubico.YubiKey.csproj`` files to improve discoverability, consistency, and clarity. The updates include new ``PackageId`` and ``PackageTags`` fields as well as a reorganized ``PackageReleaseNotes`` field. ([#265](https://github.com/Yubico/Yubico.NET.SDK/pull/265))
 
 - ``ToString`` overrides have been introduced in the [CommandApdu](xref:Yubico.Core.Iso7816.CommandApdu) and [ResponseApdu](xref:Yubico.Core.Iso7816.ResponseApdu) classes to provide a human-readable string representation of their internal state. These changes improve debugging and logging of APDUs. ([#270](https://github.com/Yubico/Yubico.NET.SDK/pull/270))
-
-- A new internal ``HkdfUtilities`` class has been added to the SDK. This class implements HKDF key derivation using HMAC-SHA256, as specified in RFC 5869, providing a reusable and standards-compliant key derivation utility. ([#299](https://github.com/Yubico/Yubico.NET.SDK/pull/299))
 
 Bug Fixes:
 

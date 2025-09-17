@@ -27,7 +27,12 @@ namespace Yubico.YubiKey.Fido2
         private Memory<byte>? _authTokenPersistent;
 
         /// <summary>
-        /// The Persistent PinUvAuthToken (PPUAT) which can be set by the user or returned by the SDK, to later be reused for read only operations within credential management.
+        /// The Persistent PinUvAuthToken (PPUAT) which can be set by the user upon instantiation of the Fido2Session
+        /// or automatically by the SDK when calling certain credential management operations such as 
+        /// <see cref="EnumerateRelyingParties"/>, 
+        /// <see cref="EnumerateCredentialsForRelyingParty(RelyingParty)"/>, 
+        /// <see cref="GetCredentialMetadata"/>, 
+        /// to later be reused for read only operations within credential management.
         /// <remarks>
         /// Note: this is the decrypted PPUAT. The SDK will dispose of this when the Fido2Session is disposed.
         /// </remarks>
@@ -544,6 +549,9 @@ namespace Yubico.YubiKey.Fido2
             return new AuthToken(AuthProtocol.Decrypt(fullToken), PinUvAuthTokenPermissions.CredentialManagement, null);
         }
 
+
+        // This method will set the AuthTokenPersistent property if it
+        // successfully gets a persistent token.
         private ReadOnlyMemory<byte>? GetReadOnlyCredMgmtToken(bool requestNewToken = false)
         {
             if (!YubiKey.HasFeature(YubiKeyFeature.FidoCtap22))
@@ -557,12 +565,13 @@ namespace Yubico.YubiKey.Fido2
             }
 
             // The methods used below will set/reset the AuthTokenPersistent
+            const PinUvAuthTokenPermissions permission = PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly;
             var resultUv = DoVerifyUv(
-                PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly, null, out string _);
+                permission, null, out string _);
 
             if (resultUv != CtapStatus.Ok)
             {
-                VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
+                VerifyPin(permission);
             }
 
             return AuthTokenPersistent;

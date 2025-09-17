@@ -1,7 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "yubico-nativeshims",
-  "version": "1.13.2",
   "dependencies": [
     "openssl"
   ]

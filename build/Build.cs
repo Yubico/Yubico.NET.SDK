@@ -14,7 +14,7 @@ using System.Diagnostics;
 using System.CommandLine;
 using System.Xml.Linq;
 
-// --- 1. Define Command-Line Interface ---
+#region Setup
 var versionOption = new Option<string?>("--package-version");
 var feedNameOption = new Option<string>("--nuget-feed-name")
 {
@@ -46,6 +46,7 @@ rootCommand.SetAction(async (parseResult) =>
     });
 
 await rootCommand.Parse(args).InvokeAsync();
+#endregion
 
 #region Main Build Logic
 async Task ExecuteBuild(string? version, string feedName, string? feedPath, bool includeDocs, bool dryRun, bool clean)

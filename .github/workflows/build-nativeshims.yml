@@ -38,7 +38,18 @@ jobs:
       - run: |
           echo 'Running build script: Windows'
           cd Yubico.NativeShims
-          & ./build-windows.ps1
+          if ("${{ github.event.inputs.version }}" -ne "") {
+            $versionInput = "${{ github.event.inputs.version }}"
+            if ($versionInput -like "*-*") {
+              $baseVersion = $versionInput.Split('-')[0]
+            } else {
+              Write-Warning "Version input does not contain a hyphen ('-'). Using the full version string as base version."
+              $baseVersion = $versionInput
+            }
+            & ./build-windows.ps1 -Version $baseVersion
+          } else {
+            & ./build-windows.ps1
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: win-x64
@@ -70,7 +81,12 @@ jobs:
       - run: |
           echo 'Running build script: Linux (amd64)'
           cd Yubico.NativeShims
-          sh ./build-linux-amd64.sh
+          if [ ! -z "${{ github.event.inputs.version }}" ]; then
+            BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
+            sh ./build-linux-amd64.sh "$BASE_VERSION"
+          else
+            sh ./build-linux-amd64.sh
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x64
@@ -84,7 +100,12 @@ jobs:
       - run: |
           echo 'Running build script: Linux (arm64)'
           cd Yubico.NativeShims
-          sh ./build-linux-arm64.sh
+          if [ ! -z "${{ github.event.inputs.version }}" ]; then
+            BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
+            sh ./build-linux-arm64.sh "$BASE_VERSION"
+          else
+            sh ./build-linux-arm64.sh
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: linux-arm64
@@ -98,7 +119,12 @@ jobs:
       - run: |
           echo 'Running build script: macOS'
           cd Yubico.NativeShims
-          sh ./build-macOS.sh
+          if [ ! -z "${{ github.event.inputs.version }}" ]; then
+            BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
+            sh ./build-macOS.sh "$BASE_VERSION"
+          else
+            sh ./build-macOS.sh
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: osx-x64

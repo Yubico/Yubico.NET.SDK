@@ -62,3 +62,13 @@
      * exists on the system or not.
      */
 #cmakedefine HAVE_PCSC_WINSCARD_H @HAVE_PCSC_WINSCARD_H@
+
+    /**
+     * Version information
+     *
+     * Pre-processor symbols that describe the version of Yubico.NativeShims.
+     */
+#define YUBICO_NATIVE_SHIMS_VERSION "@PROJECT_VERSION@"
+#define YUBICO_NATIVE_SHIMS_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define YUBICO_NATIVE_SHIMS_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define YUBICO_NATIVE_SHIMS_VERSION_PATCH @PROJECT_VERSION_PATCH@

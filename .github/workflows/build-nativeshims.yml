@@ -39,7 +39,13 @@ jobs:
           echo 'Running build script: Windows'
           cd Yubico.NativeShims
           if ("${{ github.event.inputs.version }}" -ne "") {
-            $baseVersion = "${{ github.event.inputs.version }}".Split('-')[0]
+            $versionInput = "${{ github.event.inputs.version }}"
+            if ($versionInput -like "*-*") {
+              $baseVersion = $versionInput.Split('-')[0]
+            } else {
+              Write-Warning "Version input does not contain a hyphen ('-'). Using the full version string as base version."
+              $baseVersion = $versionInput
+            }
             & ./build-windows.ps1 -Version $baseVersion
           } else {
             & ./build-windows.ps1

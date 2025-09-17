@@ -256,6 +256,10 @@ namespace Yubico.YubiKey
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V4_3_4
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath),
 
+                YubiKeyFeature.FidoCtap22 =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_8_0
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Fido2),
+
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,

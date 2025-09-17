@@ -33,7 +33,7 @@ for external milestones.
     <!-- 
     Common version for both projects. Can be overridden by the below properties if needed 
     -->
-    <CommonVersion>1.13.2</CommonVersion>
+    <CommonVersion>1.14.0</CommonVersion>
 
     <!--
     Yubico.Core project

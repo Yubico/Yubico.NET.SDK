@@ -1,6 +1,8 @@
 #!/usr/bin/env dotnet run
 
-#:package System.CommandLine@2.0.0-rc.1.25451.107
+#:package System.CommandLine@2.0.0-beta4.22272.1
+
+
 
 // To run locally: 
 // dotnet run build.cs -- --nuget-feed-path "C:\LocalNuGet"
@@ -15,37 +17,30 @@ using System.CommandLine;
 using System.Xml.Linq;
 
 #region Setup
-var versionOption = new Option<string?>("--package-version");
-var feedNameOption = new Option<string>("--nuget-feed-name")
-{
-    DefaultValueFactory = _ => "Yubico.NET.SDK-LocalNuGet"
-};
-var feedPathOption = new Option<string>("--nuget-feed-path")
-{
-    DefaultValueFactory = _ => Path.Combine(Path.GetTempPath(), "Yubico.NET.SDK-LocalNuGet")
-};
-var includeDocsOption = new Option<bool>("--include-docs");
-var dryRunOption = new Option<bool>("--dry-run");
-var cleanOption = new Option<bool>("--clean");
+var versionOption = new Option<string?>("--package-version", "The version to assign to the built NuGet packages.");
+var feedNameOption = new Option<string>("--nuget-feed-name", () => "Yubico.NET.SDK-LocalNuGet", "The name of the NuGet feed to publish to.");
+var feedPathOption = new Option<string>("--nuget-feed-path", () => Path.Combine(Path.GetTempPath(), "Yubico.NET.SDK-LocalNuGet"), "The path to the local NuGet feed.");
+var includeDocsOption = new Option<bool>("--include-docs", () => false, "Whether to include documentation in the package.");
+var dryRunOption = new Option<bool>("--dry-run", () => false, "Whether to perform a dry run without making any changes.");
+var cleanOption = new Option<bool>("--clean", () => false, "Whether to clean the output directory before building.");
 
 var rootCommand = new RootCommand("Builds the Yubico.NET.SDK project locally or in CI.")
 {
     versionOption, feedNameOption, feedPathOption, includeDocsOption, dryRunOption, cleanOption
 };
 
-rootCommand.SetAction(async (parseResult) =>
-    {
-        string? version = parseResult.GetValue(versionOption);
-        string? feedName = parseResult.GetValue(feedNameOption);
-        string? feedPath = parseResult.GetValue(feedPathOption);
-        bool includeDocs = parseResult.GetValue(includeDocsOption);
-        bool dryRun = parseResult.GetValue(dryRunOption);
-        bool clean = parseResult.GetValue(cleanOption);
+rootCommand.SetHandler(async ctx =>
+{
+    string? version = ctx.ParseResult.GetValueForOption(versionOption);
+    string feedName = ctx.ParseResult.GetValueForOption(feedNameOption)!;
+    string? feedPath = ctx.ParseResult.GetValueForOption(feedPathOption);
+    bool includeDocs = ctx.ParseResult.GetValueForOption(includeDocsOption);
+    bool dryRun = ctx.ParseResult.GetValueForOption(dryRunOption);
+    bool clean = ctx.ParseResult.GetValueForOption(cleanOption);
+    await ExecuteBuild(version, feedName, feedPath, includeDocs, dryRun, clean);
+});
 
-        await ExecuteBuild(version, feedName!, feedPath, includeDocs, dryRun, clean);
-    });
-
-await rootCommand.Parse(args).InvokeAsync();
+return await rootCommand.InvokeAsync(args);
 #endregion
 
 #region Main Build Logic

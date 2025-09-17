@@ -64,8 +64,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         AuthenticatorConfiguration = 0x20,
         
         /// <summary>
-        /// This allows the PersistentPinUvAuthToken to be used with the <see cref="CredentialManagementCommand"/> command.
-        /// If this permission is present, the PersistentPinUvAuthToken can only be used for Read Credential Management operations on Credentials.
+        /// This allows the auth token to be used with the 
+        /// <see cref="CredentialManagementCommand"/>,
+        /// <see cref="GetCredentialMetadataCommand"/>,
+        /// <see cref="EnumerateCredentialsBeginCommand"/>,
+        /// <see cref="EnumerateRpsBeginCommand"/>,
         /// The relying party ID parameter is ignored for this permission.
         /// </summary>
         PersistentCredentialManagementReadOnly = 0x40,

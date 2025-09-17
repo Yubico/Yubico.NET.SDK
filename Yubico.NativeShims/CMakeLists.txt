@@ -113,6 +113,15 @@ target_sources(
         ssl.cmac.c
         )
 
+# Add Windows resource file for version info
+if(WIN32)
+    target_sources(
+        Yubico.NativeShims
+        PRIVATE
+            Yubico.NativeShims.rc
+            )
+endif()
+
 # Linker
 target_link_libraries(
     Yubico.NativeShims

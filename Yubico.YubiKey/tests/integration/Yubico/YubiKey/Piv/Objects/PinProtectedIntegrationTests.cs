@@ -16,109 +16,111 @@ using System;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv.Objects
-{
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class PinProtectedIntegrationTests
-    {
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void ReadPinProtect_IsEmpty_Correct(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+namespace Yubico.YubiKey.Piv.Objects;
 
-            using (var pivSession = new PivSession(testDevice))
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public class PinProtectedIntegrationTests
+{
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void ReadPinProtect_IsEmpty_Correct(
+        StandardTestDevice testDeviceType)
+    {
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+        using (var pivSession = new PivSession(testDevice))
+        {
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            pivSession.ResetApplication();
+
+            var pinProtect = pivSession.ReadObject<PinProtectedData>();
+
+            Assert.True(pinProtect.IsEmpty);
+        }
+    }
+
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void WriteMgmtKey_Read_NotEmpty(
+        StandardTestDevice testDeviceType)
+    {
+        var mgmtKey = GetArbitraryMgmtKey();
+
+        using var pinProtect = new PinProtectedData();
+        pinProtect.SetManagementKey(mgmtKey);
+
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+        using (var pivSession = new PivSession(testDevice))
+        {
+            try
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                 pivSession.ResetApplication();
+                pivSession.WriteObject(pinProtect);
 
-                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
-
-                Assert.True(pinProtect.IsEmpty);
+                var pinProtectCopy = pivSession.ReadObject<PinProtectedData>();
+                Assert.False(pinProtectCopy.IsEmpty);
             }
-        }
-
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void WriteMgmtKey_Read_NotEmpty(StandardTestDevice testDeviceType)
-        {
-            Memory<byte> mgmtKey = GetArbitraryMgmtKey();
-
-            using var pinProtect = new PinProtectedData();
-            pinProtect.SetManagementKey(mgmtKey);
-
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
+            finally
             {
-                try
-                {
-                    var collectorObj = new Simple39KeyCollector();
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                    pivSession.ResetApplication();
-                    pivSession.WriteObject(pinProtect);
-
-                    PinProtectedData pinProtectCopy = pivSession.ReadObject<PinProtectedData>();
-                    Assert.False(pinProtectCopy.IsEmpty);
-                }
-                finally
-                {
-                    pivSession.ResetApplication();
-                }
+                pivSession.ResetApplication();
             }
         }
+    }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void WriteMgmtKey_Read_Correct(StandardTestDevice testDeviceType)
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void WriteMgmtKey_Read_Correct(
+        StandardTestDevice testDeviceType)
+    {
+        var mgmtKey = GetArbitraryMgmtKey();
+
+        using var pinProtect = new PinProtectedData();
+        pinProtect.SetManagementKey(mgmtKey);
+
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+        using (var pivSession = new PivSession(testDevice))
         {
-            Memory<byte> mgmtKey = GetArbitraryMgmtKey();
-
-            using var pinProtect = new PinProtectedData();
-            pinProtect.SetManagementKey(mgmtKey);
-
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
+            try
             {
-                try
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                pivSession.ResetApplication();
+                pivSession.WriteObject(pinProtect);
+
+                var pinProtectCopy = pivSession.ReadObject<PinProtectedData>();
+
+                _ = Assert.NotNull(pinProtectCopy.ManagementKey);
+                if (pinProtectCopy.ManagementKey is not null)
                 {
-                    var collectorObj = new Simple39KeyCollector();
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                    pivSession.ResetApplication();
-                    pivSession.WriteObject(pinProtect);
-
-                    PinProtectedData pinProtectCopy = pivSession.ReadObject<PinProtectedData>();
-
-                    _ = Assert.NotNull(pinProtectCopy.ManagementKey);
-                    if (!(pinProtectCopy.ManagementKey is null))
-                    {
-                        var getData = (ReadOnlyMemory<byte>)pinProtectCopy.ManagementKey;
-                        bool isValid = mgmtKey.Span.SequenceEqual(getData.Span);
-                        Assert.True(isValid);
-                    }
-
-                }
-                finally
-                {
-                    pivSession.ResetApplication();
+                    var getData = (ReadOnlyMemory<byte>)pinProtectCopy.ManagementKey;
+                    var isValid = mgmtKey.Span.SequenceEqual(getData.Span);
+                    Assert.True(isValid);
                 }
             }
+            finally
+            {
+                pivSession.ResetApplication();
+            }
         }
+    }
 
-        private Memory<byte> GetArbitraryMgmtKey()
+    private Memory<byte> GetArbitraryMgmtKey()
+    {
+        byte[] keyData =
         {
-            byte[] keyData = {
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-                0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
-                0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68
-            };
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+            0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
+            0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68
+        };
 
-            return new Memory<byte>(keyData);
-        }
+        return new Memory<byte>(keyData);
     }
 }

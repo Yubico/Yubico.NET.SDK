@@ -17,64 +17,63 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
-namespace Yubico.Core.Logging
+namespace Yubico.Core.Logging;
+
+public class LogTests : IDisposable
 {
-    public class LogTests : IDisposable
-    {
-        private readonly ILoggerFactory _originalFactory = Log.Instance;
+    private readonly ILoggerFactory _originalFactory = Log.Instance;
 
 #pragma warning disable CA1816
-        public void Dispose()
+    public void Dispose()
 #pragma warning restore CA1816
-        {
-            // Reset to the original factory after each test
-            Log.Instance = _originalFactory;
-        }
+    {
+        // Reset to the original factory after each test
+        Log.Instance = _originalFactory;
+    }
 
-        // Ensure that the default LoggerFactory is created when no configuration is provided.
-        [Fact]
-        public void DefaultLoggerFactory_IsCreated_WhenNoConfigurationProvided()
-        {
-            // Act
-            ILoggerFactory loggerFactory = Log.Instance;
+    // Ensure that the default LoggerFactory is created when no configuration is provided.
+    [Fact]
+    public void DefaultLoggerFactory_IsCreated_WhenNoConfigurationProvided()
+    {
+        // Act
+        var loggerFactory = Log.Instance;
 
-            // Assert
-            Assert.NotNull(loggerFactory);
-            ILogger logger = loggerFactory.CreateLogger<LogTests>();
-            Assert.NotNull(logger);
-        }
+        // Assert
+        Assert.NotNull(loggerFactory);
+        ILogger logger = loggerFactory.CreateLogger<LogTests>();
+        Assert.NotNull(logger);
+    }
 
-        // Ensure that LoggerFactory can be replaced manually using the Instance property.
-        [Fact]
-        public void ManualLoggerFactory_SettingInstance_OverridesDefaultFactory()
-        {
-            // Arrange
-            var mockLoggerFactory = Substitute.For<ILoggerFactory>();
-            Log.Instance = mockLoggerFactory;
+    // Ensure that LoggerFactory can be replaced manually using the Instance property.
+    [Fact]
+    public void ManualLoggerFactory_SettingInstance_OverridesDefaultFactory()
+    {
+        // Arrange
+        var mockLoggerFactory = Substitute.For<ILoggerFactory>();
+        Log.Instance = mockLoggerFactory;
 
-            // Act
-            ILoggerFactory actualFactory = Log.Instance;
+        // Act
+        var actualFactory = Log.Instance;
 
-            // Assert
-            Assert.Same(mockLoggerFactory, actualFactory);
-        }
+        // Assert
+        Assert.Same(mockLoggerFactory, actualFactory);
+    }
 
-        // Ensure that LoggerFactory can be replaced manually using the Instance property.
-        // Remove this once we remove Log.Legacy.cs
-        [Fact]
-        public void Legacy_ManualLoggerFactory_SettingInstance_OverridesDefaultFactory()
-        {
-            // Arrange
-            var mockLoggerFactory = Substitute.For<ILoggerFactory>();
+    // Ensure that LoggerFactory can be replaced manually using the Instance property.
+    // Remove this once we remove Log.Legacy.cs
+    [Fact]
+    public void Legacy_ManualLoggerFactory_SettingInstance_OverridesDefaultFactory()
+    {
+        // Arrange
+        var mockLoggerFactory = Substitute.For<ILoggerFactory>();
 #pragma warning disable CS0618 // Type or member is obsolete
-            Log.LoggerFactory = mockLoggerFactory;
+        Log.LoggerFactory = mockLoggerFactory;
 #pragma warning restore CS0618 // Type or member is obsolete
 
-            // Act
-            ILoggerFactory actualFactory = Log.Instance;
+        // Act
+        var actualFactory = Log.Instance;
 
-            // Assert
-            Assert.Same(mockLoggerFactory, actualFactory);
-        }
+        // Assert
+        Assert.Same(mockLoggerFactory, actualFactory);
     }
 }

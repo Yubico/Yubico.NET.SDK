@@ -15,67 +15,66 @@
 using System;
 using Xunit;
 
-namespace Yubico.YubiKey.U2f
+namespace Yubico.YubiKey.U2f;
+
+public class AuthDataTests
 {
-    public class AuthDataTests
+    [Fact]
+    public void IncorrectUserPresence_Throws()
     {
-        [Fact]
-        public void IncorrectUserPresence_Throws()
-        {
-            byte[] authData = RegistrationDataTests.GetGoodAuthDataArray();
-            authData[0] = 0x81;
+        var authData = RegistrationDataTests.GetGoodAuthDataArray();
+        authData[0] = 0x81;
 
-            _ = Assert.Throws<ArgumentException>(() => new AuthenticationData(authData));
-        }
+        _ = Assert.Throws<ArgumentException>(() => new AuthenticationData(authData));
+    }
 
-        [Fact]
-        public void EncodedCounter_CorrectInAuthData()
-        {
-            byte[] authData = RegistrationDataTests.GetGoodAuthDataArray();
-            authData[1] = 0;
-            authData[2] = 0;
-            authData[3] = 0x14;
-            authData[4] = 0x86;
+    [Fact]
+    public void EncodedCounter_CorrectInAuthData()
+    {
+        var authData = RegistrationDataTests.GetGoodAuthDataArray();
+        authData[1] = 0;
+        authData[2] = 0;
+        authData[3] = 0x14;
+        authData[4] = 0x86;
 
-            var authenticationData = new AuthenticationData(authData);
+        var authenticationData = new AuthenticationData(authData);
 
-            Assert.Equal(0x1486, authenticationData.Counter);
-        }
+        Assert.Equal(0x1486, authenticationData.Counter);
+    }
 
-        [Fact]
-        public void UserPresenceSet_VerifiedTrue()
-        {
-            byte[] authData = RegistrationDataTests.GetGoodAuthDataArray();
-            authData[0] = 0x01;
+    [Fact]
+    public void UserPresenceSet_VerifiedTrue()
+    {
+        var authData = RegistrationDataTests.GetGoodAuthDataArray();
+        authData[0] = 0x01;
 
-            var authenticationData = new AuthenticationData(authData);
+        var authenticationData = new AuthenticationData(authData);
 
-            Assert.True(authenticationData.UserPresenceVerified);
-        }
+        Assert.True(authenticationData.UserPresenceVerified);
+    }
 
-        [Fact]
-        public void UserPresenceNotSet_VerifiedFalse()
-        {
-            byte[] authData = RegistrationDataTests.GetGoodAuthDataArray();
-            authData[0] = 0x00;
+    [Fact]
+    public void UserPresenceNotSet_VerifiedFalse()
+    {
+        var authData = RegistrationDataTests.GetGoodAuthDataArray();
+        authData[0] = 0x00;
 
-            var authenticationData = new AuthenticationData(authData);
+        var authenticationData = new AuthenticationData(authData);
 
-            Assert.False(authenticationData.UserPresenceVerified);
-        }
+        Assert.False(authenticationData.UserPresenceVerified);
+    }
 
-        [Fact]
-        public void VerifySignature_GivenCorrectData_ReturnsTrue()
-        {
-            byte[] appId = RegistrationDataTests.GetAppIdArray(true);
-            byte[] clientDataHash = RegistrationDataTests.GetClientDataHashArray(true);
-            byte[] userPublicKey = RegistrationDataTests.GetPubKeyArray(true);
-            byte[] authData = RegistrationDataTests.GetGoodAuthDataArray();
+    [Fact]
+    public void VerifySignature_GivenCorrectData_ReturnsTrue()
+    {
+        var appId = RegistrationDataTests.GetAppIdArray(true);
+        var clientDataHash = RegistrationDataTests.GetClientDataHashArray(true);
+        var userPublicKey = RegistrationDataTests.GetPubKeyArray(true);
+        var authData = RegistrationDataTests.GetGoodAuthDataArray();
 
-            var authenticationData = new AuthenticationData(authData);
+        var authenticationData = new AuthenticationData(authData);
 
-            bool isVerified = authenticationData.VerifySignature(userPublicKey, appId, clientDataHash);
-            Assert.True(isVerified);
-        }
+        var isVerified = authenticationData.VerifySignature(userPublicKey, appId, clientDataHash);
+        Assert.True(isVerified);
     }
 }

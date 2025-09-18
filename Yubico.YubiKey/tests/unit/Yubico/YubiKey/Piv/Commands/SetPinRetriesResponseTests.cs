@@ -16,64 +16,63 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+public class SetPinRetriesResponseTests
 {
-    public class SetPinRetriesResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
-        {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new SetPinRetriesResponse(null));
+        _ = Assert.Throws<ArgumentNullException>(() => new SetPinRetriesResponse(null));
 #pragma warning restore CS8625
-        }
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
+        var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
 
-            Assert.Equal(SWConstants.Success, setPinRetriesResponse.StatusWord);
-        }
+        Assert.Equal(SWConstants.Success, setPinRetriesResponse.StatusWord);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
+        var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.Success, setPinRetriesResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.Success, setPinRetriesResponse.Status);
+    }
 
-        [Fact]
-        public void Constructor_AuthReqdResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.SecurityStatusNotSatisfied >> 8));
-            byte sw2 = unchecked((byte)SWConstants.SecurityStatusNotSatisfied);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_AuthReqdResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.SecurityStatusNotSatisfied >> 8));
+        var sw2 = unchecked((byte)SWConstants.SecurityStatusNotSatisfied);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
+        var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.AuthenticationRequired, setPinRetriesResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.AuthenticationRequired, setPinRetriesResponse.Status);
+    }
 
-        [Fact]
-        public void Constructor_ErrorResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
-            byte sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_ErrorResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
+        var sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
+        var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.Failed, setPinRetriesResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.Failed, setPinRetriesResponse.Status);
     }
 }

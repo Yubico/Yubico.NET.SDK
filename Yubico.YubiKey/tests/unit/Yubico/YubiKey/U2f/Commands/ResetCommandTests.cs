@@ -12,145 +12,144 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+public class ResetCommandTests
 {
-    public class ResetCommandTests
+    private const int offsetCla = 0;
+    private const int offsetIns = 1;
+    private const int offsetP1 = 2;
+    private const int offsetP2 = 3;
+
+    private const int lengthHeader = 4; // APDU header is 4 bytes (Cla, Ins, P1, P2)
+
+    private const int offsetLc = 4;
+
+    private const int offsetData = offsetLc;
+
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
     {
-        private const int offsetCla = 0;
-        private const int offsetIns = 1;
-        private const int offsetP1 = 2;
-        private const int offsetP2 = 3;
+        var command = new ResetCommand();
 
-        private const int lengthHeader = 4; // APDU header is 4 bytes (Cla, Ins, P1, P2)
+        Assert.Equal(0, command.CreateCommandApdu().Cla);
+    }
 
-        private const int offsetLc = 4;
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_Returns0x03()
+    {
+        var command = new ResetCommand();
 
-        private const int offsetData = offsetLc;
+        Assert.Equal(0x03, command.CreateCommandApdu().Ins);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
-        {
-            var command = new ResetCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP1Property_ReturnsZero()
+    {
+        var command = new ResetCommand();
 
-            Assert.Equal(0, command.CreateCommandApdu().Cla);
-        }
+        Assert.Equal(0, command.CreateCommandApdu().P1);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_Returns0x03()
-        {
-            var command = new ResetCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsZero()
+    {
+        var command = new ResetCommand();
 
-            Assert.Equal(0x03, command.CreateCommandApdu().Ins);
-        }
+        Assert.Equal(0, command.CreateCommandApdu().P2);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP1Property_ReturnsZero()
-        {
-            var command = new ResetCommand();
+    [Fact]
+    public void CreateCommandApdu_GetNcProperty_ReturnsCorrectLength()
+    {
+        var command = new ResetCommand();
+        var commandApdu = command.CreateCommandApdu();
 
-            Assert.Equal(0, command.CreateCommandApdu().P1);
-        }
+        Assert.Equal(lengthHeader, commandApdu.Nc);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsZero()
-        {
-            var command = new ResetCommand();
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetClaProperty_ReturnsZero()
+    {
+        var command = new ResetCommand();
+        var commandApdu = command.CreateCommandApdu();
 
-            Assert.Equal(0, command.CreateCommandApdu().P2);
-        }
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
 
-        [Fact]
-        public void CreateCommandApdu_GetNcProperty_ReturnsCorrectLength()
-        {
-            var command = new ResetCommand();
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        Assert.Equal(0, actualInnerCommandCla);
+    }
 
-            Assert.Equal(lengthHeader, commandApdu.Nc);
-        }
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetInsProperty_Returns0x45()
+    {
+        var command = new ResetCommand();
+        var commandApdu = command.CreateCommandApdu();
 
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetClaProperty_ReturnsZero()
-        {
-            var command = new ResetCommand();
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
+        Assert.Equal(0x45, actualInnerCommandIns);
+    }
 
-            Assert.Equal(0, actualInnerCommandCla);
-        }
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetP1Property_ReturnsZero()
+    {
+        var command = new ResetCommand();
+        var commandApdu = command.CreateCommandApdu();
 
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetInsProperty_Returns0x45()
-        {
-            var command = new ResetCommand();
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
+        Assert.Equal(0, actualInnerCommandP1);
+    }
 
-            Assert.Equal(0x45, actualInnerCommandIns);
-        }
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetP1Property_ReturnsZero()
-        {
-            var command = new ResetCommand();
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetP2Property_ReturnsZero()
+    {
+        var command = new ResetCommand();
+        var commandApdu = command.CreateCommandApdu();
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
 
-            Assert.Equal(0, actualInnerCommandP1);
-        }
+        Assert.Equal(0, actualInnerCommandP2);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetP2Property_ReturnsZero()
-        {
-            var command = new ResetCommand();
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetNcProperty_ReturnsNoLength()
+    {
+        var command = new ResetCommand();
+        var commandApdu = command.CreateCommandApdu();
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
+        var actualInnerCommandLc = commandApdu.Data.Slice(offsetLc, 0);
 
-            Assert.Equal(0, actualInnerCommandP2);
-        }
+        Assert.True(actualInnerCommandLc.IsEmpty);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetNcProperty_ReturnsNoLength()
-        {
-            var command = new ResetCommand();
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetData_ReturnsNoData()
+    {
+        var command = new ResetCommand();
+        var commandApdu = command.CreateCommandApdu();
 
-            ReadOnlyMemory<byte> actualInnerCommandLc = commandApdu.Data.Slice(offsetLc, 0);
+        var actualInnerCommandData = commandApdu.Data.Slice(offsetData, 0);
 
-            Assert.True(actualInnerCommandLc.IsEmpty);
-        }
+        Assert.True(actualInnerCommandData.IsEmpty);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetData_ReturnsNoData()
-        {
-            var command = new ResetCommand();
-            CommandApdu commandApdu = command.CreateCommandApdu();
-
-            ReadOnlyMemory<byte> actualInnerCommandData = commandApdu.Data.Slice(offsetData, 0);
-
-            Assert.True(actualInnerCommandData.IsEmpty);
-        }
-
-        [Fact]
-        public void CreateResponseApdu_ReturnsCorrectType()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new ResetCommand();
+    [Fact]
+    public void CreateResponseApdu_ReturnsCorrectType()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var command = new ResetCommand();
 #pragma warning disable IDE0008 // Use explicit type
-            var response = command.CreateResponseForApdu(responseApdu);
+        var response = command.CreateResponseForApdu(responseApdu);
 #pragma warning restore IDE0008 // Justification: testing the type
 
-            _ = Assert.IsType<ResetResponse>(response);
-        }
+        _ = Assert.IsType<ResetResponse>(response);
     }
 }

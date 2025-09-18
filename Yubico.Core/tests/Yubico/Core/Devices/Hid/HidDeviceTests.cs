@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.Core.Devices.Hid.UnitTests
-{
+namespace Yubico.Core.Devices.Hid.UnitTests;
 
 #if false
     public class HidDeviceTests
@@ -83,4 +82,3 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         }
     }
 #endif
-}

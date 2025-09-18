@@ -19,244 +19,246 @@ using NSubstitute;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Pipelines
+namespace Yubico.YubiKey.Pipelines;
+
+public class CommandChainingTransformTests
 {
-    public class CommandChainingTransformTests
+    [Fact]
+    public void Cleanup_Called_CallsNextTransformCleanupMethod()
     {
-        [Fact]
-        public void Cleanup_Called_CallsNextTransformCleanupMethod()
-        {
-            // Arrange
-            var mockTransform = Substitute.For<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform);
+        // Arrange
+        var mockTransform = Substitute.For<IApduTransform>();
+        var transform = new CommandChainingTransform(mockTransform);
 
-            // Act
-            transform.Cleanup();
+        // Act
+        transform.Cleanup();
 
-            // Assert
-            mockTransform.Received().Cleanup();
-        }
+        // Assert
+        mockTransform.Received().Cleanup();
+    }
 
-        [Fact]
-        public void Setup_Called_CallsNextTransformSetupMethod()
-        {
-            // Arrange
-            var mockTransform = Substitute.For<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform);
+    [Fact]
+    public void Setup_Called_CallsNextTransformSetupMethod()
+    {
+        // Arrange
+        var mockTransform = Substitute.For<IApduTransform>();
+        var transform = new CommandChainingTransform(mockTransform);
 
-            // Act
-            transform.Setup();
+        // Act
+        transform.Setup();
 
-            // Assert
-            mockTransform.Received().Setup();
-        }
+        // Assert
+        mockTransform.Received().Setup();
+    }
 
-        [Fact]
-        public void Invoke_NullCommandApdu_ThrowsArgumentNullException()
-        {
-            // Arrange
-            var mockTransform = Substitute.For<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform);
+    [Fact]
+    public void Invoke_NullCommandApdu_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var mockTransform = Substitute.For<IApduTransform>();
+        var transform = new CommandChainingTransform(mockTransform);
 
-            // Act
+        // Act
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            void Action() => _ = transform.Invoke(null, typeof(object), typeof(object));
+        void Action()
+        {
+            _ = transform.Invoke(null, typeof(object), typeof(object));
+        }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            // Assert
-            _ = Assert.Throws<ArgumentNullException>(Action);
-        }
+        // Assert
+        _ = Assert.Throws<ArgumentNullException>(Action);
+    }
 
-        [Fact]
-        public void Invoke_CommandApduWithoutData_InvokesNextTransformWithSameApdu()
-        {
-            // Arrange
-            var mockTransform = Substitute.For<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform);
-            var commandApdu = new CommandApdu();
+    [Fact]
+    public void Invoke_CommandApduWithoutData_InvokesNextTransformWithSameApdu()
+    {
+        // Arrange
+        var mockTransform = Substitute.For<IApduTransform>();
+        var transform = new CommandChainingTransform(mockTransform);
+        var commandApdu = new CommandApdu();
 
-            // Act
-            _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
+        // Act
+        _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
-            // Assert
-            mockTransform.Received(1).Invoke(
-                Arg.Is<CommandApdu>(a => a == commandApdu), 
-                Arg.Any<Type>(), 
-                Arg.Any<Type>());
-        }
+        // Assert
+        mockTransform.Received(1).Invoke(
+            Arg.Is<CommandApdu>(a => a == commandApdu),
+            Arg.Any<Type>(),
+            Arg.Any<Type>());
+    }
 
-        [Fact]
-        public void Invoke_CommandApduWithoutData_ReturnsNextTransformResponseAsIs()
-        {
-            // Arrange
-            var expectedResponse = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var mockTransform = Substitute.For<IApduTransform>();
-            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
-                .Returns(expectedResponse);
+    [Fact]
+    public void Invoke_CommandApduWithoutData_ReturnsNextTransformResponseAsIs()
+    {
+        // Arrange
+        var expectedResponse = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var mockTransform = Substitute.For<IApduTransform>();
+        _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
+            .Returns(expectedResponse);
 
-            var transform = new CommandChainingTransform(mockTransform);
-            var commandApdu = new CommandApdu();
+        var transform = new CommandChainingTransform(mockTransform);
+        var commandApdu = new CommandApdu();
 
-            // Act
-            ResponseApdu actualResponse = transform.Invoke(commandApdu, typeof(object), typeof(object));
+        // Act
+        var actualResponse = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
-            // Assert
-            Assert.Same(expectedResponse, actualResponse);
-        }
+        // Assert
+        Assert.Same(expectedResponse, actualResponse);
+    }
 
-        [Fact]
-        public void Invoke_CommandApduWithSmallData_InvokesNextTransformWithSameApdu()
-        {
-            // Arrange
-            var mockTransform = Substitute.For<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform);
-            var commandApdu = new CommandApdu { Data = new byte[] { 0, 1, 2, 3 } };
+    [Fact]
+    public void Invoke_CommandApduWithSmallData_InvokesNextTransformWithSameApdu()
+    {
+        // Arrange
+        var mockTransform = Substitute.For<IApduTransform>();
+        var transform = new CommandChainingTransform(mockTransform);
+        var commandApdu = new CommandApdu { Data = new byte[] { 0, 1, 2, 3 } };
 
-            // Act
-            _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
+        // Act
+        _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
-            // Assert
-            mockTransform.Received(1).Invoke(
-                Arg.Is<CommandApdu>(a => a == commandApdu),
-                Arg.Any<Type>(),
-                Arg.Any<Type>());
-        }
+        // Assert
+        mockTransform.Received(1).Invoke(
+            Arg.Is<CommandApdu>(a => a == commandApdu),
+            Arg.Any<Type>(),
+            Arg.Any<Type>());
+    }
 
-        [Fact]
-        public void Invoke_CommandApduWithSmallData_ReturnsNextTransformResponseAsIs()
-        {
-            // Arrange
-            var expectedResponse = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var mockTransform = Substitute.For<IApduTransform>();
-            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
-                .Returns(expectedResponse);
+    [Fact]
+    public void Invoke_CommandApduWithSmallData_ReturnsNextTransformResponseAsIs()
+    {
+        // Arrange
+        var expectedResponse = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var mockTransform = Substitute.For<IApduTransform>();
+        _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
+            .Returns(expectedResponse);
 
-            var transform = new CommandChainingTransform(mockTransform);
-            var commandApdu = new CommandApdu { Data = new byte[] { 0, 1, 2, 3 } };
+        var transform = new CommandChainingTransform(mockTransform);
+        var commandApdu = new CommandApdu { Data = new byte[] { 0, 1, 2, 3 } };
 
-            // Act
-            ResponseApdu actualResponse = transform.Invoke(commandApdu, typeof(object), typeof(object));
+        // Act
+        var actualResponse = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
-            // Assert
-            Assert.Same(expectedResponse, actualResponse);
-        }
+        // Assert
+        Assert.Same(expectedResponse, actualResponse);
+    }
 
-        [Fact]
-        public void Invoke_CommandApduWithLargeDataBuffer_OrsHex10ToClaOnAllExceptLast()
-        {
-            var observedCla = new List<byte>();
+    [Fact]
+    public void Invoke_CommandApduWithLargeDataBuffer_OrsHex10ToClaOnAllExceptLast()
+    {
+        var observedCla = new List<byte>();
 
-            // Arrange
-            var mockTransform = Substitute.For<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
-            var commandApdu = new CommandApdu { Data = Enumerable.Repeat<byte>(0xFF, 16).ToArray() };
+        // Arrange
+        var mockTransform = Substitute.For<IApduTransform>();
+        var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
+        var commandApdu = new CommandApdu { Data = Enumerable.Repeat<byte>(0xFF, 16).ToArray() };
 
-            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
-                .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
-                .AndDoes(callInfo =>
-                {
-                    var apdu = callInfo.ArgAt<CommandApdu>(0);
-                    observedCla.Add(apdu.Cla);
-                });
-            // Act
-            _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
-
-            // Assert
-            Assert.Equal(new byte[] { 0x10, 0x10, 0x10, 0x00 }, observedCla);
-        }
-
-        [Fact]
-        public void Invoke_CommandApduWithLargeDataBuffer_AllOtherApduPropertiesRemainUnchanged()
-        {
-            var observedApdus = new List<CommandApdu>();
-
-            // Arrange
-            var mockTransform = Substitute.For<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
-            var commandApdu = new CommandApdu
+        _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
+            .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
+            .AndDoes(callInfo =>
             {
-                Ins = 1,
-                P1 = 2,
-                P2 = 3,
-                Data = Enumerable.Repeat<byte>(0xFF, 16).ToArray()
-            };
+                var apdu = callInfo.ArgAt<CommandApdu>(0);
+                observedCla.Add(apdu.Cla);
+            });
+        // Act
+        _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
-            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
-                .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
-                .AndDoes(callInfo =>
-                {
-                    var apdu = callInfo.ArgAt<CommandApdu>(0);
-                    observedApdus.Add(apdu);
-                });
+        // Assert
+        Assert.Equal(new byte[] { 0x10, 0x10, 0x10, 0x00 }, observedCla);
+    }
 
-            // Act
-            _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
+    [Fact]
+    public void Invoke_CommandApduWithLargeDataBuffer_AllOtherApduPropertiesRemainUnchanged()
+    {
+        var observedApdus = new List<CommandApdu>();
 
-            // Assert
-            foreach (CommandApdu apdu in observedApdus)
-            {
-                Assert.Equal(1, apdu.Ins);
-                Assert.Equal(2, apdu.P1);
-                Assert.Equal(3, apdu.P2);
-            }
-        }
-
-        [Fact]
-        public void Invoke_CommandApduWithLargeDataBuffer_SplitsDataAcrossInvokeCalls()
+        // Arrange
+        var mockTransform = Substitute.For<IApduTransform>();
+        var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
+        var commandApdu = new CommandApdu
         {
-            var observedApdus = new List<byte[]>();
+            Ins = 1,
+            P1 = 2,
+            P2 = 3,
+            Data = Enumerable.Repeat<byte>(0xFF, 16).ToArray()
+        };
 
-            // Arrange
-            var mockTransform = Substitute.For<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
-            var commandApdu = new CommandApdu
+        _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
+            .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
+            .AndDoes(callInfo =>
             {
-                Data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
-            };
+                var apdu = callInfo.ArgAt<CommandApdu>(0);
+                observedApdus.Add(apdu);
+            });
 
-            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
-                .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
-                .AndDoes(callInfo =>
-                {
-                    var apdu = callInfo.ArgAt<CommandApdu>(0);
-                    observedApdus.Add(apdu.Data.ToArray());
-                });
-            // Act
-            _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
+        // Act
+        _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
-            // Assert
-            Assert.Equal(new byte[] { 1, 2, 3, 4 }, observedApdus[0]);
-            Assert.Equal(new byte[] { 5, 6, 7, 8 }, observedApdus[1]);
-            Assert.Equal(new byte[] { 9, 10 }, observedApdus[2]);
-        }
-
-        [Fact]
-        public void Invoke_CommandApduWithLargeDataBuffer_DoesntProcessAllBytes()
+        // Assert
+        foreach (var apdu in observedApdus)
         {
-            var observedApdus = new List<byte[]>();
-
-            // Arrange
-            var mockTransform = Substitute.For<IApduTransform>();
-            var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
-            var commandApdu = new CommandApdu
-            {
-                Data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
-            };
-
-            _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
-                .Returns(new ResponseApdu([], 0x6700))
-                .AndDoes(callInfo =>
-                {
-                    var apdu = callInfo.ArgAt<CommandApdu>(0);
-                    observedApdus.Add(apdu.Data.ToArray());
-                });
-
-            // Act
-            _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
-
-            // Assert 
-            // Should only make one pass with 4 bytes, before exiting 
-            Assert.Equal(4, observedApdus[0].Length);
+            Assert.Equal(1, apdu.Ins);
+            Assert.Equal(2, apdu.P1);
+            Assert.Equal(3, apdu.P2);
         }
+    }
+
+    [Fact]
+    public void Invoke_CommandApduWithLargeDataBuffer_SplitsDataAcrossInvokeCalls()
+    {
+        var observedApdus = new List<byte[]>();
+
+        // Arrange
+        var mockTransform = Substitute.For<IApduTransform>();
+        var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
+        var commandApdu = new CommandApdu
+        {
+            Data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
+        };
+
+        _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
+            .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }))
+            .AndDoes(callInfo =>
+            {
+                var apdu = callInfo.ArgAt<CommandApdu>(0);
+                observedApdus.Add(apdu.Data.ToArray());
+            });
+        // Act
+        _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
+
+        // Assert
+        Assert.Equal(new byte[] { 1, 2, 3, 4 }, observedApdus[0]);
+        Assert.Equal(new byte[] { 5, 6, 7, 8 }, observedApdus[1]);
+        Assert.Equal(new byte[] { 9, 10 }, observedApdus[2]);
+    }
+
+    [Fact]
+    public void Invoke_CommandApduWithLargeDataBuffer_DoesntProcessAllBytes()
+    {
+        var observedApdus = new List<byte[]>();
+
+        // Arrange
+        var mockTransform = Substitute.For<IApduTransform>();
+        var transform = new CommandChainingTransform(mockTransform) { MaxChunkSize = 4 };
+        var commandApdu = new CommandApdu
+        {
+            Data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
+        };
+
+        _ = mockTransform.Invoke(Arg.Any<CommandApdu>(), Arg.Any<Type>(), Arg.Any<Type>())
+            .Returns(new ResponseApdu([], 0x6700))
+            .AndDoes(callInfo =>
+            {
+                var apdu = callInfo.ArgAt<CommandApdu>(0);
+                observedApdus.Add(apdu.Data.ToArray());
+            });
+
+        // Act
+        _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
+
+        // Assert 
+        // Should only make one pass with 4 bytes, before exiting 
+        Assert.Equal(4, observedApdus[0].Length);
     }
 }

@@ -14,155 +14,163 @@
 
 using System;
 
-namespace Yubico.YubiKey.Piv
-{
-    // This KeyCollector class can be used to provide the KeyCollector delegate
-    // to the PivSession class (and others in the future).
-    // It is called Simple because it returns fixed, default values. The "39" is
-    // there because it is possible to return the fixed values with one byte
-    // changed to 0x39.
-    public class Simple39KeyCollector
-    {
-        private static bool _setKeyFlagOnChange;
-        public static bool _useComplexCreds;
+namespace Yubico.YubiKey.Piv;
 
-        // If the caller sets the input arg to true, then when the call asks for
-        // Change, return the old and new, then set KeyFlag to the opposite of
-        // what it currently is.
-        // For false, then this returns old and new, but does nothing to KeyFlag.
-        // If there is no arg, that's false.
-        public Simple39KeyCollector(
-            bool setKeyFlagOnChange = false,
-            bool useComplexCreds = false)
+// This KeyCollector class can be used to provide the KeyCollector delegate
+// to the PivSession class (and others in the future).
+// It is called Simple because it returns fixed, default values. The "39" is
+// there because it is possible to return the fixed values with one byte
+// changed to 0x39.
+public class Simple39KeyCollector
+{
+    private static bool _setKeyFlagOnChange;
+    public static bool _useComplexCreds;
+
+    // If the caller sets the input arg to true, then when the call asks for
+    // Change, return the old and new, then set KeyFlag to the opposite of
+    // what it currently is.
+    // For false, then this returns old and new, but does nothing to KeyFlag.
+    // If there is no arg, that's false.
+    public Simple39KeyCollector(
+        bool setKeyFlagOnChange = false,
+        bool useComplexCreds = false)
+    {
+        KeyFlag = 0;
+        RetryFlag = 0;
+        _setKeyFlagOnChange = setKeyFlagOnChange;
+        _useComplexCreds = useComplexCreds;
+    }
+
+    // If KeyFlag is set to 0, the current PIN, PUK, or key returned will be
+    // the default and the new PIN, PUK, or key will be the alternate.
+    // The alternate is the same except the first byte is different: 0x39.
+    // If KeyFlag is set to 1, the current will be the alternate and the new
+    // will be the default.
+    public int KeyFlag { get; set; }
+
+    // If RetryFlag is set to 0, the collector will return false if the
+    // RetriesRemaining is 1. This way the PIN or PUK will not be blocked.
+    // But if it is set to 1, go ahead and keep returning the wrong PIN or
+    // PUK. This way we can block the PIN or PUK for testing purposes.
+    public int RetryFlag { get; set; }
+
+    public bool Simple39KeyCollectorDelegate(
+        KeyEntryData keyEntryData)
+    {
+        if (keyEntryData.IsRetry &&
+            RetryFlag == 0 &&
+            keyEntryData.RetriesRemaining is not null &&
+            keyEntryData.RetriesRemaining == 1)
         {
-            KeyFlag = 0;
-            RetryFlag = 0;
-            _setKeyFlagOnChange = setKeyFlagOnChange;
-            _useComplexCreds = useComplexCreds;
+            return false;
         }
 
-        // If KeyFlag is set to 0, the current PIN, PUK, or key returned will be
-        // the default and the new PIN, PUK, or key will be the alternate.
-        // The alternate is the same except the first byte is different: 0x39.
-        // If KeyFlag is set to 1, the current will be the alternate and the new
-        // will be the default.
-        public int KeyFlag { get; set; }
+        var isChange = false;
+        Memory<byte> currentValue;
+        Memory<byte>? newValue = null;
 
-        // If RetryFlag is set to 0, the collector will return false if the
-        // RetriesRemaining is 1. This way the PIN or PUK will not be blocked.
-        // But if it is set to 1, go ahead and keep returning the wrong PIN or
-        // PUK. This way we can block the PIN or PUK for testing purposes.
-        public int RetryFlag { get; set; }
-
-        public bool Simple39KeyCollectorDelegate(
-            KeyEntryData keyEntryData)
+        switch (keyEntryData.Request)
         {
-            if (keyEntryData.IsRetry &&
-                RetryFlag == 0 &&
-                keyEntryData.RetriesRemaining is not null &&
-                keyEntryData.RetriesRemaining == 1)
-            {
+            default:
                 return false;
-            }
 
-            var isChange = false;
-            Memory<byte> currentValue;
-            Memory<byte>? newValue = null;
+            case KeyEntryRequest.Release:
+                return true;
 
-            switch (keyEntryData.Request)
-            {
-                default:
-                    return false;
+            case KeyEntryRequest.VerifyPivPin:
+                currentValue = CollectPin(_useComplexCreds);
+                break;
 
-                case KeyEntryRequest.Release:
-                    return true;
+            case KeyEntryRequest.ChangePivPin:
+                currentValue = CollectPin(_useComplexCreds);
+                newValue = CollectPin(_useComplexCreds);
+                isChange = true;
+                break;
 
-                case KeyEntryRequest.VerifyPivPin:
-                    currentValue = CollectPin(_useComplexCreds);
-                    break;
+            case KeyEntryRequest.ChangePivPuk:
+                currentValue = CollectPuk(_useComplexCreds);
+                newValue = CollectPuk(_useComplexCreds);
+                isChange = true;
+                break;
 
-                case KeyEntryRequest.ChangePivPin:
-                    currentValue = CollectPin(_useComplexCreds);
-                    newValue = CollectPin(_useComplexCreds);
-                    isChange = true;
-                    break;
+            case KeyEntryRequest.ResetPivPinWithPuk:
+                currentValue = CollectPuk(_useComplexCreds);
+                newValue = CollectPin(_useComplexCreds);
+                isChange = true;
+                break;
 
-                case KeyEntryRequest.ChangePivPuk:
-                    currentValue = CollectPuk(_useComplexCreds);
-                    newValue = CollectPuk(_useComplexCreds);
-                    isChange = true;
-                    break;
-
-                case KeyEntryRequest.ResetPivPinWithPuk:
-                    currentValue = CollectPuk(_useComplexCreds);
-                    newValue = CollectPin(_useComplexCreds);
-                    isChange = true;
-                    break;
-
-                case KeyEntryRequest.AuthenticatePivManagementKey:
-                    if (keyEntryData.IsRetry)
-                    {
-                        return false;
-                    }
-
-                    currentValue = CollectMgmtKey(_useComplexCreds);
-                    break;
-
-                case KeyEntryRequest.ChangePivManagementKey:
-                    if (keyEntryData.IsRetry)
-                    {
-                        return false;
-                    }
-
-                    currentValue = CollectMgmtKey(_useComplexCreds);
-                    newValue = CollectMgmtKey(_useComplexCreds);
-                    isChange = true;
-                    break;
-            }
-
-            if (newValue is null)
-            {
-                if (KeyFlag != 0)
+            case KeyEntryRequest.AuthenticatePivManagementKey:
+                if (keyEntryData.IsRetry)
                 {
-                    currentValue.Span[0] = 0x39;
+                    return false;
                 }
 
-                keyEntryData.SubmitValue(currentValue.Span);
+                currentValue = CollectMgmtKey(_useComplexCreds);
+                break;
+
+            case KeyEntryRequest.ChangePivManagementKey:
+                if (keyEntryData.IsRetry)
+                {
+                    return false;
+                }
+
+                currentValue = CollectMgmtKey(_useComplexCreds);
+                newValue = CollectMgmtKey(_useComplexCreds);
+                isChange = true;
+                break;
+        }
+
+        if (newValue is null)
+        {
+            if (KeyFlag != 0)
+            {
+                currentValue.Span[0] = 0x39;
+            }
+
+            keyEntryData.SubmitValue(currentValue.Span);
+        }
+        else
+        {
+            if (KeyFlag != 0)
+            {
+                currentValue.Span[0] = 0x39;
             }
             else
             {
-                if (KeyFlag != 0)
-                {
-                    currentValue.Span[0] = 0x39;
-                }
-                else
-                {
-                    newValue.Value.Span[0] = 0x39;
-                }
-
-                keyEntryData.SubmitValues(currentValue.Span, newValue.Value.Span);
+                newValue.Value.Span[0] = 0x39;
             }
 
-            if (_setKeyFlagOnChange && isChange)
-            {
-                KeyFlag = 1;
-            }
-
-            return true;
+            keyEntryData.SubmitValues(currentValue.Span, newValue.Value.Span);
         }
 
-        public static Memory<byte> CollectPin(
-            bool useComplex) => useComplex
+        if (_setKeyFlagOnChange && isChange)
+        {
+            KeyFlag = 1;
+        }
+
+        return true;
+    }
+
+    public static Memory<byte> CollectPin(
+        bool useComplex)
+    {
+        return useComplex
             ? PivSessionIntegrationTestBase.ComplexPin
             : PivSessionIntegrationTestBase.DefaultPin;
+    }
 
-        public static Memory<byte> CollectPuk(
-            bool useComplex) => useComplex
+    public static Memory<byte> CollectPuk(
+        bool useComplex)
+    {
+        return useComplex
             ? PivSessionIntegrationTestBase.ComplexPuk
             : PivSessionIntegrationTestBase.DefaultPuk;
+    }
 
-        public static Memory<byte> CollectMgmtKey(
-            bool useComplex) => useComplex
+    public static Memory<byte> CollectMgmtKey(
+        bool useComplex)
+    {
+        return useComplex
             ? PivSessionIntegrationTestBase.ComplexManagementKey
             : PivSessionIntegrationTestBase.DefaultManagementKey;
     }

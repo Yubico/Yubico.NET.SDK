@@ -47,7 +47,7 @@ public class ByteArrayExtensionsTests
         Assert.Equal(_arr1, result);
         Assert.NotSame(_arr1, result);
     }
-    
+
     [Fact]
     public void Concat_ByteArray_WithNullOthers_ReturnsNewArrayInstance()
     {
@@ -123,17 +123,17 @@ public class ByteArrayExtensionsTests
         // Assert
         Assert.Equal(_expected1And2, result);
     }
-    
+
     [Fact]
     public void Concat_ReadOnlyMemory_WithAllEmptyInputs_ReturnsEmptyArray()
     {
         // Arrange
         var memEmpty1 = ReadOnlyMemory<byte>.Empty;
         var memEmpty2 = ReadOnlyMemory<byte>.Empty;
-        
+
         // Act
         var result = memEmpty1.Concat(memEmpty2);
-        
+
         // Assert
         Assert.Empty(result);
     }

@@ -13,16 +13,18 @@
 // limitations under the License.
 
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+public static class PivCommandResponseTestData
 {
-    public static class PivCommandResponseTestData
+    public static byte[] GetEncryptedBlock(
+        KeyType keyType)
     {
-        public static byte[] GetEncryptedBlock(KeyType keyType) => keyType switch
+        return keyType switch
         {
             KeyType.RSA3072 => new byte[] //384 bytes
             {
@@ -81,14 +83,18 @@ namespace Yubico.YubiKey.Piv.Commands
                 0x68, 0xE8, 0x6B, 0x83, 0x65, 0xA7, 0x2B, 0x8C, 0xFE, 0x36, 0x9D, 0xE1, 0x15, 0x94, 0x26, 0xA0,
                 0x6F, 0x3D, 0xBC, 0x4B, 0x97, 0x16, 0x5E, 0x07, 0x89, 0xF3, 0x9D, 0xB4, 0xBC, 0x84, 0x4B, 0xE9,
                 0xAF, 0xEF, 0xE8, 0xD1, 0x08, 0x08, 0x21, 0x56, 0x35, 0xAD, 0xB5, 0xD3, 0x31, 0x53, 0x20, 0x9B
-            },
+            }
         };
+    }
 
-        // Get a sample digest for the given keyType.
-        // If RSA, this gets a PKCS1 v1.5 formatted block.
-        // If ECC P256, it returns 32 bytes.
-        // If ECC P384, it returns 48 bytes.
-        public static byte[] GetDigestData(KeyType keyType) => keyType switch
+    // Get a sample digest for the given keyType.
+    // If RSA, this gets a PKCS1 v1.5 formatted block.
+    // If ECC P256, it returns 32 bytes.
+    // If ECC P384, it returns 48 bytes.
+    public static byte[] GetDigestData(
+        KeyType keyType)
+    {
+        return keyType switch
         {
             KeyType.RSA2048 => new byte[]
             {
@@ -197,10 +203,14 @@ namespace Yubico.YubiKey.Piv.Commands
                 0x2f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x04, 0x20,
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
                 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
-            },
+            }
         };
+    }
 
-        public static List<byte> GetDataCommandExpectedApduData(PivDataTag tag) => tag switch
+    public static List<byte> GetDataCommandExpectedApduData(
+        PivDataTag tag)
+    {
+        return tag switch
         {
             PivDataTag.Chuid => new List<byte>(new byte[] { 0x5C, 0x03, 0x5F, 0xC1, 0x02 }),
             PivDataTag.Capability => new List<byte>(new byte[] { 0x5C, 0x03, 0x5F, 0xC1, 0x07 }),
@@ -238,10 +248,14 @@ namespace Yubico.YubiKey.Piv.Commands
             PivDataTag.BiometricGroupTemplate => new List<byte>(new byte[] { 0x5c, 0x02, 0x7F, 0x61 }),
             PivDataTag.SecureMessageSigner => new List<byte>(new byte[] { 0x5c, 0x03, 0x5F, 0xC1, 0x22 }),
             PivDataTag.PairingCodeReferenceData => new List<byte>(new byte[] { 0x5c, 0x03, 0x5F, 0xC1, 0x23 }),
-            _ => new List<byte>(),
+            _ => new List<byte>()
         };
+    }
 
-        public static List<byte> GetDataCommandExpectedApduDataInt(int tag) => tag switch
+    public static List<byte> GetDataCommandExpectedApduDataInt(
+        int tag)
+    {
+        return tag switch
         {
             0x0000007E => new List<byte>(new byte[] { 0x5C, 0x01, 0x7E }),
             0x00007F61 => new List<byte>(new byte[] { 0x5C, 0x02, 0x7F, 0x61 }),
@@ -256,208 +270,214 @@ namespace Yubico.YubiKey.Piv.Commands
             0x005FFF15 => new List<byte>(new byte[] { 0x5C, 0x03, 0x5F, 0xFF, 0x15 }),
             0x005FFFFF => new List<byte>(new byte[] { 0x5C, 0x03, 0x5F, 0xFF, 0xFF }),
             0x005F0000 => new List<byte>(new byte[] { 0x5C, 0x03, 0x5F, 0x00, 0x00 }),
-            _ => new List<byte>(),
+            _ => new List<byte>()
         };
+    }
 
-        public static byte[] PutDataEncoding(PivDataTag tag, bool isCorrect)
+    public static byte[] PutDataEncoding(
+        PivDataTag tag,
+        bool isCorrect)
+    {
+        int[] format;
+        var indexRandom = 1;
+        switch (tag)
         {
-            int[] format;
-            int indexRandom = 1;
-            switch (tag)
-            {
-                case PivDataTag.Chuid:
-                    format = new int[]
-                    {
-                        0x53,
-                        0x30, 0, 25,
-                        0x34, 0, 16,
-                        0x35, 0, 8,
-                        0x3E, 0, 0,
-                        0xFE, 0, 0
-                    };
-                    break;
-
-                case PivDataTag.Capability:
-                    format = new int[]
-                    {
-                        0x53,
-                        0xF0, 0, 21,
-                        0xF1, 0, 1,
-                        0xF2, 0, 1,
-                        0xF3, 0, 0,
-                        0xF4, 0, 1,
-                        0xF5, 0, 1,
-                        0xF6, 0, 0,
-                        0xF7, 0, 0,
-                        0xFA, 0, 0,
-                        0xFB, 0, 0,
-                        0xFC, 0, 0,
-                        0xFD, 0, 0,
-                        0xFE, 0, 0
-                    };
-                    break;
-
-                case PivDataTag.Authentication:
-                case PivDataTag.Signature:
-                case PivDataTag.KeyManagement:
-                case PivDataTag.CardAuthentication:
-                case PivDataTag.Retired1:
-                case PivDataTag.Retired2:
-                case PivDataTag.Retired3:
-                case PivDataTag.Retired4:
-                case PivDataTag.Retired5:
-                case PivDataTag.Retired6:
-                case PivDataTag.Retired7:
-                case PivDataTag.Retired8:
-                case PivDataTag.Retired9:
-                case PivDataTag.Retired10:
-                case PivDataTag.Retired11:
-                case PivDataTag.Retired12:
-                case PivDataTag.Retired13:
-                case PivDataTag.Retired14:
-                case PivDataTag.Retired15:
-                case PivDataTag.Retired16:
-                case PivDataTag.Retired17:
-                case PivDataTag.Retired18:
-                case PivDataTag.Retired19:
-                case PivDataTag.Retired20:
-                    format = new int[]
-                    {
-                        0x53,
-                        0x70, 1856, 0,
-                        0x71, 0, 1,
-                        0xFE, 0, 0
-                    };
-                    break;
-
-                case PivDataTag.SecurityObject:
-                    format = new int[]
-                    {
-                        0x53,
-                        0xBA, 30, 0,
-                        0xBB, 1298, 0,
-                        0xFE, 0, 0
-                    };
-                    break;
-
-                case PivDataTag.KeyHistory:
-                    format = new int[]
-                    {
-                        0x53,
-                        0xC1, 0, 1,
-                        0xC2, 0, 1,
-                        0xF3, 118, 0,
-                        0xFE, 0, 0
-                    };
-                    indexRandom = 7;
-                    break;
-
-                case PivDataTag.IrisImages:
-                    format = new int[]
-                    {
-                        0x53,
-                        0xBC, 7100, 0,
-                        0xFE, 0, 0
-                    };
-                    break;
-
-                case PivDataTag.FacialImage:
-                    format = new int[]
-                    {
-                        0x53,
-                        0xBC, 12704, 0,
-                        0xFE, 0, 0
-                    };
-                    break;
-
-                case PivDataTag.Fingerprints:
-                    format = new int[]
-                    {
-                        0x53,
-                        0xBC, 4000, 0,
-                        0xFE, 0, 0
-                    };
-                    break;
-
-                case PivDataTag.SecureMessageSigner:
-                    format = new int[]
-                    {
-                        0x53,
-                        0x70, 1856, 0,
-                        0x71, 0, 1,
-                        0x7F21, 601, 0,
-                        0xFE, 0, 0
-                    };
-                    break;
-
-                case PivDataTag.PairingCodeReferenceData:
-                    format = new int[]
-                    {
-                        0x53,
-                        0x99, 0, 8,
-                        0xFE, 0, 0
-                    };
-                    break;
-
-                case PivDataTag.Printed:
-                case PivDataTag.Discovery:
-                case PivDataTag.BiometricGroupTemplate:
-                default:
-                    return new byte[] { 0x01, 00 };
-            }
-
-            return BuildPutDataEncoding(format, isCorrect, indexRandom);
-        }
-
-        private static byte[] BuildPutDataEncoding(int[] format, bool isCorrect, int indexRandom)
-        {
-            var tlvWriter = new TlvWriter();
-            int index = 1;
-            using (tlvWriter.WriteNestedTlv(format[0]))
-            {
-                while (index < format.Length)
+            case PivDataTag.Chuid:
+                format = new[]
                 {
-                    int valueLen = 1;
-                    if (format[index + 1] == 0)
-                    {
-                        valueLen = format[index + 2];
-                        if (isCorrect == false)
-                        {
-                            valueLen++;
-                        }
-                    }
+                    0x53,
+                    0x30, 0, 25,
+                    0x34, 0, 16,
+                    0x35, 0, 8,
+                    0x3E, 0, 0,
+                    0xFE, 0, 0
+                };
+                break;
 
-                    if (format[index] == 0xFE && isCorrect == false)
-                    {
-                        valueLen = 1;
-                    }
+            case PivDataTag.Capability:
+                format = new[]
+                {
+                    0x53,
+                    0xF0, 0, 21,
+                    0xF1, 0, 1,
+                    0xF2, 0, 1,
+                    0xF3, 0, 0,
+                    0xF4, 0, 1,
+                    0xF5, 0, 1,
+                    0xF6, 0, 0,
+                    0xF7, 0, 0,
+                    0xFA, 0, 0,
+                    0xFB, 0, 0,
+                    0xFC, 0, 0,
+                    0xFD, 0, 0,
+                    0xFE, 0, 0
+                };
+                break;
 
-                    if (valueLen == 0)
-                    {
-                        tlvWriter.WriteValue(format[index], null);
-                    }
-                    else
-                    {
-                        byte[] value = new byte[valueLen];
-                        if (index == indexRandom)
-                        {
-                            FillWithRandomBytes(value);
-                        }
+            case PivDataTag.Authentication:
+            case PivDataTag.Signature:
+            case PivDataTag.KeyManagement:
+            case PivDataTag.CardAuthentication:
+            case PivDataTag.Retired1:
+            case PivDataTag.Retired2:
+            case PivDataTag.Retired3:
+            case PivDataTag.Retired4:
+            case PivDataTag.Retired5:
+            case PivDataTag.Retired6:
+            case PivDataTag.Retired7:
+            case PivDataTag.Retired8:
+            case PivDataTag.Retired9:
+            case PivDataTag.Retired10:
+            case PivDataTag.Retired11:
+            case PivDataTag.Retired12:
+            case PivDataTag.Retired13:
+            case PivDataTag.Retired14:
+            case PivDataTag.Retired15:
+            case PivDataTag.Retired16:
+            case PivDataTag.Retired17:
+            case PivDataTag.Retired18:
+            case PivDataTag.Retired19:
+            case PivDataTag.Retired20:
+                format = new[]
+                {
+                    0x53,
+                    0x70, 1856, 0,
+                    0x71, 0, 1,
+                    0xFE, 0, 0
+                };
+                break;
 
-                        tlvWriter.WriteValue(format[index], value);
-                    }
+            case PivDataTag.SecurityObject:
+                format = new[]
+                {
+                    0x53,
+                    0xBA, 30, 0,
+                    0xBB, 1298, 0,
+                    0xFE, 0, 0
+                };
+                break;
 
-                    index += 3;
-                }
-            }
+            case PivDataTag.KeyHistory:
+                format = new[]
+                {
+                    0x53,
+                    0xC1, 0, 1,
+                    0xC2, 0, 1,
+                    0xF3, 118, 0,
+                    0xFE, 0, 0
+                };
+                indexRandom = 7;
+                break;
 
-            return tlvWriter.Encode();
+            case PivDataTag.IrisImages:
+                format = new[]
+                {
+                    0x53,
+                    0xBC, 7100, 0,
+                    0xFE, 0, 0
+                };
+                break;
+
+            case PivDataTag.FacialImage:
+                format = new[]
+                {
+                    0x53,
+                    0xBC, 12704, 0,
+                    0xFE, 0, 0
+                };
+                break;
+
+            case PivDataTag.Fingerprints:
+                format = new[]
+                {
+                    0x53,
+                    0xBC, 4000, 0,
+                    0xFE, 0, 0
+                };
+                break;
+
+            case PivDataTag.SecureMessageSigner:
+                format = new[]
+                {
+                    0x53,
+                    0x70, 1856, 0,
+                    0x71, 0, 1,
+                    0x7F21, 601, 0,
+                    0xFE, 0, 0
+                };
+                break;
+
+            case PivDataTag.PairingCodeReferenceData:
+                format = new[]
+                {
+                    0x53,
+                    0x99, 0, 8,
+                    0xFE, 0, 0
+                };
+                break;
+
+            case PivDataTag.Printed:
+            case PivDataTag.Discovery:
+            case PivDataTag.BiometricGroupTemplate:
+            default:
+                return new byte[] { 0x01, 00 };
         }
 
-        private static void FillWithRandomBytes(byte[] buffer)
+        return BuildPutDataEncoding(format, isCorrect, indexRandom);
+    }
+
+    private static byte[] BuildPutDataEncoding(
+        int[] format,
+        bool isCorrect,
+        int indexRandom)
+    {
+        var tlvWriter = new TlvWriter();
+        var index = 1;
+        using (tlvWriter.WriteNestedTlv(format[0]))
         {
-            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
-            random.GetBytes(buffer);
+            while (index < format.Length)
+            {
+                var valueLen = 1;
+                if (format[index + 1] == 0)
+                {
+                    valueLen = format[index + 2];
+                    if (!isCorrect)
+                    {
+                        valueLen++;
+                    }
+                }
+
+                if (format[index] == 0xFE && !isCorrect)
+                {
+                    valueLen = 1;
+                }
+
+                if (valueLen == 0)
+                {
+                    tlvWriter.WriteValue(format[index], null);
+                }
+                else
+                {
+                    var value = new byte[valueLen];
+                    if (index == indexRandom)
+                    {
+                        FillWithRandomBytes(value);
+                    }
+
+                    tlvWriter.WriteValue(format[index], value);
+                }
+
+                index += 3;
+            }
         }
+
+        return tlvWriter.Encode();
+    }
+
+    private static void FillWithRandomBytes(
+        byte[] buffer)
+    {
+        using var random = RandomObjectUtility.GetRandomObject(null);
+        random.GetBytes(buffer);
     }
 }

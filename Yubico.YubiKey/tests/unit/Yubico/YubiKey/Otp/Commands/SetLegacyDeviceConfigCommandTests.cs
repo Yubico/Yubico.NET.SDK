@@ -12,257 +12,255 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Buffers.Binary;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+public class SetLegacyDeviceConfigCommandTests
 {
-    public class SetLegacyDeviceConfigCommandTests
+    [Fact]
+    public void Mode_SetGet_GetsTheSetValue()
     {
-        [Fact]
-        public void Mode_SetGet_GetsTheSetValue()
-        {
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
-            YubiKeyCapabilities expectedMode = YubiKeyCapabilities.Ccid;
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            false,
+            0);
+        var expectedMode = YubiKeyCapabilities.Ccid;
 
-            command.YubiKeyInterfaces = expectedMode;
+        command.YubiKeyInterfaces = expectedMode;
 
-            Assert.Equal(expectedMode, command.YubiKeyInterfaces);
-        }
+        Assert.Equal(expectedMode, command.YubiKeyInterfaces);
+    }
 
-        [Fact]
-        public void ChallengeResponseTimeout_SetGet_GetsTheSetValue()
-        {
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
-            byte expectedTimeout = 7;
+    [Fact]
+    public void ChallengeResponseTimeout_SetGet_GetsTheSetValue()
+    {
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            false,
+            0);
+        byte expectedTimeout = 7;
 
-            command.ChallengeResponseTimeout = expectedTimeout;
+        command.ChallengeResponseTimeout = expectedTimeout;
 
-            Assert.Equal(expectedTimeout, command.ChallengeResponseTimeout);
-        }
+        Assert.Equal(expectedTimeout, command.ChallengeResponseTimeout);
+    }
 
-        [Fact]
-        public void AutoEjectTimeout_SetGet_GetsTheSetValue()
-        {
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
-            int expectedTimeout = 1234;
+    [Fact]
+    public void AutoEjectTimeout_SetGet_GetsTheSetValue()
+    {
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            false,
+            0);
+        var expectedTimeout = 1234;
 
-            command.AutoEjectTimeout = expectedTimeout;
+        command.AutoEjectTimeout = expectedTimeout;
 
-            Assert.Equal(expectedTimeout, command.AutoEjectTimeout);
-        }
+        Assert.Equal(expectedTimeout, command.AutoEjectTimeout);
+    }
 
-        [Fact]
-        public void Application_Get_AlwaysOtp()
-        {
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+    [Fact]
+    public void Application_Get_AlwaysOtp()
+    {
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            false,
+            0);
 
-            Assert.Equal(YubiKeyApplication.Otp, command.Application);
-        }
+        Assert.Equal(YubiKeyApplication.Otp, command.Application);
+    }
 
-        [Fact]
-        public void FullConstructor_GivenValues_SetsProperties()
-        {
-            YubiKeyCapabilities expectedMode = YubiKeyCapabilities.Ccid;
-            byte expectedCrTimeout = 7;
-            bool touchEjectEnabled = true;
-            int expectedAeTimeout = 1234;
+    [Fact]
+    public void FullConstructor_GivenValues_SetsProperties()
+    {
+        var expectedMode = YubiKeyCapabilities.Ccid;
+        byte expectedCrTimeout = 7;
+        var touchEjectEnabled = true;
+        var expectedAeTimeout = 1234;
 
-            var command = new SetLegacyDeviceConfigCommand(
-                expectedMode,
-                expectedCrTimeout,
-                touchEjectEnabled,
-                expectedAeTimeout);
+        var command = new SetLegacyDeviceConfigCommand(
+            expectedMode,
+            expectedCrTimeout,
+            touchEjectEnabled,
+            expectedAeTimeout);
 
-            Assert.Equal(expectedMode, command.YubiKeyInterfaces);
-            Assert.Equal(expectedCrTimeout, command.ChallengeResponseTimeout);
-            Assert.Equal(touchEjectEnabled, command.TouchEjectEnabled);
-            Assert.Equal(expectedAeTimeout, command.AutoEjectTimeout);
-        }
+        Assert.Equal(expectedMode, command.YubiKeyInterfaces);
+        Assert.Equal(expectedCrTimeout, command.ChallengeResponseTimeout);
+        Assert.Equal(touchEjectEnabled, command.TouchEjectEnabled);
+        Assert.Equal(expectedAeTimeout, command.AutoEjectTimeout);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
-        {
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
+    {
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            false,
+            0);
 
-            byte cla = command.CreateCommandApdu().Cla;
+        var cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(0, cla);
-        }
+        Assert.Equal(0, cla);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_Returns0x01()
-        {
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_Returns0x01()
+    {
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            false,
+            0);
 
-            byte ins = command.CreateCommandApdu().Ins;
+        var ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(1, ins);
-        }
+        Assert.Equal(1, ins);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP1Property_Returns0x11()
-        {
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+    [Fact]
+    public void CreateCommandApdu_GetP1Property_Returns0x11()
+    {
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            false,
+            0);
 
-            byte p1 = command.CreateCommandApdu().P1;
+        var p1 = command.CreateCommandApdu().P1;
 
-            Assert.Equal(0x11, p1);
-        }
+        Assert.Equal(0x11, p1);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsZero()
-        {
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsZero()
+    {
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            false,
+            0);
 
-            byte p2 = command.CreateCommandApdu().P2;
+        var p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(0, p2);
-        }
+        Assert.Equal(0, p2);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetData_ModePlacedAsFirstByte()
-        {
-            byte expectedMode = 0x01;
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.Ccid,
-                0,
-                false,
-                0);
+    [Fact]
+    public void CreateCommandApdu_GetData_ModePlacedAsFirstByte()
+    {
+        byte expectedMode = 0x01;
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.Ccid,
+            0,
+            false,
+            0);
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+        var data = command.CreateCommandApdu().Data;
 
-            byte actualModeValue = (byte)(data.Span[0] & 0b0111_1111);
+        var actualModeValue = (byte)(data.Span[0] & 0b0111_1111);
 
-            Assert.Equal(expectedMode, actualModeValue);
-        }
+        Assert.Equal(expectedMode, actualModeValue);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetData_CrTimeoutPlacedAsSecondByte()
-        {
-            byte expectedTimeout = 7;
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                expectedTimeout,
-                false,
-                0);
+    [Fact]
+    public void CreateCommandApdu_GetData_CrTimeoutPlacedAsSecondByte()
+    {
+        byte expectedTimeout = 7;
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            expectedTimeout,
+            false,
+            0);
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+        var data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(expectedTimeout, data.Span[1]);
-        }
+        Assert.Equal(expectedTimeout, data.Span[1]);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetData_TouchEjectPlacedInFirstByte()
-        {
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                true,
-                0);
+    [Fact]
+    public void CreateCommandApdu_GetData_TouchEjectPlacedInFirstByte()
+    {
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            true,
+            0);
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+        var data = command.CreateCommandApdu().Data;
 
-            byte expectedTouchEjectValue = 0x80;
+        byte expectedTouchEjectValue = 0x80;
 
-            byte actualTouchEjectValue = (byte)(data.Span[0] & expectedTouchEjectValue);
+        var actualTouchEjectValue = (byte)(data.Span[0] & expectedTouchEjectValue);
 
-            Assert.Equal(actualTouchEjectValue, expectedTouchEjectValue);
-        }
+        Assert.Equal(actualTouchEjectValue, expectedTouchEjectValue);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetData_AeTimeoutPlacedAsLastTwoBytes()
-        {
-            int expectedTimeout = 1234;
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                true,
-                expectedTimeout);
+    [Fact]
+    public void CreateCommandApdu_GetData_AeTimeoutPlacedAsLastTwoBytes()
+    {
+        var expectedTimeout = 1234;
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            true,
+            expectedTimeout);
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            int actualTimeout = BinaryPrimitives.ReadUInt16LittleEndian(data.Span.Slice(2));
+        var data = command.CreateCommandApdu().Data;
+        int actualTimeout = BinaryPrimitives.ReadUInt16LittleEndian(data.Span.Slice(2));
 
-            Assert.Equal(expectedTimeout, actualTimeout);
-        }
+        Assert.Equal(expectedTimeout, actualTimeout);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetLc_Returns0x04()
-        {
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
-            int nc = command.CreateCommandApdu().Nc;
+    [Fact]
+    public void CreateCommandApdu_GetLc_Returns0x04()
+    {
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            false,
+            0);
+        var nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(4, nc);
-        }
+        Assert.Equal(4, nc);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetLe_ReturnsZero()
-        {
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+    [Fact]
+    public void CreateCommandApdu_GetLe_ReturnsZero()
+    {
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            false,
+            0);
 
-            int ne = command.CreateCommandApdu().Ne;
+        var ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(0, ne);
-        }
+        Assert.Equal(0, ne);
+    }
 
-        [Fact]
-        public void CreateResponseApdu_ReturnsCorrectType()
-        {
-            // Arrange
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+    [Fact]
+    public void CreateResponseApdu_ReturnsCorrectType()
+    {
+        // Arrange
+        var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var command = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.All,
+            0,
+            false,
+            0);
 
-            // Act
-            OtpResponse response = command.CreateResponseForApdu(responseApdu);
+        // Act
+        var response = command.CreateResponseForApdu(responseApdu);
 
-            // Assert
-            Assert.True(response is ReadStatusResponse);
-        }
+        // Assert
+        Assert.True(response is ReadStatusResponse);
     }
 }

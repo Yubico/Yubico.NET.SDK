@@ -25,7 +25,7 @@ public class AsnPrivateKeyEncoderTests
             _ => throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null)
         };
 
-        var parameters = rsa.ExportParameters(includePrivateParameters: true);
+        var parameters = rsa.ExportParameters(true);
 
         // Act
         var encoded = AsnPrivateKeyEncoder.EncodeToPkcs8(parameters);
@@ -40,17 +40,17 @@ public class AsnPrivateKeyEncoderTests
         roundtrippedRsa.ImportParameters(rsaParams.Parameters);
 
         // Verify functional equivalence with a signing/verification test
-        byte[] dataToSign = new byte[32];
+        var dataToSign = new byte[32];
         using (var rng = RandomNumberGenerator.Create())
         {
             rng.GetBytes(dataToSign);
         }
 
         // Sign with original
-        byte[] signature = rsa.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        var signature = rsa.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 
         // Verify with roundtripped
-        bool verified =
+        var verified =
             roundtrippedRsa.VerifyData(dataToSign, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         Assert.True(verified, "Roundtripped RSA key should verify signature created with original key");
     }
@@ -60,7 +60,7 @@ public class AsnPrivateKeyEncoderTests
     {
         // Arrange
         using var rsa = RSA.Create(2048);
-        var publicOnlyParams = rsa.ExportParameters(includePrivateParameters: false);
+        var publicOnlyParams = rsa.ExportParameters(false);
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => AsnPrivateKeyEncoder.EncodeToPkcs8(publicOnlyParams));
@@ -82,7 +82,7 @@ public class AsnPrivateKeyEncoderTests
             _ => throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null)
         };
 
-        var parameters = ecdsa.ExportParameters(includePrivateParameters: true);
+        var parameters = ecdsa.ExportParameters(true);
 
         // Act
         var encoded = AsnPrivateKeyEncoder.EncodeToPkcs8(parameters);
@@ -97,17 +97,17 @@ public class AsnPrivateKeyEncoderTests
         roundtrippedEcdsa.ImportParameters(ecParams.Parameters);
 
         // Verify functional equivalence with a signing/verification test
-        byte[] dataToSign = new byte[32];
+        var dataToSign = new byte[32];
         using (var rng = RandomNumberGenerator.Create())
         {
             rng.GetBytes(dataToSign);
         }
 
         // Sign with original
-        byte[] signature = ecdsa.SignData(dataToSign, HashAlgorithmName.SHA256);
+        var signature = ecdsa.SignData(dataToSign, HashAlgorithmName.SHA256);
 
         // Verify with roundtripped
-        bool verified = roundtrippedEcdsa.VerifyData(dataToSign, signature, HashAlgorithmName.SHA256);
+        var verified = roundtrippedEcdsa.VerifyData(dataToSign, signature, HashAlgorithmName.SHA256);
         Assert.True(verified, "Roundtripped ECDsa key should verify signature created with original key");
     }
 
@@ -116,7 +116,7 @@ public class AsnPrivateKeyEncoderTests
     {
         // Arrange
         using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-        var publicOnlyParams = ecdsa.ExportParameters(includePrivateParameters: false);
+        var publicOnlyParams = ecdsa.ExportParameters(false);
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => AsnPrivateKeyEncoder.EncodeToPkcs8(publicOnlyParams));
@@ -138,7 +138,7 @@ public class AsnPrivateKeyEncoderTests
             _ => throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null)
         };
 
-        var parameters = ecdsa.ExportParameters(includePrivateParameters: true);
+        var parameters = ecdsa.ExportParameters(true);
         var keyDef = KeyDefinitions.GetByKeyType(keyType);
         var coordinateLength = keyDef.LengthInBytes;
 
@@ -278,7 +278,7 @@ public class AsnPrivateKeyEncoderTests
                 reencoded = AsnPrivateKeyEncoder.EncodeToPkcs8(cvParams.PrivateKey, KeyType.X25519);
                 break;
             case Curve25519PrivateKey { KeyType: KeyType.Ed25519 } cvParams:
-                    reencoded = AsnPrivateKeyEncoder.EncodeToPkcs8(cvParams.PrivateKey, KeyType.Ed25519);
+                reencoded = AsnPrivateKeyEncoder.EncodeToPkcs8(cvParams.PrivateKey, KeyType.Ed25519);
                 break;
             default:
                 throw new NotSupportedException(
@@ -354,22 +354,22 @@ public class AsnPrivateKeyEncoderTests
             roundTrippedRsa.ImportParameters(roundTrippedParams.Parameters);
 
             // Test signing/verification
-            byte[] dataToSign = GetRandomData(32);
+            var dataToSign = GetRandomData(32);
 
             // Sign with original
-            byte[] signature = originalRsa.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            var signature = originalRsa.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 
             // Verify with roundtripped
-            bool verified =
+            var verified =
                 roundTrippedRsa.VerifyData(dataToSign, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             Assert.True(verified, "Roundtripped RSA key should verify signature created with original key");
 
             // Sign with roundtripped
-            byte[] roundTrippedSignature =
+            var roundTrippedSignature =
                 roundTrippedRsa.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 
             // Verify with original
-            bool verifiedReverse = originalRsa.VerifyData(dataToSign, roundTrippedSignature, HashAlgorithmName.SHA256,
+            var verifiedReverse = originalRsa.VerifyData(dataToSign, roundTrippedSignature, HashAlgorithmName.SHA256,
                 RSASignaturePadding.Pkcs1);
             Assert.True(verifiedReverse, "Original RSA key should verify signature created with roundtripped key");
         }
@@ -386,20 +386,20 @@ public class AsnPrivateKeyEncoderTests
             roundTrippedEcdsa.ImportParameters(roundTrippedParams.Parameters);
 
             // Test signing/verification
-            byte[] dataToSign = GetRandomData(32);
+            var dataToSign = GetRandomData(32);
 
             // Sign with original
-            byte[] signature = originalEcdsa.SignData(dataToSign, HashAlgorithmName.SHA256);
+            var signature = originalEcdsa.SignData(dataToSign, HashAlgorithmName.SHA256);
 
             // Verify with roundtripped
-            bool verified = roundTrippedEcdsa.VerifyData(dataToSign, signature, HashAlgorithmName.SHA256);
+            var verified = roundTrippedEcdsa.VerifyData(dataToSign, signature, HashAlgorithmName.SHA256);
             Assert.True(verified, "Roundtripped ECDsa key should verify signature created with original key");
 
             // Sign with roundtripped
-            byte[] roundTrippedSignature = roundTrippedEcdsa.SignData(dataToSign, HashAlgorithmName.SHA256);
+            var roundTrippedSignature = roundTrippedEcdsa.SignData(dataToSign, HashAlgorithmName.SHA256);
 
             // Verify with original
-            bool verifiedReverse =
+            var verifiedReverse =
                 originalEcdsa.VerifyData(dataToSign, roundTrippedSignature, HashAlgorithmName.SHA256);
             Assert.True(verifiedReverse, "Original ECDsa key should verify signature created with roundtripped key");
         }
@@ -448,7 +448,7 @@ public class AsnPrivateKeyEncoderTests
             byte[] data)
         {
             // Trim leading zeros
-            int startIndex = 0;
+            var startIndex = 0;
             while (startIndex < data.Length && data[startIndex] == 0)
             {
                 startIndex++;

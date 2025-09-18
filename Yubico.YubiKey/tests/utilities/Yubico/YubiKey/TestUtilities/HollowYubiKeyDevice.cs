@@ -15,305 +15,338 @@
 using System;
 using Yubico.Core.Devices;
 using Yubico.YubiKey.Scp;
+using StaticKeys = Yubico.YubiKey.Scp03.StaticKeys;
 
+namespace Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.TestUtilities
+// This is a class that implements IYubiKeyDevice. However, it is hollow, because
+// there's nothing in it. It can't really do anything.
+// But it can be used in testing.
+// Suppose you are testing a feature that requires an actual connection to a
+// YubiKey. As long as that test does not actually need to contact a real
+// YubiKey, it can use this Hollow object. It is possible to get an instance
+// of an object that implements IYubiKeyDevice without requiring an actual YubiKey.
+// Now make a hollow connection and run the tests. If some operation tries to
+// actually send a command, this object will throw an exception.
+public sealed class HollowYubiKeyDevice : IYubiKeyDevice
 {
-    // This is a class that implements IYubiKeyDevice. However, it is hollow, because
-    // there's nothing in it. It can't really do anything.
-    // But it can be used in testing.
-    // Suppose you are testing a feature that requires an actual connection to a
-    // YubiKey. As long as that test does not actually need to contact a real
-    // YubiKey, it can use this Hollow object. It is possible to get an instance
-    // of an object that implements IYubiKeyDevice without requiring an actual YubiKey.
-    // Now make a hollow connection and run the tests. If some operation tries to
-    // actually send a command, this object will throw an exception.
-    public sealed class HollowYubiKeyDevice : IYubiKeyDevice
+    private readonly bool _alwaysAuthenticatePiv;
+
+    // If no arg is given, the object will never authenticate or verify PIV
+    // elements. But if it is given and it is true, any time PIV auth or
+    // verification is requested, it will do so, assuming the caller uses the
+    // default key or PIN.
+    public HollowYubiKeyDevice(
+        bool alwaysAuthenticatePiv = false)
     {
-        private readonly bool _alwaysAuthenticatePiv;
+        _alwaysAuthenticatePiv = alwaysAuthenticatePiv;
 
-        public bool HasSmartCard { get; }
-        public bool HasHidFido { get; }
-        public bool HasHidKeyboard { get; }
+        HasSmartCard = false;
+        HasHidFido = false;
+        HasHidKeyboard = false;
 
-        public Transport AvailableTransports => Transport.All;
+        // We initialize this to zeros, but if you need a version,
+        // the setter is public. HollowConnection takes a version
+        // and feeds it back in the ReadStatusCommand.
 
-        #region IYubiKeyDeviceInfo
-        /// <inheritdoc />
-        public YubiKeyCapabilities AvailableUsbCapabilities { get; set; }
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities EnabledUsbCapabilities { get; private set; }
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities AvailableNfcCapabilities { get; private set; }
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities EnabledNfcCapabilities { get; private set; }
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities FipsApproved { get; private set; }
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities FipsCapable { get; private set; }
-
-        public YubiKeyCapabilities ResetBlocked { get; private set; }
-
-        public bool IsNfcRestricted { get; } = false;
-        public string? PartNumber { get; }
-        public bool IsPinComplexityEnabled { get; } = false;
-
-        /// <inheritdoc />
-        public int? SerialNumber { get; private set; }
-
-        /// <inheritdoc />
-        public bool IsFipsSeries { get; private set; }
-
-        /// <inheritdoc />
-        public bool IsSkySeries { get; private set; }
-
-        /// <inheritdoc />
-        public FormFactor FormFactor { get; private set; }
-
-        /// <inheritdoc />
-        public FirmwareVersion FirmwareVersion { get; set; }
-
-        public VersionQualifier VersionQualifier { get; }
-        public string VersionName => VersionQualifier.Type == VersionQualifierType.Final
-            ? FirmwareVersion.ToString()
-            : VersionQualifier.ToString();
-
-        /// <inheritdoc />
-        public TemplateStorageVersion TemplateStorageVersion { get; set; }
-
-        /// <inheritdoc />
-        public ImageProcessorVersion ImageProcessorVersion { get; set; }
-
-        /// <inheritdoc />
-        public int AutoEjectTimeout { get; private set; }
-
-        /// <inheritdoc />
-        public byte ChallengeResponseTimeout { get; private set; }
-
-        /// <inheritdoc />
-        public DeviceFlags DeviceFlags { get; private set; }
-
-        /// <inheritdoc />
-        public bool ConfigurationLocked { get; private set; }
-
-        #endregion
-
-        // If no arg is given, the object will never authenticate or verify PIV
-        // elements. But if it is given and it is true, any time PIV auth or
-        // verification is requested, it will do so, assuming the caller uses the
-        // default key or PIN.
-        public HollowYubiKeyDevice(bool alwaysAuthenticatePiv = false)
+        VersionQualifier = new VersionQualifier();
+        FirmwareVersion = new FirmwareVersion
         {
-            _alwaysAuthenticatePiv = alwaysAuthenticatePiv;
-
-            HasSmartCard = false;
-            HasHidFido = false;
-            HasHidKeyboard = false;
-
-            // We initialize this to zeros, but if you need a version,
-            // the setter is public. HollowConnection takes a version
-            // and feeds it back in the ReadStatusCommand.
-            
-            VersionQualifier = new VersionQualifier();
-            FirmwareVersion = new FirmwareVersion
-            {
-                Major = 0,
-                Minor = 0,
-                Patch = 0
-            };
-            TemplateStorageVersion = new TemplateStorageVersion
-            {
-                Major = 0,
-                Minor = 0,
-                Patch = 0
-            };
-            ImageProcessorVersion = new ImageProcessorVersion
-            {
-                Major = 0,
-                Minor = 0,
-                Patch = 0
-            };
-
-            SerialNumber = null;
-            FormFactor = FormFactor.Unknown;
-            AutoEjectTimeout = 0;
-            ConfigurationLocked = false;
-            AvailableNfcCapabilities = 0;
-            AvailableUsbCapabilities = 0;
-            EnabledNfcCapabilities = 0;
-            EnabledUsbCapabilities = 0;
-        }
-
-        public IYubiKeyConnection Connect(YubiKeyApplication yubiKeyApplication)
+            Major = 0,
+            Minor = 0,
+            Patch = 0
+        };
+        TemplateStorageVersion = new TemplateStorageVersion
         {
-            var connection = new HollowConnection(yubiKeyApplication, FirmwareVersion)
-            {
-                AlwaysAuthenticatePiv = _alwaysAuthenticatePiv,
-            };
-
-            return connection;
-        }
-
-        public IYubiKeyConnection Connect(byte[] applicationId)
+            Major = 0,
+            Minor = 0,
+            Patch = 0
+        };
+        ImageProcessorVersion = new ImageProcessorVersion
         {
-            throw new NotImplementedException();
-        }
+            Major = 0,
+            Minor = 0,
+            Patch = 0
+        };
 
-        [Obsolete("Obsolete")]
-        public IScp03YubiKeyConnection ConnectScp03(YubiKeyApplication yubikeyApplication, Yubico.YubiKey.Scp03.StaticKeys scp03Keys)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("Obsolete")]
-        public IScp03YubiKeyConnection ConnectScp03(byte[] applicationId, Yubico.YubiKey.Scp03.StaticKeys scp03Keys)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IScpYubiKeyConnection Connect(YubiKeyApplication yubikeyApplication, ScpKeyParameters scp03Keys)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IScpYubiKeyConnection Connect(byte[] applicationId, ScpKeyParameters scp03Keys)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryConnect(
-            YubiKeyApplication application,
-            out IYubiKeyConnection connection)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryConnect(
-            byte[] applicationId,
-            out IYubiKeyConnection connection)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("Obsolete")]
-        public bool TryConnectScp03(
-            YubiKeyApplication application,
-            Yubico.YubiKey.Scp03.StaticKeys scp03Keys,
-            out IScp03YubiKeyConnection connection)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("Obsolete")]
-        public bool TryConnectScp03(
-            byte[] applicationId,
-            Yubico.YubiKey.Scp03.StaticKeys scp03Keys,
-            out IScp03YubiKeyConnection connection)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryConnect(
-            YubiKeyApplication application,
-            ScpKeyParameters keyParameters,
-            out IScpYubiKeyConnection connection)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryConnect(
-            byte[] applicationId,
-            ScpKeyParameters keyParameters,
-            out IScpYubiKeyConnection connection)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        bool IYubiKeyDevice.HasSameParentDevice(IDevice other)
-        {
-            return false;
-        }
-
-        public void SetEnabledNfcCapabilities(YubiKeyCapabilities yubiKeyCapabilities) =>
-            throw new NotImplementedException();
-
-        public void SetEnabledUsbCapabilities(YubiKeyCapabilities yubiKeyCapabilities) =>
-            throw new NotImplementedException();
-
-        public void SetChallengeResponseTimeout(int seconds) =>
-            throw new NotImplementedException();
-
-        public int CompareTo(IYubiKeyDevice? other)
-        {
-            return 1;
-        }
-
-        public bool Equals(IYubiKeyDevice? other)
-        {
-            return false;
-        }
-
-        bool IYubiKeyDevice.Contains(IDevice other)
-        {
-            return false;
-        }
-
-        public void SetAutoEjectTimeout(int seconds)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetDeviceFlags(DeviceFlags deviceFlags)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void LockConfiguration(ReadOnlySpan<byte> lockCode)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UnlockConfiguration(ReadOnlySpan<byte> lockCode)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetLegacyDeviceConfiguration(
-            YubiKeyCapabilities yubiKeyInterfaces,
-            byte challengeResponseTimeout,
-            bool touchEjectEnabled,
-            int autoEjectTimeout = 0,
-            ScpKeyParameters? keyParameters = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetLegacyDeviceConfiguration(
-            YubiKeyCapabilities yubiKeyInterfaces, byte challengeResponseTimeout, bool touchEjectEnabled,
-            int autoEjectTimeout = 0)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetIsNfcRestricted(bool enabled)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetTemporaryTouchThreshold(int value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeviceReset()
-        {
-            throw new NotImplementedException();
-        }
+        SerialNumber = null;
+        FormFactor = FormFactor.Unknown;
+        AutoEjectTimeout = 0;
+        ConfigurationLocked = false;
+        AvailableNfcCapabilities = 0;
+        AvailableUsbCapabilities = 0;
+        EnabledNfcCapabilities = 0;
+        EnabledUsbCapabilities = 0;
     }
+
+    public bool HasSmartCard { get; }
+    public bool HasHidFido { get; }
+    public bool HasHidKeyboard { get; }
+
+    public Transport AvailableTransports => Transport.All;
+
+    public IYubiKeyConnection Connect(
+        YubiKeyApplication yubiKeyApplication)
+    {
+        var connection = new HollowConnection(yubiKeyApplication, FirmwareVersion)
+        {
+            AlwaysAuthenticatePiv = _alwaysAuthenticatePiv
+        };
+
+        return connection;
+    }
+
+    public IYubiKeyConnection Connect(
+        byte[] applicationId)
+    {
+        throw new NotImplementedException();
+    }
+
+    [Obsolete("Obsolete")]
+    public IScp03YubiKeyConnection ConnectScp03(
+        YubiKeyApplication yubikeyApplication,
+        StaticKeys scp03Keys)
+    {
+        throw new NotImplementedException();
+    }
+
+    [Obsolete("Obsolete")]
+    public IScp03YubiKeyConnection ConnectScp03(
+        byte[] applicationId,
+        StaticKeys scp03Keys)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IScpYubiKeyConnection Connect(
+        YubiKeyApplication yubikeyApplication,
+        ScpKeyParameters scp03Keys)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IScpYubiKeyConnection Connect(
+        byte[] applicationId,
+        ScpKeyParameters scp03Keys)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TryConnect(
+        YubiKeyApplication application,
+        out IYubiKeyConnection connection)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TryConnect(
+        byte[] applicationId,
+        out IYubiKeyConnection connection)
+    {
+        throw new NotImplementedException();
+    }
+
+    [Obsolete("Obsolete")]
+    public bool TryConnectScp03(
+        YubiKeyApplication application,
+        StaticKeys scp03Keys,
+        out IScp03YubiKeyConnection connection)
+    {
+        throw new NotImplementedException();
+    }
+
+    [Obsolete("Obsolete")]
+    public bool TryConnectScp03(
+        byte[] applicationId,
+        StaticKeys scp03Keys,
+        out IScp03YubiKeyConnection connection)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TryConnect(
+        YubiKeyApplication application,
+        ScpKeyParameters keyParameters,
+        out IScpYubiKeyConnection connection)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TryConnect(
+        byte[] applicationId,
+        ScpKeyParameters keyParameters,
+        out IScpYubiKeyConnection connection)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc />
+    bool IYubiKeyDevice.HasSameParentDevice(
+        IDevice other)
+    {
+        return false;
+    }
+
+    public void SetEnabledNfcCapabilities(
+        YubiKeyCapabilities yubiKeyCapabilities)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetEnabledUsbCapabilities(
+        YubiKeyCapabilities yubiKeyCapabilities)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetChallengeResponseTimeout(
+        int seconds)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int CompareTo(
+        IYubiKeyDevice? other)
+    {
+        return 1;
+    }
+
+    public bool Equals(
+        IYubiKeyDevice? other)
+    {
+        return false;
+    }
+
+    bool IYubiKeyDevice.Contains(
+        IDevice other)
+    {
+        return false;
+    }
+
+    public void SetAutoEjectTimeout(
+        int seconds)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetDeviceFlags(
+        DeviceFlags deviceFlags)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void LockConfiguration(
+        ReadOnlySpan<byte> lockCode)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UnlockConfiguration(
+        ReadOnlySpan<byte> lockCode)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetLegacyDeviceConfiguration(
+        YubiKeyCapabilities yubiKeyInterfaces,
+        byte challengeResponseTimeout,
+        bool touchEjectEnabled,
+        int autoEjectTimeout = 0)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetIsNfcRestricted(
+        bool enabled)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetTemporaryTouchThreshold(
+        int value)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void DeviceReset()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetLegacyDeviceConfiguration(
+        YubiKeyCapabilities yubiKeyInterfaces,
+        byte challengeResponseTimeout,
+        bool touchEjectEnabled,
+        int autoEjectTimeout = 0,
+        ScpKeyParameters? keyParameters = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    #region IYubiKeyDeviceInfo
+
+    /// <inheritdoc />
+    public YubiKeyCapabilities AvailableUsbCapabilities { get; set; }
+
+    /// <inheritdoc />
+    public YubiKeyCapabilities EnabledUsbCapabilities { get; }
+
+    /// <inheritdoc />
+    public YubiKeyCapabilities AvailableNfcCapabilities { get; }
+
+    /// <inheritdoc />
+    public YubiKeyCapabilities EnabledNfcCapabilities { get; }
+
+    /// <inheritdoc />
+    public YubiKeyCapabilities FipsApproved { get; private set; }
+
+    /// <inheritdoc />
+    public YubiKeyCapabilities FipsCapable { get; private set; }
+
+    public YubiKeyCapabilities ResetBlocked { get; private set; }
+
+    public bool IsNfcRestricted { get; } = false;
+    public string? PartNumber { get; }
+    public bool IsPinComplexityEnabled { get; } = false;
+
+    /// <inheritdoc />
+    public int? SerialNumber { get; }
+
+    /// <inheritdoc />
+    public bool IsFipsSeries { get; private set; }
+
+    /// <inheritdoc />
+    public bool IsSkySeries { get; private set; }
+
+    /// <inheritdoc />
+    public FormFactor FormFactor { get; }
+
+    /// <inheritdoc />
+    public FirmwareVersion FirmwareVersion { get; set; }
+
+    public VersionQualifier VersionQualifier { get; }
+
+    public string VersionName => VersionQualifier.Type == VersionQualifierType.Final
+        ? FirmwareVersion.ToString()
+        : VersionQualifier.ToString();
+
+    /// <inheritdoc />
+    public TemplateStorageVersion TemplateStorageVersion { get; set; }
+
+    /// <inheritdoc />
+    public ImageProcessorVersion ImageProcessorVersion { get; set; }
+
+    /// <inheritdoc />
+    public int AutoEjectTimeout { get; }
+
+    /// <inheritdoc />
+    public byte ChallengeResponseTimeout { get; private set; }
+
+    /// <inheritdoc />
+    public DeviceFlags DeviceFlags { get; private set; }
+
+    /// <inheritdoc />
+    public bool ConfigurationLocked { get; }
+
+    #endregion
 }

@@ -15,48 +15,47 @@
 using System.Formats.Cbor;
 using Xunit;
 
-namespace Yubico.YubiKey.Fido2.Cbor
+namespace Yubico.YubiKey.Fido2.Cbor;
+
+public class CborHelperTests
 {
-    public class CborHelperTests
+    [Fact]
+    public void EncodeDecode_MapWithIntKey_Succeeds()
     {
-        [Fact]
-        public void EncodeDecode_MapWithIntKey_Succeeds()
-        {
-            var w = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
+        var w = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
 
-            CborHelpers.BeginMap<int>(w)
-                .Entry(1, "test")
-                .Entry(2, "foo")
-                .Entry(-4, "bar")
-                .EndMap();
+        CborHelpers.BeginMap<int>(w)
+            .Entry(1, "test")
+            .Entry(2, "foo")
+            .Entry(-4, "bar")
+            .EndMap();
 
-            byte[] encoded = w.Encode();
+        var encoded = w.Encode();
 
-            var m = new CborMap<int>(encoded);
+        var m = new CborMap<int>(encoded);
 
-            Assert.Equal("test", m.ReadTextString(1));
-            Assert.Equal("foo", m.ReadTextString(2));
-            Assert.Equal("bar", m.ReadTextString(-4));
-        }
+        Assert.Equal("test", m.ReadTextString(1));
+        Assert.Equal("foo", m.ReadTextString(2));
+        Assert.Equal("bar", m.ReadTextString(-4));
+    }
 
-        [Fact]
-        public void EncodeDecode_MapWithStringKey_Succeeds()
-        {
-            var w = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
+    [Fact]
+    public void EncodeDecode_MapWithStringKey_Succeeds()
+    {
+        var w = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
 
-            CborHelpers.BeginMap<string>(w)
-                .Entry("a", "test")
-                .Entry("b", "foo")
-                .Entry("xyz", "bar")
-                .EndMap();
+        CborHelpers.BeginMap<string>(w)
+            .Entry("a", "test")
+            .Entry("b", "foo")
+            .Entry("xyz", "bar")
+            .EndMap();
 
-            byte[] encoded = w.Encode();
+        var encoded = w.Encode();
 
-            var m = new CborMap<string>(encoded);
+        var m = new CborMap<string>(encoded);
 
-            Assert.Equal("test", m.ReadTextString("a"));
-            Assert.Equal("foo", m.ReadTextString("b"));
-            Assert.Equal("bar", m.ReadTextString("xyz"));
-        }
+        Assert.Equal("test", m.ReadTextString("a"));
+        Assert.Equal("foo", m.ReadTextString("b"));
+        Assert.Equal("bar", m.ReadTextString("xyz"));
     }
 }

@@ -15,49 +15,48 @@
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+public class RenameResponseTests
 {
-    public class RenameResponseTests
+    private const short StatusWordNoSuchObject = 0x6984;
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
     {
-        private const short StatusWordNoSuchObject = 0x6984;
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
-        {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        var renameResponse = new RenameResponse(responseApdu);
 
-            var renameResponse = new RenameResponse(responseApdu);
+        Assert.Equal(SWConstants.Success, renameResponse.StatusWord);
+    }
 
-            Assert.Equal(SWConstants.Success, renameResponse.StatusWord);
-        }
+    [Fact]
+    public void Status_SuccessResponseApdu_ReturnsSuccess()
+    {
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
 
-        [Fact]
-        public void Status_SuccessResponseApdu_ReturnsSuccess()
-        {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        var renameResponse = new RenameResponse(responseApdu);
 
-            var renameResponse = new RenameResponse(responseApdu);
+        Assert.Equal(ResponseStatus.Success, renameResponse.Status);
+    }
 
-            Assert.Equal(ResponseStatus.Success, renameResponse.Status);
-        }
+    [Fact]
+    public void Status_NoSuchObjectResponseApdu_ReturnsNoData()
+    {
+        const byte sw1 = unchecked(StatusWordNoSuchObject >> 8);
+        const byte sw2 = unchecked((byte)StatusWordNoSuchObject);
 
-        [Fact]
-        public void Status_NoSuchObjectResponseApdu_ReturnsNoData()
-        {
-            const byte sw1 = unchecked((byte)(StatusWordNoSuchObject >> 8));
-            const byte sw2 = unchecked((byte)StatusWordNoSuchObject);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        var renameResponse = new RenameResponse(responseApdu);
 
-            var renameResponse = new RenameResponse(responseApdu);
-
-            Assert.Equal(ResponseStatus.NoData, renameResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.NoData, renameResponse.Status);
     }
 }

@@ -20,7 +20,11 @@ namespace Yubico.YubiKey.Piv;
 internal class EmptyPublicKey : IPublicKey
 {
     public KeyDefinition KeyDefinition { get; } = new();
-    public KeyType KeyType { get; }
     public static ReadOnlyMemory<byte> PublicPoint => Array.Empty<byte>();
-    public byte[] ExportSubjectPublicKeyInfo() => Array.Empty<byte>();
+    public KeyType KeyType { get; }
+
+    public byte[] ExportSubjectPublicKeyInfo()
+    {
+        return Array.Empty<byte>();
+    }
 }

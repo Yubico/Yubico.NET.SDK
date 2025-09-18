@@ -32,6 +32,7 @@ public class FidoSessionIntegrationTestBase : IDisposable
     public static Memory<byte> TestPin1 => "11234567"u8.ToArray();
     public static Memory<byte> TestPin2 => "12234567"u8.ToArray();
     public static readonly byte[] ClientDataHash = "12345678123456781234567812345678"u8.ToArray();
+
     public static readonly RelyingParty Rp = new("demo.yubico.com")
     {
         Name = "demo.yubico.com"
@@ -80,7 +81,7 @@ public class FidoSessionIntegrationTestBase : IDisposable
         {
             // Ignore errors related to non-existent credentials
         }
-        
+
         KeyCollector.ResetRequestCounts();
     }
 
@@ -124,7 +125,8 @@ public class FidoSessionIntegrationTestBase : IDisposable
                 session.TrySetPin(TestPin1);
             }
 
-            var isValid = session.TryVerifyPin(TestPin1, permissions: PinUvAuthTokenPermissions.CredentialManagement, null, out _, out _);
+            var isValid = session.TryVerifyPin(TestPin1, PinUvAuthTokenPermissions.CredentialManagement, null, out _,
+                out _);
             Assert.True(isValid, "Pin was incorrect. Please reset the key and try again.");
 
             return session;

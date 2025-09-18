@@ -16,21 +16,20 @@ using System.Linq;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Fido2
-{
-    public class GetAuthenticatorInfoTests
-    {
-        [Fact]
-        [Trait(TraitTypes.Category, TestCategories.Elevated)]
-        public void GetAuthenticator_Succeeds()
-        {
-            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+namespace Yubico.YubiKey.Fido2;
 
-            using (var fido2 = new Fido2Session(yubiKey))
-            {
-                Assert.True(fido2.AuthenticatorInfo.Aaguid.Length > 0);
-                Assert.NotNull(fido2.AuthenticatorInfo.PinUvAuthProtocols);
-            }
+public class GetAuthenticatorInfoTests
+{
+    [Fact]
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
+    public void GetAuthenticator_Succeeds()
+    {
+        var yubiKey = YubiKeyDevice.FindAll().First();
+
+        using (var fido2 = new Fido2Session(yubiKey))
+        {
+            Assert.True(fido2.AuthenticatorInfo.Aaguid.Length > 0);
+            Assert.NotNull(fido2.AuthenticatorInfo.PinUvAuthProtocols);
         }
     }
 }

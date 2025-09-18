@@ -20,595 +20,609 @@ using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
-{
-    // All these tests will also use a random number generator with a specified
-    // set of bytes, followed by 2048 random bytes. If you want to get only
-    // random bytes, skip the first SpecifiedStart bytes (get a random object and
-    // generate that many bytes).
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class PinOnlyWithResetTests : PivSessionIntegrationTestBase
-    {
-        private const int SpecifiedStart = 72;
-        private const int RandomTrailingCount = 2048;
-        readonly RandomObjectUtility _partiallyRandomGenerator;
+namespace Yubico.YubiKey.Piv;
 
-        private Span<byte> GetTripleDesKey_Strong_PrecomputedRandomBytes() => new byte[]
-        {
+// All these tests will also use a random number generator with a specified
+// set of bytes, followed by 2048 random bytes. If you want to get only
+// random bytes, skip the first SpecifiedStart bytes (get a random object and
+// generate that many bytes).
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public class PinOnlyWithResetTests : PivSessionIntegrationTestBase
+{
+    private const int SpecifiedStart = 72;
+    private const int RandomTrailingCount = 2048;
+    private readonly RandomObjectUtility _partiallyRandomGenerator;
+
+    public PinOnlyWithResetTests()
+    {
+        // The data in this array correspond to the getter fields above (Span<byte> Get_XXX_PrecomputedRandomBytes).
+        // This buffer will hold the random bytes to return.
+        // Then there will be 2048 random bytes.
+        byte[] predefinedPrefixedBytes =
+        [
+            0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
+            0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
+            0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
             0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
             0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
             0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
-        };
+            0xc9, 0xf4, 0x20, 0x5a, 0x29, 0x38, 0x1b, 0xb8,
+            0x60, 0x6b, 0xd4, 0xde, 0x18, 0xef, 0xf4, 0x3d,
+            0x43, 0x24, 0x87, 0x3e, 0x5e, 0xd2, 0xc1, 0xed
+        ];
 
-        private Span<byte> GetTripleDesKey_Weak_PrecomputedRandomBytes() => new byte[]
+        var randomBytes = new byte[SpecifiedStart + RandomTrailingCount];
+        using var random = RandomNumberGenerator.Create();
+        random.GetBytes(randomBytes);
+
+        // Set the first 72 bytes with the predefined prefixed bytes so that we can anticipate the values in the tests.
+        predefinedPrefixedBytes.CopyTo(randomBytes.AsSpan());
+        _partiallyRandomGenerator = RandomObjectUtility.SetRandomProviderFixedBytes(randomBytes);
+    }
+
+    private Span<byte> GetTripleDesKey_Strong_PrecomputedRandomBytes()
+    {
+        return new byte[]
+        {
+            0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
+            0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
+            0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B
+        };
+    }
+
+    private Span<byte> GetTripleDesKey_Weak_PrecomputedRandomBytes()
+    {
+        return new byte[]
         {
             0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
             0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
             0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B
         };
+    }
 
-        // 3DES key that is derived using a PIN of "123456" and a salt of the first 16 bytes.
-        private Span<byte> Get_DerivedKey_PrecomputedRandomBytes() => new byte[]
+    // 3DES key that is derived using a PIN of "123456" and a salt of the first 16 bytes.
+    private Span<byte> Get_DerivedKey_PrecomputedRandomBytes()
+    {
+        return new byte[]
         {
             0xc9, 0xf4, 0x20, 0x5a, 0x29, 0x38, 0x1b, 0xb8,
             0x60, 0x6b, 0xd4, 0xde, 0x18, 0xef, 0xf4, 0x3d,
             0x43, 0x24, 0x87, 0x3e, 0x5e, 0xd2, 0xc1, 0xed
         };
+    }
 
-        // Same as the weak 3DES key, but since it's AES it is allowed and not considered weak
-        private Span<byte> GetAesKey_PrecomputedRandomBytes() => new byte[]
+    // Same as the weak 3DES key, but since it's AES it is allowed and not considered weak
+    private Span<byte> GetAesKey_PrecomputedRandomBytes()
+    {
+        return new byte[]
         {
             0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
             0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
             0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B
         };
+    }
 
-        private Span<byte> GetSalt_PrecomputedRandomBytes() => new byte[]
+    private Span<byte> GetSalt_PrecomputedRandomBytes()
+    {
+        return new byte[]
         {
             0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
             0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B
         };
+    }
 
-        public PinOnlyWithResetTests()
+    [Fact]
+    public void NotPinOnly_GetMode_ReturnsNone()
+    {
+        var mode = Session.GetPinOnlyMode();
+        Assert.Equal(PivPinOnlyMode.None, mode);
+    }
+
+    [Fact]
+    public void SetPinDerived_GetMode_ReturnsCorrect()
+    {
+        using (var pivSession = GetSession())
         {
-            // The data in this array correspond to the getter fields above (Span<byte> Get_XXX_PrecomputedRandomBytes).
-            // This buffer will hold the random bytes to return.
-            // Then there will be 2048 random bytes.
-            byte[] predefinedPrefixedBytes =
-                [
-                0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
-                0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
-                0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
-                0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
-                0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
-                0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
-                0xc9, 0xf4, 0x20, 0x5a, 0x29, 0x38, 0x1b, 0xb8,
-                0x60, 0x6b, 0xd4, 0xde, 0x18, 0xef, 0xf4, 0x3d,
-                0x43, 0x24, 0x87, 0x3e, 0x5e, 0xd2, 0xc1, 0xed
-            ];
+            Assert.False(pivSession.PinVerified);
+            Assert.False(pivSession.ManagementKeyAuthenticated);
 
-            var randomBytes = new byte[SpecifiedStart + RandomTrailingCount];
-            using var random = RandomNumberGenerator.Create();
-            random.GetBytes(randomBytes);
+            pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
 
-            // Set the first 72 bytes with the predefined prefixed bytes so that we can anticipate the values in the tests.
-            predefinedPrefixedBytes.CopyTo(randomBytes.AsSpan());
-            _partiallyRandomGenerator = RandomObjectUtility.SetRandomProviderFixedBytes(randomBytes);
+            var mode = pivSession.GetPinOnlyMode();
+            Assert.Equal(PivPinOnlyMode.PinDerived, mode);
+
+            var adminData = pivSession.ReadObject<AdminData>();
+            Assert.Null(adminData.PinLastUpdated);
+            Assert.False(adminData.PinProtected);
+            Assert.True(adminData.PukBlocked);
+            _ = Assert.NotNull(adminData.Salt);
+
+            var pinProtect = pivSession.ReadObject<PinProtectedData>();
+            Assert.True(pinProtect.IsEmpty);
+            Assert.Null(pinProtect.ManagementKey);
         }
 
-        [Fact]
-        public void NotPinOnly_GetMode_ReturnsNone()
+        using (var pivSession = GetSession())
         {
-            var mode = Session.GetPinOnlyMode();
-            Assert.Equal(PivPinOnlyMode.None, mode);
+            Assert.False(pivSession.PinVerified);
+            Assert.False(pivSession.ManagementKeyAuthenticated);
+
+            pivSession.AuthenticateManagementKey();
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
         }
 
-        [Fact]
-        public void SetPinDerived_GetMode_ReturnsCorrect()
+        var isBlocked = IsPukBlocked();
+        Assert.True(isBlocked);
+    }
+
+    [Fact]
+    public void Run_SetPinDerived_UsesSalt()
+    {
+        Session.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
+        var adminData = Session.ReadObject<AdminData>();
+        Assert.NotNull(adminData.Salt);
+
+        var expected = GetSalt_PrecomputedRandomBytes();
+        var result = (ReadOnlyMemory<byte>)adminData.Salt;
+        var isValid = expected.SequenceEqual(result.Span);
+        Assert.True(isValid);
+    }
+
+    [Fact]
+    public void SetPinProtected_GetMode_ReturnsCorrect()
+    {
+        using (var pivSession = GetSession())
         {
-            using (var pivSession = GetSession())
-            {
-                Assert.False(pivSession.PinVerified);
-                Assert.False(pivSession.ManagementKeyAuthenticated);
+            // Act
+            pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
 
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
+            // Assert
+            var mode = pivSession.GetPinOnlyMode();
+            Assert.Equal(PivPinOnlyMode.PinProtected, mode);
 
-                var mode = pivSession.GetPinOnlyMode();
-                Assert.Equal(PivPinOnlyMode.PinDerived, mode);
+            var adminData = pivSession.ReadObject<AdminData>();
+            Assert.Null(adminData.PinLastUpdated);
+            Assert.True(adminData.PinProtected);
+            Assert.True(adminData.PukBlocked);
+            Assert.Null(adminData.Salt);
 
-                var adminData = pivSession.ReadObject<AdminData>();
-                Assert.Null(adminData.PinLastUpdated);
-                Assert.False(adminData.PinProtected);
-                Assert.True(adminData.PukBlocked);
-                _ = Assert.NotNull(adminData.Salt);
-
-                var pinProtect = pivSession.ReadObject<PinProtectedData>();
-                Assert.True(pinProtect.IsEmpty);
-                Assert.Null(pinProtect.ManagementKey);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                Assert.False(pivSession.PinVerified);
-                Assert.False(pivSession.ManagementKeyAuthenticated);
-
-                pivSession.AuthenticateManagementKey();
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-            }
-
-            var isBlocked = IsPukBlocked();
-            Assert.True(isBlocked);
+            var pinProtect = pivSession.ReadObject<PinProtectedData>();
+            Assert.False(pinProtect.IsEmpty);
+            Assert.NotNull(pinProtect.ManagementKey);
         }
 
-        [Fact]
-        public void Run_SetPinDerived_UsesSalt()
+        using (var pivSession = GetSession())
         {
-            Session.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
-            var adminData = Session.ReadObject<AdminData>();
-            Assert.NotNull(adminData.Salt);
+            Assert.False(pivSession.PinVerified);
+            Assert.False(pivSession.ManagementKeyAuthenticated);
 
-            var expected = GetSalt_PrecomputedRandomBytes();
-            var result = (ReadOnlyMemory<byte>)adminData.Salt;
-            var isValid = expected.SequenceEqual(result.Span);
+            pivSession.AuthenticateManagementKey();
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
+        }
+
+        var isBlocked = IsPukBlocked();
+        Assert.True(isBlocked);
+    }
+
+    [Fact]
+    public void SetBoth_GetMode_ReturnsCorrect()
+    {
+        using var session = GetSession();
+        session.SetPinOnlyMode(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived);
+        Assert.True(session.PinVerified);
+        Assert.True(session.ManagementKeyAuthenticated);
+
+        var mode = session.GetPinOnlyMode();
+        Assert.Equal(PivPinOnlyMode.PinDerived | PivPinOnlyMode.PinProtected, mode);
+
+        var isBlocked = IsPukBlocked();
+        Assert.True(isBlocked);
+    }
+
+    [Fact]
+    public void SetProtectThenDerive_GetMode_ReturnsCorrect()
+    {
+        Session.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
+        Session.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
+
+        var mode = Session.GetPinOnlyMode();
+        Assert.Equal(PivPinOnlyMode.PinDerived | PivPinOnlyMode.PinProtected, mode);
+
+        var isBlocked = IsPukBlocked();
+        Assert.True(isBlocked);
+    }
+
+    [Fact]
+    public void SetProtectThenDerive_CorrectMgmtKey()
+    {
+        var expectedManagementKey = DefaultManagementKeyType == KeyType.AES192
+            ? GetAesKey_PrecomputedRandomBytes()
+            : GetTripleDesKey_Strong_PrecomputedRandomBytes();
+
+        var expectedRandomDerivedKey = Get_DerivedKey_PrecomputedRandomBytes();
+        using (var pivSession = GetSession())
+        {
+            // Act
+            pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
+
+            // Assert
+            var pinProtect = pivSession.ReadObject<PinProtectedData>();
+            Assert.NotNull(pinProtect.ManagementKey);
+            var isValid = expectedManagementKey.SequenceEqual(pinProtect.ManagementKey.Value.Span);
             Assert.True(isValid);
         }
 
-        [Fact]
-        public void SetPinProtected_GetMode_ReturnsCorrect()
+        using (var pivSession = GetSession())
         {
-            using (var pivSession = GetSession())
-            {
-                // Act
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
+            // Act
+            pivSession.SetPinOnlyMode(PivPinOnlyMode
+                .PinDerived);
+            var mode = pivSession.GetPinOnlyMode();
+            Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
 
-                // Assert
-                var mode = pivSession.GetPinOnlyMode();
-                Assert.Equal(PivPinOnlyMode.PinProtected, mode);
+            var pinProtect = pivSession.ReadObject<PinProtectedData>();
+            Assert.False(pinProtect.IsEmpty);
+            Assert.NotNull(pinProtect.ManagementKey);
+            var result = pinProtect.ManagementKey;
+            var isValid = expectedRandomDerivedKey.SequenceEqual(result.Value!.Span);
+            Assert.True(isValid);
+        }
+    }
 
-                var adminData = pivSession.ReadObject<AdminData>();
-                Assert.Null(adminData.PinLastUpdated);
-                Assert.True(adminData.PinProtected);
-                Assert.True(adminData.PukBlocked);
-                Assert.Null(adminData.Salt);
+    [Fact]
+    public void SetProtect_ThenNone_CorrectMode()
+    {
+        // Arrange
+        var expectedManagementKey = DefaultManagementKeyType == KeyType.AES192
+            ? GetAesKey_PrecomputedRandomBytes()
+            : GetTripleDesKey_Strong_PrecomputedRandomBytes();
+        using (var pivSession = GetSession())
+        {
+            // Act
+            pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
 
-                var pinProtect = pivSession.ReadObject<PinProtectedData>();
-                Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                Assert.False(pivSession.PinVerified);
-                Assert.False(pivSession.ManagementKeyAuthenticated);
-
-                pivSession.AuthenticateManagementKey();
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-            }
-
-            var isBlocked = IsPukBlocked();
-            Assert.True(isBlocked);
+            // Assert
+            var pinProtect = pivSession.ReadObject<PinProtectedData>();
+            Assert.False(pinProtect.IsEmpty);
+            Assert.NotNull(pinProtect.ManagementKey);
+            var isValid = expectedManagementKey.SequenceEqual(pinProtect.ManagementKey.Value.Span);
+            Assert.True(isValid);
         }
 
-        [Fact]
-        public void SetBoth_GetMode_ReturnsCorrect()
+        var isBlocked = IsPukBlocked();
+        Assert.True(isBlocked);
+
+        using (var pivSession = GetSession())
         {
-            using var session = GetSession();
-            session.SetPinOnlyMode(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived);
-            Assert.True(session.PinVerified);
-            Assert.True(session.ManagementKeyAuthenticated);
+            // This will return the default mgmt key, but the mgmt key has
+            // been changed. However, we should never ask the KeyCollector
+            // for the mgmt key, so it shouldn't matter. This will test that
+            // the KeyCollector is not called, but the mgmt key will be
+            // authenticated.
 
-            var mode = session.GetPinOnlyMode();
-            Assert.Equal(PivPinOnlyMode.PinDerived | PivPinOnlyMode.PinProtected, mode);
+            Assert.False(pivSession.PinVerified);
+            Assert.False(pivSession.ManagementKeyAuthenticated);
 
-            var isBlocked = IsPukBlocked();
-            Assert.True(isBlocked);
+            pivSession.SetPinOnlyMode(PivPinOnlyMode.None);
+
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
         }
 
-        [Fact]
-        public void SetProtectThenDerive_GetMode_ReturnsCorrect()
+        using (var pivSession = GetSession())
         {
-            Session.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
-            Session.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
-
-            var mode = Session.GetPinOnlyMode();
-            Assert.Equal(PivPinOnlyMode.PinDerived | PivPinOnlyMode.PinProtected, mode);
-
-            var isBlocked = IsPukBlocked();
-            Assert.True(isBlocked);
-        }
-
-        [Fact]
-        public void SetProtectThenDerive_CorrectMgmtKey()
-        {
-            var expectedManagementKey = DefaultManagementKeyType == KeyType.AES192
-                ? GetAesKey_PrecomputedRandomBytes()
-                : GetTripleDesKey_Strong_PrecomputedRandomBytes();
-
-            var expectedRandomDerivedKey = Get_DerivedKey_PrecomputedRandomBytes();
-            using (var pivSession = GetSession())
-            {
-                // Act
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
-
-                // Assert
-                var pinProtect = pivSession.ReadObject<PinProtectedData>();
-                Assert.NotNull(pinProtect.ManagementKey);
-                var isValid = expectedManagementKey.SequenceEqual(pinProtect.ManagementKey.Value.Span);
-                Assert.True(isValid);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                // Act
-                pivSession.SetPinOnlyMode(PivPinOnlyMode
-                    .PinDerived); 
-                var mode = pivSession.GetPinOnlyMode();
-                Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
-
-                var pinProtect = pivSession.ReadObject<PinProtectedData>();
-                Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
-                var result = pinProtect.ManagementKey; 
-                var isValid = expectedRandomDerivedKey.SequenceEqual(result.Value!.Span);
-                Assert.True(isValid);
-            }
-        }
-
-        [Fact]
-        public void SetProtect_ThenNone_CorrectMode()
-        {
-            // Arrange
-            var expectedManagementKey = DefaultManagementKeyType == KeyType.AES192
-                ? GetAesKey_PrecomputedRandomBytes()
-                : GetTripleDesKey_Strong_PrecomputedRandomBytes();
-            using (var pivSession = GetSession())
-            {
-                // Act
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
-
-                // Assert
-                var pinProtect = pivSession.ReadObject<PinProtectedData>();
-                Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
-                var isValid = expectedManagementKey.SequenceEqual(pinProtect.ManagementKey.Value.Span);
-                Assert.True(isValid);
-            }
-
-            var isBlocked = IsPukBlocked();
-            Assert.True(isBlocked);
-
-            using (var pivSession = GetSession())
-            {
-                // This will return the default mgmt key, but the mgmt key has
-                // been changed. However, we should never ask the KeyCollector
-                // for the mgmt key, so it shouldn't matter. This will test that
-                // the KeyCollector is not called, but the mgmt key will be
-                // authenticated.
-
-                Assert.False(pivSession.PinVerified);
-                Assert.False(pivSession.ManagementKeyAuthenticated);
-
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.None);
-
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                // We should not need the new mgmt key to read objects, so
-                // provide a mgmt key that will return the wrong value.
-                var specifiedCollector = new SpecifiedKeyCollector(
-                    DefaultPin,
-                    DefaultPuk,
-                    expectedManagementKey.ToArray());
-                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
-
-                var mode = pivSession.GetPinOnlyMode();
-                Assert.Equal(PivPinOnlyMode.None, mode);
-
-                var adminData = pivSession.ReadObject<AdminData>();
-                Assert.True(adminData.IsEmpty);
-
-                var pinProtect = pivSession.ReadObject<PinProtectedData>();
-                Assert.True(pinProtect.IsEmpty);
-            }
-
-            isBlocked = IsPukBlocked();
-            Assert.True(isBlocked);
-
-            using (var pivSession = GetSession())
-            {
-                // In order to change retry counts, we need the correct mgmt key,
-                // which was reset to default.
-                pivSession.ChangePinAndPukRetryCounts(5, 6);
-            }
-
-            isBlocked = IsPukBlocked();
-            Assert.False(isBlocked);
-
-            // Try changing but call the auth and vfy outside the Change method.
-            using (var pivSession = GetSession())
-            {
-                pivSession.VerifyPin();
-                pivSession.AuthenticateManagementKey();
-                pivSession.ChangePinAndPukRetryCounts(7, 8);
-            }
-        }
-
-        [Theory]
-        [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x83)]
-        [InlineData(KeyType.AES128, PivPinOnlyMode.PinDerived, 0x84)]
-        [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x85)]
-        [InlineData(KeyType.AES192, PivPinOnlyMode.PinProtected, 0x86)]
-        [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x87)]
-        [InlineData(KeyType.AES192, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x88)]
-        [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected, 0x89)]
-        [InlineData(KeyType.AES256, PivPinOnlyMode.PinDerived, 0x8A)]
-        [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x8B)]
-        [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinProtected, 0x8C)]
-        [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinDerived, 0x8D)]
-        [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x8E)]
-        public void SetPinOnly_Algorithms_Success(
-            KeyType keyType,
-            PivPinOnlyMode mode,
-            byte slotNumber)
-        {
+            // We should not need the new mgmt key to read objects, so
+            // provide a mgmt key that will return the wrong value.
             var specifiedCollector = new SpecifiedKeyCollector(
                 DefaultPin,
                 DefaultPuk,
-                new byte[8]
-            );
+                expectedManagementKey.ToArray());
+            pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
 
-            using (var pivSession = GetSession())
-            {
-                pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
-            }
+            var mode = pivSession.GetPinOnlyMode();
+            Assert.Equal(PivPinOnlyMode.None, mode);
 
-            using (var pivSession = GetSession())
-            {
-                var currentMode = pivSession.GetPinOnlyMode();
-                Assert.Equal(mode, currentMode);
-            }
+            var adminData = pivSession.ReadObject<AdminData>();
+            Assert.True(adminData.IsEmpty);
 
-            using (var pivSession = GetSession())
-            {
-                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
-
-                pivSession.AuthenticateManagementKey();
-
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
-
-                var publicKey = pivSession.GenerateKeyPair(slotNumber, KeyType.ECP256);
-                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
-            }
+            var pinProtect = pivSession.ReadObject<PinProtectedData>();
+            Assert.True(pinProtect.IsEmpty);
         }
 
-        [Theory]
-        [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x82)]
-        [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x83)]
-        public void SetPinOnly_ThenBoth_Success(
-            KeyType keyType,
-            PivPinOnlyMode mode,
-            byte slotNumber)
+        isBlocked = IsPukBlocked();
+        Assert.True(isBlocked);
+
+        using (var pivSession = GetSession())
         {
-            var specifiedCollector = new SpecifiedKeyCollector(
-                DefaultPin,
-                DefaultPuk,
-                new byte[8]
-            );
-
-            var newMode = mode == PivPinOnlyMode.PinProtected
-                ? PivPinOnlyMode.PinDerived
-                : PivPinOnlyMode.PinProtected;
-
-            using (var pivSession = GetSession())
-            {
-                pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
-                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                var currentMode = pivSession.GetPinOnlyMode();
-
-                Assert.Equal(mode, currentMode);
-                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
-
-                pivSession.SetPinOnlyMode(newMode, keyType.GetPivAlgorithm());
-
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                var currentMode = pivSession.GetPinOnlyMode();
-                Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, currentMode);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
-
-                var publicKey = pivSession.GenerateKeyPair(
-                    slotNumber, KeyType.ECP256);
-
-                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
-            }
+            // In order to change retry counts, we need the correct mgmt key,
+            // which was reset to default.
+            pivSession.ChangePinAndPukRetryCounts(5, 6);
         }
 
-        [Theory]
-        [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x8F)]
-        [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x90)]
-        [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected, 0x91)]
-        [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinDerived, 0x92)]
-        public void SetPinOnly_ThenNewAlg_Success(
-            KeyType keyType,
-            PivPinOnlyMode mode,
-            byte slotNumber)
+        isBlocked = IsPukBlocked();
+        Assert.False(isBlocked);
+
+        // Try changing but call the auth and vfy outside the Change method.
+        using (var pivSession = GetSession())
         {
-            var specifiedCollector = new SpecifiedKeyCollector(
-                DefaultPin,
-                DefaultPuk,
-                new byte[8]
-            );
-
-            var newAlg = keyType switch
-            {
-                KeyType.AES128 => KeyType.AES192,
-                KeyType.AES192 => KeyType.AES256,
-                KeyType.AES256 => KeyType.TripleDES,
-                _ => KeyType.AES128,
-            };
-
-            using (var pivSession = GetSession())
-            {
-                pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
-                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                var currentMode = pivSession.GetPinOnlyMode();
-
-                Assert.Equal(mode, currentMode);
-                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
-
-                pivSession.SetPinOnlyMode(mode, newAlg.GetPivAlgorithm());
-
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(newAlg.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                var currentMode = pivSession.GetPinOnlyMode();
-                Assert.Equal(mode, currentMode);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
-
-                var publicKey = pivSession.GenerateKeyPair(
-                    slotNumber, KeyType.ECP256);
-
-                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
-            }
+            pivSession.VerifyPin();
+            pivSession.AuthenticateManagementKey();
+            pivSession.ChangePinAndPukRetryCounts(7, 8);
         }
+    }
 
-        [Theory]
-        [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x84)]
-        [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x85)]
-        [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x86)]
-        public void SetPinOnly_ThenNone_Success(
-            KeyType keyType,
-            PivPinOnlyMode mode,
-            byte slotNumber)
+    [Theory]
+    [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x83)]
+    [InlineData(KeyType.AES128, PivPinOnlyMode.PinDerived, 0x84)]
+    [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x85)]
+    [InlineData(KeyType.AES192, PivPinOnlyMode.PinProtected, 0x86)]
+    [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x87)]
+    [InlineData(KeyType.AES192, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x88)]
+    [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected, 0x89)]
+    [InlineData(KeyType.AES256, PivPinOnlyMode.PinDerived, 0x8A)]
+    [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x8B)]
+    [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinProtected, 0x8C)]
+    [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinDerived, 0x8D)]
+    [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x8E)]
+    public void SetPinOnly_Algorithms_Success(
+        KeyType keyType,
+        PivPinOnlyMode mode,
+        byte slotNumber)
+    {
+        var specifiedCollector = new SpecifiedKeyCollector(
+            DefaultPin,
+            DefaultPuk,
+            new byte[8]
+        );
+
+        using (var pivSession = GetSession())
         {
-            var specifiedCollector = new SpecifiedKeyCollector(
-                DefaultPin,
-                DefaultPuk,
-                new byte[8]
-            );
-
-            using (var pivSession = GetSession())
-            {
-                pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
-                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
-
-                var currentMode = pivSession.GetPinOnlyMode();
-                Assert.Equal(mode, currentMode);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
-
-                var publicKey = pivSession.GenerateKeyPair(
-                    slotNumber, KeyType.ECP256);
-
-                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
-                Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
-
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.None, keyType.GetPivAlgorithm());
-
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-            }
-
-            using (var pivSession = GetSession())
-            {
-                var currentMode = pivSession.GetPinOnlyMode();
-                Assert.Equal(PivPinOnlyMode.None, currentMode);
-                pivSession.TryAuthenticateManagementKey(DefaultManagementKey);
-            }
+            pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
         }
 
-        // If the PUK is blocked, return true.
-        // If the PUK is not blocked, return false.
-        // If there is any other error, throw an exception.
-        private bool IsPukBlocked()
+        using (var pivSession = GetSession())
         {
-            using var pivSession = GetSession();
-            try
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                pivSession.ChangePuk();
-
-                // If that worked, change the PUK back.
-                collectorObj.KeyFlag = 1;
-                pivSession.ChangePuk();
-            }
-            catch (SecurityException)
-            {
-                return true;
-            }
-
-            return false;
+            var currentMode = pivSession.GetPinOnlyMode();
+            Assert.Equal(mode, currentMode);
         }
 
-        protected override void Dispose(
-            bool disposing)
+        using (var pivSession = GetSession())
         {
-            if (disposing)
-            {
-                _partiallyRandomGenerator.RestoreRandomProvider();
-            }
+            pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
 
-            base.Dispose(disposing);
+            pivSession.AuthenticateManagementKey();
+
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
         }
+
+        using (var pivSession = GetSession())
+        {
+            pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+            var publicKey = pivSession.GenerateKeyPair(slotNumber, KeyType.ECP256);
+            Assert.Equal(KeyType.ECP256, publicKey.KeyType);
+        }
+    }
+
+    [Theory]
+    [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x82)]
+    [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x83)]
+    public void SetPinOnly_ThenBoth_Success(
+        KeyType keyType,
+        PivPinOnlyMode mode,
+        byte slotNumber)
+    {
+        var specifiedCollector = new SpecifiedKeyCollector(
+            DefaultPin,
+            DefaultPuk,
+            new byte[8]
+        );
+
+        var newMode = mode == PivPinOnlyMode.PinProtected
+            ? PivPinOnlyMode.PinDerived
+            : PivPinOnlyMode.PinProtected;
+
+        using (var pivSession = GetSession())
+        {
+            pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
+            Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var currentMode = pivSession.GetPinOnlyMode();
+
+            Assert.Equal(mode, currentMode);
+            Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+            pivSession.SetPinOnlyMode(newMode, keyType.GetPivAlgorithm());
+
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
+            Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var currentMode = pivSession.GetPinOnlyMode();
+            Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, currentMode);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+            var publicKey = pivSession.GenerateKeyPair(
+                slotNumber, KeyType.ECP256);
+
+            Assert.Equal(KeyType.ECP256, publicKey.KeyType);
+        }
+    }
+
+    [Theory]
+    [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x8F)]
+    [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x90)]
+    [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected, 0x91)]
+    [InlineData(KeyType.TripleDES, PivPinOnlyMode.PinDerived, 0x92)]
+    public void SetPinOnly_ThenNewAlg_Success(
+        KeyType keyType,
+        PivPinOnlyMode mode,
+        byte slotNumber)
+    {
+        var specifiedCollector = new SpecifiedKeyCollector(
+            DefaultPin,
+            DefaultPuk,
+            new byte[8]
+        );
+
+        var newAlg = keyType switch
+        {
+            KeyType.AES128 => KeyType.AES192,
+            KeyType.AES192 => KeyType.AES256,
+            KeyType.AES256 => KeyType.TripleDES,
+            _ => KeyType.AES128
+        };
+
+        using (var pivSession = GetSession())
+        {
+            pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
+            Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var currentMode = pivSession.GetPinOnlyMode();
+
+            Assert.Equal(mode, currentMode);
+            Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+            pivSession.SetPinOnlyMode(mode, newAlg.GetPivAlgorithm());
+
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
+            Assert.Equal(newAlg.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var currentMode = pivSession.GetPinOnlyMode();
+            Assert.Equal(mode, currentMode);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+            var publicKey = pivSession.GenerateKeyPair(
+                slotNumber, KeyType.ECP256);
+
+            Assert.Equal(KeyType.ECP256, publicKey.KeyType);
+        }
+    }
+
+    [Theory]
+    [InlineData(KeyType.AES128, PivPinOnlyMode.PinProtected, 0x84)]
+    [InlineData(KeyType.AES192, PivPinOnlyMode.PinDerived, 0x85)]
+    [InlineData(KeyType.AES256, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x86)]
+    public void SetPinOnly_ThenNone_Success(
+        KeyType keyType,
+        PivPinOnlyMode mode,
+        byte slotNumber)
+    {
+        var specifiedCollector = new SpecifiedKeyCollector(
+            DefaultPin,
+            DefaultPuk,
+            new byte[8]
+        );
+
+        using (var pivSession = GetSession())
+        {
+            pivSession.SetPinOnlyMode(mode, keyType.GetPivAlgorithm());
+            Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+
+            var currentMode = pivSession.GetPinOnlyMode();
+            Assert.Equal(mode, currentMode);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+            var publicKey = pivSession.GenerateKeyPair(
+                slotNumber, KeyType.ECP256);
+
+            Assert.Equal(KeyType.ECP256, publicKey.KeyType);
+            Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+            pivSession.SetPinOnlyMode(PivPinOnlyMode.None, keyType.GetPivAlgorithm());
+
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var currentMode = pivSession.GetPinOnlyMode();
+            Assert.Equal(PivPinOnlyMode.None, currentMode);
+            pivSession.TryAuthenticateManagementKey(DefaultManagementKey);
+        }
+    }
+
+    // If the PUK is blocked, return true.
+    // If the PUK is not blocked, return false.
+    // If there is any other error, throw an exception.
+    private bool IsPukBlocked()
+    {
+        using var pivSession = GetSession();
+        try
+        {
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            pivSession.ChangePuk();
+
+            // If that worked, change the PUK back.
+            collectorObj.KeyFlag = 1;
+            pivSession.ChangePuk();
+        }
+        catch (SecurityException)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected override void Dispose(
+        bool disposing)
+    {
+        if (disposing)
+        {
+            _partiallyRandomGenerator.RestoreRandomProvider();
+        }
+
+        base.Dispose(disposing);
     }
 }

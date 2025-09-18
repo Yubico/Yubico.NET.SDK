@@ -17,58 +17,60 @@ using Xunit.Abstractions;
 using Yubico.Core.Devices.Hid;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public class ListenHidTests
 {
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class ListenHidTests
+    private readonly ITestOutputHelper _output;
+    private int _counter;
+
+    public ListenHidTests(
+        ITestOutputHelper output)
     {
-        private int _counter;
-        private readonly ITestOutputHelper _output;
+        _output = output;
+        _counter = 5;
+    }
 
-        public ListenHidTests(ITestOutputHelper output)
+    [Fact]
+    public void HidDeviceListen_Succeeds()
+    {
+        var listener = HidDeviceListener.Create();
+        listener.Arrived += HandleEventFromListener;
+
+        int choice;
+        do
         {
-            _output = output;
-            _counter = 5;
+            choice = RunMenu();
+            _output.WriteLine("  choice = " + choice);
+        } while (choice != 0);
+    }
+
+    private void HandleEventFromListener(
+        object? sender,
+        HidDeviceEventArgs eventArgs)
+    {
+        _output.WriteLine("    eventArgs.Device = " + eventArgs.Device);
+    }
+
+    // This simulates a menu. There's no ReadLine (or some such) in XUnit, so
+    // run this in debug mode to be able to pause execution so we can insert
+    // and remove YubiKeys to watch what happens.
+    private int RunMenu()
+    {
+        if (_counter == 0)
+        {
+            _counter = 6;
+        }
+        else if (_counter > 6 || _counter < 0)
+        {
+            _counter = 1;
         }
 
-        [Fact]
-        public void HidDeviceListen_Succeeds()
-        {
-            var listener = HidDeviceListener.Create();
-            listener.Arrived += HandleEventFromListener;
+        _counter--;
+        _output.WriteLine("Enter positive integer or 0 to quit");
+        _output.WriteLine(_counter.ToString());
 
-            int choice;
-            do
-            {
-                choice = RunMenu();
-                _output.WriteLine("  choice = " + choice);
-            } while (choice != 0);
-        }
-
-        private void HandleEventFromListener(object? sender, HidDeviceEventArgs eventArgs)
-        {
-            _output.WriteLine("    eventArgs.Device = " + eventArgs.Device);
-        }
-
-        // This simulates a menu. There's no ReadLine (or some such) in XUnit, so
-        // run this in debug mode to be able to pause execution so we can insert
-        // and remove YubiKeys to watch what happens.
-        private int RunMenu()
-        {
-            if (_counter == 0)
-            {
-                _counter = 6;
-            }
-            else if (_counter > 6 || _counter < 0)
-            {
-                _counter = 1;
-            }
-
-            _counter--;
-            _output.WriteLine("Enter positive integer or 0 to quit");
-            _output.WriteLine(_counter.ToString());
-
-            return _counter;
-        }
+        return _counter;
     }
 }

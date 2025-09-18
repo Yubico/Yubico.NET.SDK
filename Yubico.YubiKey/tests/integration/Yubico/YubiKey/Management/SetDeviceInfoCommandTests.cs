@@ -16,102 +16,106 @@ using Xunit;
 using Yubico.YubiKey.Management.Commands;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Management
+namespace Yubico.YubiKey.Management;
+
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+[Trait(TraitTypes.Category, TestCategories.RequiresFips)]
+public class SetDeviceInfoCommandTests
 {
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    [Trait(TraitTypes.Category, TestCategories.RequiresFips)]
-
-    public class SetDeviceInfoCommandTests
+    [SkippableTheory(typeof(DeviceNotFoundException))]
+    [InlineData(StandardTestDevice.Fw5)]
+    [InlineData(StandardTestDevice.Fw5Fips)]
+    public void SetDeviceInfo_NoData_ResponseStatusSuccess(
+        StandardTestDevice testDeviceType)
     {
-        [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void SetDeviceInfo_NoData_ResponseStatusSuccess(StandardTestDevice testDeviceType)
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+        using var connection = testDevice.Connect(YubiKeyApplication.Management);
+
+        var setCommand = new SetDeviceInfoCommand();
+
+        var setDeviceInfoResponse = connection.SendCommand(setCommand);
+        Assert.Equal(ResponseStatus.Success, setDeviceInfoResponse.Status);
+    }
+
+    [SkippableTheory(typeof(DeviceNotFoundException))]
+    [InlineData(StandardTestDevice.Fw5)]
+    [InlineData(StandardTestDevice.Fw5Fips)]
+    public void SetDeviceInfo_NoChanges_DeviceInfoNotChanged(
+        StandardTestDevice testDeviceType)
+    {
+        var beginningTestDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+        var testDeviceSerialNumber = beginningTestDevice.SerialNumber!.Value;
+
+        using (var connection = beginningTestDevice.Connect(YubiKeyApplication.Management))
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var setCommand = new SetDeviceInfoCommand { ResetAfterConfig = true };
 
-            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Management);
-
-            var setCommand = new SetDeviceInfoCommand();
-
-            YubiKeyResponse setDeviceInfoResponse = connection.SendCommand(setCommand);
+            var setDeviceInfoResponse = connection.SendCommand(setCommand);
             Assert.Equal(ResponseStatus.Success, setDeviceInfoResponse.Status);
         }
 
-        [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void SetDeviceInfo_NoChanges_DeviceInfoNotChanged(StandardTestDevice testDeviceType)
+        var endingTestDevice =
+            TestDeviceSelection.RenewDeviceEnumeration(testDeviceSerialNumber);
+
+        AssertDeviceInfoValueEquals(beginningTestDevice, endingTestDevice);
+    }
+
+    [SkippableTheory(typeof(DeviceNotFoundException))]
+    [InlineData(StandardTestDevice.Fw5)]
+    [InlineData(StandardTestDevice.Fw5Fips)]
+    public void SetDeviceInfo_SameAsCurrentDeviceInfo_NoChange(
+        StandardTestDevice testDeviceType)
+    {
+        var beginningTestDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+        var testDeviceSerialNumber = beginningTestDevice.SerialNumber!.Value;
+
+        using (var connection = beginningTestDevice.Connect(YubiKeyApplication.Management))
         {
-            IYubiKeyDevice beginningTestDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var setCommand = CreateSetDeviceInfoCommand(beginningTestDevice);
+            setCommand.ResetAfterConfig = true;
 
-            int testDeviceSerialNumber = beginningTestDevice.SerialNumber!.Value;
-
-            using (IYubiKeyConnection connection = beginningTestDevice.Connect(YubiKeyApplication.Management))
-            {
-                var setCommand = new SetDeviceInfoCommand { ResetAfterConfig = true };
-
-                YubiKeyResponse setDeviceInfoResponse = connection.SendCommand(setCommand);
-                Assert.Equal(ResponseStatus.Success, setDeviceInfoResponse.Status);
-            }
-
-            IYubiKeyDevice endingTestDevice =
-                TestDeviceSelection.RenewDeviceEnumeration(testDeviceSerialNumber);
-
-            AssertDeviceInfoValueEquals(beginningTestDevice, endingTestDevice);
+            var setDeviceInfoResponse = connection.SendCommand(setCommand);
+            Assert.Equal(ResponseStatus.Success, setDeviceInfoResponse.Status);
         }
 
-        [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        [InlineData(StandardTestDevice.Fw5Fips)]
-        public void SetDeviceInfo_SameAsCurrentDeviceInfo_NoChange(StandardTestDevice testDeviceType)
+        var endingTestDevice =
+            TestDeviceSelection.RenewDeviceEnumeration(testDeviceSerialNumber);
+
+        AssertDeviceInfoValueEquals(beginningTestDevice, endingTestDevice);
+    }
+
+    private static void AssertDeviceInfoValueEquals(
+        IYubiKeyDeviceInfo expectedDeviceInfo,
+        IYubiKeyDeviceInfo actualDeviceInfo)
+    {
+        Assert.Equal(expectedDeviceInfo.AvailableUsbCapabilities, actualDeviceInfo.AvailableUsbCapabilities);
+        Assert.Equal(expectedDeviceInfo.EnabledUsbCapabilities, actualDeviceInfo.EnabledUsbCapabilities);
+        Assert.Equal(expectedDeviceInfo.AvailableNfcCapabilities, actualDeviceInfo.AvailableNfcCapabilities);
+        Assert.Equal(expectedDeviceInfo.EnabledNfcCapabilities, actualDeviceInfo.EnabledNfcCapabilities);
+        Assert.Equal(expectedDeviceInfo.SerialNumber, actualDeviceInfo.SerialNumber);
+        Assert.Equal(expectedDeviceInfo.IsFipsSeries, actualDeviceInfo.IsFipsSeries);
+        Assert.Equal(expectedDeviceInfo.IsSkySeries, actualDeviceInfo.IsSkySeries);
+        Assert.Equal(expectedDeviceInfo.FormFactor, actualDeviceInfo.FormFactor);
+        Assert.Equal(expectedDeviceInfo.FirmwareVersion, actualDeviceInfo.FirmwareVersion);
+        Assert.Equal(expectedDeviceInfo.AutoEjectTimeout, actualDeviceInfo.AutoEjectTimeout);
+        Assert.Equal(expectedDeviceInfo.ChallengeResponseTimeout, actualDeviceInfo.ChallengeResponseTimeout);
+        Assert.Equal(expectedDeviceInfo.DeviceFlags, actualDeviceInfo.DeviceFlags);
+        Assert.Equal(expectedDeviceInfo.ConfigurationLocked, actualDeviceInfo.ConfigurationLocked);
+    }
+
+    private static SetDeviceInfoCommand CreateSetDeviceInfoCommand(
+        IYubiKeyDeviceInfo deviceInfo)
+    {
+        return new SetDeviceInfoCommand
         {
-            IYubiKeyDevice beginningTestDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            int testDeviceSerialNumber = beginningTestDevice.SerialNumber!.Value;
-
-            using (IYubiKeyConnection connection = beginningTestDevice.Connect(YubiKeyApplication.Management))
-            {
-                SetDeviceInfoCommand setCommand = CreateSetDeviceInfoCommand(beginningTestDevice);
-                setCommand.ResetAfterConfig = true;
-
-                YubiKeyResponse setDeviceInfoResponse = connection.SendCommand(setCommand);
-                Assert.Equal(ResponseStatus.Success, setDeviceInfoResponse.Status);
-            }
-
-            IYubiKeyDevice endingTestDevice =
-                TestDeviceSelection.RenewDeviceEnumeration(testDeviceSerialNumber);
-
-            AssertDeviceInfoValueEquals(beginningTestDevice, endingTestDevice);
-        }
-
-        private static void AssertDeviceInfoValueEquals(
-            IYubiKeyDeviceInfo expectedDeviceInfo,
-            IYubiKeyDeviceInfo actualDeviceInfo)
-        {
-            Assert.Equal(expectedDeviceInfo.AvailableUsbCapabilities, actualDeviceInfo.AvailableUsbCapabilities);
-            Assert.Equal(expectedDeviceInfo.EnabledUsbCapabilities, actualDeviceInfo.EnabledUsbCapabilities);
-            Assert.Equal(expectedDeviceInfo.AvailableNfcCapabilities, actualDeviceInfo.AvailableNfcCapabilities);
-            Assert.Equal(expectedDeviceInfo.EnabledNfcCapabilities, actualDeviceInfo.EnabledNfcCapabilities);
-            Assert.Equal(expectedDeviceInfo.SerialNumber, actualDeviceInfo.SerialNumber);
-            Assert.Equal(expectedDeviceInfo.IsFipsSeries, actualDeviceInfo.IsFipsSeries);
-            Assert.Equal(expectedDeviceInfo.IsSkySeries, actualDeviceInfo.IsSkySeries);
-            Assert.Equal(expectedDeviceInfo.FormFactor, actualDeviceInfo.FormFactor);
-            Assert.Equal(expectedDeviceInfo.FirmwareVersion, actualDeviceInfo.FirmwareVersion);
-            Assert.Equal(expectedDeviceInfo.AutoEjectTimeout, actualDeviceInfo.AutoEjectTimeout);
-            Assert.Equal(expectedDeviceInfo.ChallengeResponseTimeout, actualDeviceInfo.ChallengeResponseTimeout);
-            Assert.Equal(expectedDeviceInfo.DeviceFlags, actualDeviceInfo.DeviceFlags);
-            Assert.Equal(expectedDeviceInfo.ConfigurationLocked, actualDeviceInfo.ConfigurationLocked);
-        }
-
-        private static SetDeviceInfoCommand CreateSetDeviceInfoCommand(IYubiKeyDeviceInfo deviceInfo) =>
-            new SetDeviceInfoCommand
-            {
-                EnabledUsbCapabilities = deviceInfo.EnabledUsbCapabilities,
-                EnabledNfcCapabilities = deviceInfo.EnabledNfcCapabilities,
-                ChallengeResponseTimeout = deviceInfo.ChallengeResponseTimeout,
-                AutoEjectTimeout = deviceInfo.AutoEjectTimeout,
-                DeviceFlags = deviceInfo.DeviceFlags
-            };
+            EnabledUsbCapabilities = deviceInfo.EnabledUsbCapabilities,
+            EnabledNfcCapabilities = deviceInfo.EnabledNfcCapabilities,
+            ChallengeResponseTimeout = deviceInfo.ChallengeResponseTimeout,
+            AutoEjectTimeout = deviceInfo.AutoEjectTimeout,
+            DeviceFlags = deviceInfo.DeviceFlags
+        };
     }
 }

@@ -18,105 +18,111 @@ using System.Text;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+public class GetProtocolVersionResponseTests
 {
-    public class GetProtocolVersionResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
-        {
 #nullable disable
-            static void action() => _ = new GetProtocolVersionResponse(null);
+        static void action()
+        {
+            _ = new GetProtocolVersionResponse(null);
+        }
 #nullable enable
 
-            _ = Assert.Throws<ArgumentNullException>(action);
-        }
+        _ = Assert.Throws<ArgumentNullException>(action);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var registerResponse = new GetProtocolVersionResponse(responseApdu);
+
+        Assert.Equal(SWConstants.Success, registerResponse.StatusWord);
+    }
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var registerResponse = new GetProtocolVersionResponse(responseApdu);
+
+        Assert.Equal(ResponseStatus.Success, registerResponse.Status);
+    }
+
+    [Fact]
+    public void Constructor_ConditionsNotSatisfiedResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.InsNotSupported >> 8));
+        var sw2 = unchecked((byte)SWConstants.InsNotSupported);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var registerResponse = new GetProtocolVersionResponse(responseApdu);
+
+        Assert.Equal(ResponseStatus.Failed, registerResponse.Status);
+    }
+
+    [Fact]
+    public void GetData_EmptyResponseData_ReturnsEmptyString()
+    {
+        var expectedData = string.Empty;
+
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new GetProtocolVersionResponse(responseApdu);
+        var actualData = response.GetData();
+
+        Assert.Equal(expectedData, actualData);
+    }
+
+    [Fact]
+    public void GetData_NonEmptyResponseData_ReturnsCorrectString()
+    {
+        var commandResponseData = new List<byte>();
+
+        var expectedString = "ABCD";
+
+        var data = Encoding.ASCII.GetBytes(expectedString);
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+
+        commandResponseData.AddRange(data);
+        commandResponseData.Add(sw1);
+        commandResponseData.Add(sw2);
+
+        var responseApdu = new ResponseApdu(commandResponseData.ToArray());
+
+        var response = new GetProtocolVersionResponse(responseApdu);
+        var actualString = response.GetData();
+
+        Assert.Equal(expectedString, actualString);
+    }
+
+    [Fact]
+    public void GetData_ResponseApduFailed_ThrowsException()
+    {
+        var sw1 = unchecked((byte)(SWConstants.InsNotSupported >> 8));
+        var sw2 = unchecked((byte)SWConstants.InsNotSupported);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new GetProtocolVersionResponse(responseApdu);
+
+        void action()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
-
-            var registerResponse = new GetProtocolVersionResponse(responseApdu);
-
-            Assert.Equal(SWConstants.Success, registerResponse.StatusWord);
+            response.GetData();
         }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
-
-            var registerResponse = new GetProtocolVersionResponse(responseApdu);
-
-            Assert.Equal(ResponseStatus.Success, registerResponse.Status);
-        }
-
-        [Fact]
-        public void Constructor_ConditionsNotSatisfiedResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.InsNotSupported >> 8));
-            byte sw2 = unchecked((byte)SWConstants.InsNotSupported);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
-
-            var registerResponse = new GetProtocolVersionResponse(responseApdu);
-
-            Assert.Equal(ResponseStatus.Failed, registerResponse.Status);
-        }
-
-        [Fact]
-        public void GetData_EmptyResponseData_ReturnsEmptyString()
-        {
-            string expectedData = string.Empty;
-
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new GetProtocolVersionResponse(responseApdu);
-            string actualData = response.GetData();
-
-            Assert.Equal(expectedData, actualData);
-        }
-
-        [Fact]
-        public void GetData_NonEmptyResponseData_ReturnsCorrectString()
-        {
-            var commandResponseData = new List<byte>();
-
-            string expectedString = "ABCD";
-
-            byte[] data = Encoding.ASCII.GetBytes(expectedString);
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-
-            commandResponseData.AddRange(data);
-            commandResponseData.Add(sw1);
-            commandResponseData.Add(sw2);
-
-            var responseApdu = new ResponseApdu(commandResponseData.ToArray());
-
-            var response = new GetProtocolVersionResponse(responseApdu);
-            string actualString = response.GetData();
-
-            Assert.Equal(expectedString, actualString);
-        }
-
-        [Fact]
-        public void GetData_ResponseApduFailed_ThrowsException()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.InsNotSupported >> 8));
-            byte sw2 = unchecked((byte)SWConstants.InsNotSupported);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new GetProtocolVersionResponse(responseApdu);
-            void action() => response.GetData();
-
-            _ = Assert.Throws<InvalidOperationException>(action);
-        }
+        _ = Assert.Throws<InvalidOperationException>(action);
     }
 }

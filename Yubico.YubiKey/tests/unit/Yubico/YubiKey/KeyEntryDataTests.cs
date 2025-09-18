@@ -12,123 +12,126 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Linq;
 using Xunit;
 
-namespace Yubico.YubiKey.Cryptography
+namespace Yubico.YubiKey.Cryptography;
+
+public class KeyEntryDataTests
 {
-    public class KeyEntryDataTests
+    [Fact]
+    public void Constructor_RetriesNull()
     {
-        [Fact]
-        public void Constructor_RetriesNull()
+        var entryData = new KeyEntryData();
+
+        Assert.Null(entryData.RetriesRemaining);
+    }
+
+    [Fact]
+    public void Constructor_RequestIsRelease()
+    {
+        var entryData = new KeyEntryData();
+
+        Assert.Equal(KeyEntryRequest.Release, entryData.Request);
+    }
+
+    [Fact]
+    public void Constructor_IsRetryIsFalse()
+    {
+        var entryData = new KeyEntryData();
+
+        Assert.False(entryData.IsRetry);
+    }
+
+    [Fact]
+    public void Constructor_ClearSucceeds()
+    {
+        var entryData = new KeyEntryData();
+        entryData.Clear();
+        var value = entryData.GetCurrentValue();
+
+        Assert.Equal(0, value.Length);
+    }
+
+    [Fact]
+    public void SubmitValue_Succeeds()
+    {
+        var entryData = new KeyEntryData();
+
+        var dataToSubmit = new byte[]
         {
-            var entryData = new KeyEntryData();
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36
+        };
+        entryData.SubmitValue(dataToSubmit);
 
-            Assert.Null(entryData.RetriesRemaining);
-        }
+        var value = entryData.GetCurrentValue();
+        var getValue = value.ToArray();
 
-        [Fact]
-        public void Constructor_RequestIsRelease()
+        var compareResult = getValue.SequenceEqual(dataToSubmit);
+
+        Assert.True(compareResult);
+    }
+
+    [Fact]
+    public void Submit_Clear_Succeeds()
+    {
+        var entryData = new KeyEntryData();
+
+        var dataToSubmit = new byte[]
         {
-            var entryData = new KeyEntryData();
+            0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47
+        };
+        entryData.SubmitValue(dataToSubmit);
+        entryData.Clear();
 
-            Assert.Equal(KeyEntryRequest.Release, entryData.Request);
-        }
+        var value = entryData.GetCurrentValue();
+        var getValue = value.ToArray();
 
-        [Fact]
-        public void Constructor_IsRetryIsFalse()
+        var expected = new byte[]
         {
-            var entryData = new KeyEntryData();
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        var compareResult = getValue.SequenceEqual(expected);
 
-            Assert.False(entryData.IsRetry);
-        }
+        Assert.True(compareResult);
+    }
 
-        [Fact]
-        public void Constructor_ClearSucceeds()
+    [Fact]
+    public void SubmitValues_Succeeds()
+    {
+        var entryData = new KeyEntryData();
+
+        var currentValue = new byte[]
         {
-            var entryData = new KeyEntryData();
-            entryData.Clear();
-            ReadOnlyMemory<byte> value = entryData.GetCurrentValue();
-
-            Assert.Equal(0, value.Length);
-        }
-
-        [Fact]
-        public void SubmitValue_Succeeds()
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36
+        };
+        var newValue = new byte[]
         {
-            var entryData = new KeyEntryData();
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
+        };
+        entryData.SubmitValues(currentValue, newValue);
 
-            byte[] dataToSubmit = new byte[] {
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36
-            };
-            entryData.SubmitValue(dataToSubmit);
+        var value = entryData.GetCurrentValue();
+        var getValue = value.ToArray();
+        var compareResult = getValue.SequenceEqual(currentValue);
 
-            ReadOnlyMemory<byte> value = entryData.GetCurrentValue();
-            byte[] getValue = value.ToArray();
+        Assert.True(compareResult);
 
-            bool compareResult = getValue.SequenceEqual(dataToSubmit);
+        value = entryData.GetNewValue();
+        getValue = value.ToArray();
+        compareResult = getValue.SequenceEqual(newValue);
 
-            Assert.True(compareResult);
-        }
+        Assert.True(compareResult);
+    }
 
-        [Fact]
-        public void Submit_Clear_Succeeds()
+    [Fact]
+    public void SetRetries_Succeeds()
+    {
+        var entryData = new KeyEntryData
         {
-            var entryData = new KeyEntryData();
+            RetriesRemaining = 5
+        };
 
-            byte[] dataToSubmit = new byte[] {
-                0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47
-            };
-            entryData.SubmitValue(dataToSubmit);
-            entryData.Clear();
-
-            ReadOnlyMemory<byte> value = entryData.GetCurrentValue();
-            byte[] getValue = value.ToArray();
-
-            byte[] expected = new byte[] {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            };
-            bool compareResult = getValue.SequenceEqual(expected);
-
-            Assert.True(compareResult);
-        }
-
-        [Fact]
-        public void SubmitValues_Succeeds()
-        {
-            var entryData = new KeyEntryData();
-
-            byte[] currentValue = new byte[] {
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36
-            };
-            byte[] newValue = new byte[] {
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
-            };
-            entryData.SubmitValues(currentValue, newValue);
-
-            ReadOnlyMemory<byte> value = entryData.GetCurrentValue();
-            byte[] getValue = value.ToArray();
-            bool compareResult = getValue.SequenceEqual(currentValue);
-
-            Assert.True(compareResult);
-
-            value = entryData.GetNewValue();
-            getValue = value.ToArray();
-            compareResult = getValue.SequenceEqual(newValue);
-
-            Assert.True(compareResult);
-        }
-
-        [Fact]
-        public void SetRetries_Succeeds()
-        {
-            var entryData = new KeyEntryData
-            {
-                RetriesRemaining = 5
-            };
-
-            _ = Assert.NotNull(entryData.RetriesRemaining);
-        }
+        _ = Assert.NotNull(entryData.RetriesRemaining);
     }
 }

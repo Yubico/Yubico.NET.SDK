@@ -20,7 +20,7 @@ using Xunit;
 
 namespace Yubico.YubiKey.Fido2;
 
-public class TestKeyCollector()
+public class TestKeyCollector
 {
     public List<KeyEntryRequest> CapturedRequests { get; } = [];
 
@@ -34,13 +34,13 @@ public class TestKeyCollector()
             case KeyEntryRequest.VerifyFido2Pin:
                 if (data.IsRetry && data.RetriesRemaining >= 1)
                 {
-
                     data.SubmitValue(FidoSessionIntegrationTestBase.TestPin2.Span);
                 }
                 else
                 {
                     data.SubmitValue(FidoSessionIntegrationTestBase.TestPin1.Span);
                 }
+
                 break;
             case KeyEntryRequest.SetFido2Pin:
                 data.SubmitValue(FidoSessionIntegrationTestBase.TestPin1.Span);
@@ -79,7 +79,10 @@ public class TestKeyCollector()
         return true;
     }
 
-    public void ResetRequestCounts() => CapturedRequests.Clear();
+    public void ResetRequestCounts()
+    {
+        CapturedRequests.Clear();
+    }
 
     public void VerifyRequestSequence(
         params KeyEntryRequest[] expectedSequence)

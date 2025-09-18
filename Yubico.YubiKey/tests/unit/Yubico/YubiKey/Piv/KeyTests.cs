@@ -16,225 +16,242 @@ using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+public class KeyTests
 {
-    public class KeyTests
+    [Fact]
+    public void TDesWeakKey()
     {
-        [Fact]
-        public void TDesWeakKey()
+        var keyData = new byte[]
         {
-            byte[] keyData = new byte[] {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            };
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+        };
 
-            using TripleDES tDesObject = CryptographyProviders.TripleDesCreator();
+        using var tDesObject = CryptographyProviders.TripleDesCreator();
 
-            bool isWeak = TripleDES.IsWeakKey(keyData);
-            Assert.True(isWeak);
+        var isWeak = TripleDES.IsWeakKey(keyData);
+        Assert.True(isWeak);
 
-            _ = Assert.Throws<CryptographicException>(() => tDesObject.Key = keyData);
-        }
+        _ = Assert.Throws<CryptographicException>(() => tDesObject.Key = keyData);
+    }
 
-        [Fact]
-        public void TDesKey()
+    [Fact]
+    public void TDesKey()
+    {
+        var keyData = new byte[]
         {
-            byte[] keyData = new byte[] {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            };
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+        };
 
-            using TripleDES tDesObject = CryptographyProviders.TripleDesCreator();
-            tDesObject.GenerateKey();
+        using var tDesObject = CryptographyProviders.TripleDesCreator();
+        tDesObject.GenerateKey();
 
-            bool isWeak = TripleDES.IsWeakKey(keyData);
-            Assert.True(isWeak);
+        var isWeak = TripleDES.IsWeakKey(keyData);
+        Assert.True(isWeak);
 
-            byte[] oldKeyData = tDesObject.Key;
+        var oldKeyData = tDesObject.Key;
 
-            oldKeyData[0] = 0x01;
-            oldKeyData[1] = 0x02;
+        oldKeyData[0] = 0x01;
+        oldKeyData[1] = 0x02;
 
-            byte[] keyDataAgain = tDesObject.Key;
+        var keyDataAgain = tDesObject.Key;
 
-            Assert.Equal(192, tDesObject.KeySize);
-        }
+        Assert.Equal(192, tDesObject.KeySize);
+    }
 
-        [Fact]
-        public void DesWeak()
+    [Fact]
+    public void DesWeak()
+    {
+        var keyData = new byte[]
         {
-            byte[] keyData = new byte[] {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            };
-            byte[] dataToEncrypt = new byte[] {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            };
-            byte[] encryptedData = new byte[8];
-            byte[] encryptCipher = new byte[8];
-
-            var desObject = TripleDES.Create();
-            desObject.Mode = CipherMode.ECB;
-            desObject.Padding = PaddingMode.None;
-            ICryptoTransform encryptor = desObject.CreateEncryptor(keyData, null);
-            int eLen = encryptor.TransformBlock(dataToEncrypt, 0, 8, encryptedData, 0);
-            Assert.Equal(8, eLen);
-
-            eLen = encryptor.TransformBlock(encryptedData, 0, 8, encryptCipher, 0);
-            Assert.Equal(8, eLen);
-
-            ICryptoTransform decryptor = desObject.CreateDecryptor(keyData, null);
-            byte[] newBuf = decryptor.TransformFinalBlock(dataToEncrypt, 0, 8);
-            Assert.Equal(encryptedData[0], newBuf[0]);
-        }
-
-        [Fact]
-        public void DesWeak_Matching()
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        var dataToEncrypt = new byte[]
         {
-            byte[] keyData1 = new byte[] {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
-            };
-            byte[] keyData2 = new byte[] {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE
-            };
-            byte[] keyData3 = new byte[] {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0xE0, 0xE0, 0xE0, 0xE0, 0xF1, 0xF1, 0xF1, 0xF1
-            };
-            byte[] keyData4 = new byte[] {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x1F, 0x1F, 0x1F, 0x1F, 0x0E, 0x0E, 0x0E, 0x0E
-            };
-            byte[] dataToEncrypt = new byte[] {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            };
-            byte[] result1 = new byte[8];
-            byte[] result2 = new byte[8];
-            byte[] result3 = new byte[8];
-            byte[] result4 = new byte[8];
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        var encryptedData = new byte[8];
+        var encryptCipher = new byte[8];
 
-            var tDesObject = TripleDES.Create();
-            tDesObject.Mode = CipherMode.ECB;
-            tDesObject.Padding = PaddingMode.None;
+        var desObject = TripleDES.Create();
+        desObject.Mode = CipherMode.ECB;
+        desObject.Padding = PaddingMode.None;
+        var encryptor = desObject.CreateEncryptor(keyData, null);
+        var eLen = encryptor.TransformBlock(dataToEncrypt, 0, 8, encryptedData, 0);
+        Assert.Equal(8, eLen);
 
-            ICryptoTransform encryptor1 = tDesObject.CreateEncryptor(keyData1, null);
-            int eLen = encryptor1.TransformBlock(dataToEncrypt, 0, 8, result1, 0);
-            Assert.Equal(8, eLen);
+        eLen = encryptor.TransformBlock(encryptedData, 0, 8, encryptCipher, 0);
+        Assert.Equal(8, eLen);
 
-            ICryptoTransform encryptor2 = tDesObject.CreateEncryptor(keyData2, null);
-            eLen = encryptor2.TransformBlock(dataToEncrypt, 0, 8, result2, 0);
-            Assert.Equal(8, eLen);
+        var decryptor = desObject.CreateDecryptor(keyData, null);
+        var newBuf = decryptor.TransformFinalBlock(dataToEncrypt, 0, 8);
+        Assert.Equal(encryptedData[0], newBuf[0]);
+    }
 
-            ICryptoTransform encryptor3 = tDesObject.CreateEncryptor(keyData3, null);
-            eLen = encryptor3.TransformBlock(dataToEncrypt, 0, 8, result3, 0);
-            Assert.Equal(8, eLen);
-
-            ICryptoTransform encryptor4 = tDesObject.CreateEncryptor(keyData4, null);
-            eLen = encryptor4.TransformBlock(dataToEncrypt, 0, 8, result4, 0);
-            Assert.Equal(8, eLen);
-        }
-
-        [Fact]
-        public void TDes_Double()
+    [Fact]
+    public void DesWeak_Matching()
+    {
+        var keyData1 = new byte[]
         {
-            byte[] keyData1 = new byte[] {
-                0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
-                0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
-            };
-            byte[] keyData2 = new byte[] {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18
-            };
-            byte[] keyData3 = new byte[] {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            };
-            byte[] dataToEncrypt = new byte[] {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            };
-            byte[] result1 = new byte[8];
-            byte[] result2 = new byte[8];
-            byte[] result3 = new byte[8];
-
-            var tDesObject = TripleDES.Create();
-            tDesObject.Mode = CipherMode.ECB;
-            tDesObject.Padding = PaddingMode.None;
-            tDesObject.KeySize = 128;
-
-            ICryptoTransform encryptor1 = tDesObject.CreateEncryptor(keyData1, null);
-            int eLen = encryptor1.TransformBlock(dataToEncrypt, 0, 8, result1, 0);
-            Assert.Equal(8, eLen);
-
-            ICryptoTransform encryptor2 = tDesObject.CreateEncryptor(keyData2, null);
-            eLen = encryptor2.TransformBlock(dataToEncrypt, 0, 8, result2, 0);
-            Assert.Equal(8, eLen);
-
-            tDesObject.KeySize = 192;
-            ICryptoTransform encryptor3 = tDesObject.CreateEncryptor(keyData3, null);
-            eLen = encryptor3.TransformBlock(dataToEncrypt, 0, 8, result3, 0);
-            Assert.Equal(8, eLen);
-        }
-
-        [Fact]
-        public void DesReplace()
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
+        };
+        var keyData2 = new byte[]
         {
-            byte[] keyDataT = new byte[] {
-                0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
-                0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
-                0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
-            };
-            byte[] keyData1 = new byte[] {
-                0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
-                0xd3, 0x90, 0xbf, 0x01, 0x9c, 0x39, 0x53, 0x70,
-                0xc9, 0x7a, 0xe1, 0x8c, 0x61, 0xe3, 0x48, 0x47
-            };
-            byte[] keyData2 = new byte[] {
-                0xd3, 0x90, 0xbf, 0x01, 0x9c, 0x39, 0x53, 0x70
-            };
-            byte[] keyData3 = new byte[] {
-                0xc9, 0x7a, 0xe1, 0x8c, 0x61, 0xe3, 0x48, 0x47
-            };
-            byte[] dataToEncrypt = new byte[] {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            };
-            byte[] result1 = new byte[8];
-            byte[] result2 = new byte[8];
-            byte[] part1 = new byte[8];
-            byte[] part2 = new byte[8];
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE
+        };
+        var keyData3 = new byte[]
+        {
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0xE0, 0xE0, 0xE0, 0xE0, 0xF1, 0xF1, 0xF1, 0xF1
+        };
+        var keyData4 = new byte[]
+        {
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x1F, 0x1F, 0x1F, 0x1F, 0x0E, 0x0E, 0x0E, 0x0E
+        };
+        var dataToEncrypt = new byte[]
+        {
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        var result1 = new byte[8];
+        var result2 = new byte[8];
+        var result3 = new byte[8];
+        var result4 = new byte[8];
 
-            var tDesObject = TripleDES.Create();
-            tDesObject.Mode = CipherMode.ECB;
-            tDesObject.Padding = PaddingMode.None;
+        var tDesObject = TripleDES.Create();
+        tDesObject.Mode = CipherMode.ECB;
+        tDesObject.Padding = PaddingMode.None;
 
-            ICryptoTransform encryptor0 = tDesObject.CreateEncryptor(keyDataT, null);
-            int eLen = encryptor0.TransformBlock(dataToEncrypt, 0, 8, result1, 0);
-            Assert.Equal(8, eLen);
+        var encryptor1 = tDesObject.CreateEncryptor(keyData1, null);
+        var eLen = encryptor1.TransformBlock(dataToEncrypt, 0, 8, result1, 0);
+        Assert.Equal(8, eLen);
 
-            ICryptoTransform encryptor1 = tDesObject.CreateEncryptor(keyData1, null);
-            eLen = encryptor1.TransformBlock(dataToEncrypt, 0, 8, part1, 0);
-            Assert.Equal(8, eLen);
+        var encryptor2 = tDesObject.CreateEncryptor(keyData2, null);
+        eLen = encryptor2.TransformBlock(dataToEncrypt, 0, 8, result2, 0);
+        Assert.Equal(8, eLen);
 
-            var desObject = DES.Create();
-            desObject.Mode = CipherMode.ECB;
-            desObject.Padding = PaddingMode.None;
+        var encryptor3 = tDesObject.CreateEncryptor(keyData3, null);
+        eLen = encryptor3.TransformBlock(dataToEncrypt, 0, 8, result3, 0);
+        Assert.Equal(8, eLen);
 
-            ICryptoTransform decryptor2 = desObject.CreateDecryptor(keyData3, null);
-            eLen = decryptor2.TransformBlock(part1, 0, 8, part2, 0);
-            Assert.Equal(8, eLen);
+        var encryptor4 = tDesObject.CreateEncryptor(keyData4, null);
+        eLen = encryptor4.TransformBlock(dataToEncrypt, 0, 8, result4, 0);
+        Assert.Equal(8, eLen);
+    }
 
-            ICryptoTransform encryptor2 = desObject.CreateEncryptor(keyData2, null);
-            eLen = encryptor2.TransformBlock(part2, 0, 8, result2, 0);
-            Assert.Equal(8, eLen);
-        }
+    [Fact]
+    public void TDes_Double()
+    {
+        var keyData1 = new byte[]
+        {
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
+        };
+        var keyData2 = new byte[]
+        {
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18
+        };
+        var keyData3 = new byte[]
+        {
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+        };
+        var dataToEncrypt = new byte[]
+        {
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        var result1 = new byte[8];
+        var result2 = new byte[8];
+        var result3 = new byte[8];
+
+        var tDesObject = TripleDES.Create();
+        tDesObject.Mode = CipherMode.ECB;
+        tDesObject.Padding = PaddingMode.None;
+        tDesObject.KeySize = 128;
+
+        var encryptor1 = tDesObject.CreateEncryptor(keyData1, null);
+        var eLen = encryptor1.TransformBlock(dataToEncrypt, 0, 8, result1, 0);
+        Assert.Equal(8, eLen);
+
+        var encryptor2 = tDesObject.CreateEncryptor(keyData2, null);
+        eLen = encryptor2.TransformBlock(dataToEncrypt, 0, 8, result2, 0);
+        Assert.Equal(8, eLen);
+
+        tDesObject.KeySize = 192;
+        var encryptor3 = tDesObject.CreateEncryptor(keyData3, null);
+        eLen = encryptor3.TransformBlock(dataToEncrypt, 0, 8, result3, 0);
+        Assert.Equal(8, eLen);
+    }
+
+    [Fact]
+    public void DesReplace()
+    {
+        var keyDataT = new byte[]
+        {
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
+        };
+        var keyData1 = new byte[]
+        {
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+            0xd3, 0x90, 0xbf, 0x01, 0x9c, 0x39, 0x53, 0x70,
+            0xc9, 0x7a, 0xe1, 0x8c, 0x61, 0xe3, 0x48, 0x47
+        };
+        var keyData2 = new byte[]
+        {
+            0xd3, 0x90, 0xbf, 0x01, 0x9c, 0x39, 0x53, 0x70
+        };
+        var keyData3 = new byte[]
+        {
+            0xc9, 0x7a, 0xe1, 0x8c, 0x61, 0xe3, 0x48, 0x47
+        };
+        var dataToEncrypt = new byte[]
+        {
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        var result1 = new byte[8];
+        var result2 = new byte[8];
+        var part1 = new byte[8];
+        var part2 = new byte[8];
+
+        var tDesObject = TripleDES.Create();
+        tDesObject.Mode = CipherMode.ECB;
+        tDesObject.Padding = PaddingMode.None;
+
+        var encryptor0 = tDesObject.CreateEncryptor(keyDataT, null);
+        var eLen = encryptor0.TransformBlock(dataToEncrypt, 0, 8, result1, 0);
+        Assert.Equal(8, eLen);
+
+        var encryptor1 = tDesObject.CreateEncryptor(keyData1, null);
+        eLen = encryptor1.TransformBlock(dataToEncrypt, 0, 8, part1, 0);
+        Assert.Equal(8, eLen);
+
+        var desObject = DES.Create();
+        desObject.Mode = CipherMode.ECB;
+        desObject.Padding = PaddingMode.None;
+
+        var decryptor2 = desObject.CreateDecryptor(keyData3, null);
+        eLen = decryptor2.TransformBlock(part1, 0, 8, part2, 0);
+        Assert.Equal(8, eLen);
+
+        var encryptor2 = desObject.CreateEncryptor(keyData2, null);
+        eLen = encryptor2.TransformBlock(part2, 0, 8, result2, 0);
+        Assert.Equal(8, eLen);
     }
 }

@@ -19,11 +19,11 @@ namespace Yubico.YubiKey.Piv;
 
 public class PivSessionUnitTestBase : IDisposable
 {
-    private bool _disposed;
-    private PivSession? _pivSessionMock;
     private HollowYubiKeyDevice? _deviceMock;
+    private bool _disposed;
     private FirmwareVersion? _firmwareVersion;
     private Func<KeyEntryData, bool>? _keyCollector;
+    private PivSession? _pivSessionMock;
 
     protected HollowYubiKeyDevice DeviceMock => _deviceMock ??= new HollowYubiKeyDevice(true)
     {
@@ -31,22 +31,6 @@ public class PivSessionUnitTestBase : IDisposable
     };
 
     protected PivSession PivSessionMock => _pivSessionMock ??= GetNewPivSession();
-
-    protected PivSession GetNewPivSession()
-    {
-        var pivSession = new PivSession(DeviceMock);
-        if (KeyCollector == null)
-        {
-            var simpleCollector = new SimpleKeyCollector(false);
-            pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-        }
-        else
-        {
-            pivSession.KeyCollector = KeyCollector;
-        }
-
-        return pivSession;
-    }
 
     protected Func<KeyEntryData, bool>? KeyCollector
     {
@@ -78,5 +62,21 @@ public class PivSessionUnitTestBase : IDisposable
         PivSessionMock.Dispose();
 
         _disposed = true;
+    }
+
+    protected PivSession GetNewPivSession()
+    {
+        var pivSession = new PivSession(DeviceMock);
+        if (KeyCollector == null)
+        {
+            var simpleCollector = new SimpleKeyCollector(false);
+            pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
+        }
+        else
+        {
+            pivSession.KeyCollector = KeyCollector;
+        }
+
+        return pivSession;
     }
 }

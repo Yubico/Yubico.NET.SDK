@@ -16,122 +16,129 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+public class ConfigureNdefCommandTests
 {
-    public class ConfigureNdefCommandTests
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
     {
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
+        var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
+
+        var cla = command.CreateCommandApdu().Cla;
+
+        Assert.Equal(0, cla);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_ReturnsHex01()
+    {
+        var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
+
+        var ins = command.CreateCommandApdu().Ins;
+
+        Assert.Equal(1, ins);
+    }
+
+    [Theory]
+    [InlineData(Slot.ShortPress, 0x08)]
+    [InlineData(Slot.LongPress, 0x09)]
+    public void CreateCommandApdu_GetP1Property_ReturnsCorrectSlot(
+        Slot otpSlot,
+        byte expectedSlotValue)
+    {
+        var command = new ConfigureNdefCommand(otpSlot, new byte[62]);
+
+        var p1 = command.CreateCommandApdu().P1;
+
+        Assert.Equal(expectedSlotValue, p1);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsZero()
+    {
+        var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
+
+        var p2 = command.CreateCommandApdu().P2;
+
+        Assert.Equal(0, p2);
+    }
+
+    [Fact]
+    public void FullConstructor_ConfigurationIncorrectSize_ThrowsArgumentExcetion()
+    {
+        static void Action()
         {
-            var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
-
-            byte cla = command.CreateCommandApdu().Cla;
-
-            Assert.Equal(0, cla);
+            _ = new ConfigureNdefCommand(Slot.LongPress, Array.Empty<byte>());
         }
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_ReturnsHex01()
+        _ = Assert.Throws<ArgumentException>(Action);
+    }
+
+    [Fact]
+    public void FullConstructor_WithoutAccessCode_WritesConfigurationAsIs()
+    {
+        var expectedConfig = new byte[62]
         {
-            var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+            11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+            21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+            31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+            41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+            51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+            61, 62
+        };
 
-            byte ins = command.CreateCommandApdu().Ins;
+        var command = new ConfigureNdefCommand(Slot.LongPress, expectedConfig, Array.Empty<byte>());
 
-            Assert.Equal(1, ins);
+        var actualConfig = command.CreateCommandApdu().Data;
+
+        Assert.True(actualConfig.Span.SequenceEqual(expectedConfig));
+    }
+
+    [Fact]
+    public void FullConstructor_WithAccessCode_WritesAccessCodeToBuffer()
+    {
+        var accessCode = new byte[6] { 1, 2, 3, 4, 5, 6 };
+        var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62], accessCode);
+
+        var data = command.CreateCommandApdu().Data.ToArray();
+
+        ReadOnlySpan<byte> expectedAccessCode = accessCode.AsSpan();
+        ReadOnlySpan<byte> actualAccessCode = data.AsSpan(56);
+
+        Assert.True(expectedAccessCode.SequenceEqual(actualAccessCode));
+    }
+
+    [Fact]
+    public void FullConstructor_IncorrectAccessCodeSize_ThrowsArgumentException()
+    {
+        static void Action()
+        {
+            _ = new ConfigureNdefCommand(Slot.LongPress, new byte[62], new byte[1]);
         }
 
-        [Theory]
-        [InlineData(Slot.ShortPress, 0x08)]
-        [InlineData(Slot.LongPress, 0x09)]
-        public void CreateCommandApdu_GetP1Property_ReturnsCorrectSlot(Slot otpSlot, byte expectedSlotValue)
-        {
-            var command = new ConfigureNdefCommand(otpSlot, new byte[62]);
+        _ = Assert.Throws<ArgumentException>(Action);
+    }
 
-            byte p1 = command.CreateCommandApdu().P1;
+    [Fact]
+    public void CreateCommandApdu_GetNe_ReturnsZero()
+    {
+        var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
 
-            Assert.Equal(expectedSlotValue, p1);
-        }
+        var ne = command.CreateCommandApdu().Ne;
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsZero()
-        {
-            var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
+        Assert.Equal(0, ne);
+    }
 
-            byte p2 = command.CreateCommandApdu().P2;
+    [Fact]
+    public void CreateResponseApdu_ReturnsCorrectType()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
 
-            Assert.Equal(0, p2);
-        }
+        IYubiKeyResponse response = command.CreateResponseForApdu(responseApdu);
 
-        [Fact]
-        public void FullConstructor_ConfigurationIncorrectSize_ThrowsArgumentExcetion()
-        {
-            static void Action() => _ = new ConfigureNdefCommand(Slot.LongPress, Array.Empty<byte>());
-
-            _ = Assert.Throws<ArgumentException>(Action);
-        }
-
-        [Fact]
-        public void FullConstructor_WithoutAccessCode_WritesConfigurationAsIs()
-        {
-            byte[] expectedConfig = new byte[62]
-            {
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-                31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-                41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-                51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-                61, 62
-            };
-
-            var command = new ConfigureNdefCommand(Slot.LongPress, expectedConfig, Array.Empty<byte>());
-
-            ReadOnlyMemory<byte> actualConfig = command.CreateCommandApdu().Data;
-
-            Assert.True(actualConfig.Span.SequenceEqual(expectedConfig));
-        }
-
-        [Fact]
-        public void FullConstructor_WithAccessCode_WritesAccessCodeToBuffer()
-        {
-            byte[] accessCode = new byte[6] { 1, 2, 3, 4, 5, 6 };
-            var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62], accessCode);
-
-            byte[] data = command.CreateCommandApdu().Data.ToArray();
-
-            ReadOnlySpan<byte> expectedAccessCode = accessCode.AsSpan();
-            ReadOnlySpan<byte> actualAccessCode = data.AsSpan(56);
-
-            Assert.True(expectedAccessCode.SequenceEqual(actualAccessCode));
-        }
-
-        [Fact]
-        public void FullConstructor_IncorrectAccessCodeSize_ThrowsArgumentException()
-        {
-            static void Action() => _ = new ConfigureNdefCommand(Slot.LongPress, new byte[62], new byte[1]);
-
-            _ = Assert.Throws<ArgumentException>(Action);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_GetNe_ReturnsZero()
-        {
-            var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
-
-            int ne = command.CreateCommandApdu().Ne;
-
-            Assert.Equal(0, ne);
-        }
-
-        [Fact]
-        public void CreateResponseApdu_ReturnsCorrectType()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
-
-            IYubiKeyResponse response = command.CreateResponseForApdu(responseApdu);
-
-            _ = Assert.IsAssignableFrom<ReadStatusResponse>(response);
-        }
+        _ = Assert.IsAssignableFrom<ReadStatusResponse>(response);
     }
 }

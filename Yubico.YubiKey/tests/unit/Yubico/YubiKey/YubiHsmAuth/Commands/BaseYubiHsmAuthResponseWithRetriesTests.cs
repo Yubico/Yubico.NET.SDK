@@ -15,77 +15,89 @@
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+public class BaseYubiHsmAuthResponseWithRetriesTests
 {
-    public class BaseYubiHsmAuthResponseWithRetriesTests
+    private const string AuthenticationRequired0RetriesStatusMessage =
+        "Wrong password or authentication key. Retries remaining: 0.";
+
+    private const string AuthenticationRequired15RetriesStatusMessage =
+        "Wrong password or authentication key. Retries remaining: 15.";
+
+    [Theory]
+    [InlineData(SWConstants.VerifyFail, ResponseStatus.AuthenticationRequired)]
+    [InlineData(0x63cf, ResponseStatus.AuthenticationRequired)]
+    public void Status_GivenStatusWord_ReturnsCorrectResponseStatus(
+        short responseSw,
+        ResponseStatus expectedStatus)
     {
-        public class SampleYubiHsmAuthResponseWithRetries : BaseYubiHsmAuthResponseWithRetries
-        {
-            public SampleYubiHsmAuthResponseWithRetries(ResponseApdu responseApdu) : base(responseApdu)
-            {
-            }
+        var response = new SampleYubiHsmAuthResponseWithRetries(
+            new ResponseApdu(new byte[] { }, responseSw));
 
-            public bool HasRetries => StatusWordContainsRetries;
+        Assert.Equal(expectedStatus, response.Status);
+    }
+
+    [Theory]
+    [InlineData(SWConstants.VerifyFail, AuthenticationRequired0RetriesStatusMessage)]
+    [InlineData(0x63cf, AuthenticationRequired15RetriesStatusMessage)]
+    public void Status_GivenStatusWord_ReturnsCorrectResponseMessage(
+        short responseSw,
+        string expectedMessage)
+    {
+        var response = new SampleYubiHsmAuthResponseWithRetries(
+            new ResponseApdu(new byte[] { }, responseSw));
+
+        Assert.Equal(expectedMessage, response.StatusMessage);
+    }
+
+    [Theory]
+    [InlineData(SWConstants.VerifyFail, true)]
+    [InlineData(0x63cf, true)]
+    [InlineData(SWConstants.Success, false)]
+    [InlineData(SWConstants.InvalidParameter, false)]
+    public void SwContainsRetries_GivenSw_ReturnsTrueWhenRetriesPresent(
+        short responseSw,
+        bool expectedResponse)
+    {
+        var response = new SampleYubiHsmAuthResponseWithRetries(
+            new ResponseApdu(new byte[] { }, responseSw));
+
+        Assert.Equal(expectedResponse, response.HasRetries);
+    }
+
+    [Theory]
+    [InlineData(SWConstants.VerifyFail, 0)]
+    [InlineData(0x63cf, 15)]
+    public void RetriesRemaining_GivenSwWithRetryCount_ReturnsCorrectRetryCount(
+        short responseSw,
+        int? expectedCount)
+    {
+        var response = new SampleYubiHsmAuthResponseWithRetries(
+            new ResponseApdu(new byte[] { }, responseSw));
+
+        Assert.Equal(expectedCount, response.RetriesRemaining);
+    }
+
+    [Theory]
+    [InlineData(SWConstants.Success)]
+    [InlineData(SWConstants.InvalidParameter)]
+    public void RetriesRemaining_GivenSwNoRetryCount_ReturnsNull(
+        short responseSw)
+    {
+        var response = new SampleYubiHsmAuthResponseWithRetries(
+            new ResponseApdu(new byte[] { }, responseSw));
+
+        Assert.True(!response.RetriesRemaining.HasValue);
+    }
+
+    public class SampleYubiHsmAuthResponseWithRetries : BaseYubiHsmAuthResponseWithRetries
+    {
+        public SampleYubiHsmAuthResponseWithRetries(
+            ResponseApdu responseApdu) : base(responseApdu)
+        {
         }
 
-        private const string AuthenticationRequired0RetriesStatusMessage = "Wrong password or authentication key. Retries remaining: 0.";
-        private const string AuthenticationRequired15RetriesStatusMessage = "Wrong password or authentication key. Retries remaining: 15.";
-
-        [Theory]
-        [InlineData(SWConstants.VerifyFail, ResponseStatus.AuthenticationRequired)]
-        [InlineData(0x63cf, ResponseStatus.AuthenticationRequired)]
-        public void Status_GivenStatusWord_ReturnsCorrectResponseStatus(short responseSw, ResponseStatus expectedStatus)
-        {
-            var response = new SampleYubiHsmAuthResponseWithRetries(
-                new ResponseApdu(new byte[] { }, responseSw));
-
-            Assert.Equal(expectedStatus, response.Status);
-        }
-
-        [Theory]
-        [InlineData(SWConstants.VerifyFail, AuthenticationRequired0RetriesStatusMessage)]
-        [InlineData(0x63cf, AuthenticationRequired15RetriesStatusMessage)]
-        public void Status_GivenStatusWord_ReturnsCorrectResponseMessage(short responseSw, string expectedMessage)
-        {
-            var response = new SampleYubiHsmAuthResponseWithRetries(
-                new ResponseApdu(new byte[] { }, responseSw));
-
-            Assert.Equal(expectedMessage, response.StatusMessage);
-        }
-
-        [Theory]
-        [InlineData(SWConstants.VerifyFail, true)]
-        [InlineData(0x63cf, true)]
-        [InlineData(SWConstants.Success, false)]
-        [InlineData(SWConstants.InvalidParameter, false)]
-        public void SwContainsRetries_GivenSw_ReturnsTrueWhenRetriesPresent(short responseSw, bool expectedResponse)
-        {
-            var response = new SampleYubiHsmAuthResponseWithRetries(
-                new ResponseApdu(new byte[] { }, responseSw));
-
-            Assert.Equal(expectedResponse, response.HasRetries);
-        }
-
-        [Theory]
-        [InlineData(SWConstants.VerifyFail, 0)]
-        [InlineData(0x63cf, 15)]
-        public void RetriesRemaining_GivenSwWithRetryCount_ReturnsCorrectRetryCount(short responseSw, int? expectedCount)
-        {
-            var response = new SampleYubiHsmAuthResponseWithRetries(
-                new ResponseApdu(new byte[] { }, responseSw));
-
-            Assert.Equal(expectedCount, response.RetriesRemaining);
-        }
-
-        [Theory]
-        [InlineData(SWConstants.Success)]
-        [InlineData(SWConstants.InvalidParameter)]
-        public void RetriesRemaining_GivenSwNoRetryCount_ReturnsNull(short responseSw)
-        {
-            var response = new SampleYubiHsmAuthResponseWithRetries(
-                new ResponseApdu(new byte[] { }, responseSw));
-
-            Assert.True(!response.RetriesRemaining.HasValue);
-        }
+        public bool HasRetries => StatusWordContainsRetries;
     }
 }

@@ -16,87 +16,105 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.Core.Devices.SmartCard.UnitTests
+namespace Yubico.Core.Devices.SmartCard.UnitTests;
+
+internal class FakeSmartCardDevice : ISmartCardDevice
 {
-    class FakeSmartCardDevice : ISmartCardDevice
+    public DateTime LastAccessed { get; } = DateTime.Now;
+    public string Path { get; } = string.Empty;
+    public string? ParentDeviceId { get; } = null;
+    public AnswerToReset? Atr { get; }
+    public SmartCardConnectionKind Kind { get; }
+
+    public ISmartCardConnection Connect()
     {
-        public DateTime LastAccessed { get; } = DateTime.Now;
-        public string Path { get; } = string.Empty;
-        public string? ParentDeviceId { get; } = null;
-        public AnswerToReset? Atr { get; }
-        public SmartCardConnectionKind Kind { get; }
-        public ISmartCardConnection Connect() => throw new NotImplementedException();
+        throw new NotImplementedException();
+    }
+}
+
+internal class FakeSmartCardListener : SmartCardDeviceListener
+{
+    public void FireArrival()
+    {
+        OnArrived(new FakeSmartCardDevice());
     }
 
-    class FakeSmartCardListener : SmartCardDeviceListener
+    public void FireRemoval()
     {
-        public void FireArrival() => OnArrived(new FakeSmartCardDevice());
-        public void FireRemoval() => OnRemoved(new FakeSmartCardDevice());
-        public void Clear() => ClearEventHandlers();
+        OnRemoved(new FakeSmartCardDevice());
     }
 
-    public class SmartCardDeviceListenerTests
+    public void Clear()
     {
-        // [Fact]
-        // public void Create_ReturnsInstanceOfListener()
-        // {
-        //     var listener = SmartCardDeviceListener.Create();
-        //     _ = Assert.IsAssignableFrom<SmartCardDeviceListener>(listener);
-        // }
+        ClearEventHandlers();
+    }
+}
 
-        [Fact]
-        public void OnArrived_WithNoListeners_NoOps()
-        {
-            var listener = new FakeSmartCardListener();
-            listener.FireArrival();
-        }
+public class SmartCardDeviceListenerTests
+{
+    // [Fact]
+    // public void Create_ReturnsInstanceOfListener()
+    // {
+    //     var listener = SmartCardDeviceListener.Create();
+    //     _ = Assert.IsAssignableFrom<SmartCardDeviceListener>(listener);
+    // }
 
-        [Fact]
-        public void OnArrived_WithEventListener_RaisesArrivedEvent()
-        {
-            var listener = new FakeSmartCardListener();
-            _ = Assert.Raises<SmartCardDeviceEventArgs>(
-                e => listener.Arrived += e,
-                e => listener.Arrived -= e,
-                () => listener.FireArrival());
-        }
+    [Fact]
+    public void OnArrived_WithNoListeners_NoOps()
+    {
+        var listener = new FakeSmartCardListener();
+        listener.FireArrival();
+    }
 
-        [Fact]
-        public void OnRemoved_WithNoListeners_NoOps()
-        {
-            var listener = new FakeSmartCardListener();
-            listener.FireRemoval();
-        }
+    [Fact]
+    public void OnArrived_WithEventListener_RaisesArrivedEvent()
+    {
+        var listener = new FakeSmartCardListener();
+        _ = Assert.Raises<SmartCardDeviceEventArgs>(
+            e => listener.Arrived += e,
+            e => listener.Arrived -= e,
+            () => listener.FireArrival());
+    }
 
-        [Fact]
-        public void OnRemoved_WithEventListener_RaisesRemovedEvent()
-        {
-            var listener = new FakeSmartCardListener();
-            _ = Assert.Raises<SmartCardDeviceEventArgs>(
-                e => listener.Removed += e,
-                e => listener.Removed -= e,
-                () => listener.FireRemoval());
-        }
+    [Fact]
+    public void OnRemoved_WithNoListeners_NoOps()
+    {
+        var listener = new FakeSmartCardListener();
+        listener.FireRemoval();
+    }
 
-        [Fact]
-        public void ClearEventHandlers_WithNoListeners_Succeeds()
-        {
-            var listener = new FakeSmartCardListener();
-            listener.Clear();
-        }
+    [Fact]
+    public void OnRemoved_WithEventListener_RaisesRemovedEvent()
+    {
+        var listener = new FakeSmartCardListener();
+        _ = Assert.Raises<SmartCardDeviceEventArgs>(
+            e => listener.Removed += e,
+            e => listener.Removed -= e,
+            () => listener.FireRemoval());
+    }
 
-        [Fact]
-        public void ClearEventHandlers_WithEventListeners_DoesNotRaiseEvent()
-        {
-            var listener = new FakeSmartCardListener();
+    [Fact]
+    public void ClearEventHandlers_WithNoListeners_Succeeds()
+    {
+        var listener = new FakeSmartCardListener();
+        listener.Clear();
+    }
 
-            listener.Arrived += (sender, args) => Assert.False(true);
-            listener.Removed += (sender, args) => Assert.False(true);
+    [Fact]
+    public void ClearEventHandlers_WithEventListeners_DoesNotRaiseEvent()
+    {
+        var listener = new FakeSmartCardListener();
 
-            listener.Clear();
+        listener.Arrived += (
+            sender,
+            args) => Assert.False(true);
+        listener.Removed += (
+            sender,
+            args) => Assert.False(true);
 
-            listener.FireArrival();
-            listener.FireRemoval();
-        }
+        listener.Clear();
+
+        listener.FireArrival();
+        listener.FireRemoval();
     }
 }

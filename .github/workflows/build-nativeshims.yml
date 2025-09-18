@@ -65,7 +65,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: nuspec
-          path: | 
+          path: |
             Yubico.NativeShims/*.nuspec
             Yubico.NativeShims/readme.md
       - uses: actions/upload-artifact@v4
@@ -91,7 +91,7 @@ jobs:
         with:
           name: linux-x64
           path: Yubico.NativeShims/linux-x64/*.so
-          
+  
   build-linux-arm64:
     name: Build Linux (arm64)
     runs-on: ubuntu-24.04
@@ -142,7 +142,7 @@ jobs:
       packages: read
       attestations: write
     runs-on: windows-2022
-    needs: [build-windows, build-linux-amd64, build-linux-arm64, build-macos]
+    needs: [ build-windows, build-linux-amd64, build-linux-arm64, build-macos ]
     env:
       PACKAGE_VERSION: ${{ github.event.inputs.version != '' && github.event.inputs.version || '1.0.0' }}
       GITHUB_REPO_URL: https://github.com/${{ github.repository }}

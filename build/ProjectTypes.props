@@ -30,43 +30,43 @@ limitations under the License. -->
   -->
 <Project>
 
-  <!--
-  Define project types in this group. Other properties that need to be set according to one of these
-  project types should be done in a separate property group.
-  -->
-  <PropertyGroup Label="Project type detection using convention based approach">
-
     <!--
-    A project is a test project if it it ends with Tests in the project name. For example:
-    MyProject.UnitTests.csproj will pick up this property. MyProject.UnitTest.csproj will not.
-    The filename convention is case Insensitive.
+    Define project types in this group. Other properties that need to be set according to one of these
+    project types should be done in a separate property group.
     -->
-    <IsTestProject Condition="$(MSBuildProjectName.Contains('Test', StringComparison.OrdinalIgnoreCase))">true</IsTestProject>
-    <IsTestProject Condition="!$(MSBuildProjectName.Contains('Test', StringComparison.OrdinalIgnoreCase))">false</IsTestProject>
+    <PropertyGroup Label="Project type detection using convention based approach">
 
-    <!--
-    A project is a SampleCode project if it it ends with SampleCode in the project name. For example:
-    MyProject.SampleCode.csproj will pick up this property. MyProject.SampleCode.csproj will not.
-    The filename convention is case Insensitive.
-    -->
-    <IsSampleCodeProject Condition="$(MSBuildProjectName.EndsWith('SampleCode', StringComparison.OrdinalIgnoreCase))">true</IsSampleCodeProject>
-    <IsSampleCodeProject Condition="!$(MSBuildProjectName.EndsWith('SampleCode', StringComparison.OrdinalIgnoreCase))">false</IsSampleCodeProject>
+        <!--
+        A project is a test project if it it ends with Tests in the project name. For example:
+        MyProject.UnitTests.csproj will pick up this property. MyProject.UnitTest.csproj will not.
+        The filename convention is case Insensitive.
+        -->
+        <IsTestProject Condition="$(MSBuildProjectName.Contains('Test', StringComparison.OrdinalIgnoreCase))">true</IsTestProject>
+        <IsTestProject Condition="!$(MSBuildProjectName.Contains('Test', StringComparison.OrdinalIgnoreCase))">false</IsTestProject>
 
-    <!--
-    A project is a reference assembly project if it ends with Ref in the project name. For
-    example: MyProject.Ref.csproj will pick up this property. The filename convention is case
-    insensitive.
-    -->
-    <IsRefProject Condition="$(MSBuildProjectName.EndsWith('Ref', StringComparison.OrdinalIgnoreCase))">true</IsRefProject>
-    <IsRefProject Condition="!$(MSBuildProjectName.EndsWith('Ref', StringComparison.OrdinalIgnoreCase))">false</IsRefProject>
+        <!--
+        A project is a SampleCode project if it it ends with SampleCode in the project name. For example:
+        MyProject.SampleCode.csproj will pick up this property. MyProject.SampleCode.csproj will not.
+        The filename convention is case Insensitive.
+        -->
+        <IsSampleCodeProject Condition="$(MSBuildProjectName.EndsWith('SampleCode', StringComparison.OrdinalIgnoreCase))">true</IsSampleCodeProject>
+        <IsSampleCodeProject Condition="!$(MSBuildProjectName.EndsWith('SampleCode', StringComparison.OrdinalIgnoreCase))">false</IsSampleCodeProject>
 
-    <!--
-    A project is a production project if it does not end in any of the other special suffixes handled
-    previously.
-    -->
-    <IsProdProject Condition="('$(IsTestProject)' == 'false') AND ('$(IsRefProject)' == 'false')">true</IsProdProject>
-    <IsProdProject Condition="('$(IsTestProject)' == 'true') OR ('$(IsRefProject)' == 'true')">false</IsProdProject>
+        <!--
+        A project is a reference assembly project if it ends with Ref in the project name. For
+        example: MyProject.Ref.csproj will pick up this property. The filename convention is case
+        insensitive.
+        -->
+        <IsRefProject Condition="$(MSBuildProjectName.EndsWith('Ref', StringComparison.OrdinalIgnoreCase))">true</IsRefProject>
+        <IsRefProject Condition="!$(MSBuildProjectName.EndsWith('Ref', StringComparison.OrdinalIgnoreCase))">false</IsRefProject>
 
-  </PropertyGroup>
+        <!--
+        A project is a production project if it does not end in any of the other special suffixes handled
+        previously.
+        -->
+        <IsProdProject Condition="('$(IsTestProject)' == 'false') AND ('$(IsRefProject)' == 'false')">true</IsProdProject>
+        <IsProdProject Condition="('$(IsTestProject)' == 'true') OR ('$(IsRefProject)' == 'true')">false</IsProdProject>
+
+    </PropertyGroup>
 
 </Project>

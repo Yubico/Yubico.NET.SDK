@@ -16,96 +16,103 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+public class VerifyFipsModeResponseTests
 {
-    public class VerifyFipsModeResponseTests
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
     {
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new VerifyFipsModeResponse(responseApdu);
+
+        Assert.Equal(SWConstants.Success, response.StatusWord);
+    }
+
+    [Fact]
+    public void Constructor_FunctionNotSupportedResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
+        var sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new VerifyFipsModeResponse(responseApdu);
+
+        Assert.Equal(ResponseStatus.Success, response.Status);
+    }
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_NoThrowIfFailed()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new VerifyFipsModeResponse(responseApdu);
+
+        void action()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new VerifyFipsModeResponse(responseApdu);
-
-            Assert.Equal(SWConstants.Success, response.StatusWord);
+            response.GetData();
         }
 
-        [Fact]
-        public void Constructor_FunctionNotSupportedResponseApdu_SetsStatusCorrectly()
+        var ex = Record.Exception(action);
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void Constructor_FunctionNotSupportedResponseApdu_NoThrowIfFailed()
+    {
+        var sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
+        var sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new VerifyFipsModeResponse(responseApdu);
+
+        void action()
         {
-            byte sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
-            byte sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new VerifyFipsModeResponse(responseApdu);
-
-            Assert.Equal(ResponseStatus.Success, response.Status);
+            response.GetData();
         }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_NoThrowIfFailed()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        var ex = Record.Exception(action);
+        Assert.Null(ex);
+    }
 
-            var response = new VerifyFipsModeResponse(responseApdu);
-            void action() => response.GetData();
+    [Fact]
+    public void ResponseApduFailed_ThrowsException()
+    {
+        var sw1 = unchecked((byte)(SWConstants.FunctionError >> 8));
+        var sw2 = unchecked((byte)SWConstants.FunctionError);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            Exception? ex = Record.Exception(action);
-            Assert.Null(ex);
-        }
+        var response = new VerifyFipsModeResponse(responseApdu);
 
-        [Fact]
-        public void Constructor_FunctionNotSupportedResponseApdu_NoThrowIfFailed()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
-            byte sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
+    }
 
-            var response = new VerifyFipsModeResponse(responseApdu);
-            void action() => response.GetData();
+    [Fact]
+    public void Constructor_FunctionNotSupportedResponseApdu_GetCorrectData()
+    {
+        var sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
+        var sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            Exception? ex = Record.Exception(action);
-            Assert.Null(ex);
-        }
+        var response = new VerifyFipsModeResponse(responseApdu);
 
-        [Fact]
-        public void ResponseApduFailed_ThrowsException()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.FunctionError >> 8));
-            byte sw2 = unchecked((byte)SWConstants.FunctionError);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        Assert.False(response.GetData());
+    }
 
-            var response = new VerifyFipsModeResponse(responseApdu);
+    [Fact]
+    public void Constructor_SuccessResponseApdu_GetCorrectData()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
-        }
+        var response = new VerifyFipsModeResponse(responseApdu);
 
-        [Fact]
-        public void Constructor_FunctionNotSupportedResponseApdu_GetCorrectData()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
-            byte sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new VerifyFipsModeResponse(responseApdu);
-
-            Assert.False(response.GetData());
-        }
-
-        [Fact]
-        public void Constructor_SuccessResponseApdu_GetCorrectData()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new VerifyFipsModeResponse(responseApdu);
-
-            Assert.True(response.GetData());
-        }
+        Assert.True(response.GetData());
     }
 }

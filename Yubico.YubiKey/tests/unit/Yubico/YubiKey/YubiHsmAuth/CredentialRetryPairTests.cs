@@ -15,36 +15,35 @@
 using System;
 using Xunit;
 
-namespace Yubico.YubiKey.YubiHsmAuth
+namespace Yubico.YubiKey.YubiHsmAuth;
+
+public class CredentialRetryPairTests
 {
-    public class CredentialRetryPairTests
+    private readonly Credential cred = new()
     {
-        readonly Credential cred = new Credential()
-        {
-            KeyType = CryptographicKeyType.Aes128,
-            TouchRequired = false,
-            Label = "aaa"
-        };
+        KeyType = CryptographicKeyType.Aes128,
+        TouchRequired = false,
+        Label = "aaa"
+    };
 
-        [Fact]
-        public void Constructor_ReturnsObject()
-        {
-            var pair = new CredentialRetryPair(cred, 0);
-            Assert.NotNull(pair);
-        }
+    [Fact]
+    public void Constructor_ReturnsObject()
+    {
+        var pair = new CredentialRetryPair(cred, 0);
+        Assert.NotNull(pair);
+    }
 
-        [Fact]
-        public void Constructor_Given2Retries_SetsRetriesTo2()
-        {
-            var pair = new CredentialRetryPair(cred, 2);
-            Assert.Equal(2, pair.Retries);
-        }
+    [Fact]
+    public void Constructor_Given2Retries_SetsRetriesTo2()
+    {
+        var pair = new CredentialRetryPair(cred, 2);
+        Assert.Equal(2, pair.Retries);
+    }
 
-        [Fact]
-        public void Constructor_NegativeRetries_ThrowsArgOutOfRangeException()
-        {
-            Action action = () => new CredentialRetryPair(cred, -1);
-            _ = Assert.Throws<ArgumentOutOfRangeException>(action);
-        }
+    [Fact]
+    public void Constructor_NegativeRetries_ThrowsArgOutOfRangeException()
+    {
+        Action action = () => new CredentialRetryPair(cred, -1);
+        _ = Assert.Throws<ArgumentOutOfRangeException>(action);
     }
 }

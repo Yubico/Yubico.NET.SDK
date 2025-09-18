@@ -21,19 +21,19 @@ limitations under the License. -->
   -->
 <Project>
 
-<!--
-  Detect the project type we're building (prod, test, ref). Note, this MUST be imported first as
-  subsequent imports take a dependency on some of the properties defined within.
-  -->
-  <Import Project="ProjectTypes.props"/>
+    <!--
+      Detect the project type we're building (prod, test, ref). Note, this MUST be imported first as
+      subsequent imports take a dependency on some of the properties defined within.
+      -->
+    <Import Project="ProjectTypes.props"/>
 
-  <!-- Information about Company, Authors, Copyright, etc. -->
-  <Import Project="Attribution.props" />
+    <!-- Information about Company, Authors, Copyright, etc. -->
+    <Import Project="Attribution.props"/>
 
-  <!-- Project-wide compiler settings -->
-  <Import Project="CompilerSettings.props" />
+    <!-- Project-wide compiler settings -->
+    <Import Project="CompilerSettings.props"/>
 
-  <!-- Centralized project versions -->
-  <Import Project="Versions.props" />
+    <!-- Centralized project versions -->
+    <Import Project="Versions.props"/>
 
 </Project>

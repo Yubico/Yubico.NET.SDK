@@ -17,143 +17,145 @@ using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+public class WriteScancodeMapTests
 {
-    public class WriteScancodeMapTests
+    [Fact]
+    public void Application_Get_ReturnsOtpApplication()
     {
-        [Fact]
-        public void Application_Get_ReturnsOtpApplication()
-        {
-            var command = new WriteScancodeMap();
+        var command = new WriteScancodeMap();
 
-            Assert.Equal(YubiKeyApplication.Otp, command.Application);
+        Assert.Equal(YubiKeyApplication.Otp, command.Application);
+    }
+
+    [Fact]
+    public void ScancodeMap_SetWithIncorrectLength_ThrowsArgumentException()
+    {
+        var scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes("abc");
+        var command = new WriteScancodeMap();
+
+        void Action()
+        {
+            command.ScancodeMap = scancodeMap;
         }
 
-        [Fact]
-        public void ScancodeMap_SetWithIncorrectLength_ThrowsArgumentException()
+        _ = Assert.Throws<ArgumentException>(Action);
+    }
+
+    [Fact]
+    public void ScancodeMap_SetFollowedByGet_ReturnsTheSetScancodeMap()
+    {
+        var scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes(
+            "123456789012345678901234567890123456789012345");
+
+        var command = new WriteScancodeMap
         {
-            byte[] scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes("abc");
-            var command = new WriteScancodeMap();
+            ScancodeMap = scancodeMap
+        };
 
-            void Action() => command.ScancodeMap = scancodeMap;
+        Assert.Equal(scancodeMap, command.ScancodeMap);
+    }
 
-            _ = Assert.Throws<ArgumentException>(Action);
-        }
+    [Fact]
+    public void DefaultConstructor_ConstructsObject()
+    {
+        var command = new WriteScancodeMap();
 
-        [Fact]
-        public void ScancodeMap_SetFollowedByGet_ReturnsTheSetScancodeMap()
-        {
-            byte[] scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes(
-                "123456789012345678901234567890123456789012345");
+        Assert.NotNull(command);
+    }
 
-            var command = new WriteScancodeMap
-            {
-                ScancodeMap = scancodeMap
-            };
+    [Fact]
+    public void DefaultConstructor_ScancodeMap_SetToDefaultModhexMap()
+    {
+        Memory<byte> scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes(
+            "cbdefghijklnrtuvCBDEFGHIJKLNRTUV0123456789!\t\n");
+        var command = new WriteScancodeMap();
 
-            Assert.Equal(scancodeMap, command.ScancodeMap);
-        }
+        // Don't use Memory<T>.Equals() here as that effectively does a ReferenceEquals instead
+        // of testing for the same array contents.
+        Assert.True(scancodeMap.Span.SequenceEqual(command.ScancodeMap.Span));
+    }
 
-        [Fact]
-        public void DefaultConstructor_ConstructsObject()
-        {
-            var command = new WriteScancodeMap();
+    [Fact]
+    public void FullConstructor_GivenScancodeMap_SetsScanmodeMapProperty()
+    {
+        var scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes(
+            "123456789012345678901234567890123456789012345");
 
-            Assert.NotNull(command);
-        }
+        var command = new WriteScancodeMap(scancodeMap);
 
-        [Fact]
-        public void DefaultConstructor_ScancodeMap_SetToDefaultModhexMap()
-        {
-            Memory<byte> scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes(
-                "cbdefghijklnrtuvCBDEFGHIJKLNRTUV0123456789!\t\n");
-            var command = new WriteScancodeMap();
+        Assert.Equal(scancodeMap, command.ScancodeMap);
+    }
 
-            // Don't use Memory<T>.Equals() here as that effectively does a ReferenceEquals instead
-            // of testing for the same array contents.
-            Assert.True(scancodeMap.Span.SequenceEqual(command.ScancodeMap.Span));
-        }
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
+    {
+        var command = new WriteScancodeMap();
 
-        [Fact]
-        public void FullConstructor_GivenScancodeMap_SetsScanmodeMapProperty()
-        {
-            byte[] scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes(
-                "123456789012345678901234567890123456789012345");
+        var cla = command.CreateCommandApdu().Cla;
 
-            var command = new WriteScancodeMap(scancodeMap);
+        Assert.Equal(0, cla);
+    }
 
-            Assert.Equal(scancodeMap, command.ScancodeMap);
-        }
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_Returns01()
+    {
+        var command = new WriteScancodeMap();
 
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
-        {
-            var command = new WriteScancodeMap();
+        var ins = command.CreateCommandApdu().Ins;
 
-            byte cla = command.CreateCommandApdu().Cla;
+        Assert.Equal(1, ins);
+    }
 
-            Assert.Equal(0, cla);
-        }
+    [Fact]
+    public void CreateCommandApdu_GetP1Property_ReturnsHex12()
+    {
+        var command = new WriteScancodeMap();
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_Returns01()
-        {
-            var command = new WriteScancodeMap();
+        var p1 = command.CreateCommandApdu().P1;
 
-            byte ins = command.CreateCommandApdu().Ins;
+        Assert.Equal(0x12, p1);
+    }
 
-            Assert.Equal(1, ins);
-        }
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsZero()
+    {
+        var command = new WriteScancodeMap();
 
-        [Fact]
-        public void CreateCommandApdu_GetP1Property_ReturnsHex12()
-        {
-            var command = new WriteScancodeMap();
+        var p2 = command.CreateCommandApdu().P2;
 
-            byte p1 = command.CreateCommandApdu().P1;
+        Assert.Equal(0, p2);
+    }
 
-            Assert.Equal(0x12, p1);
-        }
+    [Fact]
+    public void CreateCommandApdu_GetLcProperty_ReturnsScancodeMapSize()
+    {
+        var command = new WriteScancodeMap();
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsZero()
-        {
-            var command = new WriteScancodeMap();
+        var nc = command.CreateCommandApdu().Nc;
 
-            byte p2 = command.CreateCommandApdu().P2;
+        Assert.Equal(45, nc);
+    }
 
-            Assert.Equal(0, p2);
-        }
+    [Fact]
+    public void CreateCommandApdu_GetLeProperty_ReturnsZero()
+    {
+        var command = new WriteScancodeMap();
 
-        [Fact]
-        public void CreateCommandApdu_GetLcProperty_ReturnsScancodeMapSize()
-        {
-            var command = new WriteScancodeMap();
+        var ne = command.CreateCommandApdu().Ne;
 
-            int nc = command.CreateCommandApdu().Nc;
+        Assert.Equal(0, ne);
+    }
 
-            Assert.Equal(45, nc);
-        }
+    [Fact]
+    public void CreateResponseForApdu_ReturnsCorrectType()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x90, 00 });
+        var command = new WriteScancodeMap();
 
-        [Fact]
-        public void CreateCommandApdu_GetLeProperty_ReturnsZero()
-        {
-            var command = new WriteScancodeMap();
+        IYubiKeyResponse response = command.CreateResponseForApdu(responseApdu);
 
-            int ne = command.CreateCommandApdu().Ne;
-
-            Assert.Equal(0, ne);
-        }
-
-        [Fact]
-        public void CreateResponseForApdu_ReturnsCorrectType()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 00 });
-            var command = new WriteScancodeMap();
-
-            IYubiKeyResponse response = command.CreateResponseForApdu(responseApdu);
-
-            _ = Assert.IsAssignableFrom<ReadStatusResponse>(response);
-        }
+        _ = Assert.IsAssignableFrom<ReadStatusResponse>(response);
     }
 }

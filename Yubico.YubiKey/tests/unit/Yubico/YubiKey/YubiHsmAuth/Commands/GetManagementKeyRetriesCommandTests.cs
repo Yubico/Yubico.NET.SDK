@@ -13,62 +13,59 @@
 // limitations under the License.
 
 using Xunit;
-using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+public class GetManagementKeyRetriesCommandTests
 {
-    public class GetManagementKeyRetriesCommandTests
+    private GetManagementKeyRetriesCommand _command => new();
+
+    [Fact]
+    public void Application_Get_ReturnsYubiHsmAuth()
     {
-        private GetManagementKeyRetriesCommand _command =>
+        var command =
             new GetManagementKeyRetriesCommand();
 
-        [Fact]
-        public void Application_Get_ReturnsYubiHsmAuth()
-        {
-            var command =
-                new GetManagementKeyRetriesCommand();
+        Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
+    }
 
-            Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
-        }
+    [Fact]
+    public void CreateCommandApdu_Cla0()
+    {
+        var command =
+            new GetManagementKeyRetriesCommand();
+        var apdu = command.CreateCommandApdu();
 
-        [Fact]
-        public void CreateCommandApdu_Cla0()
-        {
-            var command =
-                new GetManagementKeyRetriesCommand();
-            CommandApdu apdu = command.CreateCommandApdu();
+        Assert.Equal(0, apdu.Cla);
+    }
 
-            Assert.Equal(0, apdu.Cla);
-        }
+    [Fact]
+    public void CreateCommandApdu_Ins0x09()
+    {
+        var command =
+            new GetManagementKeyRetriesCommand();
+        var apdu = command.CreateCommandApdu();
 
-        [Fact]
-        public void CreateCommandApdu_Ins0x09()
-        {
-            var command =
-                new GetManagementKeyRetriesCommand();
-            CommandApdu apdu = command.CreateCommandApdu();
+        Assert.Equal(0x09, apdu.Ins);
+    }
 
-            Assert.Equal(0x09, apdu.Ins);
-        }
+    [Fact]
+    public void CreateCommandApdu_P1Is0()
+    {
+        var command =
+            new GetManagementKeyRetriesCommand();
+        var apdu = command.CreateCommandApdu();
 
-        [Fact]
-        public void CreateCommandApdu_P1Is0()
-        {
-            var command =
-                new GetManagementKeyRetriesCommand();
-            CommandApdu apdu = command.CreateCommandApdu();
+        Assert.Equal(0, apdu.P1);
+    }
 
-            Assert.Equal(0, apdu.P1);
-        }
+    [Fact]
+    public void CreateCommandApdu_P2Is0()
+    {
+        var command =
+            new GetManagementKeyRetriesCommand();
+        var apdu = command.CreateCommandApdu();
 
-        [Fact]
-        public void CreateCommandApdu_P2Is0()
-        {
-            var command =
-                new GetManagementKeyRetriesCommand();
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            Assert.Equal(0, apdu.P2);
-        }
+        Assert.Equal(0, apdu.P2);
     }
 }

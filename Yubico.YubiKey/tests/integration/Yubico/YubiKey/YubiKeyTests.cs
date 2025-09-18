@@ -20,230 +20,237 @@ using Xunit;
 using Xunit.Abstractions;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+[Trait(TraitTypes.Category, TestCategories.RequiresSetup)]
+public class YubiKeyTests
 {
-    [Trait(TraitTypes.Category, TestCategories.RequiresSetup)]
-    public class YubiKeyTests
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public YubiKeyTests(
+        ITestOutputHelper testOutputHelper)
     {
-        private readonly ITestOutputHelper _testOutputHelper;
+        _testOutputHelper = testOutputHelper;
+    }
 
-        public YubiKeyTests(ITestOutputHelper testOutputHelper)
+    [Fact]
+    public void GetYubiKeys_NoneTransport_ThrowsArgumentException()
+    {
+        _ = Assert.Throws<ArgumentException>(() => YubiKeyDevice.FindByTransport(Transport.None).ToList());
+    }
+
+    [Fact]
+    public void GetYubiKeys_ExplicitAllTransports_MoreThanOneConnectedKey()
+    {
+        var keys = YubiKeyDevice.FindByTransport().ToList();
+
+        foreach (var key in keys)
         {
-            _testOutputHelper = testOutputHelper;
+            var concrete = key as YubiKeyDevice;
+            Assert.NotNull(concrete);
+            Assert.True(concrete!.HasHidFido || concrete.HasHidKeyboard || concrete.HasSmartCard);
         }
 
-        [Fact]
-        public void GetYubiKeys_NoneTransport_ThrowsArgumentException()
+        Assert.True(keys.Count > 1);
+    }
+
+    [Fact]
+    // Good test for checking matching logic.
+    public void GetYubiKeys_ExplicitAllTransports_OneConnectedKey()
+    {
+        var keys = YubiKeyDevice.FindByTransport().ToList();
+
+        foreach (var key in keys)
         {
-            _ = Assert.Throws<ArgumentException>(() => YubiKeyDevice.FindByTransport(Transport.None).ToList());
+            var concrete = key as YubiKeyDevice;
+            Assert.NotNull(concrete);
+            Assert.True(concrete!.HasHidFido || concrete.HasHidKeyboard || concrete.HasSmartCard);
         }
 
-        [Fact]
-        public void GetYubiKeys_ExplicitAllTransports_MoreThanOneConnectedKey()
-        {
-            var keys = YubiKeyDevice.FindByTransport().ToList();
+        Assert.True(keys.Count == 1);
+    }
 
-            foreach (IYubiKeyDevice key in keys)
+    [Fact]
+    public void GetYubiKeys_DefaultTransport_MoreThanOneConnectedKey()
+    {
+        var keys = YubiKeyDevice.FindByTransport().ToList();
+
+        foreach (var key in keys)
+        {
+            var concrete = key as YubiKeyDevice;
+            Assert.NotNull(concrete);
+            Assert.True(concrete!.HasHidFido || concrete.HasHidKeyboard || concrete.HasSmartCard);
+        }
+
+        Assert.True(keys.Count > 1);
+    }
+
+    [Fact]
+    // Good test for checking matching logic.
+    public void GetYubiKeys_DefaultTransport_OneConnectedKey()
+    {
+        var keys = YubiKeyDevice.FindByTransport().ToList();
+
+        foreach (var key in keys)
+        {
+            var concrete = key as YubiKeyDevice;
+            Assert.NotNull(concrete);
+            Assert.True(concrete!.HasHidFido || concrete.HasHidKeyboard || concrete.HasSmartCard);
+        }
+
+        Assert.True(keys.Count == 1);
+    }
+
+    [Theory]
+    //[InlineData(Transport.HidFido)]
+    [InlineData(Transport.HidKeyboard)]
+    [InlineData(Transport.UsbSmartCard)]
+    [InlineData(Transport.NfcSmartCard)]
+    [InlineData(Transport.SmartCard)]
+    public void GetYubiKeys_SingleTransport_MoreThanOneConnectedKey(
+        Transport transport)
+    {
+        var keys = YubiKeyDevice.FindByTransport(transport).ToList();
+
+        foreach (var key in keys)
+        {
+            var concrete = key as YubiKeyDevice;
+            Assert.NotNull(concrete);
+
+            switch (transport)
             {
-                var concrete = key as YubiKeyDevice;
-                Assert.NotNull(concrete);
-                Assert.True(concrete!.HasHidFido || concrete.HasHidKeyboard || concrete.HasSmartCard);
-            }
-
-            Assert.True(keys.Count > 1);
-        }
-
-        [Fact]
-        // Good test for checking matching logic.
-        public void GetYubiKeys_ExplicitAllTransports_OneConnectedKey()
-        {
-            var keys = YubiKeyDevice.FindByTransport().ToList();
-
-            foreach (IYubiKeyDevice key in keys)
-            {
-                var concrete = key as YubiKeyDevice;
-                Assert.NotNull(concrete);
-                Assert.True(concrete!.HasHidFido || concrete.HasHidKeyboard || concrete.HasSmartCard);
-            }
-
-            Assert.True(keys.Count == 1);
-        }
-
-        [Fact]
-        public void GetYubiKeys_DefaultTransport_MoreThanOneConnectedKey()
-        {
-            var keys = YubiKeyDevice.FindByTransport().ToList();
-
-            foreach (IYubiKeyDevice key in keys)
-            {
-                var concrete = key as YubiKeyDevice;
-                Assert.NotNull(concrete);
-                Assert.True(concrete!.HasHidFido || concrete.HasHidKeyboard || concrete.HasSmartCard);
-            }
-
-            Assert.True(keys.Count > 1);
-        }
-
-        [Fact]
-        // Good test for checking matching logic.
-        public void GetYubiKeys_DefaultTransport_OneConnectedKey()
-        {
-            var keys = YubiKeyDevice.FindByTransport().ToList();
-
-            foreach (IYubiKeyDevice key in keys)
-            {
-                var concrete = key as YubiKeyDevice;
-                Assert.NotNull(concrete);
-                Assert.True(concrete!.HasHidFido || concrete.HasHidKeyboard || concrete.HasSmartCard);
-            }
-
-            Assert.True(keys.Count == 1);
-        }
-
-        [Theory]
-        //[InlineData(Transport.HidFido)]
-        [InlineData(Transport.HidKeyboard)]
-        [InlineData(Transport.UsbSmartCard)]
-        [InlineData(Transport.NfcSmartCard)]
-        [InlineData(Transport.SmartCard)]
-        public void GetYubiKeys_SingleTransport_MoreThanOneConnectedKey(Transport transport)
-        {
-            var keys = YubiKeyDevice.FindByTransport(transport).ToList();
-
-            foreach (IYubiKeyDevice key in keys)
-            {
-                var concrete = key as YubiKeyDevice;
-                Assert.NotNull(concrete);
-
-                switch (transport)
-                {
-                    case Transport.HidFido:
-                        Assert.True(concrete!.HasHidFido && !concrete.HasHidKeyboard && !concrete.HasSmartCard);
-                        break;
-                    case Transport.HidKeyboard:
-                        Assert.True(!concrete!.HasHidFido && concrete.HasHidKeyboard && !concrete.HasSmartCard);
-                        break;
-                    case Transport.UsbSmartCard:
-                    case Transport.NfcSmartCard:
-                    case Transport.SmartCard:
-                        Assert.True(!concrete!.HasHidFido && !concrete.HasHidKeyboard && concrete.HasSmartCard);
-                        break;
-                }
-            }
-
-            Assert.True(keys.Count > 1);
-        }
-
-        [Theory]
-        //[InlineData(Transport.HidFido)]
-        [InlineData(Transport.HidKeyboard)]
-        [InlineData(Transport.UsbSmartCard)]
-        [InlineData(Transport.NfcSmartCard)]
-        [InlineData(Transport.SmartCard)]
-        public void GetYubiKeys_SingleTransport_OneConnectedKey(Transport transport)
-        {
-            var keys = YubiKeyDevice.FindByTransport(transport).ToList();
-
-            foreach (IYubiKeyDevice key in keys)
-            {
-                var concrete = key as YubiKeyDevice;
-                Assert.NotNull(concrete);
-
-                switch (transport)
-                {
-                    case Transport.HidFido:
-                        Assert.True(concrete!.HasHidFido && !concrete.HasHidKeyboard && !concrete.HasSmartCard);
-                        break;
-                    case Transport.HidKeyboard:
-                        Assert.True(!concrete!.HasHidFido && concrete.HasHidKeyboard && !concrete.HasSmartCard);
-                        break;
-                    case Transport.UsbSmartCard:
-                    case Transport.NfcSmartCard:
-                    case Transport.SmartCard:
-                        Assert.True(!concrete!.HasHidFido && !concrete.HasHidKeyboard && concrete.HasSmartCard);
-                        break;
-                }
-            }
-
-            Assert.True(keys.Count == 1);
-        }
-
-        [Theory]
-        [InlineData(Transport.All)]
-        //[InlineData(Transport.HidFido)]
-        [InlineData(Transport.HidKeyboard)]
-        [InlineData(Transport.UsbSmartCard)]
-        [InlineData(Transport.NfcSmartCard)]
-        [InlineData(Transport.SmartCard)]
-        public void GetYubiKeys_ExplicitTransport_ZeroConnectedKeys(Transport transport)
-        {
-            var keys = YubiKeyDevice.FindByTransport(transport).ToList();
-
-            Assert.True(keys.Count == 0);
-        }
-
-        [Fact]
-        public void GetYubiKeys_DefaultTransport_ZeroConnectedKeys()
-        {
-            var keys = YubiKeyDevice.FindByTransport().ToList();
-
-            Assert.True(keys.Count == 0);
-        }
-
-        [Fact]
-        public void GetYubiKeys_SingleTransport_RapidSwitching()
-        {
-            int numberOfRounds = 40;
-
-            var rand = new Random();
-            Transport[] transportValues =
-                new[] { /*Transport.HidFido,*/ Transport.HidKeyboard, Transport.SmartCard };
-
-            var transportTestValues = new Transport[numberOfRounds];
-            for (int i = 0; i < transportTestValues.Length; i++)
-            {
-                int randIndex = rand.Next(transportValues.Length);
-                transportTestValues[i] = transportValues[randIndex];
-            }
-
-            var sw = new Stopwatch();
-
-            List<IYubiKeyDevice> keys;
-            int n = 0;
-            foreach (Transport ct in transportTestValues)
-            {
-                _testOutputHelper.WriteLine("{0,-5}{1}",
-                    $"{++n}:",
-                    $"{Enum.GetName(typeof(Transport), ct) ?? "<null>"}");
-                sw.Restart();
-                keys = YubiKeyDevice.FindByTransport(ct).ToList();
-                sw.Stop();
-                _testOutputHelper.WriteLine($"\t({keys.Count}) -{sw.ElapsedMilliseconds,5}ms");
+                case Transport.HidFido:
+                    Assert.True(concrete!.HasHidFido && !concrete.HasHidKeyboard && !concrete.HasSmartCard);
+                    break;
+                case Transport.HidKeyboard:
+                    Assert.True(!concrete!.HasHidFido && concrete.HasHidKeyboard && !concrete.HasSmartCard);
+                    break;
+                case Transport.UsbSmartCard:
+                case Transport.NfcSmartCard:
+                case Transport.SmartCard:
+                    Assert.True(!concrete!.HasHidFido && !concrete.HasHidKeyboard && concrete.HasSmartCard);
+                    break;
             }
         }
 
-        [Fact]
-        public void TestResettingDeviceListener()
+        Assert.True(keys.Count > 1);
+    }
+
+    [Theory]
+    //[InlineData(Transport.HidFido)]
+    [InlineData(Transport.HidKeyboard)]
+    [InlineData(Transport.UsbSmartCard)]
+    [InlineData(Transport.NfcSmartCard)]
+    [InlineData(Transport.SmartCard)]
+    public void GetYubiKeys_SingleTransport_OneConnectedKey(
+        Transport transport)
+    {
+        var keys = YubiKeyDevice.FindByTransport(transport).ToList();
+
+        foreach (var key in keys)
         {
-            // Get devices (if any) and ensure the listeners are running.
-            List<IYubiKeyDevice> beforeDevices = YubiKeyDevice.FindAll().ToList();
-            _testOutputHelper.WriteLine($"Found {beforeDevices.Count} YubiKey devices before reset");
+            var concrete = key as YubiKeyDevice;
+            Assert.NotNull(concrete);
 
-            // Test that the listeners are running.
-            Assert.True(YubiKeyDeviceListener.IsListenerRunning, $"{nameof(YubiKeyDeviceListener.Instance)} is not active");
-
-            // Stop the listeners.
-            YubiKeyDeviceListener.StopListening();
-
-            // Test that we really stopped it.
-            Assert.False(YubiKeyDeviceListener.IsListenerRunning, $"{nameof(YubiKeyDeviceListener.Instance)} is still active");
-
-            // Make sure we can still enumerate devices.
-            List<IYubiKeyDevice> afterDevices = YubiKeyDevice.FindAll().ToList();
-            _testOutputHelper.WriteLine($"Found {afterDevices.Count} YubiKey devices after reset");
-
-            // Check that we have the same devices as the first check.
-            Assert.True(afterDevices.SequenceEqual(beforeDevices), "Before and after aren't the same.");
+            switch (transport)
+            {
+                case Transport.HidFido:
+                    Assert.True(concrete!.HasHidFido && !concrete.HasHidKeyboard && !concrete.HasSmartCard);
+                    break;
+                case Transport.HidKeyboard:
+                    Assert.True(!concrete!.HasHidFido && concrete.HasHidKeyboard && !concrete.HasSmartCard);
+                    break;
+                case Transport.UsbSmartCard:
+                case Transport.NfcSmartCard:
+                case Transport.SmartCard:
+                    Assert.True(!concrete!.HasHidFido && !concrete.HasHidKeyboard && concrete.HasSmartCard);
+                    break;
+            }
         }
+
+        Assert.True(keys.Count == 1);
+    }
+
+    [Theory]
+    [InlineData(Transport.All)]
+    //[InlineData(Transport.HidFido)]
+    [InlineData(Transport.HidKeyboard)]
+    [InlineData(Transport.UsbSmartCard)]
+    [InlineData(Transport.NfcSmartCard)]
+    [InlineData(Transport.SmartCard)]
+    public void GetYubiKeys_ExplicitTransport_ZeroConnectedKeys(
+        Transport transport)
+    {
+        var keys = YubiKeyDevice.FindByTransport(transport).ToList();
+
+        Assert.True(keys.Count == 0);
+    }
+
+    [Fact]
+    public void GetYubiKeys_DefaultTransport_ZeroConnectedKeys()
+    {
+        var keys = YubiKeyDevice.FindByTransport().ToList();
+
+        Assert.True(keys.Count == 0);
+    }
+
+    [Fact]
+    public void GetYubiKeys_SingleTransport_RapidSwitching()
+    {
+        var numberOfRounds = 40;
+
+        var rand = new Random();
+        var transportValues =
+            new[]
+            {
+                /*Transport.HidFido,*/ Transport.HidKeyboard, Transport.SmartCard
+            };
+
+        var transportTestValues = new Transport[numberOfRounds];
+        for (var i = 0; i < transportTestValues.Length; i++)
+        {
+            var randIndex = rand.Next(transportValues.Length);
+            transportTestValues[i] = transportValues[randIndex];
+        }
+
+        var sw = new Stopwatch();
+
+        List<IYubiKeyDevice> keys;
+        var n = 0;
+        foreach (var ct in transportTestValues)
+        {
+            _testOutputHelper.WriteLine("{0,-5}{1}",
+                $"{++n}:",
+                $"{Enum.GetName(typeof(Transport), ct) ?? "<null>"}");
+            sw.Restart();
+            keys = YubiKeyDevice.FindByTransport(ct).ToList();
+            sw.Stop();
+            _testOutputHelper.WriteLine($"\t({keys.Count}) -{sw.ElapsedMilliseconds,5}ms");
+        }
+    }
+
+    [Fact]
+    public void TestResettingDeviceListener()
+    {
+        // Get devices (if any) and ensure the listeners are running.
+        var beforeDevices = YubiKeyDevice.FindAll().ToList();
+        _testOutputHelper.WriteLine($"Found {beforeDevices.Count} YubiKey devices before reset");
+
+        // Test that the listeners are running.
+        Assert.True(YubiKeyDeviceListener.IsListenerRunning, $"{nameof(YubiKeyDeviceListener.Instance)} is not active");
+
+        // Stop the listeners.
+        YubiKeyDeviceListener.StopListening();
+
+        // Test that we really stopped it.
+        Assert.False(YubiKeyDeviceListener.IsListenerRunning,
+            $"{nameof(YubiKeyDeviceListener.Instance)} is still active");
+
+        // Make sure we can still enumerate devices.
+        var afterDevices = YubiKeyDevice.FindAll().ToList();
+        _testOutputHelper.WriteLine($"Found {afterDevices.Count} YubiKey devices after reset");
+
+        // Check that we have the same devices as the first check.
+        Assert.True(afterDevices.SequenceEqual(beforeDevices), "Before and after aren't the same.");
     }
 }

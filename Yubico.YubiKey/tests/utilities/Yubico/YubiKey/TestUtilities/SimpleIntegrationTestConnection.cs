@@ -14,51 +14,52 @@
 
 using System;
 
-namespace Yubico.YubiKey.TestUtilities
+namespace Yubico.YubiKey.TestUtilities;
+
+public class SimpleIntegrationTestConnection : IDisposable
 {
-    public class SimpleIntegrationTestConnection : IDisposable
+    private readonly IYubiKeyDevice? _device;
+    private IYubiKeyConnection? _connection;
+    private bool _disposed;
+    private int? _serialNumber;
+
+    public SimpleIntegrationTestConnection(
+        YubiKeyApplication application,
+        StandardTestDevice device = StandardTestDevice.Fw5)
     {
-        private IYubiKeyConnection? _connection;
-        private readonly IYubiKeyDevice? _device;
-        private int? _serialNumber;
-        private bool _disposed;
+        _device = IntegrationTestDeviceEnumeration.GetTestDevice(device);
+        _connection = _device.Connect(application);
+        _serialNumber = _device.SerialNumber;
+    }
 
-        public IYubiKeyConnection Connection =>
-            _connection ?? throw new ObjectDisposedException("Connection unavailable.");
+    public IYubiKeyConnection Connection =>
+        _connection ?? throw new ObjectDisposedException("Connection unavailable.");
 
-        public IYubiKeyDevice Device =>
-            _device ?? throw new ObjectDisposedException("Device unavailable.");
+    public IYubiKeyDevice Device =>
+        _device ?? throw new ObjectDisposedException("Device unavailable.");
 
-        public int SerialNumber =>
-            _serialNumber ?? throw new InvalidOperationException("No serial number.");
+    public int SerialNumber =>
+        _serialNumber ?? throw new InvalidOperationException("No serial number.");
 
-        public SimpleIntegrationTestConnection(
-            YubiKeyApplication application,
-            StandardTestDevice device = StandardTestDevice.Fw5)
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(
+        bool disposing)
+    {
+        if (!_disposed)
         {
-            _device = IntegrationTestDeviceEnumeration.GetTestDevice(device);
-            _connection = _device.Connect(application);
-            _serialNumber = _device.SerialNumber;
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
+            if (disposing)
             {
-                if (disposing)
-                {
-                    _connection?.Dispose();
-                    _serialNumber = null;
-                    _connection = null;
-                }
-                _disposed = true;
+                _connection?.Dispose();
+                _serialNumber = null;
+                _connection = null;
             }
+
+            _disposed = true;
         }
     }
 }

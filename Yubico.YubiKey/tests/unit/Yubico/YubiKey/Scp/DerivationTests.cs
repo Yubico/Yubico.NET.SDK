@@ -17,42 +17,67 @@ using Xunit;
 using Yubico.Core.Buffers;
 using Yubico.YubiKey.Scp.Helpers;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp;
 
+public class DerivationTests
 {
-    public class DerivationTests
+    //Derive(byte dataDerivationConstant, byte outputLen, byte[] kdfKey, byte[] hostChallenge, byte[] cardChallenge)
+    private static byte[] GetBadKey()
     {
-        //Derive(byte dataDerivationConstant, byte outputLen, byte[] kdfKey, byte[] hostChallenge, byte[] cardChallenge)
-        private static byte[] GetBadKey() => Hex.HexToBytes("4041424344454647");
-        private static byte[] GetBadChallenge() => Hex.HexToBytes("41424344454647");
-        private static byte[] GetHostChallenge() => Hex.HexToBytes("360CB43F4301B894");
-        private static byte[] GetCardChallenge() => Hex.HexToBytes("CAAFA4DAC615236A");
-        private static byte[] GetKey() => Hex.HexToBytes("FC90AA67CDC5DABFD5051663045DFA23");
-        private static byte[] GetCorrectDeriveOutput() => Hex.HexToBytes("45330AB30BB1A079");
+        return Hex.HexToBytes("4041424344454647");
+    }
 
-        [Fact]
-        public void Derive_GivenBadChallengeLen_ThrowsSecureChannelException()
-        {
-            _ = Assert.Throws<SecureChannelException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetKey(), GetBadChallenge(), GetCardChallenge()));
-        }
+    private static byte[] GetBadChallenge()
+    {
+        return Hex.HexToBytes("41424344454647");
+    }
 
-        [Fact]
-        public void Derive_GivenBadOutputLen_ThrowsSecureChannelException()
-        {
-            _ = Assert.Throws<SecureChannelException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0xC0, GetKey(), GetHostChallenge(), GetCardChallenge()));
-        }
+    private static byte[] GetHostChallenge()
+    {
+        return Hex.HexToBytes("360CB43F4301B894");
+    }
 
-        [Fact]
-        public void Derive_GivenBadKey_ThrowsArgumentException()
-        {
-            _ = Assert.Throws<ArgumentException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetBadKey(), GetHostChallenge(), GetCardChallenge()));
-        }
+    private static byte[] GetCardChallenge()
+    {
+        return Hex.HexToBytes("CAAFA4DAC615236A");
+    }
 
-        [Fact]
-        public void Derive_GivenCorrectVals_ReturnsCorrectHostCryptogram()
-        {
-            var hostCryptogram = Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetKey(), GetHostChallenge(), GetCardChallenge());
-            Assert.Equal(GetCorrectDeriveOutput(), hostCryptogram);
-        }
+    private static byte[] GetKey()
+    {
+        return Hex.HexToBytes("FC90AA67CDC5DABFD5051663045DFA23");
+    }
+
+    private static byte[] GetCorrectDeriveOutput()
+    {
+        return Hex.HexToBytes("45330AB30BB1A079");
+    }
+
+    [Fact]
+    public void Derive_GivenBadChallengeLen_ThrowsSecureChannelException()
+    {
+        _ = Assert.Throws<SecureChannelException>(() =>
+            Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetKey(), GetBadChallenge(), GetCardChallenge()));
+    }
+
+    [Fact]
+    public void Derive_GivenBadOutputLen_ThrowsSecureChannelException()
+    {
+        _ = Assert.Throws<SecureChannelException>(() =>
+            Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0xC0, GetKey(), GetHostChallenge(), GetCardChallenge()));
+    }
+
+    [Fact]
+    public void Derive_GivenBadKey_ThrowsArgumentException()
+    {
+        _ = Assert.Throws<ArgumentException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetBadKey(),
+            GetHostChallenge(), GetCardChallenge()));
+    }
+
+    [Fact]
+    public void Derive_GivenCorrectVals_ReturnsCorrectHostCryptogram()
+    {
+        var hostCryptogram = Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetKey(), GetHostChallenge(),
+            GetCardChallenge());
+        Assert.Equal(GetCorrectDeriveOutput(), hostCryptogram);
     }
 }

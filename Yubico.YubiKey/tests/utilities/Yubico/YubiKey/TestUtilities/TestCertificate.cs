@@ -19,13 +19,13 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.TestUtilities;
 
 /// <summary>
-/// Represents an X.509 certificate for testing purposes.
-/// Supports both regular and attestation certificates.
+///     Represents an X.509 certificate for testing purposes.
+///     Supports both regular and attestation certificates.
 /// </summary>
 public class TestCertificate : TestCrypto
 {
     /// <summary>
-    /// Indicates whether this certificate is an attestation certificate.
+    ///     Indicates whether this certificate is an attestation certificate.
     /// </summary>
     public readonly bool IsAttestation;
 
@@ -37,13 +37,16 @@ public class TestCertificate : TestCrypto
     }
 
     /// <summary>
-    /// Converts the certificate to an X509Certificate2 instance.
+    ///     Converts the certificate to an X509Certificate2 instance.
     /// </summary>
     /// <returns>X509Certificate2 instance initialized with the certificate data</returns>
-    public X509Certificate2 AsX509Certificate2() => X509CertificateLoader.LoadCertificate(_bytes);
+    public X509Certificate2 AsX509Certificate2()
+    {
+        return X509CertificateLoader.LoadCertificate(_bytes);
+    }
 
     /// <summary>
-    /// Loads a certificate from the TestData directory.
+    ///     Loads a certificate from the TestData directory.
     /// </summary>
     /// <param name="curve">The curve or key type associated with the certificate</param>
     /// <param name="keyType">keyType to load</param>

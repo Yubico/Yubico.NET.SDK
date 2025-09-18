@@ -17,13 +17,18 @@ using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv;
 
-internal class EmptyPrivateKey: IPrivateKey
+internal class EmptyPrivateKey : IPrivateKey
 {
     public KeyDefinition KeyDefinition { get; } = new();
-    public KeyType KeyType { get; }
-    public byte[] ExportPkcs8PrivateKey() => Array.Empty<byte>();
 
     public static ReadOnlyMemory<byte> PrivateKey => Array.Empty<byte>();
+    public KeyType KeyType { get; }
+
+    public byte[] ExportPkcs8PrivateKey()
+    {
+        return Array.Empty<byte>();
+    }
+
     public void Clear() { }
 
     public void Dispose()

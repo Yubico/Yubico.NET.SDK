@@ -14,36 +14,36 @@ limitations under the License. -->
 
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <AssemblyName>Yubico.YubiKey.UnitTests</AssemblyName>
-    <PackageId>Yubico.YubiKey.UnitTests</PackageId>
-    <RootNamespace></RootNamespace>
+    <PropertyGroup>
+        <AssemblyName>Yubico.YubiKey.UnitTests</AssemblyName>
+        <PackageId>Yubico.YubiKey.UnitTests</PackageId>
+        <RootNamespace></RootNamespace>
 
-    <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
 
-    <AnalysisMode>AllDisabledByDefault</AnalysisMode>
+        <AnalysisMode>AllDisabledByDefault</AnalysisMode>
 
-    <!-- StrongName signing -->
-    <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must
-         be strong named, since it uses InternalsVisibleTo. -->
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+        <!-- StrongName signing -->
+        <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must
+             be strong named, since it uses InternalsVisibleTo. -->
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
-    <ProjectReference Include="..\utilities\Yubico.YubiKey.TestUtilities.csproj" />
-    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
-    <PackageReference Include="coverlet.collector" Version="6.0.4" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-    <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageReference Include="NSubstitute" Version="5.3.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj"/>
+        <ProjectReference Include="..\utilities\Yubico.YubiKey.TestUtilities.csproj"/>
+        <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0"/>
+        <PackageReference Include="coverlet.collector" Version="6.0.4" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"/>
+        <PackageReference Include="xunit" Version="2.9.3"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
+        <PackageReference Include="NSubstitute" Version="5.3.0"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>

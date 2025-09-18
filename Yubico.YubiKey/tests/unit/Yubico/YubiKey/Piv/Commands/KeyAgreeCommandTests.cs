@@ -19,229 +19,231 @@ using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+public class KeyAgreeCommandTests
 {
-    public class KeyAgreeCommandTests
+    [Theory]
+    [InlineData(KeyType.RSA1024)]
+    [InlineData(KeyType.RSA2048)]
+    [InlineData(KeyType.RSA3072)]
+    [InlineData(KeyType.RSA4096)]
+    public void ClassType_DerivedFromPivCommand_IsTrue(
+        KeyType keyType)
     {
-        [Theory]
-        [InlineData(KeyType.RSA1024)]
-        [InlineData(KeyType.RSA2048)]
-        [InlineData(KeyType.RSA3072)]
-        [InlineData(KeyType.RSA4096)]
-        public void ClassType_DerivedFromPivCommand_IsTrue(
-            KeyType keyType)
-        {
-            byte[] pubKey = GetPublicKey(keyType);
-            var command = new AuthenticateKeyAgreeCommand(pubKey, 0x9A, keyType.GetPivAlgorithm());
+        var pubKey = GetPublicKey(keyType);
+        var command = new AuthenticateKeyAgreeCommand(pubKey, 0x9A, keyType.GetPivAlgorithm());
 
-            Assert.True(command is IYubiKeyCommand<AuthenticateKeyAgreeResponse>);
+        Assert.True(command is IYubiKeyCommand<AuthenticateKeyAgreeResponse>);
+    }
+
+    [Fact]
+    [Obsolete("Obsolete")]
+    public void FullConstructor_NullData_ThrowsException()
+    {
+        _ = Assert.Throws<ArgumentException>(() =>
+            new AuthenticateKeyAgreeCommand(null, 0x87));
+    }
+
+    [Fact]
+    [Obsolete("Obsolete")]
+    public void InitConstructor_NullData_ThrowsException()
+    {
+        _ = Assert.Throws<ArgumentException>(() =>
+            new AuthenticateKeyAgreeCommand(null, 0x9A));
+    }
+
+    [Theory]
+    [InlineData(0x9B, KeyType.ECP256)]
+    [InlineData(0x80, KeyType.ECP384)]
+    [InlineData(0x81, KeyType.ECP256)]
+    [InlineData(0x00, KeyType.ECP384)]
+    [InlineData(0xF9, KeyType.ECP256)]
+    [InlineData(0x99, KeyType.ECP384)]
+    public void Constructor_BadSlotNumber_ThrowsException(
+        byte slotNumber,
+        KeyType keyType)
+    {
+        _ = Assert.Throws<ArgumentException>(() => GetCommandObject(slotNumber, keyType));
+    }
+
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(-1)]
+    [Obsolete("Obsolete")]
+    public void Constructor_BadData_ThrowsException(
+        int badFlag)
+    {
+        var pubKey = GetPublicKey(KeyType.ECP256);
+        if (badFlag >= 0)
+        {
+            Array.Resize(ref pubKey, pubKey.Length + 1);
+            pubKey[^1] = 0x44;
+        }
+        else
+        {
+            Array.Resize(ref pubKey, pubKey.Length - 1);
         }
 
-        [Fact]
-        [Obsolete("Obsolete")]
-        public void FullConstructor_NullData_ThrowsException()
+        _ = Assert.Throws<ArgumentException>(() =>
+            new AuthenticateKeyAgreeCommand(pubKey, 0x9A));
+    }
+
+    [Fact]
+    public void Constructor_Application_Piv()
+    {
+        var pubKey = GetPublicKey(KeyType.ECP256);
+        var command = new AuthenticateKeyAgreeCommand(pubKey, 0x90, KeyType.ECP256.GetPivAlgorithm());
+
+        var application = command.Application;
+
+        Assert.Equal(YubiKeyApplication.Piv, application);
+    }
+
+    [Theory]
+    [InlineData(0x82, KeyType.ECP256)]
+    [InlineData(0x83, KeyType.ECP384)]
+    public void Constructor_Property_SlotNum(
+        byte slotNumber,
+        KeyType keyType)
+    {
+        var command = GetCommandObject(slotNumber, keyType);
+
+        var getSlotNum = command.SlotNumber;
+
+        Assert.Equal(slotNumber, getSlotNum);
+    }
+
+    [Theory]
+    [InlineData(KeyType.ECP256)]
+    [InlineData(KeyType.ECP384)]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero(
+        KeyType keyType)
+    {
+        var cmdApdu = GetKeyAgreeCommandApdu(0x86, keyType);
+
+        var Cla = cmdApdu.Cla;
+
+        Assert.Equal(0, Cla);
+    }
+
+    [Theory]
+    [InlineData(KeyType.ECP384)]
+    [InlineData(KeyType.ECP256)]
+    public void CreateCommandApdu_GetInsProperty_ReturnsHex87(
+        KeyType keyType)
+    {
+        var cmdApdu = GetKeyAgreeCommandApdu(0x90, keyType);
+
+        var Ins = cmdApdu.Ins;
+
+        Assert.Equal(0x87, Ins);
+    }
+
+    [Theory]
+    [InlineData(KeyType.ECP256)]
+    [InlineData(KeyType.ECP384)]
+    public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(
+        KeyType keyType)
+    {
+        var cmdApdu = GetKeyAgreeCommandApdu(0x91, keyType);
+
+        var P1 = cmdApdu.P1;
+
+        Assert.Equal((byte)keyType.GetPivAlgorithm(), P1);
+    }
+
+    [Theory]
+    [InlineData(0x93, KeyType.ECP384)]
+    [InlineData(0x9E, KeyType.ECP256)]
+    public void CreateCommandApdu_GetP2Property_ReturnsSlotNum(
+        byte slotNumber,
+        KeyType keyType)
+    {
+        var cmdApdu = GetKeyAgreeCommandApdu(slotNumber, keyType);
+
+        var P2 = cmdApdu.P2;
+
+        Assert.Equal(slotNumber, P2);
+    }
+
+    [Theory]
+    [InlineData(KeyType.ECP384, 103)]
+    [InlineData(KeyType.ECP256, 71)]
+    public void CreateCommandApdu_GetNcProperty_ReturnsCorrect(
+        KeyType keyType,
+        int expected)
+    {
+        var cmdApdu = GetKeyAgreeCommandApdu(0x94, keyType);
+
+        var Nc = cmdApdu.Nc;
+
+        Assert.Equal(expected, Nc);
+    }
+
+    [Theory]
+    [InlineData(KeyType.ECP384)]
+    [InlineData(KeyType.ECP256)]
+    public void CreateCommandApdu_GetNeProperty_ReturnsZero(
+        KeyType keyType)
+    {
+        var cmdApdu = GetKeyAgreeCommandApdu(0x95, keyType);
+
+        var Ne = cmdApdu.Ne;
+
+        Assert.Equal(0, Ne);
+    }
+
+    [Theory]
+    [InlineData(KeyType.ECP256)]
+    [InlineData(KeyType.ECP384)]
+    public void CreateCommandApdu_GetData_ReturnsCorrect(
+        KeyType keyType)
+    {
+        var prefix = GetKeyAgreeDataPrefix(keyType);
+        var pubKey = GetPublicKey(keyType);
+        var expected = new List<byte>(prefix);
+        expected.AddRange(pubKey);
+
+        var cmdApdu = GetKeyAgreeCommandApdu(0x9C, keyType);
+
+        var data = cmdApdu.Data;
+
+        Assert.False(data.IsEmpty);
+        if (data.IsEmpty)
         {
-            _ = Assert.Throws<ArgumentException>(() =>
-                new AuthenticateKeyAgreeCommand(null, 0x87));
+            return;
         }
 
-        [Fact]
-        [Obsolete("Obsolete")]
-        public void InitConstructor_NullData_ThrowsException()
-        {
-            _ = Assert.Throws<ArgumentException>(() =>
-                new AuthenticateKeyAgreeCommand(null, 0x9A));
-        }
+        var compareResult = data.ToArray().SequenceEqual(expected);
 
-        [Theory]
-        [InlineData(0x9B, KeyType.ECP256)]
-        [InlineData(0x80, KeyType.ECP384)]
-        [InlineData(0x81, KeyType.ECP256)]
-        [InlineData(0x00, KeyType.ECP384)]
-        [InlineData(0xF9, KeyType.ECP256)]
-        [InlineData(0x99, KeyType.ECP384)]
-        public void Constructor_BadSlotNumber_ThrowsException(
-            byte slotNumber,
-            KeyType keyType)
-        {
-            _ = Assert.Throws<ArgumentException>(() => GetCommandObject(slotNumber, keyType));
-        }
+        Assert.True(compareResult);
+    }
 
+    private static CommandApdu GetKeyAgreeCommandApdu(
+        byte slotNumber,
+        KeyType keyType)
+    {
+        var cmd = GetCommandObject(slotNumber, keyType);
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(-1)]
-        [Obsolete("Obsolete")]
-        public void Constructor_BadData_ThrowsException(
-            int badFlag)
-        {
-            byte[] pubKey = GetPublicKey(KeyType.ECP256);
-            if (badFlag >= 0)
-            {
-                Array.Resize<byte>(ref pubKey, pubKey.Length + 1);
-                pubKey[^1] = 0x44;
-            }
-            else
-            {
-                Array.Resize<byte>(ref pubKey, pubKey.Length - 1);
-            }
+        return cmd.CreateCommandApdu();
+    }
 
-            _ = Assert.Throws<ArgumentException>(() =>
-                new AuthenticateKeyAgreeCommand(pubKey, 0x9A));
-        }
+    private static AuthenticateKeyAgreeCommand GetCommandObject(
+        byte slotNumber,
+        KeyType keyType)
+    {
+        var pubKey = GetPublicKey(keyType);
+        var cmd = new AuthenticateKeyAgreeCommand(pubKey, slotNumber, keyType.GetPivAlgorithm());
 
-        [Fact]
-        public void Constructor_Application_Piv()
-        {
-            byte[] pubKey = GetPublicKey(KeyType.ECP256);
-            var command = new AuthenticateKeyAgreeCommand(pubKey, 0x90, KeyType.ECP256.GetPivAlgorithm());
+        return cmd;
+    }
 
-            YubiKeyApplication application = command.Application;
-
-            Assert.Equal(YubiKeyApplication.Piv, application);
-        }
-
-        [Theory]
-        [InlineData(0x82, KeyType.ECP256)]
-        [InlineData(0x83, KeyType.ECP384)]
-        public void Constructor_Property_SlotNum(
-            byte slotNumber,
-            KeyType keyType)
-        {
-            AuthenticateKeyAgreeCommand command = GetCommandObject(slotNumber, keyType);
-
-            byte getSlotNum = command.SlotNumber;
-
-            Assert.Equal(slotNumber, getSlotNum);
-        }
-
-        [Theory]
-        [InlineData(KeyType.ECP256)]
-        [InlineData(KeyType.ECP384)]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero(
-            KeyType keyType)
-        {
-            CommandApdu cmdApdu = GetKeyAgreeCommandApdu(0x86, keyType);
-
-            byte Cla = cmdApdu.Cla;
-
-            Assert.Equal(0, Cla);
-        }
-
-        [Theory]
-        [InlineData(KeyType.ECP384)]
-        [InlineData(KeyType.ECP256)]
-        public void CreateCommandApdu_GetInsProperty_ReturnsHex87(
-            KeyType keyType)
-        {
-            CommandApdu cmdApdu = GetKeyAgreeCommandApdu(0x90, keyType);
-
-            byte Ins = cmdApdu.Ins;
-
-            Assert.Equal(0x87, Ins);
-        }
-
-        [Theory]
-        [InlineData(KeyType.ECP256)]
-        [InlineData(KeyType.ECP384)]
-        public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(
-            KeyType keyType)
-        {
-            CommandApdu cmdApdu = GetKeyAgreeCommandApdu(0x91, keyType);
-
-            byte P1 = cmdApdu.P1;
-
-            Assert.Equal((byte)keyType.GetPivAlgorithm(), P1);
-        }
-
-        [Theory]
-        [InlineData(0x93, KeyType.ECP384)]
-        [InlineData(0x9E, KeyType.ECP256)]
-        public void CreateCommandApdu_GetP2Property_ReturnsSlotNum(
-            byte slotNumber,
-            KeyType keyType)
-        {
-            CommandApdu cmdApdu = GetKeyAgreeCommandApdu(slotNumber, keyType);
-
-            byte P2 = cmdApdu.P2;
-
-            Assert.Equal(slotNumber, P2);
-        }
-
-        [Theory]
-        [InlineData(KeyType.ECP384, 103)]
-        [InlineData(KeyType.ECP256, 71)]
-        public void CreateCommandApdu_GetNcProperty_ReturnsCorrect(
-            KeyType keyType,
-            int expected)
-        {
-            CommandApdu cmdApdu = GetKeyAgreeCommandApdu(0x94, keyType);
-
-            int Nc = cmdApdu.Nc;
-
-            Assert.Equal(expected, Nc);
-        }
-
-        [Theory]
-        [InlineData(KeyType.ECP384)]
-        [InlineData(KeyType.ECP256)]
-        public void CreateCommandApdu_GetNeProperty_ReturnsZero(
-            KeyType keyType)
-        {
-            CommandApdu cmdApdu = GetKeyAgreeCommandApdu(0x95, keyType);
-
-            int Ne = cmdApdu.Ne;
-
-            Assert.Equal(0, Ne);
-        }
-
-        [Theory]
-        [InlineData(KeyType.ECP256)]
-        [InlineData(KeyType.ECP384)]
-        public void CreateCommandApdu_GetData_ReturnsCorrect(
-            KeyType keyType)
-        {
-            byte[] prefix = GetKeyAgreeDataPrefix(keyType);
-            byte[] pubKey = GetPublicKey(keyType);
-            var expected = new List<byte>(prefix);
-            expected.AddRange(pubKey);
-
-            CommandApdu cmdApdu = GetKeyAgreeCommandApdu(0x9C, keyType);
-
-            ReadOnlyMemory<byte> data = cmdApdu.Data;
-
-            Assert.False(data.IsEmpty);
-            if (data.IsEmpty)
-            {
-                return;
-            }
-
-            bool compareResult = data.ToArray().SequenceEqual(expected);
-
-            Assert.True(compareResult);
-        }
-
-        private static CommandApdu GetKeyAgreeCommandApdu(
-            byte slotNumber,
-            KeyType keyType)
-        {
-            AuthenticateKeyAgreeCommand cmd = GetCommandObject(slotNumber, keyType);
-
-            return cmd.CreateCommandApdu();
-        }
-
-        private static AuthenticateKeyAgreeCommand GetCommandObject(
-            byte slotNumber,
-            KeyType keyType)
-        {
-            byte[] pubKey = GetPublicKey(keyType);
-            var cmd = new AuthenticateKeyAgreeCommand(pubKey, slotNumber, keyType.GetPivAlgorithm());
-
-            return cmd;
-        }
-
-        private static byte[] GetPublicKey(
-            KeyType keyType) => keyType switch
+    private static byte[] GetPublicKey(
+        KeyType keyType)
+    {
+        return keyType switch
         {
             KeyType.ECP384 => new byte[]
             {
@@ -260,16 +262,19 @@ namespace Yubico.YubiKey.Piv.Commands
                 0x11, 0x17, 0xB4, 0x11, 0xEE, 0x45, 0xD4, 0x1E, 0xB9, 0x75, 0x92, 0x55, 0x34, 0xE6, 0x2B, 0x1F,
                 0x8A, 0x49, 0x20, 0x48, 0xAD, 0xE4, 0xD0, 0xF4, 0x2C, 0xDC, 0xF5, 0x80, 0xB7, 0x25, 0x49, 0x83,
                 0xC5, 0xCD, 0x5B, 0x80, 0x0D, 0x9A, 0xBE, 0x1F, 0x1C, 0x57, 0x80, 0x83, 0xDA, 0x2E, 0x0A, 0x60,
-                0xAD, 0x0E, 0xA2, 0x29, 0x9C, 0xD5, 0x82, 0x1A, 0x8C, 0x03, 0x4D, 0x87, 0x72, 0x66, 0x59, 0x94,
-            },
+                0xAD, 0x0E, 0xA2, 0x29, 0x9C, 0xD5, 0x82, 0x1A, 0x8C, 0x03, 0x4D, 0x87, 0x72, 0x66, 0x59, 0x94
+            }
         };
+    }
 
-        // Get the TL TL TL prefix for each keyType.
-        private static byte[] GetKeyAgreeDataPrefix(
-            KeyType keyType) => keyType switch
+    // Get the TL TL TL prefix for each keyType.
+    private static byte[] GetKeyAgreeDataPrefix(
+        KeyType keyType)
+    {
+        return keyType switch
         {
             KeyType.ECP384 => new byte[] { 0x7C, 0x65, 0x82, 0x00, 0x85, 0x61 },
-            _ => new byte[] { 0x7C, 0x45, 0x82, 0x00, 0x85, 0x41 },
+            _ => new byte[] { 0x7C, 0x45, 0x82, 0x00, 0x85, 0x41 }
         };
     }
 }

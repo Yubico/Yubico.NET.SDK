@@ -19,153 +19,156 @@ using Yubico.Core.Devices.Hid;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
 
-namespace Yubico.YubiKey.U2f
+namespace Yubico.YubiKey.U2f;
+
+public class SetDeviceInfoTests : IDisposable
 {
-    public class SetDeviceInfoTests : IDisposable
+    private readonly FidoConnection _fidoConnection;
+
+    public SetDeviceInfoTests()
     {
-        private readonly FidoConnection _fidoConnection;
-
-        public SetDeviceInfoTests()
+        if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
         {
-            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+            if (!SdkPlatformInfo.IsElevated)
             {
-                if (!SdkPlatformInfo.IsElevated)
-                {
-                    throw new ArgumentException("Windows not elevated.");
-                }
+                throw new ArgumentException("Windows not elevated.");
             }
+        }
 
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
-            Assert.NotNull(devices);
+        var devices = HidDevice.GetHidDevices();
+        Assert.NotNull(devices);
 
-            HidDevice? deviceToUse = GetFidoHid(devices);
-            Assert.NotNull(deviceToUse);
+        var deviceToUse = GetFidoHid(devices);
+        Assert.NotNull(deviceToUse);
 
-            if (deviceToUse is null)
+        if (deviceToUse is null)
+        {
+            throw new ArgumentException("null device");
+        }
+
+        _fidoConnection = new FidoConnection(deviceToUse);
+        Assert.NotNull(_fidoConnection);
+    }
+
+    public void Dispose()
+    {
+        _fidoConnection.Dispose();
+    }
+
+    private static HidDevice? GetFidoHid(
+        IEnumerable<HidDevice> devices)
+    {
+        foreach (var currentDevice in devices)
+        {
+            if (currentDevice.VendorId == 0x1050 &&
+                currentDevice.UsagePage == HidUsagePage.Fido)
             {
-                throw new ArgumentException("null device");
+                return currentDevice;
             }
-
-            _fidoConnection = new FidoConnection(deviceToUse);
-            Assert.NotNull(_fidoConnection);
         }
 
-        public void Dispose()
+        return null;
+    }
+
+    [Fact]
+    public void SetCRTimeout_Succeeds()
+    {
+        var cmd = new SetDeviceInfoCommand
         {
-            _fidoConnection.Dispose();
-        }
+            ChallengeResponseTimeout = 0x20
+        };
+        var rsp = _fidoConnection.SendCommand(cmd);
 
-        private static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+        var getCmd = new GetPagedDeviceInfoCommand();
+        var getRsp = _fidoConnection.SendCommand(getCmd);
+        Assert.Equal(ResponseStatus.Success, getRsp.Status);
+
+        var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());
+        Assert.False(getData.IsFipsSeries);
+    }
+
+    [Fact]
+    public void SetLockCode_Succeeds()
+    {
+        byte[] newCode =
         {
-            foreach (HidDevice currentDevice in devices)
-            {
-                if (currentDevice.VendorId == 0x1050 &&
-                    currentDevice.UsagePage == HidUsagePage.Fido)
-                {
-                    return currentDevice;
-                }
-            }
-
-            return null;
-        }
-
-        [Fact]
-        public void SetCRTimeout_Succeeds()
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+            0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48
+        };
+        byte[] wrongCode =
         {
-            var cmd = new SetDeviceInfoCommand
-            {
-                ChallengeResponseTimeout = 0x20
-            };
-            SetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
-
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-            var getCmd = new GetPagedDeviceInfoCommand();
-            GetPagedDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
-            Assert.Equal(ResponseStatus.Success, getRsp.Status);
-
-            var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());
-            Assert.False(getData.IsFipsSeries);
-        }
-
-        [Fact]
-        public void SetLockCode_Succeeds()
+            0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
+            0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
+        };
+        byte[] clearCode =
         {
-            byte[] newCode = {
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-                0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48
-            };
-            byte[] wrongCode = {
-                0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
-                0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
-            };
-            byte[] clearCode = {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            };
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
 
-            var cmd = new SetDeviceInfoCommand
-            {
-                ChallengeResponseTimeout = 0x21
-            };
-            SetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-            cmd = new SetDeviceInfoCommand();
-            cmd.SetLockCode(newCode);
-            rsp = _fidoConnection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-            cmd = new SetDeviceInfoCommand
-            {
-                ChallengeResponseTimeout = 0x22
-            };
-            rsp = _fidoConnection.SendCommand(cmd);
-            Assert.NotEqual(ResponseStatus.Success, rsp.Status);
-
-            cmd = new SetDeviceInfoCommand();
-            cmd.ApplyLockCode(wrongCode);
-            cmd.ChallengeResponseTimeout = 0x23;
-            rsp = _fidoConnection.SendCommand(cmd);
-            Assert.NotEqual(ResponseStatus.Success, rsp.Status);
-
-            cmd = new SetDeviceInfoCommand();
-            cmd.ApplyLockCode(newCode);
-            cmd.ChallengeResponseTimeout = 0x24;
-            rsp = _fidoConnection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-            cmd = new SetDeviceInfoCommand();
-            cmd.ApplyLockCode(newCode);
-            cmd.SetLockCode(clearCode);
-            rsp = _fidoConnection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-            var getCmd = new GetPagedDeviceInfoCommand();
-            GetPagedDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
-            Assert.Equal(ResponseStatus.Success, getRsp.Status);
-
-            var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());
-            Assert.Equal(0x24, getData.ChallengeResponseTimeout);
-        }
-
-        [Fact]
-        public void SetLegacyCRTimeout_Succeeds()
+        var cmd = new SetDeviceInfoCommand
         {
-            var cmd = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.Ccid, 0x21, true, 255)
-            {
-                YubiKeyInterfaces = YubiKeyCapabilities.All
-            };
-            YubiKeyResponse rsp = _fidoConnection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
+            ChallengeResponseTimeout = 0x21
+        };
+        var rsp = _fidoConnection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var getCmd = new GetPagedDeviceInfoCommand();
-            GetPagedDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
-            Assert.Equal(ResponseStatus.Success, getRsp.Status);
+        cmd = new SetDeviceInfoCommand();
+        cmd.SetLockCode(newCode);
+        rsp = _fidoConnection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());
-            Assert.False(getData.IsFipsSeries);
-        }
+        cmd = new SetDeviceInfoCommand
+        {
+            ChallengeResponseTimeout = 0x22
+        };
+        rsp = _fidoConnection.SendCommand(cmd);
+        Assert.NotEqual(ResponseStatus.Success, rsp.Status);
+
+        cmd = new SetDeviceInfoCommand();
+        cmd.ApplyLockCode(wrongCode);
+        cmd.ChallengeResponseTimeout = 0x23;
+        rsp = _fidoConnection.SendCommand(cmd);
+        Assert.NotEqual(ResponseStatus.Success, rsp.Status);
+
+        cmd = new SetDeviceInfoCommand();
+        cmd.ApplyLockCode(newCode);
+        cmd.ChallengeResponseTimeout = 0x24;
+        rsp = _fidoConnection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+        cmd = new SetDeviceInfoCommand();
+        cmd.ApplyLockCode(newCode);
+        cmd.SetLockCode(clearCode);
+        rsp = _fidoConnection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+        var getCmd = new GetPagedDeviceInfoCommand();
+        var getRsp = _fidoConnection.SendCommand(getCmd);
+        Assert.Equal(ResponseStatus.Success, getRsp.Status);
+
+        var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());
+        Assert.Equal(0x24, getData.ChallengeResponseTimeout);
+    }
+
+    [Fact]
+    public void SetLegacyCRTimeout_Succeeds()
+    {
+        var cmd = new SetLegacyDeviceConfigCommand(
+            YubiKeyCapabilities.Ccid, 0x21, true, 255)
+        {
+            YubiKeyInterfaces = YubiKeyCapabilities.All
+        };
+        YubiKeyResponse rsp = _fidoConnection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+        var getCmd = new GetPagedDeviceInfoCommand();
+        var getRsp = _fidoConnection.SendCommand(getCmd);
+        Assert.Equal(ResponseStatus.Success, getRsp.Status);
+
+        var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());
+        Assert.False(getData.IsFipsSeries);
     }
 }

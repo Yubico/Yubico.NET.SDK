@@ -18,72 +18,75 @@ using Xunit;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Pipelines
+namespace Yubico.YubiKey.Pipelines;
+
+public class SmartCardTransformTests
 {
-    public class SmartCardTransformTests
+    [Fact]
+    public void Constructor_GivenNullConnection_ThrowsArgumentNullException()
     {
-        [Fact]
-        public void Constructor_GivenNullConnection_ThrowsArgumentNullException()
-        {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new SmartCardTransform(null));
+        _ = Assert.Throws<ArgumentNullException>(() => new SmartCardTransform(null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Fact]
-        public void Cleanup_DoesNothing()
-        {
-            // Arrange
-            var mockConnection = Substitute.For<ISmartCardConnection>();
-            var transform = new SmartCardTransform(mockConnection);
+    [Fact]
+    public void Cleanup_DoesNothing()
+    {
+        // Arrange
+        var mockConnection = Substitute.For<ISmartCardConnection>();
+        var transform = new SmartCardTransform(mockConnection);
 
-            // Act
-            Exception? exception = Record.Exception(() => transform.Cleanup());
+        // Act
+        var exception = Record.Exception(() => transform.Cleanup());
 
-            // Assert
-            Assert.Null(exception);
-        }
+        // Assert
+        Assert.Null(exception);
+    }
 
-        [Fact]
-        public void Invoke_GivenCommandApdu_CallsTrasmitWithExactApdu()
-        {
-            // Arrange
-            var mockConnection = Substitute.For<ISmartCardConnection>();
-            _ = mockConnection.Transmit(AnyCommandApdu())
-                .Returns(SuccessResponse());
+    [Fact]
+    public void Invoke_GivenCommandApdu_CallsTrasmitWithExactApdu()
+    {
+        // Arrange
+        var mockConnection = Substitute.For<ISmartCardConnection>();
+        _ = mockConnection.Transmit(AnyCommandApdu())
+            .Returns(SuccessResponse());
 
-            var transform = new SmartCardTransform(mockConnection);
-            var expectedApdu = new CommandApdu();
+        var transform = new SmartCardTransform(mockConnection);
+        var expectedApdu = new CommandApdu();
 
-            // Act
-            _ = transform.Invoke(expectedApdu, typeof(object), typeof(object));
+        // Act
+        _ = transform.Invoke(expectedApdu, typeof(object), typeof(object));
 
-            // Assert
-            mockConnection.Received().Transmit(Arg.Is<CommandApdu>(a => a == expectedApdu));
-        }
+        // Assert
+        mockConnection.Received().Transmit(Arg.Is<CommandApdu>(a => a == expectedApdu));
+    }
 
-        [Fact]
-        public void Invoke_GivenCommandApdu_ReturnsExactResponseFromTransmit()
-        {
-            // Arrange
-            var mockConnection = Substitute.For<ISmartCardConnection>();
-            ResponseApdu expectedResponse = SuccessResponse();
-            _ = mockConnection.Transmit(AnyCommandApdu())
-                .Returns(expectedResponse);
+    [Fact]
+    public void Invoke_GivenCommandApdu_ReturnsExactResponseFromTransmit()
+    {
+        // Arrange
+        var mockConnection = Substitute.For<ISmartCardConnection>();
+        var expectedResponse = SuccessResponse();
+        _ = mockConnection.Transmit(AnyCommandApdu())
+            .Returns(expectedResponse);
 
-            var transform = new SmartCardTransform(mockConnection);
+        var transform = new SmartCardTransform(mockConnection);
 
-            // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+        // Act
+        var actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
-            // Assert
-            Assert.Same(expectedResponse, actualResponse);
-        }
+        // Assert
+        Assert.Same(expectedResponse, actualResponse);
+    }
 
-        private static CommandApdu AnyCommandApdu() =>
-            Arg.Any<CommandApdu>();
+    private static CommandApdu AnyCommandApdu()
+    {
+        return Arg.Any<CommandApdu>();
+    }
 
-        private static ResponseApdu SuccessResponse() =>
-            new ResponseApdu(new byte[] { 0x90, 0x00 });
+    private static ResponseApdu SuccessResponse()
+    {
+        return new ResponseApdu(new byte[] { 0x90, 0x00 });
     }
 }

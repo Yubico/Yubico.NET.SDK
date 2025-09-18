@@ -19,159 +19,173 @@ using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+public class DecryptResponseTests
 {
-    public class DecryptResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
-        {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new AuthenticateDecryptResponse(null));
+        _ = Assert.Throws<ArgumentNullException>(() => new AuthenticateDecryptResponse(null));
 #pragma warning restore CS8625
-        }
+    }
 
-        [Theory]
-        [InlineData(SWConstants.Success, ResponseStatus.Success)]
-        [InlineData(SWConstants.SecurityStatusNotSatisfied, ResponseStatus.AuthenticationRequired)]
-        [InlineData(SWConstants.FunctionNotSupported, ResponseStatus.Failed)]
-        public void Constructor_SetsStatusWordCorrectly(short statusWord, ResponseStatus expectedStatus)
-        {
-            byte sw1 = unchecked((byte)(statusWord >> 8));
-            byte sw2 = unchecked((byte)statusWord);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Theory]
+    [InlineData(SWConstants.Success, ResponseStatus.Success)]
+    [InlineData(SWConstants.SecurityStatusNotSatisfied, ResponseStatus.AuthenticationRequired)]
+    [InlineData(SWConstants.FunctionNotSupported, ResponseStatus.Failed)]
+    public void Constructor_SetsStatusWordCorrectly(
+        short statusWord,
+        ResponseStatus expectedStatus)
+    {
+        var sw1 = unchecked((byte)(statusWord >> 8));
+        var sw2 = unchecked((byte)statusWord);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var response = new AuthenticateDecryptResponse(responseApdu);
+        var response = new AuthenticateDecryptResponse(responseApdu);
 
-            ResponseStatus Status = response.Status;
+        var Status = response.Status;
 
-            Assert.Equal(expectedStatus, Status);
-        }
+        Assert.Equal(expectedStatus, Status);
+    }
 
-        [Theory]
-        [InlineData(SWConstants.Success)]
-        [InlineData(SWConstants.SecurityStatusNotSatisfied)]
-        [InlineData(SWConstants.FunctionNotSupported)]
-        public void Constructor_SetsStatusCorrectly(short statusWord)
-        {
-            byte sw1 = unchecked((byte)(statusWord >> 8));
-            byte sw2 = unchecked((byte)statusWord);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Theory]
+    [InlineData(SWConstants.Success)]
+    [InlineData(SWConstants.SecurityStatusNotSatisfied)]
+    [InlineData(SWConstants.FunctionNotSupported)]
+    public void Constructor_SetsStatusCorrectly(
+        short statusWord)
+    {
+        var sw1 = unchecked((byte)(statusWord >> 8));
+        var sw2 = unchecked((byte)statusWord);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var response = new AuthenticateDecryptResponse(responseApdu);
+        var response = new AuthenticateDecryptResponse(responseApdu);
 
-            short StatusWord = response.StatusWord;
+        var StatusWord = response.StatusWord;
 
-            Assert.Equal(statusWord, StatusWord);
-        }
+        Assert.Equal(statusWord, StatusWord);
+    }
 
-        [Theory]
-        [InlineData(KeyType.RSA1024)]
-        [InlineData(KeyType.RSA2048)]
-        [InlineData(KeyType.RSA3072)]
-        [InlineData(KeyType.RSA4096)]
-        public void GetData_ReturnsDecrypted(KeyType keyType)
-        {
-            byte[] decryptedData = GetDecryptedData(keyType);
-            ResponseApdu responseApdu = GetResponseApdu(keyType);
+    [Theory]
+    [InlineData(KeyType.RSA1024)]
+    [InlineData(KeyType.RSA2048)]
+    [InlineData(KeyType.RSA3072)]
+    [InlineData(KeyType.RSA4096)]
+    public void GetData_ReturnsDecrypted(
+        KeyType keyType)
+    {
+        var decryptedData = GetDecryptedData(keyType);
+        var responseApdu = GetResponseApdu(keyType);
 
-            var response = new AuthenticateDecryptResponse(responseApdu);
+        var response = new AuthenticateDecryptResponse(responseApdu);
 
-            IReadOnlyList<byte> getData = response.GetData();
+        IReadOnlyList<byte> getData = response.GetData();
 
-            bool compareResult = decryptedData.SequenceEqual(getData);
+        var compareResult = decryptedData.SequenceEqual(getData);
 
-            Assert.True(compareResult);
-        }
+        Assert.True(compareResult);
+    }
 
-        [Fact]
-        public void GetData_NoAuth_Exception()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.SecurityStatusNotSatisfied >> 8));
-            byte sw2 = unchecked((byte)SWConstants.SecurityStatusNotSatisfied);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void GetData_NoAuth_Exception()
+    {
+        var sw1 = unchecked((byte)(SWConstants.SecurityStatusNotSatisfied >> 8));
+        var sw2 = unchecked((byte)SWConstants.SecurityStatusNotSatisfied);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var response = new AuthenticateDecryptResponse(responseApdu);
+        var response = new AuthenticateDecryptResponse(responseApdu);
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
+        _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
 #pragma warning restore CS8625
+    }
+
+    [Theory]
+    [InlineData(KeyType.RSA1024)]
+    [InlineData(KeyType.RSA2048)]
+    [InlineData(KeyType.RSA3072)]
+    [InlineData(KeyType.RSA4096)]
+    public void GetData_Success_NoExceptionThrown(
+        KeyType keyType)
+    {
+        var responseApdu = GetResponseApdu(keyType);
+
+        var response = new AuthenticateDecryptResponse(responseApdu);
+
+        void action()
+        {
+            response.GetData();
         }
 
-        [Theory]
-        [InlineData(KeyType.RSA1024)]
-        [InlineData(KeyType.RSA2048)]
-        [InlineData(KeyType.RSA3072)]
-        [InlineData(KeyType.RSA4096)]
-        public void GetData_Success_NoExceptionThrown(KeyType keyType)
-        {
-            ResponseApdu responseApdu = GetResponseApdu(keyType);
+        var ex = Record.Exception(action);
+        Assert.Null(ex);
+    }
 
-            var response = new AuthenticateDecryptResponse(responseApdu);
+    [Fact]
+    public void GetData_ErrorResponse_Exception()
+    {
+        var sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
+        var sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            void action() => response.GetData();
-
-            Exception? ex = Record.Exception(action);
-            Assert.Null(ex);
-        }
-
-        [Fact]
-        public void GetData_ErrorResponse_Exception()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
-            byte sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new AuthenticateDecryptResponse(responseApdu);
-
-#pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
-#pragma warning restore CS8625
-        }
-
-        [Fact]
-        public void FailResponseApdu_ExceptionOnGetData()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new AuthenticateDecryptResponse(responseApdu);
+        var response = new AuthenticateDecryptResponse(responseApdu);
 
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
+        _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
 #pragma warning restore CS8625
-        }
+    }
 
-        private static ResponseApdu GetResponseApdu(KeyType keyType)
+    [Fact]
+    public void FailResponseApdu_ExceptionOnGetData()
+    {
+        var sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+        var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new AuthenticateDecryptResponse(responseApdu);
+
+#pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
+        _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
+#pragma warning restore CS8625
+    }
+
+    private static ResponseApdu GetResponseApdu(
+        KeyType keyType)
+    {
+        var apduData = GetResponseApduData(keyType);
+        return new ResponseApdu(apduData);
+    }
+
+    // Get the data that makes up a response APDU for the given keyType.
+    // This will return the full APDU data:
+    // 7C len 82 len decryptedData 90 00
+    private static byte[] GetResponseApduData(
+        KeyType keyType)
+    {
+        var decryptedData = GetDecryptedData(keyType);
+        var statusWord = new byte[] { 0x90, 0x00 };
+
+        var prefix = keyType switch
         {
-            byte[] apduData = GetResponseApduData(keyType);
-            return new ResponseApdu(apduData);
-        }
+            KeyType.RSA2048 => new byte[] { 0x7C, 0x82, 0x01, 0x04, 0x82, 0x82, 0x01, 0x00 },
 
-        // Get the data that makes up a response APDU for the given keyType.
-        // This will return the full APDU data:
-        // 7C len 82 len decryptedData 90 00
-        private static byte[] GetResponseApduData(KeyType keyType)
+            _ => new byte[] { 0x7C, 0x81, 0x83, 0x82, 0x81, 0x80 }
+        };
+
+        var returnValue = prefix.Concat(decryptedData);
+        returnValue = returnValue.Concat(statusWord);
+
+        return returnValue.ToArray();
+    }
+
+    private static byte[] GetDecryptedData(
+        KeyType keyType)
+    {
+        return keyType switch
         {
-            byte[] decryptedData = GetDecryptedData(keyType);
-            byte[] statusWord = new byte[] { 0x90, 0x00 };
-
-            byte[] prefix = keyType switch
+            KeyType.RSA2048 => new byte[]
             {
-                KeyType.RSA2048 => new byte[] { 0x7C, 0x82, 0x01, 0x04, 0x82, 0x82, 0x01, 0x00 },
-
-                _ => new byte[] { 0x7C, 0x81, 0x83, 0x82, 0x81, 0x80 },
-            };
-
-            IEnumerable<byte> returnValue = prefix.Concat(decryptedData);
-            returnValue = returnValue.Concat(statusWord);
-
-            return returnValue.ToArray<byte>();
-        }
-
-        private static byte[] GetDecryptedData(KeyType keyType) => keyType switch
-        {
-            KeyType.RSA2048 => new byte[] {
                 0x05, 0xA4, 0x60, 0x64, 0x7D, 0x4C, 0x0B, 0x8F, 0x48, 0x2D, 0xC5, 0x50, 0x1D, 0x9D, 0x1F, 0xD2,
                 0xCC, 0x7A, 0x14, 0x74, 0x66, 0x1D, 0xE9, 0x6A, 0x1E, 0x0A, 0xD9, 0x39, 0x5E, 0x1F, 0x0F, 0xFD,
                 0x94, 0xB6, 0xA9, 0x98, 0x84, 0x52, 0xD1, 0xC4, 0xC1, 0x40, 0x1A, 0x5B, 0xCA, 0x32, 0xC0, 0xE9,
@@ -190,7 +204,8 @@ namespace Yubico.YubiKey.Piv.Commands
                 0x03, 0x26, 0xA6, 0x79, 0x41, 0x78, 0xDA, 0xEE, 0x08, 0x9A, 0xDA, 0x89, 0xCC, 0xF9, 0x27, 0xF0
             },
 
-            _ => new byte[] {
+            _ => new byte[]
+            {
                 0x00, 0x02, 0x70, 0xF1, 0x33, 0x19, 0x74, 0x21, 0x99, 0x36, 0x78, 0x6F, 0x2F, 0x5A, 0x77, 0x67,
                 0x99, 0xD9, 0x0A, 0x37, 0xAA, 0x5E, 0x16, 0xB9, 0x90, 0xA3, 0x1D, 0x6B, 0xD8, 0xF1, 0x31, 0x43,
                 0xA4, 0x8F, 0xD8, 0xDC, 0x33, 0x0D, 0xA1, 0xA6, 0x87, 0x73, 0x07, 0x57, 0x73, 0xAD, 0x90, 0x1B,
@@ -199,7 +214,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 0xD1, 0x2C, 0x06, 0x20, 0x0B, 0x8D, 0x33, 0xB2, 0xEF, 0x7E, 0xB7, 0x09, 0x2A, 0xDF, 0x5B, 0x00,
                 0xCF, 0x03, 0x5B, 0xFF, 0x4B, 0x3A, 0x9F, 0xE6, 0x49, 0xFF, 0x51, 0x76, 0x23, 0x62, 0x74, 0xA4,
                 0x2E, 0x83, 0x18, 0x90, 0x5C, 0x92, 0xB8, 0x89, 0x6F, 0xA7, 0x86, 0x0B, 0xB6, 0x1C, 0x6E, 0x60
-            },
+            }
         };
     }
 }

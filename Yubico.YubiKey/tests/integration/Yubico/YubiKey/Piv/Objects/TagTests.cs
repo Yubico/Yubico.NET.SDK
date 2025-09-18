@@ -17,85 +17,88 @@ using Xunit;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv.Objects
+namespace Yubico.YubiKey.Piv.Objects;
+
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public class TagTests
 {
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class TagTests
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void AlternateTag_Minimum_Succeeds(
+        StandardTestDevice testDeviceType)
     {
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void AlternateTag_Minimum_Succeeds(StandardTestDevice testDeviceType)
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+        using (var pivSession = new PivSession(testDevice))
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
+            try
             {
-                try
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                pivSession.ResetApplication();
+
+                pivSession.AuthenticateManagementKey();
+
+                byte[] arbitraryData =
                 {
-                    var collectorObj = new Simple39KeyCollector();
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+                    0x53, 0x02, 0x04, 0x00
+                };
 
-                    pivSession.ResetApplication();
+                var putCmd = new PutDataCommand(0x005F0000, arbitraryData);
+                var putRsp = pivSession.Connection.SendCommand(putCmd);
 
-                    pivSession.AuthenticateManagementKey();
+                Assert.Equal(ResponseStatus.Success, putRsp.Status);
 
-                    byte[] arbitraryData = {
-                        0x53, 0x02, 0x04, 0x00
-                    };
+                var getCmd = new GetDataCommand(0x005F0000);
+                var getRsp = pivSession.Connection.SendCommand(getCmd);
 
-                    var putCmd = new PutDataCommand(0x005F0000, arbitraryData);
-                    PutDataResponse putRsp = pivSession.Connection.SendCommand(putCmd);
+                Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
-                    Assert.Equal(ResponseStatus.Success, putRsp.Status);
+                var theData = getRsp.GetData();
 
-                    var getCmd = new GetDataCommand(0x005F0000);
-                    GetDataResponse getRsp = pivSession.Connection.SendCommand(getCmd);
-
-                    Assert.Equal(ResponseStatus.Success, getRsp.Status);
-
-                    ReadOnlyMemory<byte> theData = getRsp.GetData();
-
-                    bool isValid = MemoryExtensions.SequenceEqual(arbitraryData, theData.Span);
-                    Assert.True(isValid);
-                }
-                finally
-                {
-                    pivSession.ResetApplication();
-                }
+                var isValid = MemoryExtensions.SequenceEqual(arbitraryData, theData.Span);
+                Assert.True(isValid);
+            }
+            finally
+            {
+                pivSession.ResetApplication();
             }
         }
+    }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void AlternateTag_Invalid_Error(StandardTestDevice testDeviceType)
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void AlternateTag_Invalid_Error(
+        StandardTestDevice testDeviceType)
+    {
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+        using (var pivSession = new PivSession(testDevice))
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
+            try
             {
-                try
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                pivSession.ResetApplication();
+
+                pivSession.AuthenticateManagementKey();
+
+                byte[] arbitraryData =
                 {
-                    var collectorObj = new Simple39KeyCollector();
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+                    0x53, 0x02, 0x04, 0x00
+                };
 
-                    pivSession.ResetApplication();
+                PutDataCommand putCmd;
+                _ = Assert.Throws<ArgumentException>(() => putCmd = new PutDataCommand(0x005EFFFF, arbitraryData));
 
-                    pivSession.AuthenticateManagementKey();
-
-                    byte[] arbitraryData = {
-                        0x53, 0x02, 0x04, 0x00
-                    };
-
-                    PutDataCommand putCmd;
-                    _ = Assert.Throws<ArgumentException>(() => putCmd = new PutDataCommand(0x005EFFFF, arbitraryData));
-
-                    GetDataCommand getCmd;
-                    _ = Assert.Throws<ArgumentException>(() => getCmd = new GetDataCommand(0x005EFFFF));
-                }
-                finally
-                {
-                    pivSession.ResetApplication();
-                }
+                GetDataCommand getCmd;
+                _ = Assert.Throws<ArgumentException>(() => getCmd = new GetDataCommand(0x005EFFFF));
+            }
+            finally
+            {
+                pivSession.ResetApplication();
             }
         }
     }

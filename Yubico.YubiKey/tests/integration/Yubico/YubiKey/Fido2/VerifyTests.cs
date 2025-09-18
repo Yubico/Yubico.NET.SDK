@@ -16,19 +16,19 @@ using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+[Trait(TraitTypes.Category, TestCategories.Elevated)]
+[Trait(TraitTypes.Category, TestCategories.RequiresSetup)]
+[Trait(TraitTypes.Category, TestCategories.RequiresBio)]
+public class VerifyTests : FidoSessionIntegrationTestBase
 {
-    [Trait(TraitTypes.Category, TestCategories.Elevated)]
-    [Trait(TraitTypes.Category, TestCategories.RequiresSetup)]
-    [Trait(TraitTypes.Category, TestCategories.RequiresBio)]
-    public class VerifyTests : FidoSessionIntegrationTestBase
+    // Requires a biometric-capable YubiKey with a fingerprint enrolled.
+    // Also requires that the PIN is set to the default value.
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    public void VerifyUv_Succeed()
     {
-        // Requires a biometric-capable YubiKey with a fingerprint enrolled.
-        // Also requires that the PIN is set to the default value.
-        [SkippableFact(typeof(DeviceNotFoundException))]
-        public void VerifyUv_Succeed()
-        {
-            Session.VerifyUv(PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, "relyingParty1");
-        }
+        Session.VerifyUv(PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
+            "relyingParty1");
     }
 }

@@ -20,90 +20,89 @@ using Yubico.PlatformInterop;
 using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.U2f.Commands;
 
-namespace Yubico.YubiKey.U2f
+namespace Yubico.YubiKey.U2f;
+
+public class CommandTests : IDisposable
 {
-    public class CommandTests : IDisposable
+    private readonly FidoConnection _fidoConnection;
+
+    public CommandTests()
     {
-        private readonly FidoConnection _fidoConnection;
-
-        public CommandTests()
+        if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
         {
-            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+            if (!SdkPlatformInfo.IsElevated)
             {
-                if (!SdkPlatformInfo.IsElevated)
-                {
-                    throw new ArgumentException("Windows not elevated.");
-                }
+                throw new ArgumentException("Windows not elevated.");
             }
+        }
 
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
-            Assert.NotNull(devices);
+        var devices = HidDevice.GetHidDevices();
+        Assert.NotNull(devices);
 
-            HidDevice? deviceToUse = GetFidoHid(devices);
-            Assert.NotNull(deviceToUse);
+        var deviceToUse = GetFidoHid(devices);
+        Assert.NotNull(deviceToUse);
 
-            if (deviceToUse is null)
+        if (deviceToUse is null)
+        {
+            throw new ArgumentException("null device");
+        }
+
+        _fidoConnection = new FidoConnection(deviceToUse);
+        Assert.NotNull(_fidoConnection);
+    }
+
+    public void Dispose()
+    {
+        _fidoConnection.Dispose();
+    }
+
+    [Fact]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
+    public void RunGetDeviceInfo()
+    {
+        var cmd = new GetPagedDeviceInfoCommand();
+        var rsp = _fidoConnection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+        var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
+        Assert.False(deviceInfo.IsFipsSeries);
+    }
+
+    [Fact]
+    public void RunSetDeviceInfo()
+    {
+        var cmd = new SetDeviceInfoCommand();
+        Assert.Null(cmd.DeviceFlags);
+        //            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+        //            Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+        //            YubiKeyDeviceInfo getData = rsp.GetData();
+        //            Assert.False(getData.IsFipsSeries);
+    }
+
+    [Fact]
+    public void VerifyFipsMode()
+    {
+        var cmd = new VerifyFipsModeCommand();
+        var rsp = _fidoConnection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+        var getData = rsp.GetData();
+        Assert.False(getData);
+    }
+
+    public static HidDevice? GetFidoHid(
+        IEnumerable<HidDevice> devices)
+    {
+        foreach (var currentDevice in devices)
+        {
+            if (currentDevice.VendorId == 0x1050 &&
+                currentDevice.UsagePage == HidUsagePage.Fido)
             {
-                throw new ArgumentException("null device");
+                return currentDevice;
             }
-
-            _fidoConnection = new FidoConnection(deviceToUse);
-            Assert.NotNull(_fidoConnection);
         }
 
-        public void Dispose()
-        {
-            _fidoConnection.Dispose();
-        }
-
-        [Fact]
-        [Trait(TraitTypes.Category, TestCategories.Simple)]
-        public void RunGetDeviceInfo()
-        {
-            var cmd = new GetPagedDeviceInfoCommand();
-            GetPagedDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
-            Assert.False(deviceInfo.IsFipsSeries);
-        }
-
-        [Fact]
-        public void RunSetDeviceInfo()
-        {
-            var cmd = new SetDeviceInfoCommand();
-            Assert.Null(cmd.DeviceFlags);
-            //            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
-            //            Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-            //            YubiKeyDeviceInfo getData = rsp.GetData();
-            //            Assert.False(getData.IsFipsSeries);
-        }
-
-        [Fact]
-        public void VerifyFipsMode()
-        {
-            var cmd = new VerifyFipsModeCommand();
-            VerifyFipsModeResponse rsp = _fidoConnection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-            bool getData = rsp.GetData();
-            Assert.False(getData);
-        }
-
-        public static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
-        {
-            foreach (HidDevice currentDevice in devices)
-            {
-                if (currentDevice.VendorId == 0x1050 &&
-                    currentDevice.UsagePage == HidUsagePage.Fido)
-                {
-                    return currentDevice;
-                }
-            }
-
-            return null;
-        }
+        return null;
     }
 }
-

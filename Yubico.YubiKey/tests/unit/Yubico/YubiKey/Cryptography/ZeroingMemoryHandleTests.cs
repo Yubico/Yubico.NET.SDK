@@ -22,7 +22,7 @@ public class ZeroingMemoryHandleTests
     [Fact]
     public void Dispose_ShouldClearArrayContent()
     {
-        byte[] privateKeyData = new byte[] { 10, 20, 30, 40, 50 };
+        var privateKeyData = new byte[] { 10, 20, 30, 40, 50 };
         using (var secureData = new ZeroingMemoryHandle(privateKeyData))
         {
             Assert.Equal(new byte[] { 10, 20, 30, 40, 50 }, secureData.Data);
@@ -35,7 +35,7 @@ public class ZeroingMemoryHandleTests
     public void BasicUsage_ZeroesArrayWhenDisposed()
     {
         // Arrange
-        byte[] sensitiveData = new byte[] { 1, 2, 3, 4, 5 };
+        var sensitiveData = new byte[] { 1, 2, 3, 4, 5 };
 
         // Act
         using (var handle = new ZeroingMemoryHandle(sensitiveData))
@@ -52,9 +52,9 @@ public class ZeroingMemoryHandleTests
     public void NestedUsage_ZeroesAllArraysWhenDisposed()
     {
         // Arrange
-        byte[] keyData = new byte[] { 1, 2, 3, 4, 5 };
-        byte[] ivData = new byte[] { 6, 7, 8, 9, 10 };
-        byte[] resultData = new byte[5];
+        var keyData = new byte[] { 1, 2, 3, 4, 5 };
+        var ivData = new byte[] { 6, 7, 8, 9, 10 };
+        var resultData = new byte[5];
 
         // Act
         using (var keyHandle = new ZeroingMemoryHandle(keyData))
@@ -63,7 +63,7 @@ public class ZeroingMemoryHandleTests
             using (var ivHandle = new ZeroingMemoryHandle(ivData))
             {
                 // Simulate combining key and IV for an operation
-                for (int i = 0; i < 5; i++)
+                for (var i = 0; i < 5; i++)
                 {
                     resultData[i] = (byte)(keyHandle.Data.Span[i] ^ ivHandle.Data.Span[i]);
                 }
@@ -88,7 +88,7 @@ public class ZeroingMemoryHandleTests
     public void PassingToMethods_MaintainsAccess()
     {
         // Arrange
-        byte[] sensitiveData = new byte[] { 1, 2, 3, 4, 5 };
+        var sensitiveData = new byte[] { 1, 2, 3, 4, 5 };
 
         // Act
         using (var handle = new ZeroingMemoryHandle(sensitiveData))
@@ -115,7 +115,7 @@ public class ZeroingMemoryHandleTests
     public void AccessAfterDispose_ThrowsException()
     {
         // Arrange
-        byte[] sensitiveData = new byte[] { 1, 2, 3, 4, 5 };
+        var sensitiveData = new byte[] { 1, 2, 3, 4, 5 };
         var handle = new ZeroingMemoryHandle(sensitiveData);
 
         // Act
@@ -124,26 +124,26 @@ public class ZeroingMemoryHandleTests
         // Assert
         Assert.Throws<ObjectDisposedException>(() => handle.Data);
     }
-    
+
     [Fact]
     public void MultiLayerComponent_MaintainsSecurityThroughLayers()
     {
         // Arrange
-        byte[] sensitiveData = new byte[] { 1, 2, 3, 4, 5 };
-    
+        var sensitiveData = new byte[] { 1, 2, 3, 4, 5 };
+
         // Act
         using (var handle = new ZeroingMemoryHandle(sensitiveData))
         {
             // First layer
             var layer1Result = FirstLayerProcessor.Process(handle);
-        
+
             // Second layer, passing both the original handle and the layer1 result
             var layer2Result = SecondLayerProcessor.Process(handle, layer1Result);
-        
+
             // Verify data is still accessible
             Assert.Equal(new byte[] { 1, 2, 3, 4, 5 }, handle.Data);
         }
-    
+
         // Assert
         Assert.All(sensitiveData, b => Assert.Equal(0, b));
     }
@@ -151,7 +151,8 @@ public class ZeroingMemoryHandleTests
     // Mock processors for testing
     private static class FirstLayerProcessor
     {
-        public static byte[] Process(ZeroingMemoryHandle handle)
+        public static byte[] Process(
+            ZeroingMemoryHandle handle)
         {
             // Simulate processing
             var result = new byte[handle.Data.Length];
@@ -162,13 +163,16 @@ public class ZeroingMemoryHandleTests
 
     private static class SecondLayerProcessor
     {
-        public static byte[] Process(ZeroingMemoryHandle originalHandle, byte[] intermediateResult)
+        public static byte[] Process(
+            ZeroingMemoryHandle originalHandle,
+            byte[] intermediateResult)
         {
             // Simulate more processing
-            for (int i = 0; i < originalHandle.Data.Length; i++)
+            for (var i = 0; i < originalHandle.Data.Length; i++)
             {
                 intermediateResult[i] ^= originalHandle.Data.Span[i];
             }
+
             return intermediateResult;
         }
     }

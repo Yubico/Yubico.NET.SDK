@@ -28,40 +28,40 @@ for external milestones.
 -->
 <Project>
 
-  <PropertyGroup Label="Versions for all projects">
+    <PropertyGroup Label="Versions for all projects">
 
-    <!-- 
-    Common version for both projects. Can be overridden by the below properties if needed 
-    -->
-    <CommonVersion>1.14.0</CommonVersion>
+        <!-- 
+        Common version for both projects. Can be overridden by the below properties if needed 
+        -->
+        <CommonVersion>1.14.0</CommonVersion>
 
-    <!--
-    Yubico.Core project
+        <!--
+        Yubico.Core project
+    
+        This project provides foundational components and platform abstractions to other libraries
+        so that they may be written in a platform-agnostic manner.
+    
+        Increment the major version whenever a new platform is added or removed, or a breaking change
+        must take place.
+        Increment the minor version for any cross-platform feature work or improvements.
+        Increment the patch version for bug fixes.
+    
+        This project can, and should, use pre-release suffixes for development milestones.
+        -->
+        <YubicoCoreVersion>$(CommonVersion)</YubicoCoreVersion>
 
-    This project provides foundational components and platform abstractions to other libraries
-    so that they may be written in a platform-agnostic manner.
-
-    Increment the major version whenever a new platform is added or removed, or a breaking change
-    must take place.
-    Increment the minor version for any cross-platform feature work or improvements.
-    Increment the patch version for bug fixes.
-
-    This project can, and should, use pre-release suffixes for development milestones.
-    -->
-    <YubicoCoreVersion>$(CommonVersion)</YubicoCoreVersion>
-
-    <!--
-    Yubico.Authenticator project
-
-    This project defines the concept of a YubiKey as well as all of the public capabilities of
-    of a YubiKey authenticator token. This project is platform-agnostic.
-
-    Increment the major version whenever a breaking API change must take place.
-    Increment the minor version whenever a new feature or improvement is added.
-    Increment the patch version for bug fixes.
-
-    This project can, and should, use pre-release suffixes for development milestones.
-    -->
-    <YubicoYubiKeyVersion>$(CommonVersion)</YubicoYubiKeyVersion>
-  </PropertyGroup>
+        <!--
+        Yubico.Authenticator project
+    
+        This project defines the concept of a YubiKey as well as all of the public capabilities of
+        of a YubiKey authenticator token. This project is platform-agnostic.
+    
+        Increment the major version whenever a breaking API change must take place.
+        Increment the minor version whenever a new feature or improvement is added.
+        Increment the patch version for bug fixes.
+    
+        This project can, and should, use pre-release suffixes for development milestones.
+        -->
+        <YubicoYubiKeyVersion>$(CommonVersion)</YubicoYubiKeyVersion>
+    </PropertyGroup>
 </Project>

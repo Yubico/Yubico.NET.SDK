@@ -210,5 +210,6 @@ The following rules must be followed for PRs that include files from another pro
 - The contribution is correctly attributed, as needed (generally in LICENSE.txt or NOTICE.txt in
   project root).
 
-See [CryptographicOperations.cs](./Yubico.Core/src/System.Security.Cryptography/CryptographicOperations.cs) for an example of a
+See [CryptographicOperations.cs](./Yubico.Core/src/System.Security.Cryptography/CryptographicOperations.cs) for an
+example of a
 file copied from another project and attributed in the [LICENSE.txt](./LICENSE.txt) file.

@@ -14,75 +14,74 @@
 
 using System;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+// This KeyCollector class can be used to provide the KeyCollector delegate
+// to the PivSession class (and others in the future).
+// It is called Specified because the caller specifies the PIN, PUK, and mgmt
+// key at construction, and those are the only values it returns.
+public class SpecifiedKeyCollector
 {
-    // This KeyCollector class can be used to provide the KeyCollector delegate
-    // to the PivSession class (and others in the future).
-    // It is called Specified because the caller specifies the PIN, PUK, and mgmt
-    // key at construction, and those are the only values it returns.
-    public class SpecifiedKeyCollector
+    private readonly byte[] _mgmtKey;
+    private readonly byte[] _pin;
+    private readonly byte[] _puk;
+
+    public SpecifiedKeyCollector(
+        ReadOnlyMemory<byte> pin,
+        ReadOnlyMemory<byte> puk,
+        ReadOnlyMemory<byte> mgmtKey)
     {
-        private readonly byte[] _mgmtKey;
-        private readonly byte[] _pin;
-        private readonly byte[] _puk;
+        _pin = new byte[pin.Length];
+        pin.CopyTo(_pin);
 
-        public SpecifiedKeyCollector(
-            ReadOnlyMemory<byte> pin,
-            ReadOnlyMemory<byte> puk,
-            ReadOnlyMemory<byte> mgmtKey)
+        _puk = new byte[puk.Length];
+        puk.CopyTo(_puk);
+
+        _mgmtKey = new byte[mgmtKey.Length];
+        mgmtKey.CopyTo(_mgmtKey);
+    }
+
+    public bool SpecifiedKeyCollectorDelegate(
+        KeyEntryData keyEntryData)
+    {
+        if (keyEntryData.IsRetry)
         {
-            _pin = new byte[pin.Length];
-            pin.CopyTo(_pin);
-
-            _puk = new byte[puk.Length];
-            puk.CopyTo(_puk);
-
-            _mgmtKey = new byte[mgmtKey.Length];
-            mgmtKey.CopyTo(_mgmtKey);
+            return false;
         }
 
-        public bool SpecifiedKeyCollectorDelegate(
-            KeyEntryData keyEntryData)
+        byte[] currentValue;
+        byte[]? newValue = null;
+
+        switch (keyEntryData.Request)
         {
-            if (keyEntryData.IsRetry)
-            {
+            default:
                 return false;
-            }
 
-            byte[] currentValue;
-            byte[]? newValue = null;
+            case KeyEntryRequest.Release:
+                return true;
 
-            switch (keyEntryData.Request)
-            {
-                default:
-                    return false;
+            case KeyEntryRequest.VerifyPivPin:
+                currentValue = _pin;
+                break;
+            case KeyEntryRequest.ResetPivPinWithPuk:
+                currentValue = _puk;
+                newValue = _pin;
+                break;
 
-                case KeyEntryRequest.Release:
-                    return true;
-
-                case KeyEntryRequest.VerifyPivPin:
-                    currentValue = _pin;
-                    break;
-                case KeyEntryRequest.ResetPivPinWithPuk:
-                    currentValue = _puk;
-                    newValue = _pin;
-                    break;
-
-                case KeyEntryRequest.AuthenticatePivManagementKey:
-                    currentValue = _mgmtKey;
-                    break;
-            }
-
-            if (newValue is null)
-            {
-                keyEntryData.SubmitValue(currentValue);
-            }
-            else
-            {
-                keyEntryData.SubmitValues(currentValue, newValue);
-            }
-
-            return true;
+            case KeyEntryRequest.AuthenticatePivManagementKey:
+                currentValue = _mgmtKey;
+                break;
         }
+
+        if (newValue is null)
+        {
+            keyEntryData.SubmitValue(currentValue);
+        }
+        else
+        {
+            keyEntryData.SubmitValues(currentValue, newValue);
+        }
+
+        return true;
     }
 }

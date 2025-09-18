@@ -13,141 +13,141 @@ See the License for the specific language governing permissions and
 limitations under the License. -->
 
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <!-- Assembly information-->
-    <AssemblyName>Yubico.Core</AssemblyName>
-    <RootNamespace></RootNamespace>
+    <PropertyGroup>
+        <!-- Assembly information-->
+        <AssemblyName>Yubico.Core</AssemblyName>
+        <RootNamespace></RootNamespace>
 
-    <!-- Multi-target build -->
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net472</TargetFrameworks>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <!-- Multi-target build -->
+        <TargetFrameworks>netstandard2.0;netstandard2.1;net472</TargetFrameworks>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <!-- Suppressed warnings-->
-    <!-- NU5104 - We want to allow prerelease NuGet packages -->
-    <NoWarn>@(NoWarn);NU5104</NoWarn>
-    <Configurations>Debug;Release</Configurations>
+        <!-- Suppressed warnings-->
+        <!-- NU5104 - We want to allow prerelease NuGet packages -->
+        <NoWarn>@(NoWarn);NU5104</NoWarn>
+        <Configurations>Debug;Release</Configurations>
 
-    <!-- DocFX will throw a warning (which we set as an error) if it doesn't find a reference assembly. -->
-    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+        <!-- DocFX will throw a warning (which we set as an error) if it doesn't find a reference assembly. -->
+        <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
 
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 
-    <!-- XML Documentation -->
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <!-- XML Documentation -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <!-- NuGet properties -->
-    <PackageId>Yubico.Core</PackageId>
-    <Description>Yubico.Core is a support library used by other .NET Yubico libraries. You should likely never need to consume this package directly, as it will be included with other libraries.</Description>
-    <PackageIcon>yubico-circle-y-mark.png</PackageIcon>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <PackageReleaseNotes>https://github.com/Yubico/Yubico.NET.SDK/releases/latest</PackageReleaseNotes>
-    <PackageTags>yubikey;security;authentication;multifactor;mfa;twofactor;cryptography;hardware-token;fido;fido2;u2f;security-key;passwordless;smartcard;pki;usb-security</PackageTags>
-    
-    <!-- Debug Symbols !-->
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    
-    <!-- StrongName signing -->
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+        <!-- NuGet properties -->
+        <PackageId>Yubico.Core</PackageId>
+        <Description>Yubico.Core is a support library used by other .NET Yubico libraries. You should likely never need to consume this package directly, as it will be included with other libraries.</Description>
+        <PackageIcon>yubico-circle-y-mark.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <PackageReleaseNotes>https://github.com/Yubico/Yubico.NET.SDK/releases/latest</PackageReleaseNotes>
+        <PackageTags>yubikey;security;authentication;multifactor;mfa;twofactor;cryptography;hardware-token;fido;fido2;u2f;security-key;passwordless;smartcard;pki;usb-security</PackageTags>
 
-    <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);ENABLE_SENSITIVE_LOG</DefineConstants>
-  </PropertyGroup>
+        <!-- Debug Symbols !-->
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
+        <!-- StrongName signing -->
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
 
-  <ItemGroup Label="Resource file definition">
+        <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);ENABLE_SENSITIVE_LOG</DefineConstants>
+    </PropertyGroup>
 
-    <Compile Update="Resources\ExceptionMessages.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ExceptionMessages.resx</DependentUpon>
-    </Compile>
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
 
-    <EmbeddedResource Update="Resources\ExceptionMessages.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ExceptionMessages.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Yubico.Core</CustomToolNamespace>
-    </EmbeddedResource>
+    <ItemGroup Label="Resource file definition">
 
-    <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="" />
-    <None Include="..\..\README.md" Pack="true" PackagePath="" />
-    <None Include="..\..\yubico-circle-y-mark.png" Pack="true" PackagePath="" />
-    <None Include="..\..\Yubico.NET.SDK.snk">
-      <Link>Yubico.NET.SDK.snk</Link>
-    </None>
-  </ItemGroup>
+        <Compile Update="Resources\ExceptionMessages.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>ExceptionMessages.resx</DependentUpon>
+        </Compile>
 
-  <ItemGroup Label="Grouping HID code partial classes">
-    <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.ModHex.cs">
-      <DependentUpon>HidCodeTranslator.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.en_UK.cs">
-      <DependentUpon>HidCodeTranslator.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.en_US.cs">
-      <DependentUpon>HidCodeTranslator.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.de_DE.cs">
-      <DependentUpon>HidCodeTranslator.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.fr_FR.cs">
-      <DependentUpon>HidCodeTranslator.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.it_IT.cs">
-      <DependentUpon>HidCodeTranslator.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.es_US.cs">
-      <DependentUpon>HidCodeTranslator.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.sv_SE.cs">
-      <DependentUpon>HidCodeTranslator.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
+        <EmbeddedResource Update="Resources\ExceptionMessages.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>ExceptionMessages.Designer.cs</LastGenOutput>
+            <CustomToolNamespace>Yubico.Core</CustomToolNamespace>
+        </EmbeddedResource>
 
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.6" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-    <!-- Before updating PolySharp, we should do some due dilligence on the update -->
-    <PackageReference Include="PolySharp" Version="1.15.0" AllowUpdates="false">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="System.Memory" Version="4.6.3" />
-    <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
-    <!-- The wildcard version tag allows us to include the latest minor and pre-release versions -->
-    <PackageReference Include="Yubico.NativeShims" Version="1.*-*" />
-  </ItemGroup>
+        <None Include="..\..\LICENSE.txt" Pack="true" PackagePath=""/>
+        <None Include="..\..\README.md" Pack="true" PackagePath=""/>
+        <None Include="..\..\yubico-circle-y-mark.png" Pack="true" PackagePath=""/>
+        <None Include="..\..\Yubico.NET.SDK.snk">
+            <Link>Yubico.NET.SDK.snk</Link>
+        </None>
+    </ItemGroup>
 
-  <ItemGroup Label="Expose internal test hooks to Unit Test projects">
+    <ItemGroup Label="Grouping HID code partial classes">
+        <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.ModHex.cs">
+            <DependentUpon>HidCodeTranslator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.en_UK.cs">
+            <DependentUpon>HidCodeTranslator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.en_US.cs">
+            <DependentUpon>HidCodeTranslator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.de_DE.cs">
+            <DependentUpon>HidCodeTranslator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.fr_FR.cs">
+            <DependentUpon>HidCodeTranslator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.it_IT.cs">
+            <DependentUpon>HidCodeTranslator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.es_US.cs">
+            <DependentUpon>HidCodeTranslator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Yubico\Core\Devices\Hid\HidCodeTranslator.sv_SE.cs">
+            <DependentUpon>HidCodeTranslator.cs</DependentUpon>
+        </Compile>
+    </ItemGroup>
 
-    <!-- Expose internal test hooks -->
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Yubico.Core.UnitTests,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
-    </AssemblyAttribute>
+    <ItemGroup>
+        <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0"/>
+        <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.6"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.6"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.6"/>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.6"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+        <!-- Before updating PolySharp, we should do some due dilligence on the update -->
+        <PackageReference Include="PolySharp" Version="1.15.0" AllowUpdates="false">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="System.Memory" Version="4.6.3"/>
+        <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0"/>
+        <!-- The wildcard version tag allows us to include the latest minor and pre-release versions -->
+        <PackageReference Include="Yubico.NativeShims" Version="1.*-*"/>
+    </ItemGroup>
 
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Yubico.YubiKey.IntegrationTests,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
-    </AssemblyAttribute>
+    <ItemGroup Label="Expose internal test hooks to Unit Test projects">
 
-    <!-- Enable use of the Moq framework-->
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>DynamicProxyGenAssembly2,PublicKey=0024000004800000940000000602000000240000525341310004000001000100c547cac37abd99c8db225ef2f6c8a3602f3b3606cc9891605d02baa56104f4cfc0734aa39b93bf7852f7d9266654753cc297e7d2edfe0bac1cdcf9f717241550e0a7b191195b7667bb4f64bcb8e2121380fd1d9d46ad2d92d2d15605093924cceaf74c4861eff62abf69b9291ed0a340e113be11e6a7d3113e92484cf7045cc7</_Parameter1>
-    </AssemblyAttribute>
+        <!-- Expose internal test hooks -->
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>Yubico.Core.UnitTests,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
+        </AssemblyAttribute>
 
-  </ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>Yubico.YubiKey.IntegrationTests,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
+        </AssemblyAttribute>
+
+        <!-- Enable use of the Moq framework-->
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>DynamicProxyGenAssembly2,PublicKey=0024000004800000940000000602000000240000525341310004000001000100c547cac37abd99c8db225ef2f6c8a3602f3b3606cc9891605d02baa56104f4cfc0734aa39b93bf7852f7d9266654753cc297e7d2edfe0bac1cdcf9f717241550e0a7b191195b7667bb4f64bcb8e2121380fd1d9d46ad2d92d2d15605093924cceaf74c4861eff62abf69b9291ed0a340e113be11e6a7d3113e92484cf7045cc7</_Parameter1>
+        </AssemblyAttribute>
+
+    </ItemGroup>
 </Project>

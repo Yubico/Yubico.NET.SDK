@@ -16,113 +16,117 @@ using System;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv.Objects
-{
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class AdminIntegrationTests
-    {
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void ReadAdmin_IsEmpty_Correct(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+namespace Yubico.YubiKey.Piv.Objects;
 
-            using (var pivSession = new PivSession(testDevice))
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public class AdminIntegrationTests
+{
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void ReadAdmin_IsEmpty_Correct(
+        StandardTestDevice testDeviceType)
+    {
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+        using (var pivSession = new PivSession(testDevice))
+        {
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            pivSession.ResetApplication();
+
+            var admin = pivSession.ReadObject<AdminData>();
+
+            Assert.True(admin.IsEmpty);
+        }
+    }
+
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void WriteAdminData_Read_NotEmpty(
+        StandardTestDevice testDeviceType)
+    {
+        byte[] salt =
+        {
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+        };
+
+        using var admin = new AdminData();
+        admin.PukBlocked = true;
+        admin.PinProtected = true;
+        admin.SetSalt(salt);
+        admin.PinLastUpdated = DateTime.UtcNow;
+
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+        using (var pivSession = new PivSession(testDevice))
+        {
+            try
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                 pivSession.ResetApplication();
+                pivSession.WriteObject(admin);
 
-                AdminData admin = pivSession.ReadObject<AdminData>();
-
-                Assert.True(admin.IsEmpty);
+                var adminCopy = pivSession.ReadObject<AdminData>();
+                Assert.False(adminCopy.IsEmpty);
+            }
+            finally
+            {
+                pivSession.ResetApplication();
             }
         }
+    }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void WriteAdminData_Read_NotEmpty(StandardTestDevice testDeviceType)
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void WriteAdminData_Read_Correct(
+        StandardTestDevice testDeviceType)
+    {
+        byte[] salt =
         {
-            byte[] salt = {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            };
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+        };
 
-            using var admin = new AdminData();
-            admin.PukBlocked = true;
-            admin.PinProtected = true;
-            admin.SetSalt(salt);
-            admin.PinLastUpdated = DateTime.UtcNow;
+        using var admin = new AdminData();
+        admin.PukBlocked = true;
+        admin.PinProtected = true;
+        admin.SetSalt(salt);
+        admin.PinLastUpdated = DateTime.UtcNow;
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(testDevice))
+        using (var pivSession = new PivSession(testDevice))
+        {
+            try
             {
-                try
-                {
-                    var collectorObj = new Simple39KeyCollector();
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                    pivSession.ResetApplication();
-                    pivSession.WriteObject(admin);
+                pivSession.ResetApplication();
+                pivSession.WriteObject(admin);
 
-                    AdminData adminCopy = pivSession.ReadObject<AdminData>();
-                    Assert.False(adminCopy.IsEmpty);
-                }
-                finally
+                var adminCopy = pivSession.ReadObject<AdminData>();
+                _ = Assert.NotNull(adminCopy.Salt);
+                _ = Assert.NotNull(adminCopy.PinLastUpdated);
+
+                if (adminCopy.Salt is not null)
                 {
-                    pivSession.ResetApplication();
+                    var cmpObj = (ReadOnlyMemory<byte>)adminCopy.Salt;
+                    var expected = new Span<byte>(salt);
+                    var isValid = expected.SequenceEqual(cmpObj.Span);
+                    Assert.True(isValid);
                 }
+
+                Assert.True(adminCopy.PukBlocked);
+                Assert.True(adminCopy.PinProtected);
             }
-        }
-
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void WriteAdminData_Read_Correct(StandardTestDevice testDeviceType)
-        {
-            byte[] salt = {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            };
-
-            using var admin = new AdminData();
-            admin.PukBlocked = true;
-            admin.PinProtected = true;
-            admin.SetSalt(salt);
-            admin.PinLastUpdated = DateTime.UtcNow;
-
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
-            using (var pivSession = new PivSession(testDevice))
+            finally
             {
-                try
-                {
-                    var collectorObj = new Simple39KeyCollector();
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                    pivSession.ResetApplication();
-                    pivSession.WriteObject(admin);
-
-                    AdminData adminCopy = pivSession.ReadObject<AdminData>();
-                    _ = Assert.NotNull(adminCopy.Salt);
-                    _ = Assert.NotNull(adminCopy.PinLastUpdated);
-
-                    if (!(adminCopy.Salt is null))
-                    {
-                        var cmpObj = (ReadOnlyMemory<byte>)adminCopy.Salt;
-                        var expected = new Span<byte>(salt);
-                        bool isValid = expected.SequenceEqual(cmpObj.Span);
-                        Assert.True(isValid);
-                    }
-
-                    Assert.True(adminCopy.PukBlocked);
-                    Assert.True(adminCopy.PinProtected);
-                }
-                finally
-                {
-                    pivSession.ResetApplication();
-                }
+                pivSession.ResetApplication();
             }
         }
     }

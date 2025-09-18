@@ -17,101 +17,113 @@ using System.Linq;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+public class ChallengeResponseResponseTests
 {
-    public class ChallengeResponseResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
-        {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void Action() => _ = new ChallengeResponseResponse(null, ChallengeResponseAlgorithm.HmacSha1);
+        static void Action()
+        {
+            _ = new ChallengeResponseResponse(null, ChallengeResponseAlgorithm.HmacSha1);
+        }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            _ = Assert.Throws<ArgumentNullException>(Action);
-        }
+        _ = Assert.Throws<ArgumentNullException>(Action);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
+
+        Assert.Equal(SWConstants.Success, response.StatusWord);
+    }
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
+
+        Assert.Equal(ResponseStatus.Success, response.Status);
+    }
+
+    [Fact]
+    public void GetData_FailedResponseApdu_ThrowsInvalidOperationException()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
+        var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
+
+        void Action()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
-
-            var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
-
-            Assert.Equal(SWConstants.Success, response.StatusWord);
+            _ = response.GetData();
         }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+        _ = Assert.Throws<InvalidOperationException>(Action);
+    }
+
+    [Fact]
+    public void GetData_YubicoOtpResponseOfInvalidLength_ThrowsMalformedYubiKeyResponseException()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 1, 2, 3, 4, 0x90, 0x00 });
+        var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.YubicoOtp);
+
+        void Action()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
-
-            var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
-
-            Assert.Equal(ResponseStatus.Success, response.Status);
+            _ = response.GetData();
         }
 
-        [Fact]
-        public void GetData_FailedResponseApdu_ThrowsInvalidOperationException()
+        _ = Assert.Throws<MalformedYubiKeyResponseException>(Action);
+    }
+
+    [Fact]
+    public void GetData_ValidYubicoOtpResponse_ReturnedSuccessfully()
+    {
+        var expectedResponse = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+        var apduBytes = expectedResponse.Concat(new byte[] { 0x90, 0x00 }).ToArray();
+        var responseApdu = new ResponseApdu(apduBytes);
+        var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.YubicoOtp);
+
+        var actualResponse = response.GetData();
+        Assert.True(expectedResponse.SequenceEqual(actualResponse.ToArray()));
+    }
+
+    [Fact]
+    public void GetData_HmacSha1ResponseOfInvalidLength_ThrowsMalformedYubiKeyResponseException()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 1, 2, 3, 4, 0x90, 0x00 });
+        var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
+
+        void Action()
         {
-            var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
-            var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
-
-            void Action() => _ = response.GetData();
-
-            _ = Assert.Throws<InvalidOperationException>(Action);
+            _ = response.GetData();
         }
 
-        [Fact]
-        public void GetData_YubicoOtpResponseOfInvalidLength_ThrowsMalformedYubiKeyResponseException()
+        _ = Assert.Throws<MalformedYubiKeyResponseException>(Action);
+    }
+
+    [Fact]
+    public void GetData_ValidHmacSha1Response_ReturnsSuccessfully()
+    {
+        Memory<byte> expectedResponse = new byte[]
         {
-            var responseApdu = new ResponseApdu(new byte[] { 1, 2, 3, 4, 0x90, 0x00 });
-            var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.YubicoOtp);
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+        };
+        var responseApdu = new ResponseApdu(
+            expectedResponse.Span.ToArray().Concat(new byte[] { 0x90, 0x00 }).ToArray());
+        var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
 
-            void Action() => _ = response.GetData();
-
-            _ = Assert.Throws<MalformedYubiKeyResponseException>(Action);
-        }
-
-        [Fact]
-        public void GetData_ValidYubicoOtpResponse_ReturnedSuccessfully()
-        {
-            byte[] expectedResponse = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-            byte[] apduBytes = expectedResponse.Concat(new byte[] { 0x90, 0x00 }).ToArray();
-            var responseApdu = new ResponseApdu(apduBytes);
-            var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.YubicoOtp);
-
-            ReadOnlyMemory<byte> actualResponse = response.GetData();
-            Assert.True(expectedResponse.SequenceEqual(actualResponse.ToArray()));
-        }
-
-        [Fact]
-        public void GetData_HmacSha1ResponseOfInvalidLength_ThrowsMalformedYubiKeyResponseException()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 1, 2, 3, 4, 0x90, 0x00 });
-            var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
-
-            void Action() => _ = response.GetData();
-
-            _ = Assert.Throws<MalformedYubiKeyResponseException>(Action);
-        }
-
-        [Fact]
-        public void GetData_ValidHmacSha1Response_ReturnsSuccessfully()
-        {
-            Memory<byte> expectedResponse = new byte[] {
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
-            };
-            var responseApdu = new ResponseApdu(
-                expectedResponse.Span.ToArray().Concat(new byte[] { 0x90, 0x00 }).ToArray());
-            var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
-
-            ReadOnlyMemory<byte> actualResponse = response.GetData();
-            Assert.True(expectedResponse.Span.SequenceEqual(actualResponse.Span));
-        }
+        var actualResponse = response.GetData();
+        Assert.True(expectedResponse.Span.SequenceEqual(actualResponse.Span));
     }
 }

@@ -15,287 +15,291 @@
 using System;
 using System.Text;
 using Xunit;
-using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+public class GetAes128SessionKeysCommandTests
 {
-    public class GetAes128SessionKeysCommandTests
+    private const string _label = "abc";
+
+    private static readonly byte[] _password =
+        new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
+    private static readonly byte[] _hostChallenge =
+        new byte[8] { 0, 2, 4, 6, 8, 10, 12, 14 };
+
+    private static readonly byte[] _hsmDeviceChallenge =
+        new byte[8] { 1, 3, 5, 7, 9, 11, 13, 15 };
+
+    [Fact]
+    public void Application_Get_ReturnsYubiHsmAuth()
     {
-        private const string _label = "abc";
-        private static readonly byte[] _password =
-            new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-        private static readonly byte[] _hostChallenge =
-            new byte[8] { 0, 2, 4, 6, 8, 10, 12, 14 };
-        private static readonly byte[] _hsmDeviceChallenge =
-            new byte[8] { 1, 3, 5, 7, 9, 11, 13, 15 };
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
 
-        [Fact]
-        public void Application_Get_ReturnsYubiHsmAuth()
+        Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
+    }
+
+    [Theory]
+    [InlineData(CredentialWithSecrets.RequiredCredentialPasswordLength - 1)]
+    [InlineData(CredentialWithSecrets.RequiredCredentialPasswordLength + 1)]
+    public void Constructor_GivenInvalidCredentialPasswordLength_ThrowsArgumentException(
+        int passwordLength)
+    {
+        Action action = () => new GetAes128SessionKeysCommand(
+            _label,
+            new byte[passwordLength],
+            _hostChallenge,
+            _hsmDeviceChallenge);
+
+        _ = Assert.Throws<ArgumentException>(action);
+    }
+
+    [Theory]
+    [InlineData(GetAes128SessionKeysCommand.RequiredChallengeLength - 1)]
+    [InlineData(GetAes128SessionKeysCommand.RequiredChallengeLength + 1)]
+    public void Constructor_GivenInvalidHostChallengeLength_ThrowsArgumentException(
+        int hostChallengeLength)
+    {
+        Action action = () => new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            new byte[hostChallengeLength],
+            _hsmDeviceChallenge);
+
+        _ = Assert.Throws<ArgumentException>(action);
+    }
+
+    [Theory]
+    [InlineData(GetAes128SessionKeysCommand.RequiredChallengeLength - 1)]
+    [InlineData(GetAes128SessionKeysCommand.RequiredChallengeLength + 1)]
+    public void Constructor_GivenInvalidHsmDeviceChallengeLength_ThrowsArgumentException(
+        int hsmDeviceChallengeLength)
+    {
+        Action action = () => new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            new byte[hsmDeviceChallengeLength]);
+
+        _ = Assert.Throws<ArgumentException>(action);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_Cla0()
+    {
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
+
+        var apdu = command.CreateCommandApdu();
+
+        Assert.Equal(0, apdu.Cla);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_Ins0x03()
+    {
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
+
+        var apdu = command.CreateCommandApdu();
+
+        Assert.Equal(0x03, apdu.Ins);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_P1Is0()
+    {
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
+
+        var apdu = command.CreateCommandApdu();
+
+        Assert.Equal(0, apdu.P1);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_P2Is0()
+    {
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
+
+        var apdu = command.CreateCommandApdu();
+
+        Assert.Equal(0, apdu.P2);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_DataContainsLabelTag()
+    {
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
+        var apdu = command.CreateCommandApdu();
+
+        var reader = new TlvReader(apdu.Data);
+        var tag = reader.PeekTag();
+        while (reader.HasData && tag != 0x71)
         {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
-
-            Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
+            _ = reader.ReadValue(tag);
+            tag = reader.PeekTag();
         }
 
-        [Theory]
-        [InlineData(CredentialWithSecrets.RequiredCredentialPasswordLength - 1)]
-        [InlineData(CredentialWithSecrets.RequiredCredentialPasswordLength + 1)]
-        public void Constructor_GivenInvalidCredentialPasswordLength_ThrowsArgumentException(int passwordLength)
-        {
-            Action action = () => new GetAes128SessionKeysCommand(
-                _label,
-                new byte[passwordLength],
-                _hostChallenge,
-                _hsmDeviceChallenge);
+        Assert.Equal(0x71, tag);
+    }
 
-            _ = Assert.Throws<ArgumentException>(action);
+    [Fact]
+    public void CreateCommandApdu_DataContainsLabelValue()
+    {
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
+        var apdu = command.CreateCommandApdu();
+
+        var reader = new TlvReader(apdu.Data);
+        var tag = reader.PeekTag();
+        while (reader.HasData && tag != 0x71)
+        {
+            _ = reader.ReadValue(tag);
+            tag = reader.PeekTag();
         }
 
-        [Theory]
-        [InlineData(GetAes128SessionKeysCommand.RequiredChallengeLength - 1)]
-        [InlineData(GetAes128SessionKeysCommand.RequiredChallengeLength + 1)]
-        public void Constructor_GivenInvalidHostChallengeLength_ThrowsArgumentException(int hostChallengeLength)
-        {
-            Action action = () => new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                new byte[hostChallengeLength],
-                _hsmDeviceChallenge);
+        var value = reader.ReadString(tag, Encoding.UTF8);
 
-            _ = Assert.Throws<ArgumentException>(action);
+        Assert.Equal(_label, value);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_DataContainsContextTag()
+    {
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
+        var apdu = command.CreateCommandApdu();
+
+        var reader = new TlvReader(apdu.Data);
+        var tag = reader.PeekTag();
+        while (reader.HasData && tag != 0x77)
+        {
+            _ = reader.ReadValue(tag);
+            tag = reader.PeekTag();
         }
 
-        [Theory]
-        [InlineData(GetAes128SessionKeysCommand.RequiredChallengeLength - 1)]
-        [InlineData(GetAes128SessionKeysCommand.RequiredChallengeLength + 1)]
-        public void Constructor_GivenInvalidHsmDeviceChallengeLength_ThrowsArgumentException(int hsmDeviceChallengeLength)
-        {
-            Action action = () => new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                new byte[hsmDeviceChallengeLength]);
+        Assert.Equal(0x77, tag);
+    }
 
-            _ = Assert.Throws<ArgumentException>(action);
+    [Fact]
+    public void CreateCommandApdu_DataContainsContextLength16()
+    {
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
+        var apdu = command.CreateCommandApdu();
+
+        var reader = new TlvReader(apdu.Data);
+        var tag = reader.PeekTag();
+        while (reader.HasData && tag != 0x77)
+        {
+            _ = reader.ReadValue(tag);
+            tag = reader.PeekTag();
         }
 
-        [Fact]
-        public void CreateCommandApdu_Cla0()
+        var value = reader.ReadValue(tag).ToArray();
+
+        Assert.Equal(16, value.Length);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_DataContainsContextValue()
+    {
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
+        var apdu = command.CreateCommandApdu();
+
+        var reader = new TlvReader(apdu.Data);
+        var tag = reader.PeekTag();
+        while (reader.HasData && tag != 0x77)
         {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
-
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            Assert.Equal(0, apdu.Cla);
+            _ = reader.ReadValue(tag);
+            tag = reader.PeekTag();
         }
 
-        [Fact]
-        public void CreateCommandApdu_Ins0x03()
+        var value = reader.ReadValue(tag).ToArray();
+        var hostChallenge = value[..8];
+        var hsmDeviceChallenge = value[8..16];
+
+        Assert.Equal(_hostChallenge, hostChallenge);
+        Assert.Equal(_hsmDeviceChallenge, hsmDeviceChallenge);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_DataContainsCredPasswordTag()
+    {
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
+        var apdu = command.CreateCommandApdu();
+
+        var reader = new TlvReader(apdu.Data);
+        var tag = reader.PeekTag();
+        while (reader.HasData && tag != 0x73)
         {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
-
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            Assert.Equal(0x03, apdu.Ins);
+            _ = reader.ReadValue(tag);
+            tag = reader.PeekTag();
         }
 
-        [Fact]
-        public void CreateCommandApdu_P1Is0()
+        Assert.Equal(0x73, tag);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_DataContainsCredPasswordValue()
+    {
+        var command = new GetAes128SessionKeysCommand(
+            _label,
+            _password,
+            _hostChallenge,
+            _hsmDeviceChallenge);
+        var apdu = command.CreateCommandApdu();
+
+        var reader = new TlvReader(apdu.Data);
+        var tag = reader.PeekTag();
+        while (reader.HasData && tag != 0x73)
         {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
-
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            Assert.Equal(0, apdu.P1);
+            _ = reader.ReadValue(tag);
+            tag = reader.PeekTag();
         }
 
-        [Fact]
-        public void CreateCommandApdu_P2Is0()
-        {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
+        var password = reader.ReadValue(tag).ToArray();
 
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            Assert.Equal(0, apdu.P2);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_DataContainsLabelTag()
-        {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            var reader = new TlvReader(apdu.Data);
-            int tag = reader.PeekTag();
-            while (reader.HasData && tag != 0x71)
-            {
-                _ = reader.ReadValue(tag);
-                tag = reader.PeekTag();
-            }
-
-            Assert.Equal(0x71, tag);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_DataContainsLabelValue()
-        {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            var reader = new TlvReader(apdu.Data);
-            int tag = reader.PeekTag();
-            while (reader.HasData && tag != 0x71)
-            {
-                _ = reader.ReadValue(tag);
-                tag = reader.PeekTag();
-            }
-
-            string value = reader.ReadString(tag, Encoding.UTF8);
-
-            Assert.Equal(_label, value);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_DataContainsContextTag()
-        {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            var reader = new TlvReader(apdu.Data);
-            int tag = reader.PeekTag();
-            while (reader.HasData && tag != 0x77)
-            {
-                _ = reader.ReadValue(tag);
-                tag = reader.PeekTag();
-            }
-
-            Assert.Equal(0x77, tag);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_DataContainsContextLength16()
-        {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            var reader = new TlvReader(apdu.Data);
-            int tag = reader.PeekTag();
-            while (reader.HasData && tag != 0x77)
-            {
-                _ = reader.ReadValue(tag);
-                tag = reader.PeekTag();
-            }
-
-            byte[] value = reader.ReadValue(tag).ToArray();
-
-            Assert.Equal(16, value.Length);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_DataContainsContextValue()
-        {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            var reader = new TlvReader(apdu.Data);
-            int tag = reader.PeekTag();
-            while (reader.HasData && tag != 0x77)
-            {
-                _ = reader.ReadValue(tag);
-                tag = reader.PeekTag();
-            }
-
-            byte[] value = reader.ReadValue(tag).ToArray();
-            byte[] hostChallenge = value[0..8];
-            byte[] hsmDeviceChallenge = value[8..16];
-
-            Assert.Equal(_hostChallenge, hostChallenge);
-            Assert.Equal(_hsmDeviceChallenge, hsmDeviceChallenge);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_DataContainsCredPasswordTag()
-        {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            var reader = new TlvReader(apdu.Data);
-            int tag = reader.PeekTag();
-            while (reader.HasData && tag != 0x73)
-            {
-                _ = reader.ReadValue(tag);
-                tag = reader.PeekTag();
-            }
-
-            Assert.Equal(0x73, tag);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_DataContainsCredPasswordValue()
-        {
-            var command = new GetAes128SessionKeysCommand(
-                _label,
-                _password,
-                _hostChallenge,
-                _hsmDeviceChallenge);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            var reader = new TlvReader(apdu.Data);
-            int tag = reader.PeekTag();
-            while (reader.HasData && tag != 0x73)
-            {
-                _ = reader.ReadValue(tag);
-                tag = reader.PeekTag();
-            }
-
-            byte[] password = reader.ReadValue(tag).ToArray();
-
-            Assert.Equal(_password, password);
-        }
+        Assert.Equal(_password, password);
     }
 }

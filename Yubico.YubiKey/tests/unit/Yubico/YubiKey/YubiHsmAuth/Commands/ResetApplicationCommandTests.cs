@@ -13,71 +13,69 @@
 // limitations under the License.
 
 using Xunit;
-using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+public class ResetApplicationCommandTests
 {
-    public class ResetApplicationCommandTests
+    [Fact]
+    public void Application_Get_ReturnsYubiHsmAuth()
     {
-        [Fact]
-        public void Application_Get_ReturnsYubiHsmAuth()
-        {
-            var command = new ResetApplicationCommand();
+        var command = new ResetApplicationCommand();
 
-            Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
-        }
+        Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
+    }
 
-        [Fact]
-        public void Constructor_ReturnsObject()
-        {
-            var command = new ResetApplicationCommand();
+    [Fact]
+    public void Constructor_ReturnsObject()
+    {
+        var command = new ResetApplicationCommand();
 
-            Assert.NotNull(command);
-        }
+        Assert.NotNull(command);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_Cla0()
-        {
-            var command = new ResetApplicationCommand();
-            CommandApdu apdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_Cla0()
+    {
+        var command = new ResetApplicationCommand();
+        var apdu = command.CreateCommandApdu();
 
-            Assert.Equal(0, apdu.Cla);
-        }
+        Assert.Equal(0, apdu.Cla);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_Ins0x06()
-        {
-            var command = new ResetApplicationCommand();
-            CommandApdu apdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_Ins0x06()
+    {
+        var command = new ResetApplicationCommand();
+        var apdu = command.CreateCommandApdu();
 
-            Assert.Equal(0x06, apdu.Ins);
-        }
+        Assert.Equal(0x06, apdu.Ins);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_P1Is0xde()
-        {
-            var command = new ResetApplicationCommand();
-            CommandApdu apdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_P1Is0xde()
+    {
+        var command = new ResetApplicationCommand();
+        var apdu = command.CreateCommandApdu();
 
-            Assert.Equal(0xde, apdu.P1);
-        }
+        Assert.Equal(0xde, apdu.P1);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_P2Is0xad()
-        {
-            var command = new ResetApplicationCommand();
-            CommandApdu apdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_P2Is0xad()
+    {
+        var command = new ResetApplicationCommand();
+        var apdu = command.CreateCommandApdu();
 
-            Assert.Equal(0xad, apdu.P2);
-        }
+        Assert.Equal(0xad, apdu.P2);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_DataLength0()
-        {
-            var command = new ResetApplicationCommand();
-            CommandApdu apdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_DataLength0()
+    {
+        var command = new ResetApplicationCommand();
+        var apdu = command.CreateCommandApdu();
 
-            Assert.Equal(0, apdu.Data.Length);
-        }
+        Assert.Equal(0, apdu.Data.Length);
     }
 }

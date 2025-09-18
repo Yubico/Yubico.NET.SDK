@@ -12,139 +12,137 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+[Trait(TraitTypes.Category, TestCategories.Elevated)]
+public class UpdateUserInfoCommandTests : SimpleIntegrationTestConnection
 {
-    [Trait(TraitTypes.Category, TestCategories.Elevated)]
-    public class UpdateUserInfoCommandTests : SimpleIntegrationTestConnection
+    public UpdateUserInfoCommandTests()
+        : base(YubiKeyApplication.Fido2)
     {
-        public UpdateUserInfoCommandTests()
-            : base(YubiKeyApplication.Fido2)
-        {
-        }
+    }
 
-        [Fact]
-        public void UpdateInfoCommand_Succeeds()
-        {
-            byte[] pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+    [Fact]
+    public void UpdateInfoCommand_Succeeds()
+    {
+        byte[] pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
-            var protocol = new PinUvAuthProtocolTwo();
-            var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-            GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
-            Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
+        var protocol = new PinUvAuthProtocolTwo();
+        var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
+        var getKeyRsp = Connection.SendCommand(getKeyCmd);
+        Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
 
-            protocol.Encapsulate(getKeyRsp.GetData());
-            PinUvAuthTokenPermissions permissions = PinUvAuthTokenPermissions.CredentialManagement;
-            var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, null);
-            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
-            Assert.Equal(ResponseStatus.Success, getTokenRsp.Status); /*Xunit.Sdk.EqualException
+        protocol.Encapsulate(getKeyRsp.GetData());
+        var permissions = PinUvAuthTokenPermissions.CredentialManagement;
+        var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, null);
+        var getTokenRsp = Connection.SendCommand(getTokenCmd);
+        Assert.Equal(ResponseStatus.Success, getTokenRsp.Status); /*Xunit.Sdk.EqualException
 Assert.Equal() Failure: Values differ
 Expected: Success
 Actual:   Failed*/
-            ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
+        var pinToken = getTokenRsp.GetData();
 
-            var cmd = new EnumerateRpsBeginCommand(pinToken, protocol);
-            EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
+        var cmd = new EnumerateRpsBeginCommand(pinToken, protocol);
+        var rsp = Connection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            (int rpCount, RelyingParty firstRp) = rsp.GetData();
-            Assert.True(rpCount != 0);
+        var (rpCount, firstRp) = rsp.GetData();
+        Assert.True(rpCount != 0);
 
-            var credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol);
-            EnumerateCredentialsBeginResponse credRsp = Connection.SendCommand(credCmd);
-            Assert.Equal(ResponseStatus.Success, credRsp.Status);
+        var credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol);
+        var credRsp = Connection.SendCommand(credCmd);
+        Assert.Equal(ResponseStatus.Success, credRsp.Status);
 
-            (int credCount, CredentialUserInfo userInfo) = credRsp.GetData();
-            Assert.True(credCount != 0);
+        var (credCount, userInfo) = credRsp.GetData();
+        Assert.True(credCount != 0);
 
-            string origDisplayName = userInfo.User.DisplayName ?? "";
+        var origDisplayName = userInfo.User.DisplayName ?? "";
 
-            var newInfo = new UserEntity(userInfo.User.Id)
-            {
-                Name = userInfo.User.Name,
-                DisplayName = origDisplayName + " Updated",
-            };
-
-            var updateCmd = new UpdateUserInfoCommand(userInfo.CredentialId, newInfo, pinToken, protocol);
-            Fido2Response updateRsp = Connection.SendCommand(updateCmd);
-            Assert.Equal(ResponseStatus.Success, updateRsp.Status);
-
-            credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol);
-            credRsp = Connection.SendCommand(credCmd);
-            Assert.Equal(ResponseStatus.Success, credRsp.Status);
-
-            (credCount, userInfo) = credRsp.GetData();
-            Assert.True(credCount != 0);
-
-            Assert.Equal(origDisplayName + " Updated", userInfo.User.DisplayName);
-        }
-
-        [Fact]
-        public void UpdateInfoCommand_Preview_Succeeds()
+        var newInfo = new UserEntity(userInfo.User.Id)
         {
-            byte[] pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            Name = userInfo.User.Name,
+            DisplayName = origDisplayName + " Updated"
+        };
 
-            var protocol = new PinUvAuthProtocolTwo();
-            var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-            GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
-            Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
+        var updateCmd = new UpdateUserInfoCommand(userInfo.CredentialId, newInfo, pinToken, protocol);
+        var updateRsp = Connection.SendCommand(updateCmd);
+        Assert.Equal(ResponseStatus.Success, updateRsp.Status);
 
-            protocol.Encapsulate(getKeyRsp.GetData());
-            var getTokenCmd = new GetPinTokenCommand(protocol, pin);
-            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
-            Assert.Equal(ResponseStatus.Success, getTokenRsp.Status); /*Xunit.Sdk.EqualException
+        credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol);
+        credRsp = Connection.SendCommand(credCmd);
+        Assert.Equal(ResponseStatus.Success, credRsp.Status);
+
+        (credCount, userInfo) = credRsp.GetData();
+        Assert.True(credCount != 0);
+
+        Assert.Equal(origDisplayName + " Updated", userInfo.User.DisplayName);
+    }
+
+    [Fact]
+    public void UpdateInfoCommand_Preview_Succeeds()
+    {
+        byte[] pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+
+        var protocol = new PinUvAuthProtocolTwo();
+        var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
+        var getKeyRsp = Connection.SendCommand(getKeyCmd);
+        Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
+
+        protocol.Encapsulate(getKeyRsp.GetData());
+        var getTokenCmd = new GetPinTokenCommand(protocol, pin);
+        var getTokenRsp = Connection.SendCommand(getTokenCmd);
+        Assert.Equal(ResponseStatus.Success, getTokenRsp.Status); /*Xunit.Sdk.EqualException
 Assert.Equal() Failure: Values differ
 Expected: Success
 Actual:   Failed*/
-            ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
+        var pinToken = getTokenRsp.GetData();
 
-            var cmd = new EnumerateRpsBeginCommand(pinToken, protocol)
-            {
-                IsPreview = true
-            };
-            EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
+        var cmd = new EnumerateRpsBeginCommand(pinToken, protocol)
+        {
+            IsPreview = true
+        };
+        var rsp = Connection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            (int rpCount, RelyingParty firstRp) = rsp.GetData();
-            Assert.True(rpCount != 0);
+        var (rpCount, firstRp) = rsp.GetData();
+        Assert.True(rpCount != 0);
 
-            var credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol)
-            {
-                IsPreview = true
-            };
-            EnumerateCredentialsBeginResponse credRsp = Connection.SendCommand(credCmd);
-            Assert.Equal(ResponseStatus.Success, credRsp.Status);
+        var credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol)
+        {
+            IsPreview = true
+        };
+        var credRsp = Connection.SendCommand(credCmd);
+        Assert.Equal(ResponseStatus.Success, credRsp.Status);
 
-            (int credCount, CredentialUserInfo userInfo) = credRsp.GetData();
-            Assert.True(credCount != 0);
+        var (credCount, userInfo) = credRsp.GetData();
+        Assert.True(credCount != 0);
 
-            string origDisplayName = userInfo.User.DisplayName ?? "";
+        var origDisplayName = userInfo.User.DisplayName ?? "";
 
-            var newInfo = new UserEntity(userInfo.User.Id)
-            {
-                Name = userInfo.User.Name,
-                DisplayName = origDisplayName + " Updated",
-            };
+        var newInfo = new UserEntity(userInfo.User.Id)
+        {
+            Name = userInfo.User.Name,
+            DisplayName = origDisplayName + " Updated"
+        };
 
-            var updateCmd = new UpdateUserInfoCommand(userInfo.CredentialId, newInfo, pinToken, protocol);
-            Fido2Response updateRsp = Connection.SendCommand(updateCmd);
-            Assert.Equal(ResponseStatus.Success, updateRsp.Status);
+        var updateCmd = new UpdateUserInfoCommand(userInfo.CredentialId, newInfo, pinToken, protocol);
+        var updateRsp = Connection.SendCommand(updateCmd);
+        Assert.Equal(ResponseStatus.Success, updateRsp.Status);
 
-            credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol)
-            {
-                IsPreview = true
-            };
-            credRsp = Connection.SendCommand(credCmd);
-            Assert.Equal(ResponseStatus.Success, credRsp.Status);
+        credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol)
+        {
+            IsPreview = true
+        };
+        credRsp = Connection.SendCommand(credCmd);
+        Assert.Equal(ResponseStatus.Success, credRsp.Status);
 
-            (credCount, userInfo) = credRsp.GetData();
-            Assert.True(credCount != 0);
+        (credCount, userInfo) = credRsp.GetData();
+        Assert.True(credCount != 0);
 
-            Assert.Equal(origDisplayName + " Updated", userInfo.User.DisplayName);
-        }
+        Assert.Equal(origDisplayName + " Updated", userInfo.User.DisplayName);
     }
 }

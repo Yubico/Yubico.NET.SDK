@@ -15,57 +15,61 @@
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+public class BaseYubiHsmAuthResponseTests
 {
-    public class BaseYubiHsmAuthResponseTests
+    private const string SecurityStatusNotSatisfiedStatusMessage = "The device was not touched.";
+    private const string AuthenticationMethodBlockedStatusMessage = "The entry is invalid.";
+    private const string ReferenceDataUnusableStatusMessage = "Invalid authentication data.";
+    private const string SuccessStatusMessage = "The command succeeded.";
+
+    [Fact]
+    public void Constructor_GivenSuccessApdu_SetsCorrectStatusWord()
     {
-        public class SampleYubiHsmAuthResponse : BaseYubiHsmAuthResponse
+        var expectedSW = SWConstants.Success;
+
+        var response = new SampleYubiHsmAuthResponse(
+            new ResponseApdu(new byte[] { }, expectedSW));
+
+        Assert.Equal(expectedSW, response.StatusWord);
+    }
+
+    [Theory]
+    [InlineData(SWConstants.SecurityStatusNotSatisfied, ResponseStatus.RetryWithTouch)]
+    [InlineData(SWConstants.AuthenticationMethodBlocked, ResponseStatus.Failed)]
+    [InlineData(SWConstants.ReferenceDataUnusable, ResponseStatus.Failed)]
+    [InlineData(SWConstants.Success, ResponseStatus.Success)]
+    public void Status_GivenStatusWord_ReturnsCorrectResponseStatus(
+        short responseSw,
+        ResponseStatus expectedStatus)
+    {
+        var response = new SampleYubiHsmAuthResponse(
+            new ResponseApdu(new byte[] { }, responseSw));
+
+        Assert.Equal(expectedStatus, response.Status);
+    }
+
+    [Theory]
+    [InlineData(SWConstants.SecurityStatusNotSatisfied, SecurityStatusNotSatisfiedStatusMessage)]
+    [InlineData(SWConstants.AuthenticationMethodBlocked, AuthenticationMethodBlockedStatusMessage)]
+    [InlineData(SWConstants.ReferenceDataUnusable, ReferenceDataUnusableStatusMessage)]
+    [InlineData(SWConstants.Success, SuccessStatusMessage)]
+    public void Status_GivenStatusWord_ReturnsCorrectResponseMessage(
+        short responseSw,
+        string expectedMessage)
+    {
+        var response = new SampleYubiHsmAuthResponse(
+            new ResponseApdu(new byte[] { }, responseSw));
+
+        Assert.Equal(expectedMessage, response.StatusMessage);
+    }
+
+    public class SampleYubiHsmAuthResponse : BaseYubiHsmAuthResponse
+    {
+        public SampleYubiHsmAuthResponse(
+            ResponseApdu responseApdu) : base(responseApdu)
         {
-            public SampleYubiHsmAuthResponse(ResponseApdu responseApdu) : base(responseApdu)
-            {
-            }
-        }
-
-        private const string SecurityStatusNotSatisfiedStatusMessage = "The device was not touched.";
-        private const string AuthenticationMethodBlockedStatusMessage = "The entry is invalid.";
-        private const string ReferenceDataUnusableStatusMessage = "Invalid authentication data.";
-        private const string SuccessStatusMessage = "The command succeeded.";
-
-        [Fact]
-        public void Constructor_GivenSuccessApdu_SetsCorrectStatusWord()
-        {
-            short expectedSW = SWConstants.Success;
-
-            var response = new SampleYubiHsmAuthResponse(
-                new ResponseApdu(new byte[] { }, expectedSW));
-
-            Assert.Equal(expectedSW, response.StatusWord);
-        }
-
-        [Theory]
-        [InlineData(SWConstants.SecurityStatusNotSatisfied, ResponseStatus.RetryWithTouch)]
-        [InlineData(SWConstants.AuthenticationMethodBlocked, ResponseStatus.Failed)]
-        [InlineData(SWConstants.ReferenceDataUnusable, ResponseStatus.Failed)]
-        [InlineData(SWConstants.Success, ResponseStatus.Success)]
-        public void Status_GivenStatusWord_ReturnsCorrectResponseStatus(short responseSw, ResponseStatus expectedStatus)
-        {
-            var response = new SampleYubiHsmAuthResponse(
-                new ResponseApdu(new byte[] { }, responseSw));
-
-            Assert.Equal(expectedStatus, response.Status);
-        }
-
-        [Theory]
-        [InlineData(SWConstants.SecurityStatusNotSatisfied, SecurityStatusNotSatisfiedStatusMessage)]
-        [InlineData(SWConstants.AuthenticationMethodBlocked, AuthenticationMethodBlockedStatusMessage)]
-        [InlineData(SWConstants.ReferenceDataUnusable, ReferenceDataUnusableStatusMessage)]
-        [InlineData(SWConstants.Success, SuccessStatusMessage)]
-        public void Status_GivenStatusWord_ReturnsCorrectResponseMessage(short responseSw, string expectedMessage)
-        {
-            var response = new SampleYubiHsmAuthResponse(
-                new ResponseApdu(new byte[] { }, responseSw));
-
-            Assert.Equal(expectedMessage, response.StatusMessage);
         }
     }
 }

@@ -16,86 +16,94 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+public class QueryFipsModeResponseTests
 {
-    public class QueryFipsModeResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
-        {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void action() => _ = new QueryFipsModeResponse(null);
+        static void action()
+        {
+            _ = new QueryFipsModeResponse(null);
+        }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            _ = Assert.Throws<ArgumentNullException>(action);
-        }
+        _ = Assert.Throws<ArgumentNullException>(action);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
+
+        Assert.Equal(SWConstants.Success, queryFipsModeResponse.StatusWord);
+    }
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
+
+        Assert.Equal(ResponseStatus.Success, queryFipsModeResponse.Status);
+    }
+
+    [Fact]
+    public void GetData_ResponseApduFailed_ThrowsInvalidOperationException()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
+        var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
+
+        void action()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
-
-            var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
-
-            Assert.Equal(SWConstants.Success, queryFipsModeResponse.StatusWord);
+            _ = queryFipsModeResponse.GetData();
         }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+        _ = Assert.Throws<InvalidOperationException>(action);
+    }
+
+    [Fact]
+    public void GetData_ResponseApduWithWrongSizedBuffer_ThrowsMalformedYubiKeyResponseException()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x00, 0x00, 0x90, 0x00 });
+        var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
+
+        void action()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
-
-            var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
-
-            Assert.Equal(ResponseStatus.Success, queryFipsModeResponse.Status);
+            _ = queryFipsModeResponse.GetData();
         }
 
-        [Fact]
-        public void GetData_ResponseApduFailed_ThrowsInvalidOperationException()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
-            var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
+        _ = Assert.Throws<MalformedYubiKeyResponseException>(action);
+    }
 
-            void action() => _ = queryFipsModeResponse.GetData();
+    [Fact]
+    public void GetData_ResponseApduWithModeSetToZero_ReturnsFalse()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x00, 0x90, 0x00 });
+        var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
 
-            _ = Assert.Throws<InvalidOperationException>(action);
-        }
+        var fipsMode = queryFipsModeResponse.GetData();
 
-        [Fact]
-        public void GetData_ResponseApduWithWrongSizedBuffer_ThrowsMalformedYubiKeyResponseException()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x00, 0x00, 0x90, 0x00 });
-            var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
+        Assert.False(fipsMode);
+    }
 
-            void action() => _ = queryFipsModeResponse.GetData();
+    [Fact]
+    public void GetData_ResponseApduWithModeSetToOne_ReturnsTrue()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x01, 0x90, 0x00 });
+        var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
 
-            _ = Assert.Throws<MalformedYubiKeyResponseException>(action);
-        }
+        var fipsMode = queryFipsModeResponse.GetData();
 
-        [Fact]
-        public void GetData_ResponseApduWithModeSetToZero_ReturnsFalse()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x00, 0x90, 0x00 });
-            var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
-
-            bool fipsMode = queryFipsModeResponse.GetData();
-
-            Assert.False(fipsMode);
-        }
-
-        [Fact]
-        public void GetData_ResponseApduWithModeSetToOne_ReturnsTrue()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x01, 0x90, 0x00 });
-            var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
-
-            bool fipsMode = queryFipsModeResponse.GetData();
-
-            Assert.True(fipsMode);
-        }
+        Assert.True(fipsMode);
     }
 }

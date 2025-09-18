@@ -16,132 +16,130 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+public class VersionResponseTests
 {
-    public class VersionResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
-        {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new VersionResponse(null));
+        _ = Assert.Throws<ArgumentNullException>(() => new VersionResponse(null));
 #pragma warning restore CS8625
-        }
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
-            var versionResponse = new VersionResponse(responseApdu);
+        var versionResponse = new VersionResponse(responseApdu);
 
-            Assert.Equal(SWConstants.Success, versionResponse.StatusWord);
-        }
+        Assert.Equal(SWConstants.Success, versionResponse.StatusWord);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
-            var versionResponse = new VersionResponse(responseApdu);
+        var versionResponse = new VersionResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.Success, versionResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.Success, versionResponse.Status);
+    }
 
-        [Fact]
-        public void Version_GivenResponseApdu_MajorEqualsFirstByte()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 23, 45, 31, 0x90, 0x00 });
+    [Fact]
+    public void Version_GivenResponseApdu_MajorEqualsFirstByte()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 23, 45, 31, 0x90, 0x00 });
 
-            var versionResponse = new VersionResponse(responseApdu);
+        var versionResponse = new VersionResponse(responseApdu);
 
-            Assert.Equal(23, versionResponse.GetData().Major);
-        }
+        Assert.Equal(23, versionResponse.GetData().Major);
+    }
 
-        [Fact]
-        public void Version_GivenResponseApdu_MinorEqualsSecondByte()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 42, 12, 45, 0x90, 0x00 });
+    [Fact]
+    public void Version_GivenResponseApdu_MinorEqualsSecondByte()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 42, 12, 45, 0x90, 0x00 });
 
-            var versionResponse = new VersionResponse(responseApdu);
+        var versionResponse = new VersionResponse(responseApdu);
 
-            Assert.Equal(12, versionResponse.GetData().Minor);
-            Assert.Equal(12, versionResponse.GetData().Minor);
-        }
+        Assert.Equal(12, versionResponse.GetData().Minor);
+        Assert.Equal(12, versionResponse.GetData().Minor);
+    }
 
-        [Fact]
-        public void Version_GivenResponseApdu_PatchEqualsThirdByte()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 25, 57, 97, 0x90, 0x00 });
+    [Fact]
+    public void Version_GivenResponseApdu_PatchEqualsThirdByte()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 25, 57, 97, 0x90, 0x00 });
 
-            var versionResponse = new VersionResponse(responseApdu);
+        var versionResponse = new VersionResponse(responseApdu);
 
-            Assert.Equal(97, versionResponse.GetData().Patch);
-        }
+        Assert.Equal(97, versionResponse.GetData().Patch);
+    }
 
-        [Fact]
-        public void Constructor_FailResponseApdu_SetsStatusWordCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_FailResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+        var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var versionResponse = new VersionResponse(responseApdu);
+        var versionResponse = new VersionResponse(responseApdu);
 
-            Assert.Equal(SWConstants.WarningNvmUnchanged, versionResponse.StatusWord);
-        }
+        Assert.Equal(SWConstants.WarningNvmUnchanged, versionResponse.StatusWord);
+    }
 
-        [Fact]
-        public void Constructor_FailResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_FailResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+        var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var versionResponse = new VersionResponse(responseApdu);
+        var versionResponse = new VersionResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.Failed, versionResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.Failed, versionResponse.Status);
+    }
 
-        [Fact]
-        public void Construct_FailResponseApdu_ExceptionOnGetData()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Construct_FailResponseApdu_ExceptionOnGetData()
+    {
+        var sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+        var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var versionResponse = new VersionResponse(responseApdu);
+        var versionResponse = new VersionResponse(responseApdu);
 
-            _ = Assert.Throws<InvalidOperationException>(() => versionResponse.GetData());
-        }
+        _ = Assert.Throws<InvalidOperationException>(() => versionResponse.GetData());
+    }
 
-        [Fact]
-        public void FailResponseApdu_WithData_ExceptionOnGetData()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+    [Fact]
+    public void FailResponseApdu_WithData_ExceptionOnGetData()
+    {
+        var sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+        var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
-            var versionResponse = new VersionResponse(responseApdu);
+        var versionResponse = new VersionResponse(responseApdu);
 
-            _ = Assert.Throws<InvalidOperationException>(() => versionResponse.GetData());
-        }
+        _ = Assert.Throws<InvalidOperationException>(() => versionResponse.GetData());
+    }
 
-        [Fact]
-        public void Construct_ShortResponseApdu_ExceptionOnGetData()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, sw1, sw2 });
+    [Fact]
+    public void Construct_ShortResponseApdu_ExceptionOnGetData()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, sw1, sw2 });
 
-            var versionResponse = new VersionResponse(responseApdu);
+        var versionResponse = new VersionResponse(responseApdu);
 
-            _ = Assert.Throws<MalformedYubiKeyResponseException>(() => versionResponse.GetData());
-        }
-
+        _ = Assert.Throws<MalformedYubiKeyResponseException>(() => versionResponse.GetData());
     }
 }

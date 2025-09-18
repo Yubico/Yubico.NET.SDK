@@ -16,53 +16,55 @@ using System;
 using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+public class GetAssertionParametersTests
 {
-    public class GetAssertionParametersTests
+    [Fact]
+    public void Constructor_Succeeds()
     {
-        [Fact]
-        public void Constructor_Succeeds()
+        var clientDataHash = new byte[]
         {
-            byte[] clientDataHash = new byte[] {
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
-            };
-            byte[] credId = new byte[] {
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
-            };
-            byte[] pinUvAuth = new byte[] {
-                0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70,
-                0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70
-            };
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
+        };
+        var credId = new byte[]
+        {
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
+        };
+        var pinUvAuth = new byte[]
+        {
+            0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70,
+            0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70
+        };
 
-            PinUvAuthProtocol protocol = PinUvAuthProtocol.ProtocolTwo;
-            var authData = new ReadOnlyMemory<byte>(pinUvAuth);
-            if (protocol == PinUvAuthProtocol.ProtocolOne)
-            {
-                authData = authData.Slice(0, 16);
-            }
-
-            var rp = new RelyingParty("SomeRpId")
-            {
-                Name = "SomeRpName",
-            };
-            var credentialId = new CredentialId()
-            {
-                Id = credId,
-            };
-
-            var assertionParams = new GetAssertionParameters(rp, clientDataHash)
-            {
-                Protocol = protocol,
-                PinUvAuthParam = authData,
-            };
-            assertionParams.AllowCredential(credentialId);
-            assertionParams.AddExtension("fakeExtension", new byte[] { 0x04 });
-            assertionParams.AddOption("up", true);
-
-            byte[] encodedParams = assertionParams.CborEncode();
-            Assert.Equal(0xA7, encodedParams[0]);
+        var protocol = PinUvAuthProtocol.ProtocolTwo;
+        var authData = new ReadOnlyMemory<byte>(pinUvAuth);
+        if (protocol == PinUvAuthProtocol.ProtocolOne)
+        {
+            authData = authData.Slice(0, 16);
         }
+
+        var rp = new RelyingParty("SomeRpId")
+        {
+            Name = "SomeRpName"
+        };
+        var credentialId = new CredentialId
+        {
+            Id = credId
+        };
+
+        var assertionParams = new GetAssertionParameters(rp, clientDataHash)
+        {
+            Protocol = protocol,
+            PinUvAuthParam = authData
+        };
+        assertionParams.AllowCredential(credentialId);
+        assertionParams.AddExtension("fakeExtension", new byte[] { 0x04 });
+        assertionParams.AddOption("up", true);
+
+        var encodedParams = assertionParams.CborEncode();
+        Assert.Equal(0xA7, encodedParams[0]);
     }
 }

@@ -17,374 +17,394 @@ using System.Security;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
+namespace Yubico.YubiKey.YubiHsmAuth;
 
-namespace Yubico.YubiKey.YubiHsmAuth
+public class SessionGetAes128SessionKeysTests
 {
-    public class SessionGetAes128SessionKeysTests
+    #region NonKeyCollector
+
+    #region password
+
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
+    public void GetAes128SessionKeys_TouchNotRequired_ReturnsTrueAndSessionKeys()
     {
-        #region NonKeyCollector
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
 
-        #region password
-        [SkippableFact(typeof(DeviceNotFoundException))]
-        [Trait(TraitTypes.Category, TestCategories.Simple)]
-        public void GetAes128SessionKeys_TouchNotRequired_ReturnsTrueAndSessionKeys()
+        // "default" credential does not require touch
+        YhaTestUtilities.AddDefaultAes128Credential(testDevice);
+
+        SessionKeys keys;
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
         {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-
-            // "default" credential does not require touch
-            YhaTestUtilities.AddDefaultAes128Credential(testDevice);
-
-            SessionKeys keys;
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                // Test
-                keys = yubiHsmAuthSession.GetAes128SessionKeys(
-                    YhaTestUtilities.DefaultCredLabel,
-                    YhaTestUtilities.DefaultCredPassword,
-                    YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge);
-            }
-
-            // Postconditions
-            Assert.NotNull(keys);
+            // Test
+            keys = yubiHsmAuthSession.GetAes128SessionKeys(
+                YhaTestUtilities.DefaultCredLabel,
+                YhaTestUtilities.DefaultCredPassword,
+                YhaTestUtilities.DefaultHostChallenge,
+                YhaTestUtilities.DefaultHsmDeviceChallenge);
         }
 
-        [SkippableFact(typeof(DeviceNotFoundException))]
-        [Trait(TraitTypes.Category, TestCategories.Simple)]
-        public void GetAes128SessionKeys_WrongCredPassword_ThrowsSecurityException()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-            YhaTestUtilities.AddDefaultAes128Credential(testDevice);
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                // Test & postcondition
-                void getSessionKeys() => yubiHsmAuthSession.GetAes128SessionKeys(
-                    YhaTestUtilities.DefaultCredLabel,
-                    YhaTestUtilities.AlternateCredPassword,
-                    YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge);
-
-                _ = Assert.Throws<SecurityException>(getSessionKeys);
-            }
-        }
-
-        #endregion
-
-        #region touch
-
-        // When touch is required, the user should touch the YubiKey.
-        //
-        // It's recommended to use a debug break point in either the
-        // key collector or GetAes128SessionKeys(...) so that you're
-        // aware of when touch is about to be expected.
-        [Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
-        [Fact(Skip = "Requires user interaction")]
-        public void GetAes128SessionKeys_TouchRequired_ReturnsSessionKeys()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-
-            // "alternate" credential does not require touch
-            YhaTestUtilities.AddAlternateAes128Credential(testDevice);
-
-            SessionKeys keys;
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                // Test
-                keys = yubiHsmAuthSession.GetAes128SessionKeys(
-                    YhaTestUtilities.AlternateCredLabel,
-                    YhaTestUtilities.AlternateCredPassword,
-                    YhaTestUtilities.AlternateHostChallenge,
-                    YhaTestUtilities.AlternateHsmDeviceChallenge);
-            }
-
-            // Postconditions
-            Assert.NotNull(keys);
-        }
-
-        [Fact]
-        public void GetAes128SessionKeys_TouchTimeout_ThrowsTimeoutException()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-
-            // "alternate" credential does not require touch
-            YhaTestUtilities.AddAlternateAes128Credential(testDevice);
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                // Test & postcondition
-                void getSessionKeys() => yubiHsmAuthSession.GetAes128SessionKeys(
-                    YhaTestUtilities.AlternateCredLabel,
-                    YhaTestUtilities.AlternateCredPassword,
-                    YhaTestUtilities.AlternateHostChallenge,
-                    YhaTestUtilities.AlternateHsmDeviceChallenge);
-
-                _ = Assert.Throws<TimeoutException>(getSessionKeys);
-            }
-        }
-
-        #endregion
-
-        [Fact]
-        public void GetAes128SessionKeys_CredNotFound_ThrowsInvalidOpEx()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-            YhaTestUtilities.AddDefaultAes128Credential(testDevice);
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                // Use incorrect management key, exhausting retries
-                yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.DefaultValueCollectorDelegate;
-
-                // Test & postcondition
-                void getSessionKeys() => yubiHsmAuthSession.GetAes128SessionKeys(
-                    YhaTestUtilities.AlternateCredLabel,
-                    YhaTestUtilities.DefaultCredPassword,
-                    YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge);
-
-                _ = Assert.Throws<InvalidOperationException>(getSessionKeys);
-            }
-        }
-
-        #endregion
-
-        #region KeyCollector
-
-        #region password
-
-        [Fact]
-        public void TryGetAes128SessionKeys_TouchNotRequired_ReturnsTrueAndSessionKeys()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-
-            // "default" credential does not require touch
-            YhaTestUtilities.AddDefaultAes128Credential(testDevice);
-
-            bool result;
-            SessionKeys? keys;
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.DefaultValueCollectorDelegate;
-
-                // Test
-                result = yubiHsmAuthSession.TryGetAes128SessionKeys(
-                    YhaTestUtilities.DefaultCredLabel,
-                    YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge,
-                    out keys);
-            }
-
-            // Postconditions
-            Assert.True(result);
-            Assert.NotNull(keys);
-        }
-
-        [Fact]
-        public void TryGetAes128SessionKeys_CredPasswordRetry_ReturnsTrueAndSessionKeys()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-
-            // "default" credential does not require touch
-            YhaTestUtilities.AddDefaultAes128Credential(testDevice);
-
-            bool result;
-            SessionKeys? keys;
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                var keyCollector = new SimpleKeyCollector
-                {
-                    // Start with the incorrect cred password, forcing a retry
-                    UseDefaultValue = false
-                };
-                yubiHsmAuthSession.KeyCollector = keyCollector.FlipFlopCollectorDelegate;
-
-                // Test
-                result = yubiHsmAuthSession.TryGetAes128SessionKeys(
-                    YhaTestUtilities.DefaultCredLabel,
-                    YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge,
-                    out keys);
-            }
-
-            // Postconditions
-            Assert.True(result);
-            Assert.NotNull(keys);
-        }
-
-        [Fact]
-        public void TryGetAes128SessionKeys_UserCancelsCredPassword_ReturnsFalseAndNoSessionKeys()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-
-            // "default" credential does not require touch
-            YhaTestUtilities.AddDefaultAes128Credential(testDevice);
-
-            bool result;
-            SessionKeys? keys;
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.ReturnsFalseCollectorDelegate;
-
-                // Test
-                result = yubiHsmAuthSession.TryGetAes128SessionKeys(
-                    YhaTestUtilities.DefaultCredLabel,
-                    YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge,
-                    out keys);
-            }
-
-            // Postconditions
-            Assert.False(result);
-            Assert.Null(keys);
-        }
-
-        [Fact]
-        public void TryGetAes128SessionKeys_WrongCredPasswordNoRetries_ThrowsSecurityException()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-
-            // "default" credential does not require touch
-            YhaTestUtilities.AddDefaultAes128Credential(testDevice);
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                // Use incorrect cred password, exhausting retries
-                yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.AlternateValueCollectorDelegate;
-
-                // Test & postcondition
-                void tryGetSessionKeys() => yubiHsmAuthSession.TryGetAes128SessionKeys(
-                    YhaTestUtilities.DefaultCredLabel,
-                    YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge,
-                    out _);
-
-                _ = Assert.Throws<SecurityException>(tryGetSessionKeys);
-            }
-        }
-
-        #endregion
-
-        #region touch
-
-        // When touch is requested, the user should touch the YubiKey.
-        //
-        // It's recommended to use a debug break point in either the
-        // key collector or TryGetAes128SessionKeys(...) so that you're
-        // aware of when touch is about to be expected.
-        [Fact(Skip = "Requires user interaction")]
-        public void TryGetAes128SessionKeys_Touch_ReturnsTrueAndSessionKeys()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-
-            // "alternate" credential requires touch
-            YhaTestUtilities.AddAlternateAes128Credential(testDevice);
-
-            bool result;
-            SessionKeys? keys;
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.AlternateValueCollectorDelegate;
-
-                // Test
-                result = yubiHsmAuthSession.TryGetAes128SessionKeys(
-                    YhaTestUtilities.AlternateCredLabel,
-                    YhaTestUtilities.AlternateHostChallenge,
-                    YhaTestUtilities.AlternateHsmDeviceChallenge,
-                    out keys);
-            }
-
-            // Postconditions
-            Assert.True(result);
-            Assert.NotNull(keys);
-        }
-
-        [Fact]
-        public void TryGetAes128SessionKeys_TouchTimeout_ThrowsTimeoutException()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-            YhaTestUtilities.AddAlternateAes128Credential(testDevice);
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                // Use incorrect management key, exhausting retries
-                yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.AlternateValueCollectorDelegate;
-
-                // Test & postcondition
-                void tryGetSessionKeys() => yubiHsmAuthSession.TryGetAes128SessionKeys(
-                    YhaTestUtilities.AlternateCredLabel,
-                    YhaTestUtilities.AlternateHostChallenge,
-                    YhaTestUtilities.AlternateHsmDeviceChallenge,
-                    out _);
-
-                _ = Assert.Throws<TimeoutException>(tryGetSessionKeys);
-            }
-        }
-
-        #endregion
-
-        [Fact]
-        public void TryGetAes128SessionKeys_CredNotFound_ThrowsInvalidOpEx()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-            YhaTestUtilities.AddDefaultAes128Credential(testDevice);
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                // Use incorrect management key, exhausting retries
-                yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.DefaultValueCollectorDelegate;
-
-                // Test & postcondition
-                void tryGetSessionKeys() => yubiHsmAuthSession.TryGetAes128SessionKeys(
-                    YhaTestUtilities.AlternateCredLabel,
-                    YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge,
-                    out _);
-
-                _ = Assert.Throws<InvalidOperationException>(tryGetSessionKeys);
-            }
-        }
-
-        [Fact]
-        public void TryGetAes128SessionKeys_NoKeyCollector_ThrowsInvalidOpEx()
-        {
-            // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-            YhaTestUtilities.AddDefaultAes128Credential(testDevice);
-
-            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
-            {
-                // Leave yubiHsmAuthSession.KeyCollector set to its default value of `null`
-
-                // Test & postcondition
-                void tryGetSessionKeys() => yubiHsmAuthSession.TryGetAes128SessionKeys(
-                    YhaTestUtilities.DefaultCredLabel,
-                    YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge,
-                    out _);
-
-                _ = Assert.Throws<InvalidOperationException>(tryGetSessionKeys);
-            }
-        }
-
-        #endregion KeyCollector
+        // Postconditions
+        Assert.NotNull(keys);
     }
+
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    [Trait(TraitTypes.Category, TestCategories.Simple)]
+    public void GetAes128SessionKeys_WrongCredPassword_ThrowsSecurityException()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+        YhaTestUtilities.AddDefaultAes128Credential(testDevice);
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            // Test & postcondition
+            void getSessionKeys()
+            {
+                yubiHsmAuthSession.GetAes128SessionKeys(
+                    YhaTestUtilities.DefaultCredLabel,
+                    YhaTestUtilities.AlternateCredPassword,
+                    YhaTestUtilities.DefaultHostChallenge,
+                    YhaTestUtilities.DefaultHsmDeviceChallenge);
+            }
+
+            _ = Assert.Throws<SecurityException>(getSessionKeys);
+        }
+    }
+
+    #endregion
+
+    #region touch
+
+    // When touch is required, the user should touch the YubiKey.
+    //
+    // It's recommended to use a debug break point in either the
+    // key collector or GetAes128SessionKeys(...) so that you're
+    // aware of when touch is about to be expected.
+    [Trait(TraitTypes.Category, TestCategories.RequiresTouch)]
+    [Fact(Skip = "Requires user interaction")]
+    public void GetAes128SessionKeys_TouchRequired_ReturnsSessionKeys()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+
+        // "alternate" credential does not require touch
+        YhaTestUtilities.AddAlternateAes128Credential(testDevice);
+
+        SessionKeys keys;
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            // Test
+            keys = yubiHsmAuthSession.GetAes128SessionKeys(
+                YhaTestUtilities.AlternateCredLabel,
+                YhaTestUtilities.AlternateCredPassword,
+                YhaTestUtilities.AlternateHostChallenge,
+                YhaTestUtilities.AlternateHsmDeviceChallenge);
+        }
+
+        // Postconditions
+        Assert.NotNull(keys);
+    }
+
+    [Fact]
+    public void GetAes128SessionKeys_TouchTimeout_ThrowsTimeoutException()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+
+        // "alternate" credential does not require touch
+        YhaTestUtilities.AddAlternateAes128Credential(testDevice);
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            // Test & postcondition
+            void getSessionKeys()
+            {
+                yubiHsmAuthSession.GetAes128SessionKeys(
+                    YhaTestUtilities.AlternateCredLabel,
+                    YhaTestUtilities.AlternateCredPassword,
+                    YhaTestUtilities.AlternateHostChallenge,
+                    YhaTestUtilities.AlternateHsmDeviceChallenge);
+            }
+
+            _ = Assert.Throws<TimeoutException>(getSessionKeys);
+        }
+    }
+
+    #endregion
+
+    [Fact]
+    public void GetAes128SessionKeys_CredNotFound_ThrowsInvalidOpEx()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+        YhaTestUtilities.AddDefaultAes128Credential(testDevice);
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            // Use incorrect management key, exhausting retries
+            yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.DefaultValueCollectorDelegate;
+
+            // Test & postcondition
+            void getSessionKeys()
+            {
+                yubiHsmAuthSession.GetAes128SessionKeys(
+                    YhaTestUtilities.AlternateCredLabel,
+                    YhaTestUtilities.DefaultCredPassword,
+                    YhaTestUtilities.DefaultHostChallenge,
+                    YhaTestUtilities.DefaultHsmDeviceChallenge);
+            }
+
+            _ = Assert.Throws<InvalidOperationException>(getSessionKeys);
+        }
+    }
+
+    #endregion
+
+    #region KeyCollector
+
+    #region password
+
+    [Fact]
+    public void TryGetAes128SessionKeys_TouchNotRequired_ReturnsTrueAndSessionKeys()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+
+        // "default" credential does not require touch
+        YhaTestUtilities.AddDefaultAes128Credential(testDevice);
+
+        bool result;
+        SessionKeys? keys;
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.DefaultValueCollectorDelegate;
+
+            // Test
+            result = yubiHsmAuthSession.TryGetAes128SessionKeys(
+                YhaTestUtilities.DefaultCredLabel,
+                YhaTestUtilities.DefaultHostChallenge,
+                YhaTestUtilities.DefaultHsmDeviceChallenge,
+                out keys);
+        }
+
+        // Postconditions
+        Assert.True(result);
+        Assert.NotNull(keys);
+    }
+
+    [Fact]
+    public void TryGetAes128SessionKeys_CredPasswordRetry_ReturnsTrueAndSessionKeys()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+
+        // "default" credential does not require touch
+        YhaTestUtilities.AddDefaultAes128Credential(testDevice);
+
+        bool result;
+        SessionKeys? keys;
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            var keyCollector = new SimpleKeyCollector
+            {
+                // Start with the incorrect cred password, forcing a retry
+                UseDefaultValue = false
+            };
+            yubiHsmAuthSession.KeyCollector = keyCollector.FlipFlopCollectorDelegate;
+
+            // Test
+            result = yubiHsmAuthSession.TryGetAes128SessionKeys(
+                YhaTestUtilities.DefaultCredLabel,
+                YhaTestUtilities.DefaultHostChallenge,
+                YhaTestUtilities.DefaultHsmDeviceChallenge,
+                out keys);
+        }
+
+        // Postconditions
+        Assert.True(result);
+        Assert.NotNull(keys);
+    }
+
+    [Fact]
+    public void TryGetAes128SessionKeys_UserCancelsCredPassword_ReturnsFalseAndNoSessionKeys()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+
+        // "default" credential does not require touch
+        YhaTestUtilities.AddDefaultAes128Credential(testDevice);
+
+        bool result;
+        SessionKeys? keys;
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.ReturnsFalseCollectorDelegate;
+
+            // Test
+            result = yubiHsmAuthSession.TryGetAes128SessionKeys(
+                YhaTestUtilities.DefaultCredLabel,
+                YhaTestUtilities.DefaultHostChallenge,
+                YhaTestUtilities.DefaultHsmDeviceChallenge,
+                out keys);
+        }
+
+        // Postconditions
+        Assert.False(result);
+        Assert.Null(keys);
+    }
+
+    [Fact]
+    public void TryGetAes128SessionKeys_WrongCredPasswordNoRetries_ThrowsSecurityException()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+
+        // "default" credential does not require touch
+        YhaTestUtilities.AddDefaultAes128Credential(testDevice);
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            // Use incorrect cred password, exhausting retries
+            yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.AlternateValueCollectorDelegate;
+
+            // Test & postcondition
+            void tryGetSessionKeys()
+            {
+                yubiHsmAuthSession.TryGetAes128SessionKeys(
+                    YhaTestUtilities.DefaultCredLabel,
+                    YhaTestUtilities.DefaultHostChallenge,
+                    YhaTestUtilities.DefaultHsmDeviceChallenge,
+                    out _);
+            }
+
+            _ = Assert.Throws<SecurityException>(tryGetSessionKeys);
+        }
+    }
+
+    #endregion
+
+    #region touch
+
+    // When touch is requested, the user should touch the YubiKey.
+    //
+    // It's recommended to use a debug break point in either the
+    // key collector or TryGetAes128SessionKeys(...) so that you're
+    // aware of when touch is about to be expected.
+    [Fact(Skip = "Requires user interaction")]
+    public void TryGetAes128SessionKeys_Touch_ReturnsTrueAndSessionKeys()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+
+        // "alternate" credential requires touch
+        YhaTestUtilities.AddAlternateAes128Credential(testDevice);
+
+        bool result;
+        SessionKeys? keys;
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.AlternateValueCollectorDelegate;
+
+            // Test
+            result = yubiHsmAuthSession.TryGetAes128SessionKeys(
+                YhaTestUtilities.AlternateCredLabel,
+                YhaTestUtilities.AlternateHostChallenge,
+                YhaTestUtilities.AlternateHsmDeviceChallenge,
+                out keys);
+        }
+
+        // Postconditions
+        Assert.True(result);
+        Assert.NotNull(keys);
+    }
+
+    [Fact]
+    public void TryGetAes128SessionKeys_TouchTimeout_ThrowsTimeoutException()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+        YhaTestUtilities.AddAlternateAes128Credential(testDevice);
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            // Use incorrect management key, exhausting retries
+            yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.AlternateValueCollectorDelegate;
+
+            // Test & postcondition
+            void tryGetSessionKeys()
+            {
+                yubiHsmAuthSession.TryGetAes128SessionKeys(
+                    YhaTestUtilities.AlternateCredLabel,
+                    YhaTestUtilities.AlternateHostChallenge,
+                    YhaTestUtilities.AlternateHsmDeviceChallenge,
+                    out _);
+            }
+
+            _ = Assert.Throws<TimeoutException>(tryGetSessionKeys);
+        }
+    }
+
+    #endregion
+
+    [Fact]
+    public void TryGetAes128SessionKeys_CredNotFound_ThrowsInvalidOpEx()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+        YhaTestUtilities.AddDefaultAes128Credential(testDevice);
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            // Use incorrect management key, exhausting retries
+            yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.DefaultValueCollectorDelegate;
+
+            // Test & postcondition
+            void tryGetSessionKeys()
+            {
+                yubiHsmAuthSession.TryGetAes128SessionKeys(
+                    YhaTestUtilities.AlternateCredLabel,
+                    YhaTestUtilities.DefaultHostChallenge,
+                    YhaTestUtilities.DefaultHsmDeviceChallenge,
+                    out _);
+            }
+
+            _ = Assert.Throws<InvalidOperationException>(tryGetSessionKeys);
+        }
+    }
+
+    [Fact]
+    public void TryGetAes128SessionKeys_NoKeyCollector_ThrowsInvalidOpEx()
+    {
+        // Preconditions
+        var testDevice = YhaTestUtilities.GetCleanDevice();
+        YhaTestUtilities.AddDefaultAes128Credential(testDevice);
+
+        using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+        {
+            // Leave yubiHsmAuthSession.KeyCollector set to its default value of `null`
+
+            // Test & postcondition
+            void tryGetSessionKeys()
+            {
+                yubiHsmAuthSession.TryGetAes128SessionKeys(
+                    YhaTestUtilities.DefaultCredLabel,
+                    YhaTestUtilities.DefaultHostChallenge,
+                    YhaTestUtilities.DefaultHsmDeviceChallenge,
+                    out _);
+            }
+
+            _ = Assert.Throws<InvalidOperationException>(tryGetSessionKeys);
+        }
+    }
+
+    #endregion KeyCollector
 }

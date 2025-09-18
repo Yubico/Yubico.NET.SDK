@@ -16,66 +16,66 @@ using System;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Otp.Operations
+namespace Yubico.YubiKey.Otp.Operations;
+
+public class ConfigureYubicoOtpTests : IDisposable
 {
-    public class ConfigureYubicoOtpTests : IDisposable
+    private static readonly byte[] _validKey = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+    private readonly ConfigureYubicoOtp _op;
+    private readonly HollowOtpSession _session;
+    private bool _disposedValue;
+
+    public ConfigureYubicoOtpTests()
     {
-        private readonly HollowOtpSession _session;
-        private readonly ConfigureYubicoOtp _op;
-        private readonly static byte[] _validKey = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-        private bool _disposedValue;
+        _session = new HollowOtpSession(FirmwareVersion.V5_4_3);
+        _op = _session.ConfigureYubicoOtp(Slot.ShortPress);
+    }
 
-        public ConfigureYubicoOtpTests()
-        {
-            _session = new HollowOtpSession(FirmwareVersion.V5_4_3);
-            _op = _session.ConfigureYubicoOtp(Slot.ShortPress);
-        }
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-        [Fact]
-        public void TestNoSlot()
-        {
-            ConfigureYubicoOtp op = _session.ConfigureYubicoOtp(Slot.None);
-            InvalidOperationException ex =
-                Assert.Throws<InvalidOperationException>(() => op.Execute());
-            Assert.Equal(ExceptionMessages.SlotNotSet, ex.Message);
-        }
+    [Fact]
+    public void TestNoSlot()
+    {
+        var op = _session.ConfigureYubicoOtp(Slot.None);
+        var ex =
+            Assert.Throws<InvalidOperationException>(() => op.Execute());
+        Assert.Equal(ExceptionMessages.SlotNotSet, ex.Message);
+    }
 
-        [Fact]
-        public void TestGeneratedAndSpecifiedKey()
-        {
-            _ = _op.GenerateKey(new byte[ConfigureYubicoOtp.KeySize]);
-            InvalidOperationException ex =
-                Assert.Throws<InvalidOperationException>(() => _op.UseKey(_validKey));
-            Assert.Equal(ExceptionMessages.CantSpecifyKeyAndGenerate, ex.Message);
-        }
+    [Fact]
+    public void TestGeneratedAndSpecifiedKey()
+    {
+        _ = _op.GenerateKey(new byte[ConfigureYubicoOtp.KeySize]);
+        var ex =
+            Assert.Throws<InvalidOperationException>(() => _op.UseKey(_validKey));
+        Assert.Equal(ExceptionMessages.CantSpecifyKeyAndGenerate, ex.Message);
+    }
 
-        [Fact]
-        public void TestSpecifiedAndGeneratedKey()
-        {
-            _ = _op.UseKey(_validKey);
-            InvalidOperationException ex =
-                Assert.Throws<InvalidOperationException>(
-                    () => _op.GenerateKey(new byte[ConfigureYubicoOtp.KeySize]));
-            Assert.Equal(ExceptionMessages.CantSpecifyKeyAndGenerate, ex.Message);
-        }
+    [Fact]
+    public void TestSpecifiedAndGeneratedKey()
+    {
+        _ = _op.UseKey(_validKey);
+        var ex =
+            Assert.Throws<InvalidOperationException>(() => _op.GenerateKey(new byte[ConfigureYubicoOtp.KeySize]));
+        Assert.Equal(ExceptionMessages.CantSpecifyKeyAndGenerate, ex.Message);
+    }
 
-        protected virtual void Dispose(bool disposing)
+    protected virtual void Dispose(
+        bool disposing)
+    {
+        if (!_disposedValue)
         {
-            if (!_disposedValue)
+            if (disposing)
             {
-                if (disposing)
-                {
-                    _session.Dispose();
-                }
-                _disposedValue = true;
+                _session.Dispose();
             }
-        }
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            _disposedValue = true;
         }
     }
 }

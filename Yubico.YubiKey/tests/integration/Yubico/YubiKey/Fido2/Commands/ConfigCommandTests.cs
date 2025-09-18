@@ -16,155 +16,154 @@ using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+[Trait(TraitTypes.Category, TestCategories.Elevated)]
+public class ConfigCommandTests : NeedPinToken
 {
-    [Trait(TraitTypes.Category, TestCategories.Elevated)]
-    public class ConfigCommandTests : NeedPinToken
+    public ConfigCommandTests()
+        : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
     {
-        public ConfigCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
-        {
-        }
+    }
 
-        [SkippableFact(typeof(DeviceNotFoundException))]
-        public void EnableEnterpriseAttestationCommand_Succeeds()
-        {
-            var infoCmd = new GetInfoCommand();
-            GetInfoResponse infoRsp = Connection.SendCommand(infoCmd);
-            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
-            AuthenticatorInfo authInfo = infoRsp.GetData();
-            Assert.NotNull(authInfo.Options);
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    public void EnableEnterpriseAttestationCommand_Succeeds()
+    {
+        var infoCmd = new GetInfoCommand();
+        var infoRsp = Connection.SendCommand(infoCmd);
+        Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+        var authInfo = infoRsp.GetData();
+        Assert.NotNull(authInfo.Options);
 
-            var protocol = new PinUvAuthProtocolTwo();
-            bool isValid = GetPinToken(
-                protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out byte[] pinToken);
-            Assert.True(isValid);
+        var protocol = new PinUvAuthProtocolTwo();
+        var isValid = GetPinToken(
+            protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out var pinToken);
+        Assert.True(isValid);
 
-            var cmd = new EnableEnterpriseAttestationCommand(pinToken, protocol);
-            Fido2Response rsp = Connection.SendCommand(cmd);
+        var cmd = new EnableEnterpriseAttestationCommand(pinToken, protocol);
+        var rsp = Connection.SendCommand(cmd);
 
-            Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
+        Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
 
-            infoRsp = Connection.SendCommand(infoCmd);
-            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
-            authInfo = infoRsp.GetData();
-            Assert.NotNull(authInfo.Options);
-        }
+        infoRsp = Connection.SendCommand(infoCmd);
+        Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+        authInfo = infoRsp.GetData();
+        Assert.NotNull(authInfo.Options);
+    }
 
-        [SkippableFact(typeof(DeviceNotFoundException))]
-        public void ToggleAlwaysUvCommand_Succeeds()
-        {
-            var infoCmd = new GetInfoCommand();
-            GetInfoResponse infoRsp = Connection.SendCommand(infoCmd);
-            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
-            AuthenticatorInfo authInfo = infoRsp.GetData();
-            Assert.NotNull(authInfo.Options);
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    public void ToggleAlwaysUvCommand_Succeeds()
+    {
+        var infoCmd = new GetInfoCommand();
+        var infoRsp = Connection.SendCommand(infoCmd);
+        Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+        var authInfo = infoRsp.GetData();
+        Assert.NotNull(authInfo.Options);
 
-            var protocol = new PinUvAuthProtocolTwo();
-            bool isValid = GetPinToken(
-                protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out byte[] pinToken);
-            Assert.True(isValid);
+        var protocol = new PinUvAuthProtocolTwo();
+        var isValid = GetPinToken(
+            protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out var pinToken);
+        Assert.True(isValid);
 
-            var cmd = new ToggleAlwaysUvCommand(pinToken, protocol);
-            Fido2Response rsp = Connection.SendCommand(cmd);
+        var cmd = new ToggleAlwaysUvCommand(pinToken, protocol);
+        var rsp = Connection.SendCommand(cmd);
 
-            Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
+        Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
 
-            infoRsp = Connection.SendCommand(infoCmd);
-            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
-            authInfo = infoRsp.GetData();
-            Assert.NotNull(authInfo.Options);
-        }
+        infoRsp = Connection.SendCommand(infoCmd);
+        Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+        authInfo = infoRsp.GetData();
+        Assert.NotNull(authInfo.Options);
+    }
 
-        [SkippableFact(typeof(DeviceNotFoundException))]
-        public void SetMinPinLengthCommand_Pin_Succeeds()
-        {
-            var infoCmd = new GetInfoCommand();
-            GetInfoResponse infoRsp = Connection.SendCommand(infoCmd);
-            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
-            AuthenticatorInfo authInfo = infoRsp.GetData();
-            Assert.NotNull(authInfo.Options);
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    public void SetMinPinLengthCommand_Pin_Succeeds()
+    {
+        var infoCmd = new GetInfoCommand();
+        var infoRsp = Connection.SendCommand(infoCmd);
+        Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+        var authInfo = infoRsp.GetData();
+        Assert.NotNull(authInfo.Options);
 
-            var protocol = new PinUvAuthProtocolTwo();
-            bool isValid = GetPinToken(
-                protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out byte[] pinToken);
-            Assert.True(isValid);
+        var protocol = new PinUvAuthProtocolTwo();
+        var isValid = GetPinToken(
+            protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out var pinToken);
+        Assert.True(isValid);
 
-            var cmd = new SetMinPinLengthCommand(7, null, null, pinToken, protocol);
-            Fido2Response rsp = Connection.SendCommand(cmd);
+        var cmd = new SetMinPinLengthCommand(7, null, null, pinToken, protocol);
+        var rsp = Connection.SendCommand(cmd);
 
-            Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
+        Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
 
-            infoRsp = Connection.SendCommand(infoCmd);
-            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
-            authInfo = infoRsp.GetData();
-            Assert.NotNull(authInfo.Options);
-        }
+        infoRsp = Connection.SendCommand(infoCmd);
+        Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+        authInfo = infoRsp.GetData();
+        Assert.NotNull(authInfo.Options);
+    }
 
-        [SkippableFact(typeof(DeviceNotFoundException))]
-        public void SetMinPinLengthCommand_ForceChange_Succeeds()
-        {
-            var infoCmd = new GetInfoCommand();
-            GetInfoResponse infoRsp = Connection.SendCommand(infoCmd);
-            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
-            AuthenticatorInfo authInfo = infoRsp.GetData();
-            Assert.NotNull(authInfo.Options);
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    public void SetMinPinLengthCommand_ForceChange_Succeeds()
+    {
+        var infoCmd = new GetInfoCommand();
+        var infoRsp = Connection.SendCommand(infoCmd);
+        Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+        var authInfo = infoRsp.GetData();
+        Assert.NotNull(authInfo.Options);
 
-            var protocol = new PinUvAuthProtocolTwo();
-            bool isValid = GetPinToken(
-                protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out byte[] pinToken);
-            Assert.True(isValid);
+        var protocol = new PinUvAuthProtocolTwo();
+        var isValid = GetPinToken(
+            protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out var pinToken);
+        Assert.True(isValid);
 
-            var cmd = new SetMinPinLengthCommand(null, null, true, pinToken, protocol);
-            Fido2Response rsp = Connection.SendCommand(cmd);
+        var cmd = new SetMinPinLengthCommand(null, null, true, pinToken, protocol);
+        var rsp = Connection.SendCommand(cmd);
 
-            Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
+        Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
 
-            infoRsp = Connection.SendCommand(infoCmd);
-            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
-            authInfo = infoRsp.GetData();
-            Assert.True(authInfo.ForcePinChange);
+        infoRsp = Connection.SendCommand(infoCmd);
+        Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+        authInfo = infoRsp.GetData();
+        Assert.True(authInfo.ForcePinChange);
 
-            byte[] currentPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-            byte[] newPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
+        byte[] currentPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+        byte[] newPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
 
-            var changePinCmd = new ChangePinCommand(protocol, currentPin, newPin);
-            ChangePinResponse changePinRsp = Connection.SendCommand(changePinCmd);
-            Assert.Equal(ResponseStatus.Success, changePinRsp.Status);
+        var changePinCmd = new ChangePinCommand(protocol, currentPin, newPin);
+        var changePinRsp = Connection.SendCommand(changePinCmd);
+        Assert.Equal(ResponseStatus.Success, changePinRsp.Status);
 
-            infoRsp = Connection.SendCommand(infoCmd);
-            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
-            authInfo = infoRsp.GetData();
-            Assert.False(authInfo.ForcePinChange);
+        infoRsp = Connection.SendCommand(infoCmd);
+        Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+        authInfo = infoRsp.GetData();
+        Assert.False(authInfo.ForcePinChange);
 
-            changePinCmd = new ChangePinCommand(protocol, newPin, currentPin);
-            changePinRsp = Connection.SendCommand(changePinCmd);
-            Assert.Equal(ResponseStatus.Success, changePinRsp.Status);
-        }
+        changePinCmd = new ChangePinCommand(protocol, newPin, currentPin);
+        changePinRsp = Connection.SendCommand(changePinCmd);
+        Assert.Equal(ResponseStatus.Success, changePinRsp.Status);
+    }
 
-        [SkippableFact(typeof(DeviceNotFoundException))]
-        public void SetMinPinLengthCommand_AllNull_Succeeds()
-        {
-            var infoCmd = new GetInfoCommand();
-            GetInfoResponse infoRsp = Connection.SendCommand(infoCmd);
-            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
-            AuthenticatorInfo authInfo = infoRsp.GetData();
-            Assert.NotNull(authInfo.Options);
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    public void SetMinPinLengthCommand_AllNull_Succeeds()
+    {
+        var infoCmd = new GetInfoCommand();
+        var infoRsp = Connection.SendCommand(infoCmd);
+        Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+        var authInfo = infoRsp.GetData();
+        Assert.NotNull(authInfo.Options);
 
-            var protocol = new PinUvAuthProtocolTwo();
-            bool isValid = GetPinToken(
-                protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out byte[] pinToken);
-            Assert.True(isValid);
+        var protocol = new PinUvAuthProtocolTwo();
+        var isValid = GetPinToken(
+            protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out var pinToken);
+        Assert.True(isValid);
 
-            var cmd = new SetMinPinLengthCommand(null, null, null, pinToken, protocol);
-            Fido2Response rsp = Connection.SendCommand(cmd);
+        var cmd = new SetMinPinLengthCommand(null, null, null, pinToken, protocol);
+        var rsp = Connection.SendCommand(cmd);
 
-            Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
+        Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
 
-            infoRsp = Connection.SendCommand(infoCmd);
-            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
-            authInfo = infoRsp.GetData();
-            Assert.NotNull(authInfo.Options);
-        }
+        infoRsp = Connection.SendCommand(infoCmd);
+        Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+        authInfo = infoRsp.GetData();
+        Assert.NotNull(authInfo.Options);
     }
 }

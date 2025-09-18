@@ -18,217 +18,216 @@ using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp;
+
+public class Scp11KeyParametersTests : IDisposable
 {
-    public class Scp11KeyParametersTests : IDisposable
+    private readonly ECCurve _curve = ECCurve.NamedCurves.nistP256;
+    private readonly X509Certificate2[] _oceCertificates;
+    private readonly ECParameters _ocePrivateKeyParams;
+    private readonly ECParameters _sdPublicKeyParams;
+
+    public Scp11KeyParametersTests()
     {
-        private readonly ECCurve _curve = ECCurve.NamedCurves.nistP256;
-        private readonly ECParameters _sdPublicKeyParams;
-        private readonly ECParameters _ocePrivateKeyParams;
-        private readonly X509Certificate2[] _oceCertificates;
+        using var sdKeyEcdsa = ECDsa.Create(_curve);
+        _sdPublicKeyParams = sdKeyEcdsa.ExportParameters(false);
 
-        public Scp11KeyParametersTests()
+        using var oceKeyEcdsa = ECDsa.Create(_curve);
+        _ocePrivateKeyParams = oceKeyEcdsa.ExportParameters(true);
+
+        // Create a self-signed cert for testing
+        var req = new CertificateRequest(
+            "CN=Test",
+            oceKeyEcdsa,
+            HashAlgorithmName.SHA256);
+
+        _oceCertificates = new[]
         {
-            using var sdKeyEcdsa = ECDsa.Create(_curve);
-            _sdPublicKeyParams = sdKeyEcdsa.ExportParameters(false);
+            req.CreateSelfSigned(
+                DateTimeOffset.UtcNow,
+                DateTimeOffset.UtcNow.AddYears(1))
+        };
+    }
 
-            using var oceKeyEcdsa = ECDsa.Create(_curve);
-            _ocePrivateKeyParams = oceKeyEcdsa.ExportParameters(true);
-
-            // Create a self-signed cert for testing
-            var req = new CertificateRequest(
-                "CN=Test",
-                oceKeyEcdsa,
-                HashAlgorithmName.SHA256);
-
-            _oceCertificates = new[]
-            {
-                req.CreateSelfSigned(
-                    DateTimeOffset.UtcNow,
-                    DateTimeOffset.UtcNow.AddYears(1))
-            };
+    public void Dispose()
+    {
+        foreach (var cert in _oceCertificates)
+        {
+            cert.Dispose();
         }
+    }
 
-        [Fact]
-        public void Constructor_Scp11b_ValidParameters_Succeeds()
+    [Fact]
+    public void Constructor_Scp11b_ValidParameters_Succeeds()
+    {
+        // Arrange
+        var keyRef = new KeyReference(ScpKeyIds.Scp11B, 0x01);
+        var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+
+        // Act
+        var keyParams = new Scp11KeyParameters(keyRef, pkSdEcka);
+
+        // Assert
+        Assert.NotNull(keyParams);
+        Assert.Equal(0x13, keyParams.KeyReference.Id); // ScpKeyIds.Scp11B
+        Assert.Equal(0x01, keyParams.KeyReference.VersionNumber);
+        Assert.NotNull(keyParams.PkSdEcka);
+        Assert.Null(keyParams.OceKeyReference);
+        Assert.Null(keyParams.SkOceEcka);
+        Assert.Null(keyParams.OceCertificates);
+    }
+
+    [Theory]
+    [InlineData(ScpKeyIds.Scp11A)]
+    [InlineData(ScpKeyIds.Scp11C)]
+    public void Constructor_Scp11ac_ValidParameters_Succeeds(
+        byte keyId)
+    {
+        // Arrange
+        var keyRef = new KeyReference(keyId, 0x01);
+        var oceKeyRef = new KeyReference(0x01, 0x01);
+        var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+        var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
+
+        // Act
+        var keyParams = new Scp11KeyParameters(
+            keyRef,
+            pkSdEcka,
+            oceKeyRef,
+            skOceEcka,
+            _oceCertificates);
+
+        // Assert
+        Assert.NotNull(keyParams);
+        Assert.Equal(keyId, keyParams.KeyReference.Id);
+        Assert.Equal(0x01, keyParams.KeyReference.VersionNumber);
+        Assert.NotNull(keyParams.PkSdEcka);
+        Assert.NotNull(keyParams.OceKeyReference);
+        Assert.NotNull(keyParams.SkOceEcka);
+        Assert.NotNull(keyParams.OceCertificates);
+        Assert.Single(keyParams.OceCertificates);
+    }
+
+    [Theory]
+    [InlineData(ScpKeyIds.Scp11A)]
+    [InlineData(ScpKeyIds.Scp11C)]
+    public void Constructor_Scp11ac_InvalidParameters_ThrowsArgumentException(
+        byte keyId)
+    {
+        // Arrange
+        var keyRef = new KeyReference(keyId, 0x01);
+        var oceKeyRef = new KeyReference(0x01, 0x01);
+        var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+        var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
+
+        // Act
+        Assert.Throws<ArgumentException>(() =>
         {
-            // Arrange
-            var keyRef = new KeyReference(ScpKeyIds.Scp11B, 0x01);
-            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
-
-            // Act
-            var keyParams = new Scp11KeyParameters(keyRef, pkSdEcka);
-
-            // Assert
-            Assert.NotNull(keyParams);
-            Assert.Equal(0x13, keyParams.KeyReference.Id); // ScpKeyIds.Scp11B
-            Assert.Equal(0x01, keyParams.KeyReference.VersionNumber);
-            Assert.NotNull(keyParams.PkSdEcka);
-            Assert.Null(keyParams.OceKeyReference);
-            Assert.Null(keyParams.SkOceEcka);
-            Assert.Null(keyParams.OceCertificates);
-        }
-
-        [Theory]
-        [InlineData(ScpKeyIds.Scp11A)]
-        [InlineData(ScpKeyIds.Scp11C)]
-        public void Constructor_Scp11ac_ValidParameters_Succeeds(
-            byte keyId)
-        {
-            // Arrange
-            var keyRef = new KeyReference(keyId, 0x01);
-            var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
-            var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
-
-            // Act
-            var keyParams = new Scp11KeyParameters(
+            _ = new Scp11KeyParameters(
                 keyRef,
                 pkSdEcka,
                 oceKeyRef,
                 skOceEcka,
-                _oceCertificates);
+                new X509Certificate2[] { } // Empty list invalid
+            );
+        });
+    }
 
-            // Assert
-            Assert.NotNull(keyParams);
-            Assert.Equal(keyId, keyParams.KeyReference.Id);
-            Assert.Equal(0x01, keyParams.KeyReference.VersionNumber);
-            Assert.NotNull(keyParams.PkSdEcka);
-            Assert.NotNull(keyParams.OceKeyReference);
-            Assert.NotNull(keyParams.SkOceEcka);
-            Assert.NotNull(keyParams.OceCertificates);
-            Assert.Single(keyParams.OceCertificates);
-        }
+    [Fact]
+    public void Constructor_Scp11b_WithOptionalParams_ThrowsArgumentException()
+    {
+        // Arrange
+        var keyRef =
+            new KeyReference(ScpKeyIds.Scp11B, 0x01); // SCP11b and these optional parameters should not work
+        var oceKeyRef = new KeyReference(0x01, 0x01);
+        var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+        var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
 
-        [Theory]
-        [InlineData(ScpKeyIds.Scp11A)]
-        [InlineData(ScpKeyIds.Scp11C)]
-        public void Constructor_Scp11ac_InvalidParameters_ThrowsArgumentException(
-            byte keyId)
-        {
-            // Arrange
-            var keyRef = new KeyReference(keyId, 0x01);
-            var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
-            var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
+            keyRef,
+            pkSdEcka,
+            oceKeyRef,
+            skOceEcka,
+            _oceCertificates));
+    }
 
-            // Act
-            Assert.Throws<ArgumentException>(() =>
-            {
-                _ = new Scp11KeyParameters(
-                    keyRef,
-                    pkSdEcka,
-                    oceKeyRef,
-                    skOceEcka,
-                    new X509Certificate2[] { } // Empty list invalid
-                    );
-            });
-        }
+    [Theory]
+    [InlineData(ScpKeyIds.Scp11A)]
+    [InlineData(ScpKeyIds.Scp11C)]
+    public void Constructor_Scp11ac_MissingParams_ThrowsArgumentException(
+        byte keyId)
+    {
+        // Arrange
+        var keyRef = new KeyReference(keyId, 0x01);
+        var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
 
-        [Fact]
-        public void Constructor_Scp11b_WithOptionalParams_ThrowsArgumentException()
-        {
-            // Arrange
-            var keyRef =
-                new KeyReference(ScpKeyIds.Scp11B, 0x01); // SCP11b and these optional parameters should not work
-            var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
-            var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
+            keyRef,
+            pkSdEcka));
+    }
 
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
-                keyRef,
-                pkSdEcka,
-                oceKeyRef,
-                skOceEcka,
-                _oceCertificates));
-        }
+    [Theory]
+    [InlineData(0x00)] // Invalid key ID
+    [InlineData(0x10)] // Invalid key ID
+    [InlineData(0xFF)] // Invalid key ID
+    public void Constructor_InvalidKeyId_ThrowsArgumentException(
+        byte keyId)
+    {
+        // Arrange
+        var keyRef = new KeyReference(keyId, 0x01);
+        var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
 
-        [Theory]
-        [InlineData(ScpKeyIds.Scp11A)]
-        [InlineData(ScpKeyIds.Scp11C)]
-        public void Constructor_Scp11ac_MissingParams_ThrowsArgumentException(
-            byte keyId)
-        {
-            // Arrange
-            var keyRef = new KeyReference(keyId, 0x01);
-            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
+            keyRef,
+            pkSdEcka));
+    }
 
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
-                keyRef,
-                pkSdEcka));
-        }
+    [Fact]
+    [Obsolete("Obsolete")]
+    public void Dispose_ClearsPrivateKey()
+    {
+        // Arrange
+        var keyRef = new KeyReference(ScpKeyIds.Scp11A, 0x01);
+        var oceKeyRef = new KeyReference(0x01, 0x01);
+        var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+        var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
 
-        [Theory]
-        [InlineData(0x00)] // Invalid key ID
-        [InlineData(0x10)] // Invalid key ID
-        [InlineData(0xFF)] // Invalid key ID
-        public void Constructor_InvalidKeyId_ThrowsArgumentException(
-            byte keyId)
-        {
-            // Arrange
-            var keyRef = new KeyReference(keyId, 0x01);
-            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+        var keyParams = new Scp11KeyParameters(
+            keyRef,
+            pkSdEcka,
+            oceKeyRef,
+            skOceEcka,
+            _oceCertificates);
 
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => new Scp11KeyParameters(
-                keyRef,
-                pkSdEcka));
-        }
+        // Act
+        keyParams.Dispose();
 
-        [Fact]
-        [Obsolete("Obsolete")]
-        public void Dispose_ClearsPrivateKey()
-        {
-            // Arrange
-            var keyRef = new KeyReference(ScpKeyIds.Scp11A, 0x01);
-            var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
-            var skOceEcka = new ECPrivateKeyParameters(_ocePrivateKeyParams);
+        // Assert
+        Assert.Null(keyParams.SkOceEcka);
+        Assert.Null(keyParams.OceKeyReference);
+    }
 
-            var keyParams = new Scp11KeyParameters(
-                keyRef,
-                pkSdEcka,
-                oceKeyRef,
-                skOceEcka,
-                _oceCertificates);
+    [Fact]
+    public void Dispose_MultipleCalls_DoesNotThrow()
+    {
+        // Arrange
+        var keyRef = new KeyReference(ScpKeyIds.Scp11A, 0x01);
+        var oceKeyRef = new KeyReference(0x01, 0x01);
+        var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
+        var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
 
-            // Act
-            keyParams.Dispose();
+        var keyParams = new Scp11KeyParameters(
+            keyRef,
+            pkSdEcka,
+            oceKeyRef,
+            skOceEcka,
+            _oceCertificates);
 
-            // Assert
-            Assert.Null(keyParams.SkOceEcka);
-            Assert.Null(keyParams.OceKeyReference);
-        }
-
-        [Fact]
-        public void Dispose_MultipleCalls_DoesNotThrow()
-        {
-            // Arrange
-            var keyRef = new KeyReference(ScpKeyIds.Scp11A, 0x01);
-            var oceKeyRef = new KeyReference(0x01, 0x01);
-            var pkSdEcka = ECPublicKey.CreateFromParameters(_sdPublicKeyParams);
-            var skOceEcka = ECPrivateKey.CreateFromParameters(_ocePrivateKeyParams);
-
-            var keyParams = new Scp11KeyParameters(
-                keyRef,
-                pkSdEcka,
-                oceKeyRef,
-                skOceEcka,
-                _oceCertificates);
-
-            // Act & Assert - Should not throw
-            keyParams.Dispose();
-            keyParams.Dispose();
-        }
-
-        public void Dispose()
-        {
-            foreach (var cert in _oceCertificates)
-            {
-                cert.Dispose();
-            }
-        }
+        // Act & Assert - Should not throw
+        keyParams.Dispose();
+        keyParams.Dispose();
     }
 }

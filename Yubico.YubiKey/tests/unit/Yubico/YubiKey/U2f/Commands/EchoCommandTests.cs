@@ -17,277 +17,286 @@ using Xunit;
 using Yubico.Core.Buffers;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+public class EchoCommandTests
 {
-    public class EchoCommandTests
+    private const int offsetCla = 0;
+    private const int offsetIns = 1;
+    private const int offsetP1 = 2;
+    private const int offsetP2 = 3;
+
+    private const int lengthHeader = 4; // APDU header is 4 bytes (Cla, Ins, P1, P2)
+
+    private const int offsetLc = 4;
+    private const int lengthLc = 3;
+
+    private const int offsetData = offsetLc + lengthLc;
+
+    // Data set/get & constructors
+
+    [Fact]
+    public void Data_PropertySetGetNonEmptyArray_ReturnsCorrectArray()
     {
-        private const int offsetCla = 0;
-        private const int offsetIns = 1;
-        private const int offsetP1 = 2;
-        private const int offsetP2 = 3;
+        ReadOnlyMemory<byte> expectedData = new byte[] { 0x01, 0x02, 0x03 };
 
-        private const int lengthHeader = 4; // APDU header is 4 bytes (Cla, Ins, P1, P2)
-
-        private const int offsetLc = 4;
-        private const int lengthLc = 3;
-
-        private const int offsetData = offsetLc + lengthLc;
-
-        // Data set/get & constructors
-
-        [Fact]
-        public void Data_PropertySetGetNonEmptyArray_ReturnsCorrectArray()
+        var command = new EchoCommand
         {
-            ReadOnlyMemory<byte> expectedData = new byte[] { 0x01, 0x02, 0x03 };
+            Data = expectedData
+        };
 
-            var command = new EchoCommand
-            {
-                Data = expectedData
-            };
+        Assert.True(command.Data.Span.SequenceEqual(expectedData.Span));
+    }
 
-            Assert.True(command.Data.Span.SequenceEqual(expectedData.Span));
-        }
+    [Fact]
+    public void Data_DefaultConstructorDefaultValue_ReturnsEmptyArray()
+    {
+        var expectedData = ReadOnlyMemory<byte>.Empty;
 
-        [Fact]
-        public void Data_DefaultConstructorDefaultValue_ReturnsEmptyArray()
-        {
-            ReadOnlyMemory<byte> expectedData = ReadOnlyMemory<byte>.Empty;
+        var command = new EchoCommand();
 
-            var command = new EchoCommand();
+        Assert.True(command.Data.Span.SequenceEqual(expectedData.Span));
+    }
 
-            Assert.True(command.Data.Span.SequenceEqual(expectedData.Span));
-        }
+    [Fact]
+    public void Data_NonDefaultConstructorSetGetNonEmptyArray_ReturnsCorrectArray()
+    {
+        ReadOnlyMemory<byte> expectedData = new byte[] { 0x01, 0x02, 0x03 };
 
-        [Fact]
-        public void Data_NonDefaultConstructorSetGetNonEmptyArray_ReturnsCorrectArray()
-        {
-            ReadOnlyMemory<byte> expectedData = new byte[] { 0x01, 0x02, 0x03 };
+        var command = new EchoCommand(expectedData);
 
-            var command = new EchoCommand(expectedData);
+        Assert.True(command.Data.Span.SequenceEqual(expectedData.Span));
+    }
 
-            Assert.True(command.Data.Span.SequenceEqual(expectedData.Span));
-        }
+    [Fact]
+    public void Application_DefaultValue_ReturnsFidoU2F()
+    {
+        var expectedApplication = YubiKeyApplication.FidoU2f;
 
-        [Fact]
-        public void Application_DefaultValue_ReturnsFidoU2F()
-        {
-            YubiKeyApplication expectedApplication = YubiKeyApplication.FidoU2f;
+        var command = new EchoCommand();
 
-            var command = new EchoCommand();
+        Assert.Equal(command.Application, expectedApplication);
+    }
 
-            Assert.Equal(command.Application, expectedApplication);
-        }
+    // CreateCommandApdu - outer command
 
-        // CreateCommandApdu - outer command
+    [Theory]
+    [InlineData("")]
+    [InlineData("0102030405")]
+    public void CreateCommandApdu_SetData_OuterCommandCla0x00(
+        string expectedData)
+    {
+        byte expectedCla = 0;
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("0102030405")]
-        public void CreateCommandApdu_SetData_OuterCommandCla0x00(string expectedData)
-        {
-            byte expectedCla = 0;
+        var command = new EchoCommand(Hex.HexToBytes(expectedData));
+        var commandApdu = command.CreateCommandApdu();
 
-            var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        Assert.Equal(commandApdu.Cla, expectedCla);
+    }
 
-            Assert.Equal(commandApdu.Cla, expectedCla);
-        }
+    [Theory]
+    [InlineData("")]
+    [InlineData("0102030405")]
+    public void CreateCommandApdu_SetData_OuterCommandIns0x03(
+        string expectedData)
+    {
+        byte expectedIns = 0x03;
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("0102030405")]
-        public void CreateCommandApdu_SetData_OuterCommandIns0x03(string expectedData)
-        {
-            byte expectedIns = 0x03;
+        var command = new EchoCommand(Hex.HexToBytes(expectedData));
+        var commandApdu = command.CreateCommandApdu();
 
-            var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        Assert.Equal(commandApdu.Ins, expectedIns);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("0102030405")]
+    public void CreateCommandApdu_SetData_OuterCommandP1Hex00(
+        string expectedData)
+    {
+        byte expectedP1 = 0;
 
-            Assert.Equal(commandApdu.Ins, expectedIns);
-        }
+        var command = new EchoCommand(Hex.HexToBytes(expectedData));
+        var commandApdu = command.CreateCommandApdu();
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("0102030405")]
-        public void CreateCommandApdu_SetData_OuterCommandP1Hex00(string expectedData)
-        {
-            byte expectedP1 = 0;
+        Assert.Equal(commandApdu.P1, expectedP1);
+    }
 
-            var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    [Theory]
+    [InlineData("")]
+    [InlineData("0102030405")]
+    public void CreateCommandApdu_SetData_OuterCommandP2Hex00(
+        string expectedData)
+    {
+        byte expectedP2 = 0;
 
-            Assert.Equal(commandApdu.P1, expectedP1);
-        }
+        var command = new EchoCommand(Hex.HexToBytes(expectedData));
+        var commandApdu = command.CreateCommandApdu();
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("0102030405")]
-        public void CreateCommandApdu_SetData_OuterCommandP2Hex00(string expectedData)
-        {
-            byte expectedP2 = 0;
+        Assert.Equal(commandApdu.P2, expectedP2);
+    }
 
-            var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_SetEmptyData_OuterCommandNcCorrect()
+    {
+        var expectedInnerData = Array.Empty<byte>();
+        var expectedInnerLc = Array.Empty<byte>();
 
-            Assert.Equal(commandApdu.P2, expectedP2);
-        }
+        var expectedInnerCommandLength = lengthHeader + expectedInnerLc.Length + expectedInnerData.Length;
 
-        [Fact]
-        public void CreateCommandApdu_SetEmptyData_OuterCommandNcCorrect()
-        {
-            byte[] expectedInnerData = Array.Empty<byte>();
-            byte[] expectedInnerLc = Array.Empty<byte>();
+        var command = new EchoCommand(expectedInnerData);
+        var commandApdu = command.CreateCommandApdu();
 
-            int expectedInnerCommandLength = lengthHeader + expectedInnerLc.Length + expectedInnerData.Length;
+        Assert.Equal(commandApdu.Nc, expectedInnerCommandLength);
+    }
 
-            var command = new EchoCommand(expectedInnerData);
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_SetNonEmptyData_OuterCommandLcCorrect()
+    {
+        var expectedInnerData = new byte[] { 0x01, 0x02, 0x03 };
+        var expectedInnerLc = new byte[] { 0x00, 0x00, (byte)expectedInnerData.Length }; // Assumes 0 < len < 256
 
-            Assert.Equal(commandApdu.Nc, expectedInnerCommandLength);
-        }
+        var expectedInnerCommandLength = lengthHeader + expectedInnerLc.Length + expectedInnerData.Length;
 
-        [Fact]
-        public void CreateCommandApdu_SetNonEmptyData_OuterCommandLcCorrect()
-        {
-            byte[] expectedInnerData = new byte[] { 0x01, 0x02, 0x03 };
-            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)expectedInnerData.Length };  // Assumes 0 < len < 256
+        var command = new EchoCommand(expectedInnerData);
+        var commandApdu = command.CreateCommandApdu();
 
-            int expectedInnerCommandLength = lengthHeader + expectedInnerLc.Length + expectedInnerData.Length;
+        Assert.Equal(commandApdu.Nc, expectedInnerCommandLength);
+    }
 
-            var command = new EchoCommand(expectedInnerData);
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    // CreateCommandApdu - inner command
 
-            Assert.Equal(commandApdu.Nc, expectedInnerCommandLength);
-        }
+    [Theory]
+    [InlineData("")]
+    [InlineData("0102030405")]
+    public void CreateCommandApdu_SetData_InnerCommandCla0x00(
+        string expectedData)
+    {
+        byte expectedInnerCla = 0;
 
-        // CreateCommandApdu - inner command
+        var command = new EchoCommand(Hex.HexToBytes(expectedData));
+        var commandApdu = command.CreateCommandApdu();
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("0102030405")]
-        public void CreateCommandApdu_SetData_InnerCommandCla0x00(string expectedData)
-        {
-            byte expectedInnerCla = 0;
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
 
-            var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        Assert.Equal(actualInnerCommandCla, expectedInnerCla);
+    }
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
+    [Theory]
+    [InlineData("")]
+    [InlineData("0102030405")]
+    public void CreateCommandApdu_SetData_InnerCommandIns0x40(
+        string expectedData)
+    {
+        byte expectedInnerIns = 0x40;
+
+        var command = new EchoCommand(Hex.HexToBytes(expectedData));
+        var commandApdu = command.CreateCommandApdu();
 
-            Assert.Equal(actualInnerCommandCla, expectedInnerCla);
-        }
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
+
+        Assert.Equal(actualInnerCommandIns, expectedInnerIns);
+    }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("0102030405")]
-        public void CreateCommandApdu_SetData_InnerCommandIns0x40(string expectedData)
-        {
-            byte expectedInnerIns = 0x40;
+    [Theory]
+    [InlineData("")]
+    [InlineData("0102030405")]
+    public void CreateCommandApdu_SetData_InnerCommandP1Hex00(
+        string expectedData)
+    {
+        byte expectedInnerP1 = 0;
 
-            var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        var command = new EchoCommand(Hex.HexToBytes(expectedData));
+        var commandApdu = command.CreateCommandApdu();
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
 
-            Assert.Equal(actualInnerCommandIns, expectedInnerIns);
-        }
+        Assert.Equal(actualInnerCommandP1, expectedInnerP1);
+    }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("0102030405")]
-        public void CreateCommandApdu_SetData_InnerCommandP1Hex00(string expectedData)
-        {
-            byte expectedInnerP1 = 0;
+    [Theory]
+    [InlineData("")]
+    [InlineData("0102030405")]
+    public void CreateCommandApdu_SetData_InnerCommandP2Hex00(
+        string expectedData)
+    {
+        byte expectedInnerP2 = 0;
 
-            var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        var command = new EchoCommand(Hex.HexToBytes(expectedData));
+        var commandApdu = command.CreateCommandApdu();
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
 
-            Assert.Equal(actualInnerCommandP1, expectedInnerP1);
-        }
+        Assert.Equal(actualInnerCommandP2, expectedInnerP2);
+    }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("0102030405")]
-        public void CreateCommandApdu_SetData_InnerCommandP2Hex00(string expectedData)
-        {
-            byte expectedInnerP2 = 0;
+    [Fact]
+    public void CreateCommandApdu_SetNonEmptyData_InnerCommandLcCorrect()
+    {
+        var expectedInnerData = new byte[] { 0x01, 0x02, 0x03 };
+        var expectedInnerLc = new byte[] { 0x00, 0x00, (byte)expectedInnerData.Length }; // Assumes 0 < len < 256
 
-            var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        var command = new EchoCommand(expectedInnerData);
+        var commandApdu = command.CreateCommandApdu();
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
+        ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data.ToArray();
+        var actualInnerCommandLc = actualInnerCommandApdu.Slice(offsetLc, lengthLc).Span;
 
-            Assert.Equal(actualInnerCommandP2, expectedInnerP2);
-        }
+        Assert.True(actualInnerCommandLc.SequenceEqual(expectedInnerLc));
+    }
 
-        [Fact]
-        public void CreateCommandApdu_SetNonEmptyData_InnerCommandLcCorrect()
-        {
-            byte[] expectedInnerData = new byte[] { 0x01, 0x02, 0x03 };
-            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)expectedInnerData.Length };  // Assumes 0 < len < 256
+    [Fact]
+    public void CreateCommandApdu_SetNonEmptyData_InnerCommandDataCorrect()
+    {
+        var expectedInnerData = new byte[] { 0x01, 0x02, 0x03 };
 
-            var command = new EchoCommand(expectedInnerData);
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        var command = new EchoCommand(expectedInnerData);
+        var commandApdu = command.CreateCommandApdu();
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data.ToArray();
-            ReadOnlySpan<byte> actualInnerCommandLc = actualInnerCommandApdu.Slice(offsetLc, lengthLc).Span;
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandData = actualInnerCommandApdu.Slice(offsetData, expectedInnerData.Length).Span;
 
-            Assert.True(actualInnerCommandLc.SequenceEqual(expectedInnerLc));
-        }
+        Assert.True(actualInnerCommandData.SequenceEqual(expectedInnerData));
+    }
 
-        [Fact]
-        public void CreateCommandApdu_SetNonEmptyData_InnerCommandDataCorrect()
-        {
-            byte[] expectedInnerData = new byte[] { 0x01, 0x02, 0x03 };
+    // CreateResponseForApdu
+    [Theory]
+    [InlineData("")]
+    [InlineData("0102030405")]
+    public void CreateResponseForApdu_SetDataSuccessSW_ReturnsCorrectEchoResponse(
+        string expectedResponseDataString)
+    {
+        var expectedResponseDataBytes = Hex.HexToBytes(expectedResponseDataString);
+        var sw = SWConstants.Success;
 
-            var command = new EchoCommand(expectedInnerData);
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        var responseApdu = new ResponseApdu(expectedResponseDataBytes, sw);
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            ReadOnlySpan<byte> actualInnerCommandData = actualInnerCommandApdu.Slice(offsetData, expectedInnerData.Length).Span;
+        var command = new EchoCommand();
+        var echoResponse = command.CreateResponseForApdu(responseApdu);
+        var actualResponseDataBytes = echoResponse.GetData();
 
-            Assert.True(actualInnerCommandData.SequenceEqual(expectedInnerData));
-        }
+        Assert.True(actualResponseDataBytes.Span.SequenceEqual(expectedResponseDataBytes));
+    }
 
-        // CreateResponseForApdu
-        [Theory]
-        [InlineData("")]
-        [InlineData("0102030405")]
-        public void CreateResponseForApdu_SetDataSuccessSW_ReturnsCorrectEchoResponse(string expectedResponseDataString)
-        {
-            byte[] expectedResponseDataBytes = Hex.HexToBytes(expectedResponseDataString);
-            short sw = SWConstants.Success;
+    [Theory]
+    [InlineData("")]
+    [InlineData("0102030405")]
+    public void CreateResponseForApdu_SetDataFailedSW_ReturnsCorrectEchoResponse(
+        string expectedResponseDataString)
+    {
+        var expectedResponseDataBytes = Hex.HexToBytes(expectedResponseDataString);
+        var expectedSW = SWConstants.FunctionError;
 
-            var responseApdu = new ResponseApdu(expectedResponseDataBytes, sw);
+        var responseApdu = new ResponseApdu(expectedResponseDataBytes, expectedSW);
 
-            var command = new EchoCommand();
-            EchoResponse echoResponse = command.CreateResponseForApdu(responseApdu);
-            ReadOnlyMemory<byte> actualResponseDataBytes = echoResponse.GetData();
+        var command = new EchoCommand();
+        var echoResponse = command.CreateResponseForApdu(responseApdu);
+        var actualSW = echoResponse.StatusWord;
 
-            Assert.True(actualResponseDataBytes.Span.SequenceEqual(expectedResponseDataBytes));
-        }
-
-        [Theory]
-        [InlineData("")]
-        [InlineData("0102030405")]
-        public void CreateResponseForApdu_SetDataFailedSW_ReturnsCorrectEchoResponse(string expectedResponseDataString)
-        {
-            byte[] expectedResponseDataBytes = Hex.HexToBytes(expectedResponseDataString);
-            short expectedSW = SWConstants.FunctionError;
-
-            var responseApdu = new ResponseApdu(expectedResponseDataBytes, expectedSW);
-
-            var command = new EchoCommand();
-            EchoResponse echoResponse = command.CreateResponseForApdu(responseApdu);
-            short actualSW = echoResponse.StatusWord;
-
-            Assert.Equal(actualSW, expectedSW);
-        }
+        Assert.Equal(actualSW, expectedSW);
     }
 }

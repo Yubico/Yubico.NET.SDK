@@ -16,85 +16,84 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+public class GetDataResponseTests
 {
-    public class GetDataResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
-        {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new GetDataResponse(null));
+        _ = Assert.Throws<ArgumentNullException>(() => new GetDataResponse(null));
 #pragma warning restore CS8625
-        }
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0x30, 0x01, 0x05, sw1, sw2 });
+
+        var response = new GetDataResponse(responseApdu);
+
+        Assert.Equal(SWConstants.Success, response.StatusWord);
+    }
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0x30, 0x01, 0x05, sw1, sw2 });
+
+        var response = new GetDataResponse(responseApdu);
+
+        Assert.Equal(ResponseStatus.Success, response.Status);
+    }
+
+    [Fact]
+    public void Constructor_DataNotFoundResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.FileOrApplicationNotFound >> 8));
+        var sw2 = unchecked((byte)SWConstants.FileOrApplicationNotFound);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new GetDataResponse(responseApdu);
+
+        Assert.Equal(ResponseStatus.NoData, response.Status);
+    }
+
+    [Fact]
+    public void Construct_FailResponseApdu_ExceptionOnGetData()
+    {
+        var sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+        var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new GetDataResponse(responseApdu);
+
+        _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
+    }
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_GetCorrectData()
+    {
+        var testData = new byte[]
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0x30, 0x01, 0x05, sw1, sw2 });
+            0x01, 0x01, 0x11, 0x02, 0x02, 0x03, 0x03, 0x90, 0x00
+        };
 
-            var response = new GetDataResponse(responseApdu);
+        var expected = new Span<byte>(testData);
+        expected = expected.Slice(0, testData.Length - 2);
+        var responseApdu = new ResponseApdu(testData);
 
-            Assert.Equal(SWConstants.Success, response.StatusWord);
-        }
+        var response = new GetDataResponse(responseApdu);
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0x30, 0x01, 0x05, sw1, sw2 });
+        var getData = response.GetData();
 
-            var response = new GetDataResponse(responseApdu);
+        var compareResult = expected.SequenceEqual(getData.Span);
 
-            Assert.Equal(ResponseStatus.Success, response.Status);
-        }
-
-        [Fact]
-        public void Constructor_DataNotFoundResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.FileOrApplicationNotFound >> 8));
-            byte sw2 = unchecked((byte)SWConstants.FileOrApplicationNotFound);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new GetDataResponse(responseApdu);
-
-            Assert.Equal(ResponseStatus.NoData, response.Status);
-        }
-
-        [Fact]
-        public void Construct_FailResponseApdu_ExceptionOnGetData()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new GetDataResponse(responseApdu);
-
-            _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
-        }
-
-        [Fact]
-        public void Constructor_SuccessResponseApdu_GetCorrectData()
-        {
-            byte[] testData = new byte[]
-            {
-                0x01, 0x01, 0x11, 0x02, 0x02, 0x03, 0x03, 0x90, 0x00
-            };
-
-            var expected = new Span<byte>(testData);
-            expected = expected.Slice(0, testData.Length - 2);
-            var responseApdu = new ResponseApdu(testData);
-
-            var response = new GetDataResponse(responseApdu);
-
-            ReadOnlyMemory<byte> getData = response.GetData();
-
-            bool compareResult = expected.SequenceEqual(getData.Span);
-
-            Assert.True(compareResult);
-        }
+        Assert.True(compareResult);
     }
 }

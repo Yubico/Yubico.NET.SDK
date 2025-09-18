@@ -16,73 +16,76 @@ using System;
 using System.IO;
 using Xunit;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+public class PivSessionMsrootsTests : PivSessionUnitTestBase
 {
-    public class PivSessionMsrootsTests : PivSessionUnitTestBase
+    [Fact]
+    public void Write_TooMuchData_ThrowsOutOfRangeException()
     {
-        [Fact]
-        public void Write_TooMuchData_ThrowsOutOfRangeException()
-        {
-            byte[] inputData = new byte[16000];
-            _ = Assert.Throws<ArgumentOutOfRangeException>(() => PivSessionMock.WriteMsroots(inputData));
-        }
+        var inputData = new byte[16000];
+        _ = Assert.Throws<ArgumentOutOfRangeException>(() => PivSessionMock.WriteMsroots(inputData));
+    }
 
-        [Fact]
-        public void Write_NoKeyCollector_ThrowsInvalidOpException()
-        {
-            byte[] inputData = new byte[100];
-            PivSessionMock.KeyCollector = null;
-            _ = Assert.Throws<InvalidOperationException>(() => PivSessionMock.WriteMsroots(inputData));
-        }
+    [Fact]
+    public void Write_NoKeyCollector_ThrowsInvalidOpException()
+    {
+        var inputData = new byte[100];
+        PivSessionMock.KeyCollector = null;
+        _ = Assert.Throws<InvalidOperationException>(() => PivSessionMock.WriteMsroots(inputData));
+    }
 
-        [Fact]
-        public void Write_KeyCollectorFalse_ThrowsCanceledException()
-        {
-            byte[] inputData = new byte[100];
-            PivSessionMock.KeyCollector = ReturnFalseKeyCollectorDelegate;
-            _ = Assert.Throws<OperationCanceledException>(() => PivSessionMock.WriteMsroots(inputData));
-        }
+    [Fact]
+    public void Write_KeyCollectorFalse_ThrowsCanceledException()
+    {
+        var inputData = new byte[100];
+        PivSessionMock.KeyCollector = ReturnFalseKeyCollectorDelegate;
+        _ = Assert.Throws<OperationCanceledException>(() => PivSessionMock.WriteMsroots(inputData));
+    }
 
-        [Fact]
-        public void WriteStream_TooMuchData_ThrowsOutOfRangeException()
-        {
-            byte[] inputData = new byte[16000];
-            var memStream = new MemoryStream(inputData);
-            _ = Assert.Throws<ArgumentOutOfRangeException>(() => PivSessionMock.WriteMsrootsStream(memStream));
-        }
+    [Fact]
+    public void WriteStream_TooMuchData_ThrowsOutOfRangeException()
+    {
+        var inputData = new byte[16000];
+        var memStream = new MemoryStream(inputData);
+        _ = Assert.Throws<ArgumentOutOfRangeException>(() => PivSessionMock.WriteMsrootsStream(memStream));
+    }
 
-        [Fact]
-        public void WriteStream_NoKeyCollector_ThrowsInvalidOpException()
-        {
-            byte[] inputData = new byte[100];
-            var memStream = new MemoryStream(inputData);
-            PivSessionMock.KeyCollector = null;
-            _ = Assert.Throws<InvalidOperationException>(() => PivSessionMock.WriteMsrootsStream(memStream));
-        }
+    [Fact]
+    public void WriteStream_NoKeyCollector_ThrowsInvalidOpException()
+    {
+        var inputData = new byte[100];
+        var memStream = new MemoryStream(inputData);
+        PivSessionMock.KeyCollector = null;
+        _ = Assert.Throws<InvalidOperationException>(() => PivSessionMock.WriteMsrootsStream(memStream));
+    }
 
-        [Fact]
-        public void WriteStream_KeyCollectorFalse_ThrowsCanceledException()
-        {
-            byte[] inputData = new byte[100];
-            var memStream = new MemoryStream(inputData);
-            PivSessionMock.KeyCollector = ReturnFalseKeyCollectorDelegate;
-            _ = Assert.Throws<OperationCanceledException>(() => PivSessionMock.WriteMsrootsStream(memStream));
-        }
+    [Fact]
+    public void WriteStream_KeyCollectorFalse_ThrowsCanceledException()
+    {
+        var inputData = new byte[100];
+        var memStream = new MemoryStream(inputData);
+        PivSessionMock.KeyCollector = ReturnFalseKeyCollectorDelegate;
+        _ = Assert.Throws<OperationCanceledException>(() => PivSessionMock.WriteMsrootsStream(memStream));
+    }
 
-        [Fact]
-        public void Delete_NoKeyCollector_ThrowsInvalidOpException()
-        {
-            PivSessionMock.KeyCollector = null;
-            _ = Assert.Throws<InvalidOperationException>(() => PivSessionMock.DeleteMsroots());
-        }
+    [Fact]
+    public void Delete_NoKeyCollector_ThrowsInvalidOpException()
+    {
+        PivSessionMock.KeyCollector = null;
+        _ = Assert.Throws<InvalidOperationException>(() => PivSessionMock.DeleteMsroots());
+    }
 
-        [Fact]
-        public void Delete_KeyCollectorFalse_ThrowsCanceledException()
-        {
-            PivSessionMock.KeyCollector = ReturnFalseKeyCollectorDelegate;
-            _ = Assert.Throws<OperationCanceledException>(() => PivSessionMock.DeleteMsroots());
-        }
+    [Fact]
+    public void Delete_KeyCollectorFalse_ThrowsCanceledException()
+    {
+        PivSessionMock.KeyCollector = ReturnFalseKeyCollectorDelegate;
+        _ = Assert.Throws<OperationCanceledException>(() => PivSessionMock.DeleteMsroots());
+    }
 
-        private static bool ReturnFalseKeyCollectorDelegate(KeyEntryData _) => false;
+    private static bool ReturnFalseKeyCollectorDelegate(
+        KeyEntryData _)
+    {
+        return false;
     }
 }

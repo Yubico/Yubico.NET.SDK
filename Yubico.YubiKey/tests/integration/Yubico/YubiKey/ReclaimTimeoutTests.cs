@@ -25,77 +25,80 @@ using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.TestUtilities;
 using Log = Yubico.Core.Logging.Log;
-using Logger = Serilog.Core.Logger;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+internal class ThreadIdEnricher : ILogEventEnricher
 {
-    class ThreadIdEnricher : ILogEventEnricher
+    public void Enrich(
+        LogEvent logEvent,
+        ILogEventPropertyFactory propertyFactory)
     {
-        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
-        {
-            logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
-                "ThreadId", Environment.CurrentManagedThreadId));
-        }
+        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
+            "ThreadId", Environment.CurrentManagedThreadId));
     }
+}
 
-    public class ReclaimTimeoutTests
+public class ReclaimTimeoutTests
+{
+    [Trait(TraitTypes.Category, TestCategories.Elevated)]
+    [Fact]
+    public void SwitchingBetweenTransports_ForcesThreeSecondWait()
     {
-        [Trait(TraitTypes.Category, TestCategories.Elevated)]
-        [Fact]
-        public void SwitchingBetweenTransports_ForcesThreeSecondWait()
+        // Force the old behavior even for newer YubiKeys.
+        AppContext.SetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, true);
+
+        using var log = new LoggerConfiguration()
+            .Enrich.With(new ThreadIdEnricher())
+            .WriteTo.Console(
+                outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
+            .CreateLogger();
+
+        Log.ConfigureLoggerFactory(builder =>
+            builder
+                .ClearProviders()
+                .AddSerilog(log)
+                .AddFilter(level => level >= LogLevel.Information));
+
+        // TEST ASSUMPTION: This test requires FIDO. On Windows, that means this test case must run elevated (admin).
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
+
+        // Ensure all interfaces are active
+        if (testDevice.EnabledUsbCapabilities != YubiKeyCapabilities.All)
         {
-            // Force the old behavior even for newer YubiKeys.
-            AppContext.SetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, true);
-
-            using Logger? log = new LoggerConfiguration()
-                .Enrich.With(new ThreadIdEnricher())
-                .WriteTo.Console(
-                    outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
-                .CreateLogger();
-
-            Log.ConfigureLoggerFactory(builder =>
-                builder
-                    .ClearProviders()
-                    .AddSerilog(log)
-                    .AddFilter(level => level >= LogLevel.Information));
-
-            // TEST ASSUMPTION: This test requires FIDO. On Windows, that means this test case must run elevated (admin).
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
-
-            // Ensure all interfaces are active
-            if (testDevice.EnabledUsbCapabilities != YubiKeyCapabilities.All)
-            {
-                testDevice.SetEnabledUsbCapabilities(YubiKeyCapabilities.All);
-                Thread.Sleep(TimeSpan.FromSeconds(2)); // Give the YubiKey time to reboot and be rediscovered.
-                testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
-            }
-
-            // Run the tests - Keyboard -> SmartCard -> FIDO
-            var sw1 = Stopwatch.StartNew();
-            using (var otp = new OtpSession(testDevice))
-            {
-                // Running the OtpSession constructor calls the OTP interface
-            }
-            sw1.Stop();
-
-            var sw2 = Stopwatch.StartNew();
-            using (var piv = new PivSession(testDevice))
-            {
-                // Running the PivSession constructor calls the SmartCard interface
-            }
-            sw2.Stop();
-
-            var sw3 = Stopwatch.StartNew();
-            using (var fido2 = new Fido2Session(testDevice))
-            {
-                // Running the Fido2Session constructor calls the FIDO interface
-            }
-            sw3.Stop();
-
-            const long expectedLapse = 3000;
-            Assert.True(sw1.ElapsedMilliseconds > expectedLapse);
-            Assert.True(sw2.ElapsedMilliseconds > expectedLapse);
-            Assert.True(sw3.ElapsedMilliseconds > expectedLapse);
+            testDevice.SetEnabledUsbCapabilities(YubiKeyCapabilities.All);
+            Thread.Sleep(TimeSpan.FromSeconds(2)); // Give the YubiKey time to reboot and be rediscovered.
+            testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
         }
+
+        // Run the tests - Keyboard -> SmartCard -> FIDO
+        var sw1 = Stopwatch.StartNew();
+        using (var otp = new OtpSession(testDevice))
+        {
+            // Running the OtpSession constructor calls the OTP interface
+        }
+
+        sw1.Stop();
+
+        var sw2 = Stopwatch.StartNew();
+        using (var piv = new PivSession(testDevice))
+        {
+            // Running the PivSession constructor calls the SmartCard interface
+        }
+
+        sw2.Stop();
+
+        var sw3 = Stopwatch.StartNew();
+        using (var fido2 = new Fido2Session(testDevice))
+        {
+            // Running the Fido2Session constructor calls the FIDO interface
+        }
+
+        sw3.Stop();
+
+        const long expectedLapse = 3000;
+        Assert.True(sw1.ElapsedMilliseconds > expectedLapse);
+        Assert.True(sw2.ElapsedMilliseconds > expectedLapse);
+        Assert.True(sw3.ElapsedMilliseconds > expectedLapse);
     }
 }

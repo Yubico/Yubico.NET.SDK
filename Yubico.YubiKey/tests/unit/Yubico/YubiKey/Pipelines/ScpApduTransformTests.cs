@@ -17,128 +17,132 @@ using NSubstitute;
 using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.InterIndustry.Commands;
+using Yubico.YubiKey.Oath.Commands;
 using Yubico.YubiKey.Scp;
+using ResetCommand = Yubico.YubiKey.Scp.Commands.ResetCommand;
 
-namespace Yubico.YubiKey.Pipelines
+namespace Yubico.YubiKey.Pipelines;
+
+public class ScpApduTransformTests
 {
-    public class ScpApduTransformTests
+    private readonly IApduTransform _previous = Substitute.For<IApduTransform>();
+    private readonly Scp03KeyParameters _scp03KeyParams = Scp03KeyParameters.DefaultKey;
+
+    [Fact]
+    public void Constructor_NullPipeline_ThrowsArgumentNullException()
     {
-        private readonly IApduTransform _previous = Substitute.For<IApduTransform>();
-        private readonly Scp03KeyParameters _scp03KeyParams = Scp03KeyParameters.DefaultKey;
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new ScpApduTransform(null!, _scp03KeyParams));
+    }
 
-        [Fact]
-        public void Constructor_NullPipeline_ThrowsArgumentNullException()
+    [Fact]
+    public void Constructor_NullKeyParameters_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new ScpApduTransform(_previous, null!));
+    }
+
+    [Fact]
+    public void Constructor_ValidParameters_CreatesInstance()
+    {
+        // Act
+        var transform = new ScpApduTransform(_previous, _scp03KeyParams);
+
+        // Assert
+        Assert.NotNull(transform);
+        Assert.Same(_scp03KeyParams, transform.KeyParameters);
+    }
+
+    [Fact]
+    public void EncryptDataFunc_BeforeSetup_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var transform = new ScpApduTransform(_previous, _scp03KeyParams);
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => transform.EncryptDataFunc);
+    }
+
+    [Fact]
+    public void Invoke_ExemptedCommands_BypassEncoding()
+    {
+        // Arrange
+        var transform = new ScpApduTransform(_previous, _scp03KeyParams);
+
+        var testCases = new[]
         {
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => new ScpApduTransform(null!, _scp03KeyParams));
-        }
-
-        [Fact]
-        public void Constructor_NullKeyParameters_ThrowsArgumentNullException()
-        {
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => new ScpApduTransform(_previous, null!));
-        }
-
-        [Fact]
-        public void Constructor_ValidParameters_CreatesInstance()
-        {
-            // Act
-            var transform = new ScpApduTransform(_previous, _scp03KeyParams);
-
-            // Assert
-            Assert.NotNull(transform);
-            Assert.Same(_scp03KeyParams, transform.KeyParameters);
-        }
-
-        [Fact]
-        public void EncryptDataFunc_BeforeSetup_ThrowsInvalidOperationException()
-        {
-            // Arrange
-            var transform = new ScpApduTransform(_previous, _scp03KeyParams);
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => transform.EncryptDataFunc);
-        }
-
-        [Fact]
-        public void Invoke_ExemptedCommands_BypassEncoding()
-        {
-            // Arrange
-            var transform = new ScpApduTransform(_previous, _scp03KeyParams);
-
-            var testCases = new[]
+            new CommandTestCase
             {
-                new CommandTestCase{
-                    Command = new SelectApplicationCommand(YubiKeyApplication.SecurityDomain),
-                    CommandType = typeof(SelectApplicationCommand),
-                    ResponseType = typeof(ISelectApplicationResponse<GenericSelectApplicationData>)
-                },
-                new CommandTestCase{
-                    Command =  new Oath.Commands.SelectOathCommand(),
-                    CommandType = typeof(Oath.Commands.SelectOathCommand),
-                    ResponseType = typeof(Oath.Commands.SelectOathResponse)
-                },
-                new CommandTestCase{
-                    Command =  new Scp.Commands.ResetCommand(0x84, 0x01, 0x01, new byte[] { 0x00 }),
-                    CommandType = typeof(Scp.Commands.ResetCommand),
-                    ResponseType = typeof(YubiKeyResponse)
-                }
-            };
-
-            foreach (var testCase in testCases)
+                Command = new SelectApplicationCommand(YubiKeyApplication.SecurityDomain),
+                CommandType = typeof(SelectApplicationCommand),
+                ResponseType = typeof(ISelectApplicationResponse<GenericSelectApplicationData>)
+            },
+            new CommandTestCase
             {
-                _previous.Invoke(
+                Command = new SelectOathCommand(),
+                CommandType = typeof(SelectOathCommand),
+                ResponseType = typeof(SelectOathResponse)
+            },
+            new CommandTestCase
+            {
+                Command = new ResetCommand(0x84, 0x01, 0x01, new byte[] { 0x00 }),
+                CommandType = typeof(ResetCommand),
+                ResponseType = typeof(YubiKeyResponse)
+            }
+        };
+
+        foreach (var testCase in testCases)
+        {
+            _previous.Invoke(
                     Arg.Any<CommandApdu>(),
                     Arg.Any<Type>(),
                     Arg.Any<Type>())
-                    .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }));
-
-                // Act
-                _ = transform.Invoke(
-                    testCase.Command.CreateCommandApdu(),
-                    testCase.CommandType,
-                    testCase.ResponseType);
-
-                // Assert that the previous pipeline was called (which is the one that doesn't do encoding)
-                _previous.Received().Invoke(
-                    Arg.Any<CommandApdu>(),
-                    testCase.CommandType,
-                    testCase.ResponseType);
-
-                _previous.ClearReceivedCalls();
-            }
-        }
-
-        private struct CommandTestCase
-        {
-            public IYubiKeyCommand<IYubiKeyResponse> Command;
-            public Type CommandType;
-            public Type ResponseType;
-        }
-
-        [Fact]
-        public void Dispose_MultipleCalls_DoesNotThrow()
-        {
-            // Arrange
-            var transform = new ScpApduTransform(_previous, _scp03KeyParams);
-
-            // Act & Assert
-            transform.Dispose();
-            transform.Dispose(); // Should not throw
-        }
-
-        [Fact]
-        public void Cleanup_CallsUnderlyingPipelineCleanup()
-        {
-            // Arrange
-            var transform = new ScpApduTransform(_previous, _scp03KeyParams);
+                .Returns(new ResponseApdu(new byte[] { 0x90, 0x00 }));
 
             // Act
-            transform.Cleanup();
+            _ = transform.Invoke(
+                testCase.Command.CreateCommandApdu(),
+                testCase.CommandType,
+                testCase.ResponseType);
 
-            // Assert
-            _previous.Received().Cleanup();
+            // Assert that the previous pipeline was called (which is the one that doesn't do encoding)
+            _previous.Received().Invoke(
+                Arg.Any<CommandApdu>(),
+                testCase.CommandType,
+                testCase.ResponseType);
+
+            _previous.ClearReceivedCalls();
         }
+    }
+
+    [Fact]
+    public void Dispose_MultipleCalls_DoesNotThrow()
+    {
+        // Arrange
+        var transform = new ScpApduTransform(_previous, _scp03KeyParams);
+
+        // Act & Assert
+        transform.Dispose();
+        transform.Dispose(); // Should not throw
+    }
+
+    [Fact]
+    public void Cleanup_CallsUnderlyingPipelineCleanup()
+    {
+        // Arrange
+        var transform = new ScpApduTransform(_previous, _scp03KeyParams);
+
+        // Act
+        transform.Cleanup();
+
+        // Assert
+        _previous.Received().Cleanup();
+    }
+
+    private struct CommandTestCase
+    {
+        public IYubiKeyCommand<IYubiKeyResponse> Command;
+        public Type CommandType;
+        public Type ResponseType;
     }
 }

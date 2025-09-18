@@ -16,100 +16,99 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+public class SelectNdefDataCommandTests
 {
-    public class SelectNdefDataCommandTests
+    [Fact]
+    public void Application_Get_AlwaysEqualsOtpNdef()
     {
-        [Fact]
-        public void Application_Get_AlwaysEqualsOtpNdef()
-        {
-            var command = new SelectNdefDataCommand();
+        var command = new SelectNdefDataCommand();
 
-            YubiKeyApplication application = command.Application;
+        var application = command.Application;
 
-            Assert.Equal(YubiKeyApplication.OtpNdef, application);
-        }
+        Assert.Equal(YubiKeyApplication.OtpNdef, application);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
-        {
-            var command = new SelectNdefDataCommand();
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
+    {
+        var command = new SelectNdefDataCommand();
 
-            byte cla = command.CreateCommandApdu().Cla;
+        var cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(0, cla);
-        }
+        Assert.Equal(0, cla);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_ReturnsHexA4()
-        {
-            var command = new SelectNdefDataCommand();
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_ReturnsHexA4()
+    {
+        var command = new SelectNdefDataCommand();
 
-            byte ins = command.CreateCommandApdu().Ins;
+        var ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(0xA4, ins);
-        }
+        Assert.Equal(0xA4, ins);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP1Property_ReturnsZero()
-        {
-            var command = new SelectNdefDataCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP1Property_ReturnsZero()
+    {
+        var command = new SelectNdefDataCommand();
 
-            byte p1 = command.CreateCommandApdu().P1;
+        var p1 = command.CreateCommandApdu().P1;
 
-            Assert.Equal(0, p1);
-        }
+        Assert.Equal(0, p1);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsHex0C()
-        {
-            var command = new SelectNdefDataCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsHex0C()
+    {
+        var command = new SelectNdefDataCommand();
 
-            byte p2 = command.CreateCommandApdu().P2;
+        var p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(0x0C, p2);
-        }
+        Assert.Equal(0x0C, p2);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetData_ReturnsCorrectBuffer()
-        {
-            byte[] expectedBuffer = { 0xE1, 0x04 };
-            var command = new SelectNdefDataCommand();
+    [Fact]
+    public void CreateCommandApdu_GetData_ReturnsCorrectBuffer()
+    {
+        byte[] expectedBuffer = { 0xE1, 0x04 };
+        var command = new SelectNdefDataCommand();
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+        var data = command.CreateCommandApdu().Data;
 
-            Assert.True(data.Span.SequenceEqual(expectedBuffer));
-        }
+        Assert.True(data.Span.SequenceEqual(expectedBuffer));
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNc_ReturnsTwo()
-        {
-            var command = new SelectNdefDataCommand();
+    [Fact]
+    public void CreateCommandApdu_GetNc_ReturnsTwo()
+    {
+        var command = new SelectNdefDataCommand();
 
-            int nc = command.CreateCommandApdu().Nc;
+        var nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(2, nc);
-        }
+        Assert.Equal(2, nc);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNe_ReturnsZero()
-        {
-            var command = new SelectNdefDataCommand();
+    [Fact]
+    public void CreateCommandApdu_GetNe_ReturnsZero()
+    {
+        var command = new SelectNdefDataCommand();
 
-            int ne = command.CreateCommandApdu().Ne;
+        var ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(0, ne);
-        }
+        Assert.Equal(0, ne);
+    }
 
-        [Fact]
-        public void CreateResponseForApdu_ReturnsCorrectType()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 00 });
-            var command = new SelectNdefDataCommand();
+    [Fact]
+    public void CreateResponseForApdu_ReturnsCorrectType()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x90, 00 });
+        var command = new SelectNdefDataCommand();
 
-            IYubiKeyResponse response = command.CreateResponseForApdu(responseApdu);
+        IYubiKeyResponse response = command.CreateResponseForApdu(responseApdu);
 
-            _ = Assert.IsAssignableFrom<OtpResponse>(response);
-        }
+        _ = Assert.IsAssignableFrom<OtpResponse>(response);
     }
 }

@@ -16,61 +16,63 @@ using System;
 using System.Linq;
 using Xunit;
 
-namespace Yubico.Core.Buffers
+namespace Yubico.Core.Buffers;
+
+public class BcdTests
 {
-    public class BcdTests
+    [Fact]
+    public void TestDecodeBcd()
     {
-        [Fact]
-        public void TestDecodeBcd()
-        {
-            byte[] bytes = Bcd.DecodeText("01234567");
-            byte[] expected = new byte[] { 0x01, 0x23, 0x45, 0x67 };
-            Assert.True(expected.SequenceEqual(bytes));
-        }
+        var bytes = Bcd.DecodeText("01234567");
+        var expected = new byte[] { 0x01, 0x23, 0x45, 0x67 };
+        Assert.True(expected.SequenceEqual(bytes));
+    }
 
-        [Fact]
-        public void TestEncodeBcd()
-        {
-            string bcd = Bcd.EncodeBytes(new byte[] { 0x01, 0x23, 0x45, 0x67 });
-            string expected = "01234567";
-            Assert.Equal(expected, bcd);
-        }
+    [Fact]
+    public void TestEncodeBcd()
+    {
+        var bcd = Bcd.EncodeBytes(new byte[] { 0x01, 0x23, 0x45, 0x67 });
+        var expected = "01234567";
+        Assert.Equal(expected, bcd);
+    }
 
-        [Fact]
-        public void TestThrowsNullArgumentException()
-        {
-            _ = Assert.Throws<ArgumentNullException>(() => Bcd.DecodeText(null!));
-        }
+    [Fact]
+    public void TestThrowsNullArgumentException()
+    {
+        _ = Assert.Throws<ArgumentNullException>(() => Bcd.DecodeText(null!));
+    }
 
-        [Theory]
-        [InlineData("0000f000")]
-        [InlineData(" 000000")]
-        [InlineData("I Am Legend!")]
-        public void TestInvalidCharacters(string encoded)
-        {
-            _ = Assert.Throws<ArgumentException>(() => Bcd.DecodeText(encoded));
-        }
+    [Theory]
+    [InlineData("0000f000")]
+    [InlineData(" 000000")]
+    [InlineData("I Am Legend!")]
+    public void TestInvalidCharacters(
+        string encoded)
+    {
+        _ = Assert.Throws<ArgumentException>(() => Bcd.DecodeText(encoded));
+    }
 
-        [Theory]
-        [InlineData("0")]
-        [InlineData("000")]
-        [InlineData("00000")]
-        [InlineData("000000000")]
-        [InlineData("000000000000000")]
-        [InlineData("00000000000000000")]
-        public void TestUnevenStrings(string encoded)
-        {
-            _ = Assert.Throws<ArgumentException>(() => Bcd.DecodeText(encoded));
-        }
+    [Theory]
+    [InlineData("0")]
+    [InlineData("000")]
+    [InlineData("00000")]
+    [InlineData("000000000")]
+    [InlineData("000000000000000")]
+    [InlineData("00000000000000000")]
+    public void TestUnevenStrings(
+        string encoded)
+    {
+        _ = Assert.Throws<ArgumentException>(() => Bcd.DecodeText(encoded));
+    }
 
-        [Theory]
-        [InlineData(new byte[] { 0x0f })]
-        [InlineData(new byte[] { 0xa0 })]
-        [InlineData(new byte[] { 0x00, 0x0a })]
-        [InlineData(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa0 })]
-        public void TestInvalidBytes(byte[] data)
-        {
-            _ = Assert.Throws<ArgumentException>(() => Bcd.EncodeBytes(data));
-        }
+    [Theory]
+    [InlineData(new byte[] { 0x0f })]
+    [InlineData(new byte[] { 0xa0 })]
+    [InlineData(new byte[] { 0x00, 0x0a })]
+    [InlineData(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa0 })]
+    public void TestInvalidBytes(
+        byte[] data)
+    {
+        _ = Assert.Throws<ArgumentException>(() => Bcd.EncodeBytes(data));
     }
 }

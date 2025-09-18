@@ -19,129 +19,138 @@ using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+public class SignResponseTests
 {
-    public class SignResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
-        {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new AuthenticateSignResponse(null));
+        _ = Assert.Throws<ArgumentNullException>(() => new AuthenticateSignResponse(null));
 #pragma warning restore CS8625
-        }
+    }
 
-        [Theory]
-        [InlineData(SWConstants.Success, ResponseStatus.Success)]
-        [InlineData(SWConstants.SecurityStatusNotSatisfied, ResponseStatus.AuthenticationRequired)]
-        [InlineData(SWConstants.FunctionNotSupported, ResponseStatus.Failed)]
-        public void Constructor_SetsStatusWordCorrectly(short statusWord, ResponseStatus expectedStatus)
+    [Theory]
+    [InlineData(SWConstants.Success, ResponseStatus.Success)]
+    [InlineData(SWConstants.SecurityStatusNotSatisfied, ResponseStatus.AuthenticationRequired)]
+    [InlineData(SWConstants.FunctionNotSupported, ResponseStatus.Failed)]
+    public void Constructor_SetsStatusWordCorrectly(
+        short statusWord,
+        ResponseStatus expectedStatus)
+    {
+        var sw1 = unchecked((byte)(statusWord >> 8));
+        var sw2 = unchecked((byte)statusWord);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new AuthenticateSignResponse(responseApdu);
+
+        var Status = response.Status;
+
+        Assert.Equal(expectedStatus, Status);
+    }
+
+    [Theory]
+    [InlineData(SWConstants.Success)]
+    [InlineData(SWConstants.SecurityStatusNotSatisfied)]
+    [InlineData(SWConstants.FunctionNotSupported)]
+    public void Constructor_SetsStatusCorrectly(
+        short statusWord)
+    {
+        var sw1 = unchecked((byte)(statusWord >> 8));
+        var sw2 = unchecked((byte)statusWord);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new AuthenticateSignResponse(responseApdu);
+
+        var StatusWord = response.StatusWord;
+
+        Assert.Equal(statusWord, StatusWord);
+    }
+
+    [Theory]
+    [InlineData(KeyType.ECP256)]
+    [InlineData(KeyType.ECP384)]
+    [InlineData(KeyType.RSA1024)]
+    [InlineData(KeyType.RSA2048)]
+    [InlineData(KeyType.RSA3072)]
+    [InlineData(KeyType.RSA4096)]
+    public void GetData_ReturnsSignature(
+        KeyType keyType)
+    {
+        var sigData = GetSignatureData(keyType);
+        var responseApdu = GetResponseApdu(keyType);
+
+        var response = new AuthenticateSignResponse(responseApdu);
+
+        IReadOnlyList<byte> getData = response.GetData();
+
+        var compareResult = sigData.SequenceEqual(getData);
+
+        Assert.True(compareResult);
+    }
+
+    [Fact]
+    public void GetData_NoAuth_Exception()
+    {
+        var sw1 = unchecked((byte)(SWConstants.SecurityStatusNotSatisfied >> 8));
+        var sw2 = unchecked((byte)SWConstants.SecurityStatusNotSatisfied);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new AuthenticateSignResponse(responseApdu);
+
+        _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
+    }
+
+    [Fact]
+    public void FailResponseApdu_ExceptionOnGetData()
+    {
+        var sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+        var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var response = new AuthenticateSignResponse(responseApdu);
+
+        _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
+    }
+
+    private static ResponseApdu GetResponseApdu(
+        KeyType keyType)
+    {
+        var apduData = GetResponseApduData(keyType);
+        return new ResponseApdu(apduData);
+    }
+
+    // Get the data that makes up a response APDU for the given keyType.
+    // This will return the full APDU data:
+    // 7C len 82 len signature 90 00
+    private static byte[] GetResponseApduData(
+        KeyType keyType)
+    {
+        var sigData = GetSignatureData(keyType);
+        var statusWord = new byte[] { 0x90, 0x00 };
+
+        var prefix = keyType switch
         {
-            byte sw1 = unchecked((byte)(statusWord >> 8));
-            byte sw2 = unchecked((byte)statusWord);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            KeyType.RSA2048 => new byte[] { 0x7C, 0x82, 0x01, 0x04, 0x82, 0x82, 0x01, 0x00 },
 
-            var response = new AuthenticateSignResponse(responseApdu);
+            KeyType.ECP256 => new byte[] { 0x7C, 0x48, 0x82, 0x46 },
 
-            ResponseStatus Status = response.Status;
+            KeyType.ECP384 => new byte[] { 0x7C, 0x69, 0x82, 0x67 },
 
-            Assert.Equal(expectedStatus, Status);
-        }
+            _ => new byte[] { 0x7C, 0x81, 0x83, 0x82, 0x81, 0x80 }
+        };
 
-        [Theory]
-        [InlineData(SWConstants.Success)]
-        [InlineData(SWConstants.SecurityStatusNotSatisfied)]
-        [InlineData(SWConstants.FunctionNotSupported)]
-        public void Constructor_SetsStatusCorrectly(short statusWord)
-        {
-            byte sw1 = unchecked((byte)(statusWord >> 8));
-            byte sw2 = unchecked((byte)statusWord);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        var returnValue = prefix.Concat(sigData);
+        returnValue = returnValue.Concat(statusWord);
 
-            var response = new AuthenticateSignResponse(responseApdu);
+        return returnValue.ToArray();
+    }
 
-            short StatusWord = response.StatusWord;
-
-            Assert.Equal(statusWord, StatusWord);
-        }
-
-        [Theory]
-        [InlineData(KeyType.ECP256)]
-        [InlineData(KeyType.ECP384)]
-        [InlineData(KeyType.RSA1024)]
-        [InlineData(KeyType.RSA2048)]
-        [InlineData(KeyType.RSA3072)]
-        [InlineData(KeyType.RSA4096)]
-        public void GetData_ReturnsSignature(KeyType keyType)
-        {
-            byte[] sigData = GetSignatureData(keyType);
-            ResponseApdu responseApdu = GetResponseApdu(keyType);
-
-            var response = new AuthenticateSignResponse(responseApdu);
-
-            IReadOnlyList<byte> getData = response.GetData();
-
-            bool compareResult = sigData.SequenceEqual(getData);
-
-            Assert.True(compareResult);
-        }
-
-        [Fact]
-        public void GetData_NoAuth_Exception()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.SecurityStatusNotSatisfied >> 8));
-            byte sw2 = unchecked((byte)SWConstants.SecurityStatusNotSatisfied);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new AuthenticateSignResponse(responseApdu);
-
-            _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
-        }
-
-        [Fact]
-        public void FailResponseApdu_ExceptionOnGetData()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            var response = new AuthenticateSignResponse(responseApdu);
-
-            _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
-        }
-
-        private static ResponseApdu GetResponseApdu(KeyType keyType)
-        {
-            byte[] apduData = GetResponseApduData(keyType);
-            return new ResponseApdu(apduData);
-        }
-
-        // Get the data that makes up a response APDU for the given keyType.
-        // This will return the full APDU data:
-        // 7C len 82 len signature 90 00
-        private static byte[] GetResponseApduData(KeyType keyType)
-        {
-            byte[] sigData = GetSignatureData(keyType);
-            byte[] statusWord = new byte[] { 0x90, 0x00 };
-
-            byte[] prefix = keyType switch
-            {
-                KeyType.RSA2048 => new byte[] { 0x7C, 0x82, 0x01, 0x04, 0x82, 0x82, 0x01, 0x00 },
-
-                KeyType.ECP256 => new byte[] { 0x7C, 0x48, 0x82, 0x46 },
-
-                KeyType.ECP384 => new byte[] { 0x7C, 0x69, 0x82, 0x67 },
-
-                _ => new byte[] { 0x7C, 0x81, 0x83, 0x82, 0x81, 0x80 },
-            };
-
-            IEnumerable<byte> returnValue = prefix.Concat(sigData);
-            returnValue = returnValue.Concat(statusWord);
-
-            return returnValue.ToArray<byte>();
-        }
-
-        private static byte[] GetSignatureData(KeyType keyType) => keyType switch
+    private static byte[] GetSignatureData(
+        KeyType keyType)
+    {
+        return keyType switch
         {
             KeyType.RSA2048 => new byte[]
             {
@@ -193,7 +202,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 0xD1, 0x2C, 0x06, 0x20, 0x0B, 0x8D, 0x33, 0xB2, 0xEF, 0x7E, 0xB7, 0x09, 0x2A, 0xDF, 0x5B, 0xB4,
                 0xCF, 0x03, 0x5B, 0xFF, 0x4B, 0x3A, 0x9F, 0xE6, 0x49, 0xFF, 0x51, 0x76, 0x23, 0x62, 0x74, 0xA4,
                 0x2E, 0x83, 0x18, 0x90, 0x5C, 0x92, 0xB8, 0x89, 0x6F, 0xA7, 0x86, 0x0B, 0xB6, 0x1C, 0x6E, 0x60
-            },
+            }
         };
     }
 }

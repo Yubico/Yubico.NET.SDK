@@ -16,77 +16,85 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+public class GetSerialNumberResponseTests
 {
-    public class GetSerialNumberResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
-        {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void action() => _ = new GetSerialNumberResponse(null);
+        static void action()
+        {
+            _ = new GetSerialNumberResponse(null);
+        }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            _ = Assert.Throws<ArgumentNullException>(action);
-        }
+        _ = Assert.Throws<ArgumentNullException>(action);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var versionResponse = new GetSerialNumberResponse(responseApdu);
+
+        Assert.Equal(SWConstants.Success, versionResponse.StatusWord);
+    }
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var versionResponse = new GetSerialNumberResponse(responseApdu);
+
+        Assert.Equal(ResponseStatus.Success, versionResponse.Status);
+    }
+
+    [Fact]
+    public void GetData_ResponseApduFailed_ThrowsInvalidOperationException()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
+        var getSerialNumberResponse = new GetSerialNumberResponse(responseApdu);
+
+        void action()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
-
-            var versionResponse = new GetSerialNumberResponse(responseApdu);
-
-            Assert.Equal(SWConstants.Success, versionResponse.StatusWord);
+            _ = getSerialNumberResponse.GetData();
         }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+        _ = Assert.Throws<InvalidOperationException>(action);
+    }
+
+    [Fact]
+    public void GetData_ResponseApduContainingNotEnoughData_ThrowsMalformedYubiKeyResponseException()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x00, 0x90, 0x00 });
+        var getSerialNumberResponse = new GetSerialNumberResponse(responseApdu);
+
+        void action()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
-
-            var versionResponse = new GetSerialNumberResponse(responseApdu);
-
-            Assert.Equal(ResponseStatus.Success, versionResponse.Status);
+            _ = getSerialNumberResponse.GetData();
         }
 
-        [Fact]
-        public void GetData_ResponseApduFailed_ThrowsInvalidOperationException()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
-            var getSerialNumberResponse = new GetSerialNumberResponse(responseApdu);
+        var exception = Assert.Throws<MalformedYubiKeyResponseException>(action);
+        Assert.Equal(1, exception.ActualDataLength);
+        Assert.Equal(4, exception.ExpectedDataLength);
+    }
 
-            void action() => _ = getSerialNumberResponse.GetData();
+    [Fact]
+    public void GetData_ResponseApduWithData_ReturnsCorrectData()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x00, 0xBB, 0xCC, 0xDD, 0x90, 0x00 });
+        var serialResponse = new GetSerialNumberResponse(responseApdu);
 
-            _ = Assert.Throws<InvalidOperationException>(action);
-        }
+        var serialNum = serialResponse.GetData();
 
-        [Fact]
-        public void GetData_ResponseApduContainingNotEnoughData_ThrowsMalformedYubiKeyResponseException()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x00, 0x90, 0x00 });
-            var getSerialNumberResponse = new GetSerialNumberResponse(responseApdu);
-
-            void action() => _ = getSerialNumberResponse.GetData();
-
-            MalformedYubiKeyResponseException exception = Assert.Throws<MalformedYubiKeyResponseException>(action);
-            Assert.Equal(1, exception.ActualDataLength);
-            Assert.Equal(4, exception.ExpectedDataLength);
-        }
-
-        [Fact]
-        public void GetData_ResponseApduWithData_ReturnsCorrectData()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x00, 0xBB, 0xCC, 0xDD, 0x90, 0x00 });
-            var serialResponse = new GetSerialNumberResponse(responseApdu);
-
-            int serialNum = serialResponse.GetData();
-
-            Assert.Equal(0x00BBCCDD, serialNum);
-        }
+        Assert.Equal(0x00BBCCDD, serialNum);
     }
 }

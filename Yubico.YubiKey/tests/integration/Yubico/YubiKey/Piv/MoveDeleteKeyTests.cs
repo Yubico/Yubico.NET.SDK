@@ -18,100 +18,105 @@ using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Converters;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public class MoveDeleteKeyTests : PivSessionIntegrationTestBase
 {
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class MoveDeleteKeyTests : PivSessionIntegrationTestBase
+    [SkippableTheory(typeof(NotSupportedException))]
+    [InlineData(KeyType.RSA1024)]
+    [InlineData(KeyType.RSA2048)]
+    [InlineData(KeyType.RSA3072)]
+    [InlineData(KeyType.RSA4096)]
+    [InlineData(KeyType.ECP256)]
+    [InlineData(KeyType.ECP384)]
+    public void MoveKey_WithGenerate(
+        KeyType expectedAlgorithm)
     {
-        [SkippableTheory(typeof(NotSupportedException))]
-        [InlineData(KeyType.RSA1024)]
-        [InlineData(KeyType.RSA2048)]
-        [InlineData(KeyType.RSA3072)]
-        [InlineData(KeyType.RSA4096)]
-        [InlineData(KeyType.ECP256)]
-        [InlineData(KeyType.ECP384)]
-        public void MoveKey_WithGenerate(KeyType expectedAlgorithm)
-        {
-            // Arrange
-            const byte sourceSlot = PivSlot.Retired1;
-            const byte destinationSlot = PivSlot.Retired20;
+        // Arrange
+        const byte sourceSlot = PivSlot.Retired1;
+        const byte destinationSlot = PivSlot.Retired20;
 
-            DeleteKeys(Session, sourceSlot, destinationSlot);
-            var devicePublicKey = Session.GenerateKeyPair(sourceSlot, expectedAlgorithm, PivPinPolicy.None);
-            var devicePublicKeySpan = devicePublicKey.EncodeAsPiv().Span;
+        DeleteKeys(Session, sourceSlot, destinationSlot);
+        var devicePublicKey = Session.GenerateKeyPair(sourceSlot, expectedAlgorithm, PivPinPolicy.None);
+        var devicePublicKeySpan = devicePublicKey.EncodeAsPiv().Span;
 
-            // Act
-            Session.MoveKey(sourceSlot, destinationSlot);
-            var destinationMetadata = Session.GetMetadata(destinationSlot);
+        // Act
+        Session.MoveKey(sourceSlot, destinationSlot);
+        var destinationMetadata = Session.GetMetadata(destinationSlot);
 
-            // Assert
-            // Moved key slot should now be empty
-            Assert.Throws<InvalidOperationException>(() => Session.GetMetadata(sourceSlot));
-            var movedPublicKey = destinationMetadata.PublicKeyParameters!.EncodeAsPiv().Span;
-            var isMoved = devicePublicKeySpan.SequenceEqual(movedPublicKey);
-            Assert.True(isMoved);
-        }
+        // Assert
+        // Moved key slot should now be empty
+        Assert.Throws<InvalidOperationException>(() => Session.GetMetadata(sourceSlot));
+        var movedPublicKey = destinationMetadata.PublicKeyParameters!.EncodeAsPiv().Span;
+        var isMoved = devicePublicKeySpan.SequenceEqual(movedPublicKey);
+        Assert.True(isMoved);
+    }
 
-        [SkippableTheory(typeof(NotSupportedException))]
-        [InlineData(KeyType.RSA1024)]
-        [InlineData(KeyType.RSA2048)]
-        [InlineData(KeyType.RSA3072)]
-        [InlineData(KeyType.RSA4096)]
-        [InlineData(KeyType.ECP256)]
-        [InlineData(KeyType.ECP384)]
-        public void MoveKey_WithImportedKey(KeyType expectedAlgorithm)
-        {
-            // Arrange
-            const byte sourceSlot = PivSlot.Retired1;
-            const byte destinationSlot = PivSlot.Retired20;
-            var testPrivateKey = TestKeys.GetTestPrivateKey(expectedAlgorithm);
+    [SkippableTheory(typeof(NotSupportedException))]
+    [InlineData(KeyType.RSA1024)]
+    [InlineData(KeyType.RSA2048)]
+    [InlineData(KeyType.RSA3072)]
+    [InlineData(KeyType.RSA4096)]
+    [InlineData(KeyType.ECP256)]
+    [InlineData(KeyType.ECP384)]
+    public void MoveKey_WithImportedKey(
+        KeyType expectedAlgorithm)
+    {
+        // Arrange
+        const byte sourceSlot = PivSlot.Retired1;
+        const byte destinationSlot = PivSlot.Retired20;
+        var testPrivateKey = TestKeys.GetTestPrivateKey(expectedAlgorithm);
 
-            DeleteKeys(Session, sourceSlot, destinationSlot);
+        DeleteKeys(Session, sourceSlot, destinationSlot);
 
-            Session.ImportPrivateKey(sourceSlot, testPrivateKey.AsPrivateKey());
-            var devicePublicKey = Session.GetMetadata(sourceSlot);
+        Session.ImportPrivateKey(sourceSlot, testPrivateKey.AsPrivateKey());
+        var devicePublicKey = Session.GetMetadata(sourceSlot);
 
-            // Act
-            Session.MoveKey(sourceSlot, destinationSlot);
-            var destinationMetadata = Session.GetMetadata(destinationSlot);
+        // Act
+        Session.MoveKey(sourceSlot, destinationSlot);
+        var destinationMetadata = Session.GetMetadata(destinationSlot);
 
-            // Assert
-            // Moved key slot should now be empty
-            Assert.Throws<InvalidOperationException>(() => Session.GetMetadata(sourceSlot));
-            var movedPublicKey = devicePublicKey.PublicKeyParameters!.EncodeAsPiv().Span;
-            var isMoved = devicePublicKey.PublicKeyParameters!.EncodeAsPiv().Span.SequenceEqual(movedPublicKey);
-            Assert.True(isMoved);
-        }
+        // Assert
+        // Moved key slot should now be empty
+        Assert.Throws<InvalidOperationException>(() => Session.GetMetadata(sourceSlot));
+        var movedPublicKey = devicePublicKey.PublicKeyParameters!.EncodeAsPiv().Span;
+        var isMoved = devicePublicKey.PublicKeyParameters!.EncodeAsPiv().Span.SequenceEqual(movedPublicKey);
+        Assert.True(isMoved);
+    }
 
-        [SkippableTheory(typeof(NotSupportedException))]
-        [InlineData(KeyType.RSA1024)]
-        [InlineData(KeyType.RSA2048)]
-        [InlineData(KeyType.RSA3072)]
-        [InlineData(KeyType.RSA4096)]
-        [InlineData(KeyType.ECP256)]
-        [InlineData(KeyType.ECP384)]
-        public void DeleteKey_WithImportedKey(KeyType expectedAlgorithm)
-        {
-            // Arrange
-            const byte slotToDelete = PivSlot.Retired1;
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
+    [SkippableTheory(typeof(NotSupportedException))]
+    [InlineData(KeyType.RSA1024)]
+    [InlineData(KeyType.RSA2048)]
+    [InlineData(KeyType.RSA3072)]
+    [InlineData(KeyType.RSA4096)]
+    [InlineData(KeyType.ECP256)]
+    [InlineData(KeyType.ECP384)]
+    public void DeleteKey_WithImportedKey(
+        KeyType expectedAlgorithm)
+    {
+        // Arrange
+        const byte slotToDelete = PivSlot.Retired1;
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
 
-            var testPrivateKey = TestKeys.GetTestPrivateKey(expectedAlgorithm);
-            var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
-            Session.ImportPrivateKey(slotToDelete, privateKey);
+        var testPrivateKey = TestKeys.GetTestPrivateKey(expectedAlgorithm);
+        var privateKey = AsnPrivateKeyDecoder.CreatePrivateKey(testPrivateKey.EncodedKey);
+        Session.ImportPrivateKey(slotToDelete, privateKey);
 
-            // Act
-            Session.DeleteKey(slotToDelete);
+        // Act
+        Session.DeleteKey(slotToDelete);
 
-            // Assert
-            // Key has been deleted and thus returns no data on the slot query
-            Assert.Throws<InvalidOperationException>(() => Session.GetMetadata(slotToDelete));
-        }
+        // Assert
+        // Key has been deleted and thus returns no data on the slot query
+        Assert.Throws<InvalidOperationException>(() => Session.GetMetadata(slotToDelete));
+    }
 
-        private static void DeleteKeys(PivSession Session, byte sourceSlot, byte destinationSlot)
-        {
-            Session.DeleteKey(sourceSlot);
-            Session.DeleteKey(destinationSlot);
-        }
+    private static void DeleteKeys(
+        PivSession Session,
+        byte sourceSlot,
+        byte destinationSlot)
+    {
+        Session.DeleteKey(sourceSlot);
+        Session.DeleteKey(destinationSlot);
     }
 }

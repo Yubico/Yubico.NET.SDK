@@ -19,49 +19,49 @@ using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+/// <summary>
+///     Executes device wide reset and check that PINs are set to default values (where applicable).
+/// </summary>
+/// <remarks>
+///     Device wide reset is only available on YubiKey Bio Multi-protocol Edition devices.
+/// </remarks>
+public class DeviceResetTests
 {
-    /// <summary>
-    /// Executes device wide reset and check that PINs are set to default values (where applicable).
-    /// </summary>
-    /// <remarks>
-    /// Device wide reset is only available on YubiKey Bio Multi-protocol Edition devices.
-    /// </remarks>
-    public class DeviceResetTests
+    private readonly ReadOnlyMemory<byte> _complexPin = new(Encoding.ASCII.GetBytes("11234567"));
+
+    private readonly ReadOnlyMemory<byte> _defaultPin = new(Encoding.ASCII.GetBytes("123456"));
+
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    public void Reset()
     {
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Bio);
+        Skip.IfNot(testDevice.HasFeature(YubiKeyFeature.DeviceReset), "Device does not support DeviceReset.");
+        Skip.IfNot(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv),
+            "Device does not support DeviceReset.");
 
-        private readonly ReadOnlyMemory<byte> _defaultPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("123456"));
-        private readonly ReadOnlyMemory<byte> _complexPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("11234567"));
+        testDevice.DeviceReset();
 
-        [SkippableFact(typeof(DeviceNotFoundException))]
-        public void Reset()
+        /* set PIN for PIV - this will also set the FIDO2 PIN */
+        using (var pivSession = new PivSession(testDevice))
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Bio);
-            Skip.IfNot(testDevice.HasFeature(YubiKeyFeature.DeviceReset), "Device does not support DeviceReset.");
-            Skip.IfNot(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv), "Device does not support DeviceReset.");
+            Assert.True(pivSession.TryChangePin(_defaultPin, _complexPin, out _));
+        }
 
-            testDevice.DeviceReset();
+        testDevice.DeviceReset();
 
-            /* set PIN for PIV - this will also set the FIDO2 PIN */
-            using (var pivSession = new PivSession(testDevice))
-            {
-                Assert.True(pivSession.TryChangePin(_defaultPin, _complexPin, out _));
-            }
+        /* verify that PIV has default PIN */
+        using (var pivSession = new PivSession(testDevice))
+        {
+            Assert.True(pivSession.TryVerifyPin(_defaultPin, out _));
+        }
 
-            testDevice.DeviceReset();
-
-            /* verify that PIV has default PIN */
-            using (var pivSession = new PivSession(testDevice))
-            {
-                Assert.True(pivSession.TryVerifyPin(_defaultPin, out _));
-            }
-
-            /* verify that FIDO2 does not have a PIN set */
-            using (var fido2Session = new Fido2Session(testDevice))
-            {
-                var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.clientPin);
-                Assert.Equal(OptionValue.False, optionValue);
-            }
+        /* verify that FIDO2 does not have a PIN set */
+        using (var fido2Session = new Fido2Session(testDevice))
+        {
+            var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.clientPin);
+            Assert.Equal(OptionValue.False, optionValue);
         }
     }
 }

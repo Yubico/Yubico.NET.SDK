@@ -16,46 +16,45 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+public class PivResponseTests
 {
-    public class PivResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
-        {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new PivResponse(null));
+        _ = Assert.Throws<ArgumentNullException>(() => new PivResponse(null));
 #pragma warning restore CS8625
-        }
+    }
 
-        [Fact]
-        public void StatusWord_GivenResponseApdu_EqualsSWField()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 24, 73 });
+    [Fact]
+    public void StatusWord_GivenResponseApdu_EqualsSWField()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 24, 73 });
 
-            var pivResponse = new PivResponse(responseApdu);
+        var pivResponse = new PivResponse(responseApdu);
 
-            Assert.Equal(responseApdu.SW, pivResponse.StatusWord);
-        }
+        Assert.Equal(responseApdu.SW, pivResponse.StatusWord);
+    }
 
-        [Fact]
-        public void Status_GivenSuccessfulResponseApdu_ReturnsSuccess()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { SW1Constants.Success, 0x00 });
+    [Fact]
+    public void Status_GivenSuccessfulResponseApdu_ReturnsSuccess()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { SW1Constants.Success, 0x00 });
 
-            var pivResponse = new PivResponse(responseApdu);
+        var pivResponse = new PivResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.Success, pivResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.Success, pivResponse.Status);
+    }
 
-        [Fact]
-        public void Status_GivenFailedResponseApdu_ReturnsFailed()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { SW1Constants.CommandNotAllowed, 0x00 });
+    [Fact]
+    public void Status_GivenFailedResponseApdu_ReturnsFailed()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { SW1Constants.CommandNotAllowed, 0x00 });
 
-            var pivResponse = new PivResponse(responseApdu);
+        var pivResponse = new PivResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.Failed, pivResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.Failed, pivResponse.Status);
     }
 }

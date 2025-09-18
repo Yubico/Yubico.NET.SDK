@@ -49,9 +49,6 @@ internal class ScpResponse : YubiKeyResponse
                         : message ?? StatusMessage);
         }
 
-        string AddStatusWord(string originalMessage)
-        {
-            return $"{originalMessage} (StatusWord: 0x{StatusWord:X2})";
-        }
+        string AddStatusWord(string originalMessage) => $"{originalMessage} (StatusWord: 0x{StatusWord:X2})";
     }
 }

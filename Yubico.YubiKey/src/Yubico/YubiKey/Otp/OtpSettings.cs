@@ -122,10 +122,7 @@ public partial class OtpSettings<T> where T : OperationBase<T>
             // We would never use this for performance sensitive code,
             // but if we're throwing this exception, that's not a concern
             // here.
-            static int GetBitCount(Flag b)
-            {
-                return Convert.ToString((byte)b, 2).ToCharArray().Count(c => c == '1');
-            }
+            static int GetBitCount(Flag b) => Convert.ToString((byte)b, 2).ToCharArray().Count(c => c == '1');
         }
     }
 

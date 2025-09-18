@@ -131,16 +131,13 @@ public class Base16 : ITextEncoding
 
         // The decoding needs to be case-insensitive. This lets us handle that
         // in cases where the norm is upper or lower.
-        char HandleCase(char c)
-        {
-            return DefaultLowerCase
+        char HandleCase(char c) => DefaultLowerCase
                 ? (char)((c - 0x40) * (0x5b - c) > 0
                     ? c + 0x20
                     : c)
                 : (char)((c - 0x60) * (0x7b - c) > 0
                     ? c - 0x20
                     : c);
-        }
 
         int GetNibble(char c)
         {

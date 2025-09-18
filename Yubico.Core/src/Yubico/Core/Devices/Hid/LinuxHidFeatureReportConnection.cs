@@ -18,138 +18,142 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Yubico.PlatformInterop;
 
-namespace Yubico.Core.Devices.Hid
+namespace Yubico.Core.Devices.Hid;
+
+internal class LinuxHidFeatureReportConnection : IHidConnection
 {
-    internal class LinuxHidFeatureReportConnection : IHidConnection
+    private const int YubiKeyFeatureReportSize = 8;
+    private readonly LinuxHidDevice _device;
+
+    private readonly LinuxFileSafeHandle _handle;
+    private bool _isDisposed;
+
+    public LinuxHidFeatureReportConnection(LinuxHidDevice device, string devnode)
     {
-        private const int YubiKeyFeatureReportSize = 8;
+        InputReportSize = YubiKeyFeatureReportSize;
+        OutputReportSize = YubiKeyFeatureReportSize;
 
-        private readonly LinuxFileSafeHandle _handle;
-        private bool _isDisposed;
-        private readonly LinuxHidDevice _device;
+        _device = device;
+        _handle = NativeMethods.open(
+            devnode, NativeMethods.OpenFlags.O_RDWR | NativeMethods.OpenFlags.O_NONBLOCK);
 
-        public int InputReportSize { get; private set; }
-        public int OutputReportSize { get; private set; }
-
-        public LinuxHidFeatureReportConnection(LinuxHidDevice device, string devnode)
+        if (_handle.IsInvalid)
         {
-            InputReportSize = YubiKeyFeatureReportSize;
-            OutputReportSize = YubiKeyFeatureReportSize;
-
-            _device = device;
-            _handle = NativeMethods.open(
-                devnode, NativeMethods.OpenFlags.O_RDWR | NativeMethods.OpenFlags.O_NONBLOCK);
-
-            if (_handle.IsInvalid)
-            {
-                throw new PlatformApiException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.LinuxHidOpenFailed));
-            }
-        }
-
-        // Send the given report as a HID feature report.
-        // We expect to get a report that is FeatureReportSize bytes long. Then
-        // we prepend a 00 byte for the actual data passed into the YubiKey.
-        public void SetReport(byte[] report)
-        {
-            if (report.Length != YubiKeyFeatureReportSize)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidReportBufferLength));
-            }
-
-            byte[] reportToSend = new byte[report.Length + 1];
-            Array.Copy(report, 0, reportToSend, 1, report.Length);
-
-            long ioctlFlag = NativeMethods.HIDIOCSFEATURE | ((long)(report.Length + 1) << 16);
-            IntPtr setReportData = Marshal.AllocHGlobal(report.Length + 1);
-
-            try
-            {
-                Marshal.Copy(reportToSend, 0, setReportData, reportToSend.Length);
-                int bytesSent = NativeMethods.ioctl(_handle, ioctlFlag, setReportData);
-
-                _device.LogDeviceAccessTime();
-
-                if (bytesSent >= 0)
-                {
-                    return;
-                }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(setReportData);
-            }
-
             throw new PlatformApiException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    ExceptionMessages.HidrawFailed));
+                    ExceptionMessages.LinuxHidOpenFailed));
         }
+    }
 
-        // Get the feature report that is waiting on the device.
-        public byte[] GetReport()
+    #region IHidConnection Members
+
+    public int InputReportSize { get; }
+    public int OutputReportSize { get; }
+
+    // Send the given report as a HID feature report.
+    // We expect to get a report that is FeatureReportSize bytes long. Then
+    // we prepend a 00 byte for the actual data passed into the YubiKey.
+    public void SetReport(byte[] report)
+    {
+        if (report.Length != YubiKeyFeatureReportSize)
         {
-            long ioctlFlag = NativeMethods.HIDIOCGFEATURE | ((long)NativeMethods.MaxFeatureBufferSize << 16);
-            IntPtr getReportData = Marshal.AllocHGlobal(NativeMethods.MaxFeatureBufferSize);
-
-            try
-            {
-                // The return value is either < 0 for error, or the number of
-                // bytes placed into the provided buffer.
-                int bytesReturned = NativeMethods.ioctl(_handle, ioctlFlag, getReportData);
-
-                _device.LogDeviceAccessTime();
-
-                if (bytesReturned >= 0)
-                {
-                    // A YubiKey "has a usable payload of 8 bytes". Hence,
-                    // if we receive something longer than 8, just return the
-                    // last 8.
-                    byte[] outputBuffer = new byte[bytesReturned];
-                    Marshal.Copy(getReportData, outputBuffer, 0, bytesReturned);
-                    if (bytesReturned > YubiKeyFeatureReportSize)
-                    {
-                        outputBuffer = outputBuffer.Skip(bytesReturned - YubiKeyFeatureReportSize).ToArray();
-                    }
-                    return outputBuffer;
-                }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(getReportData);
-            }
-
-            throw new PlatformApiException(
+            throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    ExceptionMessages.HidrawFailed));
+                    ExceptionMessages.InvalidReportBufferLength));
         }
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
+        byte[] reportToSend = new byte[report.Length + 1];
+        Array.Copy(report, 0, reportToSend, 1, report.Length);
 
-        private void Dispose(bool disposing)
+        long ioctlFlag = NativeMethods.HIDIOCSFEATURE | (long)(report.Length + 1) << 16;
+        IntPtr setReportData = Marshal.AllocHGlobal(report.Length + 1);
+
+        try
         {
-            if (_isDisposed)
+            Marshal.Copy(reportToSend, 0, setReportData, reportToSend.Length);
+            int bytesSent = NativeMethods.ioctl(_handle, ioctlFlag, setReportData);
+
+            _device.LogDeviceAccessTime();
+
+            if (bytesSent >= 0)
             {
                 return;
             }
-
-            if (disposing)
-            {
-                _handle.Dispose();
-            }
-
-            _isDisposed = true;
         }
+        finally
+        {
+            Marshal.FreeHGlobal(setReportData);
+        }
+
+        throw new PlatformApiException(
+            string.Format(
+                CultureInfo.CurrentCulture,
+                ExceptionMessages.HidrawFailed));
+    }
+
+    // Get the feature report that is waiting on the device.
+    public byte[] GetReport()
+    {
+        long ioctlFlag = NativeMethods.HIDIOCGFEATURE | (long)NativeMethods.MaxFeatureBufferSize << 16;
+        IntPtr getReportData = Marshal.AllocHGlobal(NativeMethods.MaxFeatureBufferSize);
+
+        try
+        {
+            // The return value is either < 0 for error, or the number of
+            // bytes placed into the provided buffer.
+            int bytesReturned = NativeMethods.ioctl(_handle, ioctlFlag, getReportData);
+
+            _device.LogDeviceAccessTime();
+
+            if (bytesReturned >= 0)
+            {
+                // A YubiKey "has a usable payload of 8 bytes". Hence,
+                // if we receive something longer than 8, just return the
+                // last 8.
+                byte[] outputBuffer = new byte[bytesReturned];
+                Marshal.Copy(getReportData, outputBuffer, 0, bytesReturned);
+                if (bytesReturned > YubiKeyFeatureReportSize)
+                {
+                    outputBuffer = outputBuffer.Skip(bytesReturned - YubiKeyFeatureReportSize).ToArray();
+                }
+
+                return outputBuffer;
+            }
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(getReportData);
+        }
+
+        throw new PlatformApiException(
+            string.Format(
+                CultureInfo.CurrentCulture,
+                ExceptionMessages.HidrawFailed));
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    private void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _handle.Dispose();
+        }
+
+        _isDisposed = true;
     }
 }

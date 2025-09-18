@@ -17,73 +17,73 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Yubico.Core.Buffers
+namespace Yubico.Core.Buffers;
+
+/// <summary>
+///     Utilities for working with multi null-terminated strings.
+/// </summary>
+public static class MultiString
 {
+    private static readonly char[] _separator = ['\0'];
+
     /// <summary>
-    /// Utilities for working with multi null-terminated strings.
+    ///     Converts the byte array representing a multi-null-terminated string and return them as
+    ///     .NET strings.
     /// </summary>
-    public static class MultiString
+    /// <param name="value">Multi-string to convert.</param>
+    /// <param name="encoding">Encoding to use for interpreting the strings.</param>
+    /// <returns>Array of converted strings.</returns>
+    public static string[] GetStrings(byte[] value, Encoding encoding)
     {
-        private static readonly char[] _separator = ['\0'];
-
-        /// <summary>
-        /// Converts the byte array representing a multi-null-terminated string and return them as
-        /// .NET strings.
-        /// </summary>
-        /// <param name="value">Multi-string to convert.</param>
-        /// <param name="encoding">Encoding to use for interpreting the strings.</param>
-        /// <returns>Array of converted strings.</returns>
-        public static string[] GetStrings(byte[] value, Encoding encoding)
+        if (encoding is null)
         {
-            if (encoding is null)
-            {
-                throw new ArgumentNullException(nameof(encoding));
-            }
-
-            return encoding
-                .GetString(value)
-                .Split(_separator, StringSplitOptions.RemoveEmptyEntries);
+            throw new ArgumentNullException(nameof(encoding));
         }
 
-        /// <summary>
-        /// Converts an array of strings to a multi-null-terminated string.
-        /// </summary>
-        /// <param name="value">Array of strings.</param>
-        /// <param name="encoding">Encoding to apply to the multi-string.</param>
-        /// <returns>Byte array containing multi-string.</returns>
-        public static byte[] GetBytes(string[] value, Encoding encoding)
+        return encoding
+            .GetString(value)
+            .Split(_separator, StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    /// <summary>
+    ///     Converts an array of strings to a multi-null-terminated string.
+    /// </summary>
+    /// <param name="value">Array of strings.</param>
+    /// <param name="encoding">Encoding to apply to the multi-string.</param>
+    /// <returns>Byte array containing multi-string.</returns>
+    public static byte[] GetBytes(string[] value, Encoding encoding)
+    {
+        if (value is null)
         {
-            if (value is null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            throw new ArgumentNullException(nameof(value));
+        }
 
-            if (encoding is null)
-            {
-                throw new ArgumentNullException(nameof(encoding));
-            }
+        if (encoding is null)
+        {
+            throw new ArgumentNullException(nameof(encoding));
+        }
 
-            if (value.Length == 0)
-            {
-                return Array.Empty<byte>();
-            }
+        if (value.Length == 0)
+        {
+            return Array.Empty<byte>();
+        }
 
-            // Take a reasonable guess at the initial buffer size. Hopefully in the worst case, List
-            // would only need to resize once. A multiplier of 2 is a reasonable buffer for unicode
-            // length for both UTF-8 and UTF-16.
-            int initialLength = value.Sum(str => str.Length) * 2;
+        // Take a reasonable guess at the initial buffer size. Hopefully in the worst case, List
+        // would only need to resize once. A multiplier of 2 is a reasonable buffer for unicode
+        // length for both UTF-8 and UTF-16.
+        int initialLength = value.Sum(str => str.Length) * 2;
 
-            var multiString = new List<byte>(initialLength);
-            byte[] nullBytes = encoding.GetBytes("\0");
+        var multiString = new List<byte>(initialLength);
+        byte[] nullBytes = encoding.GetBytes("\0");
 
-            foreach (string str in value)
-            {
-                multiString.AddRange(encoding.GetBytes(str));
-                multiString.AddRange(nullBytes);
-            }
+        foreach (string str in value)
+        {
+            multiString.AddRange(encoding.GetBytes(str));
             multiString.AddRange(nullBytes);
-
-            return multiString.ToArray();
         }
+
+        multiString.AddRange(nullBytes);
+
+        return multiString.ToArray();
     }
 }

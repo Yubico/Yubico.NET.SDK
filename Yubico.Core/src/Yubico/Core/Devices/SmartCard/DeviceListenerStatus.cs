@@ -12,26 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.Core.Devices.SmartCard
+namespace Yubico.Core.Devices.SmartCard;
+
+/// <summary>
+///     An enumeration that represents the status of a device listener.
+/// </summary>
+public enum DeviceListenerStatus
 {
     /// <summary>
-    /// An enumeration that represents the status of a device listener.
+    ///     The listener has not been started, and is not currently listening for devices. No events will be raised.
     /// </summary>
-    public enum DeviceListenerStatus
-    {
-        /// <summary>
-        /// The listener has not been started, and is not currently listening for devices. No events will be raised.
-        /// </summary>
-        Stopped,
+    Stopped,
 
-        /// <summary>
-        /// The listener has been successfully started.
-        /// </summary>
-        Started,
+    /// <summary>
+    ///     The listener has been successfully started.
+    /// </summary>
+    Started,
 
-        /// <summary>
-        /// The listener encountered an error and could not start. No events will be raised.
-        /// </summary>
-        Error
-    }
+    /// <summary>
+    ///     The listener encountered an error and could not start. No events will be raised.
+    /// </summary>
+    Error
 }

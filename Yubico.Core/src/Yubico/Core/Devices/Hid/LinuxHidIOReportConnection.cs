@@ -20,122 +20,128 @@ using Yubico.Core.Buffers;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
-namespace Yubico.Core.Devices.Hid
+namespace Yubico.Core.Devices.Hid;
+
+internal class LinuxHidIOReportConnection : IHidConnection
 {
-    internal class LinuxHidIOReportConnection : IHidConnection
+    private const int YubiKeyIOReportSize = 64;
+    private readonly LinuxHidDevice _device;
+
+    private readonly LinuxFileSafeHandle _handle;
+
+    private readonly ILogger _log = Log.GetLogger<LinuxHidIOReportConnection>();
+    private bool _isDisposed;
+
+    public LinuxHidIOReportConnection(LinuxHidDevice device, string devnode)
     {
-        private const int YubiKeyIOReportSize = 64;
+        _log.LogInformation("Creating new IO report connection for device [{DevNode}]", devnode);
 
-        private readonly LinuxFileSafeHandle _handle;
-        private bool _isDisposed;
+        InputReportSize = YubiKeyIOReportSize;
+        OutputReportSize = YubiKeyIOReportSize;
 
-        private readonly ILogger _log = Logging.Log.GetLogger<LinuxHidIOReportConnection>();
-        private readonly LinuxHidDevice _device;
+        _device = device;
+        _handle = NativeMethods.open(devnode, NativeMethods.OpenFlags.O_RDWR);
 
-        public int InputReportSize { get; private set; }
-        public int OutputReportSize { get; private set; }
-
-        public LinuxHidIOReportConnection(LinuxHidDevice device, string devnode)
+        if (_handle.IsInvalid)
         {
-            _log.LogInformation("Creating new IO report connection for device [{DevNode}]", devnode);
-
-            InputReportSize = YubiKeyIOReportSize;
-            OutputReportSize = YubiKeyIOReportSize;
-
-            _device = device;
-            _handle = NativeMethods.open(devnode, NativeMethods.OpenFlags.O_RDWR);
-
-            if (_handle.IsInvalid)
-            {
-                _log.LogError("Could not open device for IO reports: {Error}", LibcHelpers.GetErrnoString());
-
-                throw new PlatformApiException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.LinuxHidOpenFailed));
-            }
-        }
-
-        // Send the given report to the FIDO device. All FIDO messages are
-        // exactly 64 bytes long.
-        public void SetReport(byte[] report)
-        {
-            _log.SensitiveLogInformation("Sending IO report> {report}, Length = {length}", Hex.BytesToHex(report), report.Length);
-            if (report.Length != YubiKeyIOReportSize)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidReportBufferLength));
-            }
-
-            // HIDRAW expects the first byte to be the frame number - or in cases where a frame number is not used,
-            // like with the YubiKey, the first byte should be zero.
-            byte[] paddedBuffer = new byte[YubiKeyIOReportSize + 1];
-            report.CopyTo(paddedBuffer.AsSpan(1)); // Leave the first byte as 00
-
-            int bytesWritten = NativeMethods.write(_handle.DangerousGetHandle().ToInt32(), paddedBuffer, paddedBuffer.Length);
-
-            _device.LogDeviceAccessTime();
-
-            CryptographicOperations.ZeroMemory(paddedBuffer);
-
-            if (bytesWritten >= 0)
-            {
-                return;
-            }
-
-            _log.LogError("Write failed with: {Error}", LibcHelpers.GetErrnoString());
+            _log.LogError("Could not open device for IO reports: {Error}", LibcHelpers.GetErrnoString());
 
             throw new PlatformApiException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    ExceptionMessages.HidrawFailed));
+                    ExceptionMessages.LinuxHidOpenFailed));
         }
+    }
 
-        // Get the response that is waiting on the device. It will be 64 bytes.
-        public byte[] GetReport()
+    #region IHidConnection Members
+
+    public int InputReportSize { get; }
+    public int OutputReportSize { get; }
+
+    // Send the given report to the FIDO device. All FIDO messages are
+    // exactly 64 bytes long.
+    public void SetReport(byte[] report)
+    {
+        _log.SensitiveLogInformation(
+            "Sending IO report> {report}, Length = {length}", Hex.BytesToHex(report), report.Length);
+
+        if (report.Length != YubiKeyIOReportSize)
         {
-            // The return value is either < 0 for error, or the number of
-            // bytes placed into the provided buffer.
-            byte[] outputBuffer = new byte[YubiKeyIOReportSize];
-            int bytesRead = NativeMethods.read(_handle, outputBuffer, YubiKeyIOReportSize);
-
-            _device.LogDeviceAccessTime();
-
-            if (bytesRead >= 0)
-            {
-                _log.SensitiveLogInformation("Receiving IO report< {report}", Hex.BytesToHex(outputBuffer));
-                return outputBuffer;
-            }
-
-            _log.LogError("Read failed with: {Error}", LibcHelpers.GetErrnoString());
-            throw new PlatformApiException(
+            throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    ExceptionMessages.HidrawFailed));
+                    ExceptionMessages.InvalidReportBufferLength));
         }
 
-        public void Dispose()
+        // HIDRAW expects the first byte to be the frame number - or in cases where a frame number is not used,
+        // like with the YubiKey, the first byte should be zero.
+        byte[] paddedBuffer = new byte[YubiKeyIOReportSize + 1];
+        report.CopyTo(paddedBuffer.AsSpan(1)); // Leave the first byte as 00
+
+        int bytesWritten = NativeMethods.write(
+            _handle.DangerousGetHandle().ToInt32(), paddedBuffer, paddedBuffer.Length);
+
+        _device.LogDeviceAccessTime();
+
+        CryptographicOperations.ZeroMemory(paddedBuffer);
+
+        if (bytesWritten >= 0)
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            return;
         }
 
-        private void Dispose(bool disposing)
+        _log.LogError("Write failed with: {Error}", LibcHelpers.GetErrnoString());
+
+        throw new PlatformApiException(
+            string.Format(
+                CultureInfo.CurrentCulture,
+                ExceptionMessages.HidrawFailed));
+    }
+
+    // Get the response that is waiting on the device. It will be 64 bytes.
+    public byte[] GetReport()
+    {
+        // The return value is either < 0 for error, or the number of
+        // bytes placed into the provided buffer.
+        byte[] outputBuffer = new byte[YubiKeyIOReportSize];
+        int bytesRead = NativeMethods.read(_handle, outputBuffer, YubiKeyIOReportSize);
+
+        _device.LogDeviceAccessTime();
+
+        if (bytesRead >= 0)
         {
-            if (_isDisposed)
-            {
-                return;
-            }
-
-            if (disposing)
-            {
-                _handle.Dispose();
-            }
-
-            _isDisposed = true;
+            _log.SensitiveLogInformation("Receiving IO report< {report}", Hex.BytesToHex(outputBuffer));
+            return outputBuffer;
         }
+
+        _log.LogError("Read failed with: {Error}", LibcHelpers.GetErrnoString());
+        throw new PlatformApiException(
+            string.Format(
+                CultureInfo.CurrentCulture,
+                ExceptionMessages.HidrawFailed));
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    private void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _handle.Dispose();
+        }
+
+        _isDisposed = true;
     }
 }

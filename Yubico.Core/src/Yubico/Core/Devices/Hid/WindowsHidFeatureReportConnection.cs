@@ -15,76 +15,82 @@
 using System;
 using Yubico.PlatformInterop;
 
-namespace Yubico.Core.Devices.Hid
+namespace Yubico.Core.Devices.Hid;
+
+internal sealed class WindowsHidFeatureReportConnection : IHidConnection
 {
-    internal sealed class WindowsHidFeatureReportConnection : IHidConnection
+    // The SDK device instance that created this connection instance.
+    private readonly WindowsHidDevice _device;
+
+    internal WindowsHidFeatureReportConnection(WindowsHidDevice device, string path)
     {
-        // The SDK device instance that created this connection instance.
-        private readonly WindowsHidDevice _device;
-        // The underlying Windows HID device used for communication.
-        private IHidDDevice HidDDevice { get; set; }
-
-        public int InputReportSize { get; private set; }
-        public int OutputReportSize { get; private set; }
-
-        internal WindowsHidFeatureReportConnection(WindowsHidDevice device, string path)
-        {
-            _device = device;
-            HidDDevice = new HidDDevice(path);
-            SetupConnection();
-        }
-
-        private void SetupConnection()
-        {
-            HidDDevice.OpenFeatureConnection();
-            InputReportSize = HidDDevice.FeatureReportByteLength;
-            OutputReportSize = HidDDevice.FeatureReportByteLength;
-        }
-
-        public byte[] GetReport()
-        {
-            byte[] data = HidDDevice.GetFeatureReport();
-
-            _device.LogDeviceAccessTime();
-
-            return data;
-        }
-
-        public void SetReport(byte[] report)
-        {
-            HidDDevice.SetFeatureReport(report);
-            _device.LogDeviceAccessTime();
-        }
-
-        #region IDisposable Support
-        private bool disposedValue; // To detect redundant calls
-
-        private void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    HidDDevice.Dispose();
-                }
-
-                disposedValue = true;
-            }
-        }
-
-        ~WindowsHidFeatureReportConnection()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(false);
-        }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        #endregion
+        _device = device;
+        HidDDevice = new HidDDevice(path);
+        SetupConnection();
     }
+
+    // The underlying Windows HID device used for communication.
+    private IHidDDevice HidDDevice { get; }
+
+    #region IHidConnection Members
+
+    public int InputReportSize { get; private set; }
+    public int OutputReportSize { get; private set; }
+
+    public byte[] GetReport()
+    {
+        byte[] data = HidDDevice.GetFeatureReport();
+
+        _device.LogDeviceAccessTime();
+
+        return data;
+    }
+
+    public void SetReport(byte[] report)
+    {
+        HidDDevice.SetFeatureReport(report);
+        _device.LogDeviceAccessTime();
+    }
+
+    #endregion
+
+    private void SetupConnection()
+    {
+        HidDDevice.OpenFeatureConnection();
+        InputReportSize = HidDDevice.FeatureReportByteLength;
+        OutputReportSize = HidDDevice.FeatureReportByteLength;
+    }
+
+    #region IDisposable Support
+
+    private bool disposedValue; // To detect redundant calls
+
+    private void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                HidDDevice.Dispose();
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    ~WindowsHidFeatureReportConnection()
+    {
+        // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        Dispose(false);
+    }
+
+    // This code added to correctly implement the disposable pattern.
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
 }

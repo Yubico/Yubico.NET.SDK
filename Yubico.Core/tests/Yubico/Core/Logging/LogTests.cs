@@ -23,6 +23,8 @@ public class LogTests : IDisposable
 {
     private readonly ILoggerFactory _originalFactory = Log.Instance;
 
+    #region IDisposable Members
+
 #pragma warning disable CA1816
     public void Dispose()
 #pragma warning restore CA1816
@@ -30,6 +32,8 @@ public class LogTests : IDisposable
         // Reset to the original factory after each test
         Log.Instance = _originalFactory;
     }
+
+    #endregion
 
     // Ensure that the default LoggerFactory is created when no configuration is provided.
     [Fact]

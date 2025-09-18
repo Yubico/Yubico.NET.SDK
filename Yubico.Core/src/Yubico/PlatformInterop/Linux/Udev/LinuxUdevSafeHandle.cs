@@ -16,23 +16,22 @@ using System;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+// This class represents the C libudev "struct udev *" class.
+internal class LinuxUdevSafeHandle : SafeHandle
 {
-    // This class represents the C libudev "struct udev *" class.
-    internal class LinuxUdevSafeHandle : SafeHandle
+    public LinuxUdevSafeHandle()
+        : base(IntPtr.Zero, true)
     {
-        public override bool IsInvalid => handle == IntPtr.Zero;
+    }
 
-        public LinuxUdevSafeHandle()
-            : base(IntPtr.Zero, true)
-        {
-        }
+    public override bool IsInvalid => handle == IntPtr.Zero;
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        override protected bool ReleaseHandle()
-        {
-            _ = NativeMethods.udev_unref(handle);
-            return true;
-        }
+    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+    protected override bool ReleaseHandle()
+    {
+        _ = NativeMethods.udev_unref(handle);
+        return true;
     }
 }

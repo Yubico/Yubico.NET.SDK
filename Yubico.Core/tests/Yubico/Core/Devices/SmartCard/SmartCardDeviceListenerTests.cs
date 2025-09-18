@@ -20,6 +20,8 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests;
 
 internal class FakeSmartCardDevice : ISmartCardDevice
 {
+    #region ISmartCardDevice Members
+
     public DateTime LastAccessed { get; } = DateTime.Now;
     public string Path { get; } = string.Empty;
     public string? ParentDeviceId { get; } = null;
@@ -30,6 +32,8 @@ internal class FakeSmartCardDevice : ISmartCardDevice
     {
         throw new NotImplementedException();
     }
+
+    #endregion
 }
 
 internal class FakeSmartCardListener : SmartCardDeviceListener

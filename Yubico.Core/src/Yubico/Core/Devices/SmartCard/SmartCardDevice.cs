@@ -16,44 +16,69 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
-namespace Yubico.Core.Devices.SmartCard
+namespace Yubico.Core.Devices.SmartCard;
+
+/// <summary>
+///     Base class for <see cref="DesktopSmartCardDevice" />.
+/// </summary>
+public abstract class SmartCardDevice : ISmartCardDevice
 {
+    private readonly ILogger _log = Log.GetLogger<SmartCardDevice>();
+
     /// <summary>
-    /// Base class for <see cref="DesktopSmartCardDevice"/>.
+    ///     Constructs a <see cref="SmartCardDevice" /> with the specified properties.
     /// </summary>
-    public abstract class SmartCardDevice : ISmartCardDevice
+    /// <param name="path">Device path.</param>
+    /// <param name="atr"><see cref="AnswerToReset" /> properties.</param>
+    protected SmartCardDevice(string path, AnswerToReset? atr)
     {
-        private readonly ILogger _log = Logging.Log.GetLogger<SmartCardDevice>();
+        Path = path;
+        Atr = atr;
 
-        /// <inheritdoc />
-        public DateTime LastAccessed { get; protected set; } = DateTime.MinValue;
+        _log.LogInformation("SmartCardDevice instance created [path = {Path}, atr = {Atr}]", path, atr);
+    }
 
-        /// <inheritdoc />
-        public string Path { get; }
+    #region ISmartCardDevice Members
 
-        /// <inheritdoc />
-        public string? ParentDeviceId { get; protected set; }
+    /// <inheritdoc />
+    public DateTime LastAccessed { get; protected set; } = DateTime.MinValue;
 
-        /// <summary>
-        /// The "answer to reset" (ATR) for the smart card.
-        /// </summary>
-        /// <remarks>
-        /// The ATR for a smart card can act as an identifier for the type of card that is inserted.
-        /// </remarks>
-        public AnswerToReset? Atr { get; }
+    /// <inheritdoc />
+    public string Path { get; }
 
-        /// <summary>
-        /// Gets the smart card's connection type.
-        /// </summary>
-        public SmartCardConnectionKind Kind { get; private set; }
+    /// <inheritdoc />
+    public string? ParentDeviceId { get; protected set; }
 
-        /// <summary>
-        /// Returns the set of smart card reader devices available to the system.
-        /// </summary>
-        /// <returns>A read-only list of <see cref="SmartCardDevice"/> objects.</returns>
-        public static IReadOnlyList<ISmartCardDevice> GetSmartCardDevices() => SdkPlatformInfo.OperatingSystem switch
+    /// <summary>
+    ///     The "answer to reset" (ATR) for the smart card.
+    /// </summary>
+    /// <remarks>
+    ///     The ATR for a smart card can act as an identifier for the type of card that is inserted.
+    /// </remarks>
+    public AnswerToReset? Atr { get; }
+
+    /// <summary>
+    ///     Gets the smart card's connection type.
+    /// </summary>
+    public SmartCardConnectionKind Kind { get; private set; }
+
+    /// <summary>
+    ///     Establishes an active connection to the smart card for the transmittal of data.
+    /// </summary>
+    /// <returns>An already opened connection to the smart card reader.</returns>
+    public abstract ISmartCardConnection Connect();
+
+    #endregion
+
+    /// <summary>
+    ///     Returns the set of smart card reader devices available to the system.
+    /// </summary>
+    /// <returns>A read-only list of <see cref="SmartCardDevice" /> objects.</returns>
+    public static IReadOnlyList<ISmartCardDevice> GetSmartCardDevices() =>
+        SdkPlatformInfo.OperatingSystem switch
         {
             SdkPlatform.Windows => DesktopSmartCardDevice.GetList(),
             SdkPlatform.MacOS => DesktopSmartCardDevice.GetList(),
@@ -61,13 +86,14 @@ namespace Yubico.Core.Devices.SmartCard
             _ => throw new PlatformNotSupportedException()
         };
 
-        /// <summary>
-        /// Creates a new smart card device object.
-        /// </summary>
-        /// <param name="readerName">Device reader name.</param>
-        /// <param name="atr">The optional <see cref="AnswerToReset"/> identifier for the smart card device.</param>
-        /// <returns>A <see cref="SmartCardDevice"/> object.</returns>
-        public static ISmartCardDevice Create(string readerName, AnswerToReset? atr) => SdkPlatformInfo.OperatingSystem switch
+    /// <summary>
+    ///     Creates a new smart card device object.
+    /// </summary>
+    /// <param name="readerName">Device reader name.</param>
+    /// <param name="atr">The optional <see cref="AnswerToReset" /> identifier for the smart card device.</param>
+    /// <returns>A <see cref="SmartCardDevice" /> object.</returns>
+    public static ISmartCardDevice Create(string readerName, AnswerToReset? atr) =>
+        SdkPlatformInfo.OperatingSystem switch
         {
             SdkPlatform.Windows => new DesktopSmartCardDevice(readerName, atr),
             SdkPlatform.MacOS => new DesktopSmartCardDevice(readerName, atr),
@@ -75,25 +101,5 @@ namespace Yubico.Core.Devices.SmartCard
             _ => throw new PlatformNotSupportedException()
         };
 
-        /// <summary>
-        /// Constructs a <see cref="SmartCardDevice"/> with the specified properties.
-        /// </summary>
-        /// <param name="path">Device path.</param>
-        /// <param name="atr"><see cref="AnswerToReset"/> properties.</param>
-        protected SmartCardDevice(string path, AnswerToReset? atr)
-        {
-            Path = path;
-            Atr = atr;
-
-            _log.LogInformation("SmartCardDevice instance created [path = {Path}, atr = {Atr}]", path, atr);
-        }
-
-        /// <summary>
-        /// Establishes an active connection to the smart card for the transmittal of data.
-        /// </summary>
-        /// <returns>An already opened connection to the smart card reader.</returns>
-        public abstract ISmartCardConnection Connect();
-
-        public override string ToString() => $"Smart Card: {Path}";
-    }
+    public override string ToString() => $"Smart Card: {Path}";
 }

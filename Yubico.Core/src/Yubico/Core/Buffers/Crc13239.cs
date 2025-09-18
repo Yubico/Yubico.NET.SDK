@@ -14,41 +14,40 @@
 
 using System;
 
-namespace Yubico.Core.Buffers
+namespace Yubico.Core.Buffers;
+
+/// <summary>
+///     Utility class for calculating and verifying the CRC13239 checksum used in YubiKey products.
+/// </summary>
+public static class Crc13239
 {
+    private const ushort InitialValue = 0xFFFF;
+    private const ushort GeneratorPolynomial = 0x8408;
+
     /// <summary>
-    /// Utility class for calculating and verifying the CRC13239 checksum used in YubiKey products.
+    ///     Calculates a CRC13239 checksum over a byte buffer.
     /// </summary>
-    public static class Crc13239
+    /// <param name="buffer">The buffer to be checksummed.</param>
+    /// <returns>A two byte CRC checksum.</returns>
+    public static short Calculate(ReadOnlySpan<byte> buffer)
     {
-        private const ushort InitialValue = 0xFFFF;
-        private const ushort GeneratorPolynomial = 0x8408;
+        ushort remainderPolynomial = InitialValue;
 
-        /// <summary>
-        /// Calculates a CRC13239 checksum over a byte buffer.
-        /// </summary>
-        /// <param name="buffer">The buffer to be checksummed.</param>
-        /// <returns>A two byte CRC checksum.</returns>
-        public static short Calculate(ReadOnlySpan<byte> buffer)
+        foreach (byte currentByte in buffer)
         {
-            ushort remainderPolynomial = InitialValue;
-
-            foreach (byte currentByte in buffer)
+            remainderPolynomial ^= currentByte;
+            for (int bitCounter = 0; bitCounter < 8; bitCounter++)
             {
-                remainderPolynomial ^= currentByte;
-                for (int bitCounter = 0; bitCounter < 8; bitCounter++)
-                {
-                    byte leastSignificantBit = (byte)(remainderPolynomial & 1);
-                    remainderPolynomial >>= 1;
+                byte leastSignificantBit = (byte)(remainderPolynomial & 1);
+                remainderPolynomial >>= 1;
 
-                    if (leastSignificantBit != 0)
-                    {
-                        remainderPolynomial ^= GeneratorPolynomial;
-                    }
+                if (leastSignificantBit != 0)
+                {
+                    remainderPolynomial ^= GeneratorPolynomial;
                 }
             }
-
-            return unchecked((short)remainderPolynomial);
         }
+
+        return unchecked((short)remainderPolynomial);
     }
 }

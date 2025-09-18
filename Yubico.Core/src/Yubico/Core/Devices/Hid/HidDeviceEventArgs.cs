@@ -12,22 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.Core.Devices.Hid
+namespace Yubico.Core.Devices.Hid;
+
+/// <summary>
+///     Event arguments given whenever a HID device is added or removed from the system.
+/// </summary>
+public class HidDeviceEventArgs : DeviceEventArgs<IHidDevice>
 {
     /// <summary>
-    /// Event arguments given whenever a HID device is added or removed from the system.
+    ///     Constructs a new instance of the <see cref="HidDeviceEventArgs" /> class.
     /// </summary>
-    public class HidDeviceEventArgs : DeviceEventArgs<IHidDevice>
+    /// <param name="device">
+    ///     The HID device that is originating this event.
+    /// </param>
+    public HidDeviceEventArgs(IHidDevice device) : base(device)
     {
-
-        /// <summary>
-        /// Constructs a new instance of the <see cref="HidDeviceEventArgs"/> class.
-        /// </summary>
-        /// <param name="device">
-        /// The HID device that is originating this event.
-        /// </param>
-        public HidDeviceEventArgs(IHidDevice device) : base(device)
-        {
-        }
     }
 }

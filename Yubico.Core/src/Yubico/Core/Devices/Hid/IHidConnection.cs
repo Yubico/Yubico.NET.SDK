@@ -14,14 +14,13 @@
 
 using System;
 
-namespace Yubico.Core.Devices.Hid
-{
-    public interface IHidConnection : IDisposable
-    {
-        int InputReportSize { get; }
-        int OutputReportSize { get; }
+namespace Yubico.Core.Devices.Hid;
 
-        void SetReport(byte[] report);
-        byte[] GetReport();
-    }
+public interface IHidConnection : IDisposable
+{
+    int InputReportSize { get; }
+    int OutputReportSize { get; }
+
+    void SetReport(byte[] report);
+    byte[] GetReport();
 }

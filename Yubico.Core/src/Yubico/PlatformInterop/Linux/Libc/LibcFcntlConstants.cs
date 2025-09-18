@@ -14,12 +14,11 @@
 
 #pragma warning disable CA1707
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+public static class LibcFcntlConstants
 {
-    public static class LibcFcntlConstants
-    {
-        public const int F_GETFL = 3; // Get the file status flags.
-        public const int F_SETFL = 4; // Set the file status flags to the value specified by arg.
-        public const int O_NONBLOCK = 0x800; // Non-blocking mode flag.
-    }
+    public const int F_GETFL = 3; // Get the file status flags.
+    public const int F_SETFL = 4; // Set the file status flags to the value specified by arg.
+    public const int O_NONBLOCK = 0x800; // Non-blocking mode flag.
 }

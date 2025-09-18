@@ -15,204 +15,218 @@
 using System;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
-
 using static Yubico.PlatformInterop.NativeMethods;
 
-namespace Yubico.Core.Devices.SmartCard
+namespace Yubico.Core.Devices.SmartCard;
+
+public class DesktopSmartCardConnection : ISmartCardConnection
 {
-    public class DesktopSmartCardConnection : ISmartCardConnection
+    private readonly SCardCardHandle _cardHandle;
+    private readonly SCardContext _context;
+    private readonly DesktopSmartCardDevice _device;
+    private readonly ILogger _log = Log.GetLogger<DesktopSmartCardConnection>();
+    private SCARD_PROTOCOL _activeProtocol;
+
+    internal DesktopSmartCardConnection(
+        DesktopSmartCardDevice device,
+        SCardContext context,
+        SCardCardHandle cardHandle,
+        SCARD_PROTOCOL activeProtocol)
     {
-        private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardConnection>();
-        private readonly DesktopSmartCardDevice _device;
-        private readonly SCardContext _context;
-        private readonly SCardCardHandle _cardHandle;
-        private SCARD_PROTOCOL _activeProtocol;
+        _device = device;
+        _context = context;
+        _cardHandle = cardHandle;
+        _activeProtocol = activeProtocol;
+    }
 
-        private class TransactionScope : IDisposable
+    #region ISmartCardConnection Members
+
+    /// <summary>
+    ///     Begins a transacted connection to the smart card.
+    /// </summary>
+    /// <remarks>
+    ///     This method has no effect on platforms which do not support transactions.
+    /// </remarks>
+    /// <returns>An IDisposable that represents the transaction.</returns>
+    /// <exception cref="SCardException">
+    ///     Thrown when the underlying platform smart card subsystem encounters an error.
+    /// </exception>
+    public IDisposable BeginTransaction(out bool cardWasReset)
+    {
+        cardWasReset = false;
+        uint result = SCardBeginTransaction(_cardHandle);
+        _log.SCardApiCall(nameof(SCardBeginTransaction), result);
+
+        // Sometimes the smart card is left in a state where it needs to be reset prior to beginning
+        // a transaction. We should automatically handle this case.
+        if (result == ErrorCode.SCARD_W_RESET_CARD)
         {
-            private readonly ILogger _log = Logging.Log.GetLogger<TransactionScope>();
-            private readonly DesktopSmartCardConnection _thisConnection;
-            private readonly IDisposable? _logScope;
-            private bool _disposedValue;
+            _log.LogWarning("Card needs to be reset.");
+            _log.CardReset();
+            Reconnect();
 
-            public TransactionScope(DesktopSmartCardConnection thisConnection)
-            {
-                _logScope = _log.BeginTransactionScope(this);
-
-                _thisConnection = thisConnection;
-            }
-
-            protected virtual void Dispose(bool disposing)
-            {
-                if (!_disposedValue)
-                {
-                    uint result = SCardEndTransaction(
-                        _thisConnection._cardHandle,
-                        SCARD_DISPOSITION.LEAVE_CARD);
-
-                    _log.SCardApiCall(nameof(SCardEndTransaction), result);
-
-                    _disposedValue = true;
-                }
-
-                if (disposing)
-                {
-                    _logScope?.Dispose();
-                }
-            }
-
-            ~TransactionScope()
-            {
-                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-                Dispose(disposing: false);
-            }
-
-            public void Dispose()
-            {
-                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-                Dispose(disposing: true);
-                GC.SuppressFinalize(this);
-            }
-        }
-
-        internal DesktopSmartCardConnection(
-            DesktopSmartCardDevice device,
-            SCardContext context,
-            SCardCardHandle cardHandle,
-            SCARD_PROTOCOL activeProtocol)
-        {
-            _device = device;
-            _context = context;
-            _cardHandle = cardHandle;
-            _activeProtocol = activeProtocol;
-        }
-
-        /// <summary>
-        /// Begins a transacted connection to the smart card.
-        /// </summary>
-        /// <remarks>
-        /// This method has no effect on platforms which do not support transactions.
-        /// </remarks>
-        /// <returns>An IDisposable that represents the transaction.</returns>
-        /// <exception cref="SCardException">
-        /// Thrown when the underlying platform smart card subsystem encounters an error.
-        /// </exception>
-        public IDisposable BeginTransaction(out bool cardWasReset)
-        {
-            cardWasReset = false;
-            uint result = SCardBeginTransaction(_cardHandle);
+            result = SCardBeginTransaction(_cardHandle);
+            cardWasReset = true;
             _log.SCardApiCall(nameof(SCardBeginTransaction), result);
-
-            // Sometimes the smart card is left in a state where it needs to be reset prior to beginning
-            // a transaction. We should automatically handle this case.
-            if (result == ErrorCode.SCARD_W_RESET_CARD)
-            {
-                _log.LogWarning("Card needs to be reset.");
-                _log.CardReset();
-                Reconnect();
-
-                result = SCardBeginTransaction(_cardHandle);
-                cardWasReset = true;
-                _log.SCardApiCall(nameof(SCardBeginTransaction), result);
-            }
-
-            if (result != ErrorCode.SCARD_S_SUCCESS)
-            {
-                throw new SCardException(ExceptionMessages.SCardTransactionFailed, result);
-            }
-
-            return new TransactionScope(this);
         }
 
-        /// <summary>
-        /// Synchronously transmit a command APDU to the smart card.
-        /// </summary>
-        /// <param name="commandApdu">A command to send to the smart card.</param>
-        /// <returns>A response APDU containing the smart card's reply.</returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="commandApdu"/> is null.
-        /// </exception>
-        /// <exception cref="SCardException">
-        /// Thrown when the underlying platform smart card subsystem encounters an error.
-        /// </exception>
-        public ResponseApdu Transmit(CommandApdu commandApdu)
+        if (result != ErrorCode.SCARD_S_SUCCESS)
         {
-            if (commandApdu is null)
-            {
-                throw new ArgumentNullException(nameof(commandApdu));
-            }
-
-            // The YubiKey likely will never return a buffer larger than 512 bytes without instead
-            // using response chaining.
-            byte[] outputBuffer = new byte[512];
-
-            uint result = SCardTransmit(
-                _cardHandle,
-                new SCARD_IO_REQUEST(_activeProtocol),
-                commandApdu.AsByteArray(),
-                IntPtr.Zero,
-                outputBuffer,
-                out int outputBufferSize
-                );
-
-            _log.SCardApiCall(nameof(SCardTransmit), result);
-
-            _device.LogDeviceAccessTime();
-
-            if (result != ErrorCode.SCARD_S_SUCCESS)
-            {
-                throw new SCardException(ExceptionMessages.SCardTransmitFailure, result);
-            }
-
-            Array.Resize(ref outputBuffer, outputBufferSize);
-
-            return new ResponseApdu(outputBuffer);
+            throw new SCardException(ExceptionMessages.SCardTransactionFailed, result);
         }
 
-        public void Reconnect()
+        return new TransactionScope(this);
+    }
+
+    /// <summary>
+    ///     Synchronously transmit a command APDU to the smart card.
+    /// </summary>
+    /// <param name="commandApdu">A command to send to the smart card.</param>
+    /// <returns>A response APDU containing the smart card's reply.</returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="commandApdu" /> is null.
+    /// </exception>
+    /// <exception cref="SCardException">
+    ///     Thrown when the underlying platform smart card subsystem encounters an error.
+    /// </exception>
+    public ResponseApdu Transmit(CommandApdu commandApdu)
+    {
+        if (commandApdu is null)
         {
-            uint result = SCardReconnect(
-                _cardHandle,
-                SCARD_SHARE.EXCLUSIVE,
-                SCARD_PROTOCOL.T1,
-                SCARD_DISPOSITION.RESET_CARD,
-                out SCARD_PROTOCOL updatedActiveProtocol);
-            _log.SCardApiCall(nameof(SCardReconnect), result);
-
-            if (result != ErrorCode.SCARD_S_SUCCESS)
-            {
-                throw new SCardException(ExceptionMessages.SCardReconnectFailed, result);
-            }
-
-            _activeProtocol = updatedActiveProtocol;
+            throw new ArgumentNullException(nameof(commandApdu));
         }
 
-        #region IDisposable Support
-        private bool _disposed;
+        // The YubiKey likely will never return a buffer larger than 512 bytes without instead
+        // using response chaining.
+        byte[] outputBuffer = new byte[512];
 
-        /// <inheritdoc />
+        uint result = SCardTransmit(
+            _cardHandle,
+            new SCARD_IO_REQUEST(_activeProtocol),
+            commandApdu.AsByteArray(),
+            IntPtr.Zero,
+            outputBuffer,
+            out int outputBufferSize
+            );
+
+        _log.SCardApiCall(nameof(SCardTransmit), result);
+
+        _device.LogDeviceAccessTime();
+
+        if (result != ErrorCode.SCARD_S_SUCCESS)
+        {
+            throw new SCardException(ExceptionMessages.SCardTransmitFailure, result);
+        }
+
+        Array.Resize(ref outputBuffer, outputBufferSize);
+
+        return new ResponseApdu(outputBuffer);
+    }
+
+    #endregion
+
+    public void Reconnect()
+    {
+        uint result = SCardReconnect(
+            _cardHandle,
+            SCARD_SHARE.EXCLUSIVE,
+            SCARD_PROTOCOL.T1,
+            SCARD_DISPOSITION.RESET_CARD,
+            out SCARD_PROTOCOL updatedActiveProtocol);
+
+        _log.SCardApiCall(nameof(SCardReconnect), result);
+
+        if (result != ErrorCode.SCARD_S_SUCCESS)
+        {
+            throw new SCardException(ExceptionMessages.SCardReconnectFailed, result);
+        }
+
+        _activeProtocol = updatedActiveProtocol;
+    }
+
+    #region Nested type: TransactionScope
+
+    private class TransactionScope : IDisposable
+    {
+        private readonly ILogger _log = Log.GetLogger<TransactionScope>();
+        private readonly IDisposable? _logScope;
+        private readonly DesktopSmartCardConnection _thisConnection;
+        private bool _disposedValue;
+
+        public TransactionScope(DesktopSmartCardConnection thisConnection)
+        {
+            _logScope = _log.BeginTransactionScope(this);
+
+            _thisConnection = thisConnection;
+        }
+
+        #region IDisposable Members
+
         public void Dispose()
         {
-            Dispose(true);
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
 
+        #endregion
+
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed)
+            if (!_disposedValue)
             {
-                return;
+                uint result = SCardEndTransaction(
+                    _thisConnection._cardHandle,
+                    SCARD_DISPOSITION.LEAVE_CARD);
+
+                _log.SCardApiCall(nameof(SCardEndTransaction), result);
+
+                _disposedValue = true;
             }
 
             if (disposing)
             {
-                _cardHandle.Dispose();
-                _context.Dispose();
+                _logScope?.Dispose();
             }
-
-            _disposed = true;
         }
-        #endregion
+
+        ~TransactionScope()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
     }
+
+    #endregion
+
+    #region IDisposable Support
+
+    private bool _disposed;
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _cardHandle.Dispose();
+            _context.Dispose();
+        }
+
+        _disposed = true;
+    }
+
+    #endregion
 }

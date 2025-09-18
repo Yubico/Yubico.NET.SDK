@@ -12,31 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.Core.Devices.SmartCard
+namespace Yubico.Core.Devices.SmartCard;
+
+/// <summary>
+///     Represents the means in which the smart card is connected to the system or reader.
+/// </summary>
+public enum SmartCardConnectionKind
 {
     /// <summary>
-    /// Represents the means in which the smart card is connected to the system or reader.
+    ///     Match any type of smart card during a query.
     /// </summary>
-    public enum SmartCardConnectionKind
-    {
-        /// <summary>
-        /// Match any type of smart card during a query.
-        /// </summary>
-        Any = 0,
+    Any = 0,
 
-        /// <summary>
-        /// The kind of connection used for this smart card could not be determined.
-        /// </summary>
-        Unknown = 1,
+    /// <summary>
+    ///     The kind of connection used for this smart card could not be determined.
+    /// </summary>
+    Unknown = 1,
 
-        /// <summary>
-        /// The smart card is connected through a USB smart card reader.
-        /// </summary>
-        Usb = 2,
+    /// <summary>
+    ///     The smart card is connected through a USB smart card reader.
+    /// </summary>
+    Usb = 2,
 
-        /// <summary>
-        /// The smart card is connected through a Near-Field Communication (NFC) reader.
-        /// </summary>
-        Nfc = 3,
-    }
+    /// <summary>
+    ///     The smart card is connected through a Near-Field Communication (NFC) reader.
+    /// </summary>
+    Nfc = 3
 }

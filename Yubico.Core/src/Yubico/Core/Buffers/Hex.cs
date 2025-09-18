@@ -14,20 +14,17 @@
 
 using System;
 
-namespace Yubico.Core.Buffers
-{
-    /// <inheritdoc cref="Base16" path="/summary"/>
-    /// <remarks>
-    /// This class is an alias for <see cref="Base16"/>. New code should use that class
-    /// </remarks>
-    public class Hex : Base16
-    {
-        /// <inheritdoc cref="Base16.EncodeBytes(ReadOnlySpan{byte})"/>
-        public static string BytesToHex(ReadOnlySpan<byte> bytes) =>
-            EncodeBytes(bytes);
+namespace Yubico.Core.Buffers;
 
-        /// <inheritdoc cref="Base16.DecodeText(string)"/>
-        public static byte[] HexToBytes(string encoded) =>
-            DecodeText(encoded);
-    }
+/// <inheritdoc cref="Base16" path="/summary" />
+/// <remarks>
+///     This class is an alias for <see cref="Base16" />. New code should use that class
+/// </remarks>
+public class Hex : Base16
+{
+    /// <inheritdoc cref="Base16.EncodeBytes(ReadOnlySpan{byte})" />
+    public static string BytesToHex(ReadOnlySpan<byte> bytes) => EncodeBytes(bytes);
+
+    /// <inheritdoc cref="Base16.DecodeText(string)" />
+    public static byte[] HexToBytes(string encoded) => DecodeText(encoded);
 }

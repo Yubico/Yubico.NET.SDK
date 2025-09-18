@@ -12,26 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.Core.Iso7816
+namespace Yubico.Core.Iso7816;
+
+/// <summary>
+///     Represents encoding options for an APDU's length fields.
+/// </summary>
+public enum ApduEncoding
 {
     /// <summary>
-    /// Represents encoding options for an APDU's length fields.
+    ///     Automatically determine the encoding length.
     /// </summary>
-    public enum ApduEncoding
-    {
-        /// <summary>
-        /// Automatically determine the encoding length.
-        /// </summary>
-        Automatic = 0,
+    Automatic = 0,
 
-        /// <summary>
-        /// Use short encoding.
-        /// </summary>
-        ShortLength = 1,
+    /// <summary>
+    ///     Use short encoding.
+    /// </summary>
+    ShortLength = 1,
 
-        /// <summary>
-        /// Use extended encoding.
-        /// </summary>
-        ExtendedLength = 2
-    }
+    /// <summary>
+    ///     Use extended encoding.
+    /// </summary>
+    ExtendedLength = 2
 }

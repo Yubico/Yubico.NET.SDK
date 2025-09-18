@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.Core
+namespace Yubico.Core;
+
+/// <summary>
+///     Compatibility switch names that can be used with `AppContext.SetSwitch` to control breaking behavioral changes
+///     within the `Yubico.Core` layer.
+/// </summary>
+public static class CoreCompatSwitches
 {
     /// <summary>
-    /// Compatibility switch names that can be used with `AppContext.SetSwitch` to control breaking behavioral changes
-    /// within the `Yubico.Core` layer.
+    ///     If set to true, Yubico.Core will attempt to open smart card handles exclusively. False will open shared.
+    ///     Default is false / shared.
     /// </summary>
-    public static class CoreCompatSwitches
-    {
-        /// <summary>
-        /// If set to true, Yubico.Core will attempt to open smart card handles exclusively. False will open shared.
-        /// Default is false / shared.
-        /// </summary>
-        public const string OpenSmartCardHandlesExclusively = nameof(OpenSmartCardHandlesExclusively);
-    }
+    public const string OpenSmartCardHandlesExclusively = nameof(OpenSmartCardHandlesExclusively);
 }

@@ -15,50 +15,48 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+internal sealed class WindowsUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
 {
-    internal sealed class WindowsUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
+    public WindowsUnmanagedDynamicLibrary(string fileName) :
+        base(OpenLibrary(fileName))
     {
-        public WindowsUnmanagedDynamicLibrary(string fileName) :
-            base(OpenLibrary(fileName))
-        {
+    }
 
+    private static SafeLibraryHandle OpenLibrary(string fileName)
+    {
+        SafeWindowsLibraryHandle handle = NativeMethods.LoadLibraryEx(fileName, IntPtr.Zero, 0);
+        if (handle.IsInvalid)
+        {
+            int hr = Marshal.GetHRForLastWin32Error();
+            Marshal.ThrowExceptionForHR(hr);
         }
 
-        private static SafeLibraryHandle OpenLibrary(string fileName)
+        return handle;
+    }
+
+    public override bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
+    {
+        if (!TryGetFunctionInternal(functionName, out d))
         {
-            SafeWindowsLibraryHandle handle = NativeMethods.LoadLibraryEx(fileName, IntPtr.Zero, 0);
-            if (handle.IsInvalid)
-            {
-                int hr = Marshal.GetHRForLastWin32Error();
-                Marshal.ThrowExceptionForHR(hr);
-            }
-            return handle;
+            return TryGetFunctionInternal(functionName + "W", out d);
         }
 
-        public override bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
+        return true;
+    }
+
+    private bool TryGetFunctionInternal<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
+    {
+        IntPtr p = NativeMethods.GetProcAddress(_handle, functionName);
+
+        if (p != IntPtr.Zero)
         {
-            if (!TryGetFunctionInternal(functionName, out d))
-            {
-                return TryGetFunctionInternal(functionName + "W", out d);
-            }
+            d = Marshal.GetDelegateForFunctionPointer<TDelegate>(p);
             return true;
         }
 
-        private bool TryGetFunctionInternal<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
-        {
-            IntPtr p = NativeMethods.GetProcAddress(_handle, functionName);
-
-            if (p != IntPtr.Zero)
-            {
-                d = Marshal.GetDelegateForFunctionPointer<TDelegate>(p);
-                return true;
-            }
-            else
-            {
-                d = null;
-                return false;
-            }
-        }
+        d = null;
+        return false;
     }
 }

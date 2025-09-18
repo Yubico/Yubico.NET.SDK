@@ -21,122 +21,125 @@ using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 using static Yubico.PlatformInterop.NativeMethods;
 
-namespace Yubico.Core.Devices.Hid
+namespace Yubico.Core.Devices.Hid;
+
+/// <summary>
+///     MacOS implementation of a Human Interface Device (HID)
+/// </summary>
+internal class MacOSHidDevice : HidDevice
 {
-    /// <summary>
-    /// MacOS implementation of a Human Interface Device (HID)
-    /// </summary>
-    internal class MacOSHidDevice : HidDevice
+    private readonly long _entryId;
+    private readonly ILogger _log = Log.GetLogger<MacOSHidDevice>();
+
+    public MacOSHidDevice(long entryId) :
+        base(entryId.ToString(CultureInfo.InvariantCulture))
     {
-        private readonly long _entryId;
-        private readonly ILogger _log = Log.GetLogger<MacOSHidDevice>();
+        _log.LogInformation(
+            $"Creating new instance of MacOSHidDevice based on device with EntryID [{entryId}]",
+            entryId);
 
-        public MacOSHidDevice(long entryId) :
-            base(entryId.ToString(CultureInfo.InvariantCulture))
+        _entryId = entryId;
+    }
+
+    /// <summary>
+    ///     Return a list of all HID devices on the system. No filtering is done here.
+    /// </summary>
+    /// <returns>
+    ///     An enumerable list of all the HID devices present on the system.
+    /// </returns>
+    public static IEnumerable<HidDevice> GetList()
+    {
+        ILogger log = Log.GetLogger(typeof(MacOSHidDevice).FullName!);
+        using IDisposable? logScope = log.BeginScope("MacOSHidDevice.GetList()");
+
+        IntPtr manager = IntPtr.Zero;
+        IntPtr deviceSet = IntPtr.Zero;
+
+        try
         {
-            _log.LogInformation(
-                $"Creating new instance of MacOSHidDevice based on device with EntryID [{entryId}]",
-                entryId);
+            manager = IOHIDManagerCreate(IntPtr.Zero, 0);
+            IOHIDManagerSetDeviceMatching(manager, IntPtr.Zero);
 
-            _entryId = entryId;
-        }
+            deviceSet = IOHIDManagerCopyDevices(manager);
 
-        /// <summary>
-        /// Return a list of all HID devices on the system. No filtering is done here.
-        /// </summary>
-        /// <returns>
-        /// An enumerable list of all the HID devices present on the system.
-        /// </returns>
-        public static IEnumerable<HidDevice> GetList()
-        {
-            ILogger log = Log.GetLogger(typeof(MacOSHidDevice).FullName!);
-            using IDisposable? logScope = log.BeginScope("MacOSHidDevice.GetList()");
+            long deviceSetCount = CFSetGetCount(deviceSet);
+            log.LogInformation("Found {DeviceCount} HID devices in this device set.", deviceSetCount);
 
-            IntPtr manager = IntPtr.Zero;
-            IntPtr deviceSet = IntPtr.Zero;
+            var devices = new IntPtr[deviceSetCount];
 
-            try
-            {
-                manager = IOHIDManagerCreate(IntPtr.Zero, 0);
-                IOHIDManagerSetDeviceMatching(manager, IntPtr.Zero);
+            CFSetGetValues(deviceSet, devices);
 
-                deviceSet = IOHIDManagerCopyDevices(manager);
-
-                long deviceSetCount = CFSetGetCount(deviceSet);
-                log.LogInformation("Found {DeviceCount} HID devices in this device set.", deviceSetCount);
-
-                var devices = new IntPtr[deviceSetCount];
-
-                CFSetGetValues(deviceSet, devices);
-
-                return devices
-                    .Select(device => new MacOSHidDevice(GetEntryId(device))
-                    {
-                        VendorId = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyVendorId) ?? 0),
-                        ProductId = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyProductId) ?? 0),
-                        Usage = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsage) ?? 0),
-                        UsagePage = (HidUsagePage?)IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsagePage) ?? HidUsagePage.Unknown,
-                        ParentDeviceId = IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyLocationId)?.ToString(CultureInfo.InvariantCulture)
-                    })
-                    .ToList();
-            }
-            finally
-            {
-                if (manager != IntPtr.Zero)
+            return devices
+                .Select(device => new MacOSHidDevice(GetEntryId(device))
                 {
-                    log.LogInformation("IOHIDManager released.");
-                    CFRelease(manager);
-                }
-
-                if (deviceSet != IntPtr.Zero)
-                {
-                    log.LogInformation("HID device set released.");
-                    CFRelease(deviceSet);
-                }
-            }
+                    VendorId = (short)(IOKitHelpers.GetNullableIntPropertyValue(
+                        device, IOKitHidConstants.DevicePropertyVendorId) ?? 0),
+                    ProductId = (short)(IOKitHelpers.GetNullableIntPropertyValue(
+                        device, IOKitHidConstants.DevicePropertyProductId) ?? 0),
+                    Usage = (short)(IOKitHelpers.GetNullableIntPropertyValue(
+                        device, IOKitHidConstants.DevicePropertyPrimaryUsage) ?? 0),
+                    UsagePage = (HidUsagePage?)IOKitHelpers.GetNullableIntPropertyValue(
+                        device, IOKitHidConstants.DevicePropertyPrimaryUsagePage) ?? HidUsagePage.Unknown,
+                    ParentDeviceId = IOKitHelpers
+                        .GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyLocationId)
+                        ?.ToString(CultureInfo.InvariantCulture)
+                })
+                .ToList();
         }
-
-        /// <summary>
-        /// Establishes a connection capable of transmitting feature reports to a keyboard device.
-        /// </summary>
-        /// <returns>
-        /// An active connection object.
-        /// </returns>
-        public override IHidConnection ConnectToFeatureReports() =>
-            new MacOSHidFeatureReportConnection(this, _entryId);
-
-        /// <summary>
-        /// Establishes a connection capable of transmitting IO reports to a FIDO device.
-        /// </summary>
-        /// <returns>
-        /// An active connection object.
-        /// </returns>
-        public override IHidConnection ConnectToIOReports() =>
-            new MacOSHidIOReportConnection(this, _entryId);
-
-        internal static long GetEntryId(IntPtr device)
+        finally
         {
-            ILogger log = Log.GetLogger(typeof(MacOSHidDevice).FullName!);
-
-            int service = IOHIDDeviceGetService(device);
-            kern_return_t result = IORegistryEntryGetRegistryEntryID(service, out long entryId);
-            log.IOKitApiCall(nameof(IORegistryEntryGetRegistryEntryID), result);
-
-            if (result != kern_return_t.KERN_SUCCESS)
+            if (manager != IntPtr.Zero)
             {
-                throw new PlatformApiException(
-                    nameof(IORegistryEntryGetRegistryEntryID),
-                    (int)result,
-                    ExceptionMessages.IOKitRegistryEntryNotFound);
+                log.LogInformation("IOHIDManager released.");
+                CFRelease(manager);
             }
 
-            return entryId;
+            if (deviceSet != IntPtr.Zero)
+            {
+                log.LogInformation("HID device set released.");
+                CFRelease(deviceSet);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Establishes a connection capable of transmitting feature reports to a keyboard device.
+    /// </summary>
+    /// <returns>
+    ///     An active connection object.
+    /// </returns>
+    public override IHidConnection ConnectToFeatureReports() => new MacOSHidFeatureReportConnection(this, _entryId);
+
+    /// <summary>
+    ///     Establishes a connection capable of transmitting IO reports to a FIDO device.
+    /// </summary>
+    /// <returns>
+    ///     An active connection object.
+    /// </returns>
+    public override IHidConnection ConnectToIOReports() => new MacOSHidIOReportConnection(this, _entryId);
+
+    internal static long GetEntryId(IntPtr device)
+    {
+        ILogger log = Log.GetLogger(typeof(MacOSHidDevice).FullName!);
+
+        int service = IOHIDDeviceGetService(device);
+        kern_return_t result = IORegistryEntryGetRegistryEntryID(service, out long entryId);
+        log.IOKitApiCall(nameof(IORegistryEntryGetRegistryEntryID), result);
+
+        if (result != kern_return_t.KERN_SUCCESS)
+        {
+            throw new PlatformApiException(
+                nameof(IORegistryEntryGetRegistryEntryID),
+                (int)result,
+                ExceptionMessages.IOKitRegistryEntryNotFound);
         }
 
-        public void LogDeviceAccessTime()
-        {
-            LastAccessed = DateTime.Now;
-            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
-        }
+        return entryId;
+    }
+
+    public void LogDeviceAccessTime()
+    {
+        LastAccessed = DateTime.Now;
+        _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
     }
 }

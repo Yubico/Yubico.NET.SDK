@@ -19,6 +19,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests;
 
 internal class FakeHidDevice : IHidDevice
 {
+    #region IHidDevice Members
+
     public DateTime LastAccessed { get; } = DateTime.Now;
     public string Path { get; } = string.Empty;
     public string? ParentDeviceId { get; } = null;
@@ -36,6 +38,8 @@ internal class FakeHidDevice : IHidDevice
     {
         throw new NotImplementedException();
     }
+
+    #endregion
 }
 
 internal class FakeHidListener : HidDeviceListener

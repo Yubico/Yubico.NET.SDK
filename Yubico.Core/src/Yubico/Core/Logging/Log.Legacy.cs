@@ -16,26 +16,25 @@ using System;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Yubico.Core.Logging
+namespace Yubico.Core.Logging;
+
+public static partial class Log
 {
-    public static partial class Log
+    private static ILoggerFactory? _factory;
+
+    [Obsolete("Obsolete, use Log.Instance instead. Setting this will override the default dotnet console logger.")]
+    public static ILoggerFactory LoggerFactory
     {
-        private static ILoggerFactory? _factory;
-
-        [Obsolete("Obsolete, use Log.Instance instead. Setting this will override the default dotnet console logger.")]
-        public static ILoggerFactory LoggerFactory
+        get => _factory ??= new NullLoggerFactory();
+        set
         {
-            get => _factory ??= new NullLoggerFactory();
-            set
-            {
-                _factory = value;
+            _factory = value;
 
-                // Also swap out the new implementation instance
-                Instance = value;
-            }
+            // Also swap out the new implementation instance
+            Instance = value;
         }
-
-        [Obsolete("Obsolete, use equivalent ILogger method, or view the changelog for further instruction.")]
-        public static Logger GetLogger() => new Logger(Yubico.Core.Logging.Log.LoggerFactory.CreateLogger("Yubico.Core logger"));
     }
+
+    [Obsolete("Obsolete, use equivalent ILogger method, or view the changelog for further instruction.")]
+    public static Logger GetLogger() => new(LoggerFactory.CreateLogger("Yubico.Core logger"));
 }

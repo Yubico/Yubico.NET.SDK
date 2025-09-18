@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.Core.Devices.Hid
-{
-    public enum HidUsagePage : short
-    {
-        Unknown = 0,
+namespace Yubico.Core.Devices.Hid;
 
-        Fido = unchecked((short)0xF1D0),
-        Keyboard = 1,
-    }
+public enum HidUsagePage : short
+{
+    Unknown = 0,
+
+    Fido = unchecked((short)0xF1D0),
+    Keyboard = 1
 }

@@ -14,32 +14,31 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.Core.Devices.SmartCard
+namespace Yubico.Core.Devices.SmartCard;
+
+/// <summary>
+///     Represents an ISO 7816 compliant smart card, visible either through CCID or NFC.
+/// </summary>
+public interface ISmartCardDevice : IDevice
 {
     /// <summary>
-    /// Represents an ISO 7816 compliant smart card, visible either through CCID or NFC.
+    ///     The "answer to reset" (ATR) for the smart card.
     /// </summary>
-    public interface ISmartCardDevice : IDevice
-    {
-        /// <summary>
-        /// The "answer to reset" (ATR) for the smart card.
-        /// </summary>
-        /// <value>
-        /// The ATR.
-        /// </value>
-        /// <remarks>
-        /// The ATR for a smart card can act as an identifier for the type of card that is inserted.
-        /// </remarks>
-        AnswerToReset? Atr { get; }
+    /// <value>
+    ///     The ATR.
+    /// </value>
+    /// <remarks>
+    ///     The ATR for a smart card can act as an identifier for the type of card that is inserted.
+    /// </remarks>
+    AnswerToReset? Atr { get; }
 
-        /// <summary>
-        /// Gets the smart card's connection type.
-        /// </summary>
-        SmartCardConnectionKind Kind { get; }
+    /// <summary>
+    ///     Gets the smart card's connection type.
+    /// </summary>
+    SmartCardConnectionKind Kind { get; }
 
-        /// <summary>
-        /// Establishes an active connection to the smart card for the transmittal of data.
-        /// </summary>
-        ISmartCardConnection Connect();
-    }
+    /// <summary>
+    ///     Establishes an active connection to the smart card for the transmittal of data.
+    /// </summary>
+    ISmartCardConnection Connect();
 }

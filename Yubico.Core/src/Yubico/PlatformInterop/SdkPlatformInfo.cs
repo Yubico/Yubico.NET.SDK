@@ -17,64 +17,66 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+public static class SdkPlatformInfo
 {
-    public static class SdkPlatformInfo
-    {
-        public static Encoding Encoding => OperatingSystem switch
+    public static Encoding Encoding =>
+        OperatingSystem switch
         {
             SdkPlatform.Windows => Encoding.Unicode,
             SdkPlatform.Unknown => throw new PlatformNotSupportedException(),
             _ => Encoding.UTF8
         };
 
-        public static int CharSize => OperatingSystem switch
+    public static int CharSize =>
+        OperatingSystem switch
         {
             SdkPlatform.Windows => 2,
             SdkPlatform.Unknown => throw new PlatformNotSupportedException(),
             _ => 1
         };
 
-        public static int DwordSize => OperatingSystem switch
+    public static int DwordSize =>
+        OperatingSystem switch
         {
             SdkPlatform.Linux => 8,
             _ => 4
         };
 
-        public static SdkPlatform OperatingSystem
+    public static SdkPlatform OperatingSystem
+    {
+        get
         {
-            get
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    return SdkPlatform.Windows;
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    return SdkPlatform.MacOS;
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    return SdkPlatform.Linux;
-                }
-                else
-                {
-                    return SdkPlatform.Unknown;
-                }
+                return SdkPlatform.Windows;
             }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return SdkPlatform.MacOS;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return SdkPlatform.Linux;
+            }
+
+            return SdkPlatform.Unknown;
         }
+    }
 
-        public static bool IsElevated
+    public static bool IsElevated
+    {
+        get
         {
-            get
+            if (OperatingSystem == SdkPlatform.Windows)
             {
-                if (OperatingSystem == SdkPlatform.Windows)
-                {
-                    return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
-                }
-
-                return false;
+                return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
             }
+
+            return false;
         }
     }
 }

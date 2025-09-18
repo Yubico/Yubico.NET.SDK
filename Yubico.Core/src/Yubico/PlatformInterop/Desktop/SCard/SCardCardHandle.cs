@@ -17,29 +17,26 @@ using System.Runtime.ConstrainedExecution;
 using Microsoft.Win32.SafeHandles;
 using static Yubico.PlatformInterop.NativeMethods;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+/// <summary>
+///     A safe-handle wrapper for the SCard card handle.
+/// </summary>
+internal class SCardCardHandle : SafeHandleZeroOrMinusOneIsInvalid
 {
-    /// <summary>
-    /// A safe-handle wrapper for the SCard card handle.
-    /// </summary>
-    internal class SCardCardHandle : SafeHandleZeroOrMinusOneIsInvalid
+    public SCardCardHandle() :
+        base(true)
     {
-        public SCARD_DISPOSITION ReleaseDisposition { get; set; } = SCARD_DISPOSITION.RESET_CARD;
-
-        public SCardCardHandle() :
-            base(true)
-        {
-
-        }
-
-        public SCardCardHandle(IntPtr handle) :
-            base(true)
-        {
-            SetHandle(handle);
-        }
-
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        protected override bool ReleaseHandle() =>
-            SCardDisconnect(handle, ReleaseDisposition) == ErrorCode.SCARD_S_SUCCESS;
     }
+
+    public SCardCardHandle(IntPtr handle) :
+        base(true)
+    {
+        SetHandle(handle);
+    }
+
+    public SCARD_DISPOSITION ReleaseDisposition { get; set; } = SCARD_DISPOSITION.RESET_CARD;
+
+    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+    protected override bool ReleaseHandle() => SCardDisconnect(handle, ReleaseDisposition) == ErrorCode.SCARD_S_SUCCESS;
 }

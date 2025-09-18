@@ -16,22 +16,21 @@ using System;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+// This class represents the libc file descriptor, the return from a call to
+// open.
+internal class LinuxFileSafeHandle : SafeHandle
 {
-    // This class represents the libc file descriptor, the return from a call to
-    // open.
-    internal class LinuxFileSafeHandle : SafeHandle
+    private const long InvalidHandle = 0x00000000FFFFFFFF;
+
+    public LinuxFileSafeHandle()
+        : base(new IntPtr(0x00000000FFFFFFFF), true)
     {
-        private const long InvalidHandle = 0x00000000FFFFFFFF;
-
-        public override bool IsInvalid => handle.ToInt64() == InvalidHandle;
-
-        public LinuxFileSafeHandle()
-            : base(new IntPtr(0x00000000FFFFFFFF), true)
-        {
-        }
-
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        override protected bool ReleaseHandle() => NativeMethods.close(handle) == 0;
     }
+
+    public override bool IsInvalid => handle.ToInt64() == InvalidHandle;
+
+    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+    protected override bool ReleaseHandle() => NativeMethods.close(handle) == 0;
 }

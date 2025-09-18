@@ -15,24 +15,24 @@
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Oath
+namespace Yubico.YubiKey.Oath;
+
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public sealed class SelectApplicationTests
 {
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public sealed class SelectApplicationTests
+    [SkippableTheory(typeof(DeviceNotFoundException))]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void ConnectOathHasData(
+        StandardTestDevice testDeviceType)
     {
-        [SkippableTheory(typeof(DeviceNotFoundException))]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void ConnectOathHasData(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
+        using var connection = testDevice.Connect(YubiKeyApplication.Oath);
 
-            Assert.NotNull(connection!.SelectApplicationData);
-            OathApplicationData data = Assert.IsType<OathApplicationData>(connection!.SelectApplicationData);
+        Assert.NotNull(connection!.SelectApplicationData);
+        var data = Assert.IsType<OathApplicationData>(connection!.SelectApplicationData);
 
-            Assert.False(data.Salt.IsEmpty);
-            Assert.True(data.Salt.Length >= 8);
-        }
+        Assert.False(data.Salt.IsEmpty);
+        Assert.True(data.Salt.Length >= 8);
     }
 }

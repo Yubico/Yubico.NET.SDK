@@ -12,80 +12,78 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+public class ListCredentialsCommandTests
 {
-    public class ListCredentialsCommandTests
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
     {
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
-        {
-            var command = new ListCommand();
+        var command = new ListCommand();
 
-            Assert.Equal(0, command.CreateCommandApdu().Cla);
-        }
+        Assert.Equal(0, command.CreateCommandApdu().Cla);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_Returns0xa1()
-        {
-            var command = new ListCommand();
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_Returns0xa1()
+    {
+        var command = new ListCommand();
 
-            Assert.Equal(0xa1, command.CreateCommandApdu().Ins);
-        }
+        Assert.Equal(0xa1, command.CreateCommandApdu().Ins);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP1Property_ReturnsZero()
-        {
-            var command = new ListCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP1Property_ReturnsZero()
+    {
+        var command = new ListCommand();
 
-            Assert.Equal(0, command.CreateCommandApdu().P1);
-        }
+        Assert.Equal(0, command.CreateCommandApdu().P1);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsZero()
-        {
-            var command = new ListCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsZero()
+    {
+        var command = new ListCommand();
 
-            Assert.Equal(0, command.CreateCommandApdu().P2);
-        }
+        Assert.Equal(0, command.CreateCommandApdu().P2);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetData_ReturnsEmpty()
-        {
-            var command = new ListCommand();
+    [Fact]
+    public void CreateCommandApdu_GetData_ReturnsEmpty()
+    {
+        var command = new ListCommand();
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+        var data = command.CreateCommandApdu().Data;
 
-            Assert.True(data.IsEmpty);
-        }
+        Assert.True(data.IsEmpty);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNc_ReturnsZero()
-        {
-            var command = new ListCommand();
+    [Fact]
+    public void CreateCommandApdu_GetNc_ReturnsZero()
+    {
+        var command = new ListCommand();
 
-            Assert.Equal(0, command.CreateCommandApdu().Nc);
-        }
+        Assert.Equal(0, command.CreateCommandApdu().Nc);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNe_ReturnsZero()
-        {
-            var command = new ListCommand();
+    [Fact]
+    public void CreateCommandApdu_GetNe_ReturnsZero()
+    {
+        var command = new ListCommand();
 
-            Assert.Equal(0, command.CreateCommandApdu().Ne);
-        }
+        Assert.Equal(0, command.CreateCommandApdu().Ne);
+    }
 
-        [Fact]
-        public void CreateResponseApdu_ReturnsCorrectType()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new ListCommand();
-            ListResponse? response = command.CreateResponseForApdu(responseApdu);
+    [Fact]
+    public void CreateResponseApdu_ReturnsCorrectType()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var command = new ListCommand();
+        var response = command.CreateResponseForApdu(responseApdu);
 
-            Assert.True(response is ListResponse);
-        }
+        Assert.True(response is ListResponse);
     }
 }

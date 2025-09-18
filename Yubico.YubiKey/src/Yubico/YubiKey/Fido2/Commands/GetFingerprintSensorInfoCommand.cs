@@ -14,38 +14,39 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Gets information about the fingerprint sensor. This is a subcommand of
+///     the CTAP command "authenticatorBioEnrollment".
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="GetFingerprintSensorInfoResponse" />.
+/// </remarks>
+public sealed class GetFingerprintSensorInfoCommand : IYubiKeyCommand<GetFingerprintSensorInfoResponse>
 {
+    private const int SubCmdSensorInfo = 0x07;
+
+    private readonly BioEnrollmentCommand _command;
+
     /// <summary>
-    /// Gets information about the fingerprint sensor. This is a subcommand of
-    /// the CTAP command "authenticatorBioEnrollment".
+    ///     Constructs a new instance of <see cref="GetFingerprintSensorInfoCommand" />.
     /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="GetFingerprintSensorInfoResponse"/>.
-    /// </remarks>
-    public sealed class GetFingerprintSensorInfoCommand : IYubiKeyCommand<GetFingerprintSensorInfoResponse>
+    public GetFingerprintSensorInfoCommand()
     {
-        private const int SubCmdSensorInfo = 0x07;
-
-        private readonly BioEnrollmentCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
-
-        /// <summary>
-        /// Constructs a new instance of <see cref="GetFingerprintSensorInfoCommand"/>.
-        /// </summary>
-        public GetFingerprintSensorInfoCommand()
-            : base()
-        {
-            _command = new BioEnrollmentCommand(SubCmdSensorInfo);
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
-
-        /// <inheritdoc />
-        public GetFingerprintSensorInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetFingerprintSensorInfoResponse(responseApdu);
+        _command = new BioEnrollmentCommand(SubCmdSensorInfo);
     }
+
+    #region IYubiKeyCommand<GetFingerprintSensorInfoResponse> Members
+
+    /// <inheritdoc />
+    public YubiKeyApplication Application => _command.Application;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+
+    /// <inheritdoc />
+    public GetFingerprintSensorInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

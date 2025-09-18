@@ -15,66 +15,77 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Scp.Commands
+namespace Yubico.YubiKey.Scp.Commands;
+
+/// <summary>
+///     Implements the GlobalPlatform STORE DATA command for transferring data to the Security Domain or Applications.
+/// </summary>
+/// <remarks>
+///     This is an internal implementation of the STORE DATA command. For storing data in the Security Domain,
+///     it is recommended to use the methods provided by <see cref="SecurityDomainSession" /> instead, such as
+///     <see cref="SecurityDomainSession.StoreData" />, <see cref="SecurityDomainSession.StoreCaIssuer" />,
+///     <see cref="SecurityDomainSession.StoreCertificates" />, and <see cref="SecurityDomainSession.StoreAllowlist" />.
+///     This command supports single block transfer with BER-TLV formatted data according to ISO 8825.
+/// </remarks>
+internal class StoreDataCommand : IYubiKeyCommand<StoreDataCommandResponse>
 {
+    private const byte GpStoreDataIns = 0xE2;
+    private readonly ReadOnlyMemory<byte> _data;
+
     /// <summary>
-    /// Implements the GlobalPlatform STORE DATA command for transferring data to the Security Domain or Applications.
+    ///     Initializes a new instance of the <see cref="StoreDataCommand" /> class, with the given data to be stored.
     /// </summary>
     /// <remarks>
-    /// This is an internal implementation of the STORE DATA command. For storing data in the Security Domain,
-    /// it is recommended to use the methods provided by <see cref="SecurityDomainSession"/> instead, such as
-    /// <see cref="SecurityDomainSession.StoreData"/>, <see cref="SecurityDomainSession.StoreCaIssuer"/>, <see cref="SecurityDomainSession.StoreCertificates"/>, and <see cref="SecurityDomainSession.StoreAllowlist"/>.
-    /// This command supports single block transfer with BER-TLV formatted data according to ISO 8825.
+    ///     This command supports single block transfer with BER-TLV formatted data according to ISO 8825.
+    ///     <para>
+    ///         For storing data in the Security Domain,
+    ///         it is recommended to use the methods provided by <see cref="SecurityDomainSession" /> instead, such as
+    ///         <see cref="SecurityDomainSession.StoreData" />, <see cref="SecurityDomainSession.StoreCaIssuer" />,
+    ///         <see cref="SecurityDomainSession.StoreCertificates" />, and <see cref="SecurityDomainSession.StoreAllowlist" />
+    ///         .
+    ///     </para>
     /// </remarks>
-    internal class StoreDataCommand : IYubiKeyCommand<StoreDataCommandResponse>
+    /// <param name="data">The data to store, which must be formatted as BER-TLV structures according to ISO 8825.</param>
+    public StoreDataCommand(ReadOnlyMemory<byte> data)
     {
-        public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
-        private const byte GpStoreDataIns = 0xE2;
-        private readonly ReadOnlyMemory<byte> _data;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StoreDataCommand"/> class, with the given data to be stored.
-        /// </summary>
-        /// <remarks>
-        /// This command supports single block transfer with BER-TLV formatted data according to ISO 8825.
-        /// <para>For storing data in the Security Domain,
-        /// it is recommended to use the methods provided by <see cref="SecurityDomainSession"/> instead, such as
-        /// <see cref="SecurityDomainSession.StoreData"/>, <see cref="SecurityDomainSession.StoreCaIssuer"/>, <see cref="SecurityDomainSession.StoreCertificates"/>, and <see cref="SecurityDomainSession.StoreAllowlist"/>.
-        /// </para>
-        /// </remarks>
-        /// <param name="data">The data to store, which must be formatted as BER-TLV structures according to ISO 8825.</param>
-        public StoreDataCommand(ReadOnlyMemory<byte> data)
-        {
-            _data = data;
-        }
-
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        private StoreDataCommand()
-        {
-            throw new NotImplementedException();
-        }
-
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Cla = 0,
-                Ins = GpStoreDataIns,
-                P1 = 0x90,
-                P2 = 0x00,
-                Data = _data
-            };
-
-        public StoreDataCommandResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new StoreDataCommandResponse(responseApdu);
+        _data = data;
     }
 
-    internal class StoreDataCommandResponse : ScpResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
+    // The default constructor explicitly defined. We don't want it to be
+    // used.
+    private StoreDataCommand()
     {
-        public StoreDataCommandResponse(ResponseApdu responseApdu) : base(responseApdu)
-        {
-        }
-
-        public ReadOnlyMemory<byte> GetData() => ResponseApdu.Data;
+        throw new NotImplementedException();
     }
+
+    #region IYubiKeyCommand<StoreDataCommandResponse> Members
+
+    public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
+
+    public CommandApdu CreateCommandApdu() =>
+        new()
+        {
+            Cla = 0,
+            Ins = GpStoreDataIns,
+            P1 = 0x90,
+            P2 = 0x00,
+            Data = _data
+        };
+
+    public StoreDataCommandResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
+}
+
+internal class StoreDataCommandResponse : ScpResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
+{
+    public StoreDataCommandResponse(ResponseApdu responseApdu) : base(responseApdu)
+    {
+    }
+
+    #region IYubiKeyResponseWithData<ReadOnlyMemory<byte>> Members
+
+    public ReadOnlyMemory<byte> GetData() => ResponseApdu.Data;
+
+    #endregion
 }

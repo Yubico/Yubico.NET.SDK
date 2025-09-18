@@ -18,109 +18,116 @@ using Xunit;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+public class PivSessionAttestationTests : PivSessionUnitTestBase
 {
-    public class PivSessionAttestationTests : PivSessionUnitTestBase
+    public PivSessionAttestationTests()
     {
-        public PivSessionAttestationTests()
-        {
-            FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 3, Patch = 0 };
-            DeviceMock.AvailableUsbCapabilities = YubiKeyCapabilities.Piv;
-        }
+        FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 3, Patch = 0 };
+        DeviceMock.AvailableUsbCapabilities = YubiKeyCapabilities.Piv;
+    }
 
-        [Theory]
-        [InlineData(PivSlot.Pin)]
-        [InlineData(PivSlot.Puk)]
-        [InlineData(PivSlot.Management)]
-        [InlineData(PivSlot.Attestation)]
-        [InlineData(0x96)]
-        public void CreateAttest_BadSlot_ThrowsArgException(byte slotNumber)
-        {
-            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.CreateAttestationStatement(slotNumber));
-        }
+    [Theory]
+    [InlineData(PivSlot.Pin)]
+    [InlineData(PivSlot.Puk)]
+    [InlineData(PivSlot.Management)]
+    [InlineData(PivSlot.Attestation)]
+    [InlineData(0x96)]
+    public void CreateAttest_BadSlot_ThrowsArgException(
+        byte slotNumber)
+    {
+        _ = Assert.Throws<ArgumentException>(() => PivSessionMock.CreateAttestationStatement(slotNumber));
+    }
 
-        [Fact]
-        public void CreateAttest_BadVersion_ThrowsNotSupportedException()
-        {
-            // Override firmware version for this specific test
-            FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 2, Patch = 0 };
+    [Fact]
+    public void CreateAttest_BadVersion_ThrowsNotSupportedException()
+    {
+        // Override firmware version for this specific test
+        FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 2, Patch = 0 };
 
-            _ = Assert.Throws<NotSupportedException>(() => PivSessionMock.CreateAttestationStatement(0x9A));
-        }
+        _ = Assert.Throws<NotSupportedException>(() => PivSessionMock.CreateAttestationStatement(0x9A));
+    }
 
-        [Fact]
-        public void GetAttest_BadVersion_ThrowsNotSupportedException()
-        {
-            // Override firmware version for this specific test
-            FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 2, Patch = 0 };
+    [Fact]
+    public void GetAttest_BadVersion_ThrowsNotSupportedException()
+    {
+        // Override firmware version for this specific test
+        FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 2, Patch = 0 };
 
-            _ = Assert.Throws<NotSupportedException>(() => PivSessionMock.GetAttestationCertificate());
-        }
+        _ = Assert.Throws<NotSupportedException>(() => PivSessionMock.GetAttestationCertificate());
+    }
 
-        [Fact]
-        public void ReplaceAttest_BadVersion_ThrowsNotSupportedException()
-        {
-            // Override firmware version for this specific test
-            FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 2, Patch = 0 };
+    [Fact]
+    public void ReplaceAttest_BadVersion_ThrowsNotSupportedException()
+    {
+        // Override firmware version for this specific test
+        FirmwareVersion = new FirmwareVersion { Major = 4, Minor = 2, Patch = 0 };
 
-            var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
-            var privateKey = RSAPrivateKey.CreateFromPkcs8(testKey.EncodedKey);
-            
+        var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
+        var privateKey = RSAPrivateKey.CreateFromPkcs8(testKey.EncodedKey);
+
 #pragma warning disable SYSLIB0026
-            var cert = new X509Certificate2();
+        var cert = new X509Certificate2();
 #pragma warning restore SYSLIB0026
 
-            _ = Assert.Throws<NotSupportedException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate(privateKey, cert));
-        }
+        _ = Assert.Throws<NotSupportedException>(() =>
+            PivSessionMock.ReplaceAttestationKeyAndCertificate(privateKey, cert));
+    }
 
-        [Fact]
-        public void ReplaceAttest_NullKey_ThrowsException()
-        {
-            var cert = TestKeys.GetTestCertificate(KeyType.RSA2048).AsX509Certificate2();
+    [Fact]
+    public void ReplaceAttest_NullKey_ThrowsException()
+    {
+        var cert = TestKeys.GetTestCertificate(KeyType.RSA2048).AsX509Certificate2();
 
-            _ = Assert.Throws<ArgumentNullException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate((IPrivateKey)null!, cert!));
-        }
+        _ = Assert.Throws<ArgumentNullException>(() =>
+            PivSessionMock.ReplaceAttestationKeyAndCertificate((IPrivateKey)null!, cert!));
+    }
 
-        [Fact]
-        public void ReplaceAttest_NullCert_ThrowsException()
-        {
-            var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
-            var privateKey = RSAPrivateKey.CreateFromPkcs8(testKey.EncodedKey);
+    [Fact]
+    public void ReplaceAttest_NullCert_ThrowsException()
+    {
+        var testKey = TestKeys.GetTestPrivateKey(KeyType.RSA2048);
+        var privateKey = RSAPrivateKey.CreateFromPkcs8(testKey.EncodedKey);
 
-            _ = Assert.Throws<ArgumentNullException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate(privateKey, null!));
-        }
+        _ = Assert.Throws<ArgumentNullException>(() =>
+            PivSessionMock.ReplaceAttestationKeyAndCertificate(privateKey, null!));
+    }
 
-        [Fact]
-        public void ReplaceAttest_Rsa1024_ThrowsException()
-        {
-            BadAttestationPairs.GetPair(BadAttestationPairs.KeyRsa1024CertValid, out var privateKeyPem, out var certPem);
-            var badPrivateKey = RSAPrivateKey.CreateFromPkcs8(PemHelper.GetBytesFromPem(privateKeyPem));
-            var badCert = X509CertificateLoader.LoadCertificate(PemHelper.GetBytesFromPem(certPem));
+    [Fact]
+    public void ReplaceAttest_Rsa1024_ThrowsException()
+    {
+        BadAttestationPairs.GetPair(BadAttestationPairs.KeyRsa1024CertValid, out var privateKeyPem, out var certPem);
+        var badPrivateKey = RSAPrivateKey.CreateFromPkcs8(PemHelper.GetBytesFromPem(privateKeyPem));
+        var badCert = X509CertificateLoader.LoadCertificate(PemHelper.GetBytesFromPem(certPem));
 
-            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate(badPrivateKey, badCert));
-        }
+        _ = Assert.Throws<ArgumentException>(() =>
+            PivSessionMock.ReplaceAttestationKeyAndCertificate(badPrivateKey, badCert));
+    }
 
-        [Theory]
-        [InlineData(BadAttestationPairs.KeyRsa2048CertVersion1)]
-        [InlineData(BadAttestationPairs.KeyEccP256CertVersion1)]
-        [InlineData(BadAttestationPairs.KeyEccP384CertVersion1)]
-        public void ReplaceAttest_Version1Cert_ThrowsException(int whichPair)
-        {
-            BadAttestationPairs.GetPair(whichPair, out var privateKeyPem, out var certPem);
-            var badPrivateKey = AsnPrivateKeyDecoder.CreatePrivateKey(PemHelper.GetBytesFromPem(privateKeyPem));
-            var badCert = X509CertificateLoader.LoadCertificate(PemHelper.GetBytesFromPem(certPem));
+    [Theory]
+    [InlineData(BadAttestationPairs.KeyRsa2048CertVersion1)]
+    [InlineData(BadAttestationPairs.KeyEccP256CertVersion1)]
+    [InlineData(BadAttestationPairs.KeyEccP384CertVersion1)]
+    public void ReplaceAttest_Version1Cert_ThrowsException(
+        int whichPair)
+    {
+        BadAttestationPairs.GetPair(whichPair, out var privateKeyPem, out var certPem);
+        var badPrivateKey = AsnPrivateKeyDecoder.CreatePrivateKey(PemHelper.GetBytesFromPem(privateKeyPem));
+        var badCert = X509CertificateLoader.LoadCertificate(PemHelper.GetBytesFromPem(certPem));
 
-            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate(badPrivateKey, badCert));
-        }
+        _ = Assert.Throws<ArgumentException>(() =>
+            PivSessionMock.ReplaceAttestationKeyAndCertificate(badPrivateKey, badCert));
+    }
 
-        [Fact]
-        public void ReplaceAttest_BigName_ThrowsException()
-        {
-            BadAttestationPairs.GetPair(BadAttestationPairs.KeyRsa2048CertBigName, out var privateKeyPem, out var certPem);
-            var badPrivateKey = RSAPrivateKey.CreateFromPkcs8(PemHelper.GetBytesFromPem(privateKeyPem));
-            var badCert = X509CertificateLoader.LoadCertificate(PemHelper.GetBytesFromPem(certPem));
+    [Fact]
+    public void ReplaceAttest_BigName_ThrowsException()
+    {
+        BadAttestationPairs.GetPair(BadAttestationPairs.KeyRsa2048CertBigName, out var privateKeyPem, out var certPem);
+        var badPrivateKey = RSAPrivateKey.CreateFromPkcs8(PemHelper.GetBytesFromPem(privateKeyPem));
+        var badCert = X509CertificateLoader.LoadCertificate(PemHelper.GetBytesFromPem(certPem));
 
-            _ = Assert.Throws<ArgumentException>(() => PivSessionMock.ReplaceAttestationKeyAndCertificate(badPrivateKey, badCert));
-        }
+        _ = Assert.Throws<ArgumentException>(() =>
+            PivSessionMock.ReplaceAttestationKeyAndCertificate(badPrivateKey, badCert));
     }
 }

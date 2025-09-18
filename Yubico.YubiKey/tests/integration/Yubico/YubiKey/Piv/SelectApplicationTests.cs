@@ -17,28 +17,28 @@ using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public sealed class SelectApplicationTests
 {
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public sealed class SelectApplicationTests
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void ConnectOathHasData(
+        StandardTestDevice testDeviceType)
     {
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void ConnectOathHasData(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+        Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Piv);
-            Assert.NotNull(connection);
+        using var connection = testDevice.Connect(YubiKeyApplication.Piv);
+        Assert.NotNull(connection);
 
-            // Connect does not actually select the app.  We need a command for this.  It can be anything.
-            _ = connection!.SendCommand(new GetSerialNumberCommand());
+        // Connect does not actually select the app.  We need a command for this.  It can be anything.
+        _ = connection!.SendCommand(new GetSerialNumberCommand());
 
-            Assert.NotNull(connection!.SelectApplicationData);
-            GenericSelectApplicationData? data = Assert.IsType<GenericSelectApplicationData>(connection.SelectApplicationData);
+        Assert.NotNull(connection!.SelectApplicationData);
+        var data = Assert.IsType<GenericSelectApplicationData>(connection.SelectApplicationData);
 
-            Assert.False(data!.RawData.IsEmpty);
-        }
+        Assert.False(data!.RawData.IsEmpty);
     }
 }

@@ -14,53 +14,56 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+/// <summary>
+///     Get the number of retries remaining for the management key.
+/// </summary>
+/// <remarks>
+///     <para>
+///         There is a limit of 8 attempts to authenticate with the management key
+///         before the management key is blocked. Once the management key is
+///         blocked, the application must be reset before performing operations
+///         which require authentication with the management key (such as adding
+///         credentials, deleting credentials, and changing the management key).
+///         To reset the application, see <see cref="ResetApplicationCommand" />.
+///         Supplying the correct management key before the management key is
+///         blocked will reset the retry counter to 8.
+///     </para>
+///     <para>
+///         The associated response class is <see cref="GetManagementKeyRetriesResponse" />.
+///     </para>
+/// </remarks>
+public sealed class GetManagementKeyRetriesCommand : IYubiKeyCommand<GetManagementKeyRetriesResponse>
 {
+    private const byte MgmtRetriesInstruction = 0x09;
+
     /// <summary>
-    /// Get the number of retries remaining for the management key.
+    ///     Constructs an instance of the <see cref="GetManagementKeyRetriesCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// There is a limit of 8 attempts to authenticate with the management key
-    /// before the management key is blocked. Once the management key is
-    /// blocked, the application must be reset before performing operations
-    /// which require authentication with the management key (such as adding
-    /// credentials, deleting credentials, and changing the management key).
-    /// To reset the application, see <see cref="ResetApplicationCommand"/>.
-    /// Supplying the correct management key before the management key is
-    /// blocked will reset the retry counter to 8.
-    /// </para>
-    /// <para>
-    /// The associated response class is <see cref="GetManagementKeyRetriesResponse"/>.
-    /// </para>
-    /// </remarks>
-    public sealed class GetManagementKeyRetriesCommand : IYubiKeyCommand<GetManagementKeyRetriesResponse>
+    public GetManagementKeyRetriesCommand()
     {
-        private const byte MgmtRetriesInstruction = 0x09;
+    }
 
-        /// <summary>
-        /// Gets the <see cref="YubiKeyApplication"/> to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.YubiHsmAuth"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
+    #region IYubiKeyCommand<GetManagementKeyRetriesResponse> Members
 
-        /// <summary>
-        /// Constructs an instance of the <see cref="GetManagementKeyRetriesCommand"/> class.
-        /// </summary>
-        public GetManagementKeyRetriesCommand()
-        {
-        }
+    /// <summary>
+    ///     Gets the <see cref="YubiKeyApplication" /> to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     <see cref="YubiKeyApplication.YubiHsmAuth" />
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = MgmtRetriesInstruction
         };
 
-        /// <inheritdoc />
-        public GetManagementKeyRetriesResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetManagementKeyRetriesResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public GetManagementKeyRetriesResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

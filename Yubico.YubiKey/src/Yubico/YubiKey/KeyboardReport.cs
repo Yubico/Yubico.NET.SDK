@@ -16,92 +16,91 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+internal class KeyboardReport
 {
-    internal class KeyboardReport
+    private const int SequenceMask = 0b0001_1111;
+    private const int FlagsMask = 0b1110_0000;
+
+    private readonly Memory<byte> _reportBuffer;
+
+    public KeyboardReport()
     {
-        private const int SequenceMask = 0b0001_1111;
-        private const int FlagsMask = 0b1110_0000;
+        _reportBuffer = new byte[8];
+    }
 
-        private readonly Memory<byte> _reportBuffer;
+    public KeyboardReport(Memory<byte> reportBuffer)
+    {
+        Debug.Assert(reportBuffer.Length == 8);
+        _reportBuffer = reportBuffer;
+    }
 
-        public Span<byte> Payload
+    public Span<byte> Payload
+    {
+        get => PayloadSpan();
+        set => value.CopyTo(PayloadSpan());
+    }
+
+    public KeyboardReportFlags Flags
+    {
+        get => (KeyboardReportFlags)(_reportBuffer.Span[^1] & FlagsMask);
+        set
         {
-            get => PayloadSpan();
-            set => value.CopyTo(PayloadSpan());
-        }
-
-        public bool IsAllZeros() => Payload.SequenceEqual(new byte[] { 0, 0, 0, 0, 0, 0, 0 });
-
-        public KeyboardReportFlags Flags
-        {
-            get => (KeyboardReportFlags)(_reportBuffer.Span[^1] & FlagsMask);
-            set
+            if (((int)value & ~FlagsMask) != 0)
             {
-                if (((int)value & ~FlagsMask) != 0)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.KeyboardInvalidFlag,
-                            value),
-                        nameof(value));
-                }
-
-                int temp = _reportBuffer.Span[^1] & SequenceMask; // Only retain the sequence number
-                temp |= (int)value; // Add in the flags
-                _reportBuffer.Span[^1] = (byte)temp;
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.KeyboardInvalidFlag,
+                        value),
+                    nameof(value));
             }
+
+            int temp = _reportBuffer.Span[^1] & SequenceMask; // Only retain the sequence number
+            temp |= (int)value; // Add in the flags
+            _reportBuffer.Span[^1] = (byte)temp;
         }
+    }
 
-        public bool TouchPending => (Flags & KeyboardReportFlags.TouchPending) != 0;
-        public bool ReadPending => (Flags & KeyboardReportFlags.ReadPending) != 0;
-        public bool WritePending => (Flags & KeyboardReportFlags.WritePending) != 0;
+    public bool TouchPending => (Flags & KeyboardReportFlags.TouchPending) != 0;
+    public bool ReadPending => (Flags & KeyboardReportFlags.ReadPending) != 0;
+    public bool WritePending => (Flags & KeyboardReportFlags.WritePending) != 0;
 
-        public int SequenceNumber
+    public int SequenceNumber
+    {
+        get => _reportBuffer.Span[^1] & SequenceMask;
+        set
         {
-            get => _reportBuffer.Span[^1] & SequenceMask;
-            set
+            if ((value & ~SequenceMask) != 0)
             {
-                if ((value & ~SequenceMask) != 0)
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(value),
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.KeyboardSequenceOutOfRange,
-                            value));
-                }
-
-                int temp = _reportBuffer.Span[^1] & FlagsMask; // Only retain the flags
-                temp |= value; // Add in the sequence number
-                _reportBuffer.Span[^1] = (byte)temp;
+                throw new ArgumentOutOfRangeException(
+                    nameof(value),
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.KeyboardSequenceOutOfRange,
+                        value));
             }
+
+            int temp = _reportBuffer.Span[^1] & FlagsMask; // Only retain the flags
+            temp |= value; // Add in the sequence number
+            _reportBuffer.Span[^1] = (byte)temp;
         }
+    }
 
-        public KeyboardReport()
-        {
-            _reportBuffer = new byte[8];
-        }
+    public bool IsAllZeros() => Payload.SequenceEqual(new byte[] { 0, 0, 0, 0, 0, 0, 0 });
 
-        public KeyboardReport(Memory<byte> reportBuffer)
-        {
-            Debug.Assert(reportBuffer.Length == 8);
-            _reportBuffer = reportBuffer;
-        }
+    public byte[] ToArray() => _reportBuffer.ToArray();
 
-        public byte[] ToArray() => _reportBuffer.ToArray();
+    private Span<byte> PayloadSpan() => _reportBuffer[..7].Span;
 
-        private Span<byte> PayloadSpan() => _reportBuffer.Slice(0, 7).Span;
-
-        public override string ToString()
-        {
-            return
-                $"TouchPending: {TouchPending}, " +
-                $"ReadPending: {ReadPending}, " +
-                $"WritePending: {WritePending}, " +
-                $"SequenceNumber: {SequenceNumber}, " +
-                $"Payload: {BitConverter.ToString(PayloadSpan().ToArray())}";
-        }
+    public override string ToString()
+    {
+        return
+            $"TouchPending: {TouchPending}, " +
+            $"ReadPending: {ReadPending}, " +
+            $"WritePending: {WritePending}, " +
+            $"SequenceNumber: {SequenceNumber}, " +
+            $"Payload: {BitConverter.ToString(PayloadSpan().ToArray())}";
     }
 }

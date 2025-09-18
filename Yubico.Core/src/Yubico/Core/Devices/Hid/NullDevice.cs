@@ -14,25 +14,30 @@
 
 using System;
 
-namespace Yubico.Core.Devices.Hid
-{
-    public class NullDevice : IHidDevice
-    {
-        public string Path => string.Empty;
-        public string? ParentDeviceId => default;
-        public DateTime LastAccessed => default;
-        public short VendorId => default;
-        public short ProductId => default;
-        public short Usage => default;
-        public HidUsagePage UsagePage => default;
-        public IHidConnection ConnectToFeatureReports() => throw new NotImplementedException();
-        public IHidConnection ConnectToIOReports() => throw new NotImplementedException();
+namespace Yubico.Core.Devices.Hid;
 
-        /// <summary>
-        /// Creates a default <see cref="IHidDevice"/> with all it's properties set to its default values, indicating a null device.
-        /// This might be used in cases where the <see cref="IHidDevice"/> otherwise would be null.
-        /// </summary>
-        internal static IHidDevice Instance => new NullDevice();
-        private NullDevice() { }
-    }
+public class NullDevice : IHidDevice
+{
+    private NullDevice() { }
+
+    /// <summary>
+    ///     Creates a default <see cref="IHidDevice" /> with all it's properties set to its default values, indicating a null
+    ///     device.
+    ///     This might be used in cases where the <see cref="IHidDevice" /> otherwise would be null.
+    /// </summary>
+    internal static IHidDevice Instance => new NullDevice();
+
+    #region IHidDevice Members
+
+    public string Path => string.Empty;
+    public string? ParentDeviceId => default;
+    public DateTime LastAccessed => default;
+    public short VendorId => default;
+    public short ProductId => default;
+    public short Usage => default;
+    public HidUsagePage UsagePage => default;
+    public IHidConnection ConnectToFeatureReports() => throw new NotImplementedException();
+    public IHidConnection ConnectToIOReports() => throw new NotImplementedException();
+
+    #endregion
 }

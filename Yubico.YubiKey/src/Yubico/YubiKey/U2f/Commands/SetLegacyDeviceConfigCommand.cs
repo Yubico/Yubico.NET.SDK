@@ -15,54 +15,57 @@
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Management.Commands;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+/// <inheritdoc />
+public sealed class SetLegacyDeviceConfigCommand : SetLegacyDeviceConfigBase,
+                                                   IYubiKeyCommand<SetLegacyDeviceConfigResponse>
 {
-    /// <inheritdoc/>
-    public sealed class SetLegacyDeviceConfigCommand : SetLegacyDeviceConfigBase, IYubiKeyCommand<SetLegacyDeviceConfigResponse>
+    private const byte DeviceConfigurationInstruction = 0x40;
+
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="SetLegacyDeviceConfigCommand" /> class.
+    /// </summary>
+    /// <inheritdoc />
+    public SetLegacyDeviceConfigCommand(
+        YubiKeyCapabilities yubiKeyInterfaces,
+        byte challengeResponseTimeout,
+        bool touchEjectEnabled,
+        int autoEjectTimeout)
+        : base(yubiKeyInterfaces, challengeResponseTimeout, touchEjectEnabled, autoEjectTimeout)
     {
-        private const byte DeviceConfigurationInstruction = 0x40;
-
-        /// <inheritdoc/>
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SetLegacyDeviceConfigCommand"/> class.
-        /// </summary>
-        /// <inheritdoc/>
-        public SetLegacyDeviceConfigCommand(
-            YubiKeyCapabilities yubiKeyInterfaces,
-            byte challengeResponseTimeout,
-            bool touchEjectEnabled,
-            int autoEjectTimeout)
-            : base(yubiKeyInterfaces, challengeResponseTimeout, touchEjectEnabled, autoEjectTimeout)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="SetLegacyDeviceConfigCommand"/> from another object which derives from
-        /// <see cref="SetLegacyDeviceConfigBase"/>.
-        /// </summary>
-        /// <remarks>
-        /// This constructor can be useful to switch between different application-specific
-        /// implementations of the same base command.
-        /// </remarks>
-        /// <param name="baseCommand">
-        /// The SetLegacyDeviceConfig base command object to copy from.
-        /// </param>
-        public SetLegacyDeviceConfigCommand(SetLegacyDeviceConfigBase baseCommand) : base(baseCommand)
-        {
-        }
-
-        /// <inheritdoc/>
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = DeviceConfigurationInstruction,
-                Data = GetDataForApdu(),
-            };
-
-        /// <inheritdoc/>
-        public SetLegacyDeviceConfigResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new SetLegacyDeviceConfigResponse(responseApdu);
     }
+
+    /// <summary>
+    ///     Creates a new <see cref="SetLegacyDeviceConfigCommand" /> from another object which derives from
+    ///     <see cref="SetLegacyDeviceConfigBase" />.
+    /// </summary>
+    /// <remarks>
+    ///     This constructor can be useful to switch between different application-specific
+    ///     implementations of the same base command.
+    /// </remarks>
+    /// <param name="baseCommand">
+    ///     The SetLegacyDeviceConfig base command object to copy from.
+    /// </param>
+    public SetLegacyDeviceConfigCommand(SetLegacyDeviceConfigBase baseCommand) : base(baseCommand)
+    {
+    }
+
+    #region IYubiKeyCommand<SetLegacyDeviceConfigResponse> Members
+
+    /// <inheritdoc />
+    public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
+        {
+            Ins = DeviceConfigurationInstruction,
+            Data = GetDataForApdu()
+        };
+
+    /// <inheritdoc />
+    public SetLegacyDeviceConfigResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

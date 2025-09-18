@@ -19,135 +19,139 @@ using Xunit;
 using Yubico.Core.Buffers;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+public class RegisterResponseTests
 {
-    public class RegisterResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
-        {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void action() => _ = new RegisterResponse(null);
+        static void action()
+        {
+            _ = new RegisterResponse(null);
+        }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            _ = Assert.Throws<ArgumentNullException>(action);
-        }
+        _ = Assert.Throws<ArgumentNullException>(action);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var registerResponse = new RegisterResponse(responseApdu);
+
+        Assert.Equal(SWConstants.Success, registerResponse.StatusWord);
+    }
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var registerResponse = new RegisterResponse(responseApdu);
+
+        Assert.Equal(ResponseStatus.Success, registerResponse.Status);
+    }
+
+    [Fact]
+    public void Constructor_ConditionsNotSatisfiedResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.ConditionsNotSatisfied >> 8));
+        var sw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+
+        var registerResponse = new RegisterResponse(responseApdu);
+
+        Assert.Equal(ResponseStatus.ConditionsNotSatisfied, registerResponse.Status);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void GetData_BadResponseData_Throws(
+        bool validPubKey,
+        bool validKeyHandle)
+    {
+        var encoding = RegistrationDataTests.GetEncodedRegistration(validPubKey, validKeyHandle);
+        var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
+
+        var registerResponse = new RegisterResponse(responseApdu);
+
+        _ = Assert.Throws<ArgumentException>(() => registerResponse.GetData());
+    }
+
+    [Fact]
+    public void GetData_GoodResponseData_Succeeds()
+    {
+        var encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
+        var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
+
+        var registerResponse = new RegisterResponse(responseApdu);
+
+        _ = registerResponse.GetData();
+    }
+
+    [Fact]
+    public void GetData_GoodResponseData_SetsUserPublicKeyCorrectly()
+    {
+        var encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
+        var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
+
+        var registerResponse = new RegisterResponse(responseApdu);
+
+        var data = registerResponse.GetData();
+        var pubKeyPoint = new ECPoint
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+            X = data.UserPublicKey.Slice(1, 32).ToArray(),
+            Y = data.UserPublicKey.Slice(33, 32).ToArray()
+        };
 
-            var registerResponse = new RegisterResponse(responseApdu);
+        Assert.Equal(RegistrationDataTests.GetPubKeyX(), Hex.BytesToHex(pubKeyPoint.X));
+        Assert.Equal(RegistrationDataTests.GetPubKeyY(), Hex.BytesToHex(pubKeyPoint.Y));
+    }
 
-            Assert.Equal(SWConstants.Success, registerResponse.StatusWord);
-        }
+    [Fact]
+    public void GetData_GoodResponseData_SetsKeyHandleCorrectly()
+    {
+        var encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
+        var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+        var registerResponse = new RegisterResponse(responseApdu);
 
-            var registerResponse = new RegisterResponse(responseApdu);
+        var data = registerResponse.GetData();
+        var keyHandle = RegistrationDataTests.GetKeyHandle(true, out _);
+        Assert.Equal(keyHandle, Hex.BytesToHex(data.KeyHandle.ToArray()));
+    }
 
-            Assert.Equal(ResponseStatus.Success, registerResponse.Status);
-        }
+    [Fact]
+    public void GetData_GoodResponseData_SetsCertificateCorrectly()
+    {
+        var encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
+        var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
 
-        [Fact]
-        public void Constructor_ConditionsNotSatisfiedResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.ConditionsNotSatisfied >> 8));
-            byte sw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+        var registerResponse = new RegisterResponse(responseApdu);
 
-            var registerResponse = new RegisterResponse(responseApdu);
+        var data = registerResponse.GetData();
+        var cert = RegistrationDataTests.GetAttestationCert();
+        Assert.Equal(cert, Hex.BytesToHex(data.AttestationCert.RawData.ToArray()));
+    }
 
-            Assert.Equal(ResponseStatus.ConditionsNotSatisfied, registerResponse.Status);
-        }
+    [Fact]
+    public void GetData_GoodResponseData_SetsSignatureCorrectly()
+    {
+        var encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
+        var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
 
-        [Theory]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
-        public void GetData_BadResponseData_Throws(bool validPubKey, bool validKeyHandle)
-        {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(validPubKey, validKeyHandle);
-            var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
+        var registerResponse = new RegisterResponse(responseApdu);
 
-            var registerResponse = new RegisterResponse(responseApdu);
-
-            _ = Assert.Throws<ArgumentException>(() => registerResponse.GetData());
-        }
-
-        [Fact]
-        public void GetData_GoodResponseData_Succeeds()
-        {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
-            var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
-
-            var registerResponse = new RegisterResponse(responseApdu);
-
-            _ = registerResponse.GetData();
-        }
-
-        [Fact]
-        public void GetData_GoodResponseData_SetsUserPublicKeyCorrectly()
-        {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
-            var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
-
-            var registerResponse = new RegisterResponse(responseApdu);
-
-            RegistrationData data = registerResponse.GetData();
-            var pubKeyPoint = new ECPoint
-            {
-                X = data.UserPublicKey.Slice(1, 32).ToArray(),
-                Y = data.UserPublicKey.Slice(33, 32).ToArray(),
-            };
-
-            Assert.Equal(RegistrationDataTests.GetPubKeyX(), Hex.BytesToHex(pubKeyPoint.X));
-            Assert.Equal(RegistrationDataTests.GetPubKeyY(), Hex.BytesToHex(pubKeyPoint.Y));
-        }
-
-        [Fact]
-        public void GetData_GoodResponseData_SetsKeyHandleCorrectly()
-        {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
-            var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
-
-            var registerResponse = new RegisterResponse(responseApdu);
-
-            RegistrationData data = registerResponse.GetData();
-            string keyHandle = RegistrationDataTests.GetKeyHandle(true, out string _);
-            Assert.Equal(keyHandle, Hex.BytesToHex(data.KeyHandle.ToArray()));
-        }
-
-        [Fact]
-        public void GetData_GoodResponseData_SetsCertificateCorrectly()
-        {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
-            var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
-
-            var registerResponse = new RegisterResponse(responseApdu);
-
-            RegistrationData data = registerResponse.GetData();
-            string cert = RegistrationDataTests.GetAttestationCert();
-            Assert.Equal(cert, Hex.BytesToHex(data.AttestationCert.RawData.ToArray()));
-        }
-
-        [Fact]
-        public void GetData_GoodResponseData_SetsSignatureCorrectly()
-        {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
-            var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
-
-            var registerResponse = new RegisterResponse(responseApdu);
-
-            RegistrationData data = registerResponse.GetData();
-            Assert.Equal(RegistrationDataTests.GetRegSignature(), Hex.BytesToHex(data.Signature.ToArray()));
-        }
+        var data = registerResponse.GetData();
+        Assert.Equal(RegistrationDataTests.GetRegSignature(), Hex.BytesToHex(data.Signature.ToArray()));
     }
 }

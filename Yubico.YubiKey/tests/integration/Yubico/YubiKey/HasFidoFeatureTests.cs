@@ -16,50 +16,49 @@ using System.Linq;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+public class HasFidoFeatureTests
 {
-    public class HasFidoFeatureTests
+    [Fact]
+    public void HasFeature_ApplicationOTP_Correct()
     {
-        [Fact]
-        public void HasFeature_ApplicationOTP_Correct()
-        {
-            IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport().First();
+        var yubiKeyDevice = YubiKeyDevice.FindByTransport().First();
 
-            bool hasFeature = yubiKeyDevice.HasFeature(YubiKeyFeature.OtpApplication);
-            bool expectedResult = !yubiKeyDevice.IsSkySeries;
-            Assert.Equal(hasFeature, expectedResult);
+        var hasFeature = yubiKeyDevice.HasFeature(YubiKeyFeature.OtpApplication);
+        var expectedResult = !yubiKeyDevice.IsSkySeries;
+        Assert.Equal(hasFeature, expectedResult);
+    }
+
+    [Fact]
+    public void HasFeature_ApplicationU2F_Correct()
+    {
+        var yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
+        var expectedResult = true;
+
+        //Can this be removed?
+        if (!yubiKeyDevice.IsSkySeries && yubiKeyDevice.FirmwareVersion.Major < 3)
+        {
+            expectedResult = false;
         }
 
-        [Fact]
-        public void HasFeature_ApplicationU2F_Correct()
+        var hasFeature = yubiKeyDevice.HasFeature(YubiKeyFeature.U2fApplication);
+
+        Assert.Equal(hasFeature, expectedResult);
+    }
+
+    [Fact]
+    public void HasFeature_ApplicationFido2_Correct()
+    {
+        var yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
+        var expectedResult = true;
+        if (!yubiKeyDevice.IsSkySeries && yubiKeyDevice.FirmwareVersion.Major < 5)
         {
-            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
-            bool expectedResult = true;
-
-            //Can this be removed?
-            if (!yubiKeyDevice.IsSkySeries && yubiKeyDevice.FirmwareVersion.Major < 3)
-            {
-                expectedResult = false;
-            }
-
-            bool hasFeature = yubiKeyDevice.HasFeature(YubiKeyFeature.U2fApplication);
-
-            Assert.Equal(hasFeature, expectedResult);
+            expectedResult = false;
         }
 
-        [Fact]
-        public void HasFeature_ApplicationFido2_Correct()
-        {
-            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevice();
-            bool expectedResult = true;
-            if (!yubiKeyDevice.IsSkySeries && yubiKeyDevice.FirmwareVersion.Major < 5)
-            {
-                expectedResult = false;
-            }
+        var hasFeature = yubiKeyDevice.HasFeature(YubiKeyFeature.Fido2Application);
 
-            bool hasFeature = yubiKeyDevice.HasFeature(YubiKeyFeature.Fido2Application);
-
-            Assert.Equal(hasFeature, expectedResult);
-        }
+        Assert.Equal(hasFeature, expectedResult);
     }
 }

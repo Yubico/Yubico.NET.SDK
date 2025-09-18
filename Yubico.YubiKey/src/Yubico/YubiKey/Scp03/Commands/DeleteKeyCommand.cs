@@ -15,67 +15,72 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Scp03.Commands
+namespace Yubico.YubiKey.Scp03.Commands;
+
+/// <summary>
+///     Use this command to delete one of the SCP03 key sets on the YubiKey.
+/// </summary>
+/// <remarks>
+///     See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP03.
+///     <para>
+///         This will execute the Delete Command. That is, there is a general purpose
+///         command that can delete various elements, including keys. However, this
+///         class can build the general purpose delete command in a way that it will
+///         only be able to delete keys.
+///     </para>
+///     <para>
+///         Note that if all three key sets are deleted, then the first key set (the
+///         key set with a KeyVersionNumber of 1) will be the default key set.
+///     </para>
+/// </remarks>
+[Obsolete("Use new DeleteKeyCommand instead")]
+internal class DeleteKeyCommand : IYubiKeyCommand<Scp03Response>
 {
+    private const byte GpDeleteKeyCla = 0x84;
+    private const byte GpDeleteKeyIns = 0xE4;
+    private const byte GpDeleteKeyP1 = 0;
+    private const byte GpDeleteKeyP2 = 0;
+    private const byte GpDeleteLastKeyP2 = 1;
+    private const byte KvnTag = 0xD2;
+    private const byte KvnLength = 1;
+
+    private readonly byte[] _data;
+    private readonly byte _p2Value;
+
+    // The default constructor explicitly defined. We don't want it to be
+    // used.
+    private DeleteKeyCommand()
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
-    /// Use this command to delete one of the SCP03 key sets on the YubiKey.
+    ///     Create a new instance of the command. When this command is executed,
+    ///     the key set represented by the given <c>keyVersionNumber</c> will be
+    ///     deleted. If there is no such key set, this command will do nothing
+    ///     and the return <c>Status</c> will be <c>ResponseStatus.NoData</c>.
     /// </summary>
     /// <remarks>
-    /// See the <xref href="UsersManualScp">User's Manual entry</xref> on SCP03.
-    /// <para>
-    /// This will execute the Delete Command. That is, there is a general purpose
-    /// command that can delete various elements, including keys. However, this
-    /// class can build the general purpose delete command in a way that it will
-    /// only be able to delete keys.
-    /// </para>
-    /// <para>
-    /// Note that if all three key sets are deleted, then the first key set (the
-    /// key set with a KeyVersionNumber of 1) will be the default key set.
-    /// </para>
+    ///     The key set used to make the connection cannot be the key set to be
+    ///     deleted, unless both of the other key sets have been deleted, and you
+    ///     pass <c>true</c> for <c>isLastKey</c>. In this case, the key will be
+    ///     deleted but the SCP03 application on the YubiKey will be reset with
+    ///     the default key.
     /// </remarks>
-    [Obsolete("Use new DeleteKeyCommand instead")]
-    internal class DeleteKeyCommand : IYubiKeyCommand<Scp03Response>
+    public DeleteKeyCommand(byte keyVersionNumber, bool isLastKey)
     {
-        private const byte GpDeleteKeyCla = 0x84;
-        private const byte GpDeleteKeyIns = 0xE4;
-        private const byte GpDeleteKeyP1 = 0;
-        private const byte GpDeleteKeyP2 = 0;
-        private const byte GpDeleteLastKeyP2 = 1;
-        private const byte KvnTag = 0xD2;
-        private const byte KvnLength = 1;
+        _data = new byte[3] { KvnTag, KvnLength, keyVersionNumber };
+        _p2Value = isLastKey
+            ? GpDeleteLastKeyP2
+            : GpDeleteKeyP2;
+    }
 
-        private readonly byte[] _data;
-        private readonly byte _p2Value;
+    #region IYubiKeyCommand<Scp03Response> Members
 
-        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
+    public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
 
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        private DeleteKeyCommand()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Create a new instance of the command. When this command is executed,
-        /// the key set represented by the given <c>keyVersionNumber</c> will be
-        /// deleted. If there is no such key set, this command will do nothing
-        /// and the return <c>Status</c> will be <c>ResponseStatus.NoData</c>.
-        /// </summary>
-        /// <remarks>
-        /// The key set used to make the connection cannot be the key set to be
-        /// deleted, unless both of the other key sets have been deleted, and you
-        /// pass <c>true</c> for <c>isLastKey</c>. In this case, the key will be
-        /// deleted but the SCP03 application on the YubiKey will be reset with
-        /// the default key.
-        /// </remarks>
-        public DeleteKeyCommand(byte keyVersionNumber, bool isLastKey)
-        {
-            _data = new byte[3] { KvnTag, KvnLength, keyVersionNumber };
-            _p2Value = isLastKey ? GpDeleteLastKeyP2 : GpDeleteKeyP2;
-        }
-
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Cla = GpDeleteKeyCla,
             Ins = GpDeleteKeyIns,
@@ -84,7 +89,7 @@ namespace Yubico.YubiKey.Scp03.Commands
             Data = _data
         };
 
-        public Scp03Response CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new Scp03Response(responseApdu);
-    }
+    public Scp03Response CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

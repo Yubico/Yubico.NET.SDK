@@ -18,199 +18,203 @@ using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+// This portion of the Fido2Session class deals with asserting (authenticating)
+// a credential stored on the YubiKey.
+public sealed partial class Fido2Session
 {
-    // This portion of the Fido2Session class deals with asserting (authenticating)
-    // a credential stored on the YubiKey.
-    public sealed partial class Fido2Session
+    /// <summary>
+    ///     Gets one or more assertions for a particular relying party.
+    ///     &gt; [!NOTE]
+    ///     &gt; You must supply a <see cref="GetAssertionParameters" /> object to
+    ///     &gt; this method, however, you do not need to set the
+    ///     &gt; <see cref="GetAssertionParameters.PinUvAuthParam" /> property,
+    ///     &gt; the SDK will do so.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Detailed information about the parameters structure and its expected values can be found on the
+    ///         <see cref="GetAssertionParameters" /> page.
+    ///     </para>
+    ///     <para>
+    ///         To get an assertion requires "user presence", which for a YubiKey is
+    ///         touch. This method will call the KeyCollector when touch is required
+    ///         (<c>KeyEntryRequest.TouchRequest</c>).
+    ///     </para>
+    ///     <para>
+    ///         The SDK will automatically perform PIN or user verification using the
+    ///         KeyCollector if needed. That is, if this method determines that
+    ///         authentication has been successfully completed, it will not need the
+    ///         PIN or fingerprint, so will not call the KeyCollector. However, if it
+    ///         needs to perform authentication, it will request user verification
+    ///         and/or a PIN using the KeyCollector.
+    ///     </para>
+    ///     <para>
+    ///         Note that because the SDK will make the appropriate authentication
+    ///         calls, it will build the <c>PinUvAuthParam</c> in the
+    ///         <c>GetAssertionParameters</c> input arg, so you do not need to do so.
+    ///     </para>
+    ///     <para>
+    ///         It is still possible to call this method with a KeyCollector that
+    ///         does not collect a PIN (you will need to have one that supports at
+    ///         least <c>KeyEntryRequest.TouchRequest</c>). You must simply make sure
+    ///         the appropriate Verify method has been called. See the User's Manual
+    ///         entries on <xref href="Fido2AuthTokens">AuthTokens</xref> and
+    ///         <xref href="SdkAuthTokenLogic">the SDK AuthToken logic</xref> for
+    ///         more information on when to verify. If you do not provide a
+    ///         KeyCollector that can collect the PIN, and the method is not able to
+    ///         perform because of an authentication failure, it will throw an
+    ///         exception.
+    ///     </para>
+    ///     <para>
+    ///         If there are no credentials associated with the relying party, this
+    ///         method will return a List with no entries (Count = 0).
+    ///     </para>
+    /// </remarks>
+    /// <param name="parameters">
+    ///     An appropriately populated <see cref="GetAssertionParameters" /> structure that
+    ///     follows all of the rules set forth by that object.
+    /// </param>
+    /// <returns>
+    ///     A collection of objects that contain the credential assertion and supporting data.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     The <paramref name="parameters" /> argument was null.
+    /// </exception>
+    /// <exception cref="Fido2Exception">
+    ///     The YubiKey could not complete the operation, likely because of a
+    ///     wrong PIN or fingerprint.
+    /// </exception>
+    /// <exception cref="TimeoutException">
+    ///     The YubiKey either required touch for a user presence check or a biometric touch for user authentication.
+    ///     The YubiKey timed out waiting for this action to be performed.
+    /// </exception>
+    public IReadOnlyList<GetAssertionData> GetAssertions(GetAssertionParameters parameters)
     {
-        /// <summary>
-        /// Gets one or more assertions for a particular relying party.
-        /// &gt; [!NOTE]
-        /// &gt; You must supply a <see cref="GetAssertionParameters"/> object to
-        /// &gt; this method, however, you do not need to set the
-        /// &gt; <see cref="GetAssertionParameters.PinUvAuthParam"/> property,
-        /// &gt; the SDK will do so.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Detailed information about the parameters structure and its expected values can be found on the
-        /// <see cref="GetAssertionParameters"/> page.
-        /// </para>
-        /// <para>
-        /// To get an assertion requires "user presence", which for a YubiKey is
-        /// touch. This method will call the KeyCollector when touch is required
-        /// (<c>KeyEntryRequest.TouchRequest</c>).
-        /// </para>
-        /// <para>
-        /// The SDK will automatically perform PIN or user verification using the
-        /// KeyCollector if needed. That is, if this method determines that
-        /// authentication has been successfully completed, it will not need the
-        /// PIN or fingerprint, so will not call the KeyCollector. However, if it
-        /// needs to perform authentication, it will request user verification
-        /// and/or a PIN using the KeyCollector.
-        /// </para>
-        /// <para>
-        /// Note that because the SDK will make the appropriate authentication
-        /// calls, it will build the <c>PinUvAuthParam</c> in the
-        /// <c>GetAssertionParameters</c> input arg, so you do not need to do so.
-        /// </para>
-        /// <para>
-        /// It is still possible to call this method with a KeyCollector that
-        /// does not collect a PIN (you will need to have one that supports at
-        /// least <c>KeyEntryRequest.TouchRequest</c>). You must simply make sure
-        /// the appropriate Verify method has been called. See the User's Manual
-        /// entries on <xref href="Fido2AuthTokens">AuthTokens</xref> and
-        /// <xref href="SdkAuthTokenLogic">the SDK AuthToken logic</xref> for
-        /// more information on when to verify. If you do not provide a
-        /// KeyCollector that can collect the PIN, and the method is not able to
-        /// perform because of an authentication failure, it will throw an
-        /// exception.
-        /// </para>
-        /// <para>
-        /// If there are no credentials associated with the relying party, this
-        /// method will return a List with no entries (Count = 0).
-        /// </para>
-        /// </remarks>
-        /// <param name="parameters">
-        /// An appropriately populated <see cref="GetAssertionParameters"/> structure that
-        /// follows all of the rules set forth by that object.
-        /// </param>
-        /// <returns>
-        /// A collection of objects that contain the credential assertion and supporting data.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// The <paramref name="parameters"/> argument was null.
-        /// </exception>
-        /// <exception cref="Fido2Exception">
-        /// The YubiKey could not complete the operation, likely because of a
-        /// wrong PIN or fingerprint.
-        /// </exception>
-        /// <exception cref="TimeoutException">
-        /// The YubiKey either required touch for a user presence check or a biometric touch for user authentication.
-        /// The YubiKey timed out waiting for this action to be performed.
-        /// </exception>
-        public IReadOnlyList<GetAssertionData> GetAssertions(GetAssertionParameters parameters)
+        Logger.LogInformation("Get assertions.");
+
+        if (parameters is null)
         {
-            Logger.LogInformation("Get assertions.");
-
-            if (parameters is null)
-            {
-                throw new ArgumentNullException(nameof(parameters));
-            }
-
-            var keyCollector = EnsureKeyCollector();
-
-            byte[] token = new byte[MaximumAuthTokenLength];
-            byte[] clientDataHash = parameters.ClientDataHash.ToArray();
-            bool forceToken = false;
-            string message = "";
-
-            do
-            {
-                // The first time through, forceToken will be false.
-                // If there is a second time, it will be true.
-                var currentToken = GetAuthToken(
-                    forceToken, PinUvAuthTokenPermissions.GetAssertion, parameters.RelyingParty.Id);
-
-                try
-                {
-                    currentToken.CopyTo(token.AsMemory());
-                    parameters.Protocol = AuthProtocol.Protocol;
-                    parameters.PinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(
-                        token, 0, currentToken.Length, clientDataHash);
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(token);
-                }
-
-                // If the hmac-secret extension was not requested, this call will
-                // do nothing.
-                parameters.EncodeHmacSecretExtension(AuthProtocol);
-
-                var response = RunGetAssertion(parameters, keyCollector, out var ctapStatus);
-
-                switch (ctapStatus)
-                {
-                    case CtapStatus.Ok:
-                        return CompleteGetAssertions(response.GetData());
-
-                    case CtapStatus.PinAuthInvalid:
-                        // If forceToken is false (its initial value), this
-                        // will set it to true and we'll try the loop again,
-                        // this time forcing a new AuthToken. If it is true,
-                        // that means we have already tried once to get a new
-                        // AuthToken, don't try again, so set forceToken to
-                        // false and we'll break out of the for loop.
-                        forceToken = !forceToken;
-                        break;
-
-                    case CtapStatus.NoCredentials:
-                        return new List<GetAssertionData>();
-
-                    case CtapStatus.OperationDenied:
-                    case CtapStatus.ActionTimeout:
-                    case CtapStatus.UserActionTimeout:
-                        throw new TimeoutException(ExceptionMessages.Fido2TouchTimeout);
-
-                    case CtapStatus.KeepAliveCancel:
-                        throw new OperationCanceledException(ExceptionMessages.OperationCancelled);
-
-                    default:
-                        // Any other error, make sure we break out of the for
-                        // loop.
-                        forceToken = false;
-                        break;
-                }
-
-                message = response.StatusMessage;
-            } while (forceToken);
-
-            throw new Fido2Exception(message);
+            throw new ArgumentNullException(nameof(parameters));
         }
 
-        private GetAssertionResponse RunGetAssertion(
-            GetAssertionParameters parameters,
-            Func<KeyEntryData, bool> keyCollector,
-            out CtapStatus ctapStatus)
+        var keyCollector = EnsureKeyCollector();
+
+        byte[] token = new byte[MaximumAuthTokenLength];
+        byte[] clientDataHash = parameters.ClientDataHash.ToArray();
+        bool forceToken = false;
+        string message = "";
+
+        do
         {
-            var keyEntryData = new KeyEntryData()
-            {
-                Request = KeyEntryRequest.TouchRequest,
-            };
-            using var touchTask = new TouchFingerprintTask(
-                keyCollector,
-                keyEntryData,
-                Connection,
-                CtapConstants.CtapGetAssertionCmd);
+            // The first time through, forceToken will be false.
+            // If there is a second time, it will be true.
+            var currentToken = GetAuthToken(
+                forceToken, PinUvAuthTokenPermissions.GetAssertion, parameters.RelyingParty.Id);
 
             try
             {
-                var response = Connection.SendCommand(new GetAssertionCommand(parameters));
-                ctapStatus = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : response.CtapStatus;
-                return response;
+                currentToken.CopyTo(token.AsMemory());
+                parameters.Protocol = AuthProtocol.Protocol;
+                parameters.PinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(
+                    token, 0, currentToken.Length, clientDataHash);
             }
             finally
             {
-                keyEntryData.Clear();
-                keyEntryData.Request = KeyEntryRequest.Release;
-                touchTask.SdkUpdate(keyEntryData);
+                CryptographicOperations.ZeroMemory(token);
             }
-        }
 
-        private IReadOnlyList<GetAssertionData> CompleteGetAssertions(GetAssertionData getAssertionData)
-        {
-            int numberOfCredentials = getAssertionData.NumberOfCredentials ?? 1;
-            var assertions = new List<GetAssertionData>(numberOfCredentials) { getAssertionData };
+            // If the hmac-secret extension was not requested, this call will
+            // do nothing.
+            parameters.EncodeHmacSecretExtension(AuthProtocol);
 
-            for (int index = 1; index < numberOfCredentials; index++)
+            var response = RunGetAssertion(parameters, keyCollector, out var ctapStatus);
+
+            switch (ctapStatus)
             {
-                var response = Connection.SendCommand(new GetNextAssertionCommand());
-                assertions.Add(response.GetData());
+                case CtapStatus.Ok:
+                    return CompleteGetAssertions(response.GetData());
+
+                case CtapStatus.PinAuthInvalid:
+                    // If forceToken is false (its initial value), this
+                    // will set it to true and we'll try the loop again,
+                    // this time forcing a new AuthToken. If it is true,
+                    // that means we have already tried once to get a new
+                    // AuthToken, don't try again, so set forceToken to
+                    // false and we'll break out of the for loop.
+                    forceToken = !forceToken;
+                    break;
+
+                case CtapStatus.NoCredentials:
+                    return new List<GetAssertionData>();
+
+                case CtapStatus.OperationDenied:
+                case CtapStatus.ActionTimeout:
+                case CtapStatus.UserActionTimeout:
+                    throw new TimeoutException(ExceptionMessages.Fido2TouchTimeout);
+
+                case CtapStatus.KeepAliveCancel:
+                    throw new OperationCanceledException(ExceptionMessages.OperationCancelled);
+
+                default:
+                    // Any other error, make sure we break out of the for
+                    // loop.
+                    forceToken = false;
+                    break;
             }
 
-            return assertions;
+            message = response.StatusMessage;
         }
+        while (forceToken);
+
+        throw new Fido2Exception(message);
+    }
+
+    private GetAssertionResponse RunGetAssertion(
+        GetAssertionParameters parameters,
+        Func<KeyEntryData, bool> keyCollector,
+        out CtapStatus ctapStatus)
+    {
+        var keyEntryData = new KeyEntryData
+        {
+            Request = KeyEntryRequest.TouchRequest
+        };
+
+        using var touchTask = new TouchFingerprintTask(
+            keyCollector,
+            keyEntryData,
+            Connection,
+            CtapConstants.CtapGetAssertionCmd);
+
+        try
+        {
+            var response = Connection.SendCommand(new GetAssertionCommand(parameters));
+            ctapStatus = touchTask.IsUserCanceled
+                ? CtapStatus.KeepAliveCancel
+                : response.CtapStatus;
+
+            return response;
+        }
+        finally
+        {
+            keyEntryData.Clear();
+            keyEntryData.Request = KeyEntryRequest.Release;
+            touchTask.SdkUpdate(keyEntryData);
+        }
+    }
+
+    private IReadOnlyList<GetAssertionData> CompleteGetAssertions(GetAssertionData getAssertionData)
+    {
+        int numberOfCredentials = getAssertionData.NumberOfCredentials ?? 1;
+        var assertions = new List<GetAssertionData>(numberOfCredentials) { getAssertionData };
+
+        for (int index = 1; index < numberOfCredentials; index++)
+        {
+            var response = Connection.SendCommand(new GetNextAssertionCommand());
+            assertions.Add(response.GetData());
+        }
+
+        return assertions;
     }
 }

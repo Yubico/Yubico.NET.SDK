@@ -15,16 +15,15 @@
 using Xunit;
 using Yubico.PlatformInterop;
 
-namespace Yubico.Core.Cryptography
-{
-    public class BnTests
-    {
-        [Fact]
-        public void CreateBn_Succeeds()
-        {
-            using SafeBigNum safeBigNum = NativeMethods.BnNew();
+namespace Yubico.Core.Cryptography;
 
-            Assert.False(safeBigNum.IsInvalid);
-        }
+public class BnTests
+{
+    [Fact]
+    public void CreateBn_Succeeds()
+    {
+        using var safeBigNum = NativeMethods.BnNew();
+
+        Assert.False(safeBigNum.IsInvalid);
     }
 }

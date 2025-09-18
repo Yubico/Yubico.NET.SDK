@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.PlatformInterop
-{
-    internal static class IOKitHidConstants
-    {
-        public const string DevicePropertyVendorId = "VendorID";
-        public const string DevicePropertyProductId = "ProductID";
-        public const string DevicePropertyLocationId = "LocationID";
-        public const string DevicePropertyPrimaryUsage = "PrimaryUsage";
-        public const string DevicePropertyPrimaryUsagePage = "PrimaryUsagePage";
-        public const string MaxInputReportSize = "MaxInputReportSize";
-        public const string MaxOutputReportSize = "MaxOutputReportSize";
+namespace Yubico.PlatformInterop;
 
-        public const int kIOHidReportTypeInput = 0;
-        public const int kIOHidReportTypeOutput = 1;
-        public const int kIOHidReportTypeFeature = 2;
-    }
+internal static class IOKitHidConstants
+{
+    public const string DevicePropertyVendorId = "VendorID";
+    public const string DevicePropertyProductId = "ProductID";
+    public const string DevicePropertyLocationId = "LocationID";
+    public const string DevicePropertyPrimaryUsage = "PrimaryUsage";
+    public const string DevicePropertyPrimaryUsagePage = "PrimaryUsagePage";
+    public const string MaxInputReportSize = "MaxInputReportSize";
+    public const string MaxOutputReportSize = "MaxOutputReportSize";
+
+    public const int kIOHidReportTypeInput = 0;
+    public const int kIOHidReportTypeOutput = 1;
+    public const int kIOHidReportTypeFeature = 2;
 }

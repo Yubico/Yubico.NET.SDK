@@ -15,66 +15,71 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.InterIndustry.Commands
+namespace Yubico.YubiKey.InterIndustry.Commands;
+
+/// <summary>
+///     Gets additional response data from the previously issued command.
+/// </summary>
+/// <remarks>
+///     The OATH application uses a different version of this command. See
+///     <see cref="Oath.Commands.GetResponseCommand" />.
+/// </remarks>
+public class GetResponseCommand : IYubiKeyCommand<YubiKeyResponse>
 {
+    private const byte GetResponseInstruction = 0xC0;
+
+    private readonly byte _Cla;
+    private readonly int _SW2;
+
     /// <summary>
-    /// Gets additional response data from the previously issued command.
+    ///     Initializes a new instance of the <see cref="GetResponseCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// The OATH application uses a different version of this command. See
-    /// <see cref="Oath.Commands.GetResponseCommand"/>.
-    /// </remarks>
-    public class GetResponseCommand : IYubiKeyCommand<YubiKeyResponse>
+    /// <param name="originatingCommand">
+    ///     The original command APDU that was sent that is now indicating that more data is in the
+    ///     response.
+    /// </param>
+    /// <param name="SW2">
+    ///     The SW2 byte of the last response. It indicates the number of bytes left for the next
+    ///     GetResponseCommand.
+    /// </param>
+    public GetResponseCommand(CommandApdu originatingCommand, short SW2)
     {
-        private const byte GetResponseInstruction = 0xC0;
-
-        private readonly byte _Cla;
-        private readonly int _SW2;
-
-        /// <summary>
-        /// Gets the YubiKeyApplication (e.g. PIV, OATH, etc.) that this command applies to.
-        /// </summary>
-        /// <remarks>
-        /// This command does not apply to the OATH application. The OATH application uses
-        /// <see cref="Oath.Commands.GetResponseCommand"/>.
-        /// </remarks>
-        /// <value>
-        /// The value will always be `YubiKeyApplication.InterIndustry` for this command.
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetResponseCommand"/> class.
-        /// </summary>
-        /// <param name="originatingCommand">
-        /// The original command APDU that was sent that is now indicating that more data is in the
-        /// response.
-        /// </param>
-        /// <param name="SW2">
-        /// The SW2 byte of the last response. It indicates the number of bytes left for the next
-        /// GetResponseCommand.
-        /// </param>
-        public GetResponseCommand(CommandApdu originatingCommand, short SW2)
+        if (originatingCommand is null)
         {
-            if (originatingCommand is null)
-            {
-                throw new ArgumentNullException(nameof(originatingCommand));
-            }
-
-            _Cla = originatingCommand.Cla;
-            _SW2 = SW2;
+            throw new ArgumentNullException(nameof(originatingCommand));
         }
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+        _Cla = originatingCommand.Cla;
+        _SW2 = SW2;
+    }
+
+    #region IYubiKeyCommand<YubiKeyResponse> Members
+
+    /// <summary>
+    ///     Gets the YubiKeyApplication (e.g. PIV, OATH, etc.) that this command applies to.
+    /// </summary>
+    /// <remarks>
+    ///     This command does not apply to the OATH application. The OATH application uses
+    ///     <see cref="Oath.Commands.GetResponseCommand" />.
+    /// </remarks>
+    /// <value>
+    ///     The value will always be `YubiKeyApplication.InterIndustry` for this command.
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Cla = _Cla,
             Ins = GetResponseInstruction,
-            Ne = _SW2 == 0 ? 256 : _SW2,
+            Ne = _SW2 == 0
+                ? 256
+                : _SW2
         };
 
-        /// <inheritdoc />
-        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new YubiKeyResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

@@ -18,198 +18,200 @@ using System.Text;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+[Trait(TraitTypes.Category, TestCategories.Elevated)]
+public class ConfigTests : SimpleIntegrationTestConnection
 {
-
-    [Trait(TraitTypes.Category, TestCategories.Elevated)]
-    public class ConfigTests : SimpleIntegrationTestConnection
+    public ConfigTests()
+        : base(YubiKeyApplication.Fido2)
     {
-        public ConfigTests()
-            : base(YubiKeyApplication.Fido2)
-        {
-        }
+    }
 
-        [Fact]
-        public void EnableEnterpriseAttestation_Succeeds()
+    [Fact]
+    public void EnableEnterpriseAttestation_Succeeds()
+    {
+        using (var fido2Session = new Fido2Session(Device))
         {
-            using (var fido2Session = new Fido2Session(Device))
+            fido2Session.KeyCollector = LocalKeyCollector;
+
+            var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("ep");
+            var isSet = fido2Session.TryEnableEnterpriseAttestation();
+
+            var shouldSupportEnterpriseAttestation =
+                optionValue == OptionValue.True || optionValue == OptionValue.False;
+            if (shouldSupportEnterpriseAttestation)
             {
-                fido2Session.KeyCollector = LocalKeyCollector;
-
-                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("ep");
-                bool isSet = fido2Session.TryEnableEnterpriseAttestation();
-
-                bool shouldSupportEnterpriseAttestation = optionValue == OptionValue.True || optionValue == OptionValue.False;
-                if (shouldSupportEnterpriseAttestation)
-                {
-                    Assert.True(isSet);
-                }
-                else
-                {
-                    Assert.False(isSet);
-                }
-
+                Assert.True(isSet);
+            }
+            else
+            {
+                Assert.False(isSet);
             }
         }
+    }
 
-        [Fact]
-        public void ToggleAlwaysUv_Succeeds()
+    [Fact]
+    public void ToggleAlwaysUv_Succeeds()
+    {
+        using (var fido2Session = new Fido2Session(Device))
         {
-            using (var fido2Session = new Fido2Session(Device))
+            fido2Session.KeyCollector = LocalKeyCollector;
+
+            var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("alwaysUv");
+
+            var expectedResult = false;
+            var expectedValue = optionValue switch
             {
-                fido2Session.KeyCollector = LocalKeyCollector;
-
-                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("alwaysUv");
-
-                bool expectedResult = false;
-                OptionValue expectedValue = optionValue switch
-                {
-                    OptionValue.True => OptionValue.False,
-                    OptionValue.False => OptionValue.True,
-                    _ => OptionValue.NotSupported,
-                };
-
-                if (expectedValue != OptionValue.NotSupported)
-                {
-                    expectedResult = true;
-                }
-
-                bool isSet = fido2Session.TryToggleAlwaysUv();
-
-                optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("alwaysUv");
-                Assert.Equal(expectedResult, isSet);
-                Assert.Equal(expectedValue, optionValue);
-            }
-        }
-
-        [Fact]
-        public void SetMinPinLen_Succeeds()
-        {
-            using (var fido2Session = new Fido2Session(Device))
-            {
-                fido2Session.KeyCollector = LocalKeyCollector;
-
-                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
-
-                bool expectedResult = optionValue == OptionValue.True;
-
-                bool isSet = fido2Session.TrySetPinConfig(6);
-                Assert.Equal(expectedResult, isSet);
-                if (isSet)
-                {
-                    _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
-                    Assert.True(fido2Session.AuthenticatorInfo.ForcePinChange!);
-                }
-            }
-        }
-
-        [Fact]
-        public void ForceChangePin_Succeeds()
-        {
-            using (var fido2Session = new Fido2Session(Device))
-            {
-                fido2Session.KeyCollector = LocalKeyCollector;
-
-                _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange); // Does not work on my USBAKeychain 5.4.3 (Assert.NotNull() Failure: Value of type 'Nullable<bool>' does not have a value)
-                Assert.False(fido2Session.AuthenticatorInfo.ForcePinChange!);
-
-                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
-
-                bool expectedResult = optionValue == OptionValue.True;
-
-                bool isSet = fido2Session.TrySetPinConfig(null, null, true);
-                Assert.Equal(expectedResult, isSet);
-                if (isSet)
-                {
-                    _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
-                    Assert.True(fido2Session.AuthenticatorInfo.ForcePinChange!);
-                }
-            }
-        }
-
-        [Fact]
-        public void SetRpId_Succeeds()
-        {
-            using (var fido2Session = new Fido2Session(Device))
-            {
-                fido2Session.KeyCollector = LocalKeyCollector;
-
-                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
-                bool isSupported = fido2Session.AuthenticatorInfo.IsExtensionSupported("minPinLength");
-
-                bool expectedResult = optionValue == OptionValue.True && isSupported;
-
-                var rpList = new List<string>(1)
-                {
-                    "rpidOne"
-                };
-                bool isSet = fido2Session.TrySetPinConfig(null, rpList);
-                Assert.Equal(expectedResult, isSet);
-
-                if (isSet)
-                {
-                    isSet = VerifyExtension(fido2Session);
-                    Assert.True(isSet);
-                }
-            }
-        }
-
-        private bool VerifyExtension(Fido2Session fido2Session)
-        {
-            byte[] clientDataHash = {
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
-            };
-            var rp = new RelyingParty("rpidOne");
-            var user1 = new UserEntity(new byte[] { 1, 2, 3, 4 })
-            {
-                Name = "TestUser",
-                DisplayName = "Test User"
+                OptionValue.True => OptionValue.False,
+                OptionValue.False => OptionValue.True,
+                _ => OptionValue.NotSupported
             };
 
-            var mcParams = new MakeCredentialParameters(rp, user1)
+            if (expectedValue != OptionValue.NotSupported)
             {
-                ClientDataHash = clientDataHash
-            };
-            mcParams.AddOption(AuthenticatorOptions.rk, true);
-            mcParams.AddExtension("minPinLength", new byte[] { 0xF5 });
-
-            MakeCredentialData mcData = fido2Session.MakeCredential(mcParams);
-
-            if (mcData.AuthenticatorData.Extensions is null)
-            {
-                return false;
+                expectedResult = true;
             }
 
-            bool isValid = mcData.AuthenticatorData.Extensions!.TryGetValue("minPinLength", out byte[]? eValue);
-            if (isValid)
-            {
-                isValid = eValue![0] == 4;
-            }
+            var isSet = fido2Session.TryToggleAlwaysUv();
 
-            return isValid;
+            optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("alwaysUv");
+            Assert.Equal(expectedResult, isSet);
+            Assert.Equal(expectedValue, optionValue);
         }
+    }
 
-        private bool LocalKeyCollector(KeyEntryData arg)
+    [Fact]
+    public void SetMinPinLen_Succeeds()
+    {
+        using (var fido2Session = new Fido2Session(Device))
         {
-            switch (arg.Request)
-            {
-                case KeyEntryRequest.VerifyFido2Pin:
-                    arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
-                    break;
-                case KeyEntryRequest.VerifyFido2Uv:
-                    Console.WriteLine("Fingerprint requested.");
-                    break;
-                case KeyEntryRequest.TouchRequest:
-                    Console.WriteLine("Touch requested.");
-                    break;
-                case KeyEntryRequest.Release:
-                    break;
-                default:
-                    throw new NotSupportedException("Not supported by this test");
-            }
+            fido2Session.KeyCollector = LocalKeyCollector;
 
-            return true;
+            var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
+
+            var expectedResult = optionValue == OptionValue.True;
+
+            var isSet = fido2Session.TrySetPinConfig(6);
+            Assert.Equal(expectedResult, isSet);
+            if (isSet)
+            {
+                _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
+                Assert.True(fido2Session.AuthenticatorInfo.ForcePinChange!);
+            }
         }
+    }
+
+    [Fact]
+    public void ForceChangePin_Succeeds()
+    {
+        using (var fido2Session = new Fido2Session(Device))
+        {
+            fido2Session.KeyCollector = LocalKeyCollector;
+
+            _ = Assert.NotNull(fido2Session.AuthenticatorInfo
+                .ForcePinChange); // Does not work on my USBAKeychain 5.4.3 (Assert.NotNull() Failure: Value of type 'Nullable<bool>' does not have a value)
+            Assert.False(fido2Session.AuthenticatorInfo.ForcePinChange!);
+
+            var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
+
+            var expectedResult = optionValue == OptionValue.True;
+
+            var isSet = fido2Session.TrySetPinConfig(null, null, true);
+            Assert.Equal(expectedResult, isSet);
+            if (isSet)
+            {
+                _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
+                Assert.True(fido2Session.AuthenticatorInfo.ForcePinChange!);
+            }
+        }
+    }
+
+    [Fact]
+    public void SetRpId_Succeeds()
+    {
+        using (var fido2Session = new Fido2Session(Device))
+        {
+            fido2Session.KeyCollector = LocalKeyCollector;
+
+            var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
+            var isSupported = fido2Session.AuthenticatorInfo.IsExtensionSupported("minPinLength");
+
+            var expectedResult = optionValue == OptionValue.True && isSupported;
+
+            var rpList = new List<string>(1)
+            {
+                "rpidOne"
+            };
+            var isSet = fido2Session.TrySetPinConfig(null, rpList);
+            Assert.Equal(expectedResult, isSet);
+
+            if (isSet)
+            {
+                isSet = VerifyExtension(fido2Session);
+                Assert.True(isSet);
+            }
+        }
+    }
+
+    private bool VerifyExtension(
+        Fido2Session fido2Session)
+    {
+        byte[] clientDataHash =
+        {
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
+        };
+        var rp = new RelyingParty("rpidOne");
+        var user1 = new UserEntity(new byte[] { 1, 2, 3, 4 })
+        {
+            Name = "TestUser",
+            DisplayName = "Test User"
+        };
+
+        var mcParams = new MakeCredentialParameters(rp, user1)
+        {
+            ClientDataHash = clientDataHash
+        };
+        mcParams.AddOption(AuthenticatorOptions.rk, true);
+        mcParams.AddExtension("minPinLength", new byte[] { 0xF5 });
+
+        var mcData = fido2Session.MakeCredential(mcParams);
+
+        if (mcData.AuthenticatorData.Extensions is null)
+        {
+            return false;
+        }
+
+        var isValid = mcData.AuthenticatorData.Extensions!.TryGetValue("minPinLength", out var eValue);
+        if (isValid)
+        {
+            isValid = eValue![0] == 4;
+        }
+
+        return isValid;
+    }
+
+    private bool LocalKeyCollector(
+        KeyEntryData arg)
+    {
+        switch (arg.Request)
+        {
+            case KeyEntryRequest.VerifyFido2Pin:
+                arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
+                break;
+            case KeyEntryRequest.VerifyFido2Uv:
+                Console.WriteLine("Fingerprint requested.");
+                break;
+            case KeyEntryRequest.TouchRequest:
+                Console.WriteLine("Touch requested.");
+                break;
+            case KeyEntryRequest.Release:
+                break;
+            default:
+                throw new NotSupportedException("Not supported by this test");
+        }
+
+        return true;
     }
 }

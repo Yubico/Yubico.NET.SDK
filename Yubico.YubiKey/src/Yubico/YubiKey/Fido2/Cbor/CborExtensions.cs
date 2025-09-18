@@ -12,49 +12,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Formats.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Cbor;
 
 internal static class CborExtensions
 {
-    public readonly static byte[] CborTrue = [CborHelpers.True];
-    public readonly static byte[] CborFalse = [CborHelpers.False];
-        
-    public static byte[] ToCbor(this bool value) => value ? CborTrue : CborFalse;
+    public static readonly byte[] CborTrue = [CborHelpers.True];
+    public static readonly byte[] CborFalse = [CborHelpers.False];
+
+    public static byte[] ToCbor(this bool value) =>
+        value
+            ? CborTrue
+            : CborFalse;
 
     public static byte[] ToCbor(this string value)
     {
-        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
         cbor.WriteTextString(value);
         return cbor.Encode();
     }
 
     public static byte[] ToCbor(this int value)
     {
-        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
         cbor.WriteInt32(value);
         return cbor.Encode();
     }
-        
+
     public static byte[] ToCbor(this byte value)
     {
-        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
         cbor.WriteInt32(value);
         return cbor.Encode();
     }
 
     public static byte[] ToCbor(this long value)
     {
-        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
         cbor.WriteInt64(value);
         return cbor.Encode();
     }
 
     public static byte[] ToCbor(this byte[] value)
     {
-        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+        var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
         cbor.WriteByteString(value);
         return cbor.Encode();
     }

@@ -14,47 +14,47 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+/// <summary>
+///     Gets detailed information about the YubiKey and its current configuration.
+/// </summary>
+/// <remarks>
+///     This class has a corresponding partner class <see cref="GetPagedDeviceInfoResponse" />
+/// </remarks>
+public class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
 {
     /// <summary>
-    /// Gets detailed information about the YubiKey and its current configuration.
+    ///     Initializes a new instance of the <see cref="GetPagedDeviceInfoCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// This class has a corresponding partner class <see cref="GetPagedDeviceInfoResponse"/>
-    /// </remarks>
-    public class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
+    public GetPagedDeviceInfoCommand()
     {
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Otp
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
+    }
 
-        /// <inheritdoc />
-        public byte Page { get; set; }
+    #region IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse> Members
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetPagedDeviceInfoCommand"/> class.
-        /// </summary>
-        public GetPagedDeviceInfoCommand()
-        {
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.Otp
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
-        }
+    /// <inheritdoc />
+    public byte Page { get; set; }
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = OtpConstants.RequestSlotInstruction,
             P1 = OtpConstants.GetDeviceInfoSlot,
             Data = new[] { Page }
         };
 
-        /// <inheritdoc />
-        public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetPagedDeviceInfoResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
 
-
+    #endregion
 }

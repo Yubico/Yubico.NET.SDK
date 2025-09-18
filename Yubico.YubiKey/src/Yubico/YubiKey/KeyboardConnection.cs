@@ -14,63 +14,67 @@
 
 using System;
 using Yubico.Core.Devices.Hid;
+using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Pipelines;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+internal class KeyboardConnection : IYubiKeyConnection
 {
-    internal class KeyboardConnection : IYubiKeyConnection
+    private readonly IApduTransform _apduPipeline;
+    private readonly IHidConnection _hidConnection;
+    private readonly KeyboardTransform _kb;
+    private bool _disposedValue;
+
+    public KeyboardConnection(IHidDevice hidDevice)
     {
-        private readonly IApduTransform _apduPipeline;
-        private readonly IHidConnection _hidConnection;
-        private readonly KeyboardTransform _kb;
-        private bool _disposedValue;
+        _hidConnection = hidDevice.ConnectToFeatureReports();
 
-        public KeyboardConnection(IHidDevice hidDevice)
+        _kb = new KeyboardTransform(_hidConnection);
+        _apduPipeline = new OtpErrorTransform(_kb);
+
+        _apduPipeline.Setup();
+    }
+
+    #region IYubiKeyConnection Members
+
+    public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
+        where TResponse : IYubiKeyResponse
+    {
+        var commandApdu = yubiKeyCommand.CreateCommandApdu();
+        var responseApdu = _apduPipeline.Invoke(commandApdu, yubiKeyCommand.GetType(), typeof(TResponse));
+
+        return yubiKeyCommand.CreateResponseForApdu(responseApdu);
+    }
+
+    public ISelectApplicationData? SelectApplicationData { get; set; }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    public event EventHandler<EventArgs> TouchEvent
+    {
+        add => _kb.TouchPending += value;
+        remove => _kb.TouchPending -= value;
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
         {
-            _hidConnection = hidDevice.ConnectToFeatureReports();
-
-            _kb = new KeyboardTransform(_hidConnection);
-            _apduPipeline = new OtpErrorTransform(_kb);
-
-            _apduPipeline.Setup();
-        }
-
-        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
-            where TResponse : IYubiKeyResponse
-        {
-            var commandApdu = yubiKeyCommand.CreateCommandApdu();
-            var responseApdu = _apduPipeline.Invoke(commandApdu, yubiKeyCommand.GetType(), typeof(TResponse));
-
-            return yubiKeyCommand.CreateResponseForApdu(responseApdu);
-        }
-
-        public event EventHandler<EventArgs> TouchEvent
-        {
-            add => _kb.TouchPending += value;
-            remove => _kb.TouchPending -= value;
-        }
-
-        public InterIndustry.Commands.ISelectApplicationData? SelectApplicationData { get; set; }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
+            if (disposing)
             {
-                if (disposing)
-                {
-                    _apduPipeline.Cleanup();
-                    _hidConnection.Dispose();
-                }
-
-                _disposedValue = true;
+                _apduPipeline.Cleanup();
+                _hidConnection.Dispose();
             }
-        }
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            System.GC.SuppressFinalize(this);
+            _disposedValue = true;
         }
     }
 }

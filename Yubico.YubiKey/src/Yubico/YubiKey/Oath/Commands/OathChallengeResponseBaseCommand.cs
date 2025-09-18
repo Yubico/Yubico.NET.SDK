@@ -17,82 +17,80 @@ using System.Buffers.Binary;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+/// <summary>
+///     Provides helper methods that are used to calculate challenge-response for the commands:
+///     SetPassword, Validate, CalculateCredential, CalculateAllCredentials.
+/// </summary>
+public abstract class OathChallengeResponseBaseCommand
 {
     /// <summary>
-    /// Provides helper methods that are used to calculate challenge-response for the commands: 
-    /// SetPassword, Validate, CalculateCredential, CalculateAllCredentials.
+    ///     Generates 8 bytes challenge that can be used for TOTP credential calculation.
     /// </summary>
-    public abstract class OathChallengeResponseBaseCommand
+    /// <returns>
+    ///     8 bytes challenge.
+    /// </returns>
+    protected static byte[] GenerateTotpChallenge(CredentialPeriod? period)
     {
-        /// <summary>
-        /// Generates 8 bytes challenge that can be used for TOTP credential calculation.
-        /// </summary>
-        /// <returns>
-        /// 8 bytes challenge.
-        /// </returns>
-        protected static byte[] GenerateTotpChallenge(CredentialPeriod? period)
+        period ??= CredentialPeriod.Period30;
+
+        ulong timePeriod = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (uint)period;
+        byte[] bytes = new byte[8];
+        BinaryPrimitives.WriteUInt64BigEndian(bytes, timePeriod);
+
+        return bytes;
+    }
+
+    [Obsolete("This method is obsolete. Call GenerateRandomChallenge instead.")]
+    protected static byte[] GenerateChallenge() => GenerateRandomChallenge();
+
+    /// <summary>
+    ///     Generates random 8 bytes that can be used as challenge for authentication.
+    /// </summary>
+    /// <returns>
+    ///     Random 8 bytes.
+    /// </returns>
+    protected static byte[] GenerateRandomChallenge()
+    {
+        using var randomObject = CryptographyProviders.RngCreator();
+
+        byte[] randomBytes = new byte[8];
+        randomObject.GetBytes(randomBytes);
+
+        return randomBytes;
+    }
+
+    /// <summary>
+    ///     Passes a user-supplied UTF-8 encoded password through 1000 rounds of PBKDF2
+    ///     with the salt value (the deviceID returned in SelectResponse).
+    /// </summary>
+    /// <returns>
+    ///     16 bytes secret for authentication.
+    /// </returns>
+    protected static byte[] CalculateSecret(ReadOnlyMemory<byte> password, ReadOnlyMemory<byte> salt)
+    {
+        #pragma warning disable CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
+        using (var pbkBytes = new Rfc2898DeriveBytes(password.ToArray(), salt.ToArray(), 1000))
         {
-            period ??= CredentialPeriod.Period30;
-
-            ulong timePeriod = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (uint)period;
-            byte[] bytes = new byte[8];
-            BinaryPrimitives.WriteUInt64BigEndian(bytes, timePeriod);
-
-            return bytes;
+            return pbkBytes.GetBytes(16);
         }
+        #pragma warning restore CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
+    }
 
-        [Obsolete("This method is obsolete. Call GenerateRandomChallenge instead.")]
-        protected static byte[] GenerateChallenge() => GenerateRandomChallenge();
-
-        /// <summary>
-        /// Generates random 8 bytes that can be used as challenge for authentication.
-        /// </summary>
-        /// <returns>
-        /// Random 8 bytes.
-        /// </returns>
-        protected static byte[] GenerateRandomChallenge()
+    /// <summary>
+    ///     Calculates HMAC using SHA1 as a hash function.
+    /// </summary>
+    /// <returns>
+    ///     HMAC result.
+    /// </returns>
+    protected static byte[] CalculateResponse(ReadOnlyMemory<byte> secret, ReadOnlyMemory<byte> message)
+    {
+        #pragma warning disable CA5350 // Do Not Use Weak Cryptographic Algorithms
+        using (var hmacSha1 = new HMACSHA1(secret.ToArray()))
+            #pragma warning restore CA5350 // Do Not Use Weak Cryptographic Algorithms
         {
-            using var randomObject = CryptographyProviders.RngCreator();
-
-            byte[] randomBytes = new byte[8];
-            randomObject.GetBytes(randomBytes);
-
-            return randomBytes;
+            return hmacSha1.ComputeHash(message.ToArray());
         }
-
-        /// <summary>
-        /// Passes a user-supplied UTF-8 encoded password through 1000 rounds of PBKDF2
-        /// with the salt value (the deviceID returned in SelectResponse).
-        /// </summary>
-        /// <returns>
-        /// 16 bytes secret for authentication.
-        /// </returns>
-        protected static byte[] CalculateSecret(ReadOnlyMemory<byte> password, ReadOnlyMemory<byte> salt)
-        {
-#pragma warning disable CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
-            using (var pbkBytes = new Rfc2898DeriveBytes(password.ToArray(), salt.ToArray(), 1000))
-            {
-                return pbkBytes.GetBytes(16);
-            }
-#pragma warning restore CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
-        }
-
-        /// <summary>
-        /// Calculates HMAC using SHA1 as a hash function.
-        /// </summary>
-        /// <returns>
-        /// HMAC result.
-        /// </returns>
-        protected static byte[] CalculateResponse(ReadOnlyMemory<byte> secret, ReadOnlyMemory<byte> message)
-        {
-#pragma warning disable CA5350 // Do Not Use Weak Cryptographic Algorithms
-            using (var hmacSha1 = new HMACSHA1(secret.ToArray()))
-#pragma warning restore CA5350 // Do Not Use Weak Cryptographic Algorithms
-            {
-                return hmacSha1.ComputeHash(message.ToArray());
-            }
-        }
-
     }
 }

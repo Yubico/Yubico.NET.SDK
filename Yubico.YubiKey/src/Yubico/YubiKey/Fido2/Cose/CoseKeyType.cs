@@ -12,37 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Fido2.Cose
+namespace Yubico.YubiKey.Fido2.Cose;
+
+/// <summary>
+///     An enumeration of the key families supported by COSE.
+///     <remarks>
+///         This enumeration is based on the IANA COSE Key Common Parameters registry.
+///         <para>
+///             https://www.iana.org/assignments/cose/cose.xhtml#key-type
+///         </para>
+///     </remarks>
+/// </summary>
+public enum CoseKeyType
 {
     /// <summary>
-    /// An enumeration of the key families supported by COSE.
-    /// <remarks>
-    /// This enumeration is based on the IANA COSE Key Common Parameters registry.
-    /// <para>
-    /// https://www.iana.org/assignments/cose/cose.xhtml#key-type
-    /// </para>
-    /// </remarks>
+    ///     The type could not be determined.
     /// </summary>
-    public enum CoseKeyType
-    {
-        /// <summary>
-        /// The type could not be determined.
-        /// </summary>
-        Unknown = 0,
+    Unknown = 0,
 
-        /// <summary>
-        /// Octet Key Pair
-        /// </summary>
-        Okp = 1,
+    /// <summary>
+    ///     Octet Key Pair
+    /// </summary>
+    Okp = 1,
 
-        /// <summary>
-        /// Elliptic Curve keys with x- and y-coordinates
-        /// </summary>
-        Ec2 = 2,
+    /// <summary>
+    ///     Elliptic Curve keys with x- and y-coordinates
+    /// </summary>
+    Ec2 = 2,
 
-        /// <summary>
-        /// Symmetric keys
-        /// </summary>
-        Symmetric = 4,
-    }
+    /// <summary>
+    ///     Symmetric keys
+    /// </summary>
+    Symmetric = 4
 }

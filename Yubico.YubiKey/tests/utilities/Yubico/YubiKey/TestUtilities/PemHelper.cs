@@ -19,19 +19,25 @@ namespace Yubico.YubiKey.TestUtilities;
 public class PemHelper
 {
     /// <summary>
-    /// Returns the Base64-encoded data without PEM headers and footers.
+    ///     Returns the Base64-encoded data without PEM headers and footers.
     /// </summary>
     /// <returns>Base64 string of the cryptographic data.</returns>
-    public static string AsBase64String(string pemString) => StripPemHeaderFooter(pemString);
+    public static string AsBase64String(
+        string pemString)
+    {
+        return StripPemHeaderFooter(pemString);
+    }
 
-    public static byte[] GetBytesFromPem(string pemData)
+    public static byte[] GetBytesFromPem(
+        string pemData)
     {
         var withoutNewlines = pemData.Replace("\n", "").Trim();
         var base64 = StripPemHeaderFooter(withoutNewlines);
         return Convert.FromBase64String(base64);
     }
 
-    private static string StripPemHeaderFooter(string pemData)
+    private static string StripPemHeaderFooter(
+        string pemData)
     {
         var base64 = pemData
             .Replace("-----BEGIN PUBLIC KEY-----", "")

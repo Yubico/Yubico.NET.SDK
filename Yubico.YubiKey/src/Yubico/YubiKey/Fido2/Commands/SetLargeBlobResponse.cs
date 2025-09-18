@@ -14,25 +14,23 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     The response to the <see cref="GetLargeBlobCommand" /> command, returning
+///     the large blob.
+/// </summary>
+public sealed class SetLargeBlobResponse : Fido2Response, IYubiKeyResponse
 {
     /// <summary>
-    /// The response to the <see cref="GetLargeBlobCommand"/> command, returning
-    /// the large blob.
+    ///     Constructs a <c>SetLargeBlobResponse</c> instance based on a ResponseApdu
+    ///     received from the YubiKey.
     /// </summary>
-    public sealed class SetLargeBlobResponse : Fido2Response, IYubiKeyResponse
+    /// <param name="responseApdu">
+    ///     The ResponseApdu returned by the YubiKey.
+    /// </param>
+    public SetLargeBlobResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        /// <summary>
-        /// Constructs a <c>SetLargeBlobResponse</c> instance based on a ResponseApdu
-        /// received from the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
-        /// </param>
-        public SetLargeBlobResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-        }
     }
 }
-

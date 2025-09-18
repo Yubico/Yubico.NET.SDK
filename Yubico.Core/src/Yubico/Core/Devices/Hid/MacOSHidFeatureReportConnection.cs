@@ -19,211 +19,214 @@ using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 using static Yubico.PlatformInterop.NativeMethods;
 
-namespace Yubico.Core.Devices.Hid
+namespace Yubico.Core.Devices.Hid;
+
+/// <summary>
+///     macOS implementation of the keyboard feature report connection.
+/// </summary>
+internal sealed class MacOSHidFeatureReportConnection : IHidConnection
 {
+    private readonly MacOSHidDevice _device;
+    private readonly long _entryId;
+    private readonly ILogger _log = Log.GetLogger<MacOSHidFeatureReportConnection>();
+    private IntPtr _deviceHandle;
+
+    private bool _isDisposed;
+
     /// <summary>
-    /// macOS implementation of the keyboard feature report connection.
+    ///     Constructs an instance of the MacOSHidFeatureReportConnection class.
     /// </summary>
-    internal sealed class MacOSHidFeatureReportConnection : IHidConnection
+    /// <param name="device">
+    ///     The device object from which this connection originates.
+    /// </param>
+    /// <param name="entryId">
+    ///     The IOKit registry entry identifier representing the device we're trying to connect to.
+    /// </param>
+    public MacOSHidFeatureReportConnection(MacOSHidDevice device, long entryId)
     {
-        private readonly MacOSHidDevice _device;
-        private readonly long _entryId;
-        private IntPtr _deviceHandle;
-        private readonly ILogger _log = Logging.Log.GetLogger<MacOSHidFeatureReportConnection>();
+        _log.LogInformation("Creating a new feature report connection for device [{EntryId}]", entryId);
 
-        private bool _isDisposed;
+        _device = device;
+        _entryId = entryId;
+        SetupConnection();
 
-        /// <summary>
-        /// The correct size, in bytes, for the data buffer to be transmitted to the keyboard.
-        /// </summary>
-        public int InputReportSize { get; }
+        InputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
+        OutputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
 
-        /// <summary>
-        /// The correct size, in bytes, for the data buffer to be received from the keyboard.
-        /// </summary>
-        public int OutputReportSize { get; }
+        _log.LogInformation(
+            "InputReportSize = {InputReportSize}; OutputReportSize = {OutputReportSize}",
+            InputReportSize,
+            OutputReportSize);
+    }
 
-        /// <summary>
-        /// Constructs an instance of the MacOSHidFeatureReportConnection class.
-        /// </summary>
-        /// <param name="device">
-        /// The device object from which this connection originates.
-        /// </param>
-        /// <param name="entryId">
-        /// The IOKit registry entry identifier representing the device we're trying to connect to.
-        /// </param>
-        public MacOSHidFeatureReportConnection(MacOSHidDevice device, long entryId)
+    #region IHidConnection Members
+
+    /// <summary>
+    ///     The correct size, in bytes, for the data buffer to be transmitted to the keyboard.
+    /// </summary>
+    public int InputReportSize { get; }
+
+    /// <summary>
+    ///     The correct size, in bytes, for the data buffer to be received from the keyboard.
+    /// </summary>
+    public int OutputReportSize { get; }
+
+    /// <summary>
+    ///     Reads a report from the keyboard interface.
+    /// </summary>
+    /// <returns>
+    ///     A buffer that contains the data received from the keyboard.
+    /// </returns>
+    /// <exception cref="PlatformApiException">
+    ///     Thrown when the underlying IOKit framework reports an error. See the exception message for details.
+    /// </exception>
+    public byte[] GetReport()
+    {
+        const int featureReportSize = 8;
+
+        byte[] buffer = new byte[featureReportSize];
+        long bufferSize = buffer.Length;
+
+        int result = IOHIDDeviceGetReport(
+            _deviceHandle,
+            IOKitHidConstants.kIOHidReportTypeFeature,
+            0,
+            buffer,
+            ref bufferSize);
+
+        _device.LogDeviceAccessTime();
+
+        _log.IOKitApiCall(nameof(IOHIDDeviceGetReport), (kern_return_t)result);
+
+        if (result != 0)
         {
-            _log.LogInformation("Creating a new feature report connection for device [{EntryId}]", entryId);
-
-            _device = device;
-            _entryId = entryId;
-            SetupConnection();
-
-            InputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
-            OutputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
-
-            _log.LogInformation(
-                "InputReportSize = {InputReportSize}; OutputReportSize = {OutputReportSize}",
-                InputReportSize,
-                OutputReportSize);
+            throw new PlatformApiException(
+                nameof(IOHIDDeviceGetReport),
+                result,
+                ExceptionMessages.IOKitOperationFailed);
         }
 
-        private void SetupConnection()
+        _log.SensitiveLogInformation(
+            "GetReport returned buffer: {Report}",
+            Hex.BytesToHex(buffer));
+
+        return buffer;
+    }
+
+    /// <summary>
+    ///     Sends a buffer to the keyboard device.
+    /// </summary>
+    /// <param name="report">
+    ///     The buffer to send.
+    /// </param>
+    /// <exception cref="PlatformApiException">
+    ///     Thrown when the underlying IOKit framework reports an error. See the exception message for details.
+    /// </exception>
+    public void SetReport(byte[] report)
+    {
+        _log.SensitiveLogInformation(
+            "Calling SetReport with data: {Report}",
+            Hex.BytesToHex(report));
+
+        int result = IOHIDDeviceSetReport(
+            _deviceHandle,
+            IOKitHidConstants.kIOHidReportTypeFeature,
+            0,
+            report,
+            report.Length);
+
+        _device.LogDeviceAccessTime();
+
+        _log.IOKitApiCall(nameof(IOHIDDeviceSetReport), (kern_return_t)result);
+
+        if (result != 0)
         {
-            int deviceEntry = 0;
-            try
-            {
-                IntPtr matchingDictionary = IORegistryEntryIDMatching((ulong)_entryId);
-                deviceEntry = IOServiceGetMatchingService(0, matchingDictionary);
-
-                if (deviceEntry == 0)
-                {
-                    _log.LogError("Failed to find a matching device entry in the IO registry.");
-                    throw new PlatformApiException(ExceptionMessages.IOKitRegistryEntryNotFound);
-                }
-
-                _deviceHandle = IOHIDDeviceCreate(IntPtr.Zero, deviceEntry);
-
-                if (_deviceHandle == IntPtr.Zero)
-                {
-                    _log.LogError("Failed to open the device handle.");
-                    throw new PlatformApiException(ExceptionMessages.IOKitCannotOpenDevice);
-                }
-
-                int result = IOHIDDeviceOpen(_deviceHandle, 0);
-                _log.IOKitApiCall(nameof(IOHIDDeviceOpen), (kern_return_t)result);
-
-                if (result != 0)
-                {
-                    throw new PlatformApiException(
-                        nameof(IOHIDDeviceOpen),
-                        result,
-                        ExceptionMessages.IOKitCannotOpenDevice);
-                }
-            }
-            finally
-            {
-                if (deviceEntry != 0)
-                {
-                    _log.LogDebug("Releasing deviceEntry object.");
-                    _ = IOObjectRelease(deviceEntry);
-                }
-            }
+            throw new PlatformApiException(
+                nameof(IOHIDDeviceSetReport),
+                result,
+                ExceptionMessages.IOKitOperationFailed);
         }
+    }
 
-        /// <summary>
-        /// Reads a report from the keyboard interface.
-        /// </summary>
-        /// <returns>
-        /// A buffer that contains the data received from the keyboard.
-        /// </returns>
-        /// <exception cref="PlatformApiException">
-        /// Thrown when the underlying IOKit framework reports an error. See the exception message for details.
-        /// </exception>
-        public byte[] GetReport()
+    /// <summary>
+    ///     Disposes this object and all of the underlying platform handles for this connection.
+    /// </summary>
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    private void SetupConnection()
+    {
+        int deviceEntry = 0;
+        try
         {
-            const int featureReportSize = 8;
+            IntPtr matchingDictionary = IORegistryEntryIDMatching((ulong)_entryId);
+            deviceEntry = IOServiceGetMatchingService(0, matchingDictionary);
 
-            byte[] buffer = new byte[featureReportSize];
-            long bufferSize = buffer.Length;
+            if (deviceEntry == 0)
+            {
+                _log.LogError("Failed to find a matching device entry in the IO registry.");
+                throw new PlatformApiException(ExceptionMessages.IOKitRegistryEntryNotFound);
+            }
 
-            int result = IOHIDDeviceGetReport(
-                _deviceHandle,
-                IOKitHidConstants.kIOHidReportTypeFeature,
-                0,
-               buffer,
-               ref bufferSize);
+            _deviceHandle = IOHIDDeviceCreate(IntPtr.Zero, deviceEntry);
 
-            _device.LogDeviceAccessTime();
+            if (_deviceHandle == IntPtr.Zero)
+            {
+                _log.LogError("Failed to open the device handle.");
+                throw new PlatformApiException(ExceptionMessages.IOKitCannotOpenDevice);
+            }
 
-            _log.IOKitApiCall(nameof(IOHIDDeviceGetReport), (kern_return_t)result);
+            int result = IOHIDDeviceOpen(_deviceHandle, 0);
+            _log.IOKitApiCall(nameof(IOHIDDeviceOpen), (kern_return_t)result);
 
             if (result != 0)
             {
                 throw new PlatformApiException(
-                    nameof(IOHIDDeviceGetReport),
+                    nameof(IOHIDDeviceOpen),
                     result,
-                    ExceptionMessages.IOKitOperationFailed);
+                    ExceptionMessages.IOKitCannotOpenDevice);
             }
-
-            _log.SensitiveLogInformation(
-                "GetReport returned buffer: {Report}",
-                Hex.BytesToHex(buffer));
-
-            return buffer;
         }
-
-        /// <summary>
-        /// Sends a buffer to the keyboard device.
-        /// </summary>
-        /// <param name="report">
-        /// The buffer to send.
-        /// </param>
-        /// <exception cref="PlatformApiException">
-        /// Thrown when the underlying IOKit framework reports an error. See the exception message for details.
-        /// </exception>
-        public void SetReport(byte[] report)
+        finally
         {
-            _log.SensitiveLogInformation(
-                "Calling SetReport with data: {Report}",
-                Hex.BytesToHex(report));
-
-            int result = IOHIDDeviceSetReport(
-                _deviceHandle,
-                IOKitHidConstants.kIOHidReportTypeFeature,
-                0,
-                report,
-                report.Length);
-
-            _device.LogDeviceAccessTime();
-
-            _log.IOKitApiCall(nameof(IOHIDDeviceSetReport), (kern_return_t)result);
-
-            if (result != 0)
+            if (deviceEntry != 0)
             {
-                throw new PlatformApiException(
-                    nameof(IOHIDDeviceSetReport),
-                    result,
-                    ExceptionMessages.IOKitOperationFailed);
+                _log.LogDebug("Releasing deviceEntry object.");
+                _ = IOObjectRelease(deviceEntry);
             }
         }
+    }
 
-        private void Dispose(bool disposing)
+    private void Dispose(bool disposing)
+    {
+        if (_isDisposed)
         {
-            if (_isDisposed)
-            {
-                return;
-            }
-
-            if (disposing)
-            {
-                // Dispose managed state here
-            }
-
-            if (_deviceHandle != IntPtr.Zero)
-            {
-                _ = IOHIDDeviceClose(_deviceHandle, 0);
-                _deviceHandle = IntPtr.Zero;
-            }
-
-            _isDisposed = true;
+            return;
         }
 
-        ~MacOSHidFeatureReportConnection()
+        if (disposing)
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
+            // Dispose managed state here
         }
 
-        /// <summary>
-        /// Disposes this object and all of the underlying platform handles for this connection.
-        /// </summary>
-        public void Dispose()
+        if (_deviceHandle != IntPtr.Zero)
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            _ = IOHIDDeviceClose(_deviceHandle, 0);
+            _deviceHandle = IntPtr.Zero;
         }
+
+        _isDisposed = true;
+    }
+
+    ~MacOSHidFeatureReportConnection()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: false);
     }
 }

@@ -15,24 +15,23 @@
 using System;
 using System.Security.Cryptography;
 
-namespace Yubico.YubiKey.Cryptography
-{
-    /// <summary>
-    /// Represents the parameters for an Elliptic Curve (EC) private key.
-    /// </summary>
-    /// <remarks>
-    /// This class encapsulates the parameters specific to EC private keys and
-    /// contains the necessary private key data.
-    /// </remarks>
-    [Obsolete("Use ECPrivateKey instead", false)]
-    public sealed class ECPrivateKeyParameters : ECPrivateKey
-    {
-        public ECPrivateKeyParameters(ECParameters parameters) : base(parameters)
-        {
-        }
+namespace Yubico.YubiKey.Cryptography;
 
-        public ECPrivateKeyParameters(ECDsa ecdsaObject) : base(ecdsaObject)
-        {
-        }
+/// <summary>
+///     Represents the parameters for an Elliptic Curve (EC) private key.
+/// </summary>
+/// <remarks>
+///     This class encapsulates the parameters specific to EC private keys and
+///     contains the necessary private key data.
+/// </remarks>
+[Obsolete("Use ECPrivateKey instead", false)]
+public sealed class ECPrivateKeyParameters : ECPrivateKey
+{
+    public ECPrivateKeyParameters(ECParameters parameters) : base(parameters)
+    {
+    }
+
+    public ECPrivateKeyParameters(ECDsa ecdsaObject) : base(ecdsaObject)
+    {
     }
 }

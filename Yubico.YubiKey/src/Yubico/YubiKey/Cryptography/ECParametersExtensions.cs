@@ -15,33 +15,31 @@
 using System.Linq;
 using System.Security.Cryptography;
 
-namespace Yubico.YubiKey.Cryptography
+namespace Yubico.YubiKey.Cryptography;
+
+/// <summary>
+///     Helper extensions for parameter copying
+/// </summary>
+public static class ECParametersExtensions
 {
-
     /// <summary>
-    /// Helper extensions for parameter copying
+    ///     Performs a deep copy of the EC parameters.
     /// </summary>
-    public static class ECParametersExtensions
+    /// <param name="original">The original ECParameters to copy.</param>
+    /// <returns>A new ECParameters with the same values as the original.</returns>
+    public static ECParameters DeepCopy(this ECParameters original)
     {
-        /// <summary>
-        /// Performs a deep copy of the EC parameters.
-        /// </summary>
-        /// <param name="original">The original ECParameters to copy.</param>
-        /// <returns>A new ECParameters with the same values as the original.</returns>
-        public static ECParameters DeepCopy(this ECParameters original)
+        var copy = new ECParameters
         {
-            var copy = new ECParameters
+            Curve = original.Curve,
+            Q = new ECPoint
             {
-                Curve = original.Curve,
-                Q = new ECPoint
-                {
-                    X = original.Q.X?.ToArray(),
-                    Y = original.Q.Y?.ToArray()
-                },
-                D = original.D?.ToArray()
-            };
+                X = original.Q.X?.ToArray(),
+                Y = original.Q.Y?.ToArray()
+            },
+            D = original.D?.ToArray()
+        };
 
-            return copy;
-        }
+        return copy;
     }
 }

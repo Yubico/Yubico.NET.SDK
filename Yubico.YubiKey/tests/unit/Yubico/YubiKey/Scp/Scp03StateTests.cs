@@ -6,139 +6,138 @@ using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Scp.Commands;
 using Yubico.YubiKey.Scp.Helpers;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp;
+
+public class Scp03StateTests
 {
-    public class Scp03StateTests
+    private readonly byte[] ResponseData;
+
+    public Scp03StateTests()
     {
-        readonly byte[] ResponseData;
+        var parent = Substitute.For<IApduTransform>();
+        var keyParams = Scp03KeyParameters.DefaultKey;
+        var hostChallenge = new byte[8];
+        var cardChallenge = new byte[8];
 
-        internal Scp03State State { get; set; }
+        ResponseData = GetFakeResponseApduData(hostChallenge, cardChallenge);
 
-        public Scp03StateTests()
-        {
-            var parent = Substitute.For<IApduTransform>();
-            var keyParams = Scp03KeyParameters.DefaultKey;
-            var hostChallenge = new byte[8];
-            var cardChallenge = new byte[8];
+        parent.Invoke(
+                Arg.Any<CommandApdu>(),
+                typeof(InitializeUpdateCommand),
+                typeof(InitializeUpdateResponse))
+            .Returns(new ResponseApdu(ResponseData));
 
-            ResponseData = GetFakeResponseApduData(hostChallenge, cardChallenge);
+        parent.Invoke(
+                Arg.Any<CommandApdu>(),
+                typeof(ExternalAuthenticateCommand),
+                typeof(ExternalAuthenticateResponse))
+            .Returns(new ResponseApdu(ResponseData));
 
-            parent.Invoke(
-                    Arg.Any<CommandApdu>(),
-                    typeof(InitializeUpdateCommand),
-                    typeof(InitializeUpdateResponse))
-                .Returns(new ResponseApdu(ResponseData));
+        // Act
+        State = Scp03State.CreateScpState(parent, keyParams, hostChallenge);
+    }
 
-            parent.Invoke(
-                    Arg.Any<CommandApdu>(),
-                    typeof(ExternalAuthenticateCommand),
-                    typeof(ExternalAuthenticateResponse))
-                .Returns(new ResponseApdu(ResponseData));
+    internal Scp03State State { get; set; }
 
-            // Act
-            State = Scp03State.CreateScpState(parent, keyParams, hostChallenge);
-        }
+    [Fact]
+    public void CreateScpState_ValidParameters_InitializesCorrectly()
+    {
+        // Arrange
+        var parent = Substitute.For<IApduTransform>();
+        var keyParams = Scp03KeyParameters.DefaultKey;
+        var hostChallenge = new byte[8];
+        var cardChallenge = new byte[8];
 
-        [Fact]
-        public void CreateScpState_ValidParameters_InitializesCorrectly()
-        {
-            // Arrange
-            var parent = Substitute.For<IApduTransform>();
-            var keyParams = Scp03KeyParameters.DefaultKey;
-            var hostChallenge = new byte[8];
-            var cardChallenge = new byte[8];
+        var responseApduData = GetFakeResponseApduData(hostChallenge, cardChallenge);
 
-            var responseApduData = GetFakeResponseApduData(hostChallenge, cardChallenge);
+        parent.Invoke(
+                Arg.Any<CommandApdu>(),
+                typeof(InitializeUpdateCommand),
+                typeof(InitializeUpdateResponse))
+            .Returns(new ResponseApdu(responseApduData));
 
-            parent.Invoke(
-                    Arg.Any<CommandApdu>(),
-                    typeof(InitializeUpdateCommand),
-                    typeof(InitializeUpdateResponse))
-                .Returns(new ResponseApdu(responseApduData));
+        parent.Invoke(
+                Arg.Any<CommandApdu>(),
+                typeof(ExternalAuthenticateCommand),
+                typeof(ExternalAuthenticateResponse))
+            .Returns(new ResponseApdu(responseApduData));
 
-            parent.Invoke(
-                    Arg.Any<CommandApdu>(),
-                    typeof(ExternalAuthenticateCommand),
-                    typeof(ExternalAuthenticateResponse))
-                .Returns(new ResponseApdu(responseApduData));
+        // Act
+        var state = Scp03State.CreateScpState(parent, keyParams, hostChallenge);
 
-            // Act
-            var state = Scp03State.CreateScpState(parent, keyParams, hostChallenge);
+        // Assert
+        Assert.NotNull(state);
+        Assert.NotNull(state.GetDataEncryptor());
+    }
 
-            // Assert
-            Assert.NotNull(state);
-            Assert.NotNull(state.GetDataEncryptor());
-        }
+    [Fact]
+    public void CreateScpState_NullPipeline_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var keyParams = Scp03KeyParameters.DefaultKey;
+        var hostChallenge = new byte[8];
 
-        [Fact]
-        public void CreateScpState_NullPipeline_ThrowsArgumentNullException()
-        {
-            // Arrange
-            var keyParams = Scp03KeyParameters.DefaultKey;
-            byte[] hostChallenge = new byte[8];
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() =>
+            Scp03State.CreateScpState(null!, keyParams, hostChallenge));
+    }
 
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() =>
-                Scp03State.CreateScpState(null!, keyParams, hostChallenge));
-        }
+    [Fact]
+    public void CreateScpState_NullKeyParams_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var pipeline = Substitute.For<IApduTransform>();
+        var hostChallenge = new byte[8];
 
-        [Fact]
-        public void CreateScpState_NullKeyParams_ThrowsArgumentNullException()
-        {
-            // Arrange
-            var pipeline = Substitute.For<IApduTransform>();
-            byte[] hostChallenge = new byte[8];
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() =>
+            Scp03State.CreateScpState(pipeline, null!, hostChallenge));
+    }
 
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() =>
-                Scp03State.CreateScpState(pipeline, null!, hostChallenge));
-        }
+    [Fact]
+    public void EncodeCommand_ValidCommand_ReturnsEncodedApdu()
+    {
+        // Arrange
+        using var rng = CryptographyProviders.RngCreator();
+        Span<byte> putKeyData = stackalloc byte[256];
+        rng.GetBytes(putKeyData);
+        var originalCommand = new PutKeyCommand(1, 2, putKeyData.ToArray()).CreateCommandApdu();
 
-        [Fact]
-        public void EncodeCommand_ValidCommand_ReturnsEncodedApdu()
-        {
-            // Arrange
-            using var rng = CryptographyProviders.RngCreator();
-            Span<byte> putKeyData = stackalloc byte[256];
-            rng.GetBytes(putKeyData);
-            var originalCommand = new PutKeyCommand(1, 2, putKeyData.ToArray()).CreateCommandApdu();
+        // Act
+        var encodedCommand = State.EncodeCommand(originalCommand);
 
-            // Act
-            var encodedCommand = State.EncodeCommand(originalCommand);
+        // Assert
+        Assert.NotNull(encodedCommand);
+        Assert.NotEqual(originalCommand.Data, encodedCommand.Data);
+    }
 
-            // Assert
-            Assert.NotNull(encodedCommand);
-            Assert.NotEqual(originalCommand.Data, encodedCommand.Data);
-        }
+    private static byte[] GetFakeResponseApduData(
+        byte[] hostChallenge,
+        byte[] cardChallenge)
+    {
+        Array.Fill(hostChallenge, (byte)1);
+        Array.Fill(cardChallenge, (byte)1);
 
-        private static byte[] GetFakeResponseApduData(
-            byte[] hostChallenge,
-            byte[] cardChallenge)
-        {
-            Array.Fill(hostChallenge, (byte)1);
-            Array.Fill(cardChallenge, (byte)1);
+        // Derive session keys
+        var sessionKeys = Derivation.DeriveSessionKeysFromStaticKeys(
+            Scp03KeyParameters.DefaultKey.StaticKeys,
+            hostChallenge,
+            cardChallenge);
 
-            // Derive session keys
-            var sessionKeys = Derivation.DeriveSessionKeysFromStaticKeys(
-                Scp03KeyParameters.DefaultKey.StaticKeys,
-                hostChallenge,
-                cardChallenge);
+        // Check supplied card cryptogram
+        var calculatedCardCryptogram = Derivation.DeriveCryptogram(
+            Derivation.DDC_CARD_CRYPTOGRAM,
+            sessionKeys.MacKey.Span,
+            hostChallenge,
+            cardChallenge);
 
-            // Check supplied card cryptogram
-            var calculatedCardCryptogram = Derivation.DeriveCryptogram(
-                Derivation.DDC_CARD_CRYPTOGRAM,
-                sessionKeys.MacKey.Span,
-                hostChallenge,
-                cardChallenge);
+        var responseApduData = new byte[31];
+        Array.Fill(responseApduData, (byte)1);
+        responseApduData[^2] = 0x90;
+        responseApduData[^1] = 0x00;
 
-            var responseApduData = new byte[31];
-            Array.Fill(responseApduData, (byte)1);
-            responseApduData[^2] = 0x90;
-            responseApduData[^1] = 0x00;
-
-            // Add fake Card Crypto response
-            calculatedCardCryptogram.Span.CopyTo(responseApduData.AsSpan(21..29));
-            return responseApduData;
-        }
+        // Add fake Card Crypto response
+        calculatedCardCryptogram.Span.CopyTo(responseApduData.AsSpan(21..29));
+        return responseApduData;
     }
 }

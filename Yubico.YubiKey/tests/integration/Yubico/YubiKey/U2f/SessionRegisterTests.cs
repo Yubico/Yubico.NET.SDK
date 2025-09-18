@@ -13,114 +13,112 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
 
-namespace Yubico.YubiKey.U2f
+namespace Yubico.YubiKey.U2f;
+
+public class SessionRegisterTests
 {
-    public class SessionRegisterTests
+    private readonly IYubiKeyDevice _yubiKeyDevice;
+
+    public SessionRegisterTests()
     {
-        private readonly IYubiKeyDevice _yubiKeyDevice;
-
-        public SessionRegisterTests()
+        if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
         {
-            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+            if (!SdkPlatformInfo.IsElevated)
             {
-                if (!SdkPlatformInfo.IsElevated)
-                {
-                    throw new ArgumentException("Windows not elevated.");
-                }
-            }
-
-            IEnumerable<IYubiKeyDevice> yubiKeys = YubiKeyDevice.FindByTransport(Transport.HidFido | Transport.UsbSmartCard);
-            var yubiKeyList = yubiKeys.ToList();
-            Assert.NotEmpty(yubiKeyList);
-
-            _yubiKeyDevice = yubiKeyList[0];
-        }
-
-        [Fact]
-        public void RegisterFips_Succeeds()
-        {
-            var keyCollector = new SimpleU2fKeyCollector(true);
-
-            using (var u2fSession = new U2fSession(_yubiKeyDevice))
-            {
-                u2fSession.KeyCollector = keyCollector.SimpleU2fKeyCollectorDelegate;
-
-                var cmd = new GetPagedDeviceInfoCommand();
-                GetPagedDeviceInfoResponse rsp = u2fSession.Connection.SendCommand(cmd);
-                Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-                var getData = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
-                if (!getData.IsFipsSeries)
-                {
-                    return;
-                }
-
-                var modeCmd = new VerifyFipsModeCommand();
-                VerifyFipsModeResponse modeRsp = u2fSession.Connection.SendCommand(modeCmd);
-                bool isMode = modeRsp.GetData();
-                Assert.True(isMode);
-
-                byte[] appId = RegistrationDataTests.GetAppIdArray(true);
-                byte[] clientDataHash = RegistrationDataTests.GetClientDataHashArray(true);
-
-                bool isValid = u2fSession.TryRegister(
-                    appId, clientDataHash, new TimeSpan(0, 0, 5), out RegistrationData? regDataQ);
-                Assert.True(isValid);
-
-                //                RegistrationData regDataQ = u2fSession.Register(
-                //                    appId, clientDataHash, TimeSpan.Zero);
-
-                Assert.NotNull(regDataQ);
-
-                if (regDataQ is null)
-                {
-                    return;
-                }
-
-                RegistrationData regData = regDataQ;
-
-                bool isVerified = regData.VerifySignature(appId, clientDataHash);
-                Assert.True(isVerified);
+                throw new ArgumentException("Windows not elevated.");
             }
         }
 
-        [Fact]
-        public void AuthenticateFips_Succeeds()
+        var yubiKeys = YubiKeyDevice.FindByTransport(Transport.HidFido | Transport.UsbSmartCard);
+        var yubiKeyList = yubiKeys.ToList();
+        Assert.NotEmpty(yubiKeyList);
+
+        _yubiKeyDevice = yubiKeyList[0];
+    }
+
+    [Fact]
+    public void RegisterFips_Succeeds()
+    {
+        var keyCollector = new SimpleU2fKeyCollector(true);
+
+        using (var u2fSession = new U2fSession(_yubiKeyDevice))
         {
-            var keyCollector = new SimpleU2fKeyCollector(true);
+            u2fSession.KeyCollector = keyCollector.SimpleU2fKeyCollectorDelegate;
 
-            byte[] appId = RegistrationDataTests.GetAppIdArray(true);
-            byte[] clientDataHash = RegistrationDataTests.GetClientDataHashArray(true);
-            byte[] keyHandle = RegistrationDataTests.GetKeyHandleArray(true, out byte handleLength);
-            byte[] pubKey = RegistrationDataTests.GetPubKeyArray(true);
+            var cmd = new GetPagedDeviceInfoCommand();
+            var rsp = u2fSession.Connection.SendCommand(cmd);
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            using (var u2fSession = new U2fSession(_yubiKeyDevice))
+            var getData = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
+            if (!getData.IsFipsSeries)
             {
-                u2fSession.KeyCollector = keyCollector.SimpleU2fKeyCollectorDelegate;
-
-                bool isValid = u2fSession.VerifyKeyHandle(appId, clientDataHash, keyHandle);
-                Assert.True(isValid);
-
-                isValid = u2fSession.TryAuthenticate(
-                    appId, clientDataHash, keyHandle, new TimeSpan(0, 0, 5), out AuthenticationData? authData, false);
-                Assert.True(isValid);
-
-                Assert.NotNull(authData);
-
-                if (authData is null)
-                {
-                    return;
-                }
-
-                bool isVerified = authData.VerifySignature(pubKey, appId, clientDataHash);
-                Assert.True(isVerified);
+                return;
             }
+
+            var modeCmd = new VerifyFipsModeCommand();
+            var modeRsp = u2fSession.Connection.SendCommand(modeCmd);
+            var isMode = modeRsp.GetData();
+            Assert.True(isMode);
+
+            var appId = RegistrationDataTests.GetAppIdArray(true);
+            var clientDataHash = RegistrationDataTests.GetClientDataHashArray(true);
+
+            var isValid = u2fSession.TryRegister(
+                appId, clientDataHash, new TimeSpan(0, 0, 5), out var regDataQ);
+            Assert.True(isValid);
+
+            //                RegistrationData regDataQ = u2fSession.Register(
+            //                    appId, clientDataHash, TimeSpan.Zero);
+
+            Assert.NotNull(regDataQ);
+
+            if (regDataQ is null)
+            {
+                return;
+            }
+
+            var regData = regDataQ;
+
+            var isVerified = regData.VerifySignature(appId, clientDataHash);
+            Assert.True(isVerified);
+        }
+    }
+
+    [Fact]
+    public void AuthenticateFips_Succeeds()
+    {
+        var keyCollector = new SimpleU2fKeyCollector(true);
+
+        var appId = RegistrationDataTests.GetAppIdArray(true);
+        var clientDataHash = RegistrationDataTests.GetClientDataHashArray(true);
+        var keyHandle = RegistrationDataTests.GetKeyHandleArray(true, out var handleLength);
+        var pubKey = RegistrationDataTests.GetPubKeyArray(true);
+
+        using (var u2fSession = new U2fSession(_yubiKeyDevice))
+        {
+            u2fSession.KeyCollector = keyCollector.SimpleU2fKeyCollectorDelegate;
+
+            var isValid = u2fSession.VerifyKeyHandle(appId, clientDataHash, keyHandle);
+            Assert.True(isValid);
+
+            isValid = u2fSession.TryAuthenticate(
+                appId, clientDataHash, keyHandle, new TimeSpan(0, 0, 5), out var authData, false);
+            Assert.True(isValid);
+
+            Assert.NotNull(authData);
+
+            if (authData is null)
+            {
+                return;
+            }
+
+            var isVerified = authData.VerifySignature(pubKey, appId, clientDataHash);
+            Assert.True(isVerified);
         }
     }
 }

@@ -18,75 +18,77 @@ using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.Commands;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+public class Fido2SessionTests
 {
-    public class Fido2SessionTests
+    [Fact]
+    private void Constructor_NullYubiKeyDevice_ThrowsArgumentNullException()
     {
-        [Fact]
-        void Constructor_NullYubiKeyDevice_ThrowsArgumentNullException()
+        static void Action()
         {
-            static void Action()
-            {
 #pragma warning disable CS8625
-                _ = new Fido2Session(null);
+            _ = new Fido2Session(null);
 #pragma warning restore CS8625
-            }
-
-            _ = Assert.Throws<ArgumentNullException>(Action);
         }
 
-        [Fact]
-        void Constructor_ValidYubiKeyDevice_Succeeds()
-        {
-            var mockYubiKey = Substitute.For<IYubiKeyDevice>();
-            var mockConnection = Substitute.For<IYubiKeyConnection>();
-            var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
+        _ = Assert.Throws<ArgumentNullException>(Action);
+    }
 
-            _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
-                .Returns(mockResponse);
+    [Fact]
+    private void Constructor_ValidYubiKeyDevice_Succeeds()
+    {
+        var mockYubiKey = Substitute.For<IYubiKeyDevice>();
+        var mockConnection = Substitute.For<IYubiKeyConnection>();
+        var mockResponse =
+            new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
-            _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
-                .Returns(mockConnection);
+        _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
+            .Returns(mockResponse);
 
-            var session = new Fido2Session(mockYubiKey);
+        _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
+            .Returns(mockConnection);
 
-            Assert.NotNull(session);
-        }
+        var session = new Fido2Session(mockYubiKey);
 
-        [Fact]
-        void Constructor_GivenValidYubiKeyDevice_ConnectsToFido2Application()
-        {
-            var mockYubiKey = Substitute.For<IYubiKeyDevice>();
-            var mockConnection = Substitute.For<IYubiKeyConnection>();
-            var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
+        Assert.NotNull(session);
+    }
 
-            _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
-                .Returns(mockResponse);
+    [Fact]
+    private void Constructor_GivenValidYubiKeyDevice_ConnectsToFido2Application()
+    {
+        var mockYubiKey = Substitute.For<IYubiKeyDevice>();
+        var mockConnection = Substitute.For<IYubiKeyConnection>();
+        var mockResponse =
+            new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
-            _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
-                .Returns(mockConnection);
+        _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
+            .Returns(mockResponse);
 
-            _ = new Fido2Session(mockYubiKey);
+        _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
+            .Returns(mockConnection);
 
-            mockYubiKey.Received().Connect(YubiKeyApplication.Fido2);
-        }
+        _ = new Fido2Session(mockYubiKey);
 
-        [Fact]
-        void GetAuthenticatorInfo_SendsGetInfoCommand()
-        {
-            var mockYubiKey = Substitute.For<IYubiKeyDevice>();
-            var mockConnection = Substitute.For<IYubiKeyConnection>();
-            var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
+        mockYubiKey.Received().Connect(YubiKeyApplication.Fido2);
+    }
 
-            _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
-                .Returns(mockResponse);
+    [Fact]
+    private void GetAuthenticatorInfo_SendsGetInfoCommand()
+    {
+        var mockYubiKey = Substitute.For<IYubiKeyDevice>();
+        var mockConnection = Substitute.For<IYubiKeyConnection>();
+        var mockResponse =
+            new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
-            _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
-                .Returns(mockConnection);
+        _ = mockConnection.SendCommand(Arg.Any<GetInfoCommand>())
+            .Returns(mockResponse);
 
-            _ = new Fido2Session(mockYubiKey);
+        _ = mockYubiKey.Connect(YubiKeyApplication.Fido2)
+            .Returns(mockConnection);
 
-            mockConnection.Received().SendCommand(Arg.Any<GetInfoCommand>());
-        }
+        _ = new Fido2Session(mockYubiKey);
+
+        mockConnection.Received().SendCommand(Arg.Any<GetInfoCommand>());
     }
 }

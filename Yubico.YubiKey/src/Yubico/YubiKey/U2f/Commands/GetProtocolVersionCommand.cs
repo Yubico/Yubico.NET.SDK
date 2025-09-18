@@ -14,51 +14,53 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+/// <summary>
+///     Get the U2F protocol version implemented by the application.
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="GetProtocolVersionResponse" />.
+/// </remarks>
+public sealed class GetProtocolVersionCommand : IYubiKeyCommand<GetProtocolVersionResponse>
 {
+    private const byte Ctap1MessageInstruction = 0x03;
+    private const byte AppVersionInstruction = 0x03;
+
     /// <summary>
-    /// Get the U2F protocol version implemented by the application.
+    ///     Constructs an instance of the <see cref="GetProtocolVersionCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="GetProtocolVersionResponse"/>.
-    /// </remarks>
-    public sealed class GetProtocolVersionCommand : IYubiKeyCommand<GetProtocolVersionResponse>
+    public GetProtocolVersionCommand()
     {
-        private const byte Ctap1MessageInstruction = 0x03;
-        private const byte AppVersionInstruction = 0x03;
-
-        /// <summary>
-        /// The YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.FidoU2f"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="GetProtocolVersionCommand"/> class.
-        /// </summary>
-        public GetProtocolVersionCommand()
-        {
-        }
-
-        /// <inheritdoc/>
-        public CommandApdu CreateCommandApdu()
-        {
-            var innerCommand = new CommandApdu()
-            {
-                Ins = AppVersionInstruction,
-            };
-
-            return new CommandApdu()
-            {
-                Ins = Ctap1MessageInstruction,
-                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength),
-            };
-        }
-
-        /// <inheritdoc/>
-        public GetProtocolVersionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetProtocolVersionResponse(responseApdu);
     }
+
+    #region IYubiKeyCommand<GetProtocolVersionResponse> Members
+
+    /// <summary>
+    ///     The YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     <see cref="YubiKeyApplication.FidoU2f" />
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu()
+    {
+        var innerCommand = new CommandApdu
+        {
+            Ins = AppVersionInstruction
+        };
+
+        return new CommandApdu
+        {
+            Ins = Ctap1MessageInstruction,
+            Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength)
+        };
+    }
+
+    /// <inheritdoc />
+    public GetProtocolVersionResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

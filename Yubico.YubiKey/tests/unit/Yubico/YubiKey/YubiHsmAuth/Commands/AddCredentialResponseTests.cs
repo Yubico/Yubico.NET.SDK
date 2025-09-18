@@ -15,51 +15,50 @@
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+public class AddCredentialResponseTests
 {
-    public class AddCredentialResponseTests
+    [Fact]
+    public void Constructor_ReturnsObject()
     {
-        [Fact]
-        public void Constructor_ReturnsObject()
-        {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.Success);
+        var apdu = new ResponseApdu(new byte[0], SWConstants.Success);
 
-            var response = new AddCredentialResponse(apdu);
+        var response = new AddCredentialResponse(apdu);
 
-            Assert.NotNull(response);
-        }
+        Assert.NotNull(response);
+    }
 
-        [Fact]
-        public void ResponseStatus_GivenStatusWord0x6983_ReturnsFailed()
-        {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+    [Fact]
+    public void ResponseStatus_GivenStatusWord0x6983_ReturnsFailed()
+    {
+        var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
 
-            var response = new AddCredentialResponse(apdu);
+        var response = new AddCredentialResponse(apdu);
 
-            Assert.Equal(ResponseStatus.Failed, response.Status);
-        }
+        Assert.Equal(ResponseStatus.Failed, response.Status);
+    }
 
-        [Fact]
-        public void StatusMessage_GivenStatusWord0x6983_ReturnsCorrectMessage()
-        {
-            string expectedMessage = "A credential with that label already exists.";
+    [Fact]
+    public void StatusMessage_GivenStatusWord0x6983_ReturnsCorrectMessage()
+    {
+        var expectedMessage = "A credential with that label already exists.";
 
-            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+        var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
 
-            var response = new AddCredentialResponse(apdu);
+        var response = new AddCredentialResponse(apdu);
 
-            Assert.Equal(expectedMessage, response.StatusMessage);
-        }
+        Assert.Equal(expectedMessage, response.StatusMessage);
+    }
 
-        // Test pass through to base class status word handling
-        [Fact]
-        public void ResponseStatus_GivenStatusWord0x63C0_ReturnsAuthenticationRequired()
-        {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.VerifyFail);
+    // Test pass through to base class status word handling
+    [Fact]
+    public void ResponseStatus_GivenStatusWord0x63C0_ReturnsAuthenticationRequired()
+    {
+        var apdu = new ResponseApdu(new byte[0], SWConstants.VerifyFail);
 
-            var response = new AddCredentialResponse(apdu);
+        var response = new AddCredentialResponse(apdu);
 
-            Assert.Equal(ResponseStatus.AuthenticationRequired, response.Status);
-        }
+        Assert.Equal(ResponseStatus.AuthenticationRequired, response.Status);
     }
 }

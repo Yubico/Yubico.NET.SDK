@@ -15,70 +15,69 @@
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+public class GetPinRetriesResponseTests
 {
-    public class GetPinRetriesResponseTests
+    [Fact]
+    public void Constructor_SuccessApdu_CreatesObject()
     {
-        [Fact]
-        public void Constructor_SuccessApdu_CreatesObject()
-        {
-            var response = new GetPinRetriesResponse(new ResponseApdu(new byte[] { 0x90, 0x00 }));
+        var response = new GetPinRetriesResponse(new ResponseApdu(new byte[] { 0x90, 0x00 }));
 
-            Assert.NotNull(response);
-        }
+        Assert.NotNull(response);
+    }
 
-        [Fact]
-        public void GetData_WithRetriesAndPowerCycle_ReturnsCorrectData()
-        {
-            var response = new GetPinRetriesResponse(
-                new ResponseApdu(
-                    new byte[]
-                    {
-                        0xA2, // Map (2 entries)
-                        0x03, 0x08, // TagPinRetries = 8
-                        0x04, 0xF5 // TagPowerCycleState = true
-                    },
-                    SWConstants.Success));
+    [Fact]
+    public void GetData_WithRetriesAndPowerCycle_ReturnsCorrectData()
+    {
+        var response = new GetPinRetriesResponse(
+            new ResponseApdu(
+                new byte[]
+                {
+                    0xA2, // Map (2 entries)
+                    0x03, 0x08, // TagPinRetries = 8
+                    0x04, 0xF5 // TagPowerCycleState = true
+                },
+                SWConstants.Success));
 
-            (int retriesRemaining, bool? powerCycleRequired) = response.GetData();
+        var (retriesRemaining, powerCycleRequired) = response.GetData();
 
-            Assert.Equal(8, retriesRemaining);
-            Assert.Equal(true, powerCycleRequired);
-        }
+        Assert.Equal(8, retriesRemaining);
+        Assert.Equal(true, powerCycleRequired);
+    }
 
-        [Fact]
-        public void GetData_WithRetriesOnly_ReturnsCorrectData()
-        {
-            var response = new GetPinRetriesResponse(
-                new ResponseApdu(
-                    new byte[]
-                    {
-                        0xA1, // Map (1 entry)
-                        0x03, 0x08, // TagPinRetries = 8
-                    },
-                    SWConstants.Success));
+    [Fact]
+    public void GetData_WithRetriesOnly_ReturnsCorrectData()
+    {
+        var response = new GetPinRetriesResponse(
+            new ResponseApdu(
+                new byte[]
+                {
+                    0xA1, // Map (1 entry)
+                    0x03, 0x08 // TagPinRetries = 8
+                },
+                SWConstants.Success));
 
-            (int retriesRemaining, bool? powerCycleRequired) = response.GetData();
+        var (retriesRemaining, powerCycleRequired) = response.GetData();
 
-            Assert.Equal(8, retriesRemaining);
-            Assert.Null(powerCycleRequired);
-        }
+        Assert.Equal(8, retriesRemaining);
+        Assert.Null(powerCycleRequired);
+    }
 
-        [Fact]
-        public void GetData_MissingRetries_ThrowsException()
-        {
-            var response = new GetPinRetriesResponse(
-                new ResponseApdu(
-                    new byte[]
-                    {
-                        0xA1, // Map (1 entry)
-                        0x04, 0xF5 // TagPowerCycleState = true
-                    },
-                    SWConstants.Success));
+    [Fact]
+    public void GetData_MissingRetries_ThrowsException()
+    {
+        var response = new GetPinRetriesResponse(
+            new ResponseApdu(
+                new byte[]
+                {
+                    0xA1, // Map (1 entry)
+                    0x04, 0xF5 // TagPowerCycleState = true
+                },
+                SWConstants.Success));
 
-            void Action() { _ = response.GetData(); }
+        void Action() { _ = response.GetData(); }
 
-            _ = Assert.Throws<Ctap2DataException>(Action);
-        }
+        _ = Assert.Throws<Ctap2DataException>(Action);
     }
 }

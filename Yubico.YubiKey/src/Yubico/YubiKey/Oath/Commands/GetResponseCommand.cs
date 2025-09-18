@@ -15,58 +15,63 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+/// <summary>
+///     Gets additional response data from the previously issued command.
+/// </summary>
+public class GetResponseCommand : IYubiKeyCommand<YubiKeyResponse>
 {
+    private const byte GetResponseInstruction = 0xA5;
+
+    private readonly byte _Cla;
+    private readonly int _SW2;
+
     /// <summary>
-    /// Gets additional response data from the previously issued command.
+    ///     Initializes a new instance of the <see cref="GetResponseCommand" /> class.
     /// </summary>
-    public class GetResponseCommand : IYubiKeyCommand<YubiKeyResponse>
+    /// <param name="originatingCommand">
+    ///     The original command APDU that was sent that is now indicating that more data is in the
+    ///     response.
+    /// </param>
+    /// <param name="SW2">
+    ///     The SW2 byte of the last response. It indicates the number of bytes left for the next
+    ///     GetResponseCommand.
+    /// </param>
+    public GetResponseCommand(CommandApdu originatingCommand, short SW2)
     {
-        private const byte GetResponseInstruction = 0xA5;
-
-        private readonly byte _Cla;
-        private readonly int _SW2;
-
-        /// <summary>
-        /// Gets the YubiKeyApplication (e.g. PIV, OATH, etc.) that this command applies to.
-        /// </summary>
-        /// <value>
-        /// The value will always be `YubiKeyApplication.Oath` for this command.
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetResponseCommand"/> class.
-        /// </summary>
-        /// <param name="originatingCommand">
-        /// The original command APDU that was sent that is now indicating that more data is in the
-        /// response.
-        /// </param>
-        /// <param name="SW2">
-        /// The SW2 byte of the last response. It indicates the number of bytes left for the next
-        /// GetResponseCommand.
-        /// </param>
-        public GetResponseCommand(CommandApdu originatingCommand, short SW2)
+        if (originatingCommand is null)
         {
-            if (originatingCommand is null)
-            {
-                throw new ArgumentNullException(nameof(originatingCommand));
-            }
-
-            _Cla = originatingCommand.Cla;
-            _SW2 = SW2;
+            throw new ArgumentNullException(nameof(originatingCommand));
         }
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+        _Cla = originatingCommand.Cla;
+        _SW2 = SW2;
+    }
+
+    #region IYubiKeyCommand<YubiKeyResponse> Members
+
+    /// <summary>
+    ///     Gets the YubiKeyApplication (e.g. PIV, OATH, etc.) that this command applies to.
+    /// </summary>
+    /// <value>
+    ///     The value will always be `YubiKeyApplication.Oath` for this command.
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Oath;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Cla = _Cla,
             Ins = GetResponseInstruction,
-            Ne = _SW2 == 0 ? 256 : _SW2,
+            Ne = _SW2 == 0
+                ? 256
+                : _SW2
         };
 
-        /// <inheritdoc />
-        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new YubiKeyResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

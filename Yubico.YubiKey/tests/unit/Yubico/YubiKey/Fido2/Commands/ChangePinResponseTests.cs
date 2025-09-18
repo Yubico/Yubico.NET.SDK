@@ -15,32 +15,31 @@
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+public class ChangePinResponseTests
 {
-    public class ChangePinResponseTests
+    [Fact]
+    public void Constructor_SuccessApdu_CreatesObject()
     {
-        [Fact]
-        public void Constructor_SuccessApdu_CreatesObject()
-        {
-            var response = new ChangePinResponse(new ResponseApdu(new byte[] { 0x90, 0x00 }));
+        var response = new ChangePinResponse(new ResponseApdu(new byte[] { 0x90, 0x00 }));
 
-            Assert.NotNull(response);
-        }
+        Assert.NotNull(response);
+    }
 
-        [Fact]
-        public void Constructor_SuccessApdu_SetsStatus()
-        {
-            var response = new ChangePinResponse(new ResponseApdu(new byte[] { 0x90, 0x00 }));
+    [Fact]
+    public void Constructor_SuccessApdu_SetsStatus()
+    {
+        var response = new ChangePinResponse(new ResponseApdu(new byte[] { 0x90, 0x00 }));
 
-            Assert.Equal(ResponseStatus.Success, response.Status);
-        }
+        Assert.Equal(ResponseStatus.Success, response.Status);
+    }
 
-        [Fact]
-        public void Constructor_ErrorApdu_SetsStatus()
-        {
-            var response = new ChangePinResponse(new ResponseApdu(new byte[] { 0x6F, 0x33 }));
+    [Fact]
+    public void Constructor_ErrorApdu_SetsStatus()
+    {
+        var response = new ChangePinResponse(new ResponseApdu(new byte[] { 0x6F, 0x33 }));
 
-            Assert.Equal(ResponseStatus.AuthenticationRequired, response.Status);
-        }
+        Assert.Equal(ResponseStatus.AuthenticationRequired, response.Status);
     }
 }

@@ -17,76 +17,78 @@ using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Remove an enrolled fingerprint. This is a subcommand of the CTAP
+///     command "authenticatorBioEnrollment".
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="Fido2Response" />. This command
+///     does not return any data, it only returns "success" or "failure", and has
+///     some FIDO2-specific error information.
+/// </remarks>
+public sealed class BioEnrollRemoveCommand : IYubiKeyCommand<Fido2Response>
 {
-    /// <summary>
-    /// Remove an enrolled fingerprint. This is a subcommand of the CTAP
-    /// command "authenticatorBioEnrollment".
-    /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="Fido2Response"/>. This command
-    /// does not return any data, it only returns "success" or "failure", and has
-    /// some FIDO2-specific error information.
-    /// </remarks>
-    public sealed class BioEnrollRemoveCommand : IYubiKeyCommand<Fido2Response>
+    private const int SubCmdRemoveEnrollment = 0x06;
+    private const int KeyTemplateId = 0x01;
+
+    private readonly BioEnrollmentCommand _command;
+
+    // The default constructor explicitly defined. We don't want it to be
+    // used.
+    public BioEnrollRemoveCommand()
     {
-        private const int SubCmdRemoveEnrollment = 0x06;
-        private const int KeyTemplateId = 0x01;
+        throw new NotImplementedException();
+    }
 
-        private readonly BioEnrollmentCommand _command;
+    /// <summary>
+    ///     Constructs an instance of the <see cref="BioEnrollEnumerateCommand" /> class.
+    /// </summary>
+    /// <param name="templateId">
+    ///     The ID of the template to remove.
+    /// </param>
+    /// <param name="pinUvAuthToken">
+    ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+    ///     key.
+    /// </param>
+    /// <param name="authProtocol">
+    ///     The Auth Protocol used to build the Auth Token.
+    /// </param>
+    public BioEnrollRemoveCommand(
+        ReadOnlyMemory<byte> templateId,
+        ReadOnlyMemory<byte> pinUvAuthToken,
+        PinUvAuthProtocolBase authProtocol)
+    {
+        _command = new BioEnrollmentCommand(
+            SubCmdRemoveEnrollment,
+            EncodeParams(templateId),
+            pinUvAuthToken,
+            authProtocol);
+    }
 
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
+    #region IYubiKeyCommand<Fido2Response> Members
 
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        public BioEnrollRemoveCommand()
-        {
-            throw new NotImplementedException();
-        }
+    /// <inheritdoc />
+    public YubiKeyApplication Application => _command.Application;
 
-        /// <summary>
-        /// Constructs an instance of the <see cref="BioEnrollEnumerateCommand"/> class.
-        /// </summary>
-        /// <param name="templateId">
-        /// The ID of the template to remove.
-        /// </param>
-        /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
-        /// </param>
-        /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
-        /// </param>
-        public BioEnrollRemoveCommand(
-            ReadOnlyMemory<byte> templateId,
-            ReadOnlyMemory<byte> pinUvAuthToken,
-            PinUvAuthProtocolBase authProtocol)
-        {
-            _command = new BioEnrollmentCommand(
-                SubCmdRemoveEnrollment,
-                EncodeParams(templateId),
-                pinUvAuthToken,
-                authProtocol);
-        }
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+    /// <inheritdoc />
+    public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
 
-        /// <inheritdoc />
-        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new Fido2Response(responseApdu);
+    #endregion
 
-        // This method encodes the parameters. For RemoveEnrollment, the
-        // parameters consist of the template ID.
-        // It is encoded as
-        //   map
-        //     01 byte string
-        private static byte[]? EncodeParams(ReadOnlyMemory<byte> templateId)
-        {
-            return new CborMapWriter<int>()
-                .Entry(KeyTemplateId, templateId)
-                .Encode();
-        }
+    // This method encodes the parameters. For RemoveEnrollment, the
+    // parameters consist of the template ID.
+    // It is encoded as
+    //   map
+    //     01 byte string
+    private static byte[]? EncodeParams(ReadOnlyMemory<byte> templateId)
+    {
+        return new CborMapWriter<int>()
+            .Entry(KeyTemplateId, templateId)
+            .Encode();
     }
 }

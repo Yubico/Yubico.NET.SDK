@@ -14,38 +14,40 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+/// <summary>
+///     Gets the serial number of the YubiKey.
+/// </summary>
+public class GetSerialNumberCommand : IYubiKeyCommand<GetSerialNumberResponse>
 {
     /// <summary>
-    /// Gets the serial number of the YubiKey.
+    ///     Constructs a new instance of the GetSerialNumberCommand class.
     /// </summary>
-    public class GetSerialNumberCommand : IYubiKeyCommand<GetSerialNumberResponse>
+    public GetSerialNumberCommand()
     {
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Otp
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
+    }
 
-        /// <summary>
-        /// Constructs a new instance of the GetSerialNumberCommand class.
-        /// </summary>
-        public GetSerialNumberCommand()
-        {
+    #region IYubiKeyCommand<GetSerialNumberResponse> Members
 
-        }
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.Otp
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = OtpConstants.RequestSlotInstruction,
             P1 = OtpConstants.SerialNumberSlot
         };
 
-        /// <inheritdoc />
-        public GetSerialNumberResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetSerialNumberResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public GetSerialNumberResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

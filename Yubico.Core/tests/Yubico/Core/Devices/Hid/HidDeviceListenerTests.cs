@@ -15,90 +15,116 @@
 using System;
 using Xunit;
 
-namespace Yubico.Core.Devices.Hid.UnitTests
+namespace Yubico.Core.Devices.Hid.UnitTests;
+
+internal class FakeHidDevice : IHidDevice
 {
-    class FakeHidDevice : IHidDevice
+    #region IHidDevice Members
+
+    public DateTime LastAccessed { get; } = DateTime.Now;
+    public string Path { get; } = string.Empty;
+    public string? ParentDeviceId { get; } = null;
+    public short VendorId { get; }
+    public short ProductId { get; }
+    public short Usage { get; }
+    public HidUsagePage UsagePage { get; }
+
+    public IHidConnection ConnectToFeatureReports()
     {
-        public DateTime LastAccessed { get; } = DateTime.Now;
-        public string Path { get; } = string.Empty;
-        public string? ParentDeviceId { get; } = null;
-        public short VendorId { get; }
-        public short ProductId { get; }
-        public short Usage { get; }
-        public HidUsagePage UsagePage { get; }
-        public IHidConnection ConnectToFeatureReports() => throw new NotImplementedException();
-        public IHidConnection ConnectToIOReports() => throw new NotImplementedException();
+        throw new NotImplementedException();
     }
 
-    class FakeHidListener : HidDeviceListener
+    public IHidConnection ConnectToIOReports()
     {
-        public void FireArrival() => OnArrived(new FakeHidDevice());
-        public void FireRemoval() => OnRemoved(new FakeHidDevice());
-        public void Clear() => ClearEventHandlers();
+        throw new NotImplementedException();
     }
 
-    public class HidDeviceListenerTests
+    #endregion
+}
+
+internal class FakeHidListener : HidDeviceListener
+{
+    public void FireArrival()
     {
-        // [Fact] // Fails on CI because of it's trying to access the HID device which is not available
-        // public void Create_ReturnsInstanceOfListener()
-        // {
-        //     var listener = HidDeviceListener.Create();
-        //     _ = Assert.IsAssignableFrom<HidDeviceListener>(listener);
-        // }
+        OnArrived(new FakeHidDevice());
+    }
 
-        [Fact]
-        public void OnArrived_WithNoListeners_NoOps()
-        {
-            var listener = new FakeHidListener();
-            listener.FireArrival();
-        }
+    public void FireRemoval()
+    {
+        OnRemoved(new FakeHidDevice());
+    }
 
-        [Fact]
-        public void OnArrived_WithEventListener_RaisesArrivedEvent()
-        {
-            var listener = new FakeHidListener();
-            _ = Assert.Raises<HidDeviceEventArgs>(
-                e => listener.Arrived += e,
-                e => listener.Arrived -= e,
-                () => listener.FireArrival());
-        }
+    public void Clear()
+    {
+        ClearEventHandlers();
+    }
+}
 
-        [Fact]
-        public void OnRemoved_WithNoListeners_NoOps()
-        {
-            var listener = new FakeHidListener();
-            listener.FireRemoval();
-        }
+public class HidDeviceListenerTests
+{
+    // [Fact] // Fails on CI because of it's trying to access the HID device which is not available
+    // public void Create_ReturnsInstanceOfListener()
+    // {
+    //     var listener = HidDeviceListener.Create();
+    //     _ = Assert.IsAssignableFrom<HidDeviceListener>(listener);
+    // }
 
-        [Fact]
-        public void OnRemoved_WithEventListener_RaisesRemovedEvent()
-        {
-            var listener = new FakeHidListener();
-            _ = Assert.Raises<HidDeviceEventArgs>(
-                e => listener.Removed += e,
-                e => listener.Removed -= e,
-                () => listener.FireRemoval());
-        }
+    [Fact]
+    public void OnArrived_WithNoListeners_NoOps()
+    {
+        var listener = new FakeHidListener();
+        listener.FireArrival();
+    }
 
-        [Fact]
-        public void ClearEventHandlers_WithNoListeners_Succeeds()
-        {
-            var listener = new FakeHidListener();
-            listener.Clear();
-        }
+    [Fact]
+    public void OnArrived_WithEventListener_RaisesArrivedEvent()
+    {
+        var listener = new FakeHidListener();
+        _ = Assert.Raises<HidDeviceEventArgs>(
+            e => listener.Arrived += e,
+            e => listener.Arrived -= e,
+            () => listener.FireArrival());
+    }
 
-        [Fact]
-        public void ClearEventHandlers_WithEventListeners_DoesNotRaiseEvent()
-        {
-            var listener = new FakeHidListener();
+    [Fact]
+    public void OnRemoved_WithNoListeners_NoOps()
+    {
+        var listener = new FakeHidListener();
+        listener.FireRemoval();
+    }
 
-            listener.Arrived += (sender, args) => Assert.False(true);
-            listener.Removed += (sender, args) => Assert.False(true);
+    [Fact]
+    public void OnRemoved_WithEventListener_RaisesRemovedEvent()
+    {
+        var listener = new FakeHidListener();
+        _ = Assert.Raises<HidDeviceEventArgs>(
+            e => listener.Removed += e,
+            e => listener.Removed -= e,
+            () => listener.FireRemoval());
+    }
 
-            listener.Clear();
+    [Fact]
+    public void ClearEventHandlers_WithNoListeners_Succeeds()
+    {
+        var listener = new FakeHidListener();
+        listener.Clear();
+    }
 
-            listener.FireArrival();
-            listener.FireRemoval();
-        }
+    [Fact]
+    public void ClearEventHandlers_WithEventListeners_DoesNotRaiseEvent()
+    {
+        var listener = new FakeHidListener();
+
+        listener.Arrived += (
+            sender,
+            args) => Assert.False(true);
+        listener.Removed += (
+            sender,
+            args) => Assert.False(true);
+
+        listener.Clear();
+
+        listener.FireArrival();
+        listener.FireRemoval();
     }
 }

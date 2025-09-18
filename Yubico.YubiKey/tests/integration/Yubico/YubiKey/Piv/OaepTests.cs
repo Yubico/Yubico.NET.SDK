@@ -18,62 +18,61 @@ using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public class OaepTests : PivSessionIntegrationTestBase
 {
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class OaepTests : PivSessionIntegrationTestBase
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void Parse_FromRsaClass(
+        StandardTestDevice testDeviceType)
     {
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void Parse_FromRsaClass(
-            StandardTestDevice testDeviceType)
+        // Arrange
+        TestDeviceType = testDeviceType;
+
+        var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(KeyType.RSA1024);
+        byte[] dataToEncrypt =
         {
-            // Arrange
-            TestDeviceType = testDeviceType;
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
+            0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
+        };
 
-            var (testPublicKey, testPrivateKey) = TestKeys.GetKeyPair(KeyType.RSA1024);
-            byte[] dataToEncrypt =
-            {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
-                0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
-            };
+        using var rsaPublic = testPublicKey.AsRSA();
+        var encryptedData = rsaPublic.Encrypt(dataToEncrypt, RSAEncryptionPadding.OaepSHA1);
+        Assert.Equal(128, encryptedData.Length);
 
-            using var rsaPublic = testPublicKey.AsRSA();
-            var encryptedData = rsaPublic.Encrypt(dataToEncrypt, RSAEncryptionPadding.OaepSHA1);
-            Assert.Equal(128, encryptedData.Length);
+        var isValid = CryptoSupport.CSharpRawRsaPrivate(testPrivateKey, encryptedData, out var formattedData);
+        Assert.True(isValid);
+        Assert.Equal(128, formattedData.Length);
 
-            var isValid = CryptoSupport.CSharpRawRsaPrivate(testPrivateKey, encryptedData, out var formattedData);
-            Assert.True(isValid);
-            Assert.Equal(128, formattedData.Length);
+        isValid = RsaFormat.TryParsePkcs1Oaep(
+            formattedData,
+            RsaFormat.Sha1,
+            out var decryptedData);
 
-            isValid = RsaFormat.TryParsePkcs1Oaep(
-                formattedData,
-                RsaFormat.Sha1,
-                out var decryptedData);
+        Assert.True(isValid);
+        Assert.Equal(32, decryptedData.Length);
 
-            Assert.True(isValid);
-            Assert.Equal(32, decryptedData.Length);
+        isValid = Session.TryAuthenticateManagementKey(false);
+        Assert.True(isValid);
 
-            isValid = Session.TryAuthenticateManagementKey(false);
-            Assert.True(isValid);
-            
-            isValid = Session.TryVerifyPin();
-            Assert.True(isValid);
+        isValid = Session.TryVerifyPin();
+        Assert.True(isValid);
 
-            Session.ImportPrivateKey(0x86, testPrivateKey.AsPrivateKey());
+        Session.ImportPrivateKey(0x86, testPrivateKey.AsPrivateKey());
 
-            var decryptCommand = new AuthenticateDecryptCommand(encryptedData, 0x86);
-            var decryptResponse = Session.Connection.SendCommand(decryptCommand);
-            Assert.Equal(ResponseStatus.Success, decryptResponse.Status);
-            
-            var yFormattedData = decryptResponse.GetData();
-            isValid = RsaFormat.TryParsePkcs1Oaep(
-                yFormattedData,
-                RsaFormat.Sha1,
-                out _);
+        var decryptCommand = new AuthenticateDecryptCommand(encryptedData, 0x86);
+        var decryptResponse = Session.Connection.SendCommand(decryptCommand);
+        Assert.Equal(ResponseStatus.Success, decryptResponse.Status);
 
-            Assert.True(isValid);
-            Assert.Equal(32, decryptedData.Length);
-        }
+        var yFormattedData = decryptResponse.GetData();
+        isValid = RsaFormat.TryParsePkcs1Oaep(
+            yFormattedData,
+            RsaFormat.Sha1,
+            out _);
+
+        Assert.True(isValid);
+        Assert.Equal(32, decryptedData.Length);
     }
 }

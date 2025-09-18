@@ -14,43 +14,45 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+/// <summary>
+///     Gets detailed information about the YubiKey and its current configuration.
+/// </summary>
+public sealed class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
 {
+    private const byte GetDeviceInfoInstruction = 0xC2;
+
     /// <summary>
-    /// Gets detailed information about the YubiKey and its current configuration.
+    ///     Constructs an instance of the <see cref="GetPagedDeviceInfoCommand" /> class.
     /// </summary>
-    public sealed class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
+    public GetPagedDeviceInfoCommand()
     {
-        private const byte GetDeviceInfoInstruction = 0xC2;
+    }
 
-        /// <inheritdoc />
-        public byte Page { get; set; }
+    #region IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse> Members
 
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.FidoU2f
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
+    /// <inheritdoc />
+    public byte Page { get; set; }
 
-        /// <summary>
-        /// Constructs an instance of the <see cref="GetPagedDeviceInfoCommand" /> class.
-        /// </summary>
-        public GetPagedDeviceInfoCommand()
-        {
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.FidoU2f
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
 
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = GetDeviceInfoInstruction,
             Data = new[] { Page }
         };
 
-        /// <inheritdoc />
-        public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetPagedDeviceInfoResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

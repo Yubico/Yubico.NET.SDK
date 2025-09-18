@@ -12,29 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+public enum CmDeviceProperty
 {
-    public enum CmDeviceProperty
-    {
-        DeviceDescription,
-        HardwareIds,
-        CompatibleIds,
-        Service,
-        Class,
-        ClassGuid,
-        Driver,
-        Manufacturer,
-        FriendlyName,
-        LocationInfo,
-        PdoName,
-        LocationPaths,
-        InstanceId,
-        DevNodeStatus,
-        ProblemCode,
-        Parent,
-        Children,
-        Siblings,
-        Model,
-        ContainerId,
-    }
+    DeviceDescription,
+    HardwareIds,
+    CompatibleIds,
+    Service,
+    Class,
+    ClassGuid,
+    Driver,
+    Manufacturer,
+    FriendlyName,
+    LocationInfo,
+    PdoName,
+    LocationPaths,
+    InstanceId,
+    DevNodeStatus,
+    ProblemCode,
+    Parent,
+    Children,
+    Siblings,
+    Model,
+    ContainerId
 }

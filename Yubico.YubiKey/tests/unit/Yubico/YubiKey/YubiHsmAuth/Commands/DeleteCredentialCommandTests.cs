@@ -15,211 +15,211 @@
 using System;
 using System.Text;
 using Xunit;
-using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+public class DeleteCredentialCommandTests
 {
-    public class DeleteCredentialCommandTests
+    private static readonly byte[] _mgmtKey =
+        new byte[16] { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7 };
+
+    private static readonly string _label = "abc";
+
+    [Fact]
+    public void ConstructorMgmtKey_GivenMgmtKey_NoException()
     {
-        private static readonly byte[] _mgmtKey =
-            new byte[16] { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7 };
-        private static readonly string _label = "abc";
+        _ = new DeleteCredentialCommand(_mgmtKey);
+    }
 
-        [Fact]
-        public void ConstructorMgmtKey_GivenMgmtKey_NoException()
+    [Theory]
+    [InlineData(15)]
+    [InlineData(17)]
+    public void CtorMgmtKey_GivenInvalidLength_ThrowsArgException(
+        int length)
+    {
+        var invalidMgmtKey = new byte[length];
+
+        _ = Assert.Throws<ArgumentException>(() => new DeleteCredentialCommand(invalidMgmtKey));
+    }
+
+    [Fact]
+    public void ConstructorMgmtKeyLabel_ValidInputs_LabelMatchesInput()
+    {
+        var cmd =
+            new DeleteCredentialCommand(_mgmtKey, _label);
+
+        Assert.Equal(_label, cmd.Label);
+    }
+
+    [Theory]
+    [InlineData(15)]
+    [InlineData(17)]
+    public void CtorMgmtKeyLabel_InvalidMgmtKeyLength_ThrowsArgException(
+        int length)
+    {
+        var invalidMgmtKey = new byte[length];
+
+        _ = Assert.Throws<ArgumentException>(() => new DeleteCredentialCommand(invalidMgmtKey, _label));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(65)]
+    public void CtorMgmtKeyLabel_InvalidLabelLength_ThrowsArgException(
+        int length)
+    {
+        var invalidLabel = new string('a', length);
+
+        _ = Assert.ThrowsAny<ArgumentException>(() => new DeleteCredentialCommand(_mgmtKey, invalidLabel));
+    }
+
+    [Fact]
+    public void Label_SetGetValidString_ReturnsMatchingString()
+    {
+        var cmd = new DeleteCredentialCommand(_mgmtKey)
         {
-            _ = new DeleteCredentialCommand(_mgmtKey);
+            Label = _label
+        };
+
+        Assert.Equal(_label, cmd.Label);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(65)]
+    public void Label_SetInvalidLabelLength_ThrowsArgException(
+        int length)
+    {
+        var invalidLabel = new string('a', length);
+
+        var cmd = new DeleteCredentialCommand(_mgmtKey);
+
+        _ = Assert.ThrowsAny<ArgumentException>(() => cmd.Label = invalidLabel);
+    }
+
+    [Fact]
+    public void Application_Get_ReturnsYubiHsmAuth()
+    {
+        var command =
+            new DeleteCredentialCommand(_mgmtKey);
+
+        Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_Cla0()
+    {
+        var command =
+            new DeleteCredentialCommand(_mgmtKey, _label);
+        var apdu = command.CreateCommandApdu();
+
+        Assert.Equal(0, apdu.Cla);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_Ins0x02()
+    {
+        var command =
+            new DeleteCredentialCommand(_mgmtKey, _label);
+        var apdu = command.CreateCommandApdu();
+
+        Assert.Equal(0x02, apdu.Ins);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_P1Is0()
+    {
+        var command =
+            new DeleteCredentialCommand(_mgmtKey, _label);
+        var apdu = command.CreateCommandApdu();
+
+        Assert.Equal(0, apdu.P1);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_P2Is0()
+    {
+        var command =
+            new DeleteCredentialCommand(_mgmtKey, _label);
+        var apdu = command.CreateCommandApdu();
+
+        Assert.Equal(0, apdu.P2);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_DataContainsMgmtKeyTag()
+    {
+        var command =
+            new DeleteCredentialCommand(_mgmtKey, _label);
+        var apdu = command.CreateCommandApdu();
+
+        var reader = new TlvReader(apdu.Data);
+        var tag = reader.PeekTag();
+        while (reader.HasData && tag != 0x7b)
+        {
+            _ = reader.ReadValue(tag);
+            tag = reader.PeekTag();
         }
 
-        [Theory]
-        [InlineData(15)]
-        [InlineData(17)]
-        public void CtorMgmtKey_GivenInvalidLength_ThrowsArgException(int length)
-        {
-            byte[] invalidMgmtKey = new byte[length];
+        Assert.Equal(0x7b, tag);
+    }
 
-            _ = Assert.Throws<ArgumentException>(
-                () => new DeleteCredentialCommand(invalidMgmtKey));
+    [Fact]
+    public void CreateCommandApdu_DataContainsMgmtKeyValue()
+    {
+        var command =
+            new DeleteCredentialCommand(_mgmtKey, _label);
+        var apdu = command.CreateCommandApdu();
+
+        var reader = new TlvReader(apdu.Data);
+        var tag = reader.PeekTag();
+        while (reader.HasData && tag != 0x7b)
+        {
+            _ = reader.ReadValue(tag);
+            tag = reader.PeekTag();
         }
 
-        [Fact]
-        public void ConstructorMgmtKeyLabel_ValidInputs_LabelMatchesInput()
-        {
-            var cmd =
-                new DeleteCredentialCommand(_mgmtKey, _label);
+        var value = reader.ReadValue(tag).ToArray();
 
-            Assert.Equal(_label, cmd.Label);
+        Assert.Equal(_mgmtKey, value);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_DataContainsLabelTag()
+    {
+        var command =
+            new DeleteCredentialCommand(_mgmtKey, _label);
+        var apdu = command.CreateCommandApdu();
+
+        var reader = new TlvReader(apdu.Data);
+        var tag = reader.PeekTag();
+        while (reader.HasData && tag != 0x71)
+        {
+            _ = reader.ReadValue(tag);
+            tag = reader.PeekTag();
         }
 
-        [Theory]
-        [InlineData(15)]
-        [InlineData(17)]
-        public void CtorMgmtKeyLabel_InvalidMgmtKeyLength_ThrowsArgException(int length)
-        {
-            byte[] invalidMgmtKey = new byte[length];
+        Assert.Equal(0x71, tag);
+    }
 
-            _ = Assert.Throws<ArgumentException>(
-                () => new DeleteCredentialCommand(invalidMgmtKey, _label));
+    [Fact]
+    public void CreateCommandApdu_DataContainsLabelValue()
+    {
+        var command =
+            new DeleteCredentialCommand(_mgmtKey, _label);
+        var apdu = command.CreateCommandApdu();
+
+        var reader = new TlvReader(apdu.Data);
+        var tag = reader.PeekTag();
+        while (reader.HasData && tag != 0x71)
+        {
+            _ = reader.ReadValue(tag);
+            tag = reader.PeekTag();
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(65)]
-        public void CtorMgmtKeyLabel_InvalidLabelLength_ThrowsArgException(int length)
-        {
-            string invalidLabel = new string('a', length);
+        var value = reader.ReadString(tag, Encoding.UTF8);
 
-            _ = Assert.ThrowsAny<ArgumentException>(
-                () => new DeleteCredentialCommand(_mgmtKey, invalidLabel));
-        }
-
-        [Fact]
-        public void Label_SetGetValidString_ReturnsMatchingString()
-        {
-            var cmd = new DeleteCredentialCommand(_mgmtKey)
-            {
-                Label = _label
-            };
-
-            Assert.Equal(_label, cmd.Label);
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(65)]
-        public void Label_SetInvalidLabelLength_ThrowsArgException(int length)
-        {
-            string invalidLabel = new string('a', length);
-
-            var cmd = new DeleteCredentialCommand(_mgmtKey);
-
-            _ = Assert.ThrowsAny<ArgumentException>(() => cmd.Label = invalidLabel);
-        }
-
-        [Fact]
-        public void Application_Get_ReturnsYubiHsmAuth()
-        {
-            var command =
-                new DeleteCredentialCommand(_mgmtKey);
-
-            Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_Cla0()
-        {
-            var command =
-                new DeleteCredentialCommand(_mgmtKey, _label);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            Assert.Equal(0, apdu.Cla);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_Ins0x02()
-        {
-            var command =
-                new DeleteCredentialCommand(_mgmtKey, _label);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            Assert.Equal(0x02, apdu.Ins);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_P1Is0()
-        {
-            var command =
-                new DeleteCredentialCommand(_mgmtKey, _label);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            Assert.Equal(0, apdu.P1);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_P2Is0()
-        {
-            var command =
-                new DeleteCredentialCommand(_mgmtKey, _label);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            Assert.Equal(0, apdu.P2);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_DataContainsMgmtKeyTag()
-        {
-            var command =
-                new DeleteCredentialCommand(_mgmtKey, _label);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            var reader = new TlvReader(apdu.Data);
-            int tag = reader.PeekTag();
-            while (reader.HasData && tag != 0x7b)
-            {
-                _ = reader.ReadValue(tag);
-                tag = reader.PeekTag();
-            }
-
-            Assert.Equal(0x7b, tag);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_DataContainsMgmtKeyValue()
-        {
-            var command =
-                new DeleteCredentialCommand(_mgmtKey, _label);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            var reader = new TlvReader(apdu.Data);
-            int tag = reader.PeekTag();
-            while (reader.HasData && tag != 0x7b)
-            {
-                _ = reader.ReadValue(tag);
-                tag = reader.PeekTag();
-            }
-
-            byte[] value = reader.ReadValue(tag).ToArray();
-
-            Assert.Equal(_mgmtKey, value);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_DataContainsLabelTag()
-        {
-            var command =
-                new DeleteCredentialCommand(_mgmtKey, _label);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            var reader = new TlvReader(apdu.Data);
-            int tag = reader.PeekTag();
-            while (reader.HasData && tag != 0x71)
-            {
-                _ = reader.ReadValue(tag);
-                tag = reader.PeekTag();
-            }
-
-            Assert.Equal(0x71, tag);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_DataContainsLabelValue()
-        {
-            var command =
-                new DeleteCredentialCommand(_mgmtKey, _label);
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            var reader = new TlvReader(apdu.Data);
-            int tag = reader.PeekTag();
-            while (reader.HasData && tag != 0x71)
-            {
-                _ = reader.ReadValue(tag);
-                tag = reader.PeekTag();
-            }
-
-            string value = reader.ReadString(tag, Encoding.UTF8);
-
-            Assert.Equal(_label, value);
-        }
+        Assert.Equal(_label, value);
     }
 }

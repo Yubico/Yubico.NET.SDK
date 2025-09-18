@@ -12,81 +12,79 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+public class GetSerialNumberCommandTests
 {
-    public class GetSerialNumberCommandTests
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
     {
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
-        {
-            var command = new GetSerialNumberCommand();
+        var command = new GetSerialNumberCommand();
 
-            byte cla = command.CreateCommandApdu().Cla;
+        var cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(0, cla);
-        }
+        Assert.Equal(0, cla);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_ReturnsHex01()
-        {
-            var command = new GetSerialNumberCommand();
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_ReturnsHex01()
+    {
+        var command = new GetSerialNumberCommand();
 
-            byte ins = command.CreateCommandApdu().Ins;
+        var ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(1, ins);
-        }
+        Assert.Equal(1, ins);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP1Property_ReturnsHex10()
-        {
-            var command = new GetSerialNumberCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP1Property_ReturnsHex10()
+    {
+        var command = new GetSerialNumberCommand();
 
-            byte p1 = command.CreateCommandApdu().P1;
+        var p1 = command.CreateCommandApdu().P1;
 
-            Assert.Equal(0x10, p1);
-        }
+        Assert.Equal(0x10, p1);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsZero()
-        {
-            var command = new GetSerialNumberCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsZero()
+    {
+        var command = new GetSerialNumberCommand();
 
-            byte p2 = command.CreateCommandApdu().P2;
+        var p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(0, p2);
-        }
+        Assert.Equal(0, p2);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetData_ReturnsEmpty()
-        {
-            var command = new GetSerialNumberCommand();
+    [Fact]
+    public void CreateCommandApdu_GetData_ReturnsEmpty()
+    {
+        var command = new GetSerialNumberCommand();
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+        var data = command.CreateCommandApdu().Data;
 
-            Assert.True(data.IsEmpty);
-        }
+        Assert.True(data.IsEmpty);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNc_ReturnsZero()
-        {
-            var command = new GetSerialNumberCommand();
+    [Fact]
+    public void CreateCommandApdu_GetNc_ReturnsZero()
+    {
+        var command = new GetSerialNumberCommand();
 
-            int nc = command.CreateCommandApdu().Nc;
+        var nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(0, nc);
-        }
+        Assert.Equal(0, nc);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNe_ReturnsZero()
-        {
-            var command = new GetSerialNumberCommand();
+    [Fact]
+    public void CreateCommandApdu_GetNe_ReturnsZero()
+    {
+        var command = new GetSerialNumberCommand();
 
-            int ne = command.CreateCommandApdu().Ne;
+        var ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(0, ne);
-        }
+        Assert.Equal(0, ne);
     }
 }

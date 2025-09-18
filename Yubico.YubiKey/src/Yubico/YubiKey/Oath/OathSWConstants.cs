@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Oath
+namespace Yubico.YubiKey.Oath;
+
+public static class OathSWConstants
 {
-    public static class OathSWConstants
-    {
-        public const short GenericError = 0x6581;
-        public const short WrongSyntax = 0x6A80;
-        public const short NoSuchObject = 0x6984;
-    }
+    public const short GenericError = 0x6581;
+    public const short WrongSyntax = 0x6A80;
+    public const short NoSuchObject = 0x6984;
 }

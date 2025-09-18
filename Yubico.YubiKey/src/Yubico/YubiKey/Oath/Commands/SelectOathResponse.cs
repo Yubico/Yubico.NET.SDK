@@ -15,97 +15,101 @@
 using System;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.InterIndustry.Commands;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+/// <summary>
+///     The response to the <see cref="SelectOathCommand" /> command, containing the YubiKey's OATH application info.
+/// </summary>
+public class SelectOathResponse : OathResponse, ISelectApplicationResponse<OathApplicationData>
 {
+    private const byte VersionTag = 0x79;
+    private const byte NameTag = 0x71;
+    private const byte ChallengeTag = 0x74;
+    private const byte AlgorithmTag = 0x7B;
+
     /// <summary>
-    /// The response to the <see cref="SelectOathCommand"/> command, containing the YubiKey's OATH application info.
+    ///     Constructs a SelectResponse instance based on a ResponseApdu received from the YubiKey.
     /// </summary>
-    public class SelectOathResponse : OathResponse, InterIndustry.Commands.ISelectApplicationResponse<OathApplicationData>
+    /// <param name="responseApdu">
+    ///     The ResponseApdu returned by the YubiKey.
+    /// </param>
+    public SelectOathResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        private const byte VersionTag = 0x79;
-        private const byte NameTag = 0x71;
-        private const byte ChallengeTag = 0x74;
-        private const byte AlgorithmTag = 0x7B;
-
-        /// <summary>
-        /// Constructs a SelectResponse instance based on a ResponseApdu received from the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
-        /// </param>
-        public SelectOathResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-        }
-
-        /// <summary>
-        /// Gets the instance of the <see cref="OathApplicationData"/> class.
-        /// </summary>
-        /// <returns>
-        /// The data in the response APDU, presented as a OATH application info.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="IYubiKeyResponse.Status"/> is not equal to <see cref="ResponseStatus.Success"/>.
-        /// </exception>
-        /// <exception cref="MalformedYubiKeyResponseException">
-        /// Thrown when the data provided does not meet the expectations, and cannot be parsed.
-        /// </exception>
-        public OathApplicationData GetData()
-        {
-            if (Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(StatusMessage);
-            }
-
-            FirmwareVersion? version = null;
-            var salt = ReadOnlyMemory<byte>.Empty;
-            var challenge = ReadOnlyMemory<byte>.Empty;
-            var algorithm = HashAlgorithm.Sha1;
-
-            var tlvReader = new TlvReader(ResponseApdu.Data);
-            while (tlvReader.HasData)
-            {
-                switch (tlvReader.PeekTag())
-                {
-                    case VersionTag:
-                        var firmwareValue = tlvReader.ReadValue(VersionTag).Span;
-                        version = new FirmwareVersion
-                        {
-                            Major = firmwareValue[0],
-                            Minor = firmwareValue[1],
-                            Patch = firmwareValue[2]
-                        };
-                        break;
-
-                    case NameTag:
-                        salt = tlvReader.ReadValue(NameTag);
-                        break;
-
-                    case ChallengeTag:
-                        challenge = tlvReader.ReadValue(ChallengeTag);
-                        break;
-
-                    case AlgorithmTag:
-                        algorithm = (HashAlgorithm)tlvReader.ReadByte(AlgorithmTag);
-                        break;
-
-                    default:
-                        throw new MalformedYubiKeyResponseException()
-                        {
-                            ResponseClass = nameof(SelectOathResponse),
-                            ActualDataLength = ResponseApdu.Data.Length,
-                        };
-                }
-            }
-
-            if (version is null)
-            {
-                throw new ArgumentNullException(nameof(version));
-            }
-
-            return new OathApplicationData(ResponseApdu.Data, version, salt, challenge, algorithm);
-        }
     }
-}
 
+    #region ISelectApplicationResponse<OathApplicationData> Members
+
+    /// <summary>
+    ///     Gets the instance of the <see cref="OathApplicationData" /> class.
+    /// </summary>
+    /// <returns>
+    ///     The data in the response APDU, presented as a OATH application info.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown when <see cref="IYubiKeyResponse.Status" /> is not equal to <see cref="ResponseStatus.Success" />.
+    /// </exception>
+    /// <exception cref="MalformedYubiKeyResponseException">
+    ///     Thrown when the data provided does not meet the expectations, and cannot be parsed.
+    /// </exception>
+    public OathApplicationData GetData()
+    {
+        if (Status != ResponseStatus.Success)
+        {
+            throw new InvalidOperationException(StatusMessage);
+        }
+
+        FirmwareVersion? version = null;
+        var salt = ReadOnlyMemory<byte>.Empty;
+        var challenge = ReadOnlyMemory<byte>.Empty;
+        var algorithm = HashAlgorithm.Sha1;
+
+        var tlvReader = new TlvReader(ResponseApdu.Data);
+        while (tlvReader.HasData)
+        {
+            switch (tlvReader.PeekTag())
+            {
+                case VersionTag:
+                    var firmwareValue = tlvReader.ReadValue(VersionTag).Span;
+                    version = new FirmwareVersion
+                    {
+                        Major = firmwareValue[0],
+                        Minor = firmwareValue[1],
+                        Patch = firmwareValue[2]
+                    };
+
+                    break;
+
+                case NameTag:
+                    salt = tlvReader.ReadValue(NameTag);
+                    break;
+
+                case ChallengeTag:
+                    challenge = tlvReader.ReadValue(ChallengeTag);
+                    break;
+
+                case AlgorithmTag:
+                    algorithm = (HashAlgorithm)tlvReader.ReadByte(AlgorithmTag);
+                    break;
+
+                default:
+                    throw new MalformedYubiKeyResponseException
+                    {
+                        ResponseClass = nameof(SelectOathResponse),
+                        ActualDataLength = ResponseApdu.Data.Length
+                    };
+            }
+        }
+
+        if (version is null)
+        {
+            throw new ArgumentNullException(nameof(version));
+        }
+
+        return new OathApplicationData(ResponseApdu.Data, version, salt, challenge, algorithm);
+    }
+
+    #endregion
+}

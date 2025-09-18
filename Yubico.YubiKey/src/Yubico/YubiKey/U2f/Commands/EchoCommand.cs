@@ -15,79 +15,81 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+/// <summary>
+///     Sends data to the YubiKey which immediately echoes the same
+///     data back.
+/// </summary>
+/// <remarks>
+///     <para>
+///         This command is defined to be a uniform function for debugging,
+///         latency, and performance measurements.
+///     </para>
+///     <para>
+///         Behavior for <see cref="Data" /> larger than 1024 bytes is undefined.
+///     </para>
+/// </remarks>
+public sealed class EchoCommand : IYubiKeyCommand<EchoResponse>
 {
+    private const byte Ctap1MessageInstruction = 0x03;
+    private const byte EchoInstruction = 0x40;
+
     /// <summary>
-    /// Sends data to the YubiKey which immediately echoes the same
-    /// data back.
+    ///     Constructs an instance of the <see cref="EchoCommand" /> class.
+    /// </summary>
+    public EchoCommand()
+    {
+    }
+
+    /// <summary>
+    ///     Constructs an instance of the <see cref="EchoCommand" /> class with
+    ///     the data to send to the YubiKey.
+    /// </summary>
+    /// <param name="data">
+    ///     The data to send to the YubiKey. See <see cref="Data" />.
+    /// </param>
+    public EchoCommand(ReadOnlyMemory<byte> data)
+    {
+        Data = data;
+    }
+
+    /// <summary>
+    ///     The data to send to the YubiKey.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// This command is defined to be a uniform function for debugging,
-    /// latency, and performance measurements.
-    /// </para>
-    /// <para>
-    /// Behavior for <see cref="Data"/> larger than 1024 bytes is undefined.
-    /// </para>
+    ///     Behavior for <see cref="Data" /> larger than 1024 bytes is undefined.
     /// </remarks>
-    public sealed class EchoCommand : IYubiKeyCommand<EchoResponse>
+    public ReadOnlyMemory<byte> Data { get; set; }
+
+    #region IYubiKeyCommand<EchoResponse> Members
+
+    /// <summary>
+    ///     The YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     <see cref="YubiKeyApplication.FidoU2f" />
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu()
     {
-        private const byte Ctap1MessageInstruction = 0x03;
-        private const byte EchoInstruction = 0x40;
-
-        /// <summary>
-        /// The data to send to the YubiKey.
-        /// </summary>
-        /// <remarks>
-        /// Behavior for <see cref="Data"/> larger than 1024 bytes is undefined.
-        /// </remarks>
-        public ReadOnlyMemory<byte> Data { get; set; }
-
-        /// <summary>
-        /// The YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.FidoU2f"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="EchoCommand"/> class.
-        /// </summary>
-        public EchoCommand()
+        var innerEchoCommand = new CommandApdu
         {
-        }
+            Ins = EchoInstruction,
+            Data = Data.ToArray()
+        };
 
-        /// <summary>
-        /// Constructs an instance of the <see cref="EchoCommand"/> class with
-        /// the data to send to the YubiKey.
-        /// </summary>
-        /// <param name="data">
-        /// The data to send to the YubiKey. See <see cref="Data"/>.
-        /// </param>
-        public EchoCommand(ReadOnlyMemory<byte> data)
+        return new CommandApdu
         {
-            Data = data;
-        }
-
-        /// <inheritdoc/>
-        public CommandApdu CreateCommandApdu()
-        {
-            var innerEchoCommand = new CommandApdu()
-            {
-                Ins = EchoInstruction,
-                Data = Data.ToArray(),
-            };
-
-            return new CommandApdu()
-            {
-                Ins = Ctap1MessageInstruction,
-                Data = innerEchoCommand.AsByteArray(ApduEncoding.ExtendedLength),
-            };
-        }
-
-        /// <inheritdoc/>
-        public EchoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new EchoResponse(responseApdu);
+            Ins = Ctap1MessageInstruction,
+            Data = innerEchoCommand.AsByteArray(ApduEncoding.ExtendedLength)
+        };
     }
+
+    /// <inheritdoc />
+    public EchoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

@@ -16,54 +16,56 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+public class AuthenticateResponseTests
 {
-    public class AuthenticateResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
-        {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void action() => _ = new AuthenticateResponse(null);
+        static void action()
+        {
+            _ = new AuthenticateResponse(null);
+        }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            _ = Assert.Throws<ArgumentNullException>(action);
-        }
+        _ = Assert.Throws<ArgumentNullException>(action);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
-            var authResponse = new AuthenticateResponse(responseApdu);
+        var authResponse = new AuthenticateResponse(responseApdu);
 
-            Assert.Equal(SWConstants.Success, authResponse.StatusWord);
-        }
+        Assert.Equal(SWConstants.Success, authResponse.StatusWord);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
-            var authResponse = new AuthenticateResponse(responseApdu);
+        var authResponse = new AuthenticateResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.Success, authResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.Success, authResponse.Status);
+    }
 
-        [Fact]
-        public void Constructor_ConditionsNotSatisfiedResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.ConditionsNotSatisfied >> 8));
-            byte sw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+    [Fact]
+    public void Constructor_ConditionsNotSatisfiedResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.ConditionsNotSatisfied >> 8));
+        var sw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
-            var authResponse = new AuthenticateResponse(responseApdu);
+        var authResponse = new AuthenticateResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.ConditionsNotSatisfied, authResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.ConditionsNotSatisfied, authResponse.Status);
     }
 }

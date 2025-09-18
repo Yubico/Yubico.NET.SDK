@@ -18,587 +18,594 @@ using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+// This portion of the Fido2Session class deals with the Credential
+// Management operations.
+public sealed partial class Fido2Session
 {
-    // This portion of the Fido2Session class deals with the Credential
-    // Management operations.
-    public sealed partial class Fido2Session
+    private Memory<byte>? _authTokenPersistent;
+
+    /// <summary>
+    ///     The Persistent PinUvAuthToken (PPUAT) which can be set by the user upon instantiation of the Fido2Session
+    ///     or automatically by the SDK when calling certain credential management operations such as
+    ///     <see cref="EnumerateRelyingParties" />,
+    ///     <see cref="EnumerateCredentialsForRelyingParty(RelyingParty)" />,
+    ///     <see cref="GetCredentialMetadata" />,
+    ///     to later be reused for read only operations within credential management.
+    ///     <remarks>
+    ///         Note: this is the decrypted PPUAT. The SDK will dispose of this when the Fido2Session is disposed.
+    ///     </remarks>
+    ///     See <see cref="PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly" /> for more information.
+    /// </summary>
+    public ReadOnlyMemory<byte>? AuthTokenPersistent
     {
-        private Memory<byte>? _authTokenPersistent;
-
-        /// <summary>
-        /// The Persistent PinUvAuthToken (PPUAT) which can be set by the user upon instantiation of the Fido2Session
-        /// or automatically by the SDK when calling certain credential management operations such as 
-        /// <see cref="EnumerateRelyingParties"/>, 
-        /// <see cref="EnumerateCredentialsForRelyingParty(RelyingParty)"/>, 
-        /// <see cref="GetCredentialMetadata"/>, 
-        /// to later be reused for read only operations within credential management.
-        /// <remarks>
-        /// Note: this is the decrypted PPUAT. The SDK will dispose of this when the Fido2Session is disposed.
-        /// </remarks>
-        /// See <see cref="PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly"/> for more information.
-        /// </summary>
-        public ReadOnlyMemory<byte>? AuthTokenPersistent
+        get
         {
-            get
-            {
-                if (_authTokenPersistent is null ||
-                    _authTokenPersistent?.Length == 0 ||
-                    !_authTokenPersistent.HasValue)
-                {
-                    return null;
-                }
-
-                return _authTokenPersistent.Value;
-            }
-        }
-
-        /// <summary>
-        /// This performs the <c>getCredsMetadata</c> subcommand of the
-        /// <c>authenticatorCredentialManagement</c> command. It gets
-        /// metadata for all the credentials on the YubiKey.
-        /// </summary>
-        /// <remarks>
-        /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
-        /// on credential management.
-        /// <para>
-        /// This method returns a Tuple of two integers, the number of
-        /// discoverable credentials and the number of "slots" remaining. The
-        /// number of slots is the number of discoverable credentials the YubiKey
-        /// can still hold.
-        /// </para>
-        /// <para>
-        /// In order to execute, this method will need a PIN/UV auth param, which
-        /// is built using an AuthToken, which itself is built from the PIN and the
-        /// permissions, or UV and permissions. This method will need an
-        /// AuthToken with the permission
-        /// <see cref="PinUvAuthTokenPermissions.CredentialManagement"/>.
-        /// </para>
-        /// <para>
-        /// If there is no <c>Fido2Session</c> property <see cref="AuthToken"/>,
-        /// or it does not work (i.e. it is expired or does not have the
-        /// appropriate permission), this method will use the <c>KeyCollector</c>
-        /// to obtain a new one.
-        /// </para>
-        /// <para>
-        /// If you do not want to use a KeyCollector, you must verify the PIN
-        /// before calling, making sure the <c>CredentialManagement</c>
-        /// permission is set. See
-        /// <see cref="TryVerifyPin(ReadOnlyMemory{byte}, PinUvAuthTokenPermissions?, string?, out int?, out bool?)"/>
-        /// <code language="csharp">
-        ///   bool isVerified = fido2Session.TryVerifyPin(
-        ///       currentPin, PinUvAuthTokenPermissions.CredentialManagement,
-        ///       null, out int _, out bool _);
-        /// </code>
-        /// </para>
-        /// </remarks>
-        /// <returns>
-        /// Two integers, the number of discoverable credentials in the YubiKey's
-        /// FIDO2 application and the number of discoverable credentials for
-        /// which it has space.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// The connected YubiKey does not support CredentialManagement, or the
-        /// PIN was invalid, or there was no KeyCollector.
-        /// </exception>
-        /// <exception cref="OperationCanceledException">
-        /// The user canceled the operation while collecting the PIN.
-        /// </exception>
-        /// <exception cref="System.Security.SecurityException">
-        /// The PIN retry count was exhausted.
-        /// </exception>
-        public (int discoverableCredentialCount, int remainingCredentialCount) GetCredentialMetadata()
-        {
-            Logger.LogInformation("Get credential metadata.");
-
-            using var currentToken = GetPreferredCredMgmtToken();
-
-            byte[] message = GetCredentialMetadataCommand.GetAuthenticationMessage();
-            byte[] authParam = AuthProtocol.Authenticate(currentToken.Value, message);
-
-            bool isPreview = CredMgmtGetIsPreview();
-            var command = new GetCredentialMetadataCommand(authParam, AuthProtocol.Protocol)
-            {
-                IsPreview = isPreview
-            };
-
-            var response = Connection.SendCommand(command);
-            if (response.CtapStatus == CtapStatus.PinAuthInvalid)
-            {
-                var savePermissions = AuthTokenPermissions;
-                string? saveRpId = AuthTokenRelyingPartyId;
-                AuthTokenPermissions = null;
-                AuthTokenRelyingPartyId = null;
-                try
-                {
-                    using var nextToken = GetPreferredCredMgmtToken(requestNewToken: true);
-
-                    authParam = AuthProtocol.Authenticate(nextToken.Value, message);
-                    command = new GetCredentialMetadataCommand(authParam, AuthProtocol.Protocol)
-                    {
-                        IsPreview = isPreview
-                    };
-
-                    response = Connection.SendCommand(command);
-                }
-                finally
-                {
-                    AuthTokenPermissions = savePermissions | PinUvAuthTokenPermissions.CredentialManagement;
-                    AuthTokenRelyingPartyId = saveRpId;
-                }
-            }
-
-            return response.GetData();
-        }
-
-        /// <summary>
-        /// This performs the <c>enumerateRPs</c> (Begin and GetNextRP)
-        /// subcommands of the <c>authenticatorCredentialManagement</c> command.
-        /// It gets a list of all the relying parties represented in all the
-        /// discoverable credentials on the YubiKey.
-        /// </summary>
-        /// <remarks>
-        /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
-        /// on credential management.
-        /// <para>
-        /// This method returns a list of <see cref="RelyingParty"/> objects.
-        /// Each object contains information about one of the relying parties
-        /// represented on the YubiKey. If there are no discoverable credentials
-        /// on the YubiKey, then the list will have no elements (<c>Count</c>
-        /// will be zero).
-        /// </para>
-        /// <para>
-        /// Note that other FIDO2 operations require the "RelyingPartyIdHash",
-        /// which is one of the properties of the RelyingParty object.
-        /// </para>
-        /// </remarks>
-        /// <returns>
-        /// A list of <c>RelyingParty</c> objects.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// The connected YubiKey does not support CredentialManagement, or the
-        /// PIN was invalid, or there was no KeyCollector.
-        /// </exception>
-        /// <exception cref="OperationCanceledException">
-        /// The user canceled the operation while collecting the PIN.
-        /// </exception>
-        /// <exception cref="System.Security.SecurityException">
-        /// The PIN retry count was exhausted.
-        /// </exception>
-        public IReadOnlyList<RelyingParty> EnumerateRelyingParties()
-        {
-            Logger.LogInformation("Enumerate relying parties.");
-
-            bool isPreview = CredMgmtGetIsPreview();
-            using var currentToken = GetPreferredCredMgmtToken();
-
-            byte[] message = EnumerateRpsBeginCommand.GetAuthenticationMessage();
-            byte[] authParam = AuthProtocol.Authenticate(currentToken.Value, message);
-            var command = new EnumerateRpsBeginCommand(authParam, AuthProtocol.Protocol)
-            {
-                IsPreview = isPreview
-            };
-
-            var response = Connection.SendCommand(command);
-            if (response.CtapStatus == CtapStatus.PinAuthInvalid)
-            {
-                var savePermissions = AuthTokenPermissions;
-                string? saveRpId = AuthTokenRelyingPartyId;
-                AuthTokenPermissions = null;
-                AuthTokenRelyingPartyId = null;
-                try
-                {
-                    using var nextToken = GetPreferredCredMgmtToken(requestNewToken: true);
-
-                    authParam = AuthProtocol.Authenticate(nextToken.Value, message);    
-                    command = new EnumerateRpsBeginCommand(authParam, AuthProtocol.Protocol)
-                    {
-                        IsPreview = isPreview
-                    };
-
-                    response = Connection.SendCommand(command);
-                }
-                finally
-                {
-                    AuthTokenPermissions = savePermissions | PinUvAuthTokenPermissions.CredentialManagement;
-                    AuthTokenRelyingPartyId = saveRpId;
-                }
-            }
-
-            if (response.CtapStatus == CtapStatus.NoCredentials)
-            {
-                return new List<RelyingParty>();
-            }
-
-            (int rpCount, var firstRp) = response.GetData();
-
-            var returnValue = new List<RelyingParty>(rpCount)
-            {
-                firstRp
-            };
-
-            var nextCmd = new EnumerateRpsGetNextCommand()
-            {
-                IsPreview = isPreview
-            };
-
-            for (int index = 1; index < rpCount; index++)
-            {
-                var nextResponse = Connection.SendCommand(nextCmd);
-                returnValue.Add(nextResponse.GetData());
-            }
-
-            return returnValue;
-        }
-
-        /// <summary>
-        /// This performs the <c>enumerateCredentials</c> (Begin and
-        /// GetNextCredential) subcommands of the
-        /// <c>authenticatorCredentialManagement</c> command. It gets a list of
-        /// all the credentials associated with a specified relying party.
-        /// </summary>
-        /// <remarks>
-        /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
-        /// on credential management.
-        /// <para>
-        /// This method returns a list of <see cref="CredentialUserInfo"/>
-        /// objects. Each object contains information about one of the
-        /// discoverable credentials associated with the specified relying party
-        /// on the YubiKey. If there are no discoverable credentials on the
-        /// YubiKey associated with the relying party, then the list will have no
-        /// elements (<c>Count</c> will be zero).
-        /// </para>
-        /// <para>
-        /// The <c>CredentialUserInfo</c> object contains properties for
-        /// <see cref="CredentialUserInfo.CredentialId"/>,
-        /// <see cref="CredentialUserInfo.CredentialPublicKey"/>,
-        /// <see cref="CredentialUserInfo.CredProtectPolicy"/>, and possibly
-        /// <see cref="CredentialUserInfo.LargeBlobKey"/>,
-        /// </para>
-        /// </remarks>
-        /// <param name="relyingParty">
-        /// The relying party for which the list of credentials is requested.
-        /// </param>
-        /// <returns>
-        /// A list of <c>CredentialUserInfo</c> objects, one for each
-        /// credential.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// The connected YubiKey does not support CredentialManagement, or the
-        /// PIN was invalid, or there was no KeyCollector.
-        /// </exception>
-        /// <exception cref="OperationCanceledException">
-        /// The user canceled the operation while collecting the PIN.
-        /// </exception>
-        /// <exception cref="System.Security.SecurityException">
-        /// The PIN retry count was exhausted.
-        /// </exception>
-        public IReadOnlyList<CredentialUserInfo> EnumerateCredentialsForRelyingParty(RelyingParty relyingParty)
-        {
-            if (relyingParty is null)
-            {
-                throw new ArgumentNullException(nameof(relyingParty));
-            }
-
-            Logger.LogInformation("Enumerate credentials for relying party: " + relyingParty.Id + ".");
-
-            using var currentToken = GetPreferredCredMgmtToken();
-
-            byte[] message = EnumerateCredentialsBeginCommand.GetAuthenticationMessage(relyingParty);
-            byte[] authParam = AuthProtocol.Authenticate(currentToken.Value, message);
-            bool isPreview = CredMgmtGetIsPreview();
-            var command = new EnumerateCredentialsBeginCommand(relyingParty, authParam, AuthProtocol.Protocol)
-            {
-                IsPreview = isPreview
-            };
-
-            var response = Connection.SendCommand(command);
-            if (response.CtapStatus == CtapStatus.PinAuthInvalid)
-            {
-                if (AuthTokenRelyingPartyId is not null)
-                {
-                    AuthTokenRelyingPartyId = relyingParty.Id;
-                }
-
-                using var nextToken = GetPreferredCredMgmtToken(requestNewToken: true);
-
-                authParam = AuthProtocol.Authenticate(nextToken.Value, message);
-                command = new EnumerateCredentialsBeginCommand(
-                    relyingParty, authParam, AuthProtocol.Protocol)
-                {
-                    IsPreview = isPreview
-                };
-
-                response = Connection.SendCommand(command);
-            }
-
-            if (response.CtapStatus == CtapStatus.NoCredentials)
-            {
-                return new List<CredentialUserInfo>();
-            }
-
-            // This will return the data or throw an exception. We either have
-            // the data, have an error other than PinAuthInvalid, or we do have
-            // the error PinAuthInvalid but only after trying twice.
-            (int credCount, var userInfo) = response.GetData();
-
-            var returnValue = new List<CredentialUserInfo>(credCount)
-            {
-                userInfo
-            };
-
-            // Get the rest of the credentials. The
-            // EnumerateCredentialsGetNextCommand does not need the AuthToken.
-            var nextCmd = new EnumerateCredentialsGetNextCommand()
-            {
-                IsPreview = isPreview
-            };
-
-            for (int index = 1; index < credCount; index++)
-            {
-                var nextResponse = Connection.SendCommand(nextCmd);
-                returnValue.Add(nextResponse.GetData());
-            }
-
-            return returnValue;
-        }
-
-        /// <summary>
-        /// This performs the <c>deleteCredential</c> subcommand of the
-        /// <c>authenticatorCredentialManagement</c> command. It deletes the one
-        /// credential represented by the given <c>credentialId</c>.
-        /// </summary>
-        /// <remarks>
-        /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
-        /// on credential management.
-        /// <para>
-        /// If there is no credential with the given <c>credentialId</c> on the
-        /// YubiKey, this method will do nothing.
-        /// </para>
-        /// </remarks>
-        /// <param name="credentialId">
-        /// The ID of the credential to delete.
-        /// </param>
-        /// <exception cref="Fido2Exception">
-        /// The YubiKey was not able to delete the specified credential.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// The connected YubiKey does not support CredentialManagement, or the
-        /// PIN was invalid, or there was no KeyCollector.
-        /// </exception>
-        /// <exception cref="OperationCanceledException">
-        /// The user canceled the operation while collecting the PIN.
-        /// </exception>
-        /// <exception cref="System.Security.SecurityException">
-        /// The PIN retry count was exhausted.
-        /// </exception>
-        public void DeleteCredential(CredentialId credentialId)
-        {
-            Logger.LogInformation("Delete credential.");
-
-            var currentToken = GetAuthToken(
-                false, PinUvAuthTokenPermissions.CredentialManagement, null);
-
-            bool isPreview = CredMgmtGetIsPreview();
-            var command = new DeleteCredentialCommand(credentialId, currentToken, AuthProtocol)
-            {
-                IsPreview = isPreview
-            };
-
-            var response = Connection.SendCommand(command);
-            if (response.CtapStatus == CtapStatus.PinAuthInvalid)
-            {
-                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
-                command = new DeleteCredentialCommand(credentialId, currentToken, AuthProtocol)
-                {
-                    IsPreview = isPreview
-                };
-
-                response = Connection.SendCommand(command);
-            }
-
-            if (response.Status == ResponseStatus.Success || response.CtapStatus == CtapStatus.NoCredentials)
-            {
-                // After a credential has been deleted, the number of
-                // discoverable credentials can change. Hence, this operation can
-                // change the AuthenticatorInfo, so make sure if someone gets it,
-                // they get a new one.
-                _authenticatorInfo = null;
-                return;
-            }
-
-            // If the response is not Success, throw an exception.
-            throw new Fido2Exception(response.StatusMessage);
-        }
-
-        /// <summary>
-        /// This performs the <c>updateUserInformation</c> subcommand of the
-        /// <c>authenticatorCredentialManagement</c> command. It replaces the
-        /// user info in the credential represented by the given
-        /// <c>credentialId</c> with the given user data.
-        /// </summary>
-        /// <remarks>
-        /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
-        /// on credential management.
-        /// <para>
-        /// This method will replace all the user information currently stored
-        /// against the <c>credentialId</c> on the YubiKey. That is, it does not
-        /// "edit" the information. Hence, the <c>userEntity</c> you supply
-        /// should contain all the information you want stored, even if some of
-        /// that information is currently stored on the YubiKey.
-        /// </para>
-        /// <para>
-        /// If there is no credential with the given <c>credentialId</c> on the
-        /// YubiKey, this method will throw an exception
-        /// </para>
-        /// </remarks>
-        /// <param name="credentialId">
-        /// The ID of the credential to update.
-        /// </param>
-        /// <param name="newUserInfo">
-        /// An object containing the information that will replace the currently
-        /// stored info.
-        /// </param>
-        /// <exception cref="Fido2Exception">
-        /// There was no credential with the given ID.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// The connected YubiKey does not support CredentialManagement, or the
-        /// PIN was invalid, or there was no KeyCollector.
-        /// </exception>
-        /// <exception cref="OperationCanceledException">
-        /// The user canceled the operation while collecting the PIN.
-        /// </exception>
-        /// <exception cref="System.Security.SecurityException">
-        /// The PIN retry count was exhausted.
-        /// </exception>
-        public void UpdateUserInfoForCredential(CredentialId credentialId, UserEntity newUserInfo)
-        {
-            Logger.LogInformation("Update user information.");
-
-            var currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.CredentialManagement, null);
-
-            var command = new UpdateUserInfoCommand(credentialId, newUserInfo, currentToken, AuthProtocol);
-            var response = Connection.SendCommand(command);
-            if (response.CtapStatus == CtapStatus.PinAuthInvalid)
-            {
-                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
-                command = new UpdateUserInfoCommand(credentialId, newUserInfo, currentToken, AuthProtocol);
-                response = Connection.SendCommand(command);
-            }
-
-            if (response.Status == ResponseStatus.Success)
-            {
-                return;
-            }
-
-            throw new Fido2Exception(response.StatusMessage);
-        }
-
-        /// <summary>
-        /// Retrieves a persistent PIN/UV authentication token to be used with
-        /// FIDO2 credential management operations that require read-only access.
-        /// </summary>
-        /// <remarks>
-        /// The token is fetched if it does not already exist or if the caller explicitly requests a new token.
-        /// The YubiKey must support and return the `encIdentifier` in its `getInfo` response (YubiKeys v5.8.0 and later).
-        /// <para>
-        /// The token obtained is tied to the permission
-        /// <see cref="PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly"/>
-        /// and is used to authenticate operations requiring read-only credential
-        /// management.
-        /// </para>
-        /// <para>
-        /// If a token is already available and `requestNewToken` parameter is set to
-        /// `false`, the current token will be returned. Otherwise, a UV verification
-        /// process will be initiated to generate a new token.
-        /// </para>
-        /// </remarks>
-        /// <returns>
-        /// A <c>ReadOnlyMemory</c> object containing the persistent PIN/UV
-        /// authentication token, or <c>null</c> if the operation is unsuccessful.
-        /// </returns>
-        public ReadOnlyMemory<byte>? GetPersistentPinUvAuthToken() => GetReadOnlyCredMgmtToken(requestNewToken: true);
-
-        private bool CredMgmtGetIsPreview()
-        {
-            var cmValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.credMgmt);
-            if (cmValue == OptionValue.True)
-            {
-                return false;
-            }
-
-            cmValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.credentialMgmtPreview);
-            if (cmValue == OptionValue.True)
-            {
-                return true;
-            }
-
-            throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
-        }
-
-        private AuthToken GetPreferredCredMgmtToken(bool requestNewToken = false)
-        {
-            var readOnlyToken = GetReadOnlyCredMgmtToken(requestNewToken);
-            if (readOnlyToken is not null)
-            {
-                return new AuthToken(readOnlyToken.Value, PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly, null);
-            }
-
-            var fullToken = GetAuthToken(requestNewToken, PinUvAuthTokenPermissions.CredentialManagement, null);
-            return new AuthToken(AuthProtocol.Decrypt(fullToken), PinUvAuthTokenPermissions.CredentialManagement, null);
-        }
-
-
-        // This method will set the AuthTokenPersistent property if it
-        // successfully gets a persistent token.
-        private ReadOnlyMemory<byte>? GetReadOnlyCredMgmtToken(bool requestNewToken = false)
-        {
-            if (!YubiKey.HasFeature(YubiKeyFeature.FidoCtap22))
+            if (_authTokenPersistent is null ||
+                _authTokenPersistent?.Length == 0 ||
+                !_authTokenPersistent.HasValue)
             {
                 return null;
             }
 
-            if (AuthTokenPersistent is not null && !requestNewToken)
-            {
-                return AuthTokenPersistent;
-            }
-
-            // The methods used below will set/reset the AuthTokenPersistent
-            const PinUvAuthTokenPermissions permission = PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly;
-            var resultUv = DoVerifyUv(
-                permission, null, out string _);
-
-            if (resultUv != CtapStatus.Ok)
-            {
-                VerifyPin(permission);
-            }
-
-            return AuthTokenPersistent;
+            return _authTokenPersistent.Value;
         }
     }
-    internal sealed class AuthToken(
-        ReadOnlyMemory<byte> value,
-        PinUvAuthTokenPermissions permissions,
-        string? relyingPartyId) : IDisposable
+
+    /// <summary>
+    ///     This performs the <c>getCredsMetadata</c> subcommand of the
+    ///     <c>authenticatorCredentialManagement</c> command. It gets
+    ///     metadata for all the credentials on the YubiKey.
+    /// </summary>
+    /// <remarks>
+    ///     See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
+    ///     on credential management.
+    ///     <para>
+    ///         This method returns a Tuple of two integers, the number of
+    ///         discoverable credentials and the number of "slots" remaining. The
+    ///         number of slots is the number of discoverable credentials the YubiKey
+    ///         can still hold.
+    ///     </para>
+    ///     <para>
+    ///         In order to execute, this method will need a PIN/UV auth param, which
+    ///         is built using an AuthToken, which itself is built from the PIN and the
+    ///         permissions, or UV and permissions. This method will need an
+    ///         AuthToken with the permission
+    ///         <see cref="PinUvAuthTokenPermissions.CredentialManagement" />.
+    ///     </para>
+    ///     <para>
+    ///         If there is no <c>Fido2Session</c> property <see cref="AuthToken" />,
+    ///         or it does not work (i.e. it is expired or does not have the
+    ///         appropriate permission), this method will use the <c>KeyCollector</c>
+    ///         to obtain a new one.
+    ///     </para>
+    ///     <para>
+    ///         If you do not want to use a KeyCollector, you must verify the PIN
+    ///         before calling, making sure the <c>CredentialManagement</c>
+    ///         permission is set. See
+    ///         <see cref="TryVerifyPin(ReadOnlyMemory{byte}, PinUvAuthTokenPermissions?, string?, out int?, out bool?)" />
+    ///         <code language="csharp">
+    ///   bool isVerified = fido2Session.TryVerifyPin(
+    ///       currentPin, PinUvAuthTokenPermissions.CredentialManagement,
+    ///       null, out int _, out bool _);
+    /// </code>
+    ///     </para>
+    /// </remarks>
+    /// <returns>
+    ///     Two integers, the number of discoverable credentials in the YubiKey's
+    ///     FIDO2 application and the number of discoverable credentials for
+    ///     which it has space.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    ///     The connected YubiKey does not support CredentialManagement, or the
+    ///     PIN was invalid, or there was no KeyCollector.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    ///     The user canceled the operation while collecting the PIN.
+    /// </exception>
+    /// <exception cref="System.Security.SecurityException">
+    ///     The PIN retry count was exhausted.
+    /// </exception>
+    public (int discoverableCredentialCount, int remainingCredentialCount) GetCredentialMetadata()
     {
-        private readonly Memory<byte> _value = value.ToArray();
-        private bool _disposed;
+        Logger.LogInformation("Get credential metadata.");
 
-        public PinUvAuthTokenPermissions Permissions { get; } = permissions;
-        public string? RelyingPartyId { get; } = relyingPartyId;
-        public ReadOnlyMemory<byte> Value => _disposed ? ReadOnlyMemory<byte>.Empty : _value;
+        using var currentToken = GetPreferredCredMgmtToken();
 
-        public void Dispose()
+        byte[] message = GetCredentialMetadataCommand.GetAuthenticationMessage();
+        byte[] authParam = AuthProtocol.Authenticate(currentToken.Value, message);
+
+        bool isPreview = CredMgmtGetIsPreview();
+        var command = new GetCredentialMetadataCommand(authParam, AuthProtocol.Protocol)
         {
-            if (_disposed)
+            IsPreview = isPreview
+        };
+
+        var response = Connection.SendCommand(command);
+        if (response.CtapStatus == CtapStatus.PinAuthInvalid)
+        {
+            var savePermissions = AuthTokenPermissions;
+            string? saveRpId = AuthTokenRelyingPartyId;
+            AuthTokenPermissions = null;
+            AuthTokenRelyingPartyId = null;
+            try
             {
-                return;
+                using var nextToken = GetPreferredCredMgmtToken(requestNewToken: true);
+
+                authParam = AuthProtocol.Authenticate(nextToken.Value, message);
+                command = new GetCredentialMetadataCommand(authParam, AuthProtocol.Protocol)
+                {
+                    IsPreview = isPreview
+                };
+
+                response = Connection.SendCommand(command);
+            }
+            finally
+            {
+                AuthTokenPermissions = savePermissions | PinUvAuthTokenPermissions.CredentialManagement;
+                AuthTokenRelyingPartyId = saveRpId;
+            }
+        }
+
+        return response.GetData();
+    }
+
+    /// <summary>
+    ///     This performs the <c>enumerateRPs</c> (Begin and GetNextRP)
+    ///     subcommands of the <c>authenticatorCredentialManagement</c> command.
+    ///     It gets a list of all the relying parties represented in all the
+    ///     discoverable credentials on the YubiKey.
+    /// </summary>
+    /// <remarks>
+    ///     See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
+    ///     on credential management.
+    ///     <para>
+    ///         This method returns a list of <see cref="RelyingParty" /> objects.
+    ///         Each object contains information about one of the relying parties
+    ///         represented on the YubiKey. If there are no discoverable credentials
+    ///         on the YubiKey, then the list will have no elements (<c>Count</c>
+    ///         will be zero).
+    ///     </para>
+    ///     <para>
+    ///         Note that other FIDO2 operations require the "RelyingPartyIdHash",
+    ///         which is one of the properties of the RelyingParty object.
+    ///     </para>
+    /// </remarks>
+    /// <returns>
+    ///     A list of <c>RelyingParty</c> objects.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    ///     The connected YubiKey does not support CredentialManagement, or the
+    ///     PIN was invalid, or there was no KeyCollector.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    ///     The user canceled the operation while collecting the PIN.
+    /// </exception>
+    /// <exception cref="System.Security.SecurityException">
+    ///     The PIN retry count was exhausted.
+    /// </exception>
+    public IReadOnlyList<RelyingParty> EnumerateRelyingParties()
+    {
+        Logger.LogInformation("Enumerate relying parties.");
+
+        bool isPreview = CredMgmtGetIsPreview();
+        using var currentToken = GetPreferredCredMgmtToken();
+
+        byte[] message = EnumerateRpsBeginCommand.GetAuthenticationMessage();
+        byte[] authParam = AuthProtocol.Authenticate(currentToken.Value, message);
+        var command = new EnumerateRpsBeginCommand(authParam, AuthProtocol.Protocol)
+        {
+            IsPreview = isPreview
+        };
+
+        var response = Connection.SendCommand(command);
+        if (response.CtapStatus == CtapStatus.PinAuthInvalid)
+        {
+            var savePermissions = AuthTokenPermissions;
+            string? saveRpId = AuthTokenRelyingPartyId;
+            AuthTokenPermissions = null;
+            AuthTokenRelyingPartyId = null;
+            try
+            {
+                using var nextToken = GetPreferredCredMgmtToken(requestNewToken: true);
+
+                authParam = AuthProtocol.Authenticate(nextToken.Value, message);
+                command = new EnumerateRpsBeginCommand(authParam, AuthProtocol.Protocol)
+                {
+                    IsPreview = isPreview
+                };
+
+                response = Connection.SendCommand(command);
+            }
+            finally
+            {
+                AuthTokenPermissions = savePermissions | PinUvAuthTokenPermissions.CredentialManagement;
+                AuthTokenRelyingPartyId = saveRpId;
+            }
+        }
+
+        if (response.CtapStatus == CtapStatus.NoCredentials)
+        {
+            return new List<RelyingParty>();
+        }
+
+        (int rpCount, var firstRp) = response.GetData();
+
+        var returnValue = new List<RelyingParty>(rpCount)
+        {
+            firstRp
+        };
+
+        var nextCmd = new EnumerateRpsGetNextCommand
+        {
+            IsPreview = isPreview
+        };
+
+        for (int index = 1; index < rpCount; index++)
+        {
+            var nextResponse = Connection.SendCommand(nextCmd);
+            returnValue.Add(nextResponse.GetData());
+        }
+
+        return returnValue;
+    }
+
+    /// <summary>
+    ///     This performs the <c>enumerateCredentials</c> (Begin and
+    ///     GetNextCredential) subcommands of the
+    ///     <c>authenticatorCredentialManagement</c> command. It gets a list of
+    ///     all the credentials associated with a specified relying party.
+    /// </summary>
+    /// <remarks>
+    ///     See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
+    ///     on credential management.
+    ///     <para>
+    ///         This method returns a list of <see cref="CredentialUserInfo" />
+    ///         objects. Each object contains information about one of the
+    ///         discoverable credentials associated with the specified relying party
+    ///         on the YubiKey. If there are no discoverable credentials on the
+    ///         YubiKey associated with the relying party, then the list will have no
+    ///         elements (<c>Count</c> will be zero).
+    ///     </para>
+    ///     <para>
+    ///         The <c>CredentialUserInfo</c> object contains properties for
+    ///         <see cref="CredentialUserInfo.CredentialId" />,
+    ///         <see cref="CredentialUserInfo.CredentialPublicKey" />,
+    ///         <see cref="CredentialUserInfo.CredProtectPolicy" />, and possibly
+    ///         <see cref="CredentialUserInfo.LargeBlobKey" />,
+    ///     </para>
+    /// </remarks>
+    /// <param name="relyingParty">
+    ///     The relying party for which the list of credentials is requested.
+    /// </param>
+    /// <returns>
+    ///     A list of <c>CredentialUserInfo</c> objects, one for each
+    ///     credential.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    ///     The connected YubiKey does not support CredentialManagement, or the
+    ///     PIN was invalid, or there was no KeyCollector.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    ///     The user canceled the operation while collecting the PIN.
+    /// </exception>
+    /// <exception cref="System.Security.SecurityException">
+    ///     The PIN retry count was exhausted.
+    /// </exception>
+    public IReadOnlyList<CredentialUserInfo> EnumerateCredentialsForRelyingParty(RelyingParty relyingParty)
+    {
+        if (relyingParty is null)
+        {
+            throw new ArgumentNullException(nameof(relyingParty));
+        }
+
+        Logger.LogInformation("Enumerate credentials for relying party: " + relyingParty.Id + ".");
+
+        using var currentToken = GetPreferredCredMgmtToken();
+
+        byte[] message = EnumerateCredentialsBeginCommand.GetAuthenticationMessage(relyingParty);
+        byte[] authParam = AuthProtocol.Authenticate(currentToken.Value, message);
+        bool isPreview = CredMgmtGetIsPreview();
+        var command = new EnumerateCredentialsBeginCommand(relyingParty, authParam, AuthProtocol.Protocol)
+        {
+            IsPreview = isPreview
+        };
+
+        var response = Connection.SendCommand(command);
+        if (response.CtapStatus == CtapStatus.PinAuthInvalid)
+        {
+            if (AuthTokenRelyingPartyId is not null)
+            {
+                AuthTokenRelyingPartyId = relyingParty.Id;
             }
 
-            CryptographicOperations.ZeroMemory(_value.Span);
-            _disposed = true;
+            using var nextToken = GetPreferredCredMgmtToken(requestNewToken: true);
+
+            authParam = AuthProtocol.Authenticate(nextToken.Value, message);
+            command = new EnumerateCredentialsBeginCommand(
+                relyingParty, authParam, AuthProtocol.Protocol)
+                {
+                    IsPreview = isPreview
+                };
+
+            response = Connection.SendCommand(command);
         }
+
+        if (response.CtapStatus == CtapStatus.NoCredentials)
+        {
+            return new List<CredentialUserInfo>();
+        }
+
+        // This will return the data or throw an exception. We either have
+        // the data, have an error other than PinAuthInvalid, or we do have
+        // the error PinAuthInvalid but only after trying twice.
+        (int credCount, var userInfo) = response.GetData();
+
+        var returnValue = new List<CredentialUserInfo>(credCount)
+        {
+            userInfo
+        };
+
+        // Get the rest of the credentials. The
+        // EnumerateCredentialsGetNextCommand does not need the AuthToken.
+        var nextCmd = new EnumerateCredentialsGetNextCommand
+        {
+            IsPreview = isPreview
+        };
+
+        for (int index = 1; index < credCount; index++)
+        {
+            var nextResponse = Connection.SendCommand(nextCmd);
+            returnValue.Add(nextResponse.GetData());
+        }
+
+        return returnValue;
+    }
+
+    /// <summary>
+    ///     This performs the <c>deleteCredential</c> subcommand of the
+    ///     <c>authenticatorCredentialManagement</c> command. It deletes the one
+    ///     credential represented by the given <c>credentialId</c>.
+    /// </summary>
+    /// <remarks>
+    ///     See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
+    ///     on credential management.
+    ///     <para>
+    ///         If there is no credential with the given <c>credentialId</c> on the
+    ///         YubiKey, this method will do nothing.
+    ///     </para>
+    /// </remarks>
+    /// <param name="credentialId">
+    ///     The ID of the credential to delete.
+    /// </param>
+    /// <exception cref="Fido2Exception">
+    ///     The YubiKey was not able to delete the specified credential.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    ///     The connected YubiKey does not support CredentialManagement, or the
+    ///     PIN was invalid, or there was no KeyCollector.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    ///     The user canceled the operation while collecting the PIN.
+    /// </exception>
+    /// <exception cref="System.Security.SecurityException">
+    ///     The PIN retry count was exhausted.
+    /// </exception>
+    public void DeleteCredential(CredentialId credentialId)
+    {
+        Logger.LogInformation("Delete credential.");
+
+        var currentToken = GetAuthToken(
+            false, PinUvAuthTokenPermissions.CredentialManagement);
+
+        bool isPreview = CredMgmtGetIsPreview();
+        var command = new DeleteCredentialCommand(credentialId, currentToken, AuthProtocol)
+        {
+            IsPreview = isPreview
+        };
+
+        var response = Connection.SendCommand(command);
+        if (response.CtapStatus == CtapStatus.PinAuthInvalid)
+        {
+            currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement);
+            command = new DeleteCredentialCommand(credentialId, currentToken, AuthProtocol)
+            {
+                IsPreview = isPreview
+            };
+
+            response = Connection.SendCommand(command);
+        }
+
+        if (response.Status == ResponseStatus.Success || response.CtapStatus == CtapStatus.NoCredentials)
+        {
+            // After a credential has been deleted, the number of
+            // discoverable credentials can change. Hence, this operation can
+            // change the AuthenticatorInfo, so make sure if someone gets it,
+            // they get a new one.
+            _authenticatorInfo = null;
+            return;
+        }
+
+        // If the response is not Success, throw an exception.
+        throw new Fido2Exception(response.StatusMessage);
+    }
+
+    /// <summary>
+    ///     This performs the <c>updateUserInformation</c> subcommand of the
+    ///     <c>authenticatorCredentialManagement</c> command. It replaces the
+    ///     user info in the credential represented by the given
+    ///     <c>credentialId</c> with the given user data.
+    /// </summary>
+    /// <remarks>
+    ///     See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
+    ///     on credential management.
+    ///     <para>
+    ///         This method will replace all the user information currently stored
+    ///         against the <c>credentialId</c> on the YubiKey. That is, it does not
+    ///         "edit" the information. Hence, the <c>userEntity</c> you supply
+    ///         should contain all the information you want stored, even if some of
+    ///         that information is currently stored on the YubiKey.
+    ///     </para>
+    ///     <para>
+    ///         If there is no credential with the given <c>credentialId</c> on the
+    ///         YubiKey, this method will throw an exception
+    ///     </para>
+    /// </remarks>
+    /// <param name="credentialId">
+    ///     The ID of the credential to update.
+    /// </param>
+    /// <param name="newUserInfo">
+    ///     An object containing the information that will replace the currently
+    ///     stored info.
+    /// </param>
+    /// <exception cref="Fido2Exception">
+    ///     There was no credential with the given ID.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    ///     The connected YubiKey does not support CredentialManagement, or the
+    ///     PIN was invalid, or there was no KeyCollector.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    ///     The user canceled the operation while collecting the PIN.
+    /// </exception>
+    /// <exception cref="System.Security.SecurityException">
+    ///     The PIN retry count was exhausted.
+    /// </exception>
+    public void UpdateUserInfoForCredential(CredentialId credentialId, UserEntity newUserInfo)
+    {
+        Logger.LogInformation("Update user information.");
+
+        var currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.CredentialManagement);
+
+        var command = new UpdateUserInfoCommand(credentialId, newUserInfo, currentToken, AuthProtocol);
+        var response = Connection.SendCommand(command);
+        if (response.CtapStatus == CtapStatus.PinAuthInvalid)
+        {
+            currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement);
+            command = new UpdateUserInfoCommand(credentialId, newUserInfo, currentToken, AuthProtocol);
+            response = Connection.SendCommand(command);
+        }
+
+        if (response.Status == ResponseStatus.Success)
+        {
+            return;
+        }
+
+        throw new Fido2Exception(response.StatusMessage);
+    }
+
+    /// <summary>
+    ///     Retrieves a persistent PIN/UV authentication token to be used with
+    ///     FIDO2 credential management operations that require read-only access.
+    /// </summary>
+    /// <remarks>
+    ///     The token is fetched if it does not already exist or if the caller explicitly requests a new token.
+    ///     The YubiKey must support and return the `encIdentifier` in its `getInfo` response (YubiKeys v5.8.0 and later).
+    ///     <para>
+    ///         The token obtained is tied to the permission
+    ///         <see cref="PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly" />
+    ///         and is used to authenticate operations requiring read-only credential
+    ///         management.
+    ///     </para>
+    ///     <para>
+    ///         If a token is already available and `requestNewToken` parameter is set to
+    ///         `false`, the current token will be returned. Otherwise, a UV verification
+    ///         process will be initiated to generate a new token.
+    ///     </para>
+    /// </remarks>
+    /// <returns>
+    ///     A <c>ReadOnlyMemory</c> object containing the persistent PIN/UV
+    ///     authentication token, or <c>null</c> if the operation is unsuccessful.
+    /// </returns>
+    public ReadOnlyMemory<byte>? GetPersistentPinUvAuthToken() => GetReadOnlyCredMgmtToken(requestNewToken: true);
+
+    private bool CredMgmtGetIsPreview()
+    {
+        var cmValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.credMgmt);
+        if (cmValue == OptionValue.True)
+        {
+            return false;
+        }
+
+        cmValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.credentialMgmtPreview);
+        if (cmValue == OptionValue.True)
+        {
+            return true;
+        }
+
+        throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+    }
+
+    private AuthToken GetPreferredCredMgmtToken(bool requestNewToken = false)
+    {
+        var readOnlyToken = GetReadOnlyCredMgmtToken(requestNewToken);
+        if (readOnlyToken is not null)
+        {
+            return new AuthToken(
+                readOnlyToken.Value, PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly, null);
+        }
+
+        var fullToken = GetAuthToken(requestNewToken, PinUvAuthTokenPermissions.CredentialManagement);
+        return new AuthToken(AuthProtocol.Decrypt(fullToken), PinUvAuthTokenPermissions.CredentialManagement, null);
+    }
+
+    // This method will set the AuthTokenPersistent property if it
+    // successfully gets a persistent token.
+    private ReadOnlyMemory<byte>? GetReadOnlyCredMgmtToken(bool requestNewToken = false)
+    {
+        if (!YubiKey.HasFeature(YubiKeyFeature.FidoCtap22))
+        {
+            return null;
+        }
+
+        if (AuthTokenPersistent is not null && !requestNewToken)
+        {
+            return AuthTokenPersistent;
+        }
+
+        // The methods used below will set/reset the AuthTokenPersistent
+        const PinUvAuthTokenPermissions permission = PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly;
+        var resultUv = DoVerifyUv(
+            permission, null, out string _);
+
+        if (resultUv != CtapStatus.Ok)
+        {
+            VerifyPin(permission);
+        }
+
+        return AuthTokenPersistent;
     }
 }
 
+internal sealed class AuthToken(
+    ReadOnlyMemory<byte> value,
+    PinUvAuthTokenPermissions permissions,
+    string? relyingPartyId) : IDisposable
+{
+    private readonly Memory<byte> _value = value.ToArray();
+    private bool _disposed;
+
+    public PinUvAuthTokenPermissions Permissions { get; } = permissions;
+    public string? RelyingPartyId { get; } = relyingPartyId;
+
+    public ReadOnlyMemory<byte> Value =>
+        _disposed
+            ? ReadOnlyMemory<byte>.Empty
+            : _value;
+
+    #region IDisposable Members
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        CryptographicOperations.ZeroMemory(_value.Span);
+        _disposed = true;
+    }
+
+    #endregion
+}

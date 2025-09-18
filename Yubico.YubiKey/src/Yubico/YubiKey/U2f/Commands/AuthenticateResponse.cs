@@ -15,40 +15,45 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+/// <summary>
+///     The response to the U2F Authenticate command.
+/// </summary>
+/// <remarks>
+///     This is the partner response class to <see cref="AuthenticateCommand" />.
+/// </remarks>
+public sealed class AuthenticateResponse : U2fResponse, IYubiKeyResponseWithData<AuthenticationData>
 {
     /// <summary>
-    /// The response to the U2F Authenticate command.
+    ///     Constructs an AuthenticateResponse from the given ResponseApdu.
     /// </summary>
-    /// <remarks>
-    /// This is the partner response class to <see cref="AuthenticateCommand"/>.
-    /// </remarks>
-    public sealed class AuthenticateResponse : U2fResponse, IYubiKeyResponseWithData<AuthenticationData>
+    /// <param name="responseApdu">
+    ///     The response to a
+    ///     <see cref="AuthenticateCommand" />.
+    /// </param>
+    public AuthenticateResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        /// <summary>
-        /// Constructs an AuthenticateResponse from the given ResponseApdu.
-        /// </summary>
-        /// <param name="responseApdu">The response to a
-        /// <see cref="AuthenticateCommand"/>.
-        /// </param>
-        public AuthenticateResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-        }
+    }
 
-        /// <summary>
-        /// Gets the authentication data from the response.
-        /// </summary>
-        /// <returns>
-        /// The data in the response APDU, presented as an AuthenticationData object.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
-        /// </exception>
-        public AuthenticationData GetData() => Status switch
+    #region IYubiKeyResponseWithData<AuthenticationData> Members
+
+    /// <summary>
+    ///     Gets the authentication data from the response.
+    /// </summary>
+    /// <returns>
+    ///     The data in the response APDU, presented as an AuthenticationData object.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
+    /// </exception>
+    public AuthenticationData GetData() =>
+        Status switch
         {
             ResponseStatus.Success => new AuthenticationData(ResponseApdu.Data),
-            _ => throw new InvalidOperationException(StatusMessage),
+            _ => throw new InvalidOperationException(StatusMessage)
         };
-    }
+
+    #endregion
 }

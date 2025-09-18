@@ -18,575 +18,595 @@ using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+[Obsolete("Replaced by KeyParameters")]
+public class ImportKeyCommandTestsObsolete
 {
-    [Obsolete("Replaced by KeyParameters")]
-    public class ImportKeyCommandTestsObsolete
+    [Theory]
+    [InlineData(1, KeyType.ECP256)]
+    [InlineData(2, KeyType.ECP384)]
+    [InlineData(3, KeyType.RSA1024)]
+    [InlineData(4, KeyType.RSA2048)]
+    public void ClassType_DerivedFromPivCommand_IsTrue(
+        int cStyle,
+        KeyType keyType)
     {
-        [Theory]
-        [InlineData(1, KeyType.ECP256)]
-        [InlineData(2, KeyType.ECP384)]
-        [InlineData(3, KeyType.RSA1024)]
-        [InlineData(4, KeyType.RSA2048)]
-        public void ClassType_DerivedFromPivCommand_IsTrue(int cStyle, KeyType keyType)
-        {
-            ImportAsymmetricKeyCommand cmd = GetCommandObject(
-                cStyle,
-                PivSlot.Retired5,
-                keyType,
-                PivPinPolicy.Always,
-                PivTouchPolicy.Never);
+        var cmd = GetCommandObject(
+            cStyle,
+            PivSlot.Retired5,
+            keyType,
+            PivPinPolicy.Always,
+            PivTouchPolicy.Never);
 
-            Assert.True(cmd is IYubiKeyCommand<ImportAsymmetricKeyResponse>);
-        }
+        Assert.True(cmd is IYubiKeyCommand<ImportAsymmetricKeyResponse>);
+    }
 
-        [Fact]
-        public void FullConstructor_NullKeyData_ThrowsException()
-        {
+    [Fact]
+    public void FullConstructor_NullKeyData_ThrowsException()
+    {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new ImportAsymmetricKeyCommand(
-                null,
-                0x87,
-                PivPinPolicy.Always,
-                PivTouchPolicy.Never));
+        _ = Assert.Throws<ArgumentNullException>(() => new ImportAsymmetricKeyCommand(
+            null,
+            0x87,
+            PivPinPolicy.Always,
+            PivTouchPolicy.Never));
 #pragma warning restore CS8625
-        }
+    }
 
-        [Fact]
-        public void InitConstructor_NullKeyData_ThrowsException()
-        {
+    [Fact]
+    public void InitConstructor_NullKeyData_ThrowsException()
+    {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new ImportAsymmetricKeyCommand(null)
-            {
-                SlotNumber = 0x87,
-                PinPolicy = PivPinPolicy.Always,
-                TouchPolicy = PivTouchPolicy.Never,
-            });
+        _ = Assert.Throws<ArgumentNullException>(() => new ImportAsymmetricKeyCommand(null)
+        {
+            SlotNumber = 0x87,
+            PinPolicy = PivPinPolicy.Always,
+            TouchPolicy = PivTouchPolicy.Never
+        });
 #pragma warning restore CS8625
+    }
+
+    [Theory]
+    [InlineData(1, 0x9B)]
+    [InlineData(2, 0x80)]
+    [InlineData(3, 0x81)]
+    [InlineData(4, 0x00)]
+    [InlineData(5, 0x96)]
+    [InlineData(6, 0xF8)]
+    [InlineData(7, 0xFA)]
+    [InlineData(8, 0x99)]
+    [InlineData(9, 0x9F)]
+    public void Constructor_BadSlotNumber_ThrowsException(
+        int cStyle,
+        byte slotNumber)
+    {
+        _ = Assert.Throws<ArgumentException>(() => GetCommandObject(
+            cStyle,
+            slotNumber,
+            KeyType.ECP256,
+            PivPinPolicy.Once,
+            PivTouchPolicy.Cached));
+    }
+
+    [Fact]
+    public void Constructor_NoSlotNumber_ThrowsException()
+    {
+        var keyData = GetKeyData(KeyType.ECP256);
+        var cmd = new ImportAsymmetricKeyCommand(keyData)
+        {
+            PinPolicy = PivPinPolicy.Always,
+            TouchPolicy = PivTouchPolicy.Never
+        };
+        _ = Assert.Throws<InvalidOperationException>(() => cmd.CreateCommandApdu());
+    }
+
+    [Fact]
+    public void Constructor_Application_Piv()
+    {
+        var keyData = GetKeyData(KeyType.ECP256);
+        var importKeyCommand = new ImportAsymmetricKeyCommand(
+            keyData,
+            PivSlot.Retired19,
+            PivPinPolicy.Never,
+            PivTouchPolicy.Never);
+
+        var application = importKeyCommand.Application;
+
+        Assert.Equal(YubiKeyApplication.Piv, application);
+
+        keyData.Clear();
+    }
+
+    [Fact]
+    public void Constructor_Property_SlotNum()
+    {
+        var keyData = GetKeyData(KeyType.ECP256);
+        var slotNumber = PivSlot.Retired20;
+        var pinPolicy = PivPinPolicy.Always;
+        var touchPolicy = PivTouchPolicy.Cached;
+        var importKeyCommand = new ImportAsymmetricKeyCommand(
+            keyData,
+            slotNumber,
+            pinPolicy,
+            touchPolicy);
+
+        var getSlotNum = importKeyCommand.SlotNumber;
+
+        Assert.Equal(slotNumber, getSlotNum);
+
+        keyData.Clear();
+    }
+
+    [Fact]
+    public void Constructor_Property_PinPolicy()
+    {
+        var keyData = GetKeyData(KeyType.ECP256);
+        var slotNumber = PivSlot.Retired20;
+        var pinPolicy = PivPinPolicy.Always;
+        var touchPolicy = PivTouchPolicy.Cached;
+        var importKeyCommand = new ImportAsymmetricKeyCommand(
+            keyData,
+            slotNumber,
+            pinPolicy,
+            touchPolicy);
+
+        var getPolicy = importKeyCommand.PinPolicy;
+
+        Assert.Equal(pinPolicy, getPolicy);
+
+        keyData.Clear();
+    }
+
+    [Fact]
+    public void Constructor_Property_TouchPolicy()
+    {
+        var keyData = GetKeyData(KeyType.ECP256);
+        var slotNumber = PivSlot.Retired20;
+        var pinPolicy = PivPinPolicy.Always;
+        var touchPolicy = PivTouchPolicy.Cached;
+        var importKeyCommand = new ImportAsymmetricKeyCommand(
+            keyData,
+            slotNumber,
+            pinPolicy,
+            touchPolicy);
+
+        var getPolicy = importKeyCommand.TouchPolicy;
+
+        Assert.Equal(touchPolicy, getPolicy);
+
+        keyData.Clear();
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero(
+        int cStyle)
+    {
+        var cmdApdu = GetImportKeyCommandApdu(
+            cStyle, 0x94, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+
+        var Cla = cmdApdu.Cla;
+
+        Assert.Equal(0, Cla);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void CreateCommandApdu_GetInsProperty_ReturnsHexFE(
+        int cStyle)
+    {
+        var cmdApdu = GetImportKeyCommandApdu(
+            cStyle,
+            0x92,
+            KeyType.RSA1024,
+            PivPinPolicy.Once,
+            PivTouchPolicy.None);
+
+        var Ins = cmdApdu.Ins;
+
+        Assert.Equal(0xFE, Ins);
+    }
+
+    [Theory]
+    [InlineData(1, KeyType.ECP256)]
+    [InlineData(2, KeyType.ECP384)]
+    [InlineData(3, KeyType.RSA1024)]
+    [InlineData(4, KeyType.RSA2048)]
+    public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(
+        int cStyle,
+        KeyType keyType)
+    {
+        var cmdApdu = GetImportKeyCommandApdu(
+            cStyle,
+            0x9E,
+            keyType,
+            PivPinPolicy.None,
+            PivTouchPolicy.Cached);
+
+        var P1 = cmdApdu.P1;
+
+        Assert.Equal((byte)keyType.GetPivAlgorithm(), P1);
+    }
+
+    [Theory]
+    [InlineData(1, 0x95)]
+    [InlineData(2, 0x82)]
+    [InlineData(3, 0x83)]
+    [InlineData(4, 0x84)]
+    [InlineData(5, 0x85)]
+    [InlineData(6, 0x86)]
+    [InlineData(7, 0x87)]
+    [InlineData(8, 0x88)]
+    [InlineData(9, 0x89)]
+    public void CreateCommandApdu_GetP2Property_ReturnsSlotNum(
+        int cStyle,
+        byte slotNumber)
+    {
+        var cmdApdu = GetImportKeyCommandApdu(
+            cStyle,
+            slotNumber,
+            KeyType.RSA2048,
+            PivPinPolicy.None,
+            PivTouchPolicy.Cached);
+
+        var P2 = cmdApdu.P2;
+
+        Assert.Equal(slotNumber, P2);
+    }
+
+    [Theory]
+    [InlineData(1, KeyType.RSA1024, PivPinPolicy.None, PivTouchPolicy.None, 0)]
+    [InlineData(2, KeyType.RSA2048, PivPinPolicy.None, PivTouchPolicy.Default, 0)]
+    [InlineData(3, KeyType.ECP256, PivPinPolicy.None, PivTouchPolicy.Never, 3)]
+    [InlineData(1, KeyType.ECP384, PivPinPolicy.None, PivTouchPolicy.Always, 3)]
+    [InlineData(2, KeyType.RSA1024, PivPinPolicy.None, PivTouchPolicy.Cached, 3)]
+    [InlineData(3, KeyType.RSA2048, PivPinPolicy.Default, PivTouchPolicy.None, 0)]
+    [InlineData(1, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Default, 0)]
+    [InlineData(2, KeyType.ECP384, PivPinPolicy.Default, PivTouchPolicy.Never, 3)]
+    [InlineData(3, KeyType.RSA1024, PivPinPolicy.Default, PivTouchPolicy.Always, 3)]
+    [InlineData(1, KeyType.RSA2048, PivPinPolicy.Default, PivTouchPolicy.Cached, 3)]
+    [InlineData(2, KeyType.ECP256, PivPinPolicy.Never, PivTouchPolicy.None, 3)]
+    [InlineData(3, KeyType.ECP384, PivPinPolicy.Never, PivTouchPolicy.Default, 3)]
+    [InlineData(1, KeyType.RSA1024, PivPinPolicy.Never, PivTouchPolicy.Never, 6)]
+    [InlineData(2, KeyType.RSA2048, PivPinPolicy.Never, PivTouchPolicy.Always, 6)]
+    [InlineData(3, KeyType.ECP256, PivPinPolicy.Never, PivTouchPolicy.Cached, 6)]
+    [InlineData(1, KeyType.ECP384, PivPinPolicy.Once, PivTouchPolicy.None, 3)]
+    [InlineData(2, KeyType.RSA1024, PivPinPolicy.Once, PivTouchPolicy.Default, 3)]
+    [InlineData(3, KeyType.RSA2048, PivPinPolicy.Once, PivTouchPolicy.Never, 6)]
+    [InlineData(1, KeyType.ECP256, PivPinPolicy.Once, PivTouchPolicy.Always, 6)]
+    [InlineData(2, KeyType.ECP384, PivPinPolicy.Once, PivTouchPolicy.Cached, 6)]
+    [InlineData(3, KeyType.RSA1024, PivPinPolicy.Always, PivTouchPolicy.None, 3)]
+    [InlineData(1, KeyType.RSA2048, PivPinPolicy.Always, PivTouchPolicy.Default, 3)]
+    [InlineData(2, KeyType.ECP256, PivPinPolicy.Always, PivTouchPolicy.Never, 6)]
+    [InlineData(3, KeyType.ECP384, PivPinPolicy.Always, PivTouchPolicy.Always, 6)]
+    [InlineData(1, KeyType.RSA1024, PivPinPolicy.Always, PivTouchPolicy.Cached, 6)]
+    public void CreateCommandApdu_GetNcProperty_ReturnsCorrect(
+        int cStyle,
+        KeyType keyType,
+        PivPinPolicy pinPolicy,
+        PivTouchPolicy touchPolicy,
+        int expectedPolicyLength)
+    {
+        var keyData = GetKeyData(keyType);
+        var cmdApdu = GetImportKeyCommandApdu(
+            cStyle,
+            0x8E,
+            keyType,
+            pinPolicy,
+            touchPolicy);
+
+        var Nc = cmdApdu.Nc;
+
+        var expectedLength = keyData.EncodedPrivateKey.Length + expectedPolicyLength;
+        Assert.Equal(expectedLength, Nc);
+
+        keyData.Clear();
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void CreateCommandApdu_GetNeProperty_ReturnsZero(
+        int cStyle)
+    {
+        var cmdApdu = GetImportKeyCommandApdu(
+            cStyle,
+            0x8F,
+            KeyType.ECP256,
+            PivPinPolicy.Always,
+            PivTouchPolicy.Never);
+
+        var Ne = cmdApdu.Ne;
+
+        Assert.Equal(0, Ne);
+    }
+
+    [Theory]
+    [InlineData(1, KeyType.RSA1024)]
+    [InlineData(2, KeyType.RSA2048)]
+    [InlineData(3, KeyType.ECP256)]
+    [InlineData(4, KeyType.ECP384)]
+    public void CreateCommandApdu_GetData_ReturnsKeyData(
+        int cStyle,
+        KeyType keyType)
+    {
+        var keyData = GetKeyData(keyType);
+        // Use Default policies so the only data will be the key data.
+        var cmdApdu = GetImportKeyCommandApdu(
+            cStyle,
+            0x8F,
+            keyType,
+            PivPinPolicy.Default,
+            PivTouchPolicy.Default);
+
+        var data = cmdApdu.Data;
+
+        Assert.False(data.IsEmpty);
+        if (data.IsEmpty)
+        {
+            return;
         }
 
-        [Theory]
-        [InlineData(1, 0x9B)]
-        [InlineData(2, 0x80)]
-        [InlineData(3, 0x81)]
-        [InlineData(4, 0x00)]
-        [InlineData(5, 0x96)]
-        [InlineData(6, 0xF8)]
-        [InlineData(7, 0xFA)]
-        [InlineData(8, 0x99)]
-        [InlineData(9, 0x9F)]
-        public void Constructor_BadSlotNumber_ThrowsException(int cStyle, byte slotNumber)
+        var compareResult = data.Span.SequenceEqual(keyData.EncodedPrivateKey.Span);
+
+        Assert.True(compareResult);
+
+        keyData.Clear();
+    }
+
+    [Theory]
+    [InlineData(1, PivPinPolicy.None, PivTouchPolicy.None)]
+    [InlineData(2, PivPinPolicy.None, PivTouchPolicy.Default)]
+    [InlineData(3, PivPinPolicy.None, PivTouchPolicy.Never)]
+    [InlineData(1, PivPinPolicy.None, PivTouchPolicy.Cached)]
+    [InlineData(2, PivPinPolicy.None, PivTouchPolicy.Always)]
+    [InlineData(3, PivPinPolicy.Default, PivTouchPolicy.None)]
+    [InlineData(1, PivPinPolicy.Default, PivTouchPolicy.Default)]
+    [InlineData(2, PivPinPolicy.Default, PivTouchPolicy.Never)]
+    [InlineData(3, PivPinPolicy.Default, PivTouchPolicy.Cached)]
+    [InlineData(1, PivPinPolicy.Default, PivTouchPolicy.Always)]
+    [InlineData(2, PivPinPolicy.Never, PivTouchPolicy.None)]
+    [InlineData(3, PivPinPolicy.Never, PivTouchPolicy.Default)]
+    [InlineData(1, PivPinPolicy.Never, PivTouchPolicy.Never)]
+    [InlineData(2, PivPinPolicy.Never, PivTouchPolicy.Cached)]
+    [InlineData(3, PivPinPolicy.Never, PivTouchPolicy.Always)]
+    [InlineData(1, PivPinPolicy.Once, PivTouchPolicy.None)]
+    [InlineData(2, PivPinPolicy.Once, PivTouchPolicy.Default)]
+    [InlineData(3, PivPinPolicy.Once, PivTouchPolicy.Never)]
+    [InlineData(1, PivPinPolicy.Once, PivTouchPolicy.Cached)]
+    [InlineData(2, PivPinPolicy.Once, PivTouchPolicy.Always)]
+    [InlineData(3, PivPinPolicy.Always, PivTouchPolicy.None)]
+    [InlineData(1, PivPinPolicy.Always, PivTouchPolicy.Default)]
+    [InlineData(2, PivPinPolicy.Always, PivTouchPolicy.Never)]
+    [InlineData(3, PivPinPolicy.Always, PivTouchPolicy.Cached)]
+    [InlineData(1, PivPinPolicy.Always, PivTouchPolicy.Always)]
+    [InlineData(4, PivPinPolicy.None, PivTouchPolicy.Never)]
+    [InlineData(5, PivPinPolicy.None, PivTouchPolicy.Cached)]
+    [InlineData(6, PivPinPolicy.Once, PivTouchPolicy.None)]
+    [InlineData(7, PivPinPolicy.Always, PivTouchPolicy.None)]
+    [InlineData(8, PivPinPolicy.Default, PivTouchPolicy.Default)]
+    [InlineData(9, PivPinPolicy.Default, PivTouchPolicy.Default)]
+    public void CreateCommandApdu_GetData_ReturnsPolicy(
+        int cStyle,
+        PivPinPolicy pinPolicy,
+        PivTouchPolicy touchPolicy)
+    {
+        var keyData = GetKeyData(KeyType.ECP256);
+        var pinData = new byte[] { 0xAA, 0x01, (byte)pinPolicy };
+        var touchData = new byte[] { 0xAB, 0x01, (byte)touchPolicy };
+        var expected = new List<byte>(keyData.EncodedPrivateKey.ToArray());
+        if (pinPolicy != PivPinPolicy.None && pinPolicy != PivPinPolicy.Default)
         {
-            _ = Assert.Throws<ArgumentException>(() => GetCommandObject(
-                cStyle,
-                slotNumber,
-                KeyType.ECP256,
-                PivPinPolicy.Once,
-                PivTouchPolicy.Cached));
+            expected.AddRange(pinData);
         }
 
-        [Fact]
-        public void Constructor_NoSlotNumber_ThrowsException()
+        if (touchPolicy != PivTouchPolicy.None && touchPolicy != PivTouchPolicy.Default)
         {
-            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
-            var cmd = new ImportAsymmetricKeyCommand(keyData)
-            {
-                PinPolicy = PivPinPolicy.Always,
-                TouchPolicy = PivTouchPolicy.Never,
-            };
-            _ = Assert.Throws<InvalidOperationException>(() => cmd.CreateCommandApdu());
+            expected.AddRange(touchData);
         }
 
-        [Fact]
-        public void Constructor_Application_Piv()
+        var cmdApdu = GetImportKeyCommandApdu(
+            cStyle,
+            0x8F,
+            KeyType.ECP256,
+            pinPolicy,
+            touchPolicy);
+
+        var data = cmdApdu.Data;
+
+        Assert.False(data.IsEmpty);
+        if (data.IsEmpty)
         {
-            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
-            var importKeyCommand = new ImportAsymmetricKeyCommand(
-                keyData,
-                PivSlot.Retired19,
-                PivPinPolicy.Never,
-                PivTouchPolicy.Never);
-
-            YubiKeyApplication application = importKeyCommand.Application;
-
-            Assert.Equal(YubiKeyApplication.Piv, application);
-
-            keyData.Clear();
+            return;
         }
 
-        [Fact]
-        public void Constructor_Property_SlotNum()
-        {
-            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
-            byte slotNumber = PivSlot.Retired20;
-            PivPinPolicy pinPolicy = PivPinPolicy.Always;
-            PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
-            var importKeyCommand = new ImportAsymmetricKeyCommand(
-                keyData,
-                slotNumber,
-                pinPolicy,
-                touchPolicy);
+        var compareResult = data.Span.SequenceEqual(expected.ToArray());
 
-            byte getSlotNum = importKeyCommand.SlotNumber;
+        Assert.True(compareResult);
 
-            Assert.Equal(slotNumber, getSlotNum);
+        keyData.Clear();
+    }
 
-            keyData.Clear();
-        }
+    [Fact]
+    public void CreateResponseForApdu_ReturnsCorrectType()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-        [Fact]
-        public void Constructor_Property_PinPolicy()
-        {
-            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
-            byte slotNumber = PivSlot.Retired20;
-            PivPinPolicy pinPolicy = PivPinPolicy.Always;
-            PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
-            var importKeyCommand = new ImportAsymmetricKeyCommand(
-                keyData,
-                slotNumber,
-                pinPolicy,
-                touchPolicy);
+        var keyData = GetKeyData(KeyType.ECP384);
+        var importKeyCommand = new ImportAsymmetricKeyCommand(
+            keyData,
+            PivSlot.Retired18,
+            PivPinPolicy.Default,
+            PivTouchPolicy.Default);
 
-            PivPinPolicy getPolicy = importKeyCommand.PinPolicy;
+        var response = importKeyCommand.CreateResponseForApdu(responseApdu);
 
-            Assert.Equal(pinPolicy, getPolicy);
+        Assert.True(response is ImportAsymmetricKeyResponse);
 
-            keyData.Clear();
-        }
+        keyData.Clear();
+    }
 
-        [Fact]
-        public void Constructor_Property_TouchPolicy()
-        {
-            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
-            byte slotNumber = PivSlot.Retired20;
-            PivPinPolicy pinPolicy = PivPinPolicy.Always;
-            PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
-            var importKeyCommand = new ImportAsymmetricKeyCommand(
-                keyData,
-                slotNumber,
-                pinPolicy,
-                touchPolicy);
+    // The constructorStyle is either 1, meaning construct the
+    // ImportAsymmetricKeyCommand using the full constructor, or anything
+    // other than 1, meaning use the object initializer constructor.
+    private static CommandApdu GetImportKeyCommandApdu(
+        int cStyle,
+        byte slotNumber,
+        KeyType keyType,
+        PivPinPolicy pinPolicy,
+        PivTouchPolicy touchPolicy)
+    {
+        var importKeyCommand = GetCommandObject(
+            cStyle,
+            slotNumber,
+            keyType,
+            pinPolicy,
+            touchPolicy);
 
-            PivTouchPolicy getPolicy = importKeyCommand.TouchPolicy;
+        return importKeyCommand.CreateCommandApdu();
+    }
 
-            Assert.Equal(touchPolicy, getPolicy);
+    // Construct a GenerateKeyPairCommand using the style specified.
+    // If the style arg is 1, this will build using the full constructor.
+    // If it is 2, it will build it using object initializer constructor.
+    // If it is 3, create it using the empty constructor and set the
+    // properties later.
+    // If it is 4, create it using the object initializer constructor but
+    // don't set the PinPolicy (it should be default).
+    // If it is 5, create it using the empty constructor and set the
+    // properties later, except don't set the PinPolicy.
+    // If it is 6, create it using the object initializer constructor but
+    // don't set the TouchPolicy (it should be default).
+    // If it is 7, create it using the empty constructor and set the
+    // properties later, except don't set the TouchPolicy.
+    // If it is 8, create it using the object initializer constructor but
+    // don't set the PinPolicy or the TouchPolicy.
+    // If it is 9, create it using the empty constructor and set the
+    // properties later, except don't set the PinPolicy or the TouchPolicy.
+    private static ImportAsymmetricKeyCommand GetCommandObject(
+        int cStyle,
+        byte slotNumber,
+        KeyType keyType,
+        PivPinPolicy pinPolicy,
+        PivTouchPolicy touchPolicy)
+    {
+        ImportAsymmetricKeyCommand cmd;
 
-            keyData.Clear();
-        }
-
-        [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        [InlineData(3)]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero(int cStyle)
-        {
-            CommandApdu cmdApdu = GetImportKeyCommandApdu(
-                cStyle, 0x94, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Never);
-
-            byte Cla = cmdApdu.Cla;
-
-            Assert.Equal(0, Cla);
-        }
-
-        [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        [InlineData(3)]
-        public void CreateCommandApdu_GetInsProperty_ReturnsHexFE(int cStyle)
-        {
-            CommandApdu cmdApdu = GetImportKeyCommandApdu(
-                cStyle,
-                0x92,
-                KeyType.RSA1024,
-                PivPinPolicy.Once,
-                PivTouchPolicy.None);
-
-            byte Ins = cmdApdu.Ins;
-
-            Assert.Equal(0xFE, Ins);
-        }
-
-        [Theory]
-        [InlineData(1, KeyType.ECP256)]
-        [InlineData(2, KeyType.ECP384)]
-        [InlineData(3, KeyType.RSA1024)]
-        [InlineData(4, KeyType.RSA2048)]
-        public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(int cStyle, KeyType keyType)
-        {
-            CommandApdu cmdApdu = GetImportKeyCommandApdu(
-                cStyle,
-                0x9E,
-                keyType,
-                PivPinPolicy.None,
-                PivTouchPolicy.Cached);
-
-            byte P1 = cmdApdu.P1;
-
-            Assert.Equal((byte)keyType.GetPivAlgorithm(), P1);
-        }
-
-        [Theory]
-        [InlineData(1, 0x95)]
-        [InlineData(2, 0x82)]
-        [InlineData(3, 0x83)]
-        [InlineData(4, 0x84)]
-        [InlineData(5, 0x85)]
-        [InlineData(6, 0x86)]
-        [InlineData(7, 0x87)]
-        [InlineData(8, 0x88)]
-        [InlineData(9, 0x89)]
-        public void CreateCommandApdu_GetP2Property_ReturnsSlotNum(int cStyle, byte slotNumber)
-        {
-            CommandApdu cmdApdu = GetImportKeyCommandApdu(
-                cStyle,
-                slotNumber,
-                KeyType.RSA2048,
-                PivPinPolicy.None,
-                PivTouchPolicy.Cached);
-
-            byte P2 = cmdApdu.P2;
-
-            Assert.Equal(slotNumber, P2);
-        }
-
-        [Theory]
-        [InlineData(1, KeyType.RSA1024, PivPinPolicy.None, PivTouchPolicy.None, 0)]
-        [InlineData(2, KeyType.RSA2048, PivPinPolicy.None, PivTouchPolicy.Default, 0)]
-        [InlineData(3, KeyType.ECP256, PivPinPolicy.None, PivTouchPolicy.Never, 3)]
-        [InlineData(1, KeyType.ECP384, PivPinPolicy.None, PivTouchPolicy.Always, 3)]
-        [InlineData(2, KeyType.RSA1024, PivPinPolicy.None, PivTouchPolicy.Cached, 3)]
-        [InlineData(3, KeyType.RSA2048, PivPinPolicy.Default, PivTouchPolicy.None, 0)]
-        [InlineData(1, KeyType.ECP256, PivPinPolicy.Default, PivTouchPolicy.Default, 0)]
-        [InlineData(2, KeyType.ECP384, PivPinPolicy.Default, PivTouchPolicy.Never, 3)]
-        [InlineData(3, KeyType.RSA1024, PivPinPolicy.Default, PivTouchPolicy.Always, 3)]
-        [InlineData(1, KeyType.RSA2048, PivPinPolicy.Default, PivTouchPolicy.Cached, 3)]
-        [InlineData(2, KeyType.ECP256, PivPinPolicy.Never, PivTouchPolicy.None, 3)]
-        [InlineData(3, KeyType.ECP384, PivPinPolicy.Never, PivTouchPolicy.Default, 3)]
-        [InlineData(1, KeyType.RSA1024, PivPinPolicy.Never, PivTouchPolicy.Never, 6)]
-        [InlineData(2, KeyType.RSA2048, PivPinPolicy.Never, PivTouchPolicy.Always, 6)]
-        [InlineData(3, KeyType.ECP256, PivPinPolicy.Never, PivTouchPolicy.Cached, 6)]
-        [InlineData(1, KeyType.ECP384, PivPinPolicy.Once, PivTouchPolicy.None, 3)]
-        [InlineData(2, KeyType.RSA1024, PivPinPolicy.Once, PivTouchPolicy.Default, 3)]
-        [InlineData(3, KeyType.RSA2048, PivPinPolicy.Once, PivTouchPolicy.Never, 6)]
-        [InlineData(1, KeyType.ECP256, PivPinPolicy.Once, PivTouchPolicy.Always, 6)]
-        [InlineData(2, KeyType.ECP384, PivPinPolicy.Once, PivTouchPolicy.Cached, 6)]
-        [InlineData(3, KeyType.RSA1024, PivPinPolicy.Always, PivTouchPolicy.None, 3)]
-        [InlineData(1, KeyType.RSA2048, PivPinPolicy.Always, PivTouchPolicy.Default, 3)]
-        [InlineData(2, KeyType.ECP256, PivPinPolicy.Always, PivTouchPolicy.Never, 6)]
-        [InlineData(3, KeyType.ECP384, PivPinPolicy.Always, PivTouchPolicy.Always, 6)]
-        [InlineData(1, KeyType.RSA1024, PivPinPolicy.Always, PivTouchPolicy.Cached, 6)]
-        public void CreateCommandApdu_GetNcProperty_ReturnsCorrect(
-            int cStyle,
-            KeyType keyType,
-            PivPinPolicy pinPolicy,
-            PivTouchPolicy touchPolicy,
-            int expectedPolicyLength)
-        {
-            PivPrivateKey keyData = GetKeyData(keyType);
-            CommandApdu cmdApdu = GetImportKeyCommandApdu(
-                cStyle,
-                0x8E,
-                keyType,
-                pinPolicy,
-                touchPolicy);
-
-            int Nc = cmdApdu.Nc;
-
-            int expectedLength = keyData.EncodedPrivateKey.Length + expectedPolicyLength;
-            Assert.Equal(expectedLength, Nc);
-
-            keyData.Clear();
-        }
-
-        [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        [InlineData(3)]
-        public void CreateCommandApdu_GetNeProperty_ReturnsZero(int cStyle)
-        {
-            CommandApdu cmdApdu = GetImportKeyCommandApdu(
-                cStyle,
-                0x8F,
-                KeyType.ECP256,
-                PivPinPolicy.Always,
-                PivTouchPolicy.Never);
-
-            int Ne = cmdApdu.Ne;
-
-            Assert.Equal(0, Ne);
-        }
-
-        [Theory]
-        [InlineData(1, KeyType.RSA1024)]
-        [InlineData(2, KeyType.RSA2048)]
-        [InlineData(3, KeyType.ECP256)]
-        [InlineData(4, KeyType.ECP384)]
-        public void CreateCommandApdu_GetData_ReturnsKeyData(int cStyle, KeyType keyType)
-        {
-            PivPrivateKey keyData = GetKeyData(keyType);
-            // Use Default policies so the only data will be the key data.
-            CommandApdu cmdApdu = GetImportKeyCommandApdu(
-                cStyle,
-                0x8F,
-                keyType,
-                PivPinPolicy.Default,
-                PivTouchPolicy.Default);
-
-            ReadOnlyMemory<byte> data = cmdApdu.Data;
-
-            Assert.False(data.IsEmpty);
-            if (data.IsEmpty)
-            {
-                return;
-            }
-
-            bool compareResult = data.Span.SequenceEqual(keyData.EncodedPrivateKey.Span);
-
-            Assert.True(compareResult);
-
-            keyData.Clear();
-        }
-
-        [Theory]
-        [InlineData(1, PivPinPolicy.None, PivTouchPolicy.None)]
-        [InlineData(2, PivPinPolicy.None, PivTouchPolicy.Default)]
-        [InlineData(3, PivPinPolicy.None, PivTouchPolicy.Never)]
-        [InlineData(1, PivPinPolicy.None, PivTouchPolicy.Cached)]
-        [InlineData(2, PivPinPolicy.None, PivTouchPolicy.Always)]
-        [InlineData(3, PivPinPolicy.Default, PivTouchPolicy.None)]
-        [InlineData(1, PivPinPolicy.Default, PivTouchPolicy.Default)]
-        [InlineData(2, PivPinPolicy.Default, PivTouchPolicy.Never)]
-        [InlineData(3, PivPinPolicy.Default, PivTouchPolicy.Cached)]
-        [InlineData(1, PivPinPolicy.Default, PivTouchPolicy.Always)]
-        [InlineData(2, PivPinPolicy.Never, PivTouchPolicy.None)]
-        [InlineData(3, PivPinPolicy.Never, PivTouchPolicy.Default)]
-        [InlineData(1, PivPinPolicy.Never, PivTouchPolicy.Never)]
-        [InlineData(2, PivPinPolicy.Never, PivTouchPolicy.Cached)]
-        [InlineData(3, PivPinPolicy.Never, PivTouchPolicy.Always)]
-        [InlineData(1, PivPinPolicy.Once, PivTouchPolicy.None)]
-        [InlineData(2, PivPinPolicy.Once, PivTouchPolicy.Default)]
-        [InlineData(3, PivPinPolicy.Once, PivTouchPolicy.Never)]
-        [InlineData(1, PivPinPolicy.Once, PivTouchPolicy.Cached)]
-        [InlineData(2, PivPinPolicy.Once, PivTouchPolicy.Always)]
-        [InlineData(3, PivPinPolicy.Always, PivTouchPolicy.None)]
-        [InlineData(1, PivPinPolicy.Always, PivTouchPolicy.Default)]
-        [InlineData(2, PivPinPolicy.Always, PivTouchPolicy.Never)]
-        [InlineData(3, PivPinPolicy.Always, PivTouchPolicy.Cached)]
-        [InlineData(1, PivPinPolicy.Always, PivTouchPolicy.Always)]
-        [InlineData(4, PivPinPolicy.None, PivTouchPolicy.Never)]
-        [InlineData(5, PivPinPolicy.None, PivTouchPolicy.Cached)]
-        [InlineData(6, PivPinPolicy.Once, PivTouchPolicy.None)]
-        [InlineData(7, PivPinPolicy.Always, PivTouchPolicy.None)]
-        [InlineData(8, PivPinPolicy.Default, PivTouchPolicy.Default)]
-        [InlineData(9, PivPinPolicy.Default, PivTouchPolicy.Default)]
-        public void CreateCommandApdu_GetData_ReturnsPolicy(
-            int cStyle,
-            PivPinPolicy pinPolicy,
-            PivTouchPolicy touchPolicy)
-        {
-            PivPrivateKey keyData = GetKeyData(KeyType.ECP256);
-            byte[] pinData = new byte[] { 0xAA, 0x01, (byte)pinPolicy };
-            byte[] touchData = new byte[] { 0xAB, 0x01, (byte)touchPolicy };
-            var expected = new List<byte>(keyData.EncodedPrivateKey.ToArray());
-            if (pinPolicy != PivPinPolicy.None && pinPolicy != PivPinPolicy.Default)
-            {
-                expected.AddRange(pinData);
-            }
-            if (touchPolicy != PivTouchPolicy.None && touchPolicy != PivTouchPolicy.Default)
-            {
-                expected.AddRange(touchData);
-            }
-            CommandApdu cmdApdu = GetImportKeyCommandApdu(
-                cStyle,
-                0x8F,
-                KeyType.ECP256,
-                pinPolicy,
-                touchPolicy);
-
-            ReadOnlyMemory<byte> data = cmdApdu.Data;
-
-            Assert.False(data.IsEmpty);
-            if (data.IsEmpty)
-            {
-                return;
-            }
-
-            bool compareResult = data.Span.SequenceEqual(expected.ToArray());
-
-            Assert.True(compareResult);
-
-            keyData.Clear();
-        }
-
-        [Fact]
-        public void CreateResponseForApdu_ReturnsCorrectType()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
-            PivPrivateKey keyData = GetKeyData(KeyType.ECP384);
-            var importKeyCommand = new ImportAsymmetricKeyCommand(
-                keyData,
-                PivSlot.Retired18,
-                PivPinPolicy.Default,
-                PivTouchPolicy.Default);
-
-            ImportAsymmetricKeyResponse response = importKeyCommand.CreateResponseForApdu(responseApdu);
-
-            Assert.True(response is ImportAsymmetricKeyResponse);
-
-            keyData.Clear();
-        }
-
-        // The constructorStyle is either 1, meaning construct the
-        // ImportAsymmetricKeyCommand using the full constructor, or anything
-        // other than 1, meaning use the object initializer constructor.
-        private static CommandApdu GetImportKeyCommandApdu(
-            int cStyle,
-            byte slotNumber,
-            KeyType keyType,
-            PivPinPolicy pinPolicy,
-            PivTouchPolicy touchPolicy)
-        {
-            ImportAsymmetricKeyCommand importKeyCommand = GetCommandObject(
-                cStyle,
-                slotNumber,
-                keyType,
-                pinPolicy,
-                touchPolicy);
-
-            return importKeyCommand.CreateCommandApdu();
-        }
-
-        // Construct a GenerateKeyPairCommand using the style specified.
-        // If the style arg is 1, this will build using the full constructor.
-        // If it is 2, it will build it using object initializer constructor.
-        // If it is 3, create it using the empty constructor and set the
-        // properties later.
-        // If it is 4, create it using the object initializer constructor but
-        // don't set the PinPolicy (it should be default).
-        // If it is 5, create it using the empty constructor and set the
-        // properties later, except don't set the PinPolicy.
-        // If it is 6, create it using the object initializer constructor but
-        // don't set the TouchPolicy (it should be default).
-        // If it is 7, create it using the empty constructor and set the
-        // properties later, except don't set the TouchPolicy.
-        // If it is 8, create it using the object initializer constructor but
-        // don't set the PinPolicy or the TouchPolicy.
-        // If it is 9, create it using the empty constructor and set the
-        // properties later, except don't set the PinPolicy or the TouchPolicy.
-        private static ImportAsymmetricKeyCommand GetCommandObject(
-            int cStyle,
-            byte slotNumber,
-            KeyType keyType,
-            PivPinPolicy pinPolicy,
-            PivTouchPolicy touchPolicy)
-        {
-            ImportAsymmetricKeyCommand cmd;
-
-            PivPrivateKey keyData = GetKeyData(keyType);
+        var keyData = GetKeyData(keyType);
 #pragma warning disable IDE0017 // Testing this specific construction
-            switch (cStyle)
-            {
-                default:
-                    cmd = new ImportAsymmetricKeyCommand(keyData, slotNumber, pinPolicy, touchPolicy);
-                    break;
+        switch (cStyle)
+        {
+            default:
+                cmd = new ImportAsymmetricKeyCommand(keyData, slotNumber, pinPolicy, touchPolicy);
+                break;
 
-                case 2:
-                    cmd = new ImportAsymmetricKeyCommand(keyData)
-                    {
-                        SlotNumber = slotNumber,
-                        PinPolicy = pinPolicy,
-                        TouchPolicy = touchPolicy,
-                    };
-                    break;
+            case 2:
+                cmd = new ImportAsymmetricKeyCommand(keyData)
+                {
+                    SlotNumber = slotNumber,
+                    PinPolicy = pinPolicy,
+                    TouchPolicy = touchPolicy
+                };
+                break;
 
 
-                case 3:
-                    cmd = new ImportAsymmetricKeyCommand(keyData);
-                    cmd.SlotNumber = slotNumber;
-                    cmd.PinPolicy = pinPolicy;
-                    cmd.TouchPolicy = touchPolicy;
-                    break;
+            case 3:
+                cmd = new ImportAsymmetricKeyCommand(keyData);
+                cmd.SlotNumber = slotNumber;
+                cmd.PinPolicy = pinPolicy;
+                cmd.TouchPolicy = touchPolicy;
+                break;
 
-                case 4:
-                    cmd = new ImportAsymmetricKeyCommand(keyData)
-                    {
-                        SlotNumber = slotNumber,
-                        TouchPolicy = touchPolicy,
-                    };
-                    break;
+            case 4:
+                cmd = new ImportAsymmetricKeyCommand(keyData)
+                {
+                    SlotNumber = slotNumber,
+                    TouchPolicy = touchPolicy
+                };
+                break;
 
-                case 5:
-                    cmd = new ImportAsymmetricKeyCommand(keyData);
-                    cmd.SlotNumber = slotNumber;
-                    cmd.TouchPolicy = touchPolicy;
-                    break;
+            case 5:
+                cmd = new ImportAsymmetricKeyCommand(keyData);
+                cmd.SlotNumber = slotNumber;
+                cmd.TouchPolicy = touchPolicy;
+                break;
 
-                case 6:
-                    cmd = new ImportAsymmetricKeyCommand(keyData)
-                    {
-                        SlotNumber = slotNumber,
-                        PinPolicy = pinPolicy,
-                    };
-                    break;
+            case 6:
+                cmd = new ImportAsymmetricKeyCommand(keyData)
+                {
+                    SlotNumber = slotNumber,
+                    PinPolicy = pinPolicy
+                };
+                break;
 
-                case 7:
-                    cmd = new ImportAsymmetricKeyCommand(keyData);
-                    cmd.SlotNumber = slotNumber;
-                    cmd.PinPolicy = pinPolicy;
-                    break;
+            case 7:
+                cmd = new ImportAsymmetricKeyCommand(keyData);
+                cmd.SlotNumber = slotNumber;
+                cmd.PinPolicy = pinPolicy;
+                break;
 
-                case 8:
-                    cmd = new ImportAsymmetricKeyCommand(keyData)
-                    {
-                        SlotNumber = slotNumber,
-                    };
-                    break;
+            case 8:
+                cmd = new ImportAsymmetricKeyCommand(keyData)
+                {
+                    SlotNumber = slotNumber
+                };
+                break;
 
-                case 9:
-                    cmd = new ImportAsymmetricKeyCommand(keyData);
-                    cmd.SlotNumber = slotNumber;
-                    break;
-            }
-#pragma warning restore IDE0017
-            return cmd;
+            case 9:
+                cmd = new ImportAsymmetricKeyCommand(keyData);
+                cmd.SlotNumber = slotNumber;
+                break;
         }
+#pragma warning restore IDE0017
+        return cmd;
+    }
 
-        private static PivPrivateKey GetKeyData(KeyType keyType) => keyType switch
+    private static PivPrivateKey GetKeyData(
+        KeyType keyType)
+    {
+        return keyType switch
         {
             KeyType.RSA1024 =>
-                     PivPrivateKey.Create(new byte[] {
-                         0x01, 0x40,
-                         0xdf, 0x2c, 0x15, 0xe7, 0x9f, 0xf7, 0xf0, 0xe4, 0x36, 0xfd, 0x93, 0x1f, 0xd7, 0x36, 0x20, 0x2e,
-                         0x70, 0xd2, 0x51, 0xe4, 0x4a, 0x5d, 0xf8, 0xbb, 0xfd, 0x2d, 0x66, 0xd1, 0xe5, 0x1d, 0x5e, 0x92,
-                         0x9b, 0xa8, 0xba, 0x9c, 0xfd, 0x53, 0x72, 0x93, 0xee, 0x98, 0x33, 0xc6, 0xe5, 0x23, 0xcb, 0x79,
-                         0x74, 0xad, 0x8f, 0x31, 0xb4, 0xa2, 0x6b, 0x46, 0xef, 0x8e, 0xad, 0x53, 0x6b, 0xb0, 0x5e, 0xc3,
-                         0x02, 0x40,
-                         0xd7, 0x96, 0x0f, 0x54, 0xfd, 0xc9, 0xa8, 0x6f, 0xcb, 0xc2, 0xea, 0x13, 0x58, 0xf6, 0x47, 0x87,
-                         0x59, 0x84, 0xba, 0x1c, 0x68, 0x9d, 0xbf, 0x29, 0xbd, 0x20, 0x7d, 0x84, 0xcf, 0x12, 0xcf, 0xe7,
-                         0xb5, 0x6f, 0x05, 0x37, 0xa3, 0x3a, 0x7c, 0x0a, 0x6f, 0x7c, 0x1b, 0xa0, 0x06, 0x23, 0x4b, 0x15,
-                         0x09, 0xbb, 0x46, 0x5d, 0xba, 0x28, 0x3d, 0x36, 0x58, 0x66, 0x34, 0x7d, 0x7f, 0x88, 0x1a, 0xa9,
-                         0x03, 0x40,
-                         0x1e, 0xfb, 0x35, 0xc7, 0x43, 0xf3, 0xdd, 0xa3, 0x30, 0xe7, 0x1e, 0xe7, 0x8a, 0xae, 0xde, 0xe4,
-                         0xd3, 0x90, 0xbf, 0x01, 0x9c, 0x39, 0x53, 0x70, 0x75, 0x83, 0x3a, 0x04, 0xe5, 0x73, 0xa0, 0x4f,
-                         0x66, 0x00, 0x94, 0x77, 0x7a, 0xcb, 0x7c, 0xda, 0x80, 0x82, 0xec, 0x9d, 0x2d, 0xee, 0x3c, 0x2f,
-                         0x0e, 0x3d, 0x91, 0xe5, 0x6a, 0x98, 0x29, 0xa0, 0x5d, 0x5d, 0x47, 0x3e, 0x8f, 0x72, 0x9a, 0x95,
-                         0x04, 0x40,
-                         0x8a, 0x40, 0xa5, 0x5c, 0x6f, 0xd4, 0x5e, 0xbc, 0x33, 0x03, 0xb0, 0x70, 0xef, 0xe0, 0x20, 0x46,
-                         0xe0, 0x55, 0x89, 0xb4, 0xa6, 0x32, 0x63, 0x61, 0x34, 0xf4, 0x1d, 0x0a, 0x8a, 0x71, 0x19, 0xfb,
-                         0x12, 0x13, 0x3c, 0x59, 0x4d, 0xc8, 0x37, 0xbb, 0xc9, 0x7a, 0xe1, 0x8c, 0x61, 0xe3, 0x48, 0x47,
-                         0x19, 0x92, 0x8b, 0xb1, 0x97, 0xac, 0x2e, 0x75, 0x27, 0x83, 0x83, 0xad, 0xe7, 0x97, 0x34, 0xe1,
-                         0x05, 0x40,
-                         0x19, 0x51, 0x79, 0x1e, 0x4e, 0x1f, 0xb1, 0xe9, 0xc1, 0x59, 0x9c, 0x69, 0xc8, 0xda, 0x2d, 0x8d,
-                         0xb7, 0x04, 0xa0, 0x7d, 0xd1, 0x45, 0x9f, 0xc8, 0xae, 0x97, 0xf7, 0x77, 0xe2, 0x53, 0x98, 0x48,
-                         0xd5, 0x75, 0xfb, 0xff, 0xfa, 0x17, 0xb0, 0xc7, 0x4a, 0x46, 0xb0, 0xa7, 0xa6, 0x0e, 0x5e, 0x2c,
-                         0xfd, 0xda, 0x5b, 0xbb, 0xc1, 0x0a, 0x77, 0x73, 0x0a, 0xaa, 0x1e, 0xc5, 0x66, 0x42, 0x96, 0xcf
-                     }),
+                PivPrivateKey.Create(new byte[]
+                {
+                    0x01, 0x40,
+                    0xdf, 0x2c, 0x15, 0xe7, 0x9f, 0xf7, 0xf0, 0xe4, 0x36, 0xfd, 0x93, 0x1f, 0xd7, 0x36, 0x20, 0x2e,
+                    0x70, 0xd2, 0x51, 0xe4, 0x4a, 0x5d, 0xf8, 0xbb, 0xfd, 0x2d, 0x66, 0xd1, 0xe5, 0x1d, 0x5e, 0x92,
+                    0x9b, 0xa8, 0xba, 0x9c, 0xfd, 0x53, 0x72, 0x93, 0xee, 0x98, 0x33, 0xc6, 0xe5, 0x23, 0xcb, 0x79,
+                    0x74, 0xad, 0x8f, 0x31, 0xb4, 0xa2, 0x6b, 0x46, 0xef, 0x8e, 0xad, 0x53, 0x6b, 0xb0, 0x5e, 0xc3,
+                    0x02, 0x40,
+                    0xd7, 0x96, 0x0f, 0x54, 0xfd, 0xc9, 0xa8, 0x6f, 0xcb, 0xc2, 0xea, 0x13, 0x58, 0xf6, 0x47, 0x87,
+                    0x59, 0x84, 0xba, 0x1c, 0x68, 0x9d, 0xbf, 0x29, 0xbd, 0x20, 0x7d, 0x84, 0xcf, 0x12, 0xcf, 0xe7,
+                    0xb5, 0x6f, 0x05, 0x37, 0xa3, 0x3a, 0x7c, 0x0a, 0x6f, 0x7c, 0x1b, 0xa0, 0x06, 0x23, 0x4b, 0x15,
+                    0x09, 0xbb, 0x46, 0x5d, 0xba, 0x28, 0x3d, 0x36, 0x58, 0x66, 0x34, 0x7d, 0x7f, 0x88, 0x1a, 0xa9,
+                    0x03, 0x40,
+                    0x1e, 0xfb, 0x35, 0xc7, 0x43, 0xf3, 0xdd, 0xa3, 0x30, 0xe7, 0x1e, 0xe7, 0x8a, 0xae, 0xde, 0xe4,
+                    0xd3, 0x90, 0xbf, 0x01, 0x9c, 0x39, 0x53, 0x70, 0x75, 0x83, 0x3a, 0x04, 0xe5, 0x73, 0xa0, 0x4f,
+                    0x66, 0x00, 0x94, 0x77, 0x7a, 0xcb, 0x7c, 0xda, 0x80, 0x82, 0xec, 0x9d, 0x2d, 0xee, 0x3c, 0x2f,
+                    0x0e, 0x3d, 0x91, 0xe5, 0x6a, 0x98, 0x29, 0xa0, 0x5d, 0x5d, 0x47, 0x3e, 0x8f, 0x72, 0x9a, 0x95,
+                    0x04, 0x40,
+                    0x8a, 0x40, 0xa5, 0x5c, 0x6f, 0xd4, 0x5e, 0xbc, 0x33, 0x03, 0xb0, 0x70, 0xef, 0xe0, 0x20, 0x46,
+                    0xe0, 0x55, 0x89, 0xb4, 0xa6, 0x32, 0x63, 0x61, 0x34, 0xf4, 0x1d, 0x0a, 0x8a, 0x71, 0x19, 0xfb,
+                    0x12, 0x13, 0x3c, 0x59, 0x4d, 0xc8, 0x37, 0xbb, 0xc9, 0x7a, 0xe1, 0x8c, 0x61, 0xe3, 0x48, 0x47,
+                    0x19, 0x92, 0x8b, 0xb1, 0x97, 0xac, 0x2e, 0x75, 0x27, 0x83, 0x83, 0xad, 0xe7, 0x97, 0x34, 0xe1,
+                    0x05, 0x40,
+                    0x19, 0x51, 0x79, 0x1e, 0x4e, 0x1f, 0xb1, 0xe9, 0xc1, 0x59, 0x9c, 0x69, 0xc8, 0xda, 0x2d, 0x8d,
+                    0xb7, 0x04, 0xa0, 0x7d, 0xd1, 0x45, 0x9f, 0xc8, 0xae, 0x97, 0xf7, 0x77, 0xe2, 0x53, 0x98, 0x48,
+                    0xd5, 0x75, 0xfb, 0xff, 0xfa, 0x17, 0xb0, 0xc7, 0x4a, 0x46, 0xb0, 0xa7, 0xa6, 0x0e, 0x5e, 0x2c,
+                    0xfd, 0xda, 0x5b, 0xbb, 0xc1, 0x0a, 0x77, 0x73, 0x0a, 0xaa, 0x1e, 0xc5, 0x66, 0x42, 0x96, 0xcf
+                }),
 
             KeyType.RSA2048 =>
-                PivPrivateKey.Create(new byte[] {
+                PivPrivateKey.Create(new byte[]
+                {
                     0x02, 0x81, 0x80,
                     0xd0, 0xc0, 0x5a, 0xba, 0xec, 0x01, 0x46, 0x1b, 0x48, 0x98, 0xd2, 0x53, 0x97, 0x68, 0x47, 0xca,
                     0xb1, 0x8e, 0xbe, 0xf2, 0x92, 0x6b, 0x62, 0x0f, 0xa7, 0x1b, 0x8c, 0x50, 0x38, 0x23, 0x2d, 0x1a,
@@ -635,27 +655,25 @@ namespace Yubico.YubiKey.Piv.Commands
                 }),
 
             KeyType.ECP256 =>
-                PivPrivateKey.Create(new byte[] {
+                PivPrivateKey.Create(new byte[]
+                {
                     0x06, 0x20,
                     0xba, 0x29, 0x7a, 0xc6, 0x64, 0x62, 0xef, 0x6c, 0xd0, 0x89, 0x76, 0x5c, 0xbd, 0x46, 0x52, 0x2b,
                     0xb0, 0x48, 0x0e, 0x85, 0x49, 0x15, 0x85, 0xe7, 0x7a, 0x74, 0x3c, 0x8e, 0x03, 0x59, 0x8d, 0x3a
                 }),
 
             _ =>
-                PivPrivateKey.Create(new byte[] {
+                PivPrivateKey.Create(new byte[]
+                {
                     0x06, 0x30,
                     0x47, 0x85, 0xde, 0x3a, 0xff, 0x10, 0x0d, 0x67, 0xa7, 0x26, 0x30, 0x62, 0x73, 0x45, 0xfd, 0xce,
                     0xeb, 0xb9, 0xbe, 0x4c, 0x93, 0x42, 0xcd, 0x6a, 0x84, 0xd6, 0x8e, 0x00, 0x70, 0x70, 0x4c, 0x66,
                     0x63, 0x53, 0xa0, 0x2c, 0xb9, 0xa7, 0x61, 0xcf, 0x56, 0xf0, 0x45, 0x07, 0xa6, 0xfb, 0x9f, 0x5a
-                }),
+                })
         };
     }
-    
-    
-    
-    
-    
-    
+}
+
 //     public class ImportKeyCommandTests // TODO
 //     {
 //         [Theory]
@@ -1285,4 +1303,3 @@ namespace Yubico.YubiKey.Piv.Commands
 //                 }),
 //         };
 //     }
-}

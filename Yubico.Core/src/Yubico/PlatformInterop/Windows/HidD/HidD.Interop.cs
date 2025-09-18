@@ -16,115 +16,106 @@ using System;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+internal static partial class NativeMethods
 {
-    internal static partial class NativeMethods
+    #region Structures
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct HIDD_ATTRIBUTES
     {
-        #region Structures
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct HIDD_ATTRIBUTES
-        {
-            public int Size;
-            public short VendorId;
-            public short ProductId;
-            public short VersionNumber;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        internal struct HIDP_CAPS
-        {
-            public short Usage;
-            public short UsagePage;
-            public short InputReportByteLength;
-            public short OutputReportByteLength;
-            public short FeatureReportByteLength;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 17)]
-            private readonly short[] Reserved;
-
-            public short NumberLinkCollectionNodes;
-
-            public short NumberInputButtonCaps;
-            public short NumberInputValueCaps;
-            public short NumberInputDataIndices;
-
-            public short NumberOutputButtonCaps;
-            public short NumberOutputValueCaps;
-            public short NumberOutputDataIndices;
-
-            public short NumberFeatureButtonCaps;
-            public short NumberFeatureValueCaps;
-            public short NumberFeatureDataIndices;
-        }
-        #endregion
-
-        #region P/Invoke DLL Imports
-
-        // Note that the DefaultDllImportSearchPaths attribute is a security best
-        // practice on the Windows platform (and required by our analyzer
-        // settings). It does not currently have any effect on platforms other
-        // than Windows, but is included because of the analyzer and in the hope
-        // that it will be supported by these platforms in the future.
-        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern bool HidD_FreePreparsedData(
-            IntPtr PreparsedData
-            );
-
-        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern bool HidD_GetAttributes(
-            SafeFileHandle HidDeviceObject,
-            out HIDD_ATTRIBUTES Attributes
-            );
-
-        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern bool HidD_GetFeature(
-            SafeFileHandle HidDeviceObject,
-            byte[] ReportBuffer,
-            int ReportBufferLength
-            );
-
-        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern bool HidD_GetManufacturerString(
-            SafeFileHandle HidDeviceObject,
-            byte[] Buffer,
-            int BufferLength
-            );
-
-        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern bool HidD_GetPreparsedData(
-            SafeFileHandle HidDeviceObject,
-            out IntPtr PreparsedData
-            );
-
-        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern bool HidD_GetProductString(
-            SafeFileHandle HidDeviceObject,
-            byte[] Buffer,
-            int BufferLength
-            );
-
-        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern bool HidD_SetFeature(
-            SafeFileHandle HidDeviceObject,
-            byte[] Buffer,
-            int BufferLength
-            );
-
-        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern bool HidP_GetCaps(
-            IntPtr PreparsedData,
-            ref HIDP_CAPS Capabilities
-            );
-
-        #endregion
+        public int Size;
+        public short VendorId;
+        public short ProductId;
+        public short VersionNumber;
     }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    internal struct HIDP_CAPS
+    {
+        public short Usage;
+        public short UsagePage;
+        public short InputReportByteLength;
+        public short OutputReportByteLength;
+        public short FeatureReportByteLength;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 17)]
+        private readonly short[] Reserved;
+
+        public short NumberLinkCollectionNodes;
+
+        public short NumberInputButtonCaps;
+        public short NumberInputValueCaps;
+        public short NumberInputDataIndices;
+
+        public short NumberOutputButtonCaps;
+        public short NumberOutputValueCaps;
+        public short NumberOutputDataIndices;
+
+        public short NumberFeatureButtonCaps;
+        public short NumberFeatureValueCaps;
+        public short NumberFeatureDataIndices;
+    }
+
+    #endregion
+
+    #region P/Invoke DLL Imports
+
+    // Note that the DefaultDllImportSearchPaths attribute is a security best
+    // practice on the Windows platform (and required by our analyzer
+    // settings). It does not currently have any effect on platforms other
+    // than Windows, but is included because of the analyzer and in the hope
+    // that it will be supported by these platforms in the future.
+    [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    internal static extern bool HidD_FreePreparsedData(IntPtr PreparsedData);
+
+    [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    internal static extern bool HidD_GetAttributes(
+        SafeFileHandle HidDeviceObject,
+        out HIDD_ATTRIBUTES Attributes);
+
+    [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    internal static extern bool HidD_GetFeature(
+        SafeFileHandle HidDeviceObject,
+        byte[] ReportBuffer,
+        int ReportBufferLength);
+
+    [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    internal static extern bool HidD_GetManufacturerString(
+        SafeFileHandle HidDeviceObject,
+        byte[] Buffer,
+        int BufferLength);
+
+    [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    internal static extern bool HidD_GetPreparsedData(
+        SafeFileHandle HidDeviceObject,
+        out IntPtr PreparsedData);
+
+    [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    internal static extern bool HidD_GetProductString(
+        SafeFileHandle HidDeviceObject,
+        byte[] Buffer,
+        int BufferLength);
+
+    [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    internal static extern bool HidD_SetFeature(
+        SafeFileHandle HidDeviceObject,
+        byte[] Buffer,
+        int BufferLength);
+
+    [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    internal static extern bool HidP_GetCaps(
+        IntPtr PreparsedData,
+        ref HIDP_CAPS Capabilities);
+
+    #endregion
 }

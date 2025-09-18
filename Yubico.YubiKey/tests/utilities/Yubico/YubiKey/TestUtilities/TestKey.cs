@@ -20,17 +20,15 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.TestUtilities;
 
 /// <summary>
-/// Represents a cryptographic key for testing purposes, supporting both RSA and EC keys.
-/// Provides conversion methods to standard .NET cryptographic types.
+///     Represents a cryptographic key for testing purposes, supporting both RSA and EC keys.
+///     Provides conversion methods to standard .NET cryptographic types.
 /// </summary>
 public class TestKey : TestCrypto
 {
-    public KeyDefinition KeyDefinition { get; }
-    public KeyType KeyType { get; }
     private readonly bool _isPrivate;
 
     /// <summary>
-    /// Loads a test key from the TestData directory.
+    ///     Loads a test key from the TestData directory.
     /// </summary>
     /// <param name="filePath">The path to the PEM file containing the key data</param>
     /// <param name="keyType"></param>
@@ -46,7 +44,13 @@ public class TestKey : TestCrypto
         _isPrivate = isPrivate;
     }
 
-    public KeyDefinition GetKeyDefinition() => KeyDefinitions.GetByKeyType(KeyType);
+    public KeyDefinition KeyDefinition { get; }
+    public KeyType KeyType { get; }
+
+    public KeyDefinition GetKeyDefinition()
+    {
+        return KeyDefinitions.GetByKeyType(KeyType);
+    }
 
     public byte[] GetExponent()
     {
@@ -90,7 +94,7 @@ public class TestKey : TestCrypto
         {
             return Load(KeyType, false).AsPublicKey();
         }
-        
+
         if (KeyDefinition.IsRSA)
         {
             return RSAPublicKey.CreateFromSubjectPublicKeyInfo(EncodedKey);
@@ -136,7 +140,7 @@ public class TestKey : TestCrypto
     }
 
     /// <summary>
-    /// Converts the key to an RSA instance if it represents an RSA key.
+    ///     Converts the key to an RSA instance if it represents an RSA key.
     /// </summary>
     /// <returns>RSA instance initialized with the key data</returns>
     /// <exception cref="InvalidOperationException">Thrown if the key is not an RSA key</exception>
@@ -154,7 +158,7 @@ public class TestKey : TestCrypto
     }
 
     /// <summary>
-    /// Converts the key to an ECDsa instance if it represents an EC key.
+    ///     Converts the key to an ECDsa instance if it represents an EC key.
     /// </summary>
     /// <returns>ECDsa instance initialized with the key data</returns>
     /// <exception cref="InvalidOperationException">Thrown if the key is not an EC key</exception>
@@ -173,13 +177,17 @@ public class TestKey : TestCrypto
 
     public static TestKey LoadPublicKey(
         KeyType keyType,
-        int? index = null) =>
-        Load(keyType, false, index);
+        int? index = null)
+    {
+        return Load(keyType, false, index);
+    }
 
     public static TestKey LoadPrivateKey(
         KeyType keyType,
-        int? index = null) =>
-        Load(keyType, true, index);
+        int? index = null)
+    {
+        return Load(keyType, true, index);
+    }
 
     private static TestKey Load(
         KeyType keyType,

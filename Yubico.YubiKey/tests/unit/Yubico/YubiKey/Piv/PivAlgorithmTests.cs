@@ -14,78 +14,84 @@
 
 using System;
 using Xunit;
-using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+public class PivAlgorithmTests
 {
-    public class PivAlgorithmTests
+    [Theory]
+    [InlineData(PivAlgorithm.Rsa1024, true)]
+    [InlineData(PivAlgorithm.Rsa2048, true)]
+    [InlineData(PivAlgorithm.Rsa3072, true)]
+    [InlineData(PivAlgorithm.Rsa4096, true)]
+    [InlineData(PivAlgorithm.EccP256, true)]
+    [InlineData(PivAlgorithm.EccP384, true)]
+    [InlineData(PivAlgorithm.None, false)]
+    [InlineData(PivAlgorithm.TripleDes, false)]
+    [InlineData(PivAlgorithm.Pin, false)]
+    [Obsolete("This test is obsolete. It is testing a deprecated method.")]
+    public void IsValidAlg_ReturnsCorrect(
+        PivAlgorithm keyType,
+        bool expectedResult)
     {
-        [Theory]
-        [InlineData(PivAlgorithm.Rsa1024, true)]
-        [InlineData(PivAlgorithm.Rsa2048, true)]
-        [InlineData(PivAlgorithm.Rsa3072, true)]
-        [InlineData(PivAlgorithm.Rsa4096, true)]
-        [InlineData(PivAlgorithm.EccP256, true)]
-        [InlineData(PivAlgorithm.EccP384, true)]
-        [InlineData(PivAlgorithm.None, false)]
-        [InlineData(PivAlgorithm.TripleDes, false)]
-        [InlineData(PivAlgorithm.Pin, false)]
-        [Obsolete("This test is obsolete. It is testing a deprecated method.")]
-        public void IsValidAlg_ReturnsCorrect(PivAlgorithm keyType, bool expectedResult)
-        {
-            bool result = keyType.IsValidAlgorithmForGenerate();
+        var result = keyType.IsValidAlgorithmForGenerate();
 
-            Assert.Equal(expectedResult, result);
-        }
+        Assert.Equal(expectedResult, result);
+    }
 
-        [Theory]
-        [InlineData(PivAlgorithm.Rsa1024, true)]
-        [InlineData(PivAlgorithm.Rsa2048, true)]
-        [InlineData(PivAlgorithm.Rsa3072, true)]
-        [InlineData(PivAlgorithm.Rsa4096, true)]
-        [InlineData(PivAlgorithm.EccP256, false)]
-        [InlineData(PivAlgorithm.EccP384, false)]
-        [InlineData(PivAlgorithm.None, false)]
-        [InlineData(PivAlgorithm.TripleDes, false)]
-        [InlineData(PivAlgorithm.Pin, false)]
-        public void IsRsa_ReturnsCorrect(PivAlgorithm keyType, bool expectedResult)
-        {
-            bool result = keyType.IsRsa();
+    [Theory]
+    [InlineData(PivAlgorithm.Rsa1024, true)]
+    [InlineData(PivAlgorithm.Rsa2048, true)]
+    [InlineData(PivAlgorithm.Rsa3072, true)]
+    [InlineData(PivAlgorithm.Rsa4096, true)]
+    [InlineData(PivAlgorithm.EccP256, false)]
+    [InlineData(PivAlgorithm.EccP384, false)]
+    [InlineData(PivAlgorithm.None, false)]
+    [InlineData(PivAlgorithm.TripleDes, false)]
+    [InlineData(PivAlgorithm.Pin, false)]
+    public void IsRsa_ReturnsCorrect(
+        PivAlgorithm keyType,
+        bool expectedResult)
+    {
+        var result = keyType.IsRsa();
 
-            Assert.Equal(expectedResult, result);
-        }
+        Assert.Equal(expectedResult, result);
+    }
 
-        [Theory]
-        [InlineData(PivAlgorithm.Rsa1024, false)]
-        [InlineData(PivAlgorithm.Rsa2048, false)]
-        [InlineData(PivAlgorithm.Rsa3072, false)]
-        [InlineData(PivAlgorithm.Rsa4096, false)]
-        [InlineData(PivAlgorithm.EccP256, true)]
-        [InlineData(PivAlgorithm.EccP384, true)]
-        [InlineData(PivAlgorithm.None, false)]
-        [InlineData(PivAlgorithm.TripleDes, false)]
-        [InlineData(PivAlgorithm.Pin, false)]
-        public void IsEcc_ReturnsCorrect(PivAlgorithm keyType, bool expectedResult)
-        {
-            bool result = keyType.IsEcc();
+    [Theory]
+    [InlineData(PivAlgorithm.Rsa1024, false)]
+    [InlineData(PivAlgorithm.Rsa2048, false)]
+    [InlineData(PivAlgorithm.Rsa3072, false)]
+    [InlineData(PivAlgorithm.Rsa4096, false)]
+    [InlineData(PivAlgorithm.EccP256, true)]
+    [InlineData(PivAlgorithm.EccP384, true)]
+    [InlineData(PivAlgorithm.None, false)]
+    [InlineData(PivAlgorithm.TripleDes, false)]
+    [InlineData(PivAlgorithm.Pin, false)]
+    public void IsEcc_ReturnsCorrect(
+        PivAlgorithm keyType,
+        bool expectedResult)
+    {
+        var result = keyType.IsEcc();
 
-            Assert.Equal(expectedResult, result);
-        }
+        Assert.Equal(expectedResult, result);
+    }
 
-        [Theory]
-        [InlineData(PivAlgorithm.Rsa1024, 1024)]
-        [InlineData(PivAlgorithm.Rsa2048, 2048)]
-        [InlineData(PivAlgorithm.Rsa3072, 3072)]
-        [InlineData(PivAlgorithm.Rsa4096, 4096)]
-        [InlineData(PivAlgorithm.EccP256, 256)]
-        [InlineData(PivAlgorithm.EccP384, 384)]
-        [InlineData(PivAlgorithm.None, 0)]
-        [InlineData(PivAlgorithm.TripleDes, 192)]
-        [InlineData(PivAlgorithm.Pin, 64)]
-        public void KeySizeBits_ReturnsCorrect(PivAlgorithm keyType, int expectedResult)
-        {
-            int result = keyType.KeySizeBits();
-            Assert.Equal(expectedResult, result);
-        }
+    [Theory]
+    [InlineData(PivAlgorithm.Rsa1024, 1024)]
+    [InlineData(PivAlgorithm.Rsa2048, 2048)]
+    [InlineData(PivAlgorithm.Rsa3072, 3072)]
+    [InlineData(PivAlgorithm.Rsa4096, 4096)]
+    [InlineData(PivAlgorithm.EccP256, 256)]
+    [InlineData(PivAlgorithm.EccP384, 384)]
+    [InlineData(PivAlgorithm.None, 0)]
+    [InlineData(PivAlgorithm.TripleDes, 192)]
+    [InlineData(PivAlgorithm.Pin, 64)]
+    public void KeySizeBits_ReturnsCorrect(
+        PivAlgorithm keyType,
+        int expectedResult)
+    {
+        var result = keyType.KeySizeBits();
+        Assert.Equal(expectedResult, result);
     }
 }

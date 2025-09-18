@@ -15,22 +15,66 @@
 using System;
 using System.Collections.Generic;
 
-namespace Yubico.Core.Tlv
+namespace Yubico.Core.Tlv;
+
+/// <summary>
+///     A Tag-Length-Value that has sub-elements.
+/// </summary>
+/// <remarks>
+///     There are two types of Nested TLV. One, the sub-elements are presented as a
+///     concatenation:
+///     <code>
+///   TLV || TLV || ... TLV
+///   for example: 81 02 05 05 82 01 14 83 04 00 72 9A 1E
+///              81 02 05 05   82 01 14   83 04 00 72 9A 1E
+/// </code>
+///     And two, a "tree" where the Nested TLV has a tag and the value is a
+///     collection of sub-elements:
+///     <code>
+///   TL { TLV || TLV || ... TLV }
+///   for example: 7C 0D 81 02 05 05 82 01 14 83 04 00 72 9A 1E
+///     7C 0D
+///        81 02
+///           05 05
+///        82 01
+///           14
+///        83 04
+///           00 72 9A 1E
+/// </code>
+/// </remarks>
+internal class TlvNestedTlv : TlvEncoder
 {
+    private readonly List<TlvEncoder> _subElements = new();
+    private readonly int _tag;
+    private int _encodedLength;
+    private int _subElementLength;
+    private byte[] _tagAndLength;
+
     /// <summary>
-    /// A Tag-Length-Value that has sub-elements.
+    ///     Build a new NestedTlv that will organize as a concatenation.
     /// </summary>
     /// <remarks>
-    /// There are two types of Nested TLV. One, the sub-elements are presented as a
-    /// concatenation:
-    /// <code>
+    ///     The sub-elements added to this Nested TLV will be encoded as a
+    ///     concatenation:
+    ///     <code>
     ///   TLV || TLV || ... TLV
     ///   for example: 81 02 05 05 82 01 14 83 04 00 72 9A 1E
     ///              81 02 05 05   82 01 14   83 04 00 72 9A 1E
     /// </code>
-    /// And two, a "tree" where the Nested TLV has a tag and the value is a
-    /// collection of sub-elements:
-    /// <code>
+    /// </remarks>
+    public TlvNestedTlv()
+    {
+        _tagAndLength = Array.Empty<byte>();
+        _encodedLength = 0;
+    }
+
+    /// <summary>
+    ///     Build a new NestedTlv that will organize as a tree with the given tag.
+    /// </summary>
+    /// <remarks>
+    ///     The sub-elements added to this Nested TLV will be encoded as a tree:
+    ///     <code>
+    ///   var ykInfo = new TlvNestedTlv(0x7C);<br />
     ///   TL { TLV || TLV || ... TLV }
     ///   for example: 7C 0D 81 02 05 05 82 01 14 83 04 00 72 9A 1E
     ///     7C 0D
@@ -42,125 +86,81 @@ namespace Yubico.Core.Tlv
     ///           00 72 9A 1E
     /// </code>
     /// </remarks>
-    internal class TlvNestedTlv : TlvEncoder
+    /// <exception cref="TlvException">
+    ///     The tag is unsupported.
+    /// </exception>
+    public TlvNestedTlv(int tag)
     {
-        private int _encodedLength;
+        _tag = tag;
+        _tagAndLength = BuildTagAndLength(tag, 0);
+        _encodedLength = _tagAndLength.Length;
+    }
 
-        /// <inheritdoc/>
-        override public int EncodedLength => _encodedLength;
+    /// <inheritdoc />
+    public override int EncodedLength => _encodedLength;
 
-        private readonly List<TlvEncoder> _subElements = new List<TlvEncoder>();
-        private int _subElementLength;
-        private readonly int _tag;
-        private byte[] _tagAndLength;
-
-        /// <summary>
-        /// Build a new NestedTlv that will organize as a concatenation.
-        /// </summary>
-        /// <remarks>
-        /// The sub-elements added to this Nested TLV will be encoded as a
-        /// concatenation:
-        /// <code>
-        ///   TLV || TLV || ... TLV
-        ///   for example: 81 02 05 05 82 01 14 83 04 00 72 9A 1E
-        ///              81 02 05 05   82 01 14   83 04 00 72 9A 1E
-        /// </code>
-        /// </remarks>
-        public TlvNestedTlv()
+    /// <summary>
+    ///     Add a new sub-element to this Nested TLV.
+    /// </summary>
+    /// <remarks>
+    ///     The subElement might be a TlvSubElement, it might be a TlvNestedTlv
+    ///     as well.
+    /// </remarks>
+    /// <param name="subElement">
+    ///     The sub-element to add.
+    /// </param>
+    /// <exception cref="TlvException">
+    ///     The tag or length is unsupported.
+    /// </exception>
+    public void AddSubElement(TlvEncoder subElement)
+    {
+        _subElements.Add(subElement);
+        _subElementLength += subElement.EncodedLength;
+        if (_tagAndLength.Length != 0)
         {
-            _tagAndLength = Array.Empty<byte>();
-            _encodedLength = 0;
+            _tagAndLength = BuildTagAndLength(_tag, _subElementLength);
         }
 
-        /// <summary>
-        /// Build a new NestedTlv that will organize as a tree with the given tag.
-        /// </summary>
-        /// <remarks>
-        /// The sub-elements added to this Nested TLV will be encoded as a tree:
-        /// <code>
-        ///   var ykInfo = new TlvNestedTlv(0x7C);<br/>
-        ///   TL { TLV || TLV || ... TLV }
-        ///   for example: 7C 0D 81 02 05 05 82 01 14 83 04 00 72 9A 1E
-        ///     7C 0D
-        ///        81 02
-        ///           05 05
-        ///        82 01
-        ///           14
-        ///        83 04
-        ///           00 72 9A 1E
-        /// </code>
-        /// </remarks>
-        /// <exception cref="TlvException">
-        /// The tag is unsupported.
-        /// </exception>
-        public TlvNestedTlv(int tag)
+        _encodedLength = _tagAndLength.Length + _subElementLength;
+    }
+
+    /// <inheritdoc />
+    public override bool TryEncode(Span<byte> encoding, int offset, out int bytesWritten)
+    {
+        bytesWritten = 0;
+        if (encoding.Length < offset + _encodedLength)
         {
-            _tag = tag;
-            _tagAndLength = BuildTagAndLength(tag, 0);
-            _encodedLength = _tagAndLength.Length;
+            return false;
         }
 
-        /// <summary>
-        /// Add a new sub-element to this Nested TLV.
-        /// </summary>
-        /// <remarks>
-        /// The subElement might be a TlvSubElement, it might be a TlvNestedTlv
-        /// as well.
-        /// </remarks>
-        /// <param name="subElement">
-        /// The sub-element to add.
-        /// </param>
-        /// <exception cref="TlvException">
-        /// The tag or length is unsupported.
-        /// </exception>
-        public void AddSubElement(TlvEncoder subElement)
+        if (_tagAndLength.Length != 0)
         {
-            _subElements.Add(subElement);
-            _subElementLength += subElement.EncodedLength;
-            if (_tagAndLength.Length != 0)
-            {
-                _tagAndLength = BuildTagAndLength(_tag, _subElementLength);
-            }
-            _encodedLength = _tagAndLength.Length + _subElementLength;
+            Span<byte> destination = encoding[offset..];
+            var source = new Span<byte>(_tagAndLength);
+            source.CopyTo(destination);
+            offset += _tagAndLength.Length;
         }
 
-        /// <inheritdoc />
-        override public bool TryEncode(Span<byte> encoding, int offset, out int bytesWritten)
+        foreach (TlvEncoder element in _subElements)
         {
-            bytesWritten = 0;
-            if (encoding.Length < offset + _encodedLength)
+            if (!element.TryEncode(encoding, offset, out int encodingLength))
             {
                 return false;
             }
 
-            if (_tagAndLength.Length != 0)
-            {
-                Span<byte> destination = encoding[offset..];
-                var source = new Span<byte>(_tagAndLength);
-                source.CopyTo(destination);
-                offset += _tagAndLength.Length;
-            }
-
-            foreach (TlvEncoder element in _subElements)
-            {
-                if (element.TryEncode(encoding, offset, out int encodingLength) == false)
-                {
-                    return false;
-                }
-                offset += encodingLength;
-            }
-
-            bytesWritten = _encodedLength;
-            return true;
+            offset += encodingLength;
         }
 
-        /// <inheritdoc />
-        override public void Clear()
+        bytesWritten = _encodedLength;
+        return true;
+    }
+
+    /// <inheritdoc />
+    public override void Clear()
+    {
+        foreach (TlvEncoder element in _subElements)
         {
-            foreach (TlvEncoder element in _subElements)
-            {
-                element.Clear();
-            }
+            element.Clear();
         }
     }
 }

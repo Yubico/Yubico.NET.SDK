@@ -17,312 +17,311 @@ using Xunit;
 using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+// All these tests will reset the PIV application, run, then reset the PIV
+// application again.
+// All these tests will also use a random number generator with a specified
+// set of bytes, followed by 2048 random bytes. If you want to get only
+// random bytes, skip the first SpecifiedStart bytes (get a random object and
+// generate that many bytes).
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public class ChangePinWithDerivedTests : PivSessionIntegrationTestBase
 {
-    // All these tests will reset the PIV application, run, then reset the PIV
-    // application again.
-    // All these tests will also use a random number generator with a specified
-    // set of bytes, followed by 2048 random bytes. If you want to get only
-    // random bytes, skip the first SpecifiedStart bytes (get a random object and
-    // generate that many bytes).
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class ChangePinWithDerivedTests : PivSessionIntegrationTestBase
+    [Fact]
+    public void SetPinOnly_TryChangePin_DerivedKeyUpdated()
     {
-        [Fact]
-        public void SetPinOnly_TryChangePin_DerivedKeyUpdated()
+        var firstSalt = new Memory<byte>(new byte[16]);
+        var secondSalt = new Memory<byte>(new byte[16]);
+
+        using (var pivSession = GetSession())
         {
-            var firstSalt = new Memory<byte>(new byte[16]);
-            var secondSalt = new Memory<byte>(new byte[16]);
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            using (var pivSession = GetSession(authenticate: false))
+            Assert.False(pivSession.PinVerified);
+            Assert.False(pivSession.ManagementKeyAuthenticated);
+
+            pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
+
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var isValid = pivSession.TryReadObject(out AdminData adminData);
+            using (adminData)
             {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+                Assert.True(isValid);
+                _ = Assert.NotNull(adminData.Salt);
+                Assert.False(adminData.PinProtected);
 
-                Assert.False(pivSession.PinVerified);
-                Assert.False(pivSession.ManagementKeyAuthenticated);
-
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
-
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                bool isValid = pivSession.TryReadObject(out AdminData adminData);
-                using (adminData)
+                if (adminData.Salt is not null)
                 {
-                    Assert.True(isValid);
-                    _ = Assert.NotNull(adminData.Salt);
-                    Assert.False(adminData.PinProtected);
-
-                    if (!(adminData.Salt is null))
-                    {
-                        var src = (ReadOnlyMemory<byte>)adminData.Salt;
-                        src.CopyTo(firstSalt);
-                    }
+                    var src = (ReadOnlyMemory<byte>)adminData.Salt;
+                    src.CopyTo(firstSalt);
                 }
             }
+        }
 
-            using (var pivSession = GetSession(authenticate: false))
+        using (var pivSession = GetSession())
+        {
+            byte[] currentPin =
             {
-                byte[] currentPin =
-                {
-                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36
-                };
-                byte[] newPin =
-                {
-                    0x39, 0x32, 0x33, 0x34, 0x35, 0x36
-                };
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36
+            };
+            byte[] newPin =
+            {
+                0x39, 0x32, 0x33, 0x34, 0x35, 0x36
+            };
 
-                Assert.False(pivSession.PinVerified);
-                Assert.False(pivSession.ManagementKeyAuthenticated);
+            Assert.False(pivSession.PinVerified);
+            Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                bool isChanged = pivSession.TryChangePin(currentPin, newPin, out int? retriesRemaining);
+            var isChanged = pivSession.TryChangePin(currentPin, newPin, out var retriesRemaining);
+            Assert.True(isChanged);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var collectorObj = new Simple39KeyCollector
+            {
+                KeyFlag = 1
+            };
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            var isValid = pivSession.TryAuthenticateManagementKey();
+            Assert.True(isValid);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var isValid = pivSession.TryReadObject(out AdminData adminData);
+            using (adminData)
+            {
+                Assert.True(isValid);
+                _ = Assert.NotNull(adminData.PinLastUpdated);
+                _ = Assert.NotNull(adminData.Salt);
+                Assert.False(adminData.PinProtected);
+
+                if (adminData.Salt is not null)
+                {
+                    var src = (ReadOnlyMemory<byte>)adminData.Salt;
+                    src.CopyTo(secondSalt);
+
+                    var isSame = firstSalt.Span.SequenceEqual(secondSalt.Span);
+                    Assert.False(isSame);
+                }
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void SetPinOnly_ChangeRetryCount_DerivedKeyUpdated(
+        int whichCall)
+    {
+        using (var pivSession = GetSession())
+        {
+            byte[] currentPin =
+            {
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36
+            };
+            byte[] newPin =
+            {
+                0x39, 0x32, 0x33, 0x34, 0x35, 0x36
+            };
+
+            Assert.False(pivSession.PinVerified);
+            Assert.False(pivSession.ManagementKeyAuthenticated);
+
+            var isChanged = pivSession.TryChangePin(currentPin, newPin, out var retriesRemaining);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var collectorObj = new Simple39KeyCollector
+            {
+                KeyFlag = 1
+            };
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            Assert.False(pivSession.PinVerified);
+            Assert.False(pivSession.ManagementKeyAuthenticated);
+
+            pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
+
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            byte[] currentPin =
+            {
+                0x39, 0x32, 0x33, 0x34, 0x35, 0x36
+            };
+
+            if (whichCall == 1)
+            {
+                var isChanged = pivSession.TryChangePinAndPukRetryCounts(
+                    ReadOnlyMemory<byte>.Empty, currentPin, 12, 13, out var retriesRemaining);
                 Assert.True(isChanged);
+                Assert.Null(retriesRemaining);
             }
-
-            using (var pivSession = GetSession(authenticate: false))
+            else
             {
                 var collectorObj = new Simple39KeyCollector
                 {
                     KeyFlag = 1
                 };
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                bool isValid = pivSession.TryAuthenticateManagementKey();
-                Assert.True(isValid);
+                pivSession.ChangePinAndPukRetryCounts(13, 14);
             }
+        }
 
-            using (var pivSession = GetSession(authenticate: false))
+        using (var pivSession = GetSession())
+        {
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            var isValid = pivSession.TryAuthenticateManagementKey();
+            Assert.True(isValid);
+            isValid = pivSession.TryVerifyPin();
+            Assert.True(isValid);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var isValid = pivSession.TryReadObject(out AdminData adminData);
+            using (adminData)
             {
-                bool isValid = pivSession.TryReadObject(out AdminData adminData);
-                using (adminData)
+                Assert.True(isValid);
+                _ = Assert.NotNull(adminData.PinLastUpdated);
+                _ = Assert.NotNull(adminData.Salt);
+                Assert.False(adminData.PinProtected);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void SetBothPinOnly_ChangePin_KeysUpdated(
+        int whichCall)
+    {
+        var firstKey = new Memory<byte>(new byte[24]);
+        var secondKey = new Memory<byte>(new byte[24]);
+
+        using (var pivSession = GetSession())
+        {
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            Assert.False(pivSession.PinVerified);
+            Assert.False(pivSession.ManagementKeyAuthenticated);
+
+            pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived | PivPinOnlyMode.PinProtected);
+
+            Assert.True(pivSession.PinVerified);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            var isValid = pivSession.TryReadObject(out PinProtectedData pinProtect);
+            using (pinProtect)
+            {
+                Assert.True(isValid);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
+                if (pinProtect.ManagementKey is not null)
                 {
+                    var src = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
+                    src.CopyTo(firstKey);
+                    isValid = pivSession.TryAuthenticateManagementKey(src);
                     Assert.True(isValid);
-                    _ = Assert.NotNull(adminData.PinLastUpdated);
-                    _ = Assert.NotNull(adminData.Salt);
-                    Assert.False(adminData.PinProtected);
-
-                    if (!(adminData.Salt is null))
-                    {
-                        var src = (ReadOnlyMemory<byte>)adminData.Salt;
-                        src.CopyTo(secondSalt);
-
-                        bool isSame = firstSalt.Span.SequenceEqual(secondSalt.Span);
-                        Assert.False(isSame);
-                    }
+                    Assert.True(pivSession.ManagementKeyAuthenticated);
                 }
             }
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        public void SetPinOnly_ChangeRetryCount_DerivedKeyUpdated(
-            int whichCall)
+        using (var pivSession = GetSession())
         {
-            using (var pivSession = GetSession(authenticate: false))
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            Assert.False(pivSession.PinVerified);
+            Assert.False(pivSession.ManagementKeyAuthenticated);
+
+            if (whichCall == 1)
             {
-                byte[] currentPin =
-                {
-                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36
-                };
-                byte[] newPin =
-                {
-                    0x39, 0x32, 0x33, 0x34, 0x35, 0x36
-                };
-
-                Assert.False(pivSession.PinVerified);
-                Assert.False(pivSession.ManagementKeyAuthenticated);
-
-                bool isChanged = pivSession.TryChangePin(currentPin, newPin, out int? retriesRemaining);
+                pivSession.ChangePin();
             }
-
-            using (var pivSession = GetSession(authenticate: false))
+            else
             {
-                var collectorObj = new Simple39KeyCollector
-                {
-                    KeyFlag = 1
-                };
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                Assert.False(pivSession.PinVerified);
-                Assert.False(pivSession.ManagementKeyAuthenticated);
-
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
-
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                byte[] currentPin =
-                {
-                    0x39, 0x32, 0x33, 0x34, 0x35, 0x36
-                };
-
-                if (whichCall == 1)
-                {
-                    bool isChanged = pivSession.TryChangePinAndPukRetryCounts(
-                        ReadOnlyMemory<byte>.Empty, currentPin, 12, 13, out int? retriesRemaining);
-                    Assert.True(isChanged);
-                    Assert.Null(retriesRemaining);
-                }
-                else
-                {
-                    var collectorObj = new Simple39KeyCollector
-                    {
-                        KeyFlag = 1
-                    };
-                    pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-                    pivSession.ChangePinAndPukRetryCounts(13, 14);
-                }
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                bool isValid = pivSession.TryAuthenticateManagementKey();
-                Assert.True(isValid);
-                isValid = pivSession.TryVerifyPin();
+                var isValid = pivSession.TryChangePin();
                 Assert.True(isValid);
             }
 
-            using (var pivSession = GetSession(authenticate: false))
+            collectorObj.KeyFlag = 1;
+            pivSession.VerifyPin();
+
+            Assert.True(pivSession.PinVerified);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var collectorObj = new Simple39KeyCollector
             {
-                bool isValid = pivSession.TryReadObject(out AdminData adminData);
-                using (adminData)
+                KeyFlag = 1
+            };
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            var isValid = pivSession.TryAuthenticateManagementKey();
+            Assert.True(isValid);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var collectorObj = new Simple39KeyCollector
+            {
+                KeyFlag = 1
+            };
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+            var isValid = pivSession.TryReadObject(out PinProtectedData pinProtect);
+            using (pinProtect)
+            {
+                Assert.True(isValid);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
+                if (pinProtect.ManagementKey is not null)
                 {
+                    var src = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
+                    src.CopyTo(secondKey);
+                    isValid = pivSession.TryAuthenticateManagementKey(src);
                     Assert.True(isValid);
-                    _ = Assert.NotNull(adminData.PinLastUpdated);
-                    _ = Assert.NotNull(adminData.Salt);
-                    Assert.False(adminData.PinProtected);
+                    Assert.True(pivSession.ManagementKeyAuthenticated);
+
+                    var isSame = firstKey.Span.SequenceEqual(secondKey.Span);
+                    Assert.False(isSame);
                 }
             }
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        public void SetBothPinOnly_ChangePin_KeysUpdated(
-            int whichCall)
+        using (var pivSession = GetSession())
         {
-            var firstKey = new Memory<byte>(new byte[24]);
-            var secondKey = new Memory<byte>(new byte[24]);
-
-            using (var pivSession = GetSession(authenticate: false))
+            var isValid = pivSession.TryReadObject(out AdminData adminData);
+            using (adminData)
             {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                Assert.False(pivSession.PinVerified);
-                Assert.False(pivSession.ManagementKeyAuthenticated);
-
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived | PivPinOnlyMode.PinProtected);
-
-                Assert.True(pivSession.PinVerified);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                bool isValid = pivSession.TryReadObject(out PinProtectedData pinProtect);
-                using (pinProtect)
-                {
-                    Assert.True(isValid);
-                    _ = Assert.NotNull(pinProtect.ManagementKey);
-                    if (!(pinProtect.ManagementKey is null))
-                    {
-                        var src = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
-                        src.CopyTo(firstKey);
-                        isValid = pivSession.TryAuthenticateManagementKey(src);
-                        Assert.True(isValid);
-                        Assert.True(pivSession.ManagementKeyAuthenticated);
-                    }
-                }
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                Assert.False(pivSession.PinVerified);
-                Assert.False(pivSession.ManagementKeyAuthenticated);
-
-                if (whichCall == 1)
-                {
-                    pivSession.ChangePin();
-                }
-                else
-                {
-                    bool isValid = pivSession.TryChangePin();
-                    Assert.True(isValid);
-                }
-
-                collectorObj.KeyFlag = 1;
-                pivSession.VerifyPin();
-
-                Assert.True(pivSession.PinVerified);
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var collectorObj = new Simple39KeyCollector
-                {
-                    KeyFlag = 1
-                };
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                bool isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var collectorObj = new Simple39KeyCollector
-                {
-                    KeyFlag = 1
-                };
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                bool isValid = pivSession.TryReadObject(out PinProtectedData pinProtect);
-                using (pinProtect)
-                {
-                    Assert.True(isValid);
-                    _ = Assert.NotNull(pinProtect.ManagementKey);
-                    if (!(pinProtect.ManagementKey is null))
-                    {
-                        var src = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
-                        src.CopyTo(secondKey);
-                        isValid = pivSession.TryAuthenticateManagementKey(src);
-                        Assert.True(isValid);
-                        Assert.True(pivSession.ManagementKeyAuthenticated);
-
-                        bool isSame = firstKey.Span.SequenceEqual(secondKey.Span);
-                        Assert.False(isSame);
-                    }
-                }
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                bool isValid = pivSession.TryReadObject(out AdminData adminData);
-                using (adminData)
-                {
-                    Assert.True(isValid);
-                    _ = Assert.NotNull(adminData.PinLastUpdated);
-                    _ = Assert.NotNull(adminData.Salt);
-                    Assert.True(adminData.PinProtected);
-                }
+                _ = Assert.NotNull(adminData.PinLastUpdated);
+                _ = Assert.NotNull(adminData.Salt);
+                Assert.True(adminData.PinProtected);
             }
         }
     }

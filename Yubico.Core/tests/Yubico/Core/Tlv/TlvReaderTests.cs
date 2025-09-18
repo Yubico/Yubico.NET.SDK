@@ -17,698 +17,747 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace Yubico.Core.Tlv.UnitTests
+namespace Yubico.Core.Tlv.UnitTests;
+
+public class TlvReaderTests
 {
-    public class TlvReaderTests
+    [Theory]
+    [InlineData(0x9B, 0x00, 1, 0x9B)]
+    [InlineData(0x5F, 0x11, 2, 0x5F11)]
+    [InlineData(0xFF, 0xFF, 2, 0xFFFF)]
+    [InlineData(0xFF, 0xFE, 2, 0xFFFE)]
+    [InlineData(0x01, 0x00, 1, 0x01)]
+    [InlineData(0x7A, 0x00, 1, 0x7A)]
+    public void PeekTag_ReturnsCorrect(
+        byte encoding0,
+        byte encoding1,
+        int tagLength,
+        int tag)
     {
-        [Theory]
-        [InlineData(0x9B, 0x00, 1, 0x9B)]
-        [InlineData(0x5F, 0x11, 2, 0x5F11)]
-        [InlineData(0xFF, 0xFF, 2, 0xFFFF)]
-        [InlineData(0xFF, 0xFE, 2, 0xFFFE)]
-        [InlineData(0x01, 0x00, 1, 0x01)]
-        [InlineData(0x7A, 0x00, 1, 0x7A)]
-        public void PeekTag_ReturnsCorrect(byte encoding0, byte encoding1, int tagLength, int tag)
+        var encoding = new byte[] { encoding0, encoding1, 0x00 };
+
+        var reader = new TlvReader(encoding);
+
+        // Call PeekTag twice to verify that the second call returns the same
+        // tag. The first call should store it locally, did it?
+        int getTag;
+        int getTagRepeat;
+        if (tagLength == 1)
         {
-            byte[] encoding = new byte[] { encoding0, encoding1, 0x00 };
-
-            var reader = new TlvReader(encoding);
-
-            // Call PeekTag twice to verify that the second call returns the same
-            // tag. The first call should store it locally, did it?
-            int getTag;
-            int getTagRepeat;
-            if (tagLength == 1)
-            {
-                getTag = reader.PeekTag();
-                getTagRepeat = reader.PeekTag();
-            }
-            else
-            {
-                getTag = reader.PeekTag(tagLength);
-                getTagRepeat = reader.PeekTag(tagLength);
-            }
-
-            Assert.Equal(tag, getTag);
-            Assert.Equal(tag, getTagRepeat);
+            getTag = reader.PeekTag();
+            getTagRepeat = reader.PeekTag();
+        }
+        else
+        {
+            getTag = reader.PeekTag(tagLength);
+            getTagRepeat = reader.PeekTag(tagLength);
         }
 
-        [Theory]
-        [InlineData(1, 0)]
-        [InlineData(2, 0x7F)]
-        [InlineData(1, 0x80)]
-        [InlineData(2, 0x81)]
-        [InlineData(1, 0x0100)]
-        [InlineData(2, 0x1122)]
-        [InlineData(1, 0xFFFF)]
-        [InlineData(2, 0x010000)]
-        [InlineData(1, 0x313233)]
-        [InlineData(2, 0xFFFFFF)]
-        public void PeekLength_ReturnsCorrect(int tagLength, int length)
+        Assert.Equal(tag, getTag);
+        Assert.Equal(tag, getTagRepeat);
+    }
+
+    [Theory]
+    [InlineData(1, 0)]
+    [InlineData(2, 0x7F)]
+    [InlineData(1, 0x80)]
+    [InlineData(2, 0x81)]
+    [InlineData(1, 0x0100)]
+    [InlineData(2, 0x1122)]
+    [InlineData(1, 0xFFFF)]
+    [InlineData(2, 0x010000)]
+    [InlineData(1, 0x313233)]
+    [InlineData(2, 0xFFFFFF)]
+    public void PeekLength_ReturnsCorrect(
+        int tagLength,
+        int length)
+    {
+        var encoding = new byte[] { 0x5F, 0x01, 0x83, 0x82, 0x81, (byte)length };
+        var offset = 4 - (tagLength - 1);
+        if (length > 0x7F)
         {
-            byte[] encoding = new byte[] { 0x5F, 0x01, 0x83, 0x82, 0x81, (byte)length };
-            int offset = 4 - (tagLength - 1);
-            if (length > 0x7F)
+            offset--;
+            if (length > 0xFF)
             {
+                encoding[4] = (byte)(length >> 8);
                 offset--;
-                if (length > 0xFF)
+                if (length > 0xFFFF)
                 {
-                    encoding[4] = (byte)(length >> 8);
+                    encoding[3] = (byte)(length >> 16);
                     offset--;
-                    if (length > 0xFFFF)
-                    {
-                        encoding[3] = (byte)(length >> 16);
-                        offset--;
-                    }
                 }
             }
-
-            encoding = encoding.Skip(offset).ToArray<byte>();
-            var reader = new TlvReader(encoding);
-
-            // Call PeekLength twice to verify that the second call returns the same
-            // length. The first call should store it locally, did it?
-            int getLength;
-            int getLengthRepeat;
-            if (tagLength == 1)
-            {
-                getLength = reader.PeekLength();
-                getLengthRepeat = reader.PeekLength();
-            }
-            else
-            {
-                getLength = reader.PeekLength(tagLength);
-                getLengthRepeat = reader.PeekLength(tagLength);
-            }
-
-            Assert.Equal(length, getLength);
-            Assert.Equal(length, getLengthRepeat);
         }
 
-        [Fact]
-        public void ReadValue_Simple_ReturnsCorrect()
+        encoding = encoding.Skip(offset).ToArray();
+        var reader = new TlvReader(encoding);
+
+        // Call PeekLength twice to verify that the second call returns the same
+        // length. The first call should store it locally, did it?
+        int getLength;
+        int getLengthRepeat;
+        if (tagLength == 1)
         {
-            byte[] encoding = new byte[] {
-                0x01, 0x02, 0x11, 0x22
-            };
-            byte[] expected = new byte[] { 0x11, 0x22 };
-
-            var reader = new TlvReader(encoding);
-
-            ReadOnlyMemory<byte> value = reader.ReadValue(0x01);
-
-            bool compareResult = value.Span.SequenceEqual(expected);
-
-            Assert.True(compareResult);
+            getLength = reader.PeekLength();
+            getLengthRepeat = reader.PeekLength();
+        }
+        else
+        {
+            getLength = reader.PeekLength(tagLength);
+            getLengthRepeat = reader.PeekLength(tagLength);
         }
 
-        [Fact]
-        public void ReadValue_Multiple_ReturnsCorrect()
+        Assert.Equal(length, getLength);
+        Assert.Equal(length, getLengthRepeat);
+    }
+
+    [Fact]
+    public void ReadValue_Simple_ReturnsCorrect()
+    {
+        var encoding = new byte[]
         {
-            byte[] encoding = new byte[] {
-                0x01, 0x02, 0x11, 0x22, 0x02, 0x03, 0x31, 0x32, 0x33, 0x03, 0x00
-            };
-            byte[] expected = new byte[] { 0x31, 0x32, 0x33 };
+            0x01, 0x02, 0x11, 0x22
+        };
+        var expected = new byte[] { 0x11, 0x22 };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
-            ReadOnlyMemory<byte> value = reader.ReadValue(0x01);
-            Assert.NotEmpty(value.Span.ToArray());
-            value = reader.ReadValue(0x02);
+        var value = reader.ReadValue(0x01);
 
-            bool compareResult = value.Span.SequenceEqual(expected);
+        var compareResult = value.Span.SequenceEqual(expected);
 
-            Assert.True(compareResult);
+        Assert.True(compareResult);
+    }
+
+    [Fact]
+    public void ReadValue_Multiple_ReturnsCorrect()
+    {
+        var encoding = new byte[]
+        {
+            0x01, 0x02, 0x11, 0x22, 0x02, 0x03, 0x31, 0x32, 0x33, 0x03, 0x00
+        };
+        var expected = new byte[] { 0x31, 0x32, 0x33 };
+
+        var reader = new TlvReader(encoding);
+
+        var value = reader.ReadValue(0x01);
+        Assert.NotEmpty(value.Span.ToArray());
+        value = reader.ReadValue(0x02);
+
+        var compareResult = value.Span.SequenceEqual(expected);
+
+        Assert.True(compareResult);
+    }
+
+    [Fact]
+    public void ReadNestedTlv_Simple_ReturnsCorrect()
+    {
+        var encoding = new byte[]
+        {
+            0x5F, 0x7C, 0x09, 0x01, 0x02, 0x11, 0x22, 0x02, 0x03, 0x31, 0x32, 0x33
+        };
+        var expected = new byte[] { 0x11, 0x22 };
+
+        var reader = new TlvReader(encoding);
+        var nestedReader = reader.ReadNestedTlv(0x5F7C);
+
+        var value = nestedReader.ReadValue(0x01);
+
+        var compareResult = value.Span.SequenceEqual(expected);
+
+        Assert.True(compareResult);
+    }
+
+    [Fact]
+    public void ReadNestedTlv_Complex_ReturnsCorrect()
+    {
+        var encoding = new byte[]
+        {
+            0x7C, 0x14, 0x01, 0x02, 0x05, 0x05, 0x7A, 0x09,
+            0x51, 0x02, 0x23, 0x24, 0x5F, 0x52, 0x02, 0x33,
+            0x34, 0x02, 0x01, 0x00, 0x03, 0x00
+        };
+        var expected1 = new byte[] { 0x05, 0x05 };
+        var expected2 = new byte[] { 0x00 };
+        var expected3 = Array.Empty<byte>();
+        var expected51 = new byte[] { 0x23, 0x24 };
+        var expected52 = new byte[] { 0x33, 0x34 };
+
+        var reader = new TlvReader(encoding);
+        var nestedReader = reader.ReadNestedTlv(0x7C);
+
+        var value1 = nestedReader.ReadValue(0x01);
+        var innerReader = nestedReader.ReadNestedTlv(0x7A);
+        var value2 = nestedReader.ReadValue(0x02);
+        var value3 = nestedReader.ReadValue(0x03);
+
+        var value51 = innerReader.ReadValue(0x51);
+        var value52 = innerReader.ReadValue(0x5F52);
+
+        var compareResult = value1.Span.SequenceEqual(expected1);
+        Assert.True(compareResult);
+
+        compareResult = value2.Span.SequenceEqual(expected2);
+        Assert.True(compareResult);
+
+        compareResult = value3.Span.SequenceEqual(expected3);
+        Assert.True(compareResult);
+
+        compareResult = value51.Span.SequenceEqual(expected51);
+        Assert.True(compareResult);
+
+        compareResult = value52.Span.SequenceEqual(expected52);
+        Assert.True(compareResult);
+    }
+
+    [Theory]
+    [InlineData(0x01)]
+    [InlineData(0x7F)]
+    [InlineData(0x80)]
+    [InlineData(0x81)]
+    [InlineData(0xFF)]
+    public void ReadByte_ReturnsCorrect(
+        byte value)
+    {
+        var encoding = new byte[] { 0x01, 0x01, value };
+
+        var reader = new TlvReader(encoding);
+
+        var getValue = reader.ReadByte(0x01);
+
+        Assert.Equal(value, getValue);
+    }
+
+    [Theory]
+    [InlineData(0x0000, true)]
+    [InlineData(0x0000, false)]
+    [InlineData(0x0001, true)]
+    [InlineData(0x0001, false)]
+    [InlineData(0x007F, true)]
+    [InlineData(0x007F, false)]
+    [InlineData(unchecked((short)0x8000), true)]
+    [InlineData(unchecked((short)0x8000), false)]
+    [InlineData(unchecked((short)0x81FF), true)]
+    [InlineData(unchecked((short)0x81FF), false)]
+    [InlineData(unchecked((short)0xFFFF), true)]
+    [InlineData(unchecked((short)0xFFFF), false)]
+    public void ReadInt16_ReturnsCorrect(
+        short value,
+        bool bigEndian)
+    {
+        var value0 = (byte)(value >> 8);
+        var value1 = (byte)value;
+        var encoding = new byte[] { 0x01, 0x02, value0, value1 };
+        if (!bigEndian)
+        {
+            encoding[2] = value1;
+            encoding[3] = value0;
         }
 
-        [Fact]
-        public void ReadNestedTlv_Simple_ReturnsCorrect()
+        var reader = new TlvReader(encoding);
+
+        var getValue = reader.ReadInt16(0x01, bigEndian);
+
+        Assert.Equal(value, getValue);
+    }
+
+    [Theory]
+    [InlineData(0x0000, true)]
+    [InlineData(0x0000, false)]
+    [InlineData(0x0001, true)]
+    [InlineData(0x0001, false)]
+    [InlineData(0x007F, true)]
+    [InlineData(0x007F, false)]
+    [InlineData(0x8000, true)]
+    [InlineData(0x8000, false)]
+    [InlineData(0x81FF, true)]
+    [InlineData(0x81FF, false)]
+    [InlineData(0xFFFF, true)]
+    [InlineData(0xFFFF, false)]
+    public void ReadUInt16_ReturnsCorrect(
+        ushort value,
+        bool bigEndian)
+    {
+        var value0 = (byte)(value >> 8);
+        var value1 = (byte)value;
+        var encoding = new byte[] { 0x01, 0x02, value0, value1 };
+        if (!bigEndian)
         {
-            byte[] encoding = new byte[] {
-                0x5F, 0x7C, 0x09, 0x01, 0x02, 0x11, 0x22, 0x02, 0x03, 0x31, 0x32, 0x33
-            };
-            byte[] expected = new byte[] { 0x11, 0x22 };
-
-            var reader = new TlvReader(encoding);
-            TlvReader nestedReader = reader.ReadNestedTlv(0x5F7C);
-
-            ReadOnlyMemory<byte> value = nestedReader.ReadValue(0x01);
-
-            bool compareResult = value.Span.SequenceEqual(expected);
-
-            Assert.True(compareResult);
+            encoding[2] = value1;
+            encoding[3] = value0;
         }
 
-        [Fact]
-        public void ReadNestedTlv_Complex_ReturnsCorrect()
+        var reader = new TlvReader(encoding);
+
+        var getValue = reader.ReadUInt16(0x01, bigEndian);
+
+        Assert.Equal(value, getValue);
+    }
+
+    [Theory]
+    [InlineData(0x00000000, true)]
+    [InlineData(0x00000000, false)]
+    [InlineData(0x00000001, true)]
+    [InlineData(0x00000001, false)]
+    [InlineData(0x7FEDCBA9, true)]
+    [InlineData(0x7FEDCBA9, false)]
+    [InlineData(unchecked((short)0x80000000), true)]
+    [InlineData(unchecked((short)0x80000000), false)]
+    [InlineData(unchecked((short)0x81FF82FE), true)]
+    [InlineData(unchecked((short)0x81FF82FE), false)]
+    [InlineData(unchecked((short)0xFFFFFFFF), true)]
+    [InlineData(unchecked((short)0xFFFFFFFF), false)]
+    public void ReadInt32_ReturnsCorrect(
+        int value,
+        bool bigEndian)
+    {
+        var value0 = (byte)(value >> 24);
+        var value1 = (byte)(value >> 16);
+        var value2 = (byte)(value >> 8);
+        var value3 = (byte)value;
+        var encoding = new byte[] { 0x01, 0x04, value0, value1, value2, value3 };
+        if (!bigEndian)
         {
-            byte[] encoding = new byte[] {
-                0x7C, 0x14, 0x01, 0x02, 0x05, 0x05, 0x7A, 0x09,
-                0x51, 0x02, 0x23, 0x24, 0x5F, 0x52, 0x02, 0x33,
-                0x34, 0x02, 0x01, 0x00, 0x03, 0x00
-            };
-            byte[] expected1 = new byte[] { 0x05, 0x05 };
-            byte[] expected2 = new byte[] { 0x00 };
-            byte[] expected3 = Array.Empty<byte>();
-            byte[] expected51 = new byte[] { 0x23, 0x24 };
-            byte[] expected52 = new byte[] { 0x33, 0x34 };
-
-            var reader = new TlvReader(encoding);
-            TlvReader nestedReader = reader.ReadNestedTlv(0x7C);
-
-            ReadOnlyMemory<byte> value1 = nestedReader.ReadValue(0x01);
-            TlvReader innerReader = nestedReader.ReadNestedTlv(0x7A);
-            ReadOnlyMemory<byte> value2 = nestedReader.ReadValue(0x02);
-            ReadOnlyMemory<byte> value3 = nestedReader.ReadValue(0x03);
-
-            ReadOnlyMemory<byte> value51 = innerReader.ReadValue(0x51);
-            ReadOnlyMemory<byte> value52 = innerReader.ReadValue(0x5F52);
-
-            bool compareResult = value1.Span.SequenceEqual(expected1);
-            Assert.True(compareResult);
-
-            compareResult = value2.Span.SequenceEqual(expected2);
-            Assert.True(compareResult);
-
-            compareResult = value3.Span.SequenceEqual(expected3);
-            Assert.True(compareResult);
-
-            compareResult = value51.Span.SequenceEqual(expected51);
-            Assert.True(compareResult);
-
-            compareResult = value52.Span.SequenceEqual(expected52);
-            Assert.True(compareResult);
+            encoding[2] = value3;
+            encoding[3] = value2;
+            encoding[4] = value1;
+            encoding[5] = value0;
         }
 
-        [Theory]
-        [InlineData(0x01)]
-        [InlineData(0x7F)]
-        [InlineData(0x80)]
-        [InlineData(0x81)]
-        [InlineData(0xFF)]
-        public void ReadByte_ReturnsCorrect(byte value)
+        var reader = new TlvReader(encoding);
+
+        var getValue = reader.ReadInt32(0x01, bigEndian);
+
+        Assert.Equal(value, getValue);
+    }
+
+    [Fact]
+    public void ReadASCII_ReturnsCorrect()
+    {
+        byte[] encoding =
         {
-            byte[] encoding = new byte[] { 0x01, 0x01, value };
+            0xA2, 0x04, 0x41, 0x42, 0x43, 0x44
+        };
+        var expectedValue = "ABCD";
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
-            byte getValue = reader.ReadByte(0x01);
+        var getValue = reader.ReadString(0xA2, Encoding.ASCII);
 
-            Assert.Equal(value, getValue);
-        }
+        Assert.Equal(expectedValue, getValue);
+    }
 
-        [Theory]
-        [InlineData(0x0000, true)]
-        [InlineData(0x0000, false)]
-        [InlineData(0x0001, true)]
-        [InlineData(0x0001, false)]
-        [InlineData(0x007F, true)]
-        [InlineData(0x007F, false)]
-        [InlineData(unchecked((short)0x8000), true)]
-        [InlineData(unchecked((short)0x8000), false)]
-        [InlineData(unchecked((short)0x81FF), true)]
-        [InlineData(unchecked((short)0x81FF), false)]
-        [InlineData(unchecked((short)0xFFFF), true)]
-        [InlineData(unchecked((short)0xFFFF), false)]
-        public void ReadInt16_ReturnsCorrect(short value, bool bigEndian)
+    [Fact]
+    public void ReadUTF8_ReturnsCorrect()
+    {
+        var encoding = new byte[]
         {
-            byte value0 = (byte)(value >> 8);
-            byte value1 = (byte)value;
-            byte[] encoding = new byte[] { 0x01, 0x02, value0, value1 };
-            if (bigEndian == false)
-            {
-                encoding[2] = value1;
-                encoding[3] = value0;
-            }
+            0xA3, 0x04, 0x41, 0xC2, 0xB1, 0x42
+        };
+        var expectedValue = "A\u00B1B";
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
-            short getValue = reader.ReadInt16(0x01, bigEndian);
+        var getValue = reader.ReadString(0xA3, Encoding.UTF8);
 
-            Assert.Equal(value, getValue);
-        }
+        Assert.Equal(expectedValue, getValue);
+    }
 
-        [Theory]
-        [InlineData(0x0000, true)]
-        [InlineData(0x0000, false)]
-        [InlineData(0x0001, true)]
-        [InlineData(0x0001, false)]
-        [InlineData(0x007F, true)]
-        [InlineData(0x007F, false)]
-        [InlineData(0x8000, true)]
-        [InlineData(0x8000, false)]
-        [InlineData(0x81FF, true)]
-        [InlineData(0x81FF, false)]
-        [InlineData(0xFFFF, true)]
-        [InlineData(0xFFFF, false)]
-        public void ReadUInt16_ReturnsCorrect(ushort value, bool bigEndian)
+    [Fact]
+    public void HasData_ReturnsCorrect()
+    {
+        var encoding = new byte[]
         {
-            byte value0 = (byte)(value >> 8);
-            byte value1 = (byte)value;
-            byte[] encoding = new byte[] { 0x01, 0x02, value0, value1 };
-            if (bigEndian == false)
-            {
-                encoding[2] = value1;
-                encoding[3] = value0;
-            }
+            0x81, 0x02, 0x11, 0x22, 0x82, 0x03, 0x31, 0x32, 0x33
+        };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
+        Assert.True(reader.HasData);
 
-            ushort getValue = reader.ReadUInt16(0x01, bigEndian);
+        var value = reader.ReadValue(0x81);
+        Assert.NotEmpty(value.ToArray());
+        Assert.True(reader.HasData);
 
-            Assert.Equal(value, getValue);
-        }
+        value = reader.ReadValue(0x82);
+        Assert.NotEmpty(value.ToArray());
+        Assert.False(reader.HasData);
+    }
 
-        [Theory]
-        [InlineData(0x00000000, true)]
-        [InlineData(0x00000000, false)]
-        [InlineData(0x00000001, true)]
-        [InlineData(0x00000001, false)]
-        [InlineData(0x7FEDCBA9, true)]
-        [InlineData(0x7FEDCBA9, false)]
-        [InlineData(unchecked((short)0x80000000), true)]
-        [InlineData(unchecked((short)0x80000000), false)]
-        [InlineData(unchecked((short)0x81FF82FE), true)]
-        [InlineData(unchecked((short)0x81FF82FE), false)]
-        [InlineData(unchecked((short)0xFFFFFFFF), true)]
-        [InlineData(unchecked((short)0xFFFFFFFF), false)]
-        public void ReadInt32_ReturnsCorrect(int value, bool bigEndian)
+    [Fact]
+    public void ReadEncoded_Simple_ReturnsCorrect()
+    {
+        var encoding = new byte[]
         {
-            byte value0 = (byte)(value >> 24);
-            byte value1 = (byte)(value >> 16);
-            byte value2 = (byte)(value >> 8);
-            byte value3 = (byte)value;
-            byte[] encoding = new byte[] { 0x01, 0x04, value0, value1, value2, value3 };
-            if (bigEndian == false)
-            {
-                encoding[2] = value3;
-                encoding[3] = value2;
-                encoding[4] = value1;
-                encoding[5] = value0;
-            }
-
-            var reader = new TlvReader(encoding);
-
-            int getValue = reader.ReadInt32(0x01, bigEndian);
-
-            Assert.Equal(value, getValue);
-        }
-
-        [Fact]
-        public void ReadASCII_ReturnsCorrect()
+            0x01, 0x02, 0x11, 0x22
+        };
+        var expected = new byte[]
         {
-            byte[] encoding =  {
-                0xA2, 0x04, 0x41, 0x42, 0x43, 0x44
-            };
-            string expectedValue = "ABCD";
+            0x01, 0x02, 0x11, 0x22
+        };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
-            string getValue = reader.ReadString(0xA2, Encoding.ASCII);
+        var encoded = reader.ReadEncoded(0x01);
 
-            Assert.Equal(expectedValue, getValue);
-        }
+        var compareResult = encoded.Span.SequenceEqual(expected);
 
-        [Fact]
-        public void ReadUTF8_ReturnsCorrect()
+        Assert.True(compareResult);
+    }
+
+    [Fact]
+    public void ReadEncoded_Multiple_ReturnsCorrect()
+    {
+        var encoding = new byte[]
         {
-            byte[] encoding = new byte[] {
-                0xA3, 0x04, 0x41, 0xC2, 0xB1, 0x42
-            };
-            string expectedValue = "A\u00B1B";
+            0x01, 0x02, 0x11, 0x22, 0x02, 0x03, 0x31, 0x32, 0x33, 0x03, 0x00
+        };
+        var expected = new byte[] { 0x02, 0x03, 0x31, 0x32, 0x33 };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
-            string getValue = reader.ReadString(0xA3, Encoding.UTF8);
+        var encoded = reader.ReadValue(0x01);
+        Assert.NotEmpty(encoded.Span.ToArray());
+        encoded = reader.ReadEncoded(0x02);
 
-            Assert.Equal(expectedValue, getValue);
-        }
+        var compareResult = encoded.Span.SequenceEqual(expected);
 
-        [Fact]
-        public void HasData_ReturnsCorrect()
-        {
-            byte[] encoding = new byte[] {
-                0x81, 0x02, 0x11, 0x22, 0x82, 0x03, 0x31, 0x32, 0x33
-            };
+        Assert.True(compareResult);
+    }
 
-            var reader = new TlvReader(encoding);
-            Assert.True(reader.HasData);
+    [Theory]
+    [InlineData(0)]
+    [InlineData(2)]
+    public void ReadByte_InvalidLength_ThrowsException(
+        int length)
+    {
+        var encoding = new byte[] { 0x89, (byte)length, 0x11, 0x02, 0x01, 0x00 };
 
-            ReadOnlyMemory<byte> value = reader.ReadValue(0x81);
-            Assert.NotEmpty(value.ToArray());
-            Assert.True(reader.HasData);
-
-            value = reader.ReadValue(0x82);
-            Assert.NotEmpty(value.ToArray());
-            Assert.False(reader.HasData);
-        }
-
-        [Fact]
-        public void ReadEncoded_Simple_ReturnsCorrect()
-        {
-            byte[] encoding = new byte[] {
-                0x01, 0x02, 0x11, 0x22
-            };
-            byte[] expected = new byte[] {
-                0x01, 0x02, 0x11, 0x22
-            };
-
-            var reader = new TlvReader(encoding);
-
-            ReadOnlyMemory<byte> encoded = reader.ReadEncoded(0x01);
-
-            bool compareResult = encoded.Span.SequenceEqual(expected);
-
-            Assert.True(compareResult);
-        }
-
-        [Fact]
-        public void ReadEncoded_Multiple_ReturnsCorrect()
-        {
-            byte[] encoding = new byte[] {
-                0x01, 0x02, 0x11, 0x22, 0x02, 0x03, 0x31, 0x32, 0x33, 0x03, 0x00
-            };
-            byte[] expected = new byte[] { 0x02, 0x03, 0x31, 0x32, 0x33 };
-
-            var reader = new TlvReader(encoding);
-
-            ReadOnlyMemory<byte> encoded = reader.ReadValue(0x01);
-            Assert.NotEmpty(encoded.Span.ToArray());
-            encoded = reader.ReadEncoded(0x02);
-
-            bool compareResult = encoded.Span.SequenceEqual(expected);
-
-            Assert.True(compareResult);
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(2)]
-        public void ReadByte_InvalidLength_ThrowsException(int length)
-        {
-            byte[] encoding = new byte[] { 0x89, (byte)length, 0x11, 0x02, 0x01, 0x00 };
-
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.ReadByte(0x89);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.ReadByte(0x89);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Fact]
-        public void ReadByte_InvalidLength_RestoresOffset()
-        {
-            byte[] encoding = new byte[] { 0x89, 0x02, 0x11, 0x02, 0x01, 0x00 };
+    [Fact]
+    public void ReadByte_InvalidLength_RestoresOffset()
+    {
+        var encoding = new byte[] { 0x89, 0x02, 0x11, 0x02, 0x01, 0x00 };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.ReadByte(0x89);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.ReadByte(0x89);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
 
-            short getValue = reader.ReadInt16(0x89);
+        var getValue = reader.ReadInt16(0x89);
 
-            Assert.Equal(0x1102, getValue);
-        }
+        Assert.Equal(0x1102, getValue);
+    }
 
-        [Fact]
-        public void ReadInt16_InvalidLength_RestoresOffset()
-        {
-            byte[] encoding = new byte[] { 0x89, 0x04, 0x11, 0x22, 0x33, 0x44, 0x01, 0x00 };
+    [Fact]
+    public void ReadInt16_InvalidLength_RestoresOffset()
+    {
+        var encoding = new byte[] { 0x89, 0x04, 0x11, 0x22, 0x33, 0x44, 0x01, 0x00 };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.ReadInt16(0x89);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.ReadInt16(0x89);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
 
-            int getValue = reader.ReadInt32(0x89, false);
+        var getValue = reader.ReadInt32(0x89, false);
 
-            Assert.Equal(0x44332211, getValue);
+        Assert.Equal(0x44332211, getValue);
+    }
+
+    [Fact]
+    public void ReadUInt16_InvalidLength_RestoresOffset()
+    {
+        var encoding = new byte[] { 0x89, 0x04, 0x11, 0x22, 0x33, 0x44, 0x01, 0x00 };
+
+        var reader = new TlvReader(encoding);
+
+        void actual()
+        {
+            reader.ReadUInt16(0x89);
         }
 
-        [Fact]
-        public void ReadUInt16_InvalidLength_RestoresOffset()
-        {
-            byte[] encoding = new byte[] { 0x89, 0x04, 0x11, 0x22, 0x33, 0x44, 0x01, 0x00 };
+        _ = Assert.Throws<TlvException>(actual);
 
-            var reader = new TlvReader(encoding);
+        var getValue = reader.ReadInt32(0x89, false);
 
-            void actual() => reader.ReadUInt16(0x89);
-            _ = Assert.Throws<TlvException>(actual);
+        Assert.Equal(0x44332211, getValue);
+    }
 
-            int getValue = reader.ReadInt32(0x89, false);
+    [Fact]
+    public void ReadInt32_InvalidLength_RestoresOffset()
+    {
+        var encoding = new byte[] { 0x89, 0x02, 0x11, 0x22, 0x01, 0x00 };
 
-            Assert.Equal(0x44332211, getValue);
-        }
-
-        [Fact]
-        public void ReadInt32_InvalidLength_RestoresOffset()
-        {
-            byte[] encoding = new byte[] { 0x89, 0x02, 0x11, 0x22, 0x01, 0x00 };
-
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.ReadInt32(0x89);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.ReadInt32(0x89);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
 
-            short getValue = reader.ReadInt16(0x89);
+        var getValue = reader.ReadInt16(0x89);
 
-            Assert.Equal(0x1122, getValue);
-        }
+        Assert.Equal(0x1122, getValue);
+    }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(3)]
-        public void ReadInt16_InvalidLength_ThrowsException(int length)
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(3)]
+    public void ReadInt16_InvalidLength_ThrowsException(
+        int length)
+    {
+        var encoding = new byte[]
         {
-            byte[] encoding = new byte[] {
-                0x90, (byte)length, 0x04, 0x03, 0x02, 0x01, 0x00
-            };
+            0x90, (byte)length, 0x04, 0x03, 0x02, 0x01, 0x00
+        };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.ReadInt16(0x90);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.ReadInt16(0x90);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(3)]
+    public void ReadUInt16_InvalidLength_ThrowsException(
+        int length)
+    {
+        var encoding = new byte[]
+        {
+            0x90, (byte)length, 0x04, 0x03, 0x02, 0x01, 0x00
+        };
+
+        var reader = new TlvReader(encoding);
+
+        void actual()
+        {
+            reader.ReadUInt16(0x90);
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(3)]
-        public void ReadUInt16_InvalidLength_ThrowsException(int length)
+        _ = Assert.Throws<TlvException>(actual);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(5)]
+    public void ReadInt32_InvalidLength_ThrowsException(
+        int length)
+    {
+        var encoding = new byte[]
         {
-            byte[] encoding = new byte[] {
-                0x90, (byte)length, 0x04, 0x03, 0x02, 0x01, 0x00
-            };
+            0x91, (byte)length, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00
+        };
 
-            var reader = new TlvReader(encoding);
-
-            void actual() => reader.ReadUInt16(0x90);
-            _ = Assert.Throws<TlvException>(actual);
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(2)]
-        [InlineData(3)]
-        [InlineData(5)]
-        public void ReadInt32_InvalidLength_ThrowsException(int length)
-        {
-            byte[] encoding = new byte[] {
-                0x91, (byte)length, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00
-            };
-
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.ReadInt32(0x91);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.ReadInt32(0x91);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Fact]
-        public void ReadValue_NotEnoughData_ThrowsException()
+    [Fact]
+    public void ReadValue_NotEnoughData_ThrowsException()
+    {
+        var encoding = new byte[]
         {
-            byte[] encoding = new byte[] {
-                0x71, 0x04, 0x01, 0x02, 0x03
-            };
+            0x71, 0x04, 0x01, 0x02, 0x03
+        };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.ReadValue(0x71);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.ReadValue(0x71);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Fact]
-        public void ReadEncoded_NotEnoughData_ThrowsException()
+    [Fact]
+    public void ReadEncoded_NotEnoughData_ThrowsException()
+    {
+        var encoding = new byte[]
         {
-            byte[] encoding = new byte[] {
-                0x71, 0x04, 0x01, 0x02, 0x03
-            };
+            0x71, 0x04, 0x01, 0x02, 0x03
+        };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.ReadEncoded(0x71);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.ReadEncoded(0x71);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Fact]
-        public void ReadEncoded_InvalidLength_ThrowsException()
+    [Fact]
+    public void ReadEncoded_InvalidLength_ThrowsException()
+    {
+        var encoding = new byte[]
         {
-            byte[] encoding = new byte[] {
-                0x30, 0x0a, 0x71, 0x80, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            };
+            0x30, 0x0a, 0x71, 0x80, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+        };
 
-            var reader = new TlvReader(encoding);
-            TlvReader nestedReader = reader.ReadNestedTlv(0x30);
+        var reader = new TlvReader(encoding);
+        var nestedReader = reader.ReadNestedTlv(0x30);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => nestedReader.ReadEncoded(0x71);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => nestedReader.ReadEncoded(0x71);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Fact]
-        public void ReadString_NullEncoding_ThrowsExcpetion()
+    [Fact]
+    public void ReadString_NullEncoding_ThrowsExcpetion()
+    {
+        var encoding = new byte[]
         {
-            byte[] encoding = new byte[] {
-                0x71, 0x04, 0x01, 0x02, 0x03
-            };
+            0x71, 0x04, 0x01, 0x02, 0x03
+        };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.ReadString(0x71, null);
-            Assert.Throws<ArgumentNullException>(actual);
+        Action actual = () => reader.ReadString(0x71, null);
+        Assert.Throws<ArgumentNullException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(3)]
-        [InlineData(-1)]
-        public void PeekTag_InvalidTagLength_ThrowsException(int tagLength)
+    [Theory]
+    [InlineData(0)]
+    [InlineData(3)]
+    [InlineData(-1)]
+    public void PeekTag_InvalidTagLength_ThrowsException(
+        int tagLength)
+    {
+        var encoding = new byte[]
         {
-            byte[] encoding = new byte[] {
-                0x90, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00
-            };
+            0x90, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00
+        };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.PeekTag(tagLength);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.PeekTag(tagLength);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void PeekTag_NotEnoughData_ThrowsException(
+        int tagLength)
+    {
+        var encoding = new byte[] { 0x03, 0x02, 0x00, 0x01 };
+
+        var tag = 0x0302;
+        if (tagLength == 1)
+        {
+            tag = 0x03;
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        public void PeekTag_NotEnoughData_ThrowsException(int tagLength)
-        {
-            byte[] encoding = new byte[] { 0x03, 0x02, 0x00, 0x01 };
-
-            int tag = 0x0302;
-            if (tagLength == 1)
-            {
-                tag = 0x03;
-            }
-
-            var reader = new TlvReader(encoding);
-            ReadOnlyMemory<byte> value = reader.ReadValue(tag);
+        var reader = new TlvReader(encoding);
+        var value = reader.ReadValue(tag);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.PeekTag(tagLength);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.PeekTag(tagLength);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(3)]
-        [InlineData(-1)]
-        public void PeekLength_InvalidTagLength_ThrowsException(int tagLength)
+    [Theory]
+    [InlineData(0)]
+    [InlineData(3)]
+    [InlineData(-1)]
+    public void PeekLength_InvalidTagLength_ThrowsException(
+        int tagLength)
+    {
+        var encoding = new byte[]
         {
-            byte[] encoding = new byte[] {
-                0x90, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00
-            };
+            0x90, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00
+        };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.PeekLength(tagLength);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.PeekLength(tagLength);
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Theory]
-        [InlineData(0x84)]
-        [InlineData(0x80)]
-        [InlineData(0x90)]
-        [InlineData(0x91)]
-        [InlineData(0xA2)]
-        [InlineData(0xB3)]
-        [InlineData(0xD1)]
-        [InlineData(0xE2)]
-        [InlineData(0xF3)]
-        public void PeekLength_InvalidFirstByte_ThrowsException(byte firstByte)
+    [Theory]
+    [InlineData(0x84)]
+    [InlineData(0x80)]
+    [InlineData(0x90)]
+    [InlineData(0x91)]
+    [InlineData(0xA2)]
+    [InlineData(0xB3)]
+    [InlineData(0xD1)]
+    [InlineData(0xE2)]
+    [InlineData(0xF3)]
+    public void PeekLength_InvalidFirstByte_ThrowsException(
+        byte firstByte)
+    {
+        var encoding = new byte[]
         {
-            byte[] encoding = new byte[] {
-                0x91, firstByte, 0x04, 0x02, 0x02, 0x01
-            };
+            0x91, firstByte, 0x04, 0x02, 0x02, 0x01
+        };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.PeekLength();
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.PeekLength();
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Fact]
-        public void PeekLength_TagOnly_ThrowsException()
-        {
-            byte[] encoding = new byte[] { 0x94 };
+    [Fact]
+    public void PeekLength_TagOnly_ThrowsException()
+    {
+        var encoding = new byte[] { 0x94 };
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.PeekLength(1);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.PeekLength();
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Theory]
-        [InlineData(3)]
-        [InlineData(2)]
-        [InlineData(1)]
-        public void PeekLength_NotEnoughData_ThrowsException(int count)
-        {
-            byte firstByte = (byte)(0x80 + count);
-            byte[] encoding = new byte[count + 1];
-            encoding[0] = 0x91;
-            encoding[1] = firstByte;
+    [Theory]
+    [InlineData(3)]
+    [InlineData(2)]
+    [InlineData(1)]
+    public void PeekLength_NotEnoughData_ThrowsException(
+        int count)
+    {
+        var firstByte = (byte)(0x80 + count);
+        var encoding = new byte[count + 1];
+        encoding[0] = 0x91;
+        encoding[1] = firstByte;
 
-            var reader = new TlvReader(encoding);
+        var reader = new TlvReader(encoding);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => reader.PeekLength(1);
-            Assert.Throws<TlvException>(actual);
+        Action actual = () => reader.PeekLength();
+        Assert.Throws<TlvException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-        }
     }
 }

@@ -18,114 +18,114 @@ using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+public class ClientPinCommandTests
 {
-    public class ClientPinCommandTests
+    [Fact]
+    public void AllOptionalProperties_AreNullByDefault()
     {
-        [Fact]
-        public void AllOptionalProperties_AreNullByDefault()
+        var command = new ClientPinCommand();
+
+        Assert.Null(command.Permissions);
+        Assert.Null(command.KeyAgreement);
+        Assert.Null(command.RpId);
+        Assert.Null(command.NewPinEnc);
+        Assert.Null(command.PinHashEnc);
+        Assert.Null(command.PinUvAuthParam);
+        Assert.Null(command.PinUvAuthProtocol);
+    }
+
+    [Fact]
+    public void Application_SetToFido2()
+    {
+        var command = new ClientPinCommand();
+
+        Assert.Equal(YubiKeyApplication.Fido2, command.Application);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_SubcommandSet_CorrectlySerializesApdu()
+    {
+        var command = new ClientPinCommand
         {
-            var command = new ClientPinCommand();
+            SubCommand = 0xFF
+        };
 
-            Assert.Null(command.Permissions);
-            Assert.Null(command.KeyAgreement);
-            Assert.Null(command.RpId);
-            Assert.Null(command.NewPinEnc);
-            Assert.Null(command.PinHashEnc);
-            Assert.Null(command.PinUvAuthParam);
-            Assert.Null(command.PinUvAuthProtocol);
-        }
+        // clientAuthenticatorPin (0x06)
+        // A1       # map(1)
+        //    02    #   unsigned(2)
+        //    18 FF #   unsigned(255)
+        byte[] expectedData = { 0x06, 0xA1, 0x02, 0x18, 0xFF };
 
-        [Fact]
-        public void Application_SetToFido2()
+        var apdu = command.CreateCommandApdu();
+
+        Assert.Equal(0, apdu.Cla);
+        Assert.Equal(0x10, apdu.Ins);
+        Assert.Equal(0, apdu.P1);
+        Assert.Equal(0, apdu.P2);
+        Assert.True(expectedData.SequenceEqual(apdu.Data.ToArray()));
+    }
+
+    [Fact]
+    public void CreateCommandApdu_AllPropertiesSet_CorrectlySerializesApdu()
+    {
+        var command = new ClientPinCommand
         {
-            var command = new ClientPinCommand();
+            PinUvAuthProtocol = PinUvAuthProtocol.ProtocolOne,
+            SubCommand = 0xFF,
+            PinUvAuthParam = new byte[] { 4, 5, 6 },
+            NewPinEnc = new byte[] { 3, 2, 1 },
+            PinHashEnc = new byte[] { 6, 5, 4 },
+            Permissions = PinUvAuthTokenPermissions.MakeCredential,
+            RpId = "test"
+        };
 
-            Assert.Equal(YubiKeyApplication.Fido2, command.Application);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_SubcommandSet_CorrectlySerializesApdu()
+        byte[] expectedData =
         {
-            var command = new ClientPinCommand()
-            {
-                SubCommand = 0xFF
-            };
+            0x06, // clientAuthenticatorPin
+            0xA7, // map (8 entries)
+            0x01, 0x01, // TagPinUvAuthProtocol = PinProtocolOne
+            0x02, 0x18, 0xFF, // TagSubCommand = 0xFF
+            0x04, 0x43, 0x04, 0x05, 0x06, // TagPinUvAuthParam = 4, 5, 6
+            0x05, 0x43, 0x03, 0x02, 0x01, // TagNewPinEnc = 3, 2, 1
+            0x06, 0x43, 0x06, 0x05, 0x04, // TagPinHashEnc = 6, 5, 4
+            0x09, 0x01, // TagPermissions = MakeCredential
+            0x0A, 0x64, 0x74, 0x65, 0x73, 0x74 // RpId = "test"
+        };
 
-            // clientAuthenticatorPin (0x06)
-            // A1       # map(1)
-            //    02    #   unsigned(2)
-            //    18 FF #   unsigned(255)
-            byte[] expectedData = { 0x06, 0xA1, 0x02, 0x18, 0xFF };
+        var apdu = command.CreateCommandApdu();
 
-            CommandApdu apdu = command.CreateCommandApdu();
+        Assert.True(expectedData.SequenceEqual(apdu.Data.ToArray()));
+    }
 
-            Assert.Equal(0, apdu.Cla);
-            Assert.Equal(0x10, apdu.Ins);
-            Assert.Equal(0, apdu.P1);
-            Assert.Equal(0, apdu.P2);
-            Assert.True(expectedData.SequenceEqual(apdu.Data.ToArray()));
-        }
+    [Fact]
+    public void CreateResponseForApdu_EmptyApdu_ReturnsClientPinResponse()
+    {
+        var command = new ClientPinCommand();
 
-        [Fact]
-        public void CreateCommandApdu_AllPropertiesSet_CorrectlySerializesApdu()
+        var response = command.CreateResponseForApdu(new ResponseApdu(new byte[] { 0x90, 0x00 }));
+
+        _ = Assert.IsType<ClientPinResponse>(response);
+    }
+
+    [Fact]
+    public void NullKeyAgreement_CorrectApdu()
+    {
+        var expectedValue = new byte[]
         {
-            var command = new ClientPinCommand()
-            {
-                PinUvAuthProtocol = PinUvAuthProtocol.ProtocolOne,
-                SubCommand = 0xFF,
-                PinUvAuthParam = new byte[] { 4, 5, 6 },
-                NewPinEnc = new byte[] { 3, 2, 1 },
-                PinHashEnc = new byte[] { 6, 5, 4 },
-                Permissions = PinUvAuthTokenPermissions.MakeCredential,
-                RpId = "test"
-            };
+            0x06, 0xA2, 0x01, 0x01, 0x02, 0x10
+        };
 
-            byte[] expectedData =
-            {
-                0x06, // clientAuthenticatorPin
-                0xA7, // map (8 entries)
-                0x01, 0x01, // TagPinUvAuthProtocol = PinProtocolOne
-                0x02, 0x18, 0xFF, // TagSubCommand = 0xFF
-                0x04, 0x43, 0x04, 0x05, 0x06, // TagPinUvAuthParam = 4, 5, 6
-                0x05, 0x43, 0x03, 0x02, 0x01, // TagNewPinEnc = 3, 2, 1
-                0x06, 0x43, 0x06, 0x05, 0x04, // TagPinHashEnc = 6, 5, 4
-                0x09, 0x01, // TagPermissions = MakeCredential
-                0x0A, 0x64, 0x74, 0x65, 0x73, 0x74 // RpId = "test"
-            };
-
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            Assert.True(expectedData.SequenceEqual(apdu.Data.ToArray()));
-        }
-
-        [Fact]
-        public void CreateResponseForApdu_EmptyApdu_ReturnsClientPinResponse()
+        var command = new ClientPinCommand
         {
-            var command = new ClientPinCommand();
+            PinUvAuthProtocol = PinUvAuthProtocol.ProtocolOne,
+            SubCommand = 16
+        };
 
-            IYubiKeyResponse response = command.CreateResponseForApdu(new ResponseApdu(new byte[] { 0x90, 0x00 }));
+        var cmdApdu = command.CreateCommandApdu();
 
-            _ = Assert.IsType<ClientPinResponse>(response);
-        }
-
-        [Fact]
-        public void NullKeyAgreement_CorrectApdu()
-        {
-            byte[] expectedValue = new byte[] {
-                0x06, 0xA2, 0x01, 0x01, 0x02, 0x10
-            };
-
-            var command = new ClientPinCommand()
-            {
-                PinUvAuthProtocol = PinUvAuthProtocol.ProtocolOne,
-                SubCommand = 16,
-            };
-
-            CommandApdu cmdApdu = command.CreateCommandApdu();
-
-            bool isValid = MemoryExtensions.SequenceEqual(new Span<byte>(expectedValue), cmdApdu.Data.Span);
-            Assert.True(isValid);
-        }
+        var isValid = new Span<byte>(expectedValue).SequenceEqual(cmdApdu.Data.Span);
+        Assert.True(isValid);
     }
 }

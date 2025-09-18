@@ -15,76 +15,76 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+internal static partial class NativeMethods
 {
-    internal static partial class NativeMethods
-    {
-        // Note that the DefaultDllImportSearchPaths attribute is a security best
-        // practice on the Windows platform (and required by our analyzer
-        // settings). It does not currently have any effect on platforms other
-        // than Windows, but is included because of the analyzer and in the hope
-        // that it will be supported by these platforms in the future.
-        [DllImport(Libraries.CoreFoundation)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        internal static extern ulong CFGetTypeID(IntPtr theObject);
+    public const int kCFRunLoopRunFinished = 1;
+    public const int kCFRunLoopRunStopped = 2;
+    public const int kCFRunLoopRunTimedOut = 3;
 
-        /*!
-            @function CFSetGetCount
-            Returns the number of values currently in the set.
-            @param theSet The set to be queried. If this parameter is not a valid
-                CFSet, the behavior is undefined.
-            @result The number of values in the set.
-        */
-        [DllImport(Libraries.CoreFoundation)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        internal static extern long CFSetGetCount(IntPtr theSet);
+    public const int kCFRunLoopRunHandledSource = 4;
 
-        /*!
-            @function CFSetGetValues
-            Fills the buffer with values from the set.
-            @param theSet The set to be queried. If this parameter is not a
-                valid CFSet, the behavior is undefined.
-            @param values A C array of pointer-sized values to be filled with
-                values from the set. The values in the C array are ordered
-                in the same order in which they appear in the set. If this
-                parameter is not a valid pointer to a C array of at least
-                CFSetGetCount() pointers, the behavior is undefined.
-        */
-        [DllImport(Libraries.CoreFoundation)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        internal static extern void CFSetGetValues(IntPtr theSet, IntPtr[] values);
+    // Note that the DefaultDllImportSearchPaths attribute is a security best
+    // practice on the Windows platform (and required by our analyzer
+    // settings). It does not currently have any effect on platforms other
+    // than Windows, but is included because of the analyzer and in the hope
+    // that it will be supported by these platforms in the future.
+    [DllImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static extern ulong CFGetTypeID(IntPtr theObject);
 
-        [DllImport(Libraries.CoreFoundation)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        internal static extern IntPtr CFStringCreateWithCString(IntPtr allocatorRef, byte[] cStr, int encoding);
+    /*!
+        @function CFSetGetCount
+        Returns the number of values currently in the set.
+        @param theSet The set to be queried. If this parameter is not a valid
+            CFSet, the behavior is undefined.
+        @result The number of values in the set.
+    */
+    [DllImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static extern long CFSetGetCount(IntPtr theSet);
 
-        [DllImport(Libraries.CoreFoundation)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        internal static extern ulong CFNumberGetTypeID();
+    /*!
+        @function CFSetGetValues
+        Fills the buffer with values from the set.
+        @param theSet The set to be queried. If this parameter is not a
+            valid CFSet, the behavior is undefined.
+        @param values A C array of pointer-sized values to be filled with
+            values from the set. The values in the C array are ordered
+            in the same order in which they appear in the set. If this
+            parameter is not a valid pointer to a C array of at least
+            CFSetGetCount() pointers, the behavior is undefined.
+    */
+    [DllImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static extern void CFSetGetValues(IntPtr theSet, IntPtr[] values);
 
-        [DllImport(Libraries.CoreFoundation)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern bool CFNumberGetValue(IntPtr numberRef, int theType, byte[] valuePtr);
+    [DllImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static extern IntPtr CFStringCreateWithCString(IntPtr allocatorRef, byte[] cStr, int encoding);
 
-        [DllImport(Libraries.CoreFoundation)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern void CFRelease(IntPtr theObject);
+    [DllImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static extern ulong CFNumberGetTypeID();
 
-        [DllImport(Libraries.CoreFoundation)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern IntPtr CFRunLoopGetCurrent();
+    [DllImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern bool CFNumberGetValue(IntPtr numberRef, int theType, byte[] valuePtr);
 
-        public const int kCFRunLoopRunFinished = 1;
-        public const int kCFRunLoopRunStopped = 2;
-        public const int kCFRunLoopRunTimedOut = 3;
-        public const int kCFRunLoopRunHandledSource = 4;
+    [DllImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern void CFRelease(IntPtr theObject);
 
-        [DllImport(Libraries.CoreFoundation)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int CFRunLoopRunInMode(IntPtr mode, double seconds, bool returnAfterSourceHandled);
+    [DllImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern IntPtr CFRunLoopGetCurrent();
 
-        [DllImport(Libraries.CoreFoundation)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern void CFRunLoopStop(IntPtr runLoop);
-    }
+    [DllImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern int CFRunLoopRunInMode(IntPtr mode, double seconds, bool returnAfterSourceHandled);
+
+    [DllImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern void CFRunLoopStop(IntPtr runLoop);
 }

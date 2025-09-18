@@ -16,36 +16,38 @@ using System;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Pipelines
+namespace Yubico.YubiKey.Pipelines;
+
+/// <summary>
+///     Represents an ApduPipeline backed by a direct connection
+///     to a specific application on a smartcard.
+/// </summary>
+internal class SmartCardTransform : IApduTransform
 {
-    /// <summary>
-    /// Represents an ApduPipeline backed by a direct connection
-    /// to a specific application on a smartcard.
-    /// </summary>
-    internal class SmartCardTransform : IApduTransform
+    private readonly ISmartCardConnection _smartCardConnection;
+
+    public SmartCardTransform(ISmartCardConnection smartCardConnection)
     {
-        readonly ISmartCardConnection _smartCardConnection;
-
-        public SmartCardTransform(ISmartCardConnection smartCardConnection)
+        if (smartCardConnection is null)
         {
-            if (smartCardConnection is null)
-            {
-                throw new ArgumentNullException(nameof(smartCardConnection));
-            }
-
-            _smartCardConnection = smartCardConnection;
+            throw new ArgumentNullException(nameof(smartCardConnection));
         }
 
-        public void Cleanup()
-        {
-
-        }
-
-        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType) => _smartCardConnection.Transmit(command);
-
-        public void Setup()
-        {
-
-        }
+        _smartCardConnection = smartCardConnection;
     }
+
+    #region IApduTransform Members
+
+    public void Cleanup()
+    {
+    }
+
+    public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType) =>
+        _smartCardConnection.Transmit(command);
+
+    public void Setup()
+    {
+    }
+
+    #endregion
 }

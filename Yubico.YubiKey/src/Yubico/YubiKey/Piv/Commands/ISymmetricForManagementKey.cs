@@ -14,64 +14,63 @@
 
 using System;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+/// <summary>
+///     The interface that defines the object that mgmt key auth will use to
+///     perform symmetric key encryption/decryption operations.
+/// </summary>
+internal interface ISymmetricForManagementKey : IDisposable
 {
     /// <summary>
-    /// The interface that defines the object that mgmt key auth will use to
-    /// perform symmetric key encryption/decryption operations.
+    ///     Indicates whether the class was instantiated to encrypt (<c>true</c>)
+    ///     or decrypt (<c>false</c>).
     /// </summary>
-    internal interface ISymmetricForManagementKey : IDisposable
-    {
-        /// <summary>
-        /// Indicates whether the class was instantiated to encrypt (<c>true</c>)
-        /// or decrypt (<c>false</c>).
-        /// </summary>
-        public bool IsEncrypting { get; }
+    bool IsEncrypting { get; }
 
-        /// <summary>
-        /// The block size of the underlying symmetric algorithm.
-        /// </summary>
-        public int BlockSize { get; }
+    /// <summary>
+    ///     The block size of the underlying symmetric algorithm.
+    /// </summary>
+    int BlockSize { get; }
 
-        /// <summary>
-        /// Encrypt or decrypt the block, depending on whether
-        /// <c>IsEncrypting</c> is true or not.
-        /// </summary>
-        /// <remarks>
-        /// The length of the input must be a multiple of the implementing
-        /// algorithm's block size (8 for 3DES, 16 for AES), and cannot be 0. The
-        /// length of the result will be the length of the input. It is possible
-        /// to process more than one block, but the <c>outputBuffer</c> (starting
-        /// at <c>outputOffset</c>) must be big enough to accept the the result.
-        /// </remarks>
-        /// <param name="inputBuffer">
-        /// The buffer containing the data to process.
-        /// </param>
-        /// <param name="inputOffset">
-        /// The offset into the <c>inputBuffer</c> where the data to process
-        /// begins.
-        /// </param>
-        /// <param name="inputCount">
-        /// The number of bytes to process.
-        /// </param>
-        /// <param name="outputBuffer">
-        /// The buffer where the result will be deposited.
-        /// </param>
-        /// <param name="outputOffset">
-        /// The offset into the <c>outputBuffer</c> where the method will begin
-        /// depositing the result.
-        /// </param>
-        /// <returns>
-        /// The number of bytes placed into the output buffer.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// The <c>inputBuffer</c> or <c>outputBuffer</c> argument is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// The <c>inputCount</c> is not a multiple of the block size (note that
-        /// 0 is not a valid input), the input or output buffers are not big
-        /// enough for the specified offset and length.
-        /// </exception>
-        public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset);
-    }
+    /// <summary>
+    ///     Encrypt or decrypt the block, depending on whether
+    ///     <c>IsEncrypting</c> is true or not.
+    /// </summary>
+    /// <remarks>
+    ///     The length of the input must be a multiple of the implementing
+    ///     algorithm's block size (8 for 3DES, 16 for AES), and cannot be 0. The
+    ///     length of the result will be the length of the input. It is possible
+    ///     to process more than one block, but the <c>outputBuffer</c> (starting
+    ///     at <c>outputOffset</c>) must be big enough to accept the the result.
+    /// </remarks>
+    /// <param name="inputBuffer">
+    ///     The buffer containing the data to process.
+    /// </param>
+    /// <param name="inputOffset">
+    ///     The offset into the <c>inputBuffer</c> where the data to process
+    ///     begins.
+    /// </param>
+    /// <param name="inputCount">
+    ///     The number of bytes to process.
+    /// </param>
+    /// <param name="outputBuffer">
+    ///     The buffer where the result will be deposited.
+    /// </param>
+    /// <param name="outputOffset">
+    ///     The offset into the <c>outputBuffer</c> where the method will begin
+    ///     depositing the result.
+    /// </param>
+    /// <returns>
+    ///     The number of bytes placed into the output buffer.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     The <c>inputBuffer</c> or <c>outputBuffer</c> argument is null.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    ///     The <c>inputCount</c> is not a multiple of the block size (note that
+    ///     0 is not a valid input), the input or output buffers are not big
+    ///     enough for the specified offset and length.
+    /// </exception>
+    int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset);
 }

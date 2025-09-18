@@ -16,66 +16,70 @@ using System;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Continue the process of getting information on all the credentials
+///     associated with a specific relying party stored on the YubiKey.
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="EnumerateCredentialsGetNextResponse" />.
+///     <para>
+///         This returns information on one of the credentials. If there is only one
+///         credential associated with the relying party, then the call to the
+///         <c>enumerateCredentialsBegin</c> subcommand gave you all the information
+///         you need. It also indicated that there was only one credential. If there
+///         are more credentials, then you can get information on the rest after the
+///         first by calling this subcommand, calling it once for every credential.
+///     </para>
+///     <para>
+///         The return from this command consist of the <c>user</c>,
+///         <c>credentialId</c>, <c>publicKey</c>, <c>credProtect</c>, and
+///         <c>largeBlobKey</c>.
+///     </para>
+///     <para>
+///         Note that this command does not need the <c>relyingPartyIdHash</c>,
+///         <c>pinUvAuthToken</c> nor the <c>authProtocol</c>. This command picks up
+///         where the <see cref="EnumerateCredentialsBeginCommand" /> left off, and
+///         can only operate successfully after that "Begin" command has successfully
+///         completed.
+///     </para>
+/// </remarks>
+public class EnumerateCredentialsGetNextCommand : CredentialMgmtSubCommand,
+                                                  IYubiKeyCommand<EnumerateCredentialsGetNextResponse>
 {
+    private const int SubCmdGetEnumerateCredsGetNext = 0x05;
+
     /// <summary>
-    /// Continue the process of getting information on all the credentials
-    /// associated with a specific relying party stored on the YubiKey.
+    ///     Constructs a new instance of
+    ///     <see cref="EnumerateCredentialsGetNextCommand" />.
     /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="EnumerateCredentialsGetNextResponse"/>.
-    /// <para>
-    /// This returns information on one of the credentials. If there is only one
-    /// credential associated with the relying party, then the call to the
-    /// <c>enumerateCredentialsBegin</c> subcommand gave you all the information
-    /// you need. It also indicated that there was only one credential. If there
-    /// are more credentials, then you can get information on the rest after the
-    /// first by calling this subcommand, calling it once for every credential.
-    /// </para>
-    /// <para>
-    /// The return from this command consist of the <c>user</c>,
-    /// <c>credentialId</c>, <c>publicKey</c>, <c>credProtect</c>, and
-    /// <c>largeBlobKey</c>.
-    /// </para>
-    /// <para>
-    /// Note that this command does not need the <c>relyingPartyIdHash</c>,
-    /// <c>pinUvAuthToken</c> nor the <c>authProtocol</c>. This command picks up
-    /// where the <see cref="EnumerateCredentialsBeginCommand"/> left off, and
-    /// can only operate successfully after that "Begin" command has successfully
-    /// completed.
-    /// </para>
-    /// </remarks>
-    public class EnumerateCredentialsGetNextCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateCredentialsGetNextResponse>
+    public EnumerateCredentialsGetNextCommand()
+        : base(new CredentialManagementCommand(SubCmdGetEnumerateCredsGetNext))
     {
-        private const int SubCmdGetEnumerateCredsGetNext = 0x05;
-
-        /// <summary>
-        /// Constructs a new instance of
-        /// <see cref="EnumerateCredentialsGetNextCommand"/>.
-        /// </summary>
-        public EnumerateCredentialsGetNextCommand()
-            : base(new CredentialManagementCommand(SubCmdGetEnumerateCredsGetNext))
-        {
-        }
-
-        /// <summary>
-        /// Constructs a new instance of <see cref="EnumerateCredentialsGetNextCommand"/> with a pre-computed PIN/UV auth param.
-        /// </summary>
-        /// <param name="pinUvAuthParam">
-        ///     The pre-computed PIN/UV auth param for this command.
-        /// </param>
-        /// <param name="protocol">
-        ///     The PIN/UV protocol version used to compute the auth param.
-        /// </param>
-        public EnumerateCredentialsGetNextCommand(
-            ReadOnlyMemory<byte> pinUvAuthParam,
-            PinUvAuthProtocol protocol)
-            : base(new CredentialManagementCommand(SubCmdGetEnumerateCredsGetNext, null, pinUvAuthParam, protocol))
-        {
-        }
-
-        /// <inheritdoc />
-        public EnumerateCredentialsGetNextResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new EnumerateCredentialsGetNextResponse(responseApdu);
     }
+
+    /// <summary>
+    ///     Constructs a new instance of <see cref="EnumerateCredentialsGetNextCommand" /> with a pre-computed PIN/UV auth
+    ///     param.
+    /// </summary>
+    /// <param name="pinUvAuthParam">
+    ///     The pre-computed PIN/UV auth param for this command.
+    /// </param>
+    /// <param name="protocol">
+    ///     The PIN/UV protocol version used to compute the auth param.
+    /// </param>
+    public EnumerateCredentialsGetNextCommand(
+        ReadOnlyMemory<byte> pinUvAuthParam,
+        PinUvAuthProtocol protocol)
+        : base(new CredentialManagementCommand(SubCmdGetEnumerateCredsGetNext, null, pinUvAuthParam, protocol))
+    {
+    }
+
+    #region IYubiKeyCommand<EnumerateCredentialsGetNextResponse> Members
+
+    /// <inheritdoc />
+    public EnumerateCredentialsGetNextResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

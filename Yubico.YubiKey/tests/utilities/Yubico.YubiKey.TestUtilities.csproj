@@ -14,34 +14,34 @@ limitations under the License. -->
 
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <AssemblyName>Yubico.YubiKey.TestUtilities</AssemblyName>
-    <RootNamespace></RootNamespace>
-    <TargetFramework>net8.0</TargetFramework>
-    <AnalysisMode>Minimum</AnalysisMode>
+    <PropertyGroup>
+        <AssemblyName>Yubico.YubiKey.TestUtilities</AssemblyName>
+        <RootNamespace></RootNamespace>
+        <TargetFramework>net8.0</TargetFramework>
+        <AnalysisMode>Minimum</AnalysisMode>
 
-    <!-- StrongName signing -->
-    <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must
-         be strong named, since it uses InternalsVisibleTo. -->
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+        <!-- StrongName signing -->
+        <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must
+             be strong named, since it uses InternalsVisibleTo. -->
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
-    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="9.0.6" />
-    <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="Xunit.SkippableFact" Version="1.5.23" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0"/>
+        <PackageReference Include="Microsoft.Bcl.Cryptography" Version="9.0.6"/>
+        <PackageReference Include="Moq" Version="4.20.72"/>
+        <PackageReference Include="Xunit.SkippableFact" Version="1.5.23"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="TestData\**\*.*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+    <ItemGroup>
+        <Content Include="TestData\**\*.*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 
 </Project>

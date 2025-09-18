@@ -16,49 +16,50 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
-namespace Yubico.Core.Tlv.UnitTests
+namespace Yubico.Core.Tlv.UnitTests;
+
+public class TlvExceptionTests
 {
-    public class TlvExceptionTests
+    [Fact]
+    public void Constructor_GivenNoParameters_ReturnsCorrectException()
     {
-        [Fact]
-        public void Constructor_GivenNoParameters_ReturnsCorrectException()
-        {
-            // Arrange
+        // Arrange
 
-            // Act
-            var exception = new TlvException();
+        // Act
+        var exception = new TlvException();
 
-            // Assert
-            _ = Assert.IsType<TlvException>(exception);
-        }
+        // Assert
+        _ = Assert.IsType<TlvException>(exception);
+    }
 
-        [Fact]
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Unit test")]
-        public void Constructor_GivenMessageParameter_SetsMessageProperty()
-        {
-            // Arrange
-            const string expectedMessage = "This is a test message.";
+    [Fact]
+    [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters",
+        Justification = "Unit test")]
+    public void Constructor_GivenMessageParameter_SetsMessageProperty()
+    {
+        // Arrange
+        const string expectedMessage = "This is a test message.";
 
-            // Act
-            var exception = new TlvException(expectedMessage);
+        // Act
+        var exception = new TlvException(expectedMessage);
 
-            // Assert
-            Assert.Equal(expectedMessage, exception.Message);
-        }
+        // Assert
+        Assert.Equal(expectedMessage, exception.Message);
+    }
 
-        [Fact]
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Unit test")]
-        public void Constructor_GivenInnerException_SetsInnerExceptionProperty()
-        {
-            // Arrange
-            var expectedInnerException = new Exception("Test exception");
-            const string message = "This is a test message.";
+    [Fact]
+    [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters",
+        Justification = "Unit test")]
+    public void Constructor_GivenInnerException_SetsInnerExceptionProperty()
+    {
+        // Arrange
+        var expectedInnerException = new Exception("Test exception");
+        const string message = "This is a test message.";
 
-            // Act
-            var exception = new TlvException(message, expectedInnerException);
+        // Act
+        var exception = new TlvException(message, expectedInnerException);
 
-            // Assert
-            Assert.Equal(expectedInnerException, exception.InnerException);
-        }
+        // Assert
+        Assert.Equal(expectedInnerException, exception.InnerException);
     }
 }

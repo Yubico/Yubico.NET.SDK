@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.InterIndustry.Commands
-{
-    /// <summary>
-    /// Represents the results of a select application command that returns a<see cref="ISelectApplicationData" />.
-    /// </summary>
-    /// <typeparam name="TData">Specific type of data returned by the Select Application command.  NOTE: This is argument is covariant.</typeparam>
-    public interface ISelectApplicationResponse<out TData> : IYubiKeyResponseWithData<TData>
-        where TData : ISelectApplicationData
-    {
+namespace Yubico.YubiKey.InterIndustry.Commands;
 
-    }
+/// <summary>
+///     Represents the results of a select application command that returns a<see cref="ISelectApplicationData" />.
+/// </summary>
+/// <typeparam name="TData">
+///     Specific type of data returned by the Select Application command.  NOTE: This is argument is
+///     covariant.
+/// </typeparam>
+public interface ISelectApplicationResponse<out TData> : IYubiKeyResponseWithData<TData>
+    where TData : ISelectApplicationData
+{
 }

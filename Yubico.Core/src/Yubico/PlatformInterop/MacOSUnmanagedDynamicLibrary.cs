@@ -17,44 +17,41 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using Yubico.Core;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+internal sealed class MacOSUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
 {
-    internal sealed class MacOSUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
+    public MacOSUnmanagedDynamicLibrary(string fileName) :
+        base(OpenLibrary(fileName))
     {
-        public MacOSUnmanagedDynamicLibrary(string fileName) :
-            base(OpenLibrary(fileName))
-        {
+    }
 
+    private static SafeLibraryHandle OpenLibrary(string fileName)
+    {
+        SafeMacOSLibraryHandle handle = NativeMethods.mac_dlopen(fileName, NativeMethods.DlOpenFlags.Lazy);
+        if (handle.IsInvalid)
+        {
+            throw new PlatformApiException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.LibraryLoadFailed,
+                    fileName));
         }
 
-        private static SafeLibraryHandle OpenLibrary(string fileName)
+        return handle;
+    }
+
+    public override bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
+    {
+        IntPtr p = NativeMethods.mac_dlsym(_handle, functionName);
+
+        if (p != IntPtr.Zero)
         {
-            SafeMacOSLibraryHandle handle = NativeMethods.mac_dlopen(fileName, NativeMethods.DlOpenFlags.Lazy);
-            if (handle.IsInvalid)
-            {
-                throw new PlatformApiException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.LibraryLoadFailed,
-                        fileName));
-            }
-            return handle;
+            d = Marshal.GetDelegateForFunctionPointer<TDelegate>(p);
+            return true;
         }
 
-        public override bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
-        {
-            IntPtr p = NativeMethods.mac_dlsym(_handle, functionName);
-
-            if (p != IntPtr.Zero)
-            {
-                d = Marshal.GetDelegateForFunctionPointer<TDelegate>(p);
-                return true;
-            }
-            else
-            {
-                d = null;
-                return false;
-            }
-        }
+        d = null;
+        return false;
     }
 }

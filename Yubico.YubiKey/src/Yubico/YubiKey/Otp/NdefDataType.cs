@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Otp
+namespace Yubico.YubiKey.Otp;
+
+/// <summary>
+///     The NFC Forum well known types that are supported by the YubiKey's NDEF payload.
+/// </summary>
+public enum NdefDataType
 {
     /// <summary>
-    /// The NFC Forum well known types that are supported by the YubiKey's NDEF payload.
+    ///     An NFC text record. Type "T" / "urn:nfc:wkt:T".
     /// </summary>
-    public enum NdefDataType
-    {
-        /// <summary>
-        /// An NFC text record. Type "T" / "urn:nfc:wkt:T".
-        /// </summary>
-        Text,
+    Text,
 
-        /// <summary>
-        /// An NFC Uniform Resource Identifier (URI) record. Type "U" / "urn:nfc:wkt:U".
-        /// </summary>
-        Uri,
-    }
+    /// <summary>
+    ///     An NFC Uniform Resource Identifier (URI) record. Type "U" / "urn:nfc:wkt:U".
+    /// </summary>
+    Uri
 }

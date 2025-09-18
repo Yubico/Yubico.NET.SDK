@@ -14,38 +14,36 @@
 
 using System;
 using Xunit;
-using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+public class GetPinRetriesCommandTests
 {
-    public class GetPinRetriesCommandTests
+    [Fact]
+    public void Constructor_Succeeds()
     {
-        [Fact]
-        public void Constructor_Succeeds()
+        var command = new GetPinRetriesCommand();
+
+        Assert.NotNull(command);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_CreatesCorrectApdu()
+    {
+        var command = new GetPinRetriesCommand();
+        var apdu = command.CreateCommandApdu();
+
+        var expectedData = new byte[]
         {
-            var command = new GetPinRetriesCommand();
+            0x06, // authenticatorClientPin (0x06)
+            0xA1, // map (1 entry)
+            0x02, 0x01 // subcommand = 1
+        };
 
-            Assert.NotNull(command);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_CreatesCorrectApdu()
-        {
-            var command = new GetPinRetriesCommand();
-            CommandApdu apdu = command.CreateCommandApdu();
-
-            byte[] expectedData = new byte[]
-            {
-                0x06, // authenticatorClientPin (0x06)
-                0xA1, // map (1 entry)
-                0x02, 0x01 // subcommand = 1
-            };
-
-            Assert.Equal(0, apdu.Cla);
-            Assert.Equal(0x10, apdu.Ins);
-            Assert.Equal(0, apdu.P1);
-            Assert.Equal(0, apdu.P2);
-            Assert.True(apdu.Data.Span.SequenceEqual(expectedData));
-        }
+        Assert.Equal(0, apdu.Cla);
+        Assert.Equal(0x10, apdu.Ins);
+        Assert.Equal(0, apdu.P1);
+        Assert.Equal(0, apdu.P2);
+        Assert.True(apdu.Data.Span.SequenceEqual(expectedData));
     }
 }

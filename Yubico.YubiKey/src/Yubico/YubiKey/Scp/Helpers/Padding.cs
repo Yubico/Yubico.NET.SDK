@@ -14,49 +14,49 @@
 
 using System;
 
-namespace Yubico.YubiKey.Scp.Helpers
+namespace Yubico.YubiKey.Scp.Helpers;
+
+internal static class Padding
 {
-    internal static class Padding
+    /// <summary>
+    ///     Pad the given <paramref name="payload" /> to the next multiple of 16 bytes by adding a 0x80 byte followed by zero
+    ///     bytes.
+    /// </summary>
+    /// <param name="payload">The payload to pad.</param>
+    /// <returns>The padded payload.</returns>
+    public static Memory<byte> PadToBlockSize(ReadOnlySpan<byte> payload)
     {
-        /// <summary>
-        /// Pad the given <paramref name="payload"/> to the next multiple of 16 bytes by adding a 0x80 byte followed by zero bytes.
-        /// </summary>
-        /// <param name="payload">The payload to pad.</param>
-        /// <returns>The padded payload.</returns>
-        public static Memory<byte> PadToBlockSize(ReadOnlySpan<byte> payload)
+        int paddedLen = ((payload.Length / 16) + 1) * 16;
+
+        Span<byte> padded = stackalloc byte[paddedLen];
+        payload.CopyTo(padded);
+        padded[payload.Length] = 0x80;
+
+        return padded.ToArray();
+    }
+
+    /// <summary>
+    ///     Remove the padding from the given <paramref name="paddedPayload" />.
+    /// </summary>
+    /// <param name="paddedPayload">The padded payload.</param>
+    /// <returns>The unpadded payload.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="paddedPayload" /> is <c>null</c>.</exception>
+    /// <exception cref="SecureChannelException">The padding is invalid.</exception>
+    public static Memory<byte> RemovePadding(ReadOnlySpan<byte> paddedPayload)
+    {
+        for (int i = paddedPayload.Length - 1; i >= 0; i--)
         {
-            int paddedLen = ((payload.Length / 16) + 1) * 16;
-
-            Span<byte> padded = stackalloc byte[paddedLen];
-            payload.CopyTo(padded);
-            padded[payload.Length] = 0x80;
-
-            return padded.ToArray();
-        }
-
-        /// <summary>
-        /// Remove the padding from the given <paramref name="paddedPayload"/>.
-        /// </summary>
-        /// <param name="paddedPayload">The padded payload.</param>
-        /// <returns>The unpadded payload.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="paddedPayload"/> is <c>null</c>.</exception>
-        /// <exception cref="SecureChannelException">The padding is invalid.</exception>
-        public static Memory<byte> RemovePadding(ReadOnlySpan<byte> paddedPayload)
-        {
-            for (int i = paddedPayload.Length - 1; i >= 0; i--)
+            if (paddedPayload[i] == 0x80)
             {
-                if (paddedPayload[i] == 0x80)
-                {
-                    return paddedPayload[..i].ToArray();
-                }
-
-                if (paddedPayload[i] != 0x00)
-                {
-                    throw new SecureChannelException(ExceptionMessages.InvalidPadding);
-                }
+                return paddedPayload[..i].ToArray();
             }
 
-            throw new SecureChannelException(ExceptionMessages.InvalidPadding);
+            if (paddedPayload[i] != 0x00)
+            {
+                throw new SecureChannelException(ExceptionMessages.InvalidPadding);
+            }
         }
+
+        throw new SecureChannelException(ExceptionMessages.InvalidPadding);
     }
 }

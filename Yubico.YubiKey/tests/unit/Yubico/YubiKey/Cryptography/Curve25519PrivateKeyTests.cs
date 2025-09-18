@@ -35,7 +35,7 @@ public class Curve25519PrivateKeyTests
         // Assert all bytes are zero
         Assert.True(privateKey.PrivateKey.ToArray().All(b => b == 0));
     }
-    
+
     [Fact]
     public void CreateFromValue_CreatesInstance()
     {
@@ -46,7 +46,7 @@ public class Curve25519PrivateKeyTests
             var privateKey = testKey.GetPrivateKeyValue();
 
             // Act
-            var privateKeyParams = Curve25519PrivateKey.CreateFromValue(privateKey, keyType); 
+            var privateKeyParams = Curve25519PrivateKey.CreateFromValue(privateKey, keyType);
 
             // Assert
             Assert.NotNull(privateKeyParams);
@@ -54,7 +54,7 @@ public class Curve25519PrivateKeyTests
             Assert.Equal(testKey.GetKeyDefinition(), privateKeyParams.KeyDefinition);
         }
     }
-        
+
     [Fact]
     public void CreateFromPkcs8_CreatesInstance()
     {
@@ -65,7 +65,7 @@ public class Curve25519PrivateKeyTests
             var privateKey = testKey.GetPrivateKeyValue();
 
             // Act
-            var privateKeyParams = Curve25519PrivateKey.CreateFromPkcs8(testKey.EncodedKey); 
+            var privateKeyParams = Curve25519PrivateKey.CreateFromPkcs8(testKey.EncodedKey);
 
             // Assert
             Assert.NotNull(privateKeyParams);
@@ -73,7 +73,7 @@ public class Curve25519PrivateKeyTests
             Assert.Equal(testKey.GetKeyDefinition(), privateKeyParams.KeyDefinition);
         }
     }
-    
+
     [Fact]
     public void VerifyX25519Key_ValidKey_Succeeds()
     {
@@ -88,7 +88,7 @@ public class Curve25519PrivateKeyTests
         Assert.NotNull(privateKeyParams);
         Assert.Equal(KeyType.X25519, privateKeyParams.KeyType);
         Assert.Equal(privateKey, privateKeyParams.PrivateKey);
-        
+
         // Verify key follows X25519 requirements per RFC 7748
         var keyBytes = privateKeyParams.PrivateKey.Span;
         Assert.Equal(32, keyBytes.Length);
@@ -96,38 +96,38 @@ public class Curve25519PrivateKeyTests
         Assert.Equal(0, keyBytes[31] & 0b_10000000); // Most significant bit should be 0
         Assert.Equal(0b_1000000, keyBytes[31] & 0b_1000000); // Second-most significant bit should be 1
     }
-    
+
     [Fact]
     public void VerifyX25519Key_InvalidBitClamping_ThrowsException()
     {
         // Arrange - Create a key that violates bit clamping requirements
-        byte[] invalidKey = new byte[32];
+        var invalidKey = new byte[32];
         Random.Shared.NextBytes(invalidKey);
-        
+
         // Break bit clamping - set lowest 3 bits to non-zero
         invalidKey[0] |= 0b111;
-        
+
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => 
+        Assert.Throws<CryptographicException>(() =>
             Curve25519PrivateKey.CreateFromValue(invalidKey, KeyType.X25519));
     }
-    
+
     [Fact]
     public void VerifyX25519Key_InvalidSecondMostSignificantBit_ThrowsException()
     {
         // Arrange - Create a key that violates bit clamping requirements
-        byte[] invalidKey = new byte[32];
+        var invalidKey = new byte[32];
         Random.Shared.NextBytes(invalidKey);
-        
+
         // Make key valid first
         invalidKey[0] &= 0b11111000; // Clear 3 LSB
         invalidKey[31] &= 0b01111111; // Clear MSB
-        
+
         // Break second-most significant bit requirement (should be 1)
         invalidKey[31] &= 0b10111111; // Set second-most significant bit to 0
-        
+
         // Act & Assert
-        Assert.Throws<CryptographicException>(() => 
+        Assert.Throws<CryptographicException>(() =>
             Curve25519PrivateKey.CreateFromValue(invalidKey, KeyType.X25519));
     }
 }

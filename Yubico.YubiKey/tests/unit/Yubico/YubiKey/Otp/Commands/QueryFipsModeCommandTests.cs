@@ -12,93 +12,91 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+public class QueryFipsModeCommandTests
 {
-    public class QueryFipsModeCommandTests
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
     {
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
-        {
-            var command = new QueryFipsModeCommand();
+        var command = new QueryFipsModeCommand();
 
-            byte cla = command.CreateCommandApdu().Cla;
+        var cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(0, cla);
-        }
+        Assert.Equal(0, cla);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_ReturnsHex01()
-        {
-            var command = new QueryFipsModeCommand();
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_ReturnsHex01()
+    {
+        var command = new QueryFipsModeCommand();
 
-            byte ins = command.CreateCommandApdu().Ins;
+        var ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(1, ins);
-        }
+        Assert.Equal(1, ins);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP1Property_ReturnsHex14()
-        {
-            var command = new QueryFipsModeCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP1Property_ReturnsHex14()
+    {
+        var command = new QueryFipsModeCommand();
 
-            byte p1 = command.CreateCommandApdu().P1;
+        var p1 = command.CreateCommandApdu().P1;
 
-            Assert.Equal(0x14, p1);
-        }
+        Assert.Equal(0x14, p1);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsZero()
-        {
-            var command = new QueryFipsModeCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsZero()
+    {
+        var command = new QueryFipsModeCommand();
 
-            byte p2 = command.CreateCommandApdu().P2;
+        var p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(0, p2);
-        }
+        Assert.Equal(0, p2);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetData_ReturnsEmpty()
-        {
-            var command = new QueryFipsModeCommand();
+    [Fact]
+    public void CreateCommandApdu_GetData_ReturnsEmpty()
+    {
+        var command = new QueryFipsModeCommand();
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+        var data = command.CreateCommandApdu().Data;
 
-            Assert.True(data.IsEmpty);
-        }
+        Assert.True(data.IsEmpty);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNc_ReturnsZero()
-        {
-            var command = new QueryFipsModeCommand();
+    [Fact]
+    public void CreateCommandApdu_GetNc_ReturnsZero()
+    {
+        var command = new QueryFipsModeCommand();
 
-            int nc = command.CreateCommandApdu().Nc;
+        var nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(0, nc);
-        }
+        Assert.Equal(0, nc);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNe_ReturnsZero()
-        {
-            var command = new QueryFipsModeCommand();
+    [Fact]
+    public void CreateCommandApdu_GetNe_ReturnsZero()
+    {
+        var command = new QueryFipsModeCommand();
 
-            int ne = command.CreateCommandApdu().Ne;
+        var ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(0, ne);
-        }
+        Assert.Equal(0, ne);
+    }
 
-        [Fact]
-        public void CreateResponseApdu_ReturnsCorrectType()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new QueryFipsModeCommand();
+    [Fact]
+    public void CreateResponseApdu_ReturnsCorrectType()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var command = new QueryFipsModeCommand();
 
-            IYubiKeyResponse response = command.CreateResponseForApdu(responseApdu);
+        IYubiKeyResponse response = command.CreateResponseForApdu(responseApdu);
 
-            Assert.True(response is QueryFipsModeResponse);
-        }
+        Assert.True(response is QueryFipsModeResponse);
     }
 }

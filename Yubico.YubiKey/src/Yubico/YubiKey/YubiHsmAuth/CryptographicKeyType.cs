@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.YubiHsmAuth
-{
-    /// <summary>
-    /// Cryptographic algorithm used to describe the key(s) associated
-    /// with a <see cref="Credential"/> in the YubiHSM Auth application.
-    /// </summary>
-    public enum CryptographicKeyType
-    {
-        None = 0,
+namespace Yubico.YubiKey.YubiHsmAuth;
 
-        /// <summary>
-        /// AES-128
-        /// </summary>
-        Aes128 = 38,
-    }
+/// <summary>
+///     Cryptographic algorithm used to describe the key(s) associated
+///     with a <see cref="Credential" /> in the YubiHSM Auth application.
+/// </summary>
+public enum CryptographicKeyType
+{
+    None = 0,
+
+    /// <summary>
+    ///     AES-128
+    /// </summary>
+    Aes128 = 38
 }

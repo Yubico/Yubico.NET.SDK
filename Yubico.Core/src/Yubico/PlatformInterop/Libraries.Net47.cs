@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #if NETFRAMEWORK
-
 using System;
 using System.IO;
 using System.Runtime.InteropServices;

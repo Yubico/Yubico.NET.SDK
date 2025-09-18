@@ -15,52 +15,51 @@
 using System;
 using Yubico.YubiKey.Scp03;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+[Obsolete("This class is obsolete and will be removed in a future release.")]
+internal class Scp03YubiKeyDevice : YubiKeyDevice
 {
-    [Obsolete("This class is obsolete and will be removed in a future release.")]
-    internal class Scp03YubiKeyDevice : YubiKeyDevice
+    public Scp03YubiKeyDevice(
+        YubiKeyDevice device,
+        StaticKeys staticKeys)
+        : base(
+            device.GetSmartCardDevice(),
+            null,
+            null,
+            device)
     {
-        public StaticKeys StaticKeys { get; private set; }
+        StaticKeys = staticKeys.GetCopy();
+    }
 
-        public Scp03YubiKeyDevice(
-            YubiKeyDevice device,
-            StaticKeys staticKeys)
-            : base(
-                device.GetSmartCardDevice(),
-                null,
-                null,
-                device)
+    public StaticKeys StaticKeys { get; }
+
+    [Obsolete("Obsolete")]
+    internal override IYubiKeyConnection? Connect(
+        YubiKeyApplication? application,
+        byte[]? applicationId,
+        StaticKeys? scp03Keys)
+    {
+        if (!HasSmartCard)
         {
-            StaticKeys = staticKeys.GetCopy();
-        }
-
-        [Obsolete("Obsolete")]
-        internal override IYubiKeyConnection? Connect(
-            YubiKeyApplication? application,
-            byte[]? applicationId,
-            StaticKeys? scp03Keys)
-        {
-            if (!HasSmartCard)
-            {
-                return null;
-            }
-
-            if (scp03Keys != null && !StaticKeys.AreKeysSame(scp03Keys))
-            {
-                return null;
-            }
-
-            if (!(application is null))
-            {
-                return new Scp03Connection(GetSmartCardDevice(), (YubiKeyApplication)application, StaticKeys);
-            }
-
-            if (!(applicationId is null))
-            {
-                return new Scp03Connection(GetSmartCardDevice(), applicationId, StaticKeys);
-            }
-
             return null;
         }
+
+        if (scp03Keys != null && !StaticKeys.AreKeysSame(scp03Keys))
+        {
+            return null;
+        }
+
+        if (application is not null)
+        {
+            return new Scp03Connection(GetSmartCardDevice(), (YubiKeyApplication)application, StaticKeys);
+        }
+
+        if (applicationId is not null)
+        {
+            return new Scp03Connection(GetSmartCardDevice(), applicationId, StaticKeys);
+        }
+
+        return null;
     }
 }

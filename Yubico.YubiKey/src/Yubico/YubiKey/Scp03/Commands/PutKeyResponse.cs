@@ -15,23 +15,26 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Scp03.Commands
+namespace Yubico.YubiKey.Scp03.Commands;
+
+/// <summary>
+///     The response to putting or replacing SCP03 keys on the YubiKey.
+/// </summary>
+[Obsolete("Use new PutKeyResponse instead")]
+internal class PutKeyResponse : Scp03Response, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
 {
-    /// <summary>
-    /// The response to putting or replacing SCP03 keys on the YubiKey.
-    /// </summary>
-    [Obsolete("Use new PutKeyResponse instead")]
-    internal class PutKeyResponse : Scp03Response, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
+    private readonly byte[] _checksum;
+
+    public PutKeyResponse(ResponseApdu responseApdu)
+        : base(responseApdu)
     {
-        private readonly byte[] _checksum;
-
-        public PutKeyResponse(ResponseApdu responseApdu)
-            : base(responseApdu)
-        {
-            _checksum = new byte[responseApdu.Data.Length];
-            responseApdu.Data.CopyTo(_checksum);
-        }
-
-        public ReadOnlyMemory<byte> GetData() => _checksum;
+        _checksum = new byte[responseApdu.Data.Length];
+        responseApdu.Data.CopyTo(_checksum);
     }
+
+    #region IYubiKeyResponseWithData<ReadOnlyMemory<byte>> Members
+
+    public ReadOnlyMemory<byte> GetData() => _checksum;
+
+    #endregion
 }

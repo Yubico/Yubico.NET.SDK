@@ -22,8 +22,8 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.Piv.Converters;
 
 /// <summary>
-/// This class converts from a Piv Encoded Key to either instances of the common IPublicKey and IPrivateKey
-/// or concrete the concrete types that inherit these interfaces.
+///     This class converts from a Piv Encoded Key to either instances of the common IPublicKey and IPrivateKey
+///     or concrete the concrete types that inherit these interfaces.
 /// </summary>
 internal class PivKeyDecoder
 {
@@ -83,22 +83,28 @@ internal class PivKeyDecoder
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="IPrivateKey"/> from the
-    /// given PIV-encoded key.
+    ///     Creates an instance of <see cref="IPrivateKey" /> from the
+    ///     given PIV-encoded key.
     /// </summary>
     /// <remarks>
-    /// The created instance will be one of the following concrete types:
-    /// <list type="bullet">
-    /// <item><see cref="RSAPrivateKey"/></item>
-    /// <item><see cref="ECPrivateKey"/></item>
-    /// <item><see cref="Curve25519PrivateKey"/></item>
-    /// </list>
+    ///     The created instance will be one of the following concrete types:
+    ///     <list type="bullet">
+    ///         <item>
+    ///             <see cref="RSAPrivateKey" />
+    ///         </item>
+    ///         <item>
+    ///             <see cref="ECPrivateKey" />
+    ///         </item>
+    ///         <item>
+    ///             <see cref="Curve25519PrivateKey" />
+    ///         </item>
+    ///     </list>
     /// </remarks>
     /// <param name="pivEncodedKey">The PIV-encoded key.</param>
     /// <param name="keyType">The type of the key.</param>
-    /// <returns>An instance of <see cref="IPrivateKey"/>.</returns>
+    /// <returns>An instance of <see cref="IPrivateKey" />.</returns>
     /// <exception cref="InvalidOperationException">
-    /// The key type is not supported.
+    ///     The key type is not supported.
     /// </exception>
     public static IPrivateKey CreatePrivateKey(ReadOnlyMemory<byte> pivEncodedKey, KeyType keyType) =>
         keyType switch

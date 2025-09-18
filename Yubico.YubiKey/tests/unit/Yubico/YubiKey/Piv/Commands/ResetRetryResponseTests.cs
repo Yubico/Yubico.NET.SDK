@@ -16,140 +16,139 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+public class ResetRetryResponseTests
 {
-    public class ResetRetryResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
-        {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new ResetRetryResponse(null));
+        _ = Assert.Throws<ArgumentNullException>(() => new ResetRetryResponse(null));
 #pragma warning restore CS8625
-        }
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var resetRetryResponse = new ResetRetryResponse(responseApdu);
+        var resetRetryResponse = new ResetRetryResponse(responseApdu);
 
-            Assert.Equal(SWConstants.Success, resetRetryResponse.StatusWord);
-        }
+        Assert.Equal(SWConstants.Success, resetRetryResponse.StatusWord);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var resetRetryResponse = new ResetRetryResponse(responseApdu);
+        var resetRetryResponse = new ResetRetryResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.Success, resetRetryResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.Success, resetRetryResponse.Status);
+    }
 
-        [Fact]
-        public void Constructor_WrongPinResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = 0x63;
-            byte sw2 = 0xC1;
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_WrongPinResponseApdu_SetsStatusCorrectly()
+    {
+        byte sw1 = 0x63;
+        byte sw2 = 0xC1;
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var resetRetryResponse = new ResetRetryResponse(responseApdu);
+        var resetRetryResponse = new ResetRetryResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.AuthenticationRequired, resetRetryResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.AuthenticationRequired, resetRetryResponse.Status);
+    }
 
-        [Fact]
-        public void Constructor_AuthenticationMethodBlockedResponseApdu_SetsStatusCorrectly()
-        {
-            short statusWord = SWConstants.AuthenticationMethodBlocked;
-            var responseApdu = new ResponseApdu(Array.Empty<byte>(), statusWord);
+    [Fact]
+    public void Constructor_AuthenticationMethodBlockedResponseApdu_SetsStatusCorrectly()
+    {
+        var statusWord = SWConstants.AuthenticationMethodBlocked;
+        var responseApdu = new ResponseApdu(Array.Empty<byte>(), statusWord);
 
-            var changeRefDataResponse = new ResetRetryResponse(responseApdu);
+        var changeRefDataResponse = new ResetRetryResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.AuthenticationRequired, changeRefDataResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.AuthenticationRequired, changeRefDataResponse.Status);
+    }
 
-        [Fact]
-        public void Constructor_SecurityStatusNotSatisfiedResponseApdu_SetsStatusCorrectly()
-        {
-            short statusWord = SWConstants.SecurityStatusNotSatisfied;
-            var responseApdu = new ResponseApdu(Array.Empty<byte>(), statusWord);
+    [Fact]
+    public void Constructor_SecurityStatusNotSatisfiedResponseApdu_SetsStatusCorrectly()
+    {
+        var statusWord = SWConstants.SecurityStatusNotSatisfied;
+        var responseApdu = new ResponseApdu(Array.Empty<byte>(), statusWord);
 
-            var changeRefDataResponse = new ResetRetryResponse(responseApdu);
+        var changeRefDataResponse = new ResetRetryResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.AuthenticationRequired, changeRefDataResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.AuthenticationRequired, changeRefDataResponse.Status);
+    }
 
-        [Fact]
-        public void Constructor_ErrorResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.ExecutionError >> 8));
-            byte sw2 = unchecked((byte)SWConstants.ExecutionError);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_ErrorResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.ExecutionError >> 8));
+        var sw2 = unchecked((byte)SWConstants.ExecutionError);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var resetRetryResponse = new ResetRetryResponse(responseApdu);
+        var resetRetryResponse = new ResetRetryResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.Failed, resetRetryResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.Failed, resetRetryResponse.Status);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_GetDataCorrectInt()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_SuccessResponseApdu_GetDataCorrectInt()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var resetRetryResponse = new ResetRetryResponse(responseApdu);
+        var resetRetryResponse = new ResetRetryResponse(responseApdu);
 
-            int? retryCount = resetRetryResponse.GetData();
+        var retryCount = resetRetryResponse.GetData();
 
-            Assert.Null(retryCount);
-        }
+        Assert.Null(retryCount);
+    }
 
-        [Fact]
-        public void Constructor_BadPinResponseApdu_GetDataCorrectInt()
-        {
-            byte sw1 = 0x63;
-            byte sw2 = 0xCF;
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_BadPinResponseApdu_GetDataCorrectInt()
+    {
+        byte sw1 = 0x63;
+        byte sw2 = 0xCF;
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var resetRetryResponse = new ResetRetryResponse(responseApdu);
+        var resetRetryResponse = new ResetRetryResponse(responseApdu);
 
-            int? retryCount = resetRetryResponse.GetData();
+        var retryCount = resetRetryResponse.GetData();
 
-            Assert.Equal(15, retryCount);
-        }
+        Assert.Equal(15, retryCount);
+    }
 
-        [Fact]
-        public void Constructor_BlockedPinResponseApdu_GetDataCorrectInt()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.AuthenticationMethodBlocked >> 8));
-            byte sw2 = unchecked((byte)SWConstants.AuthenticationMethodBlocked);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_BlockedPinResponseApdu_GetDataCorrectInt()
+    {
+        var sw1 = unchecked((byte)(SWConstants.AuthenticationMethodBlocked >> 8));
+        var sw2 = unchecked((byte)SWConstants.AuthenticationMethodBlocked);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var resetRetryResponse = new ResetRetryResponse(responseApdu);
+        var resetRetryResponse = new ResetRetryResponse(responseApdu);
 
-            int? retryCount = resetRetryResponse.GetData();
+        var retryCount = resetRetryResponse.GetData();
 
-            Assert.Equal(0, retryCount);
-        }
+        Assert.Equal(0, retryCount);
+    }
 
-        [Fact]
-        public void Constructor_FailResponseApdu_ThrowIfGetData()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.RecordNotFound >> 8));
-            byte sw2 = unchecked((byte)SWConstants.RecordNotFound);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+    [Fact]
+    public void Constructor_FailResponseApdu_ThrowIfGetData()
+    {
+        var sw1 = unchecked((byte)(SWConstants.RecordNotFound >> 8));
+        var sw2 = unchecked((byte)SWConstants.RecordNotFound);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var resetRetryResponse = new ResetRetryResponse(responseApdu);
+        var resetRetryResponse = new ResetRetryResponse(responseApdu);
 
-            _ = Assert.Throws<InvalidOperationException>(() => resetRetryResponse.GetData());
-        }
+        _ = Assert.Throws<InvalidOperationException>(() => resetRetryResponse.GetData());
     }
 }

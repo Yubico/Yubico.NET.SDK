@@ -15,49 +15,48 @@
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+public class SetPasswordResponseTests
 {
-    public class SetPasswordResponseTests
+    private const short StatusWordResponseDoesNotMatch = 0x6984;
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
     {
-        private const short StatusWordResponseDoesNotMatch = 0x6984;
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
-        {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        var setPasswordResponse = new SetPasswordResponse(responseApdu);
 
-            var setPasswordResponse = new SetPasswordResponse(responseApdu);
+        Assert.Equal(SWConstants.Success, setPasswordResponse.StatusWord);
+    }
 
-            Assert.Equal(SWConstants.Success, setPasswordResponse.StatusWord);
-        }
+    [Fact]
+    public void Status_SuccessResponseApdu_ReturnsSuccess()
+    {
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
 
-        [Fact]
-        public void Status_SuccessResponseApdu_ReturnsSuccess()
-        {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        var setPasswordResponse = new SetPasswordResponse(responseApdu);
 
-            var setPasswordResponse = new SetPasswordResponse(responseApdu);
+        Assert.Equal(ResponseStatus.Success, setPasswordResponse.Status);
+    }
 
-            Assert.Equal(ResponseStatus.Success, setPasswordResponse.Status);
-        }
+    [Fact]
+    public void Status_ResponseDoesNotMatchResponseApdu_ReturnsFailed()
+    {
+        const byte sw1 = unchecked(StatusWordResponseDoesNotMatch >> 8);
+        const byte sw2 = unchecked((byte)StatusWordResponseDoesNotMatch);
 
-        [Fact]
-        public void Status_ResponseDoesNotMatchResponseApdu_ReturnsFailed()
-        {
-            const byte sw1 = unchecked((byte)(StatusWordResponseDoesNotMatch >> 8));
-            const byte sw2 = unchecked((byte)StatusWordResponseDoesNotMatch);
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        var setPasswordResponse = new SetPasswordResponse(responseApdu);
 
-            var setPasswordResponse = new SetPasswordResponse(responseApdu);
-
-            Assert.Equal(ResponseStatus.Failed, setPasswordResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.Failed, setPasswordResponse.Status);
     }
 }

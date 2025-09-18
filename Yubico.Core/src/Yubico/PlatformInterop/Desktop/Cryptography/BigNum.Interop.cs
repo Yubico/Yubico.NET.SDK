@@ -15,51 +15,51 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+internal static partial class NativeMethods
 {
-    internal static partial class NativeMethods
-    {
-        // BIGNUM* BN_bin2bn(const unsigned char* s, int len, BIGNUM* ret);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bin2bn", ExactSpelling = true, CharSet = CharSet.Ansi)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern IntPtr BnBinaryToBigNum(byte[] buffer, int length, IntPtr ret);
+    // BIGNUM* BN_bin2bn(const unsigned char* s, int len, BIGNUM* ret);
+    [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bin2bn", ExactSpelling = true, CharSet = CharSet.Ansi)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    private static extern IntPtr BnBinaryToBigNum(byte[] buffer, int length, IntPtr ret);
 
-        public static SafeBigNum BnBinaryToBigNum(byte[] buffer) =>
-            new SafeBigNum(BnBinaryToBigNum(buffer, buffer.Length, IntPtr.Zero), true);
+    public static SafeBigNum BnBinaryToBigNum(byte[] buffer) =>
+        new(BnBinaryToBigNum(buffer, buffer.Length, IntPtr.Zero), true);
 
-        // BIGNUM* BN_new();
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_new", ExactSpelling = true, CharSet = CharSet.Ansi)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern IntPtr BnNewIntPtr();
+    // BIGNUM* BN_new();
+    [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_new", ExactSpelling = true, CharSet = CharSet.Ansi)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    private static extern IntPtr BnNewIntPtr();
 
-        public static SafeBigNum BnNew() => new SafeBigNum(BnNewIntPtr(), true);
+    public static SafeBigNum BnNew() => new(BnNewIntPtr(), true);
 
-        // void BN_clear_free(BIGNUM* a);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_clear_free", ExactSpelling = true, CharSet = CharSet.Ansi)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern void BnClearFree(IntPtr bignum);
+    // void BN_clear_free(BIGNUM* a);
+    [DllImport(
+        Libraries.NativeShims, EntryPoint = "Native_BN_clear_free", ExactSpelling = true, CharSet = CharSet.Ansi)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern void BnClearFree(IntPtr bignum);
 
-        // int BN_num_bytes(const BIGNUM* a);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_num_bytes", ExactSpelling = true, CharSet = CharSet.Ansi)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern void BnNumBytes(IntPtr bignum);
+    // int BN_num_bytes(const BIGNUM* a);
+    [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_num_bytes", ExactSpelling = true, CharSet = CharSet.Ansi)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    private static extern void BnNumBytes(IntPtr bignum);
 
-        public static void BnNumBytes(SafeBigNum bigNum) => BnNumBytes(bigNum.DangerousGetHandle());
+    public static void BnNumBytes(SafeBigNum bigNum) => BnNumBytes(bigNum.DangerousGetHandle());
 
-        // int BN_bn2bin(const BIGNUM* a, unsigned char* to);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2bin", ExactSpelling = true, CharSet = CharSet.Ansi)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern int BnBigNumToBinary(IntPtr bignum, byte[] buffer);
+    // int BN_bn2bin(const BIGNUM* a, unsigned char* to);
+    [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2bin", ExactSpelling = true, CharSet = CharSet.Ansi)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    private static extern int BnBigNumToBinary(IntPtr bignum, byte[] buffer);
 
-        public static int BnBigNumToBinary(SafeBigNum bigNum, byte[] buffer) =>
-            BnBigNumToBinary(bigNum.DangerousGetHandle(), buffer);
+    public static int BnBigNumToBinary(SafeBigNum bigNum, byte[] buffer) =>
+        BnBigNumToBinary(bigNum.DangerousGetHandle(), buffer);
 
-        // int BN_bn2binpad(const BIGNUM* a, unsigned char* to, int tolen);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2binpad", ExactSpelling = true, CharSet = CharSet.Ansi)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern int BnBigNumToBinaryWithPadding(IntPtr bignum, byte[] buffer, int bufferSize);
+    // int BN_bn2binpad(const BIGNUM* a, unsigned char* to, int tolen);
+    [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2binpad", ExactSpelling = true, CharSet = CharSet.Ansi)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    private static extern int BnBigNumToBinaryWithPadding(IntPtr bignum, byte[] buffer, int bufferSize);
 
-        public static int BnBigNumToBinaryWithPadding(SafeBigNum bigNum, byte[] buffer) =>
-            BnBigNumToBinaryWithPadding(bigNum.DangerousGetHandle(), buffer, buffer.Length);
-    }
+    public static int BnBigNumToBinaryWithPadding(SafeBigNum bigNum, byte[] buffer) =>
+        BnBigNumToBinaryWithPadding(bigNum.DangerousGetHandle(), buffer, buffer.Length);
 }

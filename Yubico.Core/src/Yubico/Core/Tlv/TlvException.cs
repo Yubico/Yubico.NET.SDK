@@ -15,32 +15,27 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Yubico.Core.Tlv
+namespace Yubico.Core.Tlv;
+
+[Serializable]
+public class TlvException : InvalidOperationException
 {
-    [Serializable]
-    public class TlvException : InvalidOperationException
+    public TlvException()
     {
-        public TlvException()
-        {
+    }
 
-        }
+    public TlvException(string message) :
+        base(message)
+    {
+    }
 
-        public TlvException(string message) :
-            base(message)
-        {
+    public TlvException(string message, Exception innerException) :
+        base(message, innerException)
+    {
+    }
 
-        }
-
-        public TlvException(string message, Exception innerException) :
-            base(message, innerException)
-        {
-
-        }
-
-        protected TlvException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
-            base(serializationInfo, streamingContext)
-        {
-
-        }
+    protected TlvException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
+        base(serializationInfo, streamingContext)
+    {
     }
 }

@@ -15,24 +15,27 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.InterIndustry.Commands
+namespace Yubico.YubiKey.InterIndustry.Commands;
+
+/// <summary>
+///     Response from SelectApplication command.
+/// </summary>
+public class GenericSelectResponse : YubiKeyResponse, ISelectApplicationResponse<GenericSelectApplicationData>
 {
+    private readonly ReadOnlyMemory<byte> _rawData;
+
     /// <summary>
-    /// Response from SelectApplication command.
+    ///     Constructs an instance of the <see cref="GenericSelectResponse" /> class.
     /// </summary>
-    public class GenericSelectResponse : YubiKeyResponse, ISelectApplicationResponse<GenericSelectApplicationData>
+    public GenericSelectResponse(ResponseApdu responseApdu) : base(responseApdu)
     {
-        private readonly ReadOnlyMemory<byte> _rawData;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="GenericSelectResponse" /> class.
-        /// </summary>
-        public GenericSelectResponse(ResponseApdu responseApdu) : base(responseApdu)
-        {
-            _rawData = responseApdu.Data;
-        }
-
-        /// <inheritdoc/>
-        public GenericSelectApplicationData GetData() => new GenericSelectApplicationData(_rawData);
+        _rawData = responseApdu.Data;
     }
+
+    #region ISelectApplicationResponse<GenericSelectApplicationData> Members
+
+    /// <inheritdoc />
+    public GenericSelectApplicationData GetData() => new(_rawData);
+
+    #endregion
 }

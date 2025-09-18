@@ -14,52 +14,54 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+/// <summary>
+///     Selects the file containing the YubiKey's NDEF data. This must be sent prior to sending the
+///     <see cref="ReadNdefDataCommand" /> command. Note that this command only works over NFC.
+/// </summary>
+public class SelectNdefDataCommand : IYubiKeyCommand<OtpResponse>
 {
+    private const byte SelectNdefDataInstruction = 0xA4;
+    private const byte SelectNdefParameter2 = 0x0C;
+
     /// <summary>
-    /// Selects the file containing the YubiKey's NDEF data. This must be sent prior to sending the
-    /// <see cref="ReadNdefDataCommand"/> command. Note that this command only works over NFC.
+    ///     Initializes a new instance of the <see cref="SelectNdefDataCommand" /> class.
     /// </summary>
-    public class SelectNdefDataCommand : IYubiKeyCommand<OtpResponse>
+    public SelectNdefDataCommand()
     {
-        private const byte SelectNdefDataInstruction = 0xA4;
-        private const byte SelectNdefParameter2 = 0x0C;
+    }
 
-        /// <summary>
-        /// Indicates which file should be selected when this command is issued. Defaults to Ndef.
-        /// </summary>
-        public NdefFileId FileID { get; set; } = NdefFileId.Ndef;
+    /// <summary>
+    ///     Indicates which file should be selected when this command is issued. Defaults to Ndef.
+    /// </summary>
+    public NdefFileId FileID { get; set; } = NdefFileId.Ndef;
 
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.OtpNdef
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.OtpNdef;
+    #region IYubiKeyCommand<OtpResponse> Members
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SelectNdefDataCommand"/> class.
-        /// </summary>
-        public SelectNdefDataCommand()
-        {
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.OtpNdef
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.OtpNdef;
 
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = SelectNdefDataInstruction,
             P2 = SelectNdefParameter2,
-            Data = new byte[]
+            Data = new[]
             {
                 (byte)(((short)FileID >> 8) & 0xFF),
                 (byte)((short)FileID & 0xFF)
             }
         };
 
-        /// <inheritdoc />
-        public OtpResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new OtpResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public OtpResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

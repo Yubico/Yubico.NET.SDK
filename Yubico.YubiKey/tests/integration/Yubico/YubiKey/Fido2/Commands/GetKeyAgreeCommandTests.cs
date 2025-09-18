@@ -17,24 +17,23 @@ using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+public class GetKeyAgreeCommandTests : SimpleIntegrationTestConnection
 {
-    public class GetKeyAgreeCommandTests : SimpleIntegrationTestConnection
+    public GetKeyAgreeCommandTests()
+        : base(YubiKeyApplication.Fido2)
     {
-        public GetKeyAgreeCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
-        {
-        }
+    }
 
-        [SkippableFact(typeof(DeviceNotFoundException))]
-        public void GetKeyAgreeCommand_Succeeds()
-        {
-            var cmd = new GetKeyAgreementCommand { PinUvAuthProtocol = PinUvAuthProtocol.ProtocolTwo, };
-            GetKeyAgreementResponse rsp = Connection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    public void GetKeyAgreeCommand_Succeeds()
+    {
+        var cmd = new GetKeyAgreementCommand { PinUvAuthProtocol = PinUvAuthProtocol.ProtocolTwo };
+        var rsp = Connection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            CoseEcPublicKey pubKey = rsp.GetData();
-            Assert.Equal(CoseEcCurve.P256, pubKey.Curve);
-        }
+        var pubKey = rsp.GetData();
+        Assert.Equal(CoseEcCurve.P256, pubKey.Curve);
     }
 }

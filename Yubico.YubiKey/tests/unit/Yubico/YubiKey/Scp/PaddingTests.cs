@@ -12,98 +12,119 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.Core.Buffers;
 using Yubico.YubiKey.Scp.Helpers;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp;
+
+public class PaddingTests
 {
-    public class PaddingTests
+    private static byte[] Get1BytePayload()
     {
-        private static byte[] Get1BytePayload() => Hex.HexToBytes("FF");
-        private static byte[] GetPadded1BytePayload() => Hex.HexToBytes("FF800000000000000000000000000000");
-        private static byte[] Get8BytePayload() => Hex.HexToBytes("0001020380050607");
-        private static byte[] GetPadded8BytePayload() => Hex.HexToBytes("00010203800506078000000000000000");
-        private static byte[] Get16BytePayload() => Hex.HexToBytes("000102038005060708090A0B0C0D0E0F");
-        private static byte[] GetPadded16BytePayload() => Hex.HexToBytes("000102038005060708090A0B0C0D0E0F80000000000000000000000000000000");
+        return Hex.HexToBytes("FF");
+    }
 
-        [Fact]
-        public void PadToBlockSize_Given1BytePayload_ReturnsCorrectlyPaddedBlock()
-        {
-            // Arrange
-            byte[] payload = Get1BytePayload();
+    private static byte[] GetPadded1BytePayload()
+    {
+        return Hex.HexToBytes("FF800000000000000000000000000000");
+    }
 
-            // Act
-            Memory<byte> paddedPayload = Padding.PadToBlockSize(payload);
+    private static byte[] Get8BytePayload()
+    {
+        return Hex.HexToBytes("0001020380050607");
+    }
 
-            // Assert
-            Assert.Equal(paddedPayload, GetPadded1BytePayload());
-        }
+    private static byte[] GetPadded8BytePayload()
+    {
+        return Hex.HexToBytes("00010203800506078000000000000000");
+    }
 
-        [Fact]
-        public void PadToBlockSize_Given8BytePayload_ReturnsCorrectlyPaddedBlock()
-        {
-            // Arrange
-            byte[] payload = Get8BytePayload();
+    private static byte[] Get16BytePayload()
+    {
+        return Hex.HexToBytes("000102038005060708090A0B0C0D0E0F");
+    }
 
-            // Act
-            Memory<byte> paddedPayload = Padding.PadToBlockSize(payload);
+    private static byte[] GetPadded16BytePayload()
+    {
+        return Hex.HexToBytes("000102038005060708090A0B0C0D0E0F80000000000000000000000000000000");
+    }
 
-            // Assert
-            Assert.Equal(paddedPayload, GetPadded8BytePayload());
-        }
+    [Fact]
+    public void PadToBlockSize_Given1BytePayload_ReturnsCorrectlyPaddedBlock()
+    {
+        // Arrange
+        var payload = Get1BytePayload();
 
-        [Fact]
-        public void PadToBlockSize_Given16BytePayload_ReturnsCorrectlyPaddedBlock()
-        {
-            // Arrange
-            byte[] payload = Get16BytePayload();
+        // Act
+        var paddedPayload = Padding.PadToBlockSize(payload);
 
-            // Act
-            Memory<byte> paddedPayload = Padding.PadToBlockSize(payload);
+        // Assert
+        Assert.Equal(paddedPayload, GetPadded1BytePayload());
+    }
 
-            // Assert
-            Assert.Equal(paddedPayload, GetPadded16BytePayload());
-        }
+    [Fact]
+    public void PadToBlockSize_Given8BytePayload_ReturnsCorrectlyPaddedBlock()
+    {
+        // Arrange
+        var payload = Get8BytePayload();
 
-        [Fact]
-        public void RemovePadding_GivenPadded1BytePayload_ReturnsPayloadWithPaddingRemoved()
-        {
-            // Arrange
-            byte[] paddedPayload = GetPadded1BytePayload();
+        // Act
+        var paddedPayload = Padding.PadToBlockSize(payload);
 
-            // Act
-            Memory<byte> payload = Padding.RemovePadding(paddedPayload);
+        // Assert
+        Assert.Equal(paddedPayload, GetPadded8BytePayload());
+    }
 
-            // Assert
-            Assert.Equal(payload, Get1BytePayload());
-        }
+    [Fact]
+    public void PadToBlockSize_Given16BytePayload_ReturnsCorrectlyPaddedBlock()
+    {
+        // Arrange
+        var payload = Get16BytePayload();
 
-        [Fact]
-        public void RemovePadding_GivenPadded8BytePayload_ReturnsPayloadWithPaddingRemoved()
-        {
-            // Arrange
-            byte[] paddedPayload = GetPadded8BytePayload();
+        // Act
+        var paddedPayload = Padding.PadToBlockSize(payload);
 
-            // Act
-            Memory<byte> payload = Padding.RemovePadding(paddedPayload);
+        // Assert
+        Assert.Equal(paddedPayload, GetPadded16BytePayload());
+    }
 
-            // Assert
-            Assert.Equal(payload, Get8BytePayload());
-        }
+    [Fact]
+    public void RemovePadding_GivenPadded1BytePayload_ReturnsPayloadWithPaddingRemoved()
+    {
+        // Arrange
+        var paddedPayload = GetPadded1BytePayload();
 
-        [Fact]
-        public void RemovePadding_GivenPadded16BytePayload_ReturnsPayloadWithPaddingRemoved()
-        {
-            // Arrange
-            byte[] paddedPayload = GetPadded16BytePayload();
+        // Act
+        var payload = Padding.RemovePadding(paddedPayload);
 
-            // Act
-            Memory<byte> payload = Padding.RemovePadding(paddedPayload);
+        // Assert
+        Assert.Equal(payload, Get1BytePayload());
+    }
 
-            // Assert
-            Assert.Equal(payload, Get16BytePayload());
-        }
+    [Fact]
+    public void RemovePadding_GivenPadded8BytePayload_ReturnsPayloadWithPaddingRemoved()
+    {
+        // Arrange
+        var paddedPayload = GetPadded8BytePayload();
+
+        // Act
+        var payload = Padding.RemovePadding(paddedPayload);
+
+        // Assert
+        Assert.Equal(payload, Get8BytePayload());
+    }
+
+    [Fact]
+    public void RemovePadding_GivenPadded16BytePayload_ReturnsPayloadWithPaddingRemoved()
+    {
+        // Arrange
+        var paddedPayload = GetPadded16BytePayload();
+
+        // Act
+        var payload = Padding.RemovePadding(paddedPayload);
+
+        // Assert
+        Assert.Equal(payload, Get16BytePayload());
     }
 }

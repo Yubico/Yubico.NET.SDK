@@ -15,31 +15,30 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+public class SafeEvpCipherCtx : SafeHandle
 {
-    public class SafeEvpCipherCtx : SafeHandle
+    public SafeEvpCipherCtx() : base(IntPtr.Zero, true)
     {
-        public SafeEvpCipherCtx() : base(IntPtr.Zero, true)
+    }
+
+    /// <inheritdoc />
+    public SafeEvpCipherCtx(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
+    {
+    }
+
+    /// <inheritdoc />
+    public override bool IsInvalid => handle == IntPtr.Zero;
+
+    /// <inheritdoc />
+    protected override bool ReleaseHandle()
+    {
+        if (!IsInvalid)
         {
+            NativeMethods.EvpCipherCtxFree(handle);
         }
 
-        /// <inheritdoc />
-        public SafeEvpCipherCtx(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
-        {
-        }
-
-        /// <inheritdoc />
-        protected override bool ReleaseHandle()
-        {
-            if (!IsInvalid)
-            {
-                NativeMethods.EvpCipherCtxFree(handle);
-            }
-
-            return true;
-        }
-
-        /// <inheritdoc />
-        public override bool IsInvalid => handle == IntPtr.Zero;
+        return true;
     }
 }

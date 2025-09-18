@@ -16,56 +16,55 @@ using System.Security;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public class AuthTests : PivSessionIntegrationTestBase
 {
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class AuthTests : PivSessionIntegrationTestBase
+    public AuthTests()
     {
-        public AuthTests()
+        var collectorObj = new Simple39KeyCollector
         {
-            var collectorObj = new Simple39KeyCollector
-            {
-                KeyFlag = 1,
-                RetryFlag = 1
-            };
+            KeyFlag = 1,
+            RetryFlag = 1
+        };
 
-            Session.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-        }
+        Session.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+    }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void VerifyPin_Blocked_ThrowsSecurityException(
-            StandardTestDevice testDeviceType)
-        {
-            TestDeviceType = testDeviceType;
-            _ = Assert.Throws<SecurityException>(() => Session.VerifyPin());
-        }
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void VerifyPin_Blocked_ThrowsSecurityException(
+        StandardTestDevice testDeviceType)
+    {
+        TestDeviceType = testDeviceType;
+        _ = Assert.Throws<SecurityException>(() => Session.VerifyPin());
+    }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void ChangePin_Blocked_ThrowsSecurityException(
-            StandardTestDevice testDeviceType)
-        {
-            TestDeviceType = testDeviceType;
-            _ = Assert.Throws<SecurityException>(() => Session.ChangePin());
-        }
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void ChangePin_Blocked_ThrowsSecurityException(
+        StandardTestDevice testDeviceType)
+    {
+        TestDeviceType = testDeviceType;
+        _ = Assert.Throws<SecurityException>(() => Session.ChangePin());
+    }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void ChangePuk_Blocked_ThrowsSecurityException(
-            StandardTestDevice testDeviceType)
-        {
-            TestDeviceType = testDeviceType;
-            _ = Assert.Throws<SecurityException>(() => Session.ChangePuk());
-        }
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void ChangePuk_Blocked_ThrowsSecurityException(
+        StandardTestDevice testDeviceType)
+    {
+        TestDeviceType = testDeviceType;
+        _ = Assert.Throws<SecurityException>(() => Session.ChangePuk());
+    }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void ResetPin_Blocked_ThrowsSecurityException(
-            StandardTestDevice testDeviceType)
-        {
-            TestDeviceType = testDeviceType;
-            _ = Assert.Throws<SecurityException>(() => Session.ResetPin());
-        }
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void ResetPin_Blocked_ThrowsSecurityException(
+        StandardTestDevice testDeviceType)
+    {
+        TestDeviceType = testDeviceType;
+        _ = Assert.Throws<SecurityException>(() => Session.ResetPin());
     }
 }

@@ -14,26 +14,25 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+/// <summary>
+///     The response class for resetting the YubiHSM Auth application.
+/// </summary>
+/// <remarks>
+///     The partner class is <see cref="ResetApplicationCommand" />.
+/// </remarks>
+public class ResetApplicationResponse : BaseYubiHsmAuthResponse
 {
     /// <summary>
-    /// The response class for resetting the YubiHSM Auth application.
+    ///     Constructs an ResetApplicationResponse based on a ResponseApdu
+    ///     received from the YubiKey.
     /// </summary>
-    /// <remarks>
-    /// The partner class is <see cref="ResetApplicationCommand"/>.
-    /// </remarks>
-    public class ResetApplicationResponse : BaseYubiHsmAuthResponse
+    /// <param name="responseApdu">
+    ///     The ResponseApdu returned by the YubiKey.
+    /// </param>
+    public ResetApplicationResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        /// <summary>
-        /// Constructs an ResetApplicationResponse based on a ResponseApdu
-        /// received from the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
-        /// </param>
-        public ResetApplicationResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-        }
     }
 }

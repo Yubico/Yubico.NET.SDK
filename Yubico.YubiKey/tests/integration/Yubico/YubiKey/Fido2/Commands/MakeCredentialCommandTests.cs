@@ -17,70 +17,70 @@ using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+[Trait(TraitTypes.Category, TestCategories.Elevated)]
+public class MakeCredentialCommandTests : NeedPinToken
 {
-    [Trait(TraitTypes.Category, TestCategories.Elevated)]
-    public class MakeCredentialCommandTests : NeedPinToken
+    public MakeCredentialCommandTests()
+        : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
     {
-        public MakeCredentialCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
+    }
+
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    public void MakeCredentialCommand_Succeeds()
+    {
+        var protocol = new PinUvAuthProtocolTwo();
+
+        var isValid = GetParams(protocol, out var makeParams);
+        Assert.True(isValid);
+
+        var cmd = new MakeCredentialCommand(makeParams);
+        var rsp = Connection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
+        var cData = rsp.GetData();
+        isValid = cData.VerifyAttestation(makeParams.ClientDataHash);
+        Assert.True(isValid);
+    }
+
+    private bool GetParams(
+        PinUvAuthProtocolBase protocol,
+        out MakeCredentialParameters makeParams)
+    {
+        byte[] clientDataHash =
         {
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
+        };
+
+        var rp = new RelyingParty("SomeRpId")
+        {
+            Name = "SomeRpName"
+        };
+        byte[] userId = { 0x11, 0x22, 0x33, 0x44 };
+        var user = new UserEntity(new ReadOnlyMemory<byte>(userId))
+        {
+            Name = "SomeUserName",
+            DisplayName = "User"
+        };
+
+        makeParams = new MakeCredentialParameters(rp, user);
+
+        if (!GetPinToken(protocol, PinUvAuthTokenPermissions.None, out var pinToken))
+        {
+            return false;
         }
 
-        [SkippableFact(typeof(DeviceNotFoundException))]
-        public void MakeCredentialCommand_Succeeds()
-        {
-            var protocol = new PinUvAuthProtocolTwo();
+        var pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, clientDataHash);
 
-            bool isValid = GetParams(protocol, out MakeCredentialParameters makeParams);
-            Assert.True(isValid);
+        makeParams.ClientDataHash = clientDataHash;
+        makeParams.Protocol = protocol.Protocol;
+        makeParams.PinUvAuthParam = pinUvAuthParam;
 
-            var cmd = new MakeCredentialCommand(makeParams);
-            MakeCredentialResponse rsp = Connection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
-            MakeCredentialData cData = rsp.GetData();
-            isValid = cData.VerifyAttestation(makeParams.ClientDataHash);
-            Assert.True(isValid);
-        }
+        makeParams.AddOption(AuthenticatorOptions.rk, true);
+        //makeParams.AddOption("up", true);
+        //makeParams.AddOption("uv", false);
 
-        private bool GetParams(
-            PinUvAuthProtocolBase protocol,
-            out MakeCredentialParameters makeParams)
-        {
-            byte[] clientDataHash = {
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
-            };
-
-            var rp = new RelyingParty("SomeRpId")
-            {
-                Name = "SomeRpName",
-            };
-            byte[] userId = { 0x11, 0x22, 0x33, 0x44 };
-            var user = new UserEntity(new ReadOnlyMemory<byte>(userId))
-            {
-                Name = "SomeUserName",
-                DisplayName = "User",
-            };
-
-            makeParams = new MakeCredentialParameters(rp, user);
-
-            if (!GetPinToken(protocol, PinUvAuthTokenPermissions.None, out byte[] pinToken))
-            {
-                return false;
-            }
-
-            byte[] pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, clientDataHash);
-
-            makeParams.ClientDataHash = clientDataHash;
-            makeParams.Protocol = protocol.Protocol;
-            makeParams.PinUvAuthParam = pinUvAuthParam;
-
-            makeParams.AddOption(AuthenticatorOptions.rk, true);
-            //makeParams.AddOption("up", true);
-            //makeParams.AddOption("uv", false);
-
-            return true;
-        }
+        return true;
     }
 }

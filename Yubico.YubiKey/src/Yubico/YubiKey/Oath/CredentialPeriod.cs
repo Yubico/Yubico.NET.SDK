@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Oath
+namespace Yubico.YubiKey.Oath;
+
+/// <summary>
+///     The credential period.
+/// </summary>
+public enum CredentialPeriod
 {
-    /// <summary>
-    /// The credential period.
-    /// </summary>
-    public enum CredentialPeriod
-    {
-        Undefined = 0,
-        Period15 = 15,
-        Period30 = 30,
-        Period60 = 60
-    }
+    Undefined = 0,
+    Period15 = 15,
+    Period30 = 30,
+    Period60 = 60
 }

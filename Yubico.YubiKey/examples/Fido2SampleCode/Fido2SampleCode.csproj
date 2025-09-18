@@ -13,17 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License. -->
 
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>disable</Nullable>
-    <IsPackable>false</IsPackable>
-    <AnalysisMode>AllDisabledByDefault</AnalysisMode>
-  </PropertyGroup>
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <ProjectReference Include="..\SharedSampleCode\SharedSampleCode.csproj" />
-  </ItemGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>disable</Nullable>
+        <IsPackable>false</IsPackable>
+        <AnalysisMode>AllDisabledByDefault</AnalysisMode>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <ProjectReference Include="..\SharedSampleCode\SharedSampleCode.csproj"/>
+    </ItemGroup>
 </Project>

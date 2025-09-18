@@ -12,79 +12,82 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Oath
-{
-    // This KeyCollector class can be used to provide the KeyCollector delegate
-    // to the OathSession class.
-    public class SimpleOathKeyCollector
-    {
-        // If KeyFlag is set to 0, the current password and 
-        // the new password returned will be the alternate.
-        // The alternate is the same except the first byte is different: 0x39.
-        // If KeyFlag is set to 1, the current will be the alternate and the new
-        // will be the default.
-        public int KeyFlag { get; set; }
+namespace Yubico.YubiKey.Oath;
 
-        public SimpleOathKeyCollector()
+// This KeyCollector class can be used to provide the KeyCollector delegate
+// to the OathSession class.
+public class SimpleOathKeyCollector
+{
+    public SimpleOathKeyCollector()
+    {
+        KeyFlag = 0;
+    }
+
+    // If KeyFlag is set to 0, the current password and 
+    // the new password returned will be the alternate.
+    // The alternate is the same except the first byte is different: 0x39.
+    // If KeyFlag is set to 1, the current will be the alternate and the new
+    // will be the default.
+    public int KeyFlag { get; set; }
+
+    public bool SimpleKeyCollectorDelegate(
+        KeyEntryData keyEntryData)
+    {
+        if (keyEntryData is null)
         {
-            KeyFlag = 0;
+            return false;
         }
 
-        public bool SimpleKeyCollectorDelegate(KeyEntryData keyEntryData)
+        byte[] currentValue;
+        byte[]? newValue = null;
+
+        switch (keyEntryData.Request)
         {
-            if (keyEntryData is null)
-            {
+            default:
                 return false;
+
+            case KeyEntryRequest.Release:
+                KeyFlag = 0;
+                return true;
+
+            case KeyEntryRequest.VerifyOathPassword:
+                currentValue = CollectPassword();
+                break;
+
+            case KeyEntryRequest.SetOathPassword:
+                currentValue = CollectPassword();
+                newValue = CollectPassword();
+                break;
+        }
+
+        if (newValue is null)
+        {
+            if (KeyFlag == 0)
+            {
+                currentValue[0] = 0x39;
             }
 
-            byte[] currentValue;
-            byte[]? newValue = null;
-
-            switch (keyEntryData.Request)
+            keyEntryData.SubmitValue(currentValue);
+        }
+        else
+        {
+            if (KeyFlag == 0)
             {
-                default:
-                    return false;
-
-                case KeyEntryRequest.Release:
-                    KeyFlag = 0;
-                    return true;
-
-                case KeyEntryRequest.VerifyOathPassword:
-                    currentValue = CollectPassword();
-                    break;
-
-                case KeyEntryRequest.SetOathPassword:
-                    currentValue = CollectPassword();
-                    newValue = CollectPassword();
-                    break;
-            }
-
-            if (newValue is null)
-            {
-                if (KeyFlag == 0)
-                {
-                    currentValue[0] = 0x39;
-                }
-
-                keyEntryData.SubmitValue(currentValue);
+                newValue[0] = 0x39;
             }
             else
             {
-                if (KeyFlag == 0)
-                {
-                    newValue[0] = 0x39;
-                }
-                else
-                {
-                    currentValue[0] = 0x39;
-                }
-
-                keyEntryData.SubmitValues(currentValue, newValue);
+                currentValue[0] = 0x39;
             }
 
-            return true;
+            keyEntryData.SubmitValues(currentValue, newValue);
         }
 
-        public static byte[] CollectPassword() => new byte[] { 0x74, 0x65, 0x73, 0x74 };
+        return true;
+    }
+
+    public static byte[] CollectPassword()
+    {
+        return new byte[] { 0x74, 0x65, 0x73, 0x74 };
     }
 }

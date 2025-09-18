@@ -16,68 +16,67 @@ using System;
 using System.Text;
 using Xunit;
 
-namespace Yubico.Core.Buffers
+namespace Yubico.Core.Buffers;
+
+public class MultiStringTests
 {
-    public class MultiStringTests
+    [Fact]
+    public void GetStrings_EmptyASCII_ReturnsZeroLengthArray()
     {
-        [Fact]
-        public void GetStrings_EmptyASCII_ReturnsZeroLengthArray()
-        {
-            byte[] asciiBytes = Array.Empty<byte>();
-            string[] expectedStrings = Array.Empty<string>();
+        var asciiBytes = Array.Empty<byte>();
+        var expectedStrings = Array.Empty<string>();
 
-            string[] actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
+        var actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
 
-            Assert.Equal(expectedStrings, actualStrings);
-        }
+        Assert.Equal(expectedStrings, actualStrings);
+    }
 
-        [Fact]
-        public void GetStrings_SingleASCIIStringDoubleNull_ReturnsSingleElementArray()
-        {
-            byte[] asciiBytes = Encoding.ASCII.GetBytes("Test string1\0\0");
-            string[] expectedStrings = { "Test string1" };
+    [Fact]
+    public void GetStrings_SingleASCIIStringDoubleNull_ReturnsSingleElementArray()
+    {
+        var asciiBytes = Encoding.ASCII.GetBytes("Test string1\0\0");
+        string[] expectedStrings = { "Test string1" };
 
-            string[] actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
+        var actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
 
-            Assert.Equal(expectedStrings, actualStrings);
-        }
+        Assert.Equal(expectedStrings, actualStrings);
+    }
 
-        [Fact]
-        public void GetStrings_MultipleASCIIString_ReturnsArray()
-        {
-            byte[] asciiBytes = Encoding.ASCII.GetBytes("Test string1\0Test string2\0Test string3\0\0");
-            string[] expectedStrings = { "Test string1", "Test string2", "Test string3" };
-            string[] actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
+    [Fact]
+    public void GetStrings_MultipleASCIIString_ReturnsArray()
+    {
+        var asciiBytes = Encoding.ASCII.GetBytes("Test string1\0Test string2\0Test string3\0\0");
+        string[] expectedStrings = { "Test string1", "Test string2", "Test string3" };
+        var actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
 
-            Assert.Equal(expectedStrings, actualStrings);
-        }
+        Assert.Equal(expectedStrings, actualStrings);
+    }
 
-        [Fact]
-        public void GetBytes_EmptyArray_ReturnsEmptyArray()
-        {
-            byte[] array = MultiString.GetBytes(Array.Empty<string>(), Encoding.ASCII);
+    [Fact]
+    public void GetBytes_EmptyArray_ReturnsEmptyArray()
+    {
+        var array = MultiString.GetBytes(Array.Empty<string>(), Encoding.ASCII);
 
-            Assert.Equal(Array.Empty<byte>(), array);
-        }
+        Assert.Equal(Array.Empty<byte>(), array);
+    }
 
-        [Fact]
-        public void GetBytes_OneString_ReturnsArrayWithDoubleNullEnding()
-        {
-            string[] strings = new string[] { "a" };
-            byte[] expectedBytes = Encoding.ASCII.GetBytes("a\0\0");
-            byte[] actualBytes = MultiString.GetBytes(strings, Encoding.ASCII);
+    [Fact]
+    public void GetBytes_OneString_ReturnsArrayWithDoubleNullEnding()
+    {
+        var strings = new[] { "a" };
+        var expectedBytes = Encoding.ASCII.GetBytes("a\0\0");
+        var actualBytes = MultiString.GetBytes(strings, Encoding.ASCII);
 
-            Assert.Equal(expectedBytes, actualBytes);
-        }
+        Assert.Equal(expectedBytes, actualBytes);
+    }
 
-        [Fact]
-        public void GetBytes_MultipleStrings_SeparatedByNullAndEndsInDoubleNull()
-        {
-            string[] strings = new string[] { "a", "b", "c" };
-            byte[] expectedBytes = Encoding.ASCII.GetBytes("a\0b\0c\0\0");
-            byte[] actualBytes = MultiString.GetBytes(strings, Encoding.ASCII);
+    [Fact]
+    public void GetBytes_MultipleStrings_SeparatedByNullAndEndsInDoubleNull()
+    {
+        var strings = new[] { "a", "b", "c" };
+        var expectedBytes = Encoding.ASCII.GetBytes("a\0b\0c\0\0");
+        var actualBytes = MultiString.GetBytes(strings, Encoding.ASCII);
 
-            Assert.Equal(expectedBytes, actualBytes);
-        }
+        Assert.Equal(expectedBytes, actualBytes);
     }
 }

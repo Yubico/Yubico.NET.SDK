@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+/// <summary>
+///     Command to delete an OTP slot configuration.
+/// </summary>
+/// <remarks>
+///     The purpose of this command is to build a completely empty APDU (except
+///     for a security code, if the slot has one). This is what tells the YubiKey
+///     to delete the OTP slot configuration.
+/// </remarks>
+public class DeleteSlotCommand : SlotConfigureBase
 {
-    /// <summary>
-    /// Command to delete an OTP slot configuration.
-    /// </summary>
-    /// <remarks>
-    /// The purpose of this command is to build a completely empty APDU (except
-    /// for a security code, if the slot has one). This is what tells the YubiKey
-    /// to delete the OTP slot configuration.
-    /// </remarks>
-    public class DeleteSlotCommand : SlotConfigureBase
-    {
-        protected override byte ShortPressCode => OtpConstants.ConfigureShortPressSlot;
-        protected override byte LongPressCode => OtpConstants.ConfigureLongPressSlot;
-        protected override bool CalculateCrc => false;
-    }
+    protected override byte ShortPressCode => OtpConstants.ConfigureShortPressSlot;
+    protected override byte LongPressCode => OtpConstants.ConfigureLongPressSlot;
+    protected override bool CalculateCrc => false;
 }

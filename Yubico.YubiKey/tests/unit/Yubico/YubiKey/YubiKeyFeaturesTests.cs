@@ -16,303 +16,303 @@ using System;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+public class YubiKeyFeaturesTests
 {
-    public class YubiKeyFeaturesTests
+    [Fact]
+    public void YubiKey_Null_Throws()
     {
-        [Fact]
-        public void YubiKey_Null_Throws()
+        IYubiKeyDevice? yubiKey = null;
+        _ = Assert.Throws<ArgumentNullException>(() => yubiKey!.HasFeature(YubiKeyFeature.OtpApplication));
+    }
+
+    [Fact]
+    public void CheckOtpApplication_ReturnsTrue()
+    {
+        var yubiKey = new HollowYubiKeyDevice
         {
-            IYubiKeyDevice? yubiKey = null;
-            _ = Assert.Throws<ArgumentNullException>(() => yubiKey!.HasFeature(YubiKeyFeature.OtpApplication));
-        }
+            AvailableUsbCapabilities = YubiKeyCapabilities.Otp
+        };
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpApplication));
+    }
 
-        [Fact]
-        public void CheckOtpApplication_ReturnsTrue()
+    [Fact]
+    public void CheckOathApplication()
+    {
+        var yubiKey = new HollowYubiKeyDevice
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                AvailableUsbCapabilities = YubiKeyCapabilities.Otp
-            };
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpApplication));
-        }
+            AvailableUsbCapabilities = YubiKeyCapabilities.Oath
+        };
 
-        [Fact]
-        public void CheckOathApplication()
+        yubiKey.FirmwareVersion.Major = 3;
+        yubiKey.FirmwareVersion.Minor = 1;
+
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OathApplication));
+    }
+
+    [Fact]
+    public void CheckPivApplication()
+    {
+        var yubiKey = new HollowYubiKeyDevice
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                AvailableUsbCapabilities = YubiKeyCapabilities.Oath
-            };
+            AvailableUsbCapabilities = YubiKeyCapabilities.Piv
+        };
 
-            yubiKey.FirmwareVersion.Major = 3;
-            yubiKey.FirmwareVersion.Minor = 1;
+        yubiKey.FirmwareVersion.Major = 3;
+        yubiKey.FirmwareVersion.Minor = 1;
 
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OathApplication));
-        }
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivApplication));
+    }
 
-        [Fact]
-        public void CheckPivApplication()
+    [Fact]
+    public void CheckManagementApplication()
+    {
+        var yubiKey = new HollowYubiKeyDevice();
+
+        yubiKey.FirmwareVersion.Major = 5;
+        yubiKey.FirmwareVersion.Minor = 0;
+
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.ManagementApplication));
+
+        yubiKey.FirmwareVersion.Major = 4;
+        yubiKey.FirmwareVersion.Minor = 0;
+
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.ManagementApplication));
+    }
+
+    [Fact]
+    public void CheckSerialNumberVisabilityControls()
+    {
+        var yubiKey = new HollowYubiKeyDevice
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                AvailableUsbCapabilities = YubiKeyCapabilities.Piv
-            };
+            AvailableUsbCapabilities = YubiKeyCapabilities.Otp
+        };
 
-            yubiKey.FirmwareVersion.Major = 3;
-            yubiKey.FirmwareVersion.Minor = 1;
+        yubiKey.FirmwareVersion.Major = 2;
+        yubiKey.FirmwareVersion.Minor = 2;
 
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivApplication));
-        }
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.SerialNumberVisibilityControls));
 
-        [Fact]
-        public void CheckManagementApplication()
+        yubiKey.FirmwareVersion.Major = 2;
+        yubiKey.FirmwareVersion.Minor = 1;
+
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.SerialNumberVisibilityControls));
+    }
+
+    [Fact]
+    public void CheckScp03s()
+    {
+        var yubiKey = new HollowYubiKeyDevice
         {
-            var yubiKey = new HollowYubiKeyDevice();
+            AvailableUsbCapabilities = YubiKeyCapabilities.Piv
+        };
 
-            yubiKey.FirmwareVersion.Major = 5;
-            yubiKey.FirmwareVersion.Minor = 0;
+        yubiKey.FirmwareVersion.Major = 5;
+        yubiKey.FirmwareVersion.Minor = 3;
 
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.ManagementApplication));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.Scp03));
 
-            yubiKey.FirmwareVersion.Major = 4;
-            yubiKey.FirmwareVersion.Minor = 0;
+        yubiKey.FirmwareVersion.Major = 5;
+        yubiKey.FirmwareVersion.Minor = 2;
 
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.ManagementApplication));
-        }
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.Scp03));
+    }
 
-        [Fact]
-        public void CheckSerialNumberVisabilityControls()
+    [Fact]
+    public void CheckOathFeatures()
+    {
+        var yubiKey = new HollowYubiKeyDevice
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                AvailableUsbCapabilities = YubiKeyCapabilities.Otp
-            };
+            AvailableUsbCapabilities = YubiKeyCapabilities.Oath
+        };
 
-            yubiKey.FirmwareVersion.Major = 2;
-            yubiKey.FirmwareVersion.Minor = 2;
+        yubiKey.FirmwareVersion.Major = 5;
+        yubiKey.FirmwareVersion.Minor = 3;
 
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.SerialNumberVisibilityControls));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OathRenameCredential));
 
-            yubiKey.FirmwareVersion.Major = 2;
-            yubiKey.FirmwareVersion.Minor = 1;
+        yubiKey.FirmwareVersion.Major = 5;
+        yubiKey.FirmwareVersion.Minor = 2;
 
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.SerialNumberVisibilityControls));
-        }
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OathRenameCredential));
 
-        [Fact]
-        public void CheckScp03s()
+        yubiKey.FirmwareVersion.Major = 4;
+        yubiKey.FirmwareVersion.Minor = 3;
+        yubiKey.FirmwareVersion.Patch = 1;
+
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OathTouchCredential));
+
+        yubiKey.FirmwareVersion.Major = 4;
+        yubiKey.FirmwareVersion.Minor = 3;
+        yubiKey.FirmwareVersion.Patch = 4;
+
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OathSha512));
+
+        yubiKey.FirmwareVersion.Major = 4;
+        yubiKey.FirmwareVersion.Minor = 2;
+        yubiKey.FirmwareVersion.Patch = 0;
+
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OathSha512));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OathTouchCredential));
+    }
+
+    [Fact]
+    public void CheckPivFeatures()
+    {
+        var yubiKey = new HollowYubiKeyDevice
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                AvailableUsbCapabilities = YubiKeyCapabilities.Piv
-            };
+            AvailableUsbCapabilities = YubiKeyCapabilities.Piv
+        };
 
-            yubiKey.FirmwareVersion.Major = 5;
-            yubiKey.FirmwareVersion.Minor = 3;
+        yubiKey.FirmwareVersion.Major = 5;
+        yubiKey.FirmwareVersion.Minor = 3;
 
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.Scp03));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivMetadata));
 
-            yubiKey.FirmwareVersion.Major = 5;
-            yubiKey.FirmwareVersion.Minor = 2;
+        yubiKey.FirmwareVersion.Major = 5;
+        yubiKey.FirmwareVersion.Minor = 0;
 
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.Scp03));
-        }
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivMetadata));
 
-        [Fact]
-        public void CheckOathFeatures()
+        yubiKey.FirmwareVersion.Major = 4;
+        yubiKey.FirmwareVersion.Minor = 3;
+
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivAttestation));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivTouchPolicyCached));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivPrivateKeyTouchPolicyCached));
+
+        yubiKey.FirmwareVersion.Major = 4;
+        yubiKey.FirmwareVersion.Minor = 2;
+        yubiKey.FirmwareVersion.Patch = 4;
+
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivEccP256));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivEccP384));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivAttestation));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivTouchPolicyCached));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivPrivateKeyTouchPolicyCached));
+
+        yubiKey.FirmwareVersion.Major = 4;
+        yubiKey.FirmwareVersion.Minor = 2;
+        yubiKey.FirmwareVersion.Patch = 0;
+
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivEccP256));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivEccP384));
+
+        yubiKey.FirmwareVersion.Major = 4;
+        yubiKey.FirmwareVersion.Minor = 0;
+
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivManagementKeyTouchPolicy));
+
+        yubiKey.FirmwareVersion.Major = 3;
+        yubiKey.FirmwareVersion.Minor = 1;
+
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivRsa1024));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivRsa2048));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivManagementKeyTouchPolicy));
+
+        yubiKey.FirmwareVersion.Major = 2;
+        yubiKey.FirmwareVersion.Minor = 4;
+
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivRsa1024));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivRsa2048));
+
+        yubiKey.FirmwareVersion.Major = 5;
+        yubiKey.FirmwareVersion.Minor = 7;
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.ManagementNfcRestricted));
+
+        yubiKey.FirmwareVersion.Major = 5;
+        yubiKey.FirmwareVersion.Minor = 6;
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.ManagementNfcRestricted));
+    }
+
+    [Fact]
+    public void CheckOtpFeatures()
+    {
+        var yubiKey = new HollowYubiKeyDevice
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                AvailableUsbCapabilities = YubiKeyCapabilities.Oath
-            };
+            AvailableUsbCapabilities = YubiKeyCapabilities.Otp
+        };
 
-            yubiKey.FirmwareVersion.Major = 5;
-            yubiKey.FirmwareVersion.Minor = 3;
+        yubiKey.FirmwareVersion.Major = 2;
+        yubiKey.FirmwareVersion.Minor = 4;
 
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OathRenameCredential));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpInvertLed));
 
-            yubiKey.FirmwareVersion.Major = 5;
-            yubiKey.FirmwareVersion.Minor = 2;
+        yubiKey.FirmwareVersion.Major = 2;
+        yubiKey.FirmwareVersion.Minor = 3;
 
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OathRenameCredential));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpNumericKeypad));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpFastTrigger));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpUpdatableSlots));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpDormantSlots));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpInvertLed));
 
-            yubiKey.FirmwareVersion.Major = 4;
-            yubiKey.FirmwareVersion.Minor = 3;
-            yubiKey.FirmwareVersion.Patch = 1;
+        yubiKey.FirmwareVersion.Major = 2;
+        yubiKey.FirmwareVersion.Minor = 2;
 
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OathTouchCredential));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpVariableSizeHmac));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpButtonTrigger));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpChallengeResponseMode));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpNumericKeypad));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpFastTrigger));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpUpdatableSlots));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpDormantSlots));
 
-            yubiKey.FirmwareVersion.Major = 4;
-            yubiKey.FirmwareVersion.Minor = 3;
-            yubiKey.FirmwareVersion.Patch = 4;
+        yubiKey.FirmwareVersion.Major = 2;
+        yubiKey.FirmwareVersion.Minor = 1;
 
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OathSha512));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpOathHotpMode));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpFixedModhex));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpVariableSizeHmac));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpButtonTrigger));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpChallengeResponseMode));
 
-            yubiKey.FirmwareVersion.Major = 4;
-            yubiKey.FirmwareVersion.Minor = 2;
-            yubiKey.FirmwareVersion.Patch = 0;
 
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OathSha512));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OathTouchCredential));
-        }
+        yubiKey.FirmwareVersion.Major = 2;
+        yubiKey.FirmwareVersion.Minor = 0;
 
-        [Fact]
-        public void CheckPivFeatures()
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpProtectedLongPressSlot));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpShortTickets));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpStaticPasswordMode));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpMixedCasePasswords));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpAlphaNumericPasswords));
+        Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpPasswordManualUpdates));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpOathHotpMode));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpFixedModhex));
+
+        yubiKey.FirmwareVersion.Major = 1;
+        yubiKey.FirmwareVersion.Minor = 9;
+
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpProtectedLongPressSlot));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpShortTickets));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpStaticPasswordMode));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpMixedCasePasswords));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpAlphaNumericPasswords));
+        Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpPasswordManualUpdates));
+    }
+
+    [Theory]
+    [InlineData(5, 4, 3, true)]
+    [InlineData(5, 4, 4, true)]
+    [InlineData(5, 4, 2, false)]
+    public void HasFeature_YubiHsmAuthApplication(
+        byte major,
+        byte minor,
+        byte patch,
+        bool expectedResult)
+    {
+        var yubiKey = new HollowYubiKeyDevice
         {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                AvailableUsbCapabilities = YubiKeyCapabilities.Piv
-            };
+            AvailableUsbCapabilities = YubiKeyCapabilities.YubiHsmAuth
+        };
 
-            yubiKey.FirmwareVersion.Major = 5;
-            yubiKey.FirmwareVersion.Minor = 3;
+        yubiKey.FirmwareVersion.Major = major;
+        yubiKey.FirmwareVersion.Minor = minor;
+        yubiKey.FirmwareVersion.Patch = patch;
 
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivMetadata));
+        var actualResult = yubiKey.HasFeature(YubiKeyFeature.YubiHsmAuthApplication);
 
-            yubiKey.FirmwareVersion.Major = 5;
-            yubiKey.FirmwareVersion.Minor = 0;
-
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivMetadata));
-
-            yubiKey.FirmwareVersion.Major = 4;
-            yubiKey.FirmwareVersion.Minor = 3;
-
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivAttestation));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivTouchPolicyCached));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivPrivateKeyTouchPolicyCached));
-
-            yubiKey.FirmwareVersion.Major = 4;
-            yubiKey.FirmwareVersion.Minor = 2;
-            yubiKey.FirmwareVersion.Patch = 4;
-
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivEccP256));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivEccP384));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivAttestation));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivTouchPolicyCached));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivPrivateKeyTouchPolicyCached));
-
-            yubiKey.FirmwareVersion.Major = 4;
-            yubiKey.FirmwareVersion.Minor = 2;
-            yubiKey.FirmwareVersion.Patch = 0;
-
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivEccP256));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivEccP384));
-
-            yubiKey.FirmwareVersion.Major = 4;
-            yubiKey.FirmwareVersion.Minor = 0;
-
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivManagementKeyTouchPolicy));
-
-            yubiKey.FirmwareVersion.Major = 3;
-            yubiKey.FirmwareVersion.Minor = 1;
-
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivRsa1024));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivRsa2048));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivManagementKeyTouchPolicy));
-
-            yubiKey.FirmwareVersion.Major = 2;
-            yubiKey.FirmwareVersion.Minor = 4;
-
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivRsa1024));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivRsa2048));
-
-            yubiKey.FirmwareVersion.Major = 5;
-            yubiKey.FirmwareVersion.Minor = 7;
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.ManagementNfcRestricted));
-
-            yubiKey.FirmwareVersion.Major = 5;
-            yubiKey.FirmwareVersion.Minor = 6;
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.ManagementNfcRestricted));
-        }
-        [Fact]
-        public void CheckOtpFeatures()
-        {
-            var yubiKey = new HollowYubiKeyDevice
-            {
-                AvailableUsbCapabilities = YubiKeyCapabilities.Otp
-            };
-
-            yubiKey.FirmwareVersion.Major = 2;
-            yubiKey.FirmwareVersion.Minor = 4;
-
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpInvertLed));
-
-            yubiKey.FirmwareVersion.Major = 2;
-            yubiKey.FirmwareVersion.Minor = 3;
-
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpNumericKeypad));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpFastTrigger));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpUpdatableSlots));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpDormantSlots));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpInvertLed));
-
-            yubiKey.FirmwareVersion.Major = 2;
-            yubiKey.FirmwareVersion.Minor = 2;
-
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpVariableSizeHmac));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpButtonTrigger));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpChallengeResponseMode));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpNumericKeypad));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpFastTrigger));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpUpdatableSlots));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpDormantSlots));
-
-            yubiKey.FirmwareVersion.Major = 2;
-            yubiKey.FirmwareVersion.Minor = 1;
-
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpOathHotpMode));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpFixedModhex));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpVariableSizeHmac));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpButtonTrigger));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpChallengeResponseMode));
-
-
-            yubiKey.FirmwareVersion.Major = 2;
-            yubiKey.FirmwareVersion.Minor = 0;
-
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpProtectedLongPressSlot));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpShortTickets));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpStaticPasswordMode));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpMixedCasePasswords));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpAlphaNumericPasswords));
-            Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpPasswordManualUpdates));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpOathHotpMode));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpFixedModhex));
-
-            yubiKey.FirmwareVersion.Major = 1;
-            yubiKey.FirmwareVersion.Minor = 9;
-
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpProtectedLongPressSlot));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpShortTickets));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpStaticPasswordMode));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpMixedCasePasswords));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpAlphaNumericPasswords));
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpPasswordManualUpdates));
-        }
-
-        [Theory]
-        [InlineData(5, 4, 3, true)]
-        [InlineData(5, 4, 4, true)]
-        [InlineData(5, 4, 2, false)]
-        public void HasFeature_YubiHsmAuthApplication(
-            byte major,
-            byte minor,
-            byte patch,
-            bool expectedResult)
-        {
-            var yubiKey = new HollowYubiKeyDevice()
-            {
-                AvailableUsbCapabilities = YubiKeyCapabilities.YubiHsmAuth
-            };
-
-            yubiKey.FirmwareVersion.Major = major;
-            yubiKey.FirmwareVersion.Minor = minor;
-            yubiKey.FirmwareVersion.Patch = patch;
-
-            bool actualResult = yubiKey.HasFeature(YubiKeyFeature.YubiHsmAuthApplication);
-
-            Assert.Equal(expectedResult, actualResult);
-        }
+        Assert.Equal(expectedResult, actualResult);
     }
 }

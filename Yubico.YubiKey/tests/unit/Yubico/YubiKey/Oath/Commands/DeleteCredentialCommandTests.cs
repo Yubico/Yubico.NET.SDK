@@ -16,69 +16,69 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+public class DeleteCredentialCommandTests
 {
-    public class DeleteCredentialCommandTests
+    private readonly Credential credential = new("Microsoft", "test@outlook.com", CredentialType.Totp,
+        HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
+
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
     {
-        readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
+        var command = new DeleteCommand { Credential = credential };
 
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
+        Assert.Equal(0, command.CreateCommandApdu().Cla);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_Returns0x02()
+    {
+        var command = new DeleteCommand { Credential = credential };
+
+        Assert.Equal(0x02, command.CreateCommandApdu().Ins);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_GetP1Property_ReturnsZero()
+    {
+        var command = new DeleteCommand { Credential = credential };
+
+        Assert.Equal(0, command.CreateCommandApdu().P1);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsZero()
+    {
+        var command = new DeleteCommand { Credential = credential };
+
+        Assert.Equal(0, command.CreateCommandApdu().P2);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_ReturnsCorrectDataAndLength()
+    {
+        var command = new DeleteCommand { Credential = credential };
+        byte[] dataList =
         {
-            var command = new DeleteCommand { Credential = credential };
+            0x71, 0x1A, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F, 0x66,
+            0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75, 0x74,
+            0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D
+        };
 
-            Assert.Equal(0, command.CreateCommandApdu().Cla);
-        }
+        var data = command.CreateCommandApdu().Data;
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_Returns0x02()
-        {
-            var command = new DeleteCommand { Credential = credential };
+        Assert.Equal(dataList.Length, command.CreateCommandApdu().Nc);
+        Assert.True(data.Span.SequenceEqual(dataList));
+    }
 
-            Assert.Equal(0x02, command.CreateCommandApdu().Ins);
-        }
+    [Fact]
+    public void CreateResponseApdu_ReturnsCorrectType()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var command = new DeleteCommand { Credential = credential };
+        var response = command.CreateResponseForApdu(responseApdu);
 
-        [Fact]
-        public void CreateCommandApdu_GetP1Property_ReturnsZero()
-        {
-            var command = new DeleteCommand { Credential = credential };
-
-            Assert.Equal(0, command.CreateCommandApdu().P1);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsZero()
-        {
-            var command = new DeleteCommand { Credential = credential };
-
-            Assert.Equal(0, command.CreateCommandApdu().P2);
-        }
-
-        [Fact]
-        public void CreateCommandApdu_ReturnsCorrectDataAndLength()
-        {
-            var command = new DeleteCommand { Credential = credential };
-            byte[] dataList =
-            {
-                0x71, 0x1A, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F, 0x66,
-                0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75, 0x74,
-                0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D
-            };
-
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-
-            Assert.Equal(dataList.Length, command.CreateCommandApdu().Nc);
-            Assert.True(data.Span.SequenceEqual(dataList));
-        }
-
-        [Fact]
-        public void CreateResponseApdu_ReturnsCorrectType()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new DeleteCommand { Credential = credential };
-            DeleteResponse? response = command.CreateResponseForApdu(responseApdu);
-
-            Assert.True(response is DeleteResponse);
-        }
+        Assert.True(response is DeleteResponse);
     }
 }

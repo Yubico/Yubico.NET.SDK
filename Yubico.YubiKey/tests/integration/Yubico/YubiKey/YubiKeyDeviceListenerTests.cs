@@ -18,41 +18,42 @@ using Xunit;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+[Trait(TraitTypes.Category, TestCategories.Elevated)]
+public class YubiKeyDeviceListenerTests
 {
-    [Trait(TraitTypes.Category, TestCategories.Elevated)]
-    public class YubiKeyDeviceListenerTests
+    private IYubiKeyDevice WaitForDevice()
     {
-        private IYubiKeyDevice WaitForDevice()
+        IYubiKeyDevice? device = null;
+
+        var reset = new AutoResetEvent(false);
+        EventHandler<YubiKeyDeviceEventArgs> handler = (
+            sender,
+            args) =>
         {
-            IYubiKeyDevice? device = null;
+            device = args.Device;
+            reset.Set();
+        };
 
-            AutoResetEvent reset = new AutoResetEvent(false);
-            EventHandler<YubiKeyDeviceEventArgs> handler = (sender, args) =>
-            {
-                device = args.Device;
-                reset.Set();
-            };
+        YubiKeyDeviceListener.Instance.Arrived += handler;
+        reset.WaitOne();
+        YubiKeyDeviceListener.Instance.Arrived -= handler;
 
-            YubiKeyDeviceListener.Instance.Arrived += handler;
-            reset.WaitOne();
-            YubiKeyDeviceListener.Instance.Arrived -= handler;
+        Assert.NotNull(device);
+        return device;
+    }
 
-            Assert.NotNull(device);
-            return device;
-        }
+    [Fact]
+    public void KeyArrived_SkyEe_IsSkySeriesIsTrue()
+    {
+        // Needs to run elevated so the listener finds and enumerates any hidFido
+        // devices else no Merge will happen, and it won't be a valid test
+        // See https://github.com/Yubico/Yubico.NET.SDK/issues/156
+        Assert.True(SdkPlatformInfo.IsElevated);
 
-        [Fact]
-        public void KeyArrived_SkyEe_IsSkySeriesIsTrue()
-        {
-            // Needs to run elevated so the listener finds and enumerates any hidFido
-            // devices else no Merge will happen, and it won't be a valid test
-            // See https://github.com/Yubico/Yubico.NET.SDK/issues/156
-            Assert.True(SdkPlatformInfo.IsElevated);
+        var device = WaitForDevice();
 
-            IYubiKeyDevice device = WaitForDevice();
-
-            Assert.True(device.IsSkySeries);
-        }
+        Assert.True(device.IsSkySeries);
     }
 }

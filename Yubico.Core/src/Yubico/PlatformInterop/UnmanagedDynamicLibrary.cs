@@ -17,14 +17,31 @@ using System.Diagnostics;
 using System.Globalization;
 using Yubico.Core;
 
-namespace Yubico.PlatformInterop
-{
-    internal abstract class UnmanagedDynamicLibrary : IDisposable
-    {
-        private bool disposedValue;
-        protected readonly SafeLibraryHandle _handle;
+namespace Yubico.PlatformInterop;
 
-        public static UnmanagedDynamicLibrary Open(string fileName) => SdkPlatformInfo.OperatingSystem switch
+internal abstract class UnmanagedDynamicLibrary : IDisposable
+{
+    protected readonly SafeLibraryHandle _handle;
+    private bool _disposedValue;
+
+    protected UnmanagedDynamicLibrary(SafeLibraryHandle handle)
+    {
+        _handle = handle;
+    }
+
+    #region IDisposable Members
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    public static UnmanagedDynamicLibrary Open(string fileName) =>
+        SdkPlatformInfo.OperatingSystem switch
         {
             SdkPlatform.Windows => new WindowsUnmanagedDynamicLibrary(fileName),
             SdkPlatform.MacOS => new MacOSUnmanagedDynamicLibrary(fileName),
@@ -32,45 +49,33 @@ namespace Yubico.PlatformInterop
             _ => throw new PlatformNotSupportedException()
         };
 
-        protected UnmanagedDynamicLibrary(SafeLibraryHandle handle)
+    public void GetFunction<TDelegate>(string functionName, out TDelegate d) where TDelegate : class
+    {
+        if (!TryGetFunction(functionName, out TDelegate? temp))
         {
-            _handle = handle;
+            throw new PlatformApiException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.GetUnmanagedFunctionFailed,
+                    functionName));
         }
 
-        public void GetFunction<TDelegate>(string functionName, out TDelegate d) where TDelegate : class
+        Debug.Assert(temp is TDelegate);
+        d = temp!;
+    }
+
+    public abstract bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class;
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
         {
-            if (!TryGetFunction(functionName, out TDelegate? temp))
+            if (disposing)
             {
-                throw new PlatformApiException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.GetUnmanagedFunctionFailed,
-                        functionName));
+                _handle.Dispose();
             }
 
-            Debug.Assert(temp is TDelegate);
-            d = temp!;
-        }
-        public abstract bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class;
-
-        private void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    _handle.Dispose();
-                }
-
-                disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            _disposedValue = true;
         }
     }
 }

@@ -16,62 +16,61 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+public class GetApplicationVersionResponseTests
 {
-    public class GetApplicationVersionResponseTests
+    [Fact]
+    public void Constructor_ReturnsObject()
     {
-        [Fact]
-        public void Constructor_ReturnsObject()
+        var apdu = new ResponseApdu(new byte[0], SWConstants.Success);
+
+        var response = new GetApplicationVersionResponse(apdu);
+
+        Assert.NotNull(response);
+    }
+
+    [Fact]
+    public void GetData_ResponseStatusFailed_ThrowsInvalidOperationException()
+    {
+        var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+
+        var response = new GetApplicationVersionResponse(apdu);
+
+        Action action = () => response.GetData();
+
+        _ = Assert.Throws<InvalidOperationException>(action);
+    }
+
+    [Fact]
+    public void GetData_ResponseStatusFailed_ExceptionMessageMatchesStatusMessage()
+    {
+        var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+
+        var response = new GetApplicationVersionResponse(apdu);
+
+        try
         {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.Success);
-
-            var response = new GetApplicationVersionResponse(apdu);
-
-            Assert.NotNull(response);
+            _ = response.GetData();
         }
-
-        [Fact]
-        public void GetData_ResponseStatusFailed_ThrowsInvalidOperationException()
+        catch (InvalidOperationException ex)
         {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
-
-            var response = new GetApplicationVersionResponse(apdu);
-
-            Action action = () => response.GetData();
-
-            _ = Assert.Throws<InvalidOperationException>(action);
+            Assert.Equal(response.StatusMessage, ex.Message);
         }
+    }
 
-        [Fact]
-        public void GetData_ResponseStatusFailed_ExceptionMessageMatchesStatusMessage()
-        {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+    [Fact]
+    public void GetData_Given1dot2dot3_ReturnsAppV1dot2dot3()
+    {
+        var expectedAppVersion = new ApplicationVersion(1, 2, 3);
 
-            var response = new GetApplicationVersionResponse(apdu);
+        var dataWithoutSw = new byte[] { 1, 2, 3 };
+        var apdu = new ResponseApdu(dataWithoutSw, SWConstants.Success);
 
-            try
-            {
-                _ = response.GetData();
-            }
-            catch (InvalidOperationException ex)
-            {
-                Assert.Equal(response.StatusMessage, ex.Message);
-            }
-        }
+        var response = new GetApplicationVersionResponse(apdu);
 
-        [Fact]
-        public void GetData_Given1dot2dot3_ReturnsAppV1dot2dot3()
-        {
-            var expectedAppVersion = new ApplicationVersion(1, 2, 3);
+        var appVersion = response.GetData();
 
-            byte[] dataWithoutSw = new byte[] { 1, 2, 3 };
-            var apdu = new ResponseApdu(dataWithoutSw, SWConstants.Success);
-
-            var response = new GetApplicationVersionResponse(apdu);
-
-            ApplicationVersion appVersion = response.GetData();
-
-            Assert.Equal(expectedAppVersion, appVersion);
-        }
+        Assert.Equal(expectedAppVersion, appVersion);
     }
 }

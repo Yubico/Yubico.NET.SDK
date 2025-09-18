@@ -17,77 +17,79 @@ using System.Text;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+/// <summary>
+///     Deletes an existing credential.
+/// </summary>
+public class DeleteCommand : IYubiKeyCommand<DeleteResponse>
 {
+    private const byte DeleteInstruction = 0x02;
+    private const byte NameTag = 0x71;
+
     /// <summary>
-    /// Deletes an existing credential.
+    ///     Constructs an instance of the <see cref="DeleteCommand" /> class.
     /// </summary>
-    public class DeleteCommand : IYubiKeyCommand<DeleteResponse>
+    public DeleteCommand()
     {
-        private const byte DeleteInstruction = 0x02;
-        private const byte NameTag = 0x71;
-
-        /// <summary>
-        /// The credential to delete.
-        /// </summary>
-        public Credential? Credential { get; set; }
-
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Oath
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="DeleteCommand" /> class.
-        /// </summary>
-        public DeleteCommand()
-        {
-        }
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="DeleteCommand" /> class.
-        /// </summary>
-        /// <param name="credential">
-        /// The credential to delete.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// The credential is null.
-        /// </exception>
-        public DeleteCommand(Credential credential)
-        {
-            if (credential is null)
-            {
-                throw new ArgumentNullException(nameof(credential));
-            }
-
-            Credential = credential;
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu()
-        {
-            if (Credential is null)
-            {
-                throw new InvalidOperationException(ExceptionMessages.InvalidCredential);
-            }
-
-            byte[] nameBytes = Encoding.UTF8.GetBytes(Credential.Name);
-
-            var tlvWriter = new TlvWriter();
-            tlvWriter.WriteValue(NameTag, nameBytes);
-
-            return new CommandApdu
-            {
-                Ins = DeleteInstruction,
-                Data = tlvWriter.Encode()
-            };
-        }
-
-        /// <inheritdoc />
-        public DeleteResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new DeleteResponse(responseApdu);
     }
+
+    /// <summary>
+    ///     Constructs an instance of the <see cref="DeleteCommand" /> class.
+    /// </summary>
+    /// <param name="credential">
+    ///     The credential to delete.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    ///     The credential is null.
+    /// </exception>
+    public DeleteCommand(Credential credential)
+    {
+        if (credential is null)
+        {
+            throw new ArgumentNullException(nameof(credential));
+        }
+
+        Credential = credential;
+    }
+
+    /// <summary>
+    ///     The credential to delete.
+    /// </summary>
+    public Credential? Credential { get; set; }
+
+    #region IYubiKeyCommand<DeleteResponse> Members
+
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.Oath
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Oath;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu()
+    {
+        if (Credential is null)
+        {
+            throw new InvalidOperationException(ExceptionMessages.InvalidCredential);
+        }
+
+        byte[] nameBytes = Encoding.UTF8.GetBytes(Credential.Name);
+
+        var tlvWriter = new TlvWriter();
+        tlvWriter.WriteValue(NameTag, nameBytes);
+
+        return new CommandApdu
+        {
+            Ins = DeleteInstruction,
+            Data = tlvWriter.Encode()
+        };
+    }
+
+    /// <inheritdoc />
+    public DeleteResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

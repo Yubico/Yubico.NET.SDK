@@ -17,40 +17,39 @@ using System.Buffers.Binary;
 using System.Linq;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Scp03
+namespace Yubico.YubiKey.Scp03;
+
+[Obsolete("Use new ChannelEncryption instead")]
+internal static class ChannelEncryption
 {
-    [Obsolete("Use new ChannelEncryption instead")]
-    internal static class ChannelEncryption
+    public static byte[] EncryptData(byte[] payload, byte[] key, int encryptionCounter)
     {
-        public static byte[] EncryptData(byte[] payload, byte[] key, int encryptionCounter)
-        {
-            // NB: Could skip this if the payload is empty (rather than sending a 16-byte encrypted '0x800000...' payload
-            byte[] countBytes = new byte[sizeof(int)];
-            BinaryPrimitives.WriteInt32BigEndian(countBytes, encryptionCounter);
+        // NB: Could skip this if the payload is empty (rather than sending a 16-byte encrypted '0x800000...' payload
+        byte[] countBytes = new byte[sizeof(int)];
+        BinaryPrimitives.WriteInt32BigEndian(countBytes, encryptionCounter);
 
-            byte[] ivInput = new byte[16];
-            countBytes.CopyTo(ivInput, 16 - countBytes.Length); // copy to rightmost part of block
-            var iv = AesUtilities.BlockCipher(key, ivInput);
+        byte[] ivInput = new byte[16];
+        countBytes.CopyTo(ivInput, 16 - countBytes.Length); // copy to rightmost part of block
+        byte[] iv = AesUtilities.BlockCipher(key, ivInput);
 
-            byte[] paddedPayload = Padding.PadToBlockSize(payload);
-            var encryptedData = AesUtilities.AesCbcEncrypt(key, iv, paddedPayload.AsSpan());
+        byte[] paddedPayload = Padding.PadToBlockSize(payload);
+        byte[] encryptedData = AesUtilities.AesCbcEncrypt(key, iv, paddedPayload.AsSpan());
 
-            return encryptedData.ToArray();
-        }
+        return encryptedData.ToArray();
+    }
 
-        public static byte[] DecryptData(byte[] payload, byte[] key, int encryptionCounter)
-        {
-            byte[] countBytes = new byte[sizeof(int)];
-            BinaryPrimitives.WriteInt32BigEndian(countBytes, encryptionCounter);
+    public static byte[] DecryptData(byte[] payload, byte[] key, int encryptionCounter)
+    {
+        byte[] countBytes = new byte[sizeof(int)];
+        BinaryPrimitives.WriteInt32BigEndian(countBytes, encryptionCounter);
 
-            byte[] ivInput = new byte[16];
-            countBytes.CopyTo(ivInput, 16 - countBytes.Length); // copy to rightmost part of block
-            ivInput[0] = 0x80; // to mark as RMAC calculation
-            byte[] iv = AesUtilities.BlockCipher(key, ivInput);
+        byte[] ivInput = new byte[16];
+        countBytes.CopyTo(ivInput, 16 - countBytes.Length); // copy to rightmost part of block
+        ivInput[0] = 0x80; // to mark as RMAC calculation
+        byte[] iv = AesUtilities.BlockCipher(key, ivInput);
 
-            byte[] decryptedData = AesUtilities.AesCbcDecrypt(key, iv, payload);
+        byte[] decryptedData = AesUtilities.AesCbcDecrypt(key, iv, payload);
 
-            return Padding.RemovePadding(decryptedData.ToArray()).ToArray();
-        }
+        return Padding.RemovePadding(decryptedData.ToArray()).ToArray();
     }
 }

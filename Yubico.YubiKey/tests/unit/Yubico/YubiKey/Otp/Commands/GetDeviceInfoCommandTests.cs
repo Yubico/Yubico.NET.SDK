@@ -12,96 +12,94 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+public class GetDeviceInfoCommandTests
 {
-    public class GetDeviceInfoCommandTests
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
     {
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
-        {
-            var command = new GetPagedDeviceInfoCommand();
+        var command = new GetPagedDeviceInfoCommand();
 
-            byte cla = command.CreateCommandApdu().Cla;
+        var cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(0, cla);
-        }
+        Assert.Equal(0, cla);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_ReturnsHex01()
-        {
-            var command = new GetPagedDeviceInfoCommand();
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_ReturnsHex01()
+    {
+        var command = new GetPagedDeviceInfoCommand();
 
-            byte ins = command.CreateCommandApdu().Ins;
+        var ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(1, ins);
-        }
+        Assert.Equal(1, ins);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP1Property_ReturnsHex13()
-        {
-            var command = new GetPagedDeviceInfoCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP1Property_ReturnsHex13()
+    {
+        var command = new GetPagedDeviceInfoCommand();
 
-            byte p1 = command.CreateCommandApdu().P1;
+        var p1 = command.CreateCommandApdu().P1;
 
-            Assert.Equal(0x13, p1);
-        }
+        Assert.Equal(0x13, p1);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsZero()
-        {
-            var command = new GetPagedDeviceInfoCommand();
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsZero()
+    {
+        var command = new GetPagedDeviceInfoCommand();
 
-            byte p2 = command.CreateCommandApdu().P2;
+        var p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(0, p2);
-        }
+        Assert.Equal(0, p2);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetData_WithNewCommand_ReturnsLengthOfOnlyOne()
-        {
-            var command = new GetPagedDeviceInfoCommand();
+    [Fact]
+    public void CreateCommandApdu_GetData_WithNewCommand_ReturnsLengthOfOnlyOne()
+    {
+        var command = new GetPagedDeviceInfoCommand();
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+        var data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(1, data.Length);
-        }
+        Assert.Equal(1, data.Length);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNc_WithNewCommand_ReturnsCorrectLengthOfOnlyOne()
-        {
-            var command = new GetPagedDeviceInfoCommand();
+    [Fact]
+    public void CreateCommandApdu_GetNc_WithNewCommand_ReturnsCorrectLengthOfOnlyOne()
+    {
+        var command = new GetPagedDeviceInfoCommand();
 
-            int nc = command.CreateCommandApdu().Nc;
+        var nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(1, nc);
-        }
+        Assert.Equal(1, nc);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNe_ReturnsZero()
-        {
-            var command = new GetPagedDeviceInfoCommand();
+    [Fact]
+    public void CreateCommandApdu_GetNe_ReturnsZero()
+    {
+        var command = new GetPagedDeviceInfoCommand();
 
-            int ne = command.CreateCommandApdu().Ne;
+        var ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(0, ne);
-        }
+        Assert.Equal(0, ne);
+    }
 
-        [Fact]
-        public void CreateResponseApdu_ReturnsCorrectType()
-        {
-            // Arrange
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new GetPagedDeviceInfoCommand();
+    [Fact]
+    public void CreateResponseApdu_ReturnsCorrectType()
+    {
+        // Arrange
+        var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var command = new GetPagedDeviceInfoCommand();
 
-            // Act
-            GetPagedDeviceInfoResponse? response = command.CreateResponseForApdu(responseApdu);
+        // Act
+        var response = command.CreateResponseForApdu(responseApdu);
 
-            // Assert
-            Assert.NotNull(response);
-        }
+        // Assert
+        Assert.NotNull(response);
     }
 }

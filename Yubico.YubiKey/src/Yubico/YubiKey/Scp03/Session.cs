@@ -18,250 +18,260 @@ using System.Security.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Scp03.Commands;
 
-namespace Yubico.YubiKey.Scp03
+namespace Yubico.YubiKey.Scp03;
+
+[Obsolete(
+    "Use new SecurityDomainSesion class in Yubico.YubiKey.Scp namespace instead. This will be removed in a future release.")]
+internal class Session : IDisposable
 {
-    [Obsolete("Use new SecurityDomainSesion class in Yubico.YubiKey.Scp namespace instead. This will be removed in a future release.")]
-    internal class Session : IDisposable
+    private bool _disposed;
+    private int _encryptionCounter;
+    private byte[]? _hostChallenge;
+    private byte[]? _hostCryptogram;
+    private byte[] _macChainingValue;
+    private SessionKeys? _sessionKeys;
+
+    /// <summary>
+    ///     Initializes the host-side state for an SCP03 session.
+    /// </summary>
+    public Session()
     {
-        private SessionKeys? _sessionKeys;
-        private byte[]? _hostChallenge;
-        private byte[]? _hostCryptogram;
-        private byte[] _macChainingValue;
-        private int _encryptionCounter;
+        _macChainingValue = new byte[16];
+        _encryptionCounter = 1;
 
-        private bool _disposed;
+        _hostChallenge = null;
+        _hostCryptogram = null;
+        _sessionKeys = null;
+        _disposed = false;
+    }
 
-        /// <summary>
-        /// Initializes the host-side state for an SCP03 session.
-        /// </summary>
-        public Session()
+    #region IDisposable Members
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    /// <summary>
+    ///     Builds the INITIALIZE_UPDATE APDU, using the supplied host challenge.
+    /// </summary>
+    /// <param name="keyVersionNumber">Which key set is to be used.</param>
+    /// <param name="hostChallenge">Randomly chosen 8-byte challenge.</param>
+    /// <returns>INITIALIZE_UPDATE APDU</returns>
+    public InitializeUpdateCommand BuildInitializeUpdate(byte keyVersionNumber, byte[] hostChallenge)
+    {
+        if (hostChallenge is null)
         {
-            _macChainingValue = new byte[16];
-            _encryptionCounter = 1;
-
-            _hostChallenge = null;
-            _hostCryptogram = null;
-            _sessionKeys = null;
-            _disposed = false;
+            throw new ArgumentNullException(nameof(hostChallenge));
         }
 
-        /// <summary>
-        /// Builds the INITIALIZE_UPDATE APDU, using the supplied host challenge.
-        /// </summary>
-        /// <param name="keyVersionNumber">Which key set is to be used.</param>
-        /// <param name="hostChallenge">Randomly chosen 8-byte challenge.</param>
-        /// <returns>INITIALIZE_UPDATE APDU</returns>
-        public InitializeUpdateCommand BuildInitializeUpdate(byte keyVersionNumber, byte[] hostChallenge)
+        if (hostChallenge.Length != 8)
         {
-            if (hostChallenge is null)
-            {
-                throw new ArgumentNullException(nameof(hostChallenge));
-            }
-
-            if (hostChallenge.Length != 8)
-            {
-                throw new ArgumentException(ExceptionMessages.InvalidHostChallengeLength, nameof(hostChallenge));
-            }
-
-            _hostChallenge = hostChallenge;
-            return new InitializeUpdateCommand(keyVersionNumber, hostChallenge);
+            throw new ArgumentException(ExceptionMessages.InvalidHostChallengeLength, nameof(hostChallenge));
         }
 
-        /// <summary>
-        /// Processes the card's response to the INITIALIZE_UPDATE APDU. Loads
-        /// data into state. Must be called after <c>BuildInitializeUpdate</c>.
-        /// </summary>
-        /// <param name="initializeUpdateResponse">Response to the previous INITIALIZE_UPDATE</param>
-        /// <param name="staticKeys">The secret static SCP03 keys shared by the host and card</param>
-        public void LoadInitializeUpdateResponse(InitializeUpdateResponse initializeUpdateResponse, StaticKeys staticKeys)
+        _hostChallenge = hostChallenge;
+        return new InitializeUpdateCommand(keyVersionNumber, hostChallenge);
+    }
+
+    /// <summary>
+    ///     Processes the card's response to the INITIALIZE_UPDATE APDU. Loads
+    ///     data into state. Must be called after <c>BuildInitializeUpdate</c>.
+    /// </summary>
+    /// <param name="initializeUpdateResponse">Response to the previous INITIALIZE_UPDATE</param>
+    /// <param name="staticKeys">The secret static SCP03 keys shared by the host and card</param>
+    public void LoadInitializeUpdateResponse(InitializeUpdateResponse initializeUpdateResponse, StaticKeys staticKeys)
+    {
+        if (_hostChallenge is null)
         {
-            if (_hostChallenge is null)
-            {
-                throw new InvalidOperationException(ExceptionMessages.LoadInitializeUpdatePriorToBuild);
-            }
-
-            if (initializeUpdateResponse is null)
-            {
-                throw new ArgumentNullException(nameof(initializeUpdateResponse));
-            }
-
-            if (staticKeys is null)
-            {
-                throw new ArgumentNullException(nameof(staticKeys));
-            }
-
-            if (initializeUpdateResponse.Status != ResponseStatus.Success)
-            {
-                throw new SecureChannelException(ExceptionMessages.InvalidInitializeUpdateResponse);
-            }
-
-            // parse data in response
-            byte[] cardChallenge = initializeUpdateResponse.CardChallenge.ToArray();
-            byte[] cardCryptogram = initializeUpdateResponse.CardCryptogram.ToArray();
-            _sessionKeys = Derivation.DeriveSessionKeysFromStaticKeys(staticKeys, _hostChallenge, cardChallenge);
-
-            // check supplied card cryptogram
-            byte[] calculatedCardCryptogram = Derivation.DeriveCryptogram(
-                Derivation.DDC_CARD_CRYPTOGRAM,
-                _sessionKeys.GetSessionMacKey(),
-                _hostChallenge,
-                cardChallenge);
-
-            if (!CryptographicOperations.FixedTimeEquals(cardCryptogram, calculatedCardCryptogram))
-            {
-                throw new SecureChannelException(ExceptionMessages.IncorrectCardCryptogram);
-            }
-
-            // calculate host cryptogram
-            _hostCryptogram = Derivation.DeriveCryptogram(
-                Derivation.DDC_HOST_CRYPTOGRAM,
-                _sessionKeys.GetSessionMacKey(),
-                _hostChallenge,
-                cardChallenge);
+            throw new InvalidOperationException(ExceptionMessages.LoadInitializeUpdatePriorToBuild);
         }
 
-        /// <summary>
-        /// Builds the EXTERNAL_AUTHENTICATE APDU. Must be called after
-        /// <c>LoadInitializeUpdateResponse</c>.
-        /// </summary>
-        /// <returns>EXTERNAL_AUTHENTICATE APDU</returns>
-        public ExternalAuthenticateCommand BuildExternalAuthenticate()
+        if (initializeUpdateResponse is null)
         {
-            if (_sessionKeys == null)
-            {
-                throw new InvalidOperationException(ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
-            }
-
-            if (_hostCryptogram is null)
-            {
-                throw new InvalidOperationException(ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
-            }
-
-            var eaCommandInitial = new ExternalAuthenticateCommand(_hostCryptogram);
-            CommandApdu macdApdu;
-            (macdApdu, _macChainingValue) = ChannelMac.MacApdu(eaCommandInitial.CreateCommandApdu(), _sessionKeys.GetSessionMacKey(), _macChainingValue);
-            var eaCommand = new ExternalAuthenticateCommand(macdApdu.Data.ToArray());
-            return eaCommand;
+            throw new ArgumentNullException(nameof(initializeUpdateResponse));
         }
 
-        /// <summary>
-        /// Verifies that the EXTERNAL_AUTHENTICATE command was successful.
-        /// </summary>
-        /// <param name="externalAuthenticateResponse">Response to the previous EXTERNAL_AUTHENTICATE</param>
-        public void LoadExternalAuthenticateResponse(ExternalAuthenticateResponse externalAuthenticateResponse)
+        if (staticKeys is null)
         {
-            if (_sessionKeys == null)
-            {
-                throw new InvalidOperationException(ExceptionMessages.LoadExternalAuthenticateResponsePriorToLoadInitializUpdateResponse);
-            }
-
-            if (externalAuthenticateResponse is null)
-            {
-                throw new ArgumentNullException(nameof(externalAuthenticateResponse));
-            }
-
-            externalAuthenticateResponse.ThrowIfFailed();
+            throw new ArgumentNullException(nameof(staticKeys));
         }
 
-        /// <summary>
-        /// Encodes (encrypt then MAC) a command using SCP03. Modifies state,
-        /// and must be sent in-order. Must be called after LoadInitializeUpdate.
-        /// </summary>
-        /// <returns></returns>
-        public CommandApdu EncodeCommand(CommandApdu command)
+        if (initializeUpdateResponse.Status != ResponseStatus.Success)
         {
-            if (_sessionKeys == null)
-            {
-                throw new InvalidOperationException(ExceptionMessages.UnknownScpError);
-            }
-
-            if (command is null)
-            {
-                throw new ArgumentNullException(nameof(command));
-            }
-
-            var encodedCommand = new CommandApdu()
-            {
-                Cla = (byte)(command.Cla | 0x84),
-                Ins = command.Ins,
-                P1 = command.P1,
-                P2 = command.P2
-            };
-
-            byte[] commandData = command.Data.ToArray();
-            byte[] encryptedData = ChannelEncryption.EncryptData(commandData, _sessionKeys.GetSessionEncKey(), _encryptionCounter);
-            _encryptionCounter += 1;
-            encodedCommand.Data = encryptedData;
-
-            CommandApdu encodedApdu;
-            (encodedApdu, _macChainingValue) = ChannelMac.MacApdu(encodedCommand, _sessionKeys.GetSessionMacKey(), _macChainingValue);
-            return encodedApdu;
+            throw new SecureChannelException(ExceptionMessages.InvalidInitializeUpdateResponse);
         }
 
-        /// <summary>
-        /// Decodes (verify RMAC then decrypt) a raw response from the device.
-        /// </summary>
-        /// <param name="response"></param>
-        /// <returns></returns>
-        public ResponseApdu DecodeResponse(ResponseApdu response)
+        // parse data in response
+        byte[] cardChallenge = initializeUpdateResponse.CardChallenge.ToArray();
+        byte[] cardCryptogram = initializeUpdateResponse.CardCryptogram.ToArray();
+        _sessionKeys = Derivation.DeriveSessionKeysFromStaticKeys(staticKeys, _hostChallenge, cardChallenge);
+
+        // check supplied card cryptogram
+        byte[] calculatedCardCryptogram = Derivation.DeriveCryptogram(
+            Derivation.DDC_CARD_CRYPTOGRAM,
+            _sessionKeys.GetSessionMacKey(),
+            _hostChallenge,
+            cardChallenge);
+
+        if (!CryptographicOperations.FixedTimeEquals(cardCryptogram, calculatedCardCryptogram))
         {
-            if (_sessionKeys is null)
-            {
-                throw new InvalidOperationException(ExceptionMessages.UnknownScpError);
-            }
+            throw new SecureChannelException(ExceptionMessages.IncorrectCardCryptogram);
+        }
 
-            if (response is null)
-            {
-                throw new ArgumentNullException(nameof(response));
-            }
+        // calculate host cryptogram
+        _hostCryptogram = Derivation.DeriveCryptogram(
+            Derivation.DDC_HOST_CRYPTOGRAM,
+            _sessionKeys.GetSessionMacKey(),
+            _hostChallenge,
+            cardChallenge);
+    }
 
-            // If the response is not Success, just return the response. The
-            // standard says, "No R-MAC shall be generated and no protection
-            // shall be applied to a response that includes an error status word:
-            // in this case only the status word shall be returned in the
-            // response."
-            if (response.SW != SWConstants.Success)
-            {
-                return response;
-            }
+    /// <summary>
+    ///     Builds the EXTERNAL_AUTHENTICATE APDU. Must be called after
+    ///     <c>LoadInitializeUpdateResponse</c>.
+    /// </summary>
+    /// <returns>EXTERNAL_AUTHENTICATE APDU</returns>
+    public ExternalAuthenticateCommand BuildExternalAuthenticate()
+    {
+        if (_sessionKeys == null)
+        {
+            throw new InvalidOperationException(
+                ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
+        }
 
-            // ALWAYS check RMAC before decryption
-            byte[] responseData = response.Data.ToArray();
-            ChannelMac.VerifyRmac(responseData, _sessionKeys.GetSessionRmacKey(), _macChainingValue);
+        if (_hostCryptogram is null)
+        {
+            throw new InvalidOperationException(
+                ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
+        }
 
-            byte[] decryptedData = Array.Empty<byte>();
-            if (responseData.Length > 8)
-            {
-                decryptedData = ChannelEncryption.DecryptData(
-                    responseData.Take(responseData.Length - 8).ToArray(),
-                    _sessionKeys.GetSessionEncKey(),
-                    _encryptionCounter - 1
+        var eaCommandInitial = new ExternalAuthenticateCommand(_hostCryptogram);
+        (var macdApdu, _macChainingValue) = ChannelMac.MacApdu(
+            eaCommandInitial.CreateCommandApdu(), _sessionKeys.GetSessionMacKey(), _macChainingValue);
+
+        var eaCommand = new ExternalAuthenticateCommand(macdApdu.Data.ToArray());
+        return eaCommand;
+    }
+
+    /// <summary>
+    ///     Verifies that the EXTERNAL_AUTHENTICATE command was successful.
+    /// </summary>
+    /// <param name="externalAuthenticateResponse">Response to the previous EXTERNAL_AUTHENTICATE</param>
+    public void LoadExternalAuthenticateResponse(ExternalAuthenticateResponse externalAuthenticateResponse)
+    {
+        if (_sessionKeys == null)
+        {
+            throw new InvalidOperationException(
+                ExceptionMessages.LoadExternalAuthenticateResponsePriorToLoadInitializUpdateResponse);
+        }
+
+        if (externalAuthenticateResponse is null)
+        {
+            throw new ArgumentNullException(nameof(externalAuthenticateResponse));
+        }
+
+        externalAuthenticateResponse.ThrowIfFailed();
+    }
+
+    /// <summary>
+    ///     Encodes (encrypt then MAC) a command using SCP03. Modifies state,
+    ///     and must be sent in-order. Must be called after LoadInitializeUpdate.
+    /// </summary>
+    /// <returns></returns>
+    public CommandApdu EncodeCommand(CommandApdu command)
+    {
+        if (_sessionKeys == null)
+        {
+            throw new InvalidOperationException(ExceptionMessages.UnknownScpError);
+        }
+
+        if (command is null)
+        {
+            throw new ArgumentNullException(nameof(command));
+        }
+
+        var encodedCommand = new CommandApdu
+        {
+            Cla = (byte)(command.Cla | 0x84),
+            Ins = command.Ins,
+            P1 = command.P1,
+            P2 = command.P2
+        };
+
+        byte[] commandData = command.Data.ToArray();
+        byte[] encryptedData = ChannelEncryption.EncryptData(
+            commandData, _sessionKeys.GetSessionEncKey(), _encryptionCounter);
+
+        _encryptionCounter += 1;
+        encodedCommand.Data = encryptedData;
+
+        (var encodedApdu, _macChainingValue) = ChannelMac.MacApdu(
+            encodedCommand, _sessionKeys.GetSessionMacKey(), _macChainingValue);
+
+        return encodedApdu;
+    }
+
+    /// <summary>
+    ///     Decodes (verify RMAC then decrypt) a raw response from the device.
+    /// </summary>
+    /// <param name="response"></param>
+    /// <returns></returns>
+    public ResponseApdu DecodeResponse(ResponseApdu response)
+    {
+        if (_sessionKeys is null)
+        {
+            throw new InvalidOperationException(ExceptionMessages.UnknownScpError);
+        }
+
+        if (response is null)
+        {
+            throw new ArgumentNullException(nameof(response));
+        }
+
+        // If the response is not Success, just return the response. The
+        // standard says, "No R-MAC shall be generated and no protection
+        // shall be applied to a response that includes an error status word:
+        // in this case only the status word shall be returned in the
+        // response."
+        if (response.SW != SWConstants.Success)
+        {
+            return response;
+        }
+
+        // ALWAYS check RMAC before decryption
+        byte[] responseData = response.Data.ToArray();
+        ChannelMac.VerifyRmac(responseData, _sessionKeys.GetSessionRmacKey(), _macChainingValue);
+
+        byte[] decryptedData = Array.Empty<byte>();
+        if (responseData.Length > 8)
+        {
+            decryptedData = ChannelEncryption.DecryptData(
+                responseData.Take(responseData.Length - 8).ToArray(),
+                _sessionKeys.GetSessionEncKey(),
+                _encryptionCounter - 1
                 );
-            }
-
-            byte[] fullDecryptedResponse = new byte[decryptedData.Length + 2];
-            decryptedData.CopyTo(fullDecryptedResponse, 0);
-            fullDecryptedResponse[decryptedData.Length] = response.SW1;
-            fullDecryptedResponse[decryptedData.Length + 1] = response.SW2;
-            return new ResponseApdu(fullDecryptedResponse);
         }
 
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
+        byte[] fullDecryptedResponse = new byte[decryptedData.Length + 2];
+        decryptedData.CopyTo(fullDecryptedResponse, 0);
+        fullDecryptedResponse[decryptedData.Length] = response.SW1;
+        fullDecryptedResponse[decryptedData.Length + 1] = response.SW2;
+        return new ResponseApdu(fullDecryptedResponse);
+    }
 
-        protected virtual void Dispose(bool disposing)
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
         {
-            if (!_disposed)
+            if (disposing)
             {
-                if (disposing)
-                {
-                    _sessionKeys?.Dispose();
+                _sessionKeys?.Dispose();
 
-                    _disposed = true;
-                }
+                _disposed = true;
             }
         }
     }

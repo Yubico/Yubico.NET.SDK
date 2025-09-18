@@ -16,32 +16,31 @@ using System;
 
 namespace Yubico.YubiKey.Cryptography;
 
-
 /// <summary>
-/// Extension methods for <see cref="IPrivateKey"/> to provide type-safe casting operations.
+///     Extension methods for <see cref="IPrivateKey" /> to provide type-safe casting operations.
 /// </summary>
 public static class IPrivateKeyExtensions
 {
     /// <summary>
-    /// Safely casts an <see cref="IPrivateKey"/> instance to a specific derived type.
+    ///     Safely casts an <see cref="IPrivateKey" /> instance to a specific derived type.
     /// </summary>
-    /// <typeparam name="T">The target type that implements <see cref="IPrivateKey"/>.</typeparam>
+    /// <typeparam name="T">The target type that implements <see cref="IPrivateKey" />.</typeparam>
     /// <param name="key">The private key instance to cast.</param>
-    /// <returns>The private key cast to the specified type <typeparamref name="T"/>.</returns>
+    /// <returns>The private key cast to the specified type <typeparamref name="T" />.</returns>
     /// <exception cref="InvalidCastException">
-    /// Thrown when the <paramref name="key"/> cannot be cast to type <typeparamref name="T"/>.
-    /// The exception message includes both the source and target type names for debugging.
+    ///     Thrown when the <paramref name="key" /> cannot be cast to type <typeparamref name="T" />.
+    ///     The exception message includes both the source and target type names for debugging.
     /// </exception>
     /// <example>
-    /// <code>
+    ///     <code>
     /// IPrivateKey genericKey = GetPrivateKey();
     /// RsaPrivateKey rsaKey = genericKey.Cast&lt;RsaPrivateKey&gt;();
     /// // throws InvalidCastException if genericKey is not an RsaPrivateKey
     /// </code>
     /// </example>
     /// <remarks>
-    /// This method provides a more explicit alternative to direct casting with clearer error messages.
-    /// Prefer this over unsafe casting operations when type safety is critical for cryptographic operations.
+    ///     This method provides a more explicit alternative to direct casting with clearer error messages.
+    ///     Prefer this over unsafe casting operations when type safety is critical for cryptographic operations.
     /// </remarks>
     public static T Cast<T>(this IPrivateKey key) where T : class, IPrivateKey =>
         key as T ?? throw new InvalidCastException($"Cannot cast {key.GetType()} to {typeof(T)}");

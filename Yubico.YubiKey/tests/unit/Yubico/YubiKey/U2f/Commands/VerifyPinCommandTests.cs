@@ -16,150 +16,149 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+public class VerifyPinCommandTests
 {
-    public class VerifyPinCommandTests
+    private const int offsetCla = 0;
+    private const int offsetIns = 1;
+    private const int offsetP1 = 2;
+    private const int offsetP2 = 3;
+    private const int lengthHeader = 4; // APDU header is 4 bytes (Cla, Ins, P1, P2)
+    private const int offsetLc = 4;
+    private const int lengthLc = 3;
+
+    private const int offsetData = offsetLc + lengthLc;
+
+    private readonly byte[] Pin = new byte[] { 1, 2, 3, 4, 5, 6 };
+
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
     {
-        private const int offsetCla = 0;
-        private const int offsetIns = 1;
-        private const int offsetP1 = 2;
-        private const int offsetP2 = 3;
-        private const int lengthHeader = 4; // APDU header is 4 bytes (Cla, Ins, P1, P2)
-        private const int offsetLc = 4;
-        private const int lengthLc = 3;
+        var command = new VerifyPinCommand(Pin);
 
-        private const int offsetData = offsetLc + lengthLc;
+        Assert.Equal(0, command.CreateCommandApdu().Cla);
+    }
 
-        private readonly byte[] Pin = new byte[] { 1, 2, 3, 4, 5, 6 };
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_Returns0x03()
+    {
+        var command = new VerifyPinCommand(Pin);
 
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
-        {
-            var command = new VerifyPinCommand(Pin);
+        Assert.Equal(0x03, command.CreateCommandApdu().Ins);
+    }
 
-            Assert.Equal(0, command.CreateCommandApdu().Cla);
-        }
+    [Fact]
+    public void CreateCommandApdu_GetP1Property_ReturnsZero()
+    {
+        var command = new VerifyPinCommand(Pin);
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_Returns0x03()
-        {
-            var command = new VerifyPinCommand(Pin);
+        Assert.Equal(0, command.CreateCommandApdu().P1);
+    }
 
-            Assert.Equal(0x03, command.CreateCommandApdu().Ins);
-        }
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsZero()
+    {
+        var command = new VerifyPinCommand(Pin);
 
-        [Fact]
-        public void CreateCommandApdu_GetP1Property_ReturnsZero()
-        {
-            var command = new VerifyPinCommand(Pin);
+        Assert.Equal(0, command.CreateCommandApdu().P2);
+    }
 
-            Assert.Equal(0, command.CreateCommandApdu().P1);
-        }
+    [Fact]
+    public void CreateCommandApdu_GetNcProperty_ReturnsCorrectLength()
+    {
+        var expectedInnerLc = new byte[] { 0x00, 0x00, (byte)Pin.Length };
+        var expectedCommandLength = lengthHeader + expectedInnerLc.Length + Pin.Length;
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsZero()
-        {
-            var command = new VerifyPinCommand(Pin);
+        var command = new VerifyPinCommand(Pin);
+        var commandApdu = command.CreateCommandApdu();
 
-            Assert.Equal(0, command.CreateCommandApdu().P2);
-        }
+        Assert.Equal(commandApdu.Nc, expectedCommandLength);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNcProperty_ReturnsCorrectLength()
-        {
-            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)Pin.Length };
-            int expectedCommandLength = lengthHeader + expectedInnerLc.Length + Pin.Length;
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetClaProperty_ReturnsZero()
+    {
+        var command = new VerifyPinCommand(Pin);
+        var commandApdu = command.CreateCommandApdu();
 
-            var command = new VerifyPinCommand(Pin);
-            CommandApdu commandApdu = command.CreateCommandApdu();
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
 
-            Assert.Equal(commandApdu.Nc, expectedCommandLength);
-        }
+        Assert.Equal(0, actualInnerCommandCla);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetClaProperty_ReturnsZero()
-        {
-            var command = new VerifyPinCommand(Pin);
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetInsProperty_Returns0x43()
+    {
+        var command = new VerifyPinCommand(Pin);
+        var commandApdu = command.CreateCommandApdu();
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
 
-            Assert.Equal(0, actualInnerCommandCla);
-        }
+        Assert.Equal(0x43, actualInnerCommandIns);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetInsProperty_Returns0x43()
-        {
-            var command = new VerifyPinCommand(Pin);
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetP1Property_ReturnsZero()
+    {
+        var command = new VerifyPinCommand(Pin);
+        var commandApdu = command.CreateCommandApdu();
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
 
-            Assert.Equal(0x43, actualInnerCommandIns);
-        }
+        Assert.Equal(0, actualInnerCommandP1);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetP1Property_ReturnsZero()
-        {
-            var command = new VerifyPinCommand(Pin);
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetP2Property_ReturnsZero()
+    {
+        var command = new VerifyPinCommand(Pin);
+        var commandApdu = command.CreateCommandApdu();
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
 
-            Assert.Equal(0, actualInnerCommandP1);
-        }
+        Assert.Equal(0, actualInnerCommandP2);
+    }
 
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetP2Property_ReturnsZero()
-        {
-            var command = new VerifyPinCommand(Pin);
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetNcProperty_ReturnsCorrectLength()
+    {
+        var expectedInnerLc = new byte[] { 0x00, 0x00, (byte)Pin.Length };
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            byte actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
+        var command = new VerifyPinCommand(Pin);
+        var commandApdu = command.CreateCommandApdu();
 
-            Assert.Equal(0, actualInnerCommandP2);
-        }
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandLc = actualInnerCommandApdu.Slice(offsetLc, lengthLc).Span;
 
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetNcProperty_ReturnsCorrectLength()
-        {
-            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)Pin.Length };
+        Assert.True(actualInnerCommandLc.SequenceEqual(expectedInnerLc));
+    }
 
-            var command = new VerifyPinCommand(Pin);
-            CommandApdu commandApdu = command.CreateCommandApdu();
+    [Fact]
+    public void CreateCommandApdu_InnerCommandGetData_ReturnsCorrectData()
+    {
+        var command = new VerifyPinCommand(Pin);
+        var commandApdu = command.CreateCommandApdu();
 
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            ReadOnlySpan<byte> actualInnerCommandLc = actualInnerCommandApdu.Slice(offsetLc, lengthLc).Span;
+        var actualInnerCommandApdu = commandApdu.Data;
+        var actualInnerCommandData = actualInnerCommandApdu.Slice(offsetData, Pin.Length).Span;
 
-            Assert.True(actualInnerCommandLc.SequenceEqual(expectedInnerLc));
-        }
+        Assert.True(actualInnerCommandData.SequenceEqual(Pin));
+    }
 
-        [Fact]
-        public void CreateCommandApdu_InnerCommandGetData_ReturnsCorrectData()
-        {
-            var command = new VerifyPinCommand(Pin);
-            CommandApdu commandApdu = command.CreateCommandApdu();
-
-            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            ReadOnlySpan<byte> actualInnerCommandData = actualInnerCommandApdu.Slice(offsetData, Pin.Length).Span;
-
-            Assert.True(actualInnerCommandData.SequenceEqual(Pin));
-        }
-
-        [Fact]
-        public void CreateResponseApdu_ReturnsCorrectType()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new VerifyPinCommand(Pin);
+    [Fact]
+    public void CreateResponseApdu_ReturnsCorrectType()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var command = new VerifyPinCommand(Pin);
 #pragma warning disable IDE0008 // Use explicit type
-            var response = command.CreateResponseForApdu(responseApdu);
+        var response = command.CreateResponseForApdu(responseApdu);
 #pragma warning restore IDE0008 // Justification: testing the type
 
-            _ = Assert.IsType<VerifyPinResponse>(response);
-        }
+        _ = Assert.IsType<VerifyPinResponse>(response);
     }
 }

@@ -15,42 +15,45 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     This is the partner response class to the
+///     <see cref="MakeCredentialCommand" /> command class.
+/// </summary>
+public class MakeCredentialResponse : Fido2Response, IYubiKeyResponseWithData<MakeCredentialData>
 {
     /// <summary>
-    /// This is the partner response class to the
-    /// <see cref="MakeCredentialCommand"/> command class.
+    ///     Constructs a new instance of the
+    ///     <see cref="MakeCredentialResponse" /> class based on a response APDU
+    ///     provided by the YubiKey.
     /// </summary>
-    public class MakeCredentialResponse : Fido2Response, IYubiKeyResponseWithData<MakeCredentialData>
+    /// <param name="responseApdu">
+    ///     A response APDU containing the CBOR response for the
+    ///     <c>authenticatorMakeCredential</c> command.
+    /// </param>
+    public MakeCredentialResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        /// <summary>
-        /// Constructs a new instance of the
-        /// <see cref="MakeCredentialResponse"/> class based on a response APDU
-        /// provided by the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response for the
-        /// <c>authenticatorMakeCredential</c> command.
-        /// </param>
-        public MakeCredentialResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-        }
-
-        /// <summary>
-        /// Returns a new instance of <see cref="MakeCredentialData"/> containing
-        /// the credential (a public key) and other information.
-        /// </summary>
-        /// <returns>
-        /// A new instance of <c>MakeCredentialData</c>.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// The response indicates there was an error, so there is no data to
-        /// return.
-        /// </exception>
-        public MakeCredentialData GetData() => Status == ResponseStatus.Success 
-            ? new MakeCredentialData(ResponseApdu.Data) 
-            : throw new InvalidOperationException(StatusMessage);
     }
-    
+
+    #region IYubiKeyResponseWithData<MakeCredentialData> Members
+
+    /// <summary>
+    ///     Returns a new instance of <see cref="MakeCredentialData" /> containing
+    ///     the credential (a public key) and other information.
+    /// </summary>
+    /// <returns>
+    ///     A new instance of <c>MakeCredentialData</c>.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    ///     The response indicates there was an error, so there is no data to
+    ///     return.
+    /// </exception>
+    public MakeCredentialData GetData() =>
+        Status == ResponseStatus.Success
+            ? new MakeCredentialData(ResponseApdu.Data)
+            : throw new InvalidOperationException(StatusMessage);
+
+    #endregion
 }

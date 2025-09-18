@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.Core.Cryptography
+namespace Yubico.Core.Cryptography;
+
+/// <summary>
+///     Factory class that will return the <c>Yubico.Core</c> implementation of
+///     the <see cref="IAesGcmPrimitives" /> interface.
+/// </summary>
+public static class AesGcmPrimitives
 {
     /// <summary>
-    /// Factory class that will return the <c>Yubico.Core</c> implementation of
-    /// the <see cref="IAesGcmPrimitives"/> interface.
+    ///     Creates a new instance of an implementation of the low level AES-GCM
+    ///     functions.
     /// </summary>
-    public static class AesGcmPrimitives
-    {
-        /// <summary>
-        /// Creates a new instance of an implementation of the low level AES-GCM
-        /// functions.
-        /// </summary>
-        /// <returns>
-        /// A new instance of the default implementation of this interface.
-        /// </returns>
-        public static IAesGcmPrimitives Create() => new AesGcmPrimitivesOpenSsl();
-    }
+    /// <returns>
+    ///     A new instance of the default implementation of this interface.
+    /// </returns>
+    public static IAesGcmPrimitives Create() => new AesGcmPrimitivesOpenSsl();
 }

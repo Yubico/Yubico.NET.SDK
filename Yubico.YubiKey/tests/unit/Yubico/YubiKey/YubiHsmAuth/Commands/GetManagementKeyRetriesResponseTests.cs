@@ -16,53 +16,52 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+public class GetManagementKeyRetriesResponseTests
 {
-    public class GetManagementKeyRetriesResponseTests
+    [Fact]
+    public void GetData_ResponseStatusFailed_ThrowsInvalidOperationException()
     {
-        [Fact]
-        public void GetData_ResponseStatusFailed_ThrowsInvalidOperationException()
+        var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+
+        var response =
+            new GetManagementKeyRetriesResponse(apdu);
+
+        Action action = () => response.GetData();
+
+        _ = Assert.Throws<InvalidOperationException>(action);
+    }
+
+    [Fact]
+    public void GetData_ResponseStatusFailed_ExceptionMessageMatchesStatusMessage()
+    {
+        var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+
+        var response =
+            new GetManagementKeyRetriesResponse(apdu);
+
+        try
         {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
-
-            var response =
-                new GetManagementKeyRetriesResponse(apdu);
-
-            Action action = () => response.GetData();
-
-            _ = Assert.Throws<InvalidOperationException>(action);
+            _ = response.GetData();
         }
-
-        [Fact]
-        public void GetData_ResponseStatusFailed_ExceptionMessageMatchesStatusMessage()
+        catch (InvalidOperationException ex)
         {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
-
-            var response =
-                new GetManagementKeyRetriesResponse(apdu);
-
-            try
-            {
-                _ = response.GetData();
-            }
-            catch (InvalidOperationException ex)
-            {
-                Assert.Equal(response.StatusMessage, ex.Message);
-            }
+            Assert.Equal(response.StatusMessage, ex.Message);
         }
+    }
 
-        [Fact]
-        public void GetData_SuccessApdu6Retries_Returns6Retries()
-        {
-            byte[] dataWithoutSw = new byte[] { 6 };
-            var apdu = new ResponseApdu(dataWithoutSw, SWConstants.Success);
+    [Fact]
+    public void GetData_SuccessApdu6Retries_Returns6Retries()
+    {
+        var dataWithoutSw = new byte[] { 6 };
+        var apdu = new ResponseApdu(dataWithoutSw, SWConstants.Success);
 
-            var response =
-                new GetManagementKeyRetriesResponse(apdu);
+        var response =
+            new GetManagementKeyRetriesResponse(apdu);
 
-            int retries = response.GetData();
+        var retries = response.GetData();
 
-            Assert.Equal(6, retries);
-        }
+        Assert.Equal(6, retries);
     }
 }

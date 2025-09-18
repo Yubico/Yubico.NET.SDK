@@ -18,17 +18,18 @@ namespace Yubico.YubiKey.Utilities;
 
 internal static class ByteArrayExtensions
 {
-    public static byte[] Concat(this ReadOnlyMemory<byte> first, params ReadOnlyMemory<byte>[] others) => ConcatCore(first, others);
+    public static byte[] Concat(this ReadOnlyMemory<byte> first, params ReadOnlyMemory<byte>[] others) =>
+        ConcatCore(first, others);
+
     public static byte[] Concat(this byte[] arr, params byte[][] others)
     {
         if (others == null || others.Length == 0)
         {
             return (byte[])arr.Clone();
         }
-       
+
         return ConcatCore(arr, Array.ConvertAll(others, item => (ReadOnlyMemory<byte>)item));
     }
-    
 
     public static byte[] Concat(this ReadOnlySpan<byte> arr, ReadOnlySpan<byte> other)
     {
@@ -37,14 +38,14 @@ internal static class ByteArrayExtensions
         {
             return Array.Empty<byte>();
         }
-    
+
         byte[] result = new byte[totalLength];
         arr.CopyTo(result);
         other.CopyTo(result.AsSpan(arr.Length));
-        
+
         return result;
     }
-    
+
     private static byte[] ConcatCore(this ReadOnlyMemory<byte> first, params ReadOnlyMemory<byte>[] others)
     {
         int totalLength = first.Length;

@@ -15,21 +15,20 @@
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+public class GetInfoCommandTests : SimpleIntegrationTestConnection
 {
-    public class GetInfoCommandTests : SimpleIntegrationTestConnection
+    public GetInfoCommandTests() : base(YubiKeyApplication.Fido2) { }
+
+    [Fact]
+    public void GetInfoCommand_Succeeds()
     {
-        public GetInfoCommandTests() : base(YubiKeyApplication.Fido2) { }
+        var cmd = new GetInfoCommand();
+        var rsp = Connection.SendCommand(cmd);
+        Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-        [Fact]
-        public void GetInfoCommand_Succeeds()
-        {
-            var cmd = new GetInfoCommand();
-            GetInfoResponse rsp = Connection.SendCommand(cmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-            AuthenticatorInfo deviceInfo = rsp.GetData();
-            Assert.NotEmpty(deviceInfo.Versions);
-        }
+        var deviceInfo = rsp.GetData();
+        Assert.NotEmpty(deviceInfo.Versions);
     }
 }

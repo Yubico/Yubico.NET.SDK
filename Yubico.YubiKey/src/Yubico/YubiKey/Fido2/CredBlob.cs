@@ -19,10 +19,14 @@ namespace Yubico.YubiKey.Fido2;
 
 internal readonly record struct CredBlob(byte[] Value) : ICborEncode
 {
+    #region ICborEncode Members
+
     public byte[] CborEncode()
     {
-        var cborWriter = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+        var cborWriter = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
         cborWriter.WriteByteString(Value);
         return cborWriter.Encode();
     }
+
+    #endregion
 }

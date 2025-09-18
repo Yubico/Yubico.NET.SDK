@@ -14,53 +14,59 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Scp.Commands
+namespace Yubico.YubiKey.Scp.Commands;
+
+/// <summary>
+///     This command is used to reset the SCP keys on the YubiKey device back to its factory default state
+///     In order to reset the YubiKey to its factory default state, one must issue the reset command to the Yubikey
+///     with incorrect parameters 65 times. This will block the keys and reset the YubiKey to its factory default state.
+/// </summary>
+internal class ResetCommand : IYubiKeyCommand<YubiKeyResponse>
 {
+    private readonly byte[] _data;
+    private readonly byte _ins;
+    private readonly byte _keyVersionNumber;
+    private readonly byte _kid;
 
     /// <summary>
-    /// This command is used to reset the SCP keys on the YubiKey device back to its factory default state
-    /// In order to reset the YubiKey to its factory default state, one must issue the reset command to the Yubikey
-    /// with incorrect parameters 65 times. This will block the keys and reset the YubiKey to its factory default state.
+    ///     Initialize a new instance of the <see cref="ResetCommand" />
+    ///     Clients should not generally build this manually. Instead, use the
+    ///     <see cref="SecurityDomainSession.Reset" /> to build commands.
     /// </summary>
-    internal class ResetCommand : IYubiKeyCommand<YubiKeyResponse>
+    /// <param name="ins">
+    ///     The instruction byte for the command
+    ///     the instruction bytes that are valid are,
+    ///     <see cref="InitializeUpdateCommand.GpInitializeUpdateIns" />,
+    ///     <see cref="ExternalAuthenticateCommand.GpExternalAuthenticateIns" />,
+    ///     <see cref="InternalAuthenticateCommand.GpInternalAuthenticateIns" />,
+    ///     <see cref="PerformSecurityOperationCommand.GpPerformSecurityOperationIns" />
+    /// </param>
+    /// <param name="keyVersionNumber">The version number of the key</param>
+    /// <param name="kid">The Key id</param>
+    /// <param name="data">The data to be reset</param>
+    public ResetCommand(byte ins, byte keyVersionNumber, byte kid, byte[] data)
     {
-        public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
-        private readonly byte[] _data;
-        private readonly byte _keyVersionNumber;
-        private readonly byte _kid;
-        private readonly byte _ins;
+        _ins = ins;
+        _data = data;
+        _keyVersionNumber = keyVersionNumber;
+        _kid = kid;
+    }
 
-        /// <summary>
-        /// Initialize a new instance of the <see cref="ResetCommand"/>
-        /// Clients should not generally build this manually. Instead, use the 
-        /// <see cref="SecurityDomainSession.Reset"/> to build commands.
-        /// </summary>
-        /// <param name="ins">The instruction byte for the command
-        /// the instruction bytes that are valid are, 
-        /// <see cref="InitializeUpdateCommand.GpInitializeUpdateIns"/>, 
-        /// <see cref="ExternalAuthenticateCommand.GpExternalAuthenticateIns"/>, 
-        /// <see cref="InternalAuthenticateCommand.GpInternalAuthenticateIns"/>, 
-        /// <see cref="PerformSecurityOperationCommand.GpPerformSecurityOperationIns"/>
-        /// </param>
-        /// <param name="keyVersionNumber">The version number of the key</param>
-        /// <param name="kid">The Key id</param>
-        /// <param name="data">The data to be reset</param>
-        public ResetCommand(byte ins, byte keyVersionNumber, byte kid, byte[] data)
-        {
-            _ins = ins;
-            _data = data;
-            _keyVersionNumber = keyVersionNumber;
-            _kid = kid;
-        }
+    #region IYubiKeyCommand<YubiKeyResponse> Members
 
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+    public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
+
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Cla = 0x80,
             Ins = _ins,
             P1 = _keyVersionNumber,
             P2 = _kid,
-            Data = _data,
+            Data = _data
         };
-        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new YubiKeyResponse(responseApdu);
-    }
+
+    public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

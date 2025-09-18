@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+internal static partial class Libraries
 {
-    internal static partial class Libraries
-    {
-        internal const string LinuxKernelLib = "libc.so.6";
-        internal const string LinuxUdevLib = "libudev.so";
-    }
+    internal const string LinuxKernelLib = "libc.so.6";
+    internal const string LinuxUdevLib = "libudev.so";
 }

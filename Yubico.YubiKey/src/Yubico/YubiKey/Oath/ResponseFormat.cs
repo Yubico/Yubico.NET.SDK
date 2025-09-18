@@ -12,27 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Oath
+namespace Yubico.YubiKey.Oath;
+
+/// <summary>
+///     The response format from OATH application.
+/// </summary>
+/// <remarks>
+///     When the OATH application calculates an one-time password (OTP),
+///     the full value it calculates depends on the <see cref="HashAlgorithm" /> type set when the
+///     credential was created. The first 4 bytes of that value are needed to derive the one-time
+///     password (OTP), as OATH is a truncated hmac verification scheme.
+/// </remarks>
+public enum ResponseFormat
 {
     /// <summary>
-    /// The response format from OATH application.
+    ///     A full response is the full hash, where the first 4 bytes contain the generated one-time password (OTP).
     /// </summary>
-    /// <remarks>
-    /// When the OATH application calculates an one-time password (OTP),
-    /// the full value it calculates depends on the <see cref="HashAlgorithm"/> type set when the
-    /// credential was created. The first 4 bytes of that value are needed to derive the one-time
-    /// password (OTP), as OATH is a truncated hmac verification scheme.
-    /// </remarks>
-    public enum ResponseFormat
-    {
-        /// <summary>
-        /// A full response is the full hash, where the first 4 bytes contain the generated one-time password (OTP).
-        /// </summary>
-        Full = 0x00,
+    Full = 0x00,
 
-        /// <summary>
-        /// A truncated response only contains the generated four-byte one-time password (OTP).
-        /// </summary>
-        Truncated = 0x01,
-    }
+    /// <summary>
+    ///     A truncated response only contains the generated four-byte one-time password (OTP).
+    /// </summary>
+    Truncated = 0x01
 }

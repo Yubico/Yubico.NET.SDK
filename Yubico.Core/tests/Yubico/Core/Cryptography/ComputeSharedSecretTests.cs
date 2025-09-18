@@ -13,30 +13,29 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using Xunit;
 
-namespace Yubico.Core.Cryptography
+namespace Yubico.Core.Cryptography;
+
+public class ComputeSharedSecretTests
 {
-    public class ComputeSharedSecretTests
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void ComputeSecret_Matches(
+        int curveNum)
     {
-        [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(2)]
-        public void ComputeSecret_Matches(int curveNum)
-        {
-            IEcdhPrimitives ecdhObject = EcdhPrimitives.Create();
-            ECCurve ecCurve = CryptoSupport.GetNamedCurve(curveNum);
-            ECParameters keyPairA = ecdhObject.GenerateKeyPair(ecCurve);
-            ECParameters keyPairB = ecdhObject.GenerateKeyPair(ecCurve);
+        var ecdhObject = EcdhPrimitives.Create();
+        var ecCurve = CryptoSupport.GetNamedCurve(curveNum);
+        var keyPairA = ecdhObject.GenerateKeyPair(ecCurve);
+        var keyPairB = ecdhObject.GenerateKeyPair(ecCurve);
 
-            byte[] secretA = ecdhObject.ComputeSharedSecret(keyPairB, keyPairA.D);
-            byte[] secretB = ecdhObject.ComputeSharedSecret(keyPairA, keyPairB.D);
+        var secretA = ecdhObject.ComputeSharedSecret(keyPairB, keyPairA.D);
+        var secretB = ecdhObject.ComputeSharedSecret(keyPairA, keyPairB.D);
 
-            bool isValid = MemoryExtensions.SequenceEqual(secretA.AsSpan(), secretB.AsSpan());
+        var isValid = secretA.AsSpan().SequenceEqual(secretB.AsSpan());
 
-            Assert.True(isValid);
-        }
+        Assert.True(isValid);
     }
 }

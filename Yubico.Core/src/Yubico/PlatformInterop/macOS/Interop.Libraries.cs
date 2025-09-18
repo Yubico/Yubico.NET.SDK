@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+internal static partial class Libraries
 {
-    internal static partial class Libraries
-    {
-        internal const string CoreFoundation = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
-        internal const string IOKitFramework = "/System/Library/Frameworks/IOKit.framework/IOKit";
-        internal const string WinSCard = "/System/Library/Frameworks/PCSC.framework/PCSC";
-    }
+    internal const string CoreFoundation = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
+    internal const string IOKitFramework = "/System/Library/Frameworks/IOKit.framework/IOKit";
+    internal const string WinSCard = "/System/Library/Frameworks/PCSC.framework/PCSC";
 }

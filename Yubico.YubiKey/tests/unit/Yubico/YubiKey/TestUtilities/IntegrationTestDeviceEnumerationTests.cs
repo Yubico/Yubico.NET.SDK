@@ -19,105 +19,104 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Sdk;
 
-namespace Yubico.YubiKey.TestUtilities
+namespace Yubico.YubiKey.TestUtilities;
+
+public class IntegrationTestDeviceEnumerationTests
 {
-    public class IntegrationTestDeviceEnumerationTests
+    [Fact]
+    public void Constructor_ShouldThrowException_And_CreateAllowlistFile_IfNotExists()
     {
-        [Fact]
-        public void Constructor_ShouldThrowException_And_CreateAllowlistFile_IfNotExists()
+        // Arrange
+        var customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        var allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
+
+        Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", null);
+
+        // Act & Assert
+        var exception = Assert.Throws<TestClassException>(() =>
         {
-            // Arrange
-            string customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            string allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
+            _ = new IntegrationTestDeviceEnumeration(customDir);
+        });
 
-            Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", null);
+        // Assert
+        Thread.Sleep(500);
+        Assert.True(File.Exists(allowlistFilePath));
+        Assert.Contains("must add your allow-listed Yubikeys serial number", exception.Message);
+    }
 
-            // Act & Assert
-            var exception = Assert.Throws<TestClassException>(() =>
-            {
-                _ = new IntegrationTestDeviceEnumeration(customDir);
-            });
+    [Fact]
+    public async Task Constructor_ShouldThrowException_IfNoAllowlistedKeys()
+    {
+        // Arrange
+        var customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        var allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
 
-            // Assert
-            Thread.Sleep(500);
-            Assert.True(File.Exists(allowlistFilePath));
-            Assert.Contains("must add your allow-listed Yubikeys serial number", exception.Message);
-        }
+        _ = Directory.CreateDirectory(customDir);
 
-        [Fact]
-        public async Task Constructor_ShouldThrowException_IfNoAllowlistedKeys()
+        // Wait 500 ms for directory to be created
+        await Task.Delay(500);
+        await File.WriteAllTextAsync(allowlistFilePath, string.Empty);
+
+        Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", null);
+
+        // Act & Assert
+        var exception = Assert.Throws<TestClassException>(() =>
         {
-            // Arrange
-            string customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            string allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
+            _ = new IntegrationTestDeviceEnumeration(customDir);
+        });
 
-            _ = Directory.CreateDirectory(customDir);
+        // Assert
+        Assert.Contains("must add your allow-listed Yubikeys serial number", exception.Message);
+    }
 
-            // Wait 500 ms for directory to be created
-            await Task.Delay(500);
-            await File.WriteAllTextAsync(allowlistFilePath, string.Empty);
+    [Fact]
+    public async Task Constructor_ShouldLoadAllowlistedKeys_FromFile()
+    {
+        // Arrange
+        var customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        var allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
+        var allowlistedKeys = new[] { "123456", "7891011" };
 
-            Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", null);
+        // Wait 500 ms for directory to be created
+        _ = Directory.CreateDirectory(customDir);
 
-            // Act & Assert
-            var exception = Assert.Throws<TestClassException>(() =>
-            {
-                _ = new IntegrationTestDeviceEnumeration(customDir);
-            });
+        await Task.Delay(500);
+        await File.WriteAllLinesAsync(allowlistFilePath, allowlistedKeys);
 
-            // Assert
-            Assert.Contains("must add your allow-listed Yubikeys serial number", exception.Message);
-        }
+        Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", null);
 
-        [Fact]
-        public async Task Constructor_ShouldLoadAllowlistedKeys_FromFile()
-        {
-            // Arrange
-            string customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            string allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
-            var allowlistedKeys = new[] { "123456", "7891011" };
+        // Act
+        var integrationTestDeviceEnumeration = new IntegrationTestDeviceEnumeration(customDir);
 
-            // Wait 500 ms for directory to be created
-            _ = Directory.CreateDirectory(customDir);
+        // Assert
+        Assert.Equal(allowlistedKeys.Length, integrationTestDeviceEnumeration.AllowedSerialNumbers.Count);
+        Assert.All(allowlistedKeys,
+            key => Assert.Contains(key, integrationTestDeviceEnumeration.AllowedSerialNumbers));
+    }
 
-            await Task.Delay(500);
-            await File.WriteAllLinesAsync(allowlistFilePath, allowlistedKeys);
+    [Fact]
+    public async Task Constructor_ShouldLoadAllowlistedKeys_FromEnvironmentVariable()
+    {
+        // Arrange
+        var customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        var allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
+        var envAllowlistedKeys = "123456:7891011";
 
-            Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", null);
+        _ = Directory.CreateDirectory(customDir);
 
-            // Act
-            var integrationTestDeviceEnumeration = new IntegrationTestDeviceEnumeration(customDir);
+        // Wait 500 ms for directory to be created
+        await Task.Delay(500);
+        await File.WriteAllTextAsync(allowlistFilePath, string.Empty);
 
-            // Assert
-            Assert.Equal(allowlistedKeys.Length, integrationTestDeviceEnumeration.AllowedSerialNumbers.Count);
-            Assert.All(allowlistedKeys,
-                key => Assert.Contains(key, integrationTestDeviceEnumeration.AllowedSerialNumbers));
-        }
+        Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", envAllowlistedKeys);
 
-        [Fact]
-        public async Task Constructor_ShouldLoadAllowlistedKeys_FromEnvironmentVariable()
-        {
-            // Arrange
-            string customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            string allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
-            var envAllowlistedKeys = "123456:7891011";
+        // Act
+        var integrationTestDeviceEnumeration = new IntegrationTestDeviceEnumeration(customDir);
 
-            _ = Directory.CreateDirectory(customDir);
-
-            // Wait 500 ms for directory to be created
-            await Task.Delay(500);
-            await File.WriteAllTextAsync(allowlistFilePath, string.Empty);
-
-            Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", envAllowlistedKeys);
-
-            // Act
-            var integrationTestDeviceEnumeration = new IntegrationTestDeviceEnumeration(customDir);
-
-            // Assert
-            var expectedKeys = envAllowlistedKeys.Split(':');
-            Assert.Equal(expectedKeys.Length, integrationTestDeviceEnumeration.AllowedSerialNumbers.Count);
-            Assert.All(expectedKeys,
-                key => Assert.Contains(key, integrationTestDeviceEnumeration.AllowedSerialNumbers));
-        }
+        // Assert
+        var expectedKeys = envAllowlistedKeys.Split(':');
+        Assert.Equal(expectedKeys.Length, integrationTestDeviceEnumeration.AllowedSerialNumbers.Count);
+        Assert.All(expectedKeys,
+            key => Assert.Contains(key, integrationTestDeviceEnumeration.AllowedSerialNumbers));
     }
 }

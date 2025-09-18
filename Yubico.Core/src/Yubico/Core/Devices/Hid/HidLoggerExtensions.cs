@@ -15,20 +15,19 @@
 using Microsoft.Extensions.Logging;
 using Yubico.PlatformInterop;
 
-namespace Yubico.Core.Devices.Hid
+namespace Yubico.Core.Devices.Hid;
+
+internal static class HidLoggerExtensions
 {
-    internal static class HidLoggerExtensions
+    public static void IOKitApiCall(this ILogger logger, string apiName, kern_return_t result)
     {
-        public static void IOKitApiCall(this ILogger logger, string apiName, kern_return_t result)
+        if (result == kern_return_t.KERN_SUCCESS)
         {
-            if (result == kern_return_t.KERN_SUCCESS)
-            {
-                logger.LogInformation("{APIName} called successfully.", apiName);
-            }
-            else
-            {
-                logger.LogError("{APIName} called and FAILED. kern_return_t = {Result}", apiName, result);
-            }
+            logger.LogInformation("{APIName} called successfully.", apiName);
+        }
+        else
+        {
+            logger.LogError("{APIName} called and FAILED. kern_return_t = {Result}", apiName, result);
         }
     }
 }

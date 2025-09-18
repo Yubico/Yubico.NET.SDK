@@ -15,44 +15,47 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     The response to the <see cref="GetLargeBlobCommand" /> command, returning
+///     the large blob.
+/// </summary>
+public sealed class GetLargeBlobResponse : Fido2Response, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
 {
     /// <summary>
-    /// The response to the <see cref="GetLargeBlobCommand"/> command, returning
-    /// the large blob.
+    ///     Constructs a <c>GetLargeBlobResponse</c> instance based on a ResponseApdu
+    ///     received from the YubiKey.
     /// </summary>
-    public sealed class GetLargeBlobResponse : Fido2Response, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
+    /// <param name="responseApdu">
+    ///     The ResponseApdu returned by the YubiKey.
+    /// </param>
+    public GetLargeBlobResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        /// <summary>
-        /// Constructs a <c>GetLargeBlobResponse</c> instance based on a ResponseApdu
-        /// received from the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
-        /// </param>
-        public GetLargeBlobResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-        }
-
-        /// <summary>
-        /// Gets the raw data returned by the YubiKey. The data is not parsed in
-        /// any way.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
-        /// </exception>
-        /// <returns>
-        /// The large blob data.
-        /// </returns>
-        public ReadOnlyMemory<byte> GetData()
-        {
-            if (Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(StatusMessage);
-            }
-
-            return ResponseApdu.Data;
-        }
     }
+
+    #region IYubiKeyResponseWithData<ReadOnlyMemory<byte>> Members
+
+    /// <summary>
+    ///     Gets the raw data returned by the YubiKey. The data is not parsed in
+    ///     any way.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
+    /// </exception>
+    /// <returns>
+    ///     The large blob data.
+    /// </returns>
+    public ReadOnlyMemory<byte> GetData()
+    {
+        if (Status != ResponseStatus.Success)
+        {
+            throw new InvalidOperationException(StatusMessage);
+        }
+
+        return ResponseApdu.Data;
+    }
+
+    #endregion
 }

@@ -14,38 +14,40 @@
 
 using System.Globalization;
 
-namespace Yubico.YubiKey.Otp
+namespace Yubico.YubiKey.Otp;
+
+/// <summary>
+///     A class that represents the various fields of an NDEF text record.
+/// </summary>
+public class NdefText
 {
     /// <summary>
-    /// A class that represents the various fields of an NDEF text record.
+    ///     Constructs a new instance of the <see cref="NdefText" /> class.
     /// </summary>
-    public class NdefText
+    public NdefText()
     {
-        /// <summary>
-        /// Represents the underlying character encoding used by the record's text.
-        /// </summary>
-        public NdefTextEncoding Encoding { get; set; }
-
-        /// <summary>
-        /// Represents the language that the text is written.
-        /// </summary>
-        public CultureInfo Language { get; set; }
-
-        /// <summary>
-        /// The message text of the NDEF text record.
-        /// </summary>
-        public string Text { get; set; }
-
-        /// <summary>
-        /// Constructs a new instance of the <see cref="NdefText"/> class.
-        /// </summary>
-        public NdefText()
-        {
-            Language = CultureInfo.InvariantCulture;
-            Text = string.Empty;
-        }
-
-        /// <inheritdoc/>
-        public override string ToString() => string.IsNullOrEmpty(Text) ? "(null or empty)" : Text;
+        Language = CultureInfo.InvariantCulture;
+        Text = string.Empty;
     }
+
+    /// <summary>
+    ///     Represents the underlying character encoding used by the record's text.
+    /// </summary>
+    public NdefTextEncoding Encoding { get; set; }
+
+    /// <summary>
+    ///     Represents the language that the text is written.
+    /// </summary>
+    public CultureInfo Language { get; set; }
+
+    /// <summary>
+    ///     The message text of the NDEF text record.
+    /// </summary>
+    public string Text { get; set; }
+
+    /// <inheritdoc />
+    public override string ToString() =>
+        string.IsNullOrEmpty(Text)
+            ? "(null or empty)"
+            : Text;
 }

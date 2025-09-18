@@ -13,26 +13,26 @@
 // limitations under the License.
 
 using System;
+using Yubico.YubiKey.InterIndustry.Commands;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+/// <summary>
+///     Represents a connection to a YubiKey device, enabling the sending of commands and retrieval of responses.
+/// </summary>
+public interface IYubiKeyConnection : IDisposable
 {
     /// <summary>
-    /// Represents a connection to a YubiKey device, enabling the sending of commands and retrieval of responses.
+    ///     An object representing the response received from the YubiKey after selecting the application.
     /// </summary>
-    public interface IYubiKeyConnection : IDisposable
-    {
-        /// <summary>
-        /// Sends a command to the YubiKey device and returns the response.
-        /// </summary>
-        /// <typeparam name="TResponse">The type of response expected from the YubiKey device.</typeparam>
-        /// <param name="yubiKeyCommand">The command to be sent to the YubiKey device.</param>
-        /// <returns>The response received from the YubiKey device.</returns>
-        TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
-            where TResponse : IYubiKeyResponse;
+    ISelectApplicationData? SelectApplicationData { get; set; }
 
-        /// <summary>
-        /// An object representing the response received from the YubiKey after selecting the application.  
-        /// </summary>
-        InterIndustry.Commands.ISelectApplicationData? SelectApplicationData { get; set; }
-    }
+    /// <summary>
+    ///     Sends a command to the YubiKey device and returns the response.
+    /// </summary>
+    /// <typeparam name="TResponse">The type of response expected from the YubiKey device.</typeparam>
+    /// <param name="yubiKeyCommand">The command to be sent to the YubiKey device.</param>
+    /// <returns>The response received from the YubiKey device.</returns>
+    TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
+        where TResponse : IYubiKeyResponse;
 }

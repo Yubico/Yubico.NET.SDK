@@ -14,33 +14,36 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+/// <summary>
+///     The base class of YubiHSM Auth response types.
+/// </summary>
+/// <remarks>
+///     This base class adds mappings for status words which have new meanings
+///     in the YubiHSM Auth application.
+/// </remarks>
+public abstract class BaseYubiHsmAuthResponse : YubiKeyResponse
 {
-    /// <summary>
-    /// The base class of YubiHSM Auth response types.
-    /// </summary>
-    /// <remarks>
-    /// This base class adds mappings for status words which have new meanings
-    /// in the YubiHSM Auth application.
-    /// </remarks>
-    public abstract class BaseYubiHsmAuthResponse : YubiKeyResponse
+    protected BaseYubiHsmAuthResponse(ResponseApdu responseApdu) : base(responseApdu)
     {
-        /// <inheritdoc/>
-        protected override ResponseStatusPair StatusCodeMap
-        {
-            get => StatusWord switch
+    }
+
+    /// <inheritdoc />
+    protected override ResponseStatusPair StatusCodeMap
+    {
+        get =>
+            StatusWord switch
             {
                 // Overriding these SW for meanings specific to the YubiHSM Auth application
-                SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(ResponseStatus.RetryWithTouch, ResponseStatusMessages.YubiHsmAuthTouchRequired),
-                SWConstants.AuthenticationMethodBlocked => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthInvalidEntry),
-                SWConstants.ReferenceDataUnusable => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthInvalidAuthData),
+                SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(
+                    ResponseStatus.RetryWithTouch, ResponseStatusMessages.YubiHsmAuthTouchRequired),
+                SWConstants.AuthenticationMethodBlocked => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthInvalidEntry),
+                SWConstants.ReferenceDataUnusable => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthInvalidAuthData),
 
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
-        }
-
-        protected BaseYubiHsmAuthResponse(ResponseApdu responseApdu) : base(responseApdu)
-        {
-        }
     }
 }

@@ -12,28 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Collections.Generic;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Oath
+namespace Yubico.YubiKey.Oath;
+
+public sealed class OathSessionTests
 {
-    public sealed class OathSessionTests
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void ResetOathApplication(
+        StandardTestDevice testDeviceType)
     {
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void ResetOathApplication(StandardTestDevice testDeviceType)
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+        using (var oathSession = new OathSession(testDevice))
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            oathSession.ResetApplication();
+            var data = oathSession.GetCredentials();
 
-            using (var oathSession = new OathSession(testDevice))
-            {
-                oathSession.ResetApplication();
-                IList<Credential> data = oathSession.GetCredentials();
-
-                Assert.True(oathSession._oathData.Challenge.IsEmpty);
-                Assert.Empty(data);
-            }
+            Assert.True(oathSession._oathData.Challenge.IsEmpty);
+            Assert.Empty(data);
         }
     }
 }

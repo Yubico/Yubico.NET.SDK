@@ -15,45 +15,46 @@
 using System;
 using Yubico.YubiKey.Scp03;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+[Obsolete("This class is deprecated")]
+public static class YubiKeyDeviceExtensions
 {
-    [Obsolete("This class is deprecated")]
-    public static class YubiKeyDeviceExtensions
+    public static IYubiKeyDevice WithScp03(this YubiKeyDevice device, StaticKeys scp03Keys) =>
+        GetScp03Device(device, scp03Keys);
+
+    internal static Scp03YubiKeyDevice GetScp03Device(this IYubiKeyDevice device, StaticKeys scp03Keys)
     {
-        public static IYubiKeyDevice WithScp03(this YubiKeyDevice device, StaticKeys scp03Keys) =>
-            GetScp03Device(device, scp03Keys);
-        internal static Scp03YubiKeyDevice GetScp03Device(this IYubiKeyDevice device, StaticKeys scp03Keys)
+        if (device is null)
         {
-            if (device is null)
-            {
-                throw new ArgumentNullException(nameof(device));
-            }
-            if (scp03Keys is null)
-            {
-                throw new ArgumentNullException(nameof(scp03Keys));
-            }
-
-            if (device is Scp03YubiKeyDevice scp03Device)
-            {
-                if (scp03Device.StaticKeys.AreKeysSame(scp03Keys))
-                {
-                    return scp03Device;
-                }
-
-                throw new ArgumentException(ExceptionMessages.Scp03KeyMismatch);
-            }
-
-            if (device is YubiKeyDevice yubiKeyDevice)
-            {
-                if (!yubiKeyDevice.HasSmartCard)
-                {
-                    throw new NotSupportedException(ExceptionMessages.CcidNotSupported);
-                }
-
-                return new Scp03YubiKeyDevice(yubiKeyDevice, scp03Keys);
-            }
-
-            throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            throw new ArgumentNullException(nameof(device));
         }
+
+        if (scp03Keys is null)
+        {
+            throw new ArgumentNullException(nameof(scp03Keys));
+        }
+
+        if (device is Scp03YubiKeyDevice scp03Device)
+        {
+            if (scp03Device.StaticKeys.AreKeysSame(scp03Keys))
+            {
+                return scp03Device;
+            }
+
+            throw new ArgumentException(ExceptionMessages.Scp03KeyMismatch);
+        }
+
+        if (device is YubiKeyDevice yubiKeyDevice)
+        {
+            if (!yubiKeyDevice.HasSmartCard)
+            {
+                throw new NotSupportedException(ExceptionMessages.CcidNotSupported);
+            }
+
+            return new Scp03YubiKeyDevice(yubiKeyDevice, scp03Keys);
+        }
+
+        throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
     }
 }

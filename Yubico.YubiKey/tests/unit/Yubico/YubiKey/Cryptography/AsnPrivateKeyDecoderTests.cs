@@ -97,7 +97,7 @@ public class AsnPrivateKeyDecoderTests
         Assert.True(ecParams.Parameters.D.Length <= expectedDSize,
             $"D component length {ecParams.Parameters.D.Length} exceeds expected max {expectedDSize}");
     }
-    
+
     [Fact]
     public void FromEncodedKey_WithX25519PrivateKey_ReturnsCorrectKey()
     {
@@ -116,7 +116,7 @@ public class AsnPrivateKeyDecoderTests
         Assert.Equal(32, x25519Params.PrivateKey.Length);
         Assert.Equal(Oids.X25519, x25519Params.KeyDefinition.AlgorithmOid);
     }
-    
+
     [Fact]
     public void FromEncodedKey_WithEd25519PrivateKey_ReturnsCorrectKey()
     {
@@ -284,7 +284,8 @@ public class AsnPrivateKeyDecoderTests
         var unsupportedAlgorithmKeyDer = writer.Encode();
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => AsnPrivateKeyDecoder.CreatePrivateKey(unsupportedAlgorithmKeyDer));
+        Assert.Throws<InvalidOperationException>(() =>
+            AsnPrivateKeyDecoder.CreatePrivateKey(unsupportedAlgorithmKeyDer));
     }
 
     [Fact]
@@ -366,7 +367,7 @@ public class AsnPrivateKeyDecoderTests
     //     Assert.Equal(testEncodedKey, exportedEncodedKey);
     //     Assert.Equal(KeyDefinitions.GetByKeyType(keyType), privateKeyParameters.GetKeyDefinition());
     // }
-    
+
     [Theory]
     // [InlineData(KeyType.RSA2048)] // Because our SDK doesn't make use of the excluded RSA parameters in the CRT format, we cant make a full PKCS privateKeyInfo  
     [InlineData(KeyType.ECP256)]
@@ -374,7 +375,8 @@ public class AsnPrivateKeyDecoderTests
     [InlineData(KeyType.ECP521)]
     [InlineData(KeyType.Ed25519)]
     [InlineData(KeyType.X25519)]
-    public void Roundtrip_WithTestKeys_ShouldRetainKeyFunctionality(KeyType keyType) 
+    public void Roundtrip_WithTestKeys_ShouldRetainKeyFunctionality(
+        KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPrivateKey(keyType);
@@ -384,7 +386,8 @@ public class AsnPrivateKeyDecoderTests
         var privateKeyParameters = AsnPrivateKeyDecoder.CreatePrivateKey(testEncodedKey);
         var exportedEncodedKey = privateKeyParameters.ExportPkcs8PrivateKey();
         var decodedParams = AsnPrivateKeyDecoder.CreatePrivateKey(exportedEncodedKey);
-        AsnPrivateKeyEncoderTests.KeyEquivalenceTestHelper.VerifyFunctionalEquivalence(privateKeyParameters, decodedParams, keyType);
+        AsnPrivateKeyEncoderTests.KeyEquivalenceTestHelper.VerifyFunctionalEquivalence(privateKeyParameters,
+            decodedParams, keyType);
     }
 
     [Fact]

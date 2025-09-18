@@ -3,97 +3,103 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Yubico.YubiKey.Scp
-{
-    public class ScpCertificates
-    {
-        public X509Certificate2? Ca { get; }
-        public IReadOnlyList<X509Certificate2> Bundle { get; }
-        public X509Certificate2? Leaf { get; }
+namespace Yubico.YubiKey.Scp;
 
-        private ScpCertificates(X509Certificate2? ca, IReadOnlyList<X509Certificate2> bundle, X509Certificate2? leaf)
+public class ScpCertificates
+{
+    private ScpCertificates(
+        X509Certificate2? ca,
+        IReadOnlyList<X509Certificate2> bundle,
+        X509Certificate2? leaf)
+    {
+        Ca = ca;
+        Bundle = bundle ?? throw new ArgumentNullException(nameof(bundle));
+        Leaf = leaf;
+    }
+
+    public X509Certificate2? Ca { get; }
+    public IReadOnlyList<X509Certificate2> Bundle { get; }
+    public X509Certificate2? Leaf { get; }
+
+    public static ScpCertificates From(
+        IEnumerable<X509Certificate2>? certificates)
+    {
+        if (certificates == null || !certificates.Any())
         {
-            Ca = ca;
-            Bundle = bundle ?? throw new ArgumentNullException(nameof(bundle));
-            Leaf = leaf;
+            return new ScpCertificates(null, Array.Empty<X509Certificate2>(), null);
         }
 
-        public static ScpCertificates From(IEnumerable<X509Certificate2>? certificates)
+        var certList = certificates.ToList();
+        X509Certificate2? ca = null;
+        byte[]? seenSerial = null;
+
+        // Order certificates with the Root CA on top
+        var ordered = new List<X509Certificate2> { certList[0] };
+        certList.RemoveAt(0);
+
+        while (certList.Count > 0)
         {
-            if (certificates == null || !certificates.Any())
-            {
-                return new ScpCertificates(null, Array.Empty<X509Certificate2>(), null);
-            }
-
-            var certList = certificates.ToList();
-            X509Certificate2? ca = null;
-            byte[]? seenSerial = null;
-
-            // Order certificates with the Root CA on top
-            var ordered = new List<X509Certificate2> { certList[0] };
+            var head = ordered[0];
+            var tail = ordered[^1];
+            var cert = certList[0];
             certList.RemoveAt(0);
 
-            while (certList.Count > 0)
+            if (IsIssuedBy(cert, cert))
             {
-                var head = ordered[0];
-                var tail = ordered[^1];
-                var cert = certList[0];
-                certList.RemoveAt(0);
-
-                if (IsIssuedBy(cert, cert))
-                {
-                    ordered.Insert(0, cert);
-                    ca = ordered[0];
-                    continue;
-                }
-
-                if (IsIssuedBy(cert, tail))
-                {
-                    ordered.Add(cert);
-                    continue;
-                }
-
-                if (IsIssuedBy(head, cert))
-                {
-                    ordered.Insert(0, cert);
-                    continue;
-                }
-
-                if (seenSerial != null && cert.GetSerialNumber().SequenceEqual(seenSerial))
-                {
-                    throw new InvalidOperationException($"Cannot decide the order of {cert} in {string.Join(", ", ordered)}");
-                }
-
-                // This cert could not be ordered, try to process rest of certificates
-                // but if you see this cert again fail because the cert chain is not complete
-                certList.Add(cert);
-                seenSerial = cert.GetSerialNumber();
+                ordered.Insert(0, cert);
+                ca = ordered[0];
+                continue;
             }
 
-            // Find ca and leaf
-            if (ca != null)
+            if (IsIssuedBy(cert, tail))
             {
-                ordered.RemoveAt(0);
+                ordered.Add(cert);
+                continue;
             }
 
-            X509Certificate2? leaf = null;
-            if (ordered.Count > 0)
+            if (IsIssuedBy(head, cert))
             {
-                var lastCert = ordered[^1];
-                var keyUsage = lastCert.Extensions.OfType<X509KeyUsageExtension>().FirstOrDefault()?.KeyUsages ?? default;
-                if (keyUsage.HasFlag(X509KeyUsageFlags.DigitalSignature))
-                {
-                    leaf = lastCert;
-                    ordered.RemoveAt(ordered.Count - 1);
-                }
+                ordered.Insert(0, cert);
+                continue;
             }
 
-            return new ScpCertificates(ca, ordered, leaf);
+            if (seenSerial != null && cert.GetSerialNumber().SequenceEqual(seenSerial))
+            {
+                throw new InvalidOperationException(
+                    $"Cannot decide the order of {cert} in {string.Join(", ", ordered)}");
+            }
+
+            // This cert could not be ordered, try to process rest of certificates
+            // but if you see this cert again fail because the cert chain is not complete
+            certList.Add(cert);
+            seenSerial = cert.GetSerialNumber();
         }
 
-        private static bool IsIssuedBy(X509Certificate2 subjectCert, X509Certificate2 issuerCert)
+        // Find ca and leaf
+        if (ca != null)
         {
-            return subjectCert.IssuerName.RawData.SequenceEqual(issuerCert.SubjectName.RawData);
+            ordered.RemoveAt(0);
         }
+
+        X509Certificate2? leaf = null;
+        if (ordered.Count > 0)
+        {
+            var lastCert = ordered[^1];
+            var keyUsage = lastCert.Extensions.OfType<X509KeyUsageExtension>().FirstOrDefault()?.KeyUsages ?? default;
+            if (keyUsage.HasFlag(X509KeyUsageFlags.DigitalSignature))
+            {
+                leaf = lastCert;
+                ordered.RemoveAt(ordered.Count - 1);
+            }
+        }
+
+        return new ScpCertificates(ca, ordered, leaf);
+    }
+
+    private static bool IsIssuedBy(
+        X509Certificate2 subjectCert,
+        X509Certificate2 issuerCert)
+    {
+        return subjectCert.IssuerName.RawData.SequenceEqual(issuerCert.SubjectName.RawData);
     }
 }

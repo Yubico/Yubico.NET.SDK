@@ -12,38 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.TestUtilities
+namespace Yubico.YubiKey.TestUtilities;
+
+public enum StandardTestDevice
 {
-    public enum StandardTestDevice
-    {
-        /// <summary>
-        /// Any version
-        /// </summary>
-        Any,
-     
-        /// <summary>
-        /// Major version 3, USB A keychain, not FIPS
-        /// </summary>
-        Fw3,
+    /// <summary>
+    ///     Any version
+    /// </summary>
+    Any,
 
-        /// <summary>
-        /// Major version 4, USB A keychain, FIPS
-        /// </summary>
-        Fw4Fips,
+    /// <summary>
+    ///     Major version 3, USB A keychain, not FIPS
+    /// </summary>
+    Fw3,
 
-        /// <summary>
-        /// Major version 5, USB A keychain, not FIPS
-        /// </summary>
-        Fw5,
+    /// <summary>
+    ///     Major version 4, USB A keychain, FIPS
+    /// </summary>
+    Fw4Fips,
 
-        /// <summary>
-        /// Major version 5, USB A keychain, FIPS
-        /// </summary>
-        Fw5Fips,
+    /// <summary>
+    ///     Major version 5, USB A keychain, not FIPS
+    /// </summary>
+    Fw5,
 
-        /// <summary>
-        /// Major version 5, USB A biometric keychain, not FIPS
-        /// </summary>
-        Fw5Bio
-    }
+    /// <summary>
+    ///     Major version 5, USB A keychain, FIPS
+    /// </summary>
+    Fw5Fips,
+
+    /// <summary>
+    ///     Major version 5, USB A biometric keychain, not FIPS
+    /// </summary>
+    Fw5Bio
 }

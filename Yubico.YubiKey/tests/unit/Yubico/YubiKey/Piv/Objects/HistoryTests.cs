@@ -16,333 +16,344 @@ using System;
 using System.Text;
 using Xunit;
 
-namespace Yubico.YubiKey.Piv.Objects
+namespace Yubico.YubiKey.Piv.Objects;
+
+public class HistoryTests
 {
-    public class HistoryTests
+    [Fact]
+    public void Constructor_IsEmpty_Correct()
     {
-        [Fact]
-        public void Constructor_IsEmpty_Correct()
+        using var history = new KeyHistory();
+
+        Assert.True(history.IsEmpty);
+    }
+
+    [Fact]
+    public void Constructor_DataTag_Correct()
+    {
+        using var history = new KeyHistory();
+
+        Assert.Equal(0x005FC10C, history.DataTag);
+    }
+
+    [Fact]
+    public void Constructor_DefinedDataTag_Correct()
+    {
+        using var history = new KeyHistory();
+
+        var definedTag = history.GetDefinedDataTag();
+        Assert.Equal(0x005FC10C, definedTag);
+    }
+
+    [Fact]
+    public void SetTag_DataTag_Correct()
+    {
+        using var history = new KeyHistory();
+        history.DataTag = 0x005F2210;
+
+        Assert.Equal(0x005F2210, history.DataTag);
+    }
+
+    [Fact]
+    public void SetTag_DefinedDataTag_Correct()
+    {
+        using var history = new KeyHistory();
+        history.DataTag = 0x005F2210;
+
+        var definedTag = history.GetDefinedDataTag();
+        Assert.Equal(0x005FC10C, definedTag);
+    }
+
+    [Theory]
+    [InlineData(0x015FFF10)]
+    [InlineData(0x0000007E)]
+    [InlineData(0x00007F61)]
+    [InlineData(0x005FC101)]
+    [InlineData(0x005FC104)]
+    [InlineData(0x005FC105)]
+    [InlineData(0x005FC10A)]
+    [InlineData(0x005FC10B)]
+    [InlineData(0x005FC10D)]
+    [InlineData(0x005FC120)]
+    [InlineData(0x005FFF01)]
+    public void SetTag_InvalidTag_Throws(
+        int newTag)
+    {
+        using var history = new KeyHistory();
+
+        _ = Assert.Throws<ArgumentException>(() => history.DataTag = newTag);
+    }
+
+    [Fact]
+    public void Constructor_OnCardCerts_Correct()
+    {
+        using var history = new KeyHistory();
+
+        Assert.Equal(0, history.OnCardCertificates);
+    }
+
+    [Fact]
+    public void Constructor_OffCardCerts_Correct()
+    {
+        using var history = new KeyHistory();
+
+        Assert.Equal(0, history.OffCardCertificates);
+    }
+
+    [Fact]
+    public void Constructor_Url_Correct()
+    {
+        using var history = new KeyHistory();
+
+        Assert.Null(history.OffCardCertificateUrl);
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(255)]
+    [InlineData(0)]
+    public void SetOnCardCerts_Valid_NotEmpty(
+        byte certCount)
+    {
+        using var history = new KeyHistory();
+        history.OnCardCertificates = certCount;
+
+        Assert.False(history.IsEmpty);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(33)]
+    [InlineData(0)]
+    public void SetOffCardCerts_Valid_NotEmpty(
+        byte certCount)
+    {
+        using var history = new KeyHistory();
+        history.OffCardCertificates = certCount;
+
+        Assert.False(history.IsEmpty);
+    }
+
+    [Fact]
+    public void SetOffCardAndUrl_Valid_NotEmpty()
+    {
+        using var history = new KeyHistory();
+        history.OffCardCertificates = 2;
+        history.OffCardCertificateUrl = new Uri("file://user/certs");
+
+        Assert.False(history.IsEmpty);
+    }
+
+    [Fact]
+    public void SetOnCardAndUrl_Valid_NotEmpty()
+    {
+        using var history = new KeyHistory();
+        history.OnCardCertificates = 4;
+        history.OffCardCertificateUrl = new Uri("file://user/certs");
+
+        Assert.False(history.IsEmpty);
+    }
+
+    [Fact]
+    public void SetOffCardAndUrl_SetZero_UrlNull()
+    {
+        using var history = new KeyHistory();
+        history.OffCardCertificates = 4;
+        history.OffCardCertificateUrl = new Uri("file://user/certs");
+        history.OffCardCertificates = 0;
+
+        Assert.Null(history.OffCardCertificateUrl);
+    }
+
+    [Fact]
+    public void ZeroCerts_SetUrl_Encode_Throws()
+    {
+        using var history = new KeyHistory();
+        history.OffCardCertificateUrl = new Uri("file://user/certs");
+        _ = Assert.Throws<InvalidOperationException>(() => history.Encode());
+    }
+
+    [Fact]
+    public void LongUrl_Throws()
+    {
+        var someName = "file://users/certs/somelongname/evenlonger/reallylongname/needevenmore";
+        someName += "/stillmoreneeded/118charactersisactuallyquitelong";
+        using var history = new KeyHistory();
+        history.OffCardCertificates = 4;
+        _ = Assert.Throws<InvalidOperationException>(() => history.OffCardCertificateUrl = new Uri(someName));
+    }
+
+    [Fact]
+    public void Encode_Empty_Correct()
+    {
+        var expected = new Span<byte>(new byte[] { 0x53, 0x00 });
+        using var history = new KeyHistory();
+
+        var encoding = history.Encode();
+        var isValid = expected.SequenceEqual(encoding);
+        Assert.True(isValid);
+    }
+
+    [Fact]
+    public void Encode_ZeroOffCard_Correct()
+    {
+        var expectedValue = new Span<byte>(new byte[]
         {
-            using var history = new KeyHistory();
+            0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
+        });
 
-            Assert.True(history.IsEmpty);
-        }
+        using var history = new KeyHistory();
+        history.OffCardCertificates = 0;
 
-        [Fact]
-        public void Constructor_DataTag_Correct()
+        var encodedHistory = history.Encode();
+
+        var isValid = expectedValue.SequenceEqual(encodedHistory);
+        Assert.True(isValid);
+    }
+
+    [Fact]
+    public void Encode_ZeroOnCard_Correct()
+    {
+        var expectedValue = new Span<byte>(new byte[]
         {
-            using var history = new KeyHistory();
+            0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
+        });
 
-            Assert.Equal(0x005FC10C, history.DataTag);
-        }
+        using var history = new KeyHistory();
+        history.OnCardCertificates = 0;
 
-        [Fact]
-        public void Constructor_DefinedDataTag_Correct()
+        var encodedHistory = history.Encode();
+
+        var isValid = expectedValue.SequenceEqual(encodedHistory);
+        Assert.True(isValid);
+    }
+
+    [Fact]
+    public void Encode_SetUrl_Correct()
+    {
+        var expectedValue = new Span<byte>(new byte[]
         {
-            using var history = new KeyHistory();
+            0x53, 0x1B,
+            0xC1, 0x01, 0x01, 0xC2, 0x01, 0x01,
+            0xF3, 0x11,
+            0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
+            0xFE, 0x00
+        });
 
-            int definedTag = history.GetDefinedDataTag();
-            Assert.Equal(0x005FC10C, definedTag);
-        }
+        using var history = new KeyHistory();
+        history.OnCardCertificates = 1;
+        history.OffCardCertificates = 1;
+        history.OffCardCertificateUrl = new Uri("file://user/certs");
 
-        [Fact]
-        public void SetTag_DataTag_Correct()
+        var encodedHistory = history.Encode();
+
+        var isValid = expectedValue.SequenceEqual(encodedHistory);
+        Assert.True(isValid);
+    }
+
+    [Fact]
+    public void Decode_OnCard_Correct()
+    {
+        var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
         {
-            using var history = new KeyHistory();
-            history.DataTag = 0x005F2210;
+            0x53, 0x1B,
+            0xC1, 0x01, 0x01, 0xC2, 0x01, 0x02,
+            0xF3, 0x11,
+            0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
+            0xFE, 0x00
+        });
 
-            Assert.Equal(0x005F2210, history.DataTag);
-        }
+        using var history = new KeyHistory();
+        var isValid = history.TryDecode(dataToDecode);
+        Assert.True(isValid);
+        Assert.Equal(1, history.OnCardCertificates);
+    }
 
-        [Fact]
-        public void SetTag_DefinedDataTag_Correct()
+    [Fact]
+    public void Decode_OffCard_Correct()
+    {
+        var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
         {
-            using var history = new KeyHistory();
-            history.DataTag = 0x005F2210;
+            0x53, 0x1B,
+            0xC1, 0x01, 0x01, 0xC2, 0x01, 0x02,
+            0xF3, 0x11,
+            0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
+            0xFE, 0x00
+        });
 
-            int definedTag = history.GetDefinedDataTag();
-            Assert.Equal(0x005FC10C, definedTag);
-        }
+        using var history = new KeyHistory();
+        var isValid = history.TryDecode(dataToDecode);
+        Assert.True(isValid);
+        Assert.Equal(2, history.OffCardCertificates);
+    }
 
-        [Theory]
-        [InlineData(0x015FFF10)]
-        [InlineData(0x0000007E)]
-        [InlineData(0x00007F61)]
-        [InlineData(0x005FC101)]
-        [InlineData(0x005FC104)]
-        [InlineData(0x005FC105)]
-        [InlineData(0x005FC10A)]
-        [InlineData(0x005FC10B)]
-        [InlineData(0x005FC10D)]
-        [InlineData(0x005FC120)]
-        [InlineData(0x005FFF01)]
-        public void SetTag_InvalidTag_Throws(int newTag)
+    [Fact]
+    public void Decode_WithUrl_CorrectUrl()
+    {
+        var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
         {
-            using var history = new KeyHistory();
+            0x53, 0x1B,
+            0xC1, 0x01, 0x01, 0xC2, 0x01, 0x01,
+            0xF3, 0x11,
+            0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
+            0xFE, 0x00
+        });
 
-            _ = Assert.Throws<ArgumentException>(() => history.DataTag = newTag);
-        }
+        var expectedValue = dataToDecode.Span.Slice(10, 17);
 
-        [Fact]
-        public void Constructor_OnCardCerts_Correct()
+        using var history = new KeyHistory();
+        var isValid = history.TryDecode(dataToDecode);
+        Assert.True(isValid);
+        Assert.NotNull(history.OffCardCertificateUrl);
+
+        if (history.OffCardCertificateUrl is not null)
         {
-            using var history = new KeyHistory();
+            var getUrl = Encoding.UTF8.GetBytes(history.OffCardCertificateUrl.AbsoluteUri);
 
-            Assert.Equal(0, history.OnCardCertificates);
-        }
-
-        [Fact]
-        public void Constructor_OffCardCerts_Correct()
-        {
-            using var history = new KeyHistory();
-
-            Assert.Equal(0, history.OffCardCertificates);
-        }
-
-        [Fact]
-        public void Constructor_Url_Correct()
-        {
-            using var history = new KeyHistory();
-
-            Assert.Null(history.OffCardCertificateUrl);
-        }
-
-        [Theory]
-        [InlineData(2)]
-        [InlineData(255)]
-        [InlineData(0)]
-        public void SetOnCardCerts_Valid_NotEmpty(byte certCount)
-        {
-            using var history = new KeyHistory();
-            history.OnCardCertificates = certCount;
-
-            Assert.False(history.IsEmpty);
-        }
-
-        [Theory]
-        [InlineData(1)]
-        [InlineData(33)]
-        [InlineData(0)]
-        public void SetOffCardCerts_Valid_NotEmpty(byte certCount)
-        {
-            using var history = new KeyHistory();
-            history.OffCardCertificates = certCount;
-
-            Assert.False(history.IsEmpty);
-        }
-
-        [Fact]
-        public void SetOffCardAndUrl_Valid_NotEmpty()
-        {
-            using var history = new KeyHistory();
-            history.OffCardCertificates = 2;
-            history.OffCardCertificateUrl = new Uri("file://user/certs");
-
-            Assert.False(history.IsEmpty);
-        }
-
-        [Fact]
-        public void SetOnCardAndUrl_Valid_NotEmpty()
-        {
-            using var history = new KeyHistory();
-            history.OnCardCertificates = 4;
-            history.OffCardCertificateUrl = new Uri("file://user/certs");
-
-            Assert.False(history.IsEmpty);
-        }
-
-        [Fact]
-        public void SetOffCardAndUrl_SetZero_UrlNull()
-        {
-            using var history = new KeyHistory();
-            history.OffCardCertificates = 4;
-            history.OffCardCertificateUrl = new Uri("file://user/certs");
-            history.OffCardCertificates = 0;
-
-            Assert.Null(history.OffCardCertificateUrl);
-        }
-
-        [Fact]
-        public void ZeroCerts_SetUrl_Encode_Throws()
-        {
-            using var history = new KeyHistory();
-            history.OffCardCertificateUrl = new Uri("file://user/certs");
-            _ = Assert.Throws<InvalidOperationException>(() => history.Encode());
-        }
-
-        [Fact]
-        public void LongUrl_Throws()
-        {
-            string someName = "file://users/certs/somelongname/evenlonger/reallylongname/needevenmore";
-            someName += "/stillmoreneeded/118charactersisactuallyquitelong";
-            using var history = new KeyHistory();
-            history.OffCardCertificates = 4;
-            _ = Assert.Throws<InvalidOperationException>(() => history.OffCardCertificateUrl = new Uri(someName));
-        }
-
-        [Fact]
-        public void Encode_Empty_Correct()
-        {
-            var expected = new Span<byte>(new byte[] { 0x53, 0x00 });
-            using var history = new KeyHistory();
-
-            byte[] encoding = history.Encode();
-            bool isValid = MemoryExtensions.SequenceEqual(expected, encoding);
+            isValid = expectedValue.SequenceEqual(getUrl);
             Assert.True(isValid);
         }
+    }
 
-        [Fact]
-        public void Encode_ZeroOffCard_Correct()
+    [Fact]
+    public void Decode_ZeroAndNoUrl_CorrectOnCard()
+    {
+        var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
         {
-            var expectedValue = new Span<byte>(new byte[] {
-                0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
-            });
+            0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
+        });
 
-            using var history = new KeyHistory();
-            history.OffCardCertificates = 0;
+        using var history = new KeyHistory();
+        var isValid = history.TryDecode(dataToDecode);
+        Assert.True(isValid);
+        Assert.Equal(0, history.OnCardCertificates);
+    }
 
-            byte[] encodedHistory = history.Encode();
-
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, encodedHistory);
-            Assert.True(isValid);
-        }
-
-        [Fact]
-        public void Encode_ZeroOnCard_Correct()
+    [Fact]
+    public void Decode_ZeroAndNoUrl_CorrectOffCard()
+    {
+        var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
         {
-            var expectedValue = new Span<byte>(new byte[] {
-                0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
-            });
+            0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
+        });
 
-            using var history = new KeyHistory();
-            history.OnCardCertificates = 0;
+        using var history = new KeyHistory();
+        var isValid = history.TryDecode(dataToDecode);
+        Assert.True(isValid);
+        Assert.Equal(0, history.OffCardCertificates);
+    }
 
-            byte[] encodedHistory = history.Encode();
-
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, encodedHistory);
-            Assert.True(isValid);
-        }
-
-        [Fact]
-        public void Encode_SetUrl_Correct()
+    [Fact]
+    public void Decode_ZeroAndNoUrl_NullUrl()
+    {
+        var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
         {
-            var expectedValue = new Span<byte>(new byte[] {
-                0x53, 0x1B,
-                0xC1, 0x01, 0x01, 0xC2, 0x01, 0x01,
-                0xF3, 0x11,
-                      0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
-                0xFE, 0x00
-            });
+            0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
+        });
 
-            using var history = new KeyHistory();
-            history.OnCardCertificates = 1;
-            history.OffCardCertificates = 1;
-            history.OffCardCertificateUrl = new Uri("file://user/certs");
-
-            byte[] encodedHistory = history.Encode();
-
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, encodedHistory);
-            Assert.True(isValid);
-        }
-
-        [Fact]
-        public void Decode_OnCard_Correct()
-        {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
-                0x53, 0x1B,
-                      0xC1, 0x01, 0x01, 0xC2, 0x01, 0x02,
-                      0xF3, 0x11,
-                            0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
-                      0xFE, 0x00
-            });
-
-            using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
-            Assert.True(isValid);
-            Assert.Equal(1, history.OnCardCertificates);
-        }
-
-        [Fact]
-        public void Decode_OffCard_Correct()
-        {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
-                0x53, 0x1B,
-                      0xC1, 0x01, 0x01, 0xC2, 0x01, 0x02,
-                      0xF3, 0x11,
-                            0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
-                      0xFE, 0x00
-            });
-
-            using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
-            Assert.True(isValid);
-            Assert.Equal(2, history.OffCardCertificates);
-        }
-
-        [Fact]
-        public void Decode_WithUrl_CorrectUrl()
-        {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
-                0x53, 0x1B,
-                      0xC1, 0x01, 0x01, 0xC2, 0x01, 0x01,
-                      0xF3, 0x11,
-                            0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
-                      0xFE, 0x00
-            });
-
-            ReadOnlySpan<byte> expectedValue = dataToDecode.Span.Slice(10, 17);
-
-            using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
-            Assert.True(isValid);
-            Assert.NotNull(history.OffCardCertificateUrl);
-
-            if (!(history.OffCardCertificateUrl is null))
-            {
-                byte[] getUrl = Encoding.UTF8.GetBytes(history.OffCardCertificateUrl.AbsoluteUri);
-
-                isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, getUrl);
-                Assert.True(isValid);
-            }
-        }
-
-        [Fact]
-        public void Decode_ZeroAndNoUrl_CorrectOnCard()
-        {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
-                0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
-            });
-
-            using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
-            Assert.True(isValid);
-            Assert.Equal(0, history.OnCardCertificates);
-        }
-
-        [Fact]
-        public void Decode_ZeroAndNoUrl_CorrectOffCard()
-        {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
-                0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
-            });
-
-            using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
-            Assert.True(isValid);
-            Assert.Equal(0, history.OffCardCertificates);
-        }
-
-        [Fact]
-        public void Decode_ZeroAndNoUrl_NullUrl()
-        {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
-                0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
-            });
-
-            using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
-            Assert.True(isValid);
-            Assert.Null(history.OffCardCertificateUrl);
-        }
+        using var history = new KeyHistory();
+        var isValid = history.TryDecode(dataToDecode);
+        Assert.True(isValid);
+        Assert.Null(history.OffCardCertificateUrl);
     }
 }

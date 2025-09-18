@@ -19,118 +19,117 @@ using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+public class CalculateAllCredentialsCommandTests
 {
-    public class CalculateAllCredentialsCommandTests
+    private readonly byte[] _fixedBytes = new byte[8] { 0xF1, 0x03, 0xDA, 0x89, 0x58, 0xE4, 0x40, 0x85 };
+
+    [Fact]
+    public void CreateCommandApdu_GetClaProperty_ReturnsZero()
     {
-        readonly byte[] _fixedBytes = new byte[8] { 0xF1, 0x03, 0xDA, 0x89, 0x58, 0xE4, 0x40, 0x85 };
+        var command = new CalculateAllCredentialsCommand();
 
-        [Fact]
-        public void CreateCommandApdu_GetClaProperty_ReturnsZero()
-        {
-            var command = new CalculateAllCredentialsCommand();
+        Assert.Equal(0, command.CreateCommandApdu().Cla);
+    }
 
-            Assert.Equal(0, command.CreateCommandApdu().Cla);
-        }
+    [Fact]
+    public void CreateCommandApdu_GetInsProperty_Returns0xa4()
+    {
+        var command = new CalculateAllCredentialsCommand();
 
-        [Fact]
-        public void CreateCommandApdu_GetInsProperty_Returns0xa4()
-        {
-            var command = new CalculateAllCredentialsCommand();
+        Assert.Equal(0xa4, command.CreateCommandApdu().Ins);
+    }
 
-            Assert.Equal(0xa4, command.CreateCommandApdu().Ins);
-        }
+    [Fact]
+    public void CreateCommandApdu_GetP1Property_ReturnsZero()
+    {
+        var command = new CalculateAllCredentialsCommand();
 
-        [Fact]
-        public void CreateCommandApdu_GetP1Property_ReturnsZero()
-        {
-            var command = new CalculateAllCredentialsCommand();
+        Assert.Equal(0, command.CreateCommandApdu().P1);
+    }
 
-            Assert.Equal(0, command.CreateCommandApdu().P1);
-        }
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_ReturnsZero()
+    {
+        var command = new CalculateAllCredentialsCommand(ResponseFormat.Full);
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_ReturnsZero()
+        Assert.Equal(0, command.CreateCommandApdu().P2);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_GetP2Property_Returns0x01()
+    {
+        var command = new CalculateAllCredentialsCommand(ResponseFormat.Truncated);
+
+        Assert.Equal(0x01, command.CreateCommandApdu().P2);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_GetNe_ReturnsZero()
+    {
+        var command = new CalculateAllCredentialsCommand();
+
+        Assert.Equal(0, command.CreateCommandApdu().Ne);
+    }
+
+    [Fact]
+    public void CreateCommandApdu_ReturnsCorrectLength()
+    {
+        var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+
+        try
         {
             var command = new CalculateAllCredentialsCommand(ResponseFormat.Full);
 
-            Assert.Equal(0, command.CreateCommandApdu().P2);
-        }
+            byte[] dataList = { 0x74, 0x08 };
 
-        [Fact]
-        public void CreateCommandApdu_GetP2Property_Returns0x01()
+            var timePeriod = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (int)CredentialPeriod.Period30;
+            var bytes = BitConverter.GetBytes(timePeriod);
+            var challenge = bytes.Concat(new byte[8 - bytes.Length]).ToArray();
+            var newDataList = dataList.Concat(challenge).ToArray();
+
+            Assert.Equal(newDataList.Length, command.CreateCommandApdu().Nc);
+        }
+        finally
         {
-            var command = new CalculateAllCredentialsCommand(ResponseFormat.Truncated);
-
-            Assert.Equal(0x01, command.CreateCommandApdu().P2);
+            utility.RestoreRandomProvider();
         }
+    }
 
-        [Fact]
-        public void CreateCommandApdu_GetNe_ReturnsZero()
+    [Fact]
+    public void CreateCommandApdu_ReturnsCorrectData()
+    {
+        var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+
+        try
         {
-            var command = new CalculateAllCredentialsCommand();
+            var command = new CalculateAllCredentialsCommand(ResponseFormat.Full);
 
-            Assert.Equal(0, command.CreateCommandApdu().Ne);
+            byte[] dataList = { 0x74, 0x08 };
+
+            ulong timePeriod = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (uint)CredentialPeriod.Period30;
+            var bytes = new byte[8];
+            BinaryPrimitives.WriteUInt64BigEndian(bytes, timePeriod);
+            var newDataList = dataList.Concat(bytes).ToArray();
+
+            var data = command.CreateCommandApdu().Data;
+
+            Assert.True(data.Span.SequenceEqual(newDataList));
         }
-
-        [Fact]
-        public void CreateCommandApdu_ReturnsCorrectLength()
+        finally
         {
-            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
-
-            try
-            {
-                var command = new CalculateAllCredentialsCommand(ResponseFormat.Full);
-
-                byte[] dataList = { 0x74, 0x08 };
-
-                int timePeriod = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (int)CredentialPeriod.Period30;
-                byte[] bytes = BitConverter.GetBytes(timePeriod);
-                byte[] challenge = bytes.Concat(new byte[8 - bytes.Length]).ToArray();
-                byte[]? newDataList = dataList.Concat(challenge).ToArray();
-
-                Assert.Equal(newDataList.Length, command.CreateCommandApdu().Nc);
-            }
-            finally
-            {
-                utility.RestoreRandomProvider();
-            }
+            utility.RestoreRandomProvider();
         }
+    }
 
-        [Fact]
-        public void CreateCommandApdu_ReturnsCorrectData()
-        {
-            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+    [Fact]
+    public void CreateResponseApdu_ReturnsCorrectType()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var command = new CalculateAllCredentialsCommand();
+        var response = command.CreateResponseForApdu(responseApdu);
 
-            try
-            {
-                var command = new CalculateAllCredentialsCommand(ResponseFormat.Full);
-
-                byte[] dataList = { 0x74, 0x08 };
-
-                ulong timePeriod = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (uint)CredentialPeriod.Period30;
-                byte[] bytes = new byte[8];
-                BinaryPrimitives.WriteUInt64BigEndian(bytes, timePeriod);
-                byte[]? newDataList = dataList.Concat(bytes).ToArray();
-
-                ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-
-                Assert.True(data.Span.SequenceEqual(newDataList));
-            }
-            finally
-            {
-                utility.RestoreRandomProvider();
-            }
-        }
-
-        [Fact]
-        public void CreateResponseApdu_ReturnsCorrectType()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new CalculateAllCredentialsCommand();
-            CalculateAllCredentialsResponse? response = command.CreateResponseForApdu(responseApdu);
-
-            Assert.True(response is CalculateAllCredentialsResponse);
-        }
+        Assert.True(response is CalculateAllCredentialsResponse);
     }
 }

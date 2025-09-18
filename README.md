@@ -24,33 +24,36 @@ limitations under the License. -->
 Enterprise-grade cross-platform SDK for YubiKey integration, built on .NET.
 
 ## Table of Contents
+
 - [.NET YubiKey SDK](#net-yubikey-sdk)
-  - [Table of Contents](#table-of-contents)
-  - [Quick Start](#quick-start)
-    - [Installation](#installation)
-    - [Basic Usage](#basic-usage)
-  - [Documentation](#documentation)
-  - [SDK Support](#sdk-support)
-  - [SDK Packages](#sdk-packages)
-    - [Public Assemblies](#public-assemblies)
-      - [Yubico.YubiKey](#yubicoyubikey)
-      - [Yubico.Core](#yubicocore)
-    - [Internal Assemblies](#internal-assemblies)
-      - [Yubico.NativeShims](#yubiconativeshims)
-  - [Build asset attestation](#build-asset-attestation)
-  - [Project Structure](#project-structure)
-  - [Contributing](#contributing)
-    - [Building the Project](#building-the-project)
-  - [Connect with us](#connect-with-us)
+    - [Table of Contents](#table-of-contents)
+    - [Quick Start](#quick-start)
+        - [Installation](#installation)
+        - [Basic Usage](#basic-usage)
+    - [Documentation](#documentation)
+    - [SDK Support](#sdk-support)
+    - [SDK Packages](#sdk-packages)
+        - [Public Assemblies](#public-assemblies)
+            - [Yubico.YubiKey](#yubicoyubikey)
+            - [Yubico.Core](#yubicocore)
+        - [Internal Assemblies](#internal-assemblies)
+            - [Yubico.NativeShims](#yubiconativeshims)
+    - [Build asset attestation](#build-asset-attestation)
+    - [Project Structure](#project-structure)
+    - [Contributing](#contributing)
+        - [Building the Project](#building-the-project)
+    - [Connect with us](#connect-with-us)
 
 ## Quick Start
 
 ### Installation
+
 ```bash
 dotnet add package Yubico.YubiKey
 ```
 
 ### Basic Usage
+
 ```csharp
 using Yubico.YubiKey;
 
@@ -65,12 +68,14 @@ IYubiKeyDevice? GetFirstYubiKey()
 ## Documentation
 
 📚 Official documentation: [docs.yubico.com/yesdk](https://docs.yubico.com/yesdk/)
+
 - User Manual
 - API Reference
 
 ## SDK Support
 
 Supported Target Frameworks:
+
 - .NET Framework 4.7
 - .NET Standard 2.1
 - .NET 6 and above
@@ -80,27 +85,34 @@ Supported Target Frameworks:
 ### Public Assemblies
 
 #### Yubico.YubiKey
+
 Primary assembly containing all classes and types needed for YubiKey interaction.
 
 #### Yubico.Core
+
 Platform abstraction layer (PAL) providing:
+
 - OS-specific functionality abstraction
 - Device enumeration
 - Utility classes for various encoding/decoding operations:
-  - Base16
-  - Base32
-  - Tag-Length-Value (BER Encoded TLV)
-  - ModHex
+    - Base16
+    - Base32
+    - Tag-Length-Value (BER Encoded TLV)
+    - ModHex
 
 ### Internal Assemblies
 
 #### Yubico.NativeShims
+
 > ⚠️ **Not for public use**  
 > 🔧 **Unmanaged Library**  
 > Provides stable ABI for P/Invoke operations in Yubico.Core.
 
 ## Build asset attestation
-Using [GitHub Attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds), you are able to verify that the NuGet package has been generated from our repository, right down to the specific GitHub Action that built it like this:  
+
+Using [GitHub Attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds),
+you are able to verify that the NuGet package has been generated from our repository, right down to the specific GitHub
+Action that built it like this:  
 `> gh attestation verify .\Yubico.Core.1.12.0.nupkg --repo Yubico/Yubico.NET.SDK`
 
 Note that you need to have the [`gh`](https://cli.github.com/) CLI installed.
@@ -108,6 +120,7 @@ Note that you need to have the [`gh`](https://cli.github.com/) CLI installed.
 ## Project Structure
 
 Repository organization:
+
 - 📁 `docs/` - API documentation and supplementary content
 - 📁 `examples/` - Sample code and demonstrations
 - 📁 `src/` - Source code for all projects
@@ -122,6 +135,7 @@ Repository organization:
 ### Building the Project
 
 Prerequisites:
+
 1. Install required tools (see [Getting Started](./contributordocs/getting-started.md))
 2. Load `Yubico.NET.SDK.sln` into your IDE.
 3. Build solution

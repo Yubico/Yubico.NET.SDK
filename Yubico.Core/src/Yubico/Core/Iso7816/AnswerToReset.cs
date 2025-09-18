@@ -15,35 +15,36 @@
 using System;
 using System.Linq;
 
-namespace Yubico.Core.Iso7816
+namespace Yubico.Core.Iso7816;
+
+public class AnswerToReset
 {
-    public class AnswerToReset
+    private readonly byte[] _bytes;
+
+    public AnswerToReset(ReadOnlySpan<byte> bytes)
     {
-        private readonly byte[] _bytes;
+        _bytes = bytes.ToArray();
+    }
 
-        public AnswerToReset(ReadOnlySpan<byte> bytes)
-        {
-            _bytes = bytes.ToArray();
-        }
-
-        public override bool Equals(object? obj) => obj switch
+    public override bool Equals(object? obj) =>
+        obj switch
         {
             AnswerToReset atr => this == atr,
             _ => false
         };
 
-        public override int GetHashCode() => _bytes.GetHashCode();
+    public override int GetHashCode() => _bytes.GetHashCode();
 
-        public override string ToString() => BitConverter.ToString(_bytes.ToArray());
+    public override string ToString() => BitConverter.ToString(_bytes.ToArray());
 
-        public static bool operator ==(AnswerToReset l, AnswerToReset r) => (l, r) switch
+    public static bool operator ==(AnswerToReset l, AnswerToReset r) =>
+        (l, r) switch
         {
-            (AnswerToReset _, null) => false,
-            (null, AnswerToReset _) => false,
-            (AnswerToReset left, AnswerToReset right) => left._bytes.AsSpan().SequenceEqual(right._bytes.AsSpan()),
+            (not null, null) => false,
+            (null, not null) => false,
+            ({ } left, { } right) => left._bytes.AsSpan().SequenceEqual(right._bytes.AsSpan()),
             _ => false
         };
 
-        public static bool operator !=(AnswerToReset l, AnswerToReset r) => !(l == r);
-    }
+    public static bool operator !=(AnswerToReset l, AnswerToReset r) => !(l == r);
 }

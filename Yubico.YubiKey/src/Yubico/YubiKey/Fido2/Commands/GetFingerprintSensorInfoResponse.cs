@@ -14,47 +14,50 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     The response partner to the GetFingerprintSensorInfoCommand, containing
+///     information about the fingerprint technique of the YubiKey.
+/// </summary>
+public class GetFingerprintSensorInfoResponse : Fido2Response, IYubiKeyResponseWithData<FingerprintSensorInfo>
 {
+    private readonly BioEnrollmentResponse _response;
+
     /// <summary>
-    /// The response partner to the GetFingerprintSensorInfoCommand, containing
-    /// information about the fingerprint technique of the YubiKey.
+    ///     Constructs a new instance of
+    ///     <see cref="GetFingerprintSensorInfoResponse" /> based on a response
+    ///     APDU provided by the YubiKey.
     /// </summary>
-    public class GetFingerprintSensorInfoResponse : Fido2Response, IYubiKeyResponseWithData<FingerprintSensorInfo>
+    /// <param name="responseApdu">
+    ///     A response APDU containing the CBOR response data for the
+    ///     <c>authenticatorBioEnrollment</c> command.
+    /// </param>
+    public GetFingerprintSensorInfoResponse(ResponseApdu responseApdu)
+        : base(responseApdu)
     {
-        private readonly BioEnrollmentResponse _response;
-
-        /// <summary>
-        /// Constructs a new instance of
-        /// <see cref="GetFingerprintSensorInfoResponse"/> based on a response
-        /// APDU provided by the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response data for the
-        /// <c>authenticatorBioEnrollment</c> command.
-        /// </param>
-        public GetFingerprintSensorInfoResponse(ResponseApdu responseApdu)
-            : base(responseApdu)
-        {
-            _response = new BioEnrollmentResponse(responseApdu);
-        }
-
-        /// <inheritdoc/>
-        public FingerprintSensorInfo GetData()
-        {
-            var bioEnrollmentData = _response.GetData();
-
-            if (!(bioEnrollmentData.FingerprintKind is null) &&
-                !(bioEnrollmentData.MaxCaptureCount is null) &&
-                !(bioEnrollmentData.MaxFriendlyNameBytes is null))
-            {
-                return new FingerprintSensorInfo(
-                    bioEnrollmentData.FingerprintKind.Value,
-                    bioEnrollmentData.MaxCaptureCount.Value,
-                    bioEnrollmentData.MaxFriendlyNameBytes.Value);
-            }
-
-            throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
-        }
+        _response = new BioEnrollmentResponse(responseApdu);
     }
+
+    #region IYubiKeyResponseWithData<FingerprintSensorInfo> Members
+
+    /// <inheritdoc />
+    public FingerprintSensorInfo GetData()
+    {
+        var bioEnrollmentData = _response.GetData();
+
+        if (bioEnrollmentData.FingerprintKind is not null &&
+            bioEnrollmentData.MaxCaptureCount is not null &&
+            bioEnrollmentData.MaxFriendlyNameBytes is not null)
+        {
+            return new FingerprintSensorInfo(
+                bioEnrollmentData.FingerprintKind.Value,
+                bioEnrollmentData.MaxCaptureCount.Value,
+                bioEnrollmentData.MaxFriendlyNameBytes.Value);
+        }
+
+        throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
+    }
+
+    #endregion
 }

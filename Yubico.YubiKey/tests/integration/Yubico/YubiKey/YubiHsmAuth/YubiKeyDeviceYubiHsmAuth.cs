@@ -15,19 +15,19 @@
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+public class YubiKeyDeviceYubiHsmAuth
 {
-    public class YubiKeyDeviceYubiHsmAuth
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void TryConnect_YubiHsmAuth(
+        StandardTestDevice testDeviceType)
     {
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void TryConnect_YubiHsmAuth(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            bool result = testDevice.TryConnect(YubiKeyApplication.YubiHsmAuth, out _);
+        var result = testDevice.TryConnect(YubiKeyApplication.YubiHsmAuth, out _);
 
-            Assert.True(result);
-        }
+        Assert.True(result);
     }
 }

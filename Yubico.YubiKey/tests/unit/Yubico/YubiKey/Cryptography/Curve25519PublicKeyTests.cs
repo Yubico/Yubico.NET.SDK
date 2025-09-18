@@ -22,14 +22,15 @@ public class Curve25519PublicKeyTests
     [Theory]
     [InlineData(KeyType.Ed25519)]
     [InlineData(KeyType.X25519)]
-    public void CreateFromValue_CreatesInstance(KeyType keyType)
+    public void CreateFromValue_CreatesInstance(
+        KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(keyType);
         var testPublicPoint = testKey.GetPublicPoint();
 
         // Act
-        var publicKey = Curve25519PublicKey.CreateFromValue(testPublicPoint, keyType); 
+        var publicKey = Curve25519PublicKey.CreateFromValue(testPublicPoint, keyType);
 
         // Assert
         Assert.NotNull(publicKey);
@@ -40,11 +41,12 @@ public class Curve25519PublicKeyTests
     [Theory]
     [InlineData(KeyType.Ed25519)]
     [InlineData(KeyType.X25519)]
-    public void CreateCurve25519FromPkcs8EncodedKey_WithValidKey_CreatesInstance(KeyType keyType)
+    public void CreateCurve25519FromPkcs8EncodedKey_WithValidKey_CreatesInstance(
+        KeyType keyType)
     {
         // Arrange
         var testPublicKey = TestKeys.GetTestPublicKey(keyType);
-            
+
         // Act
         var publicKey = Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(testPublicKey.EncodedKey);
         Assert.NotNull(publicKey);
@@ -52,18 +54,19 @@ public class Curve25519PublicKeyTests
         // Assert
         Assert.Equal(testPublicKey.GetPublicPoint(), publicKey.PublicPoint);
     }
-    
+
     [Theory]
     [InlineData(KeyType.Ed25519)]
     [InlineData(KeyType.X25519)]
-    public void CreateFromPkcs8_CreatesInstance(KeyType keyType)
+    public void CreateFromPkcs8_CreatesInstance(
+        KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(keyType);
         var testPublicPoint = testKey.GetPublicPoint();
 
         // Act
-        var publicKey = Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(testKey.EncodedKey); 
+        var publicKey = Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(testKey.EncodedKey);
 
         // Assert
         Assert.NotNull(publicKey);

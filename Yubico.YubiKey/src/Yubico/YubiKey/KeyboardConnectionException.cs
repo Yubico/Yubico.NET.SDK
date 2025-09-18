@@ -15,28 +15,25 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+[Serializable]
+public class KeyboardConnectionException : Exception
 {
-    [Serializable]
-    public class KeyboardConnectionException : Exception
+    public KeyboardConnectionException()
     {
-        public KeyboardConnectionException()
-        {
+    }
 
-        }
+    public KeyboardConnectionException(string message) : base(message)
+    {
+    }
 
-        public KeyboardConnectionException(string message) : base(message)
-        {
-        }
+    public KeyboardConnectionException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
 
-        public KeyboardConnectionException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        protected KeyboardConnectionException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
-            base(serializationInfo, streamingContext)
-        {
-
-        }
+    protected KeyboardConnectionException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
+        base(serializationInfo, streamingContext)
+    {
     }
 }

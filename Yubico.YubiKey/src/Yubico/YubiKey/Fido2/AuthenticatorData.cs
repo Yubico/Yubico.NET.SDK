@@ -21,392 +21,393 @@ using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+/// <summary>
+///     Contains information about the credential, assertion, or the
+///     authenticator itself after making a credential or getting an assertion.
+/// </summary>
+/// <remarks>
+///     When a new credential is made, or a credential is used to get an
+///     assertion, the YubiKey returns data about that operation. When making a
+///     credential, this includes information about the authenticator itself,
+///     such as the aaguid.
+///     > The <c>authenticator data object</c> defined in the FIDO2 standard is
+///     > encoded but not following the rules of CBOR or DER or any other
+///     > standard encoding scheme. The encoding is defined in the W3C standard.
+/// </remarks>
+public class AuthenticatorData
 {
+    private const int RelyingPartyIdHashLength = 32;
+    private const int SignCountLength = 4;
+    private const int CredentialIdLengthLength = 2;
+    private const int AaguidLength = 16;
+    private const byte UserPresenceBit = 0x01;
+    private const byte UserVerificationBit = 0x04;
+    private const byte AttestedBit = 0x40;
+    private const byte ExtensionsBit = 0x80;
+
+    // The default constructor explicitly defined. We don't want it to be
+    // used.
+    private AuthenticatorData()
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
-    /// Contains information about the credential, assertion, or the
-    /// authenticator itself after making a credential or getting an assertion.
+    ///     Build a new instance of <see cref="AuthenticatorData" /> based on the
+    ///     given encoding.
     /// </summary>
     /// <remarks>
-    /// When a new credential is made, or a credential is used to get an
-    /// assertion, the YubiKey returns data about that operation. When making a
-    /// credential, this includes information about the authenticator itself,
-    /// such as the aaguid.
-    /// > The <c>authenticator data object</c> defined in the FIDO2 standard is
-    /// > encoded but not following the rules of CBOR or DER or any other
-    /// > standard encoding scheme. The encoding is defined in the W3C standard.
+    ///     The overall encoding does not follow any standard encoding scheme but
+    ///     is defined in the W3C standard, although two of the elements are
+    ///     CBOR-encoded structures.
+    ///     <para>
+    ///         This constructor will copy the input data, not just a reference.
+    ///     </para>
     /// </remarks>
-    public class AuthenticatorData
+    /// <param name="encodedData">
+    ///     The authenticator data, encoded following the definition in the W3C
+    ///     standard.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    ///     The <c>encodedData</c> is not a correct encoding for FIDO2
+    ///     authenticator data.
+    /// </exception>
+    public AuthenticatorData(ReadOnlyMemory<byte> encodedData)
     {
-        private const int RelyingPartyIdHashLength = 32;
-        private const int SignCountLength = 4;
-        private const int CredentialIdLengthLength = 2;
-        private const int AaguidLength = 16;
-        private const byte UserPresenceBit = 0x01;
-        private const byte UserVerificationBit = 0x04;
-        private const byte AttestedBit = 0x40;
-        private const byte ExtensionsBit = 0x80;
+        EncodedAuthenticatorData = encodedData.ToArray();
 
-        /// <summary>
-        /// The encoded authenticator data is used to verify the attestation
-        /// statement (make credential) or assertion signature (get assertion).
-        /// </summary>
-        public ReadOnlyMemory<byte> EncodedAuthenticatorData { get; private set; }
+        RelyingPartyIdHash = EncodedAuthenticatorData[..RelyingPartyIdHashLength];
+        int offset = RelyingPartyIdHashLength;
+        byte flags = EncodedAuthenticatorData.Span[offset];
+        UserPresence = (flags & UserPresenceBit) != 0;
+        UserVerification = (flags & UserVerificationBit) != 0;
+        bool attestedData = (flags & AttestedBit) != 0;
+        bool extensions = (flags & ExtensionsBit) != 0;
+        offset++;
+        SignatureCounter = BinaryPrimitives.ReadInt32BigEndian(
+            EncodedAuthenticatorData.Span.Slice(offset, SignCountLength));
 
-        /// <summary>
-        /// The digest of the relying party ID. It is the SHA-256 digest of the
-        /// <c>Id</c> property of the <see cref="RelyingParty"/> class passed to
-        /// the <c>MakeCredential</c> method or command as part of the
-        /// <see cref="MakeCredentialParameters"/>.
-        /// </summary>
-        public ReadOnlyMemory<byte> RelyingPartyIdHash { get; private set; }
+        offset += SignCountLength;
 
-        /// <summary>
-        /// If <c>true</c>, a test of user presence indicates a user is indeed
-        /// present before making the credential (e.g. the YubiKey was touched).
-        /// Otherwise it will be <c>false</c>.
-        /// </summary>
-        public bool UserPresence { get; private set; }
-
-        /// <summary>
-        /// If <c>true</c>, a test of user verification operation indicates the
-        /// user has indeed been verified. Note that this can be biometric
-        /// verification, as well as touch plus PIN, or password. Otherwise it
-        /// will be <c>false</c>.
-        /// </summary>
-        public bool UserVerification { get; private set; }
-
-        /// <summary>
-        /// The count the authenticator returns. This should be an increasing
-        /// value for each time <c>GetAssertion</c> is called and is returned to
-        /// the relying party, which can verify that it is greater than the
-        /// previous value (to help thwart authenticator cloning).
-        /// </summary>
-        public int SignatureCounter { get; private set; }
-
-        /// <summary>
-        /// The authenticator's AAGUID. This is an optional value and can be null.
-        /// </summary>
-        /// <remarks>
-        /// When making a credential, this information will be provided, when
-        /// getting an assertion, it will not.
-        /// </remarks>
-        public ReadOnlyMemory<byte>? Aaguid { get; private set; }
-
-        /// <summary>
-        /// The CredentialId. This is an optional value and can be null.
-        /// </summary>
-        /// <remarks>
-        /// When making a credential, this information will be provided, when
-        /// getting an assertion, it will not.
-        /// </remarks>
-        public CredentialId? CredentialId { get; private set; }
-
-        /// <summary>
-        /// The Credential's public key. This is an optional value and can be null.
-        /// </summary>
-        /// <remarks>
-        /// When making a credential, this information will be provided, when
-        /// getting an assertion, it will not.
-        /// </remarks>
-        public CoseKey? CredentialPublicKey { get; private set; }
-
-        /// <summary>
-        /// The list of extensions. This is an optional value and can be null.
-        /// </summary>
-        /// <remarks>
-        /// Each extension is a key/value pair. All keys are strings, but each
-        /// extension has its own definition of a value. It could be an int, or
-        /// it could be a map containing a string and a boolean,. It is the
-        /// caller's responsibility to decode the value.
-        /// <para>
-        /// For each value, the standard (or the vendor in the case of
-        /// vendor-defined extensions) will define the structure of the value.
-        /// From that structure the value can be decoded following CBOR rules.
-        /// The encoded value is what is stored in this dictionary.
-        /// </para>
-        /// </remarks>
-        public IReadOnlyDictionary<string, byte[]>? Extensions { get; private set; }
-
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        private AuthenticatorData()
+        if (attestedData)
         {
-            throw new NotImplementedException();
+            Aaguid = EncodedAuthenticatorData.Slice(offset, AaguidLength);
+            offset += AaguidLength;
+            int credentialIdLength = BinaryPrimitives.ReadInt16BigEndian(
+                EncodedAuthenticatorData.Span.Slice(offset, CredentialIdLengthLength));
+
+            offset += CredentialIdLengthLength;
+            CredentialId = new CredentialId { Id = EncodedAuthenticatorData.Slice(offset, credentialIdLength) };
+            offset += credentialIdLength;
+            CredentialPublicKey = CoseKey.Create(EncodedAuthenticatorData[offset..], out int bytesRead);
+            offset += bytesRead;
         }
 
-        /// <summary>
-        /// Build a new instance of <see cref="AuthenticatorData"/> based on the
-        /// given encoding.
-        /// </summary>
-        /// <remarks>
-        /// The overall encoding does not follow any standard encoding scheme but
-        /// is defined in the W3C standard, although two of the elements are
-        /// CBOR-encoded structures.
-        /// <para>
-        /// This constructor will copy the input data, not just a reference.
-        /// </para>
-        /// </remarks>
-        /// <param name="encodedData">
-        /// The authenticator data, encoded following the definition in the W3C
-        /// standard.
-        /// </param>
-        /// <exception cref="ArgumentException">
-        /// The <c>encodedData</c> is not a correct encoding for FIDO2
-        /// authenticator data.
-        /// </exception>
-        public AuthenticatorData(ReadOnlyMemory<byte> encodedData)
+        // For some versions of the YubiKey, it is possible there is no
+        // extensions data, yet the extensions bit is set. This generally
+        // happens if the caller requested extension data, but the YubiKey
+        // determines that the caller is not allowed to get that data or it
+        // is not available. So don't try to read any extensions unless we
+        // know for sure there is data to read.
+        if (!extensions || offset >= EncodedAuthenticatorData.Length)
         {
-            EncodedAuthenticatorData = encodedData.ToArray();
-
-            RelyingPartyIdHash = EncodedAuthenticatorData[..RelyingPartyIdHashLength];
-            int offset = RelyingPartyIdHashLength;
-            byte flags = EncodedAuthenticatorData.Span[offset];
-            UserPresence = (flags & UserPresenceBit) != 0;
-            UserVerification = (flags & UserVerificationBit) != 0;
-            bool attestedData = (flags & AttestedBit) != 0;
-            bool extensions = (flags & ExtensionsBit) != 0;
-            offset++;
-            SignatureCounter = BinaryPrimitives.ReadInt32BigEndian(
-                EncodedAuthenticatorData.Span.Slice(offset, SignCountLength));
-            offset += SignCountLength;
-
-            if (attestedData)
-            {
-                Aaguid = EncodedAuthenticatorData.Slice(offset, AaguidLength);
-                offset += AaguidLength;
-                int credentialIdLength = BinaryPrimitives.ReadInt16BigEndian(
-                    EncodedAuthenticatorData.Span.Slice(offset, CredentialIdLengthLength));
-                offset += CredentialIdLengthLength;
-                CredentialId = new CredentialId() { Id = EncodedAuthenticatorData.Slice(offset, credentialIdLength) };
-                offset += credentialIdLength;
-                CredentialPublicKey = CoseKey.Create(EncodedAuthenticatorData[offset..], out int bytesRead);
-                offset += bytesRead;
-            }
-            // For some versions of the YubiKey, it is possible there is no
-            // extensions data, yet the extensions bit is set. This generally
-            // happens if the caller requested extension data, but the YubiKey
-            // determines that the caller is not allowed to get that data or it
-            // is not available. So don't try to read any extensions unless we
-            // know for sure there is data to read.
-            if (!extensions || offset >= EncodedAuthenticatorData.Length)
-            {
-                return;
-            }
-
-            var extensionList = new Dictionary<string, byte[]>();
-            var cbor = new CborReader(EncodedAuthenticatorData[offset..], CborConformanceMode.Ctap2Canonical);
-            int? entries = cbor.ReadStartMap();
-            int count = entries ?? 0;
-            while (count > 0)
-            {
-                string extensionKey = cbor.ReadTextString();
-                extensionList.Add(extensionKey, cbor.ReadEncodedValue().ToArray());
-                count--;
-            }
-            cbor.ReadEndMap();
-
-            Extensions = extensionList;
+            return;
         }
 
-        /// <summary>
-        /// Get the value of the "credBlob" extension. This returns the decoded
-        /// value.
-        /// </summary>
-        /// <remarks>
-        /// Because this extension is used more often, a dedicated method is
-        /// provided as a convenience. There is no need for the caller to
-        /// CBOR-decode the value for the key "credBlob".
-        /// <para>
-        /// If there is no "credBlob" extension, this method will return an empty
-        /// byte array.
-        /// </para>
-        /// </remarks>
-        /// <returns>
-        /// A byte array containing the decoded "credBlob" extension.
-        /// </returns>
-        public byte[] GetCredBlobExtension()
+        var extensionList = new Dictionary<string, byte[]>();
+        var cbor = new CborReader(EncodedAuthenticatorData[offset..], CborConformanceMode.Ctap2Canonical);
+        int? entries = cbor.ReadStartMap();
+        int count = entries ?? 0;
+        while (count > 0)
         {
-            if (!TryGetExtensionData(Fido2ExtensionKeys.CredBlob, out var encodedData))
-            {
-                return Array.Empty<byte>();
-            }
-
-            var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
-            return cborReader.ReadByteString();
-
+            string extensionKey = cbor.ReadTextString();
+            extensionList.Add(extensionKey, cbor.ReadEncodedValue().ToArray());
+            count--;
         }
 
-        /// <summary>
-        /// Get the value of the "thirdPartyPayment" extension.
-        /// </summary>
-        /// <remarks>
-        /// This method checks for the presence of the "thirdPartyPayment" extension in the authenticator data.
-        /// It returns <c>true</c> if the extension is present and its value is true, indicating that the credential
-        /// is enabled for third-party payments. Otherwise, it returns <c>false</c>.
-        /// </remarks>
-        /// <returns>
-        /// A boolean indicating whether the "thirdPartyPayment" extension is enabled.
-        /// </returns>
-        public bool GetThirdPartyPaymentExtension()
-        {
-            if (!TryGetExtensionData(Fido2ExtensionKeys.ThirdPartyPayment, out var encodedData))
-            {
-                return false;
-            }
+        cbor.ReadEndMap();
 
-            var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
-            return cborReader.ReadBoolean();
+        Extensions = extensionList;
+    }
+
+    /// <summary>
+    ///     The encoded authenticator data is used to verify the attestation
+    ///     statement (make credential) or assertion signature (get assertion).
+    /// </summary>
+    public ReadOnlyMemory<byte> EncodedAuthenticatorData { get; }
+
+    /// <summary>
+    ///     The digest of the relying party ID. It is the SHA-256 digest of the
+    ///     <c>Id</c> property of the <see cref="RelyingParty" /> class passed to
+    ///     the <c>MakeCredential</c> method or command as part of the
+    ///     <see cref="MakeCredentialParameters" />.
+    /// </summary>
+    public ReadOnlyMemory<byte> RelyingPartyIdHash { get; private set; }
+
+    /// <summary>
+    ///     If <c>true</c>, a test of user presence indicates a user is indeed
+    ///     present before making the credential (e.g. the YubiKey was touched).
+    ///     Otherwise it will be <c>false</c>.
+    /// </summary>
+    public bool UserPresence { get; private set; }
+
+    /// <summary>
+    ///     If <c>true</c>, a test of user verification operation indicates the
+    ///     user has indeed been verified. Note that this can be biometric
+    ///     verification, as well as touch plus PIN, or password. Otherwise it
+    ///     will be <c>false</c>.
+    /// </summary>
+    public bool UserVerification { get; private set; }
+
+    /// <summary>
+    ///     The count the authenticator returns. This should be an increasing
+    ///     value for each time <c>GetAssertion</c> is called and is returned to
+    ///     the relying party, which can verify that it is greater than the
+    ///     previous value (to help thwart authenticator cloning).
+    /// </summary>
+    public int SignatureCounter { get; private set; }
+
+    /// <summary>
+    ///     The authenticator's AAGUID. This is an optional value and can be null.
+    /// </summary>
+    /// <remarks>
+    ///     When making a credential, this information will be provided, when
+    ///     getting an assertion, it will not.
+    /// </remarks>
+    public ReadOnlyMemory<byte>? Aaguid { get; private set; }
+
+    /// <summary>
+    ///     The CredentialId. This is an optional value and can be null.
+    /// </summary>
+    /// <remarks>
+    ///     When making a credential, this information will be provided, when
+    ///     getting an assertion, it will not.
+    /// </remarks>
+    public CredentialId? CredentialId { get; private set; }
+
+    /// <summary>
+    ///     The Credential's public key. This is an optional value and can be null.
+    /// </summary>
+    /// <remarks>
+    ///     When making a credential, this information will be provided, when
+    ///     getting an assertion, it will not.
+    /// </remarks>
+    public CoseKey? CredentialPublicKey { get; private set; }
+
+    /// <summary>
+    ///     The list of extensions. This is an optional value and can be null.
+    /// </summary>
+    /// <remarks>
+    ///     Each extension is a key/value pair. All keys are strings, but each
+    ///     extension has its own definition of a value. It could be an int, or
+    ///     it could be a map containing a string and a boolean,. It is the
+    ///     caller's responsibility to decode the value.
+    ///     <para>
+    ///         For each value, the standard (or the vendor in the case of
+    ///         vendor-defined extensions) will define the structure of the value.
+    ///         From that structure the value can be decoded following CBOR rules.
+    ///         The encoded value is what is stored in this dictionary.
+    ///     </para>
+    /// </remarks>
+    public IReadOnlyDictionary<string, byte[]>? Extensions { get; }
+
+    /// <summary>
+    ///     Get the value of the "credBlob" extension. This returns the decoded
+    ///     value.
+    /// </summary>
+    /// <remarks>
+    ///     Because this extension is used more often, a dedicated method is
+    ///     provided as a convenience. There is no need for the caller to
+    ///     CBOR-decode the value for the key "credBlob".
+    ///     <para>
+    ///         If there is no "credBlob" extension, this method will return an empty
+    ///         byte array.
+    ///     </para>
+    /// </remarks>
+    /// <returns>
+    ///     A byte array containing the decoded "credBlob" extension.
+    /// </returns>
+    public byte[] GetCredBlobExtension()
+    {
+        if (!TryGetExtensionData(Fido2ExtensionKeys.CredBlob, out var encodedData))
+        {
+            return Array.Empty<byte>();
         }
 
-        /// <summary>
-        /// Get the value of the "minPinLength" extension. This returns the decoded
-        /// value.
-        /// </summary>
-        /// <remarks>
-        /// Because this extension is used more often, a dedicated method is
-        /// provided as a convenience. There is no need for the caller to
-        /// CBOR-decode the value for the key "minPinLength".
-        /// <para>
-        /// If there is no "minPinLength" extension, this method will return null.
-        /// </para>
-        /// </remarks>
-        /// <returns>
-        /// An int that is the decoded "minPinLength" extension.
-        /// </returns>
-        public int? GetMinPinLengthExtension()
+        var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
+        return cborReader.ReadByteString();
+    }
+
+    /// <summary>
+    ///     Get the value of the "thirdPartyPayment" extension.
+    /// </summary>
+    /// <remarks>
+    ///     This method checks for the presence of the "thirdPartyPayment" extension in the authenticator data.
+    ///     It returns <c>true</c> if the extension is present and its value is true, indicating that the credential
+    ///     is enabled for third-party payments. Otherwise, it returns <c>false</c>.
+    /// </remarks>
+    /// <returns>
+    ///     A boolean indicating whether the "thirdPartyPayment" extension is enabled.
+    /// </returns>
+    public bool GetThirdPartyPaymentExtension()
+    {
+        if (!TryGetExtensionData(Fido2ExtensionKeys.ThirdPartyPayment, out var encodedData))
         {
-            if (!TryGetExtensionData(Fido2ExtensionKeys.MinPinLength, out var encodedData))
-            {
-                return null;
-            }
-
-            var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
-            return cborReader.ReadInt32();
-
+            return false;
         }
 
-        /// <summary>
-        /// Get the value of the "hmac-secret" or "hmac-secret-mc" extension.
-        /// This returns the decoded and decrypted value or values.
-        /// </summary>
-        /// <remarks>
-        /// Because this extension is used more often, a dedicated method is
-        /// provided as a convenience. There is no need for the caller to
-        /// CBOR-decode the value for the key "hmac-secret".
-        /// <para>
-        /// There are possibly two values to return. Both will be 32 bytes long.
-        /// If there is only one secret value returned, this method will return a
-        /// 32-byte long array. If there are two values returned, this method
-        /// will return a 64-byte long array, where "output1" is the first 32
-        /// bytes and "output2" is the second 32 bytes.
-        /// </para>
-        /// <para>
-        /// The caller must supply the
-        /// <see cref="PinUvAuthProtocolBase"/> used to create the
-        /// <c>GetAssertion</c> parameters.
-        /// </para>
-        /// <para>
-        /// If you are getting assertions using
-        /// <see cref="Fido2Session.GetAssertions"/>, you can use the
-        /// <see cref="Fido2Session.AuthProtocol"/> property.
-        /// <code language="csharp">
-        ///        var gaParams = new GetAssertionParameters(relyingParty, clientDataHash);
-        ///        gaParams.RequestHmacSecretExtension(salt);
-        ///        IReadOnlyList&lt;GetAssertionData&gt; assertions = fido2.GetAssertions(gaParams);
-        ///
-        ///        byte[] hmacSecret = assertions[0].AuthenticatorData.GetHmacSecretExtension(
-        ///            fido2Session.AuthProtocol);
-        /// </code>
-        /// If the "hmac-secret" or "hmac-secret-mc"-extension was not specified when making the
-        /// credential, then the YubiKey will simply not return anything. It is
-        /// not an error. In that case, this method will return an empty byte
-        /// array.
-        /// </para>
-        /// </remarks>
-        /// <param name="authProtocol">
-        /// An instance of one of the subclasses of <c>PinUvAuthProtocolBase</c>,
-        /// which was used to get the assertion.
-        /// </param>
-        /// <returns>
-        /// A byte array containing the decoded "hmac-secret" extension.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// If the "hmac-key" is in the extensions, and the <c>authProtocol</c>
-        /// argument is null.
-        /// </exception>
-        public byte[] GetHmacSecretExtension(PinUvAuthProtocolBase authProtocol)
+        var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
+        return cborReader.ReadBoolean();
+    }
+
+    /// <summary>
+    ///     Get the value of the "minPinLength" extension. This returns the decoded
+    ///     value.
+    /// </summary>
+    /// <remarks>
+    ///     Because this extension is used more often, a dedicated method is
+    ///     provided as a convenience. There is no need for the caller to
+    ///     CBOR-decode the value for the key "minPinLength".
+    ///     <para>
+    ///         If there is no "minPinLength" extension, this method will return null.
+    ///     </para>
+    /// </remarks>
+    /// <returns>
+    ///     An int that is the decoded "minPinLength" extension.
+    /// </returns>
+    public int? GetMinPinLengthExtension()
+    {
+        if (!TryGetExtensionData(Fido2ExtensionKeys.MinPinLength, out var encodedData))
         {
-            Guard.IsNotNull(authProtocol, nameof(authProtocol));
-
-            if (!TryGetExtensionData(Fido2ExtensionKeys.HmacSecret, out var encodedData))
-            {
-                return Array.Empty<byte>();
-            }
-
-            bool hasHmacMcSecret = encodedData.Span[0] == CborHelpers.True;
-            if (hasHmacMcSecret && !TryGetExtensionData(Fido2ExtensionKeys.HmacSecretMc, out encodedData))
-            {
-                return Array.Empty<byte>();
-            }
-
-            var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
-            byte[] encryptedData = cborReader.ReadByteString();
-
-            return authProtocol.Decrypt(encryptedData);
+            return null;
         }
 
-        /// <summary>
-        /// Get the value of the "credProtect" extension. This returns the
-        /// decoded value.
-        /// </summary>
-        /// <remarks>
-        /// Because this extension is used more often, a dedicated method is
-        /// provided as a convenience. There is no need for the caller to
-        /// CBOR-decode the value for the key "credProtect".
-        /// </remarks>
-        /// <returns>
-        /// The CredProtectPolicy enum describing the value of the "credProtect"
-        /// extension.
-        /// </returns>
-        /// <exception cref="Ctap2DataException">
-        /// If the value of the extension is not a valid CredProtect policy.
-        /// </exception>
-        public CredProtectPolicy GetCredProtectExtension()
+        var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
+        return cborReader.ReadInt32();
+    }
+
+    /// <summary>
+    ///     Get the value of the "hmac-secret" or "hmac-secret-mc" extension.
+    ///     This returns the decoded and decrypted value or values.
+    /// </summary>
+    /// <remarks>
+    ///     Because this extension is used more often, a dedicated method is
+    ///     provided as a convenience. There is no need for the caller to
+    ///     CBOR-decode the value for the key "hmac-secret".
+    ///     <para>
+    ///         There are possibly two values to return. Both will be 32 bytes long.
+    ///         If there is only one secret value returned, this method will return a
+    ///         32-byte long array. If there are two values returned, this method
+    ///         will return a 64-byte long array, where "output1" is the first 32
+    ///         bytes and "output2" is the second 32 bytes.
+    ///     </para>
+    ///     <para>
+    ///         The caller must supply the
+    ///         <see cref="PinUvAuthProtocolBase" /> used to create the
+    ///         <c>GetAssertion</c> parameters.
+    ///     </para>
+    ///     <para>
+    ///         If you are getting assertions using
+    ///         <see cref="Fido2Session.GetAssertions" />, you can use the
+    ///         <see cref="Fido2Session.AuthProtocol" /> property.
+    ///         <code language="csharp">
+    ///        var gaParams = new GetAssertionParameters(relyingParty, clientDataHash);
+    ///        gaParams.RequestHmacSecretExtension(salt);
+    ///        IReadOnlyList&lt;GetAssertionData&gt; assertions = fido2.GetAssertions(gaParams);
+    /// 
+    ///        byte[] hmacSecret = assertions[0].AuthenticatorData.GetHmacSecretExtension(
+    ///            fido2Session.AuthProtocol);
+    /// </code>
+    ///         If the "hmac-secret" or "hmac-secret-mc"-extension was not specified when making the
+    ///         credential, then the YubiKey will simply not return anything. It is
+    ///         not an error. In that case, this method will return an empty byte
+    ///         array.
+    ///     </para>
+    /// </remarks>
+    /// <param name="authProtocol">
+    ///     An instance of one of the subclasses of <c>PinUvAuthProtocolBase</c>,
+    ///     which was used to get the assertion.
+    /// </param>
+    /// <returns>
+    ///     A byte array containing the decoded "hmac-secret" extension.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     If the "hmac-key" is in the extensions, and the <c>authProtocol</c>
+    ///     argument is null.
+    /// </exception>
+    public byte[] GetHmacSecretExtension(PinUvAuthProtocolBase authProtocol)
+    {
+        Guard.IsNotNull(authProtocol, nameof(authProtocol));
+
+        if (!TryGetExtensionData(Fido2ExtensionKeys.HmacSecret, out var encodedData))
         {
-            if (!TryGetExtensionData(Fido2ExtensionKeys.CredProtect, out var encodedValue))
-            {
-                return CredProtectPolicy.None;
-            }
-
-            if (encodedValue.Length != 1 ||
-                encodedValue.Span[0] < 1 ||
-                encodedValue.Span[0] > 3)
-            {
-                throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
-            }
-
-            return (CredProtectPolicy)encodedValue.Span[0];
+            return Array.Empty<byte>();
         }
 
-        private bool TryGetExtensionData(string extensionKey, out Memory<byte> encodedValue)
+        bool hasHmacMcSecret = encodedData.Span[0] == CborHelpers.True;
+        if (hasHmacMcSecret && !TryGetExtensionData(Fido2ExtensionKeys.HmacSecretMc, out encodedData))
         {
-            Guard.IsNotNullOrEmpty(extensionKey, nameof(extensionKey));
-
-            if (Extensions is null)
-            {
-                encodedValue = Array.Empty<byte>();
-                return false;
-            }
-
-            if (Extensions.TryGetValue(extensionKey, out byte[] value) != true)
-            {
-                encodedValue = Array.Empty<byte>();
-                return false;
-            }
-
-            encodedValue = value;
-            return true;
+            return Array.Empty<byte>();
         }
+
+        var cborReader = new CborReader(encodedData, CborConformanceMode.Ctap2Canonical);
+        byte[] encryptedData = cborReader.ReadByteString();
+
+        return authProtocol.Decrypt(encryptedData);
+    }
+
+    /// <summary>
+    ///     Get the value of the "credProtect" extension. This returns the
+    ///     decoded value.
+    /// </summary>
+    /// <remarks>
+    ///     Because this extension is used more often, a dedicated method is
+    ///     provided as a convenience. There is no need for the caller to
+    ///     CBOR-decode the value for the key "credProtect".
+    /// </remarks>
+    /// <returns>
+    ///     The CredProtectPolicy enum describing the value of the "credProtect"
+    ///     extension.
+    /// </returns>
+    /// <exception cref="Ctap2DataException">
+    ///     If the value of the extension is not a valid CredProtect policy.
+    /// </exception>
+    public CredProtectPolicy GetCredProtectExtension()
+    {
+        if (!TryGetExtensionData(Fido2ExtensionKeys.CredProtect, out var encodedValue))
+        {
+            return CredProtectPolicy.None;
+        }
+
+        if (encodedValue.Length != 1 ||
+            encodedValue.Span[0] < 1 ||
+            encodedValue.Span[0] > 3)
+        {
+            throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
+        }
+
+        return (CredProtectPolicy)encodedValue.Span[0];
+    }
+
+    private bool TryGetExtensionData(string extensionKey, out Memory<byte> encodedValue)
+    {
+        Guard.IsNotNullOrEmpty(extensionKey, nameof(extensionKey));
+
+        if (Extensions is null)
+        {
+            encodedValue = Array.Empty<byte>();
+            return false;
+        }
+
+        if (!Extensions.TryGetValue(extensionKey, out byte[] value))
+        {
+            encodedValue = Array.Empty<byte>();
+            return false;
+        }
+
+        encodedValue = value;
+        return true;
     }
 }

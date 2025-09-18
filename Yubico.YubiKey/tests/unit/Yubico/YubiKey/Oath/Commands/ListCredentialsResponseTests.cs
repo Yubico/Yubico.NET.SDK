@@ -16,232 +16,237 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+public class ListCredentialsResponseTests
 {
-    public class ListCredentialsResponseTests
+    [Fact]
+    public void Status_SuccessResponseApdu_ReturnsSuccess()
     {
-        [Fact]
-        public void Status_SuccessResponseApdu_ReturnsSuccess()
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
+
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var listCredentialsResponse = new ListResponse(responseApdu);
+
+        Assert.Equal(ResponseStatus.Success, listCredentialsResponse.Status);
+    }
+
+    [Fact]
+    public void SuccessResponseApdu_NoCredentials_ListCredentialsCorrectly()
+    {
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
+
+        var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+
+        var listCredentialsResponse = new ListResponse(responseApdu);
+
+        var data = listCredentialsResponse.GetData();
+
+        Assert.Empty(data);
+        Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
+    }
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_OneCredential_ListCredentialsCorrectly()
+    {
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
+
+        var responseApdu = new ResponseApdu(new byte[]
         {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
+            0x72, 0x1B, 0x21, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F,
+            0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75,
+            0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D,
+            sw1, sw2
+        });
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var listCredentialsResponse = new ListResponse(responseApdu);
+        var data = listCredentialsResponse.GetData();
 
-            Assert.Equal(ResponseStatus.Success, listCredentialsResponse.Status);
-        }
+        Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
-        [Fact]
-        public void SuccessResponseApdu_NoCredentials_ListCredentialsCorrectly()
+        _ = Assert.Single(data);
+        Assert.Equal("Microsoft", data[0].Issuer);
+        Assert.Equal("test@outlook.com", data[0].AccountName);
+        Assert.Equal(CredentialType.Totp, data[0].Type);
+        Assert.Equal(CredentialPeriod.Period30, data[0].Period);
+        Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+    }
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_Totp30sAccountMaxLength_ListCredentialsCorrectly()
+    {
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
+
+        var responseApdu = new ResponseApdu(new byte[]
         {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
+            0x72, 0x41, 0x21,
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+            0x31, 0x32, 0x33, 0x34, // (64 char)
+            sw1, sw2
+        });
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+        var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var listCredentialsResponse = new ListResponse(responseApdu);
+        var data = listCredentialsResponse.GetData();
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+        Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
-            Assert.Empty(data);
-            Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
-        }
+        _ = Assert.Single(data);
+        Assert.Equal("1234567890123456789012345678901234567890123456789012345678901234", data[0].AccountName);
+        Assert.Equal(CredentialType.Totp, data[0].Type);
+        Assert.Equal(CredentialPeriod.Period30, data[0].Period);
+        Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_OneCredential_ListCredentialsCorrectly()
+    [Fact]
+    public void Constructor_SuccessResponseApdu_OneCredentialNoIssuer_ListCredentialsCorrectly()
+    {
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
+
+        var responseApdu = new ResponseApdu(new byte[]
         {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
+            0x72, 0x11, 0x21, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75,
+            0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D,
+            sw1, sw2
+        });
 
-            var responseApdu = new ResponseApdu(new byte[] {
-                0x72, 0x1B, 0x21, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F,
-                0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75,
-                0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D,
-                sw1, sw2
-            });
+        var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var listCredentialsResponse = new ListResponse(responseApdu);
+        var data = listCredentialsResponse.GetData();
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+        Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
-            Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
+        _ = Assert.Single(data);
+        Assert.Null(data[0].Issuer);
+        Assert.Equal("test@outlook.com", data[0].AccountName);
+        Assert.Equal("test@outlook.com", data[0].Name);
+        Assert.Equal(CredentialType.Totp, data[0].Type);
+        Assert.Equal(CredentialPeriod.Period30, data[0].Period);
+        Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+    }
 
-            _ = Assert.Single(data);
-            Assert.Equal("Microsoft", data[0].Issuer);
-            Assert.Equal("test@outlook.com", data[0].AccountName);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
-        }
+    [Fact]
+    public void Constructor_SuccessResponseApdu_MultipleCredentials_ListCredentialsCorrectly()
+    {
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_Totp30sAccountMaxLength_ListCredentialsCorrectly()
+        var responseApdu = new ResponseApdu(new byte[]
         {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
+            0x72, 0x1B, 0x21, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F,
+            0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75,
+            0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D, 0x72,
+            0x16, 0x12, 0x47, 0x6F, 0x6F, 0x67, 0x6C, 0x65, 0x3A, 0x74,
+            0x65, 0x73, 0x74, 0x40, 0x67, 0x6D, 0x61, 0x69, 0x6C, 0x2E,
+            0x63, 0x6F, 0x6D, sw1, sw2
+        });
 
-            var responseApdu = new ResponseApdu(new byte[] {
-                0x72, 0x41, 0x21,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
-                0x31, 0x32, 0x33, 0x34, // (64 char)
-                sw1, sw2
-            });
+        var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var listCredentialsResponse = new ListResponse(responseApdu);
+        var data = listCredentialsResponse.GetData();
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+        Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
-            Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
+        Assert.Equal(2, data.Count);
 
-            _ = Assert.Single(data);
-            Assert.Equal("1234567890123456789012345678901234567890123456789012345678901234", data[0].AccountName);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
-        }
+        Assert.Equal("Microsoft", data[0].Issuer);
+        Assert.Equal("test@outlook.com", data[0].AccountName);
+        Assert.Equal(CredentialType.Totp, data[0].Type);
+        Assert.Equal(CredentialPeriod.Period30, data[0].Period);
+        Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_OneCredentialNoIssuer_ListCredentialsCorrectly()
+        Assert.Equal("Google", data[1].Issuer);
+        Assert.Equal("test@gmail.com", data[1].AccountName);
+        Assert.Equal(CredentialType.Hotp, data[1].Type);
+        Assert.Equal(CredentialPeriod.Undefined, data[1].Period);
+        Assert.Equal(HashAlgorithm.Sha256, data[1].Algorithm);
+    }
+
+    [Fact]
+    public void Constructor_SuccessResponseApdu_Period60_ListCredentialsCorrectly()
+    {
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
+
+        var responseApdu = new ResponseApdu(new byte[]
         {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
+            0x72, 0x1E, 0x21, 0x36, 0x30, 0x2F, 0x4D, 0x69, 0x63, 0x72,
+            0x6F, 0x73, 0x6F, 0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74,
+            0x40, 0x6F, 0x75, 0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63,
+            0x6F, 0x6D, sw1, sw2
+        });
 
-            var responseApdu = new ResponseApdu(new byte[] {
-                0x72, 0x11, 0x21, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75,
-                0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D,
-                sw1, sw2
-            });
+        var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var listCredentialsResponse = new ListResponse(responseApdu);
+        var data = listCredentialsResponse.GetData();
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+        Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
-            Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
+        _ = Assert.Single(data);
+        Assert.Equal("Microsoft", data[0].Issuer);
+        Assert.Equal("test@outlook.com", data[0].AccountName);
+        Assert.Equal(CredentialType.Totp, data[0].Type);
+        Assert.Equal(CredentialPeriod.Period60, data[0].Period);
+        Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+    }
 
-            _ = Assert.Single(data);
-            Assert.Null(data[0].Issuer);
-            Assert.Equal("test@outlook.com", data[0].AccountName);
-            Assert.Equal("test@outlook.com", data[0].Name);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
-        }
+    [Fact]
+    public void Constructor_SuccessResponseApdu_IssuerHasSemicolon_ListCredentialsCorrectly()
+    {
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_MultipleCredentials_ListCredentialsCorrectly()
+        var responseApdu = new ResponseApdu(new byte[]
         {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
+            0x72, 0x20, 0x21, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F,
+            0x66, 0x74, 0x3A, 0x64, 0x65, 0x6D, 0x6F, 0x3A, 0x74, 0x65,
+            0x73, 0x74, 0x40, 0x6F, 0x75, 0x74, 0x6C, 0x6F, 0x6F, 0x6B,
+            0x2E, 0x63, 0x6F, 0x6D, sw1, sw2
+        });
 
-            var responseApdu = new ResponseApdu(new byte[] {
-                0x72, 0x1B, 0x21, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F,
-                0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75,
-                0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D, 0x72,
-                0x16, 0x12, 0x47, 0x6F, 0x6F, 0x67, 0x6C, 0x65, 0x3A, 0x74,
-                0x65, 0x73, 0x74, 0x40, 0x67, 0x6D, 0x61, 0x69, 0x6C, 0x2E,
-                0x63, 0x6F, 0x6D, sw1, sw2
-            });
+        var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var listCredentialsResponse = new ListResponse(responseApdu);
+        var data = listCredentialsResponse.GetData();
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+        Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
-            Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
+        _ = Assert.Single(data);
+        Assert.Equal("Microsoft:demo", data[0].Issuer);
+        Assert.Equal("test@outlook.com", data[0].AccountName);
+        Assert.Equal(CredentialType.Totp, data[0].Type);
+        Assert.Equal(CredentialPeriod.Period30, data[0].Period);
+        Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+    }
 
-            Assert.Equal(2, data.Count);
+    [Fact]
+    public void ResponseApduFailed_ThrowsMalformedYubiKeyResponseException_InvalidApdu()
+    {
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, sw1, sw2 });
+        var listResponse = new ListResponse(responseApdu);
 
-            Assert.Equal("Microsoft", data[0].Issuer);
-            Assert.Equal("test@outlook.com", data[0].AccountName);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+        _ = Assert.Throws<MalformedYubiKeyResponseException>(() => listResponse.GetData());
+    }
 
-            Assert.Equal("Google", data[1].Issuer);
-            Assert.Equal("test@gmail.com", data[1].AccountName);
-            Assert.Equal(CredentialType.Hotp, data[1].Type);
-            Assert.Equal(CredentialPeriod.Undefined, data[1].Period);
-            Assert.Equal(HashAlgorithm.Sha256, data[1].Algorithm);
-        }
+    [Fact]
+    public void ResponseApduFailed_ThrowsInvalidOperationException()
+    {
+        var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
+        var listResponse = new ListResponse(responseApdu);
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_Period60_ListCredentialsCorrectly()
-        {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
-
-            var responseApdu = new ResponseApdu(new byte[] {
-                0x72, 0x1E, 0x21, 0x36, 0x30, 0x2F, 0x4D, 0x69, 0x63, 0x72,
-                0x6F, 0x73, 0x6F, 0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74,
-                0x40, 0x6F, 0x75, 0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63,
-                0x6F, 0x6D, sw1, sw2
-            });
-
-            var listCredentialsResponse = new ListResponse(responseApdu);
-
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
-
-            Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
-
-            _ = Assert.Single(data);
-            Assert.Equal("Microsoft", data[0].Issuer);
-            Assert.Equal("test@outlook.com", data[0].AccountName);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period60, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
-        }
-
-        [Fact]
-        public void Constructor_SuccessResponseApdu_IssuerHasSemicolon_ListCredentialsCorrectly()
-        {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
-
-            var responseApdu = new ResponseApdu(new byte[] {
-                0x72, 0x20, 0x21, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F,
-                0x66, 0x74, 0x3A, 0x64, 0x65, 0x6D, 0x6F, 0x3A, 0x74, 0x65,
-                0x73, 0x74, 0x40, 0x6F, 0x75, 0x74, 0x6C, 0x6F, 0x6F, 0x6B,
-                0x2E, 0x63, 0x6F, 0x6D, sw1, sw2
-            });
-
-            var listCredentialsResponse = new ListResponse(responseApdu);
-
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
-
-            Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
-
-            _ = Assert.Single(data);
-            Assert.Equal("Microsoft:demo", data[0].Issuer);
-            Assert.Equal("test@outlook.com", data[0].AccountName);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
-        }
-
-        [Fact]
-        public void ResponseApduFailed_ThrowsMalformedYubiKeyResponseException_InvalidApdu()
-        {
-            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            const byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, sw1, sw2 });
-            var listResponse = new ListResponse(responseApdu);
-
-            _ = Assert.Throws<MalformedYubiKeyResponseException>(() => listResponse.GetData());
-        }
-
-        [Fact]
-        public void ResponseApduFailed_ThrowsInvalidOperationException()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
-            var listResponse = new ListResponse(responseApdu);
-
-            _ = Assert.Throws<InvalidOperationException>(() => listResponse.GetData());
-        }
+        _ = Assert.Throws<InvalidOperationException>(() => listResponse.GetData());
     }
 }

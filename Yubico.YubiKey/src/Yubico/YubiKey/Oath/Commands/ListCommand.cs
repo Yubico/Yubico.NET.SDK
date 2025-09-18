@@ -14,41 +14,44 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+/// <summary>
+///     Lists configured credentials on the YubiKey.
+/// </summary>
+/// <remarks>
+///     This class has a corresponding partner class <see cref="ListResponse" />
+/// </remarks>
+public class ListCommand : IYubiKeyCommand<ListResponse>
 {
+    private const byte ListInstruction = 0xa1;
+
     /// <summary>
-    /// Lists configured credentials on the YubiKey.
+    ///     Constructs an instance of the <see cref="ListCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// This class has a corresponding partner class <see cref="ListResponse"/>
-    /// </remarks>
-    public class ListCommand : IYubiKeyCommand<ListResponse>
+    public ListCommand()
     {
-        private const byte ListInstruction = 0xa1;
+    }
 
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Oath
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
+    #region IYubiKeyCommand<ListResponse> Members
 
-        /// <summary>
-        /// Constructs an instance of the <see cref="ListCommand" /> class.
-        /// </summary>
-        public ListCommand()
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.Oath
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Oath;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = ListInstruction,
+            Ins = ListInstruction
         };
 
-        /// <inheritdoc />
-        public ListResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ListResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public ListResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

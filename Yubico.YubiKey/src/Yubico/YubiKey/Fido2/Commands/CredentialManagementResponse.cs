@@ -15,39 +15,42 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     The response partner to the CredentialManagementCommand.
+/// </summary>
+/// <remarks>
+///     Some subcommands return no data, they simply return a success of failure
+///     code.
+/// </remarks>
+public class CredentialManagementResponse : Fido2Response, IYubiKeyResponseWithData<CredentialManagementData>
 {
     /// <summary>
-    /// The response partner to the CredentialManagementCommand.
+    ///     Constructs a new instance of
+    ///     <see cref="CredentialManagementResponse" /> based on a response APDU
+    ///     provided by the YubiKey.
     /// </summary>
-    /// <remarks>
-    /// Some subcommands return no data, they simply return a success of failure
-    /// code.
-    /// </remarks>
-    public class CredentialManagementResponse : Fido2Response, IYubiKeyResponseWithData<CredentialManagementData>
+    /// <param name="responseApdu">
+    ///     A response APDU containing the CBOR response data for the
+    ///     <c>authenticatorCredentialManagement</c> command.
+    /// </param>
+    public CredentialManagementResponse(ResponseApdu responseApdu) : base(responseApdu)
     {
-        /// <summary>
-        /// Constructs a new instance of
-        /// <see cref="CredentialManagementResponse"/> based on a response APDU
-        /// provided by the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response data for the
-        /// <c>authenticatorCredentialManagement</c> command.
-        /// </param>
-        public CredentialManagementResponse(ResponseApdu responseApdu) : base(responseApdu)
-        {
-        }
-
-        /// <inheritdoc />
-        public CredentialManagementData GetData()
-        {
-            if (Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(StatusMessage);
-            }
-
-            return new CredentialManagementData(ResponseApdu.Data);
-        }
     }
+
+    #region IYubiKeyResponseWithData<CredentialManagementData> Members
+
+    /// <inheritdoc />
+    public CredentialManagementData GetData()
+    {
+        if (Status != ResponseStatus.Success)
+        {
+            throw new InvalidOperationException(StatusMessage);
+        }
+
+        return new CredentialManagementData(ResponseApdu.Data);
+    }
+
+    #endregion
 }

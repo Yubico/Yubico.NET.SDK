@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.Core.Devices.Hid
-{
+namespace Yubico.Core.Devices.Hid;
 #pragma warning disable CA1707 // Justification: Cannot use
-    // underscore (_) character for variable name
-    public enum KeyboardLayout
-    {
-        ModHex = 0,
-        en_US = 1,
-        en_UK = 2,
-        de_DE = 3,
-        fr_FR = 4,
-        it_IT = 5,
-        es_US = 6,
-        sv_SE = 7
-#pragma warning restore CA1707
-    }
+
+// underscore (_) character for variable name
+public enum KeyboardLayout
+{
+    ModHex = 0,
+    en_US = 1,
+    en_UK = 2,
+    de_DE = 3,
+    fr_FR = 4,
+    it_IT = 5,
+    es_US = 6,
+    sv_SE = 7
+    #pragma warning restore CA1707
 }

@@ -17,50 +17,49 @@ using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Fido2.Cose
+namespace Yubico.YubiKey.Fido2.Cose;
+
+public class CoseEcPublicKeyTests
 {
-    public class CoseEcPublicKeyTests
+    [Theory]
+    [InlineData(Oids.ECP256)]
+    [InlineData(Oids.ECP384)]
+    [InlineData(Oids.ECP521)]
+    public void Encoding_Decoding_Key_Returns_ExpectedValues(
+        string oid)
     {
-        [Theory]
-        [InlineData(Oids.ECP256)]
-        [InlineData(Oids.ECP384)]
-        [InlineData(Oids.ECP521)]
-        public void Encoding_Decoding_Key_Returns_ExpectedValues(
-            string oid)
-        {
-            // Arrange
-            var ecDsa = ECDsa.Create(ECCurve.CreateFromOid(Oid.FromOidValue(oid, OidGroup.PublicKeyAlgorithm)));
-            var publicKey = ecDsa.ExportParameters(false);
-            var coseKey = new CoseEcPublicKey(
-                CoseEcCurve.P384,
-                CoseAlgorithmIdentifier.ES384,
-                publicKey.Q.X,
-                publicKey.Q.Y);
+        // Arrange
+        var ecDsa = ECDsa.Create(ECCurve.CreateFromOid(Oid.FromOidValue(oid, OidGroup.PublicKeyAlgorithm)));
+        var publicKey = ecDsa.ExportParameters(false);
+        var coseKey = new CoseEcPublicKey(
+            CoseEcCurve.P384,
+            CoseAlgorithmIdentifier.ES384,
+            publicKey.Q.X,
+            publicKey.Q.Y);
 
-            // Act
-            var coseEncodedKey = coseKey.Encode(); // Encode
-            var coseKey2 = new CoseEcPublicKey(coseEncodedKey); // Decode
-            var publicKey2 = coseKey2.ToEcParameters();
+        // Act
+        var coseEncodedKey = coseKey.Encode(); // Encode
+        var coseKey2 = new CoseEcPublicKey(coseEncodedKey); // Decode
+        var publicKey2 = coseKey2.ToEcParameters();
 
-            // Assert
-            // The EC parameter values should be the same between the two keys.
-            Assert.Equal(publicKey.Q.X, publicKey2.Q.X);
-            Assert.Equal(publicKey.Q.Y, publicKey2.Q.Y);
-        }
+        // Assert
+        // The EC parameter values should be the same between the two keys.
+        Assert.Equal(publicKey.Q.X, publicKey2.Q.X);
+        Assert.Equal(publicKey.Q.Y, publicKey2.Q.Y);
+    }
 
-        [Theory]
-        [InlineData(Oids.ECP256)]
-        [InlineData(Oids.ECP384)]
-        [InlineData(Oids.ECP521)]
-        public void Constructor_with_EcParameters(
-            string oid)
-        {
-            var ecDsa = ECDsa.Create(ECCurve.CreateFromOid(Oid.FromOidValue(oid, OidGroup.PublicKeyAlgorithm)));
-            var publicKeyParams = ecDsa.ExportParameters(false);
+    [Theory]
+    [InlineData(Oids.ECP256)]
+    [InlineData(Oids.ECP384)]
+    [InlineData(Oids.ECP521)]
+    public void Constructor_with_EcParameters(
+        string oid)
+    {
+        var ecDsa = ECDsa.Create(ECCurve.CreateFromOid(Oid.FromOidValue(oid, OidGroup.PublicKeyAlgorithm)));
+        var publicKeyParams = ecDsa.ExportParameters(false);
 
-            // Test EC Parameters constructor
-            var coseKey = new CoseEcPublicKey(publicKeyParams);
-            Assert.True(coseKey.XCoordinate.Span.SequenceEqual(publicKeyParams.Q.X));
-        }
+        // Test EC Parameters constructor
+        var coseKey = new CoseEcPublicKey(publicKeyParams);
+        Assert.True(coseKey.XCoordinate.Span.SequenceEqual(publicKeyParams.Q.X));
     }
 }

@@ -16,83 +16,84 @@ using System;
 using System.Linq;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.YubiKey.Pipelines;
-using Yubico.YubiKey.Scp;
 using Yubico.YubiKey.Scp03;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+[Obsolete("Obsolete")]
+internal class Scp03Connection : SmartCardConnection, IScp03YubiKeyConnection
 {
-    [Obsolete("Obsolete")]
-    internal class Scp03Connection : SmartCardConnection, IScp03YubiKeyConnection
+    // If an Scp03ApduTransform is used, keep this copy so it can be disposed.
+    private readonly Scp03ApduTransform _scp03ApduTransform;
+    private bool _disposed;
+
+    public Scp03Connection(
+        ISmartCardDevice smartCardDevice,
+        YubiKeyApplication yubiKeyApplication,
+        StaticKeys scp03Keys)
+        : base(smartCardDevice, yubiKeyApplication, null)
     {
-        private bool _disposed;
+        _scp03ApduTransform = SetObject(yubiKeyApplication, scp03Keys);
+    }
 
-        // If an Scp03ApduTransform is used, keep this copy so it can be disposed.
-        private readonly Scp03ApduTransform _scp03ApduTransform;
-
-        public Scp03Connection(
-            ISmartCardDevice smartCardDevice,
-            YubiKeyApplication yubiKeyApplication,
-            Scp03.StaticKeys scp03Keys)
-            : base(smartCardDevice, yubiKeyApplication, null)
+    public Scp03Connection(ISmartCardDevice smartCardDevice, byte[] applicationId, StaticKeys scp03Keys)
+        : base(smartCardDevice, YubiKeyApplication.Unknown, applicationId)
+    {
+        var setError = YubiKeyApplication.Unknown;
+        if (applicationId.SequenceEqual(YubiKeyApplication.Fido2.GetIso7816ApplicationId()))
         {
-            _scp03ApduTransform = SetObject(yubiKeyApplication, scp03Keys);
+            setError = YubiKeyApplication.Fido2;
+        }
+        else if (applicationId.SequenceEqual(YubiKeyApplication.Otp.GetIso7816ApplicationId()))
+        {
+            setError = YubiKeyApplication.Otp;
         }
 
-        public Scp03Connection(ISmartCardDevice smartCardDevice, byte[] applicationId, Scp03.StaticKeys scp03Keys)
-            : base(smartCardDevice, YubiKeyApplication.Unknown, applicationId)
-        {
-            var setError = YubiKeyApplication.Unknown;
-            if (applicationId.SequenceEqual(YubiKeyApplication.Fido2.GetIso7816ApplicationId()))
-            {
-                setError = YubiKeyApplication.Fido2;
-            }
-            else if (applicationId.SequenceEqual(YubiKeyApplication.Otp.GetIso7816ApplicationId()))
-            {
-                setError = YubiKeyApplication.Otp;
-            }
+        _scp03ApduTransform = SetObject(setError, scp03Keys);
+    }
 
-            _scp03ApduTransform = SetObject(setError, scp03Keys);
+    #region IScp03YubiKeyConnection Members
+
+    public StaticKeys GetScp03Keys() => _scp03ApduTransform.Scp03Keys;
+
+    #endregion
+
+    private Scp03ApduTransform SetObject(
+        YubiKeyApplication setError,
+        StaticKeys scp03Keys)
+    {
+        var scp03ApduTransform = new Scp03ApduTransform(GetPipeline(), scp03Keys);
+        IApduTransform apduPipeline = scp03ApduTransform;
+
+        if (setError == YubiKeyApplication.Fido2)
+        {
+            apduPipeline = new FidoErrorTransform(apduPipeline);
+        }
+        else if (setError == YubiKeyApplication.Otp)
+        {
+            apduPipeline = new OtpErrorTransform(apduPipeline);
         }
 
-        private Scp03ApduTransform SetObject(
-            YubiKeyApplication setError,
-            Yubico.YubiKey.Scp03.StaticKeys scp03Keys)
+        SetPipeline(apduPipeline);
+
+        apduPipeline.Setup();
+
+        _disposed = false;
+
+        return scp03ApduTransform;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (!_disposed)
         {
-            var scp03ApduTransform = new Scp03ApduTransform(GetPipeline(), scp03Keys);
-            IApduTransform apduPipeline = scp03ApduTransform;
-
-            if (setError == YubiKeyApplication.Fido2)
+            if (disposing)
             {
-                apduPipeline = new FidoErrorTransform(apduPipeline);
+                _scp03ApduTransform.Dispose();
+                _disposed = true;
             }
-            else if (setError == YubiKeyApplication.Otp)
-            {
-                apduPipeline = new OtpErrorTransform(apduPipeline);
-            }
-
-            SetPipeline(apduPipeline);
-
-            apduPipeline.Setup();
-
-            _disposed = false;
-
-            return scp03ApduTransform;
         }
 
-        public Scp03.StaticKeys GetScp03Keys() => _scp03ApduTransform.Scp03Keys;
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    _scp03ApduTransform.Dispose();
-                    _disposed = true;
-                }
-            }
-
-            base.Dispose(disposing);
-        }
+        base.Dispose(disposing);
     }
 }

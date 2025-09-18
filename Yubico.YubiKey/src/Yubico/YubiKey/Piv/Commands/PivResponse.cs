@@ -14,35 +14,34 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+/// <summary>
+///     Base class for all PIV responses. Use this class to represent the status
+///     of a PIV command, or one of its derived classes to retrieve the full
+///     response.
+/// </summary>
+/// <seealso cref="Yubico.YubiKey.IYubiKeyResponse" />
+public class PivResponse : YubiKeyResponse
 {
     /// <summary>
-    /// Base class for all PIV responses. Use this class to represent the status
-    /// of a PIV command, or one of its derived classes to retrieve the full
-    /// response.
+    ///     Constructs a PivResponse based on a ResponseApdu received from the
+    ///     YubiKey.
     /// </summary>
-    /// <seealso cref="Yubico.YubiKey.IYubiKeyResponse"/>
-    public class PivResponse : YubiKeyResponse
+    /// <param name="responseApdu">
+    ///     The object containing the response APDU<br />returned by the YubiKey.
+    /// </param>
+    public PivResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        // Overridden to add values of the StatusWord known to PIV responses.
-        protected override ResponseStatusPair StatusCodeMap =>
-            StatusWord switch
-            {
-                SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied),
-                _ => base.StatusCodeMap,
-            };
-
-        /// <summary>
-        /// Constructs a PivResponse based on a ResponseApdu received from the
-        /// YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The object containing the response APDU<br/>returned by the YubiKey.
-        /// </param>
-        public PivResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-
-        }
     }
+
+    // Overridden to add values of the StatusWord known to PIV responses.
+    protected override ResponseStatusPair StatusCodeMap =>
+        StatusWord switch
+        {
+            SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(
+                ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied),
+            _ => base.StatusCodeMap
+        };
 }

@@ -15,60 +15,62 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Instruct the YubiKey to make a credential based on the input parameters.
+/// </summary>
+public class MakeCredentialCommand : IYubiKeyCommand<MakeCredentialResponse>
 {
-    /// <summary>
-    /// Instruct the YubiKey to make a credential based on the input parameters.
-    /// </summary>
-    public class MakeCredentialCommand : IYubiKeyCommand<MakeCredentialResponse>
+    private readonly MakeCredentialParameters _params;
+
+    // The default constructor explicitly defined. We don't want it to be
+    // used.
+    // Note that there is no object-initializer constructor. All the
+    // constructor inputs have no default or are secret byte arrays.
+    private MakeCredentialCommand()
     {
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
-
-        private readonly MakeCredentialParameters _params;
-
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        // Note that there is no object-initializer constructor. All the
-        // constructor inputs have no default or are secret byte arrays.
-        private MakeCredentialCommand()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="MakeCredentialCommand" />
-        /// class using the given parameters.
-        /// </summary>
-        /// <remarks>
-        /// This class will copy a reference to the input parameters object. It
-        /// will no longer need it after the call to <c>SendCommand</c>.
-        /// </remarks>
-        /// <param name="makeCredentialParameters">
-        /// An object containing all the parameters the YubiKey will use to make
-        /// a new credential.
-        /// </param>
-        public MakeCredentialCommand(MakeCredentialParameters makeCredentialParameters)
-        {
-            _params = makeCredentialParameters;
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu()
-        {
-            byte[] encodedParams = _params.CborEncode();
-            byte[] payload = new byte[encodedParams.Length + 1];
-            payload[0] = CtapConstants.CtapMakeCredentialCmd;
-            Array.Copy(encodedParams, 0, payload, 1, encodedParams.Length);
-            return new CommandApdu()
-            {
-                Ins = CtapConstants.CtapHidCbor,
-                Data = payload
-            };
-        }
-
-        /// <inheritdoc />
-        public MakeCredentialResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new MakeCredentialResponse(responseApdu);
+        throw new NotImplementedException();
     }
+
+    /// <summary>
+    ///     Constructs an instance of the <see cref="MakeCredentialCommand" />
+    ///     class using the given parameters.
+    /// </summary>
+    /// <remarks>
+    ///     This class will copy a reference to the input parameters object. It
+    ///     will no longer need it after the call to <c>SendCommand</c>.
+    /// </remarks>
+    /// <param name="makeCredentialParameters">
+    ///     An object containing all the parameters the YubiKey will use to make
+    ///     a new credential.
+    /// </param>
+    public MakeCredentialCommand(MakeCredentialParameters makeCredentialParameters)
+    {
+        _params = makeCredentialParameters;
+    }
+
+    #region IYubiKeyCommand<MakeCredentialResponse> Members
+
+    /// <inheritdoc />
+    public YubiKeyApplication Application => YubiKeyApplication.Fido2;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu()
+    {
+        byte[] encodedParams = _params.CborEncode();
+        byte[] payload = new byte[encodedParams.Length + 1];
+        payload[0] = CtapConstants.CtapMakeCredentialCmd;
+        Array.Copy(encodedParams, 0, payload, 1, encodedParams.Length);
+        return new CommandApdu
+        {
+            Ins = CtapConstants.CtapHidCbor,
+            Data = payload
+        };
+    }
+
+    /// <inheritdoc />
+    public MakeCredentialResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

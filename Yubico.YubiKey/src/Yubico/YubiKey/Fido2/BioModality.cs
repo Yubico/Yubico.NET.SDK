@@ -12,27 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+/// <summary>
+///     This enum lists all the possible biometric methods supported by the FIDO2
+///     standard.
+/// </summary>
+/// <remarks>
+///     When you call <see cref="Fido2Session.GetBioModality" /> it will return this
+///     enum, indicating what biometric method the connected YubiKey supports. If
+///     the YubiKey is not a BIO series device, it will return <c>None</c>.
+/// </remarks>
+public enum BioModality
 {
     /// <summary>
-    /// This enum lists all the possible biometric methods supported by the FIDO2
-    /// standard.
+    ///     Indicates that a YubiKey does not support any biometric method.
     /// </summary>
-    /// <remarks>
-    /// When you call <see cref="Fido2Session.GetBioModality"/> it will return this
-    /// enum, indicating what biometric method the connected YubiKey supports. If
-    /// the YubiKey is not a BIO series device, it will return <c>None</c>.
-    /// </remarks>
-    public enum BioModality
-    {
-        /// <summary>
-        /// Indicates that a YubiKey does not support any biometric method.
-        /// </summary>
-        None = 0,
+    None = 0,
 
-        /// <summary>
-        /// Indicates that a YubiKey supports the fingerprint biometric method.
-        /// </summary>
-        Fingerprint = 1,
-    }
+    /// <summary>
+    ///     Indicates that a YubiKey supports the fingerprint biometric method.
+    /// </summary>
+    Fingerprint = 1
 }

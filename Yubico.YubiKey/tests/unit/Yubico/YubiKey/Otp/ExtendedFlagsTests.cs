@@ -14,31 +14,31 @@
 
 using Xunit;
 
-namespace Yubico.YubiKey.Otp
+namespace Yubico.YubiKey.Otp;
+
+public class ExtendedFlagsTests
 {
-    public class ExtendedFlagsTests
+    [Fact]
+    public void ValidateFlagsForUpdate_NoneSpecified_NoException()
     {
-        [Fact]
-        public void ValidateFlagsForUpdate_NoneSpecified_NoException()
-        {
-            ExtendedFlags flag = ExtendedFlags.None;
+        ExtendedFlags flag = ExtendedFlags.None;
 
-            flag.ValidateFlagsForUpdate();
-        }
+        flag.ValidateFlagsForUpdate();
+    }
 
-        [Theory]
-        [InlineData(ExtendedFlags.AllowUpdate)]
-        [InlineData(ExtendedFlags.Dormant)]
-        [InlineData(ExtendedFlags.FastTrigger)]
-        [InlineData(ExtendedFlags.InvertLed)]
-        [InlineData(ExtendedFlags.SerialNumberApiVisible)]
-        [InlineData(ExtendedFlags.SerialNumberButtonVisible)]
-        [InlineData(ExtendedFlags.SerialNumberUsbVisible)]
-        [InlineData(ExtendedFlags.UseNumericKeypad)]
-        public void ValidateFlagsForUpdate_FlagInRange_NoException(byte flagByte)
-        {
-            ExtendedFlags flag = flagByte;
-            flag.ValidateFlagsForUpdate();
-        }
+    [Theory]
+    [InlineData(ExtendedFlags.AllowUpdate)]
+    [InlineData(ExtendedFlags.Dormant)]
+    [InlineData(ExtendedFlags.FastTrigger)]
+    [InlineData(ExtendedFlags.InvertLed)]
+    [InlineData(ExtendedFlags.SerialNumberApiVisible)]
+    [InlineData(ExtendedFlags.SerialNumberButtonVisible)]
+    [InlineData(ExtendedFlags.SerialNumberUsbVisible)]
+    [InlineData(ExtendedFlags.UseNumericKeypad)]
+    public void ValidateFlagsForUpdate_FlagInRange_NoException(
+        byte flagByte)
+    {
+        ExtendedFlags flag = flagByte;
+        flag.ValidateFlagsForUpdate();
     }
 }

@@ -15,74 +15,78 @@
 using Yubico.Core.Devices.SmartCard;
 using Yubico.YubiKey.Pipelines;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp;
+
+internal class ScpConnection : SmartCardConnection, IScpYubiKeyConnection
 {
-    internal class ScpConnection : SmartCardConnection, IScpYubiKeyConnection
+    private readonly ScpApduTransform _scpApduTransform;
+
+    private bool _disposed;
+
+    public ScpConnection(
+        ISmartCardDevice smartCardDevice,
+        YubiKeyApplication application,
+        ScpKeyParameters keyParameters)
+        : base(smartCardDevice, application, null)
     {
-        public ScpKeyParameters KeyParameters => _scpApduTransform.KeyParameters;
+        var scpPipeline = CreateScpPipeline(keyParameters);
+        var withErrorHandling = CreateParentPipeline(scpPipeline, application);
 
-        EncryptDataFunc IScpYubiKeyConnection.EncryptDataFunc => _scpApduTransform.EncryptDataFunc;
+        // Have the base class use the new error augmented pipeline
+        SetPipeline(withErrorHandling);
 
-        private bool _disposed;
-        private readonly ScpApduTransform _scpApduTransform;
+        // Setup the full pipeline
+        withErrorHandling.Setup();
+        _scpApduTransform = scpPipeline;
+    }
 
-        public ScpConnection(
-            ISmartCardDevice smartCardDevice,
-            YubiKeyApplication application,
-            ScpKeyParameters keyParameters)
-            : base(smartCardDevice, application, null)
+    #region IScpYubiKeyConnection Members
+
+    public ScpKeyParameters KeyParameters => _scpApduTransform.KeyParameters;
+
+    EncryptDataFunc IScpYubiKeyConnection.EncryptDataFunc => _scpApduTransform.EncryptDataFunc;
+
+    #endregion
+
+    private static IApduTransform CreateParentPipeline(IApduTransform pipeline, YubiKeyApplication application)
+    {
+        // Wrap the pipeline with error handling if needed
+        if (application == YubiKeyApplication.Fido2)
         {
-            var scpPipeline = CreateScpPipeline(keyParameters);
-            var withErrorHandling = CreateParentPipeline(scpPipeline, application);
-
-            // Have the base class use the new error augmented pipeline
-            SetPipeline(withErrorHandling);
-
-            // Setup the full pipeline
-            withErrorHandling.Setup();
-            _scpApduTransform = scpPipeline;
+            return new FidoErrorTransform(pipeline);
         }
 
-        private static IApduTransform CreateParentPipeline(IApduTransform pipeline, YubiKeyApplication application)
+        if (application == YubiKeyApplication.Otp)
         {
-            // Wrap the pipeline with error handling if needed
-            if (application == YubiKeyApplication.Fido2)
+            return new OtpErrorTransform(pipeline);
+        }
+
+        return pipeline;
+    }
+
+    private ScpApduTransform CreateScpPipeline(ScpKeyParameters keyParameters)
+    {
+        // Get the current pipeline
+        var previousPipeline = GetPipeline();
+
+        // Wrap the pipeline in ScpApduTransform
+        var scpApduTransform = new ScpApduTransform(previousPipeline, keyParameters);
+
+        // Return both pipeline
+        return scpApduTransform;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
             {
-                return new FidoErrorTransform(pipeline);
+                _scpApduTransform.Dispose();
+                _disposed = true;
             }
-
-            if (application == YubiKeyApplication.Otp)
-            {
-                return new OtpErrorTransform(pipeline);
-            }
-
-            return pipeline;
         }
 
-        private ScpApduTransform CreateScpPipeline(ScpKeyParameters keyParameters)
-        {
-            // Get the current pipeline
-            var previousPipeline = GetPipeline();
-
-            // Wrap the pipeline in ScpApduTransform
-            var scpApduTransform = new ScpApduTransform(previousPipeline, keyParameters);
-
-            // Return both pipeline
-            return scpApduTransform;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    _scpApduTransform.Dispose();
-                    _disposed = true;
-                }
-            }
-
-            base.Dispose(disposing);
-        }
+        base.Dispose(disposing);
     }
 }

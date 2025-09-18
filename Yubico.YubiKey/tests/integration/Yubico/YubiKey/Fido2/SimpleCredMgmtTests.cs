@@ -17,90 +17,90 @@ using System.Text;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+[Trait(TraitTypes.Category, TestCategories.Elevated)]
+[Trait(TraitTypes.Category, TestCategories.RequiresSetup)] // Requires pin 123456 and one FIDO credential set up
+public class SimpleCredMgmtTests : SimpleIntegrationTestConnection
 {
-    [Trait(TraitTypes.Category, TestCategories.Elevated)]
-    [Trait(TraitTypes.Category, TestCategories.RequiresSetup)] // Requires pin 123456 and one FIDO credential set up
-    public class SimpleCredMgmtTests : SimpleIntegrationTestConnection
+    public SimpleCredMgmtTests()
+        : base(YubiKeyApplication.Fido2)
     {
-        public SimpleCredMgmtTests()
-            : base(YubiKeyApplication.Fido2)
+    }
+
+    [Fact]
+    public void GetMetadata_Succeeds() // Works when at least one credential is set up
+    {
+        using var fido2Session = new Fido2Session(Device);
+        fido2Session.KeyCollector = LocalKeyCollector;
+
+        var (credCount, slotCount) = fido2Session.GetCredentialMetadata();
+
+        Assert.InRange(credCount, 1, int.MaxValue);
+        Assert.InRange(slotCount, 1, int.MaxValue);
+    }
+
+    [Fact]
+    public void EnumerateRps_Succeeds() // Works when at least one credential is set up
+    {
+        using var fido2Session = new Fido2Session(Device);
+        fido2Session.KeyCollector = LocalKeyCollector;
+
+        var rpList = fido2Session.EnumerateRelyingParties();
+
+        Assert.Single(rpList);
+    }
+
+    [Fact]
+    public void EnumerateCreds_Succeeds() // Works when at least one credential is set up
+    {
+        using var fido2Session = new Fido2Session(Device);
+        fido2Session.KeyCollector = LocalKeyCollector;
+
+        var rpList = fido2Session.EnumerateRelyingParties();
+        var ykCredList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
+
+        Assert.NotEmpty(ykCredList);
+    }
+
+    [Fact]
+    public void DeleteCred_Succeeds() // Works when at least one credential is set up
+    {
+        using var fido2Session = new Fido2Session(Device);
+        fido2Session.KeyCollector = LocalKeyCollector;
+
+        var rpList = fido2Session.EnumerateRelyingParties();
+        var credList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
+        var count = credList.Count;
+
+        fido2Session.ClearAuthToken();
+        fido2Session.DeleteCredential(credList[0].CredentialId);
+        credList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
+
+        Assert.NotNull(credList);
+        Assert.True(credList.Count == count - 1);
+    }
+
+    private bool LocalKeyCollector(
+        KeyEntryData arg)
+    {
+        switch (arg.Request)
         {
+            case KeyEntryRequest.VerifyFido2Pin:
+                arg.SubmitValue(Encoding.UTF8.GetBytes("11234567"));
+                break;
+            case KeyEntryRequest.VerifyFido2Uv:
+                Console.WriteLine("Fingerprint requested.");
+                break;
+            case KeyEntryRequest.TouchRequest:
+                Console.WriteLine("Touch requested.");
+                break;
+            case KeyEntryRequest.Release:
+                break;
+            default:
+                throw new NotSupportedException("Not supported by this test");
         }
 
-        [Fact]
-        public void GetMetadata_Succeeds() // Works when at least one credential is set up
-        {
-            using var fido2Session = new Fido2Session(Device);
-            fido2Session.KeyCollector = LocalKeyCollector;
-
-            (var credCount, var slotCount) = fido2Session.GetCredentialMetadata();
-
-            Assert.InRange(credCount, 1, int.MaxValue);
-            Assert.InRange(slotCount, 1, int.MaxValue);
-        }
-
-        [Fact]
-        public void EnumerateRps_Succeeds() // Works when at least one credential is set up
-        {
-            using var fido2Session = new Fido2Session(Device);
-            fido2Session.KeyCollector = LocalKeyCollector;
-
-            var rpList = fido2Session.EnumerateRelyingParties();
-
-            Assert.Single(rpList);
-        }
-
-        [Fact]
-        public void EnumerateCreds_Succeeds() // Works when at least one credential is set up
-        {
-            using var fido2Session = new Fido2Session(Device);
-            fido2Session.KeyCollector = LocalKeyCollector;
-
-            var rpList = fido2Session.EnumerateRelyingParties();
-            var ykCredList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
-
-            Assert.NotEmpty(ykCredList);
-        }
-
-        [Fact]
-        public void DeleteCred_Succeeds() // Works when at least one credential is set up
-        {
-            using var fido2Session = new Fido2Session(Device);
-            fido2Session.KeyCollector = LocalKeyCollector;
-
-            var rpList = fido2Session.EnumerateRelyingParties();
-            var credList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
-            var count = credList.Count;
-
-            fido2Session.ClearAuthToken();
-            fido2Session.DeleteCredential(credList[0].CredentialId);
-            credList = fido2Session.EnumerateCredentialsForRelyingParty(rpList[0]);
-
-            Assert.NotNull(credList);
-            Assert.True(credList.Count == count - 1);
-        }
-        
-        private bool LocalKeyCollector(KeyEntryData arg)
-        {
-            switch (arg.Request)
-            {
-                case KeyEntryRequest.VerifyFido2Pin:
-                    arg.SubmitValue(Encoding.UTF8.GetBytes("11234567"));
-                    break;
-                case KeyEntryRequest.VerifyFido2Uv:
-                    Console.WriteLine("Fingerprint requested.");
-                    break;
-                case KeyEntryRequest.TouchRequest:
-                    Console.WriteLine("Touch requested.");
-                    break;
-                case KeyEntryRequest.Release:
-                    break;
-                default:
-                    throw new NotSupportedException("Not supported by this test");
-            }
-
-            return true;
-        }
+        return true;
     }
 }

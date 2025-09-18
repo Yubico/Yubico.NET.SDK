@@ -45,7 +45,9 @@ public class RSAPrivateKeyTests
     }
 
     [Fact]
-    [Obsolete("Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead", false)]
+    [Obsolete(
+        "Usage of PivEccPublic/PivEccPrivateKey PivRsaPublic/PivRsaPrivateKey is deprecated. Use implementations of ECPublicKey, ECPrivateKey and RSAPublicKey, RSAPrivateKey instead",
+        false)]
     public void CreateFromPivEncoding_WithValidParameters_CreatesInstance()
     {
         // Arrange

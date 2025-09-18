@@ -14,29 +14,29 @@
 
 using Xunit;
 
-namespace Yubico.YubiKey.Otp
+namespace Yubico.YubiKey.Otp;
+
+public class TicketFlagsTests
 {
-    public class TicketFlagsTests
+    [Fact]
+    public void ValidateFlagsForUpdate_NoneSpecified_NoException()
     {
-        [Fact]
-        public void ValidateFlagsForUpdate_NoneSpecified_NoException()
-        {
-            TicketFlags flag = TicketFlags.None;
+        TicketFlags flag = TicketFlags.None;
 
-            flag.ValidateFlagsForUpdate();
-        }
+        flag.ValidateFlagsForUpdate();
+    }
 
-        [Theory]
-        [InlineData(TicketFlags.AppendCarriageReturn)]
-        [InlineData(TicketFlags.AppendDelayToFixed)]
-        [InlineData(TicketFlags.AppendDelayToOtp)]
-        [InlineData(TicketFlags.AppendTabToFixed)]
-        [InlineData(TicketFlags.AppendTabToOtp)]
-        [InlineData(TicketFlags.TabFirst)]
-        public void ValidateFlagsForUpdate_FlagInRange_NoException(byte flagByte)
-        {
-            TicketFlags flag = flagByte;
-            flag.ValidateFlagsForUpdate();
-        }
+    [Theory]
+    [InlineData(TicketFlags.AppendCarriageReturn)]
+    [InlineData(TicketFlags.AppendDelayToFixed)]
+    [InlineData(TicketFlags.AppendDelayToOtp)]
+    [InlineData(TicketFlags.AppendTabToFixed)]
+    [InlineData(TicketFlags.AppendTabToOtp)]
+    [InlineData(TicketFlags.TabFirst)]
+    public void ValidateFlagsForUpdate_FlagInRange_NoException(
+        byte flagByte)
+    {
+        TicketFlags flag = flagByte;
+        flag.ValidateFlagsForUpdate();
     }
 }

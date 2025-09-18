@@ -15,45 +15,48 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+/// <summary>
+///     The response to the <see cref="GetManagementKeyRetriesCommand" />
+///     command, containing the retries remaining for the management key.
+/// </summary>
+public sealed class GetManagementKeyRetriesResponse :
+    BaseYubiHsmAuthResponse, IYubiKeyResponseWithData<int>
 {
     /// <summary>
-    /// The response to the <see cref="GetManagementKeyRetriesCommand"/>
-    /// command, containing the retries remaining for the management key.
+    ///     Constructs a GetManagementKeyRetriesResponse instance based on a
+    ///     ResponseApdu received from the YubiKey.
     /// </summary>
-    public sealed class GetManagementKeyRetriesResponse :
-        BaseYubiHsmAuthResponse, IYubiKeyResponseWithData<int>
+    /// <param name="responseApdu">
+    ///     The ResponseApdu returned by the YubiKey.
+    /// </param>
+    public GetManagementKeyRetriesResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        /// <summary>
-        /// Constructs a GetManagementKeyRetriesResponse instance based on a
-        /// ResponseApdu received from the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
-        /// </param>
-        public GetManagementKeyRetriesResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-        }
-
-        /// <summary>
-        /// Gets the number of retries remaining for the management key.
-        /// </summary>
-        /// <returns>
-        /// The data in the response APDU, as an integer.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when the <see cref="IYubiKeyResponse.Status"/> is not equal to
-        /// <see cref="ResponseStatus.Success"/>.
-        /// </exception>
-        public int GetData()
-        {
-            if (Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(StatusMessage);
-            }
-
-            return ResponseApdu.Data.Span[0];
-        }
     }
+
+    #region IYubiKeyResponseWithData<int> Members
+
+    /// <summary>
+    ///     Gets the number of retries remaining for the management key.
+    /// </summary>
+    /// <returns>
+    ///     The data in the response APDU, as an integer.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown when the <see cref="IYubiKeyResponse.Status" /> is not equal to
+    ///     <see cref="ResponseStatus.Success" />.
+    /// </exception>
+    public int GetData()
+    {
+        if (Status != ResponseStatus.Success)
+        {
+            throw new InvalidOperationException(StatusMessage);
+        }
+
+        return ResponseApdu.Data.Span[0];
+    }
+
+    #endregion
 }

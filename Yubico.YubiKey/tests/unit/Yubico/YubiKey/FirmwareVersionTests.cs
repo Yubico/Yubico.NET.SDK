@@ -16,353 +16,392 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+public class FirmwareVersionTests
 {
-    public class FirmwareVersionTests
+    [Fact]
+    public void Parse_GivenValidString_ReturnsFirmwareVersion()
     {
-        [Fact]
-        public void Parse_GivenValidString_ReturnsFirmwareVersion()
-        {
-            // Arrange
-            
-            string validString = "1.2.3";
-            
-            // Act
-            
-            var fw = FirmwareVersion.Parse(validString);
-            
-            // Assert
-            
-            Assert.Equal(1, fw.Major);
-            Assert.Equal(2, fw.Minor);
-            Assert.Equal(3, fw.Patch);
-        }
-        
-        
-        [Fact]
-        public void Parse_GivenInvalidString_ThrowsArgumentException()
-        {
-            // Arrange
-            
-            string invalidString = "1.2";
-            
-            // Act & Assert
-            
-            Assert.Throws<ArgumentException>(() => FirmwareVersion.Parse(invalidString));
-        }
-        
-        
-        [Fact]
-        public void Major_GetSet_Succeeds()
-        {
-            var fw = new FirmwareVersion();
-            byte expectedValue = GetRandomByte();
+        // Arrange
 
-            fw.Major = expectedValue;
+        var validString = "1.2.3";
 
-            Assert.Equal(expectedValue, fw.Major);
-        }
+        // Act
 
-        [Fact]
-        public void Minor_GetSet_Succeeds()
-        {
-            var fw = new FirmwareVersion();
-            byte expectedValue = GetRandomByte();
+        var fw = FirmwareVersion.Parse(validString);
 
-            fw.Minor = expectedValue;
+        // Assert
 
-            Assert.Equal(expectedValue, fw.Minor);
-        }
+        Assert.Equal(1, fw.Major);
+        Assert.Equal(2, fw.Minor);
+        Assert.Equal(3, fw.Patch);
+    }
 
-        [Fact]
-        public void Patch_GetSet_Succeeds()
-        {
-            var fw = new FirmwareVersion();
-            byte expectedValue = GetRandomByte();
 
-            fw.Patch = expectedValue;
+    [Fact]
+    public void Parse_GivenInvalidString_ThrowsArgumentException()
+    {
+        // Arrange
 
-            Assert.Equal(expectedValue, fw.Patch);
-        }
+        var invalidString = "1.2";
 
-        [Fact]
-        public void DefaultConstructor_CreatesFw0_0_0()
-        {
-            var fw = new FirmwareVersion();
-            Assert.True(fw.Major == 0);
-            Assert.True(fw.Minor == 0);
-            Assert.True(fw.Patch == 0);
-        }
+        // Act & Assert
 
-        [Fact]
-        public void Constructor_GivenMajor_Returns1_0_0()
-        {
-            var fw = new FirmwareVersion(1);
-            Assert.True(fw.Major == 1);
-            Assert.True(fw.Minor == 0);
-            Assert.True(fw.Patch == 0);
-        }
+        Assert.Throws<ArgumentException>(() => FirmwareVersion.Parse(invalidString));
+    }
 
-        [Fact]
-        public void Constructor_GivenMajorMinor_Returns1_2_0()
-        {
-            var fw = new FirmwareVersion(1, 2);
-            Assert.True(fw.Major == 1);
-            Assert.True(fw.Minor == 2);
-            Assert.True(fw.Patch == 0);
-        }
 
-        [Fact]
-        public void Constructor_GivenMajorMinorPatch_Returns1_2_3()
-        {
-            var fw = new FirmwareVersion(1, 2, 3);
-            Assert.True(fw.Major == 1);
-            Assert.True(fw.Minor == 2);
-            Assert.True(fw.Patch == 3);
-        }
+    [Fact]
+    public void Major_GetSet_Succeeds()
+    {
+        var fw = new FirmwareVersion();
+        var expectedValue = GetRandomByte();
 
-        [Theory]
-        [InlineData(1, 0, 0, true)]
-        [InlineData(1, 0, 255, true)]
-        [InlineData(1, 255, 0, true)]
-        [InlineData(2, 0, 0, false)]
-        [InlineData(2, 0, 1, false)]
-        [InlineData(2, 1, 0, false)]
-        [InlineData(3, 0, 0, false)]
-        public void VersionTwoZeroZero_GreaterThan_Operator(byte major, byte minor, byte patch, bool expected)
-        {
-            var fwTest = new FirmwareVersion(major, minor, patch);
+        fw.Major = expectedValue;
 
-            Assert.Equal(expected, FirmwareVersion.V2_0_0 > fwTest);
-        }
+        Assert.Equal(expectedValue, fw.Major);
+    }
 
-        [Theory]
-        [InlineData(1, 0, 0, false)]
-        [InlineData(1, 0, 255, false)]
-        [InlineData(1, 255, 0, false)]
-        [InlineData(2, 0, 0, false)]
-        [InlineData(2, 0, 1, true)]
-        [InlineData(2, 1, 0, true)]
-        [InlineData(3, 0, 0, true)]
-        public void VersionTwoZeroZero_LessThan_Operator(byte major, byte minor, byte patch, bool expected)
-        {
-            var fwTest = new FirmwareVersion(major, minor, patch);
+    [Fact]
+    public void Minor_GetSet_Succeeds()
+    {
+        var fw = new FirmwareVersion();
+        var expectedValue = GetRandomByte();
 
-            Assert.Equal(expected, FirmwareVersion.V2_0_0 < fwTest);
-        }
+        fw.Minor = expectedValue;
 
-        [Theory]
-        [InlineData(1, 0, 0, true)]
-        [InlineData(1, 0, 255, true)]
-        [InlineData(1, 255, 0, true)]
-        [InlineData(2, 0, 0, true)]
-        [InlineData(2, 0, 1, false)]
-        [InlineData(2, 1, 0, false)]
-        [InlineData(3, 0, 0, false)]
-        public void VersionTwoZeroZero_GreaterThanEqualTo_Operator(byte major, byte minor, byte patch, bool expected)
-        {
-            var fwTest = new FirmwareVersion(major, minor, patch);
+        Assert.Equal(expectedValue, fw.Minor);
+    }
 
-            Assert.Equal(expected, FirmwareVersion.V2_0_0 >= fwTest);
-        }
+    [Fact]
+    public void Patch_GetSet_Succeeds()
+    {
+        var fw = new FirmwareVersion();
+        var expectedValue = GetRandomByte();
 
-        [Theory]
-        [InlineData(1, 0, 0, false)]
-        [InlineData(1, 0, 255, false)]
-        [InlineData(1, 255, 0, false)]
-        [InlineData(2, 0, 0, true)]
-        [InlineData(2, 0, 1, true)]
-        [InlineData(2, 1, 0, true)]
-        [InlineData(3, 0, 0, true)]
-        public void VersionTwoZeroZero_LessThanEqualTo_Operator(byte major, byte minor, byte patch, bool expected)
-        {
-            var fwTest = new FirmwareVersion(major, minor, patch);
+        fw.Patch = expectedValue;
 
-            Assert.Equal(expected, FirmwareVersion.V2_0_0 <= fwTest);
-        }
+        Assert.Equal(expectedValue, fw.Patch);
+    }
 
-        [Theory]
-        [InlineData(1, 0, 0, false)]
-        [InlineData(1, 0, 255, false)]
-        [InlineData(1, 255, 0, false)]
-        [InlineData(2, 0, 0, true)]
-        [InlineData(2, 0, 1, false)]
-        [InlineData(2, 1, 0, false)]
-        [InlineData(3, 0, 0, false)]
-        public void VersionTwoZeroZero_EqualTo_Operator(byte major, byte minor, byte patch, bool expected)
-        {
-            var fwTest = new FirmwareVersion(major, minor, patch);
+    [Fact]
+    public void DefaultConstructor_CreatesFw0_0_0()
+    {
+        var fw = new FirmwareVersion();
+        Assert.True(fw.Major == 0);
+        Assert.True(fw.Minor == 0);
+        Assert.True(fw.Patch == 0);
+    }
 
-            Assert.Equal(expected, FirmwareVersion.V2_0_0 == fwTest);
-        }
+    [Fact]
+    public void Constructor_GivenMajor_Returns1_0_0()
+    {
+        var fw = new FirmwareVersion(1);
+        Assert.True(fw.Major == 1);
+        Assert.True(fw.Minor == 0);
+        Assert.True(fw.Patch == 0);
+    }
 
-        [Theory]
-        [InlineData(1, 0, 0, true)]
-        [InlineData(1, 0, 255, true)]
-        [InlineData(1, 255, 0, true)]
-        [InlineData(2, 0, 0, false)]
-        [InlineData(2, 0, 1, true)]
-        [InlineData(2, 1, 0, true)]
-        [InlineData(3, 0, 0, true)]
-        public void VersionTwoZeroZero_NotEqualTo_Operator(byte major, byte minor, byte patch, bool expected)
-        {
-            var fwTest = new FirmwareVersion(major, minor, patch);
+    [Fact]
+    public void Constructor_GivenMajorMinor_Returns1_2_0()
+    {
+        var fw = new FirmwareVersion(1, 2);
+        Assert.True(fw.Major == 1);
+        Assert.True(fw.Minor == 2);
+        Assert.True(fw.Patch == 0);
+    }
 
-            Assert.Equal(expected, FirmwareVersion.V2_0_0 != fwTest);
-        }
+    [Fact]
+    public void Constructor_GivenMajorMinorPatch_Returns1_2_3()
+    {
+        var fw = new FirmwareVersion(1, 2, 3);
+        Assert.True(fw.Major == 1);
+        Assert.True(fw.Minor == 2);
+        Assert.True(fw.Patch == 3);
+    }
 
-        [Theory]
-        [InlineData(1, 0, 0, false)]
-        [InlineData(1, 0, 255, false)]
-        [InlineData(1, 255, 0, false)]
-        [InlineData(2, 0, 0, true)]
-        [InlineData(2, 0, 1, false)]
-        [InlineData(2, 1, 0, false)]
-        [InlineData(3, 0, 0, false)]
-        public void VersionTwoZeroZero_ObjectEquals(byte major, byte minor, byte patch, bool expected)
-        {
-            object fwTest = new FirmwareVersion(major, minor, patch);
+    [Theory]
+    [InlineData(1, 0, 0, true)]
+    [InlineData(1, 0, 255, true)]
+    [InlineData(1, 255, 0, true)]
+    [InlineData(2, 0, 0, false)]
+    [InlineData(2, 0, 1, false)]
+    [InlineData(2, 1, 0, false)]
+    [InlineData(3, 0, 0, false)]
+    public void VersionTwoZeroZero_GreaterThan_Operator(
+        byte major,
+        byte minor,
+        byte patch,
+        bool expected)
+    {
+        var fwTest = new FirmwareVersion(major, minor, patch);
 
-            Assert.Equal(expected, FirmwareVersion.V2_0_0.Equals(fwTest));
-        }
+        Assert.Equal(expected, FirmwareVersion.V2_0_0 > fwTest);
+    }
 
-        [Fact]
-        public void ObjectEquals_NotFirmwareVersion_ReturnsFalse()
-        {
-            var byteList = new List<byte>();
+    [Theory]
+    [InlineData(1, 0, 0, false)]
+    [InlineData(1, 0, 255, false)]
+    [InlineData(1, 255, 0, false)]
+    [InlineData(2, 0, 0, false)]
+    [InlineData(2, 0, 1, true)]
+    [InlineData(2, 1, 0, true)]
+    [InlineData(3, 0, 0, true)]
+    public void VersionTwoZeroZero_LessThan_Operator(
+        byte major,
+        byte minor,
+        byte patch,
+        bool expected)
+    {
+        var fwTest = new FirmwareVersion(major, minor, patch);
 
-            Assert.False(FirmwareVersion.V2_0_0.Equals(byteList));
-        }
+        Assert.Equal(expected, FirmwareVersion.V2_0_0 < fwTest);
+    }
 
-        [Fact]
-        public void ObjectEquals_Null_ReturnsFalse()
-        {
-            List<byte>? byteList = null;
+    [Theory]
+    [InlineData(1, 0, 0, true)]
+    [InlineData(1, 0, 255, true)]
+    [InlineData(1, 255, 0, true)]
+    [InlineData(2, 0, 0, true)]
+    [InlineData(2, 0, 1, false)]
+    [InlineData(2, 1, 0, false)]
+    [InlineData(3, 0, 0, false)]
+    public void VersionTwoZeroZero_GreaterThanEqualTo_Operator(
+        byte major,
+        byte minor,
+        byte patch,
+        bool expected)
+    {
+        var fwTest = new FirmwareVersion(major, minor, patch);
 
-            Assert.False(FirmwareVersion.V2_0_0.Equals(byteList));
-        }
+        Assert.Equal(expected, FirmwareVersion.V2_0_0 >= fwTest);
+    }
 
-        [Fact]
-        public void ObjectEquals_SameObject_ReturnsTrue()
-        {
-            object? other = FirmwareVersion.V2_0_0;
+    [Theory]
+    [InlineData(1, 0, 0, false)]
+    [InlineData(1, 0, 255, false)]
+    [InlineData(1, 255, 0, false)]
+    [InlineData(2, 0, 0, true)]
+    [InlineData(2, 0, 1, true)]
+    [InlineData(2, 1, 0, true)]
+    [InlineData(3, 0, 0, true)]
+    public void VersionTwoZeroZero_LessThanEqualTo_Operator(
+        byte major,
+        byte minor,
+        byte patch,
+        bool expected)
+    {
+        var fwTest = new FirmwareVersion(major, minor, patch);
 
-            Assert.True(FirmwareVersion.V2_0_0.Equals(other));
-        }
+        Assert.Equal(expected, FirmwareVersion.V2_0_0 <= fwTest);
+    }
 
-        [Theory]
-        [InlineData(1, 0, 0, false)]
-        [InlineData(1, 0, 255, false)]
-        [InlineData(1, 255, 0, false)]
-        [InlineData(2, 0, 0, true)]
-        [InlineData(2, 0, 1, false)]
-        [InlineData(2, 1, 0, false)]
-        [InlineData(3, 0, 0, false)]
-        public void VersionTwoZeroZero_IEquatableEquals(byte major, byte minor, byte patch, bool expected)
-        {
-            var fwTest = new FirmwareVersion(major, minor, patch);
+    [Theory]
+    [InlineData(1, 0, 0, false)]
+    [InlineData(1, 0, 255, false)]
+    [InlineData(1, 255, 0, false)]
+    [InlineData(2, 0, 0, true)]
+    [InlineData(2, 0, 1, false)]
+    [InlineData(2, 1, 0, false)]
+    [InlineData(3, 0, 0, false)]
+    public void VersionTwoZeroZero_EqualTo_Operator(
+        byte major,
+        byte minor,
+        byte patch,
+        bool expected)
+    {
+        var fwTest = new FirmwareVersion(major, minor, patch);
 
-            Assert.Equal(expected, FirmwareVersion.V2_0_0.Equals(fwTest));
-        }
+        Assert.Equal(expected, FirmwareVersion.V2_0_0 == fwTest);
+    }
 
-        [Fact]
-        public void VersionTwoZeroZero_IEquatableEquals_SameObject_ReturnsTrue()
-        {
-            FirmwareVersion other = FirmwareVersion.V2_0_0;
+    [Theory]
+    [InlineData(1, 0, 0, true)]
+    [InlineData(1, 0, 255, true)]
+    [InlineData(1, 255, 0, true)]
+    [InlineData(2, 0, 0, false)]
+    [InlineData(2, 0, 1, true)]
+    [InlineData(2, 1, 0, true)]
+    [InlineData(3, 0, 0, true)]
+    public void VersionTwoZeroZero_NotEqualTo_Operator(
+        byte major,
+        byte minor,
+        byte patch,
+        bool expected)
+    {
+        var fwTest = new FirmwareVersion(major, minor, patch);
 
-            Assert.True(FirmwareVersion.V2_0_0.Equals(other));
-        }
+        Assert.Equal(expected, FirmwareVersion.V2_0_0 != fwTest);
+    }
 
-        [Theory]
-        [InlineData(1, 0, 0, 1)]
-        [InlineData(1, 0, 255, 1)]
-        [InlineData(1, 255, 0, 1)]
-        [InlineData(2, 0, 0, 0)]
-        [InlineData(2, 0, 1, -1)]
-        [InlineData(2, 1, 0, -1)]
-        [InlineData(3, 0, 0, -1)]
-        public void VersionTwoZeroZero_IComparableCompareTo(byte major, byte minor, byte patch, int expected)
-        {
-            object fwTest = new FirmwareVersion(major, minor, patch);
+    [Theory]
+    [InlineData(1, 0, 0, false)]
+    [InlineData(1, 0, 255, false)]
+    [InlineData(1, 255, 0, false)]
+    [InlineData(2, 0, 0, true)]
+    [InlineData(2, 0, 1, false)]
+    [InlineData(2, 1, 0, false)]
+    [InlineData(3, 0, 0, false)]
+    public void VersionTwoZeroZero_ObjectEquals(
+        byte major,
+        byte minor,
+        byte patch,
+        bool expected)
+    {
+        object fwTest = new FirmwareVersion(major, minor, patch);
 
-            int result = FirmwareVersion.V2_0_0.CompareTo(fwTest);
-            int normalizedResult = result == 0 ? 0 : result > 0 ? 1 : -1;
+        Assert.Equal(expected, FirmwareVersion.V2_0_0.Equals(fwTest));
+    }
 
-            Assert.Equal(expected, normalizedResult);
-        }
+    [Fact]
+    public void ObjectEquals_NotFirmwareVersion_ReturnsFalse()
+    {
+        var byteList = new List<byte>();
 
-        [Fact]
-        public void VersionTwoZeroZero_IComparableCompareTo_NotFirmwareVersion_ThrowsArgumentException()
-        {
-            var byteList = new List<byte>();
-            _ = Assert.Throws<ArgumentException>(() => FirmwareVersion.V2_0_0.CompareTo(byteList));
-        }
+        Assert.False(FirmwareVersion.V2_0_0.Equals(byteList));
+    }
 
-        [Fact]
-        public void VersionTwoZeroZero_IComparableCompareTo_Null_Returns1()
-        {
-            List<byte>? byteList = null;
+    [Fact]
+    public void ObjectEquals_Null_ReturnsFalse()
+    {
+        List<byte>? byteList = null;
 
-            Assert.Equal(1, FirmwareVersion.V2_0_0.CompareTo(byteList));
-        }
+        Assert.False(FirmwareVersion.V2_0_0.Equals(byteList));
+    }
 
-        [Fact]
-        public void VersionTwoZeroZero_IComparableCompareTo_SameObject_Returns0()
-        {
-            object? other = FirmwareVersion.V2_0_0;
+    [Fact]
+    public void ObjectEquals_SameObject_ReturnsTrue()
+    {
+        object? other = FirmwareVersion.V2_0_0;
 
-            Assert.Equal(0, FirmwareVersion.V2_0_0.CompareTo(other));
-        }
+        Assert.True(FirmwareVersion.V2_0_0.Equals(other));
+    }
 
-        [Theory]
-        [InlineData(1, 0, 0, 1)]
-        [InlineData(1, 0, 255, 1)]
-        [InlineData(1, 255, 0, 1)]
-        [InlineData(2, 0, 0, 0)]
-        [InlineData(2, 0, 1, -1)]
-        [InlineData(2, 1, 0, -1)]
-        [InlineData(3, 0, 0, -1)]
-        public void VersionTwoZeroZero_IComparableFirmwareVersionCompareTo(byte major, byte minor, byte patch, int expected)
-        {
-            var fwTest = new FirmwareVersion(major, minor, patch);
+    [Theory]
+    [InlineData(1, 0, 0, false)]
+    [InlineData(1, 0, 255, false)]
+    [InlineData(1, 255, 0, false)]
+    [InlineData(2, 0, 0, true)]
+    [InlineData(2, 0, 1, false)]
+    [InlineData(2, 1, 0, false)]
+    [InlineData(3, 0, 0, false)]
+    public void VersionTwoZeroZero_IEquatableEquals(
+        byte major,
+        byte minor,
+        byte patch,
+        bool expected)
+    {
+        var fwTest = new FirmwareVersion(major, minor, patch);
 
-            int result = FirmwareVersion.V2_0_0.CompareTo(fwTest);
-            int normalizedResult = result == 0 ? 0 : result > 0 ? 1 : -1;
+        Assert.Equal(expected, FirmwareVersion.V2_0_0.Equals(fwTest));
+    }
 
-            Assert.Equal(expected, normalizedResult);
-        }
+    [Fact]
+    public void VersionTwoZeroZero_IEquatableEquals_SameObject_ReturnsTrue()
+    {
+        var other = FirmwareVersion.V2_0_0;
 
-        [Fact]
-        public void VersionTwoZeroZero_IComparableFirmwareVersionCompareTo_Null_Returns1()
-        {
+        Assert.True(FirmwareVersion.V2_0_0.Equals(other));
+    }
+
+    [Theory]
+    [InlineData(1, 0, 0, 1)]
+    [InlineData(1, 0, 255, 1)]
+    [InlineData(1, 255, 0, 1)]
+    [InlineData(2, 0, 0, 0)]
+    [InlineData(2, 0, 1, -1)]
+    [InlineData(2, 1, 0, -1)]
+    [InlineData(3, 0, 0, -1)]
+    public void VersionTwoZeroZero_IComparableCompareTo(
+        byte major,
+        byte minor,
+        byte patch,
+        int expected)
+    {
+        object fwTest = new FirmwareVersion(major, minor, patch);
+
+        var result = FirmwareVersion.V2_0_0.CompareTo(fwTest);
+        var normalizedResult = result == 0 ? 0 : result > 0 ? 1 : -1;
+
+        Assert.Equal(expected, normalizedResult);
+    }
+
+    [Fact]
+    public void VersionTwoZeroZero_IComparableCompareTo_NotFirmwareVersion_ThrowsArgumentException()
+    {
+        var byteList = new List<byte>();
+        _ = Assert.Throws<ArgumentException>(() => FirmwareVersion.V2_0_0.CompareTo(byteList));
+    }
+
+    [Fact]
+    public void VersionTwoZeroZero_IComparableCompareTo_Null_Returns1()
+    {
+        List<byte>? byteList = null;
+
+        Assert.Equal(1, FirmwareVersion.V2_0_0.CompareTo(byteList));
+    }
+
+    [Fact]
+    public void VersionTwoZeroZero_IComparableCompareTo_SameObject_Returns0()
+    {
+        object? other = FirmwareVersion.V2_0_0;
+
+        Assert.Equal(0, FirmwareVersion.V2_0_0.CompareTo(other));
+    }
+
+    [Theory]
+    [InlineData(1, 0, 0, 1)]
+    [InlineData(1, 0, 255, 1)]
+    [InlineData(1, 255, 0, 1)]
+    [InlineData(2, 0, 0, 0)]
+    [InlineData(2, 0, 1, -1)]
+    [InlineData(2, 1, 0, -1)]
+    [InlineData(3, 0, 0, -1)]
+    public void VersionTwoZeroZero_IComparableFirmwareVersionCompareTo(
+        byte major,
+        byte minor,
+        byte patch,
+        int expected)
+    {
+        var fwTest = new FirmwareVersion(major, minor, patch);
+
+        var result = FirmwareVersion.V2_0_0.CompareTo(fwTest);
+        var normalizedResult = result == 0 ? 0 : result > 0 ? 1 : -1;
+
+        Assert.Equal(expected, normalizedResult);
+    }
+
+    [Fact]
+    public void VersionTwoZeroZero_IComparableFirmwareVersionCompareTo_Null_Returns1()
+    {
 #nullable disable
-            FirmwareVersion fwTest = null;
+        FirmwareVersion fwTest = null;
 
-            Assert.Equal(1, FirmwareVersion.V2_0_0.CompareTo(fwTest));
+        Assert.Equal(1, FirmwareVersion.V2_0_0.CompareTo(fwTest));
 #nullable enable
-        }
+    }
 
-        [Fact]
-        public void VersionTwoZeroZero_IComparableFirmwareVersionCompareTo_SameObject_Returns0()
-        {
-            FirmwareVersion other = FirmwareVersion.V2_0_0;
+    [Fact]
+    public void VersionTwoZeroZero_IComparableFirmwareVersionCompareTo_SameObject_Returns0()
+    {
+        var other = FirmwareVersion.V2_0_0;
 
-            Assert.Equal(0, FirmwareVersion.V2_0_0.CompareTo(other));
-        }
+        Assert.Equal(0, FirmwareVersion.V2_0_0.CompareTo(other));
+    }
 
-        [Fact]
-        public void Version_LessThan_HigherVersion_ReturnsTrue()
-        {
-            var versionLeft = new ImageProcessorVersion(3, 7, 9);
-            var versionRight = new ImageProcessorVersion(3, 7, 10);
+    [Fact]
+    public void Version_LessThan_HigherVersion_ReturnsTrue()
+    {
+        var versionLeft = new ImageProcessorVersion(3, 7, 9);
+        var versionRight = new ImageProcessorVersion(3, 7, 10);
 
-            Assert.True(versionLeft < versionRight);
-        }
+        Assert.True(versionLeft < versionRight);
+    }
 
-        private static byte GetRandomByte()
-        {
-            var rng = new Random();
-            return (byte)rng.Next(0, 255);
-        }
+    private static byte GetRandomByte()
+    {
+        var rng = new Random();
+        return (byte)rng.Next(0, 255);
     }
 }

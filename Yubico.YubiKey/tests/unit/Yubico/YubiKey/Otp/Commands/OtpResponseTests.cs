@@ -16,40 +16,39 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+public class OtpResponseTests
 {
-    public class OtpResponseTests
+    [Fact]
+    public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
     {
-        [Fact]
-        public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
-        {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new OtpResponse(null));
+        _ = Assert.Throws<ArgumentNullException>(() => new OtpResponse(null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-        }
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
-            var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
+        var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
 
-            Assert.Equal(SWConstants.Success, queryFipsModeResponse.StatusWord);
-        }
+        Assert.Equal(SWConstants.Success, queryFipsModeResponse.StatusWord);
+    }
 
-        [Fact]
-        public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
-        {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
+    [Fact]
+    public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
+    {
+        var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        var sw2 = unchecked((byte)SWConstants.Success);
+        var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
-            var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
+        var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
 
-            Assert.Equal(ResponseStatus.Success, queryFipsModeResponse.Status);
-        }
+        Assert.Equal(ResponseStatus.Success, queryFipsModeResponse.Status);
     }
 }

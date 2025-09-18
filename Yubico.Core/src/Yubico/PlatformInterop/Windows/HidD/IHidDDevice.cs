@@ -14,22 +14,21 @@
 
 using System;
 
-namespace Yubico.PlatformInterop
-{
-    interface IHidDDevice : IDisposable
-    {
-        string DevicePath { get; }
-        short Usage { get; }
-        short UsagePage { get; }
-        short InputReportByteLength { get; }
-        short OutputReportByteLength { get; }
-        short FeatureReportByteLength { get; }
+namespace Yubico.PlatformInterop;
 
-        public void OpenIOConnection();
-        public void OpenFeatureConnection();
-        public byte[] GetFeatureReport();
-        public void SetFeatureReport(byte[] buffer);
-        public byte[] GetInputReport();
-        public void SetOutputReport(byte[] buffer);
-    }
+internal interface IHidDDevice : IDisposable
+{
+    string DevicePath { get; }
+    short Usage { get; }
+    short UsagePage { get; }
+    short InputReportByteLength { get; }
+    short OutputReportByteLength { get; }
+    short FeatureReportByteLength { get; }
+
+    void OpenIOConnection();
+    void OpenFeatureConnection();
+    byte[] GetFeatureReport();
+    void SetFeatureReport(byte[] buffer);
+    byte[] GetInputReport();
+    void SetOutputReport(byte[] buffer);
 }

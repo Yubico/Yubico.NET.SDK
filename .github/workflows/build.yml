@@ -96,8 +96,8 @@ jobs:
 
       # Build the project
       - name: Build Yubico.NET.SDK.sln
-        run: dotnet pack --configuration Release --nologo --verbosity minimal -p:treatWarningsAsErrors=true Yubico.NET.SDK.sln 
-
+        run: dotnet pack --configuration Release --nologo --verbosity minimal -p:treatWarningsAsErrors=true Yubico.NET.SDK.sln
+      
       # Build the documentation
       - name: Build docs
         run: |
@@ -121,7 +121,7 @@ jobs:
           name: Documentation
           path: docs/_site/
           if-no-files-found: error
-          
+      
       # Upload NuGet packages
       - name: "Save build artifacts: Nuget Packages"
         id: nuget-upload
@@ -166,7 +166,7 @@ jobs:
             Yubico.YubiKey/src/bin/Release/*.snupkg
             Yubico.Core/src/bin/Release/**/*.dll
             Yubico.YubiKey/src/bin/Release/**/*.dll
-      
+  
   upload-docs:
     name: Upload docs
     if: ${{ github.event.inputs.push-to-docs == 'true' }}
@@ -198,7 +198,7 @@ jobs:
   build-summary:
     name: Build summary
     runs-on: ubuntu-latest
-    needs: [run-tests, build-artifacts, publish-internal, upload-docs]
+    needs: [ run-tests, build-artifacts, publish-internal, upload-docs ]
     if: always()
     steps:
       - name: Generate build summary

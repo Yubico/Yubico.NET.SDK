@@ -14,43 +14,46 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+/// <summary>
+///     Get the public properties of all <see cref="Credential" />s in the
+///     YubiHSM Auth application, along with the number of retries remaining
+///     for each.
+/// </summary>
+/// <remarks>
+///     The associated response class is <see cref="ListCredentialsResponse" />.
+/// </remarks>
+public sealed class ListCredentialsCommand : IYubiKeyCommand<ListCredentialsResponse>
 {
+    private const byte ListCredentialsInstruction = 0x05;
+
     /// <summary>
-    /// Get the public properties of all <see cref="Credential"/>s in the
-    /// YubiHSM Auth application, along with the number of retries remaining
-    /// for each.
+    ///     Constructs an instance of the <see cref="ListCredentialsCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// The associated response class is <see cref="ListCredentialsResponse"/>.
-    /// </remarks>
-    public sealed class ListCredentialsCommand : IYubiKeyCommand<ListCredentialsResponse>
+    public ListCredentialsCommand()
     {
-        private const byte ListCredentialsInstruction = 0x05;
+    }
 
-        /// <summary>
-        /// Gets the <see cref="YubiKeyApplication"/> to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.YubiHsmAuth"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
+    #region IYubiKeyCommand<ListCredentialsResponse> Members
 
-        /// <summary>
-        /// Constructs an instance of the <see cref="ListCredentialsCommand"/> class.
-        /// </summary>
-        public ListCredentialsCommand()
-        {
-        }
+    /// <summary>
+    ///     Gets the <see cref="YubiKeyApplication" /> to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     <see cref="YubiKeyApplication.YubiHsmAuth" />
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = ListCredentialsInstruction
         };
 
-        /// <inheritdoc />
-        public ListCredentialsResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ListCredentialsResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public ListCredentialsResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

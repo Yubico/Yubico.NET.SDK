@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.Core.Devices.Hid
-{
-    /// <summary>
-    /// Represents a HID device.
-    /// </summary>
-    public interface IHidDevice : IDevice
-    {
-        short VendorId { get; }
-        short ProductId { get; }
-        short Usage { get; }
-        HidUsagePage UsagePage { get; }
+namespace Yubico.Core.Devices.Hid;
 
-        /// <summary>
-        /// Establishes an active connection to the HID device for the transmittal of data through feature reports.
-        /// </summary>
-        IHidConnection ConnectToFeatureReports();
-        IHidConnection ConnectToIOReports();
-    }
+/// <summary>
+///     Represents a HID device.
+/// </summary>
+public interface IHidDevice : IDevice
+{
+    short VendorId { get; }
+    short ProductId { get; }
+    short Usage { get; }
+    HidUsagePage UsagePage { get; }
+
+    /// <summary>
+    ///     Establishes an active connection to the HID device for the transmittal of data through feature reports.
+    /// </summary>
+    IHidConnection ConnectToFeatureReports();
+
+    IHidConnection ConnectToIOReports();
 }

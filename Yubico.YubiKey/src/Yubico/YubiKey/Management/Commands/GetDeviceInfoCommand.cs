@@ -15,43 +15,45 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Management.Commands
+namespace Yubico.YubiKey.Management.Commands;
+
+/// <summary>
+///     Gets detailed information about the YubiKey and its current configuration.
+/// </summary>
+/// <remarks>
+///     This class has a corresponding partner class <see cref="GetDeviceInfoResponse" />
+/// </remarks>
+[Obsolete("This class has been replaced by nameof(GetPagedDeviceInfoCommand)")]
+public class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>
 {
+    private const byte GetDeviceInfoInstruction = 0x1D;
+
     /// <summary>
-    /// Gets detailed information about the YubiKey and its current configuration.
+    ///     Initializes a new instance of the <see cref="GetDeviceInfoCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// This class has a corresponding partner class <see cref="GetDeviceInfoResponse"/>
-    /// </remarks>
-    [Obsolete("This class has been replaced by nameof(GetPagedDeviceInfoCommand)")]
-    public class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>
+    public GetDeviceInfoCommand()
     {
-        private const byte GetDeviceInfoInstruction = 0x1D;
+    }
 
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.Management"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Management;
+    #region IYubiKeyCommand<GetDeviceInfoResponse> Members
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetDeviceInfoCommand"/> class.
-        /// </summary>
-        public GetDeviceInfoCommand()
-        {
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     <see cref="YubiKeyApplication.Management" />
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Management;
 
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = GetDeviceInfoInstruction
         };
 
-        /// <inheritdoc />
-        public GetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetDeviceInfoResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public GetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

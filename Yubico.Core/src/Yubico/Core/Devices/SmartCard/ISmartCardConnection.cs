@@ -15,12 +15,11 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.Core.Devices.SmartCard
-{
-    public interface ISmartCardConnection : IDisposable
-    {
-        IDisposable BeginTransaction(out bool cardWasReset);
+namespace Yubico.Core.Devices.SmartCard;
 
-        ResponseApdu Transmit(CommandApdu commandApdu);
-    }
+public interface ISmartCardConnection : IDisposable
+{
+    IDisposable BeginTransaction(out bool cardWasReset);
+
+    ResponseApdu Transmit(CommandApdu commandApdu);
 }

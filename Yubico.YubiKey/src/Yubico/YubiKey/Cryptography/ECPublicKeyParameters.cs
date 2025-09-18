@@ -15,17 +15,16 @@
 using System;
 using System.Security.Cryptography;
 
-namespace Yubico.YubiKey.Cryptography
-{
-    [Obsolete("Use ECPublicKey instead", false)]
-    public sealed class ECPublicKeyParameters : ECPublicKey
-    {
-        public ECPublicKeyParameters(ECParameters parameters) : base(parameters)
-        {
-        }
+namespace Yubico.YubiKey.Cryptography;
 
-        public ECPublicKeyParameters(ECDsa ecdsa) : base(ecdsa)
-        {
-        }
+[Obsolete("Use ECPublicKey instead", false)]
+public sealed class ECPublicKeyParameters : ECPublicKey
+{
+    public ECPublicKeyParameters(ECParameters parameters) : base(parameters)
+    {
+    }
+
+    public ECPublicKeyParameters(ECDsa ecdsa) : base(ecdsa)
+    {
     }
 }

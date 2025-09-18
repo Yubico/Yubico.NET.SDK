@@ -15,47 +15,46 @@
 using System;
 using Xunit;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp;
+
+public class KeyReferenceTests
 {
-    public class KeyReferenceTests
+    [Fact]
+    public void Constructor_ValidParameters_SetsProperties()
     {
-        [Fact]
-        public void Constructor_ValidParameters_SetsProperties()
-        {
-            var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
+        var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
 
-            Assert.Equal(0x13, keyReference.Id);
-            Assert.Equal(0x1, keyReference.VersionNumber);
-        }
+        Assert.Equal(0x13, keyReference.Id);
+        Assert.Equal(0x1, keyReference.VersionNumber);
+    }
 
-        [Fact]
-        public void FactoryMethod_ValidParameters_SetsProperties()
-        {
-            var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
+    [Fact]
+    public void FactoryMethod_ValidParameters_SetsProperties()
+    {
+        var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0x1);
 
-            Assert.Equal(0x13, keyReference.Id);
-            Assert.Equal(0x1, keyReference.VersionNumber);
-        }
+        Assert.Equal(0x13, keyReference.Id);
+        Assert.Equal(0x1, keyReference.VersionNumber);
+    }
 
-        [Fact]
-        public void FactoryMethod_InvalidParameters_ThrowsException()
-        {
-            Assert.Throws<ArgumentException>(() => KeyReference.Create(ScpKeyIds.Scp11B, 128));
-        }
+    [Fact]
+    public void FactoryMethod_InvalidParameters_ThrowsException()
+    {
+        Assert.Throws<ArgumentException>(() => KeyReference.Create(ScpKeyIds.Scp11B, 128));
+    }
 
-        [Fact]
-        public void Constructor_0xFF_SetsProperties()
-        {
-            var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0xFF);
+    [Fact]
+    public void Constructor_0xFF_SetsProperties()
+    {
+        var keyReference = new KeyReference(ScpKeyIds.Scp11B, 0xFF);
 
-            Assert.Equal(0x13, keyReference.Id);
-            Assert.Equal(0xFF, keyReference.VersionNumber);
-        }
+        Assert.Equal(0x13, keyReference.Id);
+        Assert.Equal(0xFF, keyReference.VersionNumber);
+    }
 
-        [Fact]
-        public void FactoryMethod_InvalidKvn_ThrowsException()
-        {
-            Assert.Throws<ArgumentException>(() => KeyReference.Create(ScpKeyIds.Scp11B, 0xFF));
-        }
+    [Fact]
+    public void FactoryMethod_InvalidKvn_ThrowsException()
+    {
+        Assert.Throws<ArgumentException>(() => KeyReference.Create(ScpKeyIds.Scp11B, 0xFF));
     }
 }

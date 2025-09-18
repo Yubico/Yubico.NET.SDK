@@ -18,11 +18,13 @@ We use DocFX to build the documentation for the Yubico.YubiKey project. This is 
 generates documentation from comments in the source code. The comments are written in Markdown
 format.
 
-In order to build the documentation, use either of the following methods: 
+In order to build the documentation, use either of the following methods:
+
 1. Command Line: `docfx build docfx.json`
-2. VS Code: Run the build task `DocFXBuild` using [VS Code Tasks](https://code.visualstudio.com/docs/editor/tasks) 
-   
-> Note: In order to run `docfx` commands, you need to have docfx installed. Install `docfx` using the following command: `dotnet tool install -g docfx`
+2. VS Code: Run the build task `DocFXBuild` using [VS Code Tasks](https://code.visualstudio.com/docs/editor/tasks)
+
+> Note: In order to run `docfx` commands, you need to have docfx installed. Install `docfx` using the following command:
+`dotnet tool install -g docfx`
 
 The result is in `docs/_site`. The home page is `index.html`.
 
@@ -31,7 +33,6 @@ to get to the classes. The comments you wrote will be reflected in the documenta
 
 Note that even if there is a class and/or method with no documentation, there is an entry for it.
 Everything is there except the content.
-
 
 ## Local web server
 

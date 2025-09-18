@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+public enum SdkPlatform
 {
-    public enum SdkPlatform
-    {
-        Unknown,
-        Windows,
-        MacOS,
-        Linux
-    }
+    Unknown,
+    Windows,
+    MacOS,
+    Linux
 }

@@ -14,48 +14,47 @@
 
 using System;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+/// <summary>
+///     The communication methods a YubiKey may use to connect with a host device.
+/// </summary>
+[Flags]
+public enum Transport
 {
     /// <summary>
-    /// The communication methods a YubiKey may use to connect with a host device.
+    ///     This flag is equivalent to all flags being disabled.
     /// </summary>
-    [Flags]
-    public enum Transport
-    {
-        /// <summary>
-        /// This flag is equivalent to all flags being disabled.
-        /// </summary>
-        None = 0,
+    None = 0,
 
-        /// <summary>
-        /// USB HID class keyboard.
-        /// </summary>
-        HidKeyboard = 0x01,
+    /// <summary>
+    ///     USB HID class keyboard.
+    /// </summary>
+    HidKeyboard = 0x01,
 
-        /// <summary>
-        /// FIDO U2F authenticator device.
-        /// </summary>
-        HidFido = 0x02,
+    /// <summary>
+    ///     FIDO U2F authenticator device.
+    /// </summary>
+    HidFido = 0x02,
 
-        /// <summary>
-        /// Smart card connection over USB.
-        /// </summary>
-        UsbSmartCard = 0x04,
+    /// <summary>
+    ///     Smart card connection over USB.
+    /// </summary>
+    UsbSmartCard = 0x04,
 
-        /// <summary>
-        /// Smart card connection over NFC.
-        /// </summary>
-        NfcSmartCard = 0x08,
+    /// <summary>
+    ///     Smart card connection over NFC.
+    /// </summary>
+    NfcSmartCard = 0x08,
 
-        /// <summary>
-        /// A convenience member that combines <see cref="UsbSmartCard"/> and
-        /// <see cref="NfcSmartCard"/>.
-        /// </summary>
-        SmartCard = UsbSmartCard | NfcSmartCard,
+    /// <summary>
+    ///     A convenience member that combines <see cref="UsbSmartCard" /> and
+    ///     <see cref="NfcSmartCard" />.
+    /// </summary>
+    SmartCard = UsbSmartCard | NfcSmartCard,
 
-        /// <summary>
-        /// A convenience member that combines all flags.
-        /// </summary>
-        All = SmartCard | HidKeyboard | HidFido,
-    }
+    /// <summary>
+    ///     A convenience member that combines all flags.
+    /// </summary>
+    All = SmartCard | HidKeyboard | HidFido
 }

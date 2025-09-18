@@ -16,145 +16,155 @@ using System;
 using System.Security.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.Scp03.Commands;
 
-namespace Yubico.YubiKey.Pipelines
+namespace Yubico.YubiKey.Pipelines;
+
+/// <summary>
+///     Performs SCP03 encrypt-then-MAC on commands and verify-then-decrypt on responses.
+/// </summary>
+/// <remarks>
+///     Does an SCP03 Initialize Update / External Authenticate handshake at setup.
+///     Commands and responses sent through this pipeline are confidential and authenticated.
+///     Requires pre-shared <see cref="StaticKeys" />.
+/// </remarks>
+[Obsolete("Use ScpApduTransform instead.")]
+internal class Scp03ApduTransform : IApduTransform, IDisposable
 {
+    private readonly IApduTransform _pipeline;
+    private readonly Session _session;
+
+    private bool _disposed;
+
     /// <summary>
-    /// Performs SCP03 encrypt-then-MAC on commands and verify-then-decrypt on responses.
+    ///     Constructs a new pipeline from the given one.
     /// </summary>
-    /// <remarks>
-    /// Does an SCP03 Initialize Update / External Authenticate handshake at setup.
-    ///
-    /// Commands and responses sent through this pipeline are confidential and authenticated.
-    ///
-    /// Requires pre-shared <see cref="StaticKeys"/>.
-    /// </remarks>
-    [Obsolete("Use ScpApduTransform instead.")]
-    internal class Scp03ApduTransform : IApduTransform, IDisposable
+    /// <param name="pipeline">Underlying pipeline to send and receive encoded APDUs with</param>
+    /// <param name="staticKeys">Static keys pre-shared with the device</param>
+    public Scp03ApduTransform(IApduTransform pipeline, StaticKeys staticKeys)
     {
-        private readonly IApduTransform _pipeline;
-        private readonly Session _session;
-
-        private bool _disposed;
-
-        public StaticKeys Scp03Keys { get; private set; }
-
-        /// <summary>
-        /// Constructs a new pipeline from the given one.
-        /// </summary>
-        /// <param name="pipeline">Underlying pipeline to send and receive encoded APDUs with</param>
-        /// <param name="staticKeys">Static keys pre-shared with the device</param>
-        public Scp03ApduTransform(IApduTransform pipeline, StaticKeys staticKeys)
+        if (pipeline is null)
         {
-            if (pipeline is null)
+            throw new ArgumentNullException(nameof(pipeline));
+        }
+
+        if (staticKeys is null)
+        {
+            throw new ArgumentNullException(nameof(staticKeys));
+        }
+
+        _pipeline = pipeline;
+        Scp03Keys = staticKeys.GetCopy();
+
+        _session = new Session();
+        _disposed = false;
+    }
+
+    public StaticKeys Scp03Keys { get; }
+
+    #region IApduTransform Members
+
+    /// <summary>
+    ///     Performs SCP03 handshake. Must be called after SELECT.
+    /// </summary>
+    public void Setup()
+    {
+        using var rng = CryptographyProviders.RngCreator();
+        Setup(rng);
+    }
+
+    public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
+    {
+        // Encode command
+        var encodedCommand = _session.EncodeCommand(command);
+
+        // Pass along the encoded command
+        var response = _pipeline.Invoke(encodedCommand, commandType, responseType);
+
+        // Special carve out for SelectApplication here, since there will be nothing to decode
+        if (commandType == typeof(SelectApplicationCommand))
+        {
+            return response;
+        }
+
+        // Decode response and return it
+        return _session.DecodeResponse(response);
+    }
+
+    // There is a call to cleanup and a call to Dispose. The cleanup only
+    // needs to call the cleanup on the local APDU Pipeline object.
+    public void Cleanup() => _pipeline.Cleanup();
+
+    #endregion
+
+    #region IDisposable Members
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    internal void Setup(RandomNumberGenerator rng)
+    {
+        _pipeline.Setup();
+
+        // Generate host challenge
+        byte[] hostChallenge = new byte[8];
+        rng.GetBytes(hostChallenge);
+
+        // Perform IU/EA handshake
+        PerformInitializeUpdate(hostChallenge);
+        PerformExternalAuthenticate();
+    }
+
+    private void PerformInitializeUpdate(byte[] hostChallenge)
+    {
+        var initializeUpdateCommand = _session.BuildInitializeUpdate(
+            Scp03Keys.KeyVersionNumber, hostChallenge);
+
+        var initializeUpdateResponseApdu = _pipeline.Invoke(
+            initializeUpdateCommand.CreateCommandApdu(),
+            typeof(InitializeUpdateCommand),
+            typeof(InitializeUpdateResponse));
+
+        var initializeUpdateResponse = initializeUpdateCommand.CreateResponseForApdu(initializeUpdateResponseApdu);
+        initializeUpdateResponse.ThrowIfFailed();
+        _session.LoadInitializeUpdateResponse(initializeUpdateResponse, Scp03Keys);
+    }
+
+    private void PerformExternalAuthenticate()
+    {
+        var externalAuthenticateCommand = _session.BuildExternalAuthenticate();
+
+        var externalAuthenticateResponseApdu = _pipeline.Invoke(
+            externalAuthenticateCommand.CreateCommandApdu(),
+            typeof(ExternalAuthenticateCommand),
+            typeof(ExternalAuthenticateResponse));
+
+        var externalAuthenticateResponse =
+            externalAuthenticateCommand.CreateResponseForApdu(externalAuthenticateResponseApdu);
+
+        externalAuthenticateResponse.ThrowIfFailed();
+        _session.LoadExternalAuthenticateResponse(externalAuthenticateResponse);
+    }
+
+    // The Dispose needs to make sure the local disposable fields are
+    // disposed.
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
             {
-                throw new ArgumentNullException(nameof(pipeline));
-            }
+                Scp03Keys.Dispose();
+                _session.Dispose();
 
-            if (staticKeys is null)
-            {
-                throw new ArgumentNullException(nameof(staticKeys));
-            }
-
-            _pipeline = pipeline;
-            Scp03Keys = staticKeys.GetCopy();
-
-            _session = new Session();
-            _disposed = false;
-        }
-
-        /// <summary>
-        /// Performs SCP03 handshake. Must be called after SELECT.
-        /// </summary>
-        public void Setup()
-        {
-            using var rng = CryptographyProviders.RngCreator();
-            Setup(rng);
-        }
-
-        internal void Setup(RandomNumberGenerator rng)
-        {
-            _pipeline.Setup();
-            // Generate host challenge
-            byte[] hostChallenge = new byte[8];
-            rng.GetBytes(hostChallenge);
-            // Perform IU/EA handshake
-            PerformInitializeUpdate(hostChallenge);
-            PerformExternalAuthenticate();
-        }
-
-        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
-        {
-            // Encode command
-            var encodedCommand = _session.EncodeCommand(command);
-
-            // Pass along the encoded command
-            var response = _pipeline.Invoke(encodedCommand, commandType, responseType);
-
-            // Special carve out for SelectApplication here, since there will be nothing to decode
-            if (commandType == typeof(InterIndustry.Commands.SelectApplicationCommand))
-            {
-                return response;
-            }
-
-            // Decode response and return it
-            return _session.DecodeResponse(response);
-        }
-
-        private void PerformInitializeUpdate(byte[] hostChallenge)
-        {
-            var initializeUpdateCommand = _session.BuildInitializeUpdate(
-                Scp03Keys.KeyVersionNumber, hostChallenge);
-
-            var initializeUpdateResponseApdu = _pipeline.Invoke(
-                initializeUpdateCommand.CreateCommandApdu(),
-                typeof(InitializeUpdateCommand),
-                typeof(InitializeUpdateResponse));
-
-            var initializeUpdateResponse = initializeUpdateCommand.CreateResponseForApdu(initializeUpdateResponseApdu);
-            initializeUpdateResponse.ThrowIfFailed();
-            _session.LoadInitializeUpdateResponse(initializeUpdateResponse, Scp03Keys);
-        }
-
-        private void PerformExternalAuthenticate()
-        {
-            var externalAuthenticateCommand = _session.BuildExternalAuthenticate();
-
-            var externalAuthenticateResponseApdu = _pipeline.Invoke(
-                externalAuthenticateCommand.CreateCommandApdu(),
-                typeof(ExternalAuthenticateCommand),
-                typeof(ExternalAuthenticateResponse));
-
-            var externalAuthenticateResponse = externalAuthenticateCommand.CreateResponseForApdu(externalAuthenticateResponseApdu);
-            externalAuthenticateResponse.ThrowIfFailed();
-            _session.LoadExternalAuthenticateResponse(externalAuthenticateResponse);
-        }
-
-        // There is a call to cleanup and a call to Dispose. The cleanup only
-        // needs to call the cleanup on the local APDU Pipeline object.
-        public void Cleanup() => _pipeline.Cleanup();
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        // The Dispose needs to make sure the local disposable fields are
-        // disposed.
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    Scp03Keys.Dispose();
-                    _session.Dispose();
-
-                    _disposed = true;
-                }
+                _disposed = true;
             }
         }
     }

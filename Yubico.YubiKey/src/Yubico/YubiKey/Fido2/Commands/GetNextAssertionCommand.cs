@@ -14,46 +14,48 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Instruct the YubiKey to get the next assertion associated with the
+///     relying party specified in the previous call to
+///     <see cref="GetAssertionCommand" />.
+/// </summary>
+public class GetNextAssertionCommand : IYubiKeyCommand<GetAssertionResponse>
 {
+    private const int CtapGetNextAssertionCmd = 0x08;
+
     /// <summary>
-    /// Instruct the YubiKey to get the next assertion associated with the
-    /// relying party specified in the previous call to
-    /// <see cref="GetAssertionCommand"/>.
+    ///     Constructs an instance of the <see cref="GetNextAssertionCommand" />.
     /// </summary>
-    public class GetNextAssertionCommand : IYubiKeyCommand<GetAssertionResponse>
+    /// <remarks>
+    ///     The <c>GetNextAssertionCommand</c> will retrieve the next assertion
+    ///     in the list of assertions associated with a relying party. The
+    ///     relying party (and parameters) were sent to the YubiKey in a
+    ///     previous <see cref="GetAssertionCommand" />.
+    /// </remarks>
+    public GetNextAssertionCommand()
     {
-        private const int CtapGetNextAssertionCmd = 0x08;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="GetNextAssertionCommand"/>.
-        /// </summary>
-        /// <remarks>
-        /// The <c>GetNextAssertionCommand</c> will retrieve the next assertion
-        /// in the list of assertions associated with a relying party. The
-        /// relying party (and parameters) were sent to the YubiKey in a
-        /// previous <see cref="GetAssertionCommand"/>.
-        /// </remarks>
-        public GetNextAssertionCommand()
-        {
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu()
-        {
-            byte[] payload = new byte[] { CtapGetNextAssertionCmd };
-            return new CommandApdu()
-            {
-                Ins = CtapConstants.CtapHidCbor,
-                Data = payload
-            };
-        }
-
-        /// <inheritdoc />
-        public GetAssertionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetAssertionResponse(responseApdu);
     }
+
+    #region IYubiKeyCommand<GetAssertionResponse> Members
+
+    /// <inheritdoc />
+    public YubiKeyApplication Application => YubiKeyApplication.Fido2;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu()
+    {
+        byte[] payload = new byte[] { CtapGetNextAssertionCmd };
+        return new CommandApdu
+        {
+            Ins = CtapConstants.CtapHidCbor,
+            Data = payload
+        };
+    }
+
+    /// <inheritdoc />
+    public GetAssertionResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

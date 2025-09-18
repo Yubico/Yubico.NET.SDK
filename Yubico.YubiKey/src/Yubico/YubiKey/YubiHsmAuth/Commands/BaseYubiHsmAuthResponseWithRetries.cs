@@ -15,74 +15,77 @@
 using System.Globalization;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+/// <summary>
+///     The base class of YubiHSM Auth response types that are paired with
+///     commands that require authentication.
+/// </summary>
+/// <remarks>
+///     Some commands require authentication with either the management key
+///     or a credential password. There is a limit to the number of retries
+///     that are allowed. In the event that authentication fails, this class
+///     will return the number of retries remaining.
+/// </remarks>
+public abstract class BaseYubiHsmAuthResponseWithRetries : BaseYubiHsmAuthResponse
 {
     /// <summary>
-    /// The base class of YubiHSM Auth response types that are paired with
-    /// commands that require authentication.
+    ///     When the retry count is present in the status word, the position
+    ///     of the retry count is in the last four bits of the status word.
+    /// </summary>
+    private const short _retriesMask = 0x000f;
+
+    protected BaseYubiHsmAuthResponseWithRetries(ResponseApdu responseApdu) : base(responseApdu)
+    {
+    }
+
+    /// <summary>
+    ///     Checks whether the status word contains a retry count.
     /// </summary>
     /// <remarks>
-    /// Some commands require authentication with either the management key
-    /// or a credential password. There is a limit to the number of retries
-    /// that are allowed. In the event that authentication fails, this class
-    /// will return the number of retries remaining.
+    ///     Use <see cref="RetriesRemaining" /> to get the value.
     /// </remarks>
-    public abstract class BaseYubiHsmAuthResponseWithRetries : BaseYubiHsmAuthResponse
+    protected bool StatusWordContainsRetries => (StatusWord & ~_retriesMask) == SWConstants.VerifyFail;
+
+    /// <summary>
+    ///     The number of retries remaining after failing to authenticate.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         If the command failed to authenticate, the
+    ///         <see cref="YubiKeyResponse.Status" /> is set to
+    ///         <see cref="ResponseStatus.AuthenticationRequired" />, and this
+    ///         property returns the number of retries remaining. Otherwise this
+    ///         property returns null.
+    ///     </para>
+    ///     <para>
+    ///         This property represents the retries remaining on either the
+    ///         management key or a credential password. Refer to the implementing
+    ///         class's documentation for more information.
+    ///     </para>
+    /// </remarks>
+    public int? RetriesRemaining =>
+        StatusWordContainsRetries
+            ? StatusWord & _retriesMask
+            : null;
+
+    /// <inheritdoc />
+    protected override ResponseStatusPair StatusCodeMap
     {
-        /// <summary>
-        /// When the retry count is present in the status word, the position
-        /// of the retry count is in the last four bits of the status word.
-        /// </summary>
-        private const short _retriesMask = 0x000f;
-
-        /// <summary>
-        /// Checks whether the status word contains a retry count.
-        /// </summary>
-        /// <remarks>
-        /// Use <see cref="RetriesRemaining"/> to get the value.
-        /// </remarks>
-        protected bool StatusWordContainsRetries => (StatusWord & ~_retriesMask) == SWConstants.VerifyFail;
-
-        /// <summary>
-        /// The number of retries remaining after failing to authenticate.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// If the command failed to authenticate, the
-        /// <see cref="YubiKeyResponse.Status"/> is set to
-        /// <see cref="ResponseStatus.AuthenticationRequired"/>, and this
-        /// property returns the number of retries remaining. Otherwise this
-        /// property returns null.
-        /// </para>
-        /// <para>
-        /// This property represents the retries remaining on either the
-        /// management key or a credential password. Refer to the implementing
-        /// class's documentation for more information.
-        /// </para>
-        /// </remarks>
-        public int? RetriesRemaining => StatusWordContainsRetries ? (int?)(StatusWord & _retriesMask) : null;
-
-        /// <inheritdoc/>
-        protected override ResponseStatusPair StatusCodeMap
+        get
         {
-            get
+            // Add special handling for the situation where the status word also contains the retry count
+            if (StatusWordContainsRetries)
             {
-                // Add special handling for the situation where the status word also contains the retry count
-                if (StatusWordContainsRetries)
-                {
-                    return new ResponseStatusPair(ResponseStatus.AuthenticationRequired,
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ResponseStatusMessages.YubiHsmAuthAuthenticationRequired,
-                                RetriesRemaining));
-                }
-
-                return base.StatusCodeMap;
+                return new ResponseStatusPair(
+                    ResponseStatus.AuthenticationRequired,
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ResponseStatusMessages.YubiHsmAuthAuthenticationRequired,
+                        RetriesRemaining));
             }
-        }
 
-        protected BaseYubiHsmAuthResponseWithRetries(ResponseApdu responseApdu) : base(responseApdu)
-        {
+            return base.StatusCodeMap;
         }
     }
 }

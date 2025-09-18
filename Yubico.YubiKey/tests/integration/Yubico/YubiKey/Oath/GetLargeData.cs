@@ -18,63 +18,66 @@ using System.Linq;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Oath
+namespace Yubico.YubiKey.Oath;
+
+// This set of tests checks that we can successfully
+// retrieve large amounts of data that spans more
+// than one APDU. For more information, see
+// Pipelines.ResponseChainingTransform.
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public sealed class GetLargeData
 {
-    // This set of tests checks that we can successfully
-    // retrieve large amounts of data that spans more
-    // than one APDU. For more information, see
-    // Pipelines.ResponseChainingTransform.
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public sealed class GetLargeData
+    private static readonly Random random = new();
+
+    private static string RandomString(
+        int length)
     {
-        private static readonly Random random = new Random();
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
 
-        private static string RandomString(int length)
+    private IEnumerable<Credential> FillWithRandCreds(
+        IYubiKeyDevice testDevice)
+    {
+        var creds = new List<Credential>();
+
+        using (var oathSession = new OathSession(testDevice))
         {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
-
-        private IEnumerable<Credential> FillWithRandCreds(IYubiKeyDevice testDevice)
-        {
-            var creds = new List<Credential>();
-
-            using (var oathSession = new OathSession(testDevice))
+            // As documented, the OATH application can hold 32 creds
+            for (var i = 0; i < 32; i++)
             {
-                // As documented, the OATH application can hold 32 creds
-                for (int i = 0; i < 32; i++)
-                {
-                    creds.Add(
-                        oathSession.AddCredential(
+                creds.Add(
+                    oathSession.AddCredential(
                         "",
                         RandomString(63)));
-                }
-
-                return creds;
-            }
-        }
-
-        private IYubiKeyDevice GetCleanDevice(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            return DeviceReset.ResetOath(testDevice);
-        }
-
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void GetLotsOfCredentials(StandardTestDevice testDeviceType)
-        {
-            IYubiKeyDevice testDevice = GetCleanDevice(testDeviceType);
-            IEnumerable<Credential>? expectedCredsOnDevice = FillWithRandCreds(testDevice);
-            IEnumerable<Credential> actualCredsOnDevice;
-
-            using (var oathSession = new OathSession(testDevice))
-            {
-                actualCredsOnDevice = oathSession.GetCredentials();
             }
 
-            Assert.Equal(expectedCredsOnDevice.Count(), actualCredsOnDevice.Count());
+            return creds;
         }
+    }
+
+    private IYubiKeyDevice GetCleanDevice(
+        StandardTestDevice testDeviceType)
+    {
+        var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+        return DeviceReset.ResetOath(testDevice);
+    }
+
+    [Theory]
+    [InlineData(StandardTestDevice.Fw5)]
+    public void GetLotsOfCredentials(
+        StandardTestDevice testDeviceType)
+    {
+        var testDevice = GetCleanDevice(testDeviceType);
+        var expectedCredsOnDevice = FillWithRandCreds(testDevice);
+        IEnumerable<Credential> actualCredsOnDevice;
+
+        using (var oathSession = new OathSession(testDevice))
+        {
+            actualCredsOnDevice = oathSession.GetCredentials();
+        }
+
+        Assert.Equal(expectedCredsOnDevice.Count(), actualCredsOnDevice.Count());
     }
 }

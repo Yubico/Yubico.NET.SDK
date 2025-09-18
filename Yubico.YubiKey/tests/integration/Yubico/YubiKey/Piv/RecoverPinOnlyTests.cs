@@ -19,135 +19,134 @@ using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public class RecoverPinOnlyTests : PivSessionIntegrationTestBase
 {
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class RecoverPinOnlyTests : PivSessionIntegrationTestBase
+    [Fact]
+    public void NotPinOnly_Recover_ReturnsNone()
     {
-        [Fact]
-        public void NotPinOnly_Recover_ReturnsNone()
+        using var pivSession = GetSession();
+        var mode = pivSession.TryRecoverPinOnlyMode();
+
+        Assert.Equal(PivPinOnlyMode.None, mode);
+    }
+
+    [Fact]
+    public void PinProtected_OverwriteAdmin_CanRecover()
+    {
+        using (var pivSession = GetSession())
         {
-            using var pivSession = GetSession(authenticate: false);
+            pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
+            using var adminData = pivSession.ReadObject<AdminData>();
+
+            Assert.True(adminData.PinProtected);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var nonAdminData = new ReadOnlyMemory<byte>(new byte[]
+            {
+                0x53, 0x0A, 0x04, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
+            });
+
+            pivSession.AuthenticateManagementKey();
+            var putDataCmd = new PutDataCommand(0x005FFF00, nonAdminData);
+            var putDataRsp = pivSession.Connection.SendCommand(putDataCmd);
+
+            Assert.Equal(ResponseStatus.Success, putDataRsp.Status);
+        }
+
+        using (var pivSession = GetSession())
+        {
+            var mode = pivSession.GetPinOnlyMode();
+            Assert.True(mode.HasFlag(PivPinOnlyMode.PinProtectedUnavailable));
+            Assert.True(mode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable));
+            Assert.False(mode.HasFlag(PivPinOnlyMode.PinProtected));
+            Assert.False(mode.HasFlag(PivPinOnlyMode.PinDerived));
+        }
+
+        using (var pivSession = GetSession())
+        {
+            _ = Assert.Throws<OperationCanceledException>(() => pivSession.GenerateKeyPair(
+                PivSlot.Authentication, KeyType.ECP256));
+        }
+
+        using (var pivSession = GetSession())
+        {
             var mode = pivSession.TryRecoverPinOnlyMode();
-
-            Assert.Equal(PivPinOnlyMode.None, mode);
+            Assert.Equal(PivPinOnlyMode.PinProtected, mode);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
+            Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
+                pivSession.ManagementKeyAuthenticationResult);
+            mode = pivSession.GetPinOnlyMode();
+            Assert.True(mode.HasFlag(PivPinOnlyMode.PinProtected));
+            Assert.False(mode.HasFlag(PivPinOnlyMode.PinDerived));
         }
 
-        [Fact]
-        public void PinProtected_OverwriteAdmin_CanRecover()
+        using (var pivSession = GetSession())
         {
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
-                using var adminData = pivSession.ReadObject<AdminData>();
+            var publicKey = pivSession.GenerateKeyPair(0x86, KeyType.ECP256);
+            Assert.Equal(KeyType.ECP256, publicKey.KeyType);
+        }
+    }
 
-                Assert.True(adminData.PinProtected);
-            }
 
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var nonAdminData = new ReadOnlyMemory<byte>(new byte[]
-                {
-                    0x53, 0x0A, 0x04, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
-                });
-
-                pivSession.AuthenticateManagementKey();
-                var putDataCmd = new PutDataCommand(0x005FFF00, nonAdminData);
-                var putDataRsp = pivSession.Connection.SendCommand(putDataCmd);
-
-                Assert.Equal(ResponseStatus.Success, putDataRsp.Status);
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var mode = pivSession.GetPinOnlyMode();
-                Assert.True(mode.HasFlag(PivPinOnlyMode.PinProtectedUnavailable));
-                Assert.True(mode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable));
-                Assert.False(mode.HasFlag(PivPinOnlyMode.PinProtected));
-                Assert.False(mode.HasFlag(PivPinOnlyMode.PinDerived));
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                _ = Assert.Throws<OperationCanceledException>(() => pivSession.GenerateKeyPair(
-                    PivSlot.Authentication, KeyType.ECP256));
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var mode = pivSession.TryRecoverPinOnlyMode();
-                Assert.Equal(PivPinOnlyMode.PinProtected, mode);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
-                    pivSession.ManagementKeyAuthenticationResult);
-                mode = pivSession.GetPinOnlyMode();
-                Assert.True(mode.HasFlag(PivPinOnlyMode.PinProtected));
-                Assert.False(mode.HasFlag(PivPinOnlyMode.PinDerived));
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var publicKey = pivSession.GenerateKeyPair(0x86, KeyType.ECP256);
-                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
-            }
+    [Fact]
+    public void PinProtectedAndDerived_OverwritePrinted_CanRecover()
+    {
+        using (var pivSession = GetSession())
+        {
+            pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived);
+            using var adminData = pivSession.ReadObject<AdminData>();
+            Assert.True(adminData.PinProtected);
+            _ = Assert.NotNull(adminData.Salt);
         }
 
-
-        [Fact]
-        public void PinProtectedAndDerived_OverwritePrinted_CanRecover()
+        using (var pivSession = GetSession(true))
         {
-            using (var pivSession = GetSession(authenticate: false))
+            var nonPrintedData = new ReadOnlyMemory<byte>(new byte[]
             {
-                pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived);
-                using var adminData = pivSession.ReadObject<AdminData>();
-                Assert.True(adminData.PinProtected);
-                _ = Assert.NotNull(adminData.Salt);
-            }
+                0x53, 0x0A, 0x04, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
+            });
 
-            using (var pivSession = GetSession(authenticate: true))
-            {
-                var nonPrintedData = new ReadOnlyMemory<byte>(new byte[]
-                {
-                    0x53, 0x0A, 0x04, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
-                });
+            var putDataCmd = new PutDataCommand((int)PivDataTag.Printed, nonPrintedData);
+            var putDataRsp = pivSession.Connection.SendCommand(putDataCmd);
 
-                var putDataCmd = new PutDataCommand((int)PivDataTag.Printed, nonPrintedData);
-                var putDataRsp = pivSession.Connection.SendCommand(putDataCmd);
+            Assert.Equal(ResponseStatus.Success, putDataRsp.Status);
+        }
 
-                Assert.Equal(ResponseStatus.Success, putDataRsp.Status);
-            }
+        using (var pivSession = GetSession())
+        {
+            var mode = pivSession.GetPinOnlyMode();
+            Assert.False(mode.HasFlag(PivPinOnlyMode.PinProtectedUnavailable));
+            Assert.False(mode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable));
+            Assert.True(mode.HasFlag(PivPinOnlyMode.PinProtected));
+            Assert.True(mode.HasFlag(PivPinOnlyMode.PinDerived));
+        }
 
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var mode = pivSession.GetPinOnlyMode();
-                Assert.False(mode.HasFlag(PivPinOnlyMode.PinProtectedUnavailable));
-                Assert.False(mode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable));
-                Assert.True(mode.HasFlag(PivPinOnlyMode.PinProtected));
-                Assert.True(mode.HasFlag(PivPinOnlyMode.PinDerived));
-            }
+        using (var pivSession = GetSession())
+        {
+            var publicKey = pivSession.GenerateKeyPair(0x87, KeyType.ECP256);
+            Assert.Equal(KeyType.ECP256, publicKey.KeyType);
+        }
 
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var publicKey = pivSession.GenerateKeyPair(0x87, KeyType.ECP256);
-                Assert.Equal(KeyType.ECP256, publicKey.KeyType);
-            }
+        using (var pivSession = GetSession())
+        {
+            var mode = pivSession.TryRecoverPinOnlyMode();
+            Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
+            Assert.True(pivSession.ManagementKeyAuthenticated);
+            Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
+                pivSession.ManagementKeyAuthenticationResult);
+            mode = pivSession.GetPinOnlyMode();
+            Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
+        }
 
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                var mode = pivSession.TryRecoverPinOnlyMode();
-                Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
-                Assert.True(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
-                    pivSession.ManagementKeyAuthenticationResult);
-                mode = pivSession.GetPinOnlyMode();
-                Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
-            }
-
-            using (var pivSession = GetSession(authenticate: false))
-            {
-                using var pinProtect = pivSession.ReadObject<PinProtectedData>();
-                Assert.False(pinProtect.IsEmpty);
-            }
+        using (var pivSession = GetSession())
+        {
+            using var pinProtect = pivSession.ReadObject<PinProtectedData>();
+            Assert.False(pinProtect.IsEmpty);
         }
     }
 }

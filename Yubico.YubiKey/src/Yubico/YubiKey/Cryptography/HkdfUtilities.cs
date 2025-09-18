@@ -21,15 +21,19 @@ internal static class HkdfUtilities
     private const int Sha256HashByteLength = 32; // SHA-256 hash length in bytes
 
     /// <summary>
-    /// Derives a key using the HKDF (HMAC-based Key Derivation Function)
-    /// as specified in RFC 5869 using SHA-256.
+    ///     Derives a key using the HKDF (HMAC-based Key Derivation Function)
+    ///     as specified in RFC 5869 using SHA-256.
     /// </summary>
     /// <param name="inputKeyMaterial">The input key material (IKM).</param>
-    /// <param name="salt">Optional salt value. If not provided, a zero-length
-    ///     salt will be used.</param>
+    /// <param name="salt">
+    ///     Optional salt value. If not provided, a zero-length
+    ///     salt will be used.
+    /// </param>
     /// <param name="contextInfo">Optional context information (info).</param>
-    /// <param name="length">The desired length of the output key material (OKM).
-    ///     If not specified, defaults to 32 bytes.</param>
+    /// <param name="length">
+    ///     The desired length of the output key material (OKM).
+    ///     If not specified, defaults to 32 bytes.
+    /// </param>
     /// <returns>A Memory&lt;byte&gt; containing the derived key.</returns>
     public static Memory<byte> DeriveKey(
         ReadOnlySpan<byte> inputKeyMaterial,
@@ -54,7 +58,10 @@ internal static class HkdfUtilities
     private static ReadOnlyMemory<byte> HkdfExtract(ReadOnlySpan<byte> inputKeyMaterial, ReadOnlySpan<byte> salt)
     {
         using var hmac = CryptographyProviders.HmacCreator("HMACSHA256");
-        hmac.Key = salt.IsEmpty ? new byte[Sha256HashByteLength] : salt.ToArray();
+        hmac.Key = salt.IsEmpty
+            ? new byte[Sha256HashByteLength]
+            : salt.ToArray();
+
         return hmac.ComputeHash(inputKeyMaterial.ToArray());
     }
 
@@ -63,14 +70,17 @@ internal static class HkdfUtilities
         ReadOnlySpan<byte> contextInfo,
         int length)
     {
-        int numberOfBlocks = (length / Sha256HashByteLength) + (length % Sha256HashByteLength == 0 ? 0 : 1);
+        int numberOfBlocks = (length / Sha256HashByteLength) + (length % Sha256HashByteLength == 0
+            ? 0
+            : 1);
+
         byte[] outputKeyMaterial = new byte[length];
         Span<byte> previousBlock = Array.Empty<byte>();
 
         using var hmac = CryptographyProviders.HmacCreator("HMACSHA256");
 
         hmac.Key = pseudoRandomKey.ToArray();
-        
+
         for (byte index = 1; index <= numberOfBlocks; index++)
         {
             hmac.Initialize();
@@ -94,7 +104,7 @@ internal static class HkdfUtilities
             currentBlock
                 .AsSpan(0, bytesToCopy)
                 .CopyTo(outputKeyMaterial.AsSpan(blockOffset));
-            
+
             previousBlock = currentBlock;
         }
 

@@ -22,13 +22,13 @@ internal static class AsnUtilities
     public static ReadOnlySpan<byte> TrimLeadingZeroes(ReadOnlySpan<byte> data)
     {
         int startIndex = GetLeadingZeroCount(data);
-        return data.Slice(startIndex);
+        return data[startIndex..];
     }
 
     public static Span<byte> TrimLeadingZeroes(Span<byte> data)
     {
         int startIndex = GetLeadingZeroCount(data);
-        return data.Slice(startIndex);
+        return data[startIndex..];
     }
 
     public static int GetCoordinateSizeFromCurve(string curveOid)
@@ -44,6 +44,7 @@ internal static class AsnUtilities
         {
             return [];
         }
+
         // Check if the most significant bit is set, indicating a negative number in two's complement
         if ((value[0] & 0x80) != 0)
         {
@@ -78,7 +79,7 @@ internal static class AsnUtilities
     }
 
     /// <summary>
-    /// Verifies that the given X25519 private key meets the bit clamping requirements of RFC 7748.
+    ///     Verifies that the given X25519 private key meets the bit clamping requirements of RFC 7748.
     /// </summary>
     /// <param name="x25519PrivateKey">The X25519 private key to verify.</param>
     /// <exception cref="CryptographicException">If the private key does not meet the bit clamping requirements.</exception>

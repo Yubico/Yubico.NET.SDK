@@ -14,46 +14,46 @@ limitations under the License. -->
 
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <AssemblyName>Yubico.YubiKey.IntegrationTests</AssemblyName>
-    <RootNamespace></RootNamespace>
-    <PackageId>Yubico.YubiKey.IntegrationTests</PackageId>
+    <PropertyGroup>
+        <AssemblyName>Yubico.YubiKey.IntegrationTests</AssemblyName>
+        <RootNamespace></RootNamespace>
+        <PackageId>Yubico.YubiKey.IntegrationTests</PackageId>
 
-    <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
 
-    <AnalysisMode>AllDisabledByDefault</AnalysisMode>
+        <AnalysisMode>AllDisabledByDefault</AnalysisMode>
 
-    <!-- StrongName signing -->
-    <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must
-         be strong named, since it uses InternalsVisibleTo. -->
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+        <!-- StrongName signing -->
+        <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must
+             be strong named, since it uses InternalsVisibleTo. -->
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
-    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
-    <PackageReference Include="System.Formats.Asn1" Version="9.0.6" />
-    <PackageReference Include="Xunit.SkippableFact" Version="1.5.23" />
-    <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
-    <ProjectReference Include="..\unit\Yubico.YubiKey.UnitTests.csproj" />
-    <ProjectReference Include="..\utilities\Yubico.YubiKey.TestUtilities.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.6" />
-    <PackageReference Include="Serilog" Version="4.3.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="coverlet.collector" Version="6.0.4" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-    <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageReference Include="Moq" Version="4.20.72" />
+    <ItemGroup>
+        <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0"/>
+        <PackageReference Include="Portable.BouncyCastle" Version="1.9.0"/>
+        <PackageReference Include="System.Formats.Asn1" Version="9.0.6"/>
+        <PackageReference Include="Xunit.SkippableFact" Version="1.5.23"/>
+        <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj"/>
+        <ProjectReference Include="..\unit\Yubico.YubiKey.UnitTests.csproj"/>
+        <ProjectReference Include="..\utilities\Yubico.YubiKey.TestUtilities.csproj"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.6"/>
+        <PackageReference Include="Serilog" Version="4.3.0"/>
+        <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2"/>
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0"/>
+        <PackageReference Include="coverlet.collector" Version="6.0.4" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"/>
+        <PackageReference Include="xunit" Version="2.9.3"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
+        <PackageReference Include="Moq" Version="4.20.72"/>
 
-    <None Update="xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+        <None Update="xunit.runner.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
 
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>

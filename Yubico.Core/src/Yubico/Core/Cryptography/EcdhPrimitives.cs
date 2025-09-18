@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.Core.Cryptography
+namespace Yubico.Core.Cryptography;
+
+/// <summary>
+///     Factory class that will return the `Yubico.Core` implementation of the <see cref="IEcdhPrimitives" /> interface.
+/// </summary>
+public static class EcdhPrimitives
 {
     /// <summary>
-    /// Factory class that will return the `Yubico.Core` implementation of the <see cref="IEcdhPrimitives"/> interface.
+    ///     Creates a new instance of an implementation of the low level Elliptic Curve Diffie Hellman (ECDH) functions.
     /// </summary>
-    public static class EcdhPrimitives
-    {
-        /// <summary>
-        /// Creates a new instance of an implementation of the low level Elliptic Curve Diffie Hellman (ECDH) functions.
-        /// </summary>
-        /// <returns>
-        /// A new instance of the default implementation of this interface.
-        /// </returns>
-        public static IEcdhPrimitives Create() => new EcdhPrimitivesOpenSsl();
-    }
+    /// <returns>
+    ///     A new instance of the default implementation of this interface.
+    /// </returns>
+    public static IEcdhPrimitives Create() => new EcdhPrimitivesOpenSsl();
 }

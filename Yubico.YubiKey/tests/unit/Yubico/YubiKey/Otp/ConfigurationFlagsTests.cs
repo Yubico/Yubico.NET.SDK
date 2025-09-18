@@ -14,25 +14,25 @@
 
 using Xunit;
 
-namespace Yubico.YubiKey.Otp
+namespace Yubico.YubiKey.Otp;
+
+public class ConfigurationFlagsTests
 {
-    public class ConfigurationFlagsTests
+    [Fact]
+    public void ValidateFlagsForUpdate_NoneSpecified_NoException()
     {
-        [Fact]
-        public void ValidateFlagsForUpdate_NoneSpecified_NoException()
-        {
-            ConfigurationFlags flag = ConfigurationFlags.None;
+        ConfigurationFlags flag = ConfigurationFlags.None;
 
-            flag.ValidateFlagsForUpdate();
-        }
+        flag.ValidateFlagsForUpdate();
+    }
 
-        [Theory]
-        [InlineData(ConfigurationFlags.Use10msPacing)]
-        [InlineData(ConfigurationFlags.Use20msPacing)]
-        public void ValidateFlagsForUpdate_FlagInRange_NoException(byte flagByte)
-        {
-            ConfigurationFlags flag = flagByte;
-            flag.ValidateFlagsForUpdate();
-        }
+    [Theory]
+    [InlineData(ConfigurationFlags.Use10msPacing)]
+    [InlineData(ConfigurationFlags.Use20msPacing)]
+    public void ValidateFlagsForUpdate_FlagInRange_NoException(
+        byte flagByte)
+    {
+        ConfigurationFlags flag = flagByte;
+        flag.ValidateFlagsForUpdate();
     }
 }

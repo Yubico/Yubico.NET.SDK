@@ -15,35 +15,36 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.PlatformInterop;
+
+[Flags]
+[SuppressMessage(
+    "Design", "CA1069:Enums values should not be duplicated",
+    Justification = "Keeping interop as close to original C headers as possible")]
+internal enum SCARD_PROTOCOL
 {
-    [Flags]
-    [SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "Keeping interop as close to original C headers as possible")]
-    internal enum SCARD_PROTOCOL
-    {
-        Undefined = 0x00000000,
+    Undefined = 0x00000000,
 
-        Optimal = 0x00000000,
+    Optimal = 0x00000000,
 
-        /// <summary>
-        /// Use the T=0 protocol - an asynchronous, character-oriented half-duplex transmission
-        /// protocol.
-        /// </summary>
-        T0 = 0x00000001,
+    /// <summary>
+    ///     Use the T=0 protocol - an asynchronous, character-oriented half-duplex transmission
+    ///     protocol.
+    /// </summary>
+    T0 = 0x00000001,
 
-        /// <summary>
-        /// Use the T=1 protocol - an asynchronous, block-oriented half-duplex transmission
-        /// protocol.
-        /// </summary>
-        T1 = 0x00000002,
+    /// <summary>
+    ///     Use the T=1 protocol - an asynchronous, block-oriented half-duplex transmission
+    ///     protocol.
+    /// </summary>
+    T1 = 0x00000002,
 
-        Raw = 0x00010000,
+    Raw = 0x00010000,
 
-        /// <summary>
-        /// Both the T=0 and T=1 protocol may be used.
-        /// </summary>
-        Tx = T0 | T1,
+    /// <summary>
+    ///     Both the T=0 and T=1 protocol may be used.
+    /// </summary>
+    Tx = T0 | T1,
 
-        Default = unchecked((int)0x80000000),
-    }
+    Default = unchecked((int)0x80000000)
 }

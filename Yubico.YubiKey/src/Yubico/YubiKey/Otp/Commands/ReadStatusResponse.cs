@@ -15,74 +15,76 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+/// <summary>
+///     A shared response for many OTP commands, containing the YubiKey's current OTP application
+///     status. This is often used to verify whether a configuration was successfully applied or not.
+/// </summary>
+public class ReadStatusResponse : OtpResponse, IYubiKeyResponseWithData<OtpStatus>
 {
-    /// <summary>
-    /// A shared response for many OTP commands, containing the YubiKey's current OTP application
-    /// status. This is often used to verify whether a configuration was successfully applied or not.
-    /// </summary>
-    public class ReadStatusResponse : OtpResponse, IYubiKeyResponseWithData<OtpStatus>
+    private const int OtpStatusLength = 6;
+
+    private const byte ShortPressValidMask = 0b0000_0001;
+    private const byte LongPressValidMask = 0b0000_0010;
+    private const byte ShortPressTouchMask = 0b0000_0100;
+    private const byte LongPressTouchMask = 0b0000_1000;
+    private const byte LedInvertedMask = 0b0001_0000;
+
+    public ReadStatusResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        private const int OtpStatusLength = 6;
+    }
 
-        private const byte ShortPressValidMask = 0b0000_0001;
-        private const byte LongPressValidMask = 0b0000_0010;
-        private const byte ShortPressTouchMask = 0b0000_0100;
-        private const byte LongPressTouchMask = 0b0000_1000;
-        private const byte LedInvertedMask = 0b0001_0000;
+    #region IYubiKeyResponseWithData<OtpStatus> Members
 
-        public ReadStatusResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
+    /// <summary>
+    ///     Gets the OTP application status.
+    /// </summary>
+    /// <returns>The data in the ResponseAPDU, presented as an OtpStatus class.</returns>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
+    /// </exception>
+    /// <exception cref="MalformedYubiKeyResponseException">
+    ///     Thrown when the data received from the YubiKey does not
+    ///     match the expectations of the parser.
+    /// </exception>
+    public OtpStatus GetData()
+    {
+        if (Status != ResponseStatus.Success)
         {
-
+            throw new InvalidOperationException(StatusMessage);
         }
 
-        /// <summary>
-        /// Gets the OTP application status.
-        /// </summary>
-        /// <returns>The data in the ResponseAPDU, presented as an OtpStatus class.</returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
-        /// </exception>
-        /// <exception cref="MalformedYubiKeyResponseException">
-        /// Thrown when the data received from the YubiKey does not
-        /// match the expectations of the parser.
-        /// </exception>
-        public OtpStatus GetData()
+        if (ResponseApdu.Data.Length != OtpStatusLength)
         {
-            if (Status != ResponseStatus.Success)
+            throw new MalformedYubiKeyResponseException
             {
-                throw new InvalidOperationException(StatusMessage);
-            }
-
-            if (ResponseApdu.Data.Length != OtpStatusLength)
-            {
-                throw new MalformedYubiKeyResponseException()
-                {
-                    ResponseClass = nameof(ReadStatusResponse),
-                    ExpectedDataLength = OtpStatusLength,
-                    ActualDataLength = ResponseApdu.Data.Length
-                };
-            }
-
-            var responseApduSpan = ResponseApdu.Data.Span;
-
-            return new OtpStatus
-            {
-                FirmwareVersion = new FirmwareVersion
-                {
-                    Major = responseApduSpan[0],
-                    Minor = responseApduSpan[1],
-                    Patch = responseApduSpan[2]
-                },
-                SequenceNumber = responseApduSpan[3],
-                ShortPressConfigured = (responseApduSpan[4] & ShortPressValidMask) != 0,
-                LongPressConfigured = (responseApduSpan[4] & LongPressValidMask) != 0,
-                ShortPressRequiresTouch = (responseApduSpan[4] & ShortPressTouchMask) != 0,
-                LongPressRequiresTouch = (responseApduSpan[4] & LongPressTouchMask) != 0,
-                LedBehaviorInverted = (responseApduSpan[4] & LedInvertedMask) != 0,
-                TouchLevel = responseApduSpan[5]
+                ResponseClass = nameof(ReadStatusResponse),
+                ExpectedDataLength = OtpStatusLength,
+                ActualDataLength = ResponseApdu.Data.Length
             };
         }
+
+        var responseApduSpan = ResponseApdu.Data.Span;
+
+        return new OtpStatus
+        {
+            FirmwareVersion = new FirmwareVersion
+            {
+                Major = responseApduSpan[0],
+                Minor = responseApduSpan[1],
+                Patch = responseApduSpan[2]
+            },
+            SequenceNumber = responseApduSpan[3],
+            ShortPressConfigured = (responseApduSpan[4] & ShortPressValidMask) != 0,
+            LongPressConfigured = (responseApduSpan[4] & LongPressValidMask) != 0,
+            ShortPressRequiresTouch = (responseApduSpan[4] & ShortPressTouchMask) != 0,
+            LongPressRequiresTouch = (responseApduSpan[4] & LongPressTouchMask) != 0,
+            LedBehaviorInverted = (responseApduSpan[4] & LedInvertedMask) != 0,
+            TouchLevel = responseApduSpan[5]
+        };
     }
+
+    #endregion
 }

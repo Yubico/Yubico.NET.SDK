@@ -16,76 +16,75 @@ using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+public class ClientPinResponseTests
 {
-    public class ClientPinResponseTests
+    [Fact]
+    public void Constructor_SuccessApdu_Succeeds()
     {
-        [Fact]
-        public void Constructor_SuccessApdu_Succeeds()
-        {
-            var apdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
+        var apdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
 
-            var response = new ClientPinResponse(apdu);
+        var response = new ClientPinResponse(apdu);
 
-            Assert.NotNull(response);
-        }
+        Assert.NotNull(response);
+    }
 
-        [Fact]
-        public void GetData_FullCborData_ParsesCorrectlyAndReturnsClientPinData()
-        {
-            var apdu = new ResponseApdu(
-                new byte[]
-                {
-                    0xA4, // Map (5 entries)
-                    0x02, 0x43, 0x03, 0x02, 0x01, // TagPinUvAuthToken = 3, 2, 1
-                    0x03, 0x08, // TagPinRetries = 8
-                    0x04, 0xF5, // TagPowerCycleState = true
-                    0x05, 0x08 // TagUvRetries = 8
-                },
-                SWConstants.Success);
-            var response = new ClientPinResponse(apdu);
+    [Fact]
+    public void GetData_FullCborData_ParsesCorrectlyAndReturnsClientPinData()
+    {
+        var apdu = new ResponseApdu(
+            new byte[]
+            {
+                0xA4, // Map (5 entries)
+                0x02, 0x43, 0x03, 0x02, 0x01, // TagPinUvAuthToken = 3, 2, 1
+                0x03, 0x08, // TagPinRetries = 8
+                0x04, 0xF5, // TagPowerCycleState = true
+                0x05, 0x08 // TagUvRetries = 8
+            },
+            SWConstants.Success);
+        var response = new ClientPinResponse(apdu);
 
-            ClientPinData data = response.GetData();
+        var data = response.GetData();
 
-            Assert.True(data.PinUvAuthToken!.Value.Span.SequenceEqual(new byte[] { 3, 2, 1 }));
-            Assert.Equal(8, data.PinRetries);
-            Assert.Equal(true, data.PowerCycleState);
-            Assert.Equal(8, data.UvRetries);
-        }
+        Assert.True(data.PinUvAuthToken!.Value.Span.SequenceEqual(new byte[] { 3, 2, 1 }));
+        Assert.Equal(8, data.PinRetries);
+        Assert.Equal(true, data.PowerCycleState);
+        Assert.Equal(8, data.UvRetries);
+    }
 
-        [Fact]
-        public void GetData_EmptyCborMap_ThrowsException()
-        {
-            var apdu = new ResponseApdu(
-                new byte[]
-                {
-                    0xA0 // Empty map
-                },
-                SWConstants.Success);
+    [Fact]
+    public void GetData_EmptyCborMap_ThrowsException()
+    {
+        var apdu = new ResponseApdu(
+            new byte[]
+            {
+                0xA0 // Empty map
+            },
+            SWConstants.Success);
 
-            var response = new ClientPinResponse(apdu);
+        var response = new ClientPinResponse(apdu);
 
-            void Action() { _ = response.GetData(); }
+        void Action() { _ = response.GetData(); }
 
-            _ = Assert.Throws<Ctap2DataException>(Action);
-        }
+        _ = Assert.Throws<Ctap2DataException>(Action);
+    }
 
-        [Fact]
-        public void GetData_UnrecognizedMapEntry_ThrowsException()
-        {
-            var apdu = new ResponseApdu(
-                new byte[]
-                {
-                    0xA1, // Map (1 entry)
-                    0x0B, 0x00 // Unrecognized tag (0x0B)
-                },
-                SWConstants.Success);
+    [Fact]
+    public void GetData_UnrecognizedMapEntry_ThrowsException()
+    {
+        var apdu = new ResponseApdu(
+            new byte[]
+            {
+                0xA1, // Map (1 entry)
+                0x0B, 0x00 // Unrecognized tag (0x0B)
+            },
+            SWConstants.Success);
 
-            var response = new ClientPinResponse(apdu);
+        var response = new ClientPinResponse(apdu);
 
-            void Action() { _ = response.GetData(); }
+        void Action() { _ = response.GetData(); }
 
-            _ = Assert.Throws<Ctap2DataException>(Action);
-        }
+        _ = Assert.Throws<Ctap2DataException>(Action);
     }
 }

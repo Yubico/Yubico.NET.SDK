@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+internal static class CtapConstants
 {
-    internal static class CtapConstants
-    {
-        public const byte CtapHidMsg = 0x03;
-        public const byte CtapHidCbor = 0x10;
-        public const byte CtapHidInit = 0x06;
-        public const byte CtapHidPing = 0x01;
-        public const byte CtapHidCancel = 0x11;
-        public const byte CtapHidError = 0x3F;
-        public const byte CtapHidKeepAlive = 0x3B;
-        public const byte CtapBioEnrollCmd = 0x09;
-        public const byte CtapMakeCredentialCmd = 0x01;
-        public const byte CtapGetAssertionCmd = 0x02;
-        public const byte CtapClientPinCmd = 0x06;
-    }
+    public const byte CtapHidMsg = 0x03;
+    public const byte CtapHidCbor = 0x10;
+    public const byte CtapHidInit = 0x06;
+    public const byte CtapHidPing = 0x01;
+    public const byte CtapHidCancel = 0x11;
+    public const byte CtapHidError = 0x3F;
+    public const byte CtapHidKeepAlive = 0x3B;
+    public const byte CtapBioEnrollCmd = 0x09;
+    public const byte CtapMakeCredentialCmd = 0x01;
+    public const byte CtapGetAssertionCmd = 0x02;
+    public const byte CtapClientPinCmd = 0x06;
 }

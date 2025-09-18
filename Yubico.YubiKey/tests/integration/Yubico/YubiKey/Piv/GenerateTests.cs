@@ -17,59 +17,56 @@ using Xunit;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
-namespace Yubico.YubiKey.Piv
+namespace Yubico.YubiKey.Piv;
+
+[Trait(TraitTypes.Category, TestCategories.Simple)]
+public class GenerateTests : PivSessionIntegrationTestBase
 {
-    [Trait(TraitTypes.Category, TestCategories.Simple)]
-    public class GenerateTests : PivSessionIntegrationTestBase
+    [SkippableTheory(typeof(NotSupportedException))]
+    [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5)]
+    [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
+    [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
+    [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
+    [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
+    [InlineData(KeyType.X25519, StandardTestDevice.Fw5)]
+    [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
+    [InlineData(KeyType.ECP384, StandardTestDevice.Fw5)]
+    [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5Fips)]
+    [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5Fips)]
+    [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5Fips)]
+    [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5Fips)]
+    [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5Fips)]
+    [InlineData(KeyType.X25519, StandardTestDevice.Fw5Fips)]
+    [InlineData(KeyType.ECP256, StandardTestDevice.Fw5Fips)]
+    [InlineData(KeyType.ECP384, StandardTestDevice.Fw5Fips)]
+    [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5Fips, true)]
+    [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5Fips, true)]
+    [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5Fips, true)]
+    [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5Fips, true)]
+    [InlineData(KeyType.X25519, StandardTestDevice.Fw5Fips, true)]
+    [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5Fips, true)]
+    [InlineData(KeyType.ECP256, StandardTestDevice.Fw5Fips, true)]
+    [InlineData(KeyType.ECP384, StandardTestDevice.Fw5Fips, true)]
+    public void SimpleGenerate(
+        Cryptography.KeyType keyType,
+        StandardTestDevice deviceType,
+        bool useScp03 = false)
     {
-        [SkippableTheory(typeof(NotSupportedException))]
-        [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.X25519, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5)]
-        [InlineData(KeyType.ECP384, StandardTestDevice.Fw5)]
-        
-        [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5Fips)]
-        [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5Fips)]
-        [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5Fips)]
-        [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5Fips)]
-        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5Fips)]
-        [InlineData(KeyType.X25519, StandardTestDevice.Fw5Fips)]
-        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5Fips)]
-        [InlineData(KeyType.ECP384, StandardTestDevice.Fw5Fips)]
-        
-        [InlineData(KeyType.RSA1024, StandardTestDevice.Fw5Fips, true),]
-        [InlineData(KeyType.RSA2048, StandardTestDevice.Fw5Fips, true),]
-        [InlineData(KeyType.RSA3072, StandardTestDevice.Fw5Fips, true),]
-        [InlineData(KeyType.RSA4096, StandardTestDevice.Fw5Fips, true),]
-        [InlineData(KeyType.X25519, StandardTestDevice.Fw5Fips, true),]
-        [InlineData(KeyType.Ed25519, StandardTestDevice.Fw5Fips, true),]
-        [InlineData(KeyType.ECP256, StandardTestDevice.Fw5Fips, true),]
-        [InlineData(KeyType.ECP384, StandardTestDevice.Fw5Fips, true),]
-        public void SimpleGenerate(
-            KeyType keyType,
-            StandardTestDevice deviceType,
-            bool useScp03 = false)
+        using var pivSession = useScp03
+            ? GetSessionScp()
+            : GetSession();
+
+        var pinPolicy = PivPinPolicy.Never;
+        var touchPolicy = PivTouchPolicy.Never;
+        if (deviceType == StandardTestDevice.Fw5Fips)
         {
-            using var pivSession = useScp03
-                ? GetSessionScp()
-                : GetSession();
-
-            var pinPolicy = PivPinPolicy.Never;
-            var touchPolicy = PivTouchPolicy.Never;
-            if (deviceType == StandardTestDevice.Fw5Fips)
-            {
-                FipsTestUtilities.SetFipsApprovedCredentials(Session);
-                pinPolicy = PivPinPolicy.Always;
-                touchPolicy = PivTouchPolicy.Always;
-            }
-
-            var result = Session.GenerateKeyPair(PivSlot.Retired12, keyType, pinPolicy, touchPolicy);
-
-            Assert.Equal(keyType, result.KeyType);
+            FipsTestUtilities.SetFipsApprovedCredentials(Session);
+            pinPolicy = PivPinPolicy.Always;
+            touchPolicy = PivTouchPolicy.Always;
         }
+
+        var result = Session.GenerateKeyPair(PivSlot.Retired12, keyType, pinPolicy, touchPolicy);
+
+        Assert.Equal(keyType, result.KeyType);
     }
 }

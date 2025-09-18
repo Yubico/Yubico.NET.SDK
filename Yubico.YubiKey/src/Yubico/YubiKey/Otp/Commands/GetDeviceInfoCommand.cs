@@ -15,42 +15,44 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+/// <summary>
+///     Gets detailed information about the YubiKey and its current configuration.
+/// </summary>
+/// <remarks>
+///     This class has a corresponding partner class <see cref="GetDeviceInfoResponse" />
+/// </remarks>
+[Obsolete("This class has been replaced by GetPagedDeviceInfoCommand")]
+public class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>
 {
     /// <summary>
-    /// Gets detailed information about the YubiKey and its current configuration.
+    ///     Initializes a new instance of the <see cref="GetDeviceInfoCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// This class has a corresponding partner class <see cref="GetDeviceInfoResponse"/>
-    /// </remarks>
-    [Obsolete("This class has been replaced by GetPagedDeviceInfoCommand")]
-    public class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>
+    public GetDeviceInfoCommand()
     {
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Otp
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetDeviceInfoCommand"/> class.
-        /// </summary>
-        public GetDeviceInfoCommand()
-        {
+    #region IYubiKeyCommand<GetDeviceInfoResponse> Members
 
-        }
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.Otp
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = OtpConstants.RequestSlotInstruction,
             P1 = OtpConstants.GetDeviceInfoSlot
         };
 
-        /// <inheritdoc />
-        public GetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetDeviceInfoResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public GetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

@@ -12,25 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp;
+
+/// <summary>
+///     The connection class that can perform SCP03 operations will implement not
+///     only <see cref="IYubiKeyConnection" />, but this interface as well.
+/// </summary>
+public interface IScpYubiKeyConnection : IYubiKeyConnection
 {
     /// <summary>
-    /// The connection class that can perform SCP03 operations will implement not
-    /// only <see cref="IYubiKeyConnection"/>, but this interface as well.
+    ///     Return a reference to the SCP key set used to make the connection.
     /// </summary>
-    public interface IScpYubiKeyConnection : IYubiKeyConnection
-    {
-        /// <summary>
-        /// Return a reference to the SCP key set used to make the connection.
-        /// </summary>
-        public ScpKeyParameters KeyParameters { get; }
+    ScpKeyParameters KeyParameters { get; }
 
-        /// <summary>
-        /// Get the encryptor function to encrypt any data for a SCP command using the current session keys.
-        /// </summary>
-        internal EncryptDataFunc EncryptDataFunc
-        {
-            get;
-        }
+    /// <summary>
+    ///     Get the encryptor function to encrypt any data for a SCP command using the current session keys.
+    /// </summary>
+    internal EncryptDataFunc EncryptDataFunc
+    {
+        get;
     }
 }

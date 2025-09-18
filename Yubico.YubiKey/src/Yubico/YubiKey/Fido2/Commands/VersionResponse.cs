@@ -15,50 +15,52 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Response to a command to get the firmware version.
+/// </summary>
+/// <remarks>
+///     <p>
+///         This is the partner Response class to <see cref="VersionCommand" />.
+///     </p>
+///     <p>
+///         The data returned is <see cref="FirmwareVersion" />.
+///     </p>
+/// </remarks>
+internal class VersionResponse : Fido2Response, IYubiKeyResponseWithData<FirmwareVersion>
 {
-    /// <summary>
-    /// Response to a command to get the firmware version.
-    /// </summary>
-    /// <remarks>
-    /// <p>
-    /// This is the partner Response class to <see cref="VersionCommand"/>.
-    /// </p>
-    /// <p>
-    /// The data returned is <see cref="FirmwareVersion"/>.
-    /// </p>
-    /// </remarks>
-    internal class VersionResponse : Fido2Response, IYubiKeyResponseWithData<FirmwareVersion>
+    private const int expectedResponseLength = 17;
+
+    public VersionResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        private const int expectedResponseLength = 17;
-
-        public VersionResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-
-        }
-
-        /// <inheritdoc/>
-        public FirmwareVersion GetData()
-        {
-            if (ResponseApdu.SW != SWConstants.Success)
-            {
-                throw new InvalidOperationException(ExceptionMessages.NoResponseDataApduFailed);
-            }
-
-            if (ResponseApdu.Data.Length != expectedResponseLength)
-            {
-                throw new MalformedYubiKeyResponseException(ExceptionMessages.UnknownFidoError);
-            }
-
-            var responseApduDataSpan = ResponseApdu.Data.Span;
-
-            return new FirmwareVersion
-            {
-                Major = responseApduDataSpan[13],
-                Minor = responseApduDataSpan[14],
-                Patch = responseApduDataSpan[15]
-            };
-        }
     }
+
+    #region IYubiKeyResponseWithData<FirmwareVersion> Members
+
+    /// <inheritdoc />
+    public FirmwareVersion GetData()
+    {
+        if (ResponseApdu.SW != SWConstants.Success)
+        {
+            throw new InvalidOperationException(ExceptionMessages.NoResponseDataApduFailed);
+        }
+
+        if (ResponseApdu.Data.Length != expectedResponseLength)
+        {
+            throw new MalformedYubiKeyResponseException(ExceptionMessages.UnknownFidoError);
+        }
+
+        var responseApduDataSpan = ResponseApdu.Data.Span;
+
+        return new FirmwareVersion
+        {
+            Major = responseApduDataSpan[13],
+            Minor = responseApduDataSpan[14],
+            Patch = responseApduDataSpan[15]
+        };
+    }
+
+    #endregion
 }

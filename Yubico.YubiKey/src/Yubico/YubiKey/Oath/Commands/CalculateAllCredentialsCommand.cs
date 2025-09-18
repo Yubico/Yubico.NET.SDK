@@ -15,72 +15,73 @@
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 
-namespace Yubico.YubiKey.Oath.Commands
+namespace Yubico.YubiKey.Oath.Commands;
+
+/// <summary>
+///     Performs CALCULATE of OTP (One-Time Password) values for all available credentials on the YubiKey.
+/// </summary>
+public class CalculateAllCredentialsCommand : OathChallengeResponseBaseCommand,
+                                              IYubiKeyCommand<CalculateAllCredentialsResponse>
 {
+    private const byte CalculateAllInstruction = 0xA4;
+    private const byte ChallengeTag = 0x74;
+
     /// <summary>
-    /// Performs CALCULATE of OTP (One-Time Password) values for all available credentials on the YubiKey.
+    ///     Constructs an instance of the <see cref="CalculateAllCredentialsCommand" /> class.
+    ///     The ResponseFormat will be set to its default value which is truncated.
     /// </summary>
-    public class CalculateAllCredentialsCommand : OathChallengeResponseBaseCommand, IYubiKeyCommand<CalculateAllCredentialsResponse>
+    public CalculateAllCredentialsCommand()
     {
-        private const byte CalculateAllInstruction = 0xA4;
-        private const byte ChallengeTag = 0x74;
-
-        /// <summary>
-        /// Full or truncated response to receive back.
-        /// </summary>
-        /// <value>
-        /// The default value for the response is truncated.
-        /// </value>
-        public ResponseFormat ResponseFormat { get; set; } = ResponseFormat.Truncated;
-
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Oath
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="CalculateAllCredentialsCommand" /> class.
-        /// The ResponseFormat will be set to its default value which is truncated.
-        /// </summary>
-        public CalculateAllCredentialsCommand()
-        {
-        }
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="CalculateAllCredentialsCommand" /> class.
-        /// </summary>
-        /// <param name="responseFormat">
-        /// Full or truncated response to receive back.
-        /// </param>
-        public CalculateAllCredentialsCommand(ResponseFormat responseFormat)
-        {
-            ResponseFormat = responseFormat;
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu()
-        {
-            var tlvWriter = new TlvWriter();
-
-            // Using default period which is 30 seconds for calculating all credentials.
-            // Credentials that have different period are recalculated later in CalculateAllCredentialsResponse.
-            tlvWriter.WriteValue(ChallengeTag, GenerateTotpChallenge(CredentialPeriod.Period30));
-
-            return new CommandApdu
-            {
-                Ins = CalculateAllInstruction,
-                P2 = (byte)ResponseFormat,
-                Data = tlvWriter.Encode()
-            };
-        }
-
-        /// <inheritdoc />
-        public CalculateAllCredentialsResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new CalculateAllCredentialsResponse(responseApdu);
     }
+
+    /// <summary>
+    ///     Constructs an instance of the <see cref="CalculateAllCredentialsCommand" /> class.
+    /// </summary>
+    /// <param name="responseFormat">
+    ///     Full or truncated response to receive back.
+    /// </param>
+    public CalculateAllCredentialsCommand(ResponseFormat responseFormat)
+    {
+        ResponseFormat = responseFormat;
+    }
+
+    /// <summary>
+    ///     Full or truncated response to receive back.
+    /// </summary>
+    /// <value>
+    ///     The default value for the response is truncated.
+    /// </value>
+    public ResponseFormat ResponseFormat { get; set; } = ResponseFormat.Truncated;
+
+    #region IYubiKeyCommand<CalculateAllCredentialsResponse> Members
+
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.Oath
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Oath;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu()
+    {
+        var tlvWriter = new TlvWriter();
+
+        // Using default period which is 30 seconds for calculating all credentials.
+        // Credentials that have different period are recalculated later in CalculateAllCredentialsResponse.
+        tlvWriter.WriteValue(ChallengeTag, GenerateTotpChallenge(CredentialPeriod.Period30));
+
+        return new CommandApdu
+        {
+            Ins = CalculateAllInstruction,
+            P2 = (byte)ResponseFormat,
+            Data = tlvWriter.Encode()
+        };
+    }
+
+    /// <inheritdoc />
+    public CalculateAllCredentialsResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }
-
-

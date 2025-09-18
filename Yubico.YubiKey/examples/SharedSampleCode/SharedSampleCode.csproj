@@ -14,18 +14,18 @@ limitations under the License. -->
 
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <IsPackable>false</IsPackable>
-    <AnalysisMode>AllDisabledByDefault</AnalysisMode>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <IsPackable>false</IsPackable>
+        <AnalysisMode>AllDisabledByDefault</AnalysisMode>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>@(NoWarn);NU5105;NU5104</NoWarn>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
-  </ItemGroup>
-  
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <NoWarn>@(NoWarn);NU5105;NU5104</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj"/>
+    </ItemGroup>
+
 </Project>

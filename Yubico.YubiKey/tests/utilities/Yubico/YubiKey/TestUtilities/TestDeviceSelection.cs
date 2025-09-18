@@ -16,171 +16,178 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using TestDev = Yubico.YubiKey.TestUtilities.IntegrationTestDeviceEnumeration;
 
-namespace Yubico.YubiKey.TestUtilities
+namespace Yubico.YubiKey.TestUtilities;
+
+public static class TestDeviceSelection
 {
-    public static class TestDeviceSelection
+    /// <summary>
+    ///     Persistent enumeration to find a specific YubiKey test device by serial number.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown if the test device could not be found.
+    /// </exception>
+    public static IYubiKeyDevice RenewDeviceEnumeration(
+        int serialNumber)
     {
-        /// <summary>
-        /// Persistent enumeration to find a specific YubiKey test device by serial number.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if the test device could not be found.
-        /// </exception>
-        public static IYubiKeyDevice RenewDeviceEnumeration(
-            int serialNumber)
+        const int maxReconnectAttempts = 40;
+        var sleepDurationMs = TimeSpan.FromMilliseconds(200);
+
+        var reconnectAttempts = 0;
+        do
         {
-            const int maxReconnectAttempts = 40;
-            var sleepDurationMs = TimeSpan.FromMilliseconds(200);
+            Thread.Sleep(sleepDurationMs);
 
-            int reconnectAttempts = 0;
-            do
+            try
             {
-                System.Threading.Thread.Sleep(sleepDurationMs);
+                return TestDev.GetBySerial(serialNumber);
+            }
+            catch (InvalidOperationException)
+            {
+                //
+            }
+        } while (reconnectAttempts++ < maxReconnectAttempts);
 
-                try
-                {
-                    return TestDev.GetBySerial(serialNumber);
-                }
-                catch (InvalidOperationException)
-                {
-                    //
-                }
-            } while (reconnectAttempts++ < maxReconnectAttempts);
+        throw new InvalidOperationException($"Could not find test device s/n \"{serialNumber}\".");
+    }
 
-            throw new InvalidOperationException($"Could not find test device s/n \"{serialNumber}\".");
+    /// <summary>
+    ///     Retrieves a single <see cref="IYubiKeyDevice" /> based on test device requirements.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    ///     Thrown when <paramref name="testDeviceType" /> is not a recognized value.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown when the input sequence did not contain a valid test device.
+    /// </exception>
+    /// <param name="testDeviceType">The type of the device.</param>
+    /// <param name="minimumFirmwareVersion">
+    ///     The earliest version number the
+    ///     caller is willing to accept. Defaults to the minimum version for the given device.
+    /// </param>
+    /// <param name="yubiKeys">The list of yubikeys to select from</param>
+    /// <param name="transport">The desired transport</param>
+    /// <returns>The allow-list filtered YubiKey that was found.</returns>
+    public static IYubiKeyDevice SelectByStandardTestDevice(
+        this IEnumerable<IYubiKeyDevice> yubiKeys,
+        StandardTestDevice testDeviceType,
+        FirmwareVersion? minimumFirmwareVersion = null,
+        Transport transport = Transport.All
+    )
+    {
+        var devices = yubiKeys as IYubiKeyDevice[] ?? yubiKeys.ToArray();
+        if (!devices.Any())
+        {
+            ThrowDeviceNotFoundException($"Could not find any connected Yubikeys (Transport: {transport})", devices);
         }
 
-        /// <summary>
-        /// Retrieves a single <see cref="IYubiKeyDevice"/> based on test device requirements.
-        /// </summary>
-        /// <exception cref="ArgumentException">
-        /// Thrown when <paramref name="testDeviceType"/> is not a recognized value.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when the input sequence did not contain a valid test device.
-        /// </exception>
-        /// <param name="testDeviceType">The type of the device.</param>
-        /// <param name="minimumFirmwareVersion">The earliest version number the
-        /// caller is willing to accept. Defaults to the minimum version for the given device.</param>
-        /// <param name="yubiKeys">The list of yubikeys to select from</param>
-        /// <param name="transport">The desired transport</param>
-        /// <returns>The allow-list filtered YubiKey that was found.</returns>
-        public static IYubiKeyDevice SelectByStandardTestDevice(
-            this IEnumerable<IYubiKeyDevice> yubiKeys,
-            StandardTestDevice testDeviceType,
-            FirmwareVersion? minimumFirmwareVersion = null,
-            Transport transport = Transport.All
-            )
+        var devicesVersionFiltered =
+            devices.Where(d => d.FirmwareVersion >= MatchVersion(testDeviceType, minimumFirmwareVersion));
+
+        return testDeviceType switch
         {
-            var devices = yubiKeys as IYubiKeyDevice[] ?? yubiKeys.ToArray();
-            if (!devices.Any())
-            {
-                ThrowDeviceNotFoundException($"Could not find any connected Yubikeys (Transport: {transport})", devices);
-            }
+            StandardTestDevice.Fw3 => SelectDevice(3),
+            StandardTestDevice.Fw4Fips => SelectDevice(4, isFipsSeries: true),
+            StandardTestDevice.Fw5 => SelectDevice(5),
+            StandardTestDevice.Fw5Fips => SelectDevice(5, isFipsSeries: true),
+            StandardTestDevice.Fw5Bio => SelectDevice(5,
+                [FormFactor.UsbCBiometricKeychain, FormFactor.UsbABiometricKeychain]),
+            StandardTestDevice.Any => devices.First(),
+            _ => throw new ArgumentException("Invalid test device value.", nameof(testDeviceType))
+        };
 
-            var devicesVersionFiltered =
-                devices.Where(d => d.FirmwareVersion >= MatchVersion(testDeviceType, minimumFirmwareVersion));
-
-            return testDeviceType switch
+        IYubiKeyDevice SelectDevice(
+            int majorVersion,
+            IEnumerable<FormFactor>? formFactors = null,
+            bool isFipsSeries = false)
+        {
+            IYubiKeyDevice device = null!;
+            try
             {
-                StandardTestDevice.Fw3 => SelectDevice(3),
-                StandardTestDevice.Fw4Fips => SelectDevice(4, isFipsSeries: true),
-                StandardTestDevice.Fw5 => SelectDevice(5),
-                StandardTestDevice.Fw5Fips => SelectDevice(5, isFipsSeries: true),
-                StandardTestDevice.Fw5Bio => SelectDevice(5,  [FormFactor.UsbCBiometricKeychain, FormFactor.UsbABiometricKeychain]),
-                StandardTestDevice.Any => devices.First(),
-                _ => throw new ArgumentException("Invalid test device value.", nameof(testDeviceType)),
-            };
-
-            IYubiKeyDevice SelectDevice(
-                int majorVersion,
-                IEnumerable<FormFactor>? formFactors = null,
-                bool isFipsSeries = false)
-            {
-                IYubiKeyDevice device = null!;
-                try
+                bool MatchingDeviceSelector(
+                    IYubiKeyDevice d)
                 {
-                    bool MatchingDeviceSelector(IYubiKeyDevice d) =>
-                        d.FirmwareVersion.Major == majorVersion &&
-                        (formFactors is null || formFactors.Contains(d.FormFactor)) &&
-                        d.IsFipsSeries == isFipsSeries;
-
-                    device = devicesVersionFiltered.First(MatchingDeviceSelector);
-                }
-                catch (InvalidOperationException)
-                {
-                    ThrowDeviceNotFoundException($"Target test device not found ({testDeviceType}, Transport: {transport})", devices);
+                    return d.FirmwareVersion.Major == majorVersion &&
+                           (formFactors is null || formFactors.Contains(d.FormFactor)) &&
+                           d.IsFipsSeries == isFipsSeries;
                 }
 
-                return device;
+                device = devicesVersionFiltered.First(MatchingDeviceSelector);
             }
-        }
-
-        private static FirmwareVersion MatchVersion(
-            StandardTestDevice testDeviceType,
-            FirmwareVersion? minimumFirmwareVersion)
-        {
-            if (minimumFirmwareVersion is { })
+            catch (InvalidOperationException)
             {
-                return minimumFirmwareVersion;
+                ThrowDeviceNotFoundException($"Target test device not found ({testDeviceType}, Transport: {transport})",
+                    devices);
             }
 
-            return testDeviceType switch
-            {
-                StandardTestDevice.Fw3 => FirmwareVersion.V3_1_0,
-                StandardTestDevice.Fw4Fips => FirmwareVersion.V4_0_0,
-                _ => FirmwareVersion.V5_0_0,
-            };
-        }
-
-        public static IYubiKeyDevice SelectByMinimumVersion(
-            this IEnumerable<IYubiKeyDevice> yubiKeys,
-            FirmwareVersion minimumFirmwareVersion)
-        {
-            var devices = yubiKeys as IYubiKeyDevice[] ?? yubiKeys.ToArray();
-            if (!devices.Any())
-            {
-                throw new InvalidOperationException("Could not find any connected Yubikeys");
-            }
-
-            var device = devices.FirstOrDefault(d => d.FirmwareVersion >= minimumFirmwareVersion);
-            if (device is null)
-            {
-                ThrowDeviceNotFoundException("No matching YubiKey found", devices);
-            }
-
-            return device!;
-        }
-
-        [DoesNotReturn]
-        private static void ThrowDeviceNotFoundException(
-            string errorMessage,
-            IYubiKeyDevice[] devices)
-        {
-            var connectedDevicesText = FormatConnectedDevices(devices);
-            throw new DeviceNotFoundException($"{errorMessage}. {connectedDevicesText}");
-        }
-
-        private static string FormatConnectedDevices(
-            IReadOnlyCollection<IYubiKeyDevice> devices)
-        {
-            var deviceText =
-                devices.Select(y => $"{{{y.FirmwareVersion}, {y.FormFactor}, IsFipsSeries: {y.IsFipsSeries}}}");
-
-            return devices.Any()
-                ? $"Connected devices: {string.Join(", ", deviceText)}"
-                : string.Empty;
+            return device;
         }
     }
 
-    // Custom test exception inheriting from InvalidOperationException as some test code depends on InvalidOperationExceptions 
-    public class DeviceNotFoundException : InvalidOperationException
+    private static FirmwareVersion MatchVersion(
+        StandardTestDevice testDeviceType,
+        FirmwareVersion? minimumFirmwareVersion)
     {
-        public DeviceNotFoundException(
-            string message) : base(message)
+        if (minimumFirmwareVersion is not null)
         {
+            return minimumFirmwareVersion;
         }
+
+        return testDeviceType switch
+        {
+            StandardTestDevice.Fw3 => FirmwareVersion.V3_1_0,
+            StandardTestDevice.Fw4Fips => FirmwareVersion.V4_0_0,
+            _ => FirmwareVersion.V5_0_0
+        };
+    }
+
+    public static IYubiKeyDevice SelectByMinimumVersion(
+        this IEnumerable<IYubiKeyDevice> yubiKeys,
+        FirmwareVersion minimumFirmwareVersion)
+    {
+        var devices = yubiKeys as IYubiKeyDevice[] ?? yubiKeys.ToArray();
+        if (!devices.Any())
+        {
+            throw new InvalidOperationException("Could not find any connected Yubikeys");
+        }
+
+        var device = devices.FirstOrDefault(d => d.FirmwareVersion >= minimumFirmwareVersion);
+        if (device is null)
+        {
+            ThrowDeviceNotFoundException("No matching YubiKey found", devices);
+        }
+
+        return device!;
+    }
+
+    [DoesNotReturn]
+    private static void ThrowDeviceNotFoundException(
+        string errorMessage,
+        IYubiKeyDevice[] devices)
+    {
+        var connectedDevicesText = FormatConnectedDevices(devices);
+        throw new DeviceNotFoundException($"{errorMessage}. {connectedDevicesText}");
+    }
+
+    private static string FormatConnectedDevices(
+        IReadOnlyCollection<IYubiKeyDevice> devices)
+    {
+        var deviceText =
+            devices.Select(y => $"{{{y.FirmwareVersion}, {y.FormFactor}, IsFipsSeries: {y.IsFipsSeries}}}");
+
+        return devices.Any()
+            ? $"Connected devices: {string.Join(", ", deviceText)}"
+            : string.Empty;
+    }
+}
+
+// Custom test exception inheriting from InvalidOperationException as some test code depends on InvalidOperationExceptions 
+public class DeviceNotFoundException : InvalidOperationException
+{
+    public DeviceNotFoundException(
+        string message) : base(message)
+    {
     }
 }

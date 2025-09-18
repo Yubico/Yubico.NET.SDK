@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+/// <summary>
+///     Contains constant strings for FIDO2 extension identifiers.
+/// </summary>
+internal static class Fido2ExtensionKeys
 {
-    /// <summary>
-    /// Contains constant strings for FIDO2 extension identifiers.
-    /// </summary>
-    internal static class Fido2ExtensionKeys
-    {
-        internal const string CredBlob = "credBlob";
-        internal const string HmacSecret = "hmac-secret";
-        internal const string HmacSecretMc = "hmac-secret-mc";
-        internal const string CredProtect = "credProtect";
-        internal const string MinPinLength = "minPinLength";
-        internal const string ThirdPartyPayment = "thirdPartyPayment";
-    }
+    internal const string CredBlob = "credBlob";
+    internal const string HmacSecret = "hmac-secret";
+    internal const string HmacSecretMc = "hmac-secret-mc";
+    internal const string CredProtect = "credProtect";
+    internal const string MinPinLength = "minPinLength";
+    internal const string ThirdPartyPayment = "thirdPartyPayment";
 }

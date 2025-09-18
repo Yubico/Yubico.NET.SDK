@@ -11,7 +11,7 @@ namespace Yubico.YubiKey.Fido2;
 // These test should be able to run without a bio key, although might fail
 // on incorrect pin-verify assumptions
 [Trait(TraitTypes.Category, TestCategories.Elevated)]
-public class Fido2Tests : FidoSessionIntegrationTestBase 
+public class Fido2Tests : FidoSessionIntegrationTestBase
 {
     #region AuthenticatorInfo
 
@@ -147,7 +147,9 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
 
         // Should require pin
         _ = Session.GetCredentialMetadata();
-        Assert.Equal(2, KeyCollector.RequestCount(KeyEntryRequest.VerifyFido2Pin)); // Will have changed, as we did set the pin,requiring reset of persistent token
+        Assert.Equal(2,
+            KeyCollector.RequestCount(KeyEntryRequest
+                .VerifyFido2Pin)); // Will have changed, as we did set the pin,requiring reset of persistent token
     }
 
     [SkippableFact(typeof(DeviceNotFoundException))]
@@ -235,20 +237,21 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
     [SkippableTheory(typeof(DeviceNotFoundException))]
     [InlineData(false)]
     [InlineData(true)]
-    public void CredentialManagement_with_commands_Succeeds_WithRO_Token(bool useEncryptedToken)
+    public void CredentialManagement_with_commands_Succeeds_WithRO_Token(
+        bool useEncryptedToken)
     {
         // Arrange
         //  Create a credential to enumerate
         MakeCredentialParameters.AddOption(AuthenticatorOptions.rk, true);
         Session.MakeCredential(MakeCredentialParameters);
-                
+
         var protocol = new PinUvAuthProtocolTwo();
         var publicKey = GetAuthenticatorPublicKey(Connection, protocol);
 
         protocol.Encapsulate(publicKey);
         var persistentPinUvAuthToken = useEncryptedToken
-            ? GetReadOnlyPinToken(Connection, protocol, decryptToken: false).ToArray()
-            : GetReadOnlyPinToken(Connection, protocol, decryptToken: true).ToArray();
+            ? GetReadOnlyPinToken(Connection, protocol, false).ToArray()
+            : GetReadOnlyPinToken(Connection, protocol, true).ToArray();
 
         // Enumerate with PPUAT token should work
         EnumerateRpsBeginCommand enumRpsCommand;
@@ -258,8 +261,8 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         }
         else
         {
-            byte[] message = EnumerateRpsBeginCommand.GetAuthenticationMessage();
-            byte[] authParam = protocol.Authenticate(persistentPinUvAuthToken, message);
+            var message = EnumerateRpsBeginCommand.GetAuthenticationMessage();
+            var authParam = protocol.Authenticate(persistentPinUvAuthToken, message);
             enumRpsCommand = new EnumerateRpsBeginCommand(authParam, protocol.Protocol);
         }
 
@@ -279,8 +282,8 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         }
         else
         {
-            byte[] message = EnumerateCredentialsBeginCommand.GetAuthenticationMessage(relyingParty);
-            byte[] authParam = protocol.Authenticate(persistentPinUvAuthToken, message);
+            var message = EnumerateCredentialsBeginCommand.GetAuthenticationMessage(relyingParty);
+            var authParam = protocol.Authenticate(persistentPinUvAuthToken, message);
             enumCreds = new EnumerateCredentialsBeginCommand(relyingParty, authParam, protocol.Protocol);
         }
 

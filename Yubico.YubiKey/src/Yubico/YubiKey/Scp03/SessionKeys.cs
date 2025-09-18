@@ -15,57 +15,60 @@
 using System;
 using System.Security.Cryptography;
 
-namespace Yubico.YubiKey.Scp03
+namespace Yubico.YubiKey.Scp03;
+
+[Obsolete("Use new SessionKeys class instead.")]
+internal class SessionKeys : IDisposable
 {
-    [Obsolete("Use new SessionKeys class instead.")]
-    internal class SessionKeys : IDisposable
+    private readonly byte[] _sessionEncryptionKey;
+    private readonly byte[] _sessionMacKey;
+    private readonly byte[] _sessionRmacKey;
+
+    private bool _disposed;
+
+    // This copies a reference to the input keys and will clear them when
+    // done.
+    // Callers should not do anything with the buffers after a successful
+    // instantiation.
+    public SessionKeys(byte[] sessionMacKey, byte[] sessionEncryptionKey, byte[] sessionRmacKey)
     {
-        private readonly byte[] _sessionMacKey;
-        private readonly byte[] _sessionEncryptionKey;
-        private readonly byte[] _sessionRmacKey;
+        _sessionMacKey = sessionMacKey;
+        _sessionEncryptionKey = sessionEncryptionKey;
+        _sessionRmacKey = sessionRmacKey;
+        _disposed = false;
+    }
 
-        private bool _disposed;
+    #region IDisposable Members
 
-        // This copies a reference to the input keys and will clear them when
-        // done.
-        // Callers should not do anything with the buffers after a successful
-        // instantiation.
-        public SessionKeys(byte[] sessionMacKey, byte[] sessionEncryptionKey, byte[] sessionRmacKey)
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    // Return a reference to the byte array containing the session Mac Key.
+    public byte[] GetSessionMacKey() => _sessionMacKey;
+
+    // Return a reference to the byte array containing the session Enc Key.
+    public byte[] GetSessionEncKey() => _sessionEncryptionKey;
+
+    // Return a reference to the byte array containing the session Rmac Key.
+    public byte[] GetSessionRmacKey() => _sessionRmacKey;
+
+    // Overwrite the memory of the keys
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
         {
-            _sessionMacKey = sessionMacKey;
-            _sessionEncryptionKey = sessionEncryptionKey;
-            _sessionRmacKey = sessionRmacKey;
-            _disposed = false;
-        }
-
-        // Return a reference to the byte array containing the session Mac Key.
-        public byte[] GetSessionMacKey() => _sessionMacKey;
-
-        // Return a reference to the byte array containing the session Enc Key.
-        public byte[] GetSessionEncKey() => _sessionEncryptionKey;
-
-        // Return a reference to the byte array containing the session Rmac Key.
-        public byte[] GetSessionRmacKey() => _sessionRmacKey;
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        // Overwrite the memory of the keys
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
+            if (disposing)
             {
-                if (disposing)
-                {
-                    CryptographicOperations.ZeroMemory(_sessionMacKey.AsSpan());
-                    CryptographicOperations.ZeroMemory(_sessionEncryptionKey.AsSpan());
-                    CryptographicOperations.ZeroMemory(_sessionRmacKey.AsSpan());
+                CryptographicOperations.ZeroMemory(_sessionMacKey.AsSpan());
+                CryptographicOperations.ZeroMemory(_sessionEncryptionKey.AsSpan());
+                CryptographicOperations.ZeroMemory(_sessionRmacKey.AsSpan());
 
-                    _disposed = true;
-                }
+                _disposed = true;
             }
         }
     }

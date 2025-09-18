@@ -14,53 +14,52 @@
 
 using Xunit;
 
-namespace Yubico.Core.Iso7816.UnitTests
+namespace Yubico.Core.Iso7816.UnitTests;
+
+public class AnswerToResetTests
 {
-    public class AnswerToResetTests
+    [Fact]
+    public void Equality_SameInstance_EqualToItself()
     {
-        [Fact]
-        public void Equality_SameInstance_EqualToItself()
-        {
-            var atr1 = new AnswerToReset(new byte[] { 1, 2, 3, 4 });
-            AnswerToReset atr2 = atr1;
+        var atr1 = new AnswerToReset(new byte[] { 1, 2, 3, 4 });
+        var atr2 = atr1;
 
-            Assert.True(atr1.Equals(atr2));
-            Assert.True(atr2.Equals(atr1));
-            Assert.True(atr1 == atr2);
-            Assert.True(atr2 == atr1);
-        }
+        Assert.True(atr1.Equals(atr2));
+        Assert.True(atr2.Equals(atr1));
+        Assert.True(atr1 == atr2);
+        Assert.True(atr2 == atr1);
+    }
 
-        [Fact]
-        public void Equality_DifferentInstanceSameValue_IsEqual()
-        {
-            var atr1 = new AnswerToReset(new byte[] { 1, 2, 3, 4 });
-            var atr2 = new AnswerToReset(new byte[] { 1, 2, 3, 4 });
+    [Fact]
+    public void Equality_DifferentInstanceSameValue_IsEqual()
+    {
+        var atr1 = new AnswerToReset(new byte[] { 1, 2, 3, 4 });
+        var atr2 = new AnswerToReset(new byte[] { 1, 2, 3, 4 });
 
-            Assert.True(atr1.Equals(atr2));
-            Assert.True(atr2.Equals(atr1));
-            Assert.True(atr1 == atr2);
-            Assert.True(atr2 == atr1);
-        }
+        Assert.True(atr1.Equals(atr2));
+        Assert.True(atr2.Equals(atr1));
+        Assert.True(atr1 == atr2);
+        Assert.True(atr2 == atr1);
+    }
 
-        [Fact]
-        public void Equality_DifferentValues_AreNotEqual()
-        {
-            var atr1 = new AnswerToReset(new byte[] { 1, 2, 3, 4 });
-            var atr2 = new AnswerToReset(new byte[] { 4, 3, 2, 1 });
+    [Fact]
+    public void Equality_DifferentValues_AreNotEqual()
+    {
+        var atr1 = new AnswerToReset(new byte[] { 1, 2, 3, 4 });
+        var atr2 = new AnswerToReset(new byte[] { 4, 3, 2, 1 });
 
-            Assert.False(atr1.Equals(atr2));
-            Assert.False(atr2.Equals(atr1));
-            Assert.True(atr1 != atr2);
-            Assert.True(atr2 != atr1);
-        }
+        Assert.False(atr1.Equals(atr2));
+        Assert.False(atr2.Equals(atr1));
+        Assert.True(atr1 != atr2);
+        Assert.True(atr2 != atr1);
+    }
 
-        [Fact]
-        public void ToString_PrettyPrintsAtrValue()
-        {
-            var atr1 = new AnswerToReset(new byte[] { 1, 2, 10, 255 });
-            string expectedString = "01-02-0A-FF";
+    [Fact]
+    public void ToString_PrettyPrintsAtrValue()
+    {
+        var atr1 = new AnswerToReset(new byte[] { 1, 2, 10, 255 });
+        var expectedString = "01-02-0A-FF";
 
-            Assert.Equal(expectedString, atr1.ToString());
-        }
+        Assert.Equal(expectedString, atr1.ToString());
     }
 }

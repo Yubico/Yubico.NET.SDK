@@ -21,7 +21,7 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Piv;
 
 /// <summary>
-///  This class tests the TestKey.EncodeAsPiv (PivKeyEncoder), PivKeyDecoder and AsnPublicKeyDecoder classes.
+///     This class tests the TestKey.EncodeAsPiv (PivKeyEncoder), PivKeyDecoder and AsnPublicKeyDecoder classes.
 /// </summary>
 public class PivEncoderDecoderTests
 {
@@ -34,7 +34,8 @@ public class PivEncoderDecoderTests
     [InlineData(KeyType.ECP384)]
     [InlineData(KeyType.Ed25519)]
     [InlineData(KeyType.X25519)]
-    public void PivAndPkcsPublicEncodedKeys_AreEqual(KeyType keyType)
+    public void PivAndPkcsPublicEncodedKeys_AreEqual(
+        KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPublicKey(keyType);
@@ -82,7 +83,7 @@ public class PivEncoderDecoderTests
                 throw new ArgumentOutOfRangeException(nameof(keyType), keyType, null);
         }
     }
-    
+
     [Theory]
     [InlineData(KeyType.RSA1024)]
     [InlineData(KeyType.RSA2048)]
@@ -92,7 +93,8 @@ public class PivEncoderDecoderTests
     [InlineData(KeyType.ECP384)]
     [InlineData(KeyType.Ed25519)]
     [InlineData(KeyType.X25519)]
-    public void PivAndPkcsPrivateEncodedKeys_AreEqual(KeyType keyType)
+    public void PivAndPkcsPrivateEncodedKeys_AreEqual(
+        KeyType keyType)
     {
         // Arrange
         var testKey = TestKeys.GetTestPrivateKey(keyType);

@@ -13,8 +13,8 @@ public class OtpErrorTransformTests
         byte before,
         byte after)
     {
-        var beforeStatus = CreateOtpStatus(before, hasConfigs: true);
-        var afterStatus = CreateOtpStatus(after, hasConfigs: true);
+        var beforeStatus = CreateOtpStatus(before, true);
+        var afterStatus = CreateOtpStatus(after, true);
 
         var isValid = OtpErrorTransform.IsValidSequenceProgression(beforeStatus, afterStatus);
 
@@ -30,8 +30,8 @@ public class OtpErrorTransformTests
         byte before,
         byte after)
     {
-        var beforeStatus = CreateOtpStatus(before, hasConfigs: true);
-        var afterStatus = CreateOtpStatus(after, hasConfigs: true); // Still has configs
+        var beforeStatus = CreateOtpStatus(before, true);
+        var afterStatus = CreateOtpStatus(after, true); // Still has configs
 
         var isValid = OtpErrorTransform.IsValidSequenceProgression(beforeStatus, afterStatus);
 
@@ -45,8 +45,8 @@ public class OtpErrorTransformTests
     public void IsValidSequenceProgression_ValidReset_ReturnsTrue(
         byte before)
     {
-        var beforeStatus = CreateOtpStatus(before, hasConfigs: true);
-        var afterStatus = CreateOtpStatus(0, hasConfigs: false); // No configs remain
+        var beforeStatus = CreateOtpStatus(before, true);
+        var afterStatus = CreateOtpStatus(0, false); // No configs remain
 
         var isValid = OtpErrorTransform.IsValidSequenceProgression(beforeStatus, afterStatus);
 
@@ -61,8 +61,8 @@ public class OtpErrorTransformTests
         byte before,
         bool afterHasConfigs)
     {
-        var beforeStatus = CreateOtpStatus(before, hasConfigs: true);
-        var afterStatus = CreateOtpStatus(0, hasConfigs: afterHasConfigs);
+        var beforeStatus = CreateOtpStatus(before, true);
+        var afterStatus = CreateOtpStatus(0, afterHasConfigs);
 
         var isValid = OtpErrorTransform.IsValidSequenceProgression(beforeStatus, afterStatus);
 
@@ -71,15 +71,18 @@ public class OtpErrorTransformTests
 
     private static OtpStatus CreateOtpStatus(
         byte sequenceNumber,
-        bool hasConfigs) => new()
+        bool hasConfigs)
     {
-        FirmwareVersion = new FirmwareVersion(),
-        SequenceNumber = sequenceNumber,
-        TouchLevel = 0x00,
-        ShortPressConfigured = hasConfigs,
-        LongPressConfigured = false, // Only test one slot for simplicity
-        ShortPressRequiresTouch = false,
-        LongPressRequiresTouch = false,
-        LedBehaviorInverted = false
-    };
+        return new OtpStatus
+        {
+            FirmwareVersion = new FirmwareVersion(),
+            SequenceNumber = sequenceNumber,
+            TouchLevel = 0x00,
+            ShortPressConfigured = hasConfigs,
+            LongPressConfigured = false, // Only test one slot for simplicity
+            ShortPressRequiresTouch = false,
+            LongPressRequiresTouch = false,
+            LedBehaviorInverted = false
+        };
+    }
 }

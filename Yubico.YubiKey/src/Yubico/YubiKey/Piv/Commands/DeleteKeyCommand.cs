@@ -14,69 +14,72 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+/// <summary>
+///     The <see cref="DeleteKeyCommand" /> is used to delete a PIV key from the target slot.
+///     <remarks>
+///         Any key, including the attestation key, can be deleted.
+///     </remarks>
+/// </summary>
+public class DeleteKeyCommand : IYubiKeyCommand<DeleteKeyResponse>
 {
+    private const byte MoveOrDeleteInstruction = 0xF6;
+
     /// <summary>
-    /// The <see cref="DeleteKeyCommand"/> is used to delete a PIV key from the target slot.
-    /// <remarks>
-    /// Any key, including the attestation key, can be deleted.
-    /// </remarks>
+    ///     Constructor for the <see cref="DeleteKeyCommand" />, which is used to delete a PIV key from a slot.
     /// </summary>
-    public class DeleteKeyCommand : IYubiKeyCommand<DeleteKeyResponse>
+    /// <param name="slotToClear">The YubiKey slot of the key you want to clear.</param>
+    public DeleteKeyCommand(byte slotToClear)
     {
-        /// <summary>
-        /// The Yubikey slot of the key you want to delete.
-        /// </summary>
-        public byte SlotToClear { get; set; }
-
-        private const byte MoveOrDeleteInstruction = 0xF6;
-
-        /// <summary>
-        /// Constructor for the <see cref="DeleteKeyCommand"/>, which is used to delete a PIV key from a slot.
-        /// </summary>
-        /// <param name="slotToClear">The YubiKey slot of the key you want to clear.</param>
-        public DeleteKeyCommand(byte slotToClear)
-        {
-            SlotToClear = slotToClear;
-        }
-
-        /// <summary>
-        /// Constructor for the <see cref="DeleteKeyCommand"/>, which is used to delete a PIV key from a slot.
-        /// </summary>
-        public DeleteKeyCommand() { }
-
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs. For this command, it's PIV.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Piv
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Piv;
-
-        /// <summary>
-        /// Constructs a <see cref="CommandApdu"/> for the delete operation.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="CommandApdu"/> that targets the delete operation with the correct parameters.
-        /// </returns>
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = MoveOrDeleteInstruction,
-                P1 = 0xFF, // Will be cleared
-                P2 = SlotToClear
-            };
-
-        /// <summary>
-        /// Creates the <see cref="DeleteKeyResponse"/> from the <see cref="ResponseApdu"/> data.
-        /// </summary>
-        /// <param name="responseApdu">The return data with which the Yubikey responded to the
-        /// <see cref="DeleteKeyCommand"/>
-        /// </param>
-        /// <returns>
-        /// The <see cref="DeleteKeyResponse"/> for the <see cref="DeleteKeyCommand"/>
-        /// </returns>
-        public DeleteKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new DeleteKeyResponse(responseApdu);
+        SlotToClear = slotToClear;
     }
+
+    /// <summary>
+    ///     Constructor for the <see cref="DeleteKeyCommand" />, which is used to delete a PIV key from a slot.
+    /// </summary>
+    public DeleteKeyCommand() { }
+
+    /// <summary>
+    ///     The Yubikey slot of the key you want to delete.
+    /// </summary>
+    public byte SlotToClear { get; set; }
+
+    #region IYubiKeyCommand<DeleteKeyResponse> Members
+
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs. For this command, it's PIV.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.Piv
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Piv;
+
+    /// <summary>
+    ///     Constructs a <see cref="CommandApdu" /> for the delete operation.
+    /// </summary>
+    /// <returns>
+    ///     The <see cref="CommandApdu" /> that targets the delete operation with the correct parameters.
+    /// </returns>
+    public CommandApdu CreateCommandApdu() =>
+        new()
+        {
+            Ins = MoveOrDeleteInstruction,
+            P1 = 0xFF, // Will be cleared
+            P2 = SlotToClear
+        };
+
+    /// <summary>
+    ///     Creates the <see cref="DeleteKeyResponse" /> from the <see cref="ResponseApdu" /> data.
+    /// </summary>
+    /// <param name="responseApdu">
+    ///     The return data with which the Yubikey responded to the
+    ///     <see cref="DeleteKeyCommand" />
+    /// </param>
+    /// <returns>
+    ///     The <see cref="DeleteKeyResponse" /> for the <see cref="DeleteKeyCommand" />
+    /// </returns>
+    public DeleteKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

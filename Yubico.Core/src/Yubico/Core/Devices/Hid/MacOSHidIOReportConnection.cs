@@ -121,7 +121,14 @@ namespace Yubico.Core.Devices.Hid
                     throw new PlatformApiException(ExceptionMessages.IOKitCannotOpenDevice);
                 }
 
-                int result = IOHIDDeviceOpen(_deviceHandle, 0x01);
+                int shareMode = 
+                    AppContext.TryGetSwitch(
+                        CoreCompatSwitches.OpenHidHandlesExclusively, 
+                        out bool isEnabled) && isEnabled
+                        ? IOKitHidConstants.kIOHIDOptionsTypeSeizeDevice
+                        : IOKitHidConstants.kIOHIDOptionsTypeNone;
+                
+                int result = IOHIDDeviceOpen(_deviceHandle, shareMode);
                 _log.IOKitApiCall(nameof(IOHIDDeviceOpen), (kern_return_t)result);
 
                 if (result != 0)

@@ -189,7 +189,7 @@ public sealed class TlvObject : IDisposable
             }
 
             // Combine the first two bytes to form the tag.
-            tag = buffer[0] << 8 | buffer[1];
+            tag = (buffer[0] << 8) | buffer[1];
             buffer = buffer[2..]; // Skip the tag bytes
         }
         else
@@ -213,7 +213,7 @@ public sealed class TlvObject : IDisposable
             length = 0;
             for (int i = 0; i < lengthLn; i++)
             {
-                length = length << 8 | buffer[0];
+                length = (length << 8) | buffer[0];
                 buffer = buffer[1..];
             }
         }

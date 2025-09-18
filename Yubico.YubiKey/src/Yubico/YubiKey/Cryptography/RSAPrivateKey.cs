@@ -29,7 +29,7 @@ public sealed class RSAPrivateKey : PrivateKey
 {
     private RSAPrivateKey(RSAParameters parameters)
     {
-        int keyLengthBits = parameters.DP?.Length * 8 * 2 ?? 0;
+        int keyLengthBits = (parameters.DP?.Length * 8 * 2) ?? 0;
 
         Parameters = parameters.NormalizeParameters();
         KeyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits);

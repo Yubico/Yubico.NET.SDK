@@ -27,8 +27,8 @@ namespace Yubico.PlatformInterop;
 // subclasses.
 internal class LinuxUdev : IDisposable
 {
-    private bool _isDisposed;
     protected readonly LinuxUdevSafeHandle _udevObject;
+    private bool _isDisposed;
 
     // Create a new instance of LinuxUdev. This is essentially equivalent in
     // C to calling udev_new to get the initial object.

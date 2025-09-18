@@ -656,9 +656,9 @@ public class Credential
     {
         int hash = base.GetHashCode();
 
-        hash = (hash * 7) + _issuer?.GetHashCode() ?? "".GetHashCode();
-        hash = (hash * 7) + _accountName?.GetHashCode() ?? "".GetHashCode();
-        hash = (hash * 7) + _secret?.GetHashCode() ?? "".GetHashCode();
+        hash = ((hash * 7) + _issuer?.GetHashCode()) ?? "".GetHashCode();
+        hash = ((hash * 7) + _accountName?.GetHashCode()) ?? "".GetHashCode();
+        hash = ((hash * 7) + _secret?.GetHashCode()) ?? "".GetHashCode();
         hash = (hash * 7) + _digits.GetHashCode();
         hash = (hash * 7) + _counter.GetHashCode();
         hash = (hash * 7) + _type.GetHashCode();

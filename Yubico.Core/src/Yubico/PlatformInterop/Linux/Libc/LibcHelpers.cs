@@ -24,7 +24,8 @@ public static class LibcHelpers
             7 => "E2BIG(7): Argument list too long",
             13 => "EACCES(13): Permission denied",
             11 => "EAGAIN(11): No more processes or not enough memory or maximum nesting level reached.",
-            9 => "EBADF(9): Bad file number. Either the file descriptor is invalid or does not refer to a file, or an attempt to write to a read-only file was made.",
+            9 =>
+                "EBADF(9): Bad file number. Either the file descriptor is invalid or does not refer to a file, or an attempt to write to a read-only file was made.",
             16 => "EBUSY(16): Device or resource is busy.",
             10 => "ECHILD(10): No spawned processes.",
             36 => "EDEADLK(36): Resource deadlock would occur.",

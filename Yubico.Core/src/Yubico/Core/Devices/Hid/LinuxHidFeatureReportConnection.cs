@@ -67,7 +67,7 @@ internal class LinuxHidFeatureReportConnection : IHidConnection
         byte[] reportToSend = new byte[report.Length + 1];
         Array.Copy(report, 0, reportToSend, 1, report.Length);
 
-        long ioctlFlag = NativeMethods.HIDIOCSFEATURE | (long)(report.Length + 1) << 16;
+        long ioctlFlag = NativeMethods.HIDIOCSFEATURE | ((long)(report.Length + 1) << 16);
         IntPtr setReportData = Marshal.AllocHGlobal(report.Length + 1);
 
         try
@@ -96,7 +96,7 @@ internal class LinuxHidFeatureReportConnection : IHidConnection
     // Get the feature report that is waiting on the device.
     public byte[] GetReport()
     {
-        long ioctlFlag = NativeMethods.HIDIOCGFEATURE | (long)NativeMethods.MaxFeatureBufferSize << 16;
+        long ioctlFlag = NativeMethods.HIDIOCGFEATURE | ((long)NativeMethods.MaxFeatureBufferSize << 16);
         IntPtr getReportData = Marshal.AllocHGlobal(NativeMethods.MaxFeatureBufferSize);
 
         try

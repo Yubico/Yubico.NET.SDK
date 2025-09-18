@@ -21,7 +21,9 @@ using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Scp;
+#pragma warning disable CS0618 // Type or member is obsolete
 using StaticKeys = Yubico.YubiKey.Scp03.StaticKeys;
+#pragma warning restore CS0618 // Type or member is obsolete
 
 namespace Yubico.YubiKey.Piv;
 

@@ -41,11 +41,15 @@ public class SimpleIntegrationTestConnection : IDisposable
     public int SerialNumber =>
         _serialNumber ?? throw new InvalidOperationException("No serial number.");
 
+    #region IDisposable Members
+
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
+
+    #endregion
 
     protected virtual void Dispose(
         bool disposing)

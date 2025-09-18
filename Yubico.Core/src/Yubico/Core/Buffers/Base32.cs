@@ -53,18 +53,18 @@ public class Base32 : ITextEncoding
         int ch = 0, bits = 5, index = 0;
         foreach (byte b in data)
         {
-            ch |= b >> 8 - bits;
+            ch |= b >> (8 - bits);
             encoded[index++] = EncodeBase32Digit(ch);
 
             if (bits < 4)
             {
-                ch = b >> 3 - bits & Base32Mask;
+                ch = (b >> (3 - bits)) & Base32Mask;
                 encoded[index++] = EncodeBase32Digit(ch);
                 bits += 5;
             }
 
             bits -= 3;
-            ch = b << bits & Base32Mask;
+            ch = (b << bits) & Base32Mask;
         }
 
         // Handle stray bits at the end.
@@ -119,16 +119,16 @@ public class Base32 : ITextEncoding
 
             if (bits > 5)
             {
-                mask = base32 << bits - 5;
+                mask = base32 << (bits - 5);
                 curByte = (byte)(curByte | mask);
                 bits -= 5;
             }
             else
             {
-                mask = base32 >> 5 - bits;
+                mask = base32 >> (5 - bits);
                 curByte = (byte)(curByte | mask);
                 data[index++] = curByte;
-                curByte = (byte)(base32 << 3 + bits);
+                curByte = (byte)(base32 << (3 + bits));
                 bits += 3;
             }
         }
@@ -185,7 +185,7 @@ public class Base32 : ITextEncoding
     /// <param name="lengthInBytes">The length of the data to encode.</param>
     /// <returns>The number of characters needed.</returns>
     public static int GetEncodedSize(int lengthInBytes) =>
-        (lengthInBytes / 5 + (lengthInBytes % 5 > 0
+        ((lengthInBytes / 5) + (lengthInBytes % 5 > 0
             ? 1
             : 0)) * 8;
 

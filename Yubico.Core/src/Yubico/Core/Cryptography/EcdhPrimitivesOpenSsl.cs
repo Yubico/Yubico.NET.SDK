@@ -180,5 +180,5 @@ internal class EcdhPrimitivesOpenSsl : IEcdhPrimitives
     ///     <c>bitLength</c> is 35 (mask away the top 5 bits but retain the last
     ///     3).
     /// </returns>
-    public static byte GetLeadingByteMask(int bitLength) => (byte)(0x00FF >> (8 - (bitLength & 7) & 7));
+    public static byte GetLeadingByteMask(int bitLength) => (byte)(0x00FF >> ((8 - (bitLength & 7)) & 7));
 }

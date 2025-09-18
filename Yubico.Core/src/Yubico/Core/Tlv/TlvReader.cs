@@ -528,8 +528,8 @@ public sealed class TlvReader
 
         if (isValid)
         {
-            value = bigEndian 
-                ? BinaryPrimitives.ReadInt16BigEndian(fullValue.Span) 
+            value = bigEndian
+                ? BinaryPrimitives.ReadInt16BigEndian(fullValue.Span)
                 : BinaryPrimitives.ReadInt16LittleEndian(fullValue.Span);
         }
 
@@ -584,8 +584,8 @@ public sealed class TlvReader
     {
         _ = CommonReadValue(out ReadOnlyMemory<byte> value, expectedTag, FixedLengthInt16, true);
 
-        return bigEndian 
-            ? BinaryPrimitives.ReadUInt16BigEndian(value.Span) 
+        return bigEndian
+            ? BinaryPrimitives.ReadUInt16BigEndian(value.Span)
             : BinaryPrimitives.ReadUInt16LittleEndian(value.Span);
     }
 
@@ -636,8 +636,8 @@ public sealed class TlvReader
 
         if (isValid)
         {
-            value = bigEndian 
-                ? BinaryPrimitives.ReadUInt16BigEndian(fullValue.Span) 
+            value = bigEndian
+                ? BinaryPrimitives.ReadUInt16BigEndian(fullValue.Span)
                 : BinaryPrimitives.ReadUInt16LittleEndian(fullValue.Span);
         }
 
@@ -692,8 +692,8 @@ public sealed class TlvReader
     {
         _ = CommonReadValue(out ReadOnlyMemory<byte> value, expectedTag, FixedLengthInt32, true);
 
-        return bigEndian 
-            ? BinaryPrimitives.ReadInt32BigEndian(value.Span) 
+        return bigEndian
+            ? BinaryPrimitives.ReadInt32BigEndian(value.Span)
             : BinaryPrimitives.ReadInt32LittleEndian(value.Span);
     }
 
@@ -743,8 +743,8 @@ public sealed class TlvReader
 
         if (isValid)
         {
-            value = bigEndian 
-                ? BinaryPrimitives.ReadInt32BigEndian(fullValue.Span) 
+            value = bigEndian
+                ? BinaryPrimitives.ReadInt32BigEndian(fullValue.Span)
                 : BinaryPrimitives.ReadInt32LittleEndian(fullValue.Span);
         }
 

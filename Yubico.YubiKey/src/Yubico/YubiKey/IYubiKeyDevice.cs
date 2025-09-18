@@ -19,6 +19,7 @@ using Yubico.YubiKey.Scp;
 using MgmtCmd = Yubico.YubiKey.Management.Commands;
 #pragma warning disable CS0618 // Type or member is obsolete
 using StaticKeys = Yubico.YubiKey.Scp03.StaticKeys;
+
 #pragma warning restore CS0618 // Type or member is obsolete
 
 namespace Yubico.YubiKey;

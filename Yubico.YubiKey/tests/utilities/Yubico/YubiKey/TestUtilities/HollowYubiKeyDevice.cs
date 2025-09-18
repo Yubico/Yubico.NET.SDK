@@ -15,7 +15,9 @@
 using System;
 using Yubico.Core.Devices;
 using Yubico.YubiKey.Scp;
+#pragma warning disable CS0618 // Type or member is obsolete
 using StaticKeys = Yubico.YubiKey.Scp03.StaticKeys;
+#pragma warning restore CS0618 // Type or member is obsolete
 
 namespace Yubico.YubiKey.TestUtilities;
 
@@ -82,6 +84,8 @@ public sealed class HollowYubiKeyDevice : IYubiKeyDevice
     public bool HasSmartCard { get; }
     public bool HasHidFido { get; }
     public bool HasHidKeyboard { get; }
+
+    #region IYubiKeyDevice Members
 
     public Transport AvailableTransports => Transport.All;
 
@@ -272,6 +276,8 @@ public sealed class HollowYubiKeyDevice : IYubiKeyDevice
     {
         throw new NotImplementedException();
     }
+
+    #endregion
 
     public void SetLegacyDeviceConfiguration(
         YubiKeyCapabilities yubiKeyInterfaces,

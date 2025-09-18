@@ -69,7 +69,7 @@ public class ResponseApdu
     ///     The status word (two byte) code which represents the overall result of a CCID interaction.
     ///     The most common value is 0x9000 which represents a successful result.
     /// </summary>
-    public short SW => (short)(SW1 << 8 | SW2);
+    public short SW => (short)((SW1 << 8) | SW2);
 
     /// <summary>
     ///     A convenience property accessor for the high byte of SW

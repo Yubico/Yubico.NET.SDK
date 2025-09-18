@@ -309,7 +309,7 @@ internal class LinuxHidDevice : HidDevice
         {
             for (int index = 0; index < length; index++)
             {
-                value += descriptor[offset + index] << 8 * index;
+                value += descriptor[offset + index] << (8 * index);
             }
         }
 

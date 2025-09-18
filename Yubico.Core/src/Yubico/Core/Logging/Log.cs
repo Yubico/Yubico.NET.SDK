@@ -29,7 +29,7 @@ namespace Yubico.Core.Logging;
 ///     )
 ///     or by dynamically setting up a logger using the
 ///     <see
-///         cref="ConfigureLoggerFactory(System.Action{Microsoft.Extensions.Logging.ILoggingBuilder}(Microsoft.Extensions.Logging.ILoggingBuilder))" />
+///         cref="ConfigureLoggerFactory(Action{ILoggingBuilder})" /> 
 ///     method.
 ///     <para>
 ///         <b>How to enable Logging:</b>
@@ -52,7 +52,7 @@ namespace Yubico.Core.Logging;
 ///             <description>
 ///                 2. Use the
 ///                 <see
-///                     cref="ConfigureLoggerFactory(System.Action{Microsoft.Extensions.Logging.ILoggingBuilder}(Microsoft.Extensions.Logging.ILoggingBuilder))" />
+///                     cref="ConfigureLoggerFactory(Action{ILoggingBuilder})" /> 
 ///                 method.
 ///             </description>
 ///         </item>

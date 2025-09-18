@@ -97,7 +97,7 @@ public class Base16 : ITextEncoding
                     nameof(data));
             }
 
-            encoded[i * 2 + 1] = CharacterSet[digit2];
+            encoded[(i * 2) + 1] = CharacterSet[digit2];
         }
     }
 

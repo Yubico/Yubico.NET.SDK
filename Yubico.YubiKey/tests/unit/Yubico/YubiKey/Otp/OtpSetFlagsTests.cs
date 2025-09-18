@@ -690,10 +690,14 @@ internal class TestOp : OperationBase<TestOp>, IDisposable
         _ = Settings.AllowUpdate(false);
     }
 
+    #region IDisposable Members
+
     public void Dispose()
     {
         Session.Dispose();
     }
+
+    #endregion
 
     protected override void ExecuteOperation()
     {

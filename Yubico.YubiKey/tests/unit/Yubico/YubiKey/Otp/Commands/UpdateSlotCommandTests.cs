@@ -221,11 +221,11 @@ public class UpdateSlotCommandTests
         var data = command.CreateCommandApdu().Data;
         // The length constants only exist in the public interface of ConfigureSlotCommand. Use
         // them instead of introducing ones that are not needed on UpdateSlotCommand.
-        var dataSlice = data.Slice(UpdateSlotCommand.FixedDataLength
-                                   + UpdateSlotCommand.UidLength
-                                   + UpdateSlotCommand.AesKeyLength
-                                   + UpdateSlotCommand.AccessCodeLength
-                                   + 1).Span[0];
+        var dataSlice = data[(UpdateSlotCommand.FixedDataLength
+                              + UpdateSlotCommand.UidLength
+                              + UpdateSlotCommand.AesKeyLength
+                              + UpdateSlotCommand.AccessCodeLength
+                              + 1)..].Span[0];
 
         Assert.Equal(expectedFlags, (ExtendedFlags)dataSlice);
     }
@@ -239,11 +239,11 @@ public class UpdateSlotCommandTests
         var data = command.CreateCommandApdu().Data;
         // The length constants only exist in the public interface of ConfigureSlotCommand. Use
         // them instead of introducing ones that are not needed on UpdateSlotCommand.
-        var dataSlice = data.Slice(UpdateSlotCommand.FixedDataLength
-                                   + UpdateSlotCommand.UidLength
-                                   + UpdateSlotCommand.AesKeyLength
-                                   + UpdateSlotCommand.AccessCodeLength
-                                   + 2).Span[0];
+        var dataSlice = data[(UpdateSlotCommand.FixedDataLength
+                              + UpdateSlotCommand.UidLength
+                              + UpdateSlotCommand.AesKeyLength
+                              + UpdateSlotCommand.AccessCodeLength
+                              + 2)..].Span[0];
 
         Assert.Equal(expectedFlags, (TicketFlags)dataSlice);
     }
@@ -257,11 +257,11 @@ public class UpdateSlotCommandTests
         var data = command.CreateCommandApdu().Data;
         // The length constants only exist in the public interface of ConfigureSlotCommand. Use
         // them instead of introducing ones that are not needed on UpdateSlotCommand.
-        var dataSlice = data.Slice(UpdateSlotCommand.FixedDataLength
-                                   + UpdateSlotCommand.UidLength
-                                   + UpdateSlotCommand.AesKeyLength
-                                   + UpdateSlotCommand.AccessCodeLength
-                                   + 3).Span[0];
+        var dataSlice = data[(UpdateSlotCommand.FixedDataLength
+                              + UpdateSlotCommand.UidLength
+                              + UpdateSlotCommand.AesKeyLength
+                              + UpdateSlotCommand.AccessCodeLength
+                              + 3)..].Span[0];
 
         Assert.Equal(expectedFlags, (ConfigurationFlags)dataSlice);
     }

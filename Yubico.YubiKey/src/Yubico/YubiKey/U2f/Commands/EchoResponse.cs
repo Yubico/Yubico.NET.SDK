@@ -15,44 +15,48 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+/// <summary>
+///     The response to the Echo Command.
+/// </summary>
+/// <remarks>
+///     This is the partner response class to <see cref="EchoCommand" />.
+/// </remarks>
+public sealed class EchoResponse : U2fResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
 {
     /// <summary>
-    /// The response to the Echo Command.
+    ///     Constructs an EchoResponse from the given <see cref="ResponseApdu" />.
+    /// </summary>
+    /// <param name="responseApdu">
+    ///     The response to a <see cref="EchoCommand" />.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    ///     Thrown when <paramref name="responseApdu" /> is `null`.
+    /// </exception>
+    public EchoResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
+    {
+    }
+
+    #region IYubiKeyResponseWithData<ReadOnlyMemory<byte>> Members
+
+    /// <summary>
+    ///     Gets the echoed data from the response.
     /// </summary>
     /// <remarks>
-    /// This is the partner response class to <see cref="EchoCommand"/>.
+    ///     If the status of the response is not 'Success', this method will throw
+    ///     an exception.
     /// </remarks>
-    public sealed class EchoResponse : U2fResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
-    {
-        /// <summary>
-        /// Constructs an EchoResponse from the given <see cref="ResponseApdu"/>.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The response to a <see cref="EchoCommand"/>.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="responseApdu"/> is `null`.
-        /// </exception>
-        public EchoResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-        }
-
-        /// <summary>
-        /// Gets the echoed data from the response.
-        /// </summary>
-        /// <remarks>
-        /// If the status of the response is not 'Success', this method will throw
-        /// an exception.
-        /// </remarks>
-        /// <returns>
-        /// The data in the response APDU, as a byte array.
-        /// </returns>
-        public ReadOnlyMemory<byte> GetData() => Status switch
+    /// <returns>
+    ///     The data in the response APDU, as a byte array.
+    /// </returns>
+    public ReadOnlyMemory<byte> GetData() =>
+        Status switch
         {
             ResponseStatus.Success => ResponseApdu.Data,
-            _ => throw new InvalidOperationException(StatusMessage),
+            _ => throw new InvalidOperationException(StatusMessage)
         };
-    }
+
+    #endregion
 }

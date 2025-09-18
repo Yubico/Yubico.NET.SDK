@@ -15,116 +15,117 @@
 using System;
 using System.Globalization;
 
-namespace Yubico.YubiKey.YubiHsmAuth
+namespace Yubico.YubiKey.YubiHsmAuth;
+
+/// <summary>
+///     This class is used when adding a new credential with AES-128 keys
+///     to the YubiHSM Auth application.
+/// </summary>
+public class Aes128CredentialWithSecrets : CredentialWithSecrets
 {
     /// <summary>
-    /// This class is used when adding a new credential with AES-128 keys
-    /// to the YubiHSM Auth application.
+    ///     An AES-128 key must be exactly 16 bytes. This applies
+    ///     to both the Encryption and MAC key.
     /// </summary>
-    public class Aes128CredentialWithSecrets : CredentialWithSecrets
+    public const int RequiredKeySize = 16;
+
+    // AES-128 keys
+    private ReadOnlyMemory<byte> _encryptionKey;
+    private ReadOnlyMemory<byte> _macKey;
+
+    /// <summary>
+    ///     Create an AES-128 credential to be stored in the YubiHSM Auth
+    ///     application.
+    /// </summary>
+    /// <param name="credentialPassword">
+    ///     The credential password is required when performing operations
+    ///     that access the key(s), such as calculating session keys. Its
+    ///     length must be equal to
+    ///     <see cref="CredentialWithSecrets.RequiredCredentialPasswordLength" />.
+    /// </param>
+    /// <param name="encryptionKey">
+    ///     Sets <see cref="EncryptionKey" />.
+    /// </param>
+    /// <param name="macKey">
+    ///     Sets <see cref="MacKey" />.
+    /// </param>
+    /// <param name="label">
+    ///     Sets <see cref="Credential.Label" />.
+    /// </param>
+    /// <param name="touchRequired">
+    ///     Sets <see cref="Credential.TouchRequired" />.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    ///     Thrown when an AES-128 key does not have the required size (see
+    ///     <see cref="RequiredKeySize" />).
+    /// </exception>
+    public Aes128CredentialWithSecrets(
+        ReadOnlyMemory<byte> credentialPassword,
+        ReadOnlyMemory<byte> encryptionKey,
+        ReadOnlyMemory<byte> macKey,
+        string label,
+        bool touchRequired)
+        : base(credentialPassword, CryptographicKeyType.Aes128, label, touchRequired)
     {
-        // AES-128 keys
-        private ReadOnlyMemory<byte> _encryptionKey;
-        private ReadOnlyMemory<byte> _macKey;
+        EncryptionKey = encryptionKey;
+        MacKey = macKey;
+    }
 
-        /// <summary>
-        /// An AES-128 key must be exactly 16 bytes. This applies
-        /// to both the Encryption and MAC key.
-        /// </summary>
-        public const int RequiredKeySize = 16;
+    /// <summary>
+    ///     The AES-128 key used for encryption. Its length must be equal to
+    ///     <see cref="RequiredKeySize" />.
+    /// </summary>
+    /// <remarks>
+    ///     The caller is responsible for controlling the buffer which holds
+    ///     this value, and should overwrite the data after the command
+    ///     (see <see cref="Commands.AddCredentialCommand" />) is sent.
+    ///     The user's manual entry
+    ///     <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
+    ///     details and recommendations for handling this kind of data.
+    /// </remarks>
+    /// <exception cref="ArgumentException">
+    ///     Thrown when the key does not have the required size.
+    /// </exception>
+    public ReadOnlyMemory<byte> EncryptionKey
+    {
+        get => _encryptionKey;
 
-        /// <summary>
-        /// The AES-128 key used for encryption. Its length must be equal to
-        /// <see cref="RequiredKeySize"/>.
-        /// </summary>
-        /// <remarks>
-        /// The caller is responsible for controlling the buffer which holds
-        /// this value, and should overwrite the data after the command
-        /// (see <see cref="Commands.AddCredentialCommand"/>) is sent.
-        /// The user's manual entry
-        /// <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
-        /// details and recommendations for handling this kind of data.
-        /// </remarks>
-        /// <exception cref="ArgumentException">
-        /// Thrown when the key does not have the required size.
-        /// </exception>
-        public ReadOnlyMemory<byte> EncryptionKey
-        {
-            get => _encryptionKey;
-
-            set => _encryptionKey = value.Length == RequiredKeySize
+        set =>
+            _encryptionKey = value.Length == RequiredKeySize
                 ? value
                 : throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.YubiHsmAuthInvalidEncSize,
                         value.Length));
-        }
+    }
 
-        /// <summary>
-        /// The AES-128 key used for message authentication (MAC). Its length
-        /// must be equal to <see cref="RequiredKeySize"/>.
-        /// </summary>
-        /// <remarks>
-        /// The caller is responsible for controlling the buffer which holds
-        /// this value, and should overwrite the data after the command
-        /// (see <see cref="Commands.AddCredentialCommand"/>) is sent.
-        /// The user's manual entry
-        /// <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
-        /// details and recommendations for handling this kind of data.
-        /// </remarks>
-        /// <exception cref="ArgumentException">
-        /// Thrown when the key does not have the required size.
-        /// </exception>
-        public ReadOnlyMemory<byte> MacKey
-        {
-            get => _macKey;
+    /// <summary>
+    ///     The AES-128 key used for message authentication (MAC). Its length
+    ///     must be equal to <see cref="RequiredKeySize" />.
+    /// </summary>
+    /// <remarks>
+    ///     The caller is responsible for controlling the buffer which holds
+    ///     this value, and should overwrite the data after the command
+    ///     (see <see cref="Commands.AddCredentialCommand" />) is sent.
+    ///     The user's manual entry
+    ///     <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
+    ///     details and recommendations for handling this kind of data.
+    /// </remarks>
+    /// <exception cref="ArgumentException">
+    ///     Thrown when the key does not have the required size.
+    /// </exception>
+    public ReadOnlyMemory<byte> MacKey
+    {
+        get => _macKey;
 
-            set => _macKey = value.Length == RequiredKeySize
+        set =>
+            _macKey = value.Length == RequiredKeySize
                 ? value
                 : throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.YubiHsmAuthInvalidMacSize,
                         value.Length));
-        }
-
-        /// <summary>
-        /// Create an AES-128 credential to be stored in the YubiHSM Auth
-        /// application.
-        /// </summary>
-        /// <param name="credentialPassword">
-        /// The credential password is required when performing operations
-        /// that access the key(s), such as calculating session keys. Its
-        /// length must be equal to
-        /// <see cref="CredentialWithSecrets.RequiredCredentialPasswordLength"/>.
-        /// </param>
-        /// <param name="encryptionKey">
-        /// Sets <see cref="EncryptionKey"/>.
-        /// </param>
-        /// <param name="macKey">
-        /// Sets <see cref="MacKey"/>.
-        /// </param>
-        /// <param name="label">
-        /// Sets <see cref="Credential.Label"/>.
-        /// </param>
-        /// <param name="touchRequired">
-        /// Sets <see cref="Credential.TouchRequired"/>.
-        /// </param>
-        /// <exception cref="ArgumentException">
-        /// Thrown when an AES-128 key does not have the required size (see
-        /// <see cref="RequiredKeySize"/>).
-        /// </exception>
-        public Aes128CredentialWithSecrets(
-            ReadOnlyMemory<byte> credentialPassword,
-            ReadOnlyMemory<byte> encryptionKey,
-            ReadOnlyMemory<byte> macKey,
-            string label,
-            bool touchRequired)
-            : base(credentialPassword, CryptographicKeyType.Aes128, label, touchRequired)
-        {
-            EncryptionKey = encryptionKey;
-            MacKey = macKey;
-        }
     }
 }

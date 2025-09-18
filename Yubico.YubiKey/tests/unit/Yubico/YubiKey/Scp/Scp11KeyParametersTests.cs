@@ -49,6 +49,8 @@ public class Scp11KeyParametersTests : IDisposable
         };
     }
 
+    #region IDisposable Members
+
     public void Dispose()
     {
         foreach (var cert in _oceCertificates)
@@ -56,6 +58,8 @@ public class Scp11KeyParametersTests : IDisposable
             cert.Dispose();
         }
     }
+
+    #endregion
 
     [Fact]
     public void Constructor_Scp11b_ValidParameters_Succeeds()

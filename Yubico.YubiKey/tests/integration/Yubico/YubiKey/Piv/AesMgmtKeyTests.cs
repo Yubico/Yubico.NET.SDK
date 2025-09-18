@@ -205,7 +205,7 @@ public class AesMgmtKeyTests : PivSessionIntegrationTestBase
             Assert.Equal(DefaultManagementKeyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
             var isValid =
-                pivSession.TryAuthenticateManagementKey(_currentKey.Slice(0, _currentKeyLength), mutualAuth);
+                pivSession.TryAuthenticateManagementKey(_currentKey[.._currentKeyLength], mutualAuth);
             Assert.True(isValid);
             Assert.True(pivSession.ManagementKeyAuthenticated);
             Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
@@ -218,8 +218,8 @@ public class AesMgmtKeyTests : PivSessionIntegrationTestBase
             Assert.Equal(DefaultManagementKeyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
             var isValid = pivSession.TryChangeManagementKey(
-                _currentKey.Slice(0, _currentKeyLength),
-                _newKey.Slice(0, _newKeyLength),
+                _currentKey[.._currentKeyLength],
+                _newKey[.._newKeyLength],
                 PivTouchPolicy.None,
                 keyType.GetPivAlgorithm());
             Assert.True(isValid);
@@ -240,7 +240,7 @@ public class AesMgmtKeyTests : PivSessionIntegrationTestBase
             Assert.Equal(keyType.GetPivAlgorithm(), pivSession.ManagementKeyAlgorithm);
 
             var isValid =
-                pivSession.TryAuthenticateManagementKey(_currentKey.Slice(0, _currentKeyLength), mutualAuth);
+                pivSession.TryAuthenticateManagementKey(_currentKey[.._currentKeyLength], mutualAuth);
             Assert.True(isValid);
             Assert.True(pivSession.ManagementKeyAuthenticated);
             Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);

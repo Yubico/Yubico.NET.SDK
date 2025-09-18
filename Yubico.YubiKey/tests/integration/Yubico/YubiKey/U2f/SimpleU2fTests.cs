@@ -200,16 +200,7 @@ public class SimpleU2FTests
         return null;
     }
 
-    private class U2fHidTestingResponse : U2fResponse
-    {
-        public U2fHidTestingResponse(
-            ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-        }
-
-        public ResponseApdu rspApdu => ResponseApdu;
-    }
+    #region Nested type: U2fHidTestingCommand
 
     private class U2fHidTestingCommand : IYubiKeyCommand<U2fHidTestingResponse>
     {
@@ -220,6 +211,9 @@ public class SimpleU2FTests
         }
 
         public CommandApdu CommandApdu { get; }
+
+        #region IYubiKeyCommand<U2fHidTestingResponse> Members
+
         public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
 
         public CommandApdu CreateCommandApdu()
@@ -232,5 +226,24 @@ public class SimpleU2FTests
         {
             return new U2fHidTestingResponse(responseApdu);
         }
+
+        #endregion
     }
+
+    #endregion
+
+    #region Nested type: U2fHidTestingResponse
+
+    private class U2fHidTestingResponse : U2fResponse
+    {
+        public U2fHidTestingResponse(
+            ResponseApdu responseApdu) :
+            base(responseApdu)
+        {
+        }
+
+        public ResponseApdu rspApdu => ResponseApdu;
+    }
+
+    #endregion
 }

@@ -15,73 +15,77 @@
 using System;
 using System.Collections.Generic;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.InterIndustry.Commands;
 
-namespace Yubico.YubiKey.Pipelines
+namespace Yubico.YubiKey.Pipelines;
+
+/// <summary>
+///     A transform that automatically detects large responses and issues GET_RESPONSE APDUs until
+///     all data has been returned.
+/// </summary>
+/// <remarks>
+///     This transform will work for all YubiKey applications except
+///     OATH. For OATH, use <see cref="OathResponseChainingTransform" />.
+/// </remarks>
+internal class ResponseChainingTransform : IApduTransform
 {
-    /// <summary>
-    /// A transform that automatically detects large responses and issues GET_RESPONSE APDUs until
-    /// all data has been returned.
-    /// </summary>
-    /// <remarks>
-    /// This transform will work for all YubiKey applications except
-    /// OATH. For OATH, use <see cref="OathResponseChainingTransform"/>.
-    /// </remarks>
-    internal class ResponseChainingTransform : IApduTransform
+    private readonly IApduTransform _pipeline;
+
+    public ResponseChainingTransform(IApduTransform pipeline)
     {
-        private readonly IApduTransform _pipeline;
-
-        public ResponseChainingTransform(IApduTransform pipeline)
-        {
-            _pipeline = pipeline;
-        }
-
-        public void Cleanup() => _pipeline.Cleanup();
-
-        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
-        {
-            if (command is null)
-            {
-                throw new ArgumentNullException(nameof(command));
-            }
-
-            var responseApdu = _pipeline.Invoke(command, commandType, responseType);
-
-            // Unless we see that bytes are available, there's nothing for this transform to do.
-            if (responseApdu.SW1 != SW1Constants.BytesAvailable)
-            {
-                return responseApdu;
-            }
-
-            var tempBuffer = new List<byte>();
-
-            do
-            {
-                tempBuffer.AddRange(responseApdu.Data.ToArray());
-
-                // Note that OATH uses its own "get response" command.
-                // See OathResponseChainingTransform
-                var getResponseCommand =
-                    CreateGetResponseCommand(command, responseApdu.SW2);
-
-                responseApdu = _pipeline.Invoke(
-                    getResponseCommand.CreateCommandApdu(),
-                    commandType,
-                    responseType);
-            }
-            while (responseApdu.SW1 == SW1Constants.BytesAvailable);
-
-            if (responseApdu.SW == SWConstants.Success)
-            {
-                tempBuffer.AddRange(responseApdu.Data.ToArray());
-            }
-
-            return new ResponseApdu(tempBuffer.ToArray(), responseApdu.SW);
-        }
-
-        protected virtual IYubiKeyCommand<YubiKeyResponse>
-            CreateGetResponseCommand(CommandApdu originatingCommand, short SW2) =>
-            new InterIndustry.Commands.GetResponseCommand(originatingCommand, SW2);
-
-        public void Setup() => _pipeline.Setup();
+        _pipeline = pipeline;
     }
+
+    #region IApduTransform Members
+
+    public void Cleanup() => _pipeline.Cleanup();
+
+    public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
+    {
+        if (command is null)
+        {
+            throw new ArgumentNullException(nameof(command));
+        }
+
+        var responseApdu = _pipeline.Invoke(command, commandType, responseType);
+
+        // Unless we see that bytes are available, there's nothing for this transform to do.
+        if (responseApdu.SW1 != SW1Constants.BytesAvailable)
+        {
+            return responseApdu;
+        }
+
+        var tempBuffer = new List<byte>();
+
+        do
+        {
+            tempBuffer.AddRange(responseApdu.Data.ToArray());
+
+            // Note that OATH uses its own "get response" command.
+            // See OathResponseChainingTransform
+            var getResponseCommand =
+                CreateGetResponseCommand(command, responseApdu.SW2);
+
+            responseApdu = _pipeline.Invoke(
+                getResponseCommand.CreateCommandApdu(),
+                commandType,
+                responseType);
+        }
+        while (responseApdu.SW1 == SW1Constants.BytesAvailable);
+
+        if (responseApdu.SW == SWConstants.Success)
+        {
+            tempBuffer.AddRange(responseApdu.Data.ToArray());
+        }
+
+        return new ResponseApdu(tempBuffer.ToArray(), responseApdu.SW);
+    }
+
+    public void Setup() => _pipeline.Setup();
+
+    #endregion
+
+    protected virtual IYubiKeyCommand<YubiKeyResponse>
+        CreateGetResponseCommand(CommandApdu originatingCommand, short SW2) =>
+        new GetResponseCommand(originatingCommand, SW2);
 }

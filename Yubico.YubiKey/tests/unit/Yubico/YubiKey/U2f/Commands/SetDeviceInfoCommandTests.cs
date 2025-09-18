@@ -328,7 +328,7 @@ public class SetDeviceInfoCommandTests
         Assert.Equal(0x02, data.Span[2]);
         Assert.Equal(
             expectedCapabilities,
-            (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(data.Slice(3).Span));
+            (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(data[3..].Span));
     }
 
     [Fact]
@@ -347,7 +347,7 @@ public class SetDeviceInfoCommandTests
         Assert.Equal(0x02, data.Span[2]);
         Assert.Equal(
             expectedCapabilities,
-            (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(data.Slice(3).Span));
+            (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(data[3..].Span));
     }
 
     [Fact]
@@ -383,7 +383,7 @@ public class SetDeviceInfoCommandTests
         Assert.Equal(0x02, data.Span[2]);
         Assert.Equal(
             expectedTimeout,
-            BinaryPrimitives.ReadUInt16BigEndian(data.Slice(3).Span));
+            BinaryPrimitives.ReadUInt16BigEndian(data[3..].Span));
     }
 
     [Fact]
@@ -441,7 +441,7 @@ public class SetDeviceInfoCommandTests
         Assert.Equal(0x12, data.Span[0]);
         Assert.Equal(0x0A, data.Span[1]);
         Assert.Equal(0x10, data.Span[2]);
-        Assert.True(data.Slice(3).Span.SequenceEqual(expectedCode));
+        Assert.True(data[3..].Span.SequenceEqual(expectedCode));
     }
 
     [Fact]
@@ -456,7 +456,7 @@ public class SetDeviceInfoCommandTests
         Assert.Equal(0x12, data.Span[0]);
         Assert.Equal(0x0B, data.Span[1]);
         Assert.Equal(0x10, data.Span[2]);
-        Assert.True(data.Slice(3).Span.SequenceEqual(expectedCode));
+        Assert.True(data[3..].Span.SequenceEqual(expectedCode));
     }
 
     [Fact]

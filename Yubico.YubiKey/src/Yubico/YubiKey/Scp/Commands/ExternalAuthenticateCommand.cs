@@ -15,57 +15,66 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Scp.Commands
+namespace Yubico.YubiKey.Scp.Commands;
+
+/// <summary>
+///     Represents the second command in the SCP03 and SCP11a/c authentication handshakes, 'EXTERNAL_AUTHENTICATE'
+/// </summary>
+internal class ExternalAuthenticateCommand : IYubiKeyCommand<ExternalAuthenticateResponse>
 {
+    internal const byte GpExternalAuthenticateIns = 0x82;
+
+    private const byte GpExternalAuthenticateCla = 0x80;
+    private const byte GpHighestSecurityLevel = 0x33;
+    private readonly ReadOnlyMemory<byte> _data;
+    private readonly byte _keyId;
+    private readonly byte _keyVersionNumber;
+
     /// <summary>
-    /// Represents the second command in the SCP03 and SCP11a/c authentication handshakes, 'EXTERNAL_AUTHENTICATE'
+    ///     Constructs an EXTERNAL_AUTHENTICATE command, containing the provided data.
     /// </summary>
-    internal class ExternalAuthenticateCommand : IYubiKeyCommand<ExternalAuthenticateResponse>
+    /// <remarks>
+    ///     Clients should not generally build this manually. See <see cref="Pipelines.ScpApduTransform" /> for more.
+    /// </remarks>
+    /// <param name="data">Data for the command. E.g. a host cryptogram when authenticating with SCP03</param>
+    public ExternalAuthenticateCommand(ReadOnlyMemory<byte> data)
     {
-        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
-        internal const byte GpExternalAuthenticateIns = 0x82;
+        _data = data;
+    }
 
-        private const byte GpExternalAuthenticateCla = 0x80;
-        private const byte GpHighestSecurityLevel = 0x33;
-        private readonly ReadOnlyMemory<byte> _data;
-        private readonly byte _keyVersionNumber;
-        private readonly byte _keyId;
+    /// <summary>
+    ///     Constructs an EXTERNAL_AUTHENTICATE command, containing the provided data. This is used to create an SCP11a/c
+    ///     command.
+    /// </summary>
+    /// <param name="keyVersionNumber"></param>
+    /// <param name="keyId"></param>
+    /// <param name="data"></param>
+    public ExternalAuthenticateCommand(byte keyVersionNumber, byte keyId, ReadOnlyMemory<byte> data)
+    {
+        _keyVersionNumber = keyVersionNumber;
+        _keyId = keyId;
+        _data = data;
+    }
 
-        /// <summary>
-        /// Constructs an EXTERNAL_AUTHENTICATE command, containing the provided data.
-        /// </summary>
-        /// <remarks>
-        /// Clients should not generally build this manually. See <see cref="Pipelines.ScpApduTransform"/> for more.
-        /// </remarks>
-        /// <param name="data">Data for the command. E.g. a host cryptogram when authenticating with SCP03</param>
-        public ExternalAuthenticateCommand(ReadOnlyMemory<byte> data)
-        {
-            _data = data;
-        }
+    #region IYubiKeyCommand<ExternalAuthenticateResponse> Members
 
-        /// <summary>
-        /// Constructs an EXTERNAL_AUTHENTICATE command, containing the provided data. This is used to create an SCP11a/c command.
-        /// </summary>
-        /// <param name="keyVersionNumber"></param>
-        /// <param name="keyId"></param>
-        /// <param name="data"></param>
-        public ExternalAuthenticateCommand(byte keyVersionNumber, byte keyId, ReadOnlyMemory<byte> data)
-        {
-            _keyVersionNumber = keyVersionNumber;
-            _keyId = keyId;
-            _data = data;
-        }
+    public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
 
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Cla = GpExternalAuthenticateCla,
             Ins = GpExternalAuthenticateIns,
-            P1 = _keyVersionNumber > 0 ? _keyVersionNumber : GpHighestSecurityLevel,
-            P2 = _keyId > 0 ? _keyId : default,
+            P1 = _keyVersionNumber > 0
+                ? _keyVersionNumber
+                : GpHighestSecurityLevel,
+            P2 = _keyId > 0
+                ? _keyId
+                : default,
             Data = _data
         };
 
-        public ExternalAuthenticateResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ExternalAuthenticateResponse(responseApdu);
-    }
+    public ExternalAuthenticateResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

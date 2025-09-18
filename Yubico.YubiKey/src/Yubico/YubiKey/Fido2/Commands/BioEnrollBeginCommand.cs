@@ -17,78 +17,81 @@ using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Begins the process of enrolling a fingerprint. This is a subcommand of
+///     the CTAP command "authenticatorBioEnrollment".
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="BioEnrollBeginResponse" />.
+/// </remarks>
+public sealed class BioEnrollBeginCommand : IYubiKeyCommand<BioEnrollBeginResponse>
 {
-    /// <summary>
-    /// Begins the process of enrolling a fingerprint. This is a subcommand of
-    /// the CTAP command "authenticatorBioEnrollment".
-    /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="BioEnrollBeginResponse"/>.
-    /// </remarks>
-    public sealed class BioEnrollBeginCommand : IYubiKeyCommand<BioEnrollBeginResponse>
+    private const int SubCmdEnrollBegin = 0x01;
+    private const int KeyTimeout = 0x03;
+
+    private readonly BioEnrollmentCommand _command;
+
+    // The default constructor explicitly defined. We don't want it to be
+    // used.
+    private BioEnrollBeginCommand()
     {
-        private const int SubCmdEnrollBegin = 0x01;
-        private const int KeyTimeout = 0x03;
+        throw new NotImplementedException();
+    }
 
-        private readonly BioEnrollmentCommand _command;
+    /// <summary>
+    ///     Constructs a new instance of <see cref="BioEnrollBeginCommand" />.
+    /// </summary>
+    /// <param name="timeoutMilliseconds">
+    ///     The timeout the caller would like the YubiKey to enforce. This is
+    ///     optional and can be null.
+    /// </param>
+    /// <param name="pinUvAuthToken">
+    ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+    ///     key.
+    /// </param>
+    /// <param name="authProtocol">
+    ///     The Auth Protocol used to build the Auth Token.
+    /// </param>
+    public BioEnrollBeginCommand(
+        int? timeoutMilliseconds,
+        ReadOnlyMemory<byte> pinUvAuthToken,
+        PinUvAuthProtocolBase authProtocol)
+    {
+        _command = new BioEnrollmentCommand(
+            SubCmdEnrollBegin,
+            EncodeParams(timeoutMilliseconds),
+            pinUvAuthToken,
+            authProtocol);
+    }
 
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
+    #region IYubiKeyCommand<BioEnrollBeginResponse> Members
 
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        private BioEnrollBeginCommand()
-        {
-            throw new NotImplementedException();
-        }
+    /// <inheritdoc />
+    public YubiKeyApplication Application => _command.Application;
 
-        /// <summary>
-        /// Constructs a new instance of <see cref="BioEnrollBeginCommand"/>.
-        /// </summary>
-        /// <param name="timeoutMilliseconds">
-        /// The timeout the caller would like the YubiKey to enforce. This is
-        /// optional and can be null.
-        /// </param>
-        /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
-        /// </param>
-        /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
-        /// </param>
-        public BioEnrollBeginCommand(
-            int? timeoutMilliseconds,
-            ReadOnlyMemory<byte> pinUvAuthToken,
-            PinUvAuthProtocolBase authProtocol)
-        {
-            _command = new BioEnrollmentCommand(
-                SubCmdEnrollBegin,
-                EncodeParams(timeoutMilliseconds),
-                pinUvAuthToken,
-                authProtocol);
-        }
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+    /// <inheritdoc />
+    public BioEnrollBeginResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
 
-        /// <inheritdoc />
-        public BioEnrollBeginResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new BioEnrollBeginResponse(responseApdu);
+    #endregion
 
-        // This method encodes the parameters. For
-        // EnrollBegin, the parameters consist of the timeout in milliseconds. If
-        // the caller does not specify a timeout (null input), then there are no
-        // parameters.
-        // It is encoded as
-        //   map
-        //     03 int
-        private static byte[]? EncodeParams(int? timeoutMilliseconds)
-        {
-            return timeoutMilliseconds is null ? null
-                : new CborMapWriter<int>()
+    // This method encodes the parameters. For
+    // EnrollBegin, the parameters consist of the timeout in milliseconds. If
+    // the caller does not specify a timeout (null input), then there are no
+    // parameters.
+    // It is encoded as
+    //   map
+    //     03 int
+    private static byte[]? EncodeParams(int? timeoutMilliseconds)
+    {
+        return timeoutMilliseconds is null
+            ? null
+            : new CborMapWriter<int>()
                 .Entry(KeyTimeout, timeoutMilliseconds.Value)
                 .Encode();
-        }
     }
 }

@@ -17,33 +17,35 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Logging;
+using Yubico.PlatformInterop;
 
-namespace Yubico.YubiKey.DeviceExtensions
+namespace Yubico.YubiKey.DeviceExtensions;
+
+internal static class ISmartCardDeviceExtension
 {
-    internal static class ISmartCardDeviceExtension
+    public static bool IsYubicoDevice(this ISmartCardDevice device)
     {
-        public static bool IsYubicoDevice(this ISmartCardDevice device)
+        try
         {
-            try
-            {
-                return ProductAtrs.AllYubiKeys.Contains(device.Atr!);
-            }
-            catch (PlatformInterop.SCardException e)
-            {
-                Log.GetLogger(typeof(ISmartCardDeviceExtension).FullName!)
-                    .LogWarning(e, "Exception encountered when attempting to read device ATR.");
-            }
-
-            return false;
+            return ProductAtrs.AllYubiKeys.Contains(device.Atr!);
+        }
+        catch (SCardException e)
+        {
+            Log.GetLogger(typeof(ISmartCardDeviceExtension).FullName!)
+                .LogWarning(e, "Exception encountered when attempting to read device ATR.");
         }
 
-        // Assumes that YubiKeys connected over USB will have a reader name that contains "YubiKey".
-        // When connected over NFC, the reader is a third-party device and will not contain "YubiKey".
-        [SuppressMessage("Usage", "CA2249:Consider using \'string.Contains\' instead of \'string.IndexOf\'", Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
-        public static bool IsUsbTransport(this ISmartCardDevice scDevice) =>
-            !string.IsNullOrEmpty(scDevice.Path)
-            && scDevice.Path.IndexOf("yubikey", StringComparison.OrdinalIgnoreCase) >= 0;
-
-        public static bool IsNfcTransport(this ISmartCardDevice scDevice) => !scDevice.IsUsbTransport();
+        return false;
     }
+
+    // Assumes that YubiKeys connected over USB will have a reader name that contains "YubiKey".
+    // When connected over NFC, the reader is a third-party device and will not contain "YubiKey".
+    [SuppressMessage(
+        "Usage", "CA2249:Consider using \'string.Contains\' instead of \'string.IndexOf\'",
+        Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
+    public static bool IsUsbTransport(this ISmartCardDevice scDevice) =>
+        !string.IsNullOrEmpty(scDevice.Path)
+        && scDevice.Path.IndexOf("yubikey", StringComparison.OrdinalIgnoreCase) >= 0;
+
+    public static bool IsNfcTransport(this ISmartCardDevice scDevice) => !scDevice.IsUsbTransport();
 }

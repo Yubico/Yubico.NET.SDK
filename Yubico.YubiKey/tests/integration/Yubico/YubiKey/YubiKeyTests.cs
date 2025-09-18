@@ -215,7 +215,6 @@ public class YubiKeyTests
 
         var sw = new Stopwatch();
 
-        List<IYubiKeyDevice> keys;
         var n = 0;
         foreach (var ct in transportTestValues)
         {
@@ -223,7 +222,7 @@ public class YubiKeyTests
                 $"{++n}:",
                 $"{Enum.GetName(typeof(Transport), ct) ?? "<null>"}");
             sw.Restart();
-            keys = YubiKeyDevice.FindByTransport(ct).ToList();
+            var keys = YubiKeyDevice.FindByTransport(ct).ToList();
             sw.Stop();
             _testOutputHelper.WriteLine($"\t({keys.Count}) -{sw.ElapsedMilliseconds,5}ms");
         }

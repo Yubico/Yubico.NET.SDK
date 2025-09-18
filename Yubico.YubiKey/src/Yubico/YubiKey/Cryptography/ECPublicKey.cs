@@ -18,49 +18,24 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKey.Cryptography;
 
 /// <summary>
-/// Represents an Elliptic Curve (EC) public key.
+///     Represents an Elliptic Curve (EC) public key.
 /// </summary>
 /// <remarks>
-/// This class encapsulates EC public key parameters and provides cryptographic operations
-/// for NIST elliptic curves and provides factory methods for creating instances from EC parameters or DER-encoded data.
+///     This class encapsulates EC public key parameters and provides cryptographic operations
+///     for NIST elliptic curves and provides factory methods for creating instances from EC parameters or DER-encoded
+///     data.
 /// </remarks>
 public class ECPublicKey : PublicKey
 {
     private readonly byte[] _publicPointBytes;
 
     /// <summary>
-    /// Gets the key definition associated with this RSA private key.
-    /// </summary>
-    /// <value>
-    /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
-    /// </value>
-    public KeyDefinition KeyDefinition { get; }
-
-    /// <summary>
-    /// Gets the Elliptic Curve parameters associated with this instance.
-    /// </summary>
-    /// <value>
-    /// An <see cref="ECParameters"/> structure containing the curve parameters, key, and other
-    /// cryptographic elements needed for EC operations.
-    /// </value>
-    public ECParameters Parameters { get; }
-
-    /// <summary>
-    /// Gets the bytes representing the public key coordinates.
-    /// </summary>
-    /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the public key bytes with the format 0x04 || X || Y.</returns>
-    public ReadOnlyMemory<byte> PublicPoint => _publicPointBytes;
-
-    /// <inheritdoc />
-    public override KeyType KeyType => KeyDefinition.KeyType;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ECPublicKey"/> class.
-    /// It is a wrapper for the <see cref="ECParameters"/> class.
+    ///     Initializes a new instance of the <see cref="ECPublicKey" /> class.
+    ///     It is a wrapper for the <see cref="ECParameters" /> class.
     /// </summary>
     /// <remarks>
-    /// This constructor is used to create an instance from a <see cref="ECParameters"/> object.
-    /// It will deep copy the parameters from the <see cref="ECParameters"/> object.
+    ///     This constructor is used to create an instance from a <see cref="ECParameters" /> object.
+    ///     It will deep copy the parameters from the <see cref="ECParameters" /> object.
     /// </remarks>
     /// <param name="parameters"></param>
     /// <exception cref="ArgumentException">Thrown when the parameters contain private key data (D value).</exception>
@@ -80,7 +55,7 @@ public class ECPublicKey : PublicKey
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ECPublicKey"/> class.
+    ///     Initializes a new instance of the <see cref="ECPublicKey" /> class.
     /// </summary>
     /// <param name="ecdsa"></param>
     protected ECPublicKey(ECDsa ecdsa)
@@ -97,25 +72,51 @@ public class ECPublicKey : PublicKey
         _publicPointBytes = [0x4, .. Parameters.Q.X, .. Parameters.Q.Y];
     }
 
+    /// <summary>
+    ///     Gets the key definition associated with this RSA private key.
+    /// </summary>
+    /// <value>
+    ///     A <see cref="KeyDefinition" /> object that describes the key's properties, including its type and length.
+    /// </value>
+    public KeyDefinition KeyDefinition { get; }
+
+    /// <summary>
+    ///     Gets the Elliptic Curve parameters associated with this instance.
+    /// </summary>
+    /// <value>
+    ///     An <see cref="ECParameters" /> structure containing the curve parameters, key, and other
+    ///     cryptographic elements needed for EC operations.
+    /// </value>
+    public ECParameters Parameters { get; }
+
+    /// <summary>
+    ///     Gets the bytes representing the public key coordinates.
+    /// </summary>
+    /// <returns>A <see cref="ReadOnlyMemory{T}" /> containing the public key bytes with the format 0x04 || X || Y.</returns>
+    public ReadOnlyMemory<byte> PublicPoint => _publicPointBytes;
+
+    /// <inheritdoc />
+    public override KeyType KeyType => KeyDefinition.KeyType;
+
     /// <inheritdoc />
     public override byte[] ExportSubjectPublicKeyInfo() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(Parameters);
 
     /// <summary>
-    /// Creates an instance of <see cref="ECPublicKey"/> from the given <paramref name="parameters"/>.
+    ///     Creates an instance of <see cref="ECPublicKey" /> from the given <paramref name="parameters" />.
     /// </summary>
     /// <param name="parameters">The parameters to create the key from.</param>
-    /// <returns>An instance of <see cref="ECPublicKey"/>.</returns>
+    /// <returns>An instance of <see cref="ECPublicKey" />.</returns>
     public static ECPublicKey CreateFromParameters(ECParameters parameters) => new(parameters);
 
     /// <summary>
-    /// Creates an instance of <see cref="ECPublicKey"/> from the given
-    /// <paramref name="publicPoint"/> and <paramref name="keyType"/>.
+    ///     Creates an instance of <see cref="ECPublicKey" /> from the given
+    ///     <paramref name="publicPoint" /> and <paramref name="keyType" />.
     /// </summary>
     /// <param name="publicPoint">The raw public key data, formatted as an compressed point.</param>
     /// <param name="keyType">The type of key this is.</param>
-    /// <returns>An instance of <see cref="ECPublicKey"/>.</returns>
+    /// <returns>An instance of <see cref="ECPublicKey" />.</returns>
     /// <exception cref="ArgumentException">
-    /// Thrown if the key type is not a valid EC key.
+    ///     Thrown if the key type is not a valid EC key.
     /// </exception>
     public static ECPublicKey CreateFromValue(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
     {
@@ -141,12 +142,12 @@ public class ECPublicKey : PublicKey
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="ECPublicKey"/> from a DER-encoded SubjectPublicKeyInfo.
+    ///     Creates an instance of <see cref="ECPublicKey" /> from a DER-encoded SubjectPublicKeyInfo.
     /// </summary>
     /// <param name="subjectPublicKeyInfo">The DER-encoded SubjectPublicKeyInfo.</param>
-    /// <returns>An instance of <see cref="IPublicKey"/>.</returns>
+    /// <returns>An instance of <see cref="IPublicKey" />.</returns>
     /// <exception cref="CryptographicException">
-    /// Thrown if the subjectPublicKeyInfo is invalid.
+    ///     Thrown if the subjectPublicKeyInfo is invalid.
     /// </exception>
     public static ECPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
         AsnPublicKeyDecoder
@@ -155,5 +156,5 @@ public class ECPublicKey : PublicKey
 
     [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
     public static ECPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
-    CreateFromSubjectPublicKeyInfo(subjectPublicKeyInfo);
+        CreateFromSubjectPublicKeyInfo(subjectPublicKeyInfo);
 }

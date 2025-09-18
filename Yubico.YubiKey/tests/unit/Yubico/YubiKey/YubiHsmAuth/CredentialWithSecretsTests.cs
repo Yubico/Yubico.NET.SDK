@@ -56,6 +56,8 @@ public class CredentialWithSecretsTests
                 _touchRequired));
     }
 
+    #region Nested type: SampleCredWithSecrets
+
     private class SampleCredWithSecrets : CredentialWithSecrets
     {
         public SampleCredWithSecrets(
@@ -67,6 +69,8 @@ public class CredentialWithSecretsTests
         {
         }
     }
+
+    #endregion
 
     /* ADD CRED PASSWORD GET/SET TESTS */
 }

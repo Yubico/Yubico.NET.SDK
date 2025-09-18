@@ -16,55 +16,58 @@ using System;
 using System.Text;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+/// <summary>
+///     The response containing the U2F protocol version implemented by the application.
+/// </summary>
+/// <remarks>
+///     This is the partner Response class to <see cref="GetProtocolVersionCommand" />. The
+///     data is returned as a string, describing the protocol version of the U2F application.
+/// </remarks>
+public class GetProtocolVersionResponse : U2fResponse, IYubiKeyResponseWithData<string>
 {
     /// <summary>
-    /// The response containing the U2F protocol version implemented by the application.
+    ///     Constructs a GetProtocolVersionResponse object from the given
+    ///     <see cref="ResponseApdu" />.
+    /// </summary>
+    /// <param name="responseApdu">
+    ///     The object containing the response APDU returned by the YubiKey.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    ///     Thrown when <paramref name="responseApdu" /> is `null`.
+    /// </exception>
+    public GetProtocolVersionResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
+    {
+    }
+
+    #region IYubiKeyResponseWithData<string> Members
+
+    /// <summary>
+    ///     Gets the U2F protocol version string from the response.
     /// </summary>
     /// <remarks>
-    /// This is the partner Response class to <see cref="GetProtocolVersionCommand"/>. The
-    /// data is returned as a string, describing the protocol version of the U2F application.
+    ///     If the status of the response is not <see cref="ResponseStatus.Success" />,
+    ///     this method will throw an exception.
     /// </remarks>
-    public class GetProtocolVersionResponse : U2fResponse, IYubiKeyResponseWithData<string>
+    /// <returns>
+    ///     The data in the response APDU, which is encoded as an ASCII string. This data describes the
+    ///     U2F protocol version.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
+    /// </exception>
+    public string GetData()
     {
-        /// <summary>
-        /// Constructs a GetProtocolVersionResponse object from the given
-        /// <see cref="ResponseApdu"/>.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The object containing the response APDU returned by the YubiKey.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="responseApdu"/> is `null`.
-        /// </exception>
-        public GetProtocolVersionResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
+        if (Status != ResponseStatus.Success)
         {
+            throw new InvalidOperationException(StatusMessage);
         }
 
-        /// <summary>
-        /// Gets the U2F protocol version string from the response.
-        /// </summary>
-        /// <remarks>
-        /// If the status of the response is not <see cref="ResponseStatus.Success"/>,
-        /// this method will throw an exception.
-        /// </remarks>
-        /// <returns>
-        /// The data in the response APDU, which is encoded as an ASCII string. This data describes the
-        /// U2F protocol version.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
-        /// </exception>
-        public string GetData()
-        {
-            if (Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(StatusMessage);
-            }
-
-            var responseApduData = ResponseApdu.Data.Span;
-            return Encoding.ASCII.GetString(responseApduData.ToArray());
-        }
+        var responseApduData = ResponseApdu.Data.Span;
+        return Encoding.ASCII.GetString(responseApduData.ToArray());
     }
+
+    #endregion
 }

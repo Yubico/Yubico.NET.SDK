@@ -52,6 +52,8 @@ public class PivSessionUnitTestBase : IDisposable
         }
     }
 
+    #region IDisposable Members
+
     public void Dispose()
     {
         if (_disposed)
@@ -63,6 +65,8 @@ public class PivSessionUnitTestBase : IDisposable
 
         _disposed = true;
     }
+
+    #endregion
 
     protected PivSession GetNewPivSession()
     {

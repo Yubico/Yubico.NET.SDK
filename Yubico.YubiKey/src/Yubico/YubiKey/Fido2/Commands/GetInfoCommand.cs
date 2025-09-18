@@ -14,47 +14,49 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Gets detailed information about the authenticator.
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="GetInfoResponse" />.
+///     Specified in CTAP as "authenticatorGetInfo".
+/// </remarks>
+public sealed class GetInfoCommand : IYubiKeyCommand<GetInfoResponse>
 {
+    private const byte CtapGetInfoCmd = 0x04;
+
     /// <summary>
-    /// Gets detailed information about the authenticator.
+    ///     Constructs an instance of the <see cref="GetInfoCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="GetInfoResponse"/>.
-    /// Specified in CTAP as "authenticatorGetInfo".
-    /// </remarks>
-    public sealed class GetInfoCommand : IYubiKeyCommand<GetInfoResponse>
+    public GetInfoCommand()
     {
-        private const byte CtapGetInfoCmd = 0x04;
-
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Fido2
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="GetInfoCommand" /> class.
-        /// </summary>
-        public GetInfoCommand()
-        {
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu()
-        {
-            byte[] payload = new byte[] { CtapGetInfoCmd };
-            return new CommandApdu()
-            {
-                Ins = CtapConstants.CtapHidCbor,
-                Data = payload
-            };
-        }
-
-        /// <inheritdoc />
-        public GetInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetInfoResponse(responseApdu);
     }
+
+    #region IYubiKeyCommand<GetInfoResponse> Members
+
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.Fido2
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Fido2;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu()
+    {
+        byte[] payload = new[] { CtapGetInfoCmd };
+        return new CommandApdu
+        {
+            Ins = CtapConstants.CtapHidCbor,
+            Data = payload
+        };
+    }
+
+    /// <inheritdoc />
+    public GetInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

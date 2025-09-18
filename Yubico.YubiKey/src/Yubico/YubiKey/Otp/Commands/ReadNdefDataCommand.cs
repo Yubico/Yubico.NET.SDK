@@ -14,48 +14,50 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+/// <summary>
+///     Reads the NDEF data over an NFC connection to the YubiKey.
+/// </summary>
+/// <remarks>
+///     <para>
+///         The NDEF data file must be selected first using the <see cref="SelectNdefDataCommand" /> class.
+///     </para>
+///     <para>
+///         This command will only succeed if the YubiKey is connected through an NFC reader.
+///         It will not work over CCID if plugged in by USB or EAP.
+///     </para>
+/// </remarks>
+public class ReadNdefDataCommand : IYubiKeyCommand<ReadNdefDataResponse>
 {
+    private const byte ReadNdefDataInstruction = 0xB0; // Same as ISO READ_DATA command
+
     /// <summary>
-    /// Reads the NDEF data over an NFC connection to the YubiKey.
+    ///     Initializes a new instance of the <see cref="ReadNdefDataCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The NDEF data file must be selected first using the <see cref="SelectNdefDataCommand"/> class.
-    /// </para>
-    /// <para>
-    /// This command will only succeed if the YubiKey is connected through an NFC reader.
-    /// It will not work over CCID if plugged in by USB or EAP.
-    /// </para>
-    /// </remarks>
-    public class ReadNdefDataCommand : IYubiKeyCommand<ReadNdefDataResponse>
+    public ReadNdefDataCommand()
     {
-        private const byte ReadNdefDataInstruction = 0xB0; // Same as ISO READ_DATA command
+    }
 
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.OtpNdef
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.OtpNdef;
+    #region IYubiKeyCommand<ReadNdefDataResponse> Members
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReadNdefDataCommand"/> class.
-        /// </summary>
-        public ReadNdefDataCommand()
-        {
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.OtpNdef
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.OtpNdef;
 
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = ReadNdefDataInstruction
         };
 
-        /// <inheritdoc />
-        public ReadNdefDataResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ReadNdefDataResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public ReadNdefDataResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

@@ -14,46 +14,48 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Continue the process of getting information on all the relying parties
+///     represented in credentials on the YubiKey, by getting the next RP.
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="EnumerateRpsGetNextResponse" />.
+///     <para>
+///         This returns information on one of the relying parties. If there is only
+///         one RP, then the call to the <c>enumerateRPsBegin</c> subcommand gave
+///         you all the information you need. It also indicated that there was only
+///         one RP. If there are more RPs, then you can get information on all of
+///         them by calling this subcommand, calling it once for every RP after the
+///         first one.
+///     </para>
+///     <para>
+///         The return from this command is the next relying party.
+///     </para>
+///     <para>
+///         Note that this command does not need the <c>pinUvAuthToken</c> nor the
+///         <c>authProtocol</c>. This command picks up where the
+///         <see cref="EnumerateRpsBeginCommand" /> left off, and can only operate
+///         successfully after that "Begin" command has successfully completed.
+///     </para>
+/// </remarks>
+public class EnumerateRpsGetNextCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateRpsGetNextResponse>
 {
+    private const int SubCmdGetEnumerateRpsGetNext = 0x03;
+
     /// <summary>
-    /// Continue the process of getting information on all the relying parties
-    /// represented in credentials on the YubiKey, by getting the next RP.
+    ///     Constructs a new instance of <see cref="EnumerateRpsGetNextCommand" />.
     /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="EnumerateRpsGetNextResponse"/>.
-    /// <para>
-    /// This returns information on one of the relying parties. If there is only
-    /// one RP, then the call to the <c>enumerateRPsBegin</c> subcommand gave
-    /// you all the information you need. It also indicated that there was only
-    /// one RP. If there are more RPs, then you can get information on all of
-    /// them by calling this subcommand, calling it once for every RP after the
-    /// first one.
-    /// </para>
-    /// <para>
-    /// The return from this command is the next relying party.
-    /// </para>
-    /// <para>
-    /// Note that this command does not need the <c>pinUvAuthToken</c> nor the
-    /// <c>authProtocol</c>. This command picks up where the
-    /// <see cref="EnumerateRpsBeginCommand"/> left off, and can only operate
-    /// successfully after that "Begin" command has successfully completed.
-    /// </para>
-    /// </remarks>
-    public class EnumerateRpsGetNextCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateRpsGetNextResponse>
+    public EnumerateRpsGetNextCommand()
+        : base(new CredentialManagementCommand(SubCmdGetEnumerateRpsGetNext))
     {
-        private const int SubCmdGetEnumerateRpsGetNext = 0x03;
-
-        /// <summary>
-        /// Constructs a new instance of <see cref="EnumerateRpsGetNextCommand"/>.
-        /// </summary>
-        public EnumerateRpsGetNextCommand()
-            : base(new CredentialManagementCommand(SubCmdGetEnumerateRpsGetNext))
-        {
-        }
-
-        /// <inheritdoc />
-        public EnumerateRpsGetNextResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new EnumerateRpsGetNextResponse(responseApdu);
     }
+
+    #region IYubiKeyCommand<EnumerateRpsGetNextResponse> Members
+
+    /// <inheritdoc />
+    public EnumerateRpsGetNextResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

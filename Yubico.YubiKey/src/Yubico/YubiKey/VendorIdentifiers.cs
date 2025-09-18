@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+internal class VendorIdentifiers
 {
-    internal class VendorIdentifiers
-    {
-        public static short Yubico => 0x1050;
-    }
+    public static short Yubico => 0x1050;
 }

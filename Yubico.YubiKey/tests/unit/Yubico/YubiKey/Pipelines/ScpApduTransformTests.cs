@@ -139,10 +139,14 @@ public class ScpApduTransformTests
         _previous.Received().Cleanup();
     }
 
+    #region Nested type: CommandTestCase
+
     private struct CommandTestCase
     {
         public IYubiKeyCommand<IYubiKeyResponse> Command;
         public Type CommandType;
         public Type ResponseType;
     }
+
+    #endregion
 }

@@ -91,6 +91,8 @@ public class BaseYubiHsmAuthResponseWithRetriesTests
         Assert.True(!response.RetriesRemaining.HasValue);
     }
 
+    #region Nested type: SampleYubiHsmAuthResponseWithRetries
+
     public class SampleYubiHsmAuthResponseWithRetries : BaseYubiHsmAuthResponseWithRetries
     {
         public SampleYubiHsmAuthResponseWithRetries(
@@ -100,4 +102,6 @@ public class BaseYubiHsmAuthResponseWithRetriesTests
 
         public bool HasRetries => StatusWordContainsRetries;
     }
+
+    #endregion
 }

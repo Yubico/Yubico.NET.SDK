@@ -15,23 +15,24 @@
 namespace Yubico.YubiKey.Cryptography;
 
 /// <summary>
-/// Defines the contract for cryptographic public keys.
+///     Defines the contract for cryptographic public keys.
 /// </summary>
 /// <remarks>
-/// This interface extends <see cref="IKeyBase"/> to include public key-specific operations
-/// for X.509 SubjectPublicKeyInfo export.
-/// <para>
-/// Concrete implementations include <see cref="ECPublicKey"/>, <see cref="RSAPublicKey"/> and <see cref="Curve25519PublicKey"/>, each providing
-/// algorithm-specific public key handling and export mechanisms.
-/// </para>
+///     This interface extends <see cref="IKeyBase" /> to include public key-specific operations
+///     for X.509 SubjectPublicKeyInfo export.
+///     <para>
+///         Concrete implementations include <see cref="ECPublicKey" />, <see cref="RSAPublicKey" /> and
+///         <see cref="Curve25519PublicKey" />, each providing
+///         algorithm-specific public key handling and export mechanisms.
+///     </para>
 /// </remarks>
 public interface IPublicKey : IKeyBase
 {
     /// <summary>
-    /// Exports the public-key portion of the current key in the X.509 SubjectPublicKeyInfo format.
+    ///     Exports the public-key portion of the current key in the X.509 SubjectPublicKeyInfo format.
     /// </summary>
     /// <returns>
-    /// A byte array containing the X.509 SubjectPublicKeyInfo representation of the public-key portion of this key
+    ///     A byte array containing the X.509 SubjectPublicKeyInfo representation of the public-key portion of this key
     /// </returns>
-    public byte[] ExportSubjectPublicKeyInfo();
+    byte[] ExportSubjectPublicKeyInfo();
 }

@@ -85,7 +85,7 @@ public class GetDataResponseTests
         };
 
         var expected = new Span<byte>(testData);
-        expected = expected.Slice(0, testData.Length - 2);
+        expected = expected[..(testData.Length - 2)];
         var responseApdu = new ResponseApdu(testData);
 
         var response = new GetDataResponse(responseApdu);

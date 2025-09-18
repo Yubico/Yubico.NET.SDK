@@ -148,6 +148,8 @@ public class ZeroingMemoryHandleTests
         Assert.All(sensitiveData, b => Assert.Equal(0, b));
     }
 
+    #region Nested type: FirstLayerProcessor
+
     // Mock processors for testing
     private static class FirstLayerProcessor
     {
@@ -160,6 +162,10 @@ public class ZeroingMemoryHandleTests
             return result;
         }
     }
+
+    #endregion
+
+    #region Nested type: SecondLayerProcessor
 
     private static class SecondLayerProcessor
     {
@@ -176,4 +182,6 @@ public class ZeroingMemoryHandleTests
             return intermediateResult;
         }
     }
+
+    #endregion
 }

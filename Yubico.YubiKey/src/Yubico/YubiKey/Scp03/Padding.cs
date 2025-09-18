@@ -15,44 +15,45 @@
 using System;
 using System.Linq;
 
-namespace Yubico.YubiKey.Scp03
+namespace Yubico.YubiKey.Scp03;
+
+[Obsolete("Use new Yubico.YubiKey.Scp.Padding class instead")]
+internal static class Padding
 {
-    [Obsolete("Use new Yubico.YubiKey.Scp.Padding class instead")]
-    internal static class Padding
+    public static byte[] PadToBlockSize(byte[] payload)
     {
-        public static byte[] PadToBlockSize(byte[] payload)
+        if (payload is null)
         {
-            if (payload is null)
-            {
-                throw new ArgumentNullException(nameof(payload));
-            }
-
-            int paddedLen = ((payload.Length / 16) + 1) * 16;
-            byte[] padded = new byte[paddedLen];
-            payload.CopyTo(padded, 0);
-            padded[payload.Length] = 0x80;
-            return padded;
+            throw new ArgumentNullException(nameof(payload));
         }
-        public static byte[] RemovePadding(byte[] paddedPayload)
+
+        int paddedLen = ((payload.Length / 16) + 1) * 16;
+        byte[] padded = new byte[paddedLen];
+        payload.CopyTo(padded, 0);
+        padded[payload.Length] = 0x80;
+        return padded;
+    }
+
+    public static byte[] RemovePadding(byte[] paddedPayload)
+    {
+        if (paddedPayload is null)
         {
-            if (paddedPayload is null)
-            {
-                throw new ArgumentNullException(nameof(paddedPayload));
-            }
-
-            for (int i = paddedPayload.Length - 1; i >= 0; i--)
-            {
-                if (paddedPayload[i] == 0x80)
-                {
-                    return paddedPayload.Take(i).ToArray();
-                }
-                else if (paddedPayload[i] != 0x00)
-                {
-                    throw new SecureChannelException(ExceptionMessages.InvalidPadding);
-                }
-            }
-
-            throw new SecureChannelException(ExceptionMessages.InvalidPadding);
+            throw new ArgumentNullException(nameof(paddedPayload));
         }
+
+        for (int i = paddedPayload.Length - 1; i >= 0; i--)
+        {
+            if (paddedPayload[i] == 0x80)
+            {
+                return paddedPayload.Take(i).ToArray();
+            }
+
+            if (paddedPayload[i] != 0x00)
+            {
+                throw new SecureChannelException(ExceptionMessages.InvalidPadding);
+            }
+        }
+
+        throw new SecureChannelException(ExceptionMessages.InvalidPadding);
     }
 }

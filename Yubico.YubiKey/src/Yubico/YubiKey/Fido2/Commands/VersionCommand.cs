@@ -15,67 +15,68 @@
 using System.Security.Cryptography;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Command to get the device firmware version.
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="VersionResponse" />.
+///     <p>
+///         This command does not work over NFC - it must be run over CTAPHID.
+///     </p>
+///     <p>
+///         Example:
+///     </p>
+///     <code language="csharp">
+/// IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Fido2);
+/// VersionCommand versionCmd = new VersionCommand();
+/// VersionResponse versionRsp = connection.SendCommand(versionCmd);
+/// if (versionNum.Status == ResponseStatus.Success)
+/// {
+///     FirmwareVersion versionNum = versionRsp.GetData();
+/// }
+/// </code>
+/// </remarks>
+internal sealed class VersionCommand : IYubiKeyCommand<VersionResponse>
 {
+    private readonly RandomNumberGenerator _rng;
+
     /// <summary>
-    /// Command to get the device firmware version.
+    ///     Initializes a new instance of the VersionCommand class.
     /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="VersionResponse"/>.
-    /// <p>
-    /// This command does not work over NFC - it must be run over CTAPHID.
-    /// </p>
-    /// <p>
-    /// Example:
-    /// </p>
-    /// <code language="csharp">
-    /// IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Fido2);
-    /// VersionCommand versionCmd = new VersionCommand();
-    /// VersionResponse versionRsp = connection.SendCommand(versionCmd);
-    /// if (versionNum.Status == ResponseStatus.Success)
-    /// {
-    ///     FirmwareVersion versionNum = versionRsp.GetData();
-    /// }
-    /// </code>
-    /// </remarks>
-    internal sealed class VersionCommand : IYubiKeyCommand<VersionResponse>
+    public VersionCommand() : this(RandomNumberGenerator.Create())
     {
-        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
-
-        private readonly RandomNumberGenerator _rng;
-
-        /// <summary>
-        /// Initializes a new instance of the VersionCommand class.
-        /// </summary>
-        public VersionCommand() : this(RandomNumberGenerator.Create())
-        {
-
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the VersionCommand class.
-        /// </summary>
-        public VersionCommand(RandomNumberGenerator rng)
-        {
-            _rng = rng;
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu()
-        {
-            byte[] payload = new byte[8];
-
-            _rng.GetBytes(payload, 0, 8);
-
-            return new CommandApdu()
-            {
-                Ins = (byte)0x06,
-                Data = payload
-            };
-        }
-
-        /// <inheritdoc />
-        public VersionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new VersionResponse(responseApdu);
     }
+
+    /// <summary>
+    ///     Initializes a new instance of the VersionCommand class.
+    /// </summary>
+    public VersionCommand(RandomNumberGenerator rng)
+    {
+        _rng = rng;
+    }
+
+    #region IYubiKeyCommand<VersionResponse> Members
+
+    public YubiKeyApplication Application => YubiKeyApplication.Fido2;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu()
+    {
+        byte[] payload = new byte[8];
+
+        _rng.GetBytes(payload, 0, 8);
+
+        return new CommandApdu
+        {
+            Ins = 0x06,
+            Data = payload
+        };
+    }
+
+    /// <inheritdoc />
+    public VersionResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

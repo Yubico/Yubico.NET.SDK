@@ -14,55 +14,58 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+/// <summary>
+///     Get the YubiKey's firmware version number.
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="VersionResponse" />.
+///     <para>
+///         Example:
+///     </para>
+///     <code language="csharp">
+///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
+///   VersionCommand versionCmd = new VersionCommand();
+///   VersionResponse versionRsp = connection.SendCommand(versionCmd);<br />
+///   if (versionNum.Status == ResponseStatus.Success)
+///   {
+///       FirmwareVersion versionNum = versionRsp.GetData();
+///   }
+/// </code>
+/// </remarks>
+public sealed class VersionCommand : IYubiKeyCommand<VersionResponse>
 {
+    private const byte PivVersionInstruction = 0xFD;
+
     /// <summary>
-    /// Get the YubiKey's firmware version number.
+    ///     Initializes a new instance of the VersionCommand class. This command
+    ///     has no input.
     /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="VersionResponse"/>.
-    /// <para>
-    /// Example:
-    /// </para>
-    /// <code language="csharp">
-    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
-    ///   VersionCommand versionCmd = new VersionCommand();
-    ///   VersionResponse versionRsp = connection.SendCommand(versionCmd);<br/>
-    ///   if (versionNum.Status == ResponseStatus.Success)
-    ///   {
-    ///       FirmwareVersion versionNum = versionRsp.GetData();
-    ///   }
-    /// </code>
-    /// </remarks>
-    public sealed class VersionCommand : IYubiKeyCommand<VersionResponse>
+    public VersionCommand()
     {
-        private const byte PivVersionInstruction = 0xFD;
+    }
 
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs. For this
-        /// command it's PIV.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Piv
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Piv;
+    #region IYubiKeyCommand<VersionResponse> Members
 
-        /// <summary>
-        /// Initializes a new instance of the VersionCommand class. This command
-        /// has no input.
-        /// </summary>
-        public VersionCommand()
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs. For this
+    ///     command it's PIV.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.Piv
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Piv;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivVersionInstruction,
+            Ins = PivVersionInstruction
         };
 
-        /// <inheritdoc />
-        public VersionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new VersionResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public VersionResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

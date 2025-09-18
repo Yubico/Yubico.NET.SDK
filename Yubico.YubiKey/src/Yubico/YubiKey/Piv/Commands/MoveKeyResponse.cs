@@ -14,23 +14,24 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+/// <summary>
+///     The <see cref="MoveKeyResponse" /> for the corresponding <see cref="MoveKeyCommand" />.
+/// </summary>
+/// <seealso cref="PivResponse" />
+/// <seealso cref="YubiKeyResponse" />
+public class MoveKeyResponse : PivResponse
 {
     /// <summary>
-    /// The <see cref="MoveKeyResponse"/> for the corresponding <see cref="MoveKeyCommand"/>.
+    ///     The constructor for the <see cref="MoveKeyResponse" />
     /// </summary>
-    /// <seealso cref="PivResponse"/>
-    /// <seealso cref="YubiKeyResponse"/>
-    public class MoveKeyResponse : PivResponse
+    /// <param name="responseApdu">
+    ///     The return data with which the Yubikey responded
+    ///     to the <see cref="MoveKeyCommand" />
+    /// </param>
+    /// <seealso cref="MoveKeyCommand" />
+    public MoveKeyResponse(ResponseApdu responseApdu) : base(responseApdu)
     {
-        /// <summary>
-        /// The constructor for the <see cref="MoveKeyResponse"/>
-        /// </summary>
-        /// <param name="responseApdu">The return data with which the Yubikey responded
-        /// to the <see cref="MoveKeyCommand"/></param>
-        /// <seealso cref="MoveKeyCommand"/>
-        public MoveKeyResponse(ResponseApdu responseApdu) : base(responseApdu)
-        {
-        }
     }
 }

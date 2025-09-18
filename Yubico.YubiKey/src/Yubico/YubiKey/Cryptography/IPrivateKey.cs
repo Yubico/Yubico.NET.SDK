@@ -15,25 +15,26 @@
 namespace Yubico.YubiKey.Cryptography;
 
 /// <summary>
-/// Defines the contract for cryptographic private keys.
+///     Defines the contract for cryptographic private keys.
 /// </summary>
 /// <remarks>
-/// This interface extends <see cref="IKeyBase"/> to include private key-specific operations
-/// for PKCS#8 export and secure memory cleanup.
-/// Known implementations include <see cref="ECPrivateKey"/>, <see cref="RSAPrivateKey"/> and <see cref="Curve25519PrivateKey"/>,.
+///     This interface extends <see cref="IKeyBase" /> to include private key-specific operations
+///     for PKCS#8 export and secure memory cleanup.
+///     Known implementations include <see cref="ECPrivateKey" />, <see cref="RSAPrivateKey" /> and
+///     <see cref="Curve25519PrivateKey" />,.
 /// </remarks>
 public interface IPrivateKey : IKeyBase
 {
     /// <summary>
-    /// Exports the current key in the PKCS#8 PrivateKeyInfo format.
+    ///     Exports the current key in the PKCS#8 PrivateKeyInfo format.
     /// </summary>
     /// <returns>
-    /// A byte array containing the PKCS#8 PrivateKeyInfo representation of this key.
+    ///     A byte array containing the PKCS#8 PrivateKeyInfo representation of this key.
     /// </returns>
-    public byte[] ExportPkcs8PrivateKey();
+    byte[] ExportPkcs8PrivateKey();
 
     /// <summary>
-    /// Clears the buffers containing private key data.
+    ///     Clears the buffers containing private key data.
     /// </summary>
-    public void Clear();
+    void Clear();
 }

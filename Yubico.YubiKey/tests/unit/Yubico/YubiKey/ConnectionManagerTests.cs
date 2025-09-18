@@ -31,6 +31,8 @@ internal class TestSmartCardDevice : ISmartCardDevice
     public static readonly ISmartCardDevice NfcInstance = new TestSmartCardDevice
         { Kind = SmartCardConnectionKind.Nfc };
 
+    #region ISmartCardDevice Members
+
     public DateTime LastAccessed { get; } = DateTime.Now;
     public string Path { get; } = string.Empty;
     public string? ParentDeviceId { get; } = null;
@@ -41,12 +43,16 @@ internal class TestSmartCardDevice : ISmartCardDevice
     {
         throw new NotImplementedException();
     }
+
+    #endregion
 }
 
 internal class TestHidDevice : IHidDevice
 {
     public static readonly IHidDevice FidoInstance = new TestHidDevice { UsagePage = HidUsagePage.Fido };
     public static readonly IHidDevice KeyboardInstance = new TestHidDevice { UsagePage = HidUsagePage.Keyboard };
+
+    #region IHidDevice Members
 
     public DateTime LastAccessed { get; } = DateTime.Now;
     public string Path { get; } = string.Empty;
@@ -65,6 +71,8 @@ internal class TestHidDevice : IHidDevice
     {
         throw new NotImplementedException();
     }
+
+    #endregion
 }
 
 public class ConnectionManagerTests

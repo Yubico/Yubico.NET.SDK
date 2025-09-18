@@ -103,7 +103,7 @@ public class PinProtectedTests
     public void SetMgmtKey_Invalid_Throws()
     {
         var mgmtKey = GetArbitraryMgmtKey();
-        mgmtKey = mgmtKey.Slice(0, 23);
+        mgmtKey = mgmtKey[..23];
 
         using var pinProtect = new PinProtectedData();
 

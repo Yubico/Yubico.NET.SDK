@@ -60,6 +60,8 @@ public sealed class HollowConnection : IYubiKeyConnection
 
     public bool AlwaysAuthenticatePiv { get; set; }
 
+    #region IYubiKeyConnection Members
+
     public ISelectApplicationData? SelectApplicationData { get; set; }
 
     public TResponse SendCommand<TResponse>(
@@ -140,4 +142,6 @@ public sealed class HollowConnection : IYubiKeyConnection
     {
         SelectApplicationData = null;
     }
+
+    #endregion
 }

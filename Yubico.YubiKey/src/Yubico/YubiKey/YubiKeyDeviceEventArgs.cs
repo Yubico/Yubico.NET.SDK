@@ -14,25 +14,24 @@
 
 using System;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+/// <summary>
+///     This class contains properties that are specific to the event being raised.
+/// </summary>
+public class YubiKeyDeviceEventArgs : EventArgs
 {
     /// <summary>
-    /// This class contains properties that are specific to the event being raised.
+    ///     Constructs an event arguments.
     /// </summary>
-    public class YubiKeyDeviceEventArgs : EventArgs
+    /// <param name="device">A YubiKey device</param>
+    public YubiKeyDeviceEventArgs(IYubiKeyDevice device)
     {
-        /// <summary>
-        /// A YubiKey arrived or removed.
-        /// </summary>
-        public IYubiKeyDevice Device { get; }
-
-        /// <summary>
-        /// Constructs an event arguments.
-        /// </summary>
-        /// <param name="device">A YubiKey device</param>
-        public YubiKeyDeviceEventArgs(IYubiKeyDevice device)
-        {
-            Device = device;
-        }
+        Device = device;
     }
+
+    /// <summary>
+    ///     A YubiKey arrived or removed.
+    /// </summary>
+    public IYubiKeyDevice Device { get; }
 }

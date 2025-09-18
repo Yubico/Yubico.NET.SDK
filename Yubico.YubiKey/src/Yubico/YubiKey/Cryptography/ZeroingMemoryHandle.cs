@@ -21,18 +21,26 @@ internal class ZeroingMemoryHandle : IDisposable
 {
     private readonly Memory<byte> _data;
     private bool _disposed;
-    public int Length => _disposed ? 0 : _data.Length;
-    public int Count => Length;
 
     public ZeroingMemoryHandle(Memory<byte> data)
     {
         _data = data;
     }
 
-    public Memory<byte> Data => _disposed 
-        ? throw new ObjectDisposedException(nameof(ZeroingMemoryHandle)) 
-        : _data;
-    
+    public int Length =>
+        _disposed
+            ? 0
+            : _data.Length;
+
+    public int Count => Length;
+
+    public Memory<byte> Data =>
+        _disposed
+            ? throw new ObjectDisposedException(nameof(ZeroingMemoryHandle))
+            : _data;
+
+    #region IDisposable Members
+
     public void Dispose()
     {
         if (_disposed)
@@ -44,6 +52,8 @@ internal class ZeroingMemoryHandle : IDisposable
         _disposed = true;
         GC.SuppressFinalize(this);
     }
+
+    #endregion
 
     ~ZeroingMemoryHandle()
     {

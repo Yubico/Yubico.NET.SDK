@@ -15,62 +15,67 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     The response partner to the BioEnrollNextSampleCommand.
+/// </summary>
+public class BioEnrollNextSampleResponse : Fido2Response, IYubiKeyResponseWithData<BioEnrollSampleResult>
 {
+    private readonly BioEnrollmentResponse _response;
+    private readonly ReadOnlyMemory<byte> _templateId;
+
     /// <summary>
-    /// The response partner to the BioEnrollNextSampleCommand.
+    ///     Constructs a new instance of
+    ///     <see cref="BioEnrollNextSampleResponse" /> based on a response APDU
+    ///     provided by the YubiKey, along with the template ID of the
+    ///     fingerprint being enrolled.
     /// </summary>
-    public class BioEnrollNextSampleResponse : Fido2Response, IYubiKeyResponseWithData<BioEnrollSampleResult>
+    /// <param name="responseApdu">
+    ///     A response APDU containing the CBOR response data for the
+    ///     <c>authenticatorCredentialManagement</c> command.
+    /// </param>
+    /// <param name="templateId">
+    ///     The template ID returned by the BioEnrollBeginCommand.
+    /// </param>
+    public BioEnrollNextSampleResponse(ResponseApdu responseApdu, ReadOnlyMemory<byte> templateId)
+        : base(responseApdu)
     {
-        private readonly BioEnrollmentResponse _response;
-        private readonly ReadOnlyMemory<byte> _templateId;
-
-        /// <summary>
-        /// Constructs a new instance of
-        /// <see cref="BioEnrollNextSampleResponse"/> based on a response APDU
-        /// provided by the YubiKey, along with the template ID of the
-        /// fingerprint being enrolled.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response data for the
-        /// <c>authenticatorCredentialManagement</c> command.
-        /// </param>
-        /// <param name="templateId">
-        /// The template ID returned by the BioEnrollBeginCommand.
-        /// </param>
-        public BioEnrollNextSampleResponse(ResponseApdu responseApdu, ReadOnlyMemory<byte> templateId)
-            : base(responseApdu)
-        {
-            _response = new BioEnrollmentResponse(responseApdu);
-            _templateId = templateId;
-        }
-
-        /// <inheritdoc/>
-        public BioEnrollSampleResult GetData()
-        {
-            if (Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(StatusMessage);
-            }
-
-            var bioEnrollmentData = _response.GetData();
-            if (!(bioEnrollmentData.LastEnrollSampleStatus is null)
-                && !(bioEnrollmentData.RemainingSampleCount is null))
-            {
-                return new BioEnrollSampleResult(
-                    _templateId,
-                    bioEnrollmentData.LastEnrollSampleStatus.Value,
-                    bioEnrollmentData.RemainingSampleCount.Value);
-            }
-
-            throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
-        }
-
-        /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
-        {
-            CtapStatus.ErrOther => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2OperationCanceled),
-            _ => base.StatusCodeMap,
-        };
+        _response = new BioEnrollmentResponse(responseApdu);
+        _templateId = templateId;
     }
+
+    /// <inheritdoc />
+    protected override ResponseStatusPair StatusCodeMap =>
+        CtapStatus switch
+        {
+            CtapStatus.ErrOther => new ResponseStatusPair(
+                ResponseStatus.Failed, ResponseStatusMessages.Fido2OperationCanceled),
+            _ => base.StatusCodeMap
+        };
+
+    #region IYubiKeyResponseWithData<BioEnrollSampleResult> Members
+
+    /// <inheritdoc />
+    public BioEnrollSampleResult GetData()
+    {
+        if (Status != ResponseStatus.Success)
+        {
+            throw new InvalidOperationException(StatusMessage);
+        }
+
+        var bioEnrollmentData = _response.GetData();
+        if (bioEnrollmentData.LastEnrollSampleStatus is not null
+            && bioEnrollmentData.RemainingSampleCount is not null)
+        {
+            return new BioEnrollSampleResult(
+                _templateId,
+                bioEnrollmentData.LastEnrollSampleStatus.Value,
+                bioEnrollmentData.RemainingSampleCount.Value);
+        }
+
+        throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
+    }
+
+    #endregion
 }

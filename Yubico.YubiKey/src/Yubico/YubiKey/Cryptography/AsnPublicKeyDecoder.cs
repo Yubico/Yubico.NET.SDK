@@ -20,19 +20,19 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKey.Cryptography;
 
 /// <summary>
-/// A class that converts ASN.1 DER encoded X.509 SubjectPublicKeyInfo to instances of IPublicKey.
+///     A class that converts ASN.1 DER encoded X.509 SubjectPublicKeyInfo to instances of IPublicKey.
 /// </summary>
 internal class AsnPublicKeyDecoder
 {
     /// <summary>
-    /// Creates an instance of <see cref="IPublicKey"/> from a
-    /// ASN.1 DER-encoded SubjectPublicKeyInfo.
+    ///     Creates an instance of <see cref="IPublicKey" /> from a
+    ///     ASN.1 DER-encoded SubjectPublicKeyInfo.
     /// </summary>
     /// <param name="subjectPublicKeyInfo">
-    /// The ASN.1 DER-encoded SubjectPublicKeyInfo.
+    ///     The ASN.1 DER-encoded SubjectPublicKeyInfo.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="IPublicKey"/>.
+    ///     A new instance of <see cref="IPublicKey" />.
     /// </returns>
     /// <exception cref="CryptographicException">Thrown if public key does not match expected format.</exception>
     /// <exception cref="InvalidOperationException">Thrown if the algorithm is not supported</exception>
@@ -124,6 +124,7 @@ internal class AsnPublicKeyDecoder
         {
             throw new CryptographicException("Invalid EC public key encoding");
         }
+
         byte[] xCoordinate = new byte[coordinateSize];
         byte[] yCoordinate = new byte[coordinateSize];
 

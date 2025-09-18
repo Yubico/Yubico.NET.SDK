@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+/// <summary>
+///     Contains constant values for the hmac-secret extension.
+/// </summary>
+internal static class HmacSecretConstants
 {
-    /// <summary>
-    /// Contains constant values for the hmac-secret extension.
-    /// </summary>
-    internal static class HmacSecretConstants
-    {
-        internal const int TagKeyAgreeKey = 1;
-        internal const int TagEncryptedSalt = 2;
-        internal const int TagAuthenticatedSalt = 3;
-        internal const int TagPinProtocol = 4;
-        internal const int HmacSecretSaltLength = 32;
-    }
+    internal const int TagKeyAgreeKey = 1;
+    internal const int TagEncryptedSalt = 2;
+    internal const int TagAuthenticatedSalt = 3;
+    internal const int TagPinProtocol = 4;
+    internal const int HmacSecretSaltLength = 32;
 }

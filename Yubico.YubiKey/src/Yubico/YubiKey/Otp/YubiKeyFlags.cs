@@ -14,68 +14,69 @@
 
 using System;
 
-namespace Yubico.YubiKey.Otp
+namespace Yubico.YubiKey.Otp;
+
+/// <summary>
+///     The three YubiKey OTP flags collected in one class.
+/// </summary>
+public class YubiKeyFlags
 {
     /// <summary>
-    /// The three YubiKey OTP flags collected in one class.
+    ///     A <see langword="byte" /> containing the flags from <see cref="ExtendedFlags" />l
     /// </summary>
-    public class YubiKeyFlags
+    public byte Extended { get; set; }
+
+    /// <summary>
+    ///     A <see langword="byte" /> containing the flags from <see cref="TicketFlags" />l
+    /// </summary>
+    public byte Ticket { get; set; }
+
+    /// <summary>
+    ///     A <see langword="byte" /> containing the flags from <see cref="ConfigurationFlags" />l
+    /// </summary>
+    public byte Configuration { get; set; }
+
+    #pragma warning disable CA2225, CA1065 // Justification: Not necessary to have the expected named alternative method
+    /// <summary>
+    ///     Implicitly extract <see cref="ExtendedFlags" /> from a <see cref="YubiKeyFlags" /> object.
+    /// </summary>
+    /// <param name="flags"><see cref="YubiKeyFlags" /> object containing flags.</param>
+    public static implicit operator ExtendedFlags(YubiKeyFlags flags)
     {
-        /// <summary>
-        /// A <see langword="byte"/> containing the flags from <see cref="ExtendedFlags"/>l
-        /// </summary>
-        public byte Extended { get; set; }
-        /// <summary>
-        /// A <see langword="byte"/> containing the flags from <see cref="TicketFlags"/>l
-        /// </summary>
-        public byte Ticket { get; set; }
-        /// <summary>
-        /// A <see langword="byte"/> containing the flags from <see cref="ConfigurationFlags"/>l
-        /// </summary>
-        public byte Configuration { get; set; }
-
-#pragma warning disable CA2225, CA1065 // Justification: Not necessary to have the expected named alternative method
-        /// <summary>
-        /// Implicitly extract <see cref="ExtendedFlags"/> from a <see cref="YubiKeyFlags"/> object.
-        /// </summary>
-        /// <param name="flags"><see cref="YubiKeyFlags"/> object containing flags.</param>
-        public static implicit operator ExtendedFlags(YubiKeyFlags flags)
+        if (flags is null)
         {
-            if (flags is null)
-            {
-                throw new ArgumentNullException(nameof(flags));
-            }
-
-            return flags.Extended;
+            throw new ArgumentNullException(nameof(flags));
         }
 
-        /// <summary>
-        /// Implicitly extract <see cref="TicketFlags"/> from a <see cref="YubiKeyFlags"/> object.
-        /// </summary>
-        /// <param name="flags"><see cref="YubiKeyFlags"/> object containing flags.</param>
-        public static implicit operator TicketFlags(YubiKeyFlags flags)
-        {
-            if (flags is null)
-            {
-                throw new ArgumentNullException(nameof(flags));
-            }
-
-            return flags.Ticket;
-        }
-
-        /// <summary>
-        /// Implicitly extract <see cref="ConfigurationFlags"/> from a <see cref="YubiKeyFlags"/> object.
-        /// </summary>
-        /// <param name="flags"><see cref="YubiKeyFlags"/> object containing flags.</param>
-        public static implicit operator ConfigurationFlags(YubiKeyFlags flags)
-        {
-            if (flags is null)
-            {
-                throw new ArgumentNullException(nameof(flags));
-            }
-
-            return flags.Configuration;
-        }
-#pragma warning restore CA2225, CA1065
+        return flags.Extended;
     }
+
+    /// <summary>
+    ///     Implicitly extract <see cref="TicketFlags" /> from a <see cref="YubiKeyFlags" /> object.
+    /// </summary>
+    /// <param name="flags"><see cref="YubiKeyFlags" /> object containing flags.</param>
+    public static implicit operator TicketFlags(YubiKeyFlags flags)
+    {
+        if (flags is null)
+        {
+            throw new ArgumentNullException(nameof(flags));
+        }
+
+        return flags.Ticket;
+    }
+
+    /// <summary>
+    ///     Implicitly extract <see cref="ConfigurationFlags" /> from a <see cref="YubiKeyFlags" /> object.
+    /// </summary>
+    /// <param name="flags"><see cref="YubiKeyFlags" /> object containing flags.</param>
+    public static implicit operator ConfigurationFlags(YubiKeyFlags flags)
+    {
+        if (flags is null)
+        {
+            throw new ArgumentNullException(nameof(flags));
+        }
+
+        return flags.Configuration;
+    }
+    #pragma warning restore CA2225, CA1065
 }

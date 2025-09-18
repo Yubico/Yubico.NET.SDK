@@ -12,27 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Otp
+namespace Yubico.YubiKey.Otp;
+
+/// <summary>
+///     The identifier of the file containing the YubiKey's NDEF data.
+/// </summary>
+public enum NdefFileId
 {
     /// <summary>
-    /// The identifier of the file containing the YubiKey's NDEF data.
+    ///     Default value for this enumeration.
     /// </summary>
-    public enum NdefFileId
-    {
-        /// <summary>
-        /// Default value for this enumeration.
-        /// </summary>
-        None = 0,
+    None = 0,
 
-        /// <summary>
-        /// Identifier for the NDEF file.
-        /// </summary>
-        Ndef = unchecked((short)0xE104),
+    /// <summary>
+    ///     Identifier for the NDEF file.
+    /// </summary>
+    Ndef = unchecked((short)0xE104),
 
-        /// <summary>
-        /// Identifier for the Capability Container file. 
-        /// This file is described in the NFC Forum Tag Type 4 specification.
-        /// </summary>
-        CapabilityContainer = unchecked((short)0xE103),
-    }
+    /// <summary>
+    ///     Identifier for the Capability Container file.
+    ///     This file is described in the NFC Forum Tag Type 4 specification.
+    /// </summary>
+    CapabilityContainer = unchecked((short)0xE103)
 }

@@ -14,34 +14,33 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.InterIndustry.Commands
+namespace Yubico.YubiKey.InterIndustry.Commands;
+
+/// <summary>
+///     Selects a smart card application.
+/// </summary>
+public class SelectApplicationCommand : BaseSelectApplicationCommand<GenericSelectResponse>
 {
     /// <summary>
-    /// Selects a smart card application.
+    ///     Select Application using its raw application Id.  This is for advanced scenarios only.
     /// </summary>
-    public class SelectApplicationCommand : BaseSelectApplicationCommand<GenericSelectResponse>
+    /// <param name="applicationId">ID of the Application</param>
+    public SelectApplicationCommand(byte[] applicationId) : base(applicationId)
     {
-        /// <summary>
-        /// Select Application using its raw application Id.  This is for advanced scenarios only.
-        /// </summary>
-        /// <param name="applicationId">ID of the Application</param>
-        public SelectApplicationCommand(byte[] applicationId) : base(applicationId)
-        {
-        }
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="SelectApplicationCommand" /> class.
-        /// </summary>
-        /// <param name="yubiKeyApplication">Application</param>
-        public SelectApplicationCommand(YubiKeyApplication yubiKeyApplication) : base(yubiKeyApplication)
-        {
-        }
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        /// <param name="responseApdu"></param>
-        /// <returns></returns>
-        public override GenericSelectResponse CreateResponseForApdu(ResponseApdu responseApdu) => new GenericSelectResponse(responseApdu);
     }
+
+    /// <summary>
+    ///     Constructs an instance of the <see cref="SelectApplicationCommand" /> class.
+    /// </summary>
+    /// <param name="yubiKeyApplication">Application</param>
+    public SelectApplicationCommand(YubiKeyApplication yubiKeyApplication) : base(yubiKeyApplication)
+    {
+    }
+
+    /// <summary>
+    ///     <inheritdoc />
+    /// </summary>
+    /// <param name="responseApdu"></param>
+    /// <returns></returns>
+    public override GenericSelectResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
 }

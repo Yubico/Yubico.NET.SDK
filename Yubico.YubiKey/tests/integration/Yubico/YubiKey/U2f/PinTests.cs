@@ -52,10 +52,14 @@ public class PinTests : IDisposable
         Assert.NotNull(_fidoConnection);
     }
 
+    #region IDisposable Members
+
     public void Dispose()
     {
         _fidoConnection.Dispose();
     }
+
+    #endregion
 
     [Fact]
     public void SetPin_Succeeds()

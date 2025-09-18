@@ -19,12 +19,12 @@ namespace Yubico.YubiKey.Cryptography;
 public static class IPublicKeyExtensions
 {
     /// <summary>
-    /// Casts the given <see cref="IPublicKey"/> to the specified type.
+    ///     Casts the given <see cref="IPublicKey" /> to the specified type.
     /// </summary>
     /// <param name="key"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     /// <exception cref="InvalidCastException"></exception>
-    public static T Cast<T>(this IPublicKey key) where T : class, IPublicKey 
-        => key as T ?? throw new InvalidCastException($"Cannot cast {key.GetType()} to {typeof(T)}");
+    public static T Cast<T>(this IPublicKey key) where T : class, IPublicKey =>
+        key as T ?? throw new InvalidCastException($"Cannot cast {key.GetType()} to {typeof(T)}");
 }

@@ -13,69 +13,73 @@
 // limitations under the License.
 
 using System;
+using Yubico.YubiKey.InterIndustry.Commands;
 
-namespace Yubico.YubiKey.Oath
+namespace Yubico.YubiKey.Oath;
+
+/// <summary>
+///     Represents the information returned when selecting the OATH application.
+///     Includes information such the salt and challenge which are needed for setting/validating a password.
+/// </summary>
+public class OathApplicationData : ISelectApplicationData
 {
-    /// <summary>
-    /// Represents the information returned when selecting the OATH application. 
-    /// Includes information such the salt and challenge which are needed for setting/validating a password.
-    /// </summary>
-    public class OathApplicationData : InterIndustry.Commands.ISelectApplicationData
+    // We explicitly do not want a default constructor for this command.
+    private OathApplicationData()
     {
-        /// <inheritdoc/>
-        public ReadOnlyMemory<byte> RawData { get; }
-
-        /// <summary>
-        /// The version of the firmware currently running on the YubiKey.
-        /// </summary>
-        public FirmwareVersion Version { get; }
-
-        /// <summary>
-        /// The device identifier.
-        /// </summary>
-        public ReadOnlyMemory<byte> Salt { get; }
-
-        /// <summary>
-        /// The 8 byte challenge if authentication is configured.
-        /// </summary>
-        public ReadOnlyMemory<byte> Challenge { get; }
-
-        /// <summary>
-        /// What hash algorithm to use.
-        /// </summary>
-        public HashAlgorithm Algorithm { get; }
-
-        // We explicitly do not want a default constructor for this command.
-        private OathApplicationData()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="OathApplicationData" /> class.
-        /// </summary>
-        public OathApplicationData(
-            ReadOnlyMemory<byte> rawData,
-            FirmwareVersion version,
-            ReadOnlyMemory<byte> salt,
-            ReadOnlyMemory<byte> challenge,
-            HashAlgorithm algorithm = HashAlgorithm.Sha1)
-        {
-            if (version is null)
-            {
-                throw new ArgumentNullException(nameof(version));
-            }
-
-            if (challenge.Length != 0 && challenge.Length != 8)
-            {
-                throw new ArgumentException(ExceptionMessages.InvalidChallengeLength);
-            }
-
-            RawData = rawData;
-            Version = version;
-            Salt = salt;
-            Challenge = challenge;
-            Algorithm = algorithm;
-        }
+        throw new NotImplementedException();
     }
+
+    /// <summary>
+    ///     Constructs an instance of the <see cref="OathApplicationData" /> class.
+    /// </summary>
+    public OathApplicationData(
+        ReadOnlyMemory<byte> rawData,
+        FirmwareVersion version,
+        ReadOnlyMemory<byte> salt,
+        ReadOnlyMemory<byte> challenge,
+        HashAlgorithm algorithm = HashAlgorithm.Sha1)
+    {
+        if (version is null)
+        {
+            throw new ArgumentNullException(nameof(version));
+        }
+
+        if (challenge.Length != 0 && challenge.Length != 8)
+        {
+            throw new ArgumentException(ExceptionMessages.InvalidChallengeLength);
+        }
+
+        RawData = rawData;
+        Version = version;
+        Salt = salt;
+        Challenge = challenge;
+        Algorithm = algorithm;
+    }
+
+    /// <summary>
+    ///     The version of the firmware currently running on the YubiKey.
+    /// </summary>
+    public FirmwareVersion Version { get; }
+
+    /// <summary>
+    ///     The device identifier.
+    /// </summary>
+    public ReadOnlyMemory<byte> Salt { get; }
+
+    /// <summary>
+    ///     The 8 byte challenge if authentication is configured.
+    /// </summary>
+    public ReadOnlyMemory<byte> Challenge { get; }
+
+    /// <summary>
+    ///     What hash algorithm to use.
+    /// </summary>
+    public HashAlgorithm Algorithm { get; }
+
+    #region ISelectApplicationData Members
+
+    /// <inheritdoc />
+    public ReadOnlyMemory<byte> RawData { get; }
+
+    #endregion
 }

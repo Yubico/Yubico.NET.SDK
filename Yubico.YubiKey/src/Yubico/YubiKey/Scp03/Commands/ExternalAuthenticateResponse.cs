@@ -15,28 +15,29 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Scp03.Commands
-{
-    [Obsolete("Use new ExternalAuthenticateResponse instead")]
-    internal class ExternalAuthenticateResponse : Scp03Response
-    {
-        /// <summary>
-        /// Constructs an ExternalAuthenticateResponse based on a ResponseApdu received from the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">The ResponseApdu that corresponds to the issuance of
-        /// this command.</param>
-        public ExternalAuthenticateResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-            if (responseApdu is null)
-            {
-                throw new ArgumentNullException(nameof(responseApdu));
-            }
+namespace Yubico.YubiKey.Scp03.Commands;
 
-            if (responseApdu.Data.Length != 0)
-            {
-                throw new ArgumentException(ExceptionMessages.IncorrectExternalAuthenticateData, nameof(responseApdu));
-            }
+[Obsolete("Use new ExternalAuthenticateResponse instead")]
+internal class ExternalAuthenticateResponse : Scp03Response
+{
+    /// <summary>
+    ///     Constructs an ExternalAuthenticateResponse based on a ResponseApdu received from the YubiKey.
+    /// </summary>
+    /// <param name="responseApdu">
+    ///     The ResponseApdu that corresponds to the issuance of
+    ///     this command.
+    /// </param>
+    public ExternalAuthenticateResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
+    {
+        if (responseApdu is null)
+        {
+            throw new ArgumentNullException(nameof(responseApdu));
+        }
+
+        if (responseApdu.Data.Length != 0)
+        {
+            throw new ArgumentException(ExceptionMessages.IncorrectExternalAuthenticateData, nameof(responseApdu));
         }
     }
 }

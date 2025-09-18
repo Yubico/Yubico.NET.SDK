@@ -12,52 +12,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+public enum BioEnrollSampleStatus
 {
-    public enum BioEnrollSampleStatus
-    {
-        // CTAP2_ENROLL_FEEDBACK_FP_GOOD
-        FpGood = 0x00,
+    // CTAP2_ENROLL_FEEDBACK_FP_GOOD
+    FpGood = 0x00,
 
-        // CTAP2_ENROLL_FEEDBACK_FP_TOO_HIGH
-        FpTooHigh = 0x01,
+    // CTAP2_ENROLL_FEEDBACK_FP_TOO_HIGH
+    FpTooHigh = 0x01,
 
-        // CTAP2_ENROLL_FEEDBACK_FP_TOO_LOW
-        FpTooLow = 0x02,
+    // CTAP2_ENROLL_FEEDBACK_FP_TOO_LOW
+    FpTooLow = 0x02,
 
-        // CTAP2_ENROLL_FEEDBACK_FP_TOO_LEFT
-        FpTooLeft = 0x03,
+    // CTAP2_ENROLL_FEEDBACK_FP_TOO_LEFT
+    FpTooLeft = 0x03,
 
-        // CTAP2_ENROLL_FEEDBACK_FP_TOO_RIGHT
-        FpTooRight = 0x04,
+    // CTAP2_ENROLL_FEEDBACK_FP_TOO_RIGHT
+    FpTooRight = 0x04,
 
-        // CTAP2_ENROLL_FEEDBACK_FP_TOO_FAST
-        FpTooFast = 0x05,
+    // CTAP2_ENROLL_FEEDBACK_FP_TOO_FAST
+    FpTooFast = 0x05,
 
-        // CTAP2_ENROLL_FEEDBACK_FP_TOO_SLOW
-        FpTooSlow = 0x06,
+    // CTAP2_ENROLL_FEEDBACK_FP_TOO_SLOW
+    FpTooSlow = 0x06,
 
-        // CTAP2_ENROLL_FEEDBACK_FP_POOR_QUALITY
-        FpPoorQuality = 0x07,
+    // CTAP2_ENROLL_FEEDBACK_FP_POOR_QUALITY
+    FpPoorQuality = 0x07,
 
-        // CTAP2_ENROLL_FEEDBACK_FP_TOO_SKEWED
-        FpTooSkewed = 0x08,
+    // CTAP2_ENROLL_FEEDBACK_FP_TOO_SKEWED
+    FpTooSkewed = 0x08,
 
-        // CTAP2_ENROLL_FEEDBACK_FP_TOO_SHORT
-        FpTooShort = 0x09,
+    // CTAP2_ENROLL_FEEDBACK_FP_TOO_SHORT
+    FpTooShort = 0x09,
 
-        // CTAP2_ENROLL_FEEDBACK_FP_MERGE_FAILURE
-        FpMergeFailure = 0x0A,
+    // CTAP2_ENROLL_FEEDBACK_FP_MERGE_FAILURE
+    FpMergeFailure = 0x0A,
 
-        // CTAP2_ENROLL_FEEDBACK_FP_EXISTS
-        FpExists = 0x0B,
+    // CTAP2_ENROLL_FEEDBACK_FP_EXISTS
+    FpExists = 0x0B,
 
-        // CTAP2_ENROLL_FEEDBACK_NO_USER_ACTIVITY
-        NoUserActivity = 0x0D,
+    // CTAP2_ENROLL_FEEDBACK_NO_USER_ACTIVITY
+    NoUserActivity = 0x0D,
 
-        // CTAP2_ENROLL_FEEDBACK_NO_USER_PRESENCE_TRANSITION
-        NoUserPresenceTransition = 0x0E,
+    // CTAP2_ENROLL_FEEDBACK_NO_USER_PRESENCE_TRANSITION
+    NoUserPresenceTransition = 0x0E,
 
-        Unknown = -1,
-    }
+    Unknown = -1
 }

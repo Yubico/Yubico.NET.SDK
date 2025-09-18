@@ -15,71 +15,76 @@
 using System;
 using Yubico.YubiKey.Otp.Operations;
 
-namespace Yubico.YubiKey.Otp
+namespace Yubico.YubiKey.Otp;
+
+/// <summary>
+///     Interface for <see cref="OtpSession" />.
+/// </summary>
+/// <remarks>
+///     This exists to facilitate mocking and dependency-injection for unit tests.
+///     Unless you are developing another mock session for testing, you have no
+///     reason to directly use this interface.
+/// </remarks>
+public interface IOtpSession : IDisposable
 {
-    /// <summary>
-    /// Interface for <see cref="OtpSession"/>.
-    /// </summary>
-    /// <remarks>
-    /// This exists to facilitate mocking and dependency-injection for unit tests.
-    /// Unless you are developing another mock session for testing, you have no
-    /// reason to directly use this interface.
-    /// </remarks>
-    public interface IOtpSession : IDisposable
-    {
-        #region OTP Operation Object Factory
-        /// <inheritdoc cref="OtpSession.CalculateChallengeResponse(Slot)"/>
-        public CalculateChallengeResponse CalculateChallengeResponse(Slot slot);
+    #region OTP Operation Object Factory
 
-        /// <inheritdoc cref="OtpSession.ConfigureYubicoOtp(Slot)"/>
-        public ConfigureYubicoOtp ConfigureYubicoOtp(Slot slot);
+    /// <inheritdoc cref="OtpSession.CalculateChallengeResponse(Slot)" />
+    CalculateChallengeResponse CalculateChallengeResponse(Slot slot);
 
-        /// <inheritdoc cref="OtpSession.DeleteSlotConfiguration(Slot)"/>
-        public DeleteSlotConfiguration DeleteSlotConfiguration(Slot slot);
+    /// <inheritdoc cref="OtpSession.ConfigureYubicoOtp(Slot)" />
+    ConfigureYubicoOtp ConfigureYubicoOtp(Slot slot);
 
-        /// <inheritdoc cref="OtpSession.ConfigureChallengeResponse(Slot)"/>
-        public ConfigureChallengeResponse ConfigureChallengeResponse(Slot slot);
+    /// <inheritdoc cref="OtpSession.DeleteSlotConfiguration(Slot)" />
+    DeleteSlotConfiguration DeleteSlotConfiguration(Slot slot);
 
-        /// <inheritdoc cref="OtpSession.ConfigureHotp(Slot)"/>
-        public ConfigureHotp ConfigureHotp(Slot slot);
+    /// <inheritdoc cref="OtpSession.ConfigureChallengeResponse(Slot)" />
+    ConfigureChallengeResponse ConfigureChallengeResponse(Slot slot);
 
-        /// <inheritdoc cref="OtpSession.ConfigureNdef(Slot)"/>
-        public ConfigureNdef ConfigureNdef(Slot slot);
+    /// <inheritdoc cref="OtpSession.ConfigureHotp(Slot)" />
+    ConfigureHotp ConfigureHotp(Slot slot);
 
-        /// <inheritdoc cref="OtpSession.ConfigureStaticPassword(Slot)"/>
-        public ConfigureStaticPassword ConfigureStaticPassword(Slot slot);
+    /// <inheritdoc cref="OtpSession.ConfigureNdef(Slot)" />
+    ConfigureNdef ConfigureNdef(Slot slot);
 
-        /// <inheritdoc cref="OtpSession.UpdateSlot(Slot)"/>
-        public UpdateSlot UpdateSlot(Slot slot);
-        #endregion
+    /// <inheritdoc cref="OtpSession.ConfigureStaticPassword(Slot)" />
+    ConfigureStaticPassword ConfigureStaticPassword(Slot slot);
 
-        #region Non-Builder Implementations
-        /// <inheritdoc cref="OtpSession.DeleteSlot(Slot)"/>
-        public void DeleteSlot(Slot slot);
+    /// <inheritdoc cref="OtpSession.UpdateSlot(Slot)" />
+    UpdateSlot UpdateSlot(Slot slot);
 
-        /// <inheritdoc cref="OtpSession.SwapSlots"/>
-        public void SwapSlots();
+    #endregion
 
-        /// <inheritdoc cref="OtpSession.ReadNdefTag"/>
-        public NdefDataReader ReadNdefTag();
-        #endregion
+    #region Non-Builder Implementations
 
-        #region Properties
-        /// <inheritdoc cref="OtpStatus.ShortPressConfigured"/>
-        public bool IsShortPressConfigured { get; }
+    /// <inheritdoc cref="OtpSession.DeleteSlot(Slot)" />
+    void DeleteSlot(Slot slot);
 
-        /// <inheritdoc cref="OtpStatus.ShortPressRequiresTouch"/>
-        public bool ShortPressRequiresTouch { get; }
+    /// <inheritdoc cref="OtpSession.SwapSlots" />
+    void SwapSlots();
 
-        /// <inheritdoc cref="OtpStatus.LongPressConfigured"/>
-        public bool IsLongPressConfigured { get; }
+    /// <inheritdoc cref="OtpSession.ReadNdefTag" />
+    NdefDataReader ReadNdefTag();
 
-        /// <inheritdoc cref="OtpStatus.LongPressRequiresTouch"/>
-        public bool LongPressRequiresTouch { get; }
+    #endregion
 
-        internal FirmwareVersion FirmwareVersion { get; }
+    #region Properties
 
-        internal IYubiKeyDevice YubiKey { get; }
-        #endregion
-    }
+    /// <inheritdoc cref="OtpStatus.ShortPressConfigured" />
+    bool IsShortPressConfigured { get; }
+
+    /// <inheritdoc cref="OtpStatus.ShortPressRequiresTouch" />
+    bool ShortPressRequiresTouch { get; }
+
+    /// <inheritdoc cref="OtpStatus.LongPressConfigured" />
+    bool IsLongPressConfigured { get; }
+
+    /// <inheritdoc cref="OtpStatus.LongPressRequiresTouch" />
+    bool LongPressRequiresTouch { get; }
+
+    internal FirmwareVersion FirmwareVersion { get; }
+
+    internal IYubiKeyDevice YubiKey { get; }
+
+    #endregion
 }

@@ -65,6 +65,8 @@ public class BaseYubiHsmAuthResponseTests
         Assert.Equal(expectedMessage, response.StatusMessage);
     }
 
+    #region Nested type: SampleYubiHsmAuthResponse
+
     public class SampleYubiHsmAuthResponse : BaseYubiHsmAuthResponse
     {
         public SampleYubiHsmAuthResponse(
@@ -72,4 +74,6 @@ public class BaseYubiHsmAuthResponseTests
         {
         }
     }
+
+    #endregion
 }

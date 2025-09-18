@@ -19,12 +19,12 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKey.Cryptography;
 
 /// <summary>
-/// A class that converts public key parameters to ASN.1 DER encoding.
+///     A class that converts public key parameters to ASN.1 DER encoding.
 /// </summary>
 internal static class AsnPublicKeyEncoder
 {
     /// <summary>
-    /// Converts a public point and key type to ASN.1 DER encoded format.
+    ///     Converts a public point and key type to ASN.1 DER encoded format.
     /// </summary>
     /// <param name="publicPoint">The public key point as a byte array.</param>
     /// <param name="keyType">The type of the key.</param>
@@ -44,7 +44,7 @@ internal static class AsnPublicKeyEncoder
     }
 
     /// <summary>
-    /// Converts an RSA public key from modulus and exponent to ASN.1 DER encoded format.
+    ///     Converts an RSA public key from modulus and exponent to ASN.1 DER encoded format.
     /// </summary>
     /// <param name="modulus">The modulus of the RSA key as a byte array.</param>
     /// <param name="exponent">The exponent of the RSA key as a byte array.</param>
@@ -96,7 +96,7 @@ internal static class AsnPublicKeyEncoder
     }
 
     /// <summary>
-    /// Converts RSA public key parameters to ASN.1 DER encoded format.
+    ///     Converts RSA public key parameters to ASN.1 DER encoded format.
     /// </summary>
     /// <param name="parameters">The RSA public key parameters.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
@@ -112,7 +112,7 @@ internal static class AsnPublicKeyEncoder
     }
 
     /// <summary>
-    /// Converts EC public key parameters to ASN.1 DER encoded format.
+    ///     Converts EC public key parameters to ASN.1 DER encoded format.
     /// </summary>
     /// <param name="parameters">The EC public key parameters.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>

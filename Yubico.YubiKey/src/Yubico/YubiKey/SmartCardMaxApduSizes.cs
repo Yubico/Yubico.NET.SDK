@@ -16,22 +16,22 @@ namespace Yubico.YubiKey;
 
 #pragma warning disable CA1707 // Allow underscore in constant
 /// <summary>
-/// This contains the maximum size (in bytes) of APDU commands for the various YubiKey models.
+///     This contains the maximum size (in bytes) of APDU commands for the various YubiKey models.
 /// </summary>
 public static class SmartCardMaxApduSizes
 {
     /// <summary>
-    /// The max APDU command size for the YubiKey NEO
+    ///     The max APDU command size for the YubiKey NEO
     /// </summary>
     public const int NEO = 1390;
-    
+
     /// <summary>
-    /// The max APDU command size for the YubiKey 4 and greater
+    ///     The max APDU command size for the YubiKey 4 and greater
     /// </summary>
     public const int YK4 = 2038;
 
     /// <summary>
-    /// The max APDU command size for the YubiKey 4.3 and greater
+    ///     The max APDU command size for the YubiKey 4.3 and greater
     /// </summary>
     public const int YK4_3 = 3062;
 }

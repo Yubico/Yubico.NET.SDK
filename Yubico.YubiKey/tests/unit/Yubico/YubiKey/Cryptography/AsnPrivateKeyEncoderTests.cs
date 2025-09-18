@@ -306,6 +306,8 @@ public class AsnPrivateKeyEncoderTests
         return dataToSign;
     }
 
+    #region Nested type: KeyEquivalenceTestHelper
+
     public static class KeyEquivalenceTestHelper
     {
         public static void VerifyFunctionalEquivalence(
@@ -467,4 +469,6 @@ public class AsnPrivateKeyEncoderTests
             return result;
         }
     }
+
+    #endregion
 }

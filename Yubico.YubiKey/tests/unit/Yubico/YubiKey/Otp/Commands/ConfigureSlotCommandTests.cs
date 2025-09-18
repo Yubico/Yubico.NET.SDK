@@ -99,7 +99,7 @@ public class ConfigureSlotCommandTests
 
         command.SetFixedData(Array.Empty<byte>());
         var data = command.CreateCommandApdu().Data;
-        var dataSlice = data.Slice(0, SlotConfigureBase.FixedDataLength).Span;
+        var dataSlice = data[..SlotConfigureBase.FixedDataLength].Span;
 
         Assert.True(dataSlice.SequenceEqual(expectedFixed));
     }
@@ -112,11 +112,10 @@ public class ConfigureSlotCommandTests
 
         command.SetFixedData(new byte[expectedValidFixedDataLength]);
         var data = command.CreateCommandApdu().Data;
-        var dataSlice = data.Slice(
-            SlotConfigureBase.FixedDataLength
-            + SlotConfigureBase.UidLength
-            + SlotConfigureBase.AesKeyLength
-            + SlotConfigureBase.AccessCodeLength).Span[0];
+        var dataSlice = data[(SlotConfigureBase.FixedDataLength
+                              + SlotConfigureBase.UidLength
+                              + SlotConfigureBase.AesKeyLength
+                              + SlotConfigureBase.AccessCodeLength)..].Span[0];
 
         Assert.Equal(expectedValidFixedDataLength, dataSlice);
     }
@@ -346,11 +345,11 @@ public class ConfigureSlotCommandTests
         };
 
         var data = command.CreateCommandApdu().Data;
-        var dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                   + ConfigureSlotCommand.UidLength
-                                   + ConfigureSlotCommand.AesKeyLength
-                                   + ConfigureSlotCommand.AccessCodeLength
-                                   + 1).Span[0];
+        var dataSlice = data[(ConfigureSlotCommand.FixedDataLength
+                              + ConfigureSlotCommand.UidLength
+                              + ConfigureSlotCommand.AesKeyLength
+                              + ConfigureSlotCommand.AccessCodeLength
+                              + 1)..].Span[0];
 
         Assert.Equal(expectedFlags, (ExtendedFlags)dataSlice);
     }
@@ -365,11 +364,11 @@ public class ConfigureSlotCommandTests
         };
 
         var data = command.CreateCommandApdu().Data;
-        var dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                   + ConfigureSlotCommand.UidLength
-                                   + ConfigureSlotCommand.AesKeyLength
-                                   + ConfigureSlotCommand.AccessCodeLength
-                                   + 2).Span[0];
+        var dataSlice = data[(ConfigureSlotCommand.FixedDataLength
+                              + ConfigureSlotCommand.UidLength
+                              + ConfigureSlotCommand.AesKeyLength
+                              + ConfigureSlotCommand.AccessCodeLength
+                              + 2)..].Span[0];
 
         Assert.Equal(expectedFlags, (TicketFlags)dataSlice);
     }
@@ -385,11 +384,11 @@ public class ConfigureSlotCommandTests
         };
 
         var data = command.CreateCommandApdu().Data;
-        var dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                   + ConfigureSlotCommand.UidLength
-                                   + ConfigureSlotCommand.AesKeyLength
-                                   + ConfigureSlotCommand.AccessCodeLength
-                                   + 3).Span[0];
+        var dataSlice = data[(ConfigureSlotCommand.FixedDataLength
+                              + ConfigureSlotCommand.UidLength
+                              + ConfigureSlotCommand.AesKeyLength
+                              + ConfigureSlotCommand.AccessCodeLength
+                              + 3)..].Span[0];
 
         Assert.Equal(expectedFlags, (ConfigurationFlags)dataSlice);
     }

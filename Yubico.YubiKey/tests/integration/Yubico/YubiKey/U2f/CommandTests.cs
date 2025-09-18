@@ -51,10 +51,14 @@ public class CommandTests : IDisposable
         Assert.NotNull(_fidoConnection);
     }
 
+    #region IDisposable Members
+
     public void Dispose()
     {
         _fidoConnection.Dispose();
     }
+
+    #endregion
 
     [Fact]
     [Trait(TraitTypes.Category, TestCategories.Simple)]

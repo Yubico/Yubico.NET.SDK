@@ -12,30 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.YubiHsmAuth
+namespace Yubico.YubiKey.YubiHsmAuth;
+
+/// <summary>
+///     Tag values for TLV-formatted data associated with the YubiHSM Auth
+///     application.
+/// </summary>
+internal static class DataTagConstants
 {
+    public const byte Label = 0x71;
+
     /// <summary>
-    /// Tag values for TLV-formatted data associated with the YubiHSM Auth
-    /// application.
+    ///     The data contains a Credential and the number of remaining
+    ///     retries.
     /// </summary>
-    internal static class DataTagConstants
-    {
-        public const byte Label = 0x71;
+    public const byte LabelList = 0x72;
 
-        /// <summary>
-        /// The data contains a Credential and the number of remaining
-        /// retries.
-        /// </summary>
-        public const byte LabelList = 0x72;
-
-        public const byte Password = 0x73;
-        public const byte CryptographicKeyType = 0x74;
-        public const byte EncryptionKey = 0x75;
-        public const byte MacKey = 0x76;
-        public const byte Context = 0x77;
-        public const byte Response = 0x78;
-        public const byte Version = 0x79;
-        public const byte Touch = 0x7a;
-        public const byte ManagementKey = 0x7b;
-    }
+    public const byte Password = 0x73;
+    public const byte CryptographicKeyType = 0x74;
+    public const byte EncryptionKey = 0x75;
+    public const byte MacKey = 0x76;
+    public const byte Context = 0x77;
+    public const byte Response = 0x78;
+    public const byte Version = 0x79;
+    public const byte Touch = 0x7a;
+    public const byte ManagementKey = 0x7b;
 }

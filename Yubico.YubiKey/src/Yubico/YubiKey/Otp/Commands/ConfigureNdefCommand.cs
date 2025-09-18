@@ -16,107 +16,110 @@ using System;
 using System.Globalization;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+/// <summary>
+///     Applies a configuration to one of the two configurable NDEF slots. Note that only the primary
+///     NDEF slot (Slot.ShortPress) is accessible through NFC.
+/// </summary>
+public class ConfigureNdefCommand : IYubiKeyCommand<ReadStatusResponse>
 {
+    private const int NdefConfigSize = 62;
+    private const int AccessCodeOffset = 56;
+
     /// <summary>
-    /// Applies a configuration to one of the two configurable NDEF slots. Note that only the primary
-    /// NDEF slot (Slot.ShortPress) is accessible through NFC.
+    ///     The required size for the AccessCode buffer.
     /// </summary>
-    public class ConfigureNdefCommand : IYubiKeyCommand<ReadStatusResponse>
+    public const int AccessCodeLength = 6;
+
+    private readonly byte[] _configurationBuffer;
+
+    private readonly Slot _ndefSlot;
+
+    /// <summary>
+    ///     Constructs an instance of the <see cref="ConfigureNdefCommand" /> class.
+    /// </summary>
+    /// <param name="slot">
+    ///     The slot to which the configuration should apply. The <see cref="Slot.ShortPress" /> slot
+    ///     corresponds to the primary NDEF configuration.
+    /// </param>
+    /// <param name="configuration">
+    ///     The configuration data for the slot. Use the <see cref="NdefConfig" /> class and methods
+    ///     to generate this data.
+    /// </param>
+    public ConfigureNdefCommand(Slot slot, ReadOnlySpan<byte> configuration) :
+        this(slot, configuration, ReadOnlySpan<byte>.Empty)
     {
-        private const int NdefConfigSize = 62;
-        private const int AccessCodeOffset = 56;
+    }
 
-        private readonly Slot _ndefSlot;
-        private readonly byte[] _configurationBuffer;
+    /// <summary>
+    ///     Constructs an instance of the <see cref="ConfigureNdefCommand" /> class for a slot which
+    ///     is protected by an access code.
+    /// </summary>
+    /// <param name="slot">
+    ///     The slot to which the configuration should apply. The <see cref="Slot.ShortPress" /> slot
+    ///     corresponds to the primary NDEF configuration.
+    /// </param>
+    /// <param name="configuration">
+    ///     The configuration data for the slot. Use the <see cref="NdefConfig" /> class and methods
+    ///     to generate this data.
+    /// </param>
+    /// <param name="accessCode">The access code protecting the slot.</param>
+    /// <remarks>
+    ///     YubiKey 5 NFC devices with firmware versions 5.0.0 to 5.2.6 and 5.3.0 to 5.3.1 are affected
+    ///     by [YSA-2020-04](https://www.yubico.com/support/security-advisories/ysa-2020-04/). Devices
+    ///     with this firmware will not verify access codes on NDEF slots correctly. Please read the
+    ///     security advisory for more details.
+    /// </remarks>
+    public ConfigureNdefCommand(Slot slot, ReadOnlySpan<byte> configuration, ReadOnlySpan<byte> accessCode)
+    {
+        _ndefSlot = slot;
 
-        /// <summary>
-        /// The required size for the AccessCode buffer.
-        /// </summary>
-        public const int AccessCodeLength = 6;
+        _configurationBuffer = new byte[NdefConfigSize];
 
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="ConfigureNdefCommand"/> class.
-        /// </summary>
-        /// <param name="slot">
-        /// The slot to which the configuration should apply. The <see cref="Slot.ShortPress"/> slot
-        /// corresponds to the primary NDEF configuration.
-        /// </param>
-        /// <param name="configuration">
-        /// The configuration data for the slot. Use the <see cref="NdefConfig"/> class and methods
-        /// to generate this data.
-        /// </param>
-        public ConfigureNdefCommand(Slot slot, ReadOnlySpan<byte> configuration) :
-            this(slot, configuration, ReadOnlySpan<byte>.Empty)
+        if (configuration.Length != NdefConfigSize)
         {
-
+            throw new ArgumentException(ExceptionMessages.InvalidNdefConfig, nameof(configuration));
         }
 
-        /// <summary>
-        /// Constructs an instance of the <see cref="ConfigureNdefCommand"/> class for a slot which
-        /// is protected by an access code.
-        /// </summary>
-        /// <param name="slot">
-        /// The slot to which the configuration should apply. The <see cref="Slot.ShortPress"/> slot
-        /// corresponds to the primary NDEF configuration.
-        /// </param>
-        /// <param name="configuration">
-        /// The configuration data for the slot. Use the <see cref="NdefConfig"/> class and methods
-        /// to generate this data.
-        /// </param>
-        /// <param name="accessCode">The access code protecting the slot.</param>
-        /// <remarks>
-        /// YubiKey 5 NFC devices with firmware versions 5.0.0 to 5.2.6 and 5.3.0 to 5.3.1 are affected
-        /// by [YSA-2020-04](https://www.yubico.com/support/security-advisories/ysa-2020-04/). Devices
-        /// with this firmware will not verify access codes on NDEF slots correctly. Please read the
-        /// security advisory for more details.
-        /// </remarks>
-        public ConfigureNdefCommand(Slot slot, ReadOnlySpan<byte> configuration, ReadOnlySpan<byte> accessCode)
+        configuration.CopyTo(_configurationBuffer.AsSpan());
+
+        if (accessCode.Length > 0)
         {
-            _ndefSlot = slot;
-
-            _configurationBuffer = new byte[NdefConfigSize];
-
-            if (configuration.Length != NdefConfigSize)
+            if (accessCode.Length != AccessCodeLength)
             {
-                throw new ArgumentException(ExceptionMessages.InvalidNdefConfig, nameof(configuration));
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidPropertyLength,
+                        nameof(accessCode),
+                        AccessCodeLength,
+                        accessCode.Length));
             }
 
-            configuration.CopyTo(_configurationBuffer.AsSpan());
-
-            if (accessCode.Length > 0)
-            {
-                if (accessCode.Length != AccessCodeLength)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPropertyLength,
-                            nameof(accessCode),
-                            AccessCodeLength,
-                            accessCode.Length));
-                }
-
-                accessCode.CopyTo(_configurationBuffer.AsSpan(AccessCodeOffset, AccessCodeLength));
-            }
+            accessCode.CopyTo(_configurationBuffer.AsSpan(AccessCodeOffset, AccessCodeLength));
         }
+    }
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
+    #region IYubiKeyCommand<ReadStatusResponse> Members
+
+    /// <inheritdoc />
+    public YubiKeyApplication Application => YubiKeyApplication.Otp;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = OtpConstants.RequestSlotInstruction,
             P1 =
                 _ndefSlot == Slot.ShortPress
-                ? OtpConstants.ProgramNDEFShortPress
-                : OtpConstants.ProgramNDEFLongPress,
+                    ? OtpConstants.ProgramNDEFShortPress
+                    : OtpConstants.ProgramNDEFLongPress,
             Data = _configurationBuffer
         };
 
-        /// <inheritdoc />
-        public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ReadStatusResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

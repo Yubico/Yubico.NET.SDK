@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+/// <summary>
+///     Compatibility switch names that can be used with `AppContext.SetSwitch` to control breaking behavioral changes
+///     within the `Yubico.YubiKey` layer.
+/// </summary>
+public static class YubiKeyCompatSwitches
 {
     /// <summary>
-    /// Compatibility switch names that can be used with `AppContext.SetSwitch` to control breaking behavioral changes
-    /// within the `Yubico.YubiKey` layer.
+    ///     If set to true, the SDK will ignore whether a YubiKey is capable of faster USB interface switching
+    ///     and always use the 3-second reclaim timeout.
     /// </summary>
-    public static class YubiKeyCompatSwitches
-    {
-        /// <summary>
-        /// If set to true, the SDK will ignore whether a YubiKey is capable of faster USB interface switching
-        /// and always use the 3-second reclaim timeout.
-        /// </summary>
-        public const string UseOldReclaimTimeoutBehavior = nameof(UseOldReclaimTimeoutBehavior);
-    }
+    public const string UseOldReclaimTimeoutBehavior = nameof(UseOldReclaimTimeoutBehavior);
 }

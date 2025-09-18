@@ -14,20 +14,23 @@
 
 using System;
 
-namespace Yubico.YubiKey.InterIndustry.Commands
-{
-    /// <inheritdoc cref="ISelectApplicationData"/>
-    public class GenericSelectApplicationData : ISelectApplicationData
-    {
-        /// <inheritdoc/>
-        public ReadOnlyMemory<byte> RawData { get; }
+namespace Yubico.YubiKey.InterIndustry.Commands;
 
-        /// <summary>
-        /// Constructs an instance of the <see cref="GenericSelectApplicationData" /> class.
-        /// </summary>
-        public GenericSelectApplicationData(ReadOnlyMemory<byte> rawData)
-        {
-            RawData = rawData;
-        }
+/// <inheritdoc cref="ISelectApplicationData" />
+public class GenericSelectApplicationData : ISelectApplicationData
+{
+    /// <summary>
+    ///     Constructs an instance of the <see cref="GenericSelectApplicationData" /> class.
+    /// </summary>
+    public GenericSelectApplicationData(ReadOnlyMemory<byte> rawData)
+    {
+        RawData = rawData;
     }
+
+    #region ISelectApplicationData Members
+
+    /// <inheritdoc />
+    public ReadOnlyMemory<byte> RawData { get; }
+
+    #endregion
 }

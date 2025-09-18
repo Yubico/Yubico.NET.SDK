@@ -14,32 +14,34 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+/// <summary>
+///     Determines if the YubiKey supports FIPS, and if so, what the status of it is.
+/// </summary>
+public class QueryFipsModeCommand : IYubiKeyCommand<QueryFipsModeResponse>
 {
     /// <summary>
-    /// Determines if the YubiKey supports FIPS, and if so, what the status of it is.
+    ///     Constructs a new instance of the QueryFipsModeCommand class.
     /// </summary>
-    public class QueryFipsModeCommand : IYubiKeyCommand<QueryFipsModeResponse>
+    public QueryFipsModeCommand()
     {
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
+    }
 
-        /// <summary>
-        /// Constructs a new instance of the QueryFipsModeCommand class.
-        /// </summary>
-        public QueryFipsModeCommand()
-        {
+    #region IYubiKeyCommand<QueryFipsModeResponse> Members
 
-        }
+    public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = OtpConstants.RequestSlotInstruction,
             P1 = OtpConstants.QueryFipsSlot
         };
 
-        /// <inheritdoc />
-        public QueryFipsModeResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new QueryFipsModeResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public QueryFipsModeResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

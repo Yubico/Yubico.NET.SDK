@@ -15,94 +15,97 @@
 using System;
 using System.Security.Cryptography;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp;
+
+internal class SessionKeys : IDisposable
 {
-    internal class SessionKeys : IDisposable
+    private const byte KeySizeBytes = 16;
+    private readonly Memory<byte> _dataEncryptionKey = new byte[KeySizeBytes];
+    private readonly Memory<byte> _encryptionKey = new byte[KeySizeBytes];
+    private readonly Memory<byte> _macKey = new byte[KeySizeBytes];
+    private readonly Memory<byte> _rmacKey = new byte[KeySizeBytes];
+    private bool _disposed;
+
+    /// <summary>
+    ///     Session keys for Secure Channel Protocol (SCP).
+    /// </summary>
+    /// <param name="macKey">The session MAC key.</param>
+    /// <param name="encryptionKey">The session encryption key.</param>
+    /// <param name="rmacKey">The session RMAC key.</param>
+    /// <param name="dataEncryptionKey">The session data encryption key. Optional.</param>
+    public SessionKeys(
+        ReadOnlyMemory<byte> macKey,
+        ReadOnlyMemory<byte> encryptionKey,
+        ReadOnlyMemory<byte> rmacKey,
+        ReadOnlyMemory<byte> dataEncryptionKey)
     {
-        /// <summary>
-        /// Gets the session MAC key.
-        /// </summary>
-        public ReadOnlyMemory<byte> MacKey => _macKey;
+        ValidateKeyLength(macKey, nameof(macKey));
+        ValidateKeyLength(encryptionKey, nameof(encryptionKey));
+        ValidateKeyLength(rmacKey, nameof(rmacKey));
+        ValidateKeyLength(dataEncryptionKey, nameof(dataEncryptionKey));
 
-        /// <summary>
-        /// Gets the session encryption key.    
-        /// </summary>
-        public ReadOnlyMemory<byte> EncKey => _encryptionKey;
+        macKey.CopyTo(_macKey);
+        encryptionKey.CopyTo(_encryptionKey);
+        rmacKey.CopyTo(_rmacKey);
+        dataEncryptionKey.CopyTo(_dataEncryptionKey);
+    }
 
-        /// <summary>
-        /// Gets the session RMAC key.
-        /// </summary>
-        public ReadOnlyMemory<byte> RmacKey => _rmacKey;
+    /// <summary>
+    ///     Gets the session MAC key.
+    /// </summary>
+    public ReadOnlyMemory<byte> MacKey => _macKey;
 
-        /// <summary>
-        /// Gets the session data encryption key (DEK).
-        /// </summary>
-        public ReadOnlyMemory<byte>? DataEncryptionKey => _dataEncryptionKey;
+    /// <summary>
+    ///     Gets the session encryption key.
+    /// </summary>
+    public ReadOnlyMemory<byte> EncKey => _encryptionKey;
 
-        private const byte KeySizeBytes = 16;
-        private readonly Memory<byte> _macKey = new byte[KeySizeBytes];
-        private readonly Memory<byte> _encryptionKey = new byte[KeySizeBytes];
-        private readonly Memory<byte> _rmacKey = new byte[KeySizeBytes];
-        private readonly Memory<byte> _dataEncryptionKey = new byte[KeySizeBytes];
-        private bool _disposed;
+    /// <summary>
+    ///     Gets the session RMAC key.
+    /// </summary>
+    public ReadOnlyMemory<byte> RmacKey => _rmacKey;
 
-        /// <summary>
-        /// Session keys for Secure Channel Protocol (SCP).
-        /// </summary>
-        /// <param name="macKey">The session MAC key.</param>
-        /// <param name="encryptionKey">The session encryption key.</param>
-        /// <param name="rmacKey">The session RMAC key.</param>
-        /// <param name="dataEncryptionKey">The session data encryption key. Optional.</param>
-        public SessionKeys(
-            ReadOnlyMemory<byte> macKey,
-            ReadOnlyMemory<byte> encryptionKey,
-            ReadOnlyMemory<byte> rmacKey,
-            ReadOnlyMemory<byte> dataEncryptionKey)
+    /// <summary>
+    ///     Gets the session data encryption key (DEK).
+    /// </summary>
+    public ReadOnlyMemory<byte>? DataEncryptionKey => _dataEncryptionKey;
+
+    #region IDisposable Members
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    private static void ValidateKeyLength(ReadOnlyMemory<byte> key, string paramName)
+    {
+        if (key.Length != KeySizeBytes)
         {
-            ValidateKeyLength(macKey, nameof(macKey));
-            ValidateKeyLength(encryptionKey, nameof(encryptionKey));
-            ValidateKeyLength(rmacKey, nameof(rmacKey));
-            ValidateKeyLength(dataEncryptionKey, nameof(dataEncryptionKey));
+            throw new ArgumentException("Incorrect session key length. Must be 16.", paramName);
+        }
+    }
 
-            macKey.CopyTo(_macKey);
-            encryptionKey.CopyTo(_encryptionKey);
-            rmacKey.CopyTo(_rmacKey);
-            dataEncryptionKey.CopyTo(_dataEncryptionKey);
+    // Overwrite the memory of the keys
+    private void Dispose(bool disposing)
+    {
+        if (_disposed)
+        {
+            return;
         }
 
-        private static void ValidateKeyLength(ReadOnlyMemory<byte> key, string paramName)
+        if (!disposing)
         {
-            if (key.Length != KeySizeBytes)
-            {
-                throw new ArgumentException("Incorrect session key length. Must be 16.", paramName);
-            }
+            return;
         }
 
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
+        CryptographicOperations.ZeroMemory(_macKey.Span);
+        CryptographicOperations.ZeroMemory(_encryptionKey.Span);
+        CryptographicOperations.ZeroMemory(_rmacKey.Span);
+        CryptographicOperations.ZeroMemory(_dataEncryptionKey.Span);
 
-        // Overwrite the memory of the keys
-        private void Dispose(bool disposing)
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            if (!disposing)
-            {
-                return;
-            }
-
-            CryptographicOperations.ZeroMemory(_macKey.Span);
-            CryptographicOperations.ZeroMemory(_encryptionKey.Span);
-            CryptographicOperations.ZeroMemory(_rmacKey.Span);
-            CryptographicOperations.ZeroMemory(_dataEncryptionKey.Span);
-
-            _disposed = true;
-        }
+        _disposed = true;
     }
 }

@@ -20,19 +20,19 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKey.Cryptography;
 
 /// <summary>
-/// A class that converts ASN.1 DER encoded private keys to parameters and values.
+///     A class that converts ASN.1 DER encoded private keys to parameters and values.
 /// </summary>
 internal class AsnPrivateKeyDecoder
 {
     /// <summary>
-    /// Creates an instance of <see cref="IPrivateKey"/> from a PKCS#8
-    /// ASN.1 DER-encoded private key.
+    ///     Creates an instance of <see cref="IPrivateKey" /> from a PKCS#8
+    ///     ASN.1 DER-encoded private key.
     /// </summary>
     /// <param name="pkcs8EncodedKey">
-    /// The ASN.1 DER-encoded private key.
+    ///     The ASN.1 DER-encoded private key.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="IPrivateKey"/>.
+    ///     A new instance of <see cref="IPrivateKey" />.
     /// </returns>
     /// <exception cref="CryptographicException">Thrown if privateKey does not match expected format.</exception>
     /// <exception cref="InvalidOperationException">Thrown if the algorithm is not supported</exception>
@@ -82,18 +82,20 @@ internal class AsnPrivateKeyDecoder
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="Curve25519PrivateKey"/> from a PKCS#8
-    /// ASN.1 DER-encoded private key.
+    ///     Creates an instance of <see cref="Curve25519PrivateKey" /> from a PKCS#8
+    ///     ASN.1 DER-encoded private key.
     /// </summary>
     /// <param name="pkcs8EncodedKey">
-    /// The ASN.1 DER-encoded private key.
+    ///     The ASN.1 DER-encoded private key.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="Curve25519PrivateKey"/>.
+    ///     A new instance of <see cref="Curve25519PrivateKey" />.
     /// </returns>
     /// <exception cref="CryptographicException">Thrown if privateKey does not match expected format.</exception>
-    /// <exception cref="ArgumentException">Thrown if the algorithm is not <see cref="Oids.X25519"/> or 
-    /// <see cref="Oids.Ed25519"/></exception>
+    /// <exception cref="ArgumentException">
+    ///     Thrown if the algorithm is not <see cref="Oids.X25519" /> or
+    ///     <see cref="Oids.Ed25519" />
+    /// </exception>
     public static Curve25519PrivateKey CreateCurve25519Key(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         (byte[] privateKey, var keyType) = GetCurve25519PrivateKeyData(pkcs8EncodedKey);

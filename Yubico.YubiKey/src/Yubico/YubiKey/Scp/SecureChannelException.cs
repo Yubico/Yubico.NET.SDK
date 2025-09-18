@@ -14,28 +14,24 @@
 
 using System;
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp;
+
+/// <summary>
+///     Represents errors that occur during encoding or decoding data for SCP.
+/// </summary>
+public class SecureChannelException : Exception
 {
-    /// <summary>
-    /// Represents errors that occur during encoding or decoding data for SCP.
-    /// </summary>
-    public class SecureChannelException : Exception
+    public SecureChannelException()
     {
-        public SecureChannelException()
-        {
+    }
 
-        }
+    public SecureChannelException(string message) :
+        base($"SCP CardDataException: {message}")
+    {
+    }
 
-        public SecureChannelException(string message) :
-            base($"SCP CardDataException: {message}")
-        {
-
-        }
-
-        public SecureChannelException(string message, Exception e) :
-            base($"SCP CardDataException: {message}", e)
-        {
-
-        }
+    public SecureChannelException(string message, Exception e) :
+        base($"SCP CardDataException: {message}", e)
+    {
     }
 }

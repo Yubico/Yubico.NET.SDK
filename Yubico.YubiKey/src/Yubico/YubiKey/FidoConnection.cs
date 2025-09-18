@@ -12,70 +12,78 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Devices.Hid;
-using Yubico.Core.Iso7816;
+using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Pipelines;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+internal class FidoConnection : IYubiKeyConnection, ICancelConnection
 {
-    internal class FidoConnection : IYubiKeyConnection, ICancelConnection
+    private readonly IApduTransform _apduPipeline;
+    private readonly IHidConnection _fidoConnection;
+    private bool _disposedValue;
+
+    public FidoConnection(IHidDevice hidDevice)
     {
-        private readonly IApduTransform _apduPipeline;
-        private readonly IHidConnection _fidoConnection;
-        private bool _disposedValue;
+        _fidoConnection = hidDevice.ConnectToIOReports();
 
-        public FidoConnection(IHidDevice hidDevice)
+        _apduPipeline = new FidoTransform(_fidoConnection);
+        _apduPipeline.Setup();
+    }
+
+    #region ICancelConnection Members
+
+    // Load the QueryCancel given.
+    // This will overwrite any already loaded delegate.
+    // If the delegate is loaded, return true.
+    public bool LoadQueryCancel(QueryCancel? queryCancel)
+    {
+        if (_apduPipeline is ICancelApduTransform cancelTransform)
         {
-            _fidoConnection = hidDevice.ConnectToIOReports();
-
-            _apduPipeline = new FidoTransform(_fidoConnection);
-            _apduPipeline.Setup();
+            cancelTransform.QueryCancel = queryCancel;
+            return true;
         }
 
-        // Load the QueryCancel given.
-        // This will overwrite any already loaded delegate.
-        // If the delegate is loaded, return true.
-        public bool LoadQueryCancel(QueryCancel? queryCancel)
+        return false;
+    }
+
+    #endregion
+
+    #region IYubiKeyConnection Members
+
+    public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
+        where TResponse : IYubiKeyResponse
+    {
+        var commandApdu = yubiKeyCommand.CreateCommandApdu();
+        var responseApdu = _apduPipeline.Invoke(commandApdu, yubiKeyCommand.GetType(), typeof(TResponse));
+
+        return yubiKeyCommand.CreateResponseForApdu(responseApdu);
+    }
+
+    public ISelectApplicationData? SelectApplicationData { get; set; }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
         {
-            if (_apduPipeline is ICancelApduTransform cancelTransform)
+            if (disposing)
             {
-                cancelTransform.QueryCancel = queryCancel;
-                return true;
+                _apduPipeline.Cleanup();
+                _fidoConnection.Dispose();
             }
 
-            return false;
-        }
-
-        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
-            where TResponse : IYubiKeyResponse
-        {
-            var commandApdu = yubiKeyCommand.CreateCommandApdu();
-            var responseApdu = _apduPipeline.Invoke(commandApdu, yubiKeyCommand.GetType(), typeof(TResponse));
-
-            return yubiKeyCommand.CreateResponseForApdu(responseApdu);
-        }
-
-        public InterIndustry.Commands.ISelectApplicationData? SelectApplicationData { get; set; }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    _apduPipeline.Cleanup();
-                    _fidoConnection.Dispose();
-                }
-
-                _disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            System.GC.SuppressFinalize(this);
+            _disposedValue = true;
         }
     }
 }

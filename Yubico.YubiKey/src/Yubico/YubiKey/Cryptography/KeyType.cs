@@ -15,7 +15,7 @@
 namespace Yubico.YubiKey.Cryptography;
 
 /// <summary>
-/// Represents the type of cryptographic key.
+///     Represents the type of cryptographic key.
 /// </summary>
 public enum KeyType
 {

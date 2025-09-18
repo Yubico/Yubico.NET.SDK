@@ -12,54 +12,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Fido2.Cose
+namespace Yubico.YubiKey.Fido2.Cose;
+
+/// <summary>
+///     Represents a COSE algorithm identifier.
+///     <remarks>
+///         This enumeration is based on the IANA COSE Algorithms registry.
+///         <para>
+///             https://www.iana.org/assignments/cose/cose.xhtml#algorithms
+///         </para>
+///     </remarks>
+/// </summary>
+public enum CoseAlgorithmIdentifier
 {
     /// <summary>
-    /// Represents a COSE algorithm identifier.
-    /// <remarks>
-    /// This enumeration is based on the IANA COSE Algorithms registry.
-    /// <para>
-    /// https://www.iana.org/assignments/cose/cose.xhtml#algorithms
-    /// </para>
-    /// </remarks>
+    ///     No algorithm specified.
     /// </summary>
-    public enum CoseAlgorithmIdentifier
-    {
-        /// <summary>
-        /// No algorithm specified.
-        /// </summary>
-        None = 0,
+    None = 0,
 
-        /// <summary>
-        /// ECDSA with SHA-256 using the NIST P-256 curve.
-        /// </summary>
-        ES256 = -7,
+    /// <summary>
+    ///     ECDSA with SHA-256 using the NIST P-256 curve.
+    /// </summary>
+    ES256 = -7,
 
-        /// <summary>
-        /// ECDH with key derivation function HKDF using SHA-256.
-        /// </summary>
-        ECDHwHKDF256 = -25,
+    /// <summary>
+    ///     ECDH with key derivation function HKDF using SHA-256.
+    /// </summary>
+    ECDHwHKDF256 = -25,
 
-        /// <summary>
-        /// ECDSA with SHA-384 using the NIST P-384 curve.
-        /// </summary>
-        ES384 = -35,
+    /// <summary>
+    ///     ECDSA with SHA-384 using the NIST P-384 curve.
+    /// </summary>
+    ES384 = -35,
 
-        /// <summary>
-        /// ECDSA with SHA-512 using the NIST P-521 curve.
-        /// </summary>
-        ES512 = -36,
+    /// <summary>
+    ///     ECDSA with SHA-512 using the NIST P-521 curve.
+    /// </summary>
+    ES512 = -36,
 
-        /// <summary>
-        /// ECDSA using the Ed25519 curve and "Pure" EdDSA which uses no digest
-        /// algorithm.
-        /// </summary>
-        EdDSA = -8,
+    /// <summary>
+    ///     ECDSA using the Ed25519 curve and "Pure" EdDSA which uses no digest
+    ///     algorithm.
+    /// </summary>
+    EdDSA = -8,
 
-        /// <summary>
-        /// RSASSA-PKCS1-v1_5 with SHA-256
-        /// Currently, not supported by any YubiKey
-        /// </summary>
-        RS256 = -257,
-    }
+    /// <summary>
+    ///     RSASSA-PKCS1-v1_5 with SHA-256
+    ///     Currently, not supported by any YubiKey
+    /// </summary>
+    RS256 = -257
 }

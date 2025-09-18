@@ -14,93 +14,91 @@
 
 using System;
 
-namespace Yubico.YubiKey.Oath
+namespace Yubico.YubiKey.Oath;
+
+/// <summary>
+///     Represents a One-Time Password (OTP) code generated on Yubikey using OATH application.
+/// </summary>
+/// <remarks>
+///     The YubiKey supports Open Authentication (OATH) standards for generating OTP codes.
+///     The OTPs need to be calculated because the YubiKey doesn't have an internal clock.
+///     The system time is used and passed to the YubiKey.
+/// </remarks>
+public class Code
 {
     /// <summary>
-    /// Represents a One-Time Password (OTP) code generated on Yubikey using OATH application.
+    ///     Constructs an instance of Code class.
+    /// </summary>
+    public Code()
+    {
+    }
+
+    /// <summary>
+    ///     Constructs an instance of the <see cref="Code" /> class.
     /// </summary>
     /// <remarks>
-    /// The YubiKey supports Open Authentication (OATH) standards for generating OTP codes.
-    /// The OTPs need to be calculated because the YubiKey doesn't have an internal clock.
-    /// The system time is used and passed to the YubiKey.
+    ///     The credential period is used to set a validity for OTP code.
+    ///     The validity for HOTP code is set to DateTimeOffset.MaxValue because HOTP code is not time-based.
+    ///     The validity for TOTP code is set to DateTimeOffset.Now + credential period (15, 30, or 60 seconds).
+    ///     Also, it is "rounded" to the nearest 15, 30, or 60 seconds. For example, it will start at 1:14:30 and
+    ///     not 1:14:34 if the timestep is 30 seconds.
     /// </remarks>
-    public class Code
+    /// <param name="value">
+    ///     The generated OTP code.
+    /// </param>
+    /// <param name="period">
+    ///     The credential period to calculate the OTP code validity.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    ///     The provided period is invalid.
+    /// </exception>
+    public Code(string? value, CredentialPeriod period)
     {
-        /// <summary>
-        /// The generated OTP code.
-        /// </summary>
-        public string? Value { get; set; }
-
-        /// <summary>
-        /// The timestamp that was used to generate the OTP code.
-        /// </summary>
-        public DateTimeOffset? ValidFrom { get; set; }
-
-        /// <summary>
-        /// The timestamp when the OTP code becomes invalid.
-        /// </summary>
-        public DateTimeOffset? ValidUntil { get; set; }
-
-        /// <summary>
-        /// Constructs an instance of Code class.
-        /// </summary>
-        public Code()
+        if (!Enum.IsDefined(typeof(CredentialPeriod), period))
         {
-
+            throw new ArgumentException(ExceptionMessages.InvalidCredentialPeriod);
         }
 
-        /// <summary>
-        /// Constructs an instance of the <see cref="Code" /> class.
-        /// </summary>
-        /// <remarks>
-        /// The credential period is used to set a validity for OTP code.
-        /// The validity for HOTP code is set to DateTimeOffset.MaxValue because HOTP code is not time-based.
-        /// The validity for TOTP code is set to DateTimeOffset.Now + credential period (15, 30, or 60 seconds).
-        /// Also, it is "rounded" to the nearest 15, 30, or 60 seconds. For example, it will start at 1:14:30 and
-        /// not 1:14:34 if the timestep is 30 seconds.
-        /// </remarks>
-        /// <param name="value">
-        /// The generated OTP code.
-        /// </param>
-        /// <param name="period">
-        /// The credential period to calculate the OTP code validity.
-        /// </param>
-        /// <exception cref="ArgumentException">
-        /// The provided period is invalid.
-        /// </exception>
-        public Code(string? value, CredentialPeriod period)
+        if (!string.IsNullOrWhiteSpace(value))
         {
-            if (!Enum.IsDefined(typeof(CredentialPeriod), period))
+            Value = value;
+
+            var timestamp = DateTimeOffset.UtcNow;
+
+            if (period != CredentialPeriod.Undefined)
             {
-                throw new ArgumentException(ExceptionMessages.InvalidCredentialPeriod);
+                // The valid period can start before the calculation happens and potentially might happen even before,
+                // so that code is valid only 1 second after calculation.
+                // Taking the timestamp and rounding down to the nearest time segment given a period.
+                int secondsFromLastPeriod = (int)(timestamp.ToUnixTimeSeconds() % (int)period);
+                ValidFrom = timestamp.AddSeconds(-secondsFromLastPeriod);
+                ValidUntil = ValidFrom.Value.AddSeconds((int)period);
             }
-
-            if (!string.IsNullOrWhiteSpace(value))
+            else
             {
-                Value = value;
-
-                var timestamp = DateTimeOffset.UtcNow;
-
-                if (period != CredentialPeriod.Undefined)
-                {
-                    // The valid period can start before the calculation happens and potentially might happen even before,
-                    // so that code is valid only 1 second after calculation.
-                    // Taking the timestamp and rounding down to the nearest time segment given a period.
-                    int secondsFromLastPeriod = (int)(timestamp.ToUnixTimeSeconds() % (int)period);
-                    ValidFrom = timestamp.AddSeconds(-secondsFromLastPeriod);
-                    ValidUntil = ValidFrom.Value.AddSeconds((int)period);
-                }
-                else
-                {
-                    ValidFrom = timestamp;
-                    ValidUntil = DateTimeOffset.MaxValue;
-                }
+                ValidFrom = timestamp;
+                ValidUntil = DateTimeOffset.MaxValue;
             }
         }
-
-        /// <summary>
-        /// Checks if the OTP code is still valid.
-        /// </summary>
-        public bool IsValid() => ValidUntil > DateTimeOffset.Now;
     }
+
+    /// <summary>
+    ///     The generated OTP code.
+    /// </summary>
+    public string? Value { get; set; }
+
+    /// <summary>
+    ///     The timestamp that was used to generate the OTP code.
+    /// </summary>
+    public DateTimeOffset? ValidFrom { get; set; }
+
+    /// <summary>
+    ///     The timestamp when the OTP code becomes invalid.
+    /// </summary>
+    public DateTimeOffset? ValidUntil { get; set; }
+
+    /// <summary>
+    ///     Checks if the OTP code is still valid.
+    /// </summary>
+    public bool IsValid() => ValidUntil > DateTimeOffset.Now;
 }

@@ -14,16 +14,15 @@
 
 using Yubico.Core.Devices.Hid;
 
-namespace Yubico.YubiKey.DeviceExtensions
+namespace Yubico.YubiKey.DeviceExtensions;
+
+internal static class IHidDeviceExtension
 {
-    internal static class IHidDeviceExtension
-    {
-        public static bool IsFido(this IHidDevice device) => device.UsagePage == HidUsagePage.Fido;
+    public static bool IsFido(this IHidDevice device) => device.UsagePage == HidUsagePage.Fido;
 
-        public static bool IsKeyboard(this IHidDevice device) => device.UsagePage == HidUsagePage.Keyboard;
+    public static bool IsKeyboard(this IHidDevice device) => device.UsagePage == HidUsagePage.Keyboard;
 
-        public static bool IsYubicoDevice(this IHidDevice device) =>
-            device.VendorId == VendorIdentifiers.Yubico
-            && ProductIdentifiers.AllYubiKeys.Contains(device.ProductId);
-    }
+    public static bool IsYubicoDevice(this IHidDevice device) =>
+        device.VendorId == VendorIdentifiers.Yubico
+        && ProductIdentifiers.AllYubiKeys.Contains(device.ProductId);
 }

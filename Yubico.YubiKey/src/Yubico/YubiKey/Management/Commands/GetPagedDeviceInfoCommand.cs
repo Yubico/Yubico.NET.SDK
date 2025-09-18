@@ -14,47 +14,48 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Management.Commands
+namespace Yubico.YubiKey.Management.Commands;
+
+/// <summary>
+///     Gets detailed information about the YubiKey and its current configuration.
+/// </summary>
+/// <remarks>
+///     This class has a corresponding partner class <see cref="GetDeviceInfoResponse" />
+/// </remarks>
+public sealed class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
 {
+    private const byte GetDeviceInfoInstruction = 0x1D;
+
     /// <summary>
-    /// Gets detailed information about the YubiKey and its current configuration.
+    ///     Initializes a new instance of the <see cref="GetDeviceInfoCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// This class has a corresponding partner class <see cref="GetDeviceInfoResponse"/>
-    /// </remarks>
-    public sealed class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
+    public GetPagedDeviceInfoCommand()
     {
-        private const byte GetDeviceInfoInstruction = 0x1D;
+    }
 
-        /// <inheritdoc />
-        public byte Page { get; set; }
+    #region IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse> Members
 
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.Management"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Management;
+    /// <inheritdoc />
+    public byte Page { get; set; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetDeviceInfoCommand"/> class.
-        /// </summary>
-        public GetPagedDeviceInfoCommand()
-        {
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     <see cref="YubiKeyApplication.Management" />
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Management;
 
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = GetDeviceInfoInstruction,
             P1 = Page
         };
 
-        /// <inheritdoc />
-        public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetPagedDeviceInfoResponse(responseApdu);
-    }
-}
+    /// <inheritdoc />
+    public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
 
+    #endregion
+}

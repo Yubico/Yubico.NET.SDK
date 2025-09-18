@@ -15,36 +15,39 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Pipelines
+namespace Yubico.YubiKey.Pipelines;
+
+/// <summary>
+///     Used to parse out the CTAP status byte from a response APDU and reform the response APDU in the SW + Data
+///     format that the SDK's command layer can understand.
+/// </summary>
+internal class FidoErrorTransform : IApduTransform
 {
-    /// <summary>
-    /// Used to parse out the CTAP status byte from a response APDU and reform the response APDU in the SW + Data
-    /// format that the SDK's command layer can understand.
-    /// </summary>
-    internal class FidoErrorTransform : IApduTransform
+    private readonly IApduTransform _nextTransform;
+
+    public FidoErrorTransform(IApduTransform nextTransform)
     {
-        private readonly IApduTransform _nextTransform;
-
-        public FidoErrorTransform(IApduTransform nextTransform)
-        {
-            _nextTransform = nextTransform;
-        }
-
-        /// <inheritdoc />
-        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
-        {
-            var fidoResponse = _nextTransform.Invoke(
-                command,
-                commandType,
-                responseType);
-
-            return CtapToApduResponse.ToCtap2ResponseApdu(fidoResponse.Data.ToArray());
-        }
-
-        /// <inheritdoc />
-        public void Setup() => _nextTransform.Setup();
-
-        /// <inheritdoc />
-        public void Cleanup() => _nextTransform.Cleanup();
+        _nextTransform = nextTransform;
     }
+
+    #region IApduTransform Members
+
+    /// <inheritdoc />
+    public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
+    {
+        var fidoResponse = _nextTransform.Invoke(
+            command,
+            commandType,
+            responseType);
+
+        return CtapToApduResponse.ToCtap2ResponseApdu(fidoResponse.Data.ToArray());
+    }
+
+    /// <inheritdoc />
+    public void Setup() => _nextTransform.Setup();
+
+    /// <inheritdoc />
+    public void Cleanup() => _nextTransform.Cleanup();
+
+    #endregion
 }

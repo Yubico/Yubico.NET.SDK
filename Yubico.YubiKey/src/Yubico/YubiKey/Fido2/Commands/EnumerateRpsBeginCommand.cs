@@ -16,86 +16,85 @@ using System;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Begin the process of getting information on all the relying parties
+///     represented in credentials on the YubiKey.
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="EnumerateRpsBeginResponse" />.
+///     <para>
+///         This returns the total number of relying parties represented in the set
+///         of credentials, along with  information on the "first" relying party. If
+///         there is only one RP, then you have all the information you need. If
+///         there are more RPs, then you can get information on all of them by
+///         calling the <c>enumerateRPsGetNextRP</c> subcommand.
+///     </para>
+///     <para>
+///         Note that if there are no credentials associated with the given relying
+///         party, the response will be "No Data"
+///         (Status = ResponseStatus.NoData, and
+///         CtapStatus = CtapStatus.NoCredentials). In this case, calling the
+///         <c>response.GetData()</c> method will result in an exception.
+///     </para>
+/// </remarks>
+public class EnumerateRpsBeginCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateRpsBeginResponse>
 {
-    /// <summary>
-    /// Begin the process of getting information on all the relying parties
-    /// represented in credentials on the YubiKey.
-    /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="EnumerateRpsBeginResponse"/>.
-    /// <para>
-    /// This returns the total number of relying parties represented in the set
-    /// of credentials, along with  information on the "first" relying party. If
-    /// there is only one RP, then you have all the information you need. If
-    /// there are more RPs, then you can get information on all of them by
-    /// calling the <c>enumerateRPsGetNextRP</c> subcommand.
-    /// </para>
-    /// <para>
-    /// Note that if there are no credentials associated with the given relying
-    /// party, the response will be "No Data"
-    /// (Status = ResponseStatus.NoData, and
-    /// CtapStatus = CtapStatus.NoCredentials). In this case, calling the
-    /// <c>response.GetData()</c> method will result in an exception.
-    /// </para>
-    /// </remarks>
-    public class EnumerateRpsBeginCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateRpsBeginResponse>
+    private const int SubCmdEnumerateRpsBegin = 0x02;
+
+    // The default constructor explicitly defined. We don't want it to be
+    // used.
+    private EnumerateRpsBeginCommand()
     {
-        private const int SubCmdEnumerateRpsBegin = 0x02;
-
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        private EnumerateRpsBeginCommand()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Constructs a new instance of <see cref="EnumerateRpsBeginCommand"/>.
-        /// </summary>
-        /// <param name="pinUvAuthToken">
-        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        ///     key.
-        /// </param>
-        /// <param name="authProtocol">
-        ///     The Auth Protocol used to build the Auth Token.
-        /// </param>
-        public EnumerateRpsBeginCommand(
-            ReadOnlyMemory<byte> pinUvAuthToken,
-            PinUvAuthProtocolBase authProtocol)
-            : base(new CredentialManagementCommand(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol))
-        {
-        }
-
-        /// <summary>
-        /// Constructs a new instance of <see cref="EnumerateRpsBeginCommand"/> with a pre-computed PIN/UV auth param.
-        /// </summary>
-        /// <param name="pinUvAuthParam">
-        ///     The pre-computed PIN/UV auth param for this command.
-        /// </param>
-        /// <param name="protocol">
-        ///     The PIN/UV protocol version used to compute the auth param.
-        /// </param>
-        public EnumerateRpsBeginCommand(
-            ReadOnlyMemory<byte> pinUvAuthParam,
-            PinUvAuthProtocol protocol)
-            : base(new CredentialManagementCommand(SubCmdEnumerateRpsBegin, null, pinUvAuthParam, protocol))
-        {
-        }
-
-        /// <inheritdoc />
-        public EnumerateRpsBeginResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new EnumerateRpsBeginResponse(responseApdu);
-
-        /// <summary>
-        /// Creates the authentication message for this command, consisting of only the subcommand byte.
-        /// </summary>
-        /// <returns>
-        /// The message to be used for PIN/UV authentication.
-        /// </returns>
-        public static byte[] GetAuthenticationMessage()
-        {
-            return new byte[] { SubCmdEnumerateRpsBegin };
-        }
+        throw new NotImplementedException();
     }
+
+    /// <summary>
+    ///     Constructs a new instance of <see cref="EnumerateRpsBeginCommand" />.
+    /// </summary>
+    /// <param name="pinUvAuthToken">
+    ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+    ///     key.
+    /// </param>
+    /// <param name="authProtocol">
+    ///     The Auth Protocol used to build the Auth Token.
+    /// </param>
+    public EnumerateRpsBeginCommand(
+        ReadOnlyMemory<byte> pinUvAuthToken,
+        PinUvAuthProtocolBase authProtocol)
+        : base(new CredentialManagementCommand(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol))
+    {
+    }
+
+    /// <summary>
+    ///     Constructs a new instance of <see cref="EnumerateRpsBeginCommand" /> with a pre-computed PIN/UV auth param.
+    /// </summary>
+    /// <param name="pinUvAuthParam">
+    ///     The pre-computed PIN/UV auth param for this command.
+    /// </param>
+    /// <param name="protocol">
+    ///     The PIN/UV protocol version used to compute the auth param.
+    /// </param>
+    public EnumerateRpsBeginCommand(
+        ReadOnlyMemory<byte> pinUvAuthParam,
+        PinUvAuthProtocol protocol)
+        : base(new CredentialManagementCommand(SubCmdEnumerateRpsBegin, null, pinUvAuthParam, protocol))
+    {
+    }
+
+    #region IYubiKeyCommand<EnumerateRpsBeginResponse> Members
+
+    /// <inheritdoc />
+    public EnumerateRpsBeginResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
+
+    /// <summary>
+    ///     Creates the authentication message for this command, consisting of only the subcommand byte.
+    /// </summary>
+    /// <returns>
+    ///     The message to be used for PIN/UV authentication.
+    /// </returns>
+    public static byte[] GetAuthenticationMessage() => new byte[] { SubCmdEnumerateRpsBegin };
 }

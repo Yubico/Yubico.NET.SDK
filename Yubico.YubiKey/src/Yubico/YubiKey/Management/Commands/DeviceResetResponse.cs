@@ -14,24 +14,22 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Management.Commands
+namespace Yubico.YubiKey.Management.Commands;
+
+/// <summary>
+///     The response to the <see cref="DeviceResetCommand" /> command, containing the YubiKey's
+///     device configuration details.
+/// </summary>
+public class DeviceResetResponse : YubiKeyResponse
 {
     /// <summary>
-    /// The response to the <see cref="DeviceResetCommand"/> command, containing the YubiKey's
-    /// device configuration details.
+    ///     Constructs a DeviceResetResponse instance based on a ResponseApdu received from the YubiKey.
     /// </summary>
-    public class DeviceResetResponse : YubiKeyResponse
+    /// <param name="responseApdu">
+    ///     The ResponseApdu returned by the YubiKey.
+    /// </param>
+    public DeviceResetResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        /// <summary>
-        /// Constructs a DeviceResetResponse instance based on a ResponseApdu received from the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
-        /// </param>
-        public DeviceResetResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-
-        }
     }
 }

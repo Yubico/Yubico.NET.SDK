@@ -43,7 +43,7 @@ public class MakeCredentialParametersTests
         var authData = new ReadOnlyMemory<byte>(pinUvAuth);
         if (protocol == PinUvAuthProtocol.ProtocolOne)
         {
-            authData = authData.Slice(0, 16);
+            authData = authData[..16];
         }
 
         var rp = new RelyingParty("someRpId")

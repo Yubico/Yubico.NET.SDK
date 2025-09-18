@@ -15,44 +15,51 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Scp.Commands
+namespace Yubico.YubiKey.Scp.Commands;
+
+internal class GenerateEcKeyCommand : IYubiKeyCommand<GenerateEcKeyResponse>
 {
-    internal class GenerateEcKeyCommand : IYubiKeyCommand<GenerateEcKeyResponse>
+    internal const byte GpGenerateKeyIns = 0xF1;
+
+    private readonly ReadOnlyMemory<byte> _data;
+    private readonly byte _keyId;
+    private readonly byte _keyVersionNumber;
+
+    public GenerateEcKeyCommand(byte keyVersionNumber, byte keyId, ReadOnlyMemory<byte> data)
     {
-        public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
-        internal const byte GpGenerateKeyIns = 0xF1;
-
-        private readonly ReadOnlyMemory<byte> _data;
-        private readonly byte _keyVersionNumber;
-        private readonly byte _keyId;
-
-        public GenerateEcKeyCommand(byte keyVersionNumber, byte keyId, ReadOnlyMemory<byte> data)
-        {
-            _data = data;
-            _keyVersionNumber = keyVersionNumber;
-            _keyId = keyId;
-        }
-
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Cla = 0x80,
-                Ins = GpGenerateKeyIns,
-                P1 = _keyVersionNumber,
-                P2 = _keyId,
-                Data = _data
-            };
-
-        public GenerateEcKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GenerateEcKeyResponse(responseApdu);
+        _data = data;
+        _keyVersionNumber = keyVersionNumber;
+        _keyId = keyId;
     }
 
-    internal class GenerateEcKeyResponse : ScpResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
-    {
-        public GenerateEcKeyResponse(ResponseApdu responseApdu) : base(responseApdu)
-        {
-        }
+    #region IYubiKeyCommand<GenerateEcKeyResponse> Members
 
-        public ReadOnlyMemory<byte> GetData() => ResponseApdu.Data;
+    public YubiKeyApplication Application => YubiKeyApplication.SecurityDomain;
+
+    public CommandApdu CreateCommandApdu() =>
+        new()
+        {
+            Cla = 0x80,
+            Ins = GpGenerateKeyIns,
+            P1 = _keyVersionNumber,
+            P2 = _keyId,
+            Data = _data
+        };
+
+    public GenerateEcKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
+}
+
+internal class GenerateEcKeyResponse : ScpResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
+{
+    public GenerateEcKeyResponse(ResponseApdu responseApdu) : base(responseApdu)
+    {
     }
+
+    #region IYubiKeyResponseWithData<ReadOnlyMemory<byte>> Members
+
+    public ReadOnlyMemory<byte> GetData() => ResponseApdu.Data;
+
+    #endregion
 }

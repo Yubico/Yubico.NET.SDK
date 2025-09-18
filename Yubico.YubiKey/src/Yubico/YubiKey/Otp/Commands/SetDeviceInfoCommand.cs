@@ -15,46 +15,46 @@
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Management.Commands;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+/// <summary>
+///     Configures device-wide settings on the YubiKey.
+/// </summary>
+public class SetDeviceInfoCommand : SetDeviceInfoBaseCommand, IYubiKeyCommand<ReadStatusResponse>
 {
     /// <summary>
-    /// Configures device-wide settings on the YubiKey.
+    ///     Initializes a new instance of the <see cref="SetDeviceInfoCommand" /> class.
     /// </summary>
-    public class SetDeviceInfoCommand : SetDeviceInfoBaseCommand, IYubiKeyCommand<ReadStatusResponse>
+    public SetDeviceInfoCommand()
     {
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SetDeviceInfoCommand"/> class.
-        /// </summary>
-        public SetDeviceInfoCommand()
-        {
-
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SetDeviceInfoCommand"/> class.
-        /// </summary>
-        /// <param name="baseCommand">
-        /// An instance of the base class to use for initialization.
-        /// </param>
-        public SetDeviceInfoCommand(SetDeviceInfoBaseCommand baseCommand) : base(baseCommand)
-        {
-
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = OtpConstants.RequestSlotInstruction,
-                P1 = OtpConstants.SetDeviceInfoSlot,
-                Data = GetDataForApdu(),
-            };
-
-        /// <inheritdoc />
-        public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ReadStatusResponse(responseApdu);
     }
+
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="SetDeviceInfoCommand" /> class.
+    /// </summary>
+    /// <param name="baseCommand">
+    ///     An instance of the base class to use for initialization.
+    /// </param>
+    public SetDeviceInfoCommand(SetDeviceInfoBaseCommand baseCommand) : base(baseCommand)
+    {
+    }
+
+    #region IYubiKeyCommand<ReadStatusResponse> Members
+
+    /// <inheritdoc />
+    public YubiKeyApplication Application => YubiKeyApplication.Otp;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
+        {
+            Ins = OtpConstants.RequestSlotInstruction,
+            P1 = OtpConstants.SetDeviceInfoSlot,
+            Data = GetDataForApdu()
+        };
+
+    /// <inheritdoc />
+    public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

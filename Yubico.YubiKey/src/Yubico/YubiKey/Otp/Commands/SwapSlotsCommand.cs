@@ -14,38 +14,40 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Otp.Commands;
+
+/// <summary>
+///     Swaps the configurations in the short and long press slots.
+/// </summary>
+public class SwapSlotsCommand : IYubiKeyCommand<ReadStatusResponse>
 {
     /// <summary>
-    /// Swaps the configurations in the short and long press slots.
+    ///     Constructs a new instance of the SwapSlotsCommand class.
     /// </summary>
-    public class SwapSlotsCommand : IYubiKeyCommand<ReadStatusResponse>
+    public SwapSlotsCommand()
     {
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Otp
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
+    }
 
-        /// <summary>
-        /// Constructs a new instance of the SwapSlotsCommand class.
-        /// </summary>
-        public SwapSlotsCommand()
-        {
+    #region IYubiKeyCommand<ReadStatusResponse> Members
 
-        }
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.Otp
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = OtpConstants.RequestSlotInstruction,
             P1 = OtpConstants.SwapSlotsSlot
         };
 
-        /// <inheritdoc />
-        public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ReadStatusResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

@@ -15,41 +15,44 @@
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Management.Commands;
 
-namespace Yubico.YubiKey.U2f.Commands
+namespace Yubico.YubiKey.U2f.Commands;
+
+/// <summary>
+///     Configures device-wide settings on the YubiKey.
+/// </summary>
+public sealed class SetDeviceInfoCommand : SetDeviceInfoBaseCommand, IYubiKeyCommand<SetDeviceInfoResponse>
 {
+    private const byte SetDeviceInfoInstruction = 0xC3;
+
     /// <summary>
-    /// Configures device-wide settings on the YubiKey.
+    ///     Initializes a new instance of the <see cref="SetDeviceInfoCommand" /> class.
     /// </summary>
-    public sealed class SetDeviceInfoCommand : SetDeviceInfoBaseCommand, IYubiKeyCommand<SetDeviceInfoResponse>
+    public SetDeviceInfoCommand()
     {
-        private const byte SetDeviceInfoInstruction = 0xC3;
+    }
 
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="SetDeviceInfoCommand" /> class.
+    /// </summary>
+    public SetDeviceInfoCommand(SetDeviceInfoBaseCommand baseCommand) : base(baseCommand)
+    {
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SetDeviceInfoCommand"/> class.
-        /// </summary>
-        public SetDeviceInfoCommand()
-        {
-        }
+    #region IYubiKeyCommand<SetDeviceInfoResponse> Members
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SetDeviceInfoCommand"/> class.
-        /// </summary>
-        public SetDeviceInfoCommand(SetDeviceInfoBaseCommand baseCommand) : base(baseCommand)
-        {
-        }
+    /// <inheritdoc />
+    public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = SetDeviceInfoInstruction,
             Data = GetDataForApdu()
         };
 
-        /// <inheritdoc />
-        public SetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new SetDeviceInfoResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public SetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

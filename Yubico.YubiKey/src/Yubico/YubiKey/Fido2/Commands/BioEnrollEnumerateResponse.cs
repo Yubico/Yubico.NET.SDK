@@ -15,60 +15,65 @@
 using System.Collections.Generic;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     The response partner to the BioEnrollEnumerateCommand.
+/// </summary>
+public class BioEnrollEnumerateResponse : Fido2Response, IYubiKeyResponseWithData<IReadOnlyList<TemplateInfo>>
 {
+    private readonly BioEnrollmentResponse _response;
+
     /// <summary>
-    /// The response partner to the BioEnrollEnumerateCommand.
+    ///     Constructs a new instance of
+    ///     <see cref="BioEnrollEnumerateResponse" /> based on a response APDU
+    ///     provided by the YubiKey.
     /// </summary>
-    public class BioEnrollEnumerateResponse : Fido2Response, IYubiKeyResponseWithData<IReadOnlyList<TemplateInfo>>
+    /// <param name="responseApdu">
+    ///     A response APDU containing the CBOR response data for the
+    ///     <c>authenticatorCredentialManagement</c> command.
+    /// </param>
+    public BioEnrollEnumerateResponse(ResponseApdu responseApdu)
+        : base(responseApdu)
     {
-        private readonly BioEnrollmentResponse _response;
-
-        /// <summary>
-        /// Constructs a new instance of
-        /// <see cref="BioEnrollEnumerateResponse"/> based on a response APDU
-        /// provided by the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response data for the
-        /// <c>authenticatorCredentialManagement</c> command.
-        /// </param>
-        public BioEnrollEnumerateResponse(ResponseApdu responseApdu)
-            : base(responseApdu)
-        {
-            _response = new BioEnrollmentResponse(responseApdu);
-        }
-
-        /// <summary>
-        /// Return the data returned by the YubiKey as a <c>List</c>.
-        /// </summary>
-        /// <remarks>
-        /// If there are no fingerprints enrolled, this will return a <c>List</c>
-        /// with zero elements.
-        /// </remarks>
-        public IReadOnlyList<TemplateInfo> GetData()
-        {
-            // If the return is InvalidOption, that means there were no enrolled
-            // fingerprints, return a List of zero elements.
-            if (CtapStatus == CtapStatus.InvalidOption)
-            {
-                return new List<TemplateInfo>();
-            }
-
-            var bioEnrollmentData = _response.GetData();
-            if (!(bioEnrollmentData.TemplateInfos is null))
-            {
-                return bioEnrollmentData.TemplateInfos;
-            }
-
-            throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
-        }
-
-        /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
-        {
-            CtapStatus.InvalidOption => new ResponseStatusPair(ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
-            _ => base.StatusCodeMap,
-        };
+        _response = new BioEnrollmentResponse(responseApdu);
     }
+
+    /// <inheritdoc />
+    protected override ResponseStatusPair StatusCodeMap =>
+        CtapStatus switch
+        {
+            CtapStatus.InvalidOption => new ResponseStatusPair(
+                ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
+            _ => base.StatusCodeMap
+        };
+
+    #region IYubiKeyResponseWithData<IReadOnlyList<TemplateInfo>> Members
+
+    /// <summary>
+    ///     Return the data returned by the YubiKey as a <c>List</c>.
+    /// </summary>
+    /// <remarks>
+    ///     If there are no fingerprints enrolled, this will return a <c>List</c>
+    ///     with zero elements.
+    /// </remarks>
+    public IReadOnlyList<TemplateInfo> GetData()
+    {
+        // If the return is InvalidOption, that means there were no enrolled
+        // fingerprints, return a List of zero elements.
+        if (CtapStatus == CtapStatus.InvalidOption)
+        {
+            return new List<TemplateInfo>();
+        }
+
+        var bioEnrollmentData = _response.GetData();
+        if (bioEnrollmentData.TemplateInfos is not null)
+        {
+            return bioEnrollmentData.TemplateInfos;
+        }
+
+        throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
+    }
+
+    #endregion
 }

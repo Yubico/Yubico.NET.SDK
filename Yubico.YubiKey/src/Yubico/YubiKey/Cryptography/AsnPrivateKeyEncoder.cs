@@ -19,12 +19,12 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKey.Cryptography;
 
 /// <summary>
-/// A class that converts private key parameters to ASN.1 DER encoding.
+///     A class that converts private key parameters to ASN.1 DER encoding.
 /// </summary>
 internal static class AsnPrivateKeyEncoder
 {
     /// <summary>
-    /// Converts a private key and its corresponding public point to ASN.1 DER encoded format.
+    ///     Converts a private key and its corresponding public point to ASN.1 DER encoded format.
     /// </summary>
     /// <param name="privateKey">The private key as a byte array.</param>
     /// <param name="publicPoint">The public key point as a byte array (optional).</param>
@@ -47,7 +47,7 @@ internal static class AsnPrivateKeyEncoder
     }
 
     /// <summary>
-    /// Converts a private key and key type to ASN.1 DER encoded format in PKCS#8 structure.
+    ///     Converts a private key and key type to ASN.1 DER encoded format in PKCS#8 structure.
     /// </summary>
     /// <param name="privateKey">The private key as a byte array.</param>
     /// <param name="keyType">The type of the key.</param>
@@ -56,7 +56,7 @@ internal static class AsnPrivateKeyEncoder
         EncodeToPkcs8(privateKey, null, keyType);
 
     /// <summary>
-    /// Converts RSA private key parameters to ASN.1 DER encoded format.
+    ///     Converts RSA private key parameters to ASN.1 DER encoded format.
     /// </summary>
     /// <param name="parameters">The RSA parameters including private key values.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded private key in PKCS#8 format.</returns>
@@ -112,7 +112,7 @@ internal static class AsnPrivateKeyEncoder
     }
 
     /// <summary>
-    /// Converts EC private key parameters to ASN.1 DER encoded format.
+    ///     Converts EC private key parameters to ASN.1 DER encoded format.
     /// </summary>
     /// <param name="parameters">The EC parameters including private key value.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded private key in PKCS#8 format.</returns>
@@ -145,7 +145,7 @@ internal static class AsnPrivateKeyEncoder
     }
 
     /// <summary>
-    /// Creates an EC private key encoded in ASN.1 DER format.
+    ///     Creates an EC private key encoded in ASN.1 DER format.
     /// </summary>
     private static byte[] EncodeECKey(
         ReadOnlyMemory<byte> privateKey,
@@ -173,6 +173,7 @@ internal static class AsnPrivateKeyEncoder
                 0,
                 new Asn1Tag(TagClass.ContextSpecific, 1));
         }
+
         ecKeyWriter.PopSequence();
         using var ecPrivateKeyHandle = new ZeroingMemoryHandle(ecKeyWriter.Encode());
 
@@ -235,7 +236,7 @@ internal static class AsnPrivateKeyEncoder
         // PrivateKey as OCTET STRING
         var privateKeyWriter = new AsnWriter(AsnEncodingRules.DER);
         privateKeyWriter.WriteOctetString(privateKey);
-        
+
         using var privateKeyBytesHandle = new ZeroingMemoryHandle(privateKeyWriter.Encode());
         writer.WriteOctetString(privateKeyBytesHandle.Data.Span);
 

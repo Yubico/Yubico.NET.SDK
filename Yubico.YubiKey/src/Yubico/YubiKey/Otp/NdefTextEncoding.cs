@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Otp
+namespace Yubico.YubiKey.Otp;
+
+/// <summary>
+///     Character encodings supported by NDEF text records.
+/// </summary>
+public enum NdefTextEncoding
 {
     /// <summary>
-    /// Character encodings supported by NDEF text records.
+    ///     UTF-8 encoding.
     /// </summary>
-    public enum NdefTextEncoding
-    {
-        /// <summary>
-        /// UTF-8 encoding.
-        /// </summary>
-        Utf8,
+    Utf8,
 
-        /// <summary>
-        /// UTF-16 encoding.
-        /// </summary>
-        Utf16,
-    }
+    /// <summary>
+    ///     UTF-16 encoding.
+    /// </summary>
+    Utf16
 }

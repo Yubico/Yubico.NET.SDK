@@ -14,39 +14,39 @@
 
 using System.Collections.Generic;
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+internal class ProductIdentifiers
 {
-    internal class ProductIdentifiers
-    {
+    // YubiKey Version 1 and Version 2
+    public const short YubiKeyV1V2 = 0x0010;
 
-        // YubiKey Version 1 and Version 2
-        public const short YubiKeyV1V2 = 0x0010;
+    // YubiKey Plus
+    public const short YubiKeyPlus = 0x0410;
 
-        // YubiKey Plus
-        public const short YubiKeyPlus = 0x0410;
+    // YubiKey NEO(-N)
+    public const short YubiKeyNeoOtp = 0x0110;
+    public const short YubiKeyNeoOtpCcid = 0x0111;
+    public const short YubiKeyNeoCcid = 0x0112;
+    public const short YubiKeyNeoU2f = 0x0113;
+    public const short YubiKeyNeoOtpU2f = 0x0114;
+    public const short YubiKeyNeoU2fCcid = 0x0115;
+    public const short YubiKeyNeoOtpU2fCcid = 0x0116;
 
-        // YubiKey NEO(-N)
-        public const short YubiKeyNeoOtp = 0x0110;
-        public const short YubiKeyNeoOtpCcid = 0x0111;
-        public const short YubiKeyNeoCcid = 0x0112;
-        public const short YubiKeyNeoU2f = 0x0113;
-        public const short YubiKeyNeoOtpU2f = 0x0114;
-        public const short YubiKeyNeoU2fCcid = 0x0115;
-        public const short YubiKeyNeoOtpU2fCcid = 0x0116;
+    // YubiKey 4 and 5 series
+    public const short YubiKeyOtp = 0x0401;
+    public const short YubiKeyFido = 0x0402;
+    public const short YubiKeyOtpFido = 0x0403;
+    public const short YubiKeyCcid = 0x0404;
+    public const short YubiKeyOtpCcid = 0x0405;
+    public const short YubiKeyFidoCcid = 0x0406;
+    public const short YubiKeyOtpFidoCcid = 0x0407;
 
-        // YubiKey 4 and 5 series
-        public const short YubiKeyOtp = 0x0401;
-        public const short YubiKeyFido = 0x0402;
-        public const short YubiKeyOtpFido = 0x0403;
-        public const short YubiKeyCcid = 0x0404;
-        public const short YubiKeyOtpCcid = 0x0405;
-        public const short YubiKeyFidoCcid = 0x0406;
-        public const short YubiKeyOtpFidoCcid = 0x0407;
+    // Security Key Series
+    public const short SecurityKey = 0x0120;
 
-        // Security Key Series
-        public const short SecurityKey = 0x0120;
-
-        public static IList<short> AllYubiKeys => new List<short>()
+    public static IList<short> AllYubiKeys =>
+        new List<short>
         {
             YubiKeyV1V2,
             YubiKeyPlus,
@@ -63,7 +63,6 @@ namespace Yubico.YubiKey
             YubiKeyOtpCcid,
             YubiKeyFidoCcid,
             YubiKeyOtpFidoCcid,
-            SecurityKey,
+            SecurityKey
         };
-    }
 }

@@ -18,17 +18,17 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.Piv.Converters;
 
 /// <summary>
-/// Extension methods for encoding cryptographic key parameters into PIV-compatible formats.
+///     Extension methods for encoding cryptographic key parameters into PIV-compatible formats.
 /// </summary>
 /// <remarks>
-/// This class provides extension methods for both public and private key parameters,
-/// supporting RSA, EC (Elliptic Curve), and Curve25519 key types. The encoded formats
-/// follow the Personal Identity Verification (PIV) specifications.
+///     This class provides extension methods for both public and private key parameters,
+///     supporting RSA, EC (Elliptic Curve), and Curve25519 key types. The encoded formats
+///     follow the Personal Identity Verification (PIV) specifications.
 /// </remarks>
 public static class KeyExtensions
 {
     /// <summary>
-    /// Encodes a public key into the PIV format.
+    ///     Encodes a public key into the PIV format.
     /// </summary>
     /// <param name="parameters">The public key parameters to encode.</param>
     /// <returns>A BER encoded byte array containing the encoded public key.</returns>
@@ -39,7 +39,7 @@ public static class KeyExtensions
             ECPublicKey p => PivKeyEncoder.EncodeECPublicKey(p),
             RSAPublicKey p => PivKeyEncoder.EncodeRSAPublicKey(p),
             Curve25519PublicKey p => PivKeyEncoder.EncodeCurve25519PublicKey(p),
-            
+
             #pragma warning disable CS0618 // Type or member is obsolete
             PivPublicKey p => p.PivEncodedPublicKey.ToArray(),
             #pragma warning restore CS0618 // Type or member is obsolete
@@ -48,11 +48,14 @@ public static class KeyExtensions
         };
 
     /// <summary>
-    /// Encodes a private key into the PIV format.
+    ///     Encodes a private key into the PIV format.
     /// </summary>
     /// <param name="parameters">The private key parameters to encode.</param>
     /// <returns>A BER encoded byte array containing the encoded private key.</returns>
-    /// <exception cref="ArgumentException">Thrown when the key type is not supported or when RSA key components have invalid lengths.</exception>
+    /// <exception cref="ArgumentException">
+    ///     Thrown when the key type is not supported or when RSA key components have invalid
+    ///     lengths.
+    /// </exception>
     /// <remarks>This method returns a newly allocated array containing sensitive information.</remarks>
     public static Memory<byte> EncodeAsPiv(this IPrivateKey parameters) =>
         parameters switch
@@ -60,7 +63,7 @@ public static class KeyExtensions
             ECPrivateKey p => PivKeyEncoder.EncodeECPrivateKey(p),
             RSAPrivateKey p => PivKeyEncoder.EncodeRSAPrivateKey(p),
             Curve25519PrivateKey p => PivKeyEncoder.EncodeCurve25519PrivateKey(p),
-            
+
             #pragma warning disable CS0618 // Type or member is obsolete
             PivPrivateKey p => p.EncodedPrivateKey.ToArray(),
             #pragma warning restore CS0618 // Type or member is obsolete

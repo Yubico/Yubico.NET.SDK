@@ -15,19 +15,19 @@
 namespace Yubico.YubiKey.Cryptography;
 
 /// <summary>
-/// Defines the base contract for all cryptographic keys, providing key type identification.
+///     Defines the base contract for all cryptographic keys, providing key type identification.
 /// </summary>
 /// <remarks>
-/// This interface serves as the foundation for both public and private key abstractions,
-/// enabling polymorphic key type handling across different cryptographic algorithms.
+///     This interface serves as the foundation for both public and private key abstractions,
+///     enabling polymorphic key type handling across different cryptographic algorithms.
 /// </remarks>
 public interface IKeyBase
 {
     /// <summary>
-    /// Gets the type of the cryptographic key.
+    ///     Gets the type of the cryptographic key.
     /// </summary>
     /// <value>
-    /// A <see cref="KeyType"/> value indicating the type of the key.
+    ///     A <see cref="KeyType" /> value indicating the type of the key.
     /// </value>
-    public KeyType KeyType { get; }
+    KeyType KeyType { get; }
 }

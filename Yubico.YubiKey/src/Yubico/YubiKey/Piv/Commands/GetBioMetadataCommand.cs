@@ -14,68 +14,70 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+/// <summary>
+///     Get information about a YubiKey Bio multi-protocol key.
+/// </summary>
+/// <remarks>
+///     The GetBioMetadataCommand is available on YubiKey Bio multi-protocol keys.
+///     <para>
+///         The partner Response class is <see cref="GetBioMetadataResponse" />.
+///     </para>
+///     <para>
+///         See the User's Manual
+///         <xref href="UsersManualPivCommands#get-bio-metadata"> entry on getting bio metadata</xref>
+///         for specific information about what information is returned.
+///     </para>
+///     <para>
+///         Example:
+///     </para>
+///     <code language="csharp">
+///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br />
+///   GetBioMetadataCommand command = new GetBioMetadataCommand();
+///   GetBioMetadataResponse response = connection.SendCommand(command);<br />
+///   if (response.Status == ResponseStatus.Success)
+///   {
+///       PivBioMetadata data = response.GetData();
+///   }
+/// </code>
+/// </remarks>
+public sealed class GetBioMetadataCommand : IYubiKeyCommand<GetBioMetadataResponse>
 {
+    private const byte PivMetadataInstruction = 0xF7;
+
+    private const byte OnCardComparisonAuthenticationSlot = 0x96;
+
     /// <summary>
-    /// Get information about a YubiKey Bio multi-protocol key.
+    ///     Initializes a new instance of the GetBioMetadataCommand class.
     /// </summary>
-    /// <remarks>
-    /// The GetBioMetadataCommand is available on YubiKey Bio multi-protocol keys.
-    /// <para>
-    /// The partner Response class is <see cref="GetBioMetadataResponse"/>.
-    /// </para>
-    /// <para>
-    /// See the User's Manual
-    /// <xref href="UsersManualPivCommands#get-bio-metadata"> entry on getting bio metadata</xref>
-    /// for specific information about what information is returned. 
-    /// </para>
-    /// <para>
-    /// Example:
-    /// </para>
-    /// <code language="csharp">
-    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
-    ///   GetBioMetadataCommand command = new GetBioMetadataCommand();
-    ///   GetBioMetadataResponse response = connection.SendCommand(command);<br/>
-    ///   if (response.Status == ResponseStatus.Success)
-    ///   {
-    ///       PivBioMetadata data = response.GetData();
-    ///   }
-    /// </code>
-    /// </remarks>
-    public sealed class GetBioMetadataCommand : IYubiKeyCommand<GetBioMetadataResponse>
+    public GetBioMetadataCommand()
     {
-        private const byte PivMetadataInstruction = 0xF7;
-
-        private const byte OnCardComparisonAuthenticationSlot = 0x96;
-
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs. For this
-        /// command it's PIV.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Piv
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Piv;
-
-        /// <summary>
-        /// Initializes a new instance of the GetBioMetadataCommand class.
-        /// </summary>
-        public GetBioMetadataCommand()
-        {
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu()
-        {
-            return new CommandApdu
-            {
-                Ins = PivMetadataInstruction,
-                P2 = OnCardComparisonAuthenticationSlot,
-            };
-        }
-
-        /// <inheritdoc />
-        public GetBioMetadataResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetBioMetadataResponse(responseApdu);
     }
+
+    #region IYubiKeyCommand<GetBioMetadataResponse> Members
+
+    /// <summary>
+    ///     Gets the YubiKeyApplication to which this command belongs. For this
+    ///     command it's PIV.
+    /// </summary>
+    /// <value>
+    ///     YubiKeyApplication.Piv
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.Piv;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu()
+    {
+        return new CommandApdu
+        {
+            Ins = PivMetadataInstruction,
+            P2 = OnCardComparisonAuthenticationSlot
+        };
+    }
+
+    /// <inheritdoc />
+    public GetBioMetadataResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

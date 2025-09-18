@@ -14,41 +14,43 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Gets the modality of the BioEnrollment. This is a subcommand of the CTAP
+///     command "authenticatorBioEnrollment".
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="GetBioModalityResponse" />.
+///     <para>
+///         The modality describes what the Bio authentication (biometric) is.
+///         Currently, the only modality listed in the FIDO2 standard is fingerprint.
+///     </para>
+/// </remarks>
+public sealed class GetBioModalityCommand : IYubiKeyCommand<GetBioModalityResponse>
 {
+    private readonly BioEnrollmentCommand _command;
+
     /// <summary>
-    /// Gets the modality of the BioEnrollment. This is a subcommand of the CTAP
-    /// command "authenticatorBioEnrollment".
+    ///     Constructs an instance of the <see cref="GetBioModalityCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="GetBioModalityResponse"/>.
-    /// <para>
-    /// The modality describes what the Bio authentication (biometric) is.
-    /// Currently, the only modality listed in the FIDO2 standard is fingerprint.
-    /// </para>
-    /// </remarks>
-    public sealed class GetBioModalityCommand : IYubiKeyCommand<GetBioModalityResponse>
+    public GetBioModalityCommand()
     {
-        private readonly BioEnrollmentCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="GetBioModalityCommand" /> class.
-        /// </summary>
-        public GetBioModalityCommand()
-        {
-            // Get Bio Modality is not a defined subcommand, so we pass 0 as the
-            // subcommand. The base class knows how to handle this case.
-            _command = new BioEnrollmentCommand(0);
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
-
-        /// <inheritdoc />
-        public GetBioModalityResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetBioModalityResponse(responseApdu);
+        // Get Bio Modality is not a defined subcommand, so we pass 0 as the
+        // subcommand. The base class knows how to handle this case.
+        _command = new BioEnrollmentCommand(0);
     }
+
+    #region IYubiKeyCommand<GetBioModalityResponse> Members
+
+    /// <inheritdoc />
+    public YubiKeyApplication Application => _command.Application;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+
+    /// <inheritdoc />
+    public GetBioModalityResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

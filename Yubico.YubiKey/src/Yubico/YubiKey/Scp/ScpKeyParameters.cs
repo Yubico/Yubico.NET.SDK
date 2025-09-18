@@ -12,25 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Scp
+namespace Yubico.YubiKey.Scp;
+
+/// <summary>
+///     Abstract base class for parameters for a Secure Channel Protocol (SCP) key.
+/// </summary>
+public abstract class ScpKeyParameters
 {
     /// <summary>
-    /// Abstract base class for parameters for a Secure Channel Protocol (SCP) key.
+    ///     Creates a new instance of <see cref="ScpKeyParameters" />.
     /// </summary>
-    public abstract class ScpKeyParameters
+    /// <param name="keyReference"></param>
+    protected ScpKeyParameters(KeyReference keyReference)
     {
-        /// <summary>
-        /// The <see cref="KeyReference"/> associated with the key parameters, used in all SCP variations.
-        /// </summary>
-        public KeyReference KeyReference { get; }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="ScpKeyParameters"/>.
-        /// </summary>
-        /// <param name="keyReference"></param>
-        protected ScpKeyParameters(KeyReference keyReference)
-        {
-            KeyReference = keyReference;
-        }
+        KeyReference = keyReference;
     }
+
+    /// <summary>
+    ///     The <see cref="KeyReference" /> associated with the key parameters, used in all SCP variations.
+    /// </summary>
+    public KeyReference KeyReference { get; }
 }

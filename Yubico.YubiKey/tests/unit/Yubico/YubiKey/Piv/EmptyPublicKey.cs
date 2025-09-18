@@ -21,10 +21,15 @@ internal class EmptyPublicKey : IPublicKey
 {
     public KeyDefinition KeyDefinition { get; } = new();
     public static ReadOnlyMemory<byte> PublicPoint => Array.Empty<byte>();
+
+    #region IPublicKey Members
+
     public KeyType KeyType { get; }
 
     public byte[] ExportSubjectPublicKeyInfo()
     {
         return Array.Empty<byte>();
     }
+
+    #endregion
 }

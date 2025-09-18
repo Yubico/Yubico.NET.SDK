@@ -34,7 +34,7 @@ public class LargeBlobArrayTests
 
         if (array.Digest.HasValue)
         {
-            var isValid = arrayMem.Slice(1).Span.SequenceEqual(array.Digest.Value.Span);
+            var isValid = arrayMem[1..].Span.SequenceEqual(array.Digest.Value.Span);
             Assert.True(isValid);
         }
     }

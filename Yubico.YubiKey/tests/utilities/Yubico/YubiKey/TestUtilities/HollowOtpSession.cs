@@ -46,6 +46,8 @@ public sealed class HollowOtpSession : IOtpSession
 
     private Slot Slot { get; set; }
 
+    #region IOtpSession Members
+
     public bool IsShortPressConfigured => Status.ShortPressConfigured;
 
     public bool ShortPressRequiresTouch => Status.ShortPressRequiresTouch;
@@ -126,4 +128,6 @@ public sealed class HollowOtpSession : IOtpSession
     {
         Connection.Dispose();
     }
+
+    #endregion
 }

@@ -29,12 +29,16 @@ public class PriorityOrderer : ITestCaseOrderer
     public static readonly ConcurrentDictionary<string, ConcurrentQueue<string>>
         QueuedTests = new();
 
+    #region ITestCaseOrderer Members
+
     public IEnumerable<TTestCase> OrderTestCases<TTestCase>(
         IEnumerable<TTestCase> testCases)
         where TTestCase : ITestCase
     {
         return testCases.OrderBy(GetOrder);
     }
+
+    #endregion
 
     private static int GetOrder<TTestCase>(
         TTestCase testCase)

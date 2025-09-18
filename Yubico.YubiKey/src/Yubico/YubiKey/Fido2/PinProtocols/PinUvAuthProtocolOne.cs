@@ -18,184 +18,182 @@ using System.Security.Cryptography;
 using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Cryptography;
 
+namespace Yubico.YubiKey.Fido2.PinProtocols;
 
-namespace Yubico.YubiKey.Fido2.PinProtocols
+/// <summary>
+///     This class contains methods that perform the platform operations of
+///     FIDO2's PIN/UV auth protocol one.
+/// </summary>
+public class PinUvAuthProtocolOne : PinUvAuthProtocolBase
 {
+    private const int KeyLength = 32;
+    private const int BlockSize = 16;
+    private readonly byte[] _aesEncKey = new byte[KeyLength];
+    private bool _disposed;
+
     /// <summary>
-    /// This class contains methods that perform the platform operations of
-    /// FIDO2's PIN/UV auth protocol one.
+    ///     Constructs a new instance of <see cref="PinUvAuthProtocolOne" />.
     /// </summary>
-    public class PinUvAuthProtocolOne : PinUvAuthProtocolBase
+    public PinUvAuthProtocolOne()
     {
-        private const int KeyLength = 32;
-        private const int BlockSize = 16;
-        private bool _disposed;
-        private readonly byte[] _aesEncKey = new byte[KeyLength];
+        Protocol = PinUvAuthProtocol.ProtocolOne;
+    }
 
-        /// <summary>
-        /// Constructs a new instance of <see cref="PinUvAuthProtocolOne"/>.
-        /// </summary>
-        public PinUvAuthProtocolOne()
+    /// <inheritdoc />
+    public override byte[] Encrypt(byte[] plaintext, int offset, int length)
+    {
+        Guard.IsNotNull(plaintext, nameof(plaintext));
+
+        return Encrypt(plaintext.AsMemory(offset, length));
+    }
+
+    /// <inheritdoc />
+    public override byte[] Encrypt(ReadOnlyMemory<byte> plaintext)
+    {
+        if (EncryptionKey is null)
         {
-            Protocol = PinUvAuthProtocol.ProtocolOne;
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.InvalidCallOrder));
         }
 
-        /// <inheritdoc />
-        public override byte[] Encrypt(byte[] plaintext, int offset, int length)
+        int length = plaintext.Length;
+        if (length < BlockSize || length % BlockSize != 0)
         {
-            Guard.IsNotNull(plaintext, nameof(plaintext));
-            
-            return Encrypt(plaintext.AsMemory(offset, length));
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.IncorrectPlaintextLength));
         }
 
-        /// <inheritdoc />
-        public override byte[] Encrypt(ReadOnlyMemory<byte> plaintext)
+        using var aes = CryptographyProviders.AesCreator();
+        aes.Mode = CipherMode.CBC;
+        aes.Padding = PaddingMode.None;
+        aes.IV = new byte[BlockSize];
+        aes.Key = _aesEncKey;
+
+        using var aesTransform = aes.CreateEncryptor();
+        byte[] encryptedData = new byte[length];
+        _ = aesTransform.TransformBlock(plaintext.ToArray(), 0, length, encryptedData, 0);
+
+        return encryptedData;
+    }
+
+    /// <inheritdoc />
+    public override byte[] Decrypt(byte[] ciphertext, int offset, int length)
+    {
+        Guard.IsNotNull(ciphertext, nameof(ciphertext));
+
+        return Decrypt(ciphertext.AsMemory(offset, length));
+    }
+
+    /// <inheritdoc />
+    public override byte[] Decrypt(ReadOnlyMemory<byte> ciphertext)
+    {
+        if (EncryptionKey is null)
         {
-            if (EncryptionKey is null)
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.InvalidCallOrder));
+        }
+
+        int length = ciphertext.Length;
+        if (length == 0 || length % BlockSize != 0)
+        {
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.IncorrectCiphertextLength));
+        }
+
+        using var aes = CryptographyProviders.AesCreator();
+        aes.Mode = CipherMode.CBC;
+        aes.Padding = PaddingMode.None;
+        aes.IV = new byte[BlockSize];
+        aes.Key = _aesEncKey;
+
+        using var aesTransform = aes.CreateDecryptor();
+        byte[] decryptedData = new byte[length];
+        _ = aesTransform.TransformBlock(
+            ciphertext.ToArray(), 0, length, decryptedData, 0);
+
+        return decryptedData;
+    }
+
+    /// <inheritdoc />
+    public override byte[] Authenticate(byte[] message)
+    {
+        if (AuthenticationKey is null)
+        {
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.InvalidCallOrder));
+        }
+
+        Guard.IsNotNull(message, nameof(message));
+
+        return Authenticate(_aesEncKey, message);
+    }
+
+    /// <inheritdoc />
+    public override byte[] Authenticate(byte[] keyData, byte[] message) =>
+        Authenticate(keyData.AsMemory(), message.AsMemory());
+
+    /// <inheritdoc />
+    public override byte[] Authenticate(ReadOnlyMemory<byte> keyData, ReadOnlyMemory<byte> message)
+    {
+        Guard.IsNotNull(keyData, nameof(keyData));
+        Guard.HasSizeEqualTo(keyData, KeyLength, nameof(keyData));
+        byte[] keyBytes = keyData.ToArray();
+        byte[] messageBytes = message.ToArray();
+
+        using var hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
+
+        hmacSha256.Key = keyBytes;
+        return hmacSha256.ComputeHash(messageBytes).AsSpan(0, 16).ToArray();
+    }
+
+    /// <inheritdoc />
+    protected override void DeriveKeys(byte[] sharedSecret)
+    {
+        Guard.IsNotNull(sharedSecret, nameof(sharedSecret));
+        Guard.IsEqualTo(sharedSecret.Length, KeyLength, nameof(sharedSecret.Length));
+
+        using var sha256 = CryptographyProviders.Sha256Creator();
+
+        _ = sha256.TransformFinalBlock(sharedSecret, 0, sharedSecret.Length);
+        if (sha256.Hash.Length != KeyLength)
+        {
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.CryptographyProviderFailure));
+        }
+
+        Array.Copy(sha256.Hash, _aesEncKey, KeyLength);
+
+        EncryptionKey = _aesEncKey;
+        AuthenticationKey = _aesEncKey;
+    }
+
+    /// <summary>
+    ///     Release resources, overwrite sensitive data.
+    /// </summary>
+    protected override void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
             {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidCallOrder));
-            }
-            
-            int length = plaintext.Length;
-            if (length < BlockSize || length % BlockSize != 0 )
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectPlaintextLength));
-            }
-
-            using var aes = CryptographyProviders.AesCreator();
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.None;
-            aes.IV = new byte[BlockSize];
-            aes.Key = _aesEncKey;
-
-            using var aesTransform = aes.CreateEncryptor();
-            byte[] encryptedData = new byte[length];
-            _ = aesTransform.TransformBlock(plaintext.ToArray(), 0, length, encryptedData, 0);
-
-            return encryptedData;
-        }
-
-        /// <inheritdoc />
-        public override byte[] Decrypt(byte[] ciphertext, int offset, int length)
-        {
-            Guard.IsNotNull(ciphertext, nameof(ciphertext));
-
-            return Decrypt(ciphertext.AsMemory(offset, length));
-        }
-        
-        /// <inheritdoc />
-        public override byte[] Decrypt(ReadOnlyMemory<byte> ciphertext)
-        {
-            if (EncryptionKey is null)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidCallOrder));
-            }
-
-            int length = ciphertext.Length;
-            if (length == 0 || length % BlockSize != 0)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectCiphertextLength));
-            }
-
-            using var aes = CryptographyProviders.AesCreator();
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.None;
-            aes.IV = new byte[BlockSize];
-            aes.Key = _aesEncKey;
-
-            using var aesTransform = aes.CreateDecryptor();
-            byte[] decryptedData = new byte[length];
-            _ = aesTransform.TransformBlock(
-                ciphertext.ToArray(), 0, length, decryptedData, 0);
-
-            return decryptedData;
-        }
-
-        /// <inheritdoc />
-        public override byte[] Authenticate(byte[] message)
-        {
-            if (AuthenticationKey is null)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidCallOrder));
-            }
-
-            Guard.IsNotNull(message, nameof(message));
-
-            return Authenticate(_aesEncKey, message);
-        }
-
-        /// <inheritdoc />
-        public override byte[] Authenticate(byte[] keyData, byte[] message)
-        => Authenticate(keyData.AsMemory(), message.AsMemory());
-
-        /// <inheritdoc/>
-        public override byte[] Authenticate(ReadOnlyMemory<byte> keyData, ReadOnlyMemory<byte> message)
-        {
-            Guard.IsNotNull(keyData, nameof(keyData));
-            Guard.HasSizeEqualTo(keyData, KeyLength, nameof(keyData));
-            byte[] keyBytes = keyData.ToArray();
-            byte[] messageBytes = message.ToArray();
-            
-            using var hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
-
-            hmacSha256.Key = keyBytes;
-            return hmacSha256.ComputeHash(messageBytes).AsSpan(0, 16).ToArray();
-        }
-
-        /// <inheritdoc />
-        protected override void DeriveKeys(byte[] sharedSecret)
-        {
-            Guard.IsNotNull(sharedSecret, nameof(sharedSecret));
-            Guard.IsEqualTo(sharedSecret.Length, KeyLength, nameof(sharedSecret.Length));
-
-            using var sha256 = CryptographyProviders.Sha256Creator();
-
-            _ = sha256.TransformFinalBlock(sharedSecret, 0, sharedSecret.Length);
-            if (sha256.Hash.Length != KeyLength)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.CryptographyProviderFailure));
-            }
-
-            Array.Copy(sha256.Hash, _aesEncKey, KeyLength);
-
-            EncryptionKey = _aesEncKey;
-            AuthenticationKey = _aesEncKey;
-        }
-
-        /// <summary>
-        /// Release resources, overwrite sensitive data.
-        /// </summary>
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    CryptographicOperations.ZeroMemory(_aesEncKey);
-                }
-
-                _disposed = true;
+                CryptographicOperations.ZeroMemory(_aesEncKey);
             }
 
-            base.Dispose(disposing);
+            _disposed = true;
         }
+
+        base.Dispose(disposing);
     }
 }

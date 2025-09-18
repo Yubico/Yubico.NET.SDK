@@ -50,10 +50,14 @@ public class SetDeviceInfoTests : IDisposable
         Assert.NotNull(_fidoConnection);
     }
 
+    #region IDisposable Members
+
     public void Dispose()
     {
         _fidoConnection.Dispose();
     }
+
+    #endregion
 
     private static HidDevice? GetFidoHid(
         IEnumerable<HidDevice> devices)

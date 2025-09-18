@@ -16,40 +16,43 @@ using System;
 using System.Globalization;
 using Yubico.YubiKey.Otp.Commands;
 
-namespace Yubico.YubiKey.Otp.Operations
+namespace Yubico.YubiKey.Otp.Operations;
+
+public class DeleteSlotConfiguration : OperationBase<DeleteSlotConfiguration>
 {
-    public class DeleteSlotConfiguration : OperationBase<DeleteSlotConfiguration>
+    internal DeleteSlotConfiguration(IYubiKeyConnection connection, IOtpSession session, Slot slot)
+        : base(connection, session, slot)
     {
-        internal DeleteSlotConfiguration(IYubiKeyConnection connection, IOtpSession session, Slot slot)
-            : base(connection, session, slot) { }
+    }
 
-        protected override void ExecuteOperation()
+    protected override void ExecuteOperation()
+    {
+        var cmd = new DeleteSlotCommand
         {
-            var cmd = new DeleteSlotCommand
-            {
-                OtpSlot = OtpSlot!.Value
-            };
-            cmd.ApplyCurrentAccessCode(CurrentAccessCode);
+            OtpSlot = OtpSlot!.Value
+        };
 
-            var response = Connection.SendCommand(cmd);
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(string.Format(
+        cmd.ApplyCurrentAccessCode(CurrentAccessCode);
+
+        var response = Connection.SendCommand(cmd);
+        if (response.Status != ResponseStatus.Success)
+        {
+            throw new InvalidOperationException(
+                string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.YubiKeyOperationFailed,
                     response.StatusMessage));
-            }
         }
+    }
 
-        protected override void PreLaunchOperation()
-        {
-            if (!(OtpSlot ==
-                Slot.ShortPress
+    protected override void PreLaunchOperation()
+    {
+        if (!(OtpSlot ==
+            Slot.ShortPress
                 ? Session.IsShortPressConfigured
                 : Session.IsLongPressConfigured))
-            {
-                throw new InvalidOperationException(ExceptionMessages.CantDeleteEmptySlot);
-            }
+        {
+            throw new InvalidOperationException(ExceptionMessages.CantDeleteEmptySlot);
         }
     }
 }

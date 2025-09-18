@@ -20,116 +20,115 @@ using Yubico.Core.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Scp03
+namespace Yubico.YubiKey.Scp03;
+
+[Obsolete("Use new ChannelMac instead")]
+internal static class ChannelMac
 {
-    [Obsolete("Use new ChannelMac instead")]
-    internal static class ChannelMac
+    public static (CommandApdu macdApdu, byte[] newMacChainingValue) MacApdu(
+        CommandApdu apdu,
+        byte[] macKey,
+        byte[] macChainingValue)
     {
-        public static (CommandApdu macdApdu, byte[] newMacChainingValue) MacApdu(CommandApdu apdu, byte[] macKey, byte[] macChainingValue)
+        if (macChainingValue.Length != 16)
         {
-            if (macChainingValue.Length != 16)
-            {
-                throw new ArgumentException(ExceptionMessages.UnknownScpError, nameof(macChainingValue));
-            }
-
-            var apduWithLongerLen = AddDataToApdu(apdu, new byte[8]);
-            byte[] apduBytesWithZeroMac = ApduToBytes(apduWithLongerLen);
-            byte[] apduBytes = apduBytesWithZeroMac.Take(apduBytesWithZeroMac.Length - 8).ToArray();
-            byte[] macInp = new byte[16 + apduBytes.Length];
-            macChainingValue.CopyTo(macInp, 0);
-            apduBytes.CopyTo(macInp, 16);
-
-            using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
-            cmacObj.CmacInit(macKey);
-            cmacObj.CmacUpdate(macInp);
-            cmacObj.CmacFinal(macChainingValue);
-
-            return (AddDataToApdu(apdu, macChainingValue.Take(8).ToArray()), macChainingValue);
+            throw new ArgumentException(ExceptionMessages.UnknownScpError, nameof(macChainingValue));
         }
 
-        public static void VerifyRmac(byte[] response, byte[] rmacKey, byte[] macChainingValue)
+        var apduWithLongerLen = AddDataToApdu(apdu, new byte[8]);
+        byte[] apduBytesWithZeroMac = ApduToBytes(apduWithLongerLen);
+        byte[] apduBytes = apduBytesWithZeroMac.Take(apduBytesWithZeroMac.Length - 8).ToArray();
+        byte[] macInp = new byte[16 + apduBytes.Length];
+        macChainingValue.CopyTo(macInp, 0);
+        apduBytes.CopyTo(macInp, 16);
+
+        using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+        cmacObj.CmacInit(macKey);
+        cmacObj.CmacUpdate(macInp);
+        cmacObj.CmacFinal(macChainingValue);
+
+        return (AddDataToApdu(apdu, macChainingValue.Take(8).ToArray()), macChainingValue);
+    }
+
+    public static void VerifyRmac(byte[] response, byte[] rmacKey, byte[] macChainingValue)
+    {
+        if (response.Length < 8)
         {
-            if (response.Length < 8)
-            {
-                throw new SecureChannelException(ExceptionMessages.InsufficientResponseLengthToVerifyRmac);
-            }
-
-            if ((response.Length - 8) % 16 != 0)
-            {
-                throw new SecureChannelException(ExceptionMessages.IncorrectResponseLengthToDecrypt);
-            }
-
-            int respDataLen = response.Length - 8;
-            byte[] recvdRmac = response.Skip(response.Length - 8).ToArray();
-            byte[] macInp = new byte[16 + respDataLen + 2];
-            macChainingValue.CopyTo(macInp, 0);
-            response.Take(respDataLen).ToArray().CopyTo(macInp, 16);
-
-            // NB: this could support more status words, but devices only give RMACs w/ SW=0x9000
-            macInp[16 + respDataLen] = SW1Constants.Success;
-            macInp[16 + respDataLen + 1] = SWConstants.Success & 0xFF;
-
-            using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
-            byte[] cmac = new byte[16];
-            cmacObj.CmacInit(rmacKey);
-            cmacObj.CmacUpdate(macInp);
-            cmacObj.CmacFinal(cmac);
-
-            var calculatedRmac = cmac.AsSpan(0, 8);
-            if (!CryptographicOperations.FixedTimeEquals(recvdRmac, calculatedRmac))
-            {
-                throw new SecureChannelException(ExceptionMessages.IncorrectRmac);
-            }
+            throw new SecureChannelException(ExceptionMessages.InsufficientResponseLengthToVerifyRmac);
         }
 
-
-        private static byte[] ApduToBytes(CommandApdu apdu)
+        if ((response.Length - 8) % 16 != 0)
         {
-            byte[] data = apdu.Data.ToArray();
-            byte[] header = new byte[] { apdu.Cla, apdu.Ins, apdu.P1, apdu.P2 };
-            byte[] encodedLen = EncodeLen(data.Length);
-            using var s = new MemoryStream();
-            s.Write(header, 0, header.Length);
-            s.Write(encodedLen, 0, encodedLen.Length);
-            s.Write(data, 0, data.Length);
-            return s.ToArray();
+            throw new SecureChannelException(ExceptionMessages.IncorrectResponseLengthToDecrypt);
         }
 
-        private static CommandApdu AddDataToApdu(CommandApdu apdu, byte[] data)
+        int respDataLen = response.Length - 8;
+        byte[] recvdRmac = response.Skip(response.Length - 8).ToArray();
+        byte[] macInp = new byte[16 + respDataLen + 2];
+        macChainingValue.CopyTo(macInp, 0);
+        response.Take(respDataLen).ToArray().CopyTo(macInp, 16);
+
+        // NB: this could support more status words, but devices only give RMACs w/ SW=0x9000
+        macInp[16 + respDataLen] = SW1Constants.Success;
+        macInp[16 + respDataLen + 1] = SWConstants.Success & 0xFF;
+
+        using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+        byte[] cmac = new byte[16];
+        cmacObj.CmacInit(rmacKey);
+        cmacObj.CmacUpdate(macInp);
+        cmacObj.CmacFinal(cmac);
+
+        var calculatedRmac = cmac.AsSpan(0, 8);
+        if (!CryptographicOperations.FixedTimeEquals(recvdRmac, calculatedRmac))
         {
-            var newApdu = new CommandApdu()
-            {
-                Cla = apdu.Cla,
-                Ins = apdu.Ins,
-                P1 = apdu.P1,
-                P2 = apdu.P2
-            };
+            throw new SecureChannelException(ExceptionMessages.IncorrectRmac);
+        }
+    }
 
-            int currentDataLength = apdu.Data.Length;
-            byte[] newData = new byte[currentDataLength + data.Length];
+    private static byte[] ApduToBytes(CommandApdu apdu)
+    {
+        byte[] data = apdu.Data.ToArray();
+        byte[] header = new[] { apdu.Cla, apdu.Ins, apdu.P1, apdu.P2 };
+        byte[] encodedLen = EncodeLen(data.Length);
+        using var s = new MemoryStream();
+        s.Write(header, 0, header.Length);
+        s.Write(encodedLen, 0, encodedLen.Length);
+        s.Write(data, 0, data.Length);
+        return s.ToArray();
+    }
 
-            if (!apdu.Data.IsEmpty)
-            {
-                apdu.Data.ToArray().CopyTo(newData, 0);
-            }
+    private static CommandApdu AddDataToApdu(CommandApdu apdu, byte[] data)
+    {
+        var newApdu = new CommandApdu
+        {
+            Cla = apdu.Cla,
+            Ins = apdu.Ins,
+            P1 = apdu.P1,
+            P2 = apdu.P2
+        };
 
-            data.CopyTo(newData, currentDataLength);
-            newApdu.Data = newData;
-            return newApdu;
+        int currentDataLength = apdu.Data.Length;
+        byte[] newData = new byte[currentDataLength + data.Length];
+
+        if (!apdu.Data.IsEmpty)
+        {
+            apdu.Data.ToArray().CopyTo(newData, 0);
         }
 
-        private static byte[] EncodeLen(int len)
+        data.CopyTo(newData, currentDataLength);
+        newApdu.Data = newData;
+        return newApdu;
+    }
+
+    private static byte[] EncodeLen(int len)
+    {
+        if (len <= 0xFF)
         {
-            if (len <= 0xFF)
-            {
-                return new byte[] { (byte)len };
-            }
-            else
-            {
-                byte lenUpper = (byte)(len >> 8);
-                byte lenLower = (byte)(len & 0xFF);
-                return new byte[] { 0x00, lenUpper, lenLower };
-            }
+            return new[] { (byte)len };
         }
+
+        byte lenUpper = (byte)(len >> 8);
+        byte lenLower = (byte)(len & 0xFF);
+        return new byte[] { 0x00, lenUpper, lenLower };
     }
 }

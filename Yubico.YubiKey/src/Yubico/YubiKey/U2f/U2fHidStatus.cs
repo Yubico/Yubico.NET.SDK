@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.U2f
+namespace Yubico.YubiKey.U2f;
+
+internal enum U2fHidStatus
 {
-    internal enum U2fHidStatus
-    {
-        Success = 0x00,
-        Ctap1ErrInvalidCommand = 0x01,
-        Ctap1ErrInvalidParameter = 0x02,
-        Ctap1ErrInvalidLength = 0x03,
-        Ctap1ErrInvalidSequencing = 0x04,
-        Ctap1ErrTimeout = 0x05,
-        Ctap1ErrChannelBusy = 0x06,
-        Ctap1ErrLockRequired = 0x0a,
-        Ctap1ErrInvalidChannel = 0x0b,
-        Ctap1ErrOther = 0x7f,
-    }
+    Success = 0x00,
+    Ctap1ErrInvalidCommand = 0x01,
+    Ctap1ErrInvalidParameter = 0x02,
+    Ctap1ErrInvalidLength = 0x03,
+    Ctap1ErrInvalidSequencing = 0x04,
+    Ctap1ErrTimeout = 0x05,
+    Ctap1ErrChannelBusy = 0x06,
+    Ctap1ErrLockRequired = 0x0a,
+    Ctap1ErrInvalidChannel = 0x0b,
+    Ctap1ErrOther = 0x7f
 }

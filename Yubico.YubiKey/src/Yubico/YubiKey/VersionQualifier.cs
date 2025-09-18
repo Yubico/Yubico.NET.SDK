@@ -17,8 +17,8 @@ using System;
 namespace Yubico.YubiKey;
 
 /// <summary>
-/// Represents the type of version qualifier for a firmware version.
-/// The version qualifier type indicates whether the version is an Alpha, Beta, or Final release.
+///     Represents the type of version qualifier for a firmware version.
+///     The version qualifier type indicates whether the version is an Alpha, Beta, or Final release.
 /// </summary>
 public enum VersionQualifierType : byte
 {
@@ -28,37 +28,26 @@ public enum VersionQualifierType : byte
 }
 
 /// <summary>
-/// Represents a version qualifier for a firmware version.
-/// A version qualifier typically includes the firmware version, a type (such as Alpha, Beta, or Final),
-/// and an iteration number.
+///     Represents a version qualifier for a firmware version.
+///     A version qualifier typically includes the firmware version, a type (such as Alpha, Beta, or Final),
+///     and an iteration number.
 /// </summary>
 public class VersionQualifier
 {
     /// <summary>
-    /// Represents the firmware version associated with this qualifier.
-    /// </summary>
-    public FirmwareVersion FirmwareVersion { get; }
-
-    /// <summary>
-    /// Represents the type of version qualifier, such as Alpha, Beta, or Final.
-    /// </summary>
-    public VersionQualifierType Type { get; }
-
-    /// <summary>
-    /// Represents the iteration number of the version qualifier.
-    /// </summary>
-    public long Iteration { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="VersionQualifier"/> class.
-    /// This constructor allows you to specify the firmware version, type, and iteration.
-    /// The iteration must be a non-negative value and less than or equal to int.MaxValue.
-    /// If the firmware version is null, an <see cref="ArgumentNullException"/> will be thrown.
-    /// If the iteration is negative or greater than int.MaxValue, an <see cref="ArgumentOutOfRangeException"/> will be thrown.
+    ///     Initializes a new instance of the <see cref="VersionQualifier" /> class.
+    ///     This constructor allows you to specify the firmware version, type, and iteration.
+    ///     The iteration must be a non-negative value and less than or equal to int.MaxValue.
+    ///     If the firmware version is null, an <see cref="ArgumentNullException" /> will be thrown.
+    ///     If the iteration is negative or greater than int.MaxValue, an <see cref="ArgumentOutOfRangeException" /> will be
+    ///     thrown.
     /// </summary>
     /// <param name="firmwareVersion">The firmware version associated with this qualifier.</param>
     /// <param name="type">The type of version qualifier (Alpha, Beta, Final).</param>
-    /// <param name="iteration">The iteration number of the version qualifier, must be a non-negative value and less than or equal to int.MaxValue.</param>
+    /// <param name="iteration">
+    ///     The iteration number of the version qualifier, must be a non-negative value and less than or
+    ///     equal to int.MaxValue.
+    /// </param>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     /// <exception cref="ArgumentNullException"></exception>
     public VersionQualifier(FirmwareVersion firmwareVersion, VersionQualifierType type, long iteration)
@@ -76,9 +65,9 @@ public class VersionQualifier
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="VersionQualifier"/> class with default values.
-    /// The default firmware version is set to a new instance of <see cref="FirmwareVersion"/>,
-    /// the type is set to <see cref="VersionQualifierType.Final"/>, and the iteration is set to 0.
+    ///     Initializes a new instance of the <see cref="VersionQualifier" /> class with default values.
+    ///     The default firmware version is set to a new instance of <see cref="FirmwareVersion" />,
+    ///     the type is set to <see cref="VersionQualifierType.Final" />, and the iteration is set to 0.
     /// </summary>
     public VersionQualifier()
     {
@@ -87,7 +76,22 @@ public class VersionQualifier
     }
 
     /// <summary>
-    ///  Returns a string that represents the current <see cref="VersionQualifier"/>.
+    ///     Represents the firmware version associated with this qualifier.
+    /// </summary>
+    public FirmwareVersion FirmwareVersion { get; }
+
+    /// <summary>
+    ///     Represents the type of version qualifier, such as Alpha, Beta, or Final.
+    /// </summary>
+    public VersionQualifierType Type { get; }
+
+    /// <summary>
+    ///     Represents the iteration number of the version qualifier.
+    /// </summary>
+    public long Iteration { get; }
+
+    /// <summary>
+    ///     Returns a string that represents the current <see cref="VersionQualifier" />.
     /// </summary>
     public override string ToString() => $"{FirmwareVersion}.{Type.ToString().ToLowerInvariant()}.{Iteration}";
 

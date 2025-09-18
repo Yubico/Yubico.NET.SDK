@@ -30,6 +30,8 @@ namespace Yubico.YubiKey;
 
 internal class ThreadIdEnricher : ILogEventEnricher
 {
+    #region ILogEventEnricher Members
+
     public void Enrich(
         LogEvent logEvent,
         ILogEventPropertyFactory propertyFactory)
@@ -37,6 +39,8 @@ internal class ThreadIdEnricher : ILogEventEnricher
         logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
             "ThreadId", Environment.CurrentManagedThreadId));
     }
+
+    #endregion
 }
 
 public class ReclaimTimeoutTests

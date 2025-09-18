@@ -14,15 +14,14 @@
 
 using System;
 
-namespace Yubico.YubiKey.InterIndustry.Commands
+namespace Yubico.YubiKey.InterIndustry.Commands;
+
+/// <summary>
+///     Selecting a YubiKey application will always result in data being returned. This type represents the return data
+///     if a more specific, structured type is not available.  If a specific application has a specific data need, such
+///     as OATH, it will have its own data type which parses this data.
+/// </summary>
+public interface ISelectApplicationData
 {
-    /// <summary>
-    /// Selecting a YubiKey application will always result in data being returned. This type represents the return data
-    /// if a more specific, structured type is not available.  If a specific application has a specific data need, such
-    /// as OATH, it will have its own data type which parses this data.
-    /// </summary>
-    public interface ISelectApplicationData
-    {
-        ReadOnlyMemory<byte> RawData { get; }
-    }
+    ReadOnlyMemory<byte> RawData { get; }
 }

@@ -304,7 +304,7 @@ public class CccTests
         });
 
         var newEncoded = new Memory<byte>(new byte[encodedValue.Length + 1]);
-        encodedValue.Slice(0, offset).CopyTo(newEncoded);
+        encodedValue[..offset].CopyTo(newEncoded);
         newEncoded.Span[1] = 0x34;
         newEncoded.Span[offset] = 0x01;
         newEncoded.Span[offset + 1] = 0x01;

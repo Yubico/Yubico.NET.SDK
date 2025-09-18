@@ -22,6 +22,9 @@ internal class EmptyPrivateKey : IPrivateKey
     public KeyDefinition KeyDefinition { get; } = new();
 
     public static ReadOnlyMemory<byte> PrivateKey => Array.Empty<byte>();
+
+    #region IPrivateKey Members
+
     public KeyType KeyType { get; }
 
     public byte[] ExportPkcs8PrivateKey()
@@ -30,6 +33,8 @@ internal class EmptyPrivateKey : IPrivateKey
     }
 
     public void Clear() { }
+
+    #endregion
 
     public void Dispose()
     {

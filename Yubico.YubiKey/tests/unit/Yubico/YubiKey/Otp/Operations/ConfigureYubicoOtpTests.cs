@@ -31,12 +31,16 @@ public class ConfigureYubicoOtpTests : IDisposable
         _op = _session.ConfigureYubicoOtp(Slot.ShortPress);
     }
 
+    #region IDisposable Members
+
     public void Dispose()
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(true);
         GC.SuppressFinalize(this);
     }
+
+    #endregion
 
     [Fact]
     public void TestNoSlot()

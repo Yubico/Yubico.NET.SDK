@@ -12,51 +12,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+/// <summary>
+///     Represents the form-factor of the YubiKey.
+/// </summary>
+public enum FormFactor
 {
     /// <summary>
-    /// Represents the form-factor of the YubiKey.
+    ///     The form-factor could not be determined.
     /// </summary>
-    public enum FormFactor
-    {
-        /// <summary>
-        /// The form-factor could not be determined.
-        /// </summary>
-        Unknown = 0,
+    Unknown = 0,
 
-        /// <summary>
-        /// The YubiKey is a USB-A key-chain device.
-        /// </summary>
-        UsbAKeychain = 1,
+    /// <summary>
+    ///     The YubiKey is a USB-A key-chain device.
+    /// </summary>
+    UsbAKeychain = 1,
 
-        /// <summary>
-        /// The YubiKey is a USB-A nano device.
-        /// </summary>
-        UsbANano = 2,
+    /// <summary>
+    ///     The YubiKey is a USB-A nano device.
+    /// </summary>
+    UsbANano = 2,
 
-        /// <summary>
-        /// The YubiKey is a USB-C key-chain device.
-        /// </summary>
-        UsbCKeychain = 3,
+    /// <summary>
+    ///     The YubiKey is a USB-C key-chain device.
+    /// </summary>
+    UsbCKeychain = 3,
 
-        /// <summary>
-        /// The YubiKey is a USB-C nano device.
-        /// </summary>
-        UsbCNano = 4,
+    /// <summary>
+    ///     The YubiKey is a USB-C nano device.
+    /// </summary>
+    UsbCNano = 4,
 
-        /// <summary>
-        /// The YubiKey is a dual-port USB-C and Apple Lightning connector device.
-        /// </summary>
-        UsbCLightning = 5,
+    /// <summary>
+    ///     The YubiKey is a dual-port USB-C and Apple Lightning connector device.
+    /// </summary>
+    UsbCLightning = 5,
 
-        /// <summary>
-        /// The YubiKey is a USB-A key-chain device with a biometric (fingerprint) sensor.
-        /// </summary>
-        UsbABiometricKeychain = 6,
+    /// <summary>
+    ///     The YubiKey is a USB-A key-chain device with a biometric (fingerprint) sensor.
+    /// </summary>
+    UsbABiometricKeychain = 6,
 
-        /// <summary>
-        /// The YubiKey is a USB-C key-chain device with a biometric (fingerprint) sensor.
-        /// </summary>
-        UsbCBiometricKeychain = 7,
-    }
+    /// <summary>
+    ///     The YubiKey is a USB-C key-chain device with a biometric (fingerprint) sensor.
+    /// </summary>
+    UsbCBiometricKeychain = 7
 }

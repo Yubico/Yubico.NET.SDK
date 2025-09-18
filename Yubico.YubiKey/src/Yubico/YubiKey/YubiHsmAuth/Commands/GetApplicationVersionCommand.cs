@@ -14,42 +14,45 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+/// <summary>
+///     Get the version of the YubiHSM Auth application as a major, minor, and
+///     patch value.
+/// </summary>
+/// <remarks>
+///     The associated response class is <see cref="GetApplicationVersionResponse" />.
+/// </remarks>
+public sealed class GetApplicationVersionCommand : IYubiKeyCommand<GetApplicationVersionResponse>
 {
+    private const byte GetApplicationVersionInstruction = 0x07;
+
     /// <summary>
-    /// Get the version of the YubiHSM Auth application as a major, minor, and
-    /// patch value.
+    ///     Constructs an instance of the <see cref="GetApplicationVersionCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// The associated response class is <see cref="GetApplicationVersionResponse"/>.
-    /// </remarks>
-    public sealed class GetApplicationVersionCommand : IYubiKeyCommand<GetApplicationVersionResponse>
+    public GetApplicationVersionCommand()
     {
-        private const byte GetApplicationVersionInstruction = 0x07;
+    }
 
-        /// <summary>
-        /// Gets the <see cref="YubiKeyApplication"/> to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.YubiHsmAuth"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
+    #region IYubiKeyCommand<GetApplicationVersionResponse> Members
 
-        /// <summary>
-        /// Constructs an instance of the <see cref="GetApplicationVersionCommand"/> class.
-        /// </summary>
-        public GetApplicationVersionCommand()
-        {
-        }
+    /// <summary>
+    ///     Gets the <see cref="YubiKeyApplication" /> to which this command belongs.
+    /// </summary>
+    /// <value>
+    ///     <see cref="YubiKeyApplication.YubiHsmAuth" />
+    /// </value>
+    public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() =>
+        new()
         {
             Ins = GetApplicationVersionInstruction
         };
 
-        /// <inheritdoc />
-        public GetApplicationVersionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetApplicationVersionResponse(responseApdu);
-    }
+    /// <inheritdoc />
+    public GetApplicationVersionResponse CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

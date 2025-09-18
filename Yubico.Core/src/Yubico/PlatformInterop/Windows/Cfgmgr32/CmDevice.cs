@@ -160,9 +160,8 @@ public class CmDevice
     public IList<CmDevice> Children()
     {
         var children = new List<CmDevice>();
-        CmErrorCode errorCode;
 
-        errorCode = CM_Get_Child(out int childInstance, Instance);
+        CmErrorCode errorCode = CM_Get_Child(out int childInstance, Instance);
 
         while (errorCode == CmErrorCode.CR_SUCCESS)
         {

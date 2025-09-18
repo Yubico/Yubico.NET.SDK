@@ -74,12 +74,11 @@ public class CborMapIntTests
         bool isSigned)
     {
         var index = 0;
-        bool isValid;
 
         do
         {
             var encoding = GetNextEncoding(isSigned, ref index, out var flags);
-            isValid = TestInt32(encoding, flags);
+            var isValid = TestInt32(encoding, flags);
             Assert.True(isValid);
             isValid = TestUInt32(encoding, flags);
             Assert.True(isValid);

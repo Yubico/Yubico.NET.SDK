@@ -18,88 +18,94 @@ using Microsoft.Extensions.Logging;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 
-namespace Yubico.YubiKey.Pipelines
+namespace Yubico.YubiKey.Pipelines;
+
+/// <summary>
+///     A pipeline that performs command chaining to allow sending larger
+///     command APDUs.
+/// </summary>
+internal class CommandChainingTransform : IApduTransform
 {
-    /// <summary>
-    /// A pipeline that performs command chaining to allow sending larger
-    /// command APDUs.
-    /// </summary>
-    internal class CommandChainingTransform : IApduTransform
+    private readonly ILogger _log = Log.GetLogger<CommandChainingTransform>();
+
+    private readonly IApduTransform _pipeline;
+
+    public CommandChainingTransform(IApduTransform pipeline)
     {
-        private readonly ILogger _log = Log.GetLogger<CommandChainingTransform>();
+        _pipeline = pipeline;
+    }
 
-        public int MaxChunkSize { get; internal set; } = 255;
+    public int MaxChunkSize { get; internal set; } = 255;
 
-        readonly IApduTransform _pipeline;
+    #region IApduTransform Members
 
-        public CommandChainingTransform(IApduTransform pipeline)
+    public void Cleanup() => _pipeline.Cleanup();
+    public void Setup() => _pipeline.Setup();
+
+    public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
+    {
+        if (command is null)
         {
-            _pipeline = pipeline;
+            throw new ArgumentNullException(nameof(command));
         }
 
-        public void Cleanup() => _pipeline.Cleanup();
-        public void Setup() => _pipeline.Setup();
-
-        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType)
+        // Send single short APDU
+        int commandDataSize = command.Data.Length;
+        if (commandDataSize <= MaxChunkSize)
         {
-            if (command is null)
+            _log.LogDebug("Sending short APDU");
+            return _pipeline.Invoke(command, commandType, responseType);
+        }
+
+        // Send a series of short APDU's
+        _log.LogDebug("APDU size exceeds size of short APDU, proceeding to send data in chunks instead");
+        return SendChainedApdu(command, commandType, responseType);
+    }
+
+    #endregion
+
+    private ResponseApdu SendChainedApdu(CommandApdu command, Type commandType, Type responseType)
+    {
+        ResponseApdu? responseApdu = null;
+        var sourceData = command.Data;
+        while (!sourceData.IsEmpty)
+        {
+            responseApdu = SendPartial(command, commandType, responseType, ref sourceData);
+            if (responseApdu.SW != SWConstants.Success)
             {
-                throw new ArgumentNullException(nameof(command));
+                _log.LogWarning(
+                    "Received error response from YubiKey. (SW: 0x{StatusWord})",
+                    responseApdu.SW.ToString("X4", CultureInfo.CurrentCulture));
+
+                return responseApdu;
             }
-
-            // Send single short APDU
-            int commandDataSize = command.Data.Length;
-            if (commandDataSize <= MaxChunkSize)
-            {
-                _log.LogDebug("Sending short APDU");
-                return _pipeline.Invoke(command, commandType, responseType);
-            }
-
-            // Send a series of short APDU's
-            _log.LogDebug("APDU size exceeds size of short APDU, proceeding to send data in chunks instead");
-            return SendChainedApdu(command, commandType, responseType);
         }
 
-        private ResponseApdu SendChainedApdu(CommandApdu command, Type commandType, Type responseType)
+        return responseApdu!;
+    }
+
+    private ResponseApdu SendPartial(
+        CommandApdu command,
+        Type commandType,
+        Type responseType,
+        ref ReadOnlyMemory<byte> sourceData)
+    {
+        int chunkLength = Math.Min(MaxChunkSize, sourceData.Length);
+        var dataChunk = sourceData[..chunkLength];
+        sourceData = sourceData[chunkLength..];
+
+        var partialApdu = new CommandApdu
         {
-            ResponseApdu? responseApdu = null;
-            var sourceData = command.Data;
-            while (!sourceData.IsEmpty)
-            {
-                responseApdu = SendPartial(command, commandType, responseType, ref sourceData);
-                if (responseApdu.SW != SWConstants.Success)
-                {
-                    _log.LogWarning("Received error response from YubiKey. (SW: 0x{StatusWord})", responseApdu.SW.ToString("X4", CultureInfo.CurrentCulture));
-                    return responseApdu;
-                }
-            }
+            Cla = (byte)(command.Cla | (sourceData.IsEmpty
+                ? 0
+                : 0x10)),
+            Ins = command.Ins,
+            P1 = command.P1,
+            P2 = command.P2,
+            Data = dataChunk
+        };
 
-            return responseApdu!;
-        }
-
-        private ResponseApdu SendPartial(
-            CommandApdu command,
-            Type commandType,
-            Type responseType,
-            ref ReadOnlyMemory<byte> sourceData)
-        {
-            int chunkLength = Math.Min(MaxChunkSize, sourceData.Length);
-            var dataChunk = sourceData[..chunkLength];
-            sourceData = sourceData[chunkLength..];
-
-            var partialApdu = new CommandApdu
-            {
-                Cla = (byte)(command.Cla | (sourceData.IsEmpty
-                    ? 0
-                    : 0x10)),
-                Ins = command.Ins,
-                P1 = command.P1,
-                P2 = command.P2,
-                Data = dataChunk
-            };
-
-            var responseApdu = _pipeline.Invoke(partialApdu, commandType, responseType);
-            return responseApdu;
-        }
+        var responseApdu = _pipeline.Invoke(partialApdu, commandType, responseType);
+        return responseApdu;
     }
 }

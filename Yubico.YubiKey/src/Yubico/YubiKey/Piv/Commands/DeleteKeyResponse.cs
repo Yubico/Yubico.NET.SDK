@@ -14,23 +14,24 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Piv.Commands
+namespace Yubico.YubiKey.Piv.Commands;
+
+/// <summary>
+///     The <see cref="DeleteKeyResponse" /> for the corresponding <see cref="DeleteKeyCommand" />.
+/// </summary>
+/// <seealso cref="PivResponse" />
+/// <seealso cref="YubiKeyResponse" />
+public class DeleteKeyResponse : PivResponse
 {
     /// <summary>
-    /// The <see cref="DeleteKeyResponse"/> for the corresponding <see cref="DeleteKeyCommand"/>.
+    ///     The constructor for the <see cref="DeleteKeyResponse" />.
     /// </summary>
-    /// <seealso cref="PivResponse"/>
-    /// <seealso cref="YubiKeyResponse"/>
-    public class DeleteKeyResponse : PivResponse
+    /// <param name="responseApdu">
+    ///     The return data with which the Yubikey responded
+    ///     to the <see cref="DeleteKeyCommand" />
+    /// </param>
+    /// <seealso cref="DeleteKeyCommand" />
+    public DeleteKeyResponse(ResponseApdu responseApdu) : base(responseApdu)
     {
-        /// <summary>
-        /// The constructor for the <see cref="DeleteKeyResponse"/>.
-        /// </summary>
-        /// <param name="responseApdu">The return data with which the Yubikey responded
-        /// to the <see cref="DeleteKeyCommand"/></param>
-        /// <seealso cref="DeleteKeyCommand"/>
-        public DeleteKeyResponse(ResponseApdu responseApdu) : base(responseApdu)
-        {
-        }
     }
 }

@@ -137,6 +137,8 @@ public class PinComplexityTests
         Assert.Equal(CtapStatus.PinPolicyViolation, fido2Exception.Status);
     }
 
+    #region Nested type: PinComplexityKeyCollector
+
     private class PinComplexityKeyCollector
     {
         private ReadOnlyMemory<byte> _currentPin;
@@ -166,4 +168,6 @@ public class PinComplexityTests
             }
         }
     }
+
+    #endregion
 }

@@ -65,11 +65,15 @@ public class PivSessionIntegrationTestBase : IDisposable
 
     private bool UseComplexCreds => Device.IsFipsSeries || Device.IsPinComplexityEnabled;
 
+    #region IDisposable Members
+
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
+
+    #endregion
 
     ~PivSessionIntegrationTestBase()
     {

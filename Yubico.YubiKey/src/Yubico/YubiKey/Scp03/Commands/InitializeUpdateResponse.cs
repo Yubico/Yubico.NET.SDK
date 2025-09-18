@@ -17,39 +17,40 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Scp03.Commands
+namespace Yubico.YubiKey.Scp03.Commands;
+
+[Obsolete("Use new InitializeUpdateResponse instead")]
+internal class InitializeUpdateResponse : Scp03Response
 {
-    [Obsolete("Use new InitializeUpdateResponse instead")]
-    internal class InitializeUpdateResponse : Scp03Response
+    /// <summary>
+    ///     Constructs an InitializeUpdateResponse based on a ResponseApdu received from the YubiKey.
+    /// </summary>
+    /// <param name="responseApdu">
+    ///     The ResponseApdu that corresponds to the issuance of
+    ///     this command.
+    /// </param>
+    public InitializeUpdateResponse(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        public IReadOnlyCollection<byte> DiversificationData { get; protected set; }
-        public IReadOnlyCollection<byte> KeyInfo { get; protected set; }
-        public IReadOnlyCollection<byte> CardChallenge { get; protected set; }
-        public IReadOnlyCollection<byte> CardCryptogram { get; protected set; }
-
-        /// <summary>
-        /// Constructs an InitializeUpdateResponse based on a ResponseApdu received from the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">The ResponseApdu that corresponds to the issuance of
-        /// this command.</param>
-        public InitializeUpdateResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
+        if (responseApdu is null)
         {
-            if (responseApdu is null)
-            {
-                throw new ArgumentNullException(nameof(responseApdu));
-            }
-
-            if (responseApdu.Data.Length != 29)
-            {
-                throw new ArgumentException(ExceptionMessages.IncorrectInitializeUpdateResponseData, nameof(responseApdu));
-            }
-
-            var responseData = responseApdu.Data.Span;
-            DiversificationData = new ReadOnlyCollection<byte>(responseData[0..10].ToArray());
-            KeyInfo = new ReadOnlyCollection<byte>(responseData[10..13].ToArray());
-            CardChallenge = new ReadOnlyCollection<byte>(responseData[13..21].ToArray());
-            CardCryptogram = new ReadOnlyCollection<byte>(responseData[21..29].ToArray());
+            throw new ArgumentNullException(nameof(responseApdu));
         }
+
+        if (responseApdu.Data.Length != 29)
+        {
+            throw new ArgumentException(ExceptionMessages.IncorrectInitializeUpdateResponseData, nameof(responseApdu));
+        }
+
+        var responseData = responseApdu.Data.Span;
+        DiversificationData = new ReadOnlyCollection<byte>(responseData[..10].ToArray());
+        KeyInfo = new ReadOnlyCollection<byte>(responseData[10..13].ToArray());
+        CardChallenge = new ReadOnlyCollection<byte>(responseData[13..21].ToArray());
+        CardCryptogram = new ReadOnlyCollection<byte>(responseData[21..29].ToArray());
     }
+
+    public IReadOnlyCollection<byte> DiversificationData { get; protected set; }
+    public IReadOnlyCollection<byte> KeyInfo { get; protected set; }
+    public IReadOnlyCollection<byte> CardChallenge { get; protected set; }
+    public IReadOnlyCollection<byte> CardCryptogram { get; protected set; }
 }

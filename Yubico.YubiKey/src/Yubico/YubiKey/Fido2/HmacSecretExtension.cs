@@ -13,57 +13,57 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.Utilities;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2;
+
+internal static class HmacSecretExtension
 {
-    internal static class HmacSecretExtension
+    public static Memory<byte> Encode(
+        PinUvAuthProtocolBase authProtocol,
+        ReadOnlyMemory<byte> salt1,
+        ReadOnlyMemory<byte>? salt2 = null)
     {
-        public static Memory<byte> Encode(
-            PinUvAuthProtocolBase authProtocol,
-            ReadOnlyMemory<byte> salt1,
-             ReadOnlyMemory<byte>? salt2 = null)
+        ValidateParameters(authProtocol, salt1, salt2);
+
+        var dataToEncrypt = salt2.HasValue
+            ? salt1.Concat(salt2.Value)
+            : salt1;
+
+        byte[] encryptedSalt = authProtocol.Encrypt(dataToEncrypt);
+        byte[] authenticatedSalt = authProtocol.Authenticate(encryptedSalt);
+
+        return new CborMapWriter<int>()
+            .Entry(HmacSecretConstants.TagKeyAgreeKey, authProtocol.PlatformPublicKey!)
+            .Entry(HmacSecretConstants.TagEncryptedSalt, encryptedSalt.AsMemory())
+            .Entry(HmacSecretConstants.TagAuthenticatedSalt, authenticatedSalt.AsMemory())
+            .Entry(HmacSecretConstants.TagPinProtocol, (int)authProtocol.Protocol)
+            .Encode();
+    }
+
+    private static void ValidateParameters(
+        PinUvAuthProtocolBase authProtocol,
+        ReadOnlyMemory<byte> salt1,
+        ReadOnlyMemory<byte>? salt2)
+    {
+        Guard.IsNotNull(authProtocol, nameof(authProtocol));
+
+        if (authProtocol.EncryptionKey is null || authProtocol.PlatformPublicKey is null)
         {
-            ValidateParameters(authProtocol, salt1, salt2);
-
-            var dataToEncrypt = salt2.HasValue
-                ? salt1.Concat(salt2.Value)
-                : salt1;
-
-            byte[] encryptedSalt = authProtocol.Encrypt(dataToEncrypt);
-            byte[] authenticatedSalt = authProtocol.Authenticate(encryptedSalt);
-
-            return new CborMapWriter<int>()
-                .Entry(HmacSecretConstants.TagKeyAgreeKey, authProtocol.PlatformPublicKey!)
-                .Entry(HmacSecretConstants.TagEncryptedSalt, encryptedSalt.AsMemory())
-                .Entry(HmacSecretConstants.TagAuthenticatedSalt, authenticatedSalt.AsMemory())
-                .Entry(HmacSecretConstants.TagPinProtocol, (int)authProtocol.Protocol)
-                .Encode();
+            ThrowHelper.ThrowInvalidOperationException(ExceptionMessages.Fido2NotEncapsulated);
         }
 
-
-        private static void ValidateParameters(PinUvAuthProtocolBase authProtocol, ReadOnlyMemory<byte> salt1, ReadOnlyMemory<byte>? salt2)
+        if (salt1.Length != HmacSecretConstants.HmacSecretSaltLength)
         {
-            Guard.IsNotNull(authProtocol, nameof(authProtocol));
+            ThrowHelper.ThrowArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt1));
+        }
 
-            if (authProtocol.EncryptionKey is null || authProtocol.PlatformPublicKey is null)
-            {
-                ThrowHelper.ThrowInvalidOperationException(ExceptionMessages.Fido2NotEncapsulated);
-            }
-
-            if (salt1.Length != HmacSecretConstants.HmacSecretSaltLength)
-            {
-                ThrowHelper.ThrowArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt1));
-            }
-
-            if (salt2.HasValue && salt2.Value.Length != HmacSecretConstants.HmacSecretSaltLength)
-            {
-                ThrowHelper.ThrowArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt2));
-            }
+        if (salt2.HasValue && salt2.Value.Length != HmacSecretConstants.HmacSecretSaltLength)
+        {
+            ThrowHelper.ThrowArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt2));
         }
     }
 }

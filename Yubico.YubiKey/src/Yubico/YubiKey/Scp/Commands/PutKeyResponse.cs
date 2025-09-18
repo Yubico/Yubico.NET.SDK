@@ -15,30 +15,33 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Scp.Commands
+namespace Yubico.YubiKey.Scp.Commands;
+
+/// <summary>
+///     The response to putting or replacing SCP keys on the YubiKey.
+/// </summary>
+internal class PutKeyResponse : ScpResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
 {
+    private readonly byte[] _checksum;
+
     /// <summary>
-    /// The response to putting or replacing SCP keys on the YubiKey.
+    ///     Initializes a new instance of the <see cref="PutKeyResponse" /> class.
     /// </summary>
-    internal class PutKeyResponse : ScpResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
+    /// <param name="responseApdu">The <see cref="ResponseApdu" /> response from the YubiKey.</param>
+    public PutKeyResponse(ResponseApdu responseApdu)
+        : base(responseApdu)
     {
-        private readonly byte[] _checksum;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PutKeyResponse"/> class.
-        /// </summary>
-        /// <param name="responseApdu">The <see cref="ResponseApdu"/> response from the YubiKey.</param>
-        public PutKeyResponse(ResponseApdu responseApdu)
-            : base(responseApdu)
-        {
-            _checksum = new byte[responseApdu.Data.Length];
-            responseApdu.Data.CopyTo(_checksum);
-        }
-
-        /// <summary>
-        /// Gets the checksum of the stored key.
-        /// </summary>
-        /// <returns>The checksum of the stored key.</returns>
-        public ReadOnlyMemory<byte> GetData() => _checksum;
+        _checksum = new byte[responseApdu.Data.Length];
+        responseApdu.Data.CopyTo(_checksum);
     }
+
+    #region IYubiKeyResponseWithData<ReadOnlyMemory<byte>> Members
+
+    /// <summary>
+    ///     Gets the checksum of the stored key.
+    /// </summary>
+    /// <returns>The checksum of the stored key.</returns>
+    public ReadOnlyMemory<byte> GetData() => _checksum;
+
+    #endregion
 }

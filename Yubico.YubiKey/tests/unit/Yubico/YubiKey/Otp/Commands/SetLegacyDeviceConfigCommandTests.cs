@@ -214,7 +214,7 @@ public class SetLegacyDeviceConfigCommandTests
             expectedTimeout);
 
         var data = command.CreateCommandApdu().Data;
-        int actualTimeout = BinaryPrimitives.ReadUInt16LittleEndian(data.Span.Slice(2));
+        int actualTimeout = BinaryPrimitives.ReadUInt16LittleEndian(data.Span[2..]);
 
         Assert.Equal(expectedTimeout, actualTimeout);
     }

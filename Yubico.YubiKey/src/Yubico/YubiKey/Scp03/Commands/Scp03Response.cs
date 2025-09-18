@@ -16,33 +16,32 @@ using System;
 using System.Diagnostics;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Scp03.Commands
+namespace Yubico.YubiKey.Scp03.Commands;
+
+[Obsolete("Use new ScpResponse instead")]
+internal class Scp03Response : YubiKeyResponse
 {
-    [Obsolete("Use new ScpResponse instead")]
-    internal class Scp03Response : YubiKeyResponse
+    public Scp03Response(ResponseApdu responseApdu) :
+        base(responseApdu)
     {
-        public Scp03Response(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
+    }
 
-        }
-
-        public virtual new ResponseStatus Status => StatusWord switch
+    public new virtual ResponseStatus Status =>
+        StatusWord switch
         {
             SWConstants.Success => ResponseStatus.Success,
             _ => ResponseStatus.Failed
         };
 
-        public virtual void ThrowIfFailed()
+    public virtual void ThrowIfFailed()
+    {
+        switch (StatusWord)
         {
-            switch (StatusWord)
-            {
-                case SWConstants.Success:
-                    Debug.Assert(Status == ResponseStatus.Success);
-                    return;
-                default:
-                    throw new Exception();
-            }
+            case SWConstants.Success:
+                Debug.Assert(Status == ResponseStatus.Success);
+                return;
+            default:
+                throw new Exception();
         }
     }
 }

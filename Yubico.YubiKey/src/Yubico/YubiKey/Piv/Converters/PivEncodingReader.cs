@@ -36,6 +36,7 @@ internal static class PivEncodingReader
                     ExceptionMessages.InvalidPublicKeyData
                     ));
         }
+
         return (modulus, exponent);
     }
 
@@ -52,6 +53,7 @@ internal static class PivEncodingReader
                     ExceptionMessages.InvalidPublicKeyData
                     ));
         }
+
         return publicPoint;
     }
 
@@ -71,7 +73,7 @@ internal static class PivEncodingReader
                     ExceptionMessages.InvalidPrivateKeyData
                     ));
         }
-        
+
         var primeP = rsaValues[PivConstants.PrivateRSAPrimePTag].Span;
         var primeQ = rsaValues[PivConstants.PrivateRSAPrimeQTag].Span;
         var exponentP = rsaValues[PivConstants.PrivateRSAExponentPTag].Span;
@@ -90,23 +92,25 @@ internal static class PivEncodingReader
             // that's why we set these values as empty.
             D = Array.Empty<byte>(),
             Modulus = Array.Empty<byte>(),
-            Exponent = Array.Empty<byte>(),
+            Exponent = Array.Empty<byte>()
         };
     }
-    
+
     /// <summary>
-    /// Handles both PivEncoding and YubiKey GetMetadata encoding. 
+    ///     Handles both PivEncoding and YubiKey GetMetadata encoding.
     /// </summary>
     /// <param name="pivEncodedPublicKey"></param>
     /// <returns>Returns the portion of the bytes that contains the key data</returns>
     private static ReadOnlyMemory<byte> GetKeyEncoding(ReadOnlyMemory<byte> pivEncodedPublicKey)
     {
         var tlvObject = TlvObject.Parse(pivEncodedPublicKey.Span);
+
         // If leading byte is 0x7F49, then it is a PIV encoded key, otherwise it is a GetMetaData encoded key
         // which means we can decode the tlvs directly instead of reading from the nested value.
-        var rsaKeyEncoding = tlvObject.Tag == PivConstants.PublicKeyTag 
-            ? tlvObject.Value 
+        var rsaKeyEncoding = tlvObject.Tag == PivConstants.PublicKeyTag
+            ? tlvObject.Value
             : pivEncodedPublicKey;
+
         return rsaKeyEncoding;
     }
 }

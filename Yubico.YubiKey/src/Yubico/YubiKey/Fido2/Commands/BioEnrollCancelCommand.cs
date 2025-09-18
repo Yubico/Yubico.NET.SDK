@@ -14,41 +14,43 @@
 
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Commands;
+
+/// <summary>
+///     Cancel the current BioEnrollment process. This is a subcommand of the
+///     CTAP command "authenticatorBioEnrollment".
+/// </summary>
+/// <remarks>
+///     The partner Response class is <see cref="Fido2Response" />.
+///     <para>
+///         This does not return data, simply an indication whether it succeeded or
+///         not.
+///     </para>
+/// </remarks>
+public sealed class BioEnrollCancelCommand : IYubiKeyCommand<Fido2Response>
 {
+    private const int SubCmdEnrollCancel = 0x03;
+
+    private readonly BioEnrollmentCommand _command;
+
     /// <summary>
-    /// Cancel the current BioEnrollment process. This is a subcommand of the
-    /// CTAP command "authenticatorBioEnrollment".
+    ///     Constructs an instance of the <see cref="BioEnrollCancelCommand" /> class.
     /// </summary>
-    /// <remarks>
-    /// The partner Response class is <see cref="Fido2Response"/>.
-    /// <para>
-    /// This does not return data, simply an indication whether it succeeded or
-    /// not.
-    /// </para>
-    /// </remarks>
-    public sealed class BioEnrollCancelCommand : IYubiKeyCommand<Fido2Response>
+    public BioEnrollCancelCommand()
     {
-        private const int SubCmdEnrollCancel = 0x03;
-
-        private readonly BioEnrollmentCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="BioEnrollCancelCommand" /> class.
-        /// </summary>
-        public BioEnrollCancelCommand()
-        {
-            _command = new BioEnrollmentCommand(SubCmdEnrollCancel);
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
-
-        /// <inheritdoc />
-        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new Fido2Response(responseApdu);
+        _command = new BioEnrollmentCommand(SubCmdEnrollCancel);
     }
+
+    #region IYubiKeyCommand<Fido2Response> Members
+
+    /// <inheritdoc />
+    public YubiKeyApplication Application => _command.Application;
+
+    /// <inheritdoc />
+    public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+
+    /// <inheritdoc />
+    public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) => new(responseApdu);
+
+    #endregion
 }

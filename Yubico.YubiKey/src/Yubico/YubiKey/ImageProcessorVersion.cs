@@ -12,30 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey
+namespace Yubico.YubiKey;
+
+/// <summary>
+///     Reports the version number of the Image Processor. This is a chip
+///     specifically used to process the fingerprint images.
+/// </summary>
+public class ImageProcessorVersion : FirmwareVersion
 {
     /// <summary>
-    /// Reports the version number of the Image Processor. This is a chip
-    /// specifically used to process the fingerprint images.
+    ///     Creates an instance of <see cref="ImageProcessorVersion" /> with a
+    ///     version of 0.0.0.
     /// </summary>
-    public class ImageProcessorVersion : FirmwareVersion
+    public ImageProcessorVersion()
     {
-        /// <summary>
-        /// Creates an instance of <see cref="ImageProcessorVersion"/> with a
-        /// version of 0.0.0.
-        /// </summary>
-        public ImageProcessorVersion()
-        {
-        }
+    }
 
-        /// <summary>
-        /// Creates an instance of <see cref="ImageProcessorVersion"/> with a
-        /// version of major.minor.patch. The minor and patch args have default
-        /// values of 0.
-        /// </summary>
-        public ImageProcessorVersion(byte major, byte minor = 0, byte patch = 0)
-            : base(major, minor, patch)
-        {
-        }
+    /// <summary>
+    ///     Creates an instance of <see cref="ImageProcessorVersion" /> with a
+    ///     version of major.minor.patch. The minor and patch args have default
+    ///     values of 0.
+    /// </summary>
+    public ImageProcessorVersion(byte major, byte minor = 0, byte patch = 0)
+        : base(major, minor, patch)
+    {
     }
 }

@@ -15,35 +15,38 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.YubiHsmAuth.Commands
+namespace Yubico.YubiKey.YubiHsmAuth.Commands;
+
+/// <summary>
+///     The response to the <see cref="GetApplicationVersionCommand" /> command,
+///     containing the version of the YubiHSM Auth application as a major,
+///     minor, and patch value.
+/// </summary>
+public class GetApplicationVersionResponse : BaseYubiHsmAuthResponse, IYubiKeyResponseWithData<ApplicationVersion>
 {
-    /// <summary>
-    /// The response to the <see cref="GetApplicationVersionCommand"/> command,
-    /// containing the version of the YubiHSM Auth application as a major,
-    /// minor, and patch value.
-    /// </summary>
-    public class GetApplicationVersionResponse : BaseYubiHsmAuthResponse, IYubiKeyResponseWithData<ApplicationVersion>
+    public GetApplicationVersionResponse(ResponseApdu responseApdu) : base(responseApdu)
     {
-        public GetApplicationVersionResponse(ResponseApdu responseApdu) : base(responseApdu)
-        {
-        }
-
-        public ApplicationVersion GetData()
-        {
-            if (Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(StatusMessage);
-            }
-
-            var versionData = ResponseApdu.Data.Span;
-            var version = new ApplicationVersion
-            {
-                Major = versionData[0],
-                Minor = versionData[1],
-                Patch = versionData[2],
-            };
-
-            return version;
-        }
     }
+
+    #region IYubiKeyResponseWithData<ApplicationVersion> Members
+
+    public ApplicationVersion GetData()
+    {
+        if (Status != ResponseStatus.Success)
+        {
+            throw new InvalidOperationException(StatusMessage);
+        }
+
+        var versionData = ResponseApdu.Data.Span;
+        var version = new ApplicationVersion
+        {
+            Major = versionData[0],
+            Minor = versionData[1],
+            Patch = versionData[2]
+        };
+
+        return version;
+    }
+
+    #endregion
 }

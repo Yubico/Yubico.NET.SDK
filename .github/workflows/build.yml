@@ -1,0 +1,256 @@
+# # Copyright 2025 Yubico AB
+# #
+# # Licensed under the Apache License, Version 2.0 (the "License");
+# # you may not use this file except in compliance with the License.
+# # You may obtain a copy of the License at
+# #
+# #     http://www.apache.org/licenses/LICENSE-2.0
+# #
+# # Unless required by applicable law or agreed to in writing, software
+# # distributed under the License is distributed on an "AS IS" BASIS,
+# # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# # See the License for the specific language governing permissions and
+# # limitations under the License.
+
+# name: Build
+
+# # Triggers build on pushes to the main and develop branches.
+# on:
+#   push:
+#     branches:
+#       - 'main'
+#       - 'develop'
+#     paths:
+#       - '**.h'
+#       - '**.c'
+#       - '**.cs'
+#       - '**.csproj'
+#       - '**.sln'
+#       - '.github/workflows/build.yml'
+
+#   workflow_dispatch:
+#     inputs:
+#       push-to-dev:
+#         description: 'Push to internal NuGet'
+#         required: false
+#         default: false
+#         type: boolean
+#       push-to-docs:
+#         description: 'Push docs to internal GCP'
+#         required: false
+#         default: false
+#         type: boolean
+#       version:
+#         description: 'Version'
+#         required: false
+#         default: "0.0.0-prerelease.YYYYMMDD.B"
+#         type: string
+#   schedule:
+#     - cron: '0 0 * * *' # Every day at midnight
+
+# jobs:
+#   run-tests:
+#     name: Run tests
+#     permissions:
+#       checks: write
+#       contents: read
+#       packages: read
+#       pull-requests: write
+#     uses: ./.github/workflows/test.yml
+#     with:
+#       build-coverage-report: false
+
+#   build-artifacts:
+#     name: Build artifacts
+#     runs-on: windows-2022
+#     needs: run-tests
+#     permissions:
+#       id-token: write
+#       contents: read
+#       packages: read
+#       attestations: write
+#     outputs:
+#       docs-log-id: ${{ steps.docs-log-upload.outputs.artifact-id }}
+#       docs-id: ${{ steps.docs-upload.outputs.artifact-id }}
+#       nuget-packages-id: ${{ steps.nuget-upload.outputs.artifact-id }}
+#       symbols-packages-id: ${{ steps.symbols-upload.outputs.artifact-id }}
+#       assemblies-id: ${{ steps.assemblies-upload.outputs.artifact-id }}
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-dotnet@v4
+#         with:
+#           global-json-file: "./global.json"
+
+#       # Add local NuGet repository if version is not a plain release (i.e., has a suffix, e.g., -prerelease)
+#       - name: Add local NuGet repository for non-release versions
+#         if: ${{ github.event.inputs.version && (contains(github.event.inputs.version, '-')) }}
+#         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+
+#       - name: Set build version
+#         if: ${{ github.event.inputs.version }}
+#         run: |
+#           $file = gci ./build/Versions.props
+#           $versionProp = [xml](gc $file.FullName)
+#           $versionProp.Project.PropertyGroup.CommonVersion = "${{ github.event.inputs.version }}"
+#           $versionProp.Save($file.FullName)
+
+#       # Build the project
+#       - name: Build Yubico.NET.SDK.sln
+#         run: dotnet pack --configuration Release --nologo --verbosity minimal -p:treatWarningsAsErrors=true Yubico.NET.SDK.sln 
+
+#       # Build the documentation
+#       - name: Build docs
+#         run: |
+#           dotnet tool install --global docfx --version "2.*"
+#           docfx docfx.json --logLevel warning --log docfx.log --warningsAsErrors
+
+#       # Upload documentation log
+#       - name: "Save build artifacts: Docs log"
+#         id: docs-log-upload
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: Documentation log
+#           path: docfx.log
+#           if-no-files-found: error
+
+#       # Upload documentation
+#       - name: "Save build artifacts: Docs"
+#         id: docs-upload
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: Documentation
+#           path: docs/_site/
+#           if-no-files-found: error
+          
+#       # Upload NuGet packages
+#       - name: "Save build artifacts: Nuget Packages"
+#         id: nuget-upload
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: Nuget Packages
+#           path: |
+#             Yubico.Core/src/bin/Release/*.nupkg
+#             Yubico.YubiKey/src/bin/Release/*.nupkg
+#           if-no-files-found: error
+      
+#       # Upload symbols
+#       - name: "Save build artifacts: Symbols Packages"
+#         id: symbols-upload
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: Symbols Packages
+#           path: |
+#             Yubico.Core/src/bin/Release/*.snupkg
+#             Yubico.YubiKey/src/bin/Release/*.snupkg
+#           if-no-files-found: error
+      
+#       # Upload assemblies
+#       - name: "Save build artifacts: Assemblies"
+#         id: assemblies-upload
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: Assemblies
+#           path: |
+#             Yubico.Core/src/bin/Release/**/*.dll
+#             Yubico.YubiKey/src/bin/Release/**/*.dll
+#           if-no-files-found: error
+      
+#       # Generate artifact attestation
+#       - name: Generate artifact attestation
+#         uses: actions/attest-build-provenance@v2
+#         with:
+#           subject-path: |
+#             Yubico.Core/src/bin/Release/*.nupkg
+#             Yubico.YubiKey/src/bin/Release/*.nupkg
+#             Yubico.Core/src/bin/Release/*.snupkg
+#             Yubico.YubiKey/src/bin/Release/*.snupkg
+#             Yubico.Core/src/bin/Release/**/*.dll
+#             Yubico.YubiKey/src/bin/Release/**/*.dll
+      
+#   upload-docs:
+#     name: Upload docs
+#     if: ${{ github.event.inputs.push-to-docs == 'true' }}
+#     permissions:
+#       id-token: write
+#       contents: read
+#     uses: ./.github/workflows/upload-docs.yml
+#     needs: build-artifacts
+
+#   publish-internal:
+#     name: Publish to internal NuGet
+#     runs-on: windows-2022
+#     needs: build-artifacts
+#     if: ${{ github.event.inputs.push-to-dev == 'true' }}
+#     permissions:
+#       contents: read
+#       packages: write
+#     steps:
+#       - uses: actions/download-artifact@v4
+#         with:
+#           name: Nuget Packages
+#       - run: |
+#           $core = (Get-ChildItem -Recurse Yubico.Core/*.nupkg)[0].FullName
+#           $yubikey = (Get-ChildItem -Recurse Yubico.YubiKey/*.nupkg)[0].FullName
+#           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+#           dotnet nuget push $core --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+#           dotnet nuget push $yubikey --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+
+#   build-summary:
+#     name: Build summary
+#     runs-on: ubuntu-latest
+#     needs: [run-tests, build-artifacts, publish-internal, upload-docs]
+#     if: always()
+#     steps:
+#       - name: Generate build summary
+#         env:
+#           # Pass job results into the environment
+#           RUN_TESTS_RESULT: ${{ needs.run-tests.result }}
+#           BUILD_ARTIFACTS_RESULT: ${{ needs.build-artifacts.result }}
+#           UPLOAD_DOCS_RESULT: ${{ needs.upload-docs.result }}
+#           PUBLISH_INTERNAL_RESULT: ${{ needs.publish-internal.result }}
+#           DOCS_IMAGE_TAG: ${{ needs.upload-docs.outputs.image-tag }}
+#           DOCS_IMAGE_HASH: ${{ needs.upload-docs.outputs.image-hash }}
+          
+#           # Pass artifact IDs from the build-artifacts job outputs
+#           DOCS_LOG_ID: ${{ needs.build-artifacts.outputs.docs-log-id }}
+#           DOCS_ID: ${{ needs.build-artifacts.outputs.docs-id }}
+#           NUGET_ID: ${{ needs.build-artifacts.outputs.nuget-packages-id }}
+#           SYMBOLS_ID: ${{ needs.build-artifacts.outputs.symbols-packages-id }}
+#           ASSEMBLIES_ID: ${{ needs.build-artifacts.outputs.assemblies-id }}
+#         run: |
+#           ARTIFACT_URL_BASE="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts"
+
+#           echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+#           echo "" >> $GITHUB_STEP_SUMMARY
+#           echo "### Job Status" >> $GITHUB_STEP_SUMMARY
+#           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+#           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+#           echo "| Run tests | **${{ env.RUN_TESTS_RESULT }}** |" >> $GITHUB_STEP_SUMMARY
+#           echo "| Build artifacts | **${{ env.BUILD_ARTIFACTS_RESULT }}** |" >> $GITHUB_STEP_SUMMARY
+#           echo "| Upload docs | **${{ env.UPLOAD_DOCS_RESULT }}** |" >> $GITHUB_STEP_SUMMARY
+#           echo "| Publish to internal NuGet | **${{ env.PUBLISH_INTERNAL_RESULT }}** |" >> $GITHUB_STEP_SUMMARY
+#           echo "" >> $GITHUB_STEP_SUMMARY
+
+#           # Only show artifacts list if the build succeeded
+#           if [ "${{ env.BUILD_ARTIFACTS_RESULT }}" == "success" ]; then
+#             echo "### Built Artifacts" >> $GITHUB_STEP_SUMMARY
+#             echo "Direct links to artifacts produced by this build run:" >> $GITHUB_STEP_SUMMARY
+#             echo "" >> $GITHUB_STEP_SUMMARY
+#             echo "- [Documentation log]($ARTIFACT_URL_BASE/${{ env.DOCS_LOG_ID }})" >> $GITHUB_STEP_SUMMARY
+#             echo "- [Documentation Site]($ARTIFACT_URL_BASE/${{ env.DOCS_ID }})" >> $GITHUB_STEP_SUMMARY
+#             echo "- [Nuget Packages]($ARTIFACT_URL_BASE/${{ env.NUGET_ID }})" >> $GITHUB_STEP_SUMMARY
+#             echo "- [Symbols Packages]($ARTIFACT_URL_BASE/${{ env.SYMBOLS_ID }})" >> $GITHUB_STEP_SUMMARY
+#             echo "- [Assemblies]($ARTIFACT_URL_BASE/${{ env.ASSEMBLIES_ID }})" >> $GITHUB_STEP_SUMMARY
+#             echo "" >> $GITHUB_STEP_SUMMARY
+#           fi
+
+#           # Conditionally add the Docker image tag to the summary
+#           if [ "${{ env.UPLOAD_DOCS_RESULT }}" == "success" ]; then
+#             echo "### Documentation Docker Image" >> $GITHUB_STEP_SUMMARY
+#             echo "A new documentation Docker image was pushed." >> $GITHUB_STEP_SUMMARY
+#             echo "" >> $GITHUB_STEP_SUMMARY
+#             echo "| Attribute | Value |" >> $GITHUB_STEP_SUMMARY
+#             echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+#             echo "| **Image Tag** | \`${{ env.DOCS_IMAGE_TAG }}\` |" >> $GITHUB_STEP_SUMMARY
+#             echo "| **Image Hash** | \`${{ env.DOCS_IMAGE_HASH }}\` |" >> $GITHUB_STEP_SUMMARY
+#           fi

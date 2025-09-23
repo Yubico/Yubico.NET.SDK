@@ -11,10 +11,10 @@ public class YubiKeyManagerDiTests
         ServiceCollection services = new();
         services.AddLogging();
         services.AddYubiKeyManager();
-        ServiceProvider provider = services.BuildServiceProvider();
+        var provider = services.BuildServiceProvider();
 
         // Act
-        YubiKeyManager? manager = provider.GetService<YubiKeyManager>();
+        var manager = provider.GetService<YubiKeyManager>();
 
         // Assert
         Assert.NotNull(manager);

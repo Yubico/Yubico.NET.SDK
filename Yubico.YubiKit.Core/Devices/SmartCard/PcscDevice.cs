@@ -1,6 +1,6 @@
-﻿using Yubico.YubiKit.Core.Core.Iso7816;
+﻿using Yubico.YubiKit.Core.Iso7816;
 
-namespace Yubico.YubiKit.Core.Core.Devices.SmartCard;
+namespace Yubico.YubiKit.Core.Devices.SmartCard;
 
 public readonly struct PcscDevice : ISmartCardDevice
 {

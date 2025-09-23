@@ -14,9 +14,8 @@
 
 using Microsoft.Extensions.Logging;
 using System.Globalization;
-using Yubico.YubiKit.Core.Core;
-using Yubico.YubiKit.Core.Core.Devices.SmartCard;
-using Yubico.YubiKit.Core.Core.Iso7816;
+using Yubico.YubiKit.Core.Devices.SmartCard;
+using Yubico.YubiKit.Core.Iso7816;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
 namespace Yubico.YubiKit.Core.Connections;
@@ -60,7 +59,7 @@ internal class PcscSmartCardConnection : ISmartCardConnection
 
     #endregion
 
-    public async Task<PcscSmartCardConnection> CreateAsync(
+    public static async Task<PcscSmartCardConnection> CreateAsync(
         ILogger<PcscSmartCardConnection> logger,
         ISmartCardDevice smartCardDevice,
         CancellationToken cancellationToken = default)
@@ -73,7 +72,7 @@ internal class PcscSmartCardConnection : ISmartCardConnection
 
     private ValueTask InitializeAsync()
     {
-        Task task = Task.Run(() =>
+        var task = Task.Run(() =>
         {
             (_context, _cardHandle, _protocol) = GetConnection(_smartCardDevice.ReaderName);
         }, CancellationToken.None);
@@ -84,14 +83,14 @@ internal class PcscSmartCardConnection : ISmartCardConnection
     private static (SCardContext Context, SCardCardHandle CardHandle, SCARD_PROTOCOL Protocol) GetConnection(
         string readerName)
     {
-        uint result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext? context);
+        var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
         if (result != ErrorCode.SCARD_S_SUCCESS)
             throw new SCardException(
                 "ExceptionMessages.SCardCantEstablish",
                 result);
 
-        SCARD_SHARE shareMode = SCARD_SHARE.SHARED;
-        if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesExclusively, out bool isEnabled) &&
+        var shareMode = SCARD_SHARE.SHARED;
+        if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesExclusively, out var isEnabled) &&
             isEnabled)
             shareMode = SCARD_SHARE.EXCLUSIVE;
 
@@ -100,8 +99,8 @@ internal class PcscSmartCardConnection : ISmartCardConnection
             readerName,
             shareMode,
             SCARD_PROTOCOL.Tx,
-            out SCardCardHandle? cardHandle,
-            out SCARD_PROTOCOL activeProtocol);
+            out var cardHandle,
+            out var activeProtocol);
 
         if (result != ErrorCode.SCARD_S_SUCCESS)
             throw new SCardException(

@@ -1,39 +1,28 @@
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using Yubico.YubiKit.Core;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Connections;
 
 namespace Yubico.YubiKit.IntegrationTests;
 
-public class IntegrationTest
+public class IntegrationTest : IntegrationTestBase
 {
     [Fact]
     public async Task GetPcscDevices()
     {
-        YubiKeyManager manager = new(
-            new NullLogger<YubiKeyManager>(),
-            Options.Create(
-                new YubiKeyManagerOptions(true, TimeSpan.FromSeconds(1))));
-
-        IEnumerable<IYubiKey> pcscDevices = await manager.GetYubiKeys();
-        IYubiKey? pcscDevice = pcscDevices.FirstOrDefault();
+        var pcscDevices = await YubiKeyManager.GetYubiKeys();
+        var pcscDevice = pcscDevices.FirstOrDefault();
         Assert.NotNull(pcscDevice);
     }
 
     [Fact]
     public async Task GetDeviceInfo()
     {
-        YubiKeyManager manager = new(
-            new NullLogger<YubiKeyManager>(),
-            Options.Create(
-                new YubiKeyManagerOptions(true, TimeSpan.FromSeconds(1))));
+        var pcscDevices = await YubiKeyManager.GetYubiKeys();
+        var pcscDevice = pcscDevices.First();
+        var connection = await pcscDevice.ConnectAsync<ISmartCardConnection>();
 
-        IEnumerable<IYubiKey> pcscDevices = await manager.GetYubiKeys();
-        IYubiKey pcscDevice = pcscDevices.First();
-        ISmartCardConnection connection = await pcscDevice.ConnectAsync<ISmartCardConnection>();
-
-        ManagementSession mgmtSession = new(new NullLogger<ManagementSession>(), connection);
-        DeviceInfo deviceInfo = mgmtSession.GetDeviceInfo();
-        Assert.NotNull(deviceInfo);
+        var logger = ServiceProvider.GetRequiredService<ILogger<ManagementSession>>();
+        ManagementSession mgmtSession = new(logger, connection);
+        var deviceInfo = mgmtSession.GetDeviceInfo();
     }
 }

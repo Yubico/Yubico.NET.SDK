@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
-using Yubico.YubiKit.Core.Connections;
 
 namespace Yubico.YubiKit;
 
@@ -21,7 +20,7 @@ public static class ServiceCollectionExtensions
 {
     #region Nested type: <extension>
 
-    extension(ServiceCollection services)
+    extension(IServiceCollection services)
     {
         public IServiceCollection AddYubiKeyManager()
         {
@@ -43,7 +42,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IYubiKeyManager, YubiKeyManager>();
 
             // Registration
-            services.AddTransient<IConnectionFactory, ConnectionFactory>();
+            // services.AddTransient<IConnectionFactory, ConnectionFactory>();
 
             return services;
         }
@@ -52,11 +51,12 @@ public static class ServiceCollectionExtensions
     #endregion
 }
 
-public class YubiKeyManagerOptions(
-    bool EnableAutoDiscovery = false,
-    TimeSpan? ScanInterval = null,
-    Transports EnabledTransports = Transports.All
-);
+public class YubiKeyManagerOptions
+{
+    public bool EnableAutoDiscovery { get; set; }
+    public TimeSpan ScanInterval { get; set; }
+    public Transports EnabledTransports { get; set; }
+}
 
 [Flags]
 public enum Transports

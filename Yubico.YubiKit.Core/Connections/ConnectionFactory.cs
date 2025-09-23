@@ -13,29 +13,35 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Core.Devices.SmartCard;
+using Yubico.YubiKit.Core.Devices.SmartCard;
 
 namespace Yubico.YubiKit.Core.Connections;
 
-public interface IConnectionFactory
+public interface IConnectionFactory<TConnectionType>
 {
-    TConnectionType Create<TConnectionType>(ISmartCardDevice smartCardDevice)
-        where TConnectionType : IYubiKeyConnection;
+    Task<TConnectionType> CreateAsync(ISmartCardDevice smartCardDevice);
 }
 
-public class ConnectionFactory(ILoggerFactory loggerFactory) : IConnectionFactory
+public class ConnectionFactory<TConnectionType> : IConnectionFactory<TConnectionType>
+    where TConnectionType : IYubiKeyConnection
 {
-    #region IConnectionFactory Members
+    private readonly ILoggerFactory _loggerFactory;
 
-    public TConnectionType Create<TConnectionType>(ISmartCardDevice smartCardDevice)
-        where TConnectionType : IYubiKeyConnection
+    public ConnectionFactory(ILoggerFactory loggerFactory)
     {
-        Type? connectionType = typeof(TConnectionType);
+        _loggerFactory = loggerFactory;
+    }
+
+    #region IConnectionFactory<TConnectionType> Members
+
+    public async Task<TConnectionType> CreateAsync(ISmartCardDevice smartCardDevice)
+    {
+        var connectionType = typeof(TConnectionType);
         object connection = connectionType switch
         {
             not null when connectionType == typeof(ISmartCardConnection) =>
-                new PcscSmartCardConnection(
-                    loggerFactory.CreateLogger<PcscSmartCardConnection>(),
+                await PcscSmartCardConnection.CreateAsync(
+                    _loggerFactory.CreateLogger<PcscSmartCardConnection>(),
                     smartCardDevice
                 ),
 

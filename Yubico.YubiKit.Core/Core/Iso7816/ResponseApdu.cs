@@ -14,7 +14,7 @@
 
 using System.Globalization;
 
-namespace Yubico.YubiKit.Core.Iso7816;
+namespace Yubico.YubiKit.Core.Core.Iso7816;
 
 /// <summary>
 /// Represents an ISO 7816 application response.
@@ -51,16 +51,14 @@ public class ResponseApdu
     /// <param name="data">The raw data returned by the ISO 7816 smart card.</param>
     public ResponseApdu(byte[] data)
     {
-        ArgumentNullException.ThrowIfNull(data);
+        if (data is null)
+        {
+            throw new ArgumentNullException(nameof(data));
+        }
 
         if (data.Length < 2)
         {
-            // throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, "ExceptionMessages.ResponseApduNotEnoughBytes", data.Length));
-            throw new ArgumentException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    "ExceptionMessages.ResponseApduNotEnoughBytes",
-                    data.Length));
+            throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, "ExceptionMessages.ResponseApduNotEnoughBytes, data.Length"));
         }
 
         SW1 = data[^2];

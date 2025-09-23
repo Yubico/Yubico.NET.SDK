@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Buffers.Binary;
 using System.Globalization;
-using System.IO;
 
-namespace Yubico.YubiKit.Core.Iso7816;
+namespace Yubico.YubiKit.Core.Core.Iso7816;
 
 /// <summary>
 /// Represents an ISO 7816 application command
@@ -277,9 +275,15 @@ public class CommandApdu
         }
         else
         {
-            ThrowHelper.ThrowIf<InvalidOperationException>(
-                !ValidNe(apduEncoding),
-                $"ExceptionMessages.CommandApduFieldOutOfRangeEncoding: {nameof(Ne)}, {Enum.GetName(typeof(ApduEncoding), apduEncoding)}");
+            if (!ValidNe(apduEncoding))
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        "ExceptionMessages.CommandApduFieldOutOfRangeEncoding",
+                        nameof(Ne),
+                        Enum.GetName(typeof(ApduEncoding), apduEncoding)));
+            }
         }
 
         byte[] leField = Array.Empty<byte>();

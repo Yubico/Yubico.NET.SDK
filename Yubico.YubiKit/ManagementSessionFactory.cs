@@ -17,20 +17,29 @@ using Yubico.YubiKit.Core.Connections;
 
 namespace Yubico.YubiKit;
 
-public class ManagementSession : ApplicationSession
+public interface IManagementSessionFactory
 {
-    private readonly ILogger<ManagementSession> _logger;
-    private readonly ISmartCardConnection _smartCardConnection;
-
-    public ManagementSession(
-        ILogger<ManagementSession> logger,
-        ISmartCardConnection smartCardConnection)
-    {
-        _logger = logger;
-        _smartCardConnection = smartCardConnection;
-    }
-
-    public DeviceInfo GetDeviceInfo() => new();
+    ManagementSession Create(IYubiKeyConnection connection);
 }
 
-// Protocol
+internal class ManagementSessionFactory : IManagementSessionFactory
+{
+    private readonly ILogger<ManagementSession> _logger;
+
+    public ManagementSessionFactory(ILogger<ManagementSession> logger)
+    {
+        _logger = logger;
+    }
+
+    #region IManagementSessionFactory Members
+
+    public ManagementSession Create(IYubiKeyConnection connection) =>
+        connection switch
+        {
+            ISmartCardConnection smartCardConnection => new ManagementSession(_logger, smartCardConnection),
+            _ => throw new NotSupportedException(
+                $"The connection type {connection.GetType().FullName} is not supported.")
+        };
+
+    #endregion
+}

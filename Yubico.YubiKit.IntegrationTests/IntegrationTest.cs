@@ -22,7 +22,19 @@ public class IntegrationTest : IntegrationTestBase
         var connection = await pcscDevice.ConnectAsync<ISmartCardConnection>();
 
         var logger = ServiceProvider.GetRequiredService<ILogger<ManagementSession>>();
-        ManagementSession mgmtSession = new(logger, connection);
+        var mgmtSession = new ManagementSession(logger, connection);
+        var deviceInfo = mgmtSession.GetDeviceInfo();
+    }
+
+    [Fact]
+    public async Task GetDeviceInfoWithDISession()
+    {
+        var pcscDevices = await YubiKeyManager.GetYubiKeys();
+        var pcscDevice = pcscDevices.First();
+        var connection = await pcscDevice.ConnectAsync<ISmartCardConnection>();
+
+        var managementSessionFactory = ServiceProvider.GetRequiredService<IManagementSessionFactory>();
+        var mgmtSession = managementSessionFactory.Create(connection);
         var deviceInfo = mgmtSession.GetDeviceInfo();
     }
 }

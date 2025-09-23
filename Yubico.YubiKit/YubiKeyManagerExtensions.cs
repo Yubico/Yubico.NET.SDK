@@ -31,7 +31,6 @@ public static class ServiceCollectionExtensions
 
         public IServiceCollection AddYubiKeyManager(Action<YubiKeyManagerOptions>? configureOptions)
         {
-            // Configure options
             if (configureOptions != null) services.Configure(configureOptions);
 
             // Register Core services (internal to SDK)
@@ -39,12 +38,10 @@ public static class ServiceCollectionExtensions
             // services.AddSingleton<IPlatformDeviceProvider, PlatformDeviceProvider>();    
             // services.AddHostedService<DeviceMonitorBackgroundService>();                 
 
-            // Register user-facing services
             services.AddSingleton<IYubiKeyManager, YubiKeyManager>();
-
-            // Registration
             services.AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>();
             services.AddTransient<IYubiKeyFactory, YubiKeyFactory>();
+            services.AddSingleton<IManagementSessionFactory, ManagementSessionFactory>();
 
             return services;
         }

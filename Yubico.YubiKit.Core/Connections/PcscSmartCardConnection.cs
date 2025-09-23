@@ -29,7 +29,7 @@ internal class PcscSmartCardConnection : ISmartCardConnection
     private bool _disposed;
     private SCARD_PROTOCOL? _protocol;
 
-    internal PcscSmartCardConnection(
+    private PcscSmartCardConnection(
         ILogger<PcscSmartCardConnection> logger,
         ISmartCardDevice smartCardDevice)
     {

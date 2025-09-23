@@ -1,89 +1,23 @@
-﻿using System.Runtime.InteropServices;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Core.Devices.SmartCard;
 
 namespace Yubico.YubiKit;
 
-public class YubiKeyManager
+public class YubiKeyManager(
+    ILogger<YubiKeyManager> logger, 
+    IOptions<YubiKeyManagerOptions> options) : IYubiKeyManager
 {
-    public async Task<IEnumerable<IYubiKey>> GetPcscDevices()
+    public async Task<IEnumerable<IYubiKey>> GetYubiKeys()
     {
         var pcscDevices = await ReadPcscDevices();
-
-        return pcscDevices.Select(pcscDevice => new PcscYubiKey(pcscDevice)).Cast<IYubiKey>().ToList();
+        return pcscDevices;
     }
 
-    private async Task<IEnumerable<PcscDevice>> ReadPcscDevices()
+    private async Task<IEnumerable<IYubiKey>> ReadPcscDevices()
     {
-        throw new NotImplementedException();
+        var devices = await PcscYubiKey.GetAllAsync();
+        return devices;
     }
-}
-
-internal class PcscYubiKey : IYubiKey
-{
-    private PcscDevice pcscDevice;
-
-    public PcscYubiKey(PcscDevice pcscDevice)
-    {
-        this.pcscDevice = pcscDevice;
-    }
-}
-
-public interface IYubiKey
-{
-}
-
-public static class PscsInterop
-{
-    
-            [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardListReaders", ExactSpelling = true, CharSet = CharSet.Ansi)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern uint SCardListReaders(
-            SCardContext context,
-            byte[]? groups,
-            byte[]? readerNames,
-            ref int readerNamesLength
-            );
-
-        public static uint SCardListReaders(
-            SCardContext context,
-            string[]? groups,
-            out string[] readerNames)
-        {
-            readerNames = Array.Empty<string>();
-
-            byte[]? rawGroups = null;
-
-            if (!(groups is null))
-            {
-                rawGroups = MultiString.GetBytes(groups, System.Text.Encoding.ASCII);
-            }
-
-            int readerNamesLength = 0;
-
-            uint result = SCardListReaders(
-                context,
-                rawGroups,
-                null,
-                ref readerNamesLength);
-
-            if (result == ErrorCode.SCARD_S_SUCCESS)
-            {
-                if (readerNamesLength == 0)
-                {
-                    throw new PlatformApiException(ExceptionMessages.SCardListReadersUnexpectedLength);
-                }
-
-                byte[] rawReaderNames = new byte[readerNamesLength];
-
-                result = SCardListReaders(
-                    context,
-                    rawGroups,
-                    rawReaderNames,
-                    ref readerNamesLength);
-
-                readerNames = MultiString.GetStrings(rawReaderNames, System.Text.Encoding.ASCII);
-            }
-
-            return result;
-        }
 }

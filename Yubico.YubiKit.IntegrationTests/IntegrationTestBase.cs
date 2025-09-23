@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core;
 
 namespace Yubico.YubiKit.IntegrationTests;
 
@@ -24,6 +25,7 @@ public abstract class IntegrationTestBase : IDisposable
         var services = new ServiceCollection();
         ConfigureServices(services);
         ServiceProvider = services.BuildServiceProvider();
+        ServiceLocator.SetLocatorProvider(ServiceProvider);
         YubiKeyManager = ServiceProvider.GetRequiredService<IYubiKeyManager>();
     }
 
@@ -43,7 +45,6 @@ public abstract class IntegrationTestBase : IDisposable
     protected void ConfigureServices(IServiceCollection services)
     {
         services.AddLogging(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
-
         services.AddYubiKeyManager(options =>
         {
             options.EnableAutoDiscovery = true;

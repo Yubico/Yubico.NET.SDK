@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
@@ -21,15 +20,15 @@ namespace Yubico.YubiKit.Core.Devices.SmartCard;
 
 internal class PcscYubiKey : IYubiKey
 {
-    private readonly IConnectionFactory<ISmartCardConnection> _connectionFactory;
+    private readonly ISmartCardConnectionFactory _connectionFactory;
     private readonly ILogger<PcscYubiKey> _logger;
     private readonly ISmartCardDevice _pcscDevice;
     private ISmartCardConnection? _connection;
 
-    private PcscYubiKey(
+    internal PcscYubiKey(
         ILogger<PcscYubiKey> logger,
         ISmartCardDevice pcscDevice,
-        IConnectionFactory<ISmartCardConnection> connectionFactory)
+        ISmartCardConnectionFactory connectionFactory)
     {
         _logger = logger;
         _pcscDevice = pcscDevice;
@@ -52,9 +51,10 @@ internal class PcscYubiKey : IYubiKey
     #endregion
 
     // Move this to service later
-    public static async Task<IReadOnlyList<PcscYubiKey>> GetAllAsync() => await Task.Run(GetAll);
+    public static async Task<IReadOnlyList<IYubiKey>> GetAllAsync(IYubiKeyFactory yubiKeyFactory) =>
+        await Task.Run(() => GetAll(yubiKeyFactory));
 
-    private static IReadOnlyList<PcscYubiKey> GetAll()
+    private static IReadOnlyList<IYubiKey> GetAll(IYubiKeyFactory yubiKeyFactory)
     {
         var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
         if (result != ErrorCode.SCARD_S_SUCCESS)
@@ -83,12 +83,21 @@ internal class PcscYubiKey : IYubiKey
                     ReaderName = reader.GetReaderName(), Atr = reader.GetAtr(), Kind = SmartCardConnectionKind.Usb
                 }
                 into pcscDevice
-                select new PcscYubiKey(NullLogger<PcscYubiKey>.Instance, pcscDevice,
-                    new ConnectionFactory<ISmartCardConnection>(NullLoggerFactory.Instance))).ToList();
+                select yubiKeyFactory.CreateAsync(pcscDevice)).ToList();
         }
         finally
         {
             context.Dispose();
         }
     }
+
+    // internal PcscYubiKey(
+    //     ILogger<PcscYubiKey> logger,
+    //     ISmartCardDevice pcscDevice,
+    //     ISmartCardConnection smartCardConnection)
+    // {
+    //     _logger = logger;
+    //     _pcscDevice = pcscDevice;
+    //     _connection = smartCardConnection;
+    // }
 }

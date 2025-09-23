@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit;
 
@@ -42,7 +43,8 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IYubiKeyManager, YubiKeyManager>();
 
             // Registration
-            // services.AddTransient<IConnectionFactory, ConnectionFactory>();
+            services.AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>();
+            services.AddTransient<IYubiKeyFactory, YubiKeyFactory>();
 
             return services;
         }

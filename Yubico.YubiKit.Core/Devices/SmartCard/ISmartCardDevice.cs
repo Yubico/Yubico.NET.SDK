@@ -36,9 +36,4 @@ public interface ISmartCardDevice : IDevice
     ///     Gets the smart card's connection type.
     /// </summary>
     SmartCardConnectionKind Kind { get; }
-
-    // /// <summary>
-    // /// Establishes an active connection to the smart card for the transmittal of data.
-    // /// </summary>
-    // ISmartCardConnection Connect();
 }

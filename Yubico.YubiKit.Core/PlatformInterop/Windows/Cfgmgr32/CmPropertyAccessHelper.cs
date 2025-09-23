@@ -21,15 +21,8 @@ namespace Yubico.YubiKit.Core.PlatformInterop.Windows.Cfgmgr32;
 
 internal class CmPropertyAccessHelper
 {
-    internal delegate NativeMethods.CmErrorCode GetObjectProperty<T>(
-        T ObjectId,
-        in NativeMethods.DEVPROPKEY propertyKey,
-        out NativeMethods.DEVPROP_TYPE propertyType,
-        byte[]? propertyBuffer,
-        ref IntPtr propertyBufferSize
-    );
-
-    internal static object? TryGetProperty<T>(GetObjectProperty<T> getObjectProperty, T objectId, NativeMethods.DEVPROPKEY propertyKey)
+    internal static object? TryGetProperty<T>(GetObjectProperty<T> getObjectProperty, T objectId,
+        NativeMethods.DEVPROPKEY propertyKey)
     {
         NativeMethods.CmErrorCode errorCode;
 
@@ -42,18 +35,14 @@ internal class CmPropertyAccessHelper
             ref propertyBufferSize
         );
 
-        if (errorCode == NativeMethods.CmErrorCode.CR_NO_SUCH_VALUE)
-        {
-            return default;
-        }
-        else if (errorCode != NativeMethods.CmErrorCode.CR_BUFFER_SMALL)
-        {
+        if (errorCode == NativeMethods.CmErrorCode.CR_NO_SUCH_VALUE) return default;
+
+        if (errorCode != NativeMethods.CmErrorCode.CR_BUFFER_SMALL)
             throw new PlatformApiException(
                 "CONFIG_RET",
                 (int)errorCode,
                 $"Failed to get the size needed for the property {propertyKey} for ConfigMgr object {objectId}."
             );
-        }
 
         byte[] propertyBuffer = new byte[propertyBufferSize.ToInt64()];
         errorCode = getObjectProperty(
@@ -65,13 +54,11 @@ internal class CmPropertyAccessHelper
         );
 
         if (errorCode != NativeMethods.CmErrorCode.CR_SUCCESS)
-        {
             throw new PlatformApiException(
                 "CONFIG_RET",
                 (int)errorCode,
                 $"Failed to get the property {propertyKey} for ConfigMgr object {objectId}."
             );
-        }
 
         switch (propertyType)
         {
@@ -100,4 +87,16 @@ internal class CmPropertyAccessHelper
                 throw new NotSupportedException($"GetProperty does not support properties of type {propertyType}");
         }
     }
+
+    #region Nested type: GetObjectProperty
+
+    internal delegate NativeMethods.CmErrorCode GetObjectProperty<T>(
+        T ObjectId,
+        in NativeMethods.DEVPROPKEY propertyKey,
+        out NativeMethods.DEVPROP_TYPE propertyType,
+        byte[]? propertyBuffer,
+        ref IntPtr propertyBufferSize
+    );
+
+    #endregion
 }

@@ -14,31 +14,27 @@
 
 using System.Runtime.InteropServices;
 
-namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography
+namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography;
+
+public class SafeEvpCipherCtx : SafeHandle
 {
-    public class SafeEvpCipherCtx : SafeHandle
+    public SafeEvpCipherCtx() : base(IntPtr.Zero, true)
     {
-        public SafeEvpCipherCtx() : base(IntPtr.Zero, true)
-        {
-        }
+    }
 
-        /// <inheritdoc />
-        public SafeEvpCipherCtx(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
-        {
-        }
+    /// <inheritdoc />
+    public SafeEvpCipherCtx(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
+    {
+    }
 
-        /// <inheritdoc />
-        protected override bool ReleaseHandle()
-        {
-            if (!IsInvalid)
-            {
-                NativeMethods.EvpCipherCtxFree(handle);
-            }
+    /// <inheritdoc />
+    public override bool IsInvalid => handle == IntPtr.Zero;
 
-            return true;
-        }
+    /// <inheritdoc />
+    protected override bool ReleaseHandle()
+    {
+        if (!IsInvalid) NativeMethods.EvpCipherCtxFree(handle);
 
-        /// <inheritdoc />
-        public override bool IsInvalid => handle == IntPtr.Zero;
+        return true;
     }
 }

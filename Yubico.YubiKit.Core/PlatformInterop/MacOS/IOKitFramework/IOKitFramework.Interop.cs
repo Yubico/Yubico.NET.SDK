@@ -124,7 +124,7 @@ internal enum kern_return_t
     IOReturnIsoTooOld,
     IOReturnIsoTooNew,
     IOReturnNotFound,
-    IOReturnInvalid,
+    IOReturnInvalid
 }
 
 /*

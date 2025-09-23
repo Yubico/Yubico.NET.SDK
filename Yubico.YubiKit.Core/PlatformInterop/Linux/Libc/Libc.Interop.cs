@@ -18,16 +18,20 @@ namespace Yubico.YubiKit.Core.PlatformInterop.Linux.Libc;
 
 // This file contains native methods (P/Invoke) for Linux libc functions.
 // Currently we only need open, close, and ioctl.
-internal static partial class NativeMethods
+internal static class NativeMethods
 {
+    #region OpenFlags enum
+
     [Flags]
     public enum OpenFlags
     {
         O_RDONLY = 0,
         O_WRONLY = 1,
         O_RDWR = 2,
-        O_NONBLOCK = 0x800,
+        O_NONBLOCK = 0x800
     }
+
+    #endregion
 
     public const long HIDIOCGRAWINFO = 0x0000000080084803;
     public const long HIDIOCGRDESCSIZE = 0x0000000080044801;

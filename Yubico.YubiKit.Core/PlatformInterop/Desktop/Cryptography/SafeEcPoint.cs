@@ -14,33 +14,27 @@
 
 using System.Runtime.InteropServices;
 
-namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography
+namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography;
+
+public class SafeEcPoint : SafeHandle
 {
-    public class SafeEcPoint : SafeHandle
+    public SafeEcPoint() : base(IntPtr.Zero, true)
     {
-        public SafeEcPoint() : base(IntPtr.Zero, true)
-        {
+    }
 
-        }
+    /// <inheritdoc />
+    public SafeEcPoint(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
+    {
+    }
 
-        /// <inheritdoc />
-        public SafeEcPoint(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
-        {
+    /// <inheritdoc />
+    public override bool IsInvalid => handle == IntPtr.Zero;
 
-        }
+    /// <inheritdoc />
+    protected override bool ReleaseHandle()
+    {
+        if (!IsInvalid) NativeMethods.EcPointFree(handle);
 
-        /// <inheritdoc />
-        protected override bool ReleaseHandle()
-        {
-            if (!IsInvalid)
-            {
-                NativeMethods.EcPointFree(handle);
-            }
-
-            return true;
-        }
-
-        /// <inheritdoc />
-        public override bool IsInvalid => handle == IntPtr.Zero;
+        return true;
     }
 }

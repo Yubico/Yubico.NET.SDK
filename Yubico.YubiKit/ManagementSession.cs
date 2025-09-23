@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 
 namespace Yubico.YubiKit;
@@ -31,10 +30,7 @@ public class ManagementSession : ApplicationSession
         _smartCardConnection = smartCardConnection;
     }
 
-    public DeviceInfo GetDeviceInfo()
-    {
-        return new DeviceInfo();
-    }
+    public DeviceInfo GetDeviceInfo() => new();
 }
 
 // Protocol

@@ -12,22 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
-
 namespace Yubico.YubiKit.Core;
 
 public class CtapException : Exception
 {
     //An error response from a YubiKey
 }
-    
+
 public class BadResponseException : Exception
 {
     //The data contained in a YubiKey response was invalid
-        
 }
-    
+
 /* We also use:
-    InvalidOperationException (IllegalStateException)
-    TimeoutException The operation timed out waiting for something
- */
+InvalidOperationException (IllegalStateException)
+TimeoutException The operation timed out waiting for something
+*/

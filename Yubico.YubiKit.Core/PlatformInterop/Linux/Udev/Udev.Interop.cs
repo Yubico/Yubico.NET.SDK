@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Linux.Udev;
 
-internal static partial class NativeMethods
+internal static class NativeMethods
 {
     internal const string UdevSubsystemName = "hidraw";
     internal const string UdevMonitorName = "udev";
@@ -55,7 +55,8 @@ internal static partial class NativeMethods
     // caller to destroy, which is why this is returned as a SafeHandle.
     // The C signature is
     //   struct udev_enumerate *udev_enumerate_new(struct udev *udev);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_new", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_new",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern LinuxUdevEnumerateSafeHandle udev_enumerate_new(LinuxUdevSafeHandle udevObject);
 
@@ -66,7 +67,8 @@ internal static partial class NativeMethods
     // called by no one else.
     // The C signature is
     //   struct udev_enumerate *udev_enumerate_unref(struct udev_enumerate *udev_enumerate);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_unref", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_unref",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr udev_enumerate_unref(IntPtr enumerateObject);
 
@@ -76,7 +78,8 @@ internal static partial class NativeMethods
     // The C signature is
     //   int udev_enumerate_add_match_subsystem(
     //       struct udev_enumerate *udev_enumerate, const char *subsystem);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_enumerate_add_match_subsystem", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false,
+        EntryPoint = "udev_enumerate_add_match_subsystem", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern int udev_enumerate_add_match_subsystem(
         LinuxUdevEnumerateSafeHandle enumerateObject, string subsystem);
@@ -87,7 +90,8 @@ internal static partial class NativeMethods
     // If the result is < 0, error.
     // The C signature is
     //   int udev_enumerate_scan_devices(struct udev_enumerate *udev_enumerate);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_scan_devices", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_scan_devices",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern int udev_enumerate_scan_devices(LinuxUdevEnumerateSafeHandle enumerateObject);
 
@@ -98,7 +102,8 @@ internal static partial class NativeMethods
     // A null return is valid.
     // The C signature is
     //   struct udev_list_entry *udev_enumerate_get_list_entry(struct udev_enumerate *udev_enumerate);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_get_list_entry", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_get_list_entry",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr udev_enumerate_get_list_entry(LinuxUdevEnumerateSafeHandle enumerateObject);
 
@@ -110,7 +115,8 @@ internal static partial class NativeMethods
     // A null return is valid.
     // The C signature is
     //   struct udev_list_entry *udev_list_entry_get_next(struct udev_list_entry *list_entry);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_list_entry_get_next", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_list_entry_get_next",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr udev_list_entry_get_next(IntPtr previousEntry);
 
@@ -123,7 +129,8 @@ internal static partial class NativeMethods
     // SafeHandle.
     // The C signature is
     //   const char *udev_list_entry_get_name(struct udev_list_entry *list_entry);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_list_entry_get_name", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_list_entry_get_name",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr udev_list_entry_get_name(IntPtr currentEntry);
 
@@ -137,7 +144,8 @@ internal static partial class NativeMethods
     // The C signature is
     //   struct udev_device *udev_device_new_from_syspath(
     //       struct udev *udev, const char *syspath);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_device_new_from_syspath", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false,
+        EntryPoint = "udev_device_new_from_syspath", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern LinuxUdevDeviceSafeHandle udev_device_new_from_syspath(
         LinuxUdevSafeHandle udevObject, string path);
@@ -148,7 +156,8 @@ internal static partial class NativeMethods
     // called by no one else.
     // The C signature is
     //   struct udev_device *udev_device_unref(struct udev_device *udev_device);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_unref", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_unref",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr udev_device_unref(IntPtr deviceObject);
 
@@ -162,7 +171,8 @@ internal static partial class NativeMethods
     // SafeHandle.
     // The C signature is
     //   const char *udev_device_get_devnode(struct udev_device *udev_device);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_devnode", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_devnode",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr udev_device_get_devnode(LinuxUdevDeviceSafeHandle deviceObject);
 
@@ -192,7 +202,8 @@ internal static partial class NativeMethods
 
     // The actual P/Invoke import uses IntPtr here so that we can pass
     // non-refcounted udev objects.
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_syspath", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_syspath",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr udev_device_get_syspath(IntPtr deviceObject);
 
@@ -204,7 +215,8 @@ internal static partial class NativeMethods
     // and others.
     // The C signature is
     //   const char *udev_device_get_action(struct udev_device *udev_device);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_device_get_action", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false,
+        EntryPoint = "udev_device_get_action", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr udev_device_get_action(LinuxUdevDeviceSafeHandle deviceObject);
 
@@ -217,7 +229,8 @@ internal static partial class NativeMethods
     // The C signature is
     //   struct udev_monitor * udev_monitor_new_from_netlink(
     //       struct udev *udev, const char *name);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_monitor_new_from_netlink", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false,
+        EntryPoint = "udev_monitor_new_from_netlink", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern LinuxUdevMonitorSafeHandle udev_monitor_new_from_netlink(
         LinuxUdevSafeHandle udevObject, string name);
@@ -227,7 +240,8 @@ internal static partial class NativeMethods
     // called by no one else.
     // The C signature is
     //   void udev_monitor_unref(struct udev_monitor *udev_monitor);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_unref", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_unref",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern void udev_monitor_unref(IntPtr monitorObject);
 
@@ -238,7 +252,8 @@ internal static partial class NativeMethods
     // The C signature is
     //   int udev_monitor_filter_add_match_subsystem_devtype(
     //       struct udev_monitor *udev_monitor, const char *subsystem, const char *devtype);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_monitor_filter_add_match_subsystem_devtype", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false,
+        EntryPoint = "udev_monitor_filter_add_match_subsystem_devtype", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern int udev_monitor_filter_add_match_subsystem_devtype(
         LinuxUdevMonitorSafeHandle monitorObject, string subsystem, string? devtype);
@@ -247,7 +262,8 @@ internal static partial class NativeMethods
     // If the result is < 0, error.
     // The C signature is
     //   int udev_monitor_enable_receiving(struct udev_monitor *udev_monitor);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_enable_receiving", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_enable_receiving",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern int udev_monitor_enable_receiving(LinuxUdevMonitorSafeHandle monitorObject);
 
@@ -256,14 +272,17 @@ internal static partial class NativeMethods
     // change, this will return NULL.
     // The C signature is
     //   struct udev_device *udev_monitor_receive_device(struct udev_monitor *udev_monitor);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_receive_device", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_receive_device",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern LinuxUdevDeviceSafeHandle udev_monitor_receive_device(LinuxUdevMonitorSafeHandle monitorObject);
+    public static extern LinuxUdevDeviceSafeHandle udev_monitor_receive_device(
+        LinuxUdevMonitorSafeHandle monitorObject);
 
     // Get the socket file descriptor associated with the monitor.
     // The C signature is
     //   int udev_monitor_get_fd(struct udev_monitor *udev_monitor);
-    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_get_fd", SetLastError = true)]
+    [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_get_fd",
+        SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr udev_monitor_get_fd(LinuxUdevMonitorSafeHandle monitorObject);
 }

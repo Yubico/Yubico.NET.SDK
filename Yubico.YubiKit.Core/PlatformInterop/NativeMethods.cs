@@ -17,19 +17,33 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.PlatformInterop;
 
-internal static partial class NativeMethods
+internal static class NativeMethods
 {
+    #region DlOpenFlags enum
+
+    [Flags]
+    public enum DlOpenFlags
+    {
+        Lazy = 0x1,
+        Now = 0x2,
+        BindingMask = Lazy | Now,
+        NoLoad = 0x4,
+        DeepBind = 0x8,
+        Global = 0x100,
+        Local = 0x0,
+        NoDelete = 0x1000
+    }
+
+    #endregion
+
     private const string Kernel32Dll = "kernel32.dll";
     private const string MacDlLib = "libdl.dylib";
     private const string LinuxDlLib = "libdl.so";
 
-    static NativeMethods()
-    {
-        Libraries.EnsureInitialized();
-    }
+    static NativeMethods() => Libraries.EnsureInitialized();
 
     // Windows
-        
+
     // Note that the DefaultDllImportSearchPaths attribute is a security best
     // practice on the Windows platform (and required by our analyzer
     // settings). It does not currently have any effect on platforms other
@@ -43,32 +57,22 @@ internal static partial class NativeMethods
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static extern bool FreeLibrary(IntPtr hModule);
 
-    [DllImport(Kernel32Dll, CharSet = CharSet.Ansi, BestFitMapping = false, SetLastError = true, ExactSpelling = true)]
+    [DllImport(Kernel32Dll, CharSet = CharSet.Ansi, BestFitMapping = false, SetLastError = true,
+        ExactSpelling = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static extern IntPtr GetProcAddress(SafeLibraryHandle hModule, string methodName);
 
-    [Flags]
-    public enum DlOpenFlags
-    {
-        Lazy = 0x1,
-        Now = 0x2,
-        BindingMask = Lazy | Now,
-        NoLoad = 0x4,
-        DeepBind = 0x8,
-        Global = 0x100,
-        Local = 0x0,
-        NoDelete = 0x1000,
-    }
 
-        
     // MacOS
-        
-    [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments", Justification = "macOS uses UTF-8 which is modeled as ANSI by the marshaler")]
+
+    [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments",
+        Justification = "macOS uses UTF-8 which is modeled as ANSI by the marshaler")]
     [DllImport(MacDlLib, CharSet = CharSet.Ansi, EntryPoint = "dlopen")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern SafeMacOSLibraryHandle mac_dlopen(string fileName, DlOpenFlags flag);
 
-    [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments", Justification = "macOS uses UTF-8 which is modeled as ANSI by the marshaler")]
+    [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments",
+        Justification = "macOS uses UTF-8 which is modeled as ANSI by the marshaler")]
     [DllImport(MacDlLib, EntryPoint = "dlsym")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr mac_dlsym(SafeLibraryHandle handle, string symbol);
@@ -76,15 +80,17 @@ internal static partial class NativeMethods
     [DllImport(MacDlLib, EntryPoint = "dlclose")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern int mac_dlclose(IntPtr handle);
-        
+
     // Linux
 
-    [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments", Justification = "Linux uses UTF-8 which is modeled as ANSI by the marshaler")]
+    [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments",
+        Justification = "Linux uses UTF-8 which is modeled as ANSI by the marshaler")]
     [DllImport(LinuxDlLib, CharSet = CharSet.Ansi, EntryPoint = "dlopen")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern SafeLinuxLibraryHandle linux_dlopen(string fileName, DlOpenFlags flag);
 
-    [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments", Justification = "Linux uses UTF-8 which is modeled as ANSI by the marshaler")]
+    [SuppressMessage("Globalization", "CA2101:Specify marshaling for P/Invoke string arguments",
+        Justification = "Linux uses UTF-8 which is modeled as ANSI by the marshaler")]
     [DllImport(LinuxDlLib, EntryPoint = "dlsym")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr linux_dlsym(SafeLibraryHandle handle, string symbol);

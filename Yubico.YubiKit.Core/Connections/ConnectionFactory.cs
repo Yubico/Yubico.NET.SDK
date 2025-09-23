@@ -15,30 +15,35 @@
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Core.Devices.SmartCard;
 
-namespace Yubico.YubiKit.Core.Connections
-{
-    public interface IConnectionFactory
-    {
-        TConnectionType Create<TConnectionType>(ISmartCardDevice smartCardDevice) where TConnectionType : IYubiKeyConnection;
-    }
-    
-    public class ConnectionFactory(ILoggerFactory loggerFactory) : IConnectionFactory
-    {
-        public TConnectionType Create<TConnectionType>(ISmartCardDevice smartCardDevice) where TConnectionType : IYubiKeyConnection
-        {
-            Type? connectionType = typeof(TConnectionType);
-            object connection = connectionType switch
-            {
-                not null when connectionType == typeof(ISmartCardConnection) =>
-                    new PcscSmartCardConnection(
-                        loggerFactory.CreateLogger<PcscSmartCardConnection>(),
-                        smartCardDevice
-                        ),
-                
-                _ => throw new NotSupportedException($"The type {typeof(TConnectionType).FullName} is not supported."),
-            };
+namespace Yubico.YubiKit.Core.Connections;
 
-            return (TConnectionType)connection;
-        }
+public interface IConnectionFactory
+{
+    TConnectionType Create<TConnectionType>(ISmartCardDevice smartCardDevice)
+        where TConnectionType : IYubiKeyConnection;
+}
+
+public class ConnectionFactory(ILoggerFactory loggerFactory) : IConnectionFactory
+{
+    #region IConnectionFactory Members
+
+    public TConnectionType Create<TConnectionType>(ISmartCardDevice smartCardDevice)
+        where TConnectionType : IYubiKeyConnection
+    {
+        Type? connectionType = typeof(TConnectionType);
+        object connection = connectionType switch
+        {
+            not null when connectionType == typeof(ISmartCardConnection) =>
+                new PcscSmartCardConnection(
+                    loggerFactory.CreateLogger<PcscSmartCardConnection>(),
+                    smartCardDevice
+                ),
+
+            _ => throw new NotSupportedException($"The type {typeof(TConnectionType).FullName} is not supported.")
+        };
+
+        return (TConnectionType)connection;
     }
+
+    #endregion
 }

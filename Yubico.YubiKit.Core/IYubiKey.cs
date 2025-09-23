@@ -17,6 +17,7 @@ using Yubico.YubiKit.Core.Connections;
 namespace Yubico.YubiKit.Core;
 
 public interface IYubiKey
-{   
-    Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default) where TConnection : IYubiKeyConnection;
+{
+    Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+        where TConnection : IYubiKeyConnection;
 }

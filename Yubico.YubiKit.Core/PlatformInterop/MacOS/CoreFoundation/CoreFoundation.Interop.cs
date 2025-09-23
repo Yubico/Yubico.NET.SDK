@@ -16,8 +16,14 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.PlatformInterop.MacOS.CoreFoundation;
 
-internal static partial class NativeMethods
+internal static class NativeMethods
 {
+    public const int kCFRunLoopRunFinished = 1;
+    public const int kCFRunLoopRunStopped = 2;
+    public const int kCFRunLoopRunTimedOut = 3;
+
+    public const int kCFRunLoopRunHandledSource = 4;
+
     // Note that the DefaultDllImportSearchPaths attribute is a security best
     // practice on the Windows platform (and required by our analyzer
     // settings). It does not currently have any effect on platforms other
@@ -72,11 +78,6 @@ internal static partial class NativeMethods
     [DllImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern IntPtr CFRunLoopGetCurrent();
-
-    public const int kCFRunLoopRunFinished = 1;
-    public const int kCFRunLoopRunStopped = 2;
-    public const int kCFRunLoopRunTimedOut = 3;
-    public const int kCFRunLoopRunHandledSource = 4;
 
     [DllImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

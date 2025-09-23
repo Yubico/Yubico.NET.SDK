@@ -25,26 +25,30 @@ namespace Yubico.YubiKit.Core.PlatformInterop.Linux.Udev;
 // subclasses.
 internal class LinuxUdev : IDisposable
 {
-    protected LinuxUdevSafeHandle _udevObject;
     private bool _isDisposed;
+    protected LinuxUdevSafeHandle _udevObject;
 
     // Create a new instance of LinuxUdev. This is essentially equivalent in
     // C to calling udev_new to get the initial object.
     // That is, in C, the first thing you do is call
     //    struct udev *udevObject = udev_new();
-    public LinuxUdev()
+    public LinuxUdev() => _udevObject = (LinuxUdevSafeHandle)ThrowIfFailedNull(NativeMethods.udev_new());
+
+    #region IDisposable Members
+
+    public void Dispose()
     {
-        _udevObject = (LinuxUdevSafeHandle)ThrowIfFailedNull(NativeMethods.udev_new());
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
+
+    #endregion
 
     // Throw the PlatformApiException(LinuxUdevError) if the value is NULL.
     // Otherwise, just return value.
     protected static SafeHandle ThrowIfFailedNull(SafeHandle value)
     {
-        if (!value.IsInvalid)
-        {
-            return value;
-        }
+        if (!value.IsInvalid) return value;
 
         throw new PlatformApiException(
             string.Format(
@@ -56,10 +60,7 @@ internal class LinuxUdev : IDisposable
     // Otherwise, just return.
     protected static int ThrowIfFailedNegative(int value)
     {
-        if (value >= 0)
-        {
-            return value;
-        }
+        if (value >= 0) return value;
 
         throw new PlatformApiException(
             string.Format(
@@ -67,18 +68,9 @@ internal class LinuxUdev : IDisposable
                 "ExceptionMessages.LinuxUdevError"));
     }
 
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
     protected virtual void Dispose(bool disposing)
     {
-        if (_isDisposed)
-        {
-            return;
-        }
+        if (_isDisposed) return;
 
         _udevObject.Dispose();
         _isDisposed = true;

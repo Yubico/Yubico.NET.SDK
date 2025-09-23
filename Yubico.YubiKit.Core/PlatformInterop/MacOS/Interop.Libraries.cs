@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKit.Core.PlatformInterop.MacOS;
 
-internal static partial class Libraries
+internal static class Libraries
 {
     internal const string CoreFoundation = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
     internal const string IOKitFramework = "/System/Library/Frameworks/IOKit.framework/IOKit";

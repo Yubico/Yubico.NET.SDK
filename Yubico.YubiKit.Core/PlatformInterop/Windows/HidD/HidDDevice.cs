@@ -19,13 +19,6 @@ namespace Yubico.YubiKit.Core.PlatformInterop.Windows.HidD;
 
 internal class HidDDevice : IHidDDevice
 {
-    public string DevicePath { get; private set; }
-    public short Usage { get; private set; }
-    public short UsagePage { get; private set; }
-    public short InputReportByteLength { get; private set; }
-    public short OutputReportByteLength { get; private set; }
-    public short FeatureReportByteLength { get; private set; }
-
     private SafeFileHandle _handle;
 
     public HidDDevice(string devicePath)
@@ -42,11 +35,22 @@ internal class HidDDevice : IHidDDevice
         FeatureReportByteLength = capabilities.FeatureReportByteLength;
     }
 
+    #region IHidDDevice Members
+
+    public string DevicePath { get; }
+    public short Usage { get; }
+    public short UsagePage { get; }
+    public short InputReportByteLength { get; }
+    public short OutputReportByteLength { get; }
+    public short FeatureReportByteLength { get; }
+
     public void OpenIOConnection()
     {
         _handle.Dispose();
-        _handle = OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_READ | Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_WRITE);
+        _handle = OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_READ |
+                                       Kernel32.NativeMethods.DESIRED_ACCESS.GENERIC_WRITE);
     }
+
     public void OpenFeatureConnection()
     {
         _handle.Dispose();
@@ -55,17 +59,12 @@ internal class HidDDevice : IHidDDevice
 
     public byte[] GetFeatureReport()
     {
-        if (_handle is null)
-        {
-            throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
-        }
+        if (_handle is null) throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
 
         byte[] buffer = new byte[FeatureReportByteLength];
 
         if (!NativeMethods.HidD_GetFeature(_handle, buffer, buffer.Length))
-        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-        }
 
         byte[] returnBuf = new byte[FeatureReportByteLength - 1];
         Array.Copy(buffer, 1, returnBuf, 0, returnBuf.Length);
@@ -75,39 +74,27 @@ internal class HidDDevice : IHidDDevice
 
     public void SetFeatureReport(byte[] buffer)
     {
-        if (_handle is null)
-        {
-            throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
-        }
+        if (_handle is null) throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
 
         if (buffer.Length != FeatureReportByteLength - 1)
-        {
             throw new InvalidOperationException("ExceptionMessages.InvalidReportBufferLength");
-        }
 
         byte[] sendBuf = new byte[buffer.Length + 1];
         Array.Copy(buffer, 0, sendBuf, 1, buffer.Length);
 
         if (!NativeMethods.HidD_SetFeature(_handle, sendBuf, sendBuf.Length))
-        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-        }
     }
 
     public byte[] GetInputReport()
     {
-        if (_handle is null)
-        {
-            throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
-        }
+        if (_handle is null) throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
 
         byte[] buffer = new byte[InputReportByteLength];
 
         if (!Kernel32.NativeMethods.ReadFile(_handle, buffer, buffer.Length, out int bytesRead, IntPtr.Zero)
             || bytesRead != buffer.Length)
-        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-        }
 
         byte[] returnBuf = new byte[InputReportByteLength - 1];
         Array.Copy(buffer, 1, returnBuf, 0, returnBuf.Length);
@@ -117,41 +104,32 @@ internal class HidDDevice : IHidDDevice
 
     public void SetOutputReport(byte[] buffer)
     {
-        if (_handle is null)
-        {
-            throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
-        }
+        if (_handle is null) throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
 
         if (buffer.Length != OutputReportByteLength - 1)
-        {
             throw new InvalidOperationException("ExceptionMessages.InvalidReportBufferLength");
-        }
 
         byte[] sendBuf = new byte[buffer.Length + 1];
         Array.Copy(buffer, 0, sendBuf, 1, buffer.Length);
 
         if (!Kernel32.NativeMethods.WriteFile(_handle, sendBuf, sendBuf.Length, out int bytesWritten, IntPtr.Zero)
             || bytesWritten != sendBuf.Length)
-        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-        }
     }
+
+    #endregion
 
     private static NativeMethods.HIDP_CAPS GetCapabilities(SafeFileHandle safeHandle)
     {
-        var capabilities = new NativeMethods.HIDP_CAPS();
+        NativeMethods.HIDP_CAPS capabilities = new();
 
         if (!NativeMethods.HidD_GetPreparsedData(safeHandle, out IntPtr preparsedData))
-        {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-        }
 
         try
         {
             if (!NativeMethods.HidP_GetCaps(preparsedData, ref capabilities))
-            {
                 Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-            }
 
             return capabilities;
         }
@@ -173,33 +151,27 @@ internal class HidDDevice : IHidDDevice
             IntPtr.Zero
         );
 
-        if (handle.IsInvalid)
-        {
-            Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-        }
+        if (handle.IsInvalid) Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
 
         return handle;
     }
 
     #region IDisposable Support
+
     private bool disposedValue; // To detect redundant calls
 
     protected virtual void Dispose(bool disposing)
     {
         if (!disposedValue)
         {
-            if (disposing)
-            {
-                _handle.Dispose();
-            }
+            if (disposing) _handle.Dispose();
 
             disposedValue = true;
         }
     }
 
     // This code added to correctly implement the disposable pattern.
-    public void Dispose() =>
-        Dispose(true);
-    #endregion
+    public void Dispose() => Dispose(true);
 
+    #endregion
 }

@@ -17,7 +17,7 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Windows.HidD;
 
-internal static partial class NativeMethods
+internal static class NativeMethods
 {
     #region Structures
 
@@ -56,6 +56,7 @@ internal static partial class NativeMethods
         public short NumberFeatureValueCaps;
         public short NumberFeatureDataIndices;
     }
+
     #endregion
 
     #region P/Invoke DLL Imports

@@ -16,10 +16,6 @@ namespace Yubico.YubiKit;
 
 public readonly record struct DeviceInfo
 {
-    public string SerialNumber { get; init; }
-    public string FirmwareVersion { get; init; }
-    public string FormFactor { get; init; }
-
     private const int TAG_USB_SUPPORTED = 0x01;
     private const int TAG_SERIAL_NUMBER = 0x02;
     private const int TAG_USB_ENABLED = 0x03;
@@ -40,4 +36,7 @@ public readonly record struct DeviceInfo
     private const int TAG_VERSION_QUALIFIER = 0x19;
     private const int TAG_FPS_VERSION = 0x20;
     private const int TAG_STM_VERSION = 0x21;
+    public string SerialNumber { get; init; }
+    public string FirmwareVersion { get; init; }
+    public string FormFactor { get; init; }
 }

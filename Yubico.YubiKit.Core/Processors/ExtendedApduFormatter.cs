@@ -18,8 +18,5 @@ namespace Yubico.YubiKit.Core.Processors;
 
 internal class ExtendedApduFormatter : ApduFormatter
 {
-    public ExtendedApduFormatter(int maxApduSize)
-    {
-        throw new NotImplementedException();
-    }
+    public ExtendedApduFormatter(int maxApduSize) => throw new NotImplementedException();
 }

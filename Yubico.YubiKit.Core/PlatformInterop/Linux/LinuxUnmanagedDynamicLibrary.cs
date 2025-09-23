@@ -22,20 +22,18 @@ internal sealed class LinuxUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
     public LinuxUnmanagedDynamicLibrary(string fileName) :
         base(OpenLibrary(fileName))
     {
-
     }
 
     private static SafeLibraryHandle OpenLibrary(string fileName)
     {
         SafeLinuxLibraryHandle handle = NativeMethods.linux_dlopen(fileName, NativeMethods.DlOpenFlags.Lazy);
         if (handle.IsInvalid)
-        {
             throw new PlatformApiException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     """ExceptionMessages.LibraryLoadFailed""",
                     fileName));
-        }
+
         return handle;
     }
 
@@ -48,10 +46,8 @@ internal sealed class LinuxUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
             d = Marshal.GetDelegateForFunctionPointer<TDelegate>(p);
             return true;
         }
-        else
-        {
-            d = null;
-            return false;
-        }
+
+        d = null;
+        return false;
     }
 }

@@ -14,21 +14,21 @@
 
 using System.Runtime.InteropServices;
 
-namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography
+namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography;
+
+internal static partial class NativeMethods
 {
-    internal static partial class NativeMethods
-    {
-        // EC_GROUP* EC_GROUP_new_by_curve_name(int nid);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_GROUP_new_by_curve_name", ExactSpelling = true, CharSet = CharSet.Ansi)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern IntPtr EcGroupNewByCurveNameIntPtr(int curveId);
+    // EC_GROUP* EC_GROUP_new_by_curve_name(int nid);
+    [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_GROUP_new_by_curve_name", ExactSpelling = true,
+        CharSet = CharSet.Ansi)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    private static extern IntPtr EcGroupNewByCurveNameIntPtr(int curveId);
 
-        public static SafeEcGroup EcGroupNewByCurveName(int curveId) =>
-            new SafeEcGroup(EcGroupNewByCurveNameIntPtr(curveId), true);
+    public static SafeEcGroup EcGroupNewByCurveName(int curveId) => new(EcGroupNewByCurveNameIntPtr(curveId), true);
 
-        // void EC_GROUP_free(EC_GROUP* group);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_GROUP_free", ExactSpelling = true, CharSet = CharSet.Ansi)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern void EcGroupFree(IntPtr group);
-    }
+    // void EC_GROUP_free(EC_GROUP* group);
+    [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_GROUP_free", ExactSpelling = true,
+        CharSet = CharSet.Ansi)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    public static extern void EcGroupFree(IntPtr group);
 }

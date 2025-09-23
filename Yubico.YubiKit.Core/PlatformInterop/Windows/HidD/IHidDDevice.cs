@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Windows.HidD;
 
-interface IHidDDevice : IDisposable
+internal interface IHidDDevice : IDisposable
 {
     string DevicePath { get; }
     short Usage { get; }
@@ -23,10 +23,10 @@ interface IHidDDevice : IDisposable
     short OutputReportByteLength { get; }
     short FeatureReportByteLength { get; }
 
-    public void OpenIOConnection();
-    public void OpenFeatureConnection();
-    public byte[] GetFeatureReport();
-    public void SetFeatureReport(byte[] buffer);
-    public byte[] GetInputReport();
-    public void SetOutputReport(byte[] buffer);
+    void OpenIOConnection();
+    void OpenFeatureConnection();
+    byte[] GetFeatureReport();
+    void SetFeatureReport(byte[] buffer);
+    byte[] GetInputReport();
+    void SetOutputReport(byte[] buffer);
 }

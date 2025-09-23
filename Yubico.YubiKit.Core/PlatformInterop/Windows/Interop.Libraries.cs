@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Windows;
 
-internal static partial class Libraries
+internal static class Libraries
 {
     internal const string CfgMgr = "Cfgmgr32.dll";
     internal const string Hid = "Hid.dll";

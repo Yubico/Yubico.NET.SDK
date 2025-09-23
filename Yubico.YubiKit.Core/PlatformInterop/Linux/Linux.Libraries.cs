@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Linux;
 
-internal static partial class Libraries
+internal static class Libraries
 {
     internal const string LinuxKernelLib = "libc.so.6";
     internal const string LinuxUdevLib = "libudev.so";

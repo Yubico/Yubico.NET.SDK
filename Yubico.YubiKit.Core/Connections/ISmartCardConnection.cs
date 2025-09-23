@@ -20,7 +20,7 @@ public interface ISmartCardConnection : IYubiKeyConnection
 {
     // IDisposable BeginTransaction(out bool cardWasReset);
 
-    public Task<ResponseApdu> TransmitAndReceiveAsync(
+    Task<ResponseApdu> TransmitAndReceiveAsync(
         CommandApdu command,
         CancellationToken cancellationToken = default);
     // public Transport getTransport();

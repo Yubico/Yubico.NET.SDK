@@ -16,18 +16,22 @@ namespace Yubico.YubiKit;
 
 public class ApplicationSession : IApplicationSession
 {
+    #region IApplicationSession Members
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
     protected virtual void Dispose(bool disposing)
     {
         if (disposing)
         {
             // TODO release managed resources here
         }
-    }
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
     }
 }
 

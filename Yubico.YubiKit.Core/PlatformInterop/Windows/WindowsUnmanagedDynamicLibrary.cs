@@ -21,7 +21,6 @@ internal sealed class WindowsUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
     public WindowsUnmanagedDynamicLibrary(string fileName) :
         base(OpenLibrary(fileName))
     {
-
     }
 
     private static SafeLibraryHandle OpenLibrary(string fileName)
@@ -32,15 +31,14 @@ internal sealed class WindowsUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
             int hr = Marshal.GetHRForLastWin32Error();
             Marshal.ThrowExceptionForHR(hr);
         }
+
         return handle;
     }
 
     public override bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
     {
-        if (!TryGetFunctionInternal(functionName, out d))
-        {
-            return TryGetFunctionInternal(functionName + "W", out d);
-        }
+        if (!TryGetFunctionInternal(functionName, out d)) return TryGetFunctionInternal(functionName + "W", out d);
+
         return true;
     }
 
@@ -53,10 +51,8 @@ internal sealed class WindowsUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
             d = Marshal.GetDelegateForFunctionPointer<TDelegate>(p);
             return true;
         }
-        else
-        {
-            d = null;
-            return false;
-        }
+
+        d = null;
+        return false;
     }
 }

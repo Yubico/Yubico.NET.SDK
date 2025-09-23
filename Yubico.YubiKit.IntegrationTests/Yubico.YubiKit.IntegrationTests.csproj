@@ -9,7 +9,7 @@
         <IsTestProject>true</IsTestProject>
 
         <LangVersion>preview</LangVersion>
-        
+
     </PropertyGroup>
 
     <ItemGroup>

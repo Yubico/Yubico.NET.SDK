@@ -8,13 +8,13 @@ public class YubiKeyManagerDiTests
     public void AddYubiKeyManager_RegistersYubiKeyManagerWithLogging()
     {
         // Arrange
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         services.AddLogging();
         services.AddYubiKeyManager();
-        var provider = services.BuildServiceProvider();
+        ServiceProvider provider = services.BuildServiceProvider();
 
         // Act
-        var manager = provider.GetService<YubiKeyManager>();
+        YubiKeyManager? manager = provider.GetService<YubiKeyManager>();
 
         // Assert
         Assert.NotNull(manager);

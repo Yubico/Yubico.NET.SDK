@@ -15,27 +15,22 @@
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.ConstrainedExecution;
 
-namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard
+namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
+
+/// <summary>
+///     A safe-handle wrapper for the SCard context handle.
+/// </summary>
+internal class SCardContext : SafeHandleZeroOrMinusOneIsInvalid
 {
-    /// <summary>
-    /// A safe-handle wrapper for the SCard context handle.
-    /// </summary>
-    internal class SCardContext : SafeHandleZeroOrMinusOneIsInvalid
+    public SCardContext() :
+        base(true)
     {
-        public SCardContext() :
-            base(true)
-        {
-
-        }
-
-        public SCardContext(IntPtr handle) :
-            base(true)
-        {
-            SetHandle(handle);
-        }
-
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        protected override bool ReleaseHandle() =>
-            NativeMethods.SCardReleaseContext(handle) == ErrorCode.SCARD_S_SUCCESS;
     }
+
+    public SCardContext(IntPtr handle) :
+        base(true) =>
+        SetHandle(handle);
+
+    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+    protected override bool ReleaseHandle() => NativeMethods.SCardReleaseContext(handle) == ErrorCode.SCARD_S_SUCCESS;
 }

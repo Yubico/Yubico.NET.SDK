@@ -44,20 +44,11 @@ public static class SdkPlatformInfo
     {
         get
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return SdkPlatform.Windows;
-            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return SdkPlatform.Windows;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                return SdkPlatform.MacOS;
-            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return SdkPlatform.MacOS;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return SdkPlatform.Linux;
-            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return SdkPlatform.Linux;
 
             return SdkPlatform.Unknown;
         }

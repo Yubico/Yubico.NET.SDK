@@ -20,37 +20,20 @@ internal abstract class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
 {
     protected SafeLibraryHandle() : base(true)
     {
-
     }
 }
 
 internal sealed class SafeWindowsLibraryHandle : SafeLibraryHandle
 {
-
-    public SafeWindowsLibraryHandle() : base()
-    {
-
-    }
-
     protected override bool ReleaseHandle() => NativeMethods.FreeLibrary(handle);
 }
 
 internal sealed class SafeMacOSLibraryHandle : SafeLibraryHandle
 {
-    public SafeMacOSLibraryHandle() : base()
-    {
-
-    }
-
     protected override bool ReleaseHandle() => NativeMethods.mac_dlclose(handle) == 0;
 }
 
 internal sealed class SafeLinuxLibraryHandle : SafeLibraryHandle
 {
-    public SafeLinuxLibraryHandle() : base()
-    {
-
-    }
-
     protected override bool ReleaseHandle() => NativeMethods.linux_dlclose(handle) == 0;
 }

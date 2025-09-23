@@ -12,41 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard
+namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
+
+internal enum SCARD_STATUS
 {
-    internal enum SCARD_STATUS
-    {
-        UNKNOWN = 0,
+    UNKNOWN = 0,
 
-        /// <summary>
-        /// There is no card in the reader.
-        /// </summary>
-        ABSENT = 1,
+    /// <summary>
+    ///     There is no card in the reader.
+    /// </summary>
+    ABSENT = 1,
 
-        /// <summary>
-        /// There is a card in the reader, but it has not been moved into position for use.
-        /// </summary>
-        PRESENT = 2,
+    /// <summary>
+    ///     There is a card in the reader, but it has not been moved into position for use.
+    /// </summary>
+    PRESENT = 2,
 
-        /// <summary>
-        /// There is a card in the reader in position for use. The card is not powered.
-        /// </summary>
-        SWALLOWED = 3,
+    /// <summary>
+    ///     There is a card in the reader in position for use. The card is not powered.
+    /// </summary>
+    SWALLOWED = 3,
 
-        /// <summary>
-        /// Power is being provided to the card, but the reader driver is unaware of the mode of
-        /// the card.
-        /// </summary>
-        POWERED = 4,
+    /// <summary>
+    ///     Power is being provided to the card, but the reader driver is unaware of the mode of
+    ///     the card.
+    /// </summary>
+    POWERED = 4,
 
-        /// <summary>
-        /// The card has been reset and is awaiting PTS negotiation.
-        /// </summary>
-        NEGOTIABLE = 5,
+    /// <summary>
+    ///     The card has been reset and is awaiting PTS negotiation.
+    /// </summary>
+    NEGOTIABLE = 5,
 
-        /// <summary>
-        /// The card has been reset and specific communication protocols have been established.
-        /// </summary>
-        SPECIFIC = 6,
-    }
+    /// <summary>
+    ///     The card has been reset and specific communication protocols have been established.
+    /// </summary>
+    SPECIFIC = 6
 }

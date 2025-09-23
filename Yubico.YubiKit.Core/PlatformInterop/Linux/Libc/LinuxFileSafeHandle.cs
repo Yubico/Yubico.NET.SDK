@@ -23,13 +23,13 @@ internal class LinuxFileSafeHandle : SafeHandle
 {
     private const long InvalidHandle = 0x00000000FFFFFFFF;
 
-    public override bool IsInvalid => handle.ToInt64() == InvalidHandle;
-
     public LinuxFileSafeHandle()
         : base(new IntPtr(0x00000000FFFFFFFF), true)
     {
     }
 
+    public override bool IsInvalid => handle.ToInt64() == InvalidHandle;
+
     [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-    override protected bool ReleaseHandle() => NativeMethods.close(handle) == 0;
+    protected override bool ReleaseHandle() => NativeMethods.close(handle) == 0;
 }

@@ -14,31 +14,27 @@
 
 using System.Runtime.InteropServices;
 
-namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography
+namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography;
+
+public class SafeBigNum : SafeHandle
 {
-    public class SafeBigNum : SafeHandle
+    public SafeBigNum() : base(IntPtr.Zero, true)
     {
-        public SafeBigNum() : base(IntPtr.Zero, true)
-        {
-        }
+    }
 
-        /// <inheritdoc />
-        public SafeBigNum(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
-        {
-        }
+    /// <inheritdoc />
+    public SafeBigNum(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
+    {
+    }
 
-        /// <inheritdoc />
-        protected override bool ReleaseHandle()
-        {
-            if (!IsInvalid)
-            {
-                NativeMethods.BnClearFree(handle);
-            }
+    /// <inheritdoc />
+    public override bool IsInvalid => handle == IntPtr.Zero;
 
-            return true;
-        }
+    /// <inheritdoc />
+    protected override bool ReleaseHandle()
+    {
+        if (!IsInvalid) NativeMethods.BnClearFree(handle);
 
-        /// <inheritdoc />
-        public override bool IsInvalid => handle == IntPtr.Zero;
+        return true;
     }
 }

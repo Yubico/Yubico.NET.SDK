@@ -18,8 +18,6 @@ namespace Yubico.YubiKit.Core.Apdu;
 
 internal class ApduFormatProcessor : ApduProcessor
 {
-    public ApduFormatProcessor(ISmartCardConnection connection, ApduFormatter formatter)
-    {
+    public ApduFormatProcessor(ISmartCardConnection connection, ApduFormatter formatter) =>
         throw new NotImplementedException();
-    }
 }

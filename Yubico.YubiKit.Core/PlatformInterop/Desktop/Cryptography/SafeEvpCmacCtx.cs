@@ -15,51 +15,42 @@
 using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Core.Cryptography;
 
-namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography
+namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography;
+
+/// <summary>
+///     The SafeHandle that holds the Native CMAC CTX.
+/// </summary>
+internal class SafeEvpCmacCtx : SafeHandle
 {
     /// <summary>
-    /// The SafeHandle that holds the Native CMAC CTX.
+    ///     Create a new <c>SafeEvpCmacCtx</c>. This constructor will initialize
+    ///     the <c>BlockCipherAlgorithm</c> to <c>Aes128</c>.
     /// </summary>
-    internal class SafeEvpCmacCtx : SafeHandle
+    public SafeEvpCmacCtx() : base(IntPtr.Zero, true) => BlockCipherAlgorithm = CmacBlockCipherAlgorithm.Aes128;
+
+    /// <summary>
+    ///     Create a new <c>SafeEvpCmacCtx</c>. This constructor will initialize
+    ///     the <c>BlockCipherAlgorithm</c> to <c>Aes128</c>.
+    /// </summary>
+    public SafeEvpCmacCtx(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle) =>
+        BlockCipherAlgorithm = CmacBlockCipherAlgorithm.Aes128;
+
+    /// <summary>
+    ///     This specifies which algorithm the CMAC will use as the underlying
+    ///     block cipher algorithm. The constructors will initialize this to
+    ///     <c>Aes128</c>. If you want to use a different algorithm, set this
+    ///     property.
+    /// </summary>
+    public CmacBlockCipherAlgorithm BlockCipherAlgorithm { get; set; }
+
+    /// <inheritdoc />
+    public override bool IsInvalid => handle == IntPtr.Zero;
+
+    /// <inheritdoc />
+    protected override bool ReleaseHandle()
     {
-        /// <summary>
-        /// This specifies which algorithm the CMAC will use as the underlying
-        /// block cipher algorithm. The constructors will initialize this to
-        /// <c>Aes128</c>. If you want to use a different algorithm, set this
-        /// property.
-        /// </summary>
-        public CmacBlockCipherAlgorithm BlockCipherAlgorithm { get; set; }
+        if (!IsInvalid) NativeMethods.EvpMacCtxFree(handle);
 
-        /// <summary>
-        /// Create a new <c>SafeEvpCmacCtx</c>. This constructor will initialize
-        /// the <c>BlockCipherAlgorithm</c> to <c>Aes128</c>.
-        /// </summary>
-        public SafeEvpCmacCtx() : base(IntPtr.Zero, true)
-        {
-            BlockCipherAlgorithm = CmacBlockCipherAlgorithm.Aes128;
-        }
-
-        /// <summary>
-        /// Create a new <c>SafeEvpCmacCtx</c>. This constructor will initialize
-        /// the <c>BlockCipherAlgorithm</c> to <c>Aes128</c>.
-        /// </summary>
-        public SafeEvpCmacCtx(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
-        {
-            BlockCipherAlgorithm = CmacBlockCipherAlgorithm.Aes128;
-        }
-
-        /// <inheritdoc />
-        protected override bool ReleaseHandle()
-        {
-            if (!IsInvalid)
-            {
-                NativeMethods.EvpMacCtxFree(handle);
-            }
-
-            return true;
-        }
-
-        /// <inheritdoc />
-        public override bool IsInvalid => handle == IntPtr.Zero;
+        return true;
     }
 }

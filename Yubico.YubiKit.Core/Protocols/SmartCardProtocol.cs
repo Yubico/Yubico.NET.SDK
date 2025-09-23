@@ -25,13 +25,13 @@ internal class SmartCardProtocol : ISmartCardProtocol
     private const byte P1_SELECT = 0x04;
     private const byte P2_SELECT = 0x00;
     private const byte INS_SEND_REMAINING = 0xc0;
-    private bool _extendedApdus = true;
-    private int maxApduSize = SmartCardMaxApduSizes.Yk43;
+    private readonly ISmartCardConnection _connection;
+    private readonly bool _extendedApdus = true;
+    private readonly ILogger<SmartCardProtocol> _logger;
+    private readonly int maxApduSize = SmartCardMaxApduSizes.Yk43;
     private byte insSendRemaining;
 
     private ApduProcessor processor;
-    private readonly ILogger<SmartCardProtocol> _logger;
-    private readonly ISmartCardConnection _connection;
 
     public SmartCardProtocol(ILogger<SmartCardProtocol> logger, ISmartCardConnection connection)
     {

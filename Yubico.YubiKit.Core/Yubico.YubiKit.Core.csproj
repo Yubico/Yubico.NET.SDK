@@ -6,11 +6,11 @@
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <InternalsVisibleTo Include="Yubico.YubiKit"/>
         <InternalsVisibleTo Include="Yubico.YubiKit.UnitTests"/>

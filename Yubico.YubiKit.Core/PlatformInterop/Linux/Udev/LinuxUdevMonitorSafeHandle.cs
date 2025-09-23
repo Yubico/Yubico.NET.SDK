@@ -20,15 +20,15 @@ namespace Yubico.YubiKit.Core.PlatformInterop.Linux.Udev;
 // This class represents the C libudev "struct udev_monitor *" class.
 internal class LinuxUdevMonitorSafeHandle : SafeHandle
 {
-    public override bool IsInvalid => handle == IntPtr.Zero;
-
     public LinuxUdevMonitorSafeHandle()
         : base(IntPtr.Zero, true)
     {
     }
 
+    public override bool IsInvalid => handle == IntPtr.Zero;
+
     [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-    override protected bool ReleaseHandle()
+    protected override bool ReleaseHandle()
     {
         NativeMethods.udev_monitor_unref(handle);
         return true;

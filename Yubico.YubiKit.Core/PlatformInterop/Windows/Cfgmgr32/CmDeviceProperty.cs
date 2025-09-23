@@ -35,5 +35,5 @@ public enum CmDeviceProperty
     Children,
     Siblings,
     Model,
-    ContainerId,
+    ContainerId
 }

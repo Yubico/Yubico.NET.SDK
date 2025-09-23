@@ -13,14 +13,14 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 
 namespace Yubico.YubiKit;
 
 public static class ServiceCollectionExtensions
 {
+    #region Nested type: <extension>
+
     extension(ServiceCollection services)
     {
         public IServiceCollection AddYubiKeyManager()
@@ -32,10 +32,7 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddYubiKeyManager(Action<YubiKeyManagerOptions>? configureOptions)
         {
             // Configure options
-            if (configureOptions != null)
-            {
-                services.Configure(configureOptions);
-            }
+            if (configureOptions != null) services.Configure(configureOptions);
 
             // Register Core services (internal to SDK)
             // services.AddSingleton<IDeviceEnumerationService, DeviceEnumerationService>();
@@ -51,6 +48,8 @@ public static class ServiceCollectionExtensions
             return services;
         }
     }
+
+    #endregion
 }
 
 public class YubiKeyManagerOptions(

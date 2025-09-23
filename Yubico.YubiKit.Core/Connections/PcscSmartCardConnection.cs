@@ -25,21 +25,10 @@ internal class PcscSmartCardConnection : ISmartCardConnection
 {
     private readonly ILogger<PcscSmartCardConnection> _logger;
     private readonly ISmartCardDevice _smartCardDevice;
-    private SCardContext? _context;
     private SCardCardHandle? _cardHandle;
-    private SCARD_PROTOCOL? _protocol;
+    private SCardContext? _context;
     private bool _disposed;
-    
-    public async Task<PcscSmartCardConnection> CreateAsync(
-        ILogger<PcscSmartCardConnection> logger,
-        ISmartCardDevice smartCardDevice,
-        CancellationToken cancellationToken = default)
-    {
-        var connection = new PcscSmartCardConnection(logger, smartCardDevice);
-        await connection.InitializeAsync();
-        
-        return connection;
-    }
+    private SCARD_PROTOCOL? _protocol;
 
     internal PcscSmartCardConnection(
         ILogger<PcscSmartCardConnection> logger,
@@ -49,11 +38,37 @@ internal class PcscSmartCardConnection : ISmartCardConnection
         _smartCardDevice = smartCardDevice;
     }
 
+    #region ISmartCardConnection Members
+
     public Task<ResponseApdu> TransmitAndReceiveAsync(
         CommandApdu command,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+
+        _cardHandle?.Dispose();
+        _context?.Dispose();
+
+        _cardHandle = null!;
+        _context = null!;
+
+        _disposed = true;
+    }
+
+    #endregion
+
+    public async Task<PcscSmartCardConnection> CreateAsync(
+        ILogger<PcscSmartCardConnection> logger,
+        ISmartCardDevice smartCardDevice,
         CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        PcscSmartCardConnection connection = new(logger, smartCardDevice);
+        await connection.InitializeAsync();
+
+        return connection;
     }
 
     private ValueTask InitializeAsync()
@@ -62,26 +77,23 @@ internal class PcscSmartCardConnection : ISmartCardConnection
         {
             (_context, _cardHandle, _protocol) = GetConnection(_smartCardDevice.ReaderName);
         }, CancellationToken.None);
-        
+
         return new ValueTask(task);
     }
-    
-    private static (SCardContext Context, SCardCardHandle CardHandle, SCARD_PROTOCOL Protocol) GetConnection(string readerName)
+
+    private static (SCardContext Context, SCardCardHandle CardHandle, SCARD_PROTOCOL Protocol) GetConnection(
+        string readerName)
     {
         uint result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext? context);
         if (result != ErrorCode.SCARD_S_SUCCESS)
-        {
             throw new SCardException(
                 "ExceptionMessages.SCardCantEstablish",
                 result);
-        }
 
-        var shareMode = SCARD_SHARE.SHARED;
+        SCARD_SHARE shareMode = SCARD_SHARE.SHARED;
         if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesExclusively, out bool isEnabled) &&
             isEnabled)
-        {
             shareMode = SCARD_SHARE.EXCLUSIVE;
-        }
 
         result = NativeMethods.SCardConnect(
             context,
@@ -92,31 +104,13 @@ internal class PcscSmartCardConnection : ISmartCardConnection
             out SCARD_PROTOCOL activeProtocol);
 
         if (result != ErrorCode.SCARD_S_SUCCESS)
-        {
             throw new SCardException(
                 string.Format(
                     CultureInfo.CurrentCulture,
                     "ExceptionMessages.SCardCardCantConnect",
                     readerName),
                 result);
-        }
 
         return (context, cardHandle, activeProtocol);
-    }
-
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _cardHandle?.Dispose();
-        _context?.Dispose();
-        
-        _cardHandle = null!;
-        _context = null!;
-        
-        _disposed = true;
     }
 }

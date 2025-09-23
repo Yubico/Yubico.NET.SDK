@@ -14,7 +14,7 @@
 
 using System.Security.Cryptography;
 
-namespace Yubico.YubiKit.Core.Core.Cryptography;
+namespace Yubico.YubiKit.Core.Cryptography;
 
 /// <summary>
 ///     An interface exposing ECDH primitive operations.

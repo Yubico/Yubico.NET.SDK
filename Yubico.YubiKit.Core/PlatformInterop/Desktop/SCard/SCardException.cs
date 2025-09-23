@@ -31,8 +31,10 @@ public class SCardException : Exception
 
     [CLSCompliant(false)]
     public SCardException(string message, uint errorCode) :
-        base(message + " " + GetErrorString(errorCode)) =>
+        base(message + " " + GetErrorString(errorCode))
+    {
         HResult = (int)errorCode;
+    }
 
     public SCardException(string message, Exception innerException) :
         base(message, innerException)

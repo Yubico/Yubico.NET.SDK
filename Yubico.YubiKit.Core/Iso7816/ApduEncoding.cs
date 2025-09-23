@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Core.Iso7816;
+namespace Yubico.YubiKit.Core.Iso7816;
 
 /// <summary>
 ///     Represents encoding options for an APDU's length fields.

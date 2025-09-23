@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Runtime.InteropServices;
-using Yubico.YubiKit.Core.Core.Iso7816;
+using Yubico.YubiKit.Core.Iso7816;
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
@@ -67,7 +67,7 @@ internal static unsafe class SCardReaderStateExtensions
 
     public static AnswerToReset GetAtr(this in SCARD_READER_STATE state)
     {
-        byte[] atrBytes = new byte[state.AtrLength];
+        var atrBytes = new byte[state.AtrLength];
         fixed (byte* src = state.AnswerToReset)
         {
             Marshal.Copy((IntPtr)src, atrBytes, 0, (int)state.AtrLength);

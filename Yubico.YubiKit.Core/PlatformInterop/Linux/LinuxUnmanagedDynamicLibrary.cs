@@ -26,7 +26,7 @@ internal sealed class LinuxUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
 
     private static SafeLibraryHandle OpenLibrary(string fileName)
     {
-        SafeLinuxLibraryHandle handle = NativeMethods.linux_dlopen(fileName, NativeMethods.DlOpenFlags.Lazy);
+        var handle = NativeMethods.linux_dlopen(fileName, NativeMethods.DlOpenFlags.Lazy);
         if (handle.IsInvalid)
             throw new PlatformApiException(
                 string.Format(
@@ -39,7 +39,7 @@ internal sealed class LinuxUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
 
     public override bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
     {
-        IntPtr p = NativeMethods.linux_dlsym(_handle, functionName);
+        var p = NativeMethods.linux_dlsym(_handle, functionName);
 
         if (p != IntPtr.Zero)
         {

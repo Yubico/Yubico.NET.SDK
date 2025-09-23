@@ -32,7 +32,10 @@ internal class LinuxUdev : IDisposable
     // C to calling udev_new to get the initial object.
     // That is, in C, the first thing you do is call
     //    struct udev *udevObject = udev_new();
-    public LinuxUdev() => _udevObject = (LinuxUdevSafeHandle)ThrowIfFailedNull(NativeMethods.udev_new());
+    public LinuxUdev()
+    {
+        _udevObject = (LinuxUdevSafeHandle)ThrowIfFailedNull(NativeMethods.udev_new());
+    }
 
     #region IDisposable Members
 

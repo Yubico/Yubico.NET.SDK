@@ -16,7 +16,7 @@ using System.Security;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography;
 
-namespace Yubico.YubiKit.Core.Core.Cryptography;
+namespace Yubico.YubiKit.Core.Cryptography;
 
 /// <summary>
 ///     An OpenSSL implementation of the IAesGcmPrimitives interface, exposing
@@ -42,16 +42,16 @@ internal class AesGcmPrimitivesOpenSsl : IAesGcmPrimitives
                                         || tag.Length != AuthTagLength)
             throw new ArgumentException("ExceptionMessages.InvalidAesGcmInput");
 
-        byte[] keyBytes = keyData.ToArray();
-        byte[] dataToEncrypt = plaintext.ToArray();
-        byte[] encryptedData = new byte[plaintext.Length];
-        byte[] tagBytes = new byte[AuthTagLength];
+        var keyBytes = keyData.ToArray();
+        var dataToEncrypt = plaintext.ToArray();
+        var encryptedData = new byte[plaintext.Length];
+        var tagBytes = new byte[AuthTagLength];
 
         try
         {
-            using SafeEvpCipherCtx ctx = NativeMethods.EvpCipherCtxNew();
+            using var ctx = NativeMethods.EvpCipherCtxNew();
 
-            int status = NativeMethods.EvpAes256GcmInit(true, ctx, keyBytes, nonce.ToArray());
+            var status = NativeMethods.EvpAes256GcmInit(true, ctx, keyBytes, nonce.ToArray());
             int outputLength;
 
             if (status != 0)
@@ -104,18 +104,18 @@ internal class AesGcmPrimitivesOpenSsl : IAesGcmPrimitives
                                         || tag.Length != AuthTagLength)
             throw new ArgumentException("ExceptionMessages.InvalidAesGcmInput");
 
-        bool returnValue = false;
+        var returnValue = false;
         int outputLength;
 
-        byte[] keyBytes = keyData.ToArray();
-        byte[] decryptedData = new byte[ciphertext.Length];
-        byte[] tagBytes = tag.ToArray();
+        var keyBytes = keyData.ToArray();
+        var decryptedData = new byte[ciphertext.Length];
+        var tagBytes = tag.ToArray();
 
         try
         {
-            using SafeEvpCipherCtx ctx = NativeMethods.EvpCipherCtxNew();
+            using var ctx = NativeMethods.EvpCipherCtxNew();
 
-            int status = NativeMethods.EvpAes256GcmInit(false, ctx, keyBytes, nonce.ToArray());
+            var status = NativeMethods.EvpAes256GcmInit(false, ctx, keyBytes, nonce.ToArray());
 
             if (status != 0)
                 // The OpenSSL Wiki documents AES-GCM, and says to pass in

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Core.Devices.Hid;
+namespace Yubico.YubiKit.Core.Devices.Hid;
 #pragma warning disable CA1707 // Justification: Cannot use
 // underscore (_) character for variable name
 public enum KeyboardLayout

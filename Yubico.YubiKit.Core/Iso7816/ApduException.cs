@@ -14,7 +14,7 @@
 
 using System.Runtime.Serialization;
 
-namespace Yubico.YubiKit.Core.Core.Iso7816;
+namespace Yubico.YubiKit.Core.Iso7816;
 
 /// <summary>
 ///     The exception that is thrown when an ISO 7816 application has encountered an error.

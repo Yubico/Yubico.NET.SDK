@@ -28,8 +28,10 @@ internal class SCardCardHandle : SafeHandleZeroOrMinusOneIsInvalid
     }
 
     public SCardCardHandle(IntPtr handle) :
-        base(true) =>
+        base(true)
+    {
         SetHandle(handle);
+    }
 
     public SCARD_DISPOSITION ReleaseDisposition { get; set; } = SCARD_DISPOSITION.RESET_CARD;
 

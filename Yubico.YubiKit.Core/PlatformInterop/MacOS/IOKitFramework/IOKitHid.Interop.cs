@@ -57,11 +57,6 @@ internal static partial class NativeMethods
                     @link kIOHIDManagerOptionNone @/link (or 0).
         @result     Returns a new IOHIDManagerRef.
     */
-    // Note that the DefaultDllImportSearchPaths attribute is a security best
-    // practice on the Windows platform (and required by our analyzer
-    // settings). It does not currently have any effect on platforms other
-    // than Windows, but is included because of the analyzer and in the hope
-    // that it will be supported by these platforms in the future.
     [DllImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     internal static extern IntPtr IOHIDManagerCreate(IntPtr allocator, int options); /* OS >= 10.5 */

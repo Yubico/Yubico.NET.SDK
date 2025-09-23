@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Core.Buffers;
+namespace Yubico.YubiKit.Core.Buffers;
 
 /// <summary>
 ///     Class for encoding and decoding bytes into BCD (binary coded decimal) format.

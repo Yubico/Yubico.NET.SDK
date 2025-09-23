@@ -15,7 +15,7 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography;
 
-namespace Yubico.YubiKit.Core.Core.Cryptography;
+namespace Yubico.YubiKit.Core.Cryptography;
 
 internal static class OpenSslExtensions
 {
@@ -34,11 +34,11 @@ internal static class OpenSslExtensions
     /// </returns>
     public static (SafeEcGroup group, SafeEcPoint point) ToSslPublicKey(this ECParameters parameters)
     {
-        SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(parameters.Curve.ToSslCurveId());
-        SafeEcPoint point = NativeMethods.EcPointNew(group);
+        var group = NativeMethods.EcGroupNewByCurveName(parameters.Curve.ToSslCurveId());
+        var point = NativeMethods.EcPointNew(group);
 
-        using SafeBigNum bnX = NativeMethods.BnBinaryToBigNum(parameters.Q.X);
-        using SafeBigNum bnY = NativeMethods.BnBinaryToBigNum(parameters.Q.Y);
+        using var bnX = NativeMethods.BnBinaryToBigNum(parameters.Q.X);
+        using var bnY = NativeMethods.BnBinaryToBigNum(parameters.Q.Y);
         _ = NativeMethods.EcPointSetAffineCoordinates(group, point, bnX, bnY);
 
         return (group, point);

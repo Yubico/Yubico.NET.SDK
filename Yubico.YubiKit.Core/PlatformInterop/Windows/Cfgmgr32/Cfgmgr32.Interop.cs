@@ -206,10 +206,11 @@ internal static partial class NativeMethods
     #endregion
 
     #region P/Invoke DLL Imports
+
     internal static CmErrorCode CM_Get_Child(
         out int childInstance,
         int devInstance)
-         => CM_Get_Child(out childInstance, devInstance, 0);
+        => CM_Get_Child(out childInstance, devInstance, 0);
 
     internal static CmErrorCode CM_Get_Device_Id(
         int dnDevInst,
@@ -228,7 +229,8 @@ internal static partial class NativeMethods
         out DEVPROP_TYPE propertyType,
         byte[]? propertyBuffer,
         ref IntPtr propertyBufferSize)
-        => CM_Get_Device_Interface_Property(deviceInterface, propertyKey, out propertyType, propertyBuffer, ref propertyBufferSize, 0);
+        => CM_Get_Device_Interface_Property(deviceInterface, propertyKey, out propertyType, propertyBuffer,
+            ref propertyBufferSize, 0);
 
     internal static CmErrorCode CM_Get_DevNode_Property(
         int devInstance,
@@ -236,14 +238,17 @@ internal static partial class NativeMethods
         out DEVPROP_TYPE propertyType,
         byte[]? propertyBuffer,
         ref IntPtr propertyBufferSize)
-        => CM_Get_DevNode_Property(devInstance, in propertyKey, out propertyType, propertyBuffer, ref propertyBufferSize, 0);
+        => CM_Get_DevNode_Property(devInstance, in propertyKey, out propertyType, propertyBuffer,
+            ref propertyBufferSize, 0);
 
     internal static CmErrorCode CM_Get_Parent(
-out int pdnDevInst,
-int dnDevInst
-) =>
-CM_Get_Parent(out pdnDevInst, dnDevInst, 0);
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Locate_DevNodeW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        out int pdnDevInst,
+        int dnDevInst
+    ) =>
+        CM_Get_Parent(out pdnDevInst, dnDevInst, 0);
+
+    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Locate_DevNodeW", SetLastError = true,
+        StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial CmErrorCode CM_Locate_DevNode(
         out int devInstance,
@@ -280,7 +285,8 @@ CM_Get_Parent(out pdnDevInst, dnDevInst, 0);
     );
 
 
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_Interface_ListW", StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_Interface_ListW",
+        StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial CmErrorCode CM_Get_Device_Interface_List(
         Guid interfaceClassGuid,
@@ -290,7 +296,8 @@ CM_Get_Parent(out pdnDevInst, dnDevInst, 0);
         CM_GET_DEVICE_LIST flags
     );
 
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_Interface_List_SizeW", StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_Interface_List_SizeW",
+        StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial CmErrorCode CM_Get_Device_Interface_List_Size(
         out int bufferLengthCch,
@@ -299,7 +306,8 @@ CM_Get_Parent(out pdnDevInst, dnDevInst, 0);
         CM_GET_DEVICE_LIST flags
     );
 
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Child", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Child", SetLastError = true,
+        StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static partial CmErrorCode CM_Get_Child(
         out int childInstance,
@@ -307,7 +315,8 @@ CM_Get_Parent(out pdnDevInst, dnDevInst, 0);
         int mustBeZero
     );
 
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_IDW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_IDW", SetLastError = true,
+        StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static partial CmErrorCode CM_Get_Device_Id(
         int dnDevInst,
@@ -316,7 +325,8 @@ CM_Get_Parent(out pdnDevInst, dnDevInst, 0);
         int mustBeZero
     );
 
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_ID_Size", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_ID_Size", SetLastError = true,
+        StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static partial CmErrorCode CM_Get_Device_Id_Size(
         out IntPtr pulLen,
@@ -324,7 +334,8 @@ CM_Get_Parent(out pdnDevInst, dnDevInst, 0);
         int mustBeZero
     );
 
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_Interface_PropertyW", StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_Interface_PropertyW",
+        StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static partial CmErrorCode CM_Get_Device_Interface_Property(
         string deviceInterface,
@@ -335,7 +346,8 @@ CM_Get_Parent(out pdnDevInst, dnDevInst, 0);
         int mustBeZero
     );
 
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_DevNode_PropertyW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_DevNode_PropertyW", SetLastError = true,
+        StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static partial CmErrorCode CM_Get_DevNode_Property(
         int devInstance,
@@ -346,15 +358,14 @@ CM_Get_Parent(out pdnDevInst, dnDevInst, 0);
         int mustBeZero
     );
 
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Parent", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Parent", SetLastError = true,
+        StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static partial CmErrorCode CM_Get_Parent(
         out int pdnDevInst,
         int dnDevInst,
         int mustBeZero
     );
-
-
 
     #endregion
 }

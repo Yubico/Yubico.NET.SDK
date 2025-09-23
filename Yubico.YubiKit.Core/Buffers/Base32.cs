@@ -14,7 +14,7 @@
 
 using System.Globalization;
 
-namespace Yubico.YubiKit.Core.Core.Buffers;
+namespace Yubico.YubiKit.Core.Buffers;
 
 /// <summary>
 ///     Class for encoding and decoding bytes into Base32.
@@ -30,8 +30,8 @@ public class Base32 : ITextEncoding
     public string Encode(ReadOnlySpan<byte> data)
     {
         // Each char represents one Base32 digit (five bytes).
-        int encodedSize = GetEncodedSize(data.Length);
-        char[] encoded = new char[encodedSize];
+        var encodedSize = GetEncodedSize(data.Length);
+        var encoded = new char[encodedSize];
 
         Encode(data, encoded.AsSpan());
 
@@ -41,14 +41,14 @@ public class Base32 : ITextEncoding
     /// <inheritdoc />
     public void Encode(ReadOnlySpan<byte> data, Span<char> encoded)
     {
-        int encodedSize = GetEncodedSize(data.Length);
+        var encodedSize = GetEncodedSize(data.Length);
         if (encoded.Length < encodedSize)
             throw new ArgumentException(
                 nameof(encoded),
                 "ExceptionMessages.EncodingOverflow");
 
         int ch = 0, bits = 5, index = 0;
-        foreach (byte b in data)
+        foreach (var b in data)
         {
             ch |= b >> (8 - bits);
             encoded[index++] = EncodeBase32Digit(ch);
@@ -75,7 +75,7 @@ public class Base32 : ITextEncoding
     /// <inheritdoc />
     public void Decode(ReadOnlySpan<char> encoded, Span<byte> data)
     {
-        int byteCount = GetDecodedSize(encoded);
+        var byteCount = GetDecodedSize(encoded);
         if (byteCount > data.Length) throw new ArgumentException(nameof(data), "ExceptionMessages.DecodingOverflow");
 
         // If we were being pedantic, we could verify that the string has
@@ -88,7 +88,7 @@ public class Base32 : ITextEncoding
         {
             // Base32 isn't supposed to include lower-case letters, but
             // some of our tests do, so we'll just do a cheap ToUpper.
-            int base32 = (c - 0x60) * (0x7b - c) > 0
+            var base32 = (c - 0x60) * (0x7b - c) > 0
                 ? c - 0x20
                 : c;
 
@@ -130,7 +130,7 @@ public class Base32 : ITextEncoding
     {
         if (encoded is null) throw new ArgumentNullException(nameof(encoded));
 
-        byte[] data = new byte[GetDecodedSize(encoded.AsSpan())];
+        var data = new byte[GetDecodedSize(encoded.AsSpan())];
         Decode(encoded.AsSpan(), data);
         return data;
     }
@@ -178,7 +178,7 @@ public class Base32 : ITextEncoding
 
     private static ReadOnlySpan<char> StripPadding(ReadOnlySpan<char> encoded)
     {
-        int length = encoded.Length;
+        var length = encoded.Length;
         if (length > 0)
             while (encoded[length - 1] == '=')
                 --length;

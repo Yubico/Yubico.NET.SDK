@@ -14,7 +14,7 @@
 
 using System.Globalization;
 
-namespace Yubico.YubiKit.Core.Core.Iso7816;
+namespace Yubico.YubiKit.Core.Iso7816;
 
 /// <summary>
 ///     Represents an ISO 7816 application response.

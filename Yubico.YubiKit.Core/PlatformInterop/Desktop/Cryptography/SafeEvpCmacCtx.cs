@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Runtime.InteropServices;
-using Yubico.YubiKit.Core.Core.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography;
 
@@ -26,14 +26,19 @@ internal class SafeEvpCmacCtx : SafeHandle
     ///     Create a new <c>SafeEvpCmacCtx</c>. This constructor will initialize
     ///     the <c>BlockCipherAlgorithm</c> to <c>Aes128</c>.
     /// </summary>
-    public SafeEvpCmacCtx() : base(IntPtr.Zero, true) => BlockCipherAlgorithm = CmacBlockCipherAlgorithm.Aes128;
+    public SafeEvpCmacCtx() : base(IntPtr.Zero, true)
+    {
+        BlockCipherAlgorithm = CmacBlockCipherAlgorithm.Aes128;
+    }
 
     /// <summary>
     ///     Create a new <c>SafeEvpCmacCtx</c>. This constructor will initialize
     ///     the <c>BlockCipherAlgorithm</c> to <c>Aes128</c>.
     /// </summary>
-    public SafeEvpCmacCtx(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle) =>
+    public SafeEvpCmacCtx(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
+    {
         BlockCipherAlgorithm = CmacBlockCipherAlgorithm.Aes128;
+    }
 
     /// <summary>
     ///     This specifies which algorithm the CMAC will use as the underlying

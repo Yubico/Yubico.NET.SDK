@@ -15,7 +15,7 @@
 using System.Buffers.Binary;
 using System.Globalization;
 
-namespace Yubico.YubiKit.Core.Core.Iso7816;
+namespace Yubico.YubiKit.Core.Iso7816;
 
 /// <summary>
 ///     Represents an ISO 7816 application command
@@ -188,7 +188,7 @@ public class CommandApdu
     // Checks that Nc is valid, given the encoding.
     private bool ValidNc(ApduEncoding apduEncoding)
     {
-        int inclusiveUpperBound = GetInclusiveUpperBound(apduEncoding);
+        var inclusiveUpperBound = GetInclusiveUpperBound(apduEncoding);
 
         return Nc >= 0 && Nc <= inclusiveUpperBound;
     }
@@ -196,7 +196,7 @@ public class CommandApdu
     // Checks that Ne is valid, given the encoding.
     private bool ValidNe(ApduEncoding apduEncoding)
     {
-        int inclusiveUpperBound = GetInclusiveUpperBound(apduEncoding);
+        var inclusiveUpperBound = GetInclusiveUpperBound(apduEncoding);
 
         return Ne == int.MaxValue || (Ne >= 0 && Ne <= inclusiveUpperBound);
     }
@@ -215,11 +215,11 @@ public class CommandApdu
                     nameof(Nc),
                     Enum.GetName(typeof(ApduEncoding), apduEncoding)));
 
-        byte[] lcField = Array.Empty<byte>();
+        var lcField = Array.Empty<byte>();
 
         if (Nc > 0)
         {
-            int lcValue = Nc; // The encoded value, derived from Nc
+            var lcValue = Nc; // The encoded value, derived from Nc
 
             if (apduEncoding == ApduEncoding.ExtendedLength)
             {
@@ -254,11 +254,11 @@ public class CommandApdu
                     nameof(Ne),
                     Enum.GetName(typeof(ApduEncoding), apduEncoding)));
 
-        byte[] leField = Array.Empty<byte>();
+        var leField = Array.Empty<byte>();
 
         if (Ne > 0)
         {
-            int leValue = Ne == int.MaxValue ? 0 : Ne; // The encoded value, derived from Ne
+            var leValue = Ne == int.MaxValue ? 0 : Ne; // The encoded value, derived from Ne
 
             if (apduEncoding == ApduEncoding.ExtendedLength)
             {

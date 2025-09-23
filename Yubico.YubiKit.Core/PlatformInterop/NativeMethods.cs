@@ -40,7 +40,10 @@ internal static class NativeMethods
     private const string MacDlLib = "libdl.dylib";
     private const string LinuxDlLib = "libdl.so";
 
-    static NativeMethods() => Libraries.EnsureInitialized();
+    static NativeMethods()
+    {
+        Libraries.EnsureInitialized();
+    }
 
     // Windows
 

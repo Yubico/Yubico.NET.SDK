@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Core.Iso7816;
+using Yubico.YubiKit.Core.Iso7816;
 
-namespace Yubico.YubiKit.Core.Core.Devices.SmartCard;
+namespace Yubico.YubiKit.Core.Devices.SmartCard;
 
 /// <summary>
 ///     Represents an ISO 7816 compliant smart card, visible either through CCID or NFC.

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Core.Devices.Hid;
+namespace Yubico.YubiKit.Core.Devices.Hid;
 
 // Keyboard Mapping for ModHex.
 public sealed partial class HidCodeTranslator

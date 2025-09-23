@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Core.Buffers;
+namespace Yubico.YubiKit.Core.Buffers;
 
 /// <inheritdoc cref="Base16" path="/summary" />
 /// <remarks>

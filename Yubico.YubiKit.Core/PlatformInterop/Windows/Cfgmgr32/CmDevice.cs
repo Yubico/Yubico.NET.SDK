@@ -17,7 +17,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
-using Yubico.YubiKit.Core.Core.Buffers;
+using Yubico.YubiKit.Core.Buffers;
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Windows.Cfgmgr32;
 
@@ -66,7 +66,7 @@ public class CmDevice
 
     public bool TryGetProperty<T>(CmDeviceProperty property, out T? value) where T : class
     {
-        NativeMethods.DEVPROPKEY propKey = property switch
+        var propKey = property switch
         {
             CmDeviceProperty.DeviceDescription => NativeMethods.DEVPKEY_Device_DeviceDesc,
             CmDeviceProperty.HardwareIds => NativeMethods.DEVPKEY_Device_HardwareIds,
@@ -104,7 +104,7 @@ public class CmDevice
 
     public SafeFileHandle OpenDevice()
     {
-        SafeFileHandle handle = Kernel32.NativeMethods.CreateFile(
+        var handle = Kernel32.NativeMethods.CreateFile(
             Path,
             Kernel32.NativeMethods.DESIRED_ACCESS.NONE,
             Kernel32.NativeMethods.FILE_SHARE.READWRITE,
@@ -121,7 +121,7 @@ public class CmDevice
 
     public CmDevice? Parent()
     {
-        NativeMethods.CmErrorCode errorCode = NativeMethods.CM_Get_Parent(out int parentInstance, Instance);
+        var errorCode = NativeMethods.CM_Get_Parent(out var parentInstance, Instance);
         if (errorCode == NativeMethods.CmErrorCode.CR_SUCCESS) return new CmDevice(parentInstance);
 
         if (errorCode != NativeMethods.CmErrorCode.CR_SUCCESS &&
@@ -140,7 +140,7 @@ public class CmDevice
         List<CmDevice> children = new();
         NativeMethods.CmErrorCode errorCode;
 
-        errorCode = NativeMethods.CM_Get_Child(out int childInstance, Instance);
+        errorCode = NativeMethods.CM_Get_Child(out var childInstance, Instance);
 
         while (errorCode == NativeMethods.CmErrorCode.CR_SUCCESS)
         {
@@ -168,7 +168,7 @@ public class CmDevice
 #pragma warning disable CA1846 // Prefer 'AsSpan' over 'Substring'
         // The overload required by this preference is not available
         // for our .NETStandard 2.0 targets.
-        ushort temp = ushort.Parse(s.Substring(offset, length), NumberStyles.HexNumber,
+        var temp = ushort.Parse(s.Substring(offset, length), NumberStyles.HexNumber,
             CultureInfo.InvariantCulture);
 #pragma warning restore CA1846 // Prefer 'AsSpan' over 'Substring'
         return unchecked((short)temp);
@@ -178,9 +178,9 @@ public class CmDevice
     {
         // see: https://docs.microsoft.com/en-us/windows-hardware/drivers/hid/hidclass-hardware-ids-for-top-level-collections
 
-        string[] hardwareIds = GetProperty<string[]>(CmDeviceProperty.HardwareIds);
+        var hardwareIds = GetProperty<string[]>(CmDeviceProperty.HardwareIds);
 
-        string hidUsageHardwareId = hardwareIds
+        var hidUsageHardwareId = hardwareIds
             .Where(hi => hi.StartsWith("HID_DEVICE_UP", StringComparison.OrdinalIgnoreCase))
             .FirstOrDefault();
 
@@ -196,8 +196,8 @@ public class CmDevice
 
     private static IList<string> GetDevicePaths(Guid classGuid, string? deviceInstanceId)
     {
-        NativeMethods.CmErrorCode errorCode = NativeMethods.CM_Get_Device_Interface_List_Size(
-            out int bufferLength,
+        var errorCode = NativeMethods.CM_Get_Device_Interface_List_Size(
+            out var bufferLength,
             classGuid,
             deviceInstanceId,
             NativeMethods.CM_GET_DEVICE_LIST.PRESENT
@@ -211,7 +211,7 @@ public class CmDevice
             );
 
         // Multiple by two as size is in (wide) character count, but we're passing a byte array.
-        byte[] buffer = new byte[bufferLength * 2];
+        var buffer = new byte[bufferLength * 2];
         errorCode = NativeMethods.CM_Get_Device_Interface_List(
             classGuid,
             deviceInstanceId,
@@ -232,9 +232,9 @@ public class CmDevice
 
     private int LocateDevNode()
     {
-        NativeMethods.CM_LOCATE_DEVNODE flags = NativeMethods.CM_LOCATE_DEVNODE.NORMAL;
-        NativeMethods.CmErrorCode errorCode =
-            NativeMethods.CM_Locate_DevNode(out int devNodeHandle, InstanceId, flags);
+        var flags = NativeMethods.CM_LOCATE_DEVNODE.NORMAL;
+        var errorCode =
+            NativeMethods.CM_Locate_DevNode(out var devNodeHandle, InstanceId, flags);
         if (errorCode != NativeMethods.CmErrorCode.CR_SUCCESS)
             throw new PlatformApiException(
                 "CONFIG_RET",

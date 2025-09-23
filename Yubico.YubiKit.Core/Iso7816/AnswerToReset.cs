@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Core.Iso7816;
+namespace Yubico.YubiKit.Core.Iso7816;
 
 public class AnswerToReset
 {
     private readonly byte[] _bytes;
 
-    public AnswerToReset(ReadOnlySpan<byte> bytes) => _bytes = bytes.ToArray();
+    public AnswerToReset(ReadOnlySpan<byte> bytes)
+    {
+        _bytes = bytes.ToArray();
+    }
 
     public override bool Equals(object? obj) =>
         obj switch

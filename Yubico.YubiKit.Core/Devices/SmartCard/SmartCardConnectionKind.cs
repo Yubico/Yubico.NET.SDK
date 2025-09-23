@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Core.Devices.SmartCard;
+namespace Yubico.YubiKit.Core.Devices.SmartCard;
 
 /// <summary>
 ///     Represents the means in which the smart card is connected to the system or reader.

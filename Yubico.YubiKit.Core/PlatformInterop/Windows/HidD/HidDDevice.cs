@@ -26,7 +26,7 @@ internal class HidDDevice : IHidDDevice
         DevicePath = devicePath;
 
         _handle = OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS.NONE);
-        NativeMethods.HIDP_CAPS capabilities = GetCapabilities(_handle);
+        var capabilities = GetCapabilities(_handle);
 
         Usage = capabilities.Usage;
         UsagePage = capabilities.UsagePage;
@@ -61,12 +61,12 @@ internal class HidDDevice : IHidDDevice
     {
         if (_handle is null) throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
 
-        byte[] buffer = new byte[FeatureReportByteLength];
+        var buffer = new byte[FeatureReportByteLength];
 
         if (!NativeMethods.HidD_GetFeature(_handle, buffer, buffer.Length))
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
 
-        byte[] returnBuf = new byte[FeatureReportByteLength - 1];
+        var returnBuf = new byte[FeatureReportByteLength - 1];
         Array.Copy(buffer, 1, returnBuf, 0, returnBuf.Length);
 
         return returnBuf;
@@ -79,7 +79,7 @@ internal class HidDDevice : IHidDDevice
         if (buffer.Length != FeatureReportByteLength - 1)
             throw new InvalidOperationException("ExceptionMessages.InvalidReportBufferLength");
 
-        byte[] sendBuf = new byte[buffer.Length + 1];
+        var sendBuf = new byte[buffer.Length + 1];
         Array.Copy(buffer, 0, sendBuf, 1, buffer.Length);
 
         if (!NativeMethods.HidD_SetFeature(_handle, sendBuf, sendBuf.Length))
@@ -90,13 +90,12 @@ internal class HidDDevice : IHidDDevice
     {
         if (_handle is null) throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
 
-        byte[] buffer = new byte[InputReportByteLength];
-
-        if (!Kernel32.NativeMethods.ReadFile(_handle, buffer, buffer.Length, out int bytesRead, IntPtr.Zero)
+        var buffer = new byte[InputReportByteLength];
+        if (!Kernel32.NativeMethods.ReadFile(_handle, buffer, buffer.Length, out var bytesRead, IntPtr.Zero)
             || bytesRead != buffer.Length)
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
 
-        byte[] returnBuf = new byte[InputReportByteLength - 1];
+        var returnBuf = new byte[InputReportByteLength - 1];
         Array.Copy(buffer, 1, returnBuf, 0, returnBuf.Length);
 
         return returnBuf;
@@ -105,14 +104,13 @@ internal class HidDDevice : IHidDDevice
     public void SetOutputReport(byte[] buffer)
     {
         if (_handle is null) throw new InvalidOperationException("ExceptionMessages.InvalidSafeFileHandle");
-
         if (buffer.Length != OutputReportByteLength - 1)
             throw new InvalidOperationException("ExceptionMessages.InvalidReportBufferLength");
 
-        byte[] sendBuf = new byte[buffer.Length + 1];
+        var sendBuf = new byte[buffer.Length + 1];
         Array.Copy(buffer, 0, sendBuf, 1, buffer.Length);
 
-        if (!Kernel32.NativeMethods.WriteFile(_handle, sendBuf, sendBuf.Length, out int bytesWritten, IntPtr.Zero)
+        if (!Kernel32.NativeMethods.WriteFile(_handle, sendBuf, sendBuf.Length, out var bytesWritten, IntPtr.Zero)
             || bytesWritten != sendBuf.Length)
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
     }
@@ -123,7 +121,7 @@ internal class HidDDevice : IHidDDevice
     {
         NativeMethods.HIDP_CAPS capabilities = new();
 
-        if (!NativeMethods.HidD_GetPreparsedData(safeHandle, out IntPtr preparsedData))
+        if (!NativeMethods.HidD_GetPreparsedData(safeHandle, out var preparsedData))
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
 
         try
@@ -141,7 +139,7 @@ internal class HidDDevice : IHidDDevice
 
     private SafeFileHandle OpenHandleWithAccess(Kernel32.NativeMethods.DESIRED_ACCESS desiredAccess)
     {
-        SafeFileHandle handle = Kernel32.NativeMethods.CreateFile(
+        var handle = Kernel32.NativeMethods.CreateFile(
             DevicePath,
             desiredAccess,
             Kernel32.NativeMethods.FILE_SHARE.READWRITE,

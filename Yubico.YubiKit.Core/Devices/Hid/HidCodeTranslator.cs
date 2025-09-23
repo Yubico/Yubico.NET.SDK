@@ -14,7 +14,7 @@
 
 using System.Globalization;
 
-namespace Yubico.YubiKit.Core.Core.Devices.Hid;
+namespace Yubico.YubiKit.Core.Devices.Hid;
 
 /// <summary>
 ///     Represents an abstract keyboard's HID code map. Able to convert to and
@@ -83,7 +83,7 @@ public sealed partial class HidCodeTranslator
     {
         get
         {
-            if (_byChar.TryGetValue(ch, out byte value)) return value;
+            if (_byChar.TryGetValue(ch, out var value)) return value;
 
             throw new ArgumentOutOfRangeException(
                 string.Format(
@@ -107,7 +107,7 @@ public sealed partial class HidCodeTranslator
     {
         get
         {
-            if (_byCode.TryGetValue(hidCode, out char value)) return value;
+            if (_byCode.TryGetValue(hidCode, out var value)) return value;
 
             throw new ArgumentOutOfRangeException(
                 string.Format(

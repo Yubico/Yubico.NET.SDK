@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Core;
+namespace Yubico.YubiKit.Core;
 
 /// <summary>
 ///     Compatibility switch names that can be used with `AppContext.SetSwitch` to control breaking behavioral changes

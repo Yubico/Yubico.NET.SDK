@@ -154,7 +154,9 @@ internal static partial class NativeMethods
     #endregion
 
     #region P/Invoke DLL Imports
-    [LibraryImport(Libraries.Kernel32, EntryPoint = "CreateFileW", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+
+    [LibraryImport(Libraries.Kernel32, EntryPoint = "CreateFileW", SetLastError = true,
+        StringMarshalling = StringMarshalling.Utf8)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial SafeFileHandle CreateFile(
         string lpFileName,
@@ -165,6 +167,7 @@ internal static partial class NativeMethods
         FILE_FLAG dwFlagsAndAttributes,
         IntPtr hTemplateFile
     );
+
 //SYSLIB1092: The usage of 'LibraryImportAttribute' does not follow recommendations. It is recommended to use explicit '[In]' and '[Out]' attributes on array parameters.
     [LibraryImport(Libraries.Kernel32, EntryPoint = "WriteFile", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]

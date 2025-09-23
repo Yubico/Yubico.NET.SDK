@@ -14,7 +14,7 @@
 
 using System.Globalization;
 
-namespace Yubico.YubiKit.Core.Core.Buffers;
+namespace Yubico.YubiKit.Core.Buffers;
 
 /// <summary>
 ///     Class for encoding and decoding bytes into base-16 encoded text, otherwise known as
@@ -63,10 +63,10 @@ public class Base16 : ITextEncoding
                 nameof(encoded),
                 "ExceptionMessages.EncodingOverflow");
 
-        for (int i = 0; i < data.Length; ++i)
+        for (var i = 0; i < data.Length; ++i)
         {
-            int highestDigit = CharacterSet.Length - 1;
-            int digit1 = data[i] >> 4;
+            var highestDigit = CharacterSet.Length - 1;
+            var digit1 = data[i] >> 4;
             // Checking these so that BCD encode throws the right exception.
             if (digit1 > highestDigit)
                 throw new ArgumentException(
@@ -79,7 +79,7 @@ public class Base16 : ITextEncoding
 
             encoded[i * 2] = CharacterSet[digit1];
 
-            int digit2 = data[i] & 0x0f;
+            var digit2 = data[i] & 0x0f;
             if (digit2 > highestDigit)
                 throw new ArgumentException(
                     string.Format(
@@ -96,7 +96,7 @@ public class Base16 : ITextEncoding
     /// <inheritdoc />
     public string Encode(ReadOnlySpan<byte> data)
     {
-        char[] encoded = new char[data.Length * 2];
+        var encoded = new char[data.Length * 2];
         Encode(data, encoded.AsSpan());
         return new string(encoded);
     }
@@ -108,7 +108,7 @@ public class Base16 : ITextEncoding
 
         if (data.Length < encoded.Length / 2) throw new ArgumentException("ExceptionMessages.DecodingOverflow");
 
-        for (int i = 0; i < encoded.Length; ++i)
+        for (var i = 0; i < encoded.Length; ++i)
             data[i / 2] = (byte)((GetNibble(encoded[i]) << 4) + GetNibble(encoded[++i]));
 
         // The decoding needs to be case-insensitive. This lets us handle that
@@ -122,7 +122,7 @@ public class Base16 : ITextEncoding
 
         int GetNibble(char c)
         {
-            int n = CharacterSet.IndexOf(HandleCase(c));
+            var n = CharacterSet.IndexOf(HandleCase(c));
             if (n == -1)
                 throw new ArgumentException(
                     string.Format(
@@ -139,7 +139,7 @@ public class Base16 : ITextEncoding
     {
         if (encoded is null) throw new ArgumentNullException(nameof(encoded));
 
-        byte[] bytes = new byte[encoded.Length / 2];
+        var bytes = new byte[encoded.Length / 2];
         Decode(encoded.AsSpan(), bytes);
         return bytes;
     }

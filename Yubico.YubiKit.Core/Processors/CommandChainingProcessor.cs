@@ -19,6 +19,8 @@ namespace Yubico.YubiKit.Core.Processors;
 
 internal class CommandChainingProcessor : ApduProcessor
 {
-    public CommandChainingProcessor(ISmartCardConnection connection, ApduFormatter formatter) =>
+    public CommandChainingProcessor(ISmartCardConnection connection, ApduFormatter formatter)
+    {
         throw new NotImplementedException();
+    }
 }

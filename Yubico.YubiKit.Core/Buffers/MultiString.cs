@@ -14,7 +14,7 @@
 
 using System.Text;
 
-namespace Yubico.YubiKit.Core.Core.Buffers;
+namespace Yubico.YubiKit.Core.Buffers;
 
 /// <summary>
 ///     Utilities for working with multi null-terminated strings.
@@ -56,12 +56,12 @@ public static class MultiString
         // Take a reasonable guess at the initial buffer size. Hopefully in the worst case, List
         // would only need to resize once. A multiplier of 2 is a reasonable buffer for unicode
         // length for both UTF-8 and UTF-16.
-        int initialLength = value.Sum(str => str.Length) * 2;
+        var initialLength = value.Sum(str => str.Length) * 2;
 
         List<byte> multiString = new(initialLength);
-        byte[] nullBytes = encoding.GetBytes("\0");
+        var nullBytes = encoding.GetBytes("\0");
 
-        foreach (string str in value)
+        foreach (var str in value)
         {
             multiString.AddRange(encoding.GetBytes(str));
             multiString.AddRange(nullBytes);

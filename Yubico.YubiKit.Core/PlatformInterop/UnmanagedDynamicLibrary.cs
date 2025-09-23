@@ -25,7 +25,10 @@ internal abstract class UnmanagedDynamicLibrary : IDisposable
     protected readonly SafeLibraryHandle _handle;
     private bool disposedValue;
 
-    protected UnmanagedDynamicLibrary(SafeLibraryHandle handle) => _handle = handle;
+    protected UnmanagedDynamicLibrary(SafeLibraryHandle handle)
+    {
+        _handle = handle;
+    }
 
     #region IDisposable Members
 

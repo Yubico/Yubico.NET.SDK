@@ -17,7 +17,7 @@ using System.Text;
 using Yubico.YubiKit.Core.PlatformInterop;
 using NativeMethods = Yubico.YubiKit.Core.PlatformInterop.MacOS.CoreFoundation.NativeMethods;
 
-namespace Yubico.YubiKit.Core.Core.Devices.Hid;
+namespace Yubico.YubiKit.Core.Devices.Hid;
 
 /// <summary>
 ///     Utility methods for interacting with macOS IOKit framework.
@@ -44,7 +44,7 @@ internal static class IOKitHelpers
     /// </exception>
     public static int GetIntPropertyValue(IntPtr device, string propertyName)
     {
-        int? propertyValue = GetNullableIntPropertyValue(device, propertyName);
+        var propertyValue = GetNullableIntPropertyValue(device, propertyName);
 
         // We want to rely on Nullable<T>'s null checking and subsequent exception.
         // Rather than duplicate the messaging and exception ourselves, let's just
@@ -73,20 +73,20 @@ internal static class IOKitHelpers
     {
         const int kCFNumberTypeSignedInt = 3;
 
-        IntPtr stringRef = IntPtr.Zero;
+        var stringRef = IntPtr.Zero;
 
         try
         {
-            byte[] cstr = Encoding.UTF8.GetBytes(propertyName);
+            var cstr = Encoding.UTF8.GetBytes(propertyName);
             stringRef = NativeMethods.CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
 
-            IntPtr propertyRef =
+            var propertyRef =
                 PlatformInterop.MacOS.IOKitFramework.NativeMethods.IOHIDDeviceGetProperty(device, stringRef);
 
             if (propertyRef == IntPtr.Zero) return null;
 
-            ulong propertyType = NativeMethods.CFGetTypeID(propertyRef);
-            ulong numberType = NativeMethods.CFNumberGetTypeID();
+            var propertyType = NativeMethods.CFGetTypeID(propertyRef);
+            var numberType = NativeMethods.CFNumberGetTypeID();
             if (propertyType != numberType)
                 throw new PlatformApiException(
                     string.Format(
@@ -95,7 +95,7 @@ internal static class IOKitHelpers
                         numberType,
                         propertyType));
 
-            byte[] numberBytes = new byte[sizeof(int)];
+            var numberBytes = new byte[sizeof(int)];
             if (!NativeMethods.CFNumberGetValue(propertyRef, kCFNumberTypeSignedInt, numberBytes)) return 0;
 
             return BitConverter.ToInt32(numberBytes, 0);

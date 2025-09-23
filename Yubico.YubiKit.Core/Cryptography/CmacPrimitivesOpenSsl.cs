@@ -16,7 +16,7 @@ using System.Security;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography;
 
-namespace Yubico.YubiKit.Core.Core.Cryptography;
+namespace Yubico.YubiKit.Core.Cryptography;
 
 /// <summary>
 ///     An OpenSSL implementation of the ICmacPrimitives interface, exposing CMAC
@@ -54,7 +54,7 @@ internal sealed class CmacPrimitivesOpenSsl : ICmacPrimitives
         if (keyData.Length != _cmacCtx.BlockCipherAlgorithm.KeyLength())
             throw new ArgumentException("ExceptionMessages.InvalidCmacInput");
 
-        byte[] keyBytes = keyData.ToArray();
+        var keyBytes = keyData.ToArray();
 
         try
         {
@@ -74,7 +74,7 @@ internal sealed class CmacPrimitivesOpenSsl : ICmacPrimitives
     /// <inheritdoc />
     public void CmacUpdate(ReadOnlySpan<byte> dataToMac)
     {
-        byte[] dataBytes = dataToMac.ToArray();
+        var dataBytes = dataToMac.ToArray();
 
         try
         {
@@ -93,9 +93,9 @@ internal sealed class CmacPrimitivesOpenSsl : ICmacPrimitives
         if (macBuffer.Length != _cmacCtx.BlockCipherAlgorithm.MacLength())
             throw new ArgumentException("ExceptionMessages.InvalidCmacInput");
 
-        byte[] outputBuffer = new byte[macBuffer.Length];
+        var outputBuffer = new byte[macBuffer.Length];
 
-        if (NativeMethods.CmacEvpMacFinal(_cmacCtx, outputBuffer, outputBuffer.Length, out int outputLength) == 0)
+        if (NativeMethods.CmacEvpMacFinal(_cmacCtx, outputBuffer, outputBuffer.Length, out var outputLength) == 0)
             throw new SecurityException("ExceptionMessages.CmacFailed");
 
         if (outputLength != outputBuffer.Length) throw new SecurityException("ExceptionMessages.CmacFailed");

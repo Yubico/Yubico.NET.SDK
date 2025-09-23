@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Core.Buffers;
+namespace Yubico.YubiKit.Core.Buffers;
 
 /// <summary>
 ///     Utility class for calculating and verifying the CRC13239 checksum used in YubiKey products.
@@ -29,14 +29,14 @@ public static class Crc13239
     /// <returns>A two byte CRC checksum.</returns>
     public static short Calculate(ReadOnlySpan<byte> buffer)
     {
-        ushort remainderPolynomial = InitialValue;
+        var remainderPolynomial = InitialValue;
 
-        foreach (byte currentByte in buffer)
+        foreach (var currentByte in buffer)
         {
             remainderPolynomial ^= currentByte;
-            for (int bitCounter = 0; bitCounter < 8; bitCounter++)
+            for (var bitCounter = 0; bitCounter < 8; bitCounter++)
             {
-                byte leastSignificantBit = (byte)(remainderPolynomial & 1);
+                var leastSignificantBit = (byte)(remainderPolynomial & 1);
                 remainderPolynomial >>= 1;
 
                 if (leastSignificantBit != 0) remainderPolynomial ^= GeneratorPolynomial;

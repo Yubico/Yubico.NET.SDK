@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Core.Devices;
+namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
 ///     Represents properties and methods common to all devices.

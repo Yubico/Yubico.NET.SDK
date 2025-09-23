@@ -25,10 +25,10 @@ internal sealed class WindowsUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
 
     private static SafeLibraryHandle OpenLibrary(string fileName)
     {
-        SafeWindowsLibraryHandle handle = NativeMethods.LoadLibraryEx(fileName, IntPtr.Zero, 0);
+        var handle = NativeMethods.LoadLibraryEx(fileName, IntPtr.Zero, 0);
         if (handle.IsInvalid)
         {
-            int hr = Marshal.GetHRForLastWin32Error();
+            var hr = Marshal.GetHRForLastWin32Error();
             Marshal.ThrowExceptionForHR(hr);
         }
 
@@ -44,7 +44,7 @@ internal sealed class WindowsUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
 
     private bool TryGetFunctionInternal<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
     {
-        IntPtr p = NativeMethods.GetProcAddress(_handle, functionName);
+        var p = NativeMethods.GetProcAddress(_handle, functionName);
 
         if (p != IntPtr.Zero)
         {

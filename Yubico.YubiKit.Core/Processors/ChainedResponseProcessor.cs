@@ -18,5 +18,8 @@ namespace Yubico.YubiKit.Core.Processors;
 
 internal class ChainedResponseProcessor : ApduProcessor
 {
-    public ChainedResponseProcessor(ApduProcessor result, byte insSendRemaining) => throw new NotImplementedException();
+    public ChainedResponseProcessor(ApduProcessor result, byte insSendRemaining)
+    {
+        throw new NotImplementedException();
+    }
 }

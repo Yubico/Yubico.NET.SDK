@@ -15,7 +15,7 @@
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Text;
-using Yubico.YubiKit.Core.Core.Buffers;
+using Yubico.YubiKit.Core.Buffers;
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Windows.Cfgmgr32;
 
@@ -26,11 +26,11 @@ internal class CmPropertyAccessHelper
     {
         NativeMethods.CmErrorCode errorCode;
 
-        IntPtr propertyBufferSize = IntPtr.Zero;
+        var propertyBufferSize = IntPtr.Zero;
         errorCode = getObjectProperty(
             objectId,
             propertyKey,
-            out NativeMethods.DEVPROP_TYPE propertyType,
+            out var propertyType,
             null,
             ref propertyBufferSize
         );
@@ -44,7 +44,7 @@ internal class CmPropertyAccessHelper
                 $"Failed to get the size needed for the property {propertyKey} for ConfigMgr object {objectId}."
             );
 
-        byte[] propertyBuffer = new byte[propertyBufferSize.ToInt64()];
+        var propertyBuffer = new byte[propertyBufferSize.ToInt64()];
         errorCode = getObjectProperty(
             objectId,
             propertyKey,

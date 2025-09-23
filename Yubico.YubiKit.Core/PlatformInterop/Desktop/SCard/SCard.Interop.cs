@@ -14,7 +14,7 @@
 
 using System.Runtime.InteropServices;
 using System.Text;
-using Yubico.YubiKit.Core.Core.Buffers;
+using Yubico.YubiKit.Core.Buffers;
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
@@ -60,7 +60,7 @@ internal static partial class NativeMethods
         SCARD_SCOPE scope,
         out SCardContext context
     );
-    
+
     [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_SCardGetStatusChange")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static partial uint SCardGetStatusChange(
@@ -89,8 +89,8 @@ internal static partial class NativeMethods
 
         if (groups is not null) rawGroups = MultiString.GetBytes(groups, Encoding.ASCII);
 
-        int readerNamesLength = 0;
-        uint result = SCardListReaders(
+        var readerNamesLength = 0;
+        var result = SCardListReaders(
             context,
             rawGroups,
             null,
@@ -101,7 +101,7 @@ internal static partial class NativeMethods
         if (readerNamesLength == 0)
             throw new PlatformApiException("ExceptionMessages.SCardListReadersUnexpectedLength");
 
-        byte[] rawReaderNames = new byte[readerNamesLength];
+        var rawReaderNames = new byte[readerNamesLength];
         result = SCardListReaders(
             context,
             rawGroups,

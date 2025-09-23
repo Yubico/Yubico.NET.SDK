@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Core.Cryptography;
+namespace Yubico.YubiKit.Core.Cryptography;
 
 /// <summary>
 ///     Extension methods to operate on the CmacBlockCipherAlgorithm enum.

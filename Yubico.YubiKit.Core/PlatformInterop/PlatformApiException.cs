@@ -21,8 +21,10 @@ namespace Yubico.YubiKit.Core.PlatformInterop;
 public class PlatformApiException : Exception
 {
     public PlatformApiException() :
-        this("ExceptionMessages.UnknownPlatformApiError") =>
+        this("ExceptionMessages.UnknownPlatformApiError")
+    {
         Debug.Assert(false, "You should always call a more specific constructor for this exception type.");
+    }
 
     public PlatformApiException(string message) : base(message)
     {

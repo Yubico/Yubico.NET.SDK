@@ -16,7 +16,7 @@ using System.Security;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.Cryptography;
 
-namespace Yubico.YubiKit.Core.Core.Cryptography;
+namespace Yubico.YubiKit.Core.Cryptography;
 
 /// <summary>
 ///     An OpenSSL implementation of the IEcdh interface, exposing ECDH primitives to the SDK.
@@ -28,28 +28,28 @@ internal class EcdhPrimitivesOpenSsl : IEcdhPrimitives
     /// <inheritdoc />
     public ECParameters GenerateKeyPair(ECCurve curve)
     {
-        int bitLength = curve.BitLength();
-        int byteLength = GetByteLength(bitLength);
-        byte msByteMask = GetLeadingByteMask(bitLength);
+        var bitLength = curve.BitLength();
+        var byteLength = GetByteLength(bitLength);
+        var msByteMask = GetLeadingByteMask(bitLength);
 
         // Create a random number as the private key and store it in an
         // OpenSSL big num.
         // Make sure it is no longer than bitLength bits by masking off any
         // "extra" bits.
-        using RandomNumberGenerator rng = RandomNumberGenerator.Create();
+        using var rng = RandomNumberGenerator.Create();
 
-        byte[] privateValueBinary = new byte[byteLength];
+        var privateValueBinary = new byte[byteLength];
         rng.GetBytes(privateValueBinary);
         privateValueBinary[0] &= msByteMask;
 
-        using SafeBigNum privateValueBn = NativeMethods.BnBinaryToBigNum(privateValueBinary);
+        using var privateValueBn = NativeMethods.BnBinaryToBigNum(privateValueBinary);
 
         // Create the curve that the public point should reside on.
-        using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(curve.ToSslCurveId());
-        using SafeEcPoint publicPoint = NativeMethods.EcPointNew(group);
+        using var group = NativeMethods.EcGroupNewByCurveName(curve.ToSslCurveId());
+        using var publicPoint = NativeMethods.EcPointNew(group);
 
         // Compute where the public point should reside on the curve, based on the private key.
-        int result = NativeMethods.EcPointMul(
+        var result = NativeMethods.EcPointMul(
             group,
             publicPoint,
             privateValueBn.DangerousGetHandle(),
@@ -59,18 +59,18 @@ internal class EcdhPrimitivesOpenSsl : IEcdhPrimitives
         if (result == 0) throw new SecurityException("ExceptionMessages.EcdhKeygenFailed");
 
         // Retrieve the X and Y coordinates from the computed EC point.
-        using SafeBigNum xBn = NativeMethods.BnNew();
-        using SafeBigNum yBn = NativeMethods.BnNew();
+        using var xBn = NativeMethods.BnNew();
+        using var yBn = NativeMethods.BnNew();
         result = NativeMethods.EcPointGetAffineCoordinates(group, publicPoint, xBn, yBn);
 
         if (result == 0) throw new SecurityException("ExceptionMessages.EcdhKeygenFailed");
 
-        byte[] xBinary = new byte[byteLength];
+        var xBinary = new byte[byteLength];
         result = NativeMethods.BnBigNumToBinaryWithPadding(xBn, xBinary);
 
         if (result <= 0) throw new SecurityException("ExceptionMessages.EcdhKeygenFailed");
 
-        byte[] yBinary = new byte[byteLength];
+        var yBinary = new byte[byteLength];
         result = NativeMethods.BnBigNumToBinaryWithPadding(yBn, yBinary);
 
         if (result <= 0) throw new SecurityException("ExceptionMessages.EcdhKeygenFailed");
@@ -83,16 +83,16 @@ internal class EcdhPrimitivesOpenSsl : IEcdhPrimitives
     public byte[] ComputeSharedSecret(ECParameters publicKey, ReadOnlySpan<byte> privateValue)
     {
         // Convert all fo the input into OpenSSL datatypes
-        (SafeEcGroup? group, SafeEcPoint? publicPoint) = publicKey.ToSslPublicKey();
+        var (group, publicPoint) = publicKey.ToSslPublicKey();
 
-        using SafeEcPoint sharedPoint = NativeMethods.EcPointNew(group);
+        using var sharedPoint = NativeMethods.EcPointNew(group);
 
-        byte[] privateValueBinary = privateValue.ToArray();
-        using SafeBigNum privateValueBn = NativeMethods.BnBinaryToBigNum(privateValueBinary);
+        var privateValueBinary = privateValue.ToArray();
+        using var privateValueBn = NativeMethods.BnBinaryToBigNum(privateValueBinary);
         CryptographicOperations.ZeroMemory(privateValueBinary);
 
         // Perform the scalar-multiplication to compute the shared point.
-        int result = NativeMethods.EcPointMul(
+        var result = NativeMethods.EcPointMul(
             group,
             sharedPoint,
             IntPtr.Zero,
@@ -102,16 +102,16 @@ internal class EcdhPrimitivesOpenSsl : IEcdhPrimitives
         if (result == 0) throw new SecurityException("ExceptionMessages.EcdhComputationFailed");
 
         // Retrieve the X and Y coordinates from the shared point.
-        using SafeBigNum x = NativeMethods.BnNew();
-        using SafeBigNum y = NativeMethods.BnNew();
+        using var x = NativeMethods.BnNew();
+        using var y = NativeMethods.BnNew();
         result = NativeMethods.EcPointGetAffineCoordinates(group, sharedPoint, x, y);
 
         if (result == 0) throw new SecurityException("ExceptionMessages.EcdhComputationFailed");
 
         // We only care about the X coordinate for the result of this
         // function.
-        int secretLen = GetByteLength(publicKey.Curve.BitLength());
-        byte[] sharedSecret = new byte[secretLen];
+        var secretLen = GetByteLength(publicKey.Curve.BitLength());
+        var sharedSecret = new byte[secretLen];
         result = NativeMethods.BnBigNumToBinaryWithPadding(x, sharedSecret);
 
         if (result <= 0) throw new SecurityException("ExceptionMessages.EcdhComputationFailed");

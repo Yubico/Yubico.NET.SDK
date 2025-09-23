@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Windows.Kernel32;
 
-internal static class NativeMethods
+internal static partial class NativeMethods
 {
     #region Enumerations and flags
 
@@ -154,15 +154,9 @@ internal static class NativeMethods
     #endregion
 
     #region P/Invoke DLL Imports
-
-    // Note that the DefaultDllImportSearchPaths attribute is a security best
-    // practice on the Windows platform (and required by our analyzer
-    // settings). It does not currently have any effect on platforms other
-    // than Windows, but is included because of the analyzer and in the hope
-    // that it will be supported by these platforms in the future.
-    [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, EntryPoint = "CreateFileW", SetLastError = true)]
+    [LibraryImport(Libraries.Kernel32, EntryPoint = "CreateFileW", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    internal static extern SafeFileHandle CreateFile(
+    internal static partial SafeFileHandle CreateFile(
         string lpFileName,
         DESIRED_ACCESS dwDesiredAccess,
         FILE_SHARE dwShareMode,
@@ -171,22 +165,24 @@ internal static class NativeMethods
         FILE_FLAG dwFlagsAndAttributes,
         IntPtr hTemplateFile
     );
-
-    [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, EntryPoint = "WriteFile", SetLastError = true)]
+//SYSLIB1092: The usage of 'LibraryImportAttribute' does not follow recommendations. It is recommended to use explicit '[In]' and '[Out]' attributes on array parameters.
+    [LibraryImport(Libraries.Kernel32, EntryPoint = "WriteFile", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    internal static extern bool WriteFile(
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool WriteFile(
         SafeFileHandle handle,
-        byte[] lpBuffer,
+        [In] byte[] lpBuffer,
         int numBytesToWrite,
         out int numBytesWritten,
         IntPtr mustBeZero
     );
 
-    [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, EntryPoint = "ReadFile", SetLastError = true)]
+    [LibraryImport(Libraries.Kernel32, EntryPoint = "ReadFile", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    internal static extern bool ReadFile(
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool ReadFile(
         SafeFileHandle handle,
-        byte[] lpBuffer,
+        [Out] byte[] lpBuffer,
         int numBytesToRead,
         out int numBytesRead,
         IntPtr mustBeZero

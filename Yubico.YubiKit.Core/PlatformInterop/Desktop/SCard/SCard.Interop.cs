@@ -60,9 +60,7 @@ internal static partial class NativeMethods
         SCARD_SCOPE scope,
         out SCardContext context
     );
-
-    // https://claude.ai/chat/a74ac3c8-f0fd-4482-ab6f-fe194b4831c2
-    // Make into blittable, with LibraryImport
+    
     [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_SCardGetStatusChange")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static partial uint SCardGetStatusChange(

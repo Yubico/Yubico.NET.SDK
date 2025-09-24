@@ -39,4 +39,9 @@ public readonly record struct DeviceInfo
     public string SerialNumber { get; init; }
     public string FirmwareVersion { get; init; }
     public string FormFactor { get; init; }
+
+    public static DeviceInfo CreateFromData(ReadOnlyMemory<byte> resultData)
+    {
+        throw new NotImplementedException();
+    }
 }

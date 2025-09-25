@@ -84,13 +84,10 @@ namespace Yubico.YubiKey.TestUtilities
 
             return testDeviceType switch
             {
-                StandardTestDevice.Fw3 => SelectDevice(filteredDevices),
                 StandardTestDevice.Fw4Fips => SelectDevice(filteredDevices, isFipsSeries: true),
-                StandardTestDevice.Fw5 => SelectDevice(filteredDevices),
                 StandardTestDevice.Fw5Fips => SelectDevice(filteredDevices, isFipsSeries: true),
                 StandardTestDevice.Fw5Bio => SelectDevice(filteredDevices, [FormFactor.UsbCBiometricKeychain, FormFactor.UsbABiometricKeychain]),
-                StandardTestDevice.Any => filteredDevices.First(),
-                _ => throw new ArgumentException("Invalid test device value.", nameof(testDeviceType)),
+                _ => SelectDevice(filteredDevices)
             };
 
             IYubiKeyDevice SelectDevice(

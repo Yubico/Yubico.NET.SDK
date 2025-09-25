@@ -153,13 +153,15 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
     [SkippableFact(typeof(DeviceNotFoundException))]
     public void CredentialManagement_Succeeds_WithRO_Token()
     {
+        MinimumFirmwareVersion = FirmwareVersion.V5_8_0;
+        
         // Create a credential to enumerate
         MakeCredentialParameters.AddOption(AuthenticatorOptions.rk, true);
         Session.MakeCredential(MakeCredentialParameters);
         KeyCollector.ResetRequestCounts();
 
         // Test GetCredentialMetadata
-        using (var session = GetSession(minFw: FirmwareVersion.V5_8_0))
+        using (var session = GetSession())
         {
             Assert.Null(session.AuthTokenPersistent);
 

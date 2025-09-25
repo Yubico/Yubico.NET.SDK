@@ -116,7 +116,6 @@ namespace Yubico.YubiKey
 
         public static bool operator >(FirmwareVersion left, FirmwareVersion right)
         {
-            // CA1065, these operators shouldn't throw exceptions.
             if (left is null)
             {
                 return false;
@@ -127,18 +126,16 @@ namespace Yubico.YubiKey
 
         public static bool operator <(FirmwareVersion left, FirmwareVersion right)
         {
-            // CA1065, these operators shouldn't throw exceptions.
             if (right is null)
             {
-                return !(left is null);
+                return left is not null;
             }
 
-            return left is null ? false : left.CompareTo(right) < 0;
+            return left is not null && left.CompareTo(right) < 0;
         }
 
         public static bool operator >=(FirmwareVersion left, FirmwareVersion right)
         {
-            // CA1065, these operators shouldn't throw exceptions.
             if (left is null)
             {
                 return right is null;
@@ -149,13 +146,12 @@ namespace Yubico.YubiKey
 
         public static bool operator <=(FirmwareVersion left, FirmwareVersion right)
         {
-            // CA1065, these operators shouldn't throw exceptions.
             if (right is null)
             {
-                return !(left is null);
+                return left is not null;
             }
 
-            return left is null ? false : left.CompareTo(right) <= 0;
+            return left is not null && left.CompareTo(right) <= 0;
         }
 
         public static bool operator ==(FirmwareVersion left, FirmwareVersion right)
@@ -178,7 +174,7 @@ namespace Yubico.YubiKey
 
         public override bool Equals([NotNullWhen(true)] object? obj)
         {
-            if (!(obj is FirmwareVersion))
+            if (obj is not FirmwareVersion)
             {
                 return false;
             }
@@ -210,7 +206,7 @@ namespace Yubico.YubiKey
                 return 1;
             }
 
-            if (!(obj is FirmwareVersion))
+            if (obj is not FirmwareVersion)
             {
                 throw new ArgumentException(ExceptionMessages.ArgumentMustBeFirmwareVersion, nameof(obj));
             }

@@ -74,40 +74,35 @@ namespace Yubico.YubiKey.TestUtilities
             Transport transport = Transport.All
             )
         {
-            var devices = yubiKeys as IYubiKeyDevice[] ?? yubiKeys.ToArray();
-            if (!devices.Any())
+            if (!yubiKeys.Any())
             {
-                ThrowDeviceNotFoundException($"Could not find any connected Yubikeys (Transport: {transport})", devices);
+                ThrowDeviceNotFoundException($"Could not find any connected Yubikeys (Transport: {transport})", yubiKeys);
             }
 
-            var devicesVersionFiltered =
-                devices.Where(d => d.FirmwareVersion >= MatchVersion(testDeviceType, minimumFirmwareVersion));
+            var minVersion = GetMinVersion(testDeviceType, minimumFirmwareVersion);
+            var filteredDevices = yubiKeys.Where(d => d.FirmwareVersion >= minVersion);
 
             return testDeviceType switch
             {
-                StandardTestDevice.Fw3 => SelectDevice(3),
-                StandardTestDevice.Fw4Fips => SelectDevice(4, isFipsSeries: true),
-                StandardTestDevice.Fw5 => SelectDevice(5),
-                StandardTestDevice.Fw5Fips => SelectDevice(5, isFipsSeries: true),
-                StandardTestDevice.Fw5Bio => SelectDevice(5,  [FormFactor.UsbCBiometricKeychain, FormFactor.UsbABiometricKeychain]),
-                StandardTestDevice.Any => devices.First(),
+                StandardTestDevice.Fw3 => SelectDevice(filteredDevices),
+                StandardTestDevice.Fw4Fips => SelectDevice(filteredDevices, isFipsSeries: true),
+                StandardTestDevice.Fw5 => SelectDevice(filteredDevices),
+                StandardTestDevice.Fw5Fips => SelectDevice(filteredDevices, isFipsSeries: true),
+                StandardTestDevice.Fw5Bio => SelectDevice(filteredDevices, [FormFactor.UsbCBiometricKeychain, FormFactor.UsbABiometricKeychain]),
+                StandardTestDevice.Any => filteredDevices.First(),
                 _ => throw new ArgumentException("Invalid test device value.", nameof(testDeviceType)),
             };
 
             IYubiKeyDevice SelectDevice(
-                int majorVersion,
+                IEnumerable<IYubiKeyDevice> devices,
                 IEnumerable<FormFactor>? formFactors = null,
                 bool isFipsSeries = false)
             {
                 IYubiKeyDevice device = null!;
                 try
                 {
-                    bool MatchingDeviceSelector(IYubiKeyDevice d) =>
-                        d.FirmwareVersion.Major == majorVersion &&
-                        (formFactors is null || formFactors.Contains(d.FormFactor)) &&
-                        d.IsFipsSeries == isFipsSeries;
-
-                    device = devicesVersionFiltered.First(MatchingDeviceSelector);
+                    device = devices.First( d => (formFactors is null || formFactors.Contains(d.FormFactor)) &&
+                        d.IsFipsSeries == isFipsSeries);
                 }
                 catch (InvalidOperationException)
                 {
@@ -118,9 +113,25 @@ namespace Yubico.YubiKey.TestUtilities
             }
         }
 
-        private static FirmwareVersion MatchVersion(
-            StandardTestDevice testDeviceType,
-            FirmwareVersion? minimumFirmwareVersion)
+        public static IYubiKeyDevice SelectByMinimumVersion(
+            this IEnumerable<IYubiKeyDevice> yubiKeys,
+            FirmwareVersion minimumFirmwareVersion)
+        {
+            if (!yubiKeys.Any())
+            {
+                throw new InvalidOperationException("Could not find any connected Yubikeys");
+            }
+
+            var device = yubiKeys.FirstOrDefault(d => d.FirmwareVersion >= minimumFirmwareVersion);
+            if (device is null)
+            {
+                ThrowDeviceNotFoundException("No matching YubiKey found", yubiKeys);
+            }
+
+            return device;
+        }
+
+        private static FirmwareVersion GetMinVersion(StandardTestDevice testDeviceType, FirmwareVersion? minimumFirmwareVersion)
         {
             if (minimumFirmwareVersion is { })
             {
@@ -135,36 +146,17 @@ namespace Yubico.YubiKey.TestUtilities
             };
         }
 
-        public static IYubiKeyDevice SelectByMinimumVersion(
-            this IEnumerable<IYubiKeyDevice> yubiKeys,
-            FirmwareVersion minimumFirmwareVersion)
-        {
-            var devices = yubiKeys as IYubiKeyDevice[] ?? yubiKeys.ToArray();
-            if (!devices.Any())
-            {
-                throw new InvalidOperationException("Could not find any connected Yubikeys");
-            }
-
-            var device = devices.FirstOrDefault(d => d.FirmwareVersion >= minimumFirmwareVersion);
-            if (device is null)
-            {
-                ThrowDeviceNotFoundException("No matching YubiKey found", devices);
-            }
-
-            return device!;
-        }
-
         [DoesNotReturn]
         private static void ThrowDeviceNotFoundException(
             string errorMessage,
-            IYubiKeyDevice[] devices)
+            IEnumerable<IYubiKeyDevice> devices)
         {
             var connectedDevicesText = FormatConnectedDevices(devices);
             throw new DeviceNotFoundException($"{errorMessage}. {connectedDevicesText}");
         }
 
         private static string FormatConnectedDevices(
-            IReadOnlyCollection<IYubiKeyDevice> devices)
+            IEnumerable<IYubiKeyDevice> devices)
         {
             var deviceText =
                 devices.Select(y => $"{{{y.FirmwareVersion}, {y.FormFactor}, IsFipsSeries: {y.IsFipsSeries}}}");

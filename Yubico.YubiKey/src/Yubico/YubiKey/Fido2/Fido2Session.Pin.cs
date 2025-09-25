@@ -299,17 +299,18 @@ namespace Yubico.YubiKey.Fido2
 
             void ValidateParameters(PinUvAuthTokenPermissions p, string? rid)
             {
-                if (p == PinUvAuthTokenPermissions.None && rid is not null)
+                bool isRequestingPermissions = p != PinUvAuthTokenPermissions.None;
+                if (!isRequestingPermissions && rid is not null)
                 {
                     throw new ArgumentException(ExceptionMessages.Fido2PermsMissing);
                 }
 
-                if (AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.pinUvAuthToken) != OptionValue.True)
+                if (isRequestingPermissions && AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.pinUvAuthToken) != OptionValue.True)
                 {
                     throw new ArgumentException(ExceptionMessages.Fido2PermsNotSupported);
                 }
 
-                if (p.GetRpIdRequirement() == RequirementValue.Required && rid is null)
+                if (isRequestingPermissions && p.GetRpIdRequirement() == RequirementValue.Required && rid is null)
                 {
                     throw new InvalidOperationException(ExceptionMessages.Fido2RelyingPartyMissing);
                 }
@@ -378,7 +379,7 @@ namespace Yubico.YubiKey.Fido2
             }
             else
             {
-                AddPermissions(PinUvAuthTokenPermissions.None, null);
+                AddPermissions(PinUvAuthTokenPermissions.None, null); // TODO use VerifyPin here instead directly!!
             }
 
             return AuthToken ?? ReadOnlyMemory<byte>.Empty;

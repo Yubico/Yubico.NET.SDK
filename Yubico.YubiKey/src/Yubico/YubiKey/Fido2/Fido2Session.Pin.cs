@@ -375,11 +375,11 @@ namespace Yubico.YubiKey.Fido2
 
             if (AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.pinUvAuthToken) == OptionValue.True)
             {
-                AddPermissions(permissions, relyingPartyId);
+                AddPermissions(permissions, relyingPartyId); // This will set the auth token
             }
             else
             {
-                AddPermissions(PinUvAuthTokenPermissions.None, null); // TODO use VerifyPin here instead directly!!
+                _ = TryVerifyPin(); // This will set the auth token
             }
 
             return AuthToken ?? ReadOnlyMemory<byte>.Empty;

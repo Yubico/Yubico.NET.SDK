@@ -48,7 +48,8 @@ public class FidoSessionIntegrationTestBase : IDisposable
 
     #region Device and connection
 
-    protected StandardTestDevice TestDeviceType { get; set; } = StandardTestDevice.Any;
+    protected FirmwareVersion? MinimumFirmwareVersion { get; set; }
+    protected StandardTestDevice? TestDeviceType { get; set; }
     protected Fido2Session Session => _session ??= GetSession();
     protected IYubiKeyConnection Connection => _connection ??= Device.Connect(YubiKeyApplication.Fido2);
     protected IYubiKeyDevice Device => _device ??= IntegrationTestDeviceEnumeration.GetTestDevice(TestDeviceType);
@@ -80,7 +81,7 @@ public class FidoSessionIntegrationTestBase : IDisposable
         {
             // Ignore errors related to non-existent credentials
         }
-        
+
         KeyCollector.ResetRequestCounts();
     }
 
@@ -95,16 +96,12 @@ public class FidoSessionIntegrationTestBase : IDisposable
         Transport? transport = Transport.All,
         ReadOnlyMemory<byte>? persistentPinUvAuthToken = null)
     {
-        deviceType = TestDeviceType == StandardTestDevice.Any
-            ? deviceType
-            : TestDeviceType;
-
-        minFw ??= FirmwareVersion.V5_4_3;
-        transport ??= Transport.All;
+        minFw ??= MinimumFirmwareVersion;
+        Skip.If(minFw is {} && Device.FirmwareVersion < minFw, $"Device FW {Device.FirmwareVersion} does not meet minimum FW {minFw}");
 
         var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(
-            deviceType,
-            transport.Value,
+            TestDeviceType == StandardTestDevice.Any ? deviceType : TestDeviceType,
+            transport ?? Transport.All,
             minFw);
 
         Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Fido2));

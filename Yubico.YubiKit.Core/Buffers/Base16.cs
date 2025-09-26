@@ -137,7 +137,7 @@ public class Base16 : ITextEncoding
     /// <inheritdoc />
     public byte[] Decode(string encoded)
     {
-        if (encoded is null) throw new ArgumentNullException(nameof(encoded));
+        ArgumentNullException.ThrowIfNull(encoded);
 
         var bytes = new byte[encoded.Length / 2];
         Decode(encoded.AsSpan(), bytes);

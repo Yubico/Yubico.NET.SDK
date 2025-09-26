@@ -16,7 +16,7 @@ using Yubico.YubiKit.Core.Iso7816;
 
 namespace Yubico.YubiKit.Core.Connections;
 
-public interface ISmartCardConnection : IYubiKeyConnection
+public interface ISmartCardConnection : IConnection
 {
     // IDisposable BeginTransaction(out bool cardWasReset);
 

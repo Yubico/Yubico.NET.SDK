@@ -12,16 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Apdu;
+namespace Yubico.YubiKit;
 
-public class ApduProcessor : IDisposable
+public class YubiKeyManagerOptions
 {
-    #region IDisposable Members
+    #region Transports enum
 
-    public void Dispose()
+    [Flags]
+    public enum Transports
     {
-        // TODO release managed resources here
+        None = 0,
+        Usb = 1,
+        Nfc = 2,
+        All = Usb | Nfc
     }
 
     #endregion
+
+    public bool EnableAutoDiscovery { get; set; }
+    public TimeSpan ScanInterval { get; set; }
+    public Transports EnabledTransports { get; set; }
 }

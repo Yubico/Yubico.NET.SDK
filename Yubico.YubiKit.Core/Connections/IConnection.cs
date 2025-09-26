@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Protocols;
+namespace Yubico.YubiKit.Core.Connections;
 
-public interface ISmartCardProtocol
+public interface IConnection : IDisposable
 {
 }

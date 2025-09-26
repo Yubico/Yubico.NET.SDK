@@ -16,11 +16,13 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Iso7816;
+using Yubico.YubiKit.Core.Protocols;
 using Version = Yubico.YubiKit.Core.Version;
 
 namespace Yubico.YubiKit;
 
-public class ManagementSession : ApplicationSession
+public class ManagementSession<TConnection> : ApplicationSession
+    where TConnection : IConnection
 {
     private const byte INS_READ_CONFIG = 0x1d;
     private const int TagMoreDeviceInfo = 0x10;
@@ -28,18 +30,31 @@ public class ManagementSession : ApplicationSession
     private static readonly Feature FeatureDeviceInfo =
         new() { Name = "Device Info", VersionMajor = 4, VersionMinor = 1, VersionRevision = 0 };
 
-    private readonly ILogger<ManagementSession> _logger;
-    private readonly ISmartCardConnection _smartCardConnection;
+    private readonly ILogger<ManagementSession<TConnection>> _logger;
+
+    // private readonly ISmartCardProtocol _protocol; // for now
+    private readonly IProtocol _protocol;
+
+    // private readonly ISmartCardConnection _smartCardConnection;
+    // public ManagementSession(
+    //     ILogger<ManagementSession> logger,
+    //     ISmartCardConnection smartCardConnection)
+    // {
+    //     _logger = logger;
+    //     _smartCardConnection = smartCardConnection;
+    // }
 
     public ManagementSession(
-        ILogger<ManagementSession> logger,
-        ISmartCardConnection smartCardConnection)
+        ILogger<ManagementSession<TConnection>> logger,
+        TConnection connection,
+        IProtocolFactory<TConnection, IProtocol> protocolFactory)
     {
         _logger = logger;
-        _smartCardConnection = smartCardConnection;
+        _protocol = protocolFactory.Create(connection);
+        _protocol
     }
 
-    public Version Version { get; set; }
+    private Version Version { get; set; }
 
     public DeviceInfo GetDeviceInfo() => new() // todo fake
     {
@@ -54,7 +69,7 @@ public class ManagementSession : ApplicationSession
         NfcSupported = 0,
         ResetBlocked = 0,
         FipsCapabilities = 0,
-        FipsApprovedCapabilities = 0,
+        FipsApproved = 0,
         HasPinComplexity = false,
         PartNumber = null,
         IsNfcRestricted = false,
@@ -84,16 +99,23 @@ public class ManagementSession : ApplicationSession
                 Data = null
             };
 
-            var encodedResult = await _smartCardConnection.TransmitAndReceiveAsync(apdu); // TODO
-            if (encodedResult.Data.Length - 1 != encodedResult.Data.Span[0])
-                throw new BadResponseException("Invalid length");
+            if (_protocol is ISmartCardProtocol smartCardProtocol)
+            {
+                var encodedResult = await smartCardProtocol.TransmitAndReceiveAsync(apdu); // TODO
+                if (encodedResult.Data.Length - 1 != encodedResult.Data.Span[0])
+                    throw new BadResponseException("Invalid length");
 
-            var pageTlvs = TlvHelper.Decode(encodedResult.Data.Span).ToList();
-            var moreData = pageTlvs.Single(t => t.Tag == TagMoreDeviceInfo);
-            hasMoreData = moreData.Length == 1 && moreData.GetValueSpan()[0] == 1;
+                var pageTlvs = TlvHelper.Decode(encodedResult.Data.Span).ToList();
+                var moreData = pageTlvs.Single(t => t.Tag == TagMoreDeviceInfo);
+                hasMoreData = moreData.Length == 1 && moreData.GetValueSpan()[0] == 1;
 
-            allPagesTlvs = allPagesTlvs.Concat(pageTlvs);
-            ++page;
+                allPagesTlvs = allPagesTlvs.Concat(pageTlvs);
+                ++page;
+            }
+            else
+            {
+                throw new NotSupportedException("Protocol not supported");
+            }
         }
 
         // create deviceInfo with vls
@@ -108,14 +130,11 @@ public class ManagementSession : ApplicationSession
 
     private bool IsSupported(Feature feature) =>
         true; // TODO get from Management Session, select, and parse version info
-}
 
-internal class Feature
-{
-    public required string Name { get; init; }
-    public int VersionMajor { get; set; }
-    public int VersionMinor { get; set; }
-    public int VersionRevision { get; set; }
-}
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) _protocol.Dispose();
 
-// Protocol
+        base.Dispose(disposing);
+    }
+}

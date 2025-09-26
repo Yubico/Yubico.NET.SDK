@@ -53,7 +53,7 @@ public readonly record struct DeviceInfo
     public required YubiKeyCapabilities NfcSupported { get; init; }
     public required YubiKeyCapabilities ResetBlocked { get; init; }
     public required YubiKeyCapabilities FipsCapabilities { get; init; }
-    public required YubiKeyCapabilities FipsApprovedCapabilities { get; init; }
+    public required YubiKeyCapabilities FipsApproved { get; init; }
     public required bool HasPinComplexity { get; init; }
     public required string? PartNumber { get; init; }
     public required bool IsNfcRestricted { get; init; }
@@ -137,7 +137,7 @@ public readonly record struct DeviceInfo
             NfcEnabled = nfcEnabled,
             NfcSupported = nfcSupported,
             FipsCapabilities = fipsCapabilities,
-            FipsApprovedCapabilities = fipsApprovedCapabilities,
+            FipsApproved = fipsApprovedCapabilities,
             HasPinComplexity = hasPinComplexity,
             PartNumber = partNumber,
             IsNfcRestricted = isNfcRestricted,

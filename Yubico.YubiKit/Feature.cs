@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Connections;
+namespace Yubico.YubiKit;
 
-public interface IYubiKeyConnection : IDisposable
+internal class Feature
 {
+    public required string Name { get; init; }
+    public int VersionMajor { get; set; }
+    public int VersionMinor { get; set; }
+    public int VersionRevision { get; set; }
 }

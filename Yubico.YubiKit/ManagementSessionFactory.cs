@@ -14,29 +14,39 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Connections;
+using Yubico.YubiKit.Core.Protocols;
 
 namespace Yubico.YubiKit;
 
-public interface IManagementSessionFactory
+public interface IManagementSessionFactory<TConnection>
+    where TConnection : IConnection
 {
-    ManagementSession Create(IYubiKeyConnection connection);
+    ManagementSession<TConnection> Create(TConnection connection);
 }
 
-internal class ManagementSessionFactory : IManagementSessionFactory
+internal class ManagementSessionFactory<TConnection> : IManagementSessionFactory<TConnection>
+    where TConnection : IConnection
 {
-    private readonly ILogger<ManagementSession> _logger;
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly IProtocolFactory<TConnection, IProtocol> _protocolFactory;
 
-    public ManagementSessionFactory(ILogger<ManagementSession> logger)
+    public ManagementSessionFactory(
+        ILoggerFactory loggerFactory,
+        IProtocolFactory<TConnection, IProtocol> protocolFactory)
     {
-        _logger = logger;
+        _loggerFactory = loggerFactory;
+        _protocolFactory = protocolFactory;
     }
 
-    #region IManagementSessionFactory Members
+    #region IManagementSessionFactory<TConnection> Members
 
-    public ManagementSession Create(IYubiKeyConnection connection) =>
+    public ManagementSession<TConnection> Create(TConnection connection) =>
         connection switch
         {
-            ISmartCardConnection smartCardConnection => new ManagementSession(_logger, smartCardConnection),
+            ISmartCardConnection => new ManagementSession<TConnection>(
+                _loggerFactory.CreateLogger<ManagementSession<TConnection>>(),
+                connection,
+                _protocolFactory),
             _ => throw new NotSupportedException(
                 $"The connection type {connection.GetType().FullName} is not supported.")
         };

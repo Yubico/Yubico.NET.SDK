@@ -128,7 +128,7 @@ public class Base32 : ITextEncoding
     /// <inheritdoc />
     public byte[] Decode(string encoded)
     {
-        if (encoded is null) throw new ArgumentNullException(nameof(encoded));
+        ArgumentNullException.ThrowIfNull(encoded);
 
         var data = new byte[GetDecodedSize(encoded.AsSpan())];
         Decode(encoded.AsSpan(), data);

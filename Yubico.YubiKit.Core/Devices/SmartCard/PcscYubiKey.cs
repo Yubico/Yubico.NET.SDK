@@ -38,7 +38,7 @@ internal class PcscYubiKey : IYubiKey
     #region IYubiKey Members
 
     public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-        where TConnection : IYubiKeyConnection
+        where TConnection : IConnection
     {
         if (typeof(TConnection) != typeof(ISmartCardConnection))
             throw new NotSupportedException(

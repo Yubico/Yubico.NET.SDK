@@ -13,11 +13,13 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
+using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
 
 namespace Yubico.YubiKit;
 
-public static class ServiceCollectionExtensions
+public static class DependencyInjection
 {
     #region Nested type: <extension>
 
@@ -41,27 +43,15 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IYubiKeyManager, YubiKeyManager>();
             services.AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>();
             services.AddTransient<IYubiKeyFactory, YubiKeyFactory>();
-            services.AddSingleton<IManagementSessionFactory, ManagementSessionFactory>();
+            services.AddTransient<IProtocolFactory<ISmartCardConnection, IProtocol>,
+                SmartCardProtocolFactory<ISmartCardConnection, IProtocol>>();
+            services
+                .AddSingleton<IManagementSessionFactory<ISmartCardConnection>,
+                    ManagementSessionFactory<ISmartCardConnection>>();
 
             return services;
         }
     }
 
     #endregion
-}
-
-public class YubiKeyManagerOptions
-{
-    public bool EnableAutoDiscovery { get; set; }
-    public TimeSpan ScanInterval { get; set; }
-    public Transports EnabledTransports { get; set; }
-}
-
-[Flags]
-public enum Transports
-{
-    None = 0,
-    Usb = 1,
-    Nfc = 2,
-    All = Usb | Nfc
 }

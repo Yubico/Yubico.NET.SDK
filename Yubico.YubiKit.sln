@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.IntegrationT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core", "Yubico.YubiKit.Core\Yubico.YubiKit.Core.csproj", "{172B28F1-EF2D-31D3-570E-8BBB991865E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{172B28F1-EF2D-31D3-570E-8BBB991865E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{172B28F1-EF2D-31D3-570E-8BBB991865E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{172B28F1-EF2D-31D3-570E-8BBB991865E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

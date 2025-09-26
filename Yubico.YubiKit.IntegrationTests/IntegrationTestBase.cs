@@ -49,7 +49,7 @@ public abstract class IntegrationTestBase : IDisposable
         {
             options.EnableAutoDiscovery = true;
             options.ScanInterval = TimeSpan.FromSeconds(1);
-            options.EnabledTransports = Transports.All;
+            options.EnabledTransports = YubiKeyManagerOptions.Transports.All;
         });
     }
 }

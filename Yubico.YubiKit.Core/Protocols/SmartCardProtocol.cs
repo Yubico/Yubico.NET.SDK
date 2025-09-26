@@ -15,9 +15,21 @@
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Apdu;
 using Yubico.YubiKit.Core.Connections;
+using Yubico.YubiKit.Core.Iso7816;
 using Yubico.YubiKit.Core.Processors;
 
 namespace Yubico.YubiKit.Core.Protocols;
+
+public interface IProtocol : IDisposable
+{
+}
+
+public interface ISmartCardProtocol : IProtocol
+{
+    Task<ResponseApdu> TransmitAndReceiveAsync(
+        CommandApdu command,
+        CancellationToken cancellationToken = default);
+}
 
 internal class SmartCardProtocol : ISmartCardProtocol
 {
@@ -26,19 +38,34 @@ internal class SmartCardProtocol : ISmartCardProtocol
     private const byte P2_SELECT = 0x00;
     private const byte INS_SEND_REMAINING = 0xc0;
     private readonly ISmartCardConnection _connection;
-    private readonly bool _extendedApdus = true;
+    private readonly bool _extendedApdus = false;
     private readonly ILogger<SmartCardProtocol> _logger;
-    private readonly int maxApduSize = SmartCardMaxApduSizes.Yk43;
-    private byte insSendRemaining;
+    private readonly int _maxApduSize = SmartCardMaxApduSizes.Neo;
 
-    private ApduProcessor processor;
+    private readonly ApduProcessor _processor;
+    private byte _insSendRemaining;
 
     public SmartCardProtocol(ILogger<SmartCardProtocol> logger, ISmartCardConnection connection)
     {
         _logger = logger;
         _connection = connection;
-        (processor, _) = BuildBaseProcessor();
+        (_processor, _) = BuildBaseProcessor();
     }
+
+    #region ISmartCardProtocol Members
+
+    public void Dispose()
+    {
+        _connection.Dispose();
+        _processor.Dispose();
+    }
+
+    public async Task<ResponseApdu> TransmitAndReceiveAsync(
+        CommandApdu command,
+        CancellationToken cancellationToken = default) =>
+        await _connection.TransmitAndReceiveAsync(command, cancellationToken);
+
+    #endregion
 
     private (ApduProcessor Processor, ApduFormatter Formatter) BuildBaseProcessor()
     {
@@ -46,18 +73,16 @@ internal class SmartCardProtocol : ISmartCardProtocol
         ApduFormatter formatter;
         if (_extendedApdus)
         {
-            formatter = new ExtendedApduFormatter(maxApduSize);
+            formatter = new ExtendedApduFormatter(_maxApduSize);
             result = new ApduFormatProcessor(_connection, formatter);
         }
         else
         {
             formatter = new ShortApduFormatter();
-            // Short APDUs need command chaining
             result = new CommandChainingProcessor(_connection, formatter);
         }
 
-        // Always wrap with response chaining
-        result = new ChainedResponseProcessor(result, insSendRemaining);
+        result = new ChainedResponseProcessor(result, _insSendRemaining);
 
         return (result, formatter);
     }

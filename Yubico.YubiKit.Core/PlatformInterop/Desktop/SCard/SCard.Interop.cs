@@ -129,10 +129,9 @@ internal static partial class NativeMethods
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     public static extern uint SCardReleaseContext(IntPtr context);
 
-    [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardTransmit", ExactSpelling = true,
-        CharSet = CharSet.Ansi)]
+    [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_SCardTransmit")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    private static extern uint SCardTransmit(
+    public static partial uint SCardTransmit(
         SCardCardHandle cardHandle,
         ref SCARD_IO_REQUEST ioSendPci,
         IntPtr sendBuffer,

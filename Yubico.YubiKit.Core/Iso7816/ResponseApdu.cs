@@ -27,7 +27,7 @@ public class ResponseApdu
     /// <param name="data">The raw data returned by the ISO 7816 smart card.</param>
     public ResponseApdu(byte[] data)
     {
-        if (data is null) throw new ArgumentNullException(nameof(data));
+        ArgumentNullException.ThrowIfNull(data);
 
         if (data.Length < 2)
             throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
@@ -48,7 +48,7 @@ public class ResponseApdu
     /// <param name="sw">The status word, 'SW', for the APDU response.</param>
     public ResponseApdu(byte[] dataWithoutSW, short sw)
     {
-        if (dataWithoutSW is null) throw new ArgumentNullException(nameof(dataWithoutSW));
+        ArgumentNullException.ThrowIfNull(dataWithoutSW);
 
         SW1 = (byte)(sw >> 8);
         SW2 = (byte)(sw & 0xFF);

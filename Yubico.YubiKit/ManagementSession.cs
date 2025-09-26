@@ -13,15 +13,20 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Iso7816;
+using Version = Yubico.YubiKit.Core.Version;
 
 namespace Yubico.YubiKit;
 
 public class ManagementSession : ApplicationSession
 {
     private const byte INS_READ_CONFIG = 0x1d;
+    private const int TagMoreDeviceInfo = 0x10;
+
+    private static readonly Feature FeatureDeviceInfo =
+        new() { Name = "Device Info", VersionMajor = 4, VersionMinor = 1, VersionRevision = 0 };
 
     private readonly ILogger<ManagementSession> _logger;
     private readonly ISmartCardConnection _smartCardConnection;
@@ -34,15 +39,40 @@ public class ManagementSession : ApplicationSession
         _smartCardConnection = smartCardConnection;
     }
 
-    public DeviceInfo GetDeviceInfo() => new();
+    public Version Version { get; set; }
+
+    public DeviceInfo GetDeviceInfo() => new() // todo fake
+    {
+        IsSky = false,
+        IsFips = false,
+        FormFactor = FormFactor.Unknown,
+        SerialNumber = 0,
+        IsLocked = false,
+        UsbEnabled = 0,
+        UsbSupported = 0,
+        NfcEnabled = 0,
+        NfcSupported = 0,
+        ResetBlocked = 0,
+        FipsCapabilities = 0,
+        FipsApprovedCapabilities = 0,
+        HasPinComplexity = false,
+        PartNumber = null,
+        IsNfcRestricted = false,
+        AutoEjectTimeout = 0,
+        ChallengeResponseTimeout = default,
+        DeviceFlags = DeviceFlags.None,
+        FirmwareVersion = null,
+        VersionQualifier = null
+    };
 
     public async Task<DeviceInfo> GetDeviceInfoAsync()
     {
-        EnsureSupports(FeatureDeviceInfo);
+        EnsureSupports(FeatureDeviceInfo); // todo
+
         byte page = 0;
+        IEnumerable<Tlv> allPagesTlvs = [];
+
         var hasMoreData = true;
-        var tlvs = new Dictionary<int, Memory<byte>>();
-        
         while (hasMoreData)
         {
             var apdu = new CommandApdu
@@ -53,33 +83,31 @@ public class ManagementSession : ApplicationSession
                 P2 = 0,
                 Data = null
             };
-            
-            var result = await _smartCardConnection.TransmitAndReceiveAsync(apdu);
-            
-            // decode tlv
-            // get hasMoreData 0x10 tag
-            // store tlv in tlvs, 
+
+            var encodedResult = await _smartCardConnection.TransmitAndReceiveAsync(apdu); // TODO
+            if (encodedResult.Data.Length - 1 != encodedResult.Data.Span[0])
+                throw new BadResponseException("Invalid length");
+
+            var pageTlvs = TlvHelper.Decode(encodedResult.Data.Span).ToList();
+            var moreData = pageTlvs.Single(t => t.Tag == TagMoreDeviceInfo);
+            hasMoreData = moreData.Length == 1 && moreData.GetValueSpan()[0] == 1;
+
+            allPagesTlvs = allPagesTlvs.Concat(pageTlvs);
+            ++page;
         }
 
-            // create deviceInfo with vls
-
-        return DeviceInfo.CreateFromData(tlvs);
+        // create deviceInfo with vls
+        Version = Version.V5_8_0; // todo get from selectapplication
+        return DeviceInfo.CreateFromTlvs(allPagesTlvs.ToList(), null);
     }
 
     private void EnsureSupports(Feature feature)
     {
-        if (!IsSupported(feature))
-        {
-            throw new NotSupportedException($"{feature.Name} is not supported on this YubiKey.");
-        }
+        if (!IsSupported(feature)) throw new NotSupportedException($"{feature.Name} is not supported on this YubiKey.");
     }
 
-    private bool IsSupported(Feature feature)
-    {
-        return true; // TODO get from Management Session, select, and parse version info
-    }
-
-    private static readonly Feature FeatureDeviceInfo = new(){ Name = "Device Info", VersionMajor = 4, VersionMinor = 1, VersionRevision = 0 };
+    private bool IsSupported(Feature feature) =>
+        true; // TODO get from Management Session, select, and parse version info
 }
 
 internal class Feature

@@ -215,7 +215,7 @@ public sealed partial class HidCodeTranslator
     /// </exception>
     public byte[] GetHidCodes(string value)
     {
-        if (value is null) throw new ArgumentNullException(nameof(value));
+        ArgumentNullException.ThrowIfNull(value);
 
         return GetHidCodes(value.ToCharArray());
     }

@@ -32,7 +32,7 @@ public static class MultiString
     /// <returns>Array of converted strings.</returns>
     public static string[] GetStrings(byte[] value, Encoding encoding)
     {
-        if (encoding is null) throw new ArgumentNullException(nameof(encoding));
+        ArgumentNullException.ThrowIfNull(encoding);
 
         return encoding
             .GetString(value)
@@ -47,9 +47,9 @@ public static class MultiString
     /// <returns>Byte array containing multi-string.</returns>
     public static byte[] GetBytes(string[] value, Encoding encoding)
     {
-        if (value is null) throw new ArgumentNullException(nameof(value));
+        ArgumentNullException.ThrowIfNull(value);
 
-        if (encoding is null) throw new ArgumentNullException(nameof(encoding));
+        ArgumentNullException.ThrowIfNull(encoding);
 
         if (value.Length == 0) return Array.Empty<byte>();
 

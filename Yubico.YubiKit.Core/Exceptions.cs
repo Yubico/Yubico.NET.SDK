@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
-
 namespace Yubico.YubiKit.Core;
 
 public class CtapException : Exception
@@ -21,7 +19,7 @@ public class CtapException : Exception
     //An error response from a YubiKey
 }
 
-public class BadResponseException : Exception
+public class BadResponseException(string message) : Exception(message)
 {
     //The data contained in a YubiKey response was invalid
 }
@@ -59,7 +57,7 @@ TimeoutException The operation timed out waiting for something
 //         }
 //     }
 
-    // extension(ILogger logger)
-    // {
-    // }
+// extension(ILogger logger)
+// {
+// }
 // }

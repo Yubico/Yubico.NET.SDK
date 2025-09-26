@@ -19,10 +19,10 @@ public class IntegrationTest : IntegrationTestBase
     {
         var pcscDevices = await YubiKeyManager.GetYubiKeys();
         var pcscDevice = pcscDevices.First();
-        var connection = await pcscDevice.ConnectAsync<ISmartCardConnection>();
+        using var connection = await pcscDevice.ConnectAsync<ISmartCardConnection>();
 
         var logger = ServiceProvider.GetRequiredService<ILogger<ManagementSession>>();
-        var mgmtSession = new ManagementSession(logger, connection);
+        using var mgmtSession = new ManagementSession(logger, connection);
         var deviceInfo = mgmtSession.GetDeviceInfo();
     }
 
@@ -31,10 +31,11 @@ public class IntegrationTest : IntegrationTestBase
     {
         var pcscDevices = await YubiKeyManager.GetYubiKeys();
         var pcscDevice = pcscDevices.First();
-        var connection = await pcscDevice.ConnectAsync<ISmartCardConnection>();
+        using var connection = await pcscDevice.ConnectAsync<ISmartCardConnection>();
 
         var managementSessionFactory = ServiceProvider.GetRequiredService<IManagementSessionFactory>();
-        var mgmtSession = managementSessionFactory.Create(connection);
-        var deviceInfo = mgmtSession.GetDeviceInfo();
+        using var mgmtSession = managementSessionFactory.Create(connection);
+        var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
+        Assert.NotEqual(0, deviceInfo.SerialNumber);
     }
 }

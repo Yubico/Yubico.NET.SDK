@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Iso7816;
-
 namespace Yubico.YubiKit.Core.Connections;
 
 public interface ISmartCardConnection : IConnection
 {
     // IDisposable BeginTransaction(out bool cardWasReset);
 
-    Task<ResponseApdu> TransmitAndReceiveAsync(
+    Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         ReadOnlyMemory<byte> command,
         CancellationToken cancellationToken = default);
     // public Transport getTransport();

@@ -15,7 +15,6 @@
 using Microsoft.Extensions.Logging;
 using System.Globalization;
 using Yubico.YubiKit.Core.Devices.SmartCard;
-using Yubico.YubiKit.Core.Iso7816;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
 namespace Yubico.YubiKit.Core.Connections;
@@ -45,19 +44,50 @@ internal class PcscSmartCardConnection : ISmartCardConnection
 
         _cardHandle?.Dispose();
         _context?.Dispose();
-
         _cardHandle = null!;
         _context = null!;
-
         _disposed = true;
     }
 
-    #endregion
-
-    public Task<ResponseApdu> TransmitAndReceiveAsync(
+    public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         ReadOnlyMemory<byte> command,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        // TODO
+
+        // The YubiKey likely will never return a buffer larger than 512 bytes without instead
+        // using response chaining.
+
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(_protocol);
+        ArgumentNullException.ThrowIfNull(_context);
+        ArgumentNullException.ThrowIfNull(_cardHandle);
+
+        var outputBuffer = new byte[512];
+        var bytesReceived = 0;
+        var buffer = outputBuffer;
+        var task = Task.Run(() => NativeMethods.SCardTransmit(
+            _cardHandle,
+            new SCARD_IO_REQUEST(_protocol.Value),
+            command.Span,
+            IntPtr.Zero,
+            buffer,
+            out bytesReceived
+        ), cancellationToken);
+
+        await task;
+
+        if (task.Result != ErrorCode.SCARD_S_SUCCESS)
+            throw new SCardException("ExceptionMessages.SCardTransmitFailure, result");
+
+        Array.Resize(ref outputBuffer, bytesReceived);
+
+        return (ReadOnlyMemory<byte>)outputBuffer;
+    }
+
+    #endregion
 
     public static async Task<PcscSmartCardConnection> CreateAsync(
         ILogger<PcscSmartCardConnection> logger,
@@ -65,17 +95,17 @@ internal class PcscSmartCardConnection : ISmartCardConnection
         CancellationToken cancellationToken = default)
     {
         PcscSmartCardConnection connection = new(logger, smartCardDevice);
-        await connection.InitializeAsync();
+        await connection.InitializeAsync(cancellationToken);
 
         return connection;
     }
 
-    private ValueTask InitializeAsync()
+    private ValueTask InitializeAsync(CancellationToken cancellationToken)
     {
         var task = Task.Run(() =>
         {
             (_context, _cardHandle, _protocol) = GetConnection(_smartCardDevice.ReaderName);
-        }, CancellationToken.None);
+        }, cancellationToken);
 
         return new ValueTask(task);
     }

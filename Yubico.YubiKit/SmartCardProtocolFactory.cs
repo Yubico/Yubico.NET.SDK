@@ -18,7 +18,7 @@ using Yubico.YubiKit.Core.Protocols;
 
 namespace Yubico.YubiKit;
 
-public interface IProtocolFactory<TConnection, TProtocol>
+public interface IProtocolFactory<in TConnection, out TProtocol>
     where TConnection : IConnection
     where TProtocol : IProtocol
 {
@@ -32,10 +32,16 @@ public class SmartCardProtocolFactory<TConnection, TProtocol>(ILoggerFactory log
 {
     #region IProtocolFactory<TConnection,TProtocol> Members
 
-    public TProtocol Create(TConnection connection) => throw new NotImplementedException(); // TODO
+    public TProtocol Create(TConnection connection) =>
+        connection switch
+        {
+            ISmartCardConnection scConnection when typeof(TProtocol) == typeof(ISmartCardProtocol) =>
+                (TProtocol)(IProtocol)new SmartCardProtocol(
+                    loggerFactory.CreateLogger<SmartCardProtocol>(),
+                    scConnection),
+            _ => throw new NotSupportedException(
+                $"The connection type {typeof(TConnection).Name} is not supported by this protocol factory.")
+        };
 
     #endregion
-
-    public IProtocol Create(ISmartCardConnection connection) =>
-        new SmartCardProtocol(loggerFactory.CreateLogger<SmartCardProtocol>(), connection);
 }

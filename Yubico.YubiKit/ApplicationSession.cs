@@ -33,6 +33,14 @@ public class ApplicationSession : IApplicationSession
             // TODO release managed resources here
         }
     }
+
+    protected void EnsureSupports(Feature feature)
+    {
+        if (!IsSupported(feature)) throw new NotSupportedException($"{feature.Name} is not supported on this YubiKey.");
+    }
+
+    protected bool IsSupported(Feature feature) =>
+        true; // TODO get from Management Session, select, and parse version info
 }
 
 public interface IApplicationSession : IDisposable

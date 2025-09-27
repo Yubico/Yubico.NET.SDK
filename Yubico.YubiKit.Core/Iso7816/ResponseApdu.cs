@@ -25,7 +25,7 @@ public class ResponseApdu
     ///     Initializes a new instance of the <see cref="ResponseApdu" /> class.
     /// </summary>
     /// <param name="data">The raw data returned by the ISO 7816 smart card.</param>
-    public ResponseApdu(Memory<byte> data)
+    public ResponseApdu(ReadOnlyMemory<byte> data)
     {
         ArgumentNullException.ThrowIfNull(data);
 

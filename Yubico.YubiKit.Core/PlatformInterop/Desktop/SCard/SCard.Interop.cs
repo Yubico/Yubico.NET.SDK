@@ -130,8 +130,7 @@ internal static partial class NativeMethods
     public static extern uint SCardReleaseContext(IntPtr context);
 
     [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_SCardTransmit")]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static partial uint SCardTransmit(
+    private static partial uint SCardTransmit(
         SCardCardHandle cardHandle,
         ref SCARD_IO_REQUEST ioSendPci,
         IntPtr sendBuffer,
@@ -140,4 +139,31 @@ internal static partial class NativeMethods
         IntPtr recvBuffer,
         ref int recvLength
     );
+
+    public static unsafe uint SCardTransmit(
+        SCardCardHandle card,
+        SCARD_IO_REQUEST ioSendPci,
+        ReadOnlySpan<byte> sendBuffer,
+        IntPtr ioRecvPci,
+        Span<byte> recvBuffer,
+        out int bytesReceived)
+    {
+        fixed (byte* sendBufferPtr = sendBuffer)
+        fixed (byte* recvBufferPtr = recvBuffer)
+        {
+            var recvBufferSize = recvBuffer.Length;
+
+            var result = SCardTransmit(
+                card,
+                ref ioSendPci,
+                (IntPtr)sendBufferPtr,
+                sendBuffer.Length,
+                ioRecvPci,
+                (IntPtr)recvBufferPtr,
+                ref recvBufferSize);
+
+            bytesReceived = recvBufferSize;
+            return result;
+        }
+    }
 }

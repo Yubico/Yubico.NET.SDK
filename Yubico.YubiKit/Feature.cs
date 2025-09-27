@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKit;
 
-internal class Feature
+public class Feature
 {
     public required string Name { get; init; }
     public int VersionMajor { get; set; }

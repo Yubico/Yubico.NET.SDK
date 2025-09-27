@@ -31,18 +31,7 @@ public class ManagementSession<TConnection> : ApplicationSession
         new() { Name = "Device Info", VersionMajor = 4, VersionMinor = 1, VersionRevision = 0 };
 
     private readonly ILogger<ManagementSession<TConnection>> _logger;
-
-    // private readonly ISmartCardProtocol _protocol; // for now
     private readonly IProtocol _protocol;
-
-    // private readonly ISmartCardConnection _smartCardConnection;
-    // public ManagementSession(
-    //     ILogger<ManagementSession> logger,
-    //     ISmartCardConnection smartCardConnection)
-    // {
-    //     _logger = logger;
-    //     _smartCardConnection = smartCardConnection;
-    // }
 
     public ManagementSession(
         ILogger<ManagementSession<TConnection>> logger,
@@ -102,10 +91,10 @@ public class ManagementSession<TConnection> : ApplicationSession
             if (_protocol is ISmartCardProtocol smartCardProtocol)
             {
                 var encodedResult = await smartCardProtocol.TransmitAndReceiveAsync(apdu); // TODO
-                if (encodedResult.Data.Length - 1 != encodedResult.Data.Span[0])
+                if (encodedResult.Length - 1 != encodedResult.Span[0])
                     throw new BadResponseException("Invalid length");
 
-                var pageTlvs = TlvHelper.Decode(encodedResult.Data.Span).ToList();
+                var pageTlvs = TlvHelper.Decode(encodedResult.Span).ToList();
 
                 var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
                 hasMoreData = moreData?.Length == 1 && moreData.GetValueSpan()[0] == 1;
@@ -122,14 +111,6 @@ public class ManagementSession<TConnection> : ApplicationSession
         Version = Version.V5_8_0; // todo get from selectapplication
         return DeviceInfo.CreateFromTlvs(allPagesTlvs.ToList(), null);
     }
-
-    private void EnsureSupports(Feature feature)
-    {
-        if (!IsSupported(feature)) throw new NotSupportedException($"{feature.Name} is not supported on this YubiKey.");
-    }
-
-    private bool IsSupported(Feature feature) =>
-        true; // TODO get from Management Session, select, and parse version info
 
     protected override void Dispose(bool disposing)
     {

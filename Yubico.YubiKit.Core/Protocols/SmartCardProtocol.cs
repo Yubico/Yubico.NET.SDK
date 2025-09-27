@@ -25,7 +25,7 @@ public interface IProtocol : IDisposable
 
 public interface ISmartCardProtocol : IProtocol
 {
-    Task<ResponseApdu> TransmitAndReceiveAsync(
+    Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         CommandApdu command,
         CancellationToken cancellationToken = default);
 }
@@ -36,11 +36,11 @@ internal class SmartCardProtocol : ISmartCardProtocol
     private const byte P1_SELECT = 0x04;
     private const byte P2_SELECT = 0x00;
     private const byte INS_SEND_REMAINING = 0xc0;
+    private const int MaxApduSize = SmartCardMaxApduSizes.Neo;
     private readonly ISmartCardConnection _connection;
     private readonly bool _extendedApdus = false;
     private readonly byte _insSendRemaining;
     private readonly ILogger<SmartCardProtocol> _logger;
-    private readonly int _maxApduSize = SmartCardMaxApduSizes.Neo;
 
     private readonly IApduProcessor _processor;
 
@@ -61,10 +61,17 @@ internal class SmartCardProtocol : ISmartCardProtocol
         _processor.Dispose();
     }
 
-    public async Task<ResponseApdu> TransmitAndReceiveAsync(
+    public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         CommandApdu command,
-        CancellationToken cancellationToken = default) =>
-        await _processor.TransmitAsync(command, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _processor.TransmitAsync(command, cancellationToken);
+        if (response is not { SW1: 0x90, SW2: 0x00 })
+            throw new InvalidOperationException(
+                $"Command failed with status: {response.SW1:X2}{response.SW2:X2}");
+
+        return response.Data;
+    }
 
     #endregion
 
@@ -72,10 +79,12 @@ internal class SmartCardProtocol : ISmartCardProtocol
     {
         var command = new CommandApdu { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = aid };
         var response = await _processor.TransmitAsync(command);
-        if (response is { SW1: 0x90, SW2: 0x00 }) return response.Data;
 
-        throw new InvalidOperationException(
-            $"Select command failed with status: {response.SW1:X2}{response.SW2:X2}");
+        if (response is not { SW1: 0x90, SW2: 0x00 })
+            throw new InvalidOperationException(
+                $"Select command failed with status: {response.SW1:X2}{response.SW2:X2}");
+
+        return response.Data;
     }
 
     private (IApduProcessor Processor, IApduFormatter Formatter) BuildBaseProcessor()
@@ -85,7 +94,7 @@ internal class SmartCardProtocol : ISmartCardProtocol
 
         if (_extendedApdus)
         {
-            formatter = new ExtendedApduFormatter(_connection, _maxApduSize);
+            formatter = new ExtendedApduFormatter(_connection, MaxApduSize);
             processor = new ApduFormatProcessor(_connection, formatter);
         }
         else
@@ -96,10 +105,4 @@ internal class SmartCardProtocol : ISmartCardProtocol
 
         return (new ChainedResponseProcessor(processor, _insSendRemaining), formatter);
     }
-}
-
-internal interface IApduFormatter
-{
-    byte[] Format(
-        byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int offset, int length, int le);
 }

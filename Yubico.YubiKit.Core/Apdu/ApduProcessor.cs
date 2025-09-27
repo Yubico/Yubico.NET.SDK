@@ -12,16 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Iso7816;
+
 namespace Yubico.YubiKit.Core.Apdu;
 
-public class ApduProcessor : IDisposable
+public interface IApduProcessor : IDisposable
 {
-    #region IDisposable Members
-
-    public void Dispose()
-    {
-        // TODO release managed resources here
-    }
-
-    #endregion
+    Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default);
 }

@@ -12,8 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Protocols;
+
 namespace Yubico.YubiKit.Core.Apdu;
 
-public class ApduFormatter
+internal class ShortApduProcessor : IApduFormatter
 {
+    #region IApduFormatter Members
+
+    public byte[] Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int offset, int length,
+        int le) => throw new NotImplementedException();
+
+    #endregion
 }

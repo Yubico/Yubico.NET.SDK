@@ -12,14 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Apdu;
+using Yubico.YubiKit.Core.Connections;
+using Yubico.YubiKit.Core.Iso7816;
+using Yubico.YubiKit.Core.Protocols;
 
-namespace Yubico.YubiKit.Core.Processors;
+namespace Yubico.YubiKit.Core.Apdu;
 
-internal class ExtendedApduFormatter : ApduFormatter
+internal class CommandChainingProcessor : IApduProcessor
 {
-    public ExtendedApduFormatter(int maxApduSize)
+    public CommandChainingProcessor(ISmartCardConnection connection, IApduFormatter formatter)
     {
         throw new NotImplementedException();
     }
+
+    #region IApduProcessor Members
+
+    public void Dispose() => throw new NotImplementedException();
+
+    public Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    #endregion
 }

@@ -51,7 +51,7 @@ public class ManagementSession<TConnection> : ApplicationSession
     {
         _logger = logger;
         _protocol = protocolFactory.Create(connection);
-        _protocol
+        // _protocol
     }
 
     private Version Version { get; set; }
@@ -106,9 +106,9 @@ public class ManagementSession<TConnection> : ApplicationSession
                     throw new BadResponseException("Invalid length");
 
                 var pageTlvs = TlvHelper.Decode(encodedResult.Data.Span).ToList();
-                var moreData = pageTlvs.Single(t => t.Tag == TagMoreDeviceInfo);
-                hasMoreData = moreData.Length == 1 && moreData.GetValueSpan()[0] == 1;
 
+                var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
+                hasMoreData = moreData?.Length == 1 && moreData.GetValueSpan()[0] == 1;
                 allPagesTlvs = allPagesTlvs.Concat(pageTlvs);
                 ++page;
             }

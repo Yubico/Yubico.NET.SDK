@@ -25,7 +25,7 @@ public class ResponseApdu
     ///     Initializes a new instance of the <see cref="ResponseApdu" /> class.
     /// </summary>
     /// <param name="data">The raw data returned by the ISO 7816 smart card.</param>
-    public ResponseApdu(byte[] data)
+    public ResponseApdu(Memory<byte> data)
     {
         ArgumentNullException.ThrowIfNull(data);
 
@@ -33,9 +33,9 @@ public class ResponseApdu
             throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
                 "ExceptionMessages.ResponseApduNotEnoughBytes, data.Length"));
 
-        SW1 = data[^2];
-        SW2 = data[^1];
-        Data = data.Take(data.Length - 2).ToArray();
+        SW1 = data.Span[^2];
+        SW2 = data.Span[^1];
+        Data = data.Span[..(data.Length - 2)].ToArray();
     }
 
     /// <summary>

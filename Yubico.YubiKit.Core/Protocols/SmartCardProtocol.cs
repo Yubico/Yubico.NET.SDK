@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Apdu;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Iso7816;
-using Yubico.YubiKit.Core.Processors;
 
 namespace Yubico.YubiKit.Core.Protocols;
 
@@ -39,16 +38,18 @@ internal class SmartCardProtocol : ISmartCardProtocol
     private const byte INS_SEND_REMAINING = 0xc0;
     private readonly ISmartCardConnection _connection;
     private readonly bool _extendedApdus = false;
+    private readonly byte _insSendRemaining;
     private readonly ILogger<SmartCardProtocol> _logger;
     private readonly int _maxApduSize = SmartCardMaxApduSizes.Neo;
 
-    private readonly ApduProcessor _processor;
-    private byte _insSendRemaining;
+    private readonly IApduProcessor _processor;
 
-    public SmartCardProtocol(ILogger<SmartCardProtocol> logger, ISmartCardConnection connection)
+    public SmartCardProtocol(ILogger<SmartCardProtocol> logger, ISmartCardConnection connection,
+        ReadOnlyMemory<byte> insSendRemaining = default)
     {
         _logger = logger;
         _connection = connection;
+        _insSendRemaining = insSendRemaining.Length > 0 ? insSendRemaining.Span[0] : INS_SEND_REMAINING;
         (_processor, _) = BuildBaseProcessor();
     }
 
@@ -63,27 +64,42 @@ internal class SmartCardProtocol : ISmartCardProtocol
     public async Task<ResponseApdu> TransmitAndReceiveAsync(
         CommandApdu command,
         CancellationToken cancellationToken = default) =>
-        await _connection.TransmitAndReceiveAsync(command, cancellationToken);
+        await _processor.TransmitAsync(command, cancellationToken);
 
     #endregion
 
-    private (ApduProcessor Processor, ApduFormatter Formatter) BuildBaseProcessor()
+    public async Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> aid)
     {
-        ApduProcessor result;
-        ApduFormatter formatter;
+        var command = new CommandApdu { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = aid };
+        var response = await _processor.TransmitAsync(command);
+        if (response is { SW1: 0x90, SW2: 0x00 }) return response.Data;
+
+        throw new InvalidOperationException(
+            $"Select command failed with status: {response.SW1:X2}{response.SW2:X2}");
+    }
+
+    private (IApduProcessor Processor, IApduFormatter Formatter) BuildBaseProcessor()
+    {
+        IApduProcessor processor;
+        IApduFormatter formatter;
+
         if (_extendedApdus)
         {
-            formatter = new ExtendedApduFormatter(_maxApduSize);
-            result = new ApduFormatProcessor(_connection, formatter);
+            formatter = new ExtendedApduFormatter(_connection, _maxApduSize);
+            processor = new ApduFormatProcessor(_connection, formatter);
         }
         else
         {
-            formatter = new ShortApduFormatter();
-            result = new CommandChainingProcessor(_connection, formatter);
+            formatter = new ShortApduProcessor();
+            processor = new CommandChainingProcessor(_connection, formatter);
         }
 
-        result = new ChainedResponseProcessor(result, _insSendRemaining);
-
-        return (result, formatter);
+        return (new ChainedResponseProcessor(processor, _insSendRemaining), formatter);
     }
+}
+
+internal interface IApduFormatter
+{
+    byte[] Format(
+        byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int offset, int length, int le);
 }

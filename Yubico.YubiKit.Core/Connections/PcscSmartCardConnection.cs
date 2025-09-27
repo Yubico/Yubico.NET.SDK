@@ -39,11 +39,6 @@ internal class PcscSmartCardConnection : ISmartCardConnection
 
     #region ISmartCardConnection Members
 
-    public Task<ResponseApdu> TransmitAndReceiveAsync(
-        CommandApdu command,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
-
     public void Dispose()
     {
         if (_disposed) return;
@@ -58,6 +53,11 @@ internal class PcscSmartCardConnection : ISmartCardConnection
     }
 
     #endregion
+
+    public Task<ResponseApdu> TransmitAndReceiveAsync(
+        ReadOnlyMemory<byte> command,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
 
     public static async Task<PcscSmartCardConnection> CreateAsync(
         ILogger<PcscSmartCardConnection> logger,

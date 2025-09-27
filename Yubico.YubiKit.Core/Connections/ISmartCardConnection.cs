@@ -21,7 +21,7 @@ public interface ISmartCardConnection : IConnection
     // IDisposable BeginTransaction(out bool cardWasReset);
 
     Task<ResponseApdu> TransmitAndReceiveAsync(
-        CommandApdu command,
+        ReadOnlyMemory<byte> command,
         CancellationToken cancellationToken = default);
     // public Transport getTransport();
     // boolean isExtendedLengthApduSupported();

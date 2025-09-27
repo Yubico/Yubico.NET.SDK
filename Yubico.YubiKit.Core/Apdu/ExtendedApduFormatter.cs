@@ -12,10 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Apdu;
+using Yubico.YubiKit.Core.Connections;
+using Yubico.YubiKit.Core.Protocols;
 
-namespace Yubico.YubiKit.Core.Processors;
+namespace Yubico.YubiKit.Core.Apdu;
 
-internal class ShortApduFormatter : ApduFormatter
+internal class ExtendedApduFormatter : IApduFormatter
 {
+    public ExtendedApduFormatter(ISmartCardConnection smartCardConnection, int maxApduSize)
+    {
+        throw new NotImplementedException();
+    }
+
+    #region IApduFormatter Members
+
+    public byte[] Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int offset, int length,
+        int le) => throw new NotImplementedException();
+
+    #endregion
 }

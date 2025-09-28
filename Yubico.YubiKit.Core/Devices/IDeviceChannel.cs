@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
+namespace Yubico.YubiKit.Core.Devices;
 
-namespace Yubico.YubiKit;
-
-public interface IYubiKeyManager
+public interface IDeviceChannel
 {
-    Task<IEnumerable<IYubiKey>> GetYubiKeys();
-    IObservable<YubiKeyDeviceEvent> DeviceChanges { get; }
+    Task PublishAsync(IEnumerable<IYubiKey> devices, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IEnumerable<IYubiKey>> ConsumeAsync(CancellationToken cancellationToken = default);
+    void Complete();
 }

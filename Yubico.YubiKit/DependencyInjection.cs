@@ -26,22 +26,36 @@ public static class DependencyInjection
     {
         public IServiceCollection AddYubiKeyManager()
         {
-            services.AddSingleton<IYubiKeyManager, YubiKeyManager>();
-            return services;
+            return services.AddYubiKeyManager(configureOptions: null);
         }
 
         public IServiceCollection AddYubiKeyManager(Action<YubiKeyManagerOptions>? configureOptions)
         {
             if (configureOptions != null) services.Configure(configureOptions);
 
-            // Register Core services (internal to SDK)
-            // services.AddSingleton<IDeviceEnumerationService, DeviceEnumerationService>();
-            // services.AddSingleton<IPlatformDeviceProvider, PlatformDeviceProvider>();    
-            // services.AddHostedService<DeviceMonitorBackgroundService>();                 
-
-            services.AddSingleton<IYubiKeyManager, YubiKeyManager>();
+            // Core factory services
+            services.AddSingleton<IYubiKeyFactory, YubiKeyFactory>();
             services.AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>();
-            services.AddTransient<IYubiKeyFactory, YubiKeyFactory>();
+
+            // Device communication channel
+            services.AddSingleton<DeviceChannel>();
+            services.AddSingleton<IDeviceChannel>(sp => sp.GetRequiredService<DeviceChannel>());
+
+            // Device repository (state management + BackgroundService)
+            services.AddSingleton<YubiKeyDeviceRepository>();
+            services.AddSingleton<IYubiKeyDeviceRepository>(sp =>
+                sp.GetRequiredService<YubiKeyDeviceRepository>());
+            services.AddHostedService<YubiKeyDeviceRepository>(sp =>
+                sp.GetRequiredService<YubiKeyDeviceRepository>());
+
+            // Background monitoring service
+            services.AddHostedService<YubiKeyDeviceMonitor>();
+
+            // YubiKeyManager now uses repository
+            services.AddSingleton<YubiKeyManager>();
+            services.AddSingleton<IYubiKeyManager>(sp => sp.GetRequiredService<YubiKeyManager>());
+
+            // Protocol and session factories
             services
                 .AddTransient<IProtocolFactory<ISmartCardConnection>, SmartCardProtocolFactory<ISmartCardConnection>>();
             services

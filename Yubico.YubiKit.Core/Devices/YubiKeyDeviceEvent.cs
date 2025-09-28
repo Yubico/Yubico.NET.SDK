@@ -12,13 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
+namespace Yubico.YubiKit.Core.Devices;
 
-namespace Yubico.YubiKit;
-
-public interface IYubiKeyManager
+public enum YubiKeyDeviceAction
 {
-    Task<IEnumerable<IYubiKey>> GetYubiKeys();
-    IObservable<YubiKeyDeviceEvent> DeviceChanges { get; }
+    Added,
+    Removed,
+    Updated
+}
+
+public class YubiKeyDeviceEvent
+{
+    public IYubiKey? Device { get; }
+    public YubiKeyDeviceAction Action { get; }
+    public string? DeviceId { get; set; }
+    public DateTime Timestamp { get; }
+
+    public YubiKeyDeviceEvent(YubiKeyDeviceAction action, IYubiKey? device)
+    {
+        Action = action;
+        Device = device;
+        Timestamp = DateTime.UtcNow;
+    }
 }

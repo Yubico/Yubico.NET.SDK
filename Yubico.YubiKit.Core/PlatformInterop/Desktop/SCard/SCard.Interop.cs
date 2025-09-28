@@ -113,10 +113,9 @@ internal static partial class NativeMethods
         return result;
     }
 
-    [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardReconnect", ExactSpelling = true,
-        CharSet = CharSet.Ansi)]
+    [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_SCardReconnect")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern uint SCardReconnect(
+    public static partial uint SCardReconnect(
         SCardCardHandle cardHandle,
         SCARD_SHARE shareMode,
         SCARD_PROTOCOL preferredProtocols,
@@ -124,10 +123,9 @@ internal static partial class NativeMethods
         out SCARD_PROTOCOL activeProtocol
     );
 
-    [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardReleaseContext", ExactSpelling = true,
-        CharSet = CharSet.Ansi)]
+    [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_SCardReleaseContext")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern uint SCardReleaseContext(IntPtr context);
+    public static partial uint SCardReleaseContext(IntPtr context);
 
     [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_SCardTransmit")]
     private static partial uint SCardTransmit(

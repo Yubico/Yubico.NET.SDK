@@ -1,0 +1,59 @@
+using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Devices.SmartCard;
+using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
+
+public class PcscDeviceService : IPcscService
+{
+    private readonly IYubiKeyFactory _yubiKeyFactory;
+    private readonly ILogger<PcscDeviceService> _logger;
+
+    public PcscDeviceService(IYubiKeyFactory yubiKeyFactory, ILogger<PcscDeviceService> logger)
+    {
+        _yubiKeyFactory = yubiKeyFactory;
+        _logger = logger;
+    }
+
+    public async Task<IReadOnlyList<IYubiKey>> GetAllAsync()
+    {
+        return await Task.Run(GetAll);
+    }
+
+    public IReadOnlyList<IYubiKey> GetAll()
+    {
+        var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
+        if (result != ErrorCode.SCARD_S_SUCCESS)
+            throw new InvalidOperationException("Can't establish context with PC/SC service.");
+
+        result = NativeMethods.SCardListReaders(context, null, out var readerNames);
+        if (result != ErrorCode.SCARD_S_SUCCESS || readerNames.Length == 0) return [];
+
+        var readerStates = SCARD_READER_STATE.CreateMany(readerNames);
+        result = NativeMethods.SCardGetStatusChange(
+            context,
+            0,
+            readerStates,
+            readerStates.Length);
+
+        if (result != ErrorCode.SCARD_S_SUCCESS)
+            throw new InvalidOperationException($"SCardGetStatusChange failed: 0x{result:X8}");
+
+        try
+        {
+            return (from reader in readerStates
+                where (reader.GetEventState() & SCARD_STATE.PRESENT) != 0
+                where ProductAtrs.AllYubiKeys.Contains(reader.GetAtr())
+                select new PcscDevice
+                {
+                    ReaderName = reader.GetReaderName(), Atr = reader.GetAtr(), Kind = SmartCardConnectionKind.Usb
+                }
+                into pcscDevice
+                select _yubiKeyFactory.CreateAsync(pcscDevice)).ToList();
+        }
+        finally
+        {
+            context.Dispose();
+        }
+    }
+}

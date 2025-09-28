@@ -14,22 +14,24 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Devices.SmartCard;
 
 namespace Yubico.YubiKit.Core.Devices;
 
 public class YubiKeyDeviceMonitor : BackgroundService
 {
+    private readonly IPcscService _pcscService;
     private readonly IDeviceChannel _deviceChannel;
     private readonly IYubiKeyFactory _yubiKeyFactory;
     private readonly ILogger<YubiKeyDeviceMonitor> _logger;
     private readonly TimeSpan _scanInterval;
 
     public YubiKeyDeviceMonitor(
+        IPcscService pcscService,
         IDeviceChannel deviceChannel,
         IYubiKeyFactory yubiKeyFactory,
         ILogger<YubiKeyDeviceMonitor> logger)
     {
+        _pcscService = pcscService;
         _deviceChannel = deviceChannel;
         _yubiKeyFactory = yubiKeyFactory;
         _logger = logger;
@@ -69,7 +71,7 @@ public class YubiKeyDeviceMonitor : BackgroundService
     {
         try
         {
-            var pcscDevices = await PcscYubiKey.GetAllAsync(_yubiKeyFactory);
+            var pcscDevices = await _pcscService.GetAllAsync();
             await _deviceChannel.PublishAsync(pcscDevices, cancellationToken);
             _logger.LogDebug("Found {DeviceCount} PCSC devices", pcscDevices.Count);
         }

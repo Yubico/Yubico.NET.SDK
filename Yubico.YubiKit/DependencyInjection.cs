@@ -35,25 +35,21 @@ public static class DependencyInjection
 
             // Core factory services
             services.AddSingleton<IYubiKeyFactory, YubiKeyFactory>();
+            services.AddTransient<IPcscService, PcscDeviceService>();
             services.AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>();
 
             // Device communication channel
-            services.AddSingleton<DeviceChannel>();
-            services.AddSingleton<IDeviceChannel>(sp => sp.GetRequiredService<DeviceChannel>());
+            services.AddSingleton<IDeviceChannel, DeviceChannel>();
 
             // Device repository (state management + BackgroundService)
-            services.AddSingleton<YubiKeyDeviceRepository>();
-            services.AddSingleton<IYubiKeyDeviceRepository>(sp =>
-                sp.GetRequiredService<YubiKeyDeviceRepository>());
-            services.AddHostedService<YubiKeyDeviceRepository>(sp =>
-                sp.GetRequiredService<YubiKeyDeviceRepository>());
+            services.AddSingleton<IYubiKeyDeviceRepository, YubiKeyDeviceRepository>();
+            services.AddHostedService<YubiKeyDeviceRepository>();
 
             // Background monitoring service
             services.AddHostedService<YubiKeyDeviceMonitor>();
 
             // YubiKeyManager now uses repository
-            services.AddSingleton<YubiKeyManager>();
-            services.AddSingleton<IYubiKeyManager>(sp => sp.GetRequiredService<YubiKeyManager>());
+            services.AddSingleton<IYubiKeyManager, YubiKeyManager>();
 
             // Protocol and session factories
             services

@@ -26,6 +26,7 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
     private readonly IDeviceChannel _deviceChannel;
     private readonly IYubiKeyFactory _yubiKeyFactory;
     private readonly ILogger<YubiKeyDeviceRepository> _logger;
+    private readonly IPcscService _pcscService;
     private readonly ConcurrentDictionary<string, IYubiKey> _devices = new();
     private readonly Subject<YubiKeyDeviceEvent> _deviceChanges = new();
 
@@ -34,11 +35,12 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
     private bool _disposed;
     private readonly SemaphoreSlim _initializationLock = new(1, 1);
 
-    public YubiKeyDeviceRepository(IDeviceChannel deviceChannel, IYubiKeyFactory yubiKeyFactory, ILogger<YubiKeyDeviceRepository> logger)
+    public YubiKeyDeviceRepository(IDeviceChannel deviceChannel, IYubiKeyFactory yubiKeyFactory, ILogger<YubiKeyDeviceRepository> logger, IPcscService pcscService)
     {
         _deviceChannel = deviceChannel;
         _yubiKeyFactory = yubiKeyFactory;
         _logger = logger;
+        _pcscService = pcscService;
     }
 
     // Public API methods with guaranteed data availability
@@ -79,7 +81,7 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
             _logger.LogInformation("Cache empty, performing synchronous device scan...");
 
             // Perform ONE synchronous scan to populate cache immediately
-            var devices = await PcscYubiKey.GetAllAsync(_yubiKeyFactory);
+            var devices = await _pcscService.GetAllAsync();
             UpdateDeviceCache(devices);
 
             _logger.LogInformation("Synchronous scan completed, found {DeviceCount} devices", devices.Count());

@@ -54,12 +54,6 @@ internal class PcscSmartCardConnection : ISmartCardConnection
         CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-
-        // TODO
-
-        // The YubiKey likely will never return a buffer larger than 512 bytes without instead
-        // using response chaining.
-
         ArgumentNullException.ThrowIfNull(command);
         ArgumentNullException.ThrowIfNull(_protocol);
         ArgumentNullException.ThrowIfNull(_context);

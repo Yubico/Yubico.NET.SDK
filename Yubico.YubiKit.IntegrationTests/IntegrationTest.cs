@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Connections;
-using Yubico.YubiKit.Core.Protocols;
 
 namespace Yubico.YubiKit.IntegrationTests;
 
@@ -23,7 +22,7 @@ public class IntegrationTest : IntegrationTestBase
         using var connection = await pcscDevice.ConnectAsync<ISmartCardConnection>();
 
         var logger = ServiceProvider.GetRequiredService<ILogger<ManagementSession<ISmartCardConnection>>>();
-        var scpFactory = ServiceProvider.GetRequiredService<IProtocolFactory<ISmartCardConnection, IProtocol>>();
+        var scpFactory = ServiceProvider.GetRequiredService<IProtocolFactory<ISmartCardConnection>>();
 
         using var mgmtSession = new ManagementSession<ISmartCardConnection>(logger, connection, scpFactory);
         var deviceInfo = mgmtSession.GetDeviceInfo();

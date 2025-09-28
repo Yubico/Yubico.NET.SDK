@@ -15,7 +15,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 
 namespace Yubico.YubiKit;
 
@@ -43,8 +42,8 @@ public static class DependencyInjection
             services.AddSingleton<IYubiKeyManager, YubiKeyManager>();
             services.AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>();
             services.AddTransient<IYubiKeyFactory, YubiKeyFactory>();
-            services.AddTransient<IProtocolFactory<ISmartCardConnection, IProtocol>,
-                SmartCardProtocolFactory<ISmartCardConnection, IProtocol>>();
+            services
+                .AddTransient<IProtocolFactory<ISmartCardConnection>, SmartCardProtocolFactory<ISmartCardConnection>>();
             services
                 .AddSingleton<IManagementSessionFactory<ISmartCardConnection>,
                     ManagementSessionFactory<ISmartCardConnection>>();

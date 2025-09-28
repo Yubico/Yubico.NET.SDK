@@ -19,30 +19,19 @@ namespace Yubico.YubiKit.Core.Apdu;
 
 internal class ApduFormatProcessor(ISmartCardConnection connection, IApduFormatter formatter) : IApduProcessor
 {
-    private bool _disposed;
-
     #region IApduProcessor Members
 
-    public void Dispose()
+    public IApduFormatter Formatter => formatter;
+
+    public virtual async Task<ResponseApdu> TransmitAsync(CommandApdu command,
+        CancellationToken cancellationToken = default)
     {
-        if (_disposed) return;
-
-        connection.Dispose();
-        _disposed = true;
-    }
-
-    public async Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
         var payload = formatter.Format(
             command.Cla,
             command.Ins,
             command.P1,
             command.P2,
             command.Data,
-            0,
-            command.Data.Length,
             command.Le);
 
         var response = await connection.TransmitAndReceiveAsync(payload, cancellationToken);

@@ -18,27 +18,38 @@ namespace Yubico.YubiKit.Core.Apdu;
 
 internal class ChainedResponseProcessor : IApduProcessor
 {
-    private static byte SW1_HAS_MORE_DATA = 0x61;
-    private readonly byte _insSendRemaining;
-    private readonly IApduProcessor _processor;
+    private static readonly byte SW1_HAS_MORE_DATA = 0x61;
+    private readonly IApduProcessor _apduTransmitter;
+    private readonly CommandApdu GetMoreDataApdu;
 
     public ChainedResponseProcessor(
-        IApduProcessor processor,
+        IApduProcessor apduTransmitter,
         byte insSendRemaining)
     {
-        _processor = processor;
-        _insSendRemaining = insSendRemaining;
+        _apduTransmitter = apduTransmitter;
+        GetMoreDataApdu = new CommandApdu(0, insSendRemaining, 0, 0);
     }
 
     #region IApduProcessor Members
 
-    public void Dispose()
-    {
-        // TODO release managed resources here
-    }
+    public IApduFormatter Formatter => _apduTransmitter.Formatter;
 
-    public Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+    public async Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default)
+    {
+        var response = await _apduTransmitter.TransmitAsync(command, cancellationToken);
+
+        using var ms = new MemoryStream();
+        while (response.SW1 == SW1_HAS_MORE_DATA)
+        {
+            ms.Write(response.Data.Span);
+            response = await _apduTransmitter.TransmitAsync(GetMoreDataApdu, cancellationToken);
+        }
+
+        ms.Write(response.Data.Span);
+        ms.WriteByte(response.SW1);
+        ms.WriteByte(response.SW2);
+        return new ResponseApdu(ms.ToArray());
+    }
 
     #endregion
 }

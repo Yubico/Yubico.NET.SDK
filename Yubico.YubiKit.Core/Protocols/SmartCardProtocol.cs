@@ -28,6 +28,9 @@ public interface ISmartCardProtocol : IProtocol
     Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         CommandApdu command,
         CancellationToken cancellationToken = default);
+
+    Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
+        CancellationToken cancellationToken = default);
 }
 
 internal class SmartCardProtocol : ISmartCardProtocol
@@ -41,8 +44,7 @@ internal class SmartCardProtocol : ISmartCardProtocol
     private readonly bool _extendedApdus = false;
     private readonly byte _insSendRemaining;
     private readonly ILogger<SmartCardProtocol> _logger;
-
-    private readonly IApduProcessor _processor;
+    private readonly ChainedResponseProcessor _processor;
 
     public SmartCardProtocol(ILogger<SmartCardProtocol> logger, ISmartCardConnection connection,
         ReadOnlyMemory<byte> insSendRemaining = default)
@@ -50,16 +52,12 @@ internal class SmartCardProtocol : ISmartCardProtocol
         _logger = logger;
         _connection = connection;
         _insSendRemaining = insSendRemaining.Length > 0 ? insSendRemaining.Span[0] : INS_SEND_REMAINING;
-        (_processor, _) = BuildBaseProcessor();
+        _processor = BuildBaseProcessor();
     }
 
     #region ISmartCardProtocol Members
 
-    public void Dispose()
-    {
-        _connection.Dispose();
-        _processor.Dispose();
-    }
+    public void Dispose() => _connection.Dispose();
 
     public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         CommandApdu command,
@@ -73,12 +71,13 @@ internal class SmartCardProtocol : ISmartCardProtocol
         return response.Data;
     }
 
-    #endregion
-
-    public async Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> aid)
+    public async Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
+        CancellationToken cancellationToken = default)
     {
-        var command = new CommandApdu { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = aid };
-        var response = await _processor.TransmitAsync(command);
+        var response =
+            await _processor.TransmitAsync(
+                new CommandApdu { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId },
+                cancellationToken);
 
         if (response is not { SW1: 0x90, SW2: 0x00 })
             throw new InvalidOperationException(
@@ -87,22 +86,14 @@ internal class SmartCardProtocol : ISmartCardProtocol
         return response.Data;
     }
 
-    private (IApduProcessor Processor, IApduFormatter Formatter) BuildBaseProcessor()
+    #endregion
+
+    private ChainedResponseProcessor BuildBaseProcessor()
     {
-        IApduProcessor processor;
-        IApduFormatter formatter;
+        IApduProcessor processor = _extendedApdus
+            ? new ApduFormatProcessor(_connection, new ExtendedApduFormatter(MaxApduSize))
+            : new CommandChainingProcessor(_connection, new ShortApduFormatter());
 
-        if (_extendedApdus)
-        {
-            formatter = new ExtendedApduFormatter(_connection, MaxApduSize);
-            processor = new ApduFormatProcessor(_connection, formatter);
-        }
-        else
-        {
-            formatter = new ShortApduProcessor();
-            processor = new CommandChainingProcessor(_connection, formatter);
-        }
-
-        return (new ChainedResponseProcessor(processor, _insSendRemaining), formatter);
+        return new ChainedResponseProcessor(processor, _insSendRemaining);
     }
 }

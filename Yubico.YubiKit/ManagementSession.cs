@@ -36,11 +36,16 @@ public class ManagementSession<TConnection> : ApplicationSession
     public ManagementSession(
         ILogger<ManagementSession<TConnection>> logger,
         TConnection connection,
-        IProtocolFactory<TConnection, IProtocol> protocolFactory)
+        IProtocolFactory<TConnection> protocolFactory)
     {
         _logger = logger;
         _protocol = protocolFactory.Create(connection);
-        // _protocol
+
+        if (_protocol is ISmartCardProtocol smartCardProtocol)
+        {
+            var versionBytes = smartCardProtocol.SelectAsync(ApplicationIds.Management).GetAwaiter().GetResult();
+            // Version = Version.Parse(Encoding.UTF8.GetString(versionBytes.Span));
+        }
     }
 
     private Version Version { get; set; }
@@ -90,7 +95,9 @@ public class ManagementSession<TConnection> : ApplicationSession
 
             if (_protocol is ISmartCardProtocol smartCardProtocol)
             {
-                var encodedResult = await smartCardProtocol.TransmitAndReceiveAsync(apdu); // TODO
+                var encodedResult =
+                    await smartCardProtocol
+                        .TransmitAndReceiveAsync(apdu); // TODO Getting weird non valid TLV value here?
                 if (encodedResult.Length - 1 != encodedResult.Span[0])
                     throw new BadResponseException("Invalid length");
 

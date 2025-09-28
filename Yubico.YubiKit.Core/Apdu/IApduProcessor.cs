@@ -16,7 +16,8 @@ using Yubico.YubiKit.Core.Iso7816;
 
 namespace Yubico.YubiKit.Core.Apdu;
 
-public interface IApduProcessor : IDisposable
+public interface IApduProcessor
 {
+    IApduFormatter Formatter { get; }
     Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default);
 }

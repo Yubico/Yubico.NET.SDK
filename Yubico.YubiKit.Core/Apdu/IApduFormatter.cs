@@ -14,8 +14,8 @@
 
 namespace Yubico.YubiKit.Core.Apdu;
 
-internal interface IApduFormatter
+public interface IApduFormatter
 {
-    byte[] Format(
-        byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int offset, int length, int le);
+    ReadOnlyMemory<byte> Format(
+        byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le);
 }

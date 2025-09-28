@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers.Binary;
-using System.Globalization;
-
 namespace Yubico.YubiKit.Core.Iso7816;
 
 /// <summary>
@@ -24,9 +21,9 @@ public class CommandApdu
 {
     public CommandApdu()
     {
-        
     }
-    public CommandApdu(int cla, int ins, int p1, int p2, Memory<byte>? data, int le = 0)
+
+    public CommandApdu(int cla, int ins, int p1, int p2, ReadOnlyMemory<byte>? data = null, int le = 0)
     {
         Cla = ValidateByte(cla, nameof(cla).ToUpperInvariant());
         Ins = ValidateByte(ins, nameof(ins).ToUpperInvariant());
@@ -35,7 +32,7 @@ public class CommandApdu
         Data = data?.ToArray() ?? ReadOnlyMemory<byte>.Empty;
         Le = le;
     }
-    
+
     public byte Cla { get; init; }
     public byte Ins { get; init; }
     public byte P1 { get; init; }
@@ -49,10 +46,10 @@ public class CommandApdu
 
     private static byte ValidateByte(int byteInt, string name)
     {
-        if (byteInt is > 255 or < byte.MinValue) 
+        if (byteInt is > 255 or < byte.MinValue)
             throw new ArgumentOutOfRangeException("Invalid value for " + name + ", must fit in a byte");
-        
-        return (byte) byteInt;
+
+        return (byte)byteInt;
     }
 
     /// <summary>

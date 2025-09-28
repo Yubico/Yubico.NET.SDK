@@ -14,7 +14,6 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Connections;
-using Yubico.YubiKit.Core.Protocols;
 
 namespace Yubico.YubiKit;
 
@@ -28,11 +27,11 @@ internal class ManagementSessionFactory<TConnection> : IManagementSessionFactory
     where TConnection : IConnection
 {
     private readonly ILoggerFactory _loggerFactory;
-    private readonly IProtocolFactory<TConnection, IProtocol> _protocolFactory;
+    private readonly IProtocolFactory<TConnection> _protocolFactory;
 
     public ManagementSessionFactory(
         ILoggerFactory loggerFactory,
-        IProtocolFactory<TConnection, IProtocol> protocolFactory)
+        IProtocolFactory<TConnection> protocolFactory)
     {
         _loggerFactory = loggerFactory;
         _protocolFactory = protocolFactory;

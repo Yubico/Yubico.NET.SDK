@@ -12,28 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers.Binary;
-
 namespace Yubico.YubiKit.Core.Apdu;
 
-internal class ExtendedApduFormatter : IApduFormatter
+internal class ShortApduFormatter : IApduFormatter
 {
-    private readonly int _maxApduSize;
-
-    public ExtendedApduFormatter(int maxApduSize)
-    {
-        _maxApduSize = maxApduSize;
-    }
+    private const int ShortApduMaxChunk = 255;
 
     #region IApduFormatter Members
 
     public ReadOnlyMemory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data,
         int le)
     {
-        var totalLength = 5 + (data.Length > 0 ? 2 + data.Length : 0) + (le > 0 ? 2 : 0);
-        if (totalLength > _maxApduSize)
-            throw new NotSupportedException("APDU length exceeds YubiKey capability.");
+        var length = data.Length;
+        if (length > ShortApduMaxChunk)
+            throw new InvalidOperationException($"Length must be no greater than {ShortApduMaxChunk}");
 
+        if (le is < 0 or > ShortApduMaxChunk)
+            throw new ArgumentException($"Le must be between 0 and {ShortApduMaxChunk}", nameof(le));
+
+        var totalLength = 4 + (length > 0 ? 1 + length : 0) + (le > 0 ? 1 : 0) + (length == 0 && le == 0 ? 1 : 0);
         Span<byte> buffer = stackalloc byte[totalLength];
         var position = 0;
 
@@ -41,19 +38,20 @@ internal class ExtendedApduFormatter : IApduFormatter
         buffer[1] = ins;
         buffer[2] = p1;
         buffer[3] = p2;
-        buffer[4] = 0x00;
-        position += 5;
+        position += 4;
 
-        if (data.Length > 0)
+        if (length > 0)
         {
-            BinaryPrimitives.WriteInt16BigEndian(buffer[position..], (short)data.Length);
-            position += 2;
-            data.Span.CopyTo(buffer[position..]);
-            position += data.Length;
+            buffer[position] = (byte)length;
+            position += 1;
+            data.Span[..length].CopyTo(buffer[position..]);
+            position += length;
         }
 
         if (le > 0)
-            BinaryPrimitives.WriteInt16BigEndian(buffer[position..], (short)le);
+            buffer[position] = (byte)le;
+        else if (length == 0)
+            buffer[position] = 0;
 
         return buffer.ToArray();
     }

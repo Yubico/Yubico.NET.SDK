@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Yubico.YubiKit;
 using Yubico.YubiKit.Core.Connections;
-using Yubico.YubiKit.Core.Protocols;
 
 namespace TestProject.Controllers;
 
@@ -10,11 +9,11 @@ namespace TestProject.Controllers;
 public class DiTestController : ControllerBase
 {
     private readonly ILogger<ManagementSession<ISmartCardConnection>> _logger;
-    private readonly IProtocolFactory<ISmartCardConnection, IProtocol> _protocolFactory;
+    private readonly IProtocolFactory<ISmartCardConnection> _protocolFactory;
     private readonly IYubiKeyManager _yubiKeyManager;
 
     public DiTestController(IYubiKeyManager yubiKeyManager, ILogger<ManagementSession<ISmartCardConnection>> logger,
-        IProtocolFactory<ISmartCardConnection, IProtocol> protocolFactory)
+        IProtocolFactory<ISmartCardConnection> protocolFactory)
     {
         _yubiKeyManager = yubiKeyManager;
         _logger = logger;

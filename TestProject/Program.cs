@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 using Yubico.YubiKit;
 using Yubico.YubiKit.Core.Connections;
-using Yubico.YubiKit.Core.Protocols;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 builder.Services.AddYubiKeyManager(options =>
@@ -21,7 +20,7 @@ var app = builder.Build();
 // Minimal API endpoint: DI via [FromServices] for IYubiKeyManager
 app.MapGet("/di/minimal", async ([FromServices] IYubiKeyManager yubiKeyManager,
     [FromServices] ILogger<ManagementSession<ISmartCardConnection>> logger,
-    [FromServices] IProtocolFactory<ISmartCardConnection, IProtocol> protocolFactory) =>
+    [FromServices] IProtocolFactory<ISmartCardConnection> protocolFactory) =>
 {
     var yubiKeys = await yubiKeyManager.GetYubiKeys();
     var yubiKey = yubiKeys.FirstOrDefault();
@@ -37,7 +36,7 @@ app.MapGet("/di/serviceprovider", async (IServiceProvider sp) =>
 {
     var yubiKeyManager = sp.GetRequiredService<IYubiKeyManager>();
     var logger = sp.GetRequiredService<ILogger<ManagementSession<ISmartCardConnection>>>();
-    var protocolFactory = sp.GetRequiredService<IProtocolFactory<ISmartCardConnection, IProtocol>>();
+    var protocolFactory = sp.GetRequiredService<IProtocolFactory<ISmartCardConnection>>();
     var yubiKeys = await yubiKeyManager.GetYubiKeys();
     var yubiKey = yubiKeys.FirstOrDefault();
     if (yubiKey == null)

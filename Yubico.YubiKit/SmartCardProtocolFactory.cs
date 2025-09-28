@@ -18,25 +18,23 @@ using Yubico.YubiKit.Core.Protocols;
 
 namespace Yubico.YubiKit;
 
-public interface IProtocolFactory<in TConnection, out TProtocol>
+public interface IProtocolFactory<TConnection>
     where TConnection : IConnection
-    where TProtocol : IProtocol
 {
-    TProtocol Create(TConnection connection);
+    IProtocol Create(TConnection connection);
 }
 
-public class SmartCardProtocolFactory<TConnection, TProtocol>(ILoggerFactory loggerFactory)
-    : IProtocolFactory<TConnection, TProtocol>
+public class SmartCardProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
+    : IProtocolFactory<TConnection>
     where TConnection : IConnection
-    where TProtocol : IProtocol
 {
-    #region IProtocolFactory<TConnection,TProtocol> Members
+    #region IProtocolFactory<TConnection> Members
 
-    public TProtocol Create(TConnection connection) =>
+    public IProtocol Create(TConnection connection) =>
         connection switch
         {
-            ISmartCardConnection scConnection when typeof(TProtocol) == typeof(ISmartCardProtocol) =>
-                (TProtocol)(IProtocol)new SmartCardProtocol(
+            ISmartCardConnection scConnection =>
+                (IProtocol)new SmartCardProtocol(
                     loggerFactory.CreateLogger<SmartCardProtocol>(),
                     scConnection),
             _ => throw new NotSupportedException(

@@ -14,23 +14,41 @@
 
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Iso7816;
-using Yubico.YubiKit.Core.Protocols;
 
 namespace Yubico.YubiKit.Core.Apdu;
 
-internal class CommandChainingProcessor : IApduProcessor
+internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFormatter formatter)
+    : ApduFormatProcessor(connection, formatter)
 {
-    public CommandChainingProcessor(ISmartCardConnection connection, IApduFormatter formatter)
+    private const int ChunkSize = 255;
+
+    public override async Task<ResponseApdu> TransmitAsync(CommandApdu command,
+        CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var data = command.Data;
+        if (data.Length <= ChunkSize)
+            return await base.TransmitAsync(command, cancellationToken);
+
+        var offset = 0;
+        while (offset + ChunkSize < data.Length)
+        {
+            var chunk = data.Slice(offset, ChunkSize);
+            var chainedCommand = new CommandApdu(
+                (byte)(command.Cla | 0x10),
+                command.Ins,
+                command.P1,
+                command.P2,
+                chunk);
+
+            var result = await base.TransmitAsync(chainedCommand, cancellationToken);
+            if (result.SW != SWConstants.Success)
+                return result;
+
+            offset += ChunkSize;
+        }
+
+        var finalChunk = data[offset..];
+        var finalCommand = new CommandApdu(command.Cla, command.Ins, command.P1, command.P2, finalChunk, command.Le);
+        return await base.TransmitAsync(finalCommand, cancellationToken);
     }
-
-    #region IApduProcessor Members
-
-    public void Dispose() => throw new NotImplementedException();
-
-    public Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
-
-    #endregion
 }

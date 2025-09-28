@@ -31,6 +31,7 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
 
     // Thread-safety for initialization
     private volatile bool _hasData = false;
+    private bool _disposed;
     private readonly SemaphoreSlim _initializationLock = new(1, 1);
 
     public YubiKeyDeviceRepository(IDeviceChannel deviceChannel, IYubiKeyFactory yubiKeyFactory, ILogger<YubiKeyDeviceRepository> logger)
@@ -214,10 +215,22 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
 
     public override void Dispose()
     {
+        if (_disposed) return;
+
         _initializationLock?.Dispose();
-        _deviceChanges.OnCompleted();
-        _deviceChanges.Dispose();
+        try
+        {
+            _deviceChanges?.OnCompleted();
+            _deviceChanges?.Dispose();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Ignore if already disposed
+        }
+
         base.Dispose();
         GC.SuppressFinalize(this);
+
+        _disposed = true;
     }
 }

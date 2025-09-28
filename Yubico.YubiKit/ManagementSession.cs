@@ -24,7 +24,7 @@ namespace Yubico.YubiKit;
 public class ManagementSession<TConnection> : ApplicationSession
     where TConnection : IConnection
 {
-    private const byte INS_READ_CONFIG = 0x1d;
+    private const byte INS_GET_DEVICE_INFO = 0x1D;
     private const int TagMoreDeviceInfo = 0x10;
 
     private static readonly Feature FeatureDeviceInfo =
@@ -87,7 +87,7 @@ public class ManagementSession<TConnection> : ApplicationSession
             var apdu = new CommandApdu
             {
                 Cla = 0,
-                Ins = INS_READ_CONFIG,
+                Ins = INS_GET_DEVICE_INFO,
                 P1 = page,
                 P2 = 0,
                 Data = null
@@ -101,7 +101,7 @@ public class ManagementSession<TConnection> : ApplicationSession
                 if (encodedResult.Length - 1 != encodedResult.Span[0])
                     throw new BadResponseException("Invalid length");
 
-                var pageTlvs = TlvHelper.Decode(encodedResult.Span).ToList();
+                var pageTlvs = TlvHelper.Decode(encodedResult.Span[1..]).ToList();
 
                 var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
                 hasMoreData = moreData?.Length == 1 && moreData.GetValueSpan()[0] == 1;

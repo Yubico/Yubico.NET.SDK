@@ -84,17 +84,23 @@ public readonly record struct DeviceInfo
         var isSky = (formFactorTagData & 0x40) != 0;
         var formFactor = (FormFactor)formFactorTagData;
 
-        var resetBlocked = GetYubiKeyCapabilities(dict.GetSpan(TAG_RESET_BLOCKED));
-        var usbEnabled = GetYubiKeyCapabilities(dict.GetSpan(TAG_USB_ENABLED));
-        var usbSupported = GetYubiKeyCapabilities(dict.GetSpan(TAG_USB_SUPPORTED));
-        var nfcEnabled = GetYubiKeyCapabilities(dict.GetSpan(TAG_NFC_ENABLED));
-        var nfcSupported = GetYubiKeyCapabilities(dict.GetSpan(TAG_NFC_SUPPORTED));
-        var isNfcRestricted = dict.GetSpan(TAG_NFC_RESTRICTED)[0] == 1;
+        var resetBlocked = GetYubiKeyCapabilities(dict.GetMemory(TAG_RESET_BLOCKED));
+        var usbEnabled = GetYubiKeyCapabilities(dict.GetMemory(TAG_USB_ENABLED));
+        var usbSupported = GetYubiKeyCapabilities(dict.GetMemory(TAG_USB_SUPPORTED));
+        var nfcEnabled = GetYubiKeyCapabilities(dict.GetMemory(TAG_NFC_ENABLED));
+        var nfcSupported = GetYubiKeyCapabilities(dict.GetMemory(TAG_NFC_SUPPORTED));
+        var isNfcRestricted = dict.TryGetValue(TAG_NFC_RESTRICTED, out var nfcRestrictedBytes) &&
+                              nfcRestrictedBytes.Span[0] == 1;
 
-        var fipsCapabilities = GetFipsCapabilities(dict.GetSpan(TAG_FIPS_CAPABLE));
-        var fipsApprovedCapabilities = GetFipsCapabilities(dict.GetSpan(TAG_FIPS_APPROVED));
-        var hasPinComplexity = dict.GetSpan(TAG_PIN_COMPLEXITY)[0] == 1;
-        var partNumber = GetPartNumber(dict.GetSpan(TAG_PART_NUMBER));
+        var fipsCapabilities = GetFipsCapabilities(dict.GetMemory(TAG_FIPS_CAPABLE));
+        var fipsApprovedCapabilities = GetFipsCapabilities(dict.GetMemory(TAG_FIPS_APPROVED));
+        var hasPinComplexity = dict.TryGetValue(TAG_PIN_COMPLEXITY, out var hasPinComplexityBytes) &&
+                               hasPinComplexityBytes.Span[0] == 1;
+
+        string? partNumber = null;
+        if (dict.TryGetSpan(TAG_PART_NUMBER, out var partNumberBytes))
+            partNumber = GetPartNumber(partNumberBytes);
+
         var autoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(dict.GetSpan(TAG_AUTO_EJECT_TIMEOUT));
         var challengeResponseTimeout = dict.GetSpan(TAG_CHALLENGE_RESPONSE_TIMEOUT);
         var deviceFlags = (DeviceFlags)dict.GetSpan(TAG_DEVICE_FLAGS)[0];
@@ -207,7 +213,7 @@ public readonly record struct DeviceInfo
             // .NET defaults to decode without error detection, this is to detect an error in the decoding when
             // invalid bytes are found and allows us to return null, similar to the other Yubikey SDK's
             var encoding = new UTF8Encoding(false, true);
-            return encoding.GetString(valueSpan.ToArray());
+            return encoding.GetString(valueSpan);
         }
         catch (DecoderFallbackException)
         {
@@ -216,11 +222,12 @@ public readonly record struct DeviceInfo
         }
     }
 
-    private static YubiKeyCapabilities GetFipsCapabilities(ReadOnlySpan<byte> value)
+    private static YubiKeyCapabilities GetFipsCapabilities(ReadOnlyMemory<byte> value)
     {
-        YubiKeyCapabilities capabilities = 0;
+        if (value.IsEmpty) return 0;
 
-        int fips = BinaryPrimitives.ReadInt16BigEndian(value);
+        YubiKeyCapabilities capabilities = 0;
+        int fips = BinaryPrimitives.ReadInt16BigEndian(value.Span);
         if ((fips & 0b0000_0001) != 0) capabilities |= YubiKeyCapabilities.Fido2;
         if ((fips & 0b0000_0010) != 0) capabilities |= YubiKeyCapabilities.Piv;
         if ((fips & 0b0000_0100) != 0) capabilities |= YubiKeyCapabilities.OpenPgp;
@@ -230,10 +237,13 @@ public readonly record struct DeviceInfo
         return capabilities;
     }
 
-    private static YubiKeyCapabilities GetYubiKeyCapabilities(ReadOnlySpan<byte> value) =>
-        value.Length == 1
-            ? (YubiKeyCapabilities)value[0]
-            : (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(value);
+    private static YubiKeyCapabilities GetYubiKeyCapabilities(ReadOnlyMemory<byte> value)
+    {
+        if (value.IsEmpty) return 0;
+        return value.Length == 1
+            ? (YubiKeyCapabilities)value.Span[0]
+            : (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(value.Span);
+    }
 }
 
 [Flags]

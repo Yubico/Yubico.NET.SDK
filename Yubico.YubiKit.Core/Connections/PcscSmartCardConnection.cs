@@ -59,10 +59,11 @@ internal class PcscSmartCardConnection : ISmartCardConnection
         ArgumentNullException.ThrowIfNull(_context);
         ArgumentNullException.ThrowIfNull(_cardHandle);
 
-        var outputBuffer = new byte[512];
+        var outputBuffer = new byte[512]; // Todo, wont work for large APDUs
         var bytesReceived = 0;
         var buffer = outputBuffer;
-        var task = Task.Run(() => NativeMethods.SCardTransmit(
+
+        var result = await Task.Run(() => NativeMethods.SCardTransmit(
             _cardHandle,
             new SCARD_IO_REQUEST(_protocol.Value),
             command.Span,
@@ -71,9 +72,7 @@ internal class PcscSmartCardConnection : ISmartCardConnection
             out bytesReceived
         ), cancellationToken);
 
-        await task;
-
-        if (task.Result != ErrorCode.SCARD_S_SUCCESS)
+        if (result != ErrorCode.SCARD_S_SUCCESS)
             throw new SCardException("ExceptionMessages.SCardTransmitFailure, result");
 
         Array.Resize(ref outputBuffer, bytesReceived);

@@ -16,6 +16,11 @@ namespace Yubico.YubiKit.Core;
 
 public static class MemoryExtensions
 {
+    public static ReadOnlyMemory<TValue> GetMemory<TKey, TValue>(
+        this IDictionary<TKey, ReadOnlyMemory<TValue>> dictionary,
+        TKey key) =>
+        dictionary.TryGetValue(key, out var memory) ? memory : ReadOnlyMemory<TValue>.Empty;
+
     public static ReadOnlySpan<TValue> GetSpan<TKey, TValue>(this IDictionary<TKey, ReadOnlyMemory<TValue>> dictionary,
         TKey key) => dictionary[key].Span;
 

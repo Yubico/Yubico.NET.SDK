@@ -28,7 +28,7 @@ internal class PcscSmartCardConnection : ISmartCardConnection
     private bool _disposed;
     private SCARD_PROTOCOL? _protocol;
 
-    private PcscSmartCardConnection(
+    internal PcscSmartCardConnection(
         ILogger<PcscSmartCardConnection> logger,
         IPcscDevice smartCardDevice)
     {
@@ -82,18 +82,8 @@ internal class PcscSmartCardConnection : ISmartCardConnection
 
     #endregion
 
-    public static async Task<PcscSmartCardConnection> CreateAsync(
-        ILogger<PcscSmartCardConnection> logger,
-        IPcscDevice smartCardDevice,
-        CancellationToken cancellationToken = default)
-    {
-        PcscSmartCardConnection connection = new(logger, smartCardDevice);
-        await connection.InitializeAsync(cancellationToken);
 
-        return connection;
-    }
-
-    private ValueTask InitializeAsync(CancellationToken cancellationToken)
+    public ValueTask InitializeAsync(CancellationToken cancellationToken)
     {
         var task = Task.Run(() =>
         {
@@ -103,8 +93,8 @@ internal class PcscSmartCardConnection : ISmartCardConnection
         return new ValueTask(task);
     }
 
-    private static (SCardContext Context, SCardCardHandle CardHandle, SCARD_PROTOCOL Protocol) GetConnection(
-        string readerName)
+    private static (SCardContext Context, SCardCardHandle CardHandle, SCARD_PROTOCOL Protocol)
+    GetConnection(string readerName)
     {
         var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
         if (result != ErrorCode.SCARD_S_SUCCESS)

@@ -42,13 +42,22 @@ internal class ManagementSessionFactory<TConnection> : IManagementSessionFactory
     public ManagementSession<TConnection> Create(TConnection connection) =>
         connection switch
         {
-            ISmartCardConnection => new ManagementSession<TConnection>(
-                _loggerFactory.CreateLogger<ManagementSession<TConnection>>(),
-                connection,
-                _protocolFactory),
+            ISmartCardConnection => CreateSession((ISmartCardConnection)connection),
             _ => throw new NotSupportedException(
                 $"The connection type {connection.GetType().FullName} is not supported.")
         };
+
+    private ManagementSession<TConnection> CreateSession(ISmartCardConnection connection)
+    {
+        var session = new ManagementSession<TConnection>(
+                _loggerFactory.CreateLogger<ManagementSession<TConnection>>(),
+                (TConnection)connection,
+                _protocolFactory);
+
+        // TODO consider: session.InitializeAsync() must be called by the caller after this method returns.
+
+        return session;
+    }
 
     #endregion
 }

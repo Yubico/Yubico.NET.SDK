@@ -27,7 +27,7 @@ internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFo
     {
         var data = command.Data;
         if (data.Length <= ChunkSize)
-            return await base.TransmitAsync(command, cancellationToken);
+            return await base.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         var offset = 0;
         while (offset + ChunkSize < data.Length)
@@ -40,7 +40,7 @@ internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFo
                 command.P2,
                 chunk);
 
-            var result = await base.TransmitAsync(chainedCommand, cancellationToken);
+            var result = await base.TransmitAsync(chainedCommand, cancellationToken).ConfigureAwait(false);
             if (result.SW != SWConstants.Success)
                 return result;
 
@@ -49,6 +49,6 @@ internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFo
 
         var finalChunk = data[offset..];
         var finalCommand = new CommandApdu(command.Cla, command.Ins, command.P1, command.P2, finalChunk, command.Le);
-        return await base.TransmitAsync(finalCommand, cancellationToken);
+        return await base.TransmitAsync(finalCommand, cancellationToken).ConfigureAwait(false);
     }
 }

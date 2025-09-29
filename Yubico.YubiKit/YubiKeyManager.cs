@@ -30,7 +30,7 @@ public class YubiKeyManager : IYubiKeyManager
 
     public async Task<IEnumerable<IYubiKey>> GetYubiKeysAsync()
     {
-       return await _deviceRepository.GetAllDevicesAsync();
+       return await _deviceRepository.GetAllDevicesAsync().ConfigureAwait(false);
     }
 
     #endregion

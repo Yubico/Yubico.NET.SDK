@@ -27,7 +27,7 @@ public class DeviceChannel : IDeviceChannel, IDisposable
 
         try
         {
-            await _channel.Writer.WriteAsync(devices, cancellationToken);
+            await _channel.Writer.WriteAsync(devices, cancellationToken).ConfigureAwait(false);
         }
         catch (InvalidOperationException)
         {

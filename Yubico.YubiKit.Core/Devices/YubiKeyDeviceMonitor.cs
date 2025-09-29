@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.Devices.SmartCard;
 
 namespace Yubico.YubiKit.Core.Devices;
 
@@ -46,12 +47,12 @@ public class YubiKeyDeviceMonitor : BackgroundService
         try
         {
             _logger.LogInformation("Performing initial device scan...");
-            await PerformDeviceScan(stoppingToken);
+            await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
 
             using var timer = new PeriodicTimer(_scanInterval);
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                await PerformDeviceScan(stoppingToken);
+                await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException)
@@ -82,10 +83,10 @@ public class YubiKeyDeviceMonitor : BackgroundService
 
     private async Task ScanPcscDevices(CancellationToken cancellationToken)
     {
-        var devices = await _pcscService.GetAllAsync();
-        var yubiKeys = devices.Select(device => yubiKeyFactory.Create(device));
-        await _deviceChannel.PublishAsync(yubiKeys, cancellationToken);
+        var devices = await _pcscService.GetAllAsync().ConfigureAwait(false);
+        var yubiKeys = devices.Select(yubiKeyFactory.Create);
 
+        await _deviceChannel.PublishAsync(yubiKeys, cancellationToken).ConfigureAwait(false);
         _logger.LogInformation("PCSC scan completed, found {DeviceCount} devices", devices.Count());
     }
 
@@ -101,4 +102,5 @@ public class YubiKeyDeviceMonitor : BackgroundService
 
         _disposed = true;
     }
+
 }

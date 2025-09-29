@@ -38,56 +38,5 @@ internal unsafe struct SCARD_READER_STATE
 
     public static SCARD_READER_STATE Create(string readerName) => new(Marshal.StringToHGlobalAnsi(readerName));
 
-    public static SCARD_READER_STATE[] CreateMany(IEnumerable<string> readerNames) => readerNames
-        .Select(name => new SCARD_READER_STATE(Marshal.StringToHGlobalAnsi(name))).ToArray();
-
-    // public override string ToString()
-    // {
-    //     return $"{this.GetReaderName()}: [{this.GetCurrentSequence()} : {this.GetCurrentState()}] => [{this.GetEventSequence()} : {this.GetEventState()}]";
-    // }
-}
-
-internal static unsafe class SCardReaderStateExtensions
-{
-    private const uint SequenceMask = 0xFFFF_0000;
-    private const uint StateMask = 0x0000_FFFF;
-
-    public static SCARD_STATE GetCurrentState(this in SCARD_READER_STATE state) =>
-        (SCARD_STATE)(state.CurrentState & StateMask);
-
-    public static SCARD_STATE GetEventState(this in SCARD_READER_STATE state) =>
-        (SCARD_STATE)(state.EventState & StateMask);
-
-    public static string GetReaderName(this in SCARD_READER_STATE state)
-    {
-        if (state.ReaderName == IntPtr.Zero) return string.Empty;
-
-        return Marshal.PtrToStringUTF8(state.ReaderName) ?? string.Empty;
-    }
-
-    public static AnswerToReset GetAtr(this in SCARD_READER_STATE state)
-    {
-        var atrBytes = new byte[state.AtrLength];
-        fixed (byte* src = state.AnswerToReset)
-        {
-            Marshal.Copy((IntPtr)src, atrBytes, 0, (int)state.AtrLength);
-        }
-
-        return new AnswerToReset(atrBytes);
-    }
-
-    public static bool IsCardPresent(this in SCARD_READER_STATE state) =>
-        (state.GetEventState() & SCARD_STATE.PRESENT) != 0;
-
-    public static void AcknowledgeChanges(this ref SCARD_READER_STATE state)
-    {
-        state.CurrentState = state.EventState & ~(uint)SCARD_STATE.CHANGED;
-        state.EventState = 0;
-    }
-
-    public static int GetCurrentSequence(this in SCARD_READER_STATE state) =>
-        (int)((state.CurrentState & SequenceMask) >> 16);
-
-    public static int GetEventSequence(this in SCARD_READER_STATE state) =>
-        (int)((state.EventState & SequenceMask) >> 16);
+    public static SCARD_READER_STATE[] CreateMany(IEnumerable<string> readerNames) => [.. readerNames.Select(name => new SCARD_READER_STATE(Marshal.StringToHGlobalAnsi(name)))];
 }

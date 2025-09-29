@@ -44,10 +44,18 @@ internal class PcscYubiKey : IYubiKey
         if (typeof(TConnection) != typeof(ISmartCardConnection))
             throw new NotSupportedException(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
-
-        _connection = await _connectionFactory.CreateAsync(_pcscDevice);
-        return (TConnection)_connection;
+                
+        var connection = await ConnectAsync(cancellationToken).ConfigureAwait(false);
+        return (TConnection)connection;
     }
+
+    public async Task<ISmartCardConnection> ConnectAsync(CancellationToken cancellationToken = default)
+    {
+        _connection = await _connectionFactory.CreateAsync(_pcscDevice, cancellationToken).ConfigureAwait(false);
+        _logger.LogInformation("Connected to YubiKey in reader {ReaderName}", ReaderName);
+        return _connection;
+    }
+
 
     #endregion
 }

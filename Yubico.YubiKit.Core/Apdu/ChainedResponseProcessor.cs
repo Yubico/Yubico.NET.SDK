@@ -36,13 +36,13 @@ internal class ChainedResponseProcessor : IApduProcessor
 
     public async Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default)
     {
-        var response = await _apduTransmitter.TransmitAsync(command, cancellationToken);
+        var response = await _apduTransmitter.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         using var ms = new MemoryStream();
         while (response.SW1 == SW1_HAS_MORE_DATA)
         {
             ms.Write(response.Data.Span);
-            response = await _apduTransmitter.TransmitAsync(GetMoreDataApdu, cancellationToken);
+            response = await _apduTransmitter.TransmitAsync(GetMoreDataApdu, cancellationToken).ConfigureAwait(false);
         }
 
         ms.Write(response.Data.Span);

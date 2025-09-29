@@ -99,14 +99,11 @@ public class ManagementSession<TConnection> : ApplicationSession
 
             if (_protocol is ISmartCardProtocol smartCardProtocol)
             {
-                var encodedResult =
-                    await smartCardProtocol
-                        .TransmitAndReceiveAsync(apdu);
+                var encodedResult = await smartCardProtocol.TransmitAndReceiveAsync(apdu).ConfigureAwait(false);
                 if (encodedResult.Length - 1 != encodedResult.Span[0])
                     throw new BadResponseException("Invalid length");
 
                 var pageTlvs = TlvHelper.Decode(encodedResult.Span[1..]).ToList();
-
                 var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
                 hasMoreData = moreData?.Length == 1 && moreData.GetValueSpan()[0] == 1;
                 allPagesTlvs = allPagesTlvs.Concat(pageTlvs);

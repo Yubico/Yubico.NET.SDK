@@ -52,19 +52,19 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
     // Public API methods with guaranteed data availability
     public async Task<IReadOnlyCollection<IYubiKey>> GetAllDevicesAsync()
     {
-        await EnsureDataAvailable();
+        await EnsureDataAvailable().ConfigureAwait(false);
         return [.. _devices.Values];
     }
 
     public async Task<IReadOnlyCollection<IYubiKey>> GetSmartCardDevicesAsync()
     {
-        await EnsureDataAvailable();
+        await EnsureDataAvailable().ConfigureAwait(false);
         return [.. _devices.Values.Where(IsSmartCardDevice)];
     }
 
     public async Task<IYubiKey?> GetDeviceByIdAsync(string deviceId)
     {
-        await EnsureDataAvailable();
+        await EnsureDataAvailable().ConfigureAwait(false);
         _devices.TryGetValue(deviceId, out var device);
         return device;
     }
@@ -76,7 +76,7 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
     {
         if (_hasData) return; // Fast path - data already available
 
-        await _initializationLock.WaitAsync();
+        await _initializationLock.WaitAsync().ConfigureAwait(false);
         try
         {
             if (_hasData) return; // Double-check after acquiring lock
@@ -84,7 +84,7 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
             _logger.LogInformation("Cache empty, performing synchronous device scan...");
 
             // Perform ONE synchronous scan to populate cache immediately
-            var devices = await _pcscService.GetAllAsync(); 
+            var devices = await _pcscService.GetAllAsync().ConfigureAwait(false); 
             var yubiKeys = devices.Select(device => _yubiKeyFactory.Create(device));
             UpdateDeviceCache(yubiKeys);
 

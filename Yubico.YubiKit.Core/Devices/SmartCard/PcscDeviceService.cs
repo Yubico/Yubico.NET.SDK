@@ -13,12 +13,12 @@ public class PcscDeviceService : IPcscDeviceService
         _logger = logger;
     }
 
-    public async Task<IReadOnlyList<PcscDevice>> GetAllAsync()
+    public async Task<IReadOnlyList<IPcscDevice>> GetAllAsync()
     {
-        return await Task.Run(GetAll);
+        return await Task.Run(GetAll).ConfigureAwait(false);
     }
 
-    public IReadOnlyList<PcscDevice> GetAll()
+    public IReadOnlyList<IPcscDevice> GetAll()
     {
         _logger.LogInformation("Getting list of PC/SC devices");
         

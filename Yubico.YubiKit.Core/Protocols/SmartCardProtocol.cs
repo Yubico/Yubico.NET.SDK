@@ -66,9 +66,9 @@ internal class SmartCardProtocol : ISmartCardProtocol
         CommandApdu command,
         CancellationToken cancellationToken = default)
     {
-        await EnsureInitialized();
+        await EnsureInitialized().ConfigureAwait(false);
 
-        var response = await _processor.TransmitAsync(command, cancellationToken);
+        var response = await _processor.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
         if (response is not { SW1: 0x90, SW2: 0x00 })
             throw new InvalidOperationException(
                 $"Command failed with status: {response.SW1:X2}{response.SW2:X2}");
@@ -111,7 +111,7 @@ internal class SmartCardProtocol : ISmartCardProtocol
         }
 
         _logger.LogDebug("Protocol not initialized, performing SELECT");
-        await SelectAsync(ApplicationIds.Management);
+        await SelectAsync(ApplicationIds.Management).ConfigureAwait(false);
         _isInitialized = true;
     }
 

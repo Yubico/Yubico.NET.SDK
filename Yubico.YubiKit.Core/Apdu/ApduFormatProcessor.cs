@@ -34,7 +34,7 @@ internal class ApduFormatProcessor(ISmartCardConnection connection, IApduFormatt
             command.Data,
             command.Le);
 
-        var response = await connection.TransmitAndReceiveAsync(payload, cancellationToken);
+        var response = await connection.TransmitAndReceiveAsync(payload, cancellationToken).ConfigureAwait(false);
         return new ResponseApdu(response);
     }
 

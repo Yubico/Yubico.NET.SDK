@@ -28,9 +28,9 @@ public class YubiKeyManager : IYubiKeyManager
        return _deviceRepository.GetAllDevices();
     }
 
-    public async Task<IEnumerable<IYubiKey>> GetYubiKeysAsync()
+    public async Task<IEnumerable<IYubiKey>> GetYubiKeysAsync(CancellationToken cancellationToken = default)
     {
-       return await _deviceRepository.GetAllDevicesAsync().ConfigureAwait(false);
+       return await _deviceRepository.GetAllDevicesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     #endregion

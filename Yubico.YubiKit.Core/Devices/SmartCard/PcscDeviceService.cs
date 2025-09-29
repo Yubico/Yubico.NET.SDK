@@ -4,6 +4,12 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Devices.SmartCard;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
+public interface IPcscDeviceService
+{
+    public Task<IReadOnlyList<IPcscDevice>> GetAllAsync( CancellationToken cancellationToken = default );
+    public IReadOnlyList<IPcscDevice> GetAll();
+}
+
 public class PcscDeviceService : IPcscDeviceService
 {
     private readonly ILogger<PcscDeviceService> _logger;
@@ -13,15 +19,15 @@ public class PcscDeviceService : IPcscDeviceService
         _logger = logger;
     }
 
-    public async Task<IReadOnlyList<IPcscDevice>> GetAllAsync()
+    public async Task<IReadOnlyList<IPcscDevice>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await Task.Run(GetAll).ConfigureAwait(false);
+        return await Task.Run(GetAll, cancellationToken).ConfigureAwait(false);
     }
 
     public IReadOnlyList<IPcscDevice> GetAll()
     {
         _logger.LogInformation("Getting list of PC/SC devices");
-        
+
         var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
         if (result != ErrorCode.SCARD_S_SUCCESS)
             throw new InvalidOperationException("Can't establish context with PC/SC service.");

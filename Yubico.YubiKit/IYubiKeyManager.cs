@@ -19,7 +19,7 @@ namespace Yubico.YubiKit;
 
 public interface IYubiKeyManager
 {
-    Task<IEnumerable<IYubiKey>> GetYubiKeysAsync();
+    Task<IEnumerable<IYubiKey>> GetYubiKeysAsync(CancellationToken cancellationToken = default);
     IEnumerable<IYubiKey> GetYubiKeys();
     IObservable<YubiKeyDeviceEvent> DeviceChanges { get; }
 }

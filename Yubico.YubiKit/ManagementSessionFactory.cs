@@ -23,19 +23,13 @@ public interface IManagementSessionFactory<TConnection>
     ManagementSession<TConnection> Create(TConnection connection);
 }
 
-internal class ManagementSessionFactory<TConnection> : IManagementSessionFactory<TConnection>
+internal class ManagementSessionFactory<TConnection>(
+    ILoggerFactory loggerFactory,
+    IProtocolFactory<TConnection> protocolFactory) : IManagementSessionFactory<TConnection>
     where TConnection : IConnection
 {
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly IProtocolFactory<TConnection> _protocolFactory;
-
-    public ManagementSessionFactory(
-        ILoggerFactory loggerFactory,
-        IProtocolFactory<TConnection> protocolFactory)
-    {
-        _loggerFactory = loggerFactory;
-        _protocolFactory = protocolFactory;
-    }
+    private readonly ILoggerFactory _loggerFactory = loggerFactory;
+    private readonly IProtocolFactory<TConnection> _protocolFactory = protocolFactory;
 
     #region IManagementSessionFactory<TConnection> Members
 

@@ -14,11 +14,3 @@
 
 namespace Yubico.YubiKit.Core.Devices;
 
-public interface IYubiKeyDeviceRepository : IDisposable
-{
-    Task<IReadOnlyCollection<IYubiKey>> GetAllDevicesAsync();
-    IReadOnlyCollection<IYubiKey> GetAllDevices();
-    IObservable<YubiKeyDeviceEvent> DeviceChanges { get; }
-    Task<IYubiKey?> GetDeviceByIdAsync(string deviceId);
-    
-}

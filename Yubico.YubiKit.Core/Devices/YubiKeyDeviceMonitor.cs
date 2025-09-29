@@ -83,7 +83,7 @@ public class YubiKeyDeviceMonitor : BackgroundService
 
     private async Task ScanPcscDevices(CancellationToken cancellationToken)
     {
-        var devices = await _pcscService.GetAllAsync().ConfigureAwait(false);
+        var devices = await _pcscService.GetAllAsync(cancellationToken).ConfigureAwait(false);
         var yubiKeys = devices.Select(yubiKeyFactory.Create);
 
         await _deviceChannel.PublishAsync(yubiKeys, cancellationToken).ConfigureAwait(false);

@@ -21,6 +21,13 @@ using Yubico.YubiKit.Core.Devices.SmartCard;
 
 namespace Yubico.YubiKit.Core.Devices;
 
+public interface IYubiKeyDeviceRepository : IDisposable
+{
+    Task<IReadOnlyCollection<IYubiKey>> GetAllDevicesAsync(CancellationToken cancellationToken = default);
+    IReadOnlyCollection<IYubiKey> GetAllDevices();
+    IObservable<YubiKeyDeviceEvent> DeviceChanges { get; }
+}
+
 public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceRepository
 {
     private readonly IDeviceChannel _deviceChannel;
@@ -50,42 +57,32 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
     }
 
     // Public API methods with guaranteed data availability
-    public async Task<IReadOnlyCollection<IYubiKey>> GetAllDevicesAsync()
+    public async Task<IReadOnlyCollection<IYubiKey>> GetAllDevicesAsync(CancellationToken cancellationToken = default)
     {
-        await EnsureDataAvailable().ConfigureAwait(false);
+        await EnsureDataAvailable(cancellationToken).ConfigureAwait(false);
         return [.. _devices.Values];
     }
 
-    public async Task<IReadOnlyCollection<IYubiKey>> GetSmartCardDevicesAsync()
-    {
-        await EnsureDataAvailable().ConfigureAwait(false);
-        return [.. _devices.Values.Where(IsSmartCardDevice)];
-    }
-
-    public async Task<IYubiKey?> GetDeviceByIdAsync(string deviceId)
-    {
-        await EnsureDataAvailable().ConfigureAwait(false);
-        _devices.TryGetValue(deviceId, out var device);
-        return device;
-    }
 
     public IObservable<YubiKeyDeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
 
     // Ensures cache has data - performs sync scan if needed
-    private async Task EnsureDataAvailable()
+    private async Task EnsureDataAvailable(CancellationToken cancellationToken = default)
     {
-        if (_hasData) return; // Fast path - data already available
+        if (_hasData)
+            return; // Fast path - data already available
 
-        await _initializationLock.WaitAsync().ConfigureAwait(false);
+        await _initializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        if (_hasData)
+            return; // Double-check after acquiring lock
+
         try
         {
-            if (_hasData) return; // Double-check after acquiring lock
 
             _logger.LogInformation("Cache empty, performing synchronous device scan...");
 
-            // Perform ONE synchronous scan to populate cache immediately
-            var devices = await _pcscService.GetAllAsync().ConfigureAwait(false); 
-            var yubiKeys = devices.Select(device => _yubiKeyFactory.Create(device));
+            var devices = await _pcscService.GetAllAsync(cancellationToken).ConfigureAwait(false);
+            var yubiKeys = devices.Select(_yubiKeyFactory.Create);
             UpdateDeviceCache(yubiKeys);
 
             _logger.LogInformation("Synchronous scan completed, found {DeviceCount} devices", devices.Count());
@@ -125,8 +122,6 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
     private void UpdateDeviceCache(IEnumerable<IYubiKey> discoveredDevices)
     {
         var deviceList = discoveredDevices.ToList();
-
-        // Determine what changed
         var currentIds = _devices.Keys.ToHashSet();
         var newDeviceMap = new Dictionary<string, IYubiKey>();
 
@@ -209,7 +204,7 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
     {
         if (_disposed)
             return;
-        
+
         try
         {
             _initializationLock?.Dispose();

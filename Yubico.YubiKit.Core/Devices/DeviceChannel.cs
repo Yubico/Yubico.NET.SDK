@@ -16,6 +16,13 @@ using System.Threading.Channels;
 
 namespace Yubico.YubiKit.Core.Devices;
 
+public interface IDeviceChannel
+{
+    Task PublishAsync(IEnumerable<IYubiKey> devices, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IEnumerable<IYubiKey>> ConsumeAsync(CancellationToken cancellationToken = default);
+    void Complete();
+}
+
 public class DeviceChannel : IDeviceChannel, IDisposable
 {
     private readonly Channel<IEnumerable<IYubiKey>> _channel = Channel.CreateUnbounded<IEnumerable<IYubiKey>>();

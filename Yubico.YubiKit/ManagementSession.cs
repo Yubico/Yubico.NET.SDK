@@ -44,14 +44,14 @@ public class ManagementSession<TConnection> : ApplicationSession
         _protocol = protocolFactory.Create(connection);
     }
 
-    private async Task<Version> GetVersionAsync()
+    private async Task<Version> GetVersionAsync(CancellationToken cancellationToken = default)
     {
         if (_version is not null)
             return _version;
 
         if (_protocol is ISmartCardProtocol smartCardProtocol)
         {
-            var versionBytes = await smartCardProtocol.SelectAsync(ApplicationIds.Management).ConfigureAwait(false);
+            var versionBytes = await smartCardProtocol.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
             var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
 
             var versionString = deviceText.Split(' ').Last();
@@ -78,7 +78,7 @@ public class ManagementSession<TConnection> : ApplicationSession
     }
 
 
-    public async Task<DeviceInfo> GetDeviceInfoAsync()
+    public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
         EnsureSupports(FeatureDeviceInfo); // todo
 
@@ -99,7 +99,7 @@ public class ManagementSession<TConnection> : ApplicationSession
 
             if (_protocol is ISmartCardProtocol smartCardProtocol)
             {
-                var encodedResult = await smartCardProtocol.TransmitAndReceiveAsync(apdu).ConfigureAwait(false);
+                var encodedResult = await smartCardProtocol.TransmitAndReceiveAsync(apdu, cancellationToken).ConfigureAwait(false);
                 if (encodedResult.Length - 1 != encodedResult.Span[0])
                     throw new BadResponseException("Invalid length");
 

@@ -19,14 +19,6 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </summary>
 public interface IDevice
 {
-    /// <summary>
-    ///     Gets the platform defined path to the device.
-    /// </summary>
-    /// <remarks>
-    ///     The exact meaning of this property may vary between operating systems and device types. The SDK treats this
-    ///     property as an opaque value and only uses it to check for uniqueness across device instances. It is strongly
-    ///     recommended that you do not take a dependency on the exact format or meaning of the value of this property.
-    /// </remarks>
     string ReaderName { get; }
 
     // /// <summary>

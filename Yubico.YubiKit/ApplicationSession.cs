@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKit;
 
-public class ApplicationSession : IApplicationSession
+public abstract class ApplicationSession : IApplicationSession
 {
     #region IApplicationSession Members
 
@@ -34,15 +34,17 @@ public class ApplicationSession : IApplicationSession
         }
     }
 
-    protected void EnsureSupports(Feature feature)
+    public void EnsureSupports(Feature feature)
     {
         if (!IsSupported(feature)) throw new NotSupportedException($"{feature.Name} is not supported on this YubiKey.");
     }
 
-    protected bool IsSupported(Feature feature) =>
+    public bool IsSupported(Feature feature) =>
         true; // TODO get from Management Session, select, and parse version info
 }
 
 public interface IApplicationSession : IDisposable
 {
+    bool IsSupported(Feature feature);
+    void EnsureSupports(Feature feature);
 }

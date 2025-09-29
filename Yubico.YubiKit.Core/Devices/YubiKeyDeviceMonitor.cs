@@ -19,23 +19,23 @@ namespace Yubico.YubiKit.Core.Devices;
 
 public class YubiKeyDeviceMonitor : BackgroundService
 {
+    private readonly IYubiKeyFactory yubiKeyFactory;
     private readonly IPcscService _pcscService;
     private readonly IDeviceChannel _deviceChannel;
-    private readonly IYubiKeyFactory _yubiKeyFactory;
     private readonly ILogger<YubiKeyDeviceMonitor> _logger;
     private readonly TimeSpan _scanInterval;
 
     public YubiKeyDeviceMonitor(
+        IYubiKeyFactory yubiKeyFactory,
         IPcscService pcscService,
         IDeviceChannel deviceChannel,
-        IYubiKeyFactory yubiKeyFactory,
         ILogger<YubiKeyDeviceMonitor> logger)
     {
+        this.yubiKeyFactory = yubiKeyFactory;
         _pcscService = pcscService;
         _deviceChannel = deviceChannel;
-        _yubiKeyFactory = yubiKeyFactory;
         _logger = logger;
-        _scanInterval = TimeSpan.FromSeconds(2);
+        _scanInterval = TimeSpan.FromSeconds(200);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -72,7 +72,9 @@ public class YubiKeyDeviceMonitor : BackgroundService
         try
         {
             var pcscDevices = await _pcscService.GetAllAsync();
-            await _deviceChannel.PublishAsync(pcscDevices, cancellationToken);
+            var yubiKeys = pcscDevices.Select(device => yubiKeyFactory.Create(device));
+            
+            await _deviceChannel.PublishAsync(yubiKeys, cancellationToken);
             _logger.LogDebug("Found {DeviceCount} PCSC devices", pcscDevices.Count);
         }
         catch (Exception ex)

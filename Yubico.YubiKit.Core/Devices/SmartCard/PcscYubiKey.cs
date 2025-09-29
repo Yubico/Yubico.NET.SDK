@@ -20,14 +20,15 @@ namespace Yubico.YubiKit.Core.Devices.SmartCard;
 
 internal class PcscYubiKey : IYubiKey
 {
+    internal string ReaderName => _pcscDevice.ReaderName;
     private readonly ISmartCardConnectionFactory _connectionFactory;
     private readonly ILogger<PcscYubiKey> _logger;
-    private readonly ISmartCardDevice _pcscDevice;
+    private readonly IPcscDevice _pcscDevice;
     private ISmartCardConnection? _connection;
 
     internal PcscYubiKey(
         ILogger<PcscYubiKey> logger,
-        ISmartCardDevice pcscDevice,
+        IPcscDevice pcscDevice,
         ISmartCardConnectionFactory connectionFactory)
     {
         _logger = logger;

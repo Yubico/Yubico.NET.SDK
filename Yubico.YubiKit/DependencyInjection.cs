@@ -29,37 +29,34 @@ public static class DependencyInjection
             return services.AddYubiKeyManager(configureOptions: null);
         }
 
+        internal IServiceCollection AddBackgroundServices()
+        {
+           return services
+            .AddSingleton<YubiKeyDeviceRepository>()
+            .AddSingleton<IYubiKeyDeviceRepository>(sp => sp.GetRequiredService<YubiKeyDeviceRepository>())
+            .AddHostedService<YubiKeyDeviceRepository>(sp => sp.GetRequiredService<YubiKeyDeviceRepository>())
+
+            .AddSingleton<YubiKeyDeviceMonitor>()
+            .AddHostedService<YubiKeyDeviceMonitor>(sp => sp.GetRequiredService<YubiKeyDeviceMonitor>());
+        }
+
         public IServiceCollection AddYubiKeyManager(Action<YubiKeyManagerOptions>? configureOptions)
         {
             if (configureOptions != null) services.Configure(configureOptions);
 
-            // Core factory services
-            services.AddSingleton<IYubiKeyFactory, YubiKeyFactory>();
-            services.AddTransient<IPcscService, PcscDeviceService>();
-            services.AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>();
-
-            // Device communication channel
-            services.AddSingleton<IDeviceChannel, DeviceChannel>();
-
-            // Device repository (state management + BackgroundService)
-            services.AddSingleton<IYubiKeyDeviceRepository, YubiKeyDeviceRepository>();
-            services.AddHostedService<YubiKeyDeviceRepository>();
-
-            // Background monitoring service
-            services.AddHostedService<YubiKeyDeviceMonitor>();
-
-            // YubiKeyManager now uses repository
-            services.AddSingleton<IYubiKeyManager, YubiKeyManager>();
-
-            // Protocol and session factories
-            services
-                .AddTransient<IProtocolFactory<ISmartCardConnection>, SmartCardProtocolFactory<ISmartCardConnection>>();
-            services
-                .AddSingleton<IManagementSessionFactory<ISmartCardConnection>,
-                    ManagementSessionFactory<ISmartCardConnection>>();
+            services.AddTransient<IYubiKeyManager, YubiKeyManager>()
+                    .AddTransient<IYubiKeyFactory, YubiKeyFactory>()
+                    .AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>()
+                    .AddTransient<IPcscService, PcscDeviceService>()
+                    .AddTransient<IProtocolFactory<ISmartCardConnection>, SmartCardProtocolFactory<ISmartCardConnection>>()
+                    .AddTransient<IManagementSessionFactory<ISmartCardConnection>, ManagementSessionFactory<ISmartCardConnection>>()
+                    .AddSingleton<IDeviceChannel, DeviceChannel>()
+                    .AddBackgroundServices();
 
             return services;
         }
+
+
     }
 
     #endregion

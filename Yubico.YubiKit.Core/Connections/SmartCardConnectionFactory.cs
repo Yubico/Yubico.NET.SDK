@@ -4,7 +4,7 @@ using Yubico.YubiKit.Core.Devices.SmartCard;
 
 public interface ISmartCardConnectionFactory
 {
-    Task<ISmartCardConnection> CreateAsync(ISmartCardDevice smartCardDevice);
+    Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice);
 }
 
 public class SmartCardConnectionFactory : ISmartCardConnectionFactory
@@ -18,7 +18,7 @@ public class SmartCardConnectionFactory : ISmartCardConnectionFactory
 
     #region ISmartCardConnectionFactory Members
 
-    public async Task<ISmartCardConnection> CreateAsync(ISmartCardDevice smartCardDevice) =>
+    public async Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice) =>
         await PcscSmartCardConnection.CreateAsync(
             _loggerFactory.CreateLogger<PcscSmartCardConnection>(),
             smartCardDevice);

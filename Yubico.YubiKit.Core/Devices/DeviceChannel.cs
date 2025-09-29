@@ -16,13 +16,23 @@ using System.Threading.Channels;
 
 namespace Yubico.YubiKit.Core.Devices;
 
-public class DeviceChannel : IDeviceChannel
+public class DeviceChannel : IDeviceChannel, IDisposable
 {
     private readonly Channel<IEnumerable<IYubiKey>> _channel = Channel.CreateUnbounded<IEnumerable<IYubiKey>>();
+    private bool _disposed = false;
 
     public async Task PublishAsync(IEnumerable<IYubiKey> devices, CancellationToken cancellationToken = default)
     {
-        await _channel.Writer.WriteAsync(devices, cancellationToken);
+        if (_disposed) return;
+
+        try
+        {
+            await _channel.Writer.WriteAsync(devices, cancellationToken);
+        }
+        catch (InvalidOperationException)
+        {
+            // Writer is completed - ignore
+        }
     }
 
     public IAsyncEnumerable<IEnumerable<IYubiKey>> ConsumeAsync(CancellationToken cancellationToken = default)
@@ -30,5 +40,20 @@ public class DeviceChannel : IDeviceChannel
         return _channel.Reader.ReadAllAsync(cancellationToken);
     }
 
-    public void Complete() => _channel.Writer.Complete();
+    public void Complete()
+    {
+        if (!_disposed)
+        {
+            _channel.Writer.TryComplete();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+
+        Complete();
+        _disposed = true;
+        GC.SuppressFinalize(this);
+    }
 }

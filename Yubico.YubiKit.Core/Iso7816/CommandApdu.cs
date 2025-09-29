@@ -23,14 +23,26 @@ public class CommandApdu
     {
     }
 
-    public CommandApdu(int cla, int ins, int p1, int p2, ReadOnlyMemory<byte>? data = null, int le = 0)
+    public CommandApdu(int cla, int ins, int p1, int p2, ReadOnlyMemory<byte>? data = null, int le = 0) 
+    : this(
+        ByteUtils.ValidateByte(cla, nameof(cla)),
+        ByteUtils.ValidateByte(ins, nameof(ins)),
+        ByteUtils.ValidateByte(p1, nameof(p1)),
+        ByteUtils.ValidateByte(p2, nameof(p2)),
+        data,
+        le)
     {
-        Cla = ValidateByte(cla, nameof(cla).ToUpperInvariant());
-        Ins = ValidateByte(ins, nameof(ins).ToUpperInvariant());
-        P1 = ValidateByte(p1, nameof(p1).ToUpperInvariant());
-        P2 = ValidateByte(p2, nameof(p2).ToUpperInvariant());
-        Data = data?.ToArray() ?? ReadOnlyMemory<byte>.Empty;
+
+    }
+
+    public CommandApdu(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte>? data = null, int le = 0)
+    {
+        Cla = cla;
+        Ins = ins;
+        P1 = p1;
+        P2 = p2;
         Le = le;
+        Data = data?.ToArray() ?? ReadOnlyMemory<byte>.Empty;
     }
 
     public byte Cla { get; init; }
@@ -44,13 +56,6 @@ public class CommandApdu
     /// </summary>
     public ReadOnlyMemory<byte> Data { get; set; } = ReadOnlyMemory<byte>.Empty;
 
-    private static byte ValidateByte(int byteInt, string name)
-    {
-        if (byteInt is > 255 or < byte.MinValue)
-            throw new ArgumentOutOfRangeException("Invalid value for " + name + ", must fit in a byte");
-
-        return (byte)byteInt;
-    }
 
     /// <summary>
     ///     Prints CLA, INS, P1, P2, Lc, Le, and the length of the Data field in a formatted string.

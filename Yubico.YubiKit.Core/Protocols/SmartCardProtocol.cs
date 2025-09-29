@@ -31,6 +31,7 @@ public interface ISmartCardProtocol : IProtocol
 
     Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default);
+
 }
 
 internal class SmartCardProtocol : ISmartCardProtocol
@@ -96,4 +97,5 @@ internal class SmartCardProtocol : ISmartCardProtocol
 
         return new ChainedResponseProcessor(processor, _insSendRemaining);
     }
+
 }

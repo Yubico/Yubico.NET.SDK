@@ -1,7 +1,7 @@
-using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Devices.SmartCard;
 
 public interface IPcscService
 {
-    public Task<IReadOnlyList<IYubiKey>> GetAllAsync();
-    public IReadOnlyList<IYubiKey> GetAll();
+    public Task<IReadOnlyList<PcscDevice>> GetAllAsync();
+    public IReadOnlyList<PcscDevice> GetAll();
 }

@@ -27,6 +27,12 @@ public class Version : IComparable<Version>, IComparable, IEquatable<Version>
         Patch = patch;
     }
 
+    public Version(int major, int minor = 0, int patch = 0)
+    : this(ByteUtils.ValidateByte(major, nameof(major)), ByteUtils.ValidateByte(minor, nameof(minor)), ByteUtils.ValidateByte(patch, nameof(patch)))
+    {
+        
+    }
+
     public byte Major { get; }
     public byte Minor { get; }
     public byte Patch { get; }

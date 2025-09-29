@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Reactive;
-
 namespace Yubico.YubiKit.Core.Devices;
 
-public interface IYubiKeyDeviceRepository
+public interface IYubiKeyDeviceRepository : IDisposable
 {
     Task<IReadOnlyCollection<IYubiKey>> GetAllDevicesAsync();
-    Task<IReadOnlyCollection<IYubiKey>> GetSmartCardDevicesAsync();
+    IReadOnlyCollection<IYubiKey> GetAllDevices();
     IObservable<YubiKeyDeviceEvent> DeviceChanges { get; }
     Task<IYubiKey?> GetDeviceByIdAsync(string deviceId);
+    
 }

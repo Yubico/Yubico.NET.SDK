@@ -9,12 +9,12 @@ public class YubiKeyManager : IYubiKeyManager
 {
     private readonly ILogger<YubiKeyManager> _logger;
     private readonly IOptions<YubiKeyManagerOptions> _options;
-    private readonly IYubiKeyDeviceRepository _deviceRepository;
+    private readonly YubiKeyDeviceRepository _deviceRepository;
 
     public YubiKeyManager(
         ILogger<YubiKeyManager> logger,
         IOptions<YubiKeyManagerOptions> options,
-        IYubiKeyDeviceRepository deviceRepository)
+        YubiKeyDeviceRepository deviceRepository)
     {
         _logger = logger;
         _options = options;
@@ -23,10 +23,14 @@ public class YubiKeyManager : IYubiKeyManager
 
     #region IYubiKeyManager Members
 
-    public async Task<IEnumerable<IYubiKey>> GetYubiKeys()
+    public IEnumerable<IYubiKey> GetYubiKeys()
     {
-        var devices = await _deviceRepository.GetAllDevicesAsync();
-        return devices.AsEnumerable();
+       return _deviceRepository.GetAllDevices();
+    }
+
+    public async Task<IEnumerable<IYubiKey>> GetYubiKeysAsync()
+    {
+       return await _deviceRepository.GetAllDevicesAsync();
     }
 
     #endregion

@@ -6,22 +6,22 @@ using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
 public class PcscDeviceService : IPcscService
 {
-    private readonly IYubiKeyFactory _yubiKeyFactory;
     private readonly ILogger<PcscDeviceService> _logger;
 
-    public PcscDeviceService(IYubiKeyFactory yubiKeyFactory, ILogger<PcscDeviceService> logger)
+    public PcscDeviceService(ILogger<PcscDeviceService> logger)
     {
-        _yubiKeyFactory = yubiKeyFactory;
         _logger = logger;
     }
 
-    public async Task<IReadOnlyList<IYubiKey>> GetAllAsync()
+    public async Task<IReadOnlyList<PcscDevice>> GetAllAsync()
     {
         return await Task.Run(GetAll);
     }
 
-    public IReadOnlyList<IYubiKey> GetAll()
+    public IReadOnlyList<PcscDevice> GetAll()
     {
+        _logger.LogInformation("Getting list of PC/SC devices");
+        
         var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
         if (result != ErrorCode.SCARD_S_SUCCESS)
             throw new InvalidOperationException("Can't establish context with PC/SC service.");
@@ -41,15 +41,14 @@ public class PcscDeviceService : IPcscService
 
         try
         {
-            return (from reader in readerStates
+            return [.. from reader in readerStates
                 where (reader.GetEventState() & SCARD_STATE.PRESENT) != 0
                 where ProductAtrs.AllYubiKeys.Contains(reader.GetAtr())
                 select new PcscDevice
                 {
                     ReaderName = reader.GetReaderName(), Atr = reader.GetAtr(), Kind = SmartCardConnectionKind.Usb
                 }
-                into pcscDevice
-                select _yubiKeyFactory.CreateAsync(pcscDevice)).ToList();
+            ];
         }
         finally
         {

@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.Devices.SmartCard;
 /// <summary>
 ///     Represents an ISO 7816 compliant smart card, visible either through CCID or NFC.
 /// </summary>
-public interface ISmartCardDevice : IDevice
+public interface IPcscDevice : IDevice
 {
     /// <summary>
     ///     The "answer to reset" (ATR) for the smart card.

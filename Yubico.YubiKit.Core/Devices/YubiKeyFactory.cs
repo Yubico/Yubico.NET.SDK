@@ -19,27 +19,21 @@ namespace Yubico.YubiKit.Core.Devices;
 
 public interface IYubiKeyFactory
 {
-    IYubiKey CreateAsync(IDevice device);
+    IYubiKey Create(IDevice device);
 }
 
-public class YubiKeyFactory : IYubiKeyFactory
+public class YubiKeyFactory(
+    ILoggerFactory loggerFactory,
+    ISmartCardConnectionFactory connectionFactory) : IYubiKeyFactory
 {
-    private readonly ISmartCardConnectionFactory _connectionFactory;
-    private readonly ILoggerFactory _loggerFactory;
-
-    public YubiKeyFactory(
-        ILoggerFactory loggerFactory,
-        ISmartCardConnectionFactory connectionFactory)
-    {
-        _loggerFactory = loggerFactory;
-        _connectionFactory = connectionFactory;
-    }
+    private readonly ISmartCardConnectionFactory _connectionFactory = connectionFactory;
+    private readonly ILoggerFactory _loggerFactory = loggerFactory;
 
     #region IYubiKeyFactory Members
 
-    public IYubiKey CreateAsync(IDevice device)
+    public IYubiKey Create(IDevice device)
     {
-        if (device is not ISmartCardDevice cardDevice)
+        if (device is not IPcscDevice cardDevice)
             throw new NotSupportedException(
                 $"Device type {device.GetType().Name} is not supported by this factory.");
 
@@ -53,7 +47,7 @@ public class YubiKeyFactory : IYubiKeyFactory
 
     #endregion
 
-    private IYubiKey CreatePcscYubiKey(ISmartCardDevice cardDevice) =>
+    private IYubiKey CreatePcscYubiKey(IPcscDevice cardDevice) =>
         new PcscYubiKey(
             _loggerFactory.CreateLogger<PcscYubiKey>(),
             cardDevice,

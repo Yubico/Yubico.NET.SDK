@@ -2,7 +2,7 @@
 
 namespace Yubico.YubiKit.Core.Devices.SmartCard;
 
-public readonly struct PcscDevice : ISmartCardDevice
+public readonly struct PcscDevice : IPcscDevice
 {
     public required string ReaderName { get; init; }
     public required AnswerToReset? Atr { get; init; }

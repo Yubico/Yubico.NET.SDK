@@ -15,29 +15,47 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.IntegrationTests;
 
 public abstract class IntegrationTestBase : IDisposable
 {
+    private bool _disposed;
+
     protected IntegrationTestBase()
     {
         var services = new ServiceCollection();
         ConfigureServices(services);
         ServiceProvider = services.BuildServiceProvider();
         ServiceLocator.SetLocatorProvider(ServiceProvider);
-        YubiKeyManager = ServiceProvider.GetRequiredService<IYubiKeyManager>();
+
+        Manager = ServiceProvider.GetRequiredService<IYubiKeyManager>();
+        Repository = ServiceProvider.GetRequiredService<YubiKeyDeviceRepository>();
+        Monitor = ServiceProvider.GetRequiredService<YubiKeyDeviceMonitor>();
+
+        Monitor.StartAsync(CancellationToken.None).Wait();
+        Repository.StartAsync(CancellationToken.None).Wait();
     }
 
     protected ServiceProvider ServiceProvider { get; }
-    protected IYubiKeyManager YubiKeyManager { get; }
+    protected IYubiKeyManager Manager { get; }
+    protected YubiKeyDeviceRepository Repository { get; }
+    protected YubiKeyDeviceMonitor Monitor { get; }
 
     #region IDisposable Members
 
     public void Dispose()
     {
+        if (_disposed)
+            return;
+
+        Monitor?.Dispose();
+        Repository?.Dispose();
         ServiceProvider?.Dispose();
         GC.SuppressFinalize(this);
+
+        _disposed = true;
     }
 
     #endregion

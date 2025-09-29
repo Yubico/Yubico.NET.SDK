@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Iso7816;
@@ -26,6 +27,7 @@ public class ManagementSession<TConnection> : ApplicationSession
 {
     private const byte INS_GET_DEVICE_INFO = 0x1D;
     private const int TagMoreDeviceInfo = 0x10;
+    private Version? _version;
 
     private static readonly Feature FeatureDeviceInfo =
         new() { Name = "Device Info", VersionMajor = 4, VersionMinor = 1, VersionRevision = 0 };
@@ -40,39 +42,42 @@ public class ManagementSession<TConnection> : ApplicationSession
     {
         _logger = logger;
         _protocol = protocolFactory.Create(connection);
+    }
+
+
+    private async Task<Version> GetVersionAsync()
+    {
+        if (_version is not null)
+            return _version;
 
         if (_protocol is ISmartCardProtocol smartCardProtocol)
         {
-            var versionBytes = smartCardProtocol.SelectAsync(ApplicationIds.Management).GetAwaiter().GetResult();
-            // Version = Version.Parse(Encoding.UTF8.GetString(versionBytes.Span));
+            var versionBytes = await smartCardProtocol.SelectAsync(ApplicationIds.Management);
+            var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
+
+            var versionString = deviceText.Split(' ').Last();
+            var versionParts = versionString.Split('.').Select(s => int.Parse(s)).ToArray();
+            if (versionParts.Length == 3)
+            {
+                _version = new Version(versionParts[0], versionParts[1], versionParts[2]);
+            }
+            else
+            {
+                _version = new Version(0, 0, 0);
+            }
+
+            _logger.LogInformation("YubiKey device text: {DeviceText}", deviceText);
+            _logger.LogInformation("YubiKey version: {Version}", _version);
+            _logger.LogInformation("YubiKey version string: {VersionString}", versionString);
         }
+        else
+        {
+            throw new NotSupportedException("Protocol not supported");
+        }
+        
+        return _version;
     }
 
-    private Version Version { get; set; }
-
-    public DeviceInfo GetDeviceInfo() => new() // todo fake
-    {
-        IsSky = false,
-        IsFips = false,
-        FormFactor = FormFactor.Unknown,
-        SerialNumber = 0,
-        IsLocked = false,
-        UsbEnabled = 0,
-        UsbSupported = 0,
-        NfcEnabled = 0,
-        NfcSupported = 0,
-        ResetBlocked = 0,
-        FipsCapabilities = 0,
-        FipsApproved = 0,
-        HasPinComplexity = false,
-        PartNumber = null,
-        IsNfcRestricted = false,
-        AutoEjectTimeout = 0,
-        ChallengeResponseTimeout = default,
-        DeviceFlags = DeviceFlags.None,
-        FirmwareVersion = null,
-        VersionQualifier = null
-    };
 
     public async Task<DeviceInfo> GetDeviceInfoAsync()
     {
@@ -97,7 +102,7 @@ public class ManagementSession<TConnection> : ApplicationSession
             {
                 var encodedResult =
                     await smartCardProtocol
-                        .TransmitAndReceiveAsync(apdu); // TODO Getting weird non valid TLV value here?
+                        .TransmitAndReceiveAsync(apdu);
                 if (encodedResult.Length - 1 != encodedResult.Span[0])
                     throw new BadResponseException("Invalid length");
 
@@ -114,9 +119,7 @@ public class ManagementSession<TConnection> : ApplicationSession
             }
         }
 
-        // create deviceInfo with vls
-        Version = Version.V5_8_0; // todo get from selectapplication
-        return DeviceInfo.CreateFromTlvs(allPagesTlvs.ToList(), null);
+        return DeviceInfo.CreateFromTlvs([.. allPagesTlvs], _version);
     }
 
     protected override void Dispose(bool disposing)

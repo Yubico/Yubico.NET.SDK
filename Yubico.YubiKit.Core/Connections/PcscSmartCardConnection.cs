@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.Core.Connections;
 internal class PcscSmartCardConnection : ISmartCardConnection
 {
     private readonly ILogger<PcscSmartCardConnection> _logger;
-    private readonly ISmartCardDevice _smartCardDevice;
+    private readonly IPcscDevice _smartCardDevice;
     private SCardCardHandle? _cardHandle;
     private SCardContext? _context;
     private bool _disposed;
@@ -30,7 +30,7 @@ internal class PcscSmartCardConnection : ISmartCardConnection
 
     private PcscSmartCardConnection(
         ILogger<PcscSmartCardConnection> logger,
-        ISmartCardDevice smartCardDevice)
+        IPcscDevice smartCardDevice)
     {
         _logger = logger;
         _smartCardDevice = smartCardDevice;
@@ -84,7 +84,7 @@ internal class PcscSmartCardConnection : ISmartCardConnection
 
     public static async Task<PcscSmartCardConnection> CreateAsync(
         ILogger<PcscSmartCardConnection> logger,
-        ISmartCardDevice smartCardDevice,
+        IPcscDevice smartCardDevice,
         CancellationToken cancellationToken = default)
     {
         PcscSmartCardConnection connection = new(logger, smartCardDevice);

@@ -23,7 +23,7 @@ public class DiTestController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get()
     {
-        var yubiKeys = await _yubiKeyManager.GetYubiKeys();
+        var yubiKeys = await _yubiKeyManager.GetYubiKeysAsync();
         var yubiKey = yubiKeys.FirstOrDefault();
         if (yubiKey == null)
             return Problem("No YubiKey found.");

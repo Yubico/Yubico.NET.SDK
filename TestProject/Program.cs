@@ -22,7 +22,7 @@ app.MapGet("/di/minimal", async ([FromServices] IYubiKeyManager yubiKeyManager,
     [FromServices] ILogger<ManagementSession<ISmartCardConnection>> logger,
     [FromServices] IProtocolFactory<ISmartCardConnection> protocolFactory) =>
 {
-    var yubiKeys = await yubiKeyManager.GetYubiKeys();
+    var yubiKeys = await yubiKeyManager.GetYubiKeysAsync();
     var yubiKey = yubiKeys.FirstOrDefault();
     if (yubiKey == null)
         return Results.Problem("No YubiKey found.");
@@ -37,7 +37,7 @@ app.MapGet("/di/serviceprovider", async (IServiceProvider sp) =>
     var yubiKeyManager = sp.GetRequiredService<IYubiKeyManager>();
     var logger = sp.GetRequiredService<ILogger<ManagementSession<ISmartCardConnection>>>();
     var protocolFactory = sp.GetRequiredService<IProtocolFactory<ISmartCardConnection>>();
-    var yubiKeys = await yubiKeyManager.GetYubiKeys();
+    var yubiKeys = await yubiKeyManager.GetYubiKeysAsync();
     var yubiKey = yubiKeys.FirstOrDefault();
     if (yubiKey == null)
         return Results.Problem("No YubiKey found.");

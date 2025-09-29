@@ -27,7 +27,7 @@ internal class ChainedResponseProcessor : IApduProcessor
         byte insSendRemaining)
     {
         _apduTransmitter = apduTransmitter;
-        GetMoreDataApdu = new CommandApdu(0, insSendRemaining, 0, 0);
+        GetMoreDataApdu = new CommandApdu((byte)0, insSendRemaining, (byte)0, (byte)0);
     }
 
     #region IApduProcessor Members

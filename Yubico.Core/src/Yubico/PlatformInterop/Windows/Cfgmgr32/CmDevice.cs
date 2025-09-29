@@ -18,6 +18,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32.SafeHandles;
 using Yubico.Core.Buffers;
 using static Yubico.PlatformInterop.NativeMethods;
@@ -28,49 +29,121 @@ namespace Yubico.PlatformInterop
     {
         public string InstanceId { get; private set; }
         public int Instance { get; private set; }
-        public string Class { get; private set; }
+        public string Class { get; private set; } = null!;
         public Guid ClassGuid { get; private set; }
-        public string Path { get; private set; }
+        public string Path { get; private set; } = null!;
         public Guid ContainerId { get; private set; }
         public string? InterfacePath { get; private set; }
 
         public short HidUsageId { get; private set; }
         public short HidUsagePage { get; private set; }
 
+        [Obsolete("Use the factory methods FromDevicePath or FromDeviceInstance instead. This will be removed in a future release.", false)]
         public CmDevice(string devicePath)
         {
             InterfacePath = devicePath;
             InstanceId = (string?)CmPropertyAccessHelper.TryGetProperty(CM_Get_Device_Interface_Property, devicePath, DEVPKEY_Device_InstanceId)!;
-            Instance = LocateDevNode();
-            Class = GetProperty<string>(CmDeviceProperty.Class);
-            ClassGuid = GetProperty<Guid>(CmDeviceProperty.ClassGuid);
-            ContainerId = GetProperty<Guid>(CmDeviceProperty.ContainerId);
-            Path = "\\\\?\\GLOBALROOT" + GetProperty<string>(CmDeviceProperty.PdoName);
-
-            if (ClassGuid == CmClassGuid.HidClass || ClassGuid == CmClassGuid.Keyboard)
-            {
-                ResolveHidUsages();
-            }
+            Instance = LocateDevNode(InstanceId);
+            
+            InitializeProperties();
         }
 
+        [Obsolete("Use the factory methods FromDevicePath or FromDeviceInstance instead. This will be removed in a future release.", false)]
         public CmDevice(int deviceInstance)
         {
-            InterfacePath = null;
             Instance = deviceInstance;
             InstanceId = GetProperty<string>(CmDeviceProperty.InstanceId);
-            Class = GetProperty<string>(CmDeviceProperty.Class);
-            ClassGuid = GetProperty<Guid>(CmDeviceProperty.ClassGuid);
-            ContainerId = GetProperty<Guid>(CmDeviceProperty.ContainerId);
-            Path = "\\\\?\\GLOBALROOT" + GetProperty<string>(CmDeviceProperty.PdoName);
 
-            if (ClassGuid == CmClassGuid.HidClass || ClassGuid == CmClassGuid.Keyboard)
+            InitializeProperties();
+        }
+
+        public static CmDevice? FromDevicePath(string devicePath)
+        {
+            ILogger logger = Core.Logging.Log.GetLogger<CmDevice>();
+
+            try
             {
-                ResolveHidUsages();
+                return new CmDevice(devicePath);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // Device disappeared between notification and property query
+                // Expected during rapid plug/unplug cycles
+                logger.LogDebug(
+                    ex,
+                    "Device property unavailable - device removed during enumeration.");
+
+                return null;
+            }
+
+            catch (PlatformApiException ex)
+            {
+                // CmDevice constructor or property access failed
+                // Could be transient (device gone) or persistent (CM API broken)
+                logger.LogWarning(
+                    ex,
+                    "Configuration Manager API error during device enumeration.");
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                // Truly unexpected exceptions - could be SDK bugs
+                logger.LogError(
+                    ex,
+                    "Unexpected exception in ConfigMgr callback.");
+
+                return null;
             }
         }
 
-        public static IList<CmDevice> GetList(Guid classGuid) =>
-            GetDevicePaths(classGuid, null).Select(path => new CmDevice(path)).ToList();
+        public static CmDevice? FromDeviceInstance(int deviceInstance)
+        {
+            ILogger logger = Core.Logging.Log.GetLogger<CmDevice>();
+
+            try
+            {
+                return new CmDevice(deviceInstance);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // Device disappeared between notification and property query
+                // Expected during rapid plug/unplug cycles
+                logger.LogDebug(
+                    ex,
+                    "Device property unavailable - device removed during enumeration.");
+
+                return null;
+            }
+
+            catch (PlatformApiException ex)
+            {
+                // CmDevice constructor or property access failed
+                // Could be transient (device gone) or persistent (CM API broken)
+                logger.LogWarning(
+                    ex,
+                    "Configuration Manager API error during device enumeration.");
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                // Truly unexpected exceptions - could be SDK bugs
+                logger.LogError(
+                    ex,
+                    "Unexpected exception in ConfigMgr callback.");
+
+                return null;
+            }
+        }
+
+        public static IList<CmDevice> GetList(Guid classGuid)
+        {
+            IList<string> devicePaths = GetDevicePaths(classGuid, null);
+            IEnumerable<CmDevice?> devices = devicePaths.Select(FromDevicePath);
+            
+            return [.. devices .Where(d => d != null).Select(d => d!)];
+        }
 
         public bool TryGetProperty<T>(CmDeviceProperty property, out T? value) where T : class
         {
@@ -109,6 +182,7 @@ namespace Yubico.PlatformInterop
             {
                 return (T)value!;
             }
+
             throw new KeyNotFoundException(property.ToString());
         }
 
@@ -137,10 +211,10 @@ namespace Yubico.PlatformInterop
             CmErrorCode errorCode = CM_Get_Parent(out int parentInstance, Instance);
             if (errorCode == CmErrorCode.CR_SUCCESS)
             {
-                return new CmDevice(parentInstance);
+                return FromDeviceInstance(parentInstance);
             }
 
-            if (errorCode != CmErrorCode.CR_SUCCESS && errorCode != CmErrorCode.CR_NO_SUCH_DEVNODE)
+            if (errorCode != CmErrorCode.CR_NO_SUCH_DEVNODE)
             {
                 throw new PlatformApiException(
                     "CONFIG_RET",
@@ -155,18 +229,22 @@ namespace Yubico.PlatformInterop
         public IList<CmDevice> Children()
         {
             var children = new List<CmDevice>();
-            CmErrorCode errorCode;
 
-            errorCode = CM_Get_Child(out int childInstance, Instance);
-
+            CmErrorCode errorCode = CM_Get_Child(out int childInstance, Instance);
             while (errorCode == CmErrorCode.CR_SUCCESS)
             {
-                children.Add(new CmDevice(childInstance));
+                CmDevice? cmDevice = FromDeviceInstance(childInstance);
+                if (cmDevice is null)
+                {
+                    continue;
+                }
+                
+                children.Add(cmDevice);
 
                 errorCode = CM_Get_Sibling(out childInstance, childInstance);
             }
 
-            if (errorCode != CmErrorCode.CR_SUCCESS && errorCode != CmErrorCode.CR_NO_SUCH_DEVNODE)
+            if (errorCode != CmErrorCode.CR_NO_SUCH_DEVNODE)
             {
                 throw new PlatformApiException(
                     "CONFIG_RET",
@@ -183,12 +261,28 @@ namespace Yubico.PlatformInterop
         [SuppressMessage("Performance", "CA1846:Prefer \'AsSpan\' over \'Substring\'")]
         private static short GetHexShort(string s, int offset, int length)
         {
-#pragma warning disable CA1846 // Prefer 'AsSpan' over 'Substring'
+            #pragma warning disable CA1846 // Prefer 'AsSpan' over 'Substring'
+
             // The overload required by this preference is not available
             // for our .NETStandard 2.0 targets.
-            ushort temp = ushort.Parse(s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-#pragma warning restore CA1846 // Prefer 'AsSpan' over 'Substring'
+            ushort temp = ushort.Parse(
+                s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            #pragma warning restore CA1846 // Prefer 'AsSpan' over 'Substring'
             return unchecked((short)temp);
+        }
+        
+        private void InitializeProperties()
+        {
+            // Requires Instance to be set first, otherwise will throw.
+            Class = GetProperty<string>(CmDeviceProperty.Class);
+            ClassGuid = GetProperty<Guid>(CmDeviceProperty.ClassGuid);
+            ContainerId = GetProperty<Guid>(CmDeviceProperty.ContainerId);
+            Path = "\\\\?\\GLOBALROOT" + GetProperty<string>(CmDeviceProperty.PdoName);
+
+            if (ClassGuid == CmClassGuid.HidClass || ClassGuid == CmClassGuid.Keyboard)
+            {
+                ResolveHidUsages();
+            }
         }
 
         private void ResolveHidUsages()
@@ -196,19 +290,19 @@ namespace Yubico.PlatformInterop
             // see: https://docs.microsoft.com/en-us/windows-hardware/drivers/hid/hidclass-hardware-ids-for-top-level-collections
 
             string[] hardwareIds = GetProperty<string[]>(CmDeviceProperty.HardwareIds);
-
-            string hidUsageHardwareId = hardwareIds
-                .Where(hi => hi.StartsWith("HID_DEVICE_UP", StringComparison.OrdinalIgnoreCase))
-                .FirstOrDefault();
+            string? hidUsageHardwareId = hardwareIds
+                .FirstOrDefault(hi => hi.StartsWith("HID_DEVICE_UP", StringComparison.OrdinalIgnoreCase));
 
             // HID_DEVICE_UP:XXXX_U:XXXX
             // 0123456789012345678901234
 
-            if (!(hidUsageHardwareId is null) && hidUsageHardwareId.Length >= 25)
+            if (hidUsageHardwareId is null || hidUsageHardwareId.Length < 25)
             {
-                HidUsagePage = GetHexShort(hidUsageHardwareId, 14, 4);
-                HidUsageId = GetHexShort(hidUsageHardwareId, 21, 4);
+                return;
             }
+
+            HidUsagePage = GetHexShort(hidUsageHardwareId, 14, 4);
+            HidUsageId = GetHexShort(hidUsageHardwareId, 21, 4);
         }
 
         private static IList<string> GetDevicePaths(Guid classGuid, string? deviceInstanceId)
@@ -251,16 +345,17 @@ namespace Yubico.PlatformInterop
             return MultiString.GetStrings(buffer, System.Text.Encoding.Unicode);
         }
 
-        private int LocateDevNode()
+        private static int LocateDevNode(string instanceId)
         {
-            CM_LOCATE_DEVNODE flags = CM_LOCATE_DEVNODE.NORMAL;
-            CmErrorCode errorCode = CM_Locate_DevNode(out int devNodeHandle, InstanceId, flags);
+            const CM_LOCATE_DEVNODE flags = CM_LOCATE_DEVNODE.NORMAL;
+            
+            CmErrorCode errorCode = CM_Locate_DevNode(out int devNodeHandle, instanceId, flags);
             if (errorCode != CmErrorCode.CR_SUCCESS)
             {
                 throw new PlatformApiException(
                     "CONFIG_RET",
                     (int)errorCode,
-                    $"Unable to locate the device node for the device interface {InstanceId} using the flags {flags}."
+                    $"Unable to locate the device node for the device interface {instanceId} using the flags {flags}."
                     );
             }
 

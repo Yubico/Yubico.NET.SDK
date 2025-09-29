@@ -47,6 +47,8 @@ internal class SmartCardProtocol : ISmartCardProtocol
     private readonly ILogger<SmartCardProtocol> _logger;
     private readonly ChainedResponseProcessor _processor;
 
+    private bool _isInitialized = false;
+
     public SmartCardProtocol(ILogger<SmartCardProtocol> logger, ISmartCardConnection connection,
         ReadOnlyMemory<byte> insSendRemaining = default)
     {
@@ -64,6 +66,8 @@ internal class SmartCardProtocol : ISmartCardProtocol
         CommandApdu command,
         CancellationToken cancellationToken = default)
     {
+        await EnsureInitialized();
+
         var response = await _processor.TransmitAsync(command, cancellationToken);
         if (response is not { SW1: 0x90, SW2: 0x00 })
             throw new InvalidOperationException(
@@ -72,7 +76,8 @@ internal class SmartCardProtocol : ISmartCardProtocol
         return response.Data;
     }
 
-    public async Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
+    public async Task<ReadOnlyMemory<byte>> SelectAsync(
+        ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default)
     {
         var response =
@@ -96,6 +101,18 @@ internal class SmartCardProtocol : ISmartCardProtocol
             : new CommandChainingProcessor(_connection, new ShortApduFormatter());
 
         return new ChainedResponseProcessor(processor, _insSendRemaining);
+    }
+
+    private async Task EnsureInitialized()
+    {
+        if (_isInitialized)
+        {
+            return;
+        }
+
+        _logger.LogDebug("Protocol not initialized, performing SELECT");
+        await SelectAsync(ApplicationIds.Management);
+        _isInitialized = true;
     }
 
 }

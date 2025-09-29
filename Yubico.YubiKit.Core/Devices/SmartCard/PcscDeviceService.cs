@@ -4,7 +4,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Devices.SmartCard;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
-public class PcscDeviceService : IPcscService
+public class PcscDeviceService : IPcscDeviceService
 {
     private readonly ILogger<PcscDeviceService> _logger;
 

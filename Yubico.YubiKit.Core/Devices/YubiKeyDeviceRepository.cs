@@ -25,7 +25,7 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
 {
     private readonly IDeviceChannel _deviceChannel;
     private readonly ILogger<YubiKeyDeviceRepository> _logger;
-    private readonly IPcscService _pcscService;
+    private readonly IPcscDeviceService _pcscService;
     private readonly ConcurrentDictionary<string, IYubiKey> _devices = new();
     private readonly Subject<YubiKeyDeviceEvent> _deviceChanges = new();
     private readonly IYubiKeyFactory _yubiKeyFactory;
@@ -35,7 +35,7 @@ public class YubiKeyDeviceRepository : BackgroundService, IYubiKeyDeviceReposito
     private bool _disposed;
     private readonly SemaphoreSlim _initializationLock = new(1, 1);
 
-    public YubiKeyDeviceRepository(IYubiKeyFactory yubiKeyFactory, IDeviceChannel deviceChannel, ILogger<YubiKeyDeviceRepository> logger, IPcscService pcscService)
+    public YubiKeyDeviceRepository(IYubiKeyFactory yubiKeyFactory, IDeviceChannel deviceChannel, ILogger<YubiKeyDeviceRepository> logger, IPcscDeviceService pcscService)
     {
         _deviceChannel = deviceChannel;
         _logger = logger;

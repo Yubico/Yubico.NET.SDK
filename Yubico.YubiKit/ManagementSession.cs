@@ -44,7 +44,6 @@ public class ManagementSession<TConnection> : ApplicationSession
         _protocol = protocolFactory.Create(connection);
     }
 
-
     private async Task<Version> GetVersionAsync()
     {
         if (_version is not null)
@@ -52,7 +51,7 @@ public class ManagementSession<TConnection> : ApplicationSession
 
         if (_protocol is ISmartCardProtocol smartCardProtocol)
         {
-            var versionBytes = await smartCardProtocol.SelectAsync(ApplicationIds.Management);
+            var versionBytes = await smartCardProtocol.SelectAsync(ApplicationIds.Management).ConfigureAwait(false);
             var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
 
             var versionString = deviceText.Split(' ').Last();

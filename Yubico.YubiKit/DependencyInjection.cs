@@ -47,7 +47,7 @@ public static class DependencyInjection
             services.AddTransient<IYubiKeyManager, YubiKeyManager>()
                     .AddTransient<IYubiKeyFactory, YubiKeyFactory>()
                     .AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>()
-                    .AddTransient<IPcscService, PcscDeviceService>()
+                    .AddTransient<IPcscDeviceService, PcscDeviceService>()
                     .AddTransient<IProtocolFactory<ISmartCardConnection>, SmartCardProtocolFactory<ISmartCardConnection>>()
                     .AddTransient<IManagementSessionFactory<ISmartCardConnection>, ManagementSessionFactory<ISmartCardConnection>>()
                     .AddSingleton<IDeviceChannel, DeviceChannel>()

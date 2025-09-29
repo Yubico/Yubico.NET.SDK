@@ -20,14 +20,15 @@ namespace Yubico.YubiKit.Core.Devices;
 public class YubiKeyDeviceMonitor : BackgroundService
 {
     private readonly IYubiKeyFactory yubiKeyFactory;
-    private readonly IPcscService _pcscService;
+    private readonly IPcscDeviceService _pcscService;
     private readonly IDeviceChannel _deviceChannel;
     private readonly ILogger<YubiKeyDeviceMonitor> _logger;
     private readonly TimeSpan _scanInterval;
+    private bool _disposed;
 
     public YubiKeyDeviceMonitor(
         IYubiKeyFactory yubiKeyFactory,
-        IPcscService pcscService,
+        IPcscDeviceService pcscService,
         IDeviceChannel deviceChannel,
         ILogger<YubiKeyDeviceMonitor> logger)
     {
@@ -35,7 +36,7 @@ public class YubiKeyDeviceMonitor : BackgroundService
         _pcscService = pcscService;
         _deviceChannel = deviceChannel;
         _logger = logger;
-        _scanInterval = TimeSpan.FromSeconds(200);
+        _scanInterval = TimeSpan.FromSeconds(10000);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -44,11 +45,9 @@ public class YubiKeyDeviceMonitor : BackgroundService
 
         try
         {
-            // IMMEDIATE scan on startup (before any API calls)
             _logger.LogInformation("Performing initial device scan...");
             await PerformDeviceScan(stoppingToken);
 
-            // Then start periodic scanning using PeriodicTimer
             using var timer = new PeriodicTimer(_scanInterval);
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
@@ -67,26 +66,39 @@ public class YubiKeyDeviceMonitor : BackgroundService
         _logger.LogInformation("YubiKey device monitor stopped");
     }
 
-    private async Task PerformDeviceScan(CancellationToken cancellationToken)
+    private Task PerformDeviceScan(CancellationToken cancellationToken)
     {
         try
         {
-            var pcscDevices = await _pcscService.GetAllAsync();
-            var yubiKeys = pcscDevices.Select(device => yubiKeyFactory.Create(device));
-            
-            await _deviceChannel.PublishAsync(yubiKeys, cancellationToken);
-            _logger.LogDebug("Found {DeviceCount} PCSC devices", pcscDevices.Count);
+            return ScanPcscDevices(cancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "PCSC device scanning failed");
             // Continue despite errors - don't crash the background service
+            return Task.CompletedTask;
         }
+    }
+
+    private async Task ScanPcscDevices(CancellationToken cancellationToken)
+    {
+        var devices = await _pcscService.GetAllAsync();
+        var yubiKeys = devices.Select(device => yubiKeyFactory.Create(device));
+        await _deviceChannel.PublishAsync(yubiKeys, cancellationToken);
+
+        _logger.LogInformation("PCSC scan completed, found {DeviceCount} devices", devices.Count());
     }
 
     public override void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
         _deviceChannel.Complete();
         base.Dispose();
+
+        _disposed = true;
     }
 }

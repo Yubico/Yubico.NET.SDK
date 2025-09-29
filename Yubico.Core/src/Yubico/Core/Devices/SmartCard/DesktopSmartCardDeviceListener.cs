@@ -74,16 +74,19 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void StartListening()
         {
-            if (!_isListening)
+            if (_isListening)
             {
-                _listenerThread = new Thread(ListenForReaderChanges)
-                {
-                    IsBackground = true
-                };
-                _isListening = true;
-                Status = DeviceListenerStatus.Started;
-                _listenerThread.Start();
+                return;
             }
+
+            _listenerThread = new Thread(ListenForReaderChanges)
+            {
+                IsBackground = true
+            };
+            
+            _isListening = true;
+            Status = DeviceListenerStatus.Started;
+            _listenerThread.Start();
         }
 
         // This method is the delegate sent to the new Thread.
@@ -96,10 +99,21 @@ namespace Yubico.Core.Devices.SmartCard
             _log.LogInformation("Smart card listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
             bool usePnpWorkaround = UsePnpWorkaround();
-
-            while (_isListening && CheckForUpdates(-1, usePnpWorkaround))
+            while (_isListening)
             {
-
+                try
+                {
+                    bool result = CheckForUpdates(-1, usePnpWorkaround);
+                    if (!result)
+                    {
+                        break;
+                    }    
+                }
+                catch (Exception e)
+                {
+                    _log.LogError(e, "Exception occurred while listening for smart card reader changes.");
+                    Status = DeviceListenerStatus.Error;
+                }
             }
         }
 
@@ -166,11 +180,9 @@ namespace Yubico.Core.Devices.SmartCard
             var arrivedDevices = new List<ISmartCardDevice>();
             var removedDevices = new List<ISmartCardDevice>();
             bool sendEvents = timeout != 0;
-
             var newStates = (SCARD_READER_STATE[])_readerStates.Clone();
 
             uint getStatusChangeResult = SCardGetStatusChange(_context, timeout, newStates, newStates.Length);
-
             if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
             {
                 _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
@@ -281,10 +293,18 @@ namespace Yubico.Core.Devices.SmartCard
         // us of the change.
         private bool UsePnpWorkaround()
         {
-            SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(readerNames);
-            _ = SCardGetStatusChange(_context, 0, testState, testState.Length);
-            bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
-            return usePnpWorkaround;
+            try
+            {
+                SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(readerNames);
+                _ = SCardGetStatusChange(_context, 0, testState, testState.Length);
+                bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
+                return usePnpWorkaround;    
+            }
+            catch (Exception e)
+            {
+                _log.LogDebug(e, "Exception occurred while determining if PnP workaround is needed. Assuming it is not.");
+                return false;
+            }
         }
 
         /// <summary>

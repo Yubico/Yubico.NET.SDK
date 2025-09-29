@@ -81,7 +81,7 @@ namespace Yubico.YubiKey
             _lazyInstance = null;
         }
 
-        internal static bool IsListenerRunning => !(_lazyInstance is null);
+        internal static bool IsListenerRunning => _lazyInstance is not null;
         internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
 
         private static YubiKeyDeviceListener? _lazyInstance;
@@ -159,13 +159,10 @@ namespace Yubico.YubiKey
             _log.LogInformation("Entering write-lock.");
 
             ResetCacheMarkers();
-
-            var devicesToProcess = GetDevices();
-
             _log.LogInformation("Cache currently aware of {Count} YubiKeys.", _internalCache.Count);
 
             var addedYubiKeys = new List<IYubiKeyDevice>();
-
+            var devicesToProcess = GetDevices();
             foreach (var device in devicesToProcess)
             {
                 _log.LogInformation("Processing device {Device}", device);
@@ -201,9 +198,9 @@ namespace Yubico.YubiKey
                 {
                     deviceWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
                 }
-                catch (Exception ex) when (ex is SCardException || ex is PlatformApiException)
+                catch (Exception ex)
                 {
-                    _log.LogError("Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
+                    _log.LogError(ex, "Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
 
                     continue;
                 }

@@ -16,6 +16,7 @@ using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Yubico.PlatformInterop;
 using static Yubico.PlatformInterop.LibcFcntlConstants;
 using static Yubico.PlatformInterop.NativeMethods;
@@ -47,6 +48,7 @@ namespace Yubico.Core.Devices.Hid
 
         private readonly LinuxUdevMonitorSafeHandle _monitorObject;
         private readonly LinuxUdevSafeHandle _udevObject;
+        private readonly ILogger _log = Logging.Log.GetLogger<LinuxHidDeviceListener>();
 
         public LinuxHidDeviceListener()
         {
@@ -96,15 +98,18 @@ namespace Yubico.Core.Devices.Hid
             // If there is no sub-thread, _isListening will be false and we will
             // create a new thread and start it. Just make sure _isListening is
             // set to true before starting the thread.
-            if (!_isListening)
+            if (_isListening)
             {
-                _listenerThread = new Thread(ListenForReaderChanges)
-                {
-                    IsBackground = true
-                };
-                _isListening = true;
-                _listenerThread.Start();
+                return;
             }
+
+            _listenerThread = new Thread(ListenForReaderChanges)
+            {
+                IsBackground = true
+            };
+            
+            _isListening = true;
+            _listenerThread.Start();
         }
 
         /// <summary>
@@ -129,11 +134,13 @@ namespace Yubico.Core.Devices.Hid
             // sub-thread will complete the iteration it has most recently
             // started, see _isListening is false and quit. At that point, the
             // Join will will be able to complete and this method will exit.
-            if (!(_listenerThread is null))
+            if (_listenerThread is null)
             {
-                _isListening = false;
-                _listenerThread.Join();
+                return;
             }
+
+            _isListening = false;
+            _listenerThread.Join();
         }
 
         // This method is the delegate sent to the new Thread.
@@ -143,9 +150,18 @@ namespace Yubico.Core.Devices.Hid
         // will terminate the thread.
         private void ListenForReaderChanges()
         {
-            while (_isListening)
+            try
             {
-                CheckForUpdates();
+                while (_isListening)
+                {
+                    CheckForUpdates();
+                }
+            }
+            catch (Exception e)
+            {
+                // We must not let exceptions escape from this callback. There's nowhere for them to go, and
+                // it will likely crash the process.
+                _log.LogDebug(e, "Exception in ListenForReaderChanges thread.");
             }
         }
 

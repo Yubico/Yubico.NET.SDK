@@ -116,6 +116,12 @@ namespace Yubico.Core.Devices.Hid
                     _log.LogError("The run loop was terminated for an unexpected reason: {Result}", runLoopResult);
                 }
             }
+            catch (Exception e)
+            {
+                // We must not let exceptions escape from this callback. There's nowhere for them to go, and
+                // it will likely crash the process.
+                _log.LogError(e, "Exception in HID listener thread.");
+            }
             finally
             {
                 if (_runLoop.HasValue)

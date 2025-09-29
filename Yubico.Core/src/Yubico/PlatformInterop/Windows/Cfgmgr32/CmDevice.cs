@@ -22,6 +22,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Win32.SafeHandles;
 using Yubico.Core.Buffers;
 using static Yubico.PlatformInterop.NativeMethods;
+#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Yubico.PlatformInterop
 {

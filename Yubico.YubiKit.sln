@@ -4,13 +4,13 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit", "Yubico.YubiKit\Yubico.YubiKit.csproj", "{6D2C5F2E-B509-9FC6-8F4B-CCD0F28A208E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.UnitTests", "Yubico.YubiKit.UnitTests\Yubico.YubiKit.UnitTests.csproj", "{C0D1516E-56A8-B1F0-F451-62B43FEE04C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.UnitTests", "Yubico.YubiKit.Tests.UnitTests\Yubico.YubiKit.Tests.UnitTests.csproj", "{C0D1516E-56A8-B1F0-F451-62B43FEE04C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.IntegrationTests", "Yubico.YubiKit.IntegrationTests\Yubico.YubiKit.IntegrationTests.csproj", "{9AAD4468-8C33-1141-5D52-28F9E6E49EA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.IntegrationTests", "Yubico.YubiKit.Tests.IntegrationTests\Yubico.YubiKit.Tests.IntegrationTests.csproj", "{9AAD4468-8C33-1141-5D52-28F9E6E49EA1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core", "Yubico.YubiKit.Core\Yubico.YubiKit.Core.csproj", "{172B28F1-EF2D-31D3-570E-8BBB991865E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.TestProject", "Yubico.YubiKit.Tests.TestProject\Yubico.YubiKit.Tests.TestProject.csproj", "{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -9,6 +9,8 @@
         <IsTestProject>true</IsTestProject>
 
         <LangVersion>preview</LangVersion>
+
+        <RootNamespace>Yubico.YubiKit.UnitTests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

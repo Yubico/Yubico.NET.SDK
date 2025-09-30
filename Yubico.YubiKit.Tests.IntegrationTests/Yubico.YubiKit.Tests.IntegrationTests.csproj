@@ -10,6 +10,8 @@
 
         <LangVersion>preview</LangVersion>
 
+        <RootNamespace>Yubico.YubiKit.IntegrationTests</RootNamespace>
+
     </PropertyGroup>
 
     <ItemGroup>

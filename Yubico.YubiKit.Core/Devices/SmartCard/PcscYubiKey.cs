@@ -14,13 +14,11 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Connections;
-using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
 namespace Yubico.YubiKit.Core.Devices.SmartCard;
 
 internal class PcscYubiKey : IYubiKey
 {
-    internal string ReaderName => _pcscDevice.ReaderName;
     private readonly ISmartCardConnectionFactory _connectionFactory;
     private readonly ILogger<PcscYubiKey> _logger;
     private readonly IPcscDevice _pcscDevice;
@@ -36,26 +34,28 @@ internal class PcscYubiKey : IYubiKey
         _connectionFactory = connectionFactory;
     }
 
+    internal string ReaderName => _pcscDevice.ReaderName;
+
     #region IYubiKey Members
 
     public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-        where TConnection : IConnection
+        where TConnection : class, IConnection
     {
         if (typeof(TConnection) != typeof(ISmartCardConnection))
             throw new NotSupportedException(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
-                
+
         var connection = await ConnectAsync(cancellationToken).ConfigureAwait(false);
-        return (TConnection)connection;
+        return connection as TConnection ??
+               throw new InvalidOperationException("Connection is not of the expected type.");
     }
 
-    public async Task<ISmartCardConnection> ConnectAsync(CancellationToken cancellationToken = default)
+    #endregion
+
+    private async Task<ISmartCardConnection> ConnectAsync(CancellationToken cancellationToken = default)
     {
         _connection = await _connectionFactory.CreateAsync(_pcscDevice, cancellationToken).ConfigureAwait(false);
         _logger.LogInformation("Connected to YubiKey in reader {ReaderName}", ReaderName);
         return _connection;
     }
-
-
-    #endregion
 }

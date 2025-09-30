@@ -5,11 +5,17 @@ using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit;
 
+public interface IYubiKeyManager
+{
+    IObservable<YubiKeyDeviceEvent> DeviceChanges { get; }
+    Task<IEnumerable<IYubiKey>> GetYubiKeysAsync(CancellationToken cancellationToken = default);
+}
+
 public class YubiKeyManager : IYubiKeyManager
 {
+    private readonly YubiKeyDeviceRepository _deviceRepository;
     private readonly ILogger<YubiKeyManager> _logger;
     private readonly IOptions<YubiKeyManagerOptions> _options;
-    private readonly YubiKeyDeviceRepository _deviceRepository;
 
     public YubiKeyManager(
         ILogger<YubiKeyManager> logger,
@@ -23,18 +29,13 @@ public class YubiKeyManager : IYubiKeyManager
 
     #region IYubiKeyManager Members
 
-    public IEnumerable<IYubiKey> GetYubiKeys()
-    {
-       return _deviceRepository.GetAllDevices();
-    }
-
-    public async Task<IEnumerable<IYubiKey>> GetYubiKeysAsync(CancellationToken cancellationToken = default)
-    {
-       return await _deviceRepository.GetAllDevicesAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    #endregion
+    public async Task<IEnumerable<IYubiKey>> GetYubiKeysAsync(CancellationToken cancellationToken = default) =>
+        await _deviceRepository.GetAllDevicesAsync(cancellationToken).ConfigureAwait(false);
 
     public IObservable<YubiKeyDeviceEvent> DeviceChanges =>
         _deviceRepository.DeviceChanges;
+
+    #endregion
+
+    public IEnumerable<IYubiKey> GetYubiKeys() => _deviceRepository.GetAllDevices();
 }

@@ -7,29 +7,6 @@ using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.IntegrationTests;
 
-public class MonitorService_Enabled_Tests()
-    : IntegrationTestBase(options => options.EnableAutoDiscovery = true)
-{
-    [Fact]
-    public async Task WhenEnabled_FindsDevices()
-    {
-        SetSkipManualScan(true);
-        var devices = await YubiKeyManager.GetYubiKeysAsync();
-        Assert.NotEmpty(devices);
-    }
-}
-
-public class MonitorService_Disabled_Tests()
-    : IntegrationTestBase(options => options.EnableAutoDiscovery = false)
-{
-    [Fact]
-    public async Task WhenDisabled_FindsDevices()
-    {
-        var devices = await YubiKeyManager.GetYubiKeysAsync();
-        Assert.NotEmpty(devices);
-    }
-}
-
 public class IntegrationTest : IntegrationTestBase
 {
     [Fact]

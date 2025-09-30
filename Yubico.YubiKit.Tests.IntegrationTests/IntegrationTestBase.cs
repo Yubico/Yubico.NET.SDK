@@ -72,7 +72,7 @@ public abstract class IntegrationTestBase : IDisposable
 
     #endregion
 
-    protected void SetSkipManualScan(bool value)
+    protected void SkipDeviceRepositoryManualScan(bool value)
     {
         var type = typeof(DeviceRepository);
         var field = type.GetField("TEST_MONITORSERVICE_SKIP_MANUALSCAN",

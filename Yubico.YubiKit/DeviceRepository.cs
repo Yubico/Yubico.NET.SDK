@@ -17,7 +17,6 @@ using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Device;
 
 namespace Yubico.YubiKit;
@@ -29,28 +28,22 @@ public interface IDeviceRepository : IDisposable
     void UpdateDeviceCache(IEnumerable<IYubiKey> discoveredDevices);
 }
 
-public class DeviceRepository : IDeviceRepository
+public class DeviceRepository(
+    IYubiKeyFactory yubiKeyFactory,
+    ILogger<DeviceRepository> logger,
+    IPcscDeviceService pcscService)
+    : IDeviceRepository
 {
     private readonly Subject<YubiKeyDeviceEvent> _deviceChanges = new();
-    private readonly IDeviceChannel _deviceChannel;
     private readonly ConcurrentDictionary<string, IYubiKey> _devices = new();
     private readonly SemaphoreSlim _initializationLock = new(1, 1);
-    private readonly ILogger<DeviceRepository> _logger;
-    private readonly IPcscDeviceService _pcscService;
-    private readonly IYubiKeyFactory _yubiKeyFactory;
     private bool _disposed;
 
     // Thread-safety for initialization
     private volatile bool _hasData;
 
-    public DeviceRepository(IYubiKeyFactory yubiKeyFactory, IDeviceChannel deviceChannel,
-        ILogger<DeviceRepository> logger, IPcscDeviceService pcscService)
-    {
-        _deviceChannel = deviceChannel;
-        _logger = logger;
-        _pcscService = pcscService;
-        _yubiKeyFactory = yubiKeyFactory;
-    }
+    private readonly bool
+        TEST_MONITORSERVICE_SKIP_MANUALSCAN = false; // For unit testing only, we should be able to set this to internal
 
     #region IDeviceRepository Members
 
@@ -62,45 +55,6 @@ public class DeviceRepository : IDeviceRepository
     }
 
     public IObservable<YubiKeyDeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
-
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-
-        try
-        {
-            _initializationLock?.Dispose();
-            _deviceChanges?.OnCompleted();
-            _deviceChanges?.Dispose();
-        }
-        catch (ObjectDisposedException)
-        {
-            // Ignore if already disposed
-        }
-
-        GC.SuppressFinalize(this);
-
-        _disposed = true;
-    }
-
-    // // Background service - consumes from channel for ongoing updates
-    // protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    // {
-    //     try
-    //     {
-    //         await foreach (var devices in _deviceChannel.ConsumeAsync(stoppingToken))
-    //             UpdateDeviceCache(devices);
-    //     }
-    //     catch (OperationCanceledException)
-    //     {
-    //         _logger.LogDebug("Device repository background service was cancelled");
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         _logger.LogError(ex, "Error consuming device updates");
-    //     }
-    // }
 
     public void UpdateDeviceCache(IEnumerable<IYubiKey> discoveredDevices)
     {
@@ -124,7 +78,7 @@ public class DeviceRepository : IDeviceRepository
             var device = newDeviceMap[deviceId];
             _devices[deviceId] = device;
             _deviceChanges.OnNext(new YubiKeyDeviceEvent(YubiKeyDeviceAction.Added, device));
-            _logger.LogDebug("Added device: {DeviceId}", deviceId);
+            logger.LogDebug("Added device: {DeviceId}", deviceId);
         }
 
         // Handle updated devices
@@ -135,7 +89,7 @@ public class DeviceRepository : IDeviceRepository
             {
                 _devices[deviceId] = newDevice;
                 _deviceChanges.OnNext(new YubiKeyDeviceEvent(YubiKeyDeviceAction.Updated, newDevice));
-                _logger.LogDebug("Updated device: {DeviceId}", deviceId);
+                logger.LogDebug("Updated device: {DeviceId}", deviceId);
             }
         }
 
@@ -145,14 +99,35 @@ public class DeviceRepository : IDeviceRepository
             {
                 _deviceChanges.OnNext(
                     new YubiKeyDeviceEvent(YubiKeyDeviceAction.Removed, null) { DeviceId = deviceId });
-                _logger.LogDebug("Removed device: {DeviceId}", deviceId);
+                logger.LogDebug("Removed device: {DeviceId}", deviceId);
             }
 
         _hasData = true; // Mark as initialized
 
-        _logger.LogDebug(
+        logger.LogDebug(
             "Device cache updated: {DeviceCount} devices, {AddedCount} added, {UpdatedCount} updated, {RemovedCount} removed",
             newDeviceMap.Count, addedIds.Count(), potentiallyUpdatedIds.Count(), removedIds.Count());
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        try
+        {
+            _initializationLock?.Dispose();
+            _deviceChanges?.OnCompleted();
+            _deviceChanges?.Dispose();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Ignore if already disposed
+        }
+
+        GC.SuppressFinalize(this);
+
+        _disposed = true;
     }
 
     #endregion
@@ -160,6 +135,12 @@ public class DeviceRepository : IDeviceRepository
     // Ensures cache has data - performs sync scan if needed
     private async Task EnsureDataAvailable(CancellationToken cancellationToken = default)
     {
+        if (TEST_MONITORSERVICE_SKIP_MANUALSCAN)
+        {
+            await Task.Delay(500, cancellationToken);
+            return;
+        }
+
         if (_hasData)
             return; // Fast path - data already available
 
@@ -169,17 +150,17 @@ public class DeviceRepository : IDeviceRepository
 
         try
         {
-            _logger.LogInformation("Cache empty, performing synchronous device scan...");
+            logger.LogInformation("Cache empty, performing synchronous device scan...");
 
-            var devices = await _pcscService.GetAllAsync(cancellationToken).ConfigureAwait(false);
-            var yubiKeys = devices.Select(_yubiKeyFactory.Create);
+            var devices = await pcscService.GetAllAsync(cancellationToken).ConfigureAwait(false);
+            var yubiKeys = devices.Select(yubiKeyFactory.Create);
             UpdateDeviceCache(yubiKeys);
 
-            _logger.LogInformation("Synchronous scan completed, found {DeviceCount} devices", devices.Count());
+            logger.LogInformation("Synchronous scan completed, found {DeviceCount} devices", devices.Count());
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Synchronous device scan failed");
+            logger.LogError(ex, "Synchronous device scan failed");
             // Even if sync scan fails, mark as initialized to prevent repeated attempts
             _hasData = true;
         }

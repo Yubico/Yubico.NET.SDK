@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 using Yubico.YubiKit.Core;
 
 namespace Yubico.YubiKit.IntegrationTests;
@@ -21,34 +22,36 @@ public abstract class IntegrationTestBase : IDisposable
 {
     private bool _disposed;
 
-    protected IntegrationTestBase()
+    protected IntegrationTestBase(Action<YubiKeyManagerOptions>? overrideOptions = null)
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddYubiKeyManager(options =>
-        {
-            options.EnableAutoDiscovery = true;
-            options.ScanInterval = TimeSpan.FromSeconds(1);
-            options.EnabledTransports = YubiKeyManagerOptions.Transports.All;
-        });
+        services.AddYubiKeyManager(overrideOptions ?? DefaultOptions);
 
         ServiceProvider = services.BuildServiceProvider();
         ServiceLocator.SetLocatorProvider(ServiceProvider);
 
-        Manager = ServiceProvider.GetRequiredService<IYubiKeyManager>();
+        YubiKeyManager = ServiceProvider.GetRequiredService<IYubiKeyManager>();
         DeviceRepository = ServiceProvider.GetRequiredService<IDeviceRepository>();
         DeviceMonitorService = ServiceProvider.GetRequiredService<DeviceMonitorService>();
         DeviceListenerService = ServiceProvider.GetRequiredService<DeviceListenerService>();
 
         DeviceMonitorService.StartAsync(CancellationToken.None).Wait();
-        // DeviceRepository.StartAsync(CancellationToken.None).Wait();
         DeviceListenerService.StartAsync(CancellationToken.None).Wait();
     }
+
+    private static Action<YubiKeyManagerOptions> DefaultOptions =>
+        options =>
+        {
+            options.EnableAutoDiscovery = true;
+            options.ScanInterval = TimeSpan.FromMilliseconds(100);
+            options.EnabledTransports = YubiKeyManagerOptions.Transports.All;
+        };
 
     private DeviceListenerService DeviceListenerService { get; }
 
     protected ServiceProvider ServiceProvider { get; }
-    protected IYubiKeyManager Manager { get; }
+    protected IYubiKeyManager YubiKeyManager { get; }
     private IDeviceRepository DeviceRepository { get; }
     private DeviceMonitorService DeviceMonitorService { get; }
 
@@ -68,4 +71,12 @@ public abstract class IntegrationTestBase : IDisposable
     }
 
     #endregion
+
+    protected void SetSkipManualScan(bool value)
+    {
+        var type = typeof(DeviceRepository);
+        var field = type.GetField("TEST_MONITORSERVICE_SKIP_MANUALSCAN",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        field?.SetValue(DeviceRepository, value);
+    }
 }

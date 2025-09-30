@@ -29,31 +29,21 @@ public class YubiKeyFactory(
     ILoggerFactory loggerFactory,
     ISmartCardConnectionFactory connectionFactory) : IYubiKeyFactory
 {
-    private readonly ISmartCardConnectionFactory _connectionFactory = connectionFactory;
-    private readonly ILoggerFactory _loggerFactory = loggerFactory;
-
     #region IYubiKeyFactory Members
 
-    public IYubiKey Create(IDevice device)
-    {
-        if (device is not IPcscDevice cardDevice)
-            throw new NotSupportedException(
-                $"Device type {device.GetType().Name} is not supported by this factory.");
-
-        return device switch
+    public IYubiKey Create(IDevice device) =>
+        device switch
         {
-            PcscDevice => CreatePcscYubiKey(cardDevice),
+            IPcscDevice pcscDevice => CreatePcscYubiKey(pcscDevice),
             _ => throw new NotSupportedException(
                 $"Device type {device.GetType().Name} is not supported by this factory.")
         };
-    }
 
     #endregion
 
-    private IYubiKey CreatePcscYubiKey(IPcscDevice cardDevice) =>
-        new PcscYubiKey(
-            _loggerFactory.CreateLogger<PcscYubiKey>(),
+    private PcscYubiKey CreatePcscYubiKey(IPcscDevice cardDevice) =>
+        new(loggerFactory.CreateLogger<PcscYubiKey>(),
             cardDevice,
-            _connectionFactory
+            connectionFactory
         );
 }

@@ -1,11 +1,11 @@
 @TestProject_HostAddress = http://localhost:5205
 
-GET {{TestProject_HostAddress}}/todos/
+GET {{TestProject_HostAddress}}/di-demo
 Accept: application/json
 
 ###
 
-GET {{TestProject_HostAddress}}/todos/1
+GET {{TestProject_HostAddress}}/di-demo
 Accept: application/json
 
 ###

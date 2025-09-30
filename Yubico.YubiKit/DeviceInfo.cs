@@ -15,7 +15,6 @@
 using System.Buffers.Binary;
 using System.Text;
 using Yubico.YubiKit.Core;
-using Version = Yubico.YubiKit.Core.Version;
 
 namespace Yubico.YubiKit;
 

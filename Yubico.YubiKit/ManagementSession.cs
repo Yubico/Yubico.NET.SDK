@@ -18,7 +18,6 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Iso7816;
 using Yubico.YubiKit.Core.Protocols;
-using Version = Yubico.YubiKit.Core.Version;
 
 namespace Yubico.YubiKit;
 
@@ -27,13 +26,13 @@ public class ManagementSession<TConnection> : ApplicationSession
 {
     private const byte INS_GET_DEVICE_INFO = 0x1D;
     private const int TagMoreDeviceInfo = 0x10;
-    private Version? _version;
 
     private static readonly Feature FeatureDeviceInfo =
         new() { Name = "Device Info", VersionMajor = 4, VersionMinor = 1, VersionRevision = 0 };
 
     private readonly ILogger<ManagementSession<TConnection>> _logger;
     private readonly IProtocol _protocol;
+    private Version? _version;
 
     public ManagementSession(
         ILogger<ManagementSession<TConnection>> logger,
@@ -51,19 +50,16 @@ public class ManagementSession<TConnection> : ApplicationSession
 
         if (_protocol is ISmartCardProtocol smartCardProtocol)
         {
-            var versionBytes = await smartCardProtocol.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
+            var versionBytes = await smartCardProtocol.SelectAsync(ApplicationIds.Management, cancellationToken)
+                .ConfigureAwait(false);
             var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
 
             var versionString = deviceText.Split(' ').Last();
             var versionParts = versionString.Split('.').Select(s => int.Parse(s)).ToArray();
             if (versionParts.Length == 3)
-            {
                 _version = new Version(versionParts[0], versionParts[1], versionParts[2]);
-            }
             else
-            {
-                _version = new Version(0, 0, 0);
-            }
+                _version = new Version(0);
 
             _logger.LogInformation("YubiKey device text: {DeviceText}", deviceText);
             _logger.LogInformation("YubiKey version: {Version}", _version);
@@ -73,7 +69,7 @@ public class ManagementSession<TConnection> : ApplicationSession
         {
             throw new NotSupportedException("Protocol not supported");
         }
-        
+
         return _version;
     }
 
@@ -99,7 +95,8 @@ public class ManagementSession<TConnection> : ApplicationSession
 
             if (_protocol is ISmartCardProtocol smartCardProtocol)
             {
-                var encodedResult = await smartCardProtocol.TransmitAndReceiveAsync(apdu, cancellationToken).ConfigureAwait(false);
+                var encodedResult = await smartCardProtocol.TransmitAndReceiveAsync(apdu, cancellationToken)
+                    .ConfigureAwait(false);
                 if (encodedResult.Length - 1 != encodedResult.Span[0])
                     throw new BadResponseException("Invalid length");
 

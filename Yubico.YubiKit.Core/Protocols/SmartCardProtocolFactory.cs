@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Protocols;
 
-namespace Yubico.YubiKit;
+namespace Yubico.YubiKit.Core;
 
 public interface IProtocolFactory<TConnection>
     where TConnection : IConnection

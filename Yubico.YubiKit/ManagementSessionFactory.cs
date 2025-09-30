@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 
 namespace Yubico.YubiKit;
@@ -41,17 +42,17 @@ internal class ManagementSessionFactory<TConnection>(
                 $"The connection type {connection.GetType().FullName} is not supported.")
         };
 
+    #endregion
+
     private ManagementSession<TConnection> CreateSession(ISmartCardConnection connection)
     {
         var session = new ManagementSession<TConnection>(
-                _loggerFactory.CreateLogger<ManagementSession<TConnection>>(),
-                (TConnection)connection,
-                _protocolFactory);
+            _loggerFactory.CreateLogger<ManagementSession<TConnection>>(),
+            (TConnection)connection,
+            _protocolFactory);
 
         // TODO consider: session.InitializeAsync() must be called by the caller after this method returns.
 
         return session;
     }
-
-    #endregion
 }

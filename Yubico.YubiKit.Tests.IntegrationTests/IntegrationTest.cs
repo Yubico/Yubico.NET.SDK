@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Devices;
 

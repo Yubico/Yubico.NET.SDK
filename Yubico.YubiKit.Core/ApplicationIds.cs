@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKit.Core;
 
-public record ApplicationIds
+public record ApplicationIds // Should be in Yubico.YubiKit
 {
     public static readonly byte[] Management = { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x47, 0x11, 0x17 };
     public static readonly byte[] Otp = { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01, 0x01 };

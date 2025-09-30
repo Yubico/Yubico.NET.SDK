@@ -31,7 +31,6 @@ public interface ISmartCardProtocol : IProtocol
 
     Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default);
-
 }
 
 internal class SmartCardProtocol : ISmartCardProtocol
@@ -47,9 +46,11 @@ internal class SmartCardProtocol : ISmartCardProtocol
     private readonly ILogger<SmartCardProtocol> _logger;
     private readonly ChainedResponseProcessor _processor;
 
-    private bool _isInitialized = false;
+    private bool _isInitialized;
 
-    public SmartCardProtocol(ILogger<SmartCardProtocol> logger, ISmartCardConnection connection,
+    public SmartCardProtocol(
+        ILogger<SmartCardProtocol> logger,
+        ISmartCardConnection connection,
         ReadOnlyMemory<byte> insSendRemaining = default)
     {
         _logger = logger;
@@ -105,14 +106,11 @@ internal class SmartCardProtocol : ISmartCardProtocol
 
     private async Task EnsureInitialized()
     {
-        if (_isInitialized)
-        {
-            return;
-        }
+        if (_isInitialized) return;
 
         _logger.LogDebug("Protocol not initialized, performing SELECT");
-        await SelectAsync(ApplicationIds.Management).ConfigureAwait(false);
+        await SelectAsync(ApplicationIds.Management)
+            .ConfigureAwait(false); // TODO This might have to live in YubiKit ns
         _isInitialized = true;
     }
-
 }

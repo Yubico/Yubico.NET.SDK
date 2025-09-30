@@ -19,38 +19,38 @@ using Yubico.YubiKit.Device;
 
 namespace Yubico.YubiKit;
 
-public sealed class MonitorService : BackgroundService
+public sealed class DeviceMonitorService : BackgroundService
 {
     private readonly IDeviceChannel _deviceChannel;
-    private readonly ILogger<MonitorService> _logger;
+    private readonly ILogger<DeviceMonitorService> _logger;
     private readonly IPcscDeviceService _pcscService;
     private readonly TimeSpan _scanInterval;
-    private readonly IYubiKeyFactory yubiKeyFactory;
+    private readonly IYubiKeyFactory _yubiKeyFactory;
     private bool _disposed;
 
-    public MonitorService(
+    public DeviceMonitorService(
         IYubiKeyFactory yubiKeyFactory,
         IPcscDeviceService pcscService,
         IDeviceChannel deviceChannel,
-        ILogger<MonitorService> logger)
+        ILogger<DeviceMonitorService> logger)
     {
-        this.yubiKeyFactory = yubiKeyFactory;
+        _yubiKeyFactory = yubiKeyFactory;
         _pcscService = pcscService;
         _deviceChannel = deviceChannel;
         _logger = logger;
-        _scanInterval = TimeSpan.FromSeconds(10000);
+        _scanInterval = TimeSpan.FromMilliseconds(500);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("YubiKey device monitor started");
-
         try
         {
+            _logger.LogInformation("YubiKey device monitor started");
             _logger.LogInformation("Performing initial device scan...");
-            await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
 
+            await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
             using var timer = new PeriodicTimer(_scanInterval);
+
             while (await timer.WaitForNextTickAsync(stoppingToken))
                 await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
         }
@@ -83,7 +83,7 @@ public sealed class MonitorService : BackgroundService
     private async Task ScanPcscDevices(CancellationToken cancellationToken)
     {
         var devices = await _pcscService.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        var yubiKeys = devices.Select(yubiKeyFactory.Create); // TODO Maybe this goes into the deviceRepo 
+        var yubiKeys = devices.Select(_yubiKeyFactory.Create).ToList();
 
         await _deviceChannel.PublishAsync(yubiKeys, cancellationToken).ConfigureAwait(false);
         _logger.LogInformation("PCSC scan completed, found {DeviceCount} devices", devices.Count);

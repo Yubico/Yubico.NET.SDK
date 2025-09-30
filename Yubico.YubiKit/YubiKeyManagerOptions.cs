@@ -16,7 +16,7 @@ using Yubico.YubiKit.Core;
 
 namespace Yubico.YubiKit;
 
-public class Options
+public class YubiKeyManagerOptions
 {
     #region Transports enum
 

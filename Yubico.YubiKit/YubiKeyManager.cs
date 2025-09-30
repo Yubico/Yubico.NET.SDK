@@ -11,16 +11,16 @@ public interface IYubiKeyManager
     Task<IEnumerable<IYubiKey>> GetYubiKeysAsync(CancellationToken cancellationToken = default);
 }
 
-public class Manager : IYubiKeyManager
+public class YubiKeyManager : IYubiKeyManager
 {
-    private readonly DeviceRepository _deviceRepository;
-    private readonly ILogger<Manager> _logger;
-    private readonly IOptions<Options> _options;
+    private readonly IDeviceRepository _deviceRepository;
+    private readonly ILogger<YubiKeyManager> _logger;
+    private readonly IOptions<YubiKeyManagerOptions> _options;
 
-    public Manager(
-        ILogger<Manager> logger,
-        IOptions<Options> options,
-        DeviceRepository deviceRepository)
+    public YubiKeyManager(
+        ILogger<YubiKeyManager> logger,
+        IOptions<YubiKeyManagerOptions> options,
+        IDeviceRepository deviceRepository)
     {
         _logger = logger;
         _options = options;

@@ -28,11 +28,11 @@ public static class DependencyInjection
 
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddYubiKeyManager(Action<Options>? configureOptions = null)
+        public IServiceCollection AddYubiKeyManager(Action<YubiKeyManagerOptions>? configureOptions = null)
         {
             if (configureOptions != null) services.Configure(configureOptions);
 
-            services.AddTransient<IYubiKeyManager, Manager>()
+            services.AddTransient<IYubiKeyManager, YubiKeyManager>()
                 .AddTransient<IYubiKeyFactory, YubiKeyFactory>()
                 .AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>()
                 .AddTransient<IPcscDeviceService, PcscDeviceService>()
@@ -40,6 +40,7 @@ public static class DependencyInjection
                 .AddTransient<IManagementSessionFactory<ISmartCardConnection>,
                     ManagementSessionFactory<ISmartCardConnection>>()
                 .AddSingleton<IDeviceChannel, DeviceChannel>()
+                .AddSingleton<IDeviceRepository, DeviceRepository>()
                 .AddBackgroundServices();
 
             return services;
@@ -47,15 +48,15 @@ public static class DependencyInjection
 
         private IServiceCollection AddBackgroundServices() =>
             services
-                .AddSingleton<DeviceRepository>()
-                .AddSingleton<IYubiKeyDeviceRepository>(sp => sp.GetRequiredService<DeviceRepository>())
-                .AddHostedService<DeviceRepository>(sp => sp.GetRequiredService<DeviceRepository>())
+                .AddSingleton<DeviceListenerService>()
+                .AddSingleton<IDeviceListenerService>(sp => sp.GetRequiredService<DeviceListenerService>())
+                .AddHostedService<DeviceListenerService>(sp => sp.GetRequiredService<DeviceListenerService>())
 
                 // TODO Make use of IOptions<YubiKeyManagerOptions> in the monitor
                 .AddTransient<DeviceMonitorOptions>(sp =>
-                    sp.GetRequiredService<IOptions<Options>>().Value.ToDeviceMonitorOptions())
-                .AddSingleton<MonitorService>()
-                .AddHostedService<MonitorService>(sp => sp.GetRequiredService<MonitorService>());
+                    sp.GetRequiredService<IOptions<YubiKeyManagerOptions>>().Value.ToDeviceMonitorOptions())
+                .AddSingleton<DeviceMonitorService>()
+                .AddHostedService<DeviceMonitorService>(sp => sp.GetRequiredService<DeviceMonitorService>());
     }
 
     #endregion

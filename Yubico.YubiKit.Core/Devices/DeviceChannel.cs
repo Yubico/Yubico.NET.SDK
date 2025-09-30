@@ -26,7 +26,9 @@ public interface IDeviceChannel
 public class DeviceChannel : IDeviceChannel, IDisposable
 {
     private readonly Channel<IEnumerable<IYubiKey>> _channel = Channel.CreateUnbounded<IEnumerable<IYubiKey>>();
-    private bool _disposed = false;
+    private bool _disposed;
+
+    #region IDeviceChannel Members
 
     public async Task PublishAsync(IEnumerable<IYubiKey> devices, CancellationToken cancellationToken = default)
     {
@@ -42,18 +44,17 @@ public class DeviceChannel : IDeviceChannel, IDisposable
         }
     }
 
-    public IAsyncEnumerable<IEnumerable<IYubiKey>> ConsumeAsync(CancellationToken cancellationToken = default)
-    {
-        return _channel.Reader.ReadAllAsync(cancellationToken);
-    }
+    public IAsyncEnumerable<IEnumerable<IYubiKey>> ConsumeAsync(CancellationToken cancellationToken = default) =>
+        _channel.Reader.ReadAllAsync(cancellationToken);
 
     public void Complete()
     {
-        if (!_disposed)
-        {
-            _channel.Writer.TryComplete();
-        }
+        if (!_disposed) _channel.Writer.TryComplete();
     }
+
+    #endregion
+
+    #region IDisposable Members
 
     public void Dispose()
     {
@@ -63,4 +64,6 @@ public class DeviceChannel : IDeviceChannel, IDisposable
         _disposed = true;
         GC.SuppressFinalize(this);
     }
+
+    #endregion
 }

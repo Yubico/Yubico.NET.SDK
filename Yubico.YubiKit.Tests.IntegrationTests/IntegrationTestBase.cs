@@ -14,7 +14,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.IntegrationTests;
 
@@ -25,28 +24,33 @@ public abstract class IntegrationTestBase : IDisposable
     protected IntegrationTestBase()
     {
         var services = new ServiceCollection();
+        services.AddLogging();
         services.AddYubiKeyManager(options =>
         {
             options.EnableAutoDiscovery = true;
             options.ScanInterval = TimeSpan.FromSeconds(1);
-            options.EnabledTransports = Options.Transports.All;
+            options.EnabledTransports = YubiKeyManagerOptions.Transports.All;
         });
 
         ServiceProvider = services.BuildServiceProvider();
         ServiceLocator.SetLocatorProvider(ServiceProvider);
 
         Manager = ServiceProvider.GetRequiredService<IYubiKeyManager>();
-        Repository = ServiceProvider.GetRequiredService<DeviceRepository>();
-        MonitorService = ServiceProvider.GetRequiredService<MonitorService>();
+        DeviceRepository = ServiceProvider.GetRequiredService<IDeviceRepository>();
+        DeviceMonitorService = ServiceProvider.GetRequiredService<DeviceMonitorService>();
+        DeviceListenerService = ServiceProvider.GetRequiredService<DeviceListenerService>();
 
-        MonitorService.StartAsync(CancellationToken.None).Wait();
-        Repository.StartAsync(CancellationToken.None).Wait();
+        DeviceMonitorService.StartAsync(CancellationToken.None).Wait();
+        // DeviceRepository.StartAsync(CancellationToken.None).Wait();
+        DeviceListenerService.StartAsync(CancellationToken.None).Wait();
     }
+
+    private DeviceListenerService DeviceListenerService { get; }
 
     protected ServiceProvider ServiceProvider { get; }
     protected IYubiKeyManager Manager { get; }
-    private DeviceRepository Repository { get; }
-    private MonitorService MonitorService { get; }
+    private IDeviceRepository DeviceRepository { get; }
+    private DeviceMonitorService DeviceMonitorService { get; }
 
     #region IDisposable Members
 
@@ -55,8 +59,8 @@ public abstract class IntegrationTestBase : IDisposable
         if (_disposed)
             return;
 
-        MonitorService?.Dispose();
-        Repository?.Dispose();
+        DeviceMonitorService?.Dispose();
+        DeviceRepository?.Dispose();
         ServiceProvider?.Dispose();
         GC.SuppressFinalize(this);
 

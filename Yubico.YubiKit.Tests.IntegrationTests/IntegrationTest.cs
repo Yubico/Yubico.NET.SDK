@@ -35,7 +35,8 @@ public class IntegrationTest : IntegrationTestBase
     public async Task GetDeviceInfoAsync_with_Constructor()
     {
         var devices = await Manager.GetYubiKeysAsync();
-        var device = devices.First();
+        var device = devices.FirstOrDefault();
+        Assert.NotNull(device);
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
 
         // Collect dependencies yourself!
@@ -52,7 +53,8 @@ public class IntegrationTest : IntegrationTestBase
     public async Task GetDeviceInfoAsync_with_FactoryMethod()
     {
         var devices = await Manager.GetYubiKeysAsync();
-        var device = devices.First();
+        var device = devices.FirstOrDefault();
+        Assert.NotNull(device);
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
 
         // Collect dependencies yourself!

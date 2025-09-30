@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Device;
 
 namespace Yubico.YubiKit;
 
@@ -11,16 +11,16 @@ public interface IYubiKeyManager
     Task<IEnumerable<IYubiKey>> GetYubiKeysAsync(CancellationToken cancellationToken = default);
 }
 
-public class YubiKeyManager : IYubiKeyManager
+public class Manager : IYubiKeyManager
 {
-    private readonly YubiKeyDeviceRepository _deviceRepository;
-    private readonly ILogger<YubiKeyManager> _logger;
-    private readonly IOptions<YubiKeyManagerOptions> _options;
+    private readonly DeviceRepository _deviceRepository;
+    private readonly ILogger<Manager> _logger;
+    private readonly IOptions<Options> _options;
 
-    public YubiKeyManager(
-        ILogger<YubiKeyManager> logger,
-        IOptions<YubiKeyManagerOptions> options,
-        YubiKeyDeviceRepository deviceRepository)
+    public Manager(
+        ILogger<Manager> logger,
+        IOptions<Options> options,
+        DeviceRepository deviceRepository)
     {
         _logger = logger;
         _options = options;
@@ -36,6 +36,4 @@ public class YubiKeyManager : IYubiKeyManager
         _deviceRepository.DeviceChanges;
 
     #endregion
-
-    public IEnumerable<IYubiKey> GetYubiKeys() => _deviceRepository.GetAllDevices();
 }

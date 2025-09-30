@@ -14,24 +14,25 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Devices.SmartCard;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Device;
 
-namespace Yubico.YubiKit.Core.Devices;
+namespace Yubico.YubiKit;
 
-public class YubiKeyDeviceMonitor : BackgroundService
+public sealed class MonitorService : BackgroundService
 {
-    private readonly IYubiKeyFactory yubiKeyFactory;
-    private readonly IPcscDeviceService _pcscService;
     private readonly IDeviceChannel _deviceChannel;
-    private readonly ILogger<YubiKeyDeviceMonitor> _logger;
+    private readonly ILogger<MonitorService> _logger;
+    private readonly IPcscDeviceService _pcscService;
     private readonly TimeSpan _scanInterval;
+    private readonly IYubiKeyFactory yubiKeyFactory;
     private bool _disposed;
 
-    public YubiKeyDeviceMonitor(
+    public MonitorService(
         IYubiKeyFactory yubiKeyFactory,
         IPcscDeviceService pcscService,
         IDeviceChannel deviceChannel,
-        ILogger<YubiKeyDeviceMonitor> logger)
+        ILogger<MonitorService> logger)
     {
         this.yubiKeyFactory = yubiKeyFactory;
         _pcscService = pcscService;
@@ -51,9 +52,7 @@ public class YubiKeyDeviceMonitor : BackgroundService
 
             using var timer = new PeriodicTimer(_scanInterval);
             while (await timer.WaitForNextTickAsync(stoppingToken))
-            {
                 await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
-            }
         }
         catch (OperationCanceledException)
         {
@@ -84,23 +83,19 @@ public class YubiKeyDeviceMonitor : BackgroundService
     private async Task ScanPcscDevices(CancellationToken cancellationToken)
     {
         var devices = await _pcscService.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        var yubiKeys = devices.Select(yubiKeyFactory.Create);
+        var yubiKeys = devices.Select(yubiKeyFactory.Create); // TODO Maybe this goes into the deviceRepo 
 
         await _deviceChannel.PublishAsync(yubiKeys, cancellationToken).ConfigureAwait(false);
-        _logger.LogInformation("PCSC scan completed, found {DeviceCount} devices", devices.Count());
+        _logger.LogInformation("PCSC scan completed, found {DeviceCount} devices", devices.Count);
     }
 
     public override void Dispose()
     {
-        if (_disposed)
-        {
-            return;
-        }
+        if (_disposed) return;
 
         _deviceChannel.Complete();
         base.Dispose();
 
         _disposed = true;
     }
-
 }

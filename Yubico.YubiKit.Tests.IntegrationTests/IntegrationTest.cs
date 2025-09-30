@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
-using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Device;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.IntegrationTests;

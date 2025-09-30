@@ -13,9 +13,11 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
+using Yubico.YubiKit.Core.Devices.SmartCard;
 
-namespace Yubico.YubiKit.Core.Devices.SmartCard;
+namespace Yubico.YubiKit.Device;
 
 internal class PcscYubiKey : IYubiKey
 {

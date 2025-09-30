@@ -29,24 +29,24 @@ public abstract class IntegrationTestBase : IDisposable
         {
             options.EnableAutoDiscovery = true;
             options.ScanInterval = TimeSpan.FromSeconds(1);
-            options.EnabledTransports = YubiKeyManagerOptions.Transports.All;
+            options.EnabledTransports = Options.Transports.All;
         });
 
         ServiceProvider = services.BuildServiceProvider();
         ServiceLocator.SetLocatorProvider(ServiceProvider);
 
         Manager = ServiceProvider.GetRequiredService<IYubiKeyManager>();
-        Repository = ServiceProvider.GetRequiredService<YubiKeyDeviceRepository>();
-        Monitor = ServiceProvider.GetRequiredService<YubiKeyDeviceMonitor>();
+        Repository = ServiceProvider.GetRequiredService<DeviceRepository>();
+        MonitorService = ServiceProvider.GetRequiredService<MonitorService>();
 
-        Monitor.StartAsync(CancellationToken.None).Wait();
+        MonitorService.StartAsync(CancellationToken.None).Wait();
         Repository.StartAsync(CancellationToken.None).Wait();
     }
 
     protected ServiceProvider ServiceProvider { get; }
     protected IYubiKeyManager Manager { get; }
-    private YubiKeyDeviceRepository Repository { get; }
-    private YubiKeyDeviceMonitor Monitor { get; }
+    private DeviceRepository Repository { get; }
+    private MonitorService MonitorService { get; }
 
     #region IDisposable Members
 
@@ -55,7 +55,7 @@ public abstract class IntegrationTestBase : IDisposable
         if (_disposed)
             return;
 
-        Monitor?.Dispose();
+        MonitorService?.Dispose();
         Repository?.Dispose();
         ServiceProvider?.Dispose();
         GC.SuppressFinalize(this);

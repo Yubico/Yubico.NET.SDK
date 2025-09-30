@@ -16,12 +16,12 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 
-namespace Yubico.YubiKit;
+namespace Yubico.YubiKit.Management;
 
 public interface IManagementSessionFactory<TConnection>
     where TConnection : IConnection
 {
-    ManagementSession<TConnection> Create(TConnection connection);
+    Task<ManagementSession<TConnection>> CreateAsync(TConnection connection);
 }
 
 internal class ManagementSessionFactory<TConnection>(
@@ -34,25 +34,24 @@ internal class ManagementSessionFactory<TConnection>(
 
     #region IManagementSessionFactory<TConnection> Members
 
-    public ManagementSession<TConnection> Create(TConnection connection) =>
+    public Task<ManagementSession<TConnection>> CreateAsync(TConnection connection) =>
         connection switch
         {
-            ISmartCardConnection => CreateSession((ISmartCardConnection)connection),
+            ISmartCardConnection cardConnection => ForSmartCard(cardConnection),
             _ => throw new NotSupportedException(
                 $"The connection type {connection.GetType().FullName} is not supported.")
         };
 
     #endregion
 
-    private ManagementSession<TConnection> CreateSession(ISmartCardConnection connection)
+    private async Task<ManagementSession<TConnection>> ForSmartCard(ISmartCardConnection connection)
     {
         var session = new ManagementSession<TConnection>(
             _loggerFactory.CreateLogger<ManagementSession<TConnection>>(),
             (TConnection)connection,
             _protocolFactory);
 
-        // TODO consider: session.InitializeAsync() must be called by the caller after this method returns.
-
+        await session.InitializeAsync();
         return session;
     }
 }

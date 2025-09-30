@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 using Yubico.YubiKit;
 using Yubico.YubiKit.Core.Connections;
+using Yubico.YubiKit.Management;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 AddJsonOptions(builder);
@@ -24,7 +25,7 @@ app.MapGet("/di-demo", async (
         return Results.Problem("No YubiKey found.");
 
     using var smartCardConnection = await yubiKey.ConnectAsync<ISmartCardConnection>();
-    using var session = sessionFactory.Create(smartCardConnection);
+    using var session = await sessionFactory.CreateAsync(smartCardConnection);
 
     var deviceInfo = await session.GetDeviceInfoAsync();
     var yubiInfo = new YubiInfo(deviceInfo.SerialNumber.ToString("D8"), deviceInfo.FirmwareVersion.ToString());

@@ -40,11 +40,6 @@ internal static class NativeMethods
     private const string MacDlLib = "libdl.dylib";
     private const string LinuxDlLib = "libdl.so";
 
-    static NativeMethods()
-    {
-        Libraries.EnsureInitialized();
-    }
-
     // Windows
 
     // Note that the DefaultDllImportSearchPaths attribute is a security best

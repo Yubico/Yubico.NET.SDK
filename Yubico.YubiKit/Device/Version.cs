@@ -15,7 +15,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Yubico.YubiKit.Core.Utils;
 
-namespace Yubico.YubiKit;
+namespace Yubico.YubiKit.Device;
 
 public class Version : IComparable<Version>, IComparable, IEquatable<Version>
 {

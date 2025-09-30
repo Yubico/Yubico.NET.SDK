@@ -18,10 +18,12 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Iso7816;
 using Yubico.YubiKit.Core.Protocols;
+using Yubico.YubiKit.Device;
+using Version = Yubico.YubiKit.Device.Version;
 
-namespace Yubico.YubiKit;
+namespace Yubico.YubiKit.Management;
 
-public class ManagementSession<TConnection> : ApplicationSession
+public sealed class ManagementSession<TConnection> : ApplicationSession
     where TConnection : IConnection
 {
     private const byte INS_GET_DEVICE_INFO = 0x1D;
@@ -43,36 +45,27 @@ public class ManagementSession<TConnection> : ApplicationSession
         _protocol = protocolFactory.Create(connection);
     }
 
-    private async Task<Version> GetVersionAsync(CancellationToken cancellationToken = default)
+    public static async Task<ManagementSession<TConnection>> CreateAsync(
+        ILogger<ManagementSession<TConnection>> logger,
+        TConnection connection,
+        IProtocolFactory<TConnection> protocolFactory,
+        CancellationToken cancellationToken = default)
     {
-        if (_version is not null)
-            return _version;
-
-        if (_protocol is ISmartCardProtocol smartCardProtocol)
-        {
-            var versionBytes = await smartCardProtocol.SelectAsync(ApplicationIds.Management, cancellationToken)
-                .ConfigureAwait(false);
-            var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
-
-            var versionString = deviceText.Split(' ').Last();
-            var versionParts = versionString.Split('.').Select(s => int.Parse(s)).ToArray();
-            if (versionParts.Length == 3)
-                _version = new Version(versionParts[0], versionParts[1], versionParts[2]);
-            else
-                _version = new Version(0);
-
-            _logger.LogInformation("YubiKey device text: {DeviceText}", deviceText);
-            _logger.LogInformation("YubiKey version: {Version}", _version);
-            _logger.LogInformation("YubiKey version string: {VersionString}", versionString);
-        }
-        else
-        {
-            throw new NotSupportedException("Protocol not supported");
-        }
-
-        return _version;
+        var session = new ManagementSession<TConnection>(logger, connection, protocolFactory);
+        await session.InitializeAsync(cancellationToken);
+        return session;
     }
 
+    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        if (_version is not null)
+            return;
+
+        if (_protocol is ISmartCardProtocol smartCardProtocol)
+            await SetVersionAsync(cancellationToken, smartCardProtocol);
+        else
+            throw new NotSupportedException("Protocol not supported");
+    }
 
     public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
@@ -113,6 +106,18 @@ public class ManagementSession<TConnection> : ApplicationSession
         }
 
         return DeviceInfo.CreateFromTlvs([.. allPagesTlvs], _version);
+    }
+
+    private async Task SetVersionAsync(CancellationToken cancellationToken, ISmartCardProtocol smartCardProtocol)
+    {
+        var versionBytes = await smartCardProtocol.SelectAsync(ApplicationIds.Management, cancellationToken)
+            .ConfigureAwait(false);
+        var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
+        var versionString = deviceText.Split(' ').Last();
+        var versionParts = versionString.Split('.').Select(s => int.Parse(s)).ToArray();
+        _version = versionParts.Length == 3
+            ? new Version(versionParts[0], versionParts[1], versionParts[2])
+            : new Version(0);
     }
 
     protected override void Dispose(bool disposing)

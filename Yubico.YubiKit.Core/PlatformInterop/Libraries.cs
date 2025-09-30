@@ -45,15 +45,6 @@ namespace Yubico.YubiKit.Core.PlatformInterop
         ///     The library should be properly packaged with the correct runtimes/* folder structure in the NuGet package.
         /// </remarks>
         internal const string NativeShims = "Yubico.NativeShims";
-
-        /// <summary>
-        ///     No-op implementation for modern .NET versions.
-        /// </summary>
-        /// <remarks>
-        ///     Library loading is handled automatically by the runtime.
-        ///     This method exists only for API compatibility with .NET Framework 4.7 code.
-        /// </remarks>
-        public static void EnsureInitialized() { }
     }
 }
 #endif

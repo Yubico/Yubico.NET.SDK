@@ -16,7 +16,7 @@ using System.Buffers.Binary;
 using System.Text;
 using Yubico.YubiKit.Core;
 
-namespace Yubico.YubiKit;
+namespace Yubico.YubiKit.Device;
 
 public readonly record struct DeviceInfo
 {

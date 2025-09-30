@@ -17,6 +17,7 @@ using Microsoft.Extensions.Options;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit;
 

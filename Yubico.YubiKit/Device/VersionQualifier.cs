@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit;
+namespace Yubico.YubiKit.Device;
 
 /// <summary>
 ///     Represents the type of version qualifier for a firmware version.

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Device;
+
 namespace Yubico.YubiKit;
 
 public abstract class ApplicationSession : IApplicationSession
@@ -24,6 +26,14 @@ public abstract class ApplicationSession : IApplicationSession
         GC.SuppressFinalize(this);
     }
 
+    public void EnsureSupports(Feature feature)
+    {
+        if (!IsSupported(feature)) throw new NotSupportedException($"{feature.Name} is not supported on this YubiKey.");
+    }
+
+    public bool IsSupported(Feature feature) =>
+        true; // TODO get from Management Session, select, and parse version info
+
     #endregion
 
     protected virtual void Dispose(bool disposing)
@@ -33,14 +43,6 @@ public abstract class ApplicationSession : IApplicationSession
             // TODO release managed resources here
         }
     }
-
-    public void EnsureSupports(Feature feature)
-    {
-        if (!IsSupported(feature)) throw new NotSupportedException($"{feature.Name} is not supported on this YubiKey.");
-    }
-
-    public bool IsSupported(Feature feature) =>
-        true; // TODO get from Management Session, select, and parse version info
 }
 
 public interface IApplicationSession : IDisposable

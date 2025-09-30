@@ -1,4 +1,4 @@
-namespace Yubico.YubiKit.Core;
+namespace Yubico.YubiKit.Core.Utils;
 
 public static class ByteUtils
 {

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Connections;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.IntegrationTests;
 
@@ -9,7 +10,7 @@ public class IntegrationTest : IntegrationTestBase
     [Fact]
     public async Task DeviceEvents_ArePublished()
     {
-        var events = new List<Core.Devices.YubiKeyDeviceEvent>();
+        var events = new List<YubiKeyDeviceEvent>();
         using var subscription = Manager.DeviceChanges.Subscribe(events.Add);
 
         // Plug in or remove a YubiKey to trigger events
@@ -19,7 +20,7 @@ public class IntegrationTest : IntegrationTestBase
 
         Assert.True(events.Count > 0, $"Expected at least one device event to be published, but got {events.Count}.");
     }
-    
+
     [Fact]
     public async Task GetPcscDevices()
     {
@@ -37,8 +38,8 @@ public class IntegrationTest : IntegrationTestBase
 
         var logger = ServiceProvider.GetRequiredService<ILogger<ManagementSession<ISmartCardConnection>>>();
         var scpFactory = ServiceProvider.GetRequiredService<IProtocolFactory<ISmartCardConnection>>();
-
         using var mgmtSession = new ManagementSession<ISmartCardConnection>(logger, connection, scpFactory);
+
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
     }
@@ -48,10 +49,10 @@ public class IntegrationTest : IntegrationTestBase
     {
         var pcscDevices = await Manager.GetYubiKeysAsync();
         var pcscDevice = pcscDevices.First();
-
         using var connection = await pcscDevice.ConnectAsync<ISmartCardConnection>();
-        var managementSessionFactory = ServiceProvider.GetRequiredService<IManagementSessionFactory<ISmartCardConnection>>();
 
+        var managementSessionFactory =
+            ServiceProvider.GetRequiredService<IManagementSessionFactory<ISmartCardConnection>>();
         using var mgmtSession = managementSessionFactory.Create(connection);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();

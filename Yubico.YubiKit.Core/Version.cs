@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Diagnostics.CodeAnalysis;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Core;
 
@@ -28,9 +29,9 @@ public class Version : IComparable<Version>, IComparable, IEquatable<Version>
     }
 
     public Version(int major, int minor = 0, int patch = 0)
-    : this(ByteUtils.ValidateByte(major, nameof(major)), ByteUtils.ValidateByte(minor, nameof(minor)), ByteUtils.ValidateByte(patch, nameof(patch)))
+        : this(ByteUtils.ValidateByte(major, nameof(major)), ByteUtils.ValidateByte(minor, nameof(minor)),
+            ByteUtils.ValidateByte(patch, nameof(patch)))
     {
-        
     }
 
     public byte Major { get; }

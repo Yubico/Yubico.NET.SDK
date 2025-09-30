@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Devices;
 
@@ -24,39 +26,34 @@ public static class DependencyInjection
 
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddYubiKeyManager()
-        {
-            return services.AddYubiKeyManager(configureOptions: null);
-        }
-
-        internal IServiceCollection AddBackgroundServices()
-        {
-           return services
-            .AddSingleton<YubiKeyDeviceRepository>()
-            .AddSingleton<IYubiKeyDeviceRepository>(sp => sp.GetRequiredService<YubiKeyDeviceRepository>())
-            .AddHostedService<YubiKeyDeviceRepository>(sp => sp.GetRequiredService<YubiKeyDeviceRepository>())
-
-            .AddSingleton<YubiKeyDeviceMonitor>()
-            .AddHostedService<YubiKeyDeviceMonitor>(sp => sp.GetRequiredService<YubiKeyDeviceMonitor>());
-        }
-
-        public IServiceCollection AddYubiKeyManager(Action<YubiKeyManagerOptions>? configureOptions)
+        public IServiceCollection AddYubiKeyManager(Action<YubiKeyManagerOptions>? configureOptions = null)
         {
             if (configureOptions != null) services.Configure(configureOptions);
 
             services.AddTransient<IYubiKeyManager, YubiKeyManager>()
-                    .AddTransient<IYubiKeyFactory, YubiKeyFactory>()
-                    .AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>()
-                    .AddTransient<IPcscDeviceService, PcscDeviceService>()
-                    .AddTransient<IProtocolFactory<ISmartCardConnection>, SmartCardProtocolFactory<ISmartCardConnection>>()
-                    .AddTransient<IManagementSessionFactory<ISmartCardConnection>, ManagementSessionFactory<ISmartCardConnection>>()
-                    .AddSingleton<IDeviceChannel, DeviceChannel>()
-                    .AddBackgroundServices();
+                .AddTransient<IYubiKeyFactory, YubiKeyFactory>()
+                .AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>()
+                .AddTransient<IPcscDeviceService, PcscDeviceService>()
+                .AddTransient<IProtocolFactory<ISmartCardConnection>, SmartCardProtocolFactory<ISmartCardConnection>>()
+                .AddTransient<IManagementSessionFactory<ISmartCardConnection>,
+                    ManagementSessionFactory<ISmartCardConnection>>()
+                .AddSingleton<IDeviceChannel, DeviceChannel>()
+                .AddBackgroundServices();
 
             return services;
         }
 
+        private IServiceCollection AddBackgroundServices() =>
+            services
+                .AddSingleton<YubiKeyDeviceRepository>()
+                .AddSingleton<IYubiKeyDeviceRepository>(sp => sp.GetRequiredService<YubiKeyDeviceRepository>())
+                .AddHostedService<YubiKeyDeviceRepository>(sp => sp.GetRequiredService<YubiKeyDeviceRepository>())
 
+                // TODO Make use of IOptions<YubiKeyManagerOptions> in the monitor
+                .AddTransient<DeviceMonitorOptions>(sp =>
+                    sp.GetRequiredService<IOptions<YubiKeyManagerOptions>>().Value.ToDeviceMonitorOptions())
+                .AddSingleton<YubiKeyDeviceMonitor>()
+                .AddHostedService<YubiKeyDeviceMonitor>(sp => sp.GetRequiredService<YubiKeyDeviceMonitor>());
     }
 
     #endregion

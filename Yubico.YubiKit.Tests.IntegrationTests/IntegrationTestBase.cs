@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 
@@ -26,7 +25,13 @@ public abstract class IntegrationTestBase : IDisposable
     protected IntegrationTestBase()
     {
         var services = new ServiceCollection();
-        ConfigureServices(services);
+        services.AddYubiKeyManager(options =>
+        {
+            options.EnableAutoDiscovery = true;
+            options.ScanInterval = TimeSpan.FromSeconds(1);
+            options.EnabledTransports = YubiKeyManagerOptions.Transports.All;
+        });
+
         ServiceProvider = services.BuildServiceProvider();
         ServiceLocator.SetLocatorProvider(ServiceProvider);
 
@@ -40,8 +45,8 @@ public abstract class IntegrationTestBase : IDisposable
 
     protected ServiceProvider ServiceProvider { get; }
     protected IYubiKeyManager Manager { get; }
-    protected YubiKeyDeviceRepository Repository { get; }
-    protected YubiKeyDeviceMonitor Monitor { get; }
+    private YubiKeyDeviceRepository Repository { get; }
+    private YubiKeyDeviceMonitor Monitor { get; }
 
     #region IDisposable Members
 
@@ -59,15 +64,4 @@ public abstract class IntegrationTestBase : IDisposable
     }
 
     #endregion
-
-    protected void ConfigureServices(IServiceCollection services)
-    {
-        services.AddLogging(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
-        services.AddYubiKeyManager(options =>
-        {
-            options.EnableAutoDiscovery = true;
-            options.ScanInterval = TimeSpan.FromSeconds(1);
-            options.EnabledTransports = YubiKeyManagerOptions.Transports.All;
-        });
-    }
 }

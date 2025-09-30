@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Device;
 
@@ -23,8 +24,8 @@ public sealed class DeviceMonitorService : BackgroundService
 {
     private readonly IDeviceChannel _deviceChannel;
     private readonly ILogger<DeviceMonitorService> _logger;
+    private readonly DeviceMonitorOptions _options;
     private readonly IPcscDeviceService _pcscService;
-    private readonly TimeSpan _scanInterval;
     private readonly IYubiKeyFactory _yubiKeyFactory;
     private bool _disposed;
 
@@ -32,13 +33,23 @@ public sealed class DeviceMonitorService : BackgroundService
         IYubiKeyFactory yubiKeyFactory,
         IPcscDeviceService pcscService,
         IDeviceChannel deviceChannel,
-        ILogger<DeviceMonitorService> logger)
+        ILogger<DeviceMonitorService> logger,
+        DeviceMonitorOptions options)
     {
         _yubiKeyFactory = yubiKeyFactory;
         _pcscService = pcscService;
         _deviceChannel = deviceChannel;
         _logger = logger;
-        _scanInterval = TimeSpan.FromMilliseconds(500);
+        _options = options;
+    }
+
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        if (_options.EnableAutoDiscovery)
+            return base.StartAsync(cancellationToken);
+
+        _logger.LogInformation("YubiKey device auto-discovery is disabled. Device monitor will not start.");
+        return Task.CompletedTask;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -49,7 +60,7 @@ public sealed class DeviceMonitorService : BackgroundService
             _logger.LogInformation("Performing initial device scan...");
 
             await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
-            using var timer = new PeriodicTimer(_scanInterval);
+            using var timer = new PeriodicTimer(_options.ScanInterval);
 
             while (await timer.WaitForNextTickAsync(stoppingToken))
                 await PerformDeviceScan(stoppingToken).ConfigureAwait(false);

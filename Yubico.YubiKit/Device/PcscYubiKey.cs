@@ -29,7 +29,6 @@ internal class PcscYubiKey : IYubiKey
     private readonly ISmartCardConnectionFactory _connectionFactory;
     private readonly ILogger<PcscYubiKey> _logger;
     private readonly IPcscDevice _pcscDevice;
-    private ISmartCardConnection? _connection;
 
     internal PcscYubiKey(
         ILogger<PcscYubiKey> logger,
@@ -52,17 +51,18 @@ internal class PcscYubiKey : IYubiKey
             throw new NotSupportedException(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
 
-        var connection = await ConnectAsync(cancellationToken).ConfigureAwait(false);
+        var connection = await CreateConnection(cancellationToken).ConfigureAwait(false);
         return connection as TConnection ??
                throw new InvalidOperationException("Connection is not of the expected type.");
     }
 
     #endregion
 
-    private async Task<ISmartCardConnection> ConnectAsync(CancellationToken cancellationToken = default)
+    private async Task<ISmartCardConnection> CreateConnection(CancellationToken cancellationToken = default)
     {
-        _connection = await _connectionFactory.CreateAsync(_pcscDevice, cancellationToken).ConfigureAwait(false);
+        var connection = await _connectionFactory.CreateAsync(_pcscDevice, cancellationToken).ConfigureAwait(false);
         _logger.LogInformation("Connected to YubiKey in reader {ReaderName}", ReaderName);
-        return _connection;
+
+        return connection;
     }
 }

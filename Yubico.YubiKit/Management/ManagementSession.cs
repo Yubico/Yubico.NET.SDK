@@ -88,8 +88,10 @@ public sealed class ManagementSession<TConnection> : ApplicationSession
 
             if (_protocol is ISmartCardProtocol smartCardProtocol)
             {
-                var encodedResult = await smartCardProtocol.TransmitAndReceiveAsync(apdu, cancellationToken)
+                var encodedResult = await smartCardProtocol
+                    .TransmitAndReceiveAsync(apdu, cancellationToken)
                     .ConfigureAwait(false);
+
                 if (encodedResult.Length - 1 != encodedResult.Span[0])
                     throw new BadResponseException("Invalid length");
 
@@ -99,6 +101,10 @@ public sealed class ManagementSession<TConnection> : ApplicationSession
                 allPagesTlvs = allPagesTlvs.Concat(pageTlvs);
                 ++page;
             }
+            // else if (_protocol is IFidoProtocol fidoProtocol)
+            // {
+            //     
+            // }
             else
             {
                 throw new NotSupportedException("Protocol not supported");

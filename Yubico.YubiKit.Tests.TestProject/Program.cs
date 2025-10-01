@@ -13,7 +13,6 @@ builder.Services.AddYubiKeyManager(options =>
 });
 
 var app = builder.Build();
-
 app.MapGet("/di-demo", async (
     [FromServices] IYubiKeyManager yubiKeyManager,
     [FromServices] IManagementSessionFactory<ISmartCardConnection> sessionFactory
@@ -32,8 +31,8 @@ app.MapGet("/di-demo", async (
     return Results.Text($"YubiKey on Server:: {yubiInfo}");
 });
 
-
 app.Run();
+
 return;
 
 void AddJsonOptions(WebApplicationBuilder webApplicationBuilder)

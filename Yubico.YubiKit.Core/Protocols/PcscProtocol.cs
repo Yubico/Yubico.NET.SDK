@@ -46,7 +46,7 @@ internal class PcscProtocol : ISmartCardProtocol
     private readonly ILogger<PcscProtocol> _logger;
     private readonly ChainedResponseProcessor _processor;
 
-    private bool _isInitialized;
+    // private bool _isInitialized;
 
     public PcscProtocol(
         ILogger<PcscProtocol> logger,
@@ -67,8 +67,6 @@ internal class PcscProtocol : ISmartCardProtocol
         CommandApdu command,
         CancellationToken cancellationToken = default)
     {
-        await EnsureInitialized().ConfigureAwait(false);
-
         var response = await _processor.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
         if (response is not { SW1: 0x90, SW2: 0x00 })
             throw new InvalidOperationException(
@@ -102,15 +100,5 @@ internal class PcscProtocol : ISmartCardProtocol
             : new CommandChainingProcessor(_connection, new ShortApduFormatter());
 
         return new ChainedResponseProcessor(processor, _insSendRemaining);
-    }
-
-    private async Task EnsureInitialized()
-    {
-        if (_isInitialized) return;
-
-        _logger.LogDebug("Protocol not initialized, performing SELECT");
-        await SelectAsync(ApplicationIds.Management)
-            .ConfigureAwait(false); // TODO This might have to live in YubiKit ns
-        _isInitialized = true;
     }
 }

@@ -29,9 +29,6 @@ internal class ManagementSessionFactory<TConnection>(
     IProtocolFactory<TConnection> protocolFactory) : IManagementSessionFactory<TConnection>
     where TConnection : IConnection
 {
-    private readonly ILoggerFactory _loggerFactory = loggerFactory;
-    private readonly IProtocolFactory<TConnection> _protocolFactory = protocolFactory;
-
     #region IManagementSessionFactory<TConnection> Members
 
     public Task<ManagementSession<TConnection>> CreateAsync(TConnection connection) =>
@@ -47,9 +44,9 @@ internal class ManagementSessionFactory<TConnection>(
     private async Task<ManagementSession<TConnection>> ForSmartCard(ISmartCardConnection connection)
     {
         var session = new ManagementSession<TConnection>(
-            _loggerFactory.CreateLogger<ManagementSession<TConnection>>(),
+            loggerFactory.CreateLogger<ManagementSession<TConnection>>(),
             (TConnection)connection,
-            _protocolFactory);
+            protocolFactory);
 
         await session.InitializeAsync();
         return session;

@@ -29,9 +29,9 @@ public abstract class IntegrationTestBase : IDisposable
         services.AddYubiKeyManager(overrideOptions ?? DefaultOptions);
 
         ServiceProvider = services.BuildServiceProvider();
+        YubiKeyManager = ServiceProvider.GetRequiredService<IYubiKeyManager>();
         ServiceLocator.SetLocatorProvider(ServiceProvider);
 
-        YubiKeyManager = ServiceProvider.GetRequiredService<IYubiKeyManager>();
         DeviceRepository = ServiceProvider.GetRequiredService<IDeviceRepository>();
         DeviceMonitorService = ServiceProvider.GetRequiredService<DeviceMonitorService>();
         DeviceListenerService = ServiceProvider.GetRequiredService<DeviceListenerService>();
@@ -48,11 +48,10 @@ public abstract class IntegrationTestBase : IDisposable
             options.EnabledTransports = YubiKeyManagerOptions.Transports.All;
         };
 
-    private DeviceListenerService DeviceListenerService { get; }
-
     protected ServiceProvider ServiceProvider { get; }
     protected IYubiKeyManager YubiKeyManager { get; }
     private IDeviceRepository DeviceRepository { get; }
+    private DeviceListenerService DeviceListenerService { get; }
     private DeviceMonitorService DeviceMonitorService { get; }
 
     #region IDisposable Members

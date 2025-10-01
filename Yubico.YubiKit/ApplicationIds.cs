@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core;
+namespace Yubico.YubiKit;
 
 public record ApplicationIds // Should be in Yubico.YubiKit
 {

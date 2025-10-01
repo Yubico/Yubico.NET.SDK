@@ -15,8 +15,9 @@
 using System.Buffers.Binary;
 using System.Text;
 using Yubico.YubiKit.Core;
+using Version = Yubico.YubiKit.Device.Version;
 
-namespace Yubico.YubiKit.Device;
+namespace Yubico.YubiKit.Management;
 
 public readonly record struct DeviceInfo
 {

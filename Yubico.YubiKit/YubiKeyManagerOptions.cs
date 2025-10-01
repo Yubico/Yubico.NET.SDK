@@ -30,6 +30,6 @@ public class YubiKeyManagerOptions
     #endregion
 
     public bool EnableAutoDiscovery { get; set; }
-    public TimeSpan ScanInterval { get; set; }
-    public Transports EnabledTransports { get; set; }
+    public TimeSpan ScanInterval { get; set; } = TimeSpan.FromMicroseconds(500);
+    public Transports EnabledTransports { get; set; } = Transports.All;
 }

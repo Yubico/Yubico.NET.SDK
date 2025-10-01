@@ -33,7 +33,7 @@ public interface ISmartCardProtocol : IProtocol
         CancellationToken cancellationToken = default);
 }
 
-internal class SmartCardProtocol : ISmartCardProtocol
+internal class PcscProtocol : ISmartCardProtocol
 {
     private const byte INS_SELECT = 0xa4;
     private const byte P1_SELECT = 0x04;
@@ -43,13 +43,13 @@ internal class SmartCardProtocol : ISmartCardProtocol
     private readonly ISmartCardConnection _connection;
     private readonly bool _extendedApdus = false;
     private readonly byte _insSendRemaining;
-    private readonly ILogger<SmartCardProtocol> _logger;
+    private readonly ILogger<PcscProtocol> _logger;
     private readonly ChainedResponseProcessor _processor;
 
     private bool _isInitialized;
 
-    public SmartCardProtocol(
-        ILogger<SmartCardProtocol> logger,
+    public PcscProtocol(
+        ILogger<PcscProtocol> logger,
         ISmartCardConnection connection,
         ReadOnlyMemory<byte> insSendRemaining = default)
     {

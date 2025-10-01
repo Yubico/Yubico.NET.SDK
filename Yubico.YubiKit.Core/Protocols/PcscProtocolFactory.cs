@@ -24,7 +24,7 @@ public interface IProtocolFactory<TConnection>
     IProtocol Create(TConnection connection);
 }
 
-public class SmartCardProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
+public class PcscProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
     : IProtocolFactory<TConnection>
     where TConnection : IConnection
 {
@@ -34,8 +34,8 @@ public class SmartCardProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
         connection switch
         {
             ISmartCardConnection scConnection =>
-                (IProtocol)new SmartCardProtocol(
-                    loggerFactory.CreateLogger<SmartCardProtocol>(),
+                (IProtocol)new PcscProtocol(
+                    loggerFactory.CreateLogger<PcscProtocol>(),
                     scConnection),
             _ => throw new NotSupportedException(
                 $"The connection type {typeof(TConnection).Name} is not supported by this protocol factory.")

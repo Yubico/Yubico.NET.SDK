@@ -14,7 +14,7 @@
 
 using System.Globalization;
 
-namespace Yubico.YubiKit.Core.Buffers;
+namespace Yubico.YubiKit.Core.Utils;
 
 /// <summary>
 ///     Class for encoding and decoding bytes into base-16 encoded text, otherwise known as

@@ -14,7 +14,7 @@
 
 using System.Text;
 
-namespace Yubico.YubiKit.Core.Buffers;
+namespace Yubico.YubiKit.Core.Utils;
 
 /// <summary>
 ///     Utilities for working with multi null-terminated strings.

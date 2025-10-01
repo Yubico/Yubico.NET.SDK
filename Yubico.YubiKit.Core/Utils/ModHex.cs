@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Buffers;
+namespace Yubico.YubiKit.Core.Utils;
 
 /// <summary>
 ///     Class for encoding and decoding byte collections into MODHEX.

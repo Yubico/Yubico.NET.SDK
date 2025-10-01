@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Yubico.YubiKit;
-using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Connections;
+using Yubico.YubiKit.Core.Core.Connections;
+using Yubico.YubiKit.Core.Core.Protocols;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
 namespace TestProject.Controllers;

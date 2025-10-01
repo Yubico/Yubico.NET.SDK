@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
-using Yubico.YubiKit;
-using Yubico.YubiKit.Core.Connections;
+using TestProject;
+using Yubico.YubiKit.Core.Core.Connections;
 using Yubico.YubiKit.Management;
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -43,14 +43,17 @@ void AddJsonOptions(WebApplicationBuilder webApplicationBuilder)
     });
 }
 
-public record YubiInfo(string serialNumber, string firmwareVersion);
-
-[JsonSerializable(typeof(YubiInfo))]
-[JsonSerializable(typeof(ProblemDetails))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
+namespace TestProject
 {
-}
+    public record YubiInfo(string serialNumber, string firmwareVersion);
 
-public partial class Program
-{
+    [JsonSerializable(typeof(YubiInfo))]
+    [JsonSerializable(typeof(ProblemDetails))]
+    internal partial class AppJsonSerializerContext : JsonSerializerContext
+    {
+    }
+
+    public class Program
+    {
+    }
 }

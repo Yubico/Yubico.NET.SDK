@@ -15,6 +15,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.IntegrationTests;
 

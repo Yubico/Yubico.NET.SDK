@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Devices.SmartCard;
 using Yubico.YubiKit.Device;
 
 namespace Yubico.YubiKit;
@@ -37,13 +37,14 @@ public class DeviceRepository(
     private readonly Subject<YubiKeyDeviceEvent> _deviceChanges = new();
     private readonly ConcurrentDictionary<string, IYubiKey> _devices = new();
     private readonly SemaphoreSlim _initializationLock = new(1, 1);
+
+    private readonly bool
+        TEST_MONITORSERVICE_SKIP_MANUALSCAN = false; // For unit testing only, we should be able to set this to internal
+
     private bool _disposed;
 
     // Thread-safety for initialization
     private volatile bool _hasData;
-
-    private readonly bool
-        TEST_MONITORSERVICE_SKIP_MANUALSCAN = false; // For unit testing only, we should be able to set this to internal
 
     #region IDeviceRepository Members
 

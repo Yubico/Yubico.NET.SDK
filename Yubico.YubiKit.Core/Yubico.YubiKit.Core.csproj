@@ -24,8 +24,4 @@
         <PackageReference Include="Yubico.NativeShims" Version="1.14.0"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Processors\"/>
-    </ItemGroup>
-
 </Project>

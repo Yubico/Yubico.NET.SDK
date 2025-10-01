@@ -12,16 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.Connections;
+namespace Yubico.YubiKit.Core;
 
-public interface ISmartCardConnection : IConnection
+public static class PcscMaxApduSizes
 {
-    // IDisposable BeginTransaction(out bool cardWasReset);
+    /// <summary>
+    ///     The max APDU command size for the YubiKey NEO
+    /// </summary>
+    public const int Neo = 1390;
 
-    Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-        ReadOnlyMemory<byte> command,
-        CancellationToken cancellationToken = default);
-    // public Transport getTransport();
-    // boolean isExtendedLengthApduSupported();
-    // byte[] getAtr();
+    /// <summary>
+    ///     The max APDU command size for the YubiKey 4 and greater
+    /// </summary>
+    public const int Yk4 = 2038;
+
+    /// <summary>
+    ///     The max APDU command size for the YubiKey 4.3 and greater
+    /// </summary>
+    public const int Yk43 = 3062;
 }

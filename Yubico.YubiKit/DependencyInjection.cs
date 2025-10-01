@@ -13,10 +13,9 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
-using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Devices.SmartCard;
 using Yubico.YubiKit.Device;
 using Yubico.YubiKit.Management;
 
@@ -34,7 +33,7 @@ public static class DependencyInjection
 
             services.AddTransient<IYubiKeyManager, YubiKeyManager>()
                 .AddTransient<IYubiKeyFactory, YubiKeyFactory>()
-                .AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>()
+                .AddTransient<ISmartCardConnectionFactory, PcscConnectionFactory>()
                 .AddTransient<IPcscDeviceService, PcscDeviceService>()
                 .AddTransient<IProtocolFactory<ISmartCardConnection>, SmartCardProtocolFactory<ISmartCardConnection>>()
                 .AddTransient<IManagementSessionFactory<ISmartCardConnection>,
@@ -49,12 +48,7 @@ public static class DependencyInjection
         private IServiceCollection AddBackgroundServices() =>
             services
                 .AddSingleton<DeviceListenerService>()
-                .AddSingleton<IDeviceListenerService>(sp => sp.GetRequiredService<DeviceListenerService>())
                 .AddHostedService<DeviceListenerService>(sp => sp.GetRequiredService<DeviceListenerService>())
-
-                // TODO Make use of IOptions<YubiKeyManagerOptions> in the monitor
-                .AddTransient<DeviceMonitorOptions>(sp =>
-                    sp.GetRequiredService<IOptions<YubiKeyManagerOptions>>().Value.ToDeviceMonitorOptions())
                 .AddSingleton<DeviceMonitorService>()
                 .AddHostedService<DeviceMonitorService>(sp => sp.GetRequiredService<DeviceMonitorService>());
     }

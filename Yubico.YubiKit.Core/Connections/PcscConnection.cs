@@ -19,17 +19,33 @@ using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
 namespace Yubico.YubiKit.Core.Connections;
 
-internal class PcscSmartCardConnection : ISmartCardConnection
+public interface IConnection : IDisposable
 {
-    private readonly ILogger<PcscSmartCardConnection> _logger;
+}
+
+public interface ISmartCardConnection : IConnection
+{
+    // IDisposable BeginTransaction(out bool cardWasReset);
+
+    Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+        ReadOnlyMemory<byte> command,
+        CancellationToken cancellationToken = default);
+    // public Transport getTransport();
+    // boolean isExtendedLengthApduSupported();
+    // byte[] getAtr();
+}
+
+internal class PcscConnection : ISmartCardConnection
+{
+    private readonly ILogger<PcscConnection> _logger;
     private readonly IPcscDevice _smartCardDevice;
     private SCardCardHandle? _cardHandle;
     private SCardContext? _context;
     private bool _disposed;
     private SCARD_PROTOCOL? _protocol;
 
-    internal PcscSmartCardConnection(
-        ILogger<PcscSmartCardConnection> logger,
+    internal PcscConnection(
+        ILogger<PcscConnection> logger,
         IPcscDevice smartCardDevice)
     {
         _logger = logger;
@@ -82,7 +98,6 @@ internal class PcscSmartCardConnection : ISmartCardConnection
 
     #endregion
 
-
     public ValueTask InitializeAsync(CancellationToken cancellationToken)
     {
         var task = Task.Run(() =>
@@ -94,7 +109,7 @@ internal class PcscSmartCardConnection : ISmartCardConnection
     }
 
     private static (SCardContext Context, SCardCardHandle CardHandle, SCARD_PROTOCOL Protocol)
-    GetConnection(string readerName)
+        GetConnection(string readerName)
     {
         var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
         if (result != ErrorCode.SCARD_S_SUCCESS)

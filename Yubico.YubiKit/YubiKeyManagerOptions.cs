@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core;
-
 namespace Yubico.YubiKit;
 
 public class YubiKeyManagerOptions
@@ -34,12 +32,4 @@ public class YubiKeyManagerOptions
     public bool EnableAutoDiscovery { get; set; }
     public TimeSpan ScanInterval { get; set; }
     public Transports EnabledTransports { get; set; }
-
-    internal DeviceMonitorOptions ToDeviceMonitorOptions()
-        => new()
-        {
-            EnableAutoDiscovery = EnableAutoDiscovery,
-            EnabledTransports = (DeviceMonitorOptions.Transports)EnabledTransports,
-            ScanInterval = ScanInterval
-        };
 }

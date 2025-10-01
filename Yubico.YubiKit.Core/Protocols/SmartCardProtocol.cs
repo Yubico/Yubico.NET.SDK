@@ -39,7 +39,7 @@ internal class SmartCardProtocol : ISmartCardProtocol
     private const byte P1_SELECT = 0x04;
     private const byte P2_SELECT = 0x00;
     private const byte INS_SEND_REMAINING = 0xc0;
-    private const int MaxApduSize = SmartCardMaxApduSizes.Neo;
+    private const int MaxApduSize = PcscMaxApduSizes.Neo;
     private readonly ISmartCardConnection _connection;
     private readonly bool _extendedApdus = false;
     private readonly byte _insSendRemaining;

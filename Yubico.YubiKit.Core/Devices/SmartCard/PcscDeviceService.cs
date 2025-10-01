@@ -1,32 +1,25 @@
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Devices.SmartCard;
 using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
+
+namespace Yubico.YubiKit.Core.Devices.SmartCard;
 
 public interface IPcscDeviceService
 {
-    public Task<IReadOnlyList<IPcscDevice>> GetAllAsync( CancellationToken cancellationToken = default );
-    public IReadOnlyList<IPcscDevice> GetAll();
+    Task<IReadOnlyList<IPcscDevice>> GetAllAsync(CancellationToken cancellationToken = default);
 }
 
-public class PcscDeviceService : IPcscDeviceService
+public class PcscDeviceService(ILogger<PcscDeviceService> logger) : IPcscDeviceService
 {
-    private readonly ILogger<PcscDeviceService> _logger;
+    #region IPcscDeviceService Members
 
-    public PcscDeviceService(ILogger<PcscDeviceService> logger)
-    {
-        _logger = logger;
-    }
+    public async Task<IReadOnlyList<IPcscDevice>> GetAllAsync(CancellationToken cancellationToken = default) =>
+        await Task.Run(GetAll, cancellationToken).ConfigureAwait(false);
 
-    public async Task<IReadOnlyList<IPcscDevice>> GetAllAsync(CancellationToken cancellationToken = default)
-    {
-        return await Task.Run(GetAll, cancellationToken).ConfigureAwait(false);
-    }
+    #endregion
 
-    public IReadOnlyList<IPcscDevice> GetAll()
+    private IReadOnlyList<IPcscDevice> GetAll()
     {
-        _logger.LogInformation("Getting list of PC/SC devices");
+        logger.LogInformation("Getting list of PC/SC devices");
 
         var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
         if (result != ErrorCode.SCARD_S_SUCCESS)
@@ -47,12 +40,14 @@ public class PcscDeviceService : IPcscDeviceService
 
         try
         {
-            return [.. from reader in readerStates
+            return
+            [
+                .. from reader in readerStates
                 where (reader.GetEventState() & SCARD_STATE.PRESENT) != 0
                 where ProductAtrs.AllYubiKeys.Contains(reader.GetAtr())
                 select new PcscDevice
                 {
-                    ReaderName = reader.GetReaderName(), Atr = reader.GetAtr(), Kind = SmartCardConnectionKind.Usb
+                    ReaderName = reader.GetReaderName(), Atr = reader.GetAtr(), Kind = PscsConnectionKind.Usb
                 }
             ];
         }

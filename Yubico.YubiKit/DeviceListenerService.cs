@@ -14,25 +14,22 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
+using Microsoft.Extensions.Options;
 
 namespace Yubico.YubiKit;
-
-public interface IDeviceListenerService
-{
-}
 
 public class DeviceListenerService(
     ILogger<DeviceListenerService> logger,
     IDeviceChannel deviceChannel,
     IDeviceRepository deviceRepository,
-    DeviceMonitorOptions options)
-    : BackgroundService, IDeviceListenerService
+    IOptions<YubiKeyManagerOptions> ioptions)
+    : BackgroundService
 {
+    private readonly YubiKeyManagerOptions _options = ioptions.Value;
+
     public override Task StartAsync(CancellationToken cancellationToken)
     {
-        if (options.EnableAutoDiscovery)
+        if (_options.EnableAutoDiscovery)
             return base.StartAsync(cancellationToken);
 
         logger.LogInformation("YubiKey device auto-discovery is disabled. Device listener will not start.");

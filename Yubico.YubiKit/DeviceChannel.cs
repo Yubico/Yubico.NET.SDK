@@ -13,8 +13,9 @@
 // limitations under the License.
 
 using System.Threading.Channels;
+using Yubico.YubiKit.Device;
 
-namespace Yubico.YubiKit.Core.Devices;
+namespace Yubico.YubiKit;
 
 public interface IDeviceChannel
 {

@@ -13,11 +13,16 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Connections;
 using Yubico.YubiKit.Core.Devices.SmartCard;
 
 namespace Yubico.YubiKit.Device;
+
+public interface IYubiKey
+{
+    Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+        where TConnection : class, IConnection;
+}
 
 internal class PcscYubiKey : IYubiKey
 {

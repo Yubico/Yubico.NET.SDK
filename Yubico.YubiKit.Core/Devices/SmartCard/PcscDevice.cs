@@ -21,12 +21,12 @@ public interface IPcscDevice : IDevice
     /// <summary>
     ///     Gets the smart card's connection type.
     /// </summary>
-    SmartCardConnectionKind Kind { get; }
+    PscsConnectionKind Kind { get; }
 }
 
 public readonly struct PcscDevice : IPcscDevice
 {
     public required string ReaderName { get; init; }
     public required AnswerToReset? Atr { get; init; }
-    public SmartCardConnectionKind Kind { get; init; }
+    public PscsConnectionKind Kind { get; init; }
 }

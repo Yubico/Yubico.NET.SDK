@@ -17,7 +17,7 @@ namespace Yubico.YubiKit.Core.Devices.SmartCard;
 /// <summary>
 ///     Represents the means in which the smart card is connected to the system or reader.
 /// </summary>
-public enum SmartCardConnectionKind
+public enum PscsConnectionKind
 {
     /// <summary>
     ///     Match any type of smart card during a query.

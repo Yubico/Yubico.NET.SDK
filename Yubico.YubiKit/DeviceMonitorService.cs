@@ -14,41 +14,29 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Devices;
+using Microsoft.Extensions.Options;
+using Yubico.YubiKit.Core.Devices.SmartCard;
 using Yubico.YubiKit.Device;
 
 namespace Yubico.YubiKit;
 
-public sealed class DeviceMonitorService : BackgroundService
+public sealed class DeviceMonitorService(
+    IYubiKeyFactory yubiKeyFactory,
+    IPcscDeviceService pcscService,
+    IDeviceChannel deviceChannel,
+    ILogger<DeviceMonitorService> logger,
+    IOptions<YubiKeyManagerOptions> options)
+    : BackgroundService
 {
-    private readonly IDeviceChannel _deviceChannel;
-    private readonly ILogger<DeviceMonitorService> _logger;
-    private readonly DeviceMonitorOptions _options;
-    private readonly IPcscDeviceService _pcscService;
-    private readonly IYubiKeyFactory _yubiKeyFactory;
+    private readonly YubiKeyManagerOptions _options = options.Value;
     private bool _disposed;
-
-    public DeviceMonitorService(
-        IYubiKeyFactory yubiKeyFactory,
-        IPcscDeviceService pcscService,
-        IDeviceChannel deviceChannel,
-        ILogger<DeviceMonitorService> logger,
-        DeviceMonitorOptions options)
-    {
-        _yubiKeyFactory = yubiKeyFactory;
-        _pcscService = pcscService;
-        _deviceChannel = deviceChannel;
-        _logger = logger;
-        _options = options;
-    }
 
     public override Task StartAsync(CancellationToken cancellationToken)
     {
         if (_options.EnableAutoDiscovery)
             return base.StartAsync(cancellationToken);
 
-        _logger.LogInformation("YubiKey device auto-discovery is disabled. Device monitor will not start.");
+        logger.LogInformation("YubiKey device auto-discovery is disabled. Device monitor will not start.");
         return Task.CompletedTask;
     }
 
@@ -56,8 +44,8 @@ public sealed class DeviceMonitorService : BackgroundService
     {
         try
         {
-            _logger.LogInformation("YubiKey device monitor started");
-            _logger.LogInformation("Performing initial device scan...");
+            logger.LogInformation("YubiKey device monitor started");
+            logger.LogInformation("Performing initial device scan...");
 
             await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
             using var timer = new PeriodicTimer(_options.ScanInterval);
@@ -67,14 +55,14 @@ public sealed class DeviceMonitorService : BackgroundService
         }
         catch (OperationCanceledException)
         {
-            _logger.LogDebug("Device monitoring was cancelled");
+            logger.LogDebug("Device monitoring was cancelled");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Device monitoring failed");
+            logger.LogError(ex, "Device monitoring failed");
         }
 
-        _logger.LogInformation("YubiKey device monitor stopped");
+        logger.LogInformation("YubiKey device monitor stopped");
     }
 
     private Task PerformDeviceScan(CancellationToken cancellationToken)
@@ -85,7 +73,7 @@ public sealed class DeviceMonitorService : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "PCSC device scanning failed");
+            logger.LogError(ex, "PCSC device scanning failed");
             // Continue despite errors - don't crash the background service
             return Task.CompletedTask;
         }
@@ -93,18 +81,18 @@ public sealed class DeviceMonitorService : BackgroundService
 
     private async Task ScanPcscDevices(CancellationToken cancellationToken)
     {
-        var devices = await _pcscService.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        var yubiKeys = devices.Select(_yubiKeyFactory.Create).ToList();
+        var devices = await pcscService.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var yubiKeys = devices.Select(yubiKeyFactory.Create).ToList();
 
-        await _deviceChannel.PublishAsync(yubiKeys, cancellationToken).ConfigureAwait(false);
-        _logger.LogInformation("PCSC scan completed, found {DeviceCount} devices", devices.Count);
+        await deviceChannel.PublishAsync(yubiKeys, cancellationToken).ConfigureAwait(false);
+        logger.LogInformation("PCSC scan completed, found {DeviceCount} devices", devices.Count);
     }
 
     public override void Dispose()
     {
         if (_disposed) return;
 
-        _deviceChannel.Complete();
+        deviceChannel.Complete();
         base.Dispose();
 
         _disposed = true;

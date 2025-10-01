@@ -28,36 +28,3 @@ public class BadResponseException(string message) : Exception(message)
 InvalidOperationException (IllegalStateException)
 TimeoutException The operation timed out waiting for something
 */
-
-// public interface IMessageFormatter
-// {
-//     
-// }
-//
-// public class MessageFormatter
-// {
-//     // public string Format(string )
-// }
-
-// public static class StringExtensions
-// {
-//     extension(string source)
-//     {
-//         Format
-//     }
-// }
-
-// public static class LoggerExtensions
-// {
-//     extension<T>(ILogger<T> sourcse) where T : class
-//     {
-//         void LogInformation()
-//         {
-//             sourcse.
-//         }
-//     }
-
-// extension(ILogger logger)
-// {
-// }
-// }

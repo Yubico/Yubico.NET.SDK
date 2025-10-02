@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Core.Connections;
 using Yubico.YubiKit.Core.Core.Devices.SmartCard;
 
@@ -24,23 +25,13 @@ public interface IYubiKey
         where TConnection : class, IConnection;
 }
 
-internal class PcscYubiKey : IYubiKey
+internal class PcscYubiKey(
+    IPcscDevice pcscDevice,
+    ISmartCardConnectionFactory connectionFactory,
+    ILogger<PcscYubiKey> logger)
+    : IYubiKey
 {
-    private readonly ISmartCardConnectionFactory _connectionFactory;
-    private readonly ILogger<PcscYubiKey> _logger;
-    private readonly IPcscDevice _pcscDevice;
-
-    internal PcscYubiKey(
-        ILogger<PcscYubiKey> logger,
-        IPcscDevice pcscDevice,
-        ISmartCardConnectionFactory connectionFactory)
-    {
-        _logger = logger;
-        _pcscDevice = pcscDevice;
-        _connectionFactory = connectionFactory;
-    }
-
-    internal string ReaderName => _pcscDevice.ReaderName;
+    internal string ReaderName => pcscDevice.ReaderName;
 
     #region IYubiKey Members
 
@@ -60,9 +51,12 @@ internal class PcscYubiKey : IYubiKey
 
     private async Task<ISmartCardConnection> CreateConnection(CancellationToken cancellationToken = default)
     {
-        var connection = await _connectionFactory.CreateAsync(_pcscDevice, cancellationToken).ConfigureAwait(false);
-        _logger.LogInformation("Connected to YubiKey in reader {ReaderName}", ReaderName);
+        var connection = await connectionFactory.CreateAsync(pcscDevice, cancellationToken).ConfigureAwait(false);
+        logger.LogInformation("Connected to YubiKey in reader {ReaderName}", ReaderName);
 
         return connection;
     }
+
+    public static PcscYubiKey Create(IPcscDevice pcscDevice, ILogger<PcscYubiKey>? logger) => new(pcscDevice,
+        SmartCardConnectionFactory.CreateDefault(), logger ?? NullLogger<PcscYubiKey>.Instance);
 }

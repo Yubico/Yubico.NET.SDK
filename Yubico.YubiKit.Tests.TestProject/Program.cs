@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 using TestProject;
 using Yubico.YubiKit.Core.Core.Connections;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -13,15 +14,13 @@ builder.Services.AddYubiKeyManager(options =>
 });
 
 var app = builder.Build();
-app.MapGet("/di-demo", async (
+app.MapGet("/di-demo/minimal", async (
     [FromServices] IYubiKeyManager yubiKeyManager,
     [FromServices] IManagementSessionFactory<ISmartCardConnection> sessionFactory
 ) =>
 {
-    var yubiKeys = await yubiKeyManager.GetYubiKeysAsync();
-    var yubiKey = yubiKeys.FirstOrDefault();
-    if (yubiKey == null)
-        return Results.Problem("No YubiKey found.");
+    var yubiKeys = await yubiKeyManager.FindAllAsync();
+    var yubiKey = yubiKeys[0];
 
     using var smartCardConnection = await yubiKey.ConnectAsync<ISmartCardConnection>();
     using var session = await sessionFactory.CreateAsync(smartCardConnection);

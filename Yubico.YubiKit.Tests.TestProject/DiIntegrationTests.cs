@@ -14,9 +14,8 @@ public class DiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Theory]
-    [InlineData("/di/minimal")]
-    [InlineData("/di/serviceprovider")]
-    [InlineData("/di/controller")]
+    [InlineData("/di-demo/minimal")]
+    [InlineData("/di-demo/controller")]
     public async Task DiEndpoints_ReturnSessionType(string url)
     {
         // NOTE: This test requires a real YubiKey to be present and accessible.

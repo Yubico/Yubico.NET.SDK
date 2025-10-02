@@ -1,23 +1,24 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Core.PlatformInterop.Desktop.SCard;
 
 namespace Yubico.YubiKit.Core.Core.Devices.SmartCard;
 
-public interface IPcscDeviceService
+public interface IFindPcscDevices
 {
-    Task<IReadOnlyList<IPcscDevice>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<IPcscDevice>> FindAllAsync(CancellationToken cancellationToken = default);
 }
 
-public class PcscDeviceService(ILogger<PcscDeviceService> logger) : IPcscDeviceService
+public class FindPcscDevices(ILogger<FindPcscDevices> logger) : IFindPcscDevices
 {
-    #region IPcscDeviceService Members
+    #region IFindPcscDevices Members
 
-    public async Task<IReadOnlyList<IPcscDevice>> GetAllAsync(CancellationToken cancellationToken = default) =>
-        await Task.Run(GetAll, cancellationToken).ConfigureAwait(false);
+    public async Task<IReadOnlyList<IPcscDevice>> FindAllAsync(CancellationToken cancellationToken = default) =>
+        await Task.Run(FindAll, cancellationToken).ConfigureAwait(false);
 
     #endregion
 
-    private IReadOnlyList<IPcscDevice> GetAll()
+    private IReadOnlyList<IPcscDevice> FindAll()
     {
         logger.LogInformation("Getting list of PC/SC devices");
 
@@ -56,4 +57,7 @@ public class PcscDeviceService(ILogger<PcscDeviceService> logger) : IPcscDeviceS
             context.Dispose();
         }
     }
+
+    public static FindPcscDevices Create(ILogger<FindPcscDevices>? logger = null) =>
+        new(logger ?? NullLogger<FindPcscDevices>.Instance);
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Core.Connections;
@@ -23,7 +24,11 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
 
-public sealed class ManagementSession<TConnection> : ApplicationSession
+public sealed class ManagementSession<TConnection>(
+    TConnection connection,
+    IProtocolFactory<TConnection> protocolFactory,
+    ILogger<ManagementSession<TConnection>> logger)
+    : ApplicationSession
     where TConnection : IConnection
 {
     private const byte INS_GET_DEVICE_INFO = 0x1D;
@@ -32,39 +37,35 @@ public sealed class ManagementSession<TConnection> : ApplicationSession
     private static readonly Feature FeatureDeviceInfo =
         new() { Name = "Device Info", VersionMajor = 4, VersionMinor = 1, VersionRevision = 0 };
 
-    private readonly ILogger<ManagementSession<TConnection>> _logger;
-    private readonly IProtocol _protocol;
+    private readonly ILogger<ManagementSession<TConnection>> _logger = logger;
+    private readonly IProtocol _protocol = protocolFactory.Create(connection);
+    private bool _isInitialized;
     private FirmwareVersion? _version;
 
-    public ManagementSession(
-        ILogger<ManagementSession<TConnection>> logger,
-        TConnection connection,
-        IProtocolFactory<TConnection> protocolFactory)
-    {
-        _logger = logger;
-        _protocol = protocolFactory.Create(connection);
-    }
-
     public static async Task<ManagementSession<TConnection>> CreateAsync(
-        ILogger<ManagementSession<TConnection>> logger,
         TConnection connection,
-        IProtocolFactory<TConnection> protocolFactory,
+        ILogger<ManagementSession<TConnection>>? logger = null,
         CancellationToken cancellationToken = default)
     {
-        var session = new ManagementSession<TConnection>(logger, connection, protocolFactory);
-        await session.InitializeAsync(cancellationToken);
+        logger ??= NullLogger<ManagementSession<TConnection>>.Instance;
+        var protocolFactory = PcscProtocolFactory<TConnection>.Create();
+        var session = new ManagementSession<TConnection>(connection, protocolFactory, logger);
+
+        await session.InitializeAsync(cancellationToken).ConfigureAwait(false);
         return session;
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        if (_version is not null)
+        if (_isInitialized)
             return;
 
         if (_protocol is ISmartCardProtocol smartCardProtocol)
-            await SetVersionAsync(cancellationToken, smartCardProtocol);
+            await SetVersionAsync(cancellationToken, smartCardProtocol).ConfigureAwait(false);
         else
             throw new NotSupportedException("Protocol not supported");
+
+        _isInitialized = true;
     }
 
     public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)

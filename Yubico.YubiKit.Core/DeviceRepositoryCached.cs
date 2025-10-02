@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Yubico.YubiKit.Core.Core.Devices.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core;
@@ -24,14 +23,13 @@ namespace Yubico.YubiKit.Core;
 public interface IDeviceRepository : IDisposable
 {
     IObservable<DeviceEvent> DeviceChanges { get; }
-    Task<IReadOnlyCollection<IYubiKey>> GetAllDevicesAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default);
     void Update(IEnumerable<IYubiKey> discoveredDevices);
 }
 
-public class DeviceRepository(
-    IYubiKeyFactory yubiKeyFactory,
-    ILogger<DeviceRepository> logger,
-    IPcscDeviceService pcscService)
+public class DeviceRepositoryCached(
+    ILogger<DeviceRepositoryCached> logger,
+    IFindYubiKeys findYubiKeys)
     : IDeviceRepository
 {
     private readonly ConcurrentDictionary<string, IYubiKey> _deviceCache = new();
@@ -49,7 +47,7 @@ public class DeviceRepository(
     #region IDeviceRepository Members
 
     // Public API methods with guaranteed data availability
-    public async Task<IReadOnlyCollection<IYubiKey>> GetAllDevicesAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
     {
         await EnsureDataAvailable(cancellationToken).ConfigureAwait(false);
         return [.. _deviceCache.Values];
@@ -154,11 +152,10 @@ public class DeviceRepository(
         {
             logger.LogInformation("Cache empty, performing synchronous device scan...");
 
-            var devices = await pcscService.GetAllAsync(cancellationToken).ConfigureAwait(false);
-            var yubiKeys = devices.Select(yubiKeyFactory.Create);
+            var yubiKeys = await findYubiKeys.FindAllAsync(cancellationToken).ConfigureAwait(false);
             Update(yubiKeys);
 
-            logger.LogInformation("Synchronous scan completed, found {DeviceCount} devices", devices.Count());
+            logger.LogInformation("Synchronous scan completed, found {DeviceCount} devices", yubiKeys.Count);
         }
         catch (Exception ex)
         {

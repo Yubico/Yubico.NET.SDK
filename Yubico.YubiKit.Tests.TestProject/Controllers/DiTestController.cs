@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Yubico.YubiKit.Core.Core.Connections;
-using Yubico.YubiKit.Core.Core.Protocols;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
@@ -8,29 +7,22 @@ namespace TestProject.Controllers;
 
 [ApiController]
 [Route("di/controller")]
-public class DiTestController : ControllerBase
+public class DiTestController(
+    IYubiKeyManager yubiKeyManager,
+    IManagementSessionFactory<ISmartCardConnection> sessionFactory)
+    : ControllerBase
 {
-    private readonly ILogger<ManagementSession<ISmartCardConnection>> _logger;
-    private readonly IProtocolFactory<ISmartCardConnection> _protocolFactory;
-    private readonly IYubiKeyManager _yubiKeyManager;
-
-    public DiTestController(IYubiKeyManager yubiKeyManager, ILogger<ManagementSession<ISmartCardConnection>> logger,
-        IProtocolFactory<ISmartCardConnection> protocolFactory)
-    {
-        _yubiKeyManager = yubiKeyManager;
-        _logger = logger;
-        _protocolFactory = protocolFactory;
-    }
-
     [HttpGet]
     public async Task<IActionResult> Get()
     {
-        var yubiKeys = await _yubiKeyManager.GetYubiKeysAsync();
-        var yubiKey = yubiKeys.FirstOrDefault();
-        if (yubiKey == null)
-            return Problem("No YubiKey found.");
+        var yubiKeys = await yubiKeyManager.FindAllAsync();
+        var yubiKey = yubiKeys[0];
+
         var smartCardConnection = await yubiKey.ConnectAsync<ISmartCardConnection>();
-        var session = new ManagementSession<ISmartCardConnection>(_logger, smartCardConnection, _protocolFactory);
-        return Ok($"Controller DI: Session type is {session.GetType().Name}");
+        var session = await sessionFactory.CreateAsync(smartCardConnection);
+        var deviceInfo = await session.GetDeviceInfoAsync();
+
+        var yubiInfo = new YubiInfo(deviceInfo.SerialNumber.ToString("D8"), deviceInfo.FirmwareVersion.ToString());
+        return Ok($"YubiKey on Server:: {yubiInfo}");
     }
 }

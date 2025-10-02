@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Core.Connections;
 using Yubico.YubiKit.Core.Core.Devices;
 using Yubico.YubiKit.Core.Core.Devices.SmartCard;
@@ -41,8 +42,12 @@ public class YubiKeyFactory(
     #endregion
 
     private PcscYubiKey CreatePcscYubiKey(IPcscDevice cardDevice) =>
-        new(loggerFactory.CreateLogger<PcscYubiKey>(),
+        new(
             cardDevice,
-            connectionFactory
+            connectionFactory,
+            loggerFactory.CreateLogger<PcscYubiKey>()
         );
+
+    public static YubiKeyFactory Create(ILoggerFactory? loggerFactory = null) =>
+        new(loggerFactory ?? NullLoggerFactory.Instance, SmartCardConnectionFactory.CreateDefault());
 }

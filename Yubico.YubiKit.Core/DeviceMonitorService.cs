@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.Core;
 
 public sealed class DeviceMonitorService(
     IYubiKeyFactory yubiKeyFactory,
-    IPcscDeviceService pcscService,
+    IFindPcscDevices findPcscService,
     IDeviceChannel deviceChannel,
     ILogger<DeviceMonitorService> logger,
     IOptions<YubiKeyManagerOptions> options)
@@ -81,7 +81,7 @@ public sealed class DeviceMonitorService(
 
     private async Task ScanPcscDevices(CancellationToken cancellationToken)
     {
-        var devices = await pcscService.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var devices = await findPcscService.FindAllAsync(cancellationToken).ConfigureAwait(false);
         var yubiKeys = devices.Select(yubiKeyFactory.Create).ToList();
 
         await deviceChannel.PublishAsync(yubiKeys, cancellationToken).ConfigureAwait(false);

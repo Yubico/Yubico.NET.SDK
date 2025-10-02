@@ -13,11 +13,12 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Core.Connections;
 
 namespace Yubico.YubiKit.Core.Core.Protocols;
 
-public interface IProtocolFactory<TConnection>
+public interface IProtocolFactory<in TConnection>
     where TConnection : IConnection
 {
     IProtocol Create(TConnection connection);
@@ -41,4 +42,7 @@ public class PcscProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
         };
 
     #endregion
+
+    public static PcscProtocolFactory<TConnection> Create(ILoggerFactory? loggerFactory = null) =>
+        new(loggerFactory ?? NullLoggerFactory.Instance);
 }

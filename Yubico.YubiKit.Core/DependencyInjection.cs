@@ -32,11 +32,12 @@ public static class DependencyInjection
 
             services.AddTransient<IYubiKeyManager, YubiKeyManager>()
                 .AddTransient<IYubiKeyFactory, YubiKeyFactory>()
+                .AddTransient<IFindYubiKeys, FindYubiKeys>()
                 .AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>()
-                .AddTransient<IPcscDeviceService, PcscDeviceService>()
+                .AddTransient<IFindPcscDevices, FindPcscDevices>()
                 .AddTransient<IProtocolFactory<ISmartCardConnection>, PcscProtocolFactory<ISmartCardConnection>>()
                 .AddSingleton<IDeviceChannel, DeviceChannel>()
-                .AddSingleton<IDeviceRepository, DeviceRepository>()
+                .AddSingleton<IDeviceRepository, DeviceRepositoryCached>()
                 .AddBackgroundServices();
 
             return services;

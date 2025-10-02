@@ -21,7 +21,7 @@ public class CoreTests : IntegrationTestBase
     [Fact]
     public async Task GetPcscDevices()
     {
-        var devices = await YubiKeyManager.GetYubiKeysAsync();
+        var devices = await YubiKeyManager.FindAllAsync();
         var device = devices.FirstOrDefault();
         Assert.NotNull(device);
     }

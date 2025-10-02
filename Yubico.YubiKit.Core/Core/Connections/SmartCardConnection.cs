@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Globalization;
 using Yubico.YubiKit.Core.Core.Devices.SmartCard;
 using Yubico.YubiKit.Core.Core.PlatformInterop.Desktop.SCard;
@@ -35,22 +36,14 @@ public interface ISmartCardConnection : IConnection
     // byte[] getAtr();
 }
 
-internal class SmartCardConnection : ISmartCardConnection
+internal class SmartCardConnection(IPcscDevice smartCardDevice, ILogger<SmartCardConnection>? logger = null)
+    : ISmartCardConnection
 {
-    private readonly ILogger<SmartCardConnection> _logger;
-    private readonly IPcscDevice _smartCardDevice;
+    private readonly ILogger<SmartCardConnection> _logger = logger ?? NullLogger<SmartCardConnection>.Instance;
     private SCardCardHandle? _cardHandle;
     private SCardContext? _context;
     private bool _disposed;
     private SCARD_PROTOCOL? _protocol;
-
-    internal SmartCardConnection(
-        ILogger<SmartCardConnection> logger,
-        IPcscDevice smartCardDevice)
-    {
-        _logger = logger;
-        _smartCardDevice = smartCardDevice;
-    }
 
     #region ISmartCardConnection Members
 
@@ -99,15 +92,18 @@ internal class SmartCardConnection : ISmartCardConnection
 
     public ValueTask InitializeAsync(CancellationToken cancellationToken)
     {
+        _logger.LogDebug("Initializing smart card connection to reader {ReaderName}", smartCardDevice.ReaderName);
         var task = Task.Run(() =>
         {
-            (_context, _cardHandle, _protocol) = GetConnection(_smartCardDevice.ReaderName);
+            (_context, _cardHandle, _protocol) = GetConnection(smartCardDevice.ReaderName);
         }, cancellationToken);
 
+        _logger.LogDebug("Smart card connection initialized to reader {ReaderName}", smartCardDevice.ReaderName);
         return new ValueTask(task);
     }
 
-    private static (SCardContext Context, SCardCardHandle CardHandle, SCARD_PROTOCOL Protocol)
+    private static
+        (SCardContext Context, SCardCardHandle CardHandle, SCARD_PROTOCOL Protocol)
         GetConnection(string readerName)
     {
         var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
@@ -138,5 +134,14 @@ internal class SmartCardConnection : ISmartCardConnection
                 result);
 
         return (context, cardHandle, activeProtocol);
+    }
+
+    public static async Task<SmartCardConnection> CreateAsync(
+        IPcscDevice smartCardDevice,
+        CancellationToken cancellationToken = default, ILogger<SmartCardConnection>? logger = null)
+    {
+        var connection = new SmartCardConnection(smartCardDevice, logger);
+        await connection.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        return connection;
     }
 }

@@ -43,12 +43,10 @@ internal class ManagementSessionFactory<TConnection>(
 
     private async Task<ManagementSession<TConnection>> ForSmartCard(ISmartCardConnection connection)
     {
-        var session = new ManagementSession<TConnection>(
-            loggerFactory.CreateLogger<ManagementSession<TConnection>>(),
-            (TConnection)connection,
-            protocolFactory);
+        var session = new ManagementSession<TConnection>((TConnection)connection,
+            protocolFactory, loggerFactory.CreateLogger<ManagementSession<TConnection>>());
 
-        await session.InitializeAsync();
+        await session.InitializeAsync().ConfigureAwait(false);
         return session;
     }
 }

@@ -75,7 +75,7 @@ public abstract class IntegrationTestBase : IDisposable
 
     protected void SkipDeviceRepositoryManualScan(bool value)
     {
-        var type = typeof(DeviceRepository);
+        var type = typeof(DeviceRepositoryCached);
         var field = type.GetField("TEST_MONITORSERVICE_SKIP_MANUALSCAN",
             BindingFlags.NonPublic | BindingFlags.Instance);
         field?.SetValue(DeviceRepository, value);

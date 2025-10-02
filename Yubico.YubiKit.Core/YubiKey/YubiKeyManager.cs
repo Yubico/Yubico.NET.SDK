@@ -1,30 +1,38 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
-namespace Yubico.YubiKit.Core.YubiKey;
+﻿namespace Yubico.YubiKit.Core.YubiKey;
 
 public interface IYubiKeyManager
 {
     IObservable<DeviceEvent> DeviceChanges { get; }
-    Task<IEnumerable<IYubiKey>> GetYubiKeysAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default);
 }
 
-public class YubiKeyManager(
-    ILogger<YubiKeyManager> logger,
-    IOptions<YubiKeyManagerOptions> options,
-    IDeviceRepository deviceRepository)
-    : IYubiKeyManager
+public class YubiKeyManager(IDeviceRepository? deviceRepository = null) : IYubiKeyManager
 {
-    private readonly ILogger<YubiKeyManager> _logger = logger;
-    private readonly IOptions<YubiKeyManagerOptions> _options = options;
-
     #region IYubiKeyManager Members
 
-    public async Task<IEnumerable<IYubiKey>> GetYubiKeysAsync(CancellationToken cancellationToken = default) =>
-        await deviceRepository.GetAllDevicesAsync(cancellationToken).ConfigureAwait(false);
+    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
+    {
+        if (deviceRepository is null)
+            return await FindYubiKeys
+                .Create()
+                .FindAllAsync(cancellationToken)
+                .ConfigureAwait(false);
 
-    public IObservable<DeviceEvent> DeviceChanges =>
-        deviceRepository.DeviceChanges;
+        return await deviceRepository.FindAllAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public IObservable<DeviceEvent> DeviceChanges
+    {
+        get
+        {
+            if (deviceRepository is null)
+                throw new InvalidOperationException(
+                    $"{nameof(DeviceChanges)} is not available when the {nameof(YubiKeyManager)} " +
+                    "is created without a device repository.");
+
+            return deviceRepository.DeviceChanges;
+        }
+    }
 
     #endregion
 }

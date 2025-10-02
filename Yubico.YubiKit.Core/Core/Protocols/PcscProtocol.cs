@@ -67,6 +67,7 @@ internal class PcscProtocol : ISmartCardProtocol
         CommandApdu command,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
         var response = await _processor.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
         if (response is not { SW1: 0x90, SW2: 0x00 })
             throw new InvalidOperationException(
@@ -79,10 +80,13 @@ internal class PcscProtocol : ISmartCardProtocol
         ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogTrace("Selecting application ID: {ApplicationId}",
+            BitConverter.ToString(applicationId.ToArray()).Replace("-", string.Empty));
+
         var response =
             await _processor.TransmitAsync(
                 new CommandApdu { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId },
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
 
         if (response is not { SW1: 0x90, SW2: 0x00 })
             throw new InvalidOperationException(

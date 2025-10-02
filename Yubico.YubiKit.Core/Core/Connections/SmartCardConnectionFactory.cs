@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Core.Devices.SmartCard;
 
 namespace Yubico.YubiKit.Core.Core.Connections;
@@ -8,28 +9,22 @@ public interface ISmartCardConnectionFactory
     Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice, CancellationToken cancellationToken = default);
 }
 
-public class SmartCardConnectionFactory : ISmartCardConnectionFactory
+public class SmartCardConnectionFactory(ILoggerFactory loggerFactory) : ISmartCardConnectionFactory
 {
-    private readonly ILoggerFactory _loggerFactory;
-
-    public SmartCardConnectionFactory(ILoggerFactory loggerFactory)
-    {
-        _loggerFactory = loggerFactory;
-    }
+    private readonly ILoggerFactory _loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
 
     #region ISmartCardConnectionFactory Members
 
     public async Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice,
         CancellationToken cancellationToken = default)
     {
-        var connection = new SmartCardConnection(
-            _loggerFactory.CreateLogger<SmartCardConnection>(),
-            smartCardDevice);
-
+        var connection = new SmartCardConnection(smartCardDevice, _loggerFactory.CreateLogger<SmartCardConnection>());
         await connection.InitializeAsync(cancellationToken).ConfigureAwait(false);
-
         return connection;
     }
 
     #endregion
+
+    public static SmartCardConnectionFactory CreateDefault(ILoggerFactory? loggerFactory = null) =>
+        new(loggerFactory ?? NullLoggerFactory.Instance);
 }

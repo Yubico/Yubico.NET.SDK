@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.IntegrationTests.Core;
+namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 
 public class MonitorService_Enabled_Tests()
     : IntegrationTestBase(options => options.EnableAutoDiscovery = true)

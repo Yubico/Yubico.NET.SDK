@@ -1,17 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFrameworks>net8;net10.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
-
         <LangVersion>preview</LangVersion>
-
-        <RootNamespace>Yubico.YubiKit.IntegrationTests</RootNamespace>
-
     </PropertyGroup>
 
     <ItemGroup>
@@ -34,8 +28,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Yubico.YubiKit.Core\Yubico.YubiKit.Core.csproj"/>
+        <ProjectReference Include="..\..\..\Yubico.YubiKit.Management\src\Yubico.YubiKit.Management.csproj"/>
+        <ProjectReference Include="..\..\src\Yubico.YubiKit.Core.csproj"/>
         <ProjectReference Include="..\Yubico.YubiKit.Management\Yubico.YubiKit.Management.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="xunit.core">
+            <HintPath>..\..\..\..\..\..\.nuget\packages\xunit.extensibility.core\2.9.3\lib\netstandard1.1\xunit.core.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

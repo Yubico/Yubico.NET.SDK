@@ -2,15 +2,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.UnitTests", "Yubico.YubiKit.Tests.UnitTests\Yubico.YubiKit.Tests.UnitTests.csproj", "{C0D1516E-56A8-B1F0-F451-62B43FEE04C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core", "Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj", "{55933217-B9D6-4D18-AB08-F4B10AEF83C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.IntegrationTests", "Yubico.YubiKit.Tests.IntegrationTests\Yubico.YubiKit.Tests.IntegrationTests.csproj", "{9AAD4468-8C33-1141-5D52-28F9E6E49EA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Management", "Yubico.YubiKit.Management\src\Yubico.YubiKit.Management.csproj", "{61A3106B-B029-4B55-8F93-70F79F2257C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core", "Yubico.YubiKit.Core\Yubico.YubiKit.Core.csproj", "{172B28F1-EF2D-31D3-570E-8BBB991865E3}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{29556DAF-D256-48EA-BE95-94E86BFE0D22}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Tests.TestProject", "Yubico.YubiKit.Tests.TestProject\Yubico.YubiKit.Tests.TestProject.csproj", "{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{6BC51303-7F02-4271-99ED-4FB0EF4845D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Management", "Yubico.YubiKit.Management\Yubico.YubiKit.Management.csproj", "{6E88466F-7EB7-44F8-A249-F3EC950089A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Management.IntegrationTests", "Yubico.YubiKit.Management\tests\Yubico.YubiKit.Management.IntegrationTests\Yubico.YubiKit.Management.IntegrationTests.csproj", "{145CCD23-4ED6-443D-B520-3ED1F375A63F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core.IntegrationTests", "Yubico.YubiKit.Core\tests\Yubico.YubiKit.Core.IntegrationTests\Yubico.YubiKit.Core.IntegrationTests.csproj", "{77FE41B9-A511-4546-B546-622E549CF6DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,31 +20,33 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C0D1516E-56A8-B1F0-F451-62B43FEE04C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C0D1516E-56A8-B1F0-F451-62B43FEE04C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C0D1516E-56A8-B1F0-F451-62B43FEE04C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C0D1516E-56A8-B1F0-F451-62B43FEE04C6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9AAD4468-8C33-1141-5D52-28F9E6E49EA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9AAD4468-8C33-1141-5D52-28F9E6E49EA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9AAD4468-8C33-1141-5D52-28F9E6E49EA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9AAD4468-8C33-1141-5D52-28F9E6E49EA1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{172B28F1-EF2D-31D3-570E-8BBB991865E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{172B28F1-EF2D-31D3-570E-8BBB991865E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{172B28F1-EF2D-31D3-570E-8BBB991865E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{172B28F1-EF2D-31D3-570E-8BBB991865E3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40C57DFA-9090-4586-A8D7-7CEEC5EA2939}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6E88466F-7EB7-44F8-A249-F3EC950089A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6E88466F-7EB7-44F8-A249-F3EC950089A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6E88466F-7EB7-44F8-A249-F3EC950089A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6E88466F-7EB7-44F8-A249-F3EC950089A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55933217-B9D6-4D18-AB08-F4B10AEF83C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55933217-B9D6-4D18-AB08-F4B10AEF83C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55933217-B9D6-4D18-AB08-F4B10AEF83C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55933217-B9D6-4D18-AB08-F4B10AEF83C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61A3106B-B029-4B55-8F93-70F79F2257C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61A3106B-B029-4B55-8F93-70F79F2257C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61A3106B-B029-4B55-8F93-70F79F2257C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61A3106B-B029-4B55-8F93-70F79F2257C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{145CCD23-4ED6-443D-B520-3ED1F375A63F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{145CCD23-4ED6-443D-B520-3ED1F375A63F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{145CCD23-4ED6-443D-B520-3ED1F375A63F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{145CCD23-4ED6-443D-B520-3ED1F375A63F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77FE41B9-A511-4546-B546-622E549CF6DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77FE41B9-A511-4546-B546-622E549CF6DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77FE41B9-A511-4546-B546-622E549CF6DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77FE41B9-A511-4546-B546-622E549CF6DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A15F6F16-41BD-43F1-BF4A-17B4695A4D45}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{61A3106B-B029-4B55-8F93-70F79F2257C8} = {29556DAF-D256-48EA-BE95-94E86BFE0D22}
+		{55933217-B9D6-4D18-AB08-F4B10AEF83C3} = {6BC51303-7F02-4271-99ED-4FB0EF4845D8}
+		{145CCD23-4ED6-443D-B520-3ED1F375A63F} = {29556DAF-D256-48EA-BE95-94E86BFE0D22}
+		{77FE41B9-A511-4546-B546-622E549CF6DF} = {6BC51303-7F02-4271-99ED-4FB0EF4845D8}
 	EndGlobalSection
 EndGlobal

@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.IntegrationTests.Core;
+using Yubico.YubiKit.Core.Core.Connections;
+using Yubico.YubiKit.Core.YubiKey;
 
-public class MonitorService_Disabled_Tests()
-    : IntegrationTestBase(options => options.EnableAutoDiscovery = false)
+namespace Yubico.YubiKit.Management;
+
+public static class IYubiKeyExtensions
 {
-    [Fact]
-    public async Task WhenDisabledMonitor_FindsDevices()
+    #region Nested type: <extension>
+
+    extension(IYubiKey yubiKey)
     {
-        var devices = await YubiKeyManager.FindAllAsync();
-        Assert.NotEmpty(devices);
+        public async Task<DeviceInfo> GetDeviceInfoAsync()
+        {
+            using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
+            using var mgmtSession = await ManagementSession<ISmartCardConnection>.CreateAsync(connection);
+
+            return await mgmtSession.GetDeviceInfoAsync();
+        }
     }
 
-    [Fact]
-    public async Task WhenDisabledMonitor_WithDisabledManualScan_DoesNotFindDevices()
-    {
-        SkipDeviceRepositoryManualScan(true);
-        var devices = await YubiKeyManager.FindAllAsync();
-        Assert.Empty(devices);
-    }
+    #endregion
 }

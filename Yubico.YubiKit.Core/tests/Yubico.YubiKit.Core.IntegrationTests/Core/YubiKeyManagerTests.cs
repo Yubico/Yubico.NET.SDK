@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Management;
+using Yubico.YubiKit.Core.YubiKey;
 
-public static class IYubiKeyExtensions
+namespace Yubico.YubiKit.Core.IntegrationTests.Core;
+
+public class YubiKeyManagerTests
 {
-    // extension(IYubiKey yubiKey)
-    // {
-    //     private DeviceInfo GetDeviceInfo()
-    //     {
-    //         // Create management session
-    //     }
-    // }
+    [Fact]
+    public async Task FindAllAsync_HasAtLeastOneDevice()
+    {
+        var manager = new YubiKeyManager();
+        var devices = await manager.FindAllAsync();
+        Assert.NotEmpty(devices);
+    }
 }

@@ -12,17 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.YubiKey;
+namespace Yubico.YubiKit.Core.IntegrationTests.Core;
 
-namespace Yubico.YubiKit.IntegrationTests.Core;
-
-public class YubiKeyManagerTests
+public class MonitorService_Disabled_Tests()
+    : IntegrationTestBase(options => options.EnableAutoDiscovery = false)
 {
     [Fact]
-    public async Task FindAllAsync_HasAtLeastOneDevice()
+    public async Task WhenDisabledMonitor_FindsDevices()
     {
-        var manager = new YubiKeyManager();
-        var devices = await manager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync();
         Assert.NotEmpty(devices);
+    }
+
+    [Fact]
+    public async Task WhenDisabledMonitor_WithDisabledManualScan_DoesNotFindDevices()
+    {
+        SkipDeviceRepositoryManualScan(true);
+        var devices = await YubiKeyManager.FindAllAsync();
+        Assert.Empty(devices);
     }
 }

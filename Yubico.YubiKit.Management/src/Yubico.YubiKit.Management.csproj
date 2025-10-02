@@ -5,10 +5,13 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
+        <AssemblyName>Yubico.YubiKit.Management</AssemblyName>
+        <RootNamespace>Yubico.YubiKit.Management</RootNamespace>
     </PropertyGroup>
 
+
     <ItemGroup>
-        <ProjectReference Include="..\Yubico.YubiKit.Core\Yubico.YubiKit.Core.csproj"/>
+        <ProjectReference Include="..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj"/>
     </ItemGroup>
 
 </Project>

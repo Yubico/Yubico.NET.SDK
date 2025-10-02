@@ -2,12 +2,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Yubico.YubiKit.Core.Core.Connections;
 using Yubico.YubiKit.Management;
 
-namespace Yubico.YubiKit.IntegrationTests.Management;
+namespace Yubico.YubiKit.Core.IntegrationTests;
 
 public class ManagementTests : IntegrationTestBase
 {
     [Fact]
-    public async Task GetDeviceInfoAsync_with_Constructor()
+    public async Task CreateManagementSession_with_Constructor()
     {
         var devices = await YubiKeyManager.FindAllAsync();
         var device = devices.FirstOrDefault();
@@ -21,7 +21,7 @@ public class ManagementTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task GetDeviceInfoAsync_with_FactoryInstance()
+    public async Task CreateManagementSession_with_FactoryInstance()
     {
         var devices = await YubiKeyManager.FindAllAsync();
         var device = devices.First();
@@ -35,7 +35,7 @@ public class ManagementTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task GetDeviceInfoAsync_with_FactoryMethod()
+    public async Task CreateManagementSession_with_FactoryMethod()
     {
         var devices = await YubiKeyManager.FindAllAsync();
         var device = devices.First();
@@ -44,6 +44,17 @@ public class ManagementTests : IntegrationTestBase
         using var mgmtSession = await ManagementSession<ISmartCardConnection>.CreateAsync(connection);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
+        Assert.NotEqual(0, deviceInfo.SerialNumber);
+    }
+
+    [Fact]
+    public async Task GetDeviceInfoAsync_with_YubiKeyExtensionMethod()
+    {
+        var devices = await YubiKeyManager.FindAllAsync();
+        var device = devices.FirstOrDefault();
+        Assert.NotNull(device);
+
+        var deviceInfo = await device.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
     }
 }

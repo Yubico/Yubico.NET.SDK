@@ -5,6 +5,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
+        <RootNamespace>Yubico.YubiKit.Core</RootNamespace>
+        <Company>Yubico.YubiKit.Core</Company>
+        <Product>Yubico.YubiKit.Core</Product>
     </PropertyGroup>
 
     <PropertyGroup>

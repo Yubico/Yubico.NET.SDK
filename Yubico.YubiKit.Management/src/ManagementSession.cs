@@ -32,6 +32,9 @@ public sealed class ManagementSession<TConnection>(
     where TConnection : IConnection
 {
     private const byte INS_GET_DEVICE_INFO = 0x1D;
+    private const byte INS_DEVICE_RESET = 0x1F;
+    private const byte INS_SET_DEVICE_CONFIG = 0x1C;
+
     private const int TagMoreDeviceInfo = 0x10;
     private readonly ILogger<ManagementSession<TConnection>> _logger = logger;
     private readonly IProtocol _protocol = protocolFactory.Create(connection);
@@ -41,6 +44,9 @@ public sealed class ManagementSession<TConnection>(
 
     private static readonly Feature FeatureSetConfig =
         new("Set Config", 5, 0, 0);
+
+    private static readonly Feature FeatureDeviceReset =
+        new("Device Reset", 5, 6, 0);
 
     private bool _isInitialized;
     private FirmwareVersion? _version;
@@ -63,11 +69,7 @@ public sealed class ManagementSession<TConnection>(
         if (_isInitialized)
             return;
 
-        if (_protocol is ISmartCardProtocol smartCardProtocol)
-            await SetVersionAsync(smartCardProtocol, cancellationToken).ConfigureAwait(false);
-        else
-            throw new NotSupportedException("Protocol not supported");
-
+        _version = await SetVersionAsync(cancellationToken).ConfigureAwait(false);
         _isInitialized = true;
     }
 
@@ -83,31 +85,22 @@ public sealed class ManagementSession<TConnection>(
         {
             var apdu = new CommandApdu { Cla = 0, Ins = INS_GET_DEVICE_INFO, P1 = page, P2 = 0 };
 
-            if (_protocol is ISmartCardProtocol smartCardProtocol)
-            {
-                var encodedResult = await smartCardProtocol
-                    .TransmitAndReceiveAsync(apdu, cancellationToken)
-                    .ConfigureAwait(false);
+            var encodedResult = await TransmitAsync(apdu, cancellationToken).ConfigureAwait(false);
+            if (encodedResult.Length - 1 != encodedResult.Span[0])
+                throw new BadResponseException("Invalid length");
 
-                if (encodedResult.Length - 1 != encodedResult.Span[0])
-                    throw new BadResponseException("Invalid length");
-
-                var pageTlvs = TlvHelper.Decode(encodedResult.Span[1..]).ToList();
-                var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
-                hasMoreData = moreData?.Length == 1 && moreData.GetValueSpan()[0] == 1;
-                allPagesTlvs = allPagesTlvs.Concat(pageTlvs);
-                ++page;
-            }
-            else
-            {
-                throw new NotSupportedException("Protocol not supported");
-            }
+            var pageTlvs = TlvHelper.Decode(encodedResult.Span[1..]).ToList();
+            var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
+            hasMoreData = moreData?.Length == 1 && moreData.GetValueSpan()[0] == 1;
+            allPagesTlvs = allPagesTlvs.Concat(pageTlvs);
+            
+            ++page;
         }
 
         return DeviceInfo.CreateFromTlvs([.. allPagesTlvs], _version);
     }
 
-    public Task SetDeviceConfigAsync(
+    public async Task SetDeviceConfigAsync(
         DeviceConfig config,
         bool reboot,
         byte[]? currentLockCode = null,
@@ -115,37 +108,71 @@ public sealed class ManagementSession<TConnection>(
         CancellationToken cancellationToken = default)
     {
         EnsureSupports(FeatureSetConfig);
-
         ArgumentNullException.ThrowIfNull(config);
-        if (currentLockCode is {Length: not 16})
+
+        const int LockCodeLength = 16;
+        if (currentLockCode is { Length: not LockCodeLength })
             throw new ArgumentException("Current lock code must be 16 bytes", nameof(currentLockCode));
 
-        if (newLockCode is {Length: not 16})
+        if (newLockCode is { Length: not LockCodeLength })
             throw new ArgumentException("New lock code must be 16 bytes", nameof(newLockCode));
 
         var configBytes = config.GetBytes(reboot, currentLockCode, newLockCode);
-        var apdu = new CommandApdu { Cla = 0, Ins = 0x1C, P1 = 0, P2 = 0, Data = configBytes };
+        var apdu = new CommandApdu { Cla = 0, Ins = INS_SET_DEVICE_CONFIG, P1 = 0, P2 = 0, Data = configBytes };
 
-        if (_protocol is ISmartCardProtocol smartCardProtocol)
-            return smartCardProtocol
-                .TransmitAndReceiveAsync(apdu, cancellationToken);
-
-        throw new NotSupportedException("Protocol not supported");
+        await TransmitAsync(apdu, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task SetVersionAsync(ISmartCardProtocol smartCardProtocol, CancellationToken cancellationToken)
+    public async Task ResetDeviceAsync(CancellationToken cancellationToken = default)
     {
-        var versionBytes = await smartCardProtocol
-            .SelectAsync(ApplicationIds.Management, cancellationToken)
-            .ConfigureAwait(false);
+        EnsureSupports(FeatureDeviceReset);
+
+        await TransmitAsync(new CommandApdu { Cla = 0, Ins = INS_DEVICE_RESET, P1 = 0, P2 = 0 }, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<FirmwareVersion> SetVersionAsync(CancellationToken cancellationToken)
+    {
+        var versionBytes = await SelectAsync(cancellationToken).ConfigureAwait(false);
 
         var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
         var versionString = deviceText.Split(' ').Last();
         var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
 
-        _version = versionParts.Length == 3
-            ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
-            : new FirmwareVersion();
+        return versionParts.Length == 3
+           ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
+           : new FirmwareVersion();
+    }
+
+    private async Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken)
+    {
+        if (_protocol is ISmartCardProtocol smartCardProtocol)
+        {
+            var response = await smartCardProtocol
+                .SelectAsync(ApplicationIds.Management, cancellationToken)
+                .ConfigureAwait(false);
+
+            return response;
+        }
+        else
+        {
+            throw new NotSupportedException("Protocol not supported");
+        }
+    }
+
+    private async Task<ReadOnlyMemory<byte>> TransmitAsync(CommandApdu command, CancellationToken cancellationToken)
+    {
+        if (_protocol is ISmartCardProtocol smartCardProtocol)
+        {
+            var response = await smartCardProtocol
+                .TransmitAndReceiveAsync(command, cancellationToken)
+                .ConfigureAwait(false);
+
+            return response;
+        }
+        else
+        {
+            throw new NotSupportedException("Protocol not supported");
+        }
     }
 
     internal void EnsureSupports(Feature feature)

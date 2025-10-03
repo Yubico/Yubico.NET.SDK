@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Collections.ObjectModel;
+using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
@@ -59,78 +60,57 @@ public sealed record DeviceConfig
         EnabledCapabilities.TryGetValue(transport, out var caps) ? caps : null;
 
     /// <summary>Serializes to wire format (TLV-encoded bytes).</summary>
-    internal byte[] GetBytes(bool reboot, byte[]? currentLockCode, byte[]? newLockCode)
+    public Memory<byte> GetBytes(bool reboot, byte[]? currentLockCode, byte[]? newLockCode)
     {
-        var values = new Dictionary<byte, byte[]?>();
+        var values = new Dictionary<int, byte[]?>();
 
         if (reboot)
-            values[TagReboot] = null;
+            values.Add(TagReboot, null);
 
         if (currentLockCode is not null)
-            values[TagUnlock] = currentLockCode;
+            values.Add(TagUnlock, currentLockCode);
 
         // USB capabilities (16-bit big-endian)
         if (EnabledCapabilities.TryGetValue(Transport.Usb, out var usbEnabled))
-            values[TagUsbEnabled] = new[] { (byte)(usbEnabled >> 8), (byte)usbEnabled };
+            values.Add(TagUsbEnabled, [(byte)(usbEnabled >> 8), (byte)usbEnabled]);
 
         // NFC capabilities (16-bit big-endian)
         if (EnabledCapabilities.TryGetValue(Transport.Nfc, out var nfcEnabled))
-            values[TagNfcEnabled] = new[] { (byte)(nfcEnabled >> 8), (byte)nfcEnabled };
+            values.Add(TagNfcEnabled, [(byte)(nfcEnabled >> 8), (byte)nfcEnabled]);
 
         // Auto-eject timeout (16-bit big-endian, unsigned)
         if (AutoEjectTimeout.HasValue)
         {
             var timeout = AutoEjectTimeout.Value;
-            values[TagAutoEjectTimeout] = new[] { (byte)(timeout >> 8), (byte)timeout };
+            values.Add(TagAutoEjectTimeout, [(byte)(timeout >> 8), (byte)timeout]);
         }
 
         // Challenge-response timeout (8-bit unsigned)
         if (ChallengeResponseTimeout.HasValue)
-            values[TagChallengeResponseTimeout] = new[] { ChallengeResponseTimeout.Value };
+            values.Add(TagChallengeResponseTimeout, [ChallengeResponseTimeout.Value]);
 
         // Device flags (8-bit)
         if (DeviceFlags.HasValue)
-            values[TagDeviceFlags] = new[] { DeviceFlags.Value };
+            values.Add(TagDeviceFlags, [DeviceFlags.Value]);
 
         if (newLockCode is not null)
-            values[TagConfigurationLock] = newLockCode;
+            values.Add(TagConfigurationLock, newLockCode);
 
         if (NfcRestricted.HasValue)
-            values[TagNfcRestricted] = new[] { NfcRestricted.Value ? (byte)0x01 : (byte)0x00 };
+            values.Add(TagNfcRestricted, [NfcRestricted.Value ? (byte)0x01 : (byte)0x00]);
 
-        var tlvData = EncodeTlv(values);
-
+        var tlvData = TlvHelper.EncodeDictionary(values);
         if (tlvData.Length > 0xFF)
             throw new InvalidOperationException("DeviceConfig exceeds maximum size (255 bytes)");
 
         // Prepend length byte
-        var result = new byte[tlvData.Length + 1];
-        result[0] = (byte)tlvData.Length;
-        Array.Copy(tlvData, 0, result, 1, tlvData.Length);
+        Memory<byte> result = new byte[tlvData.Length + 1];
+        result.Span[0] = (byte)tlvData.Length;
+        tlvData.Span.CopyTo(result.Span[1..]);
         return result;
     }
 
-    private static byte[] EncodeTlv(Dictionary<byte, byte[]?> values)
-    {
-        // Placeholder - implement actual TLV encoding
-        // Should preserve order for deterministic output
-        var buffer = new List<byte>();
-        foreach (var (tag, value) in values.OrderBy(kvp => kvp.Key))
-        {
-            buffer.Add(tag);
-            if (value is null)
-            {
-                buffer.Add(0);
-            }
-            else
-            {
-                buffer.Add((byte)value.Length);
-                buffer.AddRange(value);
-            }
-        }
-
-        return buffer.ToArray();
-    }
+    
 
     public static Builder CreateBuilder() => new();
 

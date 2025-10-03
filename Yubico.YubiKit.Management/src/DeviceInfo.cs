@@ -284,7 +284,9 @@ public enum YubiKeyCapabilities
     /// <summary>
     ///     Identifies the FIDO2  = CTAP2 portion of the FIDO application.
     /// </summary>
-    Fido2 = 0x0200
+    Fido2 = 0x0200,
+    
+    All = Otp | U2f | OpenPgp | Piv | Oath | HsmAuth | Fido2
 }
 
 /// <summary>

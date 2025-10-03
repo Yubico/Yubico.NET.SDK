@@ -70,7 +70,7 @@ public class ManagementTests : IntegrationTestBase
     }
 
     [Fact]
-    private async Task SetDeviceInfoAsync_with_ManagementSession()
+    private async Task SetDeviceConfigAsync_with_ManagementSession()
     {
         var devices = await YubiKeyManager.FindAllAsync();
         var device = devices.First();
@@ -82,6 +82,7 @@ public class ManagementTests : IntegrationTestBase
         var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
 
         var newConfig = DeviceConfig.CreateBuilder()
+            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)YubiKeyCapabilities.All) // TODO Whats a good default value here?
             .WithAutoEjectTimeout(newAutoEject)
             .Build();
 
@@ -92,9 +93,39 @@ public class ManagementTests : IntegrationTestBase
 
         // Restore original setting
         var restoreConfig = DeviceConfig.CreateBuilder()
+            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)YubiKeyCapabilities.All) // TODO Whats a good default value here?
             .WithAutoEjectTimeout(originalAutoEject)
             .Build();
 
         await mgmtSession.SetDeviceConfigAsync(restoreConfig, false);
+    }
+
+    [Fact]
+    public async Task SetDeviceConfigAsync_with_YubiKeyExtensionMethod()
+    {
+        var devices = await YubiKeyManager.FindAllAsync();
+        var device = devices.First();
+
+        var originalInfo = await device.GetDeviceInfoAsync();
+        var originalAutoEject = originalInfo.AutoEjectTimeout;
+        var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
+
+        var newConfig = DeviceConfig.CreateBuilder()
+            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)YubiKeyCapabilities.All) // TODO Whats a good default value here?
+            .WithAutoEjectTimeout(newAutoEject)
+            .Build();
+
+        await device.SetDeviceConfigAsync(newConfig, false);
+
+        var updatedInfo = await device.GetDeviceInfoAsync();
+        Assert.Equal(newAutoEject, updatedInfo.AutoEjectTimeout);
+
+        // Restore original setting
+        var restoreConfig = DeviceConfig.CreateBuilder()
+            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)YubiKeyCapabilities.All) // TODO Whats a good default value here?
+            .WithAutoEjectTimeout(originalAutoEject)
+            .Build();
+
+        await device.SetDeviceConfigAsync(restoreConfig, false);
     }
 }

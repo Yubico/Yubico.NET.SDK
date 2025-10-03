@@ -36,8 +36,11 @@ public sealed class ManagementSession<TConnection>(
     private readonly ILogger<ManagementSession<TConnection>> _logger = logger;
     private readonly IProtocol _protocol = protocolFactory.Create(connection);
 
-    private readonly Feature FeatureDeviceInfo =
+    private static readonly Feature FeatureDeviceInfo =
         new("Device Info", 4, 1, 0);
+
+    private static readonly Feature FeatureSetConfig =
+        new("Set Config", 5, 0, 0);
 
     private bool _isInitialized;
     private FirmwareVersion? _version;
@@ -111,24 +114,17 @@ public sealed class ManagementSession<TConnection>(
         byte[]? newLockCode = null,
         CancellationToken cancellationToken = default)
     {
-        EnsureSupports(FeatureDeviceInfo); // Wrong
+        EnsureSupports(FeatureSetConfig);
 
         ArgumentNullException.ThrowIfNull(config);
-        if (currentLockCode?.Length != 16)
+        if (currentLockCode is {Length: not 16})
             throw new ArgumentException("Current lock code must be 16 bytes", nameof(currentLockCode));
 
-        if (newLockCode is not null && newLockCode.Length != 16)
+        if (newLockCode is {Length: not 16})
             throw new ArgumentException("New lock code must be 16 bytes", nameof(newLockCode));
 
         var configBytes = config.GetBytes(reboot, currentLockCode, newLockCode);
-        var apdu = new CommandApdu
-        {
-            Cla = 0,
-            Ins = 0x1C,
-            P1 = 0,
-            P2 = 0,
-            Data = configBytes
-        };
+        var apdu = new CommandApdu { Cla = 0, Ins = 0x1C, P1 = 0, P2 = 0, Data = configBytes };
 
         if (_protocol is ISmartCardProtocol smartCardProtocol)
             return smartCardProtocol

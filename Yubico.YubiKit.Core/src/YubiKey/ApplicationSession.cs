@@ -24,14 +24,6 @@ public abstract class ApplicationSession : IApplicationSession
         GC.SuppressFinalize(this);
     }
 
-    public void EnsureSupports(Feature feature)
-    {
-        if (!IsSupported(feature)) throw new NotSupportedException($"{feature.Name} is not supported on this YubiKey.");
-    }
-
-    public bool IsSupported(Feature feature) =>
-        true; // TODO get from Management Session, select, and parse version info
-
     #endregion
 
     protected virtual void Dispose(bool disposing)
@@ -45,6 +37,7 @@ public abstract class ApplicationSession : IApplicationSession
 
 public interface IApplicationSession : IDisposable
 {
-    bool IsSupported(Feature feature);
-    void EnsureSupports(Feature feature);
+    // bool IsSupported(Feature feature);
+    // void EnsureSupports(Feature feature);
+    // FirmwareVersion GetVersionAsync { get; }
 }

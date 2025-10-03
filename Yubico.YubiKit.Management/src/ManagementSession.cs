@@ -33,12 +33,12 @@ public sealed class ManagementSession<TConnection>(
 {
     private const byte INS_GET_DEVICE_INFO = 0x1D;
     private const int TagMoreDeviceInfo = 0x10;
-
-    private static readonly Feature FeatureDeviceInfo =
-        new() { Name = "Device Info", VersionMajor = 4, VersionMinor = 1, VersionRevision = 0 };
-
     private readonly ILogger<ManagementSession<TConnection>> _logger = logger;
     private readonly IProtocol _protocol = protocolFactory.Create(connection);
+
+    private readonly Feature FeatureDeviceInfo =
+        new("Device Info", 4, 1, 0);
+
     private bool _isInitialized;
     private FirmwareVersion? _version;
 
@@ -61,7 +61,7 @@ public sealed class ManagementSession<TConnection>(
             return;
 
         if (_protocol is ISmartCardProtocol smartCardProtocol)
-            await SetVersionAsync(cancellationToken, smartCardProtocol).ConfigureAwait(false);
+            await SetVersionAsync(smartCardProtocol, cancellationToken).ConfigureAwait(false);
         else
             throw new NotSupportedException("Protocol not supported");
 
@@ -70,7 +70,7 @@ public sealed class ManagementSession<TConnection>(
 
     public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
-        EnsureSupports(FeatureDeviceInfo); // todo
+        EnsureSupports(FeatureDeviceInfo);
 
         byte page = 0;
         IEnumerable<Tlv> allPagesTlvs = [];
@@ -78,14 +78,7 @@ public sealed class ManagementSession<TConnection>(
         var hasMoreData = true;
         while (hasMoreData)
         {
-            var apdu = new CommandApdu
-            {
-                Cla = 0,
-                Ins = INS_GET_DEVICE_INFO,
-                P1 = page,
-                P2 = 0,
-                Data = null
-            };
+            var apdu = new CommandApdu { Cla = 0, Ins = INS_GET_DEVICE_INFO, P1 = page, P2 = 0 };
 
             if (_protocol is ISmartCardProtocol smartCardProtocol)
             {
@@ -102,10 +95,6 @@ public sealed class ManagementSession<TConnection>(
                 allPagesTlvs = allPagesTlvs.Concat(pageTlvs);
                 ++page;
             }
-            // else if (_protocol is IFidoProtocol fidoProtocol)
-            // {
-            //     
-            // }
             else
             {
                 throw new NotSupportedException("Protocol not supported");
@@ -115,16 +104,35 @@ public sealed class ManagementSession<TConnection>(
         return DeviceInfo.CreateFromTlvs([.. allPagesTlvs], _version);
     }
 
-    private async Task SetVersionAsync(CancellationToken cancellationToken, ISmartCardProtocol smartCardProtocol)
+    private async Task SetVersionAsync(ISmartCardProtocol smartCardProtocol, CancellationToken cancellationToken)
     {
-        var versionBytes = await smartCardProtocol.SelectAsync(ApplicationIds.Management, cancellationToken)
+        var versionBytes = await smartCardProtocol
+            .SelectAsync(ApplicationIds.Management, cancellationToken)
             .ConfigureAwait(false);
+
         var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
         var versionString = deviceText.Split(' ').Last();
-        var versionParts = versionString.Split('.').Select(s => int.Parse(s)).ToArray();
+        var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
+
         _version = versionParts.Length == 3
             ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
-            : new FirmwareVersion(0);
+            : new FirmwareVersion();
+    }
+
+    internal void EnsureSupports(Feature feature)
+    {
+        if (!IsSupported(feature)) throw new NotSupportedException($"{feature.Name} is not supported on this YubiKey.");
+    }
+
+    internal bool IsSupported(Feature feature)
+    {
+        if (!_isInitialized)
+            throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
+
+        if (_version is null)
+            return false;
+
+        return _version >= feature.Version;
     }
 
     protected override void Dispose(bool disposing)

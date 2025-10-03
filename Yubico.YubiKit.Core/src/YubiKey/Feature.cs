@@ -14,10 +14,11 @@
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
-public class Feature
+public class Feature(string name, int versionMajor, int versionMinor, int versionRevision)
 {
-    public required string Name { get; init; }
-    public int VersionMajor { get; set; }
-    public int VersionMinor { get; set; }
-    public int VersionRevision { get; set; }
+    public string Name { get; } = name;
+    public int VersionMajor { get; init; } = versionMajor;
+    public int VersionMinor { get; init; } = versionMinor;
+    public int VersionRevision { get; init; } = versionRevision;
+    public FirmwareVersion Version { get; } = new(versionMajor, versionMinor, versionRevision);
 }

@@ -30,6 +30,12 @@ public static class IYubiKeyExtensions
 
             return await mgmtSession.GetDeviceInfoAsync();
         }
+
+        public async Task<ManagementSession<ISmartCardConnection>> CreateManagementSessionAsync()
+        {
+            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
+            return await ManagementSession<ISmartCardConnection>.CreateAsync(connection);
+        }
     }
 
     #endregion

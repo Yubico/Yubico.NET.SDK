@@ -21,6 +21,8 @@ namespace Yubico.YubiKit.Core.YubiKey;
 
 public interface IYubiKey
 {
+    string DeviceId { get; }
+
     Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection;
 }
@@ -31,9 +33,11 @@ internal class PcscYubiKey(
     ILogger<PcscYubiKey> logger)
     : IYubiKey
 {
-    internal string ReaderName => pcscDevice.ReaderName;
+    private readonly string _readerName = pcscDevice.ReaderName;
 
     #region IYubiKey Members
+
+    public string DeviceId { get; } = $"pcsc:{pcscDevice.ReaderName}";
 
     public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection
@@ -52,7 +56,7 @@ internal class PcscYubiKey(
     private async Task<ISmartCardConnection> CreateConnection(CancellationToken cancellationToken = default)
     {
         var connection = await connectionFactory.CreateAsync(pcscDevice, cancellationToken).ConfigureAwait(false);
-        logger.LogInformation("Connected to YubiKey in reader {ReaderName}", ReaderName);
+        logger.LogInformation("Connected to YubiKey in reader {ReaderName}", _readerName);
 
         return connection;
     }

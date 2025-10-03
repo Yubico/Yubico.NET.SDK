@@ -47,6 +47,18 @@ public class ManagementTests : IntegrationTestBase
     }
 
     [Fact]
+    public async Task CreateManagementSession_with_ExtensionMethod()
+    {
+        var devices = await YubiKeyManager.FindAllAsync();
+        var device = devices.First();
+
+        using var mgmtSession = await device.CreateManagementSessionAsync();
+
+        var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
+        Assert.NotEqual(0, deviceInfo.SerialNumber);
+    }
+
+    [Fact]
     public async Task GetDeviceInfoAsync_with_YubiKeyExtensionMethod()
     {
         var devices = await YubiKeyManager.FindAllAsync();

@@ -50,14 +50,14 @@ public class DeviceRepositorySimple : IDeviceRepository
 
             foreach (var device in devices)
             {
-                var id = GetDeviceId(device);
+                var id = device.DeviceId;
                 currentDeviceIds.Add(id);
 
-                if (!previousDeviceIds.Contains(id))
-                {
-                    _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, device));
-                    yield return new DeviceEvent(DeviceAction.Added, device);
-                }
+                if (previousDeviceIds.Contains(id))
+                    continue;
+                
+                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, device));
+                yield return new DeviceEvent(DeviceAction.Added, device);
             }
 
             foreach (var removedId in previousDeviceIds.Except(currentDeviceIds))
@@ -70,13 +70,4 @@ public class DeviceRepositorySimple : IDeviceRepository
             await Task.Delay(interval, cancellationToken);
         }
     }
-
-    private static string? GetDeviceId(IYubiKey device) =>
-        device switch
-        {
-            PcscYubiKey pcscDevice => GetPcscDeviceId(pcscDevice),
-            _ => null
-        };
-
-    private static string? GetPcscDeviceId(PcscYubiKey pcscDevice) => $"pcsc:{pcscDevice.ReaderName}";
 }

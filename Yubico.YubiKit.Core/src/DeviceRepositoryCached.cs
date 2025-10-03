@@ -62,14 +62,14 @@ public class DeviceRepositoryCached(
 
         foreach (var device in discoveredDevices)
         {
-            var deviceId = GetDeviceId(device);
-            if (deviceId != null) newDeviceMap[deviceId] = device;
+            var deviceId = device.DeviceId;
+            newDeviceMap[deviceId] = device;
         }
 
         var newIds = newDeviceMap.Keys.ToHashSet();
-        var addedIds = newIds.Except(currentIds);
-        var removedIds = currentIds.Except(newIds);
-        var potentiallyUpdatedIds = newIds.Intersect(currentIds);
+        var addedIds = newIds.Except(currentIds).ToList();
+        var potentiallyUpdatedIds = newIds.Intersect(currentIds).ToList();
+        var removedIds = currentIds.Except(newIds).ToList();
 
         // Handle added devices
         foreach (var deviceId in addedIds)
@@ -84,13 +84,13 @@ public class DeviceRepositoryCached(
         foreach (var deviceId in potentiallyUpdatedIds)
         {
             var newDevice = newDeviceMap[deviceId];
-            if (_deviceCache.TryGetValue(deviceId, out var existingDevice) &&
-                !DevicesAreEqual(existingDevice, newDevice))
-            {
-                _deviceCache[deviceId] = newDevice;
-                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Updated, newDevice));
-                logger.LogDebug("Updated device: {DeviceId}", deviceId);
-            }
+            if (!_deviceCache.TryGetValue(deviceId, out var existingDevice) ||
+                DevicesAreEqual(existingDevice, newDevice))
+                continue;
+
+            _deviceCache[deviceId] = newDevice;
+            _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Updated, newDevice));
+            logger.LogDebug("Updated device: {DeviceId}", deviceId);
         }
 
         // Handle removed devices
@@ -106,7 +106,7 @@ public class DeviceRepositoryCached(
 
         logger.LogDebug(
             "Device cache updated: {DeviceCount} devices, {AddedCount} added, {UpdatedCount} updated, {RemovedCount} removed",
-            newDeviceMap.Count, addedIds.Count(), potentiallyUpdatedIds.Count(), removedIds.Count());
+            newDeviceMap.Count, addedIds.Count, potentiallyUpdatedIds.Count, removedIds.Count);
     }
 
     public void Dispose()
@@ -169,17 +169,8 @@ public class DeviceRepositoryCached(
         }
     }
 
-    private static string? GetDeviceId(IYubiKey device) =>
-        device switch
-        {
-            PcscYubiKey pcscDevice => GetPcscDeviceId(pcscDevice),
-            _ => null
-        };
-
-    private static string? GetPcscDeviceId(PcscYubiKey pcscDevice) => $"pcsc:{pcscDevice.ReaderName}";
-
     private static bool IsSmartCardDevice(IYubiKey device) => device is PcscYubiKey;
 
     private static bool DevicesAreEqual(IYubiKey device1, IYubiKey device2) =>
-        GetDeviceId(device1) == GetDeviceId(device2);
+        device1.DeviceId == device2.DeviceId;
 }

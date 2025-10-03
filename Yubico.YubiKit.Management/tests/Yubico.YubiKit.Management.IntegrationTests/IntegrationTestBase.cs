@@ -46,7 +46,7 @@ public abstract class IntegrationTestBase : IDisposable
         {
             options.EnableAutoDiscovery = true;
             options.ScanInterval = TimeSpan.FromMilliseconds(100);
-            options.EnabledTransports = YubiKeyManagerOptions.Transports.All;
+            options.EnabledTransport = Transport.All;
         };
 
     protected ServiceProvider ServiceProvider { get; }

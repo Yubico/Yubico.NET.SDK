@@ -27,6 +27,8 @@ public interface IYubiKey
         where TConnection : class, IConnection;
 }
 
+// An idea is to connect this class over the smartCardConnection to the ManagementSession, and get some deviceInfo..
+// Such as serial, fw version. 
 internal class PcscYubiKey(
     IPcscDevice pcscDevice,
     ISmartCardConnectionFactory connectionFactory,

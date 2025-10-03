@@ -14,9 +14,11 @@
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
-public class YubiKeyManagerOptions
+[Flags]
+public enum Transport
 {
-    public bool EnableAutoDiscovery { get; set; }
-    public TimeSpan ScanInterval { get; set; } = TimeSpan.FromMilliseconds(500);
-    public Transport EnabledTransport { get; set; } = Transport.All;
+    None = 0,
+    Usb = 1,
+    Nfc = 2,
+    All = Usb | Nfc
 }

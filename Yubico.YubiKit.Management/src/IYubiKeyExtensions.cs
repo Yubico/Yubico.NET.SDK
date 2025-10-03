@@ -23,18 +23,34 @@ public static class IYubiKeyExtensions
 
     extension(IYubiKey yubiKey)
     {
-        public async Task<DeviceInfo> GetDeviceInfoAsync()
+        public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
         {
-            using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
-            using var mgmtSession = await ManagementSession<ISmartCardConnection>.CreateAsync(connection);
+            using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken);
 
-            return await mgmtSession.GetDeviceInfoAsync();
+            return await mgmtSession.GetDeviceInfoAsync(cancellationToken);
         }
 
-        public async Task<ManagementSession<ISmartCardConnection>> CreateManagementSessionAsync()
+        public async Task SetDeviceConfigAsync(
+            DeviceConfig config,
+            bool reboot,
+            byte[]? currentLockCode = null,
+            byte[]? newLockCode = null,
+            CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
-            return await ManagementSession<ISmartCardConnection>.CreateAsync(connection);
+            using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken);
+
+            await mgmtSession.SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken);
+        }
+
+
+        public async Task<ManagementSession<ISmartCardConnection>> CreateManagementSessionAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+            return await ManagementSession<ISmartCardConnection>.CreateAsync(connection,
+                cancellationToken: cancellationToken);
         }
     }
 

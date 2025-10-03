@@ -104,6 +104,39 @@ public sealed class ManagementSession<TConnection>(
         return DeviceInfo.CreateFromTlvs([.. allPagesTlvs], _version);
     }
 
+    public Task SetDeviceConfigAsync(
+        DeviceConfig config,
+        bool reboot,
+        byte[]? currentLockCode = null,
+        byte[]? newLockCode = null,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureSupports(FeatureDeviceInfo); // Wrong
+
+        ArgumentNullException.ThrowIfNull(config);
+        if (currentLockCode?.Length != 16)
+            throw new ArgumentException("Current lock code must be 16 bytes", nameof(currentLockCode));
+
+        if (newLockCode is not null && newLockCode.Length != 16)
+            throw new ArgumentException("New lock code must be 16 bytes", nameof(newLockCode));
+
+        var configBytes = config.GetBytes(reboot, currentLockCode, newLockCode);
+        var apdu = new CommandApdu
+        {
+            Cla = 0,
+            Ins = 0x1C,
+            P1 = 0,
+            P2 = 0,
+            Data = configBytes
+        };
+
+        if (_protocol is ISmartCardProtocol smartCardProtocol)
+            return smartCardProtocol
+                .TransmitAndReceiveAsync(apdu, cancellationToken);
+
+        throw new NotSupportedException("Protocol not supported");
+    }
+
     private async Task SetVersionAsync(ISmartCardProtocol smartCardProtocol, CancellationToken cancellationToken)
     {
         var versionBytes = await smartCardProtocol

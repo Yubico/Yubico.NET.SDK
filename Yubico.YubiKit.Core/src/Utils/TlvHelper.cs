@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers;
 using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Core.Utils;
@@ -98,45 +99,38 @@ public static class TlvHelper
             : tlv.Value.ToArray();
     }
 
-    public static Memory<byte> EncodeDictionary(IReadOnlyDictionary<int, byte[]> tlvData)
+    public static Memory<byte> EncodeDictionary(IReadOnlyDictionary<int, byte[]?> tlvData)
     {
-        ArgumentNullException.ThrowIfNull(tlvData);
-
-        var totalSize = 0;
-        foreach (var entry in tlvData)
+        if (tlvData.Count == 0)
         {
-            var tlv = new Tlv(entry.Key, entry.Value ?? Array.Empty<byte>());
-            ReadOnlyMemory<byte> bytes = tlv.GetBytes();
-            totalSize += bytes.Length;
+            return Array.Empty<byte>();
         }
 
-        var result = new byte[totalSize];
-        var position = 0;
+        int estimatedSize = tlvData.Sum(kvp => 2 + (kvp.Value?.Length ?? 0));
+        byte[] rented = ArrayPool<byte>.Shared.Rent(estimatedSize);
 
         try
         {
-            foreach (var entry in tlvData)
-            {
-                var tlv = new Tlv(entry.Key, entry.Value ?? Array.Empty<byte>());
-                var tlvBytes = tlv.GetBytes().ToArray();
+            int position = 0;
+            Span<byte> buffer = rented.AsSpan();
 
-                try
-                {
-                    Buffer.BlockCopy(tlvBytes, 0, result, position, tlvBytes.Length);
-                    position += tlvBytes.Length;
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(tlvBytes);
-                }
+            foreach (var (tag, value) in tlvData.OrderBy(kvp => kvp.Key))
+            {
+                var tlv = new Tlv(tag, value ?? []);
+                var tlvBytes = tlv.GetBytes().Span;
+                tlvBytes.CopyTo(buffer[position..]);
+                position += tlvBytes.Length;
             }
 
-            return result.AsMemory(0, position);
+            // Copy only the written portion
+            byte[] result = new byte[position];
+            buffer[..position].CopyTo(result);
+            return result;
         }
-        catch
+        finally
         {
-            CryptographicOperations.ZeroMemory(result);
-            throw;
+            CryptographicOperations.ZeroMemory(rented);
+            ArrayPool<byte>.Shared.Return(rented);
         }
     }
 }

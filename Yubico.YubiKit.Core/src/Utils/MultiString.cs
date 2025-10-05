@@ -51,7 +51,7 @@ public static class MultiString
 
         ArgumentNullException.ThrowIfNull(encoding);
 
-        if (value.Length == 0) return Array.Empty<byte>();
+        if (value.Length == 0) return [];
 
         // Take a reasonable guess at the initial buffer size. Hopefully in the worst case, List
         // would only need to resize once. A multiplier of 2 is a reasonable buffer for unicode

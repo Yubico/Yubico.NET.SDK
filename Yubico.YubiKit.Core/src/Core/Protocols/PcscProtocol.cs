@@ -46,8 +46,6 @@ internal class PcscProtocol : ISmartCardProtocol
     private readonly ILogger<PcscProtocol> _logger;
     private readonly ChainedResponseProcessor _processor;
 
-    // private bool _isInitialized;
-
     public PcscProtocol(
         ILogger<PcscProtocol> logger,
         ISmartCardConnection connection,
@@ -68,6 +66,7 @@ internal class PcscProtocol : ISmartCardProtocol
         CancellationToken cancellationToken = default)
     {
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
+        
         var response = await _processor.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
         if (response is not { SW1: 0x90, SW2: 0x00 })
             throw new InvalidOperationException(
@@ -80,8 +79,7 @@ internal class PcscProtocol : ISmartCardProtocol
         ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogTrace("Selecting application ID: {ApplicationId}",
-            BitConverter.ToString(applicationId.ToArray()).Replace("-", string.Empty));
+        _logger.LogTrace("Selecting application ID: {ApplicationId}", Convert.ToHexString(applicationId.ToArray()));
 
         var response =
             await _processor.TransmitAsync(

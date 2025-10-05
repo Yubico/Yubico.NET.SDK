@@ -84,7 +84,7 @@ internal static partial class NativeMethods
         string[]? groups,
         out string[] readerNames)
     {
-        readerNames = Array.Empty<string>();
+        readerNames = [];
         byte[]? rawGroups = null;
 
         if (groups is not null) rawGroups = MultiString.GetBytes(groups, Encoding.ASCII);

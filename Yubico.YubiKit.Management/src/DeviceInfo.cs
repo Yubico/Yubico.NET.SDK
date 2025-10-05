@@ -70,43 +70,41 @@ public readonly record struct DeviceInfo
         ? FirmwareVersion.ToString()
         : VersionQualifier.ToString();
 
-
-    public static DeviceInfo CreateFromTlvs(IReadOnlyCollection<Tlv> tlvPages, FirmwareVersion? defaultVersion)
+    public static DeviceInfo CreateFromTlvs(IReadOnlyCollection<Tlv> tlvs, FirmwareVersion? defaultVersion)
     {
-        var dict = new Dictionary<int, ReadOnlyMemory<byte>>(tlvPages.Count);
-        foreach (var tlv in tlvPages)
-            dict.Add(tlv.Tag, tlv.Value);
+        var tlvDict = tlvs.ToDictionary(tlv => tlv.Tag, tlv => tlv.Value);
 
-        var isLocked = dict.GetSpan(TAG_CONFIG_LOCKED)[0] == 1;
-        var serialNumber = BinaryPrimitives.ReadInt32BigEndian(dict.GetSpan(TAG_SERIAL_NUMBER));
+        var isLocked = tlvDict.GetSpan(TAG_CONFIG_LOCKED)[0] == 1;
+        var serialNumber = BinaryPrimitives.ReadInt32BigEndian(tlvDict.GetSpan(TAG_SERIAL_NUMBER));
 
-        int formFactorTagData = dict.GetSpan(TAG_FORMFACTOR)[0];
+        int formFactorTagData = tlvDict.GetSpan(TAG_FORMFACTOR)[0];
         var isFips = (formFactorTagData & 0x80) != 0;
         var isSky = (formFactorTagData & 0x40) != 0;
         var formFactor = (FormFactor)formFactorTagData;
 
-        var resetBlocked = GetYubiKeyCapabilities(dict.GetMemory(TAG_RESET_BLOCKED));
-        var usbEnabled = GetYubiKeyCapabilities(dict.GetMemory(TAG_USB_ENABLED));
-        var usbSupported = GetYubiKeyCapabilities(dict.GetMemory(TAG_USB_SUPPORTED));
-        var nfcEnabled = GetYubiKeyCapabilities(dict.GetMemory(TAG_NFC_ENABLED));
-        var nfcSupported = GetYubiKeyCapabilities(dict.GetMemory(TAG_NFC_SUPPORTED));
-        var isNfcRestricted = dict.TryGetValue(TAG_NFC_RESTRICTED, out var nfcRestrictedBytes) &&
-                              nfcRestrictedBytes.Span[0] == 1;
+        var resetBlocked = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_RESET_BLOCKED));
+        var usbEnabled = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_USB_ENABLED));
+        var usbSupported = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_USB_SUPPORTED));
+        var nfcEnabled = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_NFC_ENABLED));
+        var nfcSupported = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_NFC_SUPPORTED));
+        var fipsCapabilities = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_FIPS_CAPABLE));
+        var fipsApprovedCapabilities = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_FIPS_APPROVED));
 
-        var fipsCapabilities = GetFipsCapabilities(dict.GetMemory(TAG_FIPS_CAPABLE));
-        var fipsApprovedCapabilities = GetFipsCapabilities(dict.GetMemory(TAG_FIPS_APPROVED));
-        var hasPinComplexity = dict.TryGetValue(TAG_PIN_COMPLEXITY, out var hasPinComplexityBytes) &&
-                               hasPinComplexityBytes.Span[0] == 1;
+        var isNfcRestricted = tlvDict.TryGetValue(TAG_NFC_RESTRICTED, out var nfcRestrictedBytes) &&
+                              nfcRestrictedBytes.Span[0] == 1;
+        var hasPinComplexity = tlvDict.TryGetValue(TAG_PIN_COMPLEXITY, out var hasPinComplexityBytes) &&
+                                       hasPinComplexityBytes.Span[0] == 1;
 
         string? partNumber = null;
-        if (dict.TryGetSpan(TAG_PART_NUMBER, out var partNumberBytes))
+        if (tlvDict.TryGetSpan(TAG_PART_NUMBER, out var partNumberBytes))
             partNumber = GetPartNumber(partNumberBytes);
 
-        var autoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(dict.GetSpan(TAG_AUTO_EJECT_TIMEOUT));
-        var challengeResponseTimeout = dict.GetSpan(TAG_CHALLENGE_RESPONSE_TIMEOUT);
-        var deviceFlags = (DeviceFlags)dict.GetSpan(TAG_DEVICE_FLAGS)[0];
+        var autoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(tlvDict.GetSpan(TAG_AUTO_EJECT_TIMEOUT));
+        var challengeResponseTimeout = tlvDict.GetMemory(TAG_CHALLENGE_RESPONSE_TIMEOUT);
+        var deviceFlags = (DeviceFlags)tlvDict.GetSpan(TAG_DEVICE_FLAGS)[0];
+
         FirmwareVersion? fpsVersion = null;
-        if (dict.TryGetSpan(TAG_FPS_VERSION, out var fpsVersionBytes) &&
+        if (tlvDict.TryGetSpan(TAG_FPS_VERSION, out var fpsVersionBytes) &&
             !fpsVersionBytes.SequenceEqual(new byte[3]))
         {
             var fpsVersionMajor = fpsVersionBytes[0];
@@ -116,7 +114,7 @@ public readonly record struct DeviceInfo
         }
 
         FirmwareVersion? stmVersion = null;
-        if (dict.TryGetSpan(TAG_STM_VERSION, out var stmVersionBytes) &&
+        if (tlvDict.TryGetSpan(TAG_STM_VERSION, out var stmVersionBytes) &&
             !stmVersionBytes.SequenceEqual(new byte[3]))
         {
             var stmVersionMajor = stmVersionBytes[0];
@@ -125,11 +123,11 @@ public readonly record struct DeviceInfo
             stmVersion = new FirmwareVersion(stmVersionMajor, stmVersionMinor, stmVersionMPatch);
         }
 
-        var firmwareVersionMajor = dict.GetSpan(TAG_FIRMWARE_VERSION)[0];
-        var firmwareVersionMinor = dict.GetSpan(TAG_FIRMWARE_VERSION)[1];
-        var firmwareVersionMPatch = dict.GetSpan(TAG_FIRMWARE_VERSION)[2];
+        var firmwareVersionMajor = tlvDict.GetSpan(TAG_FIRMWARE_VERSION)[0];
+        var firmwareVersionMinor = tlvDict.GetSpan(TAG_FIRMWARE_VERSION)[1];
+        var firmwareVersionMPatch = tlvDict.GetSpan(TAG_FIRMWARE_VERSION)[2];
         defaultVersion ??= new FirmwareVersion(firmwareVersionMajor, firmwareVersionMinor, firmwareVersionMPatch);
-        var (firmwareVersion, versionQualifier) = DetermineFirmwareVersion(dict, defaultVersion);
+        var (firmwareVersion, versionQualifier) = DetermineFirmwareVersion(tlvDict, defaultVersion);
 
         return new DeviceInfo
         {
@@ -149,7 +147,7 @@ public readonly record struct DeviceInfo
             PartNumber = partNumber,
             IsNfcRestricted = isNfcRestricted,
             AutoEjectTimeout = autoEjectTimeout,
-            ChallengeResponseTimeout = challengeResponseTimeout.ToArray(),
+            ChallengeResponseTimeout = challengeResponseTimeout,
             DeviceFlags = deviceFlags,
             FirmwareVersion = firmwareVersion,
             VersionQualifier = versionQualifier,
@@ -223,105 +221,48 @@ public readonly record struct DeviceInfo
             return null;
         }
     }
+}
 
-    private static YubiKeyCapabilities GetFipsCapabilities(ReadOnlyMemory<byte> value)
+public static class CapabilityMapper // TODO internal
+{
+    private static readonly (int Bit, YubiKeyCapabilities Cap)[] FipsMapping =
+    [
+        (0x01, YubiKeyCapabilities.Fido2),
+        (0x02, YubiKeyCapabilities.Piv),
+        (0x04, YubiKeyCapabilities.OpenPgp),
+        (0x08, YubiKeyCapabilities.Oath),
+        (0x10, YubiKeyCapabilities.HsmAuth)
+    ];
+
+    public static YubiKeyCapabilities FromFips(ReadOnlyMemory<byte> value)
     {
         if (value.IsEmpty) return 0;
+        if (value.Length == 1 && value.Span[0] == 0)
+        {
+            return YubiKeyCapabilities.None;
+        }
 
-        YubiKeyCapabilities capabilities = 0;
         int fips = BinaryPrimitives.ReadInt16BigEndian(value.Span);
-        if ((fips & 0b0000_0001) != 0) capabilities |= YubiKeyCapabilities.Fido2;
-        if ((fips & 0b0000_0010) != 0) capabilities |= YubiKeyCapabilities.Piv;
-        if ((fips & 0b0000_0100) != 0) capabilities |= YubiKeyCapabilities.OpenPgp;
-        if ((fips & 0b0000_1000) != 0) capabilities |= YubiKeyCapabilities.Oath;
-        if ((fips & 0b0001_0000) != 0) capabilities |= YubiKeyCapabilities.HsmAuth;
+        YubiKeyCapabilities capabilities = 0;
+
+        foreach (var (bit, cap) in FipsMapping)
+        {
+            if ((fips & bit) != 0)
+                capabilities |= cap;
+        }
 
         return capabilities;
     }
 
-    private static YubiKeyCapabilities GetYubiKeyCapabilities(ReadOnlyMemory<byte> value)
+    public static YubiKeyCapabilities FromApp(ReadOnlyMemory<byte> appData)
     {
-        if (value.IsEmpty) return 0;
-        return value.Length == 1
-            ? (YubiKeyCapabilities)value.Span[0]
-            : (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(value.Span);
+        if (appData.IsEmpty)
+        {
+            return YubiKeyCapabilities.None;
+        }
+
+        return appData.Length == 1
+            ? (YubiKeyCapabilities)appData.Span[0]
+            : (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(appData.Span);
     }
-}
-
-[Flags]
-public enum YubiKeyCapabilities
-{
-    /// <summary>
-    ///     Identifies the YubiOTP application.
-    /// </summary>
-    Otp = 0x0001,
-
-    /// <summary>
-    ///     Identifies the U2F (CTAP1) portion of the FIDO application.
-    /// </summary>
-    U2f = 0x0002,
-
-    /// <summary>
-    ///     Identifies the OpenPGP application, implementing the OpenPGP Card protocol.
-    /// </summary>
-    OpenPgp = 0x0008,
-
-    /// <summary>
-    ///     Identifies the PIV application, implementing the PIV protocol.
-    /// </summary>
-    Piv = 0x0010,
-
-    /// <summary>
-    ///     Identifies the OATH application, implementing the YKOATH protocol.
-    /// </summary>
-    Oath = 0x0020,
-
-    /// <summary>
-    ///     Identifies the HSMAUTH application.
-    /// </summary>
-    HsmAuth = 0x0100,
-
-    /// <summary>
-    ///     Identifies the FIDO2  = CTAP2 portion of the FIDO application.
-    /// </summary>
-    Fido2 = 0x0200,
-    
-    All = Otp | U2f | OpenPgp | Piv | Oath | HsmAuth | Fido2
-}
-
-/// <summary>
-///     Miscellaneous flags representing various settings available on the YubiKey.
-/// </summary>
-[Flags]
-public enum DeviceFlags
-{
-    /// <summary>
-    ///     No device flags are set.
-    /// </summary>
-    None = 0x00,
-
-    /// <summary>
-    ///     USB remote wakeup is enabled.
-    /// </summary>
-    RemoteWakeup = 0x40,
-
-    /// <summary>
-    ///     The CCID touch-eject feature is enabled.
-    /// </summary>
-    /// <remarks>
-    ///     <para>
-    ///         For the CCID connection, the YubiKey behaves as a smart card reader and smart
-    ///         card. When this flag is disabled, the smart card is always present in the smart
-    ///         card reader. When enabled, the smart card will be ejected by default,
-    ///         and the user is required to touch the YubiKey to insert the smart card. For
-    ///         this to take effect, all <see cref="YubiKeyCapabilities" /> which do not depend
-    ///         on the CCID connection (such as <c>Fido2</c>, <c>FidoU2f</c>, and <c>Otp</c>)
-    ///         must be disabled.
-    ///     </para>
-    ///     <para>
-    ///         To automatically eject the smart card following a touch, see
-    ///         <see cref="IYubiKeyDeviceInfo.AutoEjectTimeout" />.
-    ///     </para>
-    /// </remarks>
-    TouchEject = 0x80
 }

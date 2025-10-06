@@ -141,9 +141,17 @@ namespace Yubico.YubiKey
                 {
                     // Give events a chance to coalesce.
                     await _semaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
-                    await Task.Delay(200, CancellationToken).ConfigureAwait(false);
+                    await Task.Delay(TimeSpan.FromMilliseconds(200), CancellationToken).ConfigureAwait(false);
 
-                    Update();
+                    try
+                    {
+                        Update();
+                    }
+                    catch (Exception e)
+                    {
+                        _log.LogError(e, "The YubiKey device listener encountered an unhandled exception during an update. The listener will continue to run.");
+                    }
+                    
                     // Reset any outstanding events.
                     _ = await _semaphore.WaitAsync(0, CancellationToken).ConfigureAwait(false);
                 }
@@ -250,20 +258,9 @@ namespace Yubico.YubiKey
         {
             var devicesToProcess = new List<IDevice>();
 
-            IList<IDevice> hidKeyboardDevices = GetHidKeyboardDevices().ToList();
-            IList<IDevice> smartCardDevices = GetSmartCardDevices().ToList();
-            IList<IDevice> hidFidoDevices = new List<IDevice>();
-
-            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows && !SdkPlatformInfo.IsElevated)
-            {
-                _log.LogWarning(
-                    "SDK running in an un-elevated Windows process. " +
-                    "Skipping FIDO enumeration as this requires process elevation.");
-            }
-            else
-            {
-                hidFidoDevices = GetHidFidoDevices().ToList();
-            }
+            var hidKeyboardDevices = GetHidKeyboardDevices();
+            var smartCardDevices = GetSmartCardDevices();
+            var hidFidoDevices = GetHidFidoDevices();
 
             _log.LogInformation(
                 "Found {HidCount} HID Keyboard devices, {FidoCount} HID FIDO devices, and {SCardCount} Smart Card devices for processing.",
@@ -356,43 +353,59 @@ namespace Yubico.YubiKey
                 device);
         }
 
-        private static IEnumerable<IDevice> GetHidFidoDevices()
+        private IReadOnlyList<IDevice> GetHidFidoDevices()
+        {
+            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows && !SdkPlatformInfo.IsElevated)
+            {
+                _log.LogWarning(
+                    "SDK running in an un-elevated Windows process. " +
+                    "Skipping FIDO enumeration as this requires process elevation.");
+                return new List<IDevice>();
+            }
+
+            try
+            {
+                return HidDevice
+                    .GetHidDevices()
+                    .Where(d => d.IsYubicoDevice() && d.IsFido())
+                    .ToList();
+            }
+            catch (PlatformInterop.PlatformApiException e)
+            {
+                ErrorHandler(e);
+                return new List<IDevice>();
+            }
+        }
+
+        private static IReadOnlyList<IDevice> GetHidKeyboardDevices()
         {
             try
             {
                 return HidDevice
                     .GetHidDevices()
-                    .Where(d => d.IsYubicoDevice() && d.IsFido());
+                    .Where(d => d.IsYubicoDevice() && d.IsKeyboard()).ToList();
             }
-            catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
-
-            return Enumerable.Empty<IDevice>();
-        }
-
-        private static IEnumerable<IDevice> GetHidKeyboardDevices()
-        {
-            try
+            catch (PlatformInterop.PlatformApiException e)
             {
-                return HidDevice
-                    .GetHidDevices()
-                    .Where(d => d.IsYubicoDevice() && d.IsKeyboard());
+                ErrorHandler(e);
+                return new List<IDevice>();
             }
-            catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
-
-            return Enumerable.Empty<IDevice>();
         }
 
-        private static IEnumerable<IDevice> GetSmartCardDevices()
+        private static IReadOnlyList<IDevice> GetSmartCardDevices()
         {
             try
             {
                 return SmartCardDevice
                         .GetSmartCardDevices()
-                        .Where(d => d.IsYubicoDevice());
+                        .Where(d => d.IsYubicoDevice())
+                        .ToList();
             }
-            catch (PlatformInterop.SCardException e) { ErrorHandler(e); }
-
-            return Enumerable.Empty<IDevice>();
+            catch (PlatformInterop.SCardException e)
+            {
+                ErrorHandler(e);
+                return new List<IDevice>();
+            }
         }
 
         private static void ErrorHandler(Exception exception) => Log

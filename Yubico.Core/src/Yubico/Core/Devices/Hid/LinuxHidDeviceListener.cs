@@ -60,9 +60,22 @@ namespace Yubico.Core.Devices.Hid
             StartListening();
         }
 
-        ~LinuxHidDeviceListener()
+        protected override void Dispose(bool disposing)
         {
-            Dispose(false);
+            try
+            {
+                if (disposing)
+                {
+                    _monitorObject.Dispose();
+                    _udevObject.Dispose();
+                }
+
+                StopListening();
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         /// <summary>
@@ -134,24 +147,6 @@ namespace Yubico.Core.Devices.Hid
 
             _isListening = false;
             _listenerThread.Join();
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (disposing)
-                {
-                    _monitorObject.Dispose();
-                    _udevObject.Dispose();
-                }
-
-                StopListening();
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
         }
 
         // This method is the delegate sent to the new Thread.

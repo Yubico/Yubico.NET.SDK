@@ -37,11 +37,9 @@ namespace Yubico.Core.Devices.Hid
             StartListening();
         }
 
-        // While there are resources to clean up, it doesn't seem right to have this class be IDisposable. Eventual
-        // cleanup by the GC is fine, however there are some steps that need to be run in order to clean up.
         ~MacOSHidDeviceListener()
         {
-            StopListening();
+            Dispose(false);
         }
 
         private void StartListening()
@@ -55,14 +53,29 @@ namespace Yubico.Core.Devices.Hid
 
         private void StopListening()
         {
-            ClearEventHandlers();
-
             if (_runLoop.HasValue && _runLoop != IntPtr.Zero)
             {
                 CFRunLoopStop(_runLoop.Value);
             }
 
             _listenerThread?.Join();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    // No managed resources to dispose.
+                }
+
+                StopListening();
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         private void ListeningThread()

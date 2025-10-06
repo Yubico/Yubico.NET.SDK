@@ -38,7 +38,7 @@ namespace Yubico.Core.Devices.Hid
 
         ~WindowsHidDeviceListener()
         {
-            StopListening();
+            Dispose(false);
         }
 
         private void StartListening()
@@ -90,6 +90,23 @@ namespace Yubico.Core.Devices.Hid
             {
                 _marshalableThisPtr.Value.Free();
                 _marshalableThisPtr = null;
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    // No managed resources to dispose.
+                }
+
+                StopListening();
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 

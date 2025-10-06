@@ -33,7 +33,7 @@ namespace Yubico.Core.Devices.Hid
     /// already attached to the system will be ignored.
     /// </para>
     /// </remarks>
-    public abstract class HidDeviceListener
+    public abstract class HidDeviceListener : IDisposable
     {
         private readonly ILogger _log = Logging.Log.GetLogger<HidDeviceListener>();
 
@@ -46,6 +46,8 @@ namespace Yubico.Core.Devices.Hid
         /// Subscribe to receive an event whenever a Human Interface Device (HID) is removed from the computer.
         /// </summary>
         public event EventHandler<HidDeviceEventArgs>? Removed;
+
+        private bool _disposed;
 
         /// <summary>
         /// Creates an instance of a <see cref="HidDeviceListener"/>.
@@ -99,6 +101,35 @@ namespace Yubico.Core.Devices.Hid
         {
             Arrived = null;
             Removed = null;
+        }
+
+        /// <summary>
+        /// Release the managed and unmanaged resources used by the
+        /// <see cref="HidDeviceListener" />.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Release the managed and unmanaged resources used by the
+        /// <see cref="HidDeviceListener" />.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                ClearEventHandlers();
+            }
+
+            _disposed = true;
         }
     }
 }

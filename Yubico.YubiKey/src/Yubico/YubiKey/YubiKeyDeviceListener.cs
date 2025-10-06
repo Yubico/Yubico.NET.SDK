@@ -139,9 +139,10 @@ namespace Yubico.YubiKey
             {
                 try
                 {
-                    await _semaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
                     // Give events a chance to coalesce.
+                    await _semaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
                     await Task.Delay(200, CancellationToken).ConfigureAwait(false);
+
                     Update();
                     // Reset any outstanding events.
                     _ = await _semaphore.WaitAsync(0, CancellationToken).ConfigureAwait(false);
@@ -408,30 +409,19 @@ namespace Yubico.YubiKey
             {
                 if (disposing)
                 {
-                    // Signal the listen thread that it's time to end.
+                    _isListening = false;
+                    _ = _listenTask.Wait(TimeSpan.FromSeconds(1));
                     _tokenSource.Cancel();
+                    _ = _semaphore.Release();
+                    _rwLock.Dispose();
 
-                    // Shut down the listener handlers.
-                    _hidListener.Arrived -= ArriveHandler;
-                    _hidListener.Removed -= RemoveHandler;
-                    if (_hidListener is IDisposable hidDisp)
-                    {
-                        hidDisp.Dispose();
-                    }
+                    _hidListener.Dispose();
 
-                    _smartCardListener.Arrived -= ArriveHandler;
-                    _smartCardListener.Removed -= RemoveHandler;
                     if (_smartCardListener is IDisposable scDisp)
                     {
                         scDisp.Dispose();
                     }
 
-                    // Give the listen task a moment (likely is already done).
-                    _ = !_listenTask.Wait(100);
-                    _listenTask.Dispose();
-
-                    // Get rid of synchronization objects.
-                    _rwLock.Dispose();
                     _semaphore.Dispose();
                     _tokenSource.Dispose();
 
@@ -440,6 +430,7 @@ namespace Yubico.YubiKey
                         _lazyInstance = null;
                     }
                 }
+
                 _isDisposed = true;
             }
         }

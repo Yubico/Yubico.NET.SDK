@@ -60,16 +60,9 @@ namespace Yubico.Core.Devices.Hid
             StartListening();
         }
 
-        // We're declaring an explicit finalizer because there are resources that need to be cleaned.
-        // I'd like to avoid forcing this class to be disposable, based on its expected usage. None
-        // of the resources acquired by this class have any critical time constraints that would
-        // necessitate deterministic cleanup (Dispose). Letting the garbage collector clean up this
-        // class should be fine, so long as this finalizer is called.
         ~LinuxHidDeviceListener()
         {
-            StopListening();
-            _monitorObject.Dispose();
-            _udevObject.Dispose();
+            Dispose(false);
         }
 
         /// <summary>
@@ -141,6 +134,24 @@ namespace Yubico.Core.Devices.Hid
 
             _isListening = false;
             _listenerThread.Join();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    _monitorObject.Dispose();
+                    _udevObject.Dispose();
+                }
+
+                StopListening();
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         // This method is the delegate sent to the new Thread.

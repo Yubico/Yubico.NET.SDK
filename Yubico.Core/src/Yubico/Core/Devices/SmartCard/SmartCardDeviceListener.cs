@@ -33,7 +33,7 @@ namespace Yubico.Core.Devices.SmartCard
     /// already attached to the system will be ignored.
     /// </para>
     /// </remarks>
-    public abstract class SmartCardDeviceListener
+    public abstract class SmartCardDeviceListener : IDisposable
     {
         private readonly ILogger _log = Logging.Log.GetLogger<SmartCardDeviceListener>();
 
@@ -104,6 +104,41 @@ namespace Yubico.Core.Devices.SmartCard
         {
             Arrived = null;
             Removed = null;
+        }
+
+        private bool _disposed;
+
+        /// <summary>
+        /// Disposes the objects.
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    ClearEventHandlers();
+                }
+                _disposed = true;
+            }
+        }
+
+        ~SmartCardDeviceListener()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(false);
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        /// <summary>
+        /// Calls Dispose(true).
+        /// </summary>
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

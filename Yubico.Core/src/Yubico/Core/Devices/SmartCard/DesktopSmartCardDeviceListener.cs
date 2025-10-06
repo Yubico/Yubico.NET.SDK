@@ -29,6 +29,7 @@ namespace Yubico.Core.Devices.SmartCard
     /// </summary>
     internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener, IDisposable
     {
+        internal static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
         private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardDeviceListener>();
 
         // The resource manager context.
@@ -120,41 +121,25 @@ namespace Yubico.Core.Devices.SmartCard
         #region IDisposable Support
 
         private bool _disposedValue; // To detect redundant calls
-        internal static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
 
         /// <summary>
         /// Disposes the objects.
         /// </summary>
         /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (!_disposedValue)
             {
                 if (disposing)
                 {
-                    uint _ = SCardCancel(_context);
+                    _ = SCardCancel(_context);
                     _context.Dispose();
                     StopListening();
                 }
                 _disposedValue = true;
             }
-        }
-
-        ~DesktopSmartCardDeviceListener()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(false);
-        }
-
-        // This code added to correctly implement the disposable pattern.
-        /// <summary>
-        /// Calls Dispose(true).
-        /// </summary>
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            
+            base.Dispose(disposing);
         }
 
         #endregion
@@ -169,7 +154,6 @@ namespace Yubico.Core.Devices.SmartCard
                 return;
             }
 
-            ClearEventHandlers();
             _isListening = false;
             Status = DeviceListenerStatus.Stopped;
             _listenerThread.Join();

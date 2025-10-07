@@ -26,10 +26,10 @@ device".
 With the YubiKey, there is the option to also require a PIN in order to use the U2F
 application. However, this option is available only for YubiKey 4 FIPS
 Series keys. If you try to set a PIN for the U2F application on a non-FIPS YubiKey 4 Series key,
-a YubiKey 5 Series key (FIPS or non-FIPS), or a YubiKey Security Key Series key, it will not
+a YubiKey 5 Series key (FIPS or non-FIPS), or a Security Key Series key, it will not
 work.
 
-However, with YubiKey 5 Series (FIPS and non-FIPS) and YubiKey Security Key Series keys, it 
+However, with YubiKey 5 Series (FIPS and non-FIPS) and Security Key Series keys, it 
 is possible to set a PIN on the *FIDO2*
 application. YubiKey 4 Series keys do not have a FIDO2 application.
 

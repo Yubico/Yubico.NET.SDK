@@ -18,9 +18,11 @@ using Yubico.YubiKit.Core.Core.Iso7816;
 namespace Yubico.YubiKit.Core.Core.Apdu;
 
 internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFormatter formatter)
-    : ApduFormatProcessor(connection, formatter)
+    : ExtendedApduProcessor(connection, formatter)
 {
     private const int ChunkSize = 255;
+    private const int HasMoreData = 0x10;
+
 
     public override async Task<ResponseApdu> TransmitAsync(CommandApdu command,
         CancellationToken cancellationToken = default)
@@ -32,14 +34,15 @@ internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFo
         var offset = 0;
         while (offset + ChunkSize < data.Length)
         {
-            var chunk = data.Slice(offset, ChunkSize);
-            var chainedCommand = new CommandApdu(
-                (byte)(command.Cla | 0x10),
-                command.Ins,
-                command.P1,
-                command.P2,
-                chunk);
+            var chunk = data[offset..ChunkSize];
+            // var chainedCommand = new CommandApdu(
+            //     (byte)(command.Cla | HasMoreData),
+            //     command.Ins,
+            //     command.P1,
+            //     command.P2,
+            //     chunk);
 
+            var chainedCommand = command with { Cla = (byte)(command.Cla | HasMoreData), Data = chunk};
             var result = await base.TransmitAsync(chainedCommand, cancellationToken).ConfigureAwait(false);
             if (result.SW != SWConstants.Success)
                 return result;

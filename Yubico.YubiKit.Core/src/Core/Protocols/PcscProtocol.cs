@@ -16,11 +16,13 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Core.Apdu;
 using Yubico.YubiKit.Core.Core.Connections;
 using Yubico.YubiKit.Core.Core.Iso7816;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.Core.Protocols;
 
 public interface IProtocol : IDisposable
 {
+    void Configure(FirmwareVersion version, Configuration? configuration = null) ;
 }
 
 public interface ISmartCardProtocol : IProtocol
@@ -33,18 +35,25 @@ public interface ISmartCardProtocol : IProtocol
         CancellationToken cancellationToken = default);
 }
 
+public readonly record struct Configuration
+{
+    public bool? ForceShortApdus { get; init; }
+}
+
 internal class PcscProtocol : ISmartCardProtocol
 {
-    private const byte INS_SELECT = 0xa4;
+    private bool _useExtendedApdus = true;
+    private int MaxApduSize = SmartCardMaxApduSizes.Neo; // Lowest as default
+    private IApduProcessor _processor;
+
+    private const byte INS_SELECT = 0xA4;
     private const byte P1_SELECT = 0x04;
     private const byte P2_SELECT = 0x00;
-    private const byte INS_SEND_REMAINING = 0xc0;
-    private const int MaxApduSize = SmartCardMaxApduSizes.Neo;
-    private readonly ISmartCardConnection _connection;
-    private readonly bool _extendedApdus = false;
+    private const byte INS_SEND_REMAINING = 0xC0;
     private readonly byte _insSendRemaining;
     private readonly ILogger<PcscProtocol> _logger;
-    private readonly ChainedResponseProcessor _processor;
+    private readonly ISmartCardConnection _connection;
+
 
     public PcscProtocol(
         ILogger<PcscProtocol> logger,
@@ -66,9 +75,9 @@ internal class PcscProtocol : ISmartCardProtocol
         CancellationToken cancellationToken = default)
     {
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
-        
+
         var response = await _processor.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
-        if (response is not { SW1: 0x90, SW2: 0x00 })
+        if (!response.IsOK())
             throw new InvalidOperationException(
                 $"Command failed with status: {response.SW1:X2}{response.SW2:X2}");
 
@@ -86,7 +95,7 @@ internal class PcscProtocol : ISmartCardProtocol
                 new CommandApdu { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId },
                 cancellationToken).ConfigureAwait(false);
 
-        if (response is not { SW1: 0x90, SW2: 0x00 })
+        if (!response.IsOK())
             throw new InvalidOperationException(
                 $"Select command failed with status: {response.SW1:X2}{response.SW2:X2}");
 
@@ -95,12 +104,46 @@ internal class PcscProtocol : ISmartCardProtocol
 
     #endregion
 
-    private ChainedResponseProcessor BuildBaseProcessor()
+    private IApduProcessor BuildBaseProcessor()
     {
-        IApduProcessor processor = _extendedApdus
-            ? new ApduFormatProcessor(_connection, new ExtendedApduFormatter(MaxApduSize))
+        var processor = _useExtendedApdus
+            ? new ExtendedApduProcessor(_connection, new ExtendedApduFormatter(MaxApduSize))
             : new CommandChainingProcessor(_connection, new ShortApduFormatter());
 
         return new ChainedResponseProcessor(processor, _insSendRemaining);
     }
+
+    public void Configure(FirmwareVersion firmwareVersion, Configuration? configuration)
+    {
+        if (firmwareVersion.IsAtLeast(4, 0, 0))
+        {
+            bool forceShortApdu = configuration.HasValue && configuration.Value.ForceShortApdus == true;
+            _useExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;
+            MaxApduSize = firmwareVersion.IsAtLeast(4, 3, 0)
+                ? SmartCardMaxApduSizes.Yk43
+                : SmartCardMaxApduSizes.Yk4;
+            ReconfigureProcessor();
+        }
+    }
+
+    private void ReconfigureProcessor()
+    {
+        var newProcessor = BuildBaseProcessor();
+        if (_processor is ScpProcessor scpp)
+        {
+            // Keep existing SCP state
+            newProcessor = new ScpProcessor(newProcessor, scpp.Formatter, scpp.State);
+        }
+
+        _processor = newProcessor;
+    }
+}
+
+internal class ScpProcessor(IApduProcessor processor, IApduFormatter formatter, object state) : IApduProcessor
+{
+    internal object State { get; } = state;
+
+    public IApduFormatter Formatter { get; } = formatter;
+
+    public Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

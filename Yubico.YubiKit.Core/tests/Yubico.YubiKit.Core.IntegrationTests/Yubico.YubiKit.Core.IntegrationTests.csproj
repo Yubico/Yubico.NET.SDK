@@ -28,9 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\Yubico.YubiKit.Management\src\Yubico.YubiKit.Management.csproj"/>
         <ProjectReference Include="..\..\src\Yubico.YubiKit.Core.csproj"/>
-        <ProjectReference Include="..\Yubico.YubiKit.Management\Yubico.YubiKit.Management.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

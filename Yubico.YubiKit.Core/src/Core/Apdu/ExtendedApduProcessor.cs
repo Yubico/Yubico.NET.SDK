@@ -17,7 +17,7 @@ using Yubico.YubiKit.Core.Core.Iso7816;
 
 namespace Yubico.YubiKit.Core.Core.Apdu;
 
-internal class ApduFormatProcessor(ISmartCardConnection connection, IApduFormatter formatter) : IApduProcessor
+internal class ExtendedApduProcessor(ISmartCardConnection connection, IApduFormatter formatter) : IApduProcessor
 {
     #region IApduProcessor Members
 

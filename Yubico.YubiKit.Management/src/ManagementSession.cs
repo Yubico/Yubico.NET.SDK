@@ -25,9 +25,9 @@ using Yubico.YubiKit.Core.YubiKey;
 namespace Yubico.YubiKit.Management;
 
 public sealed class ManagementSession<TConnection>(
-    TConnection connection,
-    IProtocolFactory<TConnection> protocolFactory,
-    ILogger<ManagementSession<TConnection>> logger)
+    TConnection _connection,
+    IProtocolFactory<TConnection> _protocolFactory,
+    ILogger<ManagementSession<TConnection>> _logger)
     : ApplicationSession
     where TConnection : IConnection
 {
@@ -36,8 +36,7 @@ public sealed class ManagementSession<TConnection>(
     private const byte INS_SET_DEVICE_CONFIG = 0x1C;
 
     private const int TagMoreDeviceInfo = 0x10;
-    private readonly ILogger<ManagementSession<TConnection>> _logger = logger;
-    private readonly IProtocol _protocol = protocolFactory.Create(connection);
+    private readonly IProtocol _protocol = _protocolFactory.Create(_connection);
 
     private static readonly Feature FeatureDeviceInfo =
         new("Device Info", 4, 1, 0);
@@ -70,6 +69,7 @@ public sealed class ManagementSession<TConnection>(
             return;
 
         _version = await SetVersionAsync(cancellationToken).ConfigureAwait(false);
+        _protocol.Configure(_version);
         _isInitialized = true;
     }
 
@@ -93,7 +93,7 @@ public sealed class ManagementSession<TConnection>(
             var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
             hasMoreData = moreData?.Length == 1 && moreData.GetValueSpan()[0] == 1;
             allPagesTlvs = allPagesTlvs.Concat(pageTlvs);
-            
+
             ++page;
         }
 

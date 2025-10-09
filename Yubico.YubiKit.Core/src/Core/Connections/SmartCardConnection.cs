@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System.Globalization;
 using Yubico.YubiKit.Core.Core.Devices.SmartCard;
 using Yubico.YubiKit.Core.Core.PlatformInterop.Desktop.SCard;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.Core.Connections;
 
@@ -31,8 +32,8 @@ public interface ISmartCardConnection : IConnection
     Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         ReadOnlyMemory<byte> command,
         CancellationToken cancellationToken = default);
-    // public Transport getTransport();
-    // boolean isExtendedLengthApduSupported();
+    public Transport Transport { get; }
+    bool SupportsExtendedApdu();
     // byte[] getAtr();
 }
 
@@ -144,4 +145,7 @@ internal class SmartCardConnection(IPcscDevice smartCardDevice, ILogger<SmartCar
         await connection.InitializeAsync(cancellationToken).ConfigureAwait(false);
         return connection;
     }
-}
+
+    public Transport Transport => Transport.Usb; // TODO determine transport
+    public bool SupportsExtendedApdu() => true; // TODO determine who supports extended APDUs
+}   

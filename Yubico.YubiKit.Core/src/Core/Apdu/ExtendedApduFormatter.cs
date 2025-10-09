@@ -16,14 +16,9 @@ using System.Buffers.Binary;
 
 namespace Yubico.YubiKit.Core.Core.Apdu;
 
-internal class ExtendedApduFormatter : IApduFormatter
+internal class ExtendedApduFormatter(int maxApduSize) : IApduFormatter
 {
-    private readonly int _maxApduSize;
-
-    public ExtendedApduFormatter(int maxApduSize)
-    {
-        _maxApduSize = maxApduSize;
-    }
+    private readonly int _maxApduSize = maxApduSize;
 
     #region IApduFormatter Members
 

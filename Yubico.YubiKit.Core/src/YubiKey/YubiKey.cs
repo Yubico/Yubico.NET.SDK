@@ -16,7 +16,7 @@ using System.Runtime.CompilerServices;
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
-public static class YubiKey // Keep?
+public static class YubiKey // TODO Keep Plan was to do all via manager?
 {
     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default) =>
         FindYubiKeys.Create().FindAllAsync(cancellationToken);

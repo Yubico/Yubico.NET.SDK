@@ -29,8 +29,7 @@ public class SCardException : Exception
     {
     }
 
-    [CLSCompliant(false)]
-    public SCardException(string message, uint errorCode) :
+    public SCardException(string message, long errorCode) :
         base(message + " " + GetErrorString(errorCode))
     {
         HResult = (int)errorCode;
@@ -41,12 +40,7 @@ public class SCardException : Exception
     {
     }
 
-    protected SCardException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
-        base(serializationInfo, streamingContext)
-    {
-    }
-
-    internal static string GetErrorString(uint errorCode) =>
+    internal static string GetErrorString(long errorCode) =>
         errorCode switch
         {
             ErrorCode.ERROR_BROKEN_PIPE =>

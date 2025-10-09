@@ -136,7 +136,7 @@ public sealed record DeviceConfig
         public Builder WithAutoEjectTimeout(ushort seconds)
         {
             // Sanity check: 1 hour max seems reasonable
-            // Todo whats a good value here?
+            // TODO whats a good value here?
             ArgumentOutOfRangeException.ThrowIfGreaterThan(seconds, 3600, nameof(seconds));
             _autoEjectTimeout = seconds;
             return this;
@@ -145,7 +145,7 @@ public sealed record DeviceConfig
         /// <summary>Sets challenge-response timeout (0-255 seconds).</summary>
         public Builder WithChallengeResponseTimeout(byte seconds)
         {
-            // Todo whats a good value here?
+            // TODO whats a good value here?
             ArgumentOutOfRangeException.ThrowIfGreaterThan(seconds, 60, nameof(seconds));
             _challengeResponseTimeout = seconds;
             return this;

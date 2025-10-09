@@ -25,9 +25,7 @@ public static class IYubiKeyExtensions
     {
         public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
         {
-            using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
             using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken);
-
             return await mgmtSession.GetDeviceInfoAsync(cancellationToken);
         }
 
@@ -38,9 +36,7 @@ public static class IYubiKeyExtensions
             byte[]? newLockCode = null,
             CancellationToken cancellationToken = default)
         {
-            using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
             using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken);
-
             await mgmtSession.SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken);
         }
 
@@ -48,6 +44,7 @@ public static class IYubiKeyExtensions
         public async Task<ManagementSession<ISmartCardConnection>> CreateManagementSessionAsync(
             CancellationToken cancellationToken = default)
         {
+            // Connection is disposed inside of session. User must dispose session.
             var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
             return await ManagementSession<ISmartCardConnection>.CreateAsync(connection,
                 cancellationToken: cancellationToken);

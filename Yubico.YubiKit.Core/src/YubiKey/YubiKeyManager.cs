@@ -10,15 +10,14 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository = null) : IYubiK
 {
     #region IYubiKeyManager Members
 
-    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
     {
         if (deviceRepository is null)
-            return await FindYubiKeys
+            return FindYubiKeys
                 .Create()
-                .FindAllAsync(cancellationToken)
-                .ConfigureAwait(false);
+                .FindAllAsync(cancellationToken);
 
-        return await deviceRepository.FindAllAsync(cancellationToken).ConfigureAwait(false);
+        return deviceRepository.FindAllAsync(cancellationToken);
     }
 
     public IObservable<DeviceEvent> DeviceChanges

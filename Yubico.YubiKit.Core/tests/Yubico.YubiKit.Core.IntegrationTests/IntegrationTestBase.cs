@@ -15,7 +15,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Yubico.YubiKit.Core.YubiKey;
-using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Core.IntegrationTests;
 
@@ -27,7 +26,7 @@ public abstract class IntegrationTestBase : IDisposable
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddYubiKeyManager(overrideOptions ?? DefaultOptions);
+        services.AddYubiKeyManagerCore(overrideOptions ?? DefaultOptions);
 
         ServiceProvider = services.BuildServiceProvider();
         YubiKeyManager = ServiceProvider.GetRequiredService<IYubiKeyManager>();

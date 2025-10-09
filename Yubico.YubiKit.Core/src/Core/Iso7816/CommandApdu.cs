@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.Core.Iso7816;
 /// <summary>
 ///     Represents an ISO 7816 application command
 /// </summary>
-public class CommandApdu
+public readonly record struct CommandApdu
 {
     public CommandApdu()
     {
@@ -55,7 +55,7 @@ public class CommandApdu
     /// <summary>
     ///     Gets or sets the optional command data payload.
     /// </summary>
-    public ReadOnlyMemory<byte> Data { get; set; } = ReadOnlyMemory<byte>.Empty;
+    public ReadOnlyMemory<byte> Data { get; init; }
 
 
     /// <summary>

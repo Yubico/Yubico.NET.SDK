@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.Core.Iso7816;
 /// <summary>
 ///     Represents an ISO 7816 application response.
 /// </summary>
-public class ResponseApdu
+public readonly record struct ResponseApdu
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="ResponseApdu" /> class.
@@ -27,8 +27,6 @@ public class ResponseApdu
     /// <param name="data">The raw data returned by the ISO 7816 smart card.</param>
     public ResponseApdu(ReadOnlyMemory<byte> data)
     {
-        ArgumentNullException.ThrowIfNull(data);
-
         if (data.Length < 2)
             throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
                 "ExceptionMessages.ResponseApduNotEnoughBytes, data.Length"));
@@ -83,4 +81,6 @@ public class ResponseApdu
     ///     Prints SW1, SW2, and the length of the Data field in a formatted string.
     /// </summary>
     public override string ToString() => $"SW1: 0x{SW1:X2} SW2: 0x{SW2:X2} Data: {Data.Span.Length} bytes";
+
+    public bool IsOK() => SW1 == 0x90 && SW2 == 0x00; 
 }

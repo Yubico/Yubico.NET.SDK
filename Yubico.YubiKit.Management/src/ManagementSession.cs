@@ -16,9 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Core.Connections;
-using Yubico.YubiKit.Core.Core.Iso7816;
-using Yubico.YubiKit.Core.Core.Protocols;
+using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 

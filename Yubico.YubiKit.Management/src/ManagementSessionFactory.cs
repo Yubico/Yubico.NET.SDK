@@ -13,8 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.Core.Connections;
-using Yubico.YubiKit.Core.Core.Protocols;
+using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Management;
 

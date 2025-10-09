@@ -14,7 +14,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Core.Connections;
+using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;

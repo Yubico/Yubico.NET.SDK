@@ -15,7 +15,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Yubico.YubiKit.Core.Core.Devices.SmartCard;
+using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core;

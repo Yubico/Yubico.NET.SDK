@@ -107,6 +107,7 @@ public sealed record DeviceConfig
         Memory<byte> result = new byte[tlvData.Length + 1];
         result.Span[0] = (byte)tlvData.Length;
         tlvData.Span.CopyTo(result.Span[1..]);
+
         return result;
     }
 
@@ -172,9 +173,10 @@ public sealed record DeviceConfig
 
         public DeviceConfig Build()
         {
-            if (_enabledCapabilities.Count == 0)
-                throw new InvalidOperationException(
-                    "At least one transport capability must be configured");
+            if (_enabledCapabilities.TryGetValue(Transport.Usb, out var usb) && usb == 0)
+            {
+                throw new InvalidOperationException("At least one USB capability must be enabled.");
+            }
 
             return new DeviceConfig
             {

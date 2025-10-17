@@ -15,7 +15,7 @@
 namespace Yubico.YubiKit.Management;
 
 [Flags]
-public enum YubiKeyCapabilities
+public enum DeviceCapabilities
 {
     None = 0,
     /// <summary>

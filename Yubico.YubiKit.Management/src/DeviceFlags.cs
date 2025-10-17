@@ -39,7 +39,7 @@ public enum DeviceFlags
     ///         card. When this flag is disabled, the smart card is always present in the smart
     ///         card reader. When enabled, the smart card will be ejected by default,
     ///         and the user is required to touch the YubiKey to insert the smart card. For
-    ///         this to take effect, all <see cref="YubiKeyCapabilities" /> which do not depend
+    ///         this to take effect, all <see cref="DeviceCapabilities" /> which do not depend
     ///         on the CCID connection (such as <c>Fido2</c>, <c>FidoU2f</c>, and <c>Otp</c>)
     ///         must be disabled.
     ///     </para>

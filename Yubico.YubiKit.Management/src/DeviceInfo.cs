@@ -48,13 +48,13 @@ public readonly record struct DeviceInfo
     public required FormFactor FormFactor { get; init; }
     public required int SerialNumber { get; init; }
     public required bool IsLocked { get; init; }
-    public required YubiKeyCapabilities UsbEnabled { get; init; }
-    public required YubiKeyCapabilities UsbSupported { get; init; }
-    public required YubiKeyCapabilities NfcEnabled { get; init; }
-    public required YubiKeyCapabilities NfcSupported { get; init; }
-    public required YubiKeyCapabilities ResetBlocked { get; init; }
-    public required YubiKeyCapabilities FipsCapabilities { get; init; }
-    public required YubiKeyCapabilities FipsApproved { get; init; }
+    public required DeviceCapabilities UsbEnabled { get; init; }
+    public required DeviceCapabilities UsbSupported { get; init; }
+    public required DeviceCapabilities NfcEnabled { get; init; }
+    public required DeviceCapabilities NfcSupported { get; init; }
+    public required DeviceCapabilities ResetBlocked { get; init; }
+    public required DeviceCapabilities FipsCapabilities { get; init; }
+    public required DeviceCapabilities FipsApproved { get; init; }
     public required bool HasPinComplexity { get; init; }
     public required string? PartNumber { get; init; }
     public required bool IsNfcRestricted { get; init; }
@@ -225,25 +225,25 @@ public readonly record struct DeviceInfo
 
 public static class CapabilityMapper // TODO internal
 {
-    private static readonly (int Bit, YubiKeyCapabilities Cap)[] FipsMapping =
+    private static readonly (int Bit, DeviceCapabilities Cap)[] FipsMapping =
     [
-        (0x01, YubiKeyCapabilities.Fido2),
-        (0x02, YubiKeyCapabilities.Piv),
-        (0x04, YubiKeyCapabilities.OpenPgp),
-        (0x08, YubiKeyCapabilities.Oath),
-        (0x10, YubiKeyCapabilities.HsmAuth)
+        (0x01, DeviceCapabilities.Fido2),
+        (0x02, DeviceCapabilities.Piv),
+        (0x04, DeviceCapabilities.OpenPgp),
+        (0x08, DeviceCapabilities.Oath),
+        (0x10, DeviceCapabilities.HsmAuth)
     ];
 
-    public static YubiKeyCapabilities FromFips(ReadOnlyMemory<byte> value)
+    public static DeviceCapabilities FromFips(ReadOnlyMemory<byte> value)
     {
         if (value.IsEmpty) return 0;
         if (value.Length == 1 && value.Span[0] == 0)
         {
-            return YubiKeyCapabilities.None;
+            return DeviceCapabilities.None;
         }
 
         int fips = BinaryPrimitives.ReadInt16BigEndian(value.Span);
-        YubiKeyCapabilities capabilities = 0;
+        DeviceCapabilities capabilities = 0;
 
         foreach (var (bit, cap) in FipsMapping)
         {
@@ -254,15 +254,15 @@ public static class CapabilityMapper // TODO internal
         return capabilities;
     }
 
-    public static YubiKeyCapabilities FromApp(ReadOnlyMemory<byte> appData)
+    public static DeviceCapabilities FromApp(ReadOnlyMemory<byte> appData)
     {
         if (appData.IsEmpty)
         {
-            return YubiKeyCapabilities.None;
+            return DeviceCapabilities.None;
         }
 
         return appData.Length == 1
-            ? (YubiKeyCapabilities)appData.Span[0]
-            : (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(appData.Span);
+            ? (DeviceCapabilities)appData.Span[0]
+            : (DeviceCapabilities)BinaryPrimitives.ReadInt16BigEndian(appData.Span);
     }
 }

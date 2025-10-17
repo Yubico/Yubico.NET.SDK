@@ -82,7 +82,7 @@ public class ManagementTests : IntegrationTestBase
         var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
 
         var newConfig = DeviceConfig.CreateBuilder()
-            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)YubiKeyCapabilities.All) // TODO Whats a good default value here?
+            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
             .WithAutoEjectTimeout(newAutoEject)
             .Build();
 
@@ -93,7 +93,7 @@ public class ManagementTests : IntegrationTestBase
 
         // Restore original setting
         var restoreConfig = DeviceConfig.CreateBuilder()
-            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)YubiKeyCapabilities.All) // TODO Whats a good default value here?
+            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
             .WithAutoEjectTimeout(originalAutoEject)
             .Build();
 
@@ -111,7 +111,7 @@ public class ManagementTests : IntegrationTestBase
         var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
 
         var newConfig = DeviceConfig.CreateBuilder()
-            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)YubiKeyCapabilities.All) // TODO Whats a good default value here?
+            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
             .WithAutoEjectTimeout(newAutoEject)
             .Build();
 
@@ -122,7 +122,7 @@ public class ManagementTests : IntegrationTestBase
 
         // Restore original setting
         var restoreConfig = DeviceConfig.CreateBuilder()
-            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)YubiKeyCapabilities.All) // TODO Whats a good default value here?
+            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
             .WithAutoEjectTimeout(originalAutoEject)
             .Build();
 

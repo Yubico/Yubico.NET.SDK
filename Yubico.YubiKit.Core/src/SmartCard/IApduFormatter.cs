@@ -18,4 +18,6 @@ public interface IApduFormatter
 {
     ReadOnlyMemory<byte> Format(
         byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le);
+
+        ReadOnlyMemory<byte> Format(CommandApdu apdu);
 }

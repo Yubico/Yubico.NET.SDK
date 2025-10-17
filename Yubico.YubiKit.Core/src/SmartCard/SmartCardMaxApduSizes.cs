@@ -30,4 +30,6 @@ public static class SmartCardMaxApduSizes
     ///     The max APDU command size for the YubiKey 4.3 and greater
     /// </summary>
     public const int Yk43 = 3062;
+
+    public const int ShortApduMaxChunkSize = 255;
 }

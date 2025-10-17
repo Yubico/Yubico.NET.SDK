@@ -16,7 +16,7 @@ namespace Yubico.YubiKit.Core.SmartCard;
 
 internal class ShortApduFormatter : IApduFormatter
 {
-    private const int ShortApduMaxChunk = 255;
+    private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
 
     #region IApduFormatter Members
 
@@ -55,6 +55,8 @@ internal class ShortApduFormatter : IApduFormatter
 
         return buffer.ToArray();
     }
+
+    public ReadOnlyMemory<byte> Format(CommandApdu apdu) => throw new NotImplementedException();
 
     #endregion
 }

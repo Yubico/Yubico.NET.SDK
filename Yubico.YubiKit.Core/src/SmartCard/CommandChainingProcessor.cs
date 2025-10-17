@@ -17,34 +17,26 @@ namespace Yubico.YubiKit.Core.SmartCard;
 internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFormatter formatter)
     : ExtendedApduProcessor(connection, formatter)
 {
-    private const int ChunkSize = 255;
     private const int HasMoreData = 0x10;
+    private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
 
-
-    public override async Task<ResponseApdu> TransmitAsync(CommandApdu command,
-        CancellationToken cancellationToken = default)
+    public override async Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default)
     {
         var data = command.Data;
-        if (data.Length <= ChunkSize)
+        if (data.Length <= ShortApduMaxChunk)
             return await base.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
         var offset = 0;
-        while (offset + ChunkSize < data.Length)
+        while (offset + ShortApduMaxChunk < data.Length)
         {
-            var chunk = data[offset..ChunkSize];
-            // var chainedCommand = new CommandApdu(
-            //     (byte)(command.Cla | HasMoreData),
-            //     command.Ins,
-            //     command.P1,
-            //     command.P2,
-            //     chunk);
-
-            var chainedCommand = command with { Cla = (byte)(command.Cla | HasMoreData), Data = chunk};
+            var chunk = data[offset..ShortApduMaxChunk];
+            var chainedCommand = command with { Cla = (byte)(command.Cla | HasMoreData), Data = chunk };
+            
             var result = await base.TransmitAsync(chainedCommand, cancellationToken).ConfigureAwait(false);
             if (result.SW != SWConstants.Success)
                 return result;
 
-            offset += ChunkSize;
+            offset += ShortApduMaxChunk;
         }
 
         var finalChunk = data[offset..];

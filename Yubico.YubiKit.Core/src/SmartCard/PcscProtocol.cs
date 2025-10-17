@@ -13,13 +13,14 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Buffers;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
 public interface IProtocol : IDisposable
 {
-    void Configure(FirmwareVersion version, Configuration? configuration = null) ;
+    void Configure(FirmwareVersion version, Configuration? configuration = null);
 }
 
 public interface ISmartCardProtocol : IProtocol
@@ -136,11 +137,55 @@ internal class PcscProtocol : ISmartCardProtocol
     }
 }
 
-internal class ScpProcessor(IApduProcessor processor, IApduFormatter formatter, object state) : IApduProcessor
+internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, ScpState state) : IApduProcessor
 {
-    internal object State { get; } = state;
-
     public IApduFormatter Formatter { get; } = formatter;
 
-    public Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default)
+        => Transmit(command, encrypt: true, cancellationToken);
+
+    internal ScpState State { get; } = state;
+    private readonly ExtendedApduFormatter _extendedApduFormatter = new(SmartCardMaxApduSizes.Yk43);
+    public async Task<ResponseApdu> Transmit(CommandApdu command, bool encrypt, CancellationToken cancellationToken)
+    {
+        Span<byte> dataPostEnc = ArrayPool<byte>.Shared.Rent(command.Data.Length);
+        command.Data.Span.CopyTo(dataPostEnc);
+        if (encrypt)
+        {
+            State.Encrypt(dataPostEnc);
+        }
+
+        Span<byte> dataPostMac = ArrayPool<byte>.Shared.Rent(dataPostEnc.Length);
+        dataPostEnc.CopyTo(dataPostMac);
+
+        var cla = command.Cla | 0x04; // isEncrypted
+
+        ReadOnlySpan<byte> dataPostFormat = ArrayPool<byte>.Shared.Rent(dataPostEnc.Length); // TODO size?
+        var newApdu = command with { Cla = (byte)cla, Data = dataPostMac.ToArray() };
+        if (dataPostMac.Length > SmartCardMaxApduSizes.ShortApduMaxChunkSize)
+        {
+            dataPostFormat = _extendedApduFormatter.Format(newApdu).Span;
+        }
+        else
+        {
+            dataPostFormat = Formatter.Format(newApdu).Span;
+        }
+
+        ReadOnlySpan<byte> mac = State.MacEncode(dataPostFormat[..^8]);
+        mac.CopyTo(dataPostMac);
+
+        var response = await @delegate.TransmitAsync(newApdu with { Data = dataPostMac.ToArray() }, cancellationToken);
+        var responseData = response.Data;
+
+        if (responseData.Length > 0)
+        {
+            responseData = State.MacDecode(responseData, response.SW);
+        }
+    }
+}
+
+
+internal record ScpState
+{
+
 }

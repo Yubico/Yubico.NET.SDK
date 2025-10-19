@@ -147,6 +147,8 @@ namespace Yubico.Core.Devices.Hid
 
             _isListening = false;
             _listenerThread.Join();
+            
+            _listenerThread = null;
         }
 
         // This method is the delegate sent to the new Thread.

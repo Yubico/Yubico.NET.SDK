@@ -164,94 +164,110 @@ namespace Yubico.YubiKey
 
         private void Update()
         {
-            _rwLock.EnterWriteLock();
-            _log.LogInformation("Entering write-lock.");
-
-            ResetCacheMarkers();
-            _log.LogInformation("Cache currently aware of {Count} YubiKeys.", _internalCache.Count);
-
+            // Declare these outside try block so we can fire events after releasing lock
             var addedYubiKeys = new List<IYubiKeyDevice>();
-            var devicesToProcess = GetDevices();
-            foreach (var device in devicesToProcess)
+            IEnumerable<IYubiKeyDevice> removedYubiKeys;
+
+            _rwLock.EnterWriteLock();
+            try
             {
-                _log.LogInformation("Processing device {Device}", device);
+                _log.LogInformation("Entering write-lock.");
 
-                // First check if we've already seen this device (very fast)
-                var existingEntry = _internalCache.Keys.FirstOrDefault(k => k.Contains(device));
-                if (existingEntry != null)
+                ResetCacheMarkers();
+                _log.LogInformation("Cache currently aware of {Count} YubiKeys.", _internalCache.Count);
+
+                var devicesToProcess = GetDevices();
+                foreach (var device in devicesToProcess)
                 {
-                    MarkExistingYubiKey(existingEntry);
+                    _log.LogInformation("Processing device {Device}", device);
 
-                    continue;
-                }
+                    // First check if we've already seen this device (very fast)
+                    var existingEntry = _internalCache.Keys.FirstOrDefault(k => k.Contains(device));
+                    if (existingEntry != null)
+                    {
+                        MarkExistingYubiKey(existingEntry);
 
-                // Next, see if the device has any information about its parent, and if we can match that way (fast)
-                existingEntry = _internalCache.Keys.FirstOrDefault(k => k.HasSameParentDevice(device));
+                        continue;
+                    }
 
-                if (existingEntry is YubiKeyDevice parentDevice)
-                {
-                    MergeAndMarkExistingYubiKey(parentDevice, device);
+                    // Next, see if the device has any information about its parent, and if we can match that way (fast)
+                    existingEntry = _internalCache.Keys.FirstOrDefault(k => k.HasSameParentDevice(device));
 
-                    continue;
-                }
+                    if (existingEntry is YubiKeyDevice parentDevice)
+                    {
+                        MergeAndMarkExistingYubiKey(parentDevice, device);
 
-                // Lastly, let's talk to the YubiKey to get its device info and see if we match via serial number (slow)
-                YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo;
+                        continue;
+                    }
 
-                // This sort of call can fail for a number of reasons. Probably the most common will be when some other
-                // application is using one of the device interfaces exclusively - GPG is an example of this. It tends
-                // to take the smart card reader USB interface and not let go of it. So, for those of us that use GPG
-                // with YubiKeys for commit signing, the SDK is unlikely to be able to connect. There's not much we can
-                // do about that other than skip, and log a message that this has happened.
-                try
-                {
-                    deviceWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
-                }
-                catch (Exception ex)
-                {
-                    _log.LogError(ex, "Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
+                    // Lastly, let's talk to the YubiKey to get its device info and see if we match via serial number (slow)
+                    YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo;
 
-                    continue;
-                }
+                    // This sort of call can fail for a number of reasons. Probably the most common will be when some other
+                    // application is using one of the device interfaces exclusively - GPG is an example of this. It tends
+                    // to take the smart card reader USB interface and not let go of it. So, for those of us that use GPG
+                    // with YubiKeys for commit signing, the SDK is unlikely to be able to connect. There's not much we can
+                    // do about that other than skip, and log a message that this has happened.
+                    try
+                    {
+                        deviceWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogError(ex, "Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
 
-                if (deviceWithInfo.Info.SerialNumber is null)
-                {
+                        continue;
+                    }
+
+                    if (deviceWithInfo.Info.SerialNumber is null)
+                    {
+                        CreateAndMarkNewYubiKey(deviceWithInfo, addedYubiKeys);
+
+                        continue;
+                    }
+
+                    existingEntry =
+                        _internalCache.Keys.FirstOrDefault(k => k.SerialNumber == deviceWithInfo.Info.SerialNumber);
+
+                    if (existingEntry is YubiKeyDevice mergeTarget)
+                    {
+                        MergeAndMarkExistingYubiKey(mergeTarget, deviceWithInfo);
+
+                        continue;
+                    }
+
                     CreateAndMarkNewYubiKey(deviceWithInfo, addedYubiKeys);
-
-                    continue;
                 }
 
-                existingEntry =
-                    _internalCache.Keys.FirstOrDefault(k => k.SerialNumber == deviceWithInfo.Info.SerialNumber);
+                removedYubiKeys = _internalCache
+                    .Where(e => e.Value == false)
+                    .Select(e => e.Key)
+                    .ToList();
 
-                if (existingEntry is YubiKeyDevice mergeTarget)
+                // Remove from cache while holding lock
+                foreach (var removedKey in removedYubiKeys)
                 {
-                    MergeAndMarkExistingYubiKey(mergeTarget, deviceWithInfo);
-
-                    continue;
+                    _ = _internalCache.Remove(removedKey);
                 }
 
-                CreateAndMarkNewYubiKey(deviceWithInfo, addedYubiKeys);
+                _log.LogInformation("Exiting write-lock.");
+            }
+            finally
+            {
+                _rwLock.ExitWriteLock();
             }
 
-            IEnumerable<IYubiKeyDevice> removedYubiKeys = _internalCache
-                .Where(e => e.Value == false)
-                .Select(e => e.Key)
-                .ToList();
-
+            // Fire events AFTER releasing lock to prevent deadlocks
+            // If user's event handler calls FindAll(), it won't deadlock
             foreach (var removedKey in removedYubiKeys)
             {
                 OnDeviceRemoved(new YubiKeyDeviceEventArgs(removedKey));
-                _ = _internalCache.Remove(removedKey);
             }
 
             foreach (var addedKey in addedYubiKeys)
             {
                 OnDeviceArrived(new YubiKeyDeviceEventArgs(addedKey));
             }
-
-            _log.LogInformation("Exiting write-lock.");
-            _rwLock.ExitWriteLock();
         }
 
         private List<IDevice> GetDevices()

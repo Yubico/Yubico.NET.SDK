@@ -102,7 +102,20 @@ namespace Yubico.Core.Devices.Hid
                     // No managed resources to dispose.
                 }
 
-                StopListening();
+                try
+                {
+                    StopListening();
+                }
+                catch (Exception ex)
+                {
+                    // CRITICAL: Never throw from Dispose, especially when called from finalizer
+                    // Throwing from finalizer will crash the GC thread and terminate the application
+                    if (disposing)
+                    {
+                        _log.LogWarning(ex, "Exception during StopListening in WindowsHidDeviceListener disposal");
+                    }
+                    // If !disposing (finalizer path), silently ignore to prevent GC thread crash
+                }
             }
             finally
             {

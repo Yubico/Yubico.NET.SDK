@@ -158,19 +158,27 @@ namespace Yubico.Core.Devices.Hid
             }
             finally
             {
-                if (_runLoop.HasValue)
+                // Wrap cleanup in try-catch to prevent P/Invoke exceptions from crashing the background thread
+                try
                 {
-                    IOHIDManagerUnscheduleFromRunLoop(manager, _runLoop.Value, runLoopMode);
-                }
+                    if (_runLoop.HasValue)
+                    {
+                        IOHIDManagerUnscheduleFromRunLoop(manager, _runLoop.Value, runLoopMode);
+                    }
 
-                if (manager != IntPtr.Zero)
-                {
-                    _log.LogInformation("IOHIDManager released.");
-                }
+                    if (manager != IntPtr.Zero)
+                    {
+                        _log.LogInformation("IOHIDManager released.");
+                    }
 
-                if (runLoopMode != IntPtr.Zero)
+                    if (runLoopMode != IntPtr.Zero)
+                    {
+                        CFRelease(runLoopMode);
+                    }
+                }
+                catch (Exception ex)
                 {
-                    CFRelease(runLoopMode);
+                    _log.LogError(ex, "Exception during cleanup in MacOS HID listener thread.");
                 }
             }
         }

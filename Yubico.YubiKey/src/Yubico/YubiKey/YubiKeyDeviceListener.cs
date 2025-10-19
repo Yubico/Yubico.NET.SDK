@@ -121,7 +121,20 @@ namespace Yubico.YubiKey
         private void ListenerHandler(string eventType, IDeviceEventArgs<IDevice> e)
         {
             LogEvent(eventType, e);
-            _ = _semaphore.Release();
+
+            try
+            {
+                _ = _semaphore.Release();
+            }
+            catch (SemaphoreFullException ex)
+            {
+                _log.LogWarning(ex, "Semaphore was already at maximum count. This can happen during rapid device connect/disconnect events.");
+            }
+            catch (ObjectDisposedException)
+            {
+                // Listener is shutting down, ignore
+                _log.LogDebug("Semaphore release called during disposal. Ignoring.");
+            }
         }
 
         private void SetupDeviceListeners()

@@ -489,21 +489,63 @@ namespace Yubico.YubiKey
             {
                 if (disposing)
                 {
+                    // Step 1: Signal shutdown to stop the listening loop
                     _isListening = false;
-                    _ = _listenTask.Wait(TimeSpan.FromSeconds(1));
+
+                    // Step 2: Cancel the token to unblock any semaphore waits
                     _tokenSource.Cancel();
-                    _ = _semaphore.Release();
-                    _rwLock.Dispose();
 
-                    _hidListener.Dispose();
-
-                    if (_smartCardListener is IDisposable scDisp)
+                    // Step 3: Wait for the background task to complete
+                    // Increased timeout from 1 to 5 seconds to allow Update() to finish
+                    try
                     {
-                        scDisp.Dispose();
+                        _ = _listenTask.Wait(TimeSpan.FromSeconds(2));
+                    }
+                    catch (AggregateException)
+                    {
+                        // Task may have already completed or been cancelled, ignore
                     }
 
-                    _semaphore.Dispose();
+                    // Step 4: Now safe to dispose synchronization primitives
+                    // Wrap in try-catch to prevent disposal exceptions
+                    try
+                    {
+                        _rwLock.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWarning(ex, "Exception disposing ReaderWriterLockSlim during cleanup");
+                    }
+
+                    try
+                    {
+                        _semaphore.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWarning(ex, "Exception disposing SemaphoreSlim during cleanup");
+                    }
+
                     _tokenSource.Dispose();
+
+                    // Step 5: Dispose platform listeners
+                    try
+                    {
+                        _hidListener.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWarning(ex, "Exception disposing HidDeviceListener during cleanup");
+                    }
+
+                    try
+                    {
+                        _smartCardListener.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWarning(ex, "Exception disposing SmartCardDeviceListener during cleanup");
+                    }
 
                     if (ReferenceEquals(_lazyInstance, this))
                     {

@@ -329,12 +329,50 @@ namespace Yubico.YubiKey
         /// <summary>
         /// Raises event on device arrival.
         /// </summary>
-        private void OnDeviceArrived(YubiKeyDeviceEventArgs e) => Arrived?.Invoke(typeof(YubiKeyDevice), e);
+        internal void OnDeviceArrived(YubiKeyDeviceEventArgs e)
+        {
+            if (Arrived is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (EventHandler<YubiKeyDeviceEventArgs> handler in Arrived.GetInvocationList())
+            {
+                try
+                {
+                    handler.Invoke(typeof(YubiKeyDevice), e);
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's Arrived event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
+        }
 
         /// <summary>
         /// Raises event on device removal.
         /// </summary>
-        private void OnDeviceRemoved(YubiKeyDeviceEventArgs e) => Removed?.Invoke(typeof(YubiKeyDevice), e);
+        internal void OnDeviceRemoved(YubiKeyDeviceEventArgs e)
+        {
+            if (Removed is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (EventHandler<YubiKeyDeviceEventArgs> handler in Removed.GetInvocationList())
+            {
+                try
+                {
+                    handler.Invoke(typeof(YubiKeyDevice), e);
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's Removed event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
+        }
 
         private void LogEvent(string eventType, IDeviceEventArgs<IDevice> e)
         {

@@ -78,7 +78,24 @@ namespace Yubico.Core.Devices.Hid
         protected void OnArrived(IHidDevice device)
         {
             _log.LogInformation("HID {Device} arrived.", device);
-            Arrived?.Invoke(this, new HidDeviceEventArgs(device));
+
+            if (Arrived is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (EventHandler<HidDeviceEventArgs> handler in Arrived.GetInvocationList())
+            {
+                try
+                {
+                    handler.Invoke(this, new HidDeviceEventArgs(device));
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's HID Arrived event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
         }
 
         /// <summary>
@@ -91,7 +108,24 @@ namespace Yubico.Core.Devices.Hid
         protected void OnRemoved(IHidDevice device)
         {
             _log.LogInformation("HID {Device} removed.", device);
-            Removed?.Invoke(this, new HidDeviceEventArgs(device));
+
+            if (Removed is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (EventHandler<HidDeviceEventArgs> handler in Removed.GetInvocationList())
+            {
+                try
+                {
+                    handler.Invoke(this, new HidDeviceEventArgs(device));
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's HID Removed event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
         }
 
         /// <summary>

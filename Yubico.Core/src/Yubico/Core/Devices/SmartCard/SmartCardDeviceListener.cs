@@ -81,7 +81,24 @@ namespace Yubico.Core.Devices.SmartCard
         protected void OnArrived(ISmartCardDevice device)
         {
             _log.LogInformation("ISmartCardDevice {Device} arrived.", device);
-            Arrived?.Invoke(this, new SmartCardDeviceEventArgs(device));
+
+            if (Arrived is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (EventHandler<SmartCardDeviceEventArgs> handler in Arrived.GetInvocationList())
+            {
+                try
+                {
+                    handler.Invoke(this, new SmartCardDeviceEventArgs(device));
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's SmartCard Arrived event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
         }
 
         /// <summary>
@@ -94,7 +111,24 @@ namespace Yubico.Core.Devices.SmartCard
         protected void OnRemoved(ISmartCardDevice device)
         {
             _log.LogInformation("ISmartCardDevice {Device} removed.", device);
-            Removed?.Invoke(this, new SmartCardDeviceEventArgs(device));
+
+            if (Removed is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (EventHandler<SmartCardDeviceEventArgs> handler in Removed.GetInvocationList())
+            {
+                try
+                {
+                    handler.Invoke(this, new SmartCardDeviceEventArgs(device));
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's SmartCard Removed event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
         }
 
         /// <summary>

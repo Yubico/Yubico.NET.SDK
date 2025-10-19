@@ -53,12 +53,20 @@ namespace Yubico.Core.Devices.Hid
 
         private void StopListening()
         {
-            if (_runLoop.HasValue && _runLoop != IntPtr.Zero)
+            // Use local variables to prevent race condition if multiple threads call StopListening()
+            Thread? threadToJoin = _listenerThread;
+            IntPtr? runLoopToStop = _runLoop;
+
+            if (runLoopToStop.HasValue && runLoopToStop != IntPtr.Zero)
             {
-                CFRunLoopStop(_runLoop.Value);
+                CFRunLoopStop(runLoopToStop.Value);
             }
 
-            _listenerThread?.Join();
+            threadToJoin?.Join();
+
+            // Clear fields to make StopListening() idempotent
+            _runLoop = null;
+            _listenerThread = null;
         }
 
         protected override void Dispose(bool disposing)

@@ -149,14 +149,18 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void StopListening()
         {
-            if (_listenerThread is null)
+            // Use local variable to prevent race condition if multiple threads call StopListening()
+            Thread? threadToJoin = _listenerThread;
+            if (threadToJoin is null)
             {
                 return;
             }
 
             _isListening = false;
             Status = DeviceListenerStatus.Stopped;
-            _listenerThread.Join();
+            threadToJoin.Join();
+
+            _listenerThread = null;
         }
 
         private bool CheckForUpdates(int timeout, bool usePnpWorkaround)

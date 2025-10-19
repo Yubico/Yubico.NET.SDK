@@ -140,14 +140,17 @@ namespace Yubico.Core.Devices.Hid
             // sub-thread will complete the iteration it has most recently
             // started, see _isListening is false and quit. At that point, the
             // Join will will be able to complete and this method will exit.
-            if (_listenerThread is null)
+
+            // Use local variable to prevent race condition if multiple threads call StopListening()
+            Thread? threadToJoin = _listenerThread;
+            if (threadToJoin is null)
             {
                 return;
             }
 
             _isListening = false;
-            _listenerThread.Join();
-            
+            threadToJoin.Join();
+
             _listenerThread = null;
         }
 

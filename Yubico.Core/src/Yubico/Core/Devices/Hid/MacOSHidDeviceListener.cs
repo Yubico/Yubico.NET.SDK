@@ -28,6 +28,12 @@ namespace Yubico.Core.Devices.Hid
         private Thread? _listenerThread;
         private IntPtr? _runLoop;
 
+        // Keep strong references to delegates to prevent garbage collection
+        // Native IOHIDManager stores function pointers to these callbacks
+        // If delegates are collected, native callbacks will crash with "callback on garbage collected delegate"
+        private IOHIDDeviceCallback? _arrivedCallbackDelegate;
+        private IOHIDDeviceCallback? _removedCallbackDelegate;
+
         private readonly ILogger _log = Logging.Log.GetLogger<MacOSHidDeviceListener>();
 
         // Start listening as soon as this object is constructed.
@@ -131,8 +137,15 @@ namespace Yubico.Core.Devices.Hid
                 _ = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, true);
                 _log.LogInformation("Flushed existing devices.");
 
-                IOHIDManagerRegisterDeviceMatchingCallback(manager, ArrivedCallback, IntPtr.Zero);
-                IOHIDManagerRegisterDeviceRemovalCallback(manager, RemovedCallback, IntPtr.Zero);
+                // CRITICAL: Store delegates as instance fields to prevent garbage collection
+                // If we pass method groups directly, the P/Invoke marshaller creates temporary delegates
+                // that can be GC'd while native code still holds function pointers to them
+                // This causes: "A callback was made on a garbage collected delegate" crash
+                _arrivedCallbackDelegate = ArrivedCallback;
+                _removedCallbackDelegate = RemovedCallback;
+
+                IOHIDManagerRegisterDeviceMatchingCallback(manager, _arrivedCallbackDelegate, IntPtr.Zero);
+                IOHIDManagerRegisterDeviceRemovalCallback(manager, _removedCallbackDelegate, IntPtr.Zero);
 
                 int runLoopResult = kCFRunLoopRunHandledSource;
 
@@ -179,6 +192,12 @@ namespace Yubico.Core.Devices.Hid
                 catch (Exception ex)
                 {
                     _log.LogError(ex, "Exception during cleanup in MacOS HID listener thread.");
+                }
+                finally
+                {
+                    // Clear delegate references to allow garbage collection after thread exits
+                    _arrivedCallbackDelegate = null;
+                    _removedCallbackDelegate = null;
                 }
             }
         }

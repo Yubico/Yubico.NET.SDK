@@ -84,6 +84,7 @@ namespace Yubico.Core.Devices.Hid
                 CmErrorCode errorCode = CM_Unregister_Notification(_notificationContext);
                 _log.LogInformation("Unregistered callback with ConfigMgr32.");
                 ThrowIfFailed(errorCode);
+                _notificationContext = IntPtr.Zero;  // Clear to make idempotent
             }
 
             if (_marshalableThisPtr.HasValue)
@@ -99,9 +100,11 @@ namespace Yubico.Core.Devices.Hid
             {
                 if (disposing)
                 {
-                    // No managed resources to dispose.
+                    // No managed resources beyond what we handle below
                 }
 
+                // Stop listening and unregister native callback
+                // This ensures native code won't call our callback after disposal
                 try
                 {
                     StopListening();
@@ -116,6 +119,10 @@ namespace Yubico.Core.Devices.Hid
                     }
                     // If !disposing (finalizer path), silently ignore to prevent GC thread crash
                 }
+
+                // Clear delegate reference to allow garbage collection
+                // Must be done AFTER StopListening() to ensure callback isn't invoked on null delegate
+                _callbackDelegate = null;
             }
             finally
             {

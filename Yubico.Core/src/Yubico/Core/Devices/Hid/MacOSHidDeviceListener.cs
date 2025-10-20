@@ -81,9 +81,11 @@ namespace Yubico.Core.Devices.Hid
             {
                 if (disposing)
                 {
-                    // No managed resources to dispose.
+                    // No managed resources to dispose beyond what StopListening handles
                 }
 
+                // Stop the listening thread and wait for it to complete
+                // This ensures ListeningThread's finally block runs and cleans up native resources
                 try
                 {
                     StopListening();
@@ -98,6 +100,11 @@ namespace Yubico.Core.Devices.Hid
                     }
                     // If !disposing (finalizer path), silently ignore to prevent GC thread crash
                 }
+
+                // Clear delegate references to allow garbage collection
+                // Must be done AFTER StopListening() to ensure callbacks aren't invoked on null delegates
+                _arrivedCallbackDelegate = null;
+                _removedCallbackDelegate = null;
             }
             finally
             {
@@ -171,34 +178,53 @@ namespace Yubico.Core.Devices.Hid
             }
             finally
             {
-                // Wrap cleanup in try-catch to prevent P/Invoke exceptions from crashing the background thread
+                // Clean up thread-local native resources
+                // Wrap in try-catch to prevent P/Invoke exceptions from crashing the background thread
+                _log.LogInformation("Cleaning up native resources for listener thread.");
+
                 try
                 {
-                    if (_runLoop.HasValue)
+                    // Unschedule manager from run loop before releasing
+                    if (_runLoop.HasValue && manager != IntPtr.Zero)
                     {
                         IOHIDManagerUnscheduleFromRunLoop(manager, _runLoop.Value, runLoopMode);
-                    }
-
-                    if (manager != IntPtr.Zero)
-                    {
-                        _log.LogInformation("IOHIDManager released.");
-                    }
-
-                    if (runLoopMode != IntPtr.Zero)
-                    {
-                        CFRelease(runLoopMode);
+                        _log.LogInformation("IOHIDManager unscheduled from run loop.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _log.LogError(ex, "Exception during cleanup in MacOS HID listener thread.");
+                    _log.LogError(ex, "Exception unscheduling IOHIDManager from run loop.");
                 }
-                finally
+
+                try
                 {
-                    // Clear delegate references to allow garbage collection after thread exits
-                    _arrivedCallbackDelegate = null;
-                    _removedCallbackDelegate = null;
+                    // Release the IOHIDManager (FIX: This was missing - memory leak!)
+                    if (manager != IntPtr.Zero)
+                    {
+                        CFRelease(manager);
+                        _log.LogInformation("IOHIDManager released.");
+                    }
                 }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception releasing IOHIDManager.");
+                }
+
+                try
+                {
+                    // Release the run loop mode string
+                    if (runLoopMode != IntPtr.Zero)
+                    {
+                        CFRelease(runLoopMode);
+                        _log.LogInformation("Run loop mode string released.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception releasing run loop mode string.");
+                }
+
+                _log.LogInformation("Listener thread cleanup complete.");
             }
         }
 

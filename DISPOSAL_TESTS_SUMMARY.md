@@ -9,7 +9,7 @@ Created comprehensive disposal and resource management tests for all platform-sp
 ### 1. LinuxHidDeviceListenerDisposalTests.cs ✅
 **Location**: `Yubico.Core/tests/Yubico/Core/Devices/Hid/LinuxHidDeviceListenerDisposalTests.cs`
 
-**Tests (8 total)**:
+**Tests (9 total)**:
 - ✅ `Dispose_CompletesWithinReasonableTime` - Verifies <200ms disposal (100ms poll timeout)
 - ✅ `Dispose_CalledMultipleTimes_IsIdempotent` - Multiple disposal safety
 - ✅ `RepeatedCreateDispose_NoLeaks` - 50 iterations to catch FD/thread leaks
@@ -18,6 +18,7 @@ Created comprehensive disposal and resource management tests for all platform-sp
 - ✅ `Dispose_TerminatesListenerThread` - Thread cleanup verification
 - ✅ `ParallelCreateDispose_NoLeaksOrDeadlocks` - 20 parallel create/dispose
 - ✅ `Dispose_UnusedListener_Succeeds` - Edge case testing
+- ✅ `Finalizer_DoesNotCrashGCThread` - Finalizer exception safety
 
 **Platform-specific checks**:
 - File descriptor leak detection via `/proc/{pid}/fd`
@@ -87,23 +88,23 @@ Created comprehensive disposal and resource management tests for all platform-sp
 
 ### On Linux (Current Platform)
 ```
-Total tests: 28
-     Passed: 8   (Linux-specific tests)
+Total tests: 29
+     Passed: 9   (Linux-specific tests)
     Skipped: 20  (Windows: 10, macOS: 10)
 ```
 
 ### Expected on Windows
 ```
-Total tests: 28
+Total tests: 29
      Passed: 10  (Windows-specific tests)
-    Skipped: 18 (Linux: 8, macOS: 10)
+    Skipped: 19 (Linux: 9, macOS: 10)
 ```
 
 ### Expected on macOS
 ```
-Total tests: 28
+Total tests: 29
      Passed: 10  (macOS-specific tests)
-    Skipped: 18 (Linux: 8, Windows: 10)
+    Skipped: 19 (Linux: 9, Windows: 10)
 ```
 
 ## Bug Found and Fixed
@@ -154,6 +155,69 @@ protected override void Dispose(bool disposing)
 ```
 
 **Impact**: This bug could have caused production crashes in multi-threaded scenarios where multiple threads try to dispose the same listener concurrently (e.g., application shutdown, DI container disposal).
+
+### Missing Finalizer on Linux 🐛
+
+**Issue**: `LinuxHidDeviceListener` lacked a finalizer, unlike Windows and macOS implementations.
+
+**Root Cause**:
+- If `Dispose()` was never called, the listener thread would run indefinitely
+- The thread held references to `LinuxUdevMonitorSafeHandle` and `LinuxUdevSafeHandle`
+- While SafeHandles have their own finalizers, they couldn't run while the thread held references
+- Result: Resource leak (netlink socket, udev handles, running thread)
+
+**Fix Applied**:
+```csharp
+~LinuxHidDeviceListener()
+{
+    Dispose(false);
+}
+
+protected override void Dispose(bool disposing)
+{
+    lock (_disposeLock)
+    {
+        if (_isDisposed)
+            return;
+
+        try
+        {
+            // StopListening must happen in both paths (disposing and finalizer)
+            // to ensure the listener thread is terminated
+            try
+            {
+                StopListening();
+            }
+            catch (Exception ex)
+            {
+                // CRITICAL: Never throw from Dispose, especially when called from finalizer
+                if (disposing)
+                    _log.LogWarning(ex, "Exception during StopListening...");
+                // If !disposing (finalizer path), silently ignore to prevent GC thread crash
+            }
+
+            if (disposing)
+            {
+                // Deterministic disposal - clean up SafeHandles explicitly
+                _monitorObject.Dispose();
+                _udevObject.Dispose();
+                _monitorObject = null!;
+                _udevObject = null!;
+            }
+            // If !disposing (finalizer path), SafeHandles will finalize themselves
+            // once the thread releases its hold on them
+
+            _isDisposed = true;
+        }
+        finally
+        {
+            base.Dispose(disposing);
+        }
+    }
+}
+```
+
+**Impact**: Without the finalizer, every missed `Dispose()` call would leak the listener thread and native udev resources. The finalizer provides defense-in-depth cleanup.
 
 ## Test Coverage Improvements
 

@@ -19,26 +19,27 @@ limitations under the License. -->
 # The FIDO U2F PIN
 
 Both the FIDO U2F and FIDO2 standards specify that a device have a "test of user presence"
-in order to perform registration and authentication operations. This test is described as
-follows. "The user touches a button (or sensor of some kind) to 'activate' the U2F
+in order to perform registration and authentication operations. During the test,
+"the user touches a button (or sensor of some kind) to 'activate' the U2F
 device".
 
-With the YubiKey, there is the option to specify a PIN in order to use the U2F
-application as well as touch. However, this option is available only for YubiKey 4 FIPS
-series. If you try to set a PIN for the U2F application on a non-FIPS version 4 YubiKey,
-or a YubiKey 5 (FIPS or non-FIPS) series, or a YubiKey Security Key series, it will not
+With the YubiKey, there is the option to also require a PIN in order to use the U2F
+application. However, this option is available only for YubiKey 4 FIPS
+Series keys. If you try to set a PIN for the U2F application on a non-FIPS YubiKey 4 Series key,
+a YubiKey 5 Series key (FIPS or non-FIPS), or a Security Key Series key, it will not
 work.
 
-Note that with a version 5 FIPS series YubiKey, it is possible to set a PIN on the FIDO2
-application. Version 4 series YubiKeys do not have the FIDO2 application, and it is not
-possible to set a FIDO2 PIN on a non-FIPS version 5 series YubiKey.
+However, with YubiKey 5 Series (FIPS and non-FIPS) and Security Key Series keys, it 
+is possible to set a PIN on the *FIDO2*
+application. YubiKey 4 Series keys do not have a FIDO2 application.
 
-| YubiKey  | U2F Available | FIDO2 Available | U2F PIN | FIDO2 PIN |
-|:--------:|:-------------:|:---------------:|:-------:|:---------:|
-|   v 4    |      yes      |       no        |   no    |     -     |
-| v 4 FIPS |      yes      |       no        |   yes   |     -     |
-|   v 5    |      yes      |       yes       |   no    |    no     |
-| v 5 FIPS |      yes      |       yes       |   no    |    yes    |
-|   SKY    |      yes      |       yes       |   no    |    no     |
+| YubiKey      | U2F Available | FIDO2 Available | U2F PIN | FIDO2 PIN |
+|:------------:|:-------------:|:---------------:|:-------:|:---------:|
+|   4          |      yes      |       no        |   no    |     -     |
+|   4 FIPS     |      yes      |       no        |   yes   |     -     |
+|   5          |      yes      |       yes       |   no    |    yes    |
+|   5 FIPS     |      yes      |       yes       |   no    |    yes    |
+| Security Key |      yes      |       yes       |   no    |    yes    |
 
-To learn more about the U2F PIN, see the article on [FIDO U2F and FIPS](fips-mode.md).
+To learn more about how the U2F PIN is used with YubiKey 4 FIPS
+Series keys, see [FIDO U2F and FIPS](fips-mode.md).

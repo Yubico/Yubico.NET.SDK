@@ -18,7 +18,6 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using Yubico.PlatformInterop;
-
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.Hid
@@ -66,7 +65,9 @@ namespace Yubico.Core.Devices.Hid
 
                 _marshalableThisPtr = GCHandle.Alloc(this);
                 _callbackDelegate = OnEventReceived;
-                CmErrorCode errorCode = CM_Register_Notification(pFilter, GCHandle.ToIntPtr(_marshalableThisPtr.Value), _callbackDelegate, out _notificationContext);
+                CmErrorCode errorCode = CM_Register_Notification(
+                    pFilter, GCHandle.ToIntPtr(_marshalableThisPtr.Value), _callbackDelegate, out _notificationContext);
+
                 _log.LogInformation("Registered callback with ConfigMgr32.");
                 ThrowIfFailed(errorCode);
             }
@@ -103,35 +104,61 @@ namespace Yubico.Core.Devices.Hid
             }
         }
 
-        private static int OnEventReceived(IntPtr hNotify, IntPtr context, CM_NOTIFY_ACTION action, IntPtr eventDataPtr, int eventDataSize)
+        private static int OnEventReceived(
+            IntPtr hNotify,
+            IntPtr context,
+            CM_NOTIFY_ACTION action,
+            IntPtr eventDataPtr,
+            int eventDataSize)
         {
             var thisPtr = GCHandle.FromIntPtr(context);
             var thisObj = thisPtr.Target as WindowsHidDeviceListener;
-            thisObj?._log.LogInformation("ConfigMgr callback received.");
 
-            CM_NOTIFY_EVENT_DATA eventData = Marshal.PtrToStructure<CM_NOTIFY_EVENT_DATA>(eventDataPtr);
-            Debug.Assert(eventData.ClassGuid == CmInterfaceGuid.Hid);
-            Debug.Assert(eventData.FilterType == CM_NOTIFY_FILTER_TYPE.DEVINTERFACE);
-
-            int stringOffset = 24; // Magic number from C land
-            int stringSize = eventDataSize - stringOffset;
-            byte[] buffer = new byte[eventDataSize];
-
-            Marshal.Copy(eventDataPtr + stringOffset, buffer, 0, stringSize);
-
-            if (action == CM_NOTIFY_ACTION.DEVICEINTERFACEARRIVAL)
+            try
             {
-                string instancePath = System.Text.Encoding.Unicode.GetString(buffer);
-                var cmDevice = new CmDevice(instancePath);
-                var device = new WindowsHidDevice(cmDevice);
-                thisObj?.OnArrived(device);
-            }
-            else if (action == CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL)
-            {
-                thisObj?.OnRemoved(NullDevice.Instance);
-            }
 
-            return 0;
+                CM_NOTIFY_EVENT_DATA eventData = Marshal.PtrToStructure<CM_NOTIFY_EVENT_DATA>(eventDataPtr);
+                Debug.Assert(eventData.ClassGuid == CmInterfaceGuid.Hid);
+                Debug.Assert(eventData.FilterType == CM_NOTIFY_FILTER_TYPE.DEVINTERFACE);
+
+                int stringOffset = 24; // Magic number from C land
+                int stringSize = eventDataSize - stringOffset;
+                byte[] buffer = new byte[eventDataSize];
+
+                Marshal.Copy(eventDataPtr + stringOffset, buffer, 0, stringSize);
+
+                switch (action)
+                {
+                    case CM_NOTIFY_ACTION.DEVICEINTERFACEARRIVAL:
+                        {
+                            string instancePath = System.Text.Encoding.Unicode.GetString(buffer);
+                            var cmDevice = CmDevice.FromDevicePath(instancePath);
+                            if (cmDevice == null)
+                            {
+                                thisObj?._log.LogWarning(
+                                    "Failed to create CmDevice from instance path {InstancePath}.", instancePath);
+
+                                return 0; // We can't do anything without a CmDevice. Exit gracefully.
+                            }
+
+                            var device = new WindowsHidDevice(cmDevice);
+                            thisObj?.OnArrived(device);
+                            break;
+                        }
+                    case CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL:
+                        thisObj?.OnRemoved(NullDevice.Instance);
+                        break;
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                // We must not let exceptions escape from this callback. There's nowhere for them to go, and
+                // it will likely crash the process.
+                thisObj?._log.LogDebug($"Exception in OnEventReceived: {ex}");
+                return 0;
+            }
         }
     }
 }

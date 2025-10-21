@@ -48,10 +48,18 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         public event EventHandler<SmartCardDeviceEventArgs>? Removed;
 
+        // Volatile ensures thread-safe reads/writes of Status property across background listener thread and caller threads
+        // without requiring locks. This prevents torn reads where a thread could see an intermediate/invalid enum value.
+        private volatile DeviceListenerStatus _status;
+
         /// <summary>
         /// A status that indicates the state of the device listener.
         /// </summary>
-        public DeviceListenerStatus Status { get; set; }
+        public DeviceListenerStatus Status
+        {
+            get => _status;
+            set => _status = value;
+        }
 
         /// <summary>
         /// Creates an instance of a <see cref="SmartCardDeviceListener"/>.

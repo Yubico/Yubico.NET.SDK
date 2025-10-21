@@ -45,6 +45,7 @@ namespace Yubico.Core.Devices.Hid
         // This is exactly what would happen if we had a lock.
         private bool _isListening;
         private Thread? _listenerThread;
+        private readonly object _startStopLock = new object();
 
         private LinuxUdevMonitorSafeHandle _monitorObject;
         private LinuxUdevSafeHandle _udevObject;
@@ -64,18 +65,16 @@ namespace Yubico.Core.Devices.Hid
         {
             try
             {
-                if (!disposing)
+                if (disposing)
                 {
-                    return;
+                    StopListening();
+
+                    _monitorObject.Dispose();
+                    _udevObject.Dispose();
+
+                    _monitorObject = null!;
+                    _udevObject = null!;
                 }
-                
-                StopListening();
-
-                _monitorObject.Dispose();
-                _udevObject.Dispose();
-
-                _monitorObject = null!;
-                _udevObject = null!;
             }
             finally
             {
@@ -102,25 +101,27 @@ namespace Yubico.Core.Devices.Hid
 
             _ = ThrowIfFailedNegative(udev_monitor_enable_receiving(_monitorObject));
 
-            // We don't need to lock because if there is a separate thread that
-            // has access to _isListening, it does not change it.
-            // If there is a sub-thread running, _isListening will be true and we
-            // don't want to do anything.
-            // If there is no sub-thread, _isListening will be false and we will
-            // create a new thread and start it. Just make sure _isListening is
-            // set to true before starting the thread.
-            if (_isListening)
+            // Lock to prevent race condition if multiple threads call StartListening simultaneously
+            lock (_startStopLock)
             {
-                return;
-            }
+                // If there is a sub-thread running, _isListening will be true and we
+                // don't want to do anything.
+                // If there is no sub-thread, _isListening will be false and we will
+                // create a new thread and start it. Just make sure _isListening is
+                // set to true before starting the thread.
+                if (_isListening)
+                {
+                    return;
+                }
 
-            _listenerThread = new Thread(ListenForReaderChanges)
-            {
-                IsBackground = true
-            };
-            
-            _isListening = true;
-            _listenerThread.Start();
+                _listenerThread = new Thread(ListenForReaderChanges)
+                {
+                    IsBackground = true
+                };
+
+                _isListening = true;
+                _listenerThread.Start();
+            }
         }
 
         /// <summary>

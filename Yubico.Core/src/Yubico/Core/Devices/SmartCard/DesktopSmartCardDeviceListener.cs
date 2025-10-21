@@ -40,6 +40,7 @@ namespace Yubico.Core.Devices.SmartCard
 
         private bool _isListening;
         private Thread? _listenerThread;
+        private readonly object _startStopLock = new object();
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDeviceListener"/>.
@@ -75,19 +76,22 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void StartListening()
         {
-            if (_isListening)
+            lock (_startStopLock)
             {
-                return;
-            }
+                if (_isListening)
+                {
+                    return;
+                }
 
-            _listenerThread = new Thread(ListenForReaderChanges)
-            {
-                IsBackground = true
-            };
-            
-            _isListening = true;
-            Status = DeviceListenerStatus.Started;
-            _listenerThread.Start();
+                _listenerThread = new Thread(ListenForReaderChanges)
+                {
+                    IsBackground = true
+                };
+
+                _isListening = true;
+                Status = DeviceListenerStatus.Started;
+                _listenerThread.Start();
+            }
         }
 
         // This method is the delegate sent to the new Thread.

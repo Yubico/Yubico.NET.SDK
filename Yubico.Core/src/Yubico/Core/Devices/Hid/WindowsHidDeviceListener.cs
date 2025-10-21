@@ -193,7 +193,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 // We must not let exceptions escape from this callback. There's nowhere for them to go, and
                 // it will likely crash the process.
-                thisObj?._log.LogDebug($"Exception in OnEventReceived: {ex}");
+                thisObj?._log.LogError(ex, "Exception in OnEventReceived");
                 return 0;
             }
         }

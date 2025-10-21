@@ -36,6 +36,7 @@ namespace Yubico.Core.Devices.SmartCard
     public abstract class SmartCardDeviceListener : IDisposable
     {
         private readonly ILogger _log = Logging.Log.GetLogger<SmartCardDeviceListener>();
+        private readonly object _disposeLock = new object();
 
         /// <summary>
         /// Subscribe to receive an event whenever a smart card device is added to the computer.
@@ -82,13 +83,15 @@ namespace Yubico.Core.Devices.SmartCard
         {
             _log.LogInformation("ISmartCardDevice {Device} arrived.", device);
 
-            if (Arrived is null)
+            // Capture event reference atomically to prevent race conditions with ClearEventHandlers
+            EventHandler<SmartCardDeviceEventArgs>? arrivedEvent = Arrived;
+            if (arrivedEvent is null)
             {
                 return;
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (Delegate d in Arrived.GetInvocationList())
+            foreach (Delegate d in arrivedEvent.GetInvocationList())
             {
                 var handler = (EventHandler<SmartCardDeviceEventArgs>)d;
                 try
@@ -113,15 +116,17 @@ namespace Yubico.Core.Devices.SmartCard
         {
             _log.LogInformation("ISmartCardDevice {Device} removed.", device);
 
-            if (Removed is null)
+            // Capture event reference atomically to prevent race conditions with ClearEventHandlers
+            EventHandler<SmartCardDeviceEventArgs>? removedEvent = Removed;
+            if (removedEvent is null)
             {
                 return;
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (Delegate d in Removed.GetInvocationList())
-            {  
-                var handler = (EventHandler<SmartCardDeviceEventArgs>)d;  
+            foreach (Delegate d in removedEvent.GetInvocationList())
+            {
+                var handler = (EventHandler<SmartCardDeviceEventArgs>)d;
                 try
                 {
                     handler.Invoke(this, new SmartCardDeviceEventArgs(device));
@@ -150,16 +155,19 @@ namespace Yubico.Core.Devices.SmartCard
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed)
+            lock (_disposeLock)
             {
-                return;
+                if (_disposed)
+                {
+                    return;
+                }
+                _disposed = true;
             }
 
             if (disposing)
             {
                 ClearEventHandlers();
             }
-            _disposed = true;
         }
 
         ~SmartCardDeviceListener()

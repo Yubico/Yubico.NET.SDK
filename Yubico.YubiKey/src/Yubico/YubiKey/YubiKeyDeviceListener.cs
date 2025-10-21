@@ -177,15 +177,13 @@ namespace Yubico.YubiKey
 
         private void Update()
         {
-            // Declare these outside try block so we can fire events after releasing lock
             var addedYubiKeys = new List<IYubiKeyDevice>();
             IEnumerable<IYubiKeyDevice> removedYubiKeys;
 
             _rwLock.EnterWriteLock();
+            _log.LogInformation("Entering write-lock.");
             try
             {
-                _log.LogInformation("Entering write-lock.");
-
                 ResetCacheMarkers();
                 _log.LogInformation("Cache currently aware of {Count} YubiKeys.", _internalCache.Count);
 
@@ -253,7 +251,7 @@ namespace Yubico.YubiKey
                 }
 
                 removedYubiKeys = _internalCache
-                    .Where(e => e.Value == false)
+                    .Where(e => !e.Value)
                     .Select(e => e.Key)
                     .ToList();
 

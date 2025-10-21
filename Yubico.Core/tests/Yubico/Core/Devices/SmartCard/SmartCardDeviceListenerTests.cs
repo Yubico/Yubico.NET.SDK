@@ -178,5 +178,57 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             Assert.True(handler1Called, "Handler 1 should have been called");
             Assert.True(handler3Called, "Handler 3 should have been called despite handler 2 throwing");
         }
+
+        [Fact]
+        public void Dispose_CalledOnce_Succeeds()
+        {
+            var listener = new FakeSmartCardListener();
+            var exception = Record.Exception(() => listener.Dispose());
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public void Dispose_CalledTwice_IsIdempotent()
+        {
+            var listener = new FakeSmartCardListener();
+
+            listener.Dispose();
+            var exception = Record.Exception(() => listener.Dispose());
+
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public void Dispose_CalledMultipleTimes_IsIdempotent()
+        {
+            var listener = new FakeSmartCardListener();
+
+            for (int i = 0; i < 10; i++)
+            {
+                var exception = Record.Exception(() => listener.Dispose());
+                Assert.Null(exception);
+            }
+        }
+
+        [Fact]
+        public void Dispose_ClearsEventHandlers()
+        {
+            var listener = new FakeSmartCardListener();
+            bool arrivedCalled = false;
+            bool removedCalled = false;
+
+            listener.Arrived += (s, e) => { arrivedCalled = true; };
+            listener.Removed += (s, e) => { removedCalled = true; };
+
+            listener.Dispose();
+
+            // Fire events after disposal
+            listener.FireArrival();
+            listener.FireRemoval();
+
+            // Handlers should have been cleared, so they shouldn't be called
+            Assert.False(arrivedCalled, "Arrived handler should not be called after Dispose");
+            Assert.False(removedCalled, "Removed handler should not be called after Dispose");
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace Yubico.Core.Devices.SmartCard
     /// <summary>
     /// A listener class for smart card related events.
     /// </summary>
-    internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener, IDisposable
+    internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener
     {
         internal static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
         private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardDeviceListener>();
@@ -128,15 +128,11 @@ namespace Yubico.Core.Devices.SmartCard
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (disposing)
             {
-                if (disposing)
-                {
-                    _ = SCardCancel(_context);
-                    _context.Dispose();
-                    StopListening();
-                }
-                _disposedValue = true;
+                _ = SCardCancel(_context);
+                _context.Dispose();
+                StopListening();
             }
             
             base.Dispose(disposing);

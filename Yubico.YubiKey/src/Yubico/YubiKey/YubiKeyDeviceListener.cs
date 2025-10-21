@@ -366,8 +366,9 @@ namespace Yubico.YubiKey
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (EventHandler<YubiKeyDeviceEventArgs> handler in Arrived.GetInvocationList())
-            {
+            foreach (Delegate d in Arrived.GetInvocationList())  
+            {  
+                var handler = (EventHandler<HidDeviceEventArgs>)d;  
                 try
                 {
                     handler.Invoke(typeof(YubiKeyDevice), e);
@@ -390,8 +391,9 @@ namespace Yubico.YubiKey
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (EventHandler<YubiKeyDeviceEventArgs> handler in Removed.GetInvocationList())
-            {
+            foreach (Delegate d in Arrived.GetInvocationList())  
+            {  
+                var handler = (EventHandler<HidDeviceEventArgs>)d;  
                 try
                 {
                     handler.Invoke(typeof(YubiKeyDevice), e);
@@ -496,34 +498,40 @@ namespace Yubico.YubiKey
                     _tokenSource.Cancel();
 
                     // Step 3: Wait for the background task to complete
-                    // Increased timeout from 1 to 5 seconds to allow Update() to finish
                     try
                     {
-                        _ = _listenTask.Wait(TimeSpan.FromSeconds(2));
+                        _ = _listenTask.Wait(TimeSpan.FromSeconds(5));
                     }
                     catch (AggregateException)
                     {
                         // Task may have already completed or been cancelled, ignore
                     }
 
-                    // Step 4: Now safe to dispose synchronization primitives
-                    // Wrap in try-catch to prevent disposal exceptions
-                    try
-                    {
-                        _rwLock.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        _log.LogWarning(ex, "Exception disposing ReaderWriterLockSlim during cleanup");
-                    }
+                    if (_listenTask.IsCompleted)  
+                    {                    
+                        // Step 4: Now safe to dispose synchronization primitives
+                        // Wrap in try-catch to prevent disposal exceptions
+                        try
+                        {
+                            _rwLock.Dispose();
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.LogWarning(ex, "Exception disposing ReaderWriterLockSlim during cleanup");
+                        }
 
-                    try
-                    {
-                        _semaphore.Dispose();
+                        try
+                        {
+                            _semaphore.Dispose();
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.LogWarning(ex, "Exception disposing SemaphoreSlim during cleanup");
+                        } 
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        _log.LogWarning(ex, "Exception disposing SemaphoreSlim during cleanup");
+                        _log.LogWarning("Background listen task did not complete in time; skipping disposal of synchronization primitives to avoid ObjectDisposedException race conditions.");  
                     }
 
                     _tokenSource.Dispose();

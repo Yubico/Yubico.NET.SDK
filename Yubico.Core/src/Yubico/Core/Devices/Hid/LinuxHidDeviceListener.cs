@@ -32,8 +32,8 @@ namespace Yubico.Core.Devices.Hid
         private bool _isDisposed;
         private readonly object _disposeLock = new object();
 
-        private LinuxUdevMonitorSafeHandle _monitorObject;
-        private LinuxUdevSafeHandle _udevObject;
+        private readonly LinuxUdevMonitorSafeHandle _monitorObject;
+        private readonly LinuxUdevSafeHandle _udevObject;
         private readonly ILogger _log = Logging.Log.GetLogger<LinuxHidDeviceListener>();
 
         public LinuxHidDeviceListener()
@@ -42,6 +42,11 @@ namespace Yubico.Core.Devices.Hid
             _monitorObject = ThrowIfFailedNull(udev_monitor_new_from_netlink(_udevObject, UdevMonitorName));
 
             StartListening();
+        }
+
+        ~LinuxHidDeviceListener()
+        {
+            Dispose(false);
         }
 
         protected override void Dispose(bool disposing)
@@ -53,20 +58,32 @@ namespace Yubico.Core.Devices.Hid
                     return;
                 }
 
+                _isDisposed = true;
+
                 try
                 {
+                    // StopListening must happen in both paths (disposing and finalizer)
+                    // to ensure the listener thread is terminated and releases its hold on SafeHandles
+                    StopListening();
+
                     if (disposing)
                     {
-                        StopListening();
-
+                        // Deterministic disposal - clean up SafeHandles explicitly
                         _monitorObject.Dispose();
                         _udevObject.Dispose();
-
-                        _monitorObject = null!;
-                        _udevObject = null!;
                     }
-
-                    _isDisposed = true;
+                    // If !disposing (finalizer path), SafeHandles will finalize themselves
+                    // once the thread releases its hold on them
+                }
+                catch (Exception ex)
+                {
+                    // CRITICAL: Never throw from Dispose, especially when called from finalizer
+                    // Throwing from finalizer will crash the GC thread and terminate the application
+                    if (disposing)
+                    {
+                        _log.LogWarning(ex, "Exception during LinuxHidDeviceListener disposal");
+                    }
+                    // If !disposing (finalizer path), silently ignore to prevent GC thread crash
                 }
                 finally
                 {

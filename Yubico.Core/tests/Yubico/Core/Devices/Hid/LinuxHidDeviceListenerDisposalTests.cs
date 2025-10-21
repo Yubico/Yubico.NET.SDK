@@ -238,6 +238,32 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         }
 
         /// <summary>
+        /// Verifies that finalizer doesn't throw exceptions that would crash GC thread.
+        /// </summary>
+        [SkippableFact]
+        public void Finalizer_DoesNotCrashGCThread()
+        {
+            Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.Linux, "Linux-only test");
+
+            // Create listener and let it go out of scope without disposing
+            CreateAndAbandonListener();
+
+            // Force GC and finalizers to run
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            // If we get here, finalizer didn't crash
+            Assert.True(true);
+        }
+
+        private static void CreateAndAbandonListener()
+        {
+            _ = HidDeviceListener.Create();
+            // Let it go out of scope without disposing
+        }
+
+        /// <summary>
         /// Helper method to get count of open file descriptors for current process.
         /// </summary>
         private static int GetOpenFileDescriptorCount()

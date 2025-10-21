@@ -34,6 +34,9 @@ namespace Yubico.Core.Devices.Hid
         private IOHIDDeviceCallback? _arrivedCallbackDelegate;
         private IOHIDDeviceCallback? _removedCallbackDelegate;
 
+        private bool _isDisposed;
+        private readonly object _disposeLock = new object();
+
         private readonly ILogger _log = Logging.Log.GetLogger<MacOSHidDeviceListener>();
 
         // Start listening as soon as this object is constructed.
@@ -77,18 +80,25 @@ namespace Yubico.Core.Devices.Hid
 
         protected override void Dispose(bool disposing)
         {
-            try
+            lock (_disposeLock)
             {
-                if (disposing)
+                if (_isDisposed)
                 {
-                    // No managed resources to dispose beyond what StopListening handles
+                    return;
                 }
 
-                // Stop the listening thread and wait for it to complete
-                // This ensures ListeningThread's finally block runs and cleans up native resources
+                _isDisposed = true;
+
                 try
                 {
+                    // Stop the listening thread and wait for it to complete
+                    // This ensures ListeningThread's finally block runs and cleans up native resources
                     StopListening();
+
+                    // Clear delegate references to allow garbage collection
+                    // Must be done AFTER StopListening() to ensure callbacks aren't invoked on null delegates
+                    _arrivedCallbackDelegate = null;
+                    _removedCallbackDelegate = null;
                 }
                 catch (Exception ex)
                 {
@@ -96,19 +106,14 @@ namespace Yubico.Core.Devices.Hid
                     // Throwing from finalizer will crash the GC thread and terminate the application
                     if (disposing)
                     {
-                        _log.LogWarning(ex, "Exception during StopListening in MacOSHidDeviceListener disposal");
+                        _log.LogWarning(ex, "Exception during MacOSHidDeviceListener disposal");
                     }
                     // If !disposing (finalizer path), silently ignore to prevent GC thread crash
                 }
-
-                // Clear delegate references to allow garbage collection
-                // Must be done AFTER StopListening() to ensure callbacks aren't invoked on null delegates
-                _arrivedCallbackDelegate = null;
-                _removedCallbackDelegate = null;
-            }
-            finally
-            {
-                base.Dispose(disposing);
+                finally
+                {
+                    base.Dispose(disposing);
+                }
             }
         }
 

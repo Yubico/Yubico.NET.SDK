@@ -27,6 +27,8 @@ namespace Yubico.Core.Devices.Hid
         private IntPtr _notificationContext;
         private GCHandle? _marshalableThisPtr;
         private CM_NOTIFY_CALLBACK? _callbackDelegate;
+        private bool _isDisposed;
+        private readonly object _disposeLock = new object();
 
         private readonly ILogger _log = Logging.Log.GetLogger<WindowsHidDeviceListener>();
 
@@ -96,18 +98,24 @@ namespace Yubico.Core.Devices.Hid
 
         protected override void Dispose(bool disposing)
         {
-            try
+            lock (_disposeLock)
             {
-                if (disposing)
+                if (_isDisposed)
                 {
-                    // No managed resources beyond what we handle below
+                    return;
                 }
 
-                // Stop listening and unregister native callback
-                // This ensures native code won't call our callback after disposal
+                _isDisposed = true;
+
                 try
                 {
+                    // Stop listening and unregister native callback
+                    // This ensures native code won't call our callback after disposal
                     StopListening();
+
+                    // Clear delegate reference to allow garbage collection
+                    // Must be done AFTER StopListening() to ensure callback isn't invoked on null delegate
+                    _callbackDelegate = null;
                 }
                 catch (Exception ex)
                 {
@@ -115,18 +123,14 @@ namespace Yubico.Core.Devices.Hid
                     // Throwing from finalizer will crash the GC thread and terminate the application
                     if (disposing)
                     {
-                        _log.LogWarning(ex, "Exception during StopListening in WindowsHidDeviceListener disposal");
+                        _log.LogWarning(ex, "Exception during WindowsHidDeviceListener disposal");
                     }
                     // If !disposing (finalizer path), silently ignore to prevent GC thread crash
                 }
-
-                // Clear delegate reference to allow garbage collection
-                // Must be done AFTER StopListening() to ensure callback isn't invoked on null delegate
-                _callbackDelegate = null;
-            }
-            finally
-            {
-                base.Dispose(disposing);
+                finally
+                {
+                    base.Dispose(disposing);
+                }
             }
         }
 

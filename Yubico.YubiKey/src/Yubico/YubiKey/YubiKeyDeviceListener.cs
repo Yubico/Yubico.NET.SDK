@@ -179,7 +179,7 @@ namespace Yubico.YubiKey
         {
             // Declare these outside try block so we can fire events after releasing lock
             var addedYubiKeys = new List<IYubiKeyDevice>();
-            IEnumerable<IYubiKeyDevice> removedYubiKeys;
+            IEnumerable<IYubiKeyDevice> removedYubiKeys = Array.Empty<IYubiKeyDevice>();
 
             _rwLock.EnterWriteLock();
             try

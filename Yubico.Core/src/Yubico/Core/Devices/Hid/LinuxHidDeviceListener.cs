@@ -30,6 +30,7 @@ namespace Yubico.Core.Devices.Hid
         private readonly object _startStopLock = new object();
         private CancellationTokenSource? _cancellationTokenSource;
         private bool _isDisposed;
+        private readonly object _disposeLock = new object();
 
         private LinuxUdevMonitorSafeHandle _monitorObject;
         private LinuxUdevSafeHandle _udevObject;
@@ -45,29 +46,32 @@ namespace Yubico.Core.Devices.Hid
 
         protected override void Dispose(bool disposing)
         {
-            if (_isDisposed)
+            lock (_disposeLock)
             {
-                return;
-            }
-
-            try
-            {
-                if (disposing)
+                if (_isDisposed)
                 {
-                    StopListening();
-
-                    _monitorObject.Dispose();
-                    _udevObject.Dispose();
-
-                    _monitorObject = null!;
-                    _udevObject = null!;
+                    return;
                 }
 
-                _isDisposed = true;
-            }
-            finally
-            {
-                base.Dispose(disposing);
+                try
+                {
+                    if (disposing)
+                    {
+                        StopListening();
+
+                        _monitorObject.Dispose();
+                        _udevObject.Dispose();
+
+                        _monitorObject = null!;
+                        _udevObject = null!;
+                    }
+
+                    _isDisposed = true;
+                }
+                finally
+                {
+                    base.Dispose(disposing);
+                }
             }
         }
 

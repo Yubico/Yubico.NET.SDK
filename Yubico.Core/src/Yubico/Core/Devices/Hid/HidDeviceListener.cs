@@ -116,7 +116,7 @@ namespace Yubico.Core.Devices.Hid
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (Delegate d in Arrived.GetInvocationList())  
+            foreach (Delegate d in Removed.GetInvocationList())  
             {  
                 var handler = (EventHandler<HidDeviceEventArgs>)d;  
                 try

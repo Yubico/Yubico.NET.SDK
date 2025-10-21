@@ -46,8 +46,8 @@ namespace Yubico.Core.Devices.Hid
         private bool _isListening;
         private Thread? _listenerThread;
 
-        private readonly LinuxUdevMonitorSafeHandle _monitorObject;
-        private readonly LinuxUdevSafeHandle _udevObject;
+        private LinuxUdevMonitorSafeHandle _monitorObject;
+        private LinuxUdevSafeHandle _udevObject;
         private readonly ILogger _log = Logging.Log.GetLogger<LinuxHidDeviceListener>();
 
         public LinuxHidDeviceListener()
@@ -64,13 +64,18 @@ namespace Yubico.Core.Devices.Hid
         {
             try
             {
-                if (disposing)
+                if (!disposing)
                 {
-                    _monitorObject.Dispose();
-                    _udevObject.Dispose();
+                    return;
                 }
-
+                
                 StopListening();
+
+                _monitorObject.Dispose();
+                _udevObject.Dispose();
+
+                _monitorObject = null!;
+                _udevObject = null!;
             }
             finally
             {
@@ -172,7 +177,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 // We must not let exceptions escape from this callback. There's nowhere for them to go, and
                 // it will likely crash the process.
-                _log.LogDebug(e, "Exception in ListenForReaderChanges thread.");
+                _log.LogWarning(e, "Exception in ListenForReaderChanges thread.");
             }
         }
 

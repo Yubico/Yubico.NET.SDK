@@ -120,8 +120,6 @@ namespace Yubico.Core.Devices.SmartCard
 
         #region IDisposable Support
 
-        private bool _disposedValue; // To detect redundant calls
-
         /// <summary>
         /// Disposes the objects.
         /// </summary>

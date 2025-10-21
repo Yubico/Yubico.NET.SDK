@@ -366,9 +366,9 @@ namespace Yubico.YubiKey
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (Delegate d in Arrived.GetInvocationList())  
+            foreach (var d in Arrived.GetInvocationList())  
             {  
-                var handler = (EventHandler<HidDeviceEventArgs>)d;  
+                var handler = (EventHandler<YubiKeyDeviceEventArgs>)d;  
                 try
                 {
                     handler.Invoke(typeof(YubiKeyDevice), e);
@@ -383,7 +383,7 @@ namespace Yubico.YubiKey
         /// <summary>
         /// Raises event on device removal.
         /// </summary>
-        internal void OnDeviceRemoved(YubiKeyDeviceEventArgs e)
+        private void OnDeviceRemoved(YubiKeyDeviceEventArgs e)
         {
             if (Removed is null)
             {
@@ -391,9 +391,9 @@ namespace Yubico.YubiKey
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (Delegate d in Arrived.GetInvocationList())  
+            foreach (var d in Removed.GetInvocationList())  
             {  
-                var handler = (EventHandler<HidDeviceEventArgs>)d;  
+                var handler = (EventHandler<YubiKeyDeviceEventArgs>)d;  
                 try
                 {
                     handler.Invoke(typeof(YubiKeyDevice), e);
@@ -439,7 +439,7 @@ namespace Yubico.YubiKey
                     .Where(d => d.IsYubicoDevice() && d.IsFido())
                     .ToList();
             }
-            catch (PlatformInterop.PlatformApiException e)
+            catch (PlatformApiException e)
             {
                 ErrorHandler(e);
                 return new List<IDevice>();
@@ -454,7 +454,7 @@ namespace Yubico.YubiKey
                     .GetHidDevices()
                     .Where(d => d.IsYubicoDevice() && d.IsKeyboard()).ToList();
             }
-            catch (PlatformInterop.PlatformApiException e)
+            catch (PlatformApiException e)
             {
                 ErrorHandler(e);
                 return new List<IDevice>();
@@ -470,7 +470,7 @@ namespace Yubico.YubiKey
                         .Where(d => d.IsYubicoDevice())
                         .ToList();
             }
-            catch (PlatformInterop.SCardException e)
+            catch (SCardException e)
             {
                 ErrorHandler(e);
                 return new List<IDevice>();
@@ -487,82 +487,84 @@ namespace Yubico.YubiKey
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_isDisposed)
+            if (_isDisposed)
             {
-                if (disposing)
+                return;
+            }
+
+            if (disposing)
+            {
+                // Step 1: Signal shutdown to stop the listening loop
+                _isListening = false;
+
+                // Step 2: Cancel the token to unblock any semaphore waits
+                _tokenSource.Cancel();
+
+                // Step 3: Wait for the background task to complete
+                try
                 {
-                    // Step 1: Signal shutdown to stop the listening loop
-                    _isListening = false;
-
-                    // Step 2: Cancel the token to unblock any semaphore waits
-                    _tokenSource.Cancel();
-
-                    // Step 3: Wait for the background task to complete
-                    try
-                    {
-                        _ = _listenTask.Wait(TimeSpan.FromSeconds(5));
-                    }
-                    catch (AggregateException)
-                    {
-                        // Task may have already completed or been cancelled, ignore
-                    }
-
-                    if (_listenTask.IsCompleted)  
-                    {                    
-                        // Step 4: Now safe to dispose synchronization primitives
-                        // Wrap in try-catch to prevent disposal exceptions
-                        try
-                        {
-                            _rwLock.Dispose();
-                        }
-                        catch (Exception ex)
-                        {
-                            _log.LogWarning(ex, "Exception disposing ReaderWriterLockSlim during cleanup");
-                        }
-
-                        try
-                        {
-                            _semaphore.Dispose();
-                        }
-                        catch (Exception ex)
-                        {
-                            _log.LogWarning(ex, "Exception disposing SemaphoreSlim during cleanup");
-                        } 
-                    }
-                    else
-                    {
-                        _log.LogWarning("Background listen task did not complete in time; skipping disposal of synchronization primitives to avoid ObjectDisposedException race conditions.");  
-                    }
-
-                    _tokenSource.Dispose();
-
-                    // Step 5: Dispose platform listeners
-                    try
-                    {
-                        _hidListener.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        _log.LogWarning(ex, "Exception disposing HidDeviceListener during cleanup");
-                    }
-
-                    try
-                    {
-                        _smartCardListener.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        _log.LogWarning(ex, "Exception disposing SmartCardDeviceListener during cleanup");
-                    }
-
-                    if (ReferenceEquals(_lazyInstance, this))
-                    {
-                        _lazyInstance = null;
-                    }
+                    _ = _listenTask.Wait(TimeSpan.FromSeconds(5));
+                }
+                catch (AggregateException)
+                {
+                    // Task may have already completed or been cancelled, ignore
                 }
 
-                _isDisposed = true;
+                if (_listenTask.IsCompleted)  
+                {                    
+                    // Step 4: Now safe to dispose synchronization primitives
+                    // Wrap in try-catch to prevent disposal exceptions
+                    try
+                    {
+                        _rwLock.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWarning(ex, "Exception disposing ReaderWriterLockSlim during cleanup");
+                    }
+
+                    try
+                    {
+                        _semaphore.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWarning(ex, "Exception disposing SemaphoreSlim during cleanup");
+                    } 
+                }
+                else
+                {
+                    _log.LogWarning("Background listen task did not complete in time; skipping disposal of synchronization primitives to avoid ObjectDisposedException race conditions.");  
+                }
+
+                _tokenSource.Dispose();
+
+                // Step 5: Dispose platform listeners
+                try
+                {
+                    _hidListener.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    _log.LogWarning(ex, "Exception disposing HidDeviceListener during cleanup");
+                }
+
+                try
+                {
+                    _smartCardListener.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    _log.LogWarning(ex, "Exception disposing SmartCardDeviceListener during cleanup");
+                }
+
+                if (ReferenceEquals(_lazyInstance, this))
+                {
+                    _lazyInstance = null;
+                }
             }
+
+            _isDisposed = true;
         }
 
         ~YubiKeyDeviceListener()
@@ -571,7 +573,6 @@ namespace Yubico.YubiKey
             Dispose(false);
         }
 
-        // This code added to correctly implement the disposable pattern.
         /// <summary>
         /// Calls Dispose(true).
         /// </summary>

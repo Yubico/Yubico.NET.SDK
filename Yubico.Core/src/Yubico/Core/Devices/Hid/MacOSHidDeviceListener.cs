@@ -50,40 +50,56 @@ namespace Yubico.Core.Devices.Hid
         // Start listening as soon as this object is constructed.
         public MacOSHidDeviceListener()
         {
-            _log.LogInformation("Creating MacOSHidDeviceListener.");
+            _log.LogInformation("[TELEMETRY] MacOSHidDeviceListener constructor called on thread {ThreadId}", Environment.CurrentManagedThreadId);
             StartListening();
+            _log.LogInformation("[TELEMETRY] MacOSHidDeviceListener constructor complete");
         }
 
         ~MacOSHidDeviceListener()
         {
+            _log.LogInformation("[TELEMETRY] MacOSHidDeviceListener finalizer called");
             Dispose(false);
         }
 
         private void StartListening()
         {
+            _log.LogInformation("[TELEMETRY] StartListening() called, creating background thread");
             _listenerThread = new Thread(ListeningThread)
             {
                 IsBackground = true
             };
             _listenerThread.Start();
+            _log.LogInformation("[TELEMETRY] Background thread started");
         }
 
         private void StopListening()
         {
+            _log.LogInformation("[TELEMETRY] StopListening() called");
+
             // Use local variables to prevent race condition if multiple threads call StopListening()
             Thread? threadToJoin = _listenerThread;
             IntPtr? runLoopToStop = _runLoop;
 
+            _log.LogInformation("[TELEMETRY] Setting _shouldStop flag to true");
+
             // Set cancellation flag (Apple's recommended pattern)
             // Thread will check this flag and exit on next loop iteration
             _shouldStop = true;
+
+            _log.LogInformation("[TELEMETRY] _shouldStop flag set. RunLoop pointer: {RunLoop}", runLoopToStop);
 
             // Also call CFRunLoopStop() as best-effort to wake the thread immediately
             // This is not strictly necessary (flag will work), but reduces latency
             // If thread hasn't initialized _runLoop yet, that's fine - flag will handle it
             if (runLoopToStop.HasValue && runLoopToStop != IntPtr.Zero)
             {
+                _log.LogInformation("[TELEMETRY] Calling CFRunLoopStop({RunLoop})", runLoopToStop.Value);
                 CFRunLoopStop(runLoopToStop.Value);
+                _log.LogInformation("[TELEMETRY] CFRunLoopStop() returned");
+            }
+            else
+            {
+                _log.LogInformation("[TELEMETRY] Skipping CFRunLoopStop (runLoop not initialized)");
             }
 
             // Wait for thread to exit with timeout
@@ -91,34 +107,54 @@ namespace Yubico.Core.Devices.Hid
             // Reduced from 3s since flag-based exit is reliable
             if (threadToJoin != null)
             {
+                _log.LogInformation("[TELEMETRY] Waiting for thread to exit (1 second timeout)...");
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
                 bool exited = threadToJoin.Join(TimeSpan.FromSeconds(1));
-                if (!exited)
+                stopwatch.Stop();
+
+                if (exited)
                 {
-                    _log.LogWarning("Unexpected: Listener thread blocked during disposal despite cancellation flag.");
+                    _log.LogInformation("[TELEMETRY] Thread exited successfully after {Elapsed}ms", stopwatch.ElapsedMilliseconds);
                 }
+                else
+                {
+                    _log.LogWarning("[TELEMETRY] HANG DETECTED! Thread did not exit after {Elapsed}ms", stopwatch.ElapsedMilliseconds);
+                }
+            }
+            else
+            {
+                _log.LogInformation("[TELEMETRY] No thread to join");
             }
 
             // Clear fields to make StopListening() idempotent
             _runLoop = null;
             _listenerThread = null;
+
+            _log.LogInformation("[TELEMETRY] StopListening() complete");
         }
 
         protected override void Dispose(bool disposing)
         {
+            _log.LogInformation("[TELEMETRY] Dispose(disposing={Disposing}) called on thread {ThreadId}", disposing, Environment.CurrentManagedThreadId);
+
             lock (_disposeLock)
             {
                 if (_isDisposed)
                 {
+                    _log.LogInformation("[TELEMETRY] Already disposed, returning early");
                     return;
                 }
 
+                _log.LogInformation("[TELEMETRY] Setting _isDisposed = true");
                 _isDisposed = true;
 
                 try
                 {
                     // Stop the listening thread and wait for it to complete
                     // This ensures ListeningThread's finally block runs and cleans up native resources
+                    _log.LogInformation("[TELEMETRY] Calling StopListening()...");
                     StopListening();
+                    _log.LogInformation("[TELEMETRY] StopListening() returned");
 
                     // Clear delegate references to allow garbage collection
                     // Must be done AFTER StopListening() to ensure callbacks aren't invoked on null delegates
@@ -131,13 +167,15 @@ namespace Yubico.Core.Devices.Hid
                     // Throwing from finalizer will crash the GC thread and terminate the application
                     if (disposing)
                     {
-                        _log.LogWarning(ex, "Exception during MacOSHidDeviceListener disposal");
+                        _log.LogWarning(ex, "[TELEMETRY] Exception during MacOSHidDeviceListener disposal");
                     }
                     // If !disposing (finalizer path), silently ignore to prevent GC thread crash
                 }
                 finally
                 {
+                    _log.LogInformation("[TELEMETRY] Calling base.Dispose({Disposing})", disposing);
                     base.Dispose(disposing);
+                    _log.LogInformation("[TELEMETRY] Dispose complete");
                 }
             }
         }
@@ -207,12 +245,33 @@ namespace Yubico.Core.Devices.Hid
                 // Apple's recommended pattern: while (!_shouldStop) { CFRunLoopRunInMode(...); }
                 // This ensures the thread exits promptly when disposal sets _shouldStop = true
                 // We also check return codes to exit on unexpected errors
-                _log.LogInformation("Beginning run loop polling.");
+                _log.LogInformation("[TELEMETRY] Entering run loop. _shouldStop={ShouldStop}", _shouldStop);
+                int loopIterations = 0;
                 while (!_shouldStop && (runLoopResult == kCFRunLoopRunHandledSource || runLoopResult == kCFRunLoopRunTimedOut))
                 {
+                    loopIterations++;
+
+                    // Log every iteration for first 50, then every 10th to avoid spam
+                    bool shouldLog = loopIterations <= 50 || loopIterations % 10 == 0;
+
+                    if (shouldLog)
+                    {
+                        _log.LogInformation("[TELEMETRY] Loop iter {Iteration}: _shouldStop={ShouldStop}, prevResult={Result}, calling CFRunLoopRunInMode...",
+                            loopIterations, _shouldStop, runLoopResult);
+                    }
+
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
                     runLoopResult = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, true);
+                    sw.Stop();
+
+                    if (shouldLog)
+                    {
+                        _log.LogInformation("[TELEMETRY] Loop iter {Iteration}: CFRunLoopRunInMode returned {Result} after {Elapsed}ms",
+                            loopIterations, runLoopResult, sw.ElapsedMilliseconds);
+                    }
                 }
-                _log.LogInformation("Run loop exited.");
+                _log.LogInformation("[TELEMETRY] Run loop exited after {Iterations} iterations. _shouldStop={ShouldStop}, finalResult={Result}",
+                    loopIterations, _shouldStop, runLoopResult);
 
                 if (runLoopResult != kCFRunLoopRunStopped)
                 {
@@ -229,20 +288,21 @@ namespace Yubico.Core.Devices.Hid
             {
                 // Clean up thread-local native resources
                 // Wrap in try-catch to prevent P/Invoke exceptions from crashing the background thread
-                _log.LogInformation("Cleaning up native resources for listener thread.");
+                _log.LogInformation("[TELEMETRY] Listener thread finally block - cleaning up native resources");
 
                 try
                 {
                     // Unschedule manager from run loop before releasing
                     if (_runLoop.HasValue && manager != IntPtr.Zero && runLoopMode != IntPtr.Zero)
                     {
+                        _log.LogInformation("[TELEMETRY] Unscheduling IOHIDManager from run loop");
                         IOHIDManagerUnscheduleFromRunLoop(manager, _runLoop.Value, runLoopMode);
-                        _log.LogInformation("IOHIDManager unscheduled from run loop.");
+                        _log.LogInformation("[TELEMETRY] IOHIDManager unscheduled from run loop");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _log.LogError(ex, "Exception unscheduling IOHIDManager from run loop.");
+                    _log.LogError(ex, "[TELEMETRY] Exception unscheduling IOHIDManager from run loop");
                 }
 
                 try
@@ -250,13 +310,14 @@ namespace Yubico.Core.Devices.Hid
                     // Release the IOHIDManager
                     if (manager != IntPtr.Zero)
                     {
+                        _log.LogInformation("[TELEMETRY] Releasing IOHIDManager");
                         CFRelease(manager);
-                        _log.LogInformation("IOHIDManager released.");
+                        _log.LogInformation("[TELEMETRY] IOHIDManager released");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _log.LogError(ex, "Exception releasing IOHIDManager.");
+                    _log.LogError(ex, "[TELEMETRY] Exception releasing IOHIDManager");
                 }
 
                 try
@@ -264,16 +325,17 @@ namespace Yubico.Core.Devices.Hid
                     // Release the run loop mode CFString
                     if (runLoopMode != IntPtr.Zero)
                     {
+                        _log.LogInformation("[TELEMETRY] Releasing run loop mode CFString");
                         CFRelease(runLoopMode);
-                        _log.LogInformation("Run loop mode CFString released.");
+                        _log.LogInformation("[TELEMETRY] Run loop mode CFString released");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _log.LogError(ex, "Exception releasing run loop mode CFString.");
+                    _log.LogError(ex, "[TELEMETRY] Exception releasing run loop mode CFString");
                 }
 
-                _log.LogInformation("Listener thread cleanup complete.");
+                _log.LogInformation("[TELEMETRY] Listener thread cleanup complete - thread exiting");
             }
         }
 

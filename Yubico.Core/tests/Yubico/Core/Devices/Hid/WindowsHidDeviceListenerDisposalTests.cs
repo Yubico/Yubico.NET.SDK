@@ -321,7 +321,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             stopwatch.Stop();
 
             Assert.Null(exception);
-            Assert.True(stopwatch.ElapsedMilliseconds < 100);
+            Assert.True(stopwatch.ElapsedMilliseconds < 100,
+                $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <100ms");
         }
 
         /// <summary>

@@ -182,7 +182,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             // If CFRunLoopStop works, this should complete quickly
             Assert.True(stopwatch.ElapsedMilliseconds < 500,
-                "CFRunLoop did not stop in reasonable time");
+                $"CFRunLoop took {stopwatch.ElapsedMilliseconds}, expected < 500 ms");
         }
 
         /// <summary>
@@ -277,7 +277,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             stopwatch.Stop();
 
             Assert.Null(exception);
-            Assert.True(stopwatch.ElapsedMilliseconds < 500);
+            Assert.True(stopwatch.ElapsedMilliseconds < 500,
+                $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <500ms");
         }
 
         /// <summary>

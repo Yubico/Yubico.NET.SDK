@@ -227,7 +227,8 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             stopwatch.Stop();
 
             Assert.Null(exception);
-            Assert.True(stopwatch.ElapsedMilliseconds < 5500);
+            Assert.True(stopwatch.ElapsedMilliseconds < 5500,
+                $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <5500ms");
         }
 
         /// <summary>

@@ -71,7 +71,15 @@ namespace Yubico.Core.Devices.Hid
                 CFRunLoopStop(runLoopToStop.Value);
             }
 
-            threadToJoin?.Join();
+            // Wait for thread to exit with timeout to prevent indefinite blocking
+            if (threadToJoin != null)
+            {
+                bool exited = threadToJoin.Join(TimeSpan.FromSeconds(3));
+                if (!exited)
+                {
+                    _log.LogWarning("Unexpected: Listener thread blocked during disposal despite CFRunLoopStop.");
+                }
+            }
 
             // Clear fields to make StopListening() idempotent
             _runLoop = null;

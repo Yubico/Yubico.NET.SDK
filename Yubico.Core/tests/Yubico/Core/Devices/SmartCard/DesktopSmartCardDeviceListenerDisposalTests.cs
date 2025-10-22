@@ -255,29 +255,6 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         }
 
         /// <summary>
-        /// Verifies that concurrent StartListening calls don't create multiple threads.
-        /// </summary>
-        [Fact]
-        public void ConcurrentStartListening_DoesNotCreateMultipleThreads()
-        {
-            // This test is implicitly validated by Create() which calls StartListening()
-            // The thread count tests above would fail if multiple threads were created
-            var listener = SmartCardDeviceListener.Create();
-
-            Thread.Sleep(100); // Let listener start
-            int threadCount1 = Process.GetCurrentProcess().Threads.Count;
-
-            // Dispose and verify cleanup
-            listener.Dispose();
-            Thread.Sleep(500);
-
-            int threadCount2 = Process.GetCurrentProcess().Threads.Count;
-
-            // Thread count should decrease (±2 for variance)
-            Assert.InRange(threadCount2, threadCount2, threadCount1 + 2);
-        }
-
-        /// <summary>
         /// Verifies that event handlers are cleared during disposal.
         /// </summary>
         [Fact]

@@ -321,27 +321,31 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             // Create listener and let it go out of scope without disposing
-            string instanceId = CreateAndAbandonListener();
-            _output.WriteLine($"[TEST] Abandoned listener without disposing: {instanceId}");
+            CreateAndAbandonListener();
+            _output.WriteLine("[TEST] Abandoned listener without disposing");
 
-            // Force GC and finalizers to run
+            // Force GC and finalizers to run - be aggressive to ensure finalization
             _output.WriteLine("[TEST] Forcing GC to run finalizers...");
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
+            for (int i = 0; i < 3; i++)
+            {
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+                GC.WaitForPendingFinalizers();
+            }
+            _output.WriteLine("[TEST] GC cycle completed");
+
+            // Give finalizer thread time to complete cleanup
+            Thread.Sleep(2000);
 
             // If we get here, finalizer didn't crash
-            _output.WriteLine($"[TEST] Finalizer for {instanceId} completed without crashing GC thread");
+            _output.WriteLine("[TEST] Finalizer completed without crashing GC thread");
             Assert.True(true);
         }
 
-        private static string CreateAndAbandonListener()
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        private static void CreateAndAbandonListener()
         {
-            var listener = HidDeviceListener.Create();
-            var macListener = listener as MacOSHidDeviceListener;
-            string instanceId = macListener?.InstanceId ?? "unknown";
+            _ = HidDeviceListener.Create();
             // Let it go out of scope without disposing
-            return instanceId;
         }
 
         /// <summary>

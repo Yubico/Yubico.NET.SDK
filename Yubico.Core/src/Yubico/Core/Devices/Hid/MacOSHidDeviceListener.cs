@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using static Yubico.PlatformInterop.NativeMethods;
@@ -25,9 +24,17 @@ namespace Yubico.Core.Devices.Hid
     /// </summary>
     internal class MacOSHidDeviceListener : HidDeviceListener
     {
+        // Apple's standard run loop mode for normal operation
+        // https://developer.apple.com/documentation/corefoundation/default-run-loop-mode
+        private const string kCFRunLoopDefaultMode = "kCFRunLoopDefaultMode";
+
         private Thread? _listenerThread;
         private IntPtr? _runLoop;
-        private readonly ManualResetEventSlim _runLoopReady = new ManualResetEventSlim(false);
+
+        // Volatile flag for thread-safe cancellation
+        // Using Apple's recommended pattern: while (!_shouldStop) { CFRunLoopRunInMode(...); }
+        // This ensures disposal exits quickly without depending on CFRunLoopStop() timing
+        private volatile bool _shouldStop;
 
         // Keep strong references to delegates to prevent garbage collection
         // Native IOHIDManager stores function pointers to these callbacks
@@ -65,30 +72,29 @@ namespace Yubico.Core.Devices.Hid
         {
             // Use local variables to prevent race condition if multiple threads call StopListening()
             Thread? threadToJoin = _listenerThread;
-
-            // CRITICAL: Wait for run loop to be initialized before stopping it
-            // Without this, disposal can race with thread startup and never call CFRunLoopStop()
-            // This would cause the thread to block indefinitely in CFRunLoopRunInMode()
-            // Timeout ensures we don't block forever if thread fails to start
-            bool runLoopInitialized = _runLoopReady.Wait(TimeSpan.FromSeconds(5));
-            if (!runLoopInitialized)
-            {
-                _log.LogWarning("Run loop did not initialize within timeout during disposal");
-            }
-
             IntPtr? runLoopToStop = _runLoop;
+
+            // Set cancellation flag (Apple's recommended pattern)
+            // Thread will check this flag and exit on next loop iteration
+            _shouldStop = true;
+
+            // Also call CFRunLoopStop() as best-effort to wake the thread immediately
+            // This is not strictly necessary (flag will work), but reduces latency
+            // If thread hasn't initialized _runLoop yet, that's fine - flag will handle it
             if (runLoopToStop.HasValue && runLoopToStop != IntPtr.Zero)
             {
                 CFRunLoopStop(runLoopToStop.Value);
             }
 
-            // Wait for thread to exit with timeout to prevent indefinite blocking
+            // Wait for thread to exit with timeout
+            // Expected: ~100-200ms (one poll interval) thanks to cancellation flag
+            // Reduced from 3s since flag-based exit is reliable
             if (threadToJoin != null)
             {
-                bool exited = threadToJoin.Join(TimeSpan.FromSeconds(3));
+                bool exited = threadToJoin.Join(TimeSpan.FromSeconds(1));
                 if (!exited)
                 {
-                    _log.LogWarning("Unexpected: Listener thread blocked during disposal despite CFRunLoopStop.");
+                    _log.LogWarning("Unexpected: Listener thread blocked during disposal despite cancellation flag.");
                 }
             }
 
@@ -118,12 +124,6 @@ namespace Yubico.Core.Devices.Hid
                     // Must be done AFTER StopListening() to ensure callbacks aren't invoked on null delegates
                     _arrivedCallbackDelegate = null;
                     _removedCallbackDelegate = null;
-
-                    // Dispose synchronization primitive
-                    if (disposing)
-                    {
-                        _runLoopReady.Dispose();
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -170,17 +170,14 @@ namespace Yubico.Core.Devices.Hid
 
             try
             {
-                byte[] cstr = Encoding.UTF8.GetBytes($"default-runloop-{Environment.CurrentManagedThreadId}");
-                runLoopMode = CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
+                // Create CFString for kCFRunLoopDefaultMode constant
+                byte[] modeBytes = System.Text.Encoding.UTF8.GetBytes(kCFRunLoopDefaultMode + "\0");
+                runLoopMode = CFStringCreateWithCString(IntPtr.Zero, modeBytes, 0);
 
                 manager = IOHIDManagerCreate(IntPtr.Zero, 0);
                 IOHIDManagerSetDeviceMatching(manager, IntPtr.Zero);
 
                 _runLoop = CFRunLoopGetCurrent();
-
-                // Signal that run loop is ready BEFORE scheduling with manager
-                // This prevents disposal race condition where Dispose() is called before run loop is initialized
-                _runLoopReady.Set();
 
                 IOHIDManagerScheduleWithRunLoop(manager, _runLoop.Value, runLoopMode);
 
@@ -188,7 +185,7 @@ namespace Yubico.Core.Devices.Hid
                     "IOHIDManager {Manager} is scheduled with run loop {Loop} with mode {Mode}",
                     manager,
                     _runLoop,
-                    runLoopMode);
+                    kCFRunLoopDefaultMode);  // Log the constant string name
 
                 // MacOS returns both present and future device events. We're only interested in the future ones, so let's
                 // clear out the ones that are already present.
@@ -207,10 +204,11 @@ namespace Yubico.Core.Devices.Hid
 
                 int runLoopResult = kCFRunLoopRunHandledSource;
 
-                // This is essentially an infinite loop (hence running this on its own thread). This can be broken if
-                // an error is encountered, or if someone calls CFRunLoopStop as is done in StopListening/Finalizer.
+                // Apple's recommended pattern: while (!_shouldStop) { CFRunLoopRunInMode(...); }
+                // This ensures the thread exits promptly when disposal sets _shouldStop = true
+                // We also check return codes to exit on unexpected errors
                 _log.LogInformation("Beginning run loop polling.");
-                while (runLoopResult == kCFRunLoopRunHandledSource || runLoopResult == kCFRunLoopRunTimedOut)
+                while (!_shouldStop && (runLoopResult == kCFRunLoopRunHandledSource || runLoopResult == kCFRunLoopRunTimedOut))
                 {
                     runLoopResult = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, true);
                 }
@@ -236,7 +234,7 @@ namespace Yubico.Core.Devices.Hid
                 try
                 {
                     // Unschedule manager from run loop before releasing
-                    if (_runLoop.HasValue && manager != IntPtr.Zero)
+                    if (_runLoop.HasValue && manager != IntPtr.Zero && runLoopMode != IntPtr.Zero)
                     {
                         IOHIDManagerUnscheduleFromRunLoop(manager, _runLoop.Value, runLoopMode);
                         _log.LogInformation("IOHIDManager unscheduled from run loop.");
@@ -249,7 +247,7 @@ namespace Yubico.Core.Devices.Hid
 
                 try
                 {
-                    // Release the IOHIDManager (FIX: This was missing - memory leak!)
+                    // Release the IOHIDManager
                     if (manager != IntPtr.Zero)
                     {
                         CFRelease(manager);
@@ -263,16 +261,16 @@ namespace Yubico.Core.Devices.Hid
 
                 try
                 {
-                    // Release the run loop mode string
+                    // Release the run loop mode CFString
                     if (runLoopMode != IntPtr.Zero)
                     {
                         CFRelease(runLoopMode);
-                        _log.LogInformation("Run loop mode string released.");
+                        _log.LogInformation("Run loop mode CFString released.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _log.LogError(ex, "Exception releasing run loop mode string.");
+                    _log.LogError(ex, "Exception releasing run loop mode CFString.");
                 }
 
                 _log.LogInformation("Listener thread cleanup complete.");

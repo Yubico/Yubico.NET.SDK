@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid.UnitTests
@@ -27,6 +28,12 @@ namespace Yubico.Core.Devices.Hid.UnitTests
     /// </summary>
     public class MacOSHidDeviceListenerDisposalTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public MacOSHidDeviceListenerDisposalTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
         /// <summary>
         /// Verifies that Dispose() completes within a reasonable time.
         /// macOS listener uses CFRunLoopStop which should be fast.
@@ -34,6 +41,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public void Dispose_CompletesWithinReasonableTime()
         {
+            _output.WriteLine("=== TEST START: Dispose_CompletesWithinReasonableTime ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             var listener = HidDeviceListener.Create();
@@ -55,6 +63,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public void Dispose_CalledMultipleTimes_IsIdempotent()
         {
+            _output.WriteLine("=== TEST START: Dispose_CalledMultipleTimes_IsIdempotent ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             var listener = HidDeviceListener.Create();
@@ -79,6 +88,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public void RepeatedCreateDispose_NoLeaks()
         {
+            _output.WriteLine("=== TEST START: RepeatedCreateDispose_NoLeaks ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             int portCountBefore = GetMachPortCount();
@@ -119,6 +129,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public async Task ConcurrentDispose_IsThreadSafe()
         {
+            _output.WriteLine("=== TEST START: ConcurrentDispose_IsThreadSafe ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             var listener = HidDeviceListener.Create();
@@ -141,6 +152,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public void Dispose_TerminatesListenerThread()
         {
+            _output.WriteLine("=== TEST START: Dispose_TerminatesListenerThread ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             int threadCountBefore = Process.GetCurrentProcess().Threads.Count;
@@ -170,6 +182,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public void Dispose_StopsCFRunLoop()
         {
+            _output.WriteLine("=== TEST START: Dispose_StopsCFRunLoop ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             var listener = HidDeviceListener.Create();
@@ -192,6 +205,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public async Task ParallelCreateDispose_NoLeaksOrDeadlocks()
         {
+            _output.WriteLine("=== TEST START: ParallelCreateDispose_NoLeaksOrDeadlocks ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             int threadCountBefore = Process.GetCurrentProcess().Threads.Count;
@@ -234,6 +248,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public void SequentialCreateDispose_HighIterations_NoLeaks()
         {
+            _output.WriteLine("=== TEST START: SequentialCreateDispose_HighIterations_NoLeaks ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             int threadCountBefore = Process.GetCurrentProcess().Threads.Count;
@@ -267,6 +282,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public void Dispose_UnusedListener_Succeeds()
         {
+            _output.WriteLine("=== TEST START: Dispose_UnusedListener_Succeeds ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             var listener = HidDeviceListener.Create();
@@ -287,6 +303,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public void Finalizer_DoesNotCrashGCThread()
         {
+            _output.WriteLine("=== TEST START: Finalizer_DoesNotCrashGCThread ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             // Create listener and let it go out of scope without disposing
@@ -313,6 +330,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public void Dispose_StopsIOKitCallbacks()
         {
+            _output.WriteLine("=== TEST START: Dispose_StopsIOKitCallbacks ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             var listener = HidDeviceListener.Create();
@@ -339,6 +357,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [SkippableFact]
         public void Dispose_ClearsDelegateReferences()
         {
+            _output.WriteLine("=== TEST START: Dispose_ClearsDelegateReferences ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             var listener = HidDeviceListener.Create();

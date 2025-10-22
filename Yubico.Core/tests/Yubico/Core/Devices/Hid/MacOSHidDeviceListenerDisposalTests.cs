@@ -45,6 +45,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             var listener = HidDeviceListener.Create();
+            var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[TEST] Created listener instance: {macListener?.InstanceId ?? "unknown"}");
 
             var stopwatch = Stopwatch.StartNew();
             listener.Dispose();
@@ -54,6 +56,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Allow more time than Linux due to CFRunLoop wake latency
             Assert.True(stopwatch.ElapsedMilliseconds < 500,
                 $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <500ms");
+            _output.WriteLine($"[TEST] Instance {macListener?.InstanceId} disposed in {stopwatch.ElapsedMilliseconds}ms");
         }
 
         /// <summary>
@@ -216,10 +219,15 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             var tasks = new Task[30];
             for (int i = 0; i < 30; i++)
             {
+                int taskNum = i; // Capture for closure
                 tasks[i] = Task.Run(() =>
                 {
                     using var listener = HidDeviceListener.Create();
+                    var macListener = listener as MacOSHidDeviceListener;
+                    string instanceId = macListener?.InstanceId ?? "unknown";
+                    _output.WriteLine($"[TEST-Task{taskNum:D2}] Created listener: {instanceId}");
                     Thread.Sleep(50); // Hold briefly to ensure thread starts
+                    _output.WriteLine($"[TEST-Task{taskNum:D2}] Disposing listener: {instanceId}");
                 });
             }
 
@@ -259,6 +267,12 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             for (int i = 0; i < 500; i++)
             {
                 using var listener = HidDeviceListener.Create();
+                var macListener = listener as MacOSHidDeviceListener;
+                // Log every 50th iteration to avoid spam
+                if (i % 50 == 0 || i < 5)
+                {
+                    _output.WriteLine($"[TEST-Iteration{i:D3}] Created listener: {macListener?.InstanceId ?? "unknown"}");
+                }
                 Thread.Sleep(10); // Brief hold to ensure thread lifecycle
             }
 
@@ -307,21 +321,27 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             // Create listener and let it go out of scope without disposing
-            CreateAndAbandonListener();
+            string instanceId = CreateAndAbandonListener();
+            _output.WriteLine($"[TEST] Abandoned listener without disposing: {instanceId}");
 
             // Force GC and finalizers to run
+            _output.WriteLine("[TEST] Forcing GC to run finalizers...");
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
             // If we get here, finalizer didn't crash
+            _output.WriteLine($"[TEST] Finalizer for {instanceId} completed without crashing GC thread");
             Assert.True(true);
         }
 
-        private static void CreateAndAbandonListener()
+        private static string CreateAndAbandonListener()
         {
-            _ = HidDeviceListener.Create();
+            var listener = HidDeviceListener.Create();
+            var macListener = listener as MacOSHidDeviceListener;
+            string instanceId = macListener?.InstanceId ?? "unknown";
             // Let it go out of scope without disposing
+            return instanceId;
         }
 
         /// <summary>
@@ -334,6 +354,9 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             var listener = HidDeviceListener.Create();
+            var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[TEST] Created listener: {macListener?.InstanceId ?? "unknown"}");
+
             var callbackFired = false;
 
             listener.Arrived += (s, e) =>
@@ -341,6 +364,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                 callbackFired = true;
             };
 
+            _output.WriteLine($"[TEST] Disposing listener: {macListener?.InstanceId ?? "unknown"}");
             listener.Dispose();
 
             // Wait a bit to see if any callbacks fire (they shouldn't)
@@ -349,6 +373,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // We can't easily trigger a device event in tests, but we can verify
             // that disposal completed without errors
             Assert.False(callbackFired, "No device events should fire in test environment");
+            _output.WriteLine($"[TEST] Verified no callbacks fired for {macListener?.InstanceId ?? "unknown"}");
         }
 
         /// <summary>
@@ -361,17 +386,22 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
             var listener = HidDeviceListener.Create();
+            var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[TEST] Created listener: {macListener?.InstanceId ?? "unknown"}");
 
             listener.Arrived += (s, e) => { };
             listener.Removed += (s, e) => { };
 
+            _output.WriteLine($"[TEST] Disposing listener: {macListener?.InstanceId ?? "unknown"}");
             listener.Dispose();
 
             // Force GC to verify delegates can be collected
+            _output.WriteLine($"[TEST] Forcing GC to collect delegates for {macListener?.InstanceId ?? "unknown"}");
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
             // If we get here without issues, delegates were properly released
+            _output.WriteLine($"[TEST] Delegates properly released for {macListener?.InstanceId ?? "unknown"}");
             Assert.True(true);
         }
 

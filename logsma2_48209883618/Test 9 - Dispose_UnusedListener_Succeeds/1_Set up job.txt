@@ -1,0 +1,31 @@
+﻿2025-10-22T21:57:42.5732730Z Current runner version: '2.329.0'
+2025-10-22T21:57:42.5746360Z ##[group]Runner Image Provisioner
+2025-10-22T21:57:42.5746800Z Hosted Compute Agent
+2025-10-22T21:57:42.5747110Z Version: 20251016.436
+2025-10-22T21:57:42.5747460Z Commit: 8ab8ac8bfd662a3739dab9fe09456aba92132568
+2025-10-22T21:57:42.5747890Z Build Date: 2025-10-15T20:44:12Z
+2025-10-22T21:57:42.5748230Z ##[endgroup]
+2025-10-22T21:57:42.5748540Z ##[group]Operating System
+2025-10-22T21:57:42.5748870Z macOS
+2025-10-22T21:57:42.5749160Z 15.6.1
+2025-10-22T21:57:42.5749430Z 24G90
+2025-10-22T21:57:42.5749700Z ##[endgroup]
+2025-10-22T21:57:42.5749990Z ##[group]Runner Image
+2025-10-22T21:57:42.5750290Z Image: macos-15-arm64
+2025-10-22T21:57:42.5750590Z Version: 20251015.0042
+2025-10-22T21:57:42.5751220Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20251015.0042/images/macos/macos-15-arm64-Readme.md
+2025-10-22T21:57:42.5752130Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20251015.0042
+2025-10-22T21:57:42.5752770Z ##[endgroup]
+2025-10-22T21:57:42.5753370Z ##[group]GITHUB_TOKEN Permissions
+2025-10-22T21:57:42.5754180Z Contents: read
+2025-10-22T21:57:42.5754460Z Metadata: read
+2025-10-22T21:57:42.5754730Z Packages: read
+2025-10-22T21:57:42.5755000Z ##[endgroup]
+2025-10-22T21:57:42.5756150Z Secret source: Actions
+2025-10-22T21:57:42.5756490Z Prepare workflow directory
+2025-10-22T21:57:42.5951840Z Prepare all required actions
+2025-10-22T21:57:42.5977410Z Getting action download info
+2025-10-22T21:57:42.9705810Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-22T21:57:43.2586260Z Download action repository 'actions/setup-dotnet@v4' (SHA:67a3573c9a986a3f9c594539f4ab511d57bb3ce9)
+2025-10-22T21:57:44.4964440Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-10-22T21:57:44.6472040Z Complete job name: Test 9 - Dispose_UnusedListener_Succeeds

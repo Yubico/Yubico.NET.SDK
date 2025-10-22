@@ -1,0 +1,52 @@
+name: macOS Disposal Tests - Combined Execution
+
+# Tests all 12 MacOSHidDeviceListenerDisposalTests together in one process
+# This validates that the finalizer fix prevents orphaned listeners that interfere with other tests
+
+on:
+  push:
+    branches:
+      - experiment/isolate-disposal-hang
+  pull_request:
+    branches:
+      - experiment/isolate-disposal-hang
+  workflow_dispatch:
+
+jobs:
+  combined-disposal-tests:
+    name: All 12 Disposal Tests Combined
+    runs-on: macos-latest
+    timeout-minutes: 15  # Increased timeout to allow all 12 tests to complete
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+
+      - name: Run All 12 Disposal Tests Together (COMBINED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+
+      - name: Upload Combined Test Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Combined-All-12-Tests
+          path: '**/TestResults/*'

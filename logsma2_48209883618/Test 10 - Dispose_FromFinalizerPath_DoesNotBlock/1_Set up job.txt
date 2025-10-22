@@ -1,0 +1,31 @@
+﻿2025-10-22T21:57:43.0561940Z Current runner version: '2.329.0'
+2025-10-22T21:57:43.0578540Z ##[group]Runner Image Provisioner
+2025-10-22T21:57:43.0579090Z Hosted Compute Agent
+2025-10-22T21:57:43.0579420Z Version: 20251016.436
+2025-10-22T21:57:43.0579790Z Commit: 8ab8ac8bfd662a3739dab9fe09456aba92132568
+2025-10-22T21:57:43.0580210Z Build Date: 2025-10-15T20:44:12Z
+2025-10-22T21:57:43.0580570Z ##[endgroup]
+2025-10-22T21:57:43.0580900Z ##[group]Operating System
+2025-10-22T21:57:43.0581230Z macOS
+2025-10-22T21:57:43.0581520Z 15.6.1
+2025-10-22T21:57:43.0581800Z 24G90
+2025-10-22T21:57:43.0582110Z ##[endgroup]
+2025-10-22T21:57:43.0582400Z ##[group]Runner Image
+2025-10-22T21:57:43.0582710Z Image: macos-15-arm64
+2025-10-22T21:57:43.0583020Z Version: 20251015.0042
+2025-10-22T21:57:43.0583690Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20251015.0042/images/macos/macos-15-arm64-Readme.md
+2025-10-22T21:57:43.0584650Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20251015.0042
+2025-10-22T21:57:43.0585450Z ##[endgroup]
+2025-10-22T21:57:43.0586180Z ##[group]GITHUB_TOKEN Permissions
+2025-10-22T21:57:43.0587580Z Contents: read
+2025-10-22T21:57:43.0587910Z Metadata: read
+2025-10-22T21:57:43.0588230Z Packages: read
+2025-10-22T21:57:43.0588550Z ##[endgroup]
+2025-10-22T21:57:43.0590040Z Secret source: Actions
+2025-10-22T21:57:43.0590440Z Prepare workflow directory
+2025-10-22T21:57:43.0917750Z Prepare all required actions
+2025-10-22T21:57:43.0956330Z Getting action download info
+2025-10-22T21:57:43.6042330Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-22T21:57:43.9013790Z Download action repository 'actions/setup-dotnet@v4' (SHA:67a3573c9a986a3f9c594539f4ab511d57bb3ce9)
+2025-10-22T21:57:44.6620170Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-10-22T21:57:44.8751520Z Complete job name: Test 10 - Dispose_FromFinalizerPath_DoesNotBlock

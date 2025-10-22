@@ -1,0 +1,202 @@
+﻿2025-10-22T21:57:54.5819120Z ##[group]Run dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_StopsCFRunLoop" --logger "console;verbosity=detailed"
+2025-10-22T21:57:54.5820460Z [36;1mdotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_StopsCFRunLoop" --logger "console;verbosity=detailed"[0m
+2025-10-22T21:57:54.5860050Z shell: /bin/bash -e {0}
+2025-10-22T21:57:54.5860320Z env:
+2025-10-22T21:57:54.5860530Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:57:54.5860870Z   Logging__LogLevel__Default: Information
+2025-10-22T21:57:54.5861130Z   Logging__LogLevel__Yubico: Information
+2025-10-22T21:57:54.5861370Z ##[endgroup]
+2025-10-22T21:57:55.3930020Z   Determining projects to restore...
+2025-10-22T21:57:59.0779150Z   Restored /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico.Core.UnitTests.csproj (in 3.21 sec).
+2025-10-22T21:57:59.3488550Z   Restored /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/src/Yubico.Core.csproj (in 3.51 sec).
+2025-10-22T21:58:04.3862670Z   Yubico.Core -> /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/src/bin/Debug/netstandard2.1/Yubico.Core.dll
+2025-10-22T21:58:06.9627900Z   Yubico.Core.UnitTests -> /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll
+2025-10-22T21:58:06.9797460Z Test run for /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll (.NETCoreApp,Version=v8.0)
+2025-10-22T21:58:07.3171610Z VSTest version 17.14.1 (arm64)
+2025-10-22T21:58:07.3272850Z 
+2025-10-22T21:58:07.4774920Z Starting test execution, please wait...
+2025-10-22T21:58:07.5107760Z A total of 1 test files matched the specified pattern.
+2025-10-22T21:58:07.5135340Z /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll
+2025-10-22T21:58:08.6228070Z [xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 8.0.21)
+2025-10-22T21:58:08.7017670Z [xUnit.net 00:00:00.09]   Discovering: Yubico.Core.UnitTests
+2025-10-22T21:58:08.7976410Z [xUnit.net 00:00:00.18]   Discovered:  Yubico.Core.UnitTests
+2025-10-22T21:58:08.8130200Z [xUnit.net 00:00:00.20]   Starting:    Yubico.Core.UnitTests
+2025-10-22T21:58:08.8960760Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.8962940Z       [TELEMETRY][L001] MacOSHidDeviceListener constructor called on thread 7
+2025-10-22T21:58:08.8963630Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.8964270Z       [TELEMETRY][L001] StartListening() called, creating background thread
+2025-10-22T21:58:08.8964860Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.8965340Z       [TELEMETRY][L001] Background thread started
+2025-10-22T21:58:08.8965940Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.8966480Z       [TELEMETRY][L001] MacOSHidDeviceListener constructor complete
+2025-10-22T21:58:08.8967110Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.8967680Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:08.8968130Z       HID listener thread started. ThreadID is 18.
+2025-10-22T21:58:08.9093800Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.9094410Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:08.9095380Z       IOHIDManager 4780587280 is scheduled with run loop 4511153376 with mode kCFRunLoopDefaultMode
+2025-10-22T21:58:08.9096080Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.9096440Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:08.9097480Z       Flushed existing devices.
+2025-10-22T21:58:08.9097940Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.9098300Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:08.9098630Z       [TELEMETRY][L001] Entering run loop. _shouldStop=False
+2025-10-22T21:58:08.9100080Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.9100610Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:08.9101000Z       [TELEMETRY][L001] Loop iter 1: _shouldStop=False, prevResult=4, calling CFRunLoopRunInMode...
+2025-10-22T21:58:09.0326150Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0333060Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=7, _isDisposed=False, _shouldStop=False
+2025-10-22T21:58:09.0336340Z         CallStack:
+2025-10-22T21:58:09.0337290Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:09.0338310Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:09.0339540Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.Dispose_StopsCFRunLoop() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 233
+2025-10-22T21:58:09.0341560Z          at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+2025-10-22T21:58:09.0342410Z          at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+2025-10-22T21:58:09.0343240Z          at Xunit.Sdk.TestInvoker`1.CallTestMethod(Object testClassInstance) in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 149
+2025-10-22T21:58:09.0344300Z          at Xunit.Sdk.TestInvoker`1.<>c__DisplayClass47_0.<<InvokeTestMethodAsync>b__1>d.MoveNext() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 256
+2025-10-22T21:58:09.0345200Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0346000Z          at Xunit.Sdk.TestInvoker`1.<>c__DisplayClass47_0.<InvokeTestMethodAsync>b__1()
+2025-10-22T21:58:09.0346810Z          at Xunit.Sdk.ExecutionTimer.AggregateAsync(Func`1 asyncAction) in /_/src/xunit.execution/Sdk/Frameworks/ExecutionTimer.cs:line 48
+2025-10-22T21:58:09.0362720Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0371030Z          at Xunit.Sdk.ExecutionTimer.AggregateAsync(Func`1 asyncAction)
+2025-10-22T21:58:09.0371990Z          at Xunit.Sdk.TestInvoker`1.<>c__DisplayClass47_0.<InvokeTestMethodAsync>b__0() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 215
+2025-10-22T21:58:09.0372880Z          at Xunit.Sdk.ExceptionAggregator.RunAsync(Func`1 code) in /_/src/xunit.core/Sdk/ExceptionAggregator.cs:line 90
+2025-10-22T21:58:09.0373750Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0374480Z          at Xunit.Sdk.ExceptionAggregator.RunAsync(Func`1 code)
+2025-10-22T21:58:09.0375200Z          at Xunit.Sdk.TestInvoker`1.InvokeTestMethodAsync(Object testClassInstance) in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 214
+2025-10-22T21:58:09.0376150Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0376890Z          at Xunit.Sdk.TestInvoker`1.InvokeTestMethodAsync(Object testClassInstance)
+2025-10-22T21:58:09.0377710Z          at Xunit.Sdk.XunitTestInvoker.InvokeTestMethodAsync(Object testClassInstance) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestInvoker.cs:line 112
+2025-10-22T21:58:09.0378690Z          at Xunit.Sdk.TestInvoker`1.<RunAsync>b__46_0() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 180
+2025-10-22T21:58:09.0379570Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0380790Z          at Xunit.Sdk.TestInvoker`1.<RunAsync>b__46_0()
+2025-10-22T21:58:09.0381400Z          at Xunit.Sdk.ExceptionAggregator.RunAsync[T](Func`1 code) in /_/src/xunit.core/Sdk/ExceptionAggregator.cs:line 107
+2025-10-22T21:58:09.0382290Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0383950Z          at Xunit.Sdk.ExceptionAggregator.RunAsync[T](Func`1 code)
+2025-10-22T21:58:09.0384590Z          at Xunit.Sdk.TestInvoker`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 163
+2025-10-22T21:58:09.0385480Z          at Xunit.Sdk.XunitTestRunner.InvokeTestMethodAsync(ExceptionAggregator aggregator) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestRunner.cs:line 88
+2025-10-22T21:58:09.0386830Z          at Xunit.Sdk.XunitTestRunner.InvokeTestAsync(ExceptionAggregator aggregator) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestRunner.cs:line 70
+2025-10-22T21:58:09.0387760Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0388480Z          at Xunit.Sdk.XunitTestRunner.InvokeTestAsync(ExceptionAggregator aggregator)
+2025-10-22T21:58:09.0389460Z          at Xunit.Sdk.TestRunner`1.<>c__DisplayClass43_0.<RunAsync>b__0() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestRunner.cs:line 149
+2025-10-22T21:58:09.0390320Z          at Xunit.Sdk.ExceptionAggregator.RunAsync[T](Func`1 code) in /_/src/xunit.core/Sdk/ExceptionAggregator.cs:line 107
+2025-10-22T21:58:09.0391180Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0391910Z          at Xunit.Sdk.ExceptionAggregator.RunAsync[T](Func`1 code)
+2025-10-22T21:58:09.0392570Z          at Xunit.Sdk.TestRunner`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestRunner.cs:line 149
+2025-10-22T21:58:09.0393330Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0394070Z          at Xunit.Sdk.TestRunner`1.RunAsync()
+2025-10-22T21:58:09.0394800Z          at Xunit.Sdk.XunitTestCaseRunner.RunTestAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestCaseRunner.cs:line 140
+2025-10-22T21:58:09.0395640Z          at Xunit.Sdk.TestCaseRunner`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestCaseRunner.cs:line 82
+2025-10-22T21:58:09.0396440Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0397180Z          at Xunit.Sdk.TestCaseRunner`1.RunAsync()
+2025-10-22T21:58:09.0398220Z          at Xunit.Sdk.XunitTestCase.RunAsync(IMessageSink diagnosticMessageSink, IMessageBus messageBus, Object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource) in /_/src/xunit.execution/Sdk/Frameworks/XunitTestCase.cs:line 170
+2025-10-22T21:58:09.0399710Z          at Xunit.Sdk.SkippableFactTestCase.<>n__0(IMessageSink diagnosticMessageSink, IMessageBus messageBus, Object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
+2025-10-22T21:58:09.0401100Z          at Xunit.Sdk.SkippableFactTestCase.RunAsync(IMessageSink diagnosticMessageSink, IMessageBus messageBus, Object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
+2025-10-22T21:58:09.0402180Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0403280Z          at Xunit.Sdk.SkippableFactTestCase.RunAsync(IMessageSink diagnosticMessageSink, IMessageBus messageBus, Object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
+2025-10-22T21:58:09.0404570Z          at Xunit.Sdk.XunitTestMethodRunner.RunTestCaseAsync(IXunitTestCase testCase) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestMethodRunner.cs:line 45
+2025-10-22T21:58:09.0405780Z          at Xunit.Sdk.TestMethodRunner`1.RunTestCasesAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestMethodRunner.cs:line 136
+2025-10-22T21:58:09.0406650Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0407540Z          at Xunit.Sdk.TestMethodRunner`1.RunTestCasesAsync()
+2025-10-22T21:58:09.0408230Z          at Xunit.Sdk.TestMethodRunner`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestMethodRunner.cs:line 106
+2025-10-22T21:58:09.0409030Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0409740Z          at Xunit.Sdk.TestMethodRunner`1.RunAsync()
+2025-10-22T21:58:09.0410720Z          at Xunit.Sdk.XunitTestClassRunner.RunTestMethodAsync(ITestMethod testMethod, IReflectionMethodInfo method, IEnumerable`1 testCases, Object[] constructorArguments) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestClassRunner.cs:line 206
+2025-10-22T21:58:09.0411710Z          at Xunit.Sdk.TestClassRunner`1.RunTestMethodsAsync()
+2025-10-22T21:58:09.0412430Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0413080Z          at Xunit.Sdk.TestClassRunner`1.RunTestMethodsAsync()
+2025-10-22T21:58:09.0413710Z          at Xunit.Sdk.TestClassRunner`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestClassRunner.cs:line 175
+2025-10-22T21:58:09.0414490Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0415230Z          at Xunit.Sdk.TestClassRunner`1.RunAsync()
+2025-10-22T21:58:09.0416220Z          at Xunit.Sdk.XunitTestCollectionRunner.RunTestClassAsync(ITestClass testClass, IReflectionTypeInfo class, IEnumerable`1 testCases) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestCollectionRunner.cs:line 185
+2025-10-22T21:58:09.0420070Z          at Xunit.Sdk.TestCollectionRunner`1.RunTestClassesAsync()
+2025-10-22T21:58:09.0424490Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0425480Z          at Xunit.Sdk.TestCollectionRunner`1.RunTestClassesAsync()
+2025-10-22T21:58:09.0426210Z          at Xunit.Sdk.TestCollectionRunner`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestCollectionRunner.cs:line 101
+2025-10-22T21:58:09.0427100Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0427850Z          at Xunit.Sdk.TestCollectionRunner`1.RunAsync()
+2025-10-22T21:58:09.0428970Z          at Xunit.Sdk.XunitTestAssemblyRunner.RunTestCollectionAsync(IMessageBus messageBus, ITestCollection testCollection, IEnumerable`1 testCases, CancellationTokenSource cancellationTokenSource) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestAssemblyRunner.cs:line 346
+2025-10-22T21:58:09.0430080Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0431210Z          at Xunit.Sdk.XunitTestAssemblyRunner.RunTestCollectionAsync(IMessageBus messageBus, ITestCollection testCollection, IEnumerable`1 testCases, CancellationTokenSource cancellationTokenSource)
+2025-10-22T21:58:09.0432420Z          at Xunit.Sdk.XunitTestAssemblyRunner.<>c__DisplayClass16_2.<RunTestCollectionsAsync>b__2() in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestAssemblyRunner.cs:line 250
+2025-10-22T21:58:09.0433310Z          at System.Threading.Tasks.Task`1.InnerInvoke()
+2025-10-22T21:58:09.0434230Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:09.0435230Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:09.0436160Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:09.0436880Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:09.0437480Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:09.0438250Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0439010Z       [TELEMETRY][L001] Setting _isDisposed = true
+2025-10-22T21:58:09.0439640Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0440250Z       [TELEMETRY][L001] Calling StopListening(fromFinalizer=False)...
+2025-10-22T21:58:09.0441000Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0441570Z       [TELEMETRY][L001] StopListening(fromFinalizer=False) called
+2025-10-22T21:58:09.0442190Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0442730Z       [TELEMETRY][L001] Setting _shouldStop flag to true
+2025-10-22T21:58:09.0443410Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0443990Z       [TELEMETRY][L001] _shouldStop flag set. RunLoop pointer: 4511153376
+2025-10-22T21:58:09.0444710Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0445280Z       [TELEMETRY][L001] Calling CFRunLoopStop(4511153376)
+2025-10-22T21:58:09.0445850Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0446450Z       [TELEMETRY][L001] CFRunLoopStop() returned
+2025-10-22T21:58:09.0447030Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0447580Z       [TELEMETRY][L001] Waiting for thread to exit (1 second timeout)...
+2025-10-22T21:58:09.0448300Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0448850Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0449410Z       [TELEMETRY][L001] Loop iter 1: CFRunLoopRunInMode returned 3 after 122ms
+2025-10-22T21:58:09.0450100Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0450640Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0451230Z       [TELEMETRY][L001] Run loop exited after 1 iterations. _shouldStop=True, finalResult=3
+2025-10-22T21:58:09.0451970Z fail: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0452530Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0453040Z       The run loop was terminated for an unexpected reason: 3
+2025-10-22T21:58:09.0453620Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0454250Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0454860Z       [TELEMETRY][L001] Listener thread finally block - cleaning up native resources
+2025-10-22T21:58:09.0455480Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0456430Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0457190Z       [TELEMETRY][L001] Unscheduling IOHIDManager from run loop
+2025-10-22T21:58:09.0457960Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0458660Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0459300Z       [TELEMETRY][L001] IOHIDManager unscheduled from run loop
+2025-10-22T21:58:09.0459980Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0460590Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0461060Z       [TELEMETRY][L001] Releasing IOHIDManager
+2025-10-22T21:58:09.0461750Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0462750Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0463380Z       [TELEMETRY][L001] IOHIDManager released
+2025-10-22T21:58:09.0464080Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0464730Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0465310Z       [TELEMETRY][L001] Releasing run loop mode CFString
+2025-10-22T21:58:09.0466540Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0467420Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0468120Z       [TELEMETRY][L001] Run loop mode CFString released
+2025-10-22T21:58:09.0468710Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0469410Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0469900Z       [TELEMETRY][L001] Listener thread cleanup complete - thread exiting
+2025-10-22T21:58:09.0470620Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0471170Z       [TELEMETRY][L001] Thread exited successfully after 0ms
+2025-10-22T21:58:09.0471780Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0472330Z       [TELEMETRY][L001] StopListening() complete
+2025-10-22T21:58:09.0472880Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0473430Z       [TELEMETRY][L001] StopListening() returned successfully
+2025-10-22T21:58:09.0474050Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0474510Z       [TELEMETRY][L001] Calling base.Dispose(True)
+2025-10-22T21:58:09.0475090Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0475710Z       [TELEMETRY][L001] <<< DISPOSE-EXIT: Complete
+2025-10-22T21:58:09.0502360Z [xUnit.net 00:00:00.43]   Finished:    Yubico.Core.UnitTests
+2025-10-22T21:58:09.1085260Z   Passed Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.Dispose_StopsCFRunLoop [205 ms]
+2025-10-22T21:58:09.1106690Z   Standard Output Messages:
+2025-10-22T21:58:09.1107060Z  === TEST START: Dispose_StopsCFRunLoop ===
+2025-10-22T21:58:09.1107390Z  [USING-ENTRY] Test=Dispose_StopsCFRunLoop, Thread=7
+2025-10-22T21:58:09.1107680Z  [USING-BODY] Test=Dispose_StopsCFRunLoop, Listener=L001, Thread=7
+2025-10-22T21:58:09.1107920Z  [TEST] Calling Dispose() on L001
+2025-10-22T21:58:09.1108170Z  [TEST] Dispose() completed on L001
+2025-10-22T21:58:09.1108430Z  [USING-EXIT] Test=Dispose_StopsCFRunLoop, Listener=L001, Thread=7
+2025-10-22T21:58:09.1108700Z 
+2025-10-22T21:58:09.1108700Z 
+2025-10-22T21:58:09.1108790Z 
+2025-10-22T21:58:09.1114480Z Test Run Successful.
+2025-10-22T21:58:09.1114690Z Total tests: 1
+2025-10-22T21:58:09.1114860Z      Passed: 1
+2025-10-22T21:58:09.1160120Z  Total time: 1.5987 Seconds

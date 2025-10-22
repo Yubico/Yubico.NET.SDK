@@ -1,0 +1,383 @@
+﻿2025-10-22T21:57:42.2865980Z Current runner version: '2.329.0'
+2025-10-22T21:57:42.2882630Z ##[group]Runner Image Provisioner
+2025-10-22T21:57:42.2883150Z Hosted Compute Agent
+2025-10-22T21:57:42.2883480Z Version: 20251016.436
+2025-10-22T21:57:42.2883860Z Commit: 8ab8ac8bfd662a3739dab9fe09456aba92132568
+2025-10-22T21:57:42.2884290Z Build Date: 2025-10-15T20:44:12Z
+2025-10-22T21:57:42.2884660Z ##[endgroup]
+2025-10-22T21:57:42.2884980Z ##[group]Operating System
+2025-10-22T21:57:42.2885330Z macOS
+2025-10-22T21:57:42.2885630Z 15.6.1
+2025-10-22T21:57:42.2885910Z 24G90
+2025-10-22T21:57:42.2886190Z ##[endgroup]
+2025-10-22T21:57:42.2886500Z ##[group]Runner Image
+2025-10-22T21:57:42.2886820Z Image: macos-15-arm64
+2025-10-22T21:57:42.2887130Z Version: 20251015.0042
+2025-10-22T21:57:42.2887820Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20251015.0042/images/macos/macos-15-arm64-Readme.md
+2025-10-22T21:57:42.2888900Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20251015.0042
+2025-10-22T21:57:42.2889510Z ##[endgroup]
+2025-10-22T21:57:42.2890210Z ##[group]GITHUB_TOKEN Permissions
+2025-10-22T21:57:42.2891450Z Contents: read
+2025-10-22T21:57:42.2891750Z Metadata: read
+2025-10-22T21:57:42.2892050Z Packages: read
+2025-10-22T21:57:42.2892340Z ##[endgroup]
+2025-10-22T21:57:42.2893800Z Secret source: Actions
+2025-10-22T21:57:42.2894180Z Prepare workflow directory
+2025-10-22T21:57:42.3264660Z Prepare all required actions
+2025-10-22T21:57:42.3307260Z Getting action download info
+2025-10-22T21:57:42.5554680Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-22T21:57:42.9001690Z Download action repository 'actions/setup-dotnet@v4' (SHA:67a3573c9a986a3f9c594539f4ab511d57bb3ce9)
+2025-10-22T21:57:44.3695100Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-10-22T21:57:44.5444100Z Complete job name: Test 6 - Dispose_StopsCFRunLoop
+2025-10-22T21:57:44.5939180Z ##[group]Run actions/checkout@v4
+2025-10-22T21:57:44.5939970Z with:
+2025-10-22T21:57:44.5940420Z   repository: Yubico/Yubico.NET.SDK
+2025-10-22T21:57:44.5941260Z   token: ***
+2025-10-22T21:57:44.5941680Z   ssh-strict: true
+2025-10-22T21:57:44.5942130Z   ssh-user: git
+2025-10-22T21:57:44.5942580Z   persist-credentials: true
+2025-10-22T21:57:44.5943080Z   clean: true
+2025-10-22T21:57:44.5943560Z   sparse-checkout-cone-mode: true
+2025-10-22T21:57:44.5944140Z   fetch-depth: 1
+2025-10-22T21:57:44.5944580Z   fetch-tags: false
+2025-10-22T21:57:44.5945060Z   show-progress: true
+2025-10-22T21:57:44.5945530Z   lfs: false
+2025-10-22T21:57:44.5945970Z   submodules: false
+2025-10-22T21:57:44.5946470Z   set-safe-directory: true
+2025-10-22T21:57:44.5947100Z ##[endgroup]
+2025-10-22T21:57:44.9590560Z Syncing repository: Yubico/Yubico.NET.SDK
+2025-10-22T21:57:44.9593880Z ##[group]Getting Git version info
+2025-10-22T21:57:44.9594410Z Working directory is '/Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK'
+2025-10-22T21:57:44.9594950Z [command]/opt/homebrew/bin/git version
+2025-10-22T21:57:45.0133370Z git version 2.50.1
+2025-10-22T21:57:45.0170020Z ##[endgroup]
+2025-10-22T21:57:45.0178540Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/bf367d72-c508-4ab6-b908-c27783fb3b04/.gitconfig'
+2025-10-22T21:57:45.0185790Z Temporarily overriding HOME='/Users/runner/work/_temp/bf367d72-c508-4ab6-b908-c27783fb3b04' before making global git config changes
+2025-10-22T21:57:45.0186520Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-22T21:57:45.0189440Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK
+2025-10-22T21:57:45.0284650Z Deleting the contents of '/Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK'
+2025-10-22T21:57:45.0287310Z ##[group]Initializing the repository
+2025-10-22T21:57:45.0291300Z [command]/opt/homebrew/bin/git init /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK
+2025-10-22T21:57:45.0489070Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-10-22T21:57:45.0492580Z hint: is subject to change. To configure the initial branch name to use in all
+2025-10-22T21:57:45.0494150Z hint: of your new repositories, which will suppress this warning, call:
+2025-10-22T21:57:45.0494600Z hint:
+2025-10-22T21:57:45.0494870Z hint: 	git config --global init.defaultBranch <name>
+2025-10-22T21:57:45.0495170Z hint:
+2025-10-22T21:57:45.0495480Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-10-22T21:57:45.0495930Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-10-22T21:57:45.0496280Z hint:
+2025-10-22T21:57:45.0496470Z hint: 	git branch -m <name>
+2025-10-22T21:57:45.0496700Z hint:
+2025-10-22T21:57:45.0497000Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-10-22T21:57:45.0497540Z Initialized empty Git repository in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/.git/
+2025-10-22T21:57:45.0498780Z [command]/opt/homebrew/bin/git remote add origin https://github.com/Yubico/Yubico.NET.SDK
+2025-10-22T21:57:45.0570950Z ##[endgroup]
+2025-10-22T21:57:45.0571420Z ##[group]Disabling automatic garbage collection
+2025-10-22T21:57:45.0573330Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2025-10-22T21:57:45.0633570Z ##[endgroup]
+2025-10-22T21:57:45.0634070Z ##[group]Setting up auth
+2025-10-22T21:57:45.0636240Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-22T21:57:45.0700550Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-22T21:57:45.1652150Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-22T21:57:45.1708370Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-22T21:57:45.2515230Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-10-22T21:57:45.2577480Z ##[endgroup]
+2025-10-22T21:57:45.2577920Z ##[group]Fetching the repository
+2025-10-22T21:57:45.2582390Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +aabfee568d26bca8fd9e83fafbe1a8934840ca60:refs/remotes/origin/experiment/isolate-disposal-hang
+2025-10-22T21:57:46.8801370Z From https://github.com/Yubico/Yubico.NET.SDK
+2025-10-22T21:57:46.8805870Z  * [new ref]         aabfee568d26bca8fd9e83fafbe1a8934840ca60 -> origin/experiment/isolate-disposal-hang
+2025-10-22T21:57:46.8886030Z ##[endgroup]
+2025-10-22T21:57:46.8890270Z ##[group]Determining the checkout info
+2025-10-22T21:57:46.8897250Z ##[endgroup]
+2025-10-22T21:57:46.8898220Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2025-10-22T21:57:46.8974420Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2025-10-22T21:57:46.9016110Z ##[group]Checking out the ref
+2025-10-22T21:57:46.9017670Z [command]/opt/homebrew/bin/git checkout --progress --force -B experiment/isolate-disposal-hang refs/remotes/origin/experiment/isolate-disposal-hang
+2025-10-22T21:57:47.1659460Z Switched to a new branch 'experiment/isolate-disposal-hang'
+2025-10-22T21:57:47.1761320Z branch 'experiment/isolate-disposal-hang' set up to track 'origin/experiment/isolate-disposal-hang'.
+2025-10-22T21:57:47.2065000Z ##[endgroup]
+2025-10-22T21:57:47.2367930Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2025-10-22T21:57:47.2469210Z aabfee568d26bca8fd9e83fafbe1a8934840ca60
+2025-10-22T21:57:47.3026060Z ##[group]Run actions/setup-dotnet@v4
+2025-10-22T21:57:47.3026330Z with:
+2025-10-22T21:57:47.3026470Z   global-json-file: ./global.json
+2025-10-22T21:57:47.3026690Z   cache: false
+2025-10-22T21:57:47.3026830Z ##[endgroup]
+2025-10-22T21:57:47.4822620Z [command]/Users/runner/work/_actions/actions/setup-dotnet/v4/externals/install-dotnet.sh --skip-non-versioned-files --runtime dotnet --channel LTS
+2025-10-22T21:57:48.0387310Z dotnet-install: .NET Core Runtime with version '8.0.21' is already installed.
+2025-10-22T21:57:48.0396410Z [command]/Users/runner/work/_actions/actions/setup-dotnet/v4/externals/install-dotnet.sh --skip-non-versioned-files --channel 9.0
+2025-10-22T21:57:48.3762430Z dotnet-install: .NET Core SDK with version '9.0.306' is already installed.
+2025-10-22T21:57:48.3910240Z ##[group]Run dotnet nuget add source --username DennisDyallo --password *** --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+2025-10-22T21:57:48.3911640Z [36;1mdotnet nuget add source --username DennisDyallo --password *** --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"[0m
+2025-10-22T21:57:48.3962830Z shell: /bin/bash -e {0}
+2025-10-22T21:57:48.3963060Z env:
+2025-10-22T21:57:48.3963270Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:57:48.3963460Z ##[endgroup]
+2025-10-22T21:57:49.0960010Z 
+2025-10-22T21:57:49.1061760Z Welcome to .NET 9.0!
+2025-10-22T21:57:49.1162890Z ---------------------
+2025-10-22T21:57:49.1226510Z SDK Version: 9.0.306
+2025-10-22T21:57:49.1267860Z 
+2025-10-22T21:57:49.1327450Z Telemetry
+2025-10-22T21:57:49.1411390Z ---------
+2025-10-22T21:57:49.1437990Z The .NET tools collect usage data in order to help us improve your experience. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+2025-10-22T21:57:49.1527730Z 
+2025-10-22T21:57:49.1557940Z Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
+2025-10-22T21:57:49.7372630Z 
+2025-10-22T21:57:49.7372900Z ----------------
+2025-10-22T21:57:49.7373340Z Installed an ASP.NET Core HTTPS development certificate.
+2025-10-22T21:57:49.7373700Z To trust the certificate, run 'dotnet dev-certs https --trust'
+2025-10-22T21:57:49.7374090Z Learn about HTTPS: https://aka.ms/dotnet-https
+2025-10-22T21:57:49.7374240Z 
+2025-10-22T21:57:49.7374310Z ----------------
+2025-10-22T21:57:49.7374540Z Write your first app: https://aka.ms/dotnet-hello-world
+2025-10-22T21:57:49.7374850Z Find out what's new: https://aka.ms/dotnet-whats-new
+2025-10-22T21:57:49.7375190Z Explore documentation: https://aka.ms/dotnet-docs
+2025-10-22T21:57:49.7375610Z Report issues and find source on GitHub: https://github.com/dotnet/core
+2025-10-22T21:57:49.7376070Z Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+2025-10-22T21:57:49.7376480Z --------------------------------------------------------------------------------------
+2025-10-22T21:57:49.9790050Z Package source with Name: github added successfully.
+2025-10-22T21:57:50.0913160Z ##[group]Run brew install openssl
+2025-10-22T21:57:50.0913820Z [36;1mbrew install openssl[0m
+2025-10-22T21:57:50.0914320Z [36;1msudo mkdir -p /usr/local/lib[0m
+2025-10-22T21:57:50.0915280Z [36;1msudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib[0m
+2025-10-22T21:57:50.0916590Z [36;1msudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib[0m
+2025-10-22T21:57:50.0961940Z shell: /bin/bash -e {0}
+2025-10-22T21:57:50.0962130Z env:
+2025-10-22T21:57:50.0962310Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:57:50.0962530Z ##[endgroup]
+2025-10-22T21:57:54.4633710Z ##[warning]openssl@3 3.6.0 is already installed and up-to-date.
+To reinstall 3.6.0, run:
+  brew reinstall openssl@3
+
+2025-10-22T21:57:54.5819140Z ##[group]Run dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_StopsCFRunLoop" --logger "console;verbosity=detailed"
+2025-10-22T21:57:54.5820470Z [36;1mdotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_StopsCFRunLoop" --logger "console;verbosity=detailed"[0m
+2025-10-22T21:57:54.5860060Z shell: /bin/bash -e {0}
+2025-10-22T21:57:54.5860320Z env:
+2025-10-22T21:57:54.5860530Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:57:54.5860880Z   Logging__LogLevel__Default: Information
+2025-10-22T21:57:54.5861130Z   Logging__LogLevel__Yubico: Information
+2025-10-22T21:57:54.5861370Z ##[endgroup]
+2025-10-22T21:57:55.3930100Z   Determining projects to restore...
+2025-10-22T21:57:59.0779290Z   Restored /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico.Core.UnitTests.csproj (in 3.21 sec).
+2025-10-22T21:57:59.3488880Z   Restored /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/src/Yubico.Core.csproj (in 3.51 sec).
+2025-10-22T21:58:04.3862830Z   Yubico.Core -> /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/src/bin/Debug/netstandard2.1/Yubico.Core.dll
+2025-10-22T21:58:06.9628020Z   Yubico.Core.UnitTests -> /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll
+2025-10-22T21:58:06.9797510Z Test run for /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll (.NETCoreApp,Version=v8.0)
+2025-10-22T21:58:07.3171670Z VSTest version 17.14.1 (arm64)
+2025-10-22T21:58:07.3272920Z 
+2025-10-22T21:58:07.4774960Z Starting test execution, please wait...
+2025-10-22T21:58:07.5107800Z A total of 1 test files matched the specified pattern.
+2025-10-22T21:58:07.5135380Z /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll
+2025-10-22T21:58:08.6228250Z [xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 8.0.21)
+2025-10-22T21:58:08.7017710Z [xUnit.net 00:00:00.09]   Discovering: Yubico.Core.UnitTests
+2025-10-22T21:58:08.7976450Z [xUnit.net 00:00:00.18]   Discovered:  Yubico.Core.UnitTests
+2025-10-22T21:58:08.8130230Z [xUnit.net 00:00:00.20]   Starting:    Yubico.Core.UnitTests
+2025-10-22T21:58:08.8960800Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.8962950Z       [TELEMETRY][L001] MacOSHidDeviceListener constructor called on thread 7
+2025-10-22T21:58:08.8963640Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.8964270Z       [TELEMETRY][L001] StartListening() called, creating background thread
+2025-10-22T21:58:08.8964870Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.8965350Z       [TELEMETRY][L001] Background thread started
+2025-10-22T21:58:08.8965950Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.8966500Z       [TELEMETRY][L001] MacOSHidDeviceListener constructor complete
+2025-10-22T21:58:08.8967110Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.8967680Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:08.8968130Z       HID listener thread started. ThreadID is 18.
+2025-10-22T21:58:08.9093860Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.9094420Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:08.9095390Z       IOHIDManager 4780587280 is scheduled with run loop 4511153376 with mode kCFRunLoopDefaultMode
+2025-10-22T21:58:08.9096090Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.9096450Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:08.9097480Z       Flushed existing devices.
+2025-10-22T21:58:08.9097940Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.9098300Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:08.9099660Z       [TELEMETRY][L001] Entering run loop. _shouldStop=False
+2025-10-22T21:58:08.9100080Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:08.9100610Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:08.9101000Z       [TELEMETRY][L001] Loop iter 1: _shouldStop=False, prevResult=4, calling CFRunLoopRunInMode...
+2025-10-22T21:58:09.0326190Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0333070Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=7, _isDisposed=False, _shouldStop=False
+2025-10-22T21:58:09.0336350Z         CallStack:
+2025-10-22T21:58:09.0337300Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:09.0338310Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:09.0339560Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.Dispose_StopsCFRunLoop() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 233
+2025-10-22T21:58:09.0341560Z          at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+2025-10-22T21:58:09.0342410Z          at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+2025-10-22T21:58:09.0343240Z          at Xunit.Sdk.TestInvoker`1.CallTestMethod(Object testClassInstance) in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 149
+2025-10-22T21:58:09.0344300Z          at Xunit.Sdk.TestInvoker`1.<>c__DisplayClass47_0.<<InvokeTestMethodAsync>b__1>d.MoveNext() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 256
+2025-10-22T21:58:09.0345210Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0346000Z          at Xunit.Sdk.TestInvoker`1.<>c__DisplayClass47_0.<InvokeTestMethodAsync>b__1()
+2025-10-22T21:58:09.0346820Z          at Xunit.Sdk.ExecutionTimer.AggregateAsync(Func`1 asyncAction) in /_/src/xunit.execution/Sdk/Frameworks/ExecutionTimer.cs:line 48
+2025-10-22T21:58:09.0362740Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0371040Z          at Xunit.Sdk.ExecutionTimer.AggregateAsync(Func`1 asyncAction)
+2025-10-22T21:58:09.0371990Z          at Xunit.Sdk.TestInvoker`1.<>c__DisplayClass47_0.<InvokeTestMethodAsync>b__0() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 215
+2025-10-22T21:58:09.0372880Z          at Xunit.Sdk.ExceptionAggregator.RunAsync(Func`1 code) in /_/src/xunit.core/Sdk/ExceptionAggregator.cs:line 90
+2025-10-22T21:58:09.0373770Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0374480Z          at Xunit.Sdk.ExceptionAggregator.RunAsync(Func`1 code)
+2025-10-22T21:58:09.0375200Z          at Xunit.Sdk.TestInvoker`1.InvokeTestMethodAsync(Object testClassInstance) in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 214
+2025-10-22T21:58:09.0376150Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0376890Z          at Xunit.Sdk.TestInvoker`1.InvokeTestMethodAsync(Object testClassInstance)
+2025-10-22T21:58:09.0377710Z          at Xunit.Sdk.XunitTestInvoker.InvokeTestMethodAsync(Object testClassInstance) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestInvoker.cs:line 112
+2025-10-22T21:58:09.0378700Z          at Xunit.Sdk.TestInvoker`1.<RunAsync>b__46_0() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 180
+2025-10-22T21:58:09.0380050Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0380800Z          at Xunit.Sdk.TestInvoker`1.<RunAsync>b__46_0()
+2025-10-22T21:58:09.0381410Z          at Xunit.Sdk.ExceptionAggregator.RunAsync[T](Func`1 code) in /_/src/xunit.core/Sdk/ExceptionAggregator.cs:line 107
+2025-10-22T21:58:09.0382290Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0383950Z          at Xunit.Sdk.ExceptionAggregator.RunAsync[T](Func`1 code)
+2025-10-22T21:58:09.0384590Z          at Xunit.Sdk.TestInvoker`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 163
+2025-10-22T21:58:09.0385480Z          at Xunit.Sdk.XunitTestRunner.InvokeTestMethodAsync(ExceptionAggregator aggregator) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestRunner.cs:line 88
+2025-10-22T21:58:09.0386840Z          at Xunit.Sdk.XunitTestRunner.InvokeTestAsync(ExceptionAggregator aggregator) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestRunner.cs:line 70
+2025-10-22T21:58:09.0387760Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0388480Z          at Xunit.Sdk.XunitTestRunner.InvokeTestAsync(ExceptionAggregator aggregator)
+2025-10-22T21:58:09.0389470Z          at Xunit.Sdk.TestRunner`1.<>c__DisplayClass43_0.<RunAsync>b__0() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestRunner.cs:line 149
+2025-10-22T21:58:09.0390320Z          at Xunit.Sdk.ExceptionAggregator.RunAsync[T](Func`1 code) in /_/src/xunit.core/Sdk/ExceptionAggregator.cs:line 107
+2025-10-22T21:58:09.0391180Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0391920Z          at Xunit.Sdk.ExceptionAggregator.RunAsync[T](Func`1 code)
+2025-10-22T21:58:09.0392570Z          at Xunit.Sdk.TestRunner`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestRunner.cs:line 149
+2025-10-22T21:58:09.0393330Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0394070Z          at Xunit.Sdk.TestRunner`1.RunAsync()
+2025-10-22T21:58:09.0394800Z          at Xunit.Sdk.XunitTestCaseRunner.RunTestAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestCaseRunner.cs:line 140
+2025-10-22T21:58:09.0395640Z          at Xunit.Sdk.TestCaseRunner`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestCaseRunner.cs:line 82
+2025-10-22T21:58:09.0396440Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0397180Z          at Xunit.Sdk.TestCaseRunner`1.RunAsync()
+2025-10-22T21:58:09.0398220Z          at Xunit.Sdk.XunitTestCase.RunAsync(IMessageSink diagnosticMessageSink, IMessageBus messageBus, Object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource) in /_/src/xunit.execution/Sdk/Frameworks/XunitTestCase.cs:line 170
+2025-10-22T21:58:09.0399720Z          at Xunit.Sdk.SkippableFactTestCase.<>n__0(IMessageSink diagnosticMessageSink, IMessageBus messageBus, Object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
+2025-10-22T21:58:09.0401100Z          at Xunit.Sdk.SkippableFactTestCase.RunAsync(IMessageSink diagnosticMessageSink, IMessageBus messageBus, Object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
+2025-10-22T21:58:09.0402180Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0403290Z          at Xunit.Sdk.SkippableFactTestCase.RunAsync(IMessageSink diagnosticMessageSink, IMessageBus messageBus, Object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
+2025-10-22T21:58:09.0404790Z          at Xunit.Sdk.XunitTestMethodRunner.RunTestCaseAsync(IXunitTestCase testCase) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestMethodRunner.cs:line 45
+2025-10-22T21:58:09.0405790Z          at Xunit.Sdk.TestMethodRunner`1.RunTestCasesAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestMethodRunner.cs:line 136
+2025-10-22T21:58:09.0406650Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0407540Z          at Xunit.Sdk.TestMethodRunner`1.RunTestCasesAsync()
+2025-10-22T21:58:09.0408240Z          at Xunit.Sdk.TestMethodRunner`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestMethodRunner.cs:line 106
+2025-10-22T21:58:09.0409030Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0409740Z          at Xunit.Sdk.TestMethodRunner`1.RunAsync()
+2025-10-22T21:58:09.0410730Z          at Xunit.Sdk.XunitTestClassRunner.RunTestMethodAsync(ITestMethod testMethod, IReflectionMethodInfo method, IEnumerable`1 testCases, Object[] constructorArguments) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestClassRunner.cs:line 206
+2025-10-22T21:58:09.0411720Z          at Xunit.Sdk.TestClassRunner`1.RunTestMethodsAsync()
+2025-10-22T21:58:09.0412430Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0413080Z          at Xunit.Sdk.TestClassRunner`1.RunTestMethodsAsync()
+2025-10-22T21:58:09.0413710Z          at Xunit.Sdk.TestClassRunner`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestClassRunner.cs:line 175
+2025-10-22T21:58:09.0414580Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0415230Z          at Xunit.Sdk.TestClassRunner`1.RunAsync()
+2025-10-22T21:58:09.0416220Z          at Xunit.Sdk.XunitTestCollectionRunner.RunTestClassAsync(ITestClass testClass, IReflectionTypeInfo class, IEnumerable`1 testCases) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestCollectionRunner.cs:line 185
+2025-10-22T21:58:09.0420080Z          at Xunit.Sdk.TestCollectionRunner`1.RunTestClassesAsync()
+2025-10-22T21:58:09.0424490Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0425480Z          at Xunit.Sdk.TestCollectionRunner`1.RunTestClassesAsync()
+2025-10-22T21:58:09.0426210Z          at Xunit.Sdk.TestCollectionRunner`1.RunAsync() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestCollectionRunner.cs:line 101
+2025-10-22T21:58:09.0427100Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0427860Z          at Xunit.Sdk.TestCollectionRunner`1.RunAsync()
+2025-10-22T21:58:09.0428970Z          at Xunit.Sdk.XunitTestAssemblyRunner.RunTestCollectionAsync(IMessageBus messageBus, ITestCollection testCollection, IEnumerable`1 testCases, CancellationTokenSource cancellationTokenSource) in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestAssemblyRunner.cs:line 346
+2025-10-22T21:58:09.0430080Z          at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+2025-10-22T21:58:09.0431210Z          at Xunit.Sdk.XunitTestAssemblyRunner.RunTestCollectionAsync(IMessageBus messageBus, ITestCollection testCollection, IEnumerable`1 testCases, CancellationTokenSource cancellationTokenSource)
+2025-10-22T21:58:09.0432420Z          at Xunit.Sdk.XunitTestAssemblyRunner.<>c__DisplayClass16_2.<RunTestCollectionsAsync>b__2() in /_/src/xunit.execution/Sdk/Frameworks/Runners/XunitTestAssemblyRunner.cs:line 250
+2025-10-22T21:58:09.0433320Z          at System.Threading.Tasks.Task`1.InnerInvoke()
+2025-10-22T21:58:09.0434230Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:09.0435480Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:09.0436160Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:09.0436880Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:09.0437480Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:09.0438250Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0439020Z       [TELEMETRY][L001] Setting _isDisposed = true
+2025-10-22T21:58:09.0439650Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0440250Z       [TELEMETRY][L001] Calling StopListening(fromFinalizer=False)...
+2025-10-22T21:58:09.0441000Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0441570Z       [TELEMETRY][L001] StopListening(fromFinalizer=False) called
+2025-10-22T21:58:09.0442190Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0442740Z       [TELEMETRY][L001] Setting _shouldStop flag to true
+2025-10-22T21:58:09.0443420Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0443990Z       [TELEMETRY][L001] _shouldStop flag set. RunLoop pointer: 4511153376
+2025-10-22T21:58:09.0444710Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0445280Z       [TELEMETRY][L001] Calling CFRunLoopStop(4511153376)
+2025-10-22T21:58:09.0445850Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0446450Z       [TELEMETRY][L001] CFRunLoopStop() returned
+2025-10-22T21:58:09.0447030Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0447580Z       [TELEMETRY][L001] Waiting for thread to exit (1 second timeout)...
+2025-10-22T21:58:09.0448300Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0448850Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0449420Z       [TELEMETRY][L001] Loop iter 1: CFRunLoopRunInMode returned 3 after 122ms
+2025-10-22T21:58:09.0450100Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0450640Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0451230Z       [TELEMETRY][L001] Run loop exited after 1 iterations. _shouldStop=True, finalResult=3
+2025-10-22T21:58:09.0451970Z fail: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0452540Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0453050Z       The run loop was terminated for an unexpected reason: 3
+2025-10-22T21:58:09.0453620Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0454250Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0454860Z       [TELEMETRY][L001] Listener thread finally block - cleaning up native resources
+2025-10-22T21:58:09.0455490Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0456440Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0457200Z       [TELEMETRY][L001] Unscheduling IOHIDManager from run loop
+2025-10-22T21:58:09.0457960Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0458660Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0459300Z       [TELEMETRY][L001] IOHIDManager unscheduled from run loop
+2025-10-22T21:58:09.0459980Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0460590Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0461070Z       [TELEMETRY][L001] Releasing IOHIDManager
+2025-10-22T21:58:09.0461760Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0462750Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0463380Z       [TELEMETRY][L001] IOHIDManager released
+2025-10-22T21:58:09.0464080Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0464730Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0465680Z       [TELEMETRY][L001] Releasing run loop mode CFString
+2025-10-22T21:58:09.0466540Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0467430Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0468130Z       [TELEMETRY][L001] Run loop mode CFString released
+2025-10-22T21:58:09.0468710Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0469410Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.0469910Z       [TELEMETRY][L001] Listener thread cleanup complete - thread exiting
+2025-10-22T21:58:09.0470620Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0471170Z       [TELEMETRY][L001] Thread exited successfully after 0ms
+2025-10-22T21:58:09.0471790Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0472330Z       [TELEMETRY][L001] StopListening() complete
+2025-10-22T21:58:09.0472880Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0473440Z       [TELEMETRY][L001] StopListening() returned successfully
+2025-10-22T21:58:09.0474050Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0474520Z       [TELEMETRY][L001] Calling base.Dispose(True)
+2025-10-22T21:58:09.0475100Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.0475720Z       [TELEMETRY][L001] <<< DISPOSE-EXIT: Complete
+2025-10-22T21:58:09.0502380Z [xUnit.net 00:00:00.43]   Finished:    Yubico.Core.UnitTests
+2025-10-22T21:58:09.1085290Z   Passed Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.Dispose_StopsCFRunLoop [205 ms]
+2025-10-22T21:58:09.1106720Z   Standard Output Messages:
+2025-10-22T21:58:09.1107060Z  === TEST START: Dispose_StopsCFRunLoop ===
+2025-10-22T21:58:09.1107400Z  [USING-ENTRY] Test=Dispose_StopsCFRunLoop, Thread=7
+2025-10-22T21:58:09.1107680Z  [USING-BODY] Test=Dispose_StopsCFRunLoop, Listener=L001, Thread=7
+2025-10-22T21:58:09.1107930Z  [TEST] Calling Dispose() on L001
+2025-10-22T21:58:09.1108190Z  [TEST] Dispose() completed on L001
+2025-10-22T21:58:09.1108430Z  [USING-EXIT] Test=Dispose_StopsCFRunLoop, Listener=L001, Thread=7
+2025-10-22T21:58:09.1108700Z 
+2025-10-22T21:58:09.1108700Z 
+2025-10-22T21:58:09.1108790Z 
+2025-10-22T21:58:09.1114490Z Test Run Successful.
+2025-10-22T21:58:09.1114690Z Total tests: 1
+2025-10-22T21:58:09.1114860Z      Passed: 1
+2025-10-22T21:58:09.1160140Z  Total time: 1.5987 Seconds
+2025-10-22T21:58:09.2100230Z ##[group]Run actions/upload-artifact@v4
+2025-10-22T21:58:09.2100440Z with:
+2025-10-22T21:58:09.2100580Z   name: Logs-Test06-Dispose_StopsCFRunLoop
+2025-10-22T21:58:09.2100770Z   path: **/TestResults/*
+2025-10-22T21:58:09.2100930Z   if-no-files-found: warn
+2025-10-22T21:58:09.2101080Z   compression-level: 6
+2025-10-22T21:58:09.2101290Z   overwrite: false
+2025-10-22T21:58:09.2101500Z   include-hidden-files: false
+2025-10-22T21:58:09.2101710Z env:
+2025-10-22T21:58:09.2101910Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:58:09.2102080Z ##[endgroup]
+2025-10-22T21:58:09.6743660Z ##[warning]No files were found with the provided path: **/TestResults/*. No artifacts will be uploaded.
+2025-10-22T21:58:09.6882850Z Post job cleanup.
+2025-10-22T21:58:09.8170820Z Post job cleanup.
+2025-10-22T21:58:09.9161080Z [command]/opt/homebrew/bin/git version
+2025-10-22T21:58:09.9334090Z git version 2.50.1
+2025-10-22T21:58:09.9371760Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/7be2f311-e18d-4acf-b299-5727d4b1d806/.gitconfig'
+2025-10-22T21:58:09.9379460Z Temporarily overriding HOME='/Users/runner/work/_temp/7be2f311-e18d-4acf-b299-5727d4b1d806' before making global git config changes
+2025-10-22T21:58:09.9380240Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-22T21:58:09.9388810Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK
+2025-10-22T21:58:09.9512230Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-22T21:58:09.9579020Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-22T21:58:10.0556780Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-22T21:58:10.0612730Z http.https://github.com/.extraheader
+2025-10-22T21:58:10.0621230Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-10-22T21:58:10.0685070Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-22T21:58:10.1601740Z Cleaning up orphan processes
+2025-10-22T21:58:10.4410010Z Terminate orphan process: pid (2090) (dotnet)

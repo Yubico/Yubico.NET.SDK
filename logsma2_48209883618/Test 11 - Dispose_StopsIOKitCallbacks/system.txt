@@ -1,0 +1,5 @@
+2025-10-22T21:57:40.2510000Z Requested labels: macos-latest
+2025-10-22T21:57:40.2510000Z Job defined at: Yubico/Yubico.NET.SDK/.github/workflows/test-macos-isolated.yml@refs/heads/experiment/isolate-disposal-hang
+2025-10-22T21:57:40.2510000Z Waiting for a runner to pick up this job...
+2025-10-22T21:57:40.2580000Z Job is about to start running on the hosted runner: GitHub Actions 1000196954
+2025-10-22T21:57:40.2560000Z Job is waiting for a hosted runner to come online.

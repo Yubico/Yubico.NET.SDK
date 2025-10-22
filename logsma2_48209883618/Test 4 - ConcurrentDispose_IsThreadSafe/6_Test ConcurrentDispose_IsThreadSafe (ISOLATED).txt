@@ -1,0 +1,264 @@
+﻿2025-10-22T21:57:53.8666540Z ##[group]Run dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.ConcurrentDispose_IsThreadSafe" --logger "console;verbosity=detailed"
+2025-10-22T21:57:53.8667760Z [36;1mdotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.ConcurrentDispose_IsThreadSafe" --logger "console;verbosity=detailed"[0m
+2025-10-22T21:57:53.8713050Z shell: /bin/bash -e {0}
+2025-10-22T21:57:53.8713340Z env:
+2025-10-22T21:57:53.8713530Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:57:53.8713830Z   Logging__LogLevel__Default: Information
+2025-10-22T21:57:53.8714090Z   Logging__LogLevel__Yubico: Information
+2025-10-22T21:57:53.8714280Z ##[endgroup]
+2025-10-22T21:57:54.7719890Z   Determining projects to restore...
+2025-10-22T21:57:57.8353150Z   Restored /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico.Core.UnitTests.csproj (in 2.69 sec).
+2025-10-22T21:57:58.1657690Z   Restored /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/src/Yubico.Core.csproj (in 3.04 sec).
+2025-10-22T21:58:04.8965580Z   Yubico.Core -> /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/src/bin/Debug/netstandard2.1/Yubico.Core.dll
+2025-10-22T21:58:08.2192820Z   Yubico.Core.UnitTests -> /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll
+2025-10-22T21:58:08.2477770Z Test run for /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll (.NETCoreApp,Version=v8.0)
+2025-10-22T21:58:08.4267580Z VSTest version 17.14.1 (arm64)
+2025-10-22T21:58:08.4297750Z 
+2025-10-22T21:58:08.5554300Z Starting test execution, please wait...
+2025-10-22T21:58:08.5810670Z A total of 1 test files matched the specified pattern.
+2025-10-22T21:58:08.5822590Z /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll
+2025-10-22T21:58:09.4307190Z [xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 8.0.21)
+2025-10-22T21:58:09.5118520Z [xUnit.net 00:00:00.10]   Discovering: Yubico.Core.UnitTests
+2025-10-22T21:58:09.6759380Z [xUnit.net 00:00:00.27]   Discovered:  Yubico.Core.UnitTests
+2025-10-22T21:58:09.7305750Z [xUnit.net 00:00:00.31]   Starting:    Yubico.Core.UnitTests
+2025-10-22T21:58:09.8695530Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.8740050Z       [TELEMETRY][L001] MacOSHidDeviceListener constructor called on thread 13
+2025-10-22T21:58:09.8786150Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.8830090Z       [TELEMETRY][L001] StartListening() called, creating background thread
+2025-10-22T21:58:09.8838270Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.8896090Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.8980400Z       HID listener thread started. ThreadID is 18.
+2025-10-22T21:58:09.9032880Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.9065370Z       [TELEMETRY][L001] Background thread started
+2025-10-22T21:58:09.9086530Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.9112290Z       [TELEMETRY][L001] MacOSHidDeviceListener constructor complete
+2025-10-22T21:58:09.9122960Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.9174970Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.9224040Z       IOHIDManager 5500920448 is scheduled with run loop 4964156064 with mode kCFRunLoopDefaultMode
+2025-10-22T21:58:09.9284840Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.9318750Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.9351160Z       Flushed existing devices.
+2025-10-22T21:58:09.9382610Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.9383230Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.9428280Z       [TELEMETRY][L001] Entering run loop. _shouldStop=False
+2025-10-22T21:58:09.9476870Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.9519430Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:09.9535260Z       [TELEMETRY][L001] Loop iter 1: _shouldStop=False, prevResult=4, calling CFRunLoopRunInMode...
+2025-10-22T21:58:09.9551390Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.9568060Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=13, _isDisposed=False, _shouldStop=False
+2025-10-22T21:58:09.9591220Z         CallStack:
+2025-10-22T21:58:09.9617540Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:09.9623390Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:09.9651270Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:58:09.9668210Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:09.9686690Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:09.9705050Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:09.9728780Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:09.9737430Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:09.9763100Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.9778040Z       [TELEMETRY][L001] Setting _isDisposed = true
+2025-10-22T21:58:09.9808040Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.9810080Z       [TELEMETRY][L001] Calling StopListening(fromFinalizer=False)...
+2025-10-22T21:58:09.9842660Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:09.9843330Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=12, _isDisposed=True, _shouldStop=False
+2025-10-22T21:58:09.9868200Z         CallStack:
+2025-10-22T21:58:09.9875830Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:09.9892520Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:09.9927440Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:58:10.0005780Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:10.0109660Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:10.0151550Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:10.0205340Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:10.0240850Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:10.0274310Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0312970Z       [TELEMETRY][L001] StopListening(fromFinalizer=False) called
+2025-10-22T21:58:10.0330280Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0332600Z       [TELEMETRY][L001] Setting _shouldStop flag to true
+2025-10-22T21:58:10.0333250Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0336120Z       [TELEMETRY][L001] _shouldStop flag set. RunLoop pointer: 4964156064
+2025-10-22T21:58:10.0336820Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0337860Z       [TELEMETRY][L001] Calling CFRunLoopStop(4964156064)
+2025-10-22T21:58:10.0338350Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0338900Z       [TELEMETRY][L001] CFRunLoopStop() returned
+2025-10-22T21:58:10.0339370Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0340050Z       [TELEMETRY][L001] Waiting for thread to exit (1 second timeout)...
+2025-10-22T21:58:10.0340660Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0341100Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:10.0342550Z       [TELEMETRY][L001] Loop iter 1: CFRunLoopRunInMode returned 2 after 2ms
+2025-10-22T21:58:10.0344730Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0345770Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:10.0347010Z       [TELEMETRY][L001] Run loop exited after 1 iterations. _shouldStop=True, finalResult=2
+2025-10-22T21:58:10.0348520Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0349410Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:10.0351110Z       [TELEMETRY][L001] Listener thread finally block - cleaning up native resources
+2025-10-22T21:58:10.0352480Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0353720Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:10.0354780Z       [TELEMETRY][L001] Unscheduling IOHIDManager from run loop
+2025-10-22T21:58:10.0355960Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0357130Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:10.0358170Z       [TELEMETRY][L001] IOHIDManager unscheduled from run loop
+2025-10-22T21:58:10.0359640Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0360810Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:10.0368980Z       [TELEMETRY][L001] Releasing IOHIDManager
+2025-10-22T21:58:10.0371030Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0372350Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:10.0373670Z       [TELEMETRY][L001] IOHIDManager released
+2025-10-22T21:58:10.0375010Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0378600Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:10.0380110Z       [TELEMETRY][L001] Releasing run loop mode CFString
+2025-10-22T21:58:10.0381450Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0382630Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:10.0383810Z       [TELEMETRY][L001] Run loop mode CFString released
+2025-10-22T21:58:10.0385050Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0386130Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:58:10.0387330Z       [TELEMETRY][L001] Listener thread cleanup complete - thread exiting
+2025-10-22T21:58:10.0388740Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0389880Z       [TELEMETRY][L001] Thread exited successfully after 0ms
+2025-10-22T21:58:10.0391210Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0392680Z       [TELEMETRY][L001] StopListening() complete
+2025-10-22T21:58:10.0393850Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0401920Z       [TELEMETRY][L001] StopListening() returned successfully
+2025-10-22T21:58:10.0402750Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0404020Z       [TELEMETRY][L001] Calling base.Dispose(True)
+2025-10-22T21:58:10.0405710Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0408040Z       [TELEMETRY][L001] <<< DISPOSE-EXIT: Complete
+2025-10-22T21:58:10.0410600Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0412550Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:58:10.0414110Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0415940Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=12, _isDisposed=True, _shouldStop=True
+2025-10-22T21:58:10.0417090Z         CallStack:
+2025-10-22T21:58:10.0418830Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:10.0421420Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:10.0424980Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:58:10.0429520Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:10.0431720Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:10.0432980Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:10.0434150Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:10.0435190Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:10.0436210Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0437470Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=13, _isDisposed=True, _shouldStop=True
+2025-10-22T21:58:10.0438470Z         CallStack:
+2025-10-22T21:58:10.0439920Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:10.0442150Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:10.0445720Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:58:10.0447260Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:10.0448140Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:10.0448800Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:10.0449270Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:10.0449680Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:10.0450410Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0450770Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:58:10.0451960Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0453050Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:58:10.0454420Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0455730Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=12, _isDisposed=True, _shouldStop=True
+2025-10-22T21:58:10.0456740Z         CallStack:
+2025-10-22T21:58:10.0458360Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:10.0461640Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:10.0465020Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:58:10.0469990Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:10.0472070Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:10.0473950Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:10.0475500Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:10.0476760Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:10.0477870Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0478730Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:58:10.0480170Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0481680Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=13, _isDisposed=True, _shouldStop=True
+2025-10-22T21:58:10.0482880Z         CallStack:
+2025-10-22T21:58:10.0484990Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:10.0487230Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:10.0490370Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:58:10.0494020Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:10.0496310Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:10.0497680Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:10.0498930Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:10.0500000Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:10.0501010Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0501810Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:58:10.0502820Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0503970Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=12, _isDisposed=True, _shouldStop=True
+2025-10-22T21:58:10.0504880Z         CallStack:
+2025-10-22T21:58:10.0620490Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:10.0623160Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:10.0624350Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:58:10.0626970Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:10.0627840Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:10.0628570Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:10.0629360Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:10.0630430Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:10.0631650Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0632950Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:58:10.0633930Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0635260Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=13, _isDisposed=True, _shouldStop=True
+2025-10-22T21:58:10.0636240Z         CallStack:
+2025-10-22T21:58:10.0637860Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:10.0640460Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:10.0643570Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:58:10.0647050Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:10.0649410Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:10.0650570Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:10.0651760Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:10.0652740Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:10.0653590Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0654340Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:58:10.0655170Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0656350Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=12, _isDisposed=True, _shouldStop=True
+2025-10-22T21:58:10.0657270Z         CallStack:
+2025-10-22T21:58:10.0660020Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:10.0660860Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:10.0662160Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:58:10.0663670Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:10.0664530Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:10.0665070Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:10.0665530Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:10.0665900Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:10.0667060Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0667470Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:58:10.0667870Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0668360Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=13, _isDisposed=True, _shouldStop=True
+2025-10-22T21:58:10.0669130Z         CallStack:
+2025-10-22T21:58:10.0669730Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:58:10.0670540Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:58:10.0671680Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:58:10.0674000Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:58:10.0676700Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:58:10.0677860Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:58:10.0679000Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:58:10.0679910Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:58:10.0680760Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:58:10.0681640Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:58:10.0682490Z [xUnit.net 00:00:00.49]   Finished:    Yubico.Core.UnitTests
+2025-10-22T21:58:10.0683910Z   Passed Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.ConcurrentDispose_IsThreadSafe [140 ms]
+2025-10-22T21:58:10.0685120Z   Standard Output Messages:
+2025-10-22T21:58:10.0686280Z  === TEST START: ConcurrentDispose_IsThreadSafe ===
+2025-10-22T21:58:10.0686810Z  [USING-ENTRY] Test=ConcurrentDispose_IsThreadSafe, Thread=13
+2025-10-22T21:58:10.0687180Z  [USING-BODY] Test=ConcurrentDispose_IsThreadSafe, Listener=L001, Thread=13
+2025-10-22T21:58:10.0687470Z  [TEST] Task 0 calling Dispose() on L001
+2025-10-22T21:58:10.0687710Z  [TEST] Task 9 calling Dispose() on L001
+2025-10-22T21:58:10.0687990Z  [TEST] Task 9 Dispose() completed on L001
+2025-10-22T21:58:10.0688300Z  [TEST] Task 0 Dispose() completed on L001
+2025-10-22T21:58:10.0688590Z  [TEST] Task 8 calling Dispose() on L001
+2025-10-22T21:58:10.0688820Z  [TEST] Task 1 calling Dispose() on L001
+2025-10-22T21:58:10.0689100Z  [TEST] Task 1 Dispose() completed on L001
+2025-10-22T21:58:10.0689380Z  [TEST] Task 8 Dispose() completed on L001
+2025-10-22T21:58:10.0689730Z  [TEST] Task 2 calling Dispose() on L001
+2025-10-22T21:58:10.0690010Z  [TEST] Task 7 calling Dispose() on L001
+2025-10-22T21:58:10.0690300Z  [TEST] Task 2 Dispose() completed on L001
+2025-10-22T21:58:10.0690580Z  [TEST] Task 3 calling Dispose() on L001
+2025-10-22T21:58:10.0690880Z  [TEST] Task 7 Dispose() completed on L001
+2025-10-22T21:58:10.0691100Z  [TEST] Task 6 calling Dispose() on L001
+2025-10-22T21:58:10.0691320Z  [TEST] Task 3 Dispose() completed on L001
+2025-10-22T21:58:10.0691540Z  [TEST] Task 4 calling Dispose() on L001
+2025-10-22T21:58:10.0691740Z  [TEST] Task 6 Dispose() completed on L001
+2025-10-22T21:58:10.0691950Z  [TEST] Task 5 calling Dispose() on L001
+2025-10-22T21:58:10.0692140Z  [TEST] Task 4 Dispose() completed on L001
+2025-10-22T21:58:10.0692410Z  [TEST] Task 5 Dispose() completed on L001
+2025-10-22T21:58:10.0692790Z  [USING-EXIT] Test=ConcurrentDispose_IsThreadSafe, Listener=L001, Thread=21
+2025-10-22T21:58:10.0693100Z 
+2025-10-22T21:58:10.0693770Z 
+2025-10-22T21:58:10.0693770Z 
+2025-10-22T21:58:10.0693880Z Test Run Successful.
+2025-10-22T21:58:10.0694140Z Total tests: 1
+2025-10-22T21:58:10.0694290Z      Passed: 1
+2025-10-22T21:58:10.0694530Z  Total time: 1.3935 Seconds

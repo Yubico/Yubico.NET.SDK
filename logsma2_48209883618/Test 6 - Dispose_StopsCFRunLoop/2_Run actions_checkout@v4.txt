@@ -1,0 +1,70 @@
+﻿2025-10-22T21:57:44.5939140Z ##[group]Run actions/checkout@v4
+2025-10-22T21:57:44.5939960Z with:
+2025-10-22T21:57:44.5940420Z   repository: Yubico/Yubico.NET.SDK
+2025-10-22T21:57:44.5941260Z   token: ***
+2025-10-22T21:57:44.5941680Z   ssh-strict: true
+2025-10-22T21:57:44.5942120Z   ssh-user: git
+2025-10-22T21:57:44.5942580Z   persist-credentials: true
+2025-10-22T21:57:44.5943080Z   clean: true
+2025-10-22T21:57:44.5943560Z   sparse-checkout-cone-mode: true
+2025-10-22T21:57:44.5944130Z   fetch-depth: 1
+2025-10-22T21:57:44.5944580Z   fetch-tags: false
+2025-10-22T21:57:44.5945060Z   show-progress: true
+2025-10-22T21:57:44.5945520Z   lfs: false
+2025-10-22T21:57:44.5945970Z   submodules: false
+2025-10-22T21:57:44.5946460Z   set-safe-directory: true
+2025-10-22T21:57:44.5947100Z ##[endgroup]
+2025-10-22T21:57:44.9590450Z Syncing repository: Yubico/Yubico.NET.SDK
+2025-10-22T21:57:44.9593860Z ##[group]Getting Git version info
+2025-10-22T21:57:44.9594310Z Working directory is '/Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK'
+2025-10-22T21:57:44.9594950Z [command]/opt/homebrew/bin/git version
+2025-10-22T21:57:45.0133310Z git version 2.50.1
+2025-10-22T21:57:45.0169970Z ##[endgroup]
+2025-10-22T21:57:45.0178520Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/bf367d72-c508-4ab6-b908-c27783fb3b04/.gitconfig'
+2025-10-22T21:57:45.0185750Z Temporarily overriding HOME='/Users/runner/work/_temp/bf367d72-c508-4ab6-b908-c27783fb3b04' before making global git config changes
+2025-10-22T21:57:45.0186520Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-22T21:57:45.0189410Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK
+2025-10-22T21:57:45.0284590Z Deleting the contents of '/Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK'
+2025-10-22T21:57:45.0287300Z ##[group]Initializing the repository
+2025-10-22T21:57:45.0291260Z [command]/opt/homebrew/bin/git init /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK
+2025-10-22T21:57:45.0488820Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-10-22T21:57:45.0492540Z hint: is subject to change. To configure the initial branch name to use in all
+2025-10-22T21:57:45.0494110Z hint: of your new repositories, which will suppress this warning, call:
+2025-10-22T21:57:45.0494600Z hint:
+2025-10-22T21:57:45.0494870Z hint: 	git config --global init.defaultBranch <name>
+2025-10-22T21:57:45.0495160Z hint:
+2025-10-22T21:57:45.0495470Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-10-22T21:57:45.0495930Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-10-22T21:57:45.0496280Z hint:
+2025-10-22T21:57:45.0496470Z hint: 	git branch -m <name>
+2025-10-22T21:57:45.0496690Z hint:
+2025-10-22T21:57:45.0497000Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-10-22T21:57:45.0497540Z Initialized empty Git repository in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/.git/
+2025-10-22T21:57:45.0498740Z [command]/opt/homebrew/bin/git remote add origin https://github.com/Yubico/Yubico.NET.SDK
+2025-10-22T21:57:45.0570910Z ##[endgroup]
+2025-10-22T21:57:45.0571420Z ##[group]Disabling automatic garbage collection
+2025-10-22T21:57:45.0573320Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2025-10-22T21:57:45.0633520Z ##[endgroup]
+2025-10-22T21:57:45.0634070Z ##[group]Setting up auth
+2025-10-22T21:57:45.0636230Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-22T21:57:45.0700470Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-22T21:57:45.1652080Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-22T21:57:45.1707570Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-22T21:57:45.2515170Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-10-22T21:57:45.2577430Z ##[endgroup]
+2025-10-22T21:57:45.2577920Z ##[group]Fetching the repository
+2025-10-22T21:57:45.2582380Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +aabfee568d26bca8fd9e83fafbe1a8934840ca60:refs/remotes/origin/experiment/isolate-disposal-hang
+2025-10-22T21:57:46.8801310Z From https://github.com/Yubico/Yubico.NET.SDK
+2025-10-22T21:57:46.8805810Z  * [new ref]         aabfee568d26bca8fd9e83fafbe1a8934840ca60 -> origin/experiment/isolate-disposal-hang
+2025-10-22T21:57:46.8885980Z ##[endgroup]
+2025-10-22T21:57:46.8890260Z ##[group]Determining the checkout info
+2025-10-22T21:57:46.8897240Z ##[endgroup]
+2025-10-22T21:57:46.8898200Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2025-10-22T21:57:46.8974380Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2025-10-22T21:57:46.9016080Z ##[group]Checking out the ref
+2025-10-22T21:57:46.9017660Z [command]/opt/homebrew/bin/git checkout --progress --force -B experiment/isolate-disposal-hang refs/remotes/origin/experiment/isolate-disposal-hang
+2025-10-22T21:57:47.1659420Z Switched to a new branch 'experiment/isolate-disposal-hang'
+2025-10-22T21:57:47.1761280Z branch 'experiment/isolate-disposal-hang' set up to track 'origin/experiment/isolate-disposal-hang'.
+2025-10-22T21:57:47.2064960Z ##[endgroup]
+2025-10-22T21:57:47.2367880Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2025-10-22T21:57:47.2469160Z aabfee568d26bca8fd9e83fafbe1a8934840ca60

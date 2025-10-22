@@ -27,6 +27,7 @@ namespace Yubico.Core.Devices.Hid
     {
         private Thread? _listenerThread;
         private IntPtr? _runLoop;
+        private readonly ManualResetEventSlim _runLoopReady = new ManualResetEventSlim(false);
 
         // Keep strong references to delegates to prevent garbage collection
         // Native IOHIDManager stores function pointers to these callbacks
@@ -64,8 +65,18 @@ namespace Yubico.Core.Devices.Hid
         {
             // Use local variables to prevent race condition if multiple threads call StopListening()
             Thread? threadToJoin = _listenerThread;
-            IntPtr? runLoopToStop = _runLoop;
 
+            // CRITICAL: Wait for run loop to be initialized before stopping it
+            // Without this, disposal can race with thread startup and never call CFRunLoopStop()
+            // This would cause the thread to block indefinitely in CFRunLoopRunInMode()
+            // Timeout ensures we don't block forever if thread fails to start
+            bool runLoopInitialized = _runLoopReady.Wait(TimeSpan.FromSeconds(5));
+            if (!runLoopInitialized)
+            {
+                _log.LogWarning("Run loop did not initialize within timeout during disposal");
+            }
+
+            IntPtr? runLoopToStop = _runLoop;
             if (runLoopToStop.HasValue && runLoopToStop != IntPtr.Zero)
             {
                 CFRunLoopStop(runLoopToStop.Value);
@@ -107,6 +118,12 @@ namespace Yubico.Core.Devices.Hid
                     // Must be done AFTER StopListening() to ensure callbacks aren't invoked on null delegates
                     _arrivedCallbackDelegate = null;
                     _removedCallbackDelegate = null;
+
+                    // Dispose synchronization primitive
+                    if (disposing)
+                    {
+                        _runLoopReady.Dispose();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -160,6 +177,11 @@ namespace Yubico.Core.Devices.Hid
                 IOHIDManagerSetDeviceMatching(manager, IntPtr.Zero);
 
                 _runLoop = CFRunLoopGetCurrent();
+
+                // Signal that run loop is ready BEFORE scheduling with manager
+                // This prevents disposal race condition where Dispose() is called before run loop is initialized
+                _runLoopReady.Set();
+
                 IOHIDManagerScheduleWithRunLoop(manager, _runLoop.Value, runLoopMode);
 
                 _log.LogInformation(

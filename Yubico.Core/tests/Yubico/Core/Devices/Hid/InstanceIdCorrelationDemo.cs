@@ -40,9 +40,11 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         /// </summary>
         class DemoListener : IDisposable
         {
+#pragma warning disable IDE0032
             private readonly string _instanceId;
+#pragma warning restore IDE0032
             private readonly ILogger _log;
-            private Thread? _backgroundThread;
+            private readonly Thread? _backgroundThread;
 
             public DemoListener(ILogger logger)
             {
@@ -52,8 +54,10 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                     _instanceId, Environment.CurrentManagedThreadId);
 
                 // Start background thread
-                _backgroundThread = new Thread(() => BackgroundWork());
-                _backgroundThread.IsBackground = true;
+                _backgroundThread = new Thread(() => BackgroundWork())
+                {
+                    IsBackground = true
+                };
                 _backgroundThread.Start();
             }
 

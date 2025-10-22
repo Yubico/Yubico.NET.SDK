@@ -48,7 +48,9 @@ namespace Yubico.Core.Devices.Hid
         private readonly ILogger _log = Logging.Log.GetLogger<MacOSHidDeviceListener>();
 
         // Unique instance ID for correlating logs across threads and tests
+        #pragma warning disable IDE0032
         private readonly string _instanceId;
+        #pragma warning restore IDE0032
         private static int _instanceCounter;
 
         // Expose instance ID for test correlation

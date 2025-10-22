@@ -1,0 +1,418 @@
+# Copyright 2025 Yubico AB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Test MacOS Disposal Tests (Isolated)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'experiment/isolate-disposal-hang'
+
+jobs:
+  # Test 1: Dispose_CompletesWithinReasonableTime
+  test-01-dispose-completes-quickly:
+    name: Test 1 - Dispose_CompletesWithinReasonableTime
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test Dispose_CompletesWithinReasonableTime (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_CompletesWithinReasonableTime" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test01-Dispose_CompletesWithinReasonableTime
+          path: '**/TestResults/*'
+
+  # Test 2: Dispose_CalledMultipleTimes_IsIdempotent
+  test-02-dispose-idempotent:
+    name: Test 2 - Dispose_CalledMultipleTimes_IsIdempotent
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test Dispose_CalledMultipleTimes_IsIdempotent (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_CalledMultipleTimes_IsIdempotent" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test02-Dispose_CalledMultipleTimes_IsIdempotent
+          path: '**/TestResults/*'
+
+  # Test 3: RepeatedCreateDispose_NoLeaks
+  test-03-repeated-create-dispose:
+    name: Test 3 - RepeatedCreateDispose_NoLeaks
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test RepeatedCreateDispose_NoLeaks (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.RepeatedCreateDispose_NoLeaks" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test03-RepeatedCreateDispose_NoLeaks
+          path: '**/TestResults/*'
+
+  # Test 4: ConcurrentDispose_IsThreadSafe
+  test-04-concurrent-dispose:
+    name: Test 4 - ConcurrentDispose_IsThreadSafe
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test ConcurrentDispose_IsThreadSafe (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.ConcurrentDispose_IsThreadSafe" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test04-ConcurrentDispose_IsThreadSafe
+          path: '**/TestResults/*'
+
+  # Test 5: Dispose_TerminatesListenerThread
+  test-05-dispose-terminates-thread:
+    name: Test 5 - Dispose_TerminatesListenerThread
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test Dispose_TerminatesListenerThread (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_TerminatesListenerThread" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test05-Dispose_TerminatesListenerThread
+          path: '**/TestResults/*'
+
+  # Test 6: Dispose_StopsCFRunLoop
+  test-06-dispose-stops-runloop:
+    name: Test 6 - Dispose_StopsCFRunLoop
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test Dispose_StopsCFRunLoop (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_StopsCFRunLoop" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test06-Dispose_StopsCFRunLoop
+          path: '**/TestResults/*'
+
+  # Test 7: ParallelCreateDispose_NoLeaksOrDeadlocks
+  test-07-parallel-create-dispose:
+    name: Test 7 - ParallelCreateDispose_NoLeaksOrDeadlocks
+    runs-on: macos-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test ParallelCreateDispose_NoLeaksOrDeadlocks (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.ParallelCreateDispose_NoLeaksOrDeadlocks" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test07-ParallelCreateDispose_NoLeaksOrDeadlocks
+          path: '**/TestResults/*'
+
+  # Test 8: SequentialCreateDispose_HighIterations_NoLeaks (SUSPECT - reduced to 50 iterations)
+  test-08-sequential-high-iterations:
+    name: Test 8 - SequentialCreateDispose_HighIterations_NoLeaks
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test SequentialCreateDispose_HighIterations_NoLeaks (ISOLATED - 50 iterations)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.SequentialCreateDispose_HighIterations_NoLeaks" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test08-SequentialCreateDispose_HighIterations_NoLeaks
+          path: '**/TestResults/*'
+
+  # Test 9: Dispose_UnusedListener_Succeeds
+  test-09-dispose-unused:
+    name: Test 9 - Dispose_UnusedListener_Succeeds
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test Dispose_UnusedListener_Succeeds (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_UnusedListener_Succeeds" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test09-Dispose_UnusedListener_Succeeds
+          path: '**/TestResults/*'
+
+  # Test 10: Finalizer_DoesNotCrashGCThread (SUSPECT)
+  test-10-finalizer:
+    name: Test 10 - Finalizer_DoesNotCrashGCThread
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test Finalizer_DoesNotCrashGCThread (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Finalizer_DoesNotCrashGCThread" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test10-Finalizer_DoesNotCrashGCThread
+          path: '**/TestResults/*'
+
+  # Test 11: Dispose_StopsIOKitCallbacks
+  test-11-dispose-stops-callbacks:
+    name: Test 11 - Dispose_StopsIOKitCallbacks
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test Dispose_StopsIOKitCallbacks (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_StopsIOKitCallbacks" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test11-Dispose_StopsIOKitCallbacks
+          path: '**/TestResults/*'
+
+  # Test 12: Dispose_ClearsDelegateReferences
+  test-12-dispose-clears-delegates:
+    name: Test 12 - Dispose_ClearsDelegateReferences
+    runs-on: macos-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: "./global.json"
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+      - name: Install OpenSSL and link
+        run: |
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+      - name: Test Dispose_ClearsDelegateReferences (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_ClearsDelegateReferences" --logger "console;verbosity=detailed"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs-Test12-Dispose_ClearsDelegateReferences
+          path: '**/TestResults/*'

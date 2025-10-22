@@ -318,9 +318,9 @@ jobs:
           name: Logs-Test09-Dispose_UnusedListener_Succeeds
           path: '**/TestResults/*'
 
-  # Test 10: Finalizer_DoesNotCrashGCThread (SUSPECT)
+  # Test 10: Dispose_FromFinalizerPath_DoesNotBlock (Fixed - tests finalizer path via reflection)
   test-10-finalizer:
-    name: Test 10 - Finalizer_DoesNotCrashGCThread
+    name: Test 10 - Dispose_FromFinalizerPath_DoesNotBlock
     runs-on: macos-latest
     timeout-minutes: 5
     permissions:
@@ -339,8 +339,8 @@ jobs:
           sudo mkdir -p /usr/local/lib
           sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
           sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
-      - name: Test Finalizer_DoesNotCrashGCThread (ISOLATED)
-        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Finalizer_DoesNotCrashGCThread" --logger "console;verbosity=detailed"
+      - name: Test Dispose_FromFinalizerPath_DoesNotBlock (ISOLATED)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Dispose_FromFinalizerPath_DoesNotBlock" --logger "console;verbosity=detailed"
         env:
           Logging__LogLevel__Default: Information
           Logging__LogLevel__Yubico: Information
@@ -348,7 +348,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Logs-Test10-Finalizer_DoesNotCrashGCThread
+          name: Logs-Test10-Dispose_FromFinalizerPath_DoesNotBlock
           path: '**/TestResults/*'
 
   # Test 11: Dispose_StopsIOKitCallbacks

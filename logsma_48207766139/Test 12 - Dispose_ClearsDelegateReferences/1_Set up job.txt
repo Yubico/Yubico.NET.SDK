@@ -1,0 +1,31 @@
+﻿2025-10-22T21:41:45.6299610Z Current runner version: '2.329.0'
+2025-10-22T21:41:45.6312200Z ##[group]Runner Image Provisioner
+2025-10-22T21:41:45.6312630Z Hosted Compute Agent
+2025-10-22T21:41:45.6312930Z Version: 20251016.436
+2025-10-22T21:41:45.6313270Z Commit: 8ab8ac8bfd662a3739dab9fe09456aba92132568
+2025-10-22T21:41:45.6313660Z Build Date: 2025-10-15T20:44:12Z
+2025-10-22T21:41:45.6314000Z ##[endgroup]
+2025-10-22T21:41:45.6314300Z ##[group]Operating System
+2025-10-22T21:41:45.6314630Z macOS
+2025-10-22T21:41:45.6314910Z 15.6.1
+2025-10-22T21:41:45.6315440Z 24G90
+2025-10-22T21:41:45.6315790Z ##[endgroup]
+2025-10-22T21:41:45.6316080Z ##[group]Runner Image
+2025-10-22T21:41:45.6316380Z Image: macos-15-arm64
+2025-10-22T21:41:45.6316670Z Version: 20251015.0042
+2025-10-22T21:41:45.6317440Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20251015.0042/images/macos/macos-15-arm64-Readme.md
+2025-10-22T21:41:45.6318300Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20251015.0042
+2025-10-22T21:41:45.6318930Z ##[endgroup]
+2025-10-22T21:41:45.6319550Z ##[group]GITHUB_TOKEN Permissions
+2025-10-22T21:41:45.6320510Z Contents: read
+2025-10-22T21:41:45.6320790Z Metadata: read
+2025-10-22T21:41:45.6321060Z Packages: read
+2025-10-22T21:41:45.6321330Z ##[endgroup]
+2025-10-22T21:41:45.6322450Z Secret source: Actions
+2025-10-22T21:41:45.6322810Z Prepare workflow directory
+2025-10-22T21:41:45.6548620Z Prepare all required actions
+2025-10-22T21:41:45.6575820Z Getting action download info
+2025-10-22T21:41:46.0232590Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-22T21:41:46.1590590Z Download action repository 'actions/setup-dotnet@v4' (SHA:67a3573c9a986a3f9c594539f4ab511d57bb3ce9)
+2025-10-22T21:41:47.3634470Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-10-22T21:41:47.5248320Z Complete job name: Test 12 - Dispose_ClearsDelegateReferences

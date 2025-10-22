@@ -1,0 +1,12 @@
+﻿2025-10-22T21:42:07.4418000Z ##[group]Run actions/upload-artifact@v4
+2025-10-22T21:42:07.4418390Z with:
+2025-10-22T21:42:07.4418590Z   name: Logs-Test12-Dispose_ClearsDelegateReferences
+2025-10-22T21:42:07.4419280Z   path: **/TestResults/*
+2025-10-22T21:42:07.4419570Z   if-no-files-found: warn
+2025-10-22T21:42:07.4419830Z   compression-level: 6
+2025-10-22T21:42:07.4420050Z   overwrite: false
+2025-10-22T21:42:07.4420600Z   include-hidden-files: false
+2025-10-22T21:42:07.4421500Z env:
+2025-10-22T21:42:07.4421710Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:42:07.4422210Z ##[endgroup]
+2025-10-22T21:42:07.8363150Z ##[warning]No files were found with the provided path: **/TestResults/*. No artifacts will be uploaded.

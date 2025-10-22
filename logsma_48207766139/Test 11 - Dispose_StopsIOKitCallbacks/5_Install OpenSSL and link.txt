@@ -1,0 +1,13 @@
+﻿2025-10-22T21:41:52.5126890Z ##[group]Run brew install openssl
+2025-10-22T21:41:52.5127200Z [36;1mbrew install openssl[0m
+2025-10-22T21:41:52.5127600Z [36;1msudo mkdir -p /usr/local/lib[0m
+2025-10-22T21:41:52.5128020Z [36;1msudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib[0m
+2025-10-22T21:41:52.5128570Z [36;1msudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib[0m
+2025-10-22T21:41:52.5176450Z shell: /bin/bash -e {0}
+2025-10-22T21:41:52.5176900Z env:
+2025-10-22T21:41:52.5177090Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:41:52.5177290Z ##[endgroup]
+2025-10-22T21:41:56.9845920Z ##[warning]openssl@3 3.6.0 is already installed and up-to-date.
+To reinstall 3.6.0, run:
+  brew reinstall openssl@3
+

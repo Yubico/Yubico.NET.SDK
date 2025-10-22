@@ -1,0 +1,30 @@
+﻿2025-10-22T21:41:51.1333060Z ##[group]Run dotnet nuget add source --username DennisDyallo --password *** --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+2025-10-22T21:41:51.1334580Z [36;1mdotnet nuget add source --username DennisDyallo --password *** --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"[0m
+2025-10-22T21:41:51.1378160Z shell: /bin/bash -e {0}
+2025-10-22T21:41:51.1378410Z env:
+2025-10-22T21:41:51.1378610Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:41:51.1378810Z ##[endgroup]
+2025-10-22T21:41:51.6194320Z 
+2025-10-22T21:41:51.6222210Z Welcome to .NET 9.0!
+2025-10-22T21:41:51.6222690Z ---------------------
+2025-10-22T21:41:51.6223020Z SDK Version: 9.0.306
+2025-10-22T21:41:51.6223260Z 
+2025-10-22T21:41:51.6223450Z Telemetry
+2025-10-22T21:41:51.6223690Z ---------
+2025-10-22T21:41:51.6224770Z The .NET tools collect usage data in order to help us improve your experience. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+2025-10-22T21:41:51.6225620Z 
+2025-10-22T21:41:51.6225850Z Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
+2025-10-22T21:41:52.1049490Z 
+2025-10-22T21:41:52.1089820Z ----------------
+2025-10-22T21:41:52.1121310Z Installed an ASP.NET Core HTTPS development certificate.
+2025-10-22T21:41:52.1181990Z To trust the certificate, run 'dotnet dev-certs https --trust'
+2025-10-22T21:41:52.1257170Z Learn about HTTPS: https://aka.ms/dotnet-https
+2025-10-22T21:41:52.1281390Z 
+2025-10-22T21:41:52.1310940Z ----------------
+2025-10-22T21:41:52.1319890Z Write your first app: https://aka.ms/dotnet-hello-world
+2025-10-22T21:41:52.1421560Z Find out what's new: https://aka.ms/dotnet-whats-new
+2025-10-22T21:41:52.1526070Z Explore documentation: https://aka.ms/dotnet-docs
+2025-10-22T21:41:52.1628520Z Report issues and find source on GitHub: https://github.com/dotnet/core
+2025-10-22T21:41:52.1730350Z Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+2025-10-22T21:41:52.1822890Z --------------------------------------------------------------------------------------
+2025-10-22T21:41:52.3705770Z Package source with Name: github added successfully.

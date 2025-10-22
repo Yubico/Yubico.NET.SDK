@@ -1,0 +1,9 @@
+﻿2025-10-22T21:41:51.5517840Z ##[group]Run actions/setup-dotnet@v4
+2025-10-22T21:41:51.5518650Z with:
+2025-10-22T21:41:51.5519190Z   global-json-file: ./global.json
+2025-10-22T21:41:51.5519880Z   cache: false
+2025-10-22T21:41:51.5520420Z ##[endgroup]
+2025-10-22T21:41:51.7266130Z [command]/Users/runner/work/_actions/actions/setup-dotnet/v4/externals/install-dotnet.sh --skip-non-versioned-files --runtime dotnet --channel LTS
+2025-10-22T21:41:52.9952790Z dotnet-install: .NET Core Runtime with version '8.0.21' is already installed.
+2025-10-22T21:41:52.9992480Z [command]/Users/runner/work/_actions/actions/setup-dotnet/v4/externals/install-dotnet.sh --skip-non-versioned-files --channel 9.0
+2025-10-22T21:41:53.6277270Z dotnet-install: .NET Core SDK with version '9.0.306' is already installed.

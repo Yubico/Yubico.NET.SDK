@@ -1,0 +1,445 @@
+﻿2025-10-22T21:41:46.8131580Z Current runner version: '2.329.0'
+2025-10-22T21:41:46.8153010Z ##[group]Runner Image Provisioner
+2025-10-22T21:41:46.8153560Z Hosted Compute Agent
+2025-10-22T21:41:46.8153900Z Version: 20251016.436
+2025-10-22T21:41:46.8154270Z Commit: 8ab8ac8bfd662a3739dab9fe09456aba92132568
+2025-10-22T21:41:46.8154710Z Build Date: 2025-10-15T20:44:12Z
+2025-10-22T21:41:46.8155070Z ##[endgroup]
+2025-10-22T21:41:46.8155410Z ##[group]Operating System
+2025-10-22T21:41:46.8155760Z macOS
+2025-10-22T21:41:46.8157160Z 15.6.1
+2025-10-22T21:41:46.8157620Z 24G90
+2025-10-22T21:41:46.8158470Z ##[endgroup]
+2025-10-22T21:41:46.8158960Z ##[group]Runner Image
+2025-10-22T21:41:46.8159330Z Image: macos-15-arm64
+2025-10-22T21:41:46.8159650Z Version: 20251015.0042
+2025-10-22T21:41:46.8161390Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20251015.0042/images/macos/macos-15-arm64-Readme.md
+2025-10-22T21:41:46.8165520Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20251015.0042
+2025-10-22T21:41:46.8166160Z ##[endgroup]
+2025-10-22T21:41:46.8166900Z ##[group]GITHUB_TOKEN Permissions
+2025-10-22T21:41:46.8169570Z Contents: read
+2025-10-22T21:41:46.8169990Z Metadata: read
+2025-10-22T21:41:46.8170700Z Packages: read
+2025-10-22T21:41:46.8171030Z ##[endgroup]
+2025-10-22T21:41:46.8172980Z Secret source: Actions
+2025-10-22T21:41:46.8173400Z Prepare workflow directory
+2025-10-22T21:41:46.8502300Z Prepare all required actions
+2025-10-22T21:41:46.8530650Z Getting action download info
+2025-10-22T21:41:47.2581290Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-22T21:41:47.4659820Z Download action repository 'actions/setup-dotnet@v4' (SHA:67a3573c9a986a3f9c594539f4ab511d57bb3ce9)
+2025-10-22T21:41:48.6074190Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-10-22T21:41:48.7948720Z Complete job name: Test 4 - ConcurrentDispose_IsThreadSafe
+2025-10-22T21:41:48.8378960Z ##[group]Run actions/checkout@v4
+2025-10-22T21:41:48.8380380Z with:
+2025-10-22T21:41:48.8380730Z   repository: Yubico/Yubico.NET.SDK
+2025-10-22T21:41:48.8381320Z   token: ***
+2025-10-22T21:41:48.8381640Z   ssh-strict: true
+2025-10-22T21:41:48.8381950Z   ssh-user: git
+2025-10-22T21:41:48.8382260Z   persist-credentials: true
+2025-10-22T21:41:48.8382610Z   clean: true
+2025-10-22T21:41:48.8382930Z   sparse-checkout-cone-mode: true
+2025-10-22T21:41:48.8383300Z   fetch-depth: 1
+2025-10-22T21:41:48.8383610Z   fetch-tags: false
+2025-10-22T21:41:48.8383920Z   show-progress: true
+2025-10-22T21:41:48.8384250Z   lfs: false
+2025-10-22T21:41:48.8384540Z   submodules: false
+2025-10-22T21:41:48.8384870Z   set-safe-directory: true
+2025-10-22T21:41:48.8385390Z ##[endgroup]
+2025-10-22T21:41:49.2010500Z Syncing repository: Yubico/Yubico.NET.SDK
+2025-10-22T21:41:49.2011960Z ##[group]Getting Git version info
+2025-10-22T21:41:49.2014270Z Working directory is '/Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK'
+2025-10-22T21:41:49.2017620Z [command]/opt/homebrew/bin/git version
+2025-10-22T21:41:49.2563730Z git version 2.50.1
+2025-10-22T21:41:49.2599660Z ##[endgroup]
+2025-10-22T21:41:49.2609840Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/735f0405-5dc8-4d13-abfc-a96bf06bcef9/.gitconfig'
+2025-10-22T21:41:49.2613640Z Temporarily overriding HOME='/Users/runner/work/_temp/735f0405-5dc8-4d13-abfc-a96bf06bcef9' before making global git config changes
+2025-10-22T21:41:49.2614760Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-22T21:41:49.2622620Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK
+2025-10-22T21:41:49.2732250Z Deleting the contents of '/Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK'
+2025-10-22T21:41:49.2736460Z ##[group]Initializing the repository
+2025-10-22T21:41:49.2740400Z [command]/opt/homebrew/bin/git init /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK
+2025-10-22T21:41:49.2996120Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-10-22T21:41:49.3000340Z hint: is subject to change. To configure the initial branch name to use in all
+2025-10-22T21:41:49.3014280Z hint: of your new repositories, which will suppress this warning, call:
+2025-10-22T21:41:49.3016360Z hint:
+2025-10-22T21:41:49.3019730Z hint: 	git config --global init.defaultBranch <name>
+2025-10-22T21:41:49.3026230Z hint:
+2025-10-22T21:41:49.3027830Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-10-22T21:41:49.3031190Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-10-22T21:41:49.3032530Z hint:
+2025-10-22T21:41:49.3033020Z hint: 	git branch -m <name>
+2025-10-22T21:41:49.3033530Z hint:
+2025-10-22T21:41:49.3034760Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-10-22T21:41:49.3038490Z Initialized empty Git repository in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/.git/
+2025-10-22T21:41:49.3040810Z [command]/opt/homebrew/bin/git remote add origin https://github.com/Yubico/Yubico.NET.SDK
+2025-10-22T21:41:49.3347970Z ##[endgroup]
+2025-10-22T21:41:49.3350170Z ##[group]Disabling automatic garbage collection
+2025-10-22T21:41:49.3355050Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2025-10-22T21:41:49.3435290Z ##[endgroup]
+2025-10-22T21:41:49.3435970Z ##[group]Setting up auth
+2025-10-22T21:41:49.3456860Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-22T21:41:49.3530950Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-22T21:41:49.4331010Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-22T21:41:49.4387900Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-22T21:41:49.6163140Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-10-22T21:41:49.6239810Z ##[endgroup]
+2025-10-22T21:41:49.6274100Z ##[group]Fetching the repository
+2025-10-22T21:41:49.6289910Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +61edcc0f6126c293f1d4612607aa535e18b7d3f1:refs/remotes/origin/experiment/isolate-disposal-hang
+2025-10-22T21:41:50.9347790Z From https://github.com/Yubico/Yubico.NET.SDK
+2025-10-22T21:41:50.9348910Z  * [new ref]         61edcc0f6126c293f1d4612607aa535e18b7d3f1 -> origin/experiment/isolate-disposal-hang
+2025-10-22T21:41:50.9411290Z ##[endgroup]
+2025-10-22T21:41:50.9412030Z ##[group]Determining the checkout info
+2025-10-22T21:41:50.9412860Z ##[endgroup]
+2025-10-22T21:41:50.9416860Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2025-10-22T21:41:50.9488110Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2025-10-22T21:41:50.9558980Z ##[group]Checking out the ref
+2025-10-22T21:41:50.9564960Z [command]/opt/homebrew/bin/git checkout --progress --force -B experiment/isolate-disposal-hang refs/remotes/origin/experiment/isolate-disposal-hang
+2025-10-22T21:41:51.1941820Z Switched to a new branch 'experiment/isolate-disposal-hang'
+2025-10-22T21:41:51.1951540Z branch 'experiment/isolate-disposal-hang' set up to track 'origin/experiment/isolate-disposal-hang'.
+2025-10-22T21:41:51.1987860Z ##[endgroup]
+2025-10-22T21:41:51.2073660Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2025-10-22T21:41:51.2136530Z 61edcc0f6126c293f1d4612607aa535e18b7d3f1
+2025-10-22T21:41:51.2326540Z ##[group]Run actions/setup-dotnet@v4
+2025-10-22T21:41:51.2326760Z with:
+2025-10-22T21:41:51.2326930Z   global-json-file: ./global.json
+2025-10-22T21:41:51.2327120Z   cache: false
+2025-10-22T21:41:51.2327260Z ##[endgroup]
+2025-10-22T21:41:51.3993010Z [command]/Users/runner/work/_actions/actions/setup-dotnet/v4/externals/install-dotnet.sh --skip-non-versioned-files --runtime dotnet --channel LTS
+2025-10-22T21:41:52.1330800Z dotnet-install: .NET Core Runtime with version '8.0.21' is already installed.
+2025-10-22T21:41:52.1412730Z [command]/Users/runner/work/_actions/actions/setup-dotnet/v4/externals/install-dotnet.sh --skip-non-versioned-files --channel 9.0
+2025-10-22T21:41:52.7714210Z dotnet-install: .NET Core SDK with version '9.0.306' is already installed.
+2025-10-22T21:41:52.8195960Z ##[group]Run dotnet nuget add source --username DennisDyallo --password *** --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+2025-10-22T21:41:52.8197060Z [36;1mdotnet nuget add source --username DennisDyallo --password *** --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"[0m
+2025-10-22T21:41:52.8256470Z shell: /bin/bash -e {0}
+2025-10-22T21:41:52.8256750Z env:
+2025-10-22T21:41:52.8256960Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:41:52.8257170Z ##[endgroup]
+2025-10-22T21:41:53.5794720Z 
+2025-10-22T21:41:53.5818800Z Welcome to .NET 9.0!
+2025-10-22T21:41:53.5819250Z ---------------------
+2025-10-22T21:41:53.5819530Z SDK Version: 9.0.306
+2025-10-22T21:41:53.5819770Z 
+2025-10-22T21:41:53.5819900Z Telemetry
+2025-10-22T21:41:53.5820200Z ---------
+2025-10-22T21:41:53.5821220Z The .NET tools collect usage data in order to help us improve your experience. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+2025-10-22T21:41:53.5821980Z 
+2025-10-22T21:41:53.5822200Z Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
+2025-10-22T21:41:54.2242790Z 
+2025-10-22T21:41:54.2244510Z ----------------
+2025-10-22T21:41:54.2246480Z Installed an ASP.NET Core HTTPS development certificate.
+2025-10-22T21:41:54.2247720Z To trust the certificate, run 'dotnet dev-certs https --trust'
+2025-10-22T21:41:54.2248900Z Learn about HTTPS: https://aka.ms/dotnet-https
+2025-10-22T21:41:54.2249430Z 
+2025-10-22T21:41:54.2249680Z ----------------
+2025-10-22T21:41:54.2250380Z Write your first app: https://aka.ms/dotnet-hello-world
+2025-10-22T21:41:54.2251410Z Find out what's new: https://aka.ms/dotnet-whats-new
+2025-10-22T21:41:54.2252430Z Explore documentation: https://aka.ms/dotnet-docs
+2025-10-22T21:41:54.2253530Z Report issues and find source on GitHub: https://github.com/dotnet/core
+2025-10-22T21:41:54.2254790Z Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+2025-10-22T21:41:54.2256050Z --------------------------------------------------------------------------------------
+2025-10-22T21:41:54.4717940Z Package source with Name: github added successfully.
+2025-10-22T21:41:54.5484160Z ##[group]Run brew install openssl
+2025-10-22T21:41:54.5484580Z [36;1mbrew install openssl[0m
+2025-10-22T21:41:54.5484810Z [36;1msudo mkdir -p /usr/local/lib[0m
+2025-10-22T21:41:54.5485200Z [36;1msudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib[0m
+2025-10-22T21:41:54.5485690Z [36;1msudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib[0m
+2025-10-22T21:41:54.5516740Z shell: /bin/bash -e {0}
+2025-10-22T21:41:54.5517020Z env:
+2025-10-22T21:41:54.5517170Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:41:54.5517420Z ##[endgroup]
+2025-10-22T21:41:57.9628120Z ##[warning]openssl@3 3.6.0 is already installed and up-to-date.
+To reinstall 3.6.0, run:
+  brew reinstall openssl@3
+
+2025-10-22T21:41:58.1078350Z ##[group]Run dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.ConcurrentDispose_IsThreadSafe" --logger "console;verbosity=detailed"
+2025-10-22T21:41:58.1079730Z [36;1mdotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.ConcurrentDispose_IsThreadSafe" --logger "console;verbosity=detailed"[0m
+2025-10-22T21:41:58.1402180Z shell: /bin/bash -e {0}
+2025-10-22T21:41:58.1402370Z env:
+2025-10-22T21:41:58.1402570Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:41:58.1403020Z   Logging__LogLevel__Default: Information
+2025-10-22T21:41:58.1403310Z   Logging__LogLevel__Yubico: Information
+2025-10-22T21:41:58.1403560Z ##[endgroup]
+2025-10-22T21:41:59.0510770Z   Determining projects to restore...
+2025-10-22T21:42:03.3206240Z   Restored /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/src/Yubico.Core.csproj (in 3.92 sec).
+2025-10-22T21:42:03.3226380Z   Restored /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico.Core.UnitTests.csproj (in 3.94 sec).
+2025-10-22T21:42:11.0803230Z   Yubico.Core -> /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/src/bin/Debug/netstandard2.1/Yubico.Core.dll
+2025-10-22T21:42:14.4627540Z   Yubico.Core.UnitTests -> /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll
+2025-10-22T21:42:14.4763090Z Test run for /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll (.NETCoreApp,Version=v8.0)
+2025-10-22T21:42:14.7915530Z VSTest version 17.14.1 (arm64)
+2025-10-22T21:42:14.8016790Z 
+2025-10-22T21:42:14.9863490Z Starting test execution, please wait...
+2025-10-22T21:42:15.0146200Z A total of 1 test files matched the specified pattern.
+2025-10-22T21:42:15.0181120Z /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll
+2025-10-22T21:42:16.1150170Z [xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 8.0.21)
+2025-10-22T21:42:16.2495660Z [xUnit.net 00:00:00.14]   Discovering: Yubico.Core.UnitTests
+2025-10-22T21:42:16.4183920Z [xUnit.net 00:00:00.31]   Discovered:  Yubico.Core.UnitTests
+2025-10-22T21:42:16.4617440Z [xUnit.net 00:00:00.35]   Starting:    Yubico.Core.UnitTests
+2025-10-22T21:42:16.5999690Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.6118990Z       [TELEMETRY][L001] MacOSHidDeviceListener constructor called on thread 12
+2025-10-22T21:42:16.6197340Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.6247140Z       [TELEMETRY][L001] StartListening() called, creating background thread
+2025-10-22T21:42:16.6319900Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.6360650Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.6396030Z       HID listener thread started. ThreadID is 18.
+2025-10-22T21:42:16.6435800Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.6474680Z       [TELEMETRY][L001] Background thread started
+2025-10-22T21:42:16.6513950Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.6541190Z       [TELEMETRY][L001] MacOSHidDeviceListener constructor complete
+2025-10-22T21:42:16.6554860Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.6625270Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.6660540Z       IOHIDManager 5341582864 is scheduled with run loop 5341597056 with mode kCFRunLoopDefaultMode
+2025-10-22T21:42:16.6680320Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.6715660Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.6740640Z       Flushed existing devices.
+2025-10-22T21:42:16.6748900Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.6783680Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.6829800Z       [TELEMETRY][L001] Entering run loop. _shouldStop=False
+2025-10-22T21:42:16.6864280Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.6870090Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.6891310Z       [TELEMETRY][L001] Loop iter 1: _shouldStop=False, prevResult=4, calling CFRunLoopRunInMode...
+2025-10-22T21:42:16.6946730Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.6965310Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=13, _isDisposed=False, _shouldStop=False
+2025-10-22T21:42:16.7003680Z         CallStack:
+2025-10-22T21:42:16.7060330Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:42:16.7112920Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:42:16.7149050Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:42:16.7184230Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:42:16.7231670Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:42:16.7264970Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:42:16.7302600Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:42:16.7340650Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:42:16.7386310Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.7410810Z       [TELEMETRY][L001] Setting _isDisposed = true
+2025-10-22T21:42:16.7433450Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.7447860Z       [TELEMETRY][L001] Calling StopListening(fromFinalizer=False)...
+2025-10-22T21:42:16.7481520Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.7489370Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=12, _isDisposed=False, _shouldStop=False
+2025-10-22T21:42:16.7513260Z         CallStack:
+2025-10-22T21:42:16.7582200Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:42:16.7616140Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:42:16.7669210Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:42:16.7706510Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:42:16.7710650Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:42:16.7711670Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:42:16.7712430Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:42:16.7715410Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:42:16.7717870Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.7732230Z       [TELEMETRY][L001] StopListening(fromFinalizer=False) called
+2025-10-22T21:42:16.7763230Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.7789910Z       [TELEMETRY][L001] Setting _shouldStop flag to true
+2025-10-22T21:42:16.7814870Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.7918380Z       [TELEMETRY][L001] _shouldStop flag set. RunLoop pointer: 5341597056
+2025-10-22T21:42:16.8023550Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8131560Z       [TELEMETRY][L001] Calling CFRunLoopStop(5341597056)
+2025-10-22T21:42:16.8207420Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8254090Z       [TELEMETRY][L001] CFRunLoopStop() returned
+2025-10-22T21:42:16.8356360Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8398500Z       [TELEMETRY][L001] Waiting for thread to exit (1 second timeout)...
+2025-10-22T21:42:16.8501760Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8522720Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.8546710Z       [TELEMETRY][L001] Loop iter 1: CFRunLoopRunInMode returned 2 after 10ms
+2025-10-22T21:42:16.8548530Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8549980Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.8551520Z       [TELEMETRY][L001] Run loop exited after 1 iterations. _shouldStop=True, finalResult=2
+2025-10-22T21:42:16.8553310Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8569980Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.8695310Z       [TELEMETRY][L001] Listener thread finally block - cleaning up native resources
+2025-10-22T21:42:16.8702530Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8704550Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.8704900Z       [TELEMETRY][L001] Unscheduling IOHIDManager from run loop
+2025-10-22T21:42:16.8709430Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8710110Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.8710670Z       [TELEMETRY][L001] IOHIDManager unscheduled from run loop
+2025-10-22T21:42:16.8711200Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8713730Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.8714130Z       [TELEMETRY][L001] Releasing IOHIDManager
+2025-10-22T21:42:16.8715080Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8716040Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.8716770Z       [TELEMETRY][L001] IOHIDManager released
+2025-10-22T21:42:16.8717410Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8739450Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.8741920Z       [TELEMETRY][L001] Releasing run loop mode CFString
+2025-10-22T21:42:16.8758250Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8761860Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.8762310Z       [TELEMETRY][L001] Run loop mode CFString released
+2025-10-22T21:42:16.8762700Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8763020Z       => MacOSHidDeviceListener.StartListening()
+2025-10-22T21:42:16.8763430Z       [TELEMETRY][L001] Listener thread cleanup complete - thread exiting
+2025-10-22T21:42:16.8763880Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8764300Z       [TELEMETRY][L001] Thread exited successfully after 0ms
+2025-10-22T21:42:16.8764720Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8765330Z       [TELEMETRY][L001] StopListening() complete
+2025-10-22T21:42:16.8765750Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8766090Z       [TELEMETRY][L001] StopListening() returned successfully
+2025-10-22T21:42:16.8766570Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8766950Z       [TELEMETRY][L001] Calling base.Dispose(True)
+2025-10-22T21:42:16.8768030Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8768390Z       [TELEMETRY][L001] <<< DISPOSE-EXIT: Complete
+2025-10-22T21:42:16.8768830Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8769170Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:42:16.8769570Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8770670Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=13, _isDisposed=True, _shouldStop=True
+2025-10-22T21:42:16.8771170Z         CallStack:
+2025-10-22T21:42:16.8771940Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:42:16.8773010Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:42:16.8774570Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:42:16.8776220Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:42:16.8777270Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:42:16.8778020Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:42:16.8778600Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:42:16.8779150Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:42:16.8779750Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8780190Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:42:16.8780700Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8781300Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=12, _isDisposed=True, _shouldStop=True
+2025-10-22T21:42:16.8781920Z         CallStack:
+2025-10-22T21:42:16.8782640Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:42:16.8783690Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:42:16.8785230Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:42:16.8786850Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:42:16.8787990Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:42:16.8788770Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:42:16.8789370Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:42:16.8789910Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:42:16.8807270Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8808840Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:42:16.8810210Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8853420Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=13, _isDisposed=True, _shouldStop=True
+2025-10-22T21:42:16.8855840Z         CallStack:
+2025-10-22T21:42:16.8858200Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:42:16.8859400Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:42:16.8861070Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:42:16.8863470Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:42:16.8865250Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:42:16.8866460Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:42:16.8867200Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:42:16.8867990Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:42:16.8869740Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8870550Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:42:16.8871930Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8872600Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=12, _isDisposed=True, _shouldStop=True
+2025-10-22T21:42:16.8875250Z         CallStack:
+2025-10-22T21:42:16.8880720Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:42:16.8884450Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:42:16.8887740Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:42:16.8902640Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:42:16.8903720Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:42:16.8904160Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:42:16.8904620Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:42:16.8905060Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:42:16.8905480Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8905840Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:42:16.8906250Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.8906640Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=13, _isDisposed=True, _shouldStop=True
+2025-10-22T21:42:16.8907030Z         CallStack:
+2025-10-22T21:42:16.8907720Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:42:16.8908800Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:42:16.9033490Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:42:16.9035020Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:42:16.9035920Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:42:16.9037080Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:42:16.9037460Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:42:16.9038560Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:42:16.9038950Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.9039320Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:42:16.9039730Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.9040150Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=12, _isDisposed=True, _shouldStop=True
+2025-10-22T21:42:16.9040520Z         CallStack:
+2025-10-22T21:42:16.9041120Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:42:16.9041980Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:42:16.9043220Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:42:16.9044660Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:42:16.9045500Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:42:16.9046050Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:42:16.9046440Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:42:16.9046830Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:42:16.9047170Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.9047460Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:42:16.9047770Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.9048150Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=13, _isDisposed=True, _shouldStop=True
+2025-10-22T21:42:16.9048550Z         CallStack:
+2025-10-22T21:42:16.9049070Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:42:16.9049960Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:42:16.9051160Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:42:16.9052600Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:42:16.9053350Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:42:16.9053940Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:42:16.9054450Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:42:16.9055200Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:42:16.9055650Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.9056030Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:42:16.9056360Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.9056830Z       [TELEMETRY][L001] >>> DISPOSE-ENTRY: disposing=True, thread=12, _isDisposed=True, _shouldStop=True
+2025-10-22T21:42:16.9057710Z         CallStack:
+2025-10-22T21:42:16.9058300Z          at Yubico.Core.Devices.Hid.MacOSHidDeviceListener.Dispose(Boolean disposing) in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDeviceListener.cs:line 154
+2025-10-22T21:42:16.9059190Z          at Yubico.Core.Devices.Hid.HidDeviceListener.Dispose() in /_/Yubico.Core/src/Yubico/Core/Devices/Hid/HidDeviceListener.cs:line 153
+2025-10-22T21:42:16.9060420Z          at Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.<>c__DisplayClass5_1.<ConcurrentDispose_IsThreadSafe>b__0() in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico/Core/Devices/Hid/MacOSHidDeviceListenerDisposalTests.cs:line 168
+2025-10-22T21:42:16.9061710Z          at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+2025-10-22T21:42:16.9062530Z          at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+2025-10-22T21:42:16.9063050Z          at System.Threading.ThreadPoolWorkQueue.Dispatch()
+2025-10-22T21:42:16.9063420Z          at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+2025-10-22T21:42:16.9063780Z          at System.Threading.Thread.StartCallback()
+2025-10-22T21:42:16.9064080Z info: Yubico.Core.Devices.Hid.MacOSHidDeviceListener[0]
+2025-10-22T21:42:16.9064440Z       [TELEMETRY][L001] Already disposed, returning early
+2025-10-22T21:42:16.9064850Z [xUnit.net 00:00:00.54]   Finished:    Yubico.Core.UnitTests
+2025-10-22T21:42:16.9065410Z   Passed Yubico.Core.Devices.Hid.UnitTests.MacOSHidDeviceListenerDisposalTests.ConcurrentDispose_IsThreadSafe [144 ms]
+2025-10-22T21:42:16.9065880Z   Standard Output Messages:
+2025-10-22T21:42:16.9066170Z  === TEST START: ConcurrentDispose_IsThreadSafe ===
+2025-10-22T21:42:16.9066590Z  [USING-ENTRY] Test=ConcurrentDispose_IsThreadSafe, Thread=12
+2025-10-22T21:42:16.9066940Z  [USING-BODY] Test=ConcurrentDispose_IsThreadSafe, Listener=L001, Thread=12
+2025-10-22T21:42:16.9067220Z  [TEST] Task 0 calling Dispose() on L001
+2025-10-22T21:42:16.9067570Z  [TEST] Task 9 calling Dispose() on L001
+2025-10-22T21:42:16.9067840Z  [TEST] Task 0 Dispose() completed on L001
+2025-10-22T21:42:16.9068130Z  [TEST] Task 1 calling Dispose() on L001
+2025-10-22T21:42:16.9068340Z  [TEST] Task 9 Dispose() completed on L001
+2025-10-22T21:42:16.9068630Z  [TEST] Task 8 calling Dispose() on L001
+2025-10-22T21:42:16.9068910Z  [TEST] Task 1 Dispose() completed on L001
+2025-10-22T21:42:16.9069190Z  [TEST] Task 8 Dispose() completed on L001
+2025-10-22T21:42:16.9069520Z  [TEST] Task 2 calling Dispose() on L001
+2025-10-22T21:42:16.9069790Z  [TEST] Task 7 calling Dispose() on L001
+2025-10-22T21:42:16.9070060Z  [TEST] Task 2 Dispose() completed on L001
+2025-10-22T21:42:16.9070330Z  [TEST] Task 3 calling Dispose() on L001
+2025-10-22T21:42:16.9070680Z  [TEST] Task 7 Dispose() completed on L001
+2025-10-22T21:42:16.9070880Z  [TEST] Task 6 calling Dispose() on L001
+2025-10-22T21:42:16.9071140Z  [TEST] Task 3 Dispose() completed on L001
+2025-10-22T21:42:16.9071420Z  [TEST] Task 4 calling Dispose() on L001
+2025-10-22T21:42:16.9071620Z  [TEST] Task 6 Dispose() completed on L001
+2025-10-22T21:42:16.9071840Z  [TEST] Task 5 calling Dispose() on L001
+2025-10-22T21:42:16.9072070Z  [TEST] Task 4 Dispose() completed on L001
+2025-10-22T21:42:16.9072380Z  [TEST] Task 5 Dispose() completed on L001
+2025-10-22T21:42:16.9072750Z  [USING-EXIT] Test=ConcurrentDispose_IsThreadSafe, Listener=L001, Thread=21
+2025-10-22T21:42:16.9073280Z 
+2025-10-22T21:42:16.9073290Z 
+2025-10-22T21:42:16.9073290Z 
+2025-10-22T21:42:16.9073450Z Test Run Successful.
+2025-10-22T21:42:16.9073660Z Total tests: 1
+2025-10-22T21:42:16.9073870Z      Passed: 1
+2025-10-22T21:42:16.9074090Z  Total time: 1.7212 Seconds
+2025-10-22T21:42:16.9195000Z ##[group]Run actions/upload-artifact@v4
+2025-10-22T21:42:16.9195230Z with:
+2025-10-22T21:42:16.9195620Z   name: Logs-Test04-ConcurrentDispose_IsThreadSafe
+2025-10-22T21:42:16.9195840Z   path: **/TestResults/*
+2025-10-22T21:42:16.9196000Z   if-no-files-found: warn
+2025-10-22T21:42:16.9196160Z   compression-level: 6
+2025-10-22T21:42:16.9196300Z   overwrite: false
+2025-10-22T21:42:16.9196560Z   include-hidden-files: false
+2025-10-22T21:42:16.9196720Z env:
+2025-10-22T21:42:16.9196840Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:42:16.9197030Z ##[endgroup]
+2025-10-22T21:42:17.7901220Z ##[warning]No files were found with the provided path: **/TestResults/*. No artifacts will be uploaded.
+2025-10-22T21:42:17.8024860Z Post job cleanup.
+2025-10-22T21:42:18.0769650Z Post job cleanup.
+2025-10-22T21:42:18.2381530Z [command]/opt/homebrew/bin/git version
+2025-10-22T21:42:18.2574010Z git version 2.50.1
+2025-10-22T21:42:18.2896750Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/f052f4ee-bdbb-4e56-b4d6-1ba1a9ca2855/.gitconfig'
+2025-10-22T21:42:18.2914220Z Temporarily overriding HOME='/Users/runner/work/_temp/f052f4ee-bdbb-4e56-b4d6-1ba1a9ca2855' before making global git config changes
+2025-10-22T21:42:18.3018080Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-22T21:42:18.3122380Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK
+2025-10-22T21:42:18.3286630Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-22T21:42:18.3467160Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-22T21:42:18.4971000Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-22T21:42:18.5072580Z http.https://github.com/.extraheader
+2025-10-22T21:42:18.5380520Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-10-22T21:42:18.5688340Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-22T21:42:18.7032000Z Cleaning up orphan processes
+2025-10-22T21:42:19.5893630Z Terminate orphan process: pid (1451) (dotnet)

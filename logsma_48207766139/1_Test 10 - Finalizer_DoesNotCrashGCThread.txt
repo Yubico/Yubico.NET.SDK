@@ -1,0 +1,205 @@
+﻿2025-10-22T21:41:46.5092340Z Current runner version: '2.329.0'
+2025-10-22T21:41:46.5109230Z ##[group]Runner Image Provisioner
+2025-10-22T21:41:46.5109720Z Hosted Compute Agent
+2025-10-22T21:41:46.5110040Z Version: 20251016.436
+2025-10-22T21:41:46.5110410Z Commit: 8ab8ac8bfd662a3739dab9fe09456aba92132568
+2025-10-22T21:41:46.5110830Z Build Date: 2025-10-15T20:44:12Z
+2025-10-22T21:41:46.5111190Z ##[endgroup]
+2025-10-22T21:41:46.5111500Z ##[group]Operating System
+2025-10-22T21:41:46.5111840Z macOS
+2025-10-22T21:41:46.5112130Z 15.6.1
+2025-10-22T21:41:46.5112400Z 24G90
+2025-10-22T21:41:46.5112660Z ##[endgroup]
+2025-10-22T21:41:46.5112940Z ##[group]Runner Image
+2025-10-22T21:41:46.5113240Z Image: macos-15-arm64
+2025-10-22T21:41:46.5113530Z Version: 20251015.0042
+2025-10-22T21:41:46.5114180Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20251015.0042/images/macos/macos-15-arm64-Readme.md
+2025-10-22T21:41:46.5115230Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20251015.0042
+2025-10-22T21:41:46.5115810Z ##[endgroup]
+2025-10-22T21:41:46.5116450Z ##[group]GITHUB_TOKEN Permissions
+2025-10-22T21:41:46.5117420Z Contents: read
+2025-10-22T21:41:46.5117700Z Metadata: read
+2025-10-22T21:41:46.5117980Z Packages: read
+2025-10-22T21:41:46.5118260Z ##[endgroup]
+2025-10-22T21:41:46.5119520Z Secret source: Actions
+2025-10-22T21:41:46.5119880Z Prepare workflow directory
+2025-10-22T21:41:46.5314300Z Prepare all required actions
+2025-10-22T21:41:46.5340890Z Getting action download info
+2025-10-22T21:41:46.9367420Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-22T21:41:47.1375280Z Download action repository 'actions/setup-dotnet@v4' (SHA:67a3573c9a986a3f9c594539f4ab511d57bb3ce9)
+2025-10-22T21:41:48.2643220Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-10-22T21:41:48.4189040Z Complete job name: Test 10 - Finalizer_DoesNotCrashGCThread
+2025-10-22T21:41:48.4564570Z ##[group]Run actions/checkout@v4
+2025-10-22T21:41:48.4565140Z with:
+2025-10-22T21:41:48.4565450Z   repository: Yubico/Yubico.NET.SDK
+2025-10-22T21:41:48.4566000Z   token: ***
+2025-10-22T21:41:48.4566270Z   ssh-strict: true
+2025-10-22T21:41:48.4566560Z   ssh-user: git
+2025-10-22T21:41:48.4566860Z   persist-credentials: true
+2025-10-22T21:41:48.4567190Z   clean: true
+2025-10-22T21:41:48.4567490Z   sparse-checkout-cone-mode: true
+2025-10-22T21:41:48.4567840Z   fetch-depth: 1
+2025-10-22T21:41:48.4568120Z   fetch-tags: false
+2025-10-22T21:41:48.4568410Z   show-progress: true
+2025-10-22T21:41:48.4568720Z   lfs: false
+2025-10-22T21:41:48.4568990Z   submodules: false
+2025-10-22T21:41:48.4569290Z   set-safe-directory: true
+2025-10-22T21:41:48.4569720Z ##[endgroup]
+2025-10-22T21:41:48.7174780Z Syncing repository: Yubico/Yubico.NET.SDK
+2025-10-22T21:41:48.7177000Z ##[group]Getting Git version info
+2025-10-22T21:41:48.7177730Z Working directory is '/Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK'
+2025-10-22T21:41:48.7178530Z [command]/opt/homebrew/bin/git version
+2025-10-22T21:41:48.7687410Z git version 2.50.1
+2025-10-22T21:41:48.7719240Z ##[endgroup]
+2025-10-22T21:41:48.7725950Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/c291c636-5758-4907-9b3a-70231702113d/.gitconfig'
+2025-10-22T21:41:48.7732960Z Temporarily overriding HOME='/Users/runner/work/_temp/c291c636-5758-4907-9b3a-70231702113d' before making global git config changes
+2025-10-22T21:41:48.7734020Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-22T21:41:48.7736440Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK
+2025-10-22T21:41:48.7828420Z Deleting the contents of '/Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK'
+2025-10-22T21:41:48.7835330Z ##[group]Initializing the repository
+2025-10-22T21:41:48.7836440Z [command]/opt/homebrew/bin/git init /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK
+2025-10-22T21:41:48.8642230Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-10-22T21:41:48.8654710Z hint: is subject to change. To configure the initial branch name to use in all
+2025-10-22T21:41:48.8661020Z hint: of your new repositories, which will suppress this warning, call:
+2025-10-22T21:41:48.8669440Z hint:
+2025-10-22T21:41:48.8669890Z hint: 	git config --global init.defaultBranch <name>
+2025-10-22T21:41:48.8670360Z hint:
+2025-10-22T21:41:48.8670790Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-10-22T21:41:48.8671480Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-10-22T21:41:48.8672030Z hint:
+2025-10-22T21:41:48.8672320Z hint: 	git branch -m <name>
+2025-10-22T21:41:48.8672650Z hint:
+2025-10-22T21:41:48.8673110Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-10-22T21:41:48.8673920Z Initialized empty Git repository in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/.git/
+2025-10-22T21:41:48.8675560Z [command]/opt/homebrew/bin/git remote add origin https://github.com/Yubico/Yubico.NET.SDK
+2025-10-22T21:41:48.8720310Z ##[endgroup]
+2025-10-22T21:41:48.8720910Z ##[group]Disabling automatic garbage collection
+2025-10-22T21:41:48.8722330Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2025-10-22T21:41:48.8776760Z ##[endgroup]
+2025-10-22T21:41:48.8777540Z ##[group]Setting up auth
+2025-10-22T21:41:48.8780970Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-22T21:41:48.8837650Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-22T21:41:48.9608480Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-22T21:41:48.9672880Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-22T21:41:49.0390950Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-10-22T21:41:49.0468530Z ##[endgroup]
+2025-10-22T21:41:49.0469350Z ##[group]Fetching the repository
+2025-10-22T21:41:49.0472730Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +61edcc0f6126c293f1d4612607aa535e18b7d3f1:refs/remotes/origin/experiment/isolate-disposal-hang
+2025-10-22T21:41:50.3221390Z From https://github.com/Yubico/Yubico.NET.SDK
+2025-10-22T21:41:50.3222930Z  * [new ref]         61edcc0f6126c293f1d4612607aa535e18b7d3f1 -> origin/experiment/isolate-disposal-hang
+2025-10-22T21:41:50.3278190Z ##[endgroup]
+2025-10-22T21:41:50.3278910Z ##[group]Determining the checkout info
+2025-10-22T21:41:50.3279720Z ##[endgroup]
+2025-10-22T21:41:50.3283130Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2025-10-22T21:41:50.3344000Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2025-10-22T21:41:50.3405810Z ##[group]Checking out the ref
+2025-10-22T21:41:50.3408340Z [command]/opt/homebrew/bin/git checkout --progress --force -B experiment/isolate-disposal-hang refs/remotes/origin/experiment/isolate-disposal-hang
+2025-10-22T21:41:50.5067830Z Switched to a new branch 'experiment/isolate-disposal-hang'
+2025-10-22T21:41:50.5170700Z branch 'experiment/isolate-disposal-hang' set up to track 'origin/experiment/isolate-disposal-hang'.
+2025-10-22T21:41:50.5339790Z ##[endgroup]
+2025-10-22T21:41:50.5399950Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2025-10-22T21:41:50.5403960Z 61edcc0f6126c293f1d4612607aa535e18b7d3f1
+2025-10-22T21:41:50.5574450Z ##[group]Run actions/setup-dotnet@v4
+2025-10-22T21:41:50.5575280Z with:
+2025-10-22T21:41:50.5575780Z   global-json-file: ./global.json
+2025-10-22T21:41:50.5576450Z   cache: false
+2025-10-22T21:41:50.5576960Z ##[endgroup]
+2025-10-22T21:41:50.6938290Z [command]/Users/runner/work/_actions/actions/setup-dotnet/v4/externals/install-dotnet.sh --skip-non-versioned-files --runtime dotnet --channel LTS
+2025-10-22T21:41:51.4034860Z dotnet-install: .NET Core Runtime with version '8.0.21' is already installed.
+2025-10-22T21:41:51.4053630Z [command]/Users/runner/work/_actions/actions/setup-dotnet/v4/externals/install-dotnet.sh --skip-non-versioned-files --channel 9.0
+2025-10-22T21:41:51.9982840Z dotnet-install: .NET Core SDK with version '9.0.306' is already installed.
+2025-10-22T21:41:52.0072590Z ##[group]Run dotnet nuget add source --username DennisDyallo --password *** --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+2025-10-22T21:41:52.0073680Z [36;1mdotnet nuget add source --username DennisDyallo --password *** --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"[0m
+2025-10-22T21:41:52.0115400Z shell: /bin/bash -e {0}
+2025-10-22T21:41:52.0115630Z env:
+2025-10-22T21:41:52.0115840Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:41:52.0116050Z ##[endgroup]
+2025-10-22T21:41:52.5794820Z 
+2025-10-22T21:41:52.5826820Z Welcome to .NET 9.0!
+2025-10-22T21:41:52.5851830Z ---------------------
+2025-10-22T21:41:52.5862740Z SDK Version: 9.0.306
+2025-10-22T21:41:52.5884540Z 
+2025-10-22T21:41:52.5891510Z Telemetry
+2025-10-22T21:41:52.5912220Z ---------
+2025-10-22T21:41:52.5920390Z The .NET tools collect usage data in order to help us improve your experience. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+2025-10-22T21:41:52.5926740Z 
+2025-10-22T21:41:52.5929530Z Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
+2025-10-22T21:41:52.9944910Z 
+2025-10-22T21:41:52.9945160Z ----------------
+2025-10-22T21:41:52.9945660Z Installed an ASP.NET Core HTTPS development certificate.
+2025-10-22T21:41:52.9946040Z To trust the certificate, run 'dotnet dev-certs https --trust'
+2025-10-22T21:41:52.9946470Z Learn about HTTPS: https://aka.ms/dotnet-https
+2025-10-22T21:41:52.9946690Z 
+2025-10-22T21:41:52.9946750Z ----------------
+2025-10-22T21:41:52.9947050Z Write your first app: https://aka.ms/dotnet-hello-world
+2025-10-22T21:41:52.9947360Z Find out what's new: https://aka.ms/dotnet-whats-new
+2025-10-22T21:41:52.9947660Z Explore documentation: https://aka.ms/dotnet-docs
+2025-10-22T21:41:52.9948080Z Report issues and find source on GitHub: https://github.com/dotnet/core
+2025-10-22T21:41:52.9948550Z Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+2025-10-22T21:41:52.9948980Z --------------------------------------------------------------------------------------
+2025-10-22T21:41:53.2514980Z Package source with Name: github added successfully.
+2025-10-22T21:41:53.3092800Z ##[group]Run brew install openssl
+2025-10-22T21:41:53.3093150Z [36;1mbrew install openssl[0m
+2025-10-22T21:41:53.3093370Z [36;1msudo mkdir -p /usr/local/lib[0m
+2025-10-22T21:41:53.3093760Z [36;1msudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib[0m
+2025-10-22T21:41:53.3094270Z [36;1msudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib[0m
+2025-10-22T21:41:53.3128200Z shell: /bin/bash -e {0}
+2025-10-22T21:41:53.3128410Z env:
+2025-10-22T21:41:53.3128580Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:41:53.3128830Z ##[endgroup]
+2025-10-22T21:41:59.3140190Z ##[warning]openssl@3 3.6.0 is already installed and up-to-date.
+To reinstall 3.6.0, run:
+  brew reinstall openssl@3
+
+2025-10-22T21:41:59.5133650Z ##[group]Run dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Finalizer_DoesNotCrashGCThread" --logger "console;verbosity=detailed"
+2025-10-22T21:41:59.5134860Z [36;1mdotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Finalizer_DoesNotCrashGCThread" --logger "console;verbosity=detailed"[0m
+2025-10-22T21:41:59.5346940Z shell: /bin/bash -e {0}
+2025-10-22T21:41:59.5348180Z env:
+2025-10-22T21:41:59.5348400Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:41:59.5348690Z   Logging__LogLevel__Default: Information
+2025-10-22T21:41:59.5351490Z   Logging__LogLevel__Yubico: Information
+2025-10-22T21:41:59.5351780Z ##[endgroup]
+2025-10-22T21:42:00.3793440Z   Determining projects to restore...
+2025-10-22T21:42:04.5342960Z   Restored /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/Yubico.Core.UnitTests.csproj (in 3.66 sec).
+2025-10-22T21:42:06.3147900Z   Restored /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/src/Yubico.Core.csproj (in 5.44 sec).
+2025-10-22T21:42:10.1977440Z   Yubico.Core -> /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/src/bin/Debug/netstandard2.1/Yubico.Core.dll
+2025-10-22T21:42:13.0060470Z   Yubico.Core.UnitTests -> /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll
+2025-10-22T21:42:13.0139160Z Test run for /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll (.NETCoreApp,Version=v8.0)
+2025-10-22T21:42:13.2005510Z VSTest version 17.14.1 (arm64)
+2025-10-22T21:42:13.2020500Z 
+2025-10-22T21:42:13.3030030Z Starting test execution, please wait...
+2025-10-22T21:42:13.3218360Z A total of 1 test files matched the specified pattern.
+2025-10-22T21:42:13.3264060Z /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll
+2025-10-22T21:42:13.8825380Z [xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 8.0.21)
+2025-10-22T21:42:13.9321030Z [xUnit.net 00:00:00.06]   Discovering: Yubico.Core.UnitTests
+2025-10-22T21:42:14.0254640Z [xUnit.net 00:00:00.15]   Discovered:  Yubico.Core.UnitTests
+2025-10-22T21:42:14.0312130Z No test matches the given testcase filter `FullyQualifiedName~MacOSHidDeviceListenerDisposalTests.Finalizer_DoesNotCrashGCThread` in /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK/Yubico.Core/tests/bin/Debug/net8.0/Yubico.Core.UnitTests.dll
+2025-10-22T21:42:14.0600940Z 
+2025-10-22T21:42:14.1261840Z ##[group]Run actions/upload-artifact@v4
+2025-10-22T21:42:14.1263050Z with:
+2025-10-22T21:42:14.1263400Z   name: Logs-Test10-Finalizer_DoesNotCrashGCThread
+2025-10-22T21:42:14.1263760Z   path: **/TestResults/*
+2025-10-22T21:42:14.1263990Z   if-no-files-found: warn
+2025-10-22T21:42:14.1264320Z   compression-level: 6
+2025-10-22T21:42:14.1264560Z   overwrite: false
+2025-10-22T21:42:14.1264760Z   include-hidden-files: false
+2025-10-22T21:42:14.1264990Z env:
+2025-10-22T21:42:14.1265270Z   DOTNET_ROOT: /Users/runner/.dotnet
+2025-10-22T21:42:14.1265490Z ##[endgroup]
+2025-10-22T21:42:14.5830670Z ##[warning]No files were found with the provided path: **/TestResults/*. No artifacts will be uploaded.
+2025-10-22T21:42:14.6059230Z Post job cleanup.
+2025-10-22T21:42:14.7452380Z Post job cleanup.
+2025-10-22T21:42:14.8311230Z [command]/opt/homebrew/bin/git version
+2025-10-22T21:42:14.8478240Z git version 2.50.1
+2025-10-22T21:42:14.8577310Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/aee249f9-e6c1-4a89-80a8-762a5baaf377/.gitconfig'
+2025-10-22T21:42:14.8578960Z Temporarily overriding HOME='/Users/runner/work/_temp/aee249f9-e6c1-4a89-80a8-762a5baaf377' before making global git config changes
+2025-10-22T21:42:14.8579770Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-22T21:42:14.8580480Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/Yubico.NET.SDK/Yubico.NET.SDK
+2025-10-22T21:42:14.8655280Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-22T21:42:14.8746430Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-22T21:42:14.9716730Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-22T21:42:14.9739070Z http.https://github.com/.extraheader
+2025-10-22T21:42:14.9796120Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-10-22T21:42:14.9843610Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-22T21:42:15.0706870Z Cleaning up orphan processes
+2025-10-22T21:42:15.2353670Z Terminate orphan process: pid (2286) (dotnet)

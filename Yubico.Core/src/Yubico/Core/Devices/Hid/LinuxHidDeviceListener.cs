@@ -246,30 +246,50 @@ namespace Yubico.Core.Devices.Hid
 
         /// <summary>
         /// Checks if there are any pending udev events using poll with a timeout.
+        /// Uses the Linux poll() system call for efficient I/O multiplexing.
         /// </summary>
-        /// <param name="timeoutMs">Timeout in milliseconds</param>
-        /// <returns>True if events are available, false if timeout occurred</returns>
+        /// <param name="timeoutMs">Timeout in milliseconds. Thread blocks up to this duration waiting for events.</param>
+        /// <returns>True if events are available, false if timeout occurred or error</returns>
+        /// <remarks>
+        /// Reference: Linux poll(2) man page - https://man7.org/linux/man-pages/man2/poll.2.html
+        ///
+        /// The poll() system call monitors file descriptors for I/O readiness without blocking indefinitely.
+        /// This allows the listener thread to remain responsive to cancellation requests while waiting for device events.
+        ///
+        /// A 100ms timeout provides a balance between:
+        /// - Responsiveness: Thread checks cancellation every 100ms
+        /// - Efficiency: Only 10 wake-ups per second (minimal CPU/battery impact)
+        /// - Low latency: Device events processed within 0-100ms
+        /// </remarks>
         private bool HasPendingEvents(int timeoutMs)
         {
             IntPtr fd = udev_monitor_get_fd(_monitorObject);
 
-            // Use poll to wait for events with timeout
-            // POLLIN = 0x0001 (data available to read)
+            // POLLIN = "Poll INput" - bit flag (0x0001) indicating data is ready to read
+            // From poll(2) man page: "There is data to read"
+            // Other flags: POLLOUT (can write), POLLERR (error), POLLHUP (hangup)
             const short POLLIN = 0x0001;
 
             var pollFd = new PollFd
             {
-                fd = fd,
-                events = POLLIN,
-                revents = 0
+                fd = fd,              // File descriptor to monitor (udev monitor)
+                events = POLLIN,      // INPUT: What we want to monitor (readable data)
+                revents = 0           // OUTPUT: What actually occurred (filled by kernel)
             };
 
             PollFd[] pollFds = new[] { pollFd };
+
+            // poll() blocks up to timeoutMs waiting for events on the file descriptor
+            // Returns immediately if event arrives before timeout
             int result = poll(pollFds, 1, timeoutMs);
 
-            // result > 0 means events are ready
-            // result == 0 means timeout
-            // result < 0 means error
+            // result > 0: Number of file descriptors with events ready
+            // result == 0: Timeout occurred, no events
+            // result < 0: Error occurred
+
+            // Bitwise AND isolates the POLLIN bit from revents to check if data is ready
+            // Example: revents=0x0001 (POLLIN) & 0x0001 = 0x0001 (true)
+            //          revents=0x0008 (POLLERR) & 0x0001 = 0x0000 (false)
             return result > 0 && (pollFds[0].revents & POLLIN) != 0;
         }
 

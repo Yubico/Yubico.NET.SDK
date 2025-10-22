@@ -127,7 +127,23 @@ namespace Yubico.Core.Devices.Hid
 
         private void ListeningThread()
         {
-            const int runLoopTimeout = 10; // 10 seconds is arbitrary, pulled from Apple sample code
+            // CFRunLoopRunInMode timeout in SECONDS (not milliseconds!)
+            // Reference: https://developer.apple.com/documentation/corefoundation/1541988-cfrunloopruninmode
+            //
+            // CFRunLoopRunInMode monitors the run loop for events with a timeout, similar to Linux poll().
+            // It blocks the thread for up to 'timeout' seconds waiting for IOHIDManager device events.
+            //
+            // Return values from CFRunLoopRunInMode:
+            // - kCFRunLoopRunStopped (2): Stopped by CFRunLoopStop() - triggers disposal exit
+            // - kCFRunLoopRunTimedOut (3): Timeout expired with no events - continue monitoring
+            // - kCFRunLoopRunHandledSource (4): Processed a device event - continue monitoring
+            //
+            // 0.1 second (100ms) timeout provides:
+            // - Responsiveness: Thread checks CFRunLoopStop() every 100ms
+            // - Efficiency: Only 10 wake-ups per second (minimal CPU/battery impact)
+            // - Low latency: Device events processed within 0-100ms
+            // - Consistency: Matches Linux poll() timeout for uniform cross-platform behavior
+            const double runLoopTimeout = 0.1; // 100 milliseconds (0.1 seconds)
             using IDisposable? logScope = _log.BeginScope("MacOSHidDeviceListener.StartListening()");
 
             _log.LogInformation("HID listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);

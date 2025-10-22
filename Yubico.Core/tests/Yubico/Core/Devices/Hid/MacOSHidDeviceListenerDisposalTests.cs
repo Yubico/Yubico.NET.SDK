@@ -115,7 +115,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         /// Verifies that concurrent Dispose() calls from multiple threads are thread-safe.
         /// </summary>
         [SkippableFact]
-        public void ConcurrentDispose_IsThreadSafe()
+        public async Task ConcurrentDispose_IsThreadSafe()
         {
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
@@ -129,7 +129,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             }
 
             // Should not throw or deadlock
-            var exception = Record.Exception(() => Task.WaitAll(tasks));
+            var exception = await Record.ExceptionAsync(async () => await Task.WhenAll(tasks));
             Assert.Null(exception);
         }
 
@@ -186,7 +186,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         /// Stress test: Create and dispose many listeners in parallel.
         /// </summary>
         [SkippableFact]
-        public void ParallelCreateDispose_NoLeaksOrDeadlocks()
+        public async Task ParallelCreateDispose_NoLeaksOrDeadlocks()
         {
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
@@ -204,8 +204,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             }
 
             // Should complete without timeout
-            bool completed = Task.WaitAll(tasks, TimeSpan.FromSeconds(15));
-            Assert.True(completed, "Parallel create/dispose timed out");
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            await Task.WhenAll(tasks).WaitAsync(cts.Token);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();

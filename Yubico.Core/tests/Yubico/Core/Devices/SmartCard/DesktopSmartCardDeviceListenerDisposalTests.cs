@@ -93,7 +93,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         /// This tests the disposal lock implementation.
         /// </summary>
         [Fact]
-        public void ConcurrentDispose_IsThreadSafe()
+        public async Task ConcurrentDispose_IsThreadSafe()
         {
             var listener = SmartCardDeviceListener.Create();
 
@@ -105,7 +105,8 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             }
 
             // Should not throw or deadlock
-            var exception = Record.Exception(() => Task.WaitAll(tasks, TimeSpan.FromSeconds(30)));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var exception = await Record.ExceptionAsync(async () => await Task.WhenAll(tasks).WaitAsync(cts.Token));
             Assert.Null(exception);
         }
 
@@ -164,7 +165,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         /// Stress test: Create and dispose many listeners in parallel.
         /// </summary>
         [Fact]
-        public void ParallelCreateDispose_NoLeaksOrDeadlocks()
+        public async Task ParallelCreateDispose_NoLeaksOrDeadlocks()
         {
             // Create 10 listeners in parallel, dispose them
             var tasks = new Task[10];
@@ -178,8 +179,8 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             }
 
             // Should complete without timeout
-            bool completed = Task.WaitAll(tasks, TimeSpan.FromSeconds(30));
-            Assert.True(completed, "Parallel create/dispose timed out");
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            await Task.WhenAll(tasks).WaitAsync(cts.Token);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();

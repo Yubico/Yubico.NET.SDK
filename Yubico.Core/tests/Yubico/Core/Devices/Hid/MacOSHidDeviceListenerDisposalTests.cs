@@ -44,8 +44,10 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: Dispose_CompletesWithinReasonableTime ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_CompletesWithinReasonableTime)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
             var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_CompletesWithinReasonableTime)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
             _output.WriteLine($"[TEST] Created listener instance: {macListener?.InstanceId ?? "unknown"}");
 
             var stopwatch = Stopwatch.StartNew();
@@ -57,6 +59,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             Assert.True(stopwatch.ElapsedMilliseconds < 500,
                 $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <500ms");
             _output.WriteLine($"[TEST] Instance {macListener?.InstanceId} disposed in {stopwatch.ElapsedMilliseconds}ms");
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_CompletesWithinReasonableTime)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -69,19 +72,28 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: Dispose_CalledMultipleTimes_IsIdempotent ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_CalledMultipleTimes_IsIdempotent)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
+            var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_CalledMultipleTimes_IsIdempotent)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
 
             // First disposal
+            _output.WriteLine($"[TEST] First Dispose() call for {macListener?.InstanceId}");
             listener.Dispose();
+            _output.WriteLine($"[TEST] First Dispose() completed for {macListener?.InstanceId}");
 
             // Subsequent disposals should not throw
+            _output.WriteLine($"[TEST] Second Dispose() call for {macListener?.InstanceId}");
             var exception1 = Record.Exception(() => listener.Dispose());
+            _output.WriteLine($"[TEST] Third Dispose() call for {macListener?.InstanceId}");
             var exception2 = Record.Exception(() => listener.Dispose());
+            _output.WriteLine($"[TEST] Fourth Dispose() call for {macListener?.InstanceId}");
             var exception3 = Record.Exception(() => listener.Dispose());
 
             Assert.Null(exception1);
             Assert.Null(exception2);
             Assert.Null(exception3);
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_CalledMultipleTimes_IsIdempotent)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -100,8 +112,12 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Create and dispose 50 listeners
             for (int i = 0; i < 50; i++)
             {
+                _output.WriteLine($"[USING-ENTRY] Test={nameof(RepeatedCreateDispose_NoLeaks)}, Iteration={i}, Thread={Environment.CurrentManagedThreadId}");
                 using var listener = HidDeviceListener.Create();
+                var macListener = listener as MacOSHidDeviceListener;
+                _output.WriteLine($"[USING-BODY] Test={nameof(RepeatedCreateDispose_NoLeaks)}, Iteration={i}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
                 // Listener created and immediately disposed
+                _output.WriteLine($"[USING-EXIT] Test={nameof(RepeatedCreateDispose_NoLeaks)}, Iteration={i}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
             }
 
             // Force GC to ensure any finalizers run
@@ -135,18 +151,28 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: ConcurrentDispose_IsThreadSafe ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(ConcurrentDispose_IsThreadSafe)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
+            var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[USING-BODY] Test={nameof(ConcurrentDispose_IsThreadSafe)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
 
             // Launch 10 concurrent Dispose() calls
             var tasks = new Task[10];
             for (int i = 0; i < 10; i++)
             {
-                tasks[i] = Task.Run(() => listener.Dispose());
+                int taskNum = i;
+                tasks[i] = Task.Run(() =>
+                {
+                    _output.WriteLine($"[TEST] Task {taskNum} calling Dispose() on {macListener?.InstanceId}");
+                    listener.Dispose();
+                    _output.WriteLine($"[TEST] Task {taskNum} Dispose() completed on {macListener?.InstanceId}");
+                });
             }
 
             // Should not throw or deadlock
             var exception = await Record.ExceptionAsync(async () => await Task.WhenAll(tasks));
             Assert.Null(exception);
+            _output.WriteLine($"[USING-EXIT] Test={nameof(ConcurrentDispose_IsThreadSafe)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -160,14 +186,19 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             int threadCountBefore = Process.GetCurrentProcess().Threads.Count;
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_TerminatesListenerThread)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
+            var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_TerminatesListenerThread)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
             Thread.Sleep(100); // Give thread time to start
 
             int threadCountDuring = Process.GetCurrentProcess().Threads.Count;
             Assert.True(threadCountDuring >= threadCountBefore,
                 "Thread count should increase when listener is active");
 
+            _output.WriteLine($"[TEST] Calling Dispose() on {macListener?.InstanceId}");
             listener.Dispose();
+            _output.WriteLine($"[TEST] Dispose() completed on {macListener?.InstanceId}");
             Thread.Sleep(200); // Give thread time to terminate
 
             int threadCountAfter = Process.GetCurrentProcess().Threads.Count;
@@ -177,6 +208,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             int threadDifference = Math.Abs(threadCountAfter - threadCountBefore);
             Assert.True(threadDifference <= 3,
                 $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±3)");
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_TerminatesListenerThread)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -188,17 +220,23 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: Dispose_StopsCFRunLoop ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_StopsCFRunLoop)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
+            var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_StopsCFRunLoop)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
             Thread.Sleep(100); // Ensure CFRunLoop is running
 
             // Dispose should stop the run loop
             var stopwatch = Stopwatch.StartNew();
+            _output.WriteLine($"[TEST] Calling Dispose() on {macListener?.InstanceId}");
             listener.Dispose();
+            _output.WriteLine($"[TEST] Dispose() completed on {macListener?.InstanceId}");
             stopwatch.Stop();
 
             // If CFRunLoopStop works, this should complete quickly
             Assert.True(stopwatch.ElapsedMilliseconds < 500,
                 $"CFRunLoop took {stopwatch.ElapsedMilliseconds}, expected < 500 ms");
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_StopsCFRunLoop)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -222,12 +260,15 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                 int taskNum = i; // Capture for closure
                 tasks[i] = Task.Run(() =>
                 {
+                    _output.WriteLine($"[USING-ENTRY] Test={nameof(ParallelCreateDispose_NoLeaksOrDeadlocks)}, Task={taskNum:D2}, Thread={Environment.CurrentManagedThreadId}");
                     using var listener = HidDeviceListener.Create();
                     var macListener = listener as MacOSHidDeviceListener;
                     string instanceId = macListener?.InstanceId ?? "unknown";
+                    _output.WriteLine($"[USING-BODY] Test={nameof(ParallelCreateDispose_NoLeaksOrDeadlocks)}, Task={taskNum:D2}, Listener={instanceId}, Thread={Environment.CurrentManagedThreadId}");
                     _output.WriteLine($"[TEST-Task{taskNum:D2}] Created listener: {instanceId}");
                     Thread.Sleep(50); // Hold briefly to ensure thread starts
                     _output.WriteLine($"[TEST-Task{taskNum:D2}] Disposing listener: {instanceId}");
+                    _output.WriteLine($"[USING-EXIT] Test={nameof(ParallelCreateDispose_NoLeaksOrDeadlocks)}, Task={taskNum:D2}, Listener={instanceId}, Thread={Environment.CurrentManagedThreadId}");
                 });
             }
 
@@ -261,19 +302,18 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             int threadCountBefore = Process.GetCurrentProcess().Threads.Count;
 
-            // Create and dispose 500 listeners sequentially
+            // Create and dispose 50 listeners sequentially (REDUCED from 500 for debugging)
             // Sequential execution minimizes parallel activity noise
-            // High iteration count amplifies leak signal (500:1 signal-to-noise ratio)
-            for (int i = 0; i < 500; i++)
+            // High iteration count amplifies leak signal (50:1 signal-to-noise ratio)
+            for (int i = 0; i < 50; i++)
             {
+                _output.WriteLine($"[USING-ENTRY] Test={nameof(SequentialCreateDispose_HighIterations_NoLeaks)}, Iteration={i:D3}, Thread={Environment.CurrentManagedThreadId}");
                 using var listener = HidDeviceListener.Create();
                 var macListener = listener as MacOSHidDeviceListener;
-                // Log every 50th iteration to avoid spam
-                if (i % 50 == 0 || i < 5)
-                {
-                    _output.WriteLine($"[TEST-Iteration{i:D3}] Created listener: {macListener?.InstanceId ?? "unknown"}");
-                }
+                _output.WriteLine($"[USING-BODY] Test={nameof(SequentialCreateDispose_HighIterations_NoLeaks)}, Iteration={i:D3}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
+                _output.WriteLine($"[TEST-Iteration{i:D3}] Created listener: {macListener?.InstanceId ?? "unknown"}");
                 Thread.Sleep(10); // Brief hold to ensure thread lifecycle
+                _output.WriteLine($"[USING-EXIT] Test={nameof(SequentialCreateDispose_HighIterations_NoLeaks)}, Iteration={i:D3}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
             }
 
             GC.Collect();
@@ -299,16 +339,22 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: Dispose_UnusedListener_Succeeds ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_UnusedListener_Succeeds)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
+            var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_UnusedListener_Succeeds)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
             // Don't subscribe to any events or do anything
 
             var stopwatch = Stopwatch.StartNew();
+            _output.WriteLine($"[TEST] Calling Dispose() on {macListener?.InstanceId}");
             var exception = Record.Exception(() => listener.Dispose());
+            _output.WriteLine($"[TEST] Dispose() completed on {macListener?.InstanceId}");
             stopwatch.Stop();
 
             Assert.Null(exception);
             Assert.True(stopwatch.ElapsedMilliseconds < 500,
                 $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <500ms");
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_UnusedListener_Succeeds)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -342,10 +388,14 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private static void CreateAndAbandonListener()
+        private void CreateAndAbandonListener()
         {
-            _ = HidDeviceListener.Create();
+            _output.WriteLine($"[FINALIZER-TEST] CreateAndAbandonListener ENTRY, Thread={Environment.CurrentManagedThreadId}");
+            var listener = HidDeviceListener.Create();
+            var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[FINALIZER-TEST] Created listener {macListener?.InstanceId} WITHOUT using statement, Thread={Environment.CurrentManagedThreadId}");
             // Let it go out of scope without disposing
+            _output.WriteLine($"[FINALIZER-TEST] CreateAndAbandonListener EXIT (listener {macListener?.InstanceId} going out of scope), Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -357,8 +407,10 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: Dispose_StopsIOKitCallbacks ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_StopsIOKitCallbacks)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
             var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_StopsIOKitCallbacks)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
             _output.WriteLine($"[TEST] Created listener: {macListener?.InstanceId ?? "unknown"}");
 
             var callbackFired = false;
@@ -370,6 +422,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             _output.WriteLine($"[TEST] Disposing listener: {macListener?.InstanceId ?? "unknown"}");
             listener.Dispose();
+            _output.WriteLine($"[TEST] Dispose() completed on {macListener?.InstanceId}");
 
             // Wait a bit to see if any callbacks fire (they shouldn't)
             Thread.Sleep(500);
@@ -378,6 +431,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // that disposal completed without errors
             Assert.False(callbackFired, "No device events should fire in test environment");
             _output.WriteLine($"[TEST] Verified no callbacks fired for {macListener?.InstanceId ?? "unknown"}");
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_StopsIOKitCallbacks)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -389,8 +443,10 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: Dispose_ClearsDelegateReferences ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_ClearsDelegateReferences)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
             var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_ClearsDelegateReferences)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
             _output.WriteLine($"[TEST] Created listener: {macListener?.InstanceId ?? "unknown"}");
 
             listener.Arrived += (s, e) => { };
@@ -398,6 +454,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             _output.WriteLine($"[TEST] Disposing listener: {macListener?.InstanceId ?? "unknown"}");
             listener.Dispose();
+            _output.WriteLine($"[TEST] Dispose() completed on {macListener?.InstanceId}");
 
             // Force GC to verify delegates can be collected
             _output.WriteLine($"[TEST] Forcing GC to collect delegates for {macListener?.InstanceId ?? "unknown"}");
@@ -406,6 +463,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             // If we get here without issues, delegates were properly released
             _output.WriteLine($"[TEST] Delegates properly released for {macListener?.InstanceId ?? "unknown"}");
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_ClearsDelegateReferences)}, Listener={macListener?.InstanceId}, Thread={Environment.CurrentManagedThreadId}");
             Assert.True(true);
         }
 

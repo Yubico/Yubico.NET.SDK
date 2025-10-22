@@ -151,7 +151,9 @@ namespace Yubico.Core.Devices.Hid
 
         protected override void Dispose(bool disposing)
         {
-            _log.LogInformation("[TELEMETRY][{InstanceId}] Dispose(disposing={Disposing}) called on thread {ThreadId}", _instanceId, disposing, Environment.CurrentManagedThreadId);
+            string callStack = new System.Diagnostics.StackTrace(true).ToString();
+            _log.LogInformation("[TELEMETRY][{InstanceId}] >>> DISPOSE-ENTRY: disposing={Disposing}, thread={ThreadId}, _isDisposed={IsDisposed}, _shouldStop={ShouldStop}\n  CallStack:\n{CallStack}",
+                _instanceId, disposing, Environment.CurrentManagedThreadId, _isDisposed, _shouldStop, callStack);
 
             lock (_disposeLock)
             {
@@ -171,7 +173,7 @@ namespace Yubico.Core.Devices.Hid
                     // Pass fromFinalizer=true when disposing=false to prevent blocking GC thread
                     _log.LogInformation("[TELEMETRY][{InstanceId}] Calling StopListening(fromFinalizer={FromFinalizer})...", _instanceId, !disposing);
                     StopListening(fromFinalizer: !disposing);
-                    _log.LogInformation("[TELEMETRY][{InstanceId}] StopListening() returned", _instanceId);
+                    _log.LogInformation("[TELEMETRY][{InstanceId}] StopListening() returned successfully", _instanceId);
 
                     // Clear delegate references to allow garbage collection
                     // Must be done AFTER StopListening() to ensure callbacks aren't invoked on null delegates
@@ -182,6 +184,8 @@ namespace Yubico.Core.Devices.Hid
                 {
                     // CRITICAL: Never throw from Dispose, especially when called from finalizer
                     // Throwing from finalizer will crash the GC thread and terminate the application
+                    _log.LogError(ex, "[TELEMETRY][{InstanceId}] ⚠️ EXCEPTION in Dispose: {Message}\n  StackTrace:\n{StackTrace}",
+                        _instanceId, ex.Message, ex.StackTrace);
                     if (disposing)
                     {
                         _log.LogWarning(ex, "[TELEMETRY][{InstanceId}] Exception during MacOSHidDeviceListener disposal", _instanceId);
@@ -192,7 +196,7 @@ namespace Yubico.Core.Devices.Hid
                 {
                     _log.LogInformation("[TELEMETRY][{InstanceId}] Calling base.Dispose({Disposing})", _instanceId, disposing);
                     base.Dispose(disposing);
-                    _log.LogInformation("[TELEMETRY][{InstanceId}] Dispose complete", _instanceId);
+                    _log.LogInformation("[TELEMETRY][{InstanceId}] <<< DISPOSE-EXIT: Complete", _instanceId);
                 }
             }
         }

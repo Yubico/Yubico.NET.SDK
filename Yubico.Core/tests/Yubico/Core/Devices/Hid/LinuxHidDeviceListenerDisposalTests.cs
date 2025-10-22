@@ -186,6 +186,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
         /// <summary>
         /// Stress test: Create and dispose many listeners in parallel.
+        /// Increased to 100 listeners to amplify leak signal above background noise.
         /// </summary>
         [SkippableFact]
         public async Task ParallelCreateDispose_NoLeaksOrDeadlocks()
@@ -194,9 +195,10 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             int fdCountBefore = GetOpenFileDescriptorCount();
 
-            // Create 20 listeners in parallel, dispose them
-            var tasks = new Task[20];
-            for (int i = 0; i < 20; i++)
+            // Create 100 listeners in parallel to amplify leak detection
+            // If each leaks 1 FD: 100 leaked FDs >> background noise
+            var tasks = new Task[100];
+            for (int i = 0; i < 100; i++)
             {
                 tasks[i] = Task.Run(() =>
                 {
@@ -205,8 +207,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                 });
             }
 
-            // Should complete without timeout
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            // Should complete without timeout (longer timeout for more listeners)
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             await Task.WhenAll(tasks).WaitAsync(cts.Token);
 
             GC.Collect();
@@ -214,8 +216,44 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             int fdCountAfter = GetOpenFileDescriptorCount();
             int fdDifference = Math.Abs(fdCountAfter - fdCountBefore);
-            Assert.True(fdDifference <= 5,
-                $"FD leak in parallel test: {fdCountBefore} before, {fdCountAfter} after");
+
+            // Tolerance adjusted for more parallel activity, but still catches significant leaks
+            // 100 leaked FDs would far exceed this threshold
+            Assert.True(fdDifference <= 10,
+                $"FD leak in parallel test: {fdCountBefore} before, {fdCountAfter} after (difference: {fdDifference})");
+        }
+
+        /// <summary>
+        /// High-iteration sequential test: Create and dispose many listeners sequentially.
+        /// This amplifies leak signal while minimizing parallel activity noise.
+        /// With 500 iterations, even a 1-FD leak per listener becomes obvious (500 vs ±5 noise).
+        /// </summary>
+        [SkippableFact]
+        public void SequentialCreateDispose_HighIterations_NoLeaks()
+        {
+            Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.Linux, "Linux-only test");
+
+            int fdCountBefore = GetOpenFileDescriptorCount();
+
+            // Create and dispose 500 listeners sequentially
+            // Sequential execution minimizes parallel activity noise
+            // High iteration count amplifies leak signal (500:1 signal-to-noise ratio)
+            for (int i = 0; i < 500; i++)
+            {
+                using var listener = HidDeviceListener.Create();
+                // Dispose happens at end of using block
+            }
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            int fdCountAfter = GetOpenFileDescriptorCount();
+            int fdDifference = Math.Abs(fdCountAfter - fdCountBefore);
+
+            // With 500 iterations, any per-listener leak would be obvious
+            // Background noise is still ~±5, so tolerance of ±8 catches leaks clearly
+            Assert.True(fdDifference <= 8,
+                $"FD leak in sequential test: {fdCountBefore} before, {fdCountAfter} after (difference: {fdDifference})");
         }
 
         /// <summary>

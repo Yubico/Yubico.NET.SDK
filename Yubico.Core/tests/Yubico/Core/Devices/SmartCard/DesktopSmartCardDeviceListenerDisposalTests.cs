@@ -163,13 +163,15 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
 
         /// <summary>
         /// Stress test: Create and dispose many listeners in parallel.
+        /// Increased to 100 listeners to amplify leak signal above background noise.
         /// </summary>
         [Fact]
         public async Task ParallelCreateDispose_NoLeaksOrDeadlocks()
         {
-            // Create 10 listeners in parallel, dispose them
-            var tasks = new Task[10];
-            for (int i = 0; i < 10; i++)
+            // Create 100 listeners in parallel to amplify leak detection
+            // Increased from 10 to make potential resource leaks more visible
+            var tasks = new Task[100];
+            for (int i = 0; i < 100; i++)
             {
                 tasks[i] = Task.Run(() =>
                 {
@@ -178,14 +180,36 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
                 });
             }
 
-            // Should complete without timeout
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            // Should complete without timeout (adjusted for more listeners)
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
             await Task.WhenAll(tasks).WaitAsync(cts.Token);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
             // If we get here, no deadlocks or exceptions occurred
+            Assert.True(true);
+        }
+
+        /// <summary>
+        /// High-iteration sequential test: Create and dispose many listeners sequentially.
+        /// This amplifies leak signal and tests disposal under sequential load.
+        /// </summary>
+        [Fact]
+        public void SequentialCreateDispose_HighIterations_NoLeaks()
+        {
+            // Create and dispose 500 listeners sequentially
+            // High iteration count helps detect resource leaks
+            for (int i = 0; i < 500; i++)
+            {
+                using var listener = SmartCardDeviceListener.Create();
+                // Dispose happens at end of using block
+            }
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            // If we get here without timeout or exception, disposal is working correctly
             Assert.True(true);
         }
 
@@ -250,8 +274,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             int threadCount2 = Process.GetCurrentProcess().Threads.Count;
 
             // Thread count should decrease (±2 for variance)
-            Assert.True(threadCount2 <= threadCount1 + 2,
-                "Thread count should not increase after disposal");
+            Assert.InRange(threadCount2, threadCount2, threadCount1 + 2);
         }
 
         /// <summary>

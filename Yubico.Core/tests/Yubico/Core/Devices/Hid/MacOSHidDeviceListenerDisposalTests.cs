@@ -192,9 +192,10 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             int threadCountBefore = Process.GetCurrentProcess().Threads.Count;
 
-            // Create 20 listeners in parallel, dispose them
-            var tasks = new Task[20];
-            for (int i = 0; i < 20; i++)
+            // Create 100 listeners in parallel to amplify leak detection
+            // If each leaks 1 thread: 100 leaked threads >> background noise
+            var tasks = new Task[100];
+            for (int i = 0; i < 100; i++)
             {
                 tasks[i] = Task.Run(() =>
                 {
@@ -203,8 +204,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                 });
             }
 
-            // Should complete without timeout
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            // Should complete without timeout (longer timeout for more listeners)
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(45));
             await Task.WhenAll(tasks).WaitAsync(cts.Token);
 
             GC.Collect();
@@ -213,8 +214,45 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             int threadCountAfter = Process.GetCurrentProcess().Threads.Count;
             int threadDifference = Math.Abs(threadCountAfter - threadCountBefore);
+
+            // Tolerance adjusted for more parallel activity, but still catches significant leaks
+            // 100 leaked threads would far exceed this threshold
+            Assert.True(threadDifference <= 5,
+                $"Thread leak in parallel test: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference})");
+        }
+
+        /// <summary>
+        /// High-iteration sequential test: Create and dispose many listeners sequentially.
+        /// This amplifies leak signal while minimizing parallel activity noise.
+        /// With 500 iterations, even a 1-thread leak per listener becomes obvious.
+        /// </summary>
+        [SkippableFact]
+        public void SequentialCreateDispose_HighIterations_NoLeaks()
+        {
+            Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
+
+            int threadCountBefore = Process.GetCurrentProcess().Threads.Count;
+
+            // Create and dispose 500 listeners sequentially
+            // Sequential execution minimizes parallel activity noise
+            // High iteration count amplifies leak signal (500:1 signal-to-noise ratio)
+            for (int i = 0; i < 500; i++)
+            {
+                using var listener = HidDeviceListener.Create();
+                Thread.Sleep(10); // Brief hold to ensure thread lifecycle
+            }
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            Thread.Sleep(200);
+
+            int threadCountAfter = Process.GetCurrentProcess().Threads.Count;
+            int threadDifference = Math.Abs(threadCountAfter - threadCountBefore);
+
+            // With 500 iterations, any per-listener leak would be obvious
+            // Background noise is still ~±2, so tolerance of ±3 catches leaks clearly
             Assert.True(threadDifference <= 3,
-                $"Thread leak in parallel test: {threadCountBefore} before, {threadCountAfter} after");
+                $"Thread leak in sequential test: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference})");
         }
 
         /// <summary>

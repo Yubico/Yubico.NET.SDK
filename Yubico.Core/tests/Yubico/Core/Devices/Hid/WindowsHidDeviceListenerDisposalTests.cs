@@ -163,7 +163,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Allow for small variance (±5 handles) due to system activity
             var handleDifference = Math.Abs(handleCountAfter - handleCountBefore);
             Assert.True(handleDifference <= 5,
-                $"Handle leak detected: {handleCountBefore} before, {handleCountAfter} after (difference: {handleDifference})");
+                $"Handle leak detected: {handleCountBefore} before, {handleCountAfter} after (difference: {handleDifference}, limit: ±5)");
         }
 
         /// <summary>
@@ -261,7 +261,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // when creating 100 listeners in parallel. This is NOT a per-listener leak.
             // A real per-listener leak would show 100+ handles leaked.
             Assert.True(handleDifference <= 35,
-                $"Handle leak in parallel test: {handleCountBefore} before, {handleCountAfter} after (difference: {handleDifference})");
+                $"Handle leak in parallel test: {handleCountBefore} before, {handleCountAfter} after (difference: {handleDifference}, limit: ±35)");
         }
 
         /// <summary>
@@ -302,7 +302,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // With 500 iterations, any per-listener leak would be obvious
             // Background noise is still ~±15, so tolerance of ±20 catches leaks clearly
             Assert.True(handleDifference <= 20,
-                $"Handle leak in sequential test: {handleCountBefore} before, {handleCountAfter} after (difference: {handleDifference})");
+                $"Handle leak in sequential test: {handleCountBefore} before, {handleCountAfter} after (difference: {handleDifference}, limit: ±20)");
         }
 
         /// <summary>

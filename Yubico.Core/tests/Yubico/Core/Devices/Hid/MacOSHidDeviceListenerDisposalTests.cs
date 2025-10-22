@@ -108,9 +108,9 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             int threadDifference = Math.Abs(threadCountAfter - threadCountBefore);
 
             Assert.True(portDifference <= 25,
-                $"Mach port leak detected: {portCountBefore} before, {portCountAfter} after");
+                $"Mach port leak detected: {portCountBefore} before, {portCountAfter} after (difference: {portDifference}, limit: ±25)");
             Assert.True(threadDifference <= 25,
-                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after");
+                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±25)");
         }
 
         /// <summary>
@@ -161,7 +161,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Single listener test is more susceptible to OS noise, allow ±3 threads
             int threadDifference = Math.Abs(threadCountAfter - threadCountBefore);
             Assert.True(threadDifference <= 3,
-                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after");
+                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±3)");
         }
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Tolerance covers first-use IOKit/CFRunLoop initialization (~15 threads) plus parallel variance (~10 threads)
             // With 30 listeners, real per-listener leaks (30+ threads) still exceed tolerance
             Assert.True(threadDifference <= 25,
-                $"Thread leak in parallel test: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference})");
+                $"Thread leak in parallel test: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±25)");
         }
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Sequential minimizes noise, but allow generous tolerance for first-use initialization
             // With 500 listeners, real leaks (500+ threads) far exceed tolerance (signal-to-noise: 500:10 = 50:1)
             Assert.True(threadDifference <= 10,
-                $"Thread leak in sequential test: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference})");
+                $"Thread leak in sequential test: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±10)");
         }
 
         /// <summary>

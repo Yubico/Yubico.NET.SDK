@@ -101,7 +101,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Allow for small variance (±2 FDs) due to system activity
             int fdDifference = Math.Abs(fdCountAfter - fdCountBefore);
             Assert.True(fdDifference <= 2,
-                $"File descriptor leak detected: {fdCountBefore} before, {fdCountAfter} after (difference: {fdDifference})");
+                $"File descriptor leak detected: {fdCountBefore} before, {fdCountAfter} after (difference: {fdDifference}, limit: ±2)");
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Thread count should return to original (±1 for variance)
             int threadDifference = Math.Abs(threadCountAfter - threadCountBefore);
             Assert.True(threadDifference <= 1,
-                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after");
+                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±1)");
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Tolerance adjusted for more parallel activity, but still catches significant leaks
             // 100 leaked FDs would far exceed this threshold
             Assert.True(fdDifference <= 10,
-                $"FD leak in parallel test: {fdCountBefore} before, {fdCountAfter} after (difference: {fdDifference})");
+                $"FD leak in parallel test: {fdCountBefore} before, {fdCountAfter} after (difference: {fdDifference}, limit: ±10)");
         }
 
         /// <summary>
@@ -253,7 +253,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // With 500 iterations, any per-listener leak would be obvious
             // Background noise is still ~±5, so tolerance of ±8 catches leaks clearly
             Assert.True(fdDifference <= 8,
-                $"FD leak in sequential test: {fdCountBefore} before, {fdCountAfter} after (difference: {fdDifference})");
+                $"FD leak in sequential test: {fdCountBefore} before, {fdCountAfter} after (difference: {fdDifference}, limit: ±8)");
         }
 
         /// <summary>

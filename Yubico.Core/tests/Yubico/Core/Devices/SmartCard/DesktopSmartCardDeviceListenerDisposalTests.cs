@@ -158,7 +158,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             // Thread count should return to original (±2 for variance due to system activity)
             int threadDifference = Math.Abs(threadCountAfter - threadCountBefore);
             Assert.True(threadDifference <= 2,
-                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after");
+                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±2)");
         }
 
         /// <summary>

@@ -21,7 +21,6 @@ limitations under the License. -->
 At its foundation, FIDO2 is very similar to U2F. However, there are differences. For
 example:
 
-- In FIDO2 the private key is stored on the authenticator
 - In FIDO2 the messages between entities are much more complex with more information
 - In FIDO2 the PIN is encrypted before transmitting it to the authenticator
 - FIDO2 has mechanisms for biometric authenticators (e.g. "on-board" fingerprint readers)

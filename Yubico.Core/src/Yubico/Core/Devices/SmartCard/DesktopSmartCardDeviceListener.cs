@@ -41,6 +41,8 @@ namespace Yubico.Core.Devices.SmartCard
         private bool _isListening;
         private Thread? _listenerThread;
         private readonly object _startStopLock = new object();
+        private bool _isDisposed;
+        private readonly object _disposeLock = new object();
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDeviceListener"/>.
@@ -130,14 +132,38 @@ namespace Yubico.Core.Devices.SmartCard
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            lock (_disposeLock)
             {
-                _ = SCardCancel(_context);
-                _context.Dispose();
-                StopListening();
+                if (_isDisposed)
+                {
+                    return;
+                }
+
+                _isDisposed = true;
+
+                try
+                {
+                    if (disposing)
+                    {
+                        _ = SCardCancel(_context);
+                        _context.Dispose();
+                        StopListening();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // CRITICAL: Never throw from Dispose, especially when called from finalizer
+                    if (disposing)
+                    {
+                        _log.LogWarning(ex, "Exception during DesktopSmartCardDeviceListener disposal");
+                    }
+                    // If !disposing (finalizer path), silently ignore to prevent GC thread crash
+                }
+                finally
+                {
+                    base.Dispose(disposing);
+                }
             }
-            
-            base.Dispose(disposing);
         }
 
         #endregion

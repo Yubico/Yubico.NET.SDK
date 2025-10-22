@@ -364,9 +364,9 @@ namespace Yubico.YubiKey
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (var d in Arrived.GetInvocationList())  
-            {  
-                var handler = (EventHandler<YubiKeyDeviceEventArgs>)d;  
+            foreach (Delegate d in Arrived.GetInvocationList())
+            {
+                var handler = (EventHandler<YubiKeyDeviceEventArgs>)d;
                 try
                 {
                     handler.Invoke(typeof(YubiKeyDevice), e);
@@ -389,9 +389,9 @@ namespace Yubico.YubiKey
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (var d in Removed.GetInvocationList())  
-            {  
-                var handler = (EventHandler<YubiKeyDeviceEventArgs>)d;  
+            foreach (Delegate d in Removed.GetInvocationList())
+            {
+                var handler = (EventHandler<YubiKeyDeviceEventArgs>)d;
                 try
                 {
                     handler.Invoke(typeof(YubiKeyDevice), e);
@@ -498,7 +498,7 @@ namespace Yubico.YubiKey
                 // Step 2: Cancel the token to unblock any semaphore waits
                 _tokenSource.Cancel();
 
-                // Step 3: Wait for the background task to complete
+                // Step 3: Wait up to 5 seconds for the background task to complete
                 try
                 {
                     _ = _listenTask.Wait(TimeSpan.FromSeconds(5));

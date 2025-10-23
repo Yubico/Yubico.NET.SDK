@@ -28,6 +28,7 @@ limitations under the License. -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
     <StartupObject>Yubico.YubiKey.TestApp.Program</StartupObject>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>

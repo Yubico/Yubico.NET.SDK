@@ -27,6 +27,8 @@ namespace Yubico.Core.Devices.Hid
         private IntPtr _notificationContext;
         private GCHandle? _marshalableThisPtr;
         private CM_NOTIFY_CALLBACK? _callbackDelegate;
+        private bool _isDisposed;
+        private readonly object _disposeLock = new object();
 
         private readonly ILogger _log = Logging.Log.GetLogger<WindowsHidDeviceListener>();
 
@@ -38,7 +40,7 @@ namespace Yubico.Core.Devices.Hid
 
         ~WindowsHidDeviceListener()
         {
-            StopListening();
+            Dispose(false);
         }
 
         private void StartListening()
@@ -84,12 +86,51 @@ namespace Yubico.Core.Devices.Hid
                 CmErrorCode errorCode = CM_Unregister_Notification(_notificationContext);
                 _log.LogInformation("Unregistered callback with ConfigMgr32.");
                 ThrowIfFailed(errorCode);
+                _notificationContext = IntPtr.Zero;  // Clear to make idempotent
             }
 
             if (_marshalableThisPtr.HasValue)
             {
                 _marshalableThisPtr.Value.Free();
                 _marshalableThisPtr = null;
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            lock (_disposeLock)
+            {
+                if (_isDisposed)
+                {
+                    return;
+                }
+
+                _isDisposed = true;
+
+                try
+                {
+                    // Stop listening and unregister native callback
+                    // This ensures native code won't call our callback after disposal
+                    StopListening();
+
+                    // Clear delegate reference to allow garbage collection
+                    // Must be done AFTER StopListening() to ensure callback isn't invoked on null delegate
+                    _callbackDelegate = null;
+                }
+                catch (Exception ex)
+                {
+                    // CRITICAL: Never throw from Dispose, especially when called from finalizer
+                    // Throwing from finalizer will crash the GC thread and terminate the application
+                    if (disposing)
+                    {
+                        _log.LogWarning(ex, "Exception during WindowsHidDeviceListener disposal");
+                    }
+                    // If !disposing (finalizer path), silently ignore to prevent GC thread crash
+                }
+                finally
+                {
+                    base.Dispose(disposing);
+                }
             }
         }
 
@@ -156,7 +197,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 // We must not let exceptions escape from this callback. There's nowhere for them to go, and
                 // it will likely crash the process.
-                thisObj?._log.LogDebug($"Exception in OnEventReceived: {ex}");
+                thisObj?._log.LogError(ex, "Exception in OnEventReceived");
                 return 0;
             }
         }

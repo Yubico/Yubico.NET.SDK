@@ -18,33 +18,18 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using Yubico.PlatformInterop;
-using static Yubico.PlatformInterop.LibcFcntlConstants;
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.Hid
 {
     internal class LinuxHidDeviceListener : HidDeviceListener
     {
-        // Note that both the main thread and the created thread (sub-thread)
-        // will have access to _isListening. That seems like we will have race
-        // conditions and hence we need a lock.
-        // However, only the main thread will change this value. The sub-thread
-        // will only read it. The only race condition is when the StopListening
-        // method is called. In that case, the main thread will change it from
-        // true to false. Once the sub-thread sees it is false, it will stop.
-        // Suppose by chance, that, at the exact same time, the main thread wants
-        // to stop (change _isListening to false) and the sub-thread wants to
-        // read it to determine if it should continue. This is the race
-        // condition.
-        // If the main thread is able to change the value first, then the sub
-        // thread will see it is false and stop running, which is what we want.
-        // If the sub-thread reads it first, it will start another iteration, the
-        // main thread will change the value and wait for the sub-thread to stop.
-        // The sub-thread will finish its current iteration and then the next
-        // iteration will see that the value is false and will stop.
-        // This is exactly what would happen if we had a lock.
         private bool _isListening;
         private Thread? _listenerThread;
+        private readonly object _startStopLock = new object();
+        private CancellationTokenSource? _cancellationTokenSource;
+        private bool _isDisposed;
+        private readonly object _disposeLock = new object();
 
         private readonly LinuxUdevMonitorSafeHandle _monitorObject;
         private readonly LinuxUdevSafeHandle _udevObject;
@@ -55,26 +40,54 @@ namespace Yubico.Core.Devices.Hid
             _udevObject = udev_new();
             _monitorObject = ThrowIfFailedNull(udev_monitor_new_from_netlink(_udevObject, UdevMonitorName));
 
-            RemoveNonBlockingFlagOnUdevMonitorSocket();
-
             StartListening();
+        }
+
+        ~LinuxHidDeviceListener()
+        {
+            Dispose(false);
         }
 
         protected override void Dispose(bool disposing)
         {
-            try
+            lock (_disposeLock)
             {
-                if (disposing)
+                if (_isDisposed)
                 {
-                    _monitorObject.Dispose();
-                    _udevObject.Dispose();
+                    return;
                 }
 
-                StopListening();
-            }
-            finally
-            {
-                base.Dispose(disposing);
+                _isDisposed = true;
+
+                try
+                {
+                    // StopListening must happen in both paths (disposing and finalizer)
+                    // to ensure the listener thread is terminated and releases its hold on SafeHandles
+                    StopListening();
+
+                    if (disposing)
+                    {
+                        // Deterministic disposal - clean up SafeHandles explicitly
+                        _monitorObject.Dispose();
+                        _udevObject.Dispose();
+                    }
+                    // If !disposing (finalizer path), SafeHandles will finalize themselves
+                    // once the thread releases its hold on them
+                }
+                catch (Exception ex)
+                {
+                    // CRITICAL: Never throw from Dispose, especially when called from finalizer
+                    // Throwing from finalizer will crash the GC thread and terminate the application
+                    if (disposing)
+                    {
+                        _log.LogWarning(ex, "Exception during LinuxHidDeviceListener disposal");
+                    }
+                    // If !disposing (finalizer path), silently ignore to prevent GC thread crash
+                }
+                finally
+                {
+                    base.Dispose(disposing);
+                }
             }
         }
 
@@ -92,30 +105,27 @@ namespace Yubico.Core.Devices.Hid
         /// </remarks>
         private void StartListening()
         {
-            _ = ThrowIfFailedNegative(udev_monitor_filter_add_match_subsystem_devtype(
-                    _monitorObject, UdevSubsystemName, null));
-
-            _ = ThrowIfFailedNegative(udev_monitor_enable_receiving(_monitorObject));
-
-            // We don't need to lock because if there is a separate thread that
-            // has access to _isListening, it does not change it.
-            // If there is a sub-thread running, _isListening will be true and we
-            // don't want to do anything.
-            // If there is no sub-thread, _isListening will be false and we will
-            // create a new thread and start it. Just make sure _isListening is
-            // set to true before starting the thread.
-            if (_isListening)
+            lock (_startStopLock)
             {
-                return;
+                if (_isListening)
+                {
+                    return;
+                }
+
+                _ = ThrowIfFailedNegative(udev_monitor_filter_add_match_subsystem_devtype(
+                        _monitorObject, UdevSubsystemName, null));
+
+                _ = ThrowIfFailedNegative(udev_monitor_enable_receiving(_monitorObject));
+
+                _cancellationTokenSource = new CancellationTokenSource();
+                _listenerThread = new Thread(ListenForReaderChanges)
+                {
+                    IsBackground = true
+                };
+
+                _isListening = true;
+                _listenerThread.Start();
             }
-
-            _listenerThread = new Thread(ListenForReaderChanges)
-            {
-                IsBackground = true
-            };
-            
-            _isListening = true;
-            _listenerThread.Start();
         }
 
         /// <summary>
@@ -127,43 +137,46 @@ namespace Yubico.Core.Devices.Hid
         /// </remarks>
         private void StopListening()
         {
-            // If someone creates an instance of this class and then immediately
-            // calls Stop, we don't want to do anything. Hence, check for null
-            // (we declared this field nullable).
-            // If there is a _listenerThread, then it is either active or not.
-            // It can be inactive if the caller called Stop two times in a row.
-            // If it is inactive, _isListening will be false already, and it
-            // doesn't matter that we're setting it to false again. The Join will
-            // do nothing and we exit.
-            // If the sub-thread is active, then _isListening is true, so we're
-            // setting it to false so the sub-thread knows to quit. The
-            // sub-thread will complete the iteration it has most recently
-            // started, see _isListening is false and quit. At that point, the
-            // Join will will be able to complete and this method will exit.
-
-            // Use local variable to prevent race condition if multiple threads call StopListening()
-            Thread? threadToJoin = _listenerThread;
-            if (threadToJoin is null)
+            lock (_startStopLock)
             {
-                return;
+                if (!_isListening || _listenerThread is null || _cancellationTokenSource is null)
+                {
+                    return;
+                }
+
+                _isListening = false;
+
+                // Signal the thread to stop
+                _cancellationTokenSource.Cancel();
             }
 
-            _isListening = false;
-            threadToJoin.Join();
+            // Wait for thread to exit (outside of lock to avoid blocking other operations)
+            // Use a timeout to prevent indefinite blocking
+            Thread? threadToJoin = _listenerThread;
+            if (threadToJoin != null)
+            {
+                bool exited = threadToJoin.Join(TimeSpan.FromSeconds(3));
+                if (!exited)
+                {
+                    _log.LogWarning("Listener thread did not exit within timeout. This should not happen with proper cancellation support.");
+                }
+            }
 
-            _listenerThread = null;
+            lock (_startStopLock)
+            {
+                _listenerThread = null;
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = null;
+            }
         }
 
-        // This method is the delegate sent to the new Thread.
-        // Once the new Thread is started, this method will execute. As long as
-        // the _isListening field is true, it will keep checking for updates.
-        // Once _isListening is false, it will quit the loop and return, which
-        // will terminate the thread.
         private void ListenForReaderChanges()
         {
             try
             {
-                while (_isListening)
+                CancellationToken cancellationToken = _cancellationTokenSource?.Token ?? CancellationToken.None;
+
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     CheckForUpdates();
                 }
@@ -172,7 +185,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 // We must not let exceptions escape from this callback. There's nowhere for them to go, and
                 // it will likely crash the process.
-                _log.LogDebug(e, "Exception in ListenForReaderChanges thread.");
+                _log.LogWarning(e, "Exception in ListenForReaderChanges thread.");
             }
         }
 
@@ -182,7 +195,16 @@ namespace Yubico.Core.Devices.Hid
         // concerned with, it simply returns.
         private void CheckForUpdates()
         {
+            // First check if there are any events available using poll with a short timeout
+            // This allows the thread to remain responsive to cancellation
+            if (!HasPendingEvents(timeoutMs: 100))
+            {
+                // No events available within timeout, return to allow cancellation check
+                return;
+            }
+
             // If this call returns NULL, there was no update.
+            // Since we're using non-blocking mode, this should return immediately
             using LinuxUdevDeviceSafeHandle udevDevice = udev_monitor_receive_device(_monitorObject);
             if (udevDevice.IsInvalid)
             {
@@ -220,14 +242,54 @@ namespace Yubico.Core.Devices.Hid
                     ExceptionMessages.LinuxUdevError));
         }
 
-        private void RemoveNonBlockingFlagOnUdevMonitorSocket()
+
+        /// <summary>
+        /// Checks if there are any pending udev events using poll with a timeout.
+        /// Uses the Linux poll() system call for efficient I/O multiplexing.
+        /// </summary>
+        /// <param name="timeoutMs">Timeout in milliseconds. Thread blocks up to this duration waiting for events.</param>
+        /// <returns>True if events are available, false if timeout occurred or error</returns>
+        /// <remarks>
+        /// Reference: Linux poll(2) man page - https://man7.org/linux/man-pages/man2/poll.2.html
+        ///
+        /// The poll() system call monitors file descriptors for I/O readiness without blocking indefinitely.
+        /// This allows the listener thread to remain responsive to cancellation requests while waiting for device events.
+        ///
+        /// A 100ms timeout provides a balance between:
+        /// - Responsiveness: Thread checks cancellation every 100ms
+        /// - Efficiency: Only 10 wake-ups per second (minimal CPU/battery impact)
+        /// - Low latency: Device events processed within 0-100ms
+        /// </remarks>
+        private bool HasPendingEvents(int timeoutMs)
         {
             IntPtr fd = udev_monitor_get_fd(_monitorObject);
 
-            int flags = ThrowIfFailedNegative(fcntl(fd, F_GETFL));
+            // POLLIN = "Poll INput" - bit flag (0x0001) indicating data is ready to read
+            // From poll(2) man page: "There is data to read"
+            // Other flags: POLLOUT (can write), POLLERR (error), POLLHUP (hangup)
+            const short POLLIN = 0x0001;
 
-            // Remove the O_NONBLOCK flag to set the file descriptor to blocking mode.
-            _ = ThrowIfFailedNegative(fcntl(fd, F_SETFL, flags & ~O_NONBLOCK));
+            var pollFd = new PollFd
+            {
+                fd = fd,              // File descriptor to monitor (udev monitor)
+                events = POLLIN,      // INPUT: What we want to monitor (readable data)
+                revents = 0           // OUTPUT: What actually occurred (filled by kernel)
+            };
+
+            PollFd[] pollFds = new[] { pollFd };
+
+            // poll() blocks up to timeoutMs waiting for events on the file descriptor
+            // Returns immediately if event arrives before timeout
+            int result = poll(pollFds, 1, timeoutMs);
+
+            // result > 0: Number of file descriptors with events ready
+            // result == 0: Timeout occurred, no events
+            // result < 0: Error occurred
+
+            // Bitwise AND isolates the POLLIN bit from revents to check if data is ready
+            // Example: revents=0x0001 (POLLIN) & 0x0001 = 0x0001 (true)
+            //          revents=0x0008 (POLLERR) & 0x0001 = 0x0000 (false)
+            return result > 0 && (pollFds[0].revents & POLLIN) != 0;
         }
 
         // Throw the PlatformApiException(LinuxUdevError) if the value is < 0.

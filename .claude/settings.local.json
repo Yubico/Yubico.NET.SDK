@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell.exe:*)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.YubiKey\\tests\\integration\\Yubico.YubiKey.IntegrationTests.csproj\" --filter \"FullyQualifiedName~YubiKeyDeviceListenerCrashSafetyUnitTests.EventHandler_MultipleHandlers\" --verbosity normal)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.YubiKey\\tests\\integration\\Yubico.YubiKey.IntegrationTests.csproj\" --filter \"FullyQualifiedName~YubiKeyDeviceListenerCrashSafetyUnitTests\" --verbosity normal)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.YubiKey\\tests\\integration\\Yubico.YubiKey.IntegrationTests.csproj\" --filter \"FullyQualifiedName~YubiKeyDeviceListenerCrashSafetyUnitTests\" --verbosity quiet --nologo)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~HidDeviceListenerTests\" --verbosity quiet --nologo)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~SmartCardDeviceListenerTests\" --verbosity quiet --nologo)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~WindowsHidDeviceListenerDisposalTests\" --verbosity normal --nologo)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~WindowsHidDeviceListenerDisposalTests.ParallelCreateDispose_NoLeaksOrDeadlocks\" --verbosity detailed --nologo)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~WindowsHidDeviceListenerDisposalTests.SequentialCreateDispose_HighIterations_NoLeaks\" --verbosity quiet --nologo)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~WindowsHidDeviceListenerDisposalTests.ParallelCreateDispose_NoLeaksOrDeadlocks\" --verbosity quiet --nologo)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~WindowsHidDeviceListenerDisposalTests.ParallelCreateDispose_NoLeaksOrDeadlocks\" --verbosity normal --nologo)",
+      "Bash(Select-String -Pattern \"Handle leak\")",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~WindowsHidDeviceListenerDisposalTests.DiagnosticTest_MultipleRounds\" --verbosity normal --nologo)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~WindowsHidDeviceListenerDisposalTests.DiagnosticTest_MultipleRounds\" --logger \"console;verbosity=detailed\" --nologo)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~WindowsHidDeviceListenerDisposalTests.ParallelCreateDispose_NoLeaksOrDeadlocks\" --logger \"console;verbosity=normal\" --nologo)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~WindowsHidDeviceListenerDisposalTests\" --verbosity quiet --nologo)",
+      "Bash(dotnet test \"C:\\Users\\Dennis.Dyall\\Documents\\Work\\Yubico.NET.SDK\\Yubico.Core\\tests\\Yubico.Core.UnitTests.csproj\" --filter \"FullyQualifiedName~DisposalTests\" --verbosity quiet --nologo)",
+      "Bash(git stash:*)",
+      "Bash(GIT_SEQUENCE_EDITOR='cp /tmp/rebase-plan.txt' git rebase -i 66f225bc)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(tail:*)",
+      "Bash(git checkout:*)",
+      "Bash(for file in logsmac_48203511832/*.txt)",
+      "Bash(done)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git add:*)",
+      "Bash(git log:*)",
+      "Bash(gh pr list:*)",
+      "Bash(git tag:*)",
+      "Bash(gh pr view:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

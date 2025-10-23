@@ -192,7 +192,6 @@ namespace Yubico.Core.Devices.SmartCard
             Status = DeviceListenerStatus.Stopped;
 
             // Wait for thread to exit with timeout to prevent indefinite blocking
-            // SmartCard operations can be slower, so use 3 second timeout
             bool exited = threadToJoin.Join(MaxDisposalWaitTime);
             if (!exited)
             {

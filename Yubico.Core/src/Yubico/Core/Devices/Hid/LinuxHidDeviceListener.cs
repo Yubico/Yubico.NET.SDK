@@ -264,7 +264,10 @@ namespace Yubico.Core.Devices.Hid
         /// </remarks>
         private bool HasPendingEvents(int timeoutMs)
         {
-            IntPtr fd = udev_monitor_get_fd(_monitorObject);
+            IntPtr fdPtr = udev_monitor_get_fd(_monitorObject);
+            // Convert IntPtr to int - Linux file descriptors are always 32-bit integers
+            // poll() expects struct pollfd { int fd; ... } per poll(2) man page
+            int fd = fdPtr.ToInt32();
 
             // POLLIN = "Poll INput" - bit flag (0x0001) indicating data is ready to read
             // From poll(2) man page: "There is data to read"

@@ -117,7 +117,7 @@ namespace Yubico.PlatformInterop
         [StructLayout(LayoutKind.Sequential)]
         internal struct PollFd
         {
-            public IntPtr fd;
+            public int fd;
             public short events;
             public short revents;
         }

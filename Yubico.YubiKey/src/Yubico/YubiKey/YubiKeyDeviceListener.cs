@@ -85,6 +85,7 @@ namespace Yubico.YubiKey
         internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
 
         private static YubiKeyDeviceListener? _lazyInstance;
+        private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
 
         private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
@@ -364,8 +365,9 @@ namespace Yubico.YubiKey
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (EventHandler<YubiKeyDeviceEventArgs> handler in Arrived.GetInvocationList())
+            foreach (var @delegate in Arrived.GetInvocationList())
             {
+                var handler = (EventHandler<YubiKeyDeviceEventArgs>)@delegate;
                 try
                 {
                     handler.Invoke(typeof(YubiKeyDevice), e);
@@ -380,7 +382,7 @@ namespace Yubico.YubiKey
         /// <summary>
         /// Raises event on device removal.
         /// </summary>
-        internal void OnDeviceRemoved(YubiKeyDeviceEventArgs e)
+        private void OnDeviceRemoved(YubiKeyDeviceEventArgs e)
         {
             if (Removed is null)
             {
@@ -388,8 +390,9 @@ namespace Yubico.YubiKey
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (EventHandler<YubiKeyDeviceEventArgs> handler in Removed.GetInvocationList())
+            foreach (var @delegate in Removed.GetInvocationList())
             {
+                var handler = (EventHandler<YubiKeyDeviceEventArgs>)@delegate;
                 try
                 {
                     handler.Invoke(typeof(YubiKeyDevice), e);
@@ -494,10 +497,9 @@ namespace Yubico.YubiKey
                     _tokenSource.Cancel();
 
                     // Step 3: Wait for the background task to complete
-                    // Increased timeout from 1 to 5 seconds to allow Update() to finish
                     try
                     {
-                        _ = _listenTask.Wait(TimeSpan.FromSeconds(2));
+                        _ = _listenTask.Wait(MaxDisposalWaitTime);
                     }
                     catch (AggregateException)
                     {
@@ -554,7 +556,7 @@ namespace Yubico.YubiKey
                 _isDisposed = true;
             }
         }
-
+        
         ~YubiKeyDeviceListener()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.

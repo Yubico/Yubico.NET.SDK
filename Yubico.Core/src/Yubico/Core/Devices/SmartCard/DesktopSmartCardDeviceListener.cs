@@ -27,7 +27,7 @@ namespace Yubico.Core.Devices.SmartCard
     /// <summary>
     /// A listener class for smart card related events.
     /// </summary>
-    internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener, IDisposable
+    internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener
     {
         internal static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
         private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardDeviceListener>();
@@ -40,6 +40,9 @@ namespace Yubico.Core.Devices.SmartCard
 
         private bool _isListening;
         private Thread? _listenerThread;
+        private readonly object _startStopLock = new object();
+        private bool _isDisposed;
+        private readonly object _disposeLock = new object();
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDeviceListener"/>.
@@ -75,19 +78,22 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void StartListening()
         {
-            if (_isListening)
+            lock (_startStopLock)
             {
-                return;
-            }
+                if (_isListening)
+                {
+                    return;
+                }
 
-            _listenerThread = new Thread(ListenForReaderChanges)
-            {
-                IsBackground = true
-            };
-            
-            _isListening = true;
-            Status = DeviceListenerStatus.Started;
-            _listenerThread.Start();
+                _listenerThread = new Thread(ListenForReaderChanges)
+                {
+                    IsBackground = true
+                };
+
+                _isListening = true;
+                Status = DeviceListenerStatus.Started;
+                _listenerThread.Start();
+            }
         }
 
         // This method is the delegate sent to the new Thread.
@@ -120,26 +126,44 @@ namespace Yubico.Core.Devices.SmartCard
 
         #region IDisposable Support
 
-        private bool _disposedValue; // To detect redundant calls
-
         /// <summary>
         /// Disposes the objects.
         /// </summary>
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            lock (_disposeLock)
             {
-                if (disposing)
+                if (_isDisposed)
                 {
-                    _ = SCardCancel(_context);
-                    _context.Dispose();
-                    StopListening();
+                    return;
                 }
-                _disposedValue = true;
+
+                _isDisposed = true;
+
+                try
+                {
+                    if (disposing)
+                    {
+                        _ = SCardCancel(_context);
+                        _context.Dispose();
+                        StopListening();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // CRITICAL: Never throw from Dispose, especially when called from finalizer
+                    if (disposing)
+                    {
+                        _log.LogWarning(ex, "Exception during DesktopSmartCardDeviceListener disposal");
+                    }
+                    // If !disposing (finalizer path), silently ignore to prevent GC thread crash
+                }
+                finally
+                {
+                    base.Dispose(disposing);
+                }
             }
-            
-            base.Dispose(disposing);
         }
 
         #endregion

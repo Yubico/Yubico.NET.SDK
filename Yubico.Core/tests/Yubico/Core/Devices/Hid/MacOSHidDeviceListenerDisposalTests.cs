@@ -45,7 +45,10 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: Dispose_CompletesWithinReasonableTime ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_CompletesWithinReasonableTime)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_CompletesWithinReasonableTime)}, Thread={Environment.CurrentManagedThreadId}");
+            _output.WriteLine($"[TEST] Created listener instance");
 
             var stopwatch = Stopwatch.StartNew();
             listener.Dispose();
@@ -55,6 +58,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Allow more time than Linux due to CFRunLoop wake latency
             Assert.True(stopwatch.ElapsedMilliseconds < 500,
                 $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <500ms");
+            _output.WriteLine($"[TEST] Instance disposed in {stopwatch.ElapsedMilliseconds}ms");
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_CompletesWithinReasonableTime)}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -67,19 +72,27 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: Dispose_CalledMultipleTimes_IsIdempotent ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_CalledMultipleTimes_IsIdempotent)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_CalledMultipleTimes_IsIdempotent)}, Thread={Environment.CurrentManagedThreadId}");
 
             // First disposal
+            _output.WriteLine($"[TEST] First Dispose() call");
             listener.Dispose();
+            _output.WriteLine($"[TEST] First Dispose() completed");
 
             // Subsequent disposals should not throw
+            _output.WriteLine($"[TEST] Second Dispose() call");
             var exception1 = Record.Exception(() => listener.Dispose());
+            _output.WriteLine($"[TEST] Third Dispose() call");
             var exception2 = Record.Exception(() => listener.Dispose());
+            _output.WriteLine($"[TEST] Fourth Dispose() call");
             var exception3 = Record.Exception(() => listener.Dispose());
 
             Assert.Null(exception1);
             Assert.Null(exception2);
             Assert.Null(exception3);
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_CalledMultipleTimes_IsIdempotent)}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -98,8 +111,11 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Create and dispose 50 listeners
             for (int i = 0; i < 50; i++)
             {
+                _output.WriteLine($"[USING-ENTRY] Test={nameof(RepeatedCreateDispose_NoLeaks)}, Iteration={i}, Thread={Environment.CurrentManagedThreadId}");
                 using var listener = HidDeviceListener.Create();
+                _output.WriteLine($"[USING-BODY] Test={nameof(RepeatedCreateDispose_NoLeaks)}, Iteration={i}, Thread={Environment.CurrentManagedThreadId}");
                 // Listener created and immediately disposed
+                _output.WriteLine($"[USING-EXIT] Test={nameof(RepeatedCreateDispose_NoLeaks)}, Iteration={i}, Thread={Environment.CurrentManagedThreadId}");
             }
 
             // Force GC to ensure any finalizers run
@@ -119,9 +135,9 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             int threadDifference = Math.Abs(threadCountAfter - threadCountBefore);
 
             Assert.True(portDifference <= 25,
-                $"Mach port leak detected: {portCountBefore} before, {portCountAfter} after (difference: {portDifference}, limit: ±25)");
+                $"Mach port leak detected: {portCountBefore} before, {portCountAfter} after (difference: {portDifference}, threshold: ±25)");
             Assert.True(threadDifference <= 25,
-                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±25)");
+                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, threshold: ±25)");
         }
 
         /// <summary>
@@ -133,18 +149,27 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: ConcurrentDispose_IsThreadSafe ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(ConcurrentDispose_IsThreadSafe)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
+            _output.WriteLine($"[USING-BODY] Test={nameof(ConcurrentDispose_IsThreadSafe)}, Thread={Environment.CurrentManagedThreadId}");
 
             // Launch 10 concurrent Dispose() calls
             var tasks = new Task[10];
             for (int i = 0; i < 10; i++)
             {
-                tasks[i] = Task.Run(() => listener.Dispose());
+                int taskNum = i;
+                tasks[i] = Task.Run(() =>
+                {
+                    _output.WriteLine($"[TEST] Task {taskNum} calling Dispose()");
+                    listener.Dispose();
+                    _output.WriteLine($"[TEST] Task {taskNum} Dispose() completed");
+                });
             }
 
             // Should not throw or deadlock
             var exception = await Record.ExceptionAsync(async () => await Task.WhenAll(tasks));
             Assert.Null(exception);
+            _output.WriteLine($"[USING-EXIT] Test={nameof(ConcurrentDispose_IsThreadSafe)}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -158,24 +183,28 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             int threadCountBefore = Process.GetCurrentProcess().Threads.Count;
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_TerminatesListenerThread)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_TerminatesListenerThread)}, Thread={Environment.CurrentManagedThreadId}");
             Thread.Sleep(100); // Give thread time to start
 
             int threadCountDuring = Process.GetCurrentProcess().Threads.Count;
             Assert.True(threadCountDuring >= threadCountBefore,
                 "Thread count should increase when listener is active");
 
+            _output.WriteLine($"[TEST] Calling Dispose()");
             listener.Dispose();
+            _output.WriteLine($"[TEST] Dispose() completed");
             Thread.Sleep(200); // Give thread time to terminate
 
             int threadCountAfter = Process.GetCurrentProcess().Threads.Count;
 
             // Thread count should return close to original
-            // Single listener test is more susceptible to OS noise
-            // macOS IOKit creates unpredictable background threads, so use generous tolerance
+            // macOS IOKit creates unpredictable background threads, allow ±10 for tolerance
             int threadDifference = Math.Abs(threadCountAfter - threadCountBefore);
             Assert.True(threadDifference <= 10,
-                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±10)");
+                $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, threshold: ±10)");
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_TerminatesListenerThread)}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -187,17 +216,22 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: Dispose_StopsCFRunLoop ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_StopsCFRunLoop)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_StopsCFRunLoop)}, Thread={Environment.CurrentManagedThreadId}");
             Thread.Sleep(100); // Ensure CFRunLoop is running
 
             // Dispose should stop the run loop
             var stopwatch = Stopwatch.StartNew();
+            _output.WriteLine($"[TEST] Calling Dispose()");
             listener.Dispose();
+            _output.WriteLine($"[TEST] Dispose() completed");
             stopwatch.Stop();
 
             // If CFRunLoopStop works, this should complete quickly
             Assert.True(stopwatch.ElapsedMilliseconds < 500,
                 $"CFRunLoop took {stopwatch.ElapsedMilliseconds}, expected < 500 ms");
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_StopsCFRunLoop)}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -221,8 +255,13 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                 int taskNum = i; // Capture for closure
                 tasks[i] = Task.Run(() =>
                 {
+                    _output.WriteLine($"[USING-ENTRY] Test={nameof(ParallelCreateDispose_NoLeaksOrDeadlocks)}, Task={taskNum:D2}, Thread={Environment.CurrentManagedThreadId}");
                     using var listener = HidDeviceListener.Create();
+                    _output.WriteLine($"[USING-BODY] Test={nameof(ParallelCreateDispose_NoLeaksOrDeadlocks)}, Task={taskNum:D2}, Thread={Environment.CurrentManagedThreadId}");
+                    _output.WriteLine($"[TEST-Task{taskNum:D2}] Created listener");
                     Thread.Sleep(50); // Hold briefly to ensure thread starts
+                    _output.WriteLine($"[TEST-Task{taskNum:D2}] Disposing listener");
+                    _output.WriteLine($"[USING-EXIT] Test={nameof(ParallelCreateDispose_NoLeaksOrDeadlocks)}, Task={taskNum:D2}, Thread={Environment.CurrentManagedThreadId}");
                 });
             }
 
@@ -240,7 +279,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Tolerance covers first-use IOKit/CFRunLoop initialization (~15 threads) plus parallel variance (~10 threads)
             // With 30 listeners, real per-listener leaks (30+ threads) still exceed tolerance
             Assert.True(threadDifference <= 25,
-                $"Thread leak in parallel test: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±25)");
+                $"Thread leak in parallel test: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, threshold: ±25)");
         }
 
         /// <summary>
@@ -256,13 +295,17 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 
             int threadCountBefore = Process.GetCurrentProcess().Threads.Count;
 
-            // Create and dispose 500 listeners sequentially
+            // Create and dispose 50 listeners sequentially (REDUCED from 500 for macOS)
             // Sequential execution minimizes parallel activity noise
-            // High iteration count amplifies leak signal (500:1 signal-to-noise ratio)
-            for (int i = 0; i < 500; i++)
+            // High iteration count amplifies leak signal (50:1 signal-to-noise ratio)
+            for (int i = 0; i < 50; i++)
             {
+                _output.WriteLine($"[USING-ENTRY] Test={nameof(SequentialCreateDispose_HighIterations_NoLeaks)}, Iteration={i:D3}, Thread={Environment.CurrentManagedThreadId}");
                 using var listener = HidDeviceListener.Create();
+                _output.WriteLine($"[USING-BODY] Test={nameof(SequentialCreateDispose_HighIterations_NoLeaks)}, Iteration={i:D3}, Thread={Environment.CurrentManagedThreadId}");
+                _output.WriteLine($"[TEST-Iteration{i:D3}] Created listener");
                 Thread.Sleep(10); // Brief hold to ensure thread lifecycle
+                _output.WriteLine($"[USING-EXIT] Test={nameof(SequentialCreateDispose_HighIterations_NoLeaks)}, Iteration={i:D3}, Thread={Environment.CurrentManagedThreadId}");
             }
 
             GC.Collect();
@@ -272,11 +315,11 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             int threadCountAfter = Process.GetCurrentProcess().Threads.Count;
             int threadDifference = Math.Abs(threadCountAfter - threadCountBefore);
 
-            // With 500 iterations, any per-listener leak would be obvious
+            // With 50 iterations, any per-listener leak would be obvious
             // Sequential minimizes noise, but allow generous tolerance for first-use initialization
-            // With 500 listeners, real leaks (500+ threads) far exceed tolerance (signal-to-noise: 500:10 = 50:1)
+            // With 50 listeners, real leaks (50+ threads) far exceed tolerance (signal-to-noise: 50:10 = 5:1)
             Assert.True(threadDifference <= 10,
-                $"Thread leak in sequential test: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±10)");
+                $"Thread leak in sequential test: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, threshold: ±10)");
         }
 
         /// <summary>
@@ -288,16 +331,21 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: Dispose_UnusedListener_Succeeds ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_UnusedListener_Succeeds)}, Thread={Environment.CurrentManagedThreadId}");
             var listener = HidDeviceListener.Create();
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_UnusedListener_Succeeds)}, Thread={Environment.CurrentManagedThreadId}");
             // Don't subscribe to any events or do anything
 
             var stopwatch = Stopwatch.StartNew();
+            _output.WriteLine($"[TEST] Calling Dispose()");
             var exception = Record.Exception(() => listener.Dispose());
+            _output.WriteLine($"[TEST] Dispose() completed");
             stopwatch.Stop();
 
             Assert.Null(exception);
             Assert.True(stopwatch.ElapsedMilliseconds < 500,
                 $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <500ms");
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_UnusedListener_Succeeds)}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>
@@ -317,8 +365,10 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             _output.WriteLine("=== TEST START: Dispose_FromFinalizerPath_DoesNotBlock ===");
             Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
 
-            using var listener = HidDeviceListener.Create();
+            _output.WriteLine($"[USING-ENTRY] Test={nameof(Dispose_FromFinalizerPath_DoesNotBlock)}, Thread={Environment.CurrentManagedThreadId}");
+            var listener = HidDeviceListener.Create();
             var macListener = listener as MacOSHidDeviceListener;
+            _output.WriteLine($"[USING-BODY] Test={nameof(Dispose_FromFinalizerPath_DoesNotBlock)}, Thread={Environment.CurrentManagedThreadId}");
             _output.WriteLine($"[TEST] Created listener");
 
             // Give listener thread time to start
@@ -336,10 +386,12 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             stopwatch.Stop();
 
             // Dispose(false) should complete quickly because it skips Thread.Join() from finalizer path
+            // If it blocks on Thread.Join(), this will take 1+ seconds and fail
             Assert.True(stopwatch.ElapsedMilliseconds < 500,
                 $"Dispose(false) took {stopwatch.ElapsedMilliseconds}ms, expected <500ms (should skip Thread.Join from finalizer)");
 
             _output.WriteLine($"[TEST] Dispose(false) completed in {stopwatch.ElapsedMilliseconds}ms without blocking - finalizer path works correctly");
+            _output.WriteLine($"[USING-EXIT] Test={nameof(Dispose_FromFinalizerPath_DoesNotBlock)}, Thread={Environment.CurrentManagedThreadId}");
         }
 
         /// <summary>

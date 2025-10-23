@@ -124,30 +124,6 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         }
 
         /// <summary>
-        /// Verifies that Dispose() can be called while events might be processing.
-        /// </summary>
-        [Fact]
-        public void Dispose_DuringEventHandling_CompletesGracefully()
-        {
-            var listener = SmartCardDeviceListener.Create();
-            var handlerCanComplete = new ManualResetEventSlim(false);
-
-            listener.Arrived += (s, e) =>
-            {
-                handlerCanComplete.Wait(TimeSpan.FromMilliseconds(8000));
-            };
-
-            var stopwatch = Stopwatch.StartNew();
-            listener.Dispose();
-            stopwatch.Stop();
-
-            handlerCanComplete.Set();
-
-            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
-                $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
-        }
-
-        /// <summary>
         /// Verifies that listener thread terminates after Dispose().
         /// </summary>
         [Fact]

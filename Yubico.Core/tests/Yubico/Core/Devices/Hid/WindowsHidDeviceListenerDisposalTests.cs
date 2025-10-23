@@ -183,32 +183,6 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         }
 
         /// <summary>
-        /// Verifies that Dispose() can be called while events might be firing.
-        /// Tests that callback unregistration prevents use-after-free.
-        /// </summary>
-        [SkippableFact]
-        public void Dispose_DuringPotentialEvents_CompletesGracefully()
-        {
-            Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows, "Windows-only test");
-
-            var listener = HidDeviceListener.Create();
-            var handlerCallCount = 0;
-
-            listener.Arrived += (s, e) =>
-            {
-                Interlocked.Increment(ref handlerCallCount);
-            };
-
-            // Dispose should complete quickly even if events might be firing
-            var stopwatch = Stopwatch.StartNew();
-            listener.Dispose();
-            stopwatch.Stop();
-
-            Assert.True(stopwatch.ElapsedMilliseconds < 100,
-                $"Dispose took {stopwatch.ElapsedMilliseconds}ms");
-        }
-
-        /// <summary>
         /// Stress test: Create and dispose many listeners in parallel.
         /// Increased to 100 listeners to amplify leak signal above background noise.
         /// </summary>

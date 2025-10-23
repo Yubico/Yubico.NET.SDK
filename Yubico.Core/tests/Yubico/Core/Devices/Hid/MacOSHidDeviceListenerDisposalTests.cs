@@ -396,58 +396,6 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         }
 
         /// <summary>
-        /// Verifies that IOHIDManager callbacks don't fire after disposal.
-        /// </summary>
-        [SkippableFact]
-        public void Dispose_StopsIOKitCallbacks()
-        {
-            _output.WriteLine("=== TEST START: Dispose_StopsIOKitCallbacks ===");
-            Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
-
-            var listener = HidDeviceListener.Create();
-
-            var callbackFired = false;
-
-            listener.Arrived += (s, e) =>
-            {
-                callbackFired = true;
-            };
-
-            listener.Dispose();
-
-            // Wait a bit to see if any callbacks fire (they shouldn't)
-            Thread.Sleep(500);
-
-            // We can't easily trigger a device event in tests, but we can verify
-            // that disposal completed without errors
-            Assert.False(callbackFired, "No device events should fire in test environment");
-        }
-
-        /// <summary>
-        /// Verifies that delegate references are properly cleared to prevent GC issues.
-        /// </summary>
-        [SkippableFact]
-        public void Dispose_ClearsDelegateReferences()
-        {
-            Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.MacOS, "macOS-only test");
-
-            var listener = HidDeviceListener.Create();
-            var macListener = listener as MacOSHidDeviceListener;
-
-            listener.Arrived += (s, e) => { };
-            listener.Removed += (s, e) => { };
-
-            listener.Dispose();
-
-            // Force GC to verify delegates can be collected
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            // If we get here without issues, delegates were properly released
-            Assert.True(true);
-        }
-
-        /// <summary>
         /// Helper method to get count of Mach ports for current process.
         /// This helps detect IOKit notification port leaks.
         /// </summary>

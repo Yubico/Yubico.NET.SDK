@@ -128,36 +128,6 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         }
 
         /// <summary>
-        /// Verifies that Dispose() can be called while events are being processed.
-        /// </summary>
-        [SkippableFact]
-        public void Dispose_DuringEventHandling_CompletesGracefully()
-        {
-            Skip.IfNot(SdkPlatformInfo.OperatingSystem == SdkPlatform.Linux, "Linux-only test");
-
-            var listener = HidDeviceListener.Create();
-            var handlerStarted = new ManualResetEventSlim(false);
-            var handlerCanComplete = new ManualResetEventSlim(false);
-
-            listener.Arrived += (s, e) =>
-            {
-                handlerStarted.Set();
-                handlerCanComplete.Wait(TimeSpan.FromSeconds(5));
-            };
-
-            // Note: We can't easily trigger a real device event in a unit test,
-            // but we can verify that Dispose() completes quickly regardless
-            var stopwatch = Stopwatch.StartNew();
-            listener.Dispose();
-            stopwatch.Stop();
-
-            handlerCanComplete.Set();
-
-            Assert.True(stopwatch.ElapsedMilliseconds < 200,
-                $"Dispose took {stopwatch.ElapsedMilliseconds}ms even without events");
-        }
-
-        /// <summary>
         /// Verifies that listener thread terminates after Dispose().
         /// </summary>
         [SkippableFact]

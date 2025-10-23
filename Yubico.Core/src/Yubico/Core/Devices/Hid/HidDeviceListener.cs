@@ -85,8 +85,9 @@ namespace Yubico.Core.Devices.Hid
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (EventHandler<HidDeviceEventArgs> handler in Arrived.GetInvocationList())
+            foreach (Delegate? @delegate in Arrived.GetInvocationList())
             {
+                var handler = (EventHandler<HidDeviceEventArgs>)@delegate;
                 try
                 {
                     handler.Invoke(this, new HidDeviceEventArgs(device));
@@ -115,8 +116,9 @@ namespace Yubico.Core.Devices.Hid
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (EventHandler<HidDeviceEventArgs> handler in Removed.GetInvocationList())
+            foreach (Delegate? @delegate in Removed.GetInvocationList())
             {
+                var handler = (EventHandler<HidDeviceEventArgs>)@delegate;
                 try
                 {
                     handler.Invoke(this, new HidDeviceEventArgs(device));

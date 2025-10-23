@@ -145,9 +145,15 @@ namespace Yubico.Core.Devices.SmartCard
                 {
                     if (disposing)
                     {
+                        // Cancel any blocking SCardGetStatusChange calls
                         _ = SCardCancel(_context);
-                        _context.Dispose();
+
+                        // Stop the listener thread BEFORE disposing the context
+                        // This ensures the thread can exit gracefully while context is still valid
                         StopListening();
+
+                        // Now it's safe to dispose the context
+                        _context.Dispose();
                     }
                 }
                 catch (Exception ex)
@@ -182,7 +188,14 @@ namespace Yubico.Core.Devices.SmartCard
 
             _isListening = false;
             Status = DeviceListenerStatus.Stopped;
-            threadToJoin.Join();
+
+            // Wait for thread to exit with timeout to prevent indefinite blocking
+            // SmartCard operations can be slower, so use 3 second timeout
+            bool exited = threadToJoin.Join(TimeSpan.FromSeconds(3));
+            if (!exited)
+            {
+                _log.LogWarning("Smart card listener thread did not exit within timeout. Context may have been disposed prematurely.");
+            }
 
             _listenerThread = null;
         }

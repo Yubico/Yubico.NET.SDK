@@ -27,6 +27,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
     /// Tests for disposal and resource management of LinuxHidDeviceListener.
     /// These tests verify thread safety, resource cleanup, and disposal timing.
     /// </summary>
+    [Collection("DisposalTests")]
     public class LinuxHidDeviceListenerDisposalTests
     {
         /// <summary>

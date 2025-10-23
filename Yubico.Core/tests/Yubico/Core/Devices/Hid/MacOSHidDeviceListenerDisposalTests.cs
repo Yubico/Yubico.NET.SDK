@@ -27,6 +27,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
     /// Tests for disposal and resource management of MacOSHidDeviceListener.
     /// These tests verify thread lifecycle, CFRunLoop cleanup, and disposal timing.
     /// </summary>
+    [Collection("DisposalTests")]
     public class MacOSHidDeviceListenerDisposalTests
     {
         private readonly ITestOutputHelper _output;

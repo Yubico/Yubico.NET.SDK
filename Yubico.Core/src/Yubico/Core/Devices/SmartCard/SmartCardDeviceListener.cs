@@ -88,8 +88,9 @@ namespace Yubico.Core.Devices.SmartCard
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (EventHandler<SmartCardDeviceEventArgs> handler in Arrived.GetInvocationList())
+            foreach (Delegate? @delegate in Arrived.GetInvocationList())
             {
+                var handler = (EventHandler<SmartCardDeviceEventArgs>)@delegate;
                 try
                 {
                     handler.Invoke(this, new SmartCardDeviceEventArgs(device));
@@ -118,8 +119,9 @@ namespace Yubico.Core.Devices.SmartCard
             }
 
             // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
-            foreach (EventHandler<SmartCardDeviceEventArgs> handler in Removed.GetInvocationList())
+            foreach (Delegate? @delegate in Removed.GetInvocationList())
             {
+                var handler = (EventHandler<SmartCardDeviceEventArgs>)@delegate;
                 try
                 {
                     handler.Invoke(this, new SmartCardDeviceEventArgs(device));

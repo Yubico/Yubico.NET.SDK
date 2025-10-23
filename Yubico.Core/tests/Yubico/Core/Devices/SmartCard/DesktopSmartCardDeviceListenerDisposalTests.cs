@@ -24,6 +24,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
     /// Tests for disposal and resource management of DesktopSmartCardDeviceListener.
     /// These tests verify thread safety, resource cleanup, and disposal timing.
     /// </summary>
+    [Collection("DisposalTests")]
     public class DesktopSmartCardDeviceListenerDisposalTests
     {
         /// <summary>

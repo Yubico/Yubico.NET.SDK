@@ -25,6 +25,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
     /// Tests for disposal and resource management of WindowsHidDeviceListener.
     /// These tests verify callback unregistration, resource cleanup, and disposal timing.
     /// </summary>
+    [Collection("DisposalTests")]
     public class WindowsHidDeviceListenerDisposalTests
     {
         private static bool _isWarm = false;

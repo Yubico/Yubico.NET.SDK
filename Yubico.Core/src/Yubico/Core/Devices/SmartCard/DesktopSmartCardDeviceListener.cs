@@ -29,7 +29,7 @@ namespace Yubico.Core.Devices.SmartCard
     /// </summary>
     internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener
     {
-        internal static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
+        private static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
         private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardDeviceListener>();
 
         // The resource manager context.
@@ -38,11 +38,13 @@ namespace Yubico.Core.Devices.SmartCard
         // The active smart card readers.
         private SCARD_READER_STATE[] _readerStates;
 
-        private bool _isListening;
         private Thread? _listenerThread;
-        private readonly object _startStopLock = new object();
+        private bool _isListening;
         private bool _isDisposed;
+        private readonly object _startStopLock = new object();
         private readonly object _disposeLock = new object();
+        private readonly TimeSpan _maxDisposalWaitTime = TimeSpan.FromSeconds(8);
+        private readonly TimeSpan _checkForChangesWaitTime = TimeSpan.FromMilliseconds(100);
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDeviceListener"/>.
@@ -110,7 +112,7 @@ namespace Yubico.Core.Devices.SmartCard
             {
                 try
                 {
-                    bool result = CheckForUpdates(-1, usePnpWorkaround);
+                    bool result = CheckForUpdates((int)_checkForChangesWaitTime.TotalMilliseconds, usePnpWorkaround);
                     if (!result)
                     {
                         break;
@@ -191,7 +193,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             // Wait for thread to exit with timeout to prevent indefinite blocking
             // SmartCard operations can be slower, so use 3 second timeout
-            bool exited = threadToJoin.Join(TimeSpan.FromSeconds(3));
+            bool exited = threadToJoin.Join(_maxDisposalWaitTime);
             if (!exited)
             {
                 _log.LogWarning("Smart card listener thread did not exit within timeout. Context may have been disposed prematurely.");

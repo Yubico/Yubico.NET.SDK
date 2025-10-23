@@ -27,6 +27,9 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
     [Collection("DisposalTests")]
     public class DesktopSmartCardDeviceListenerDisposalTests
     {
+        //  Needs to be lower than the timeout in the listener thread (DesktopSmartCardDeviceListener._maxDisposalWaitTime)
+        readonly TimeSpan MaxWaitTime = TimeSpan.FromSeconds(5); 
+        
         /// <summary>
         /// Verifies that Dispose() completes within a reasonable time.
         /// This ensures the listener thread terminates properly.
@@ -40,9 +43,8 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
             listener.Dispose();
             stopwatch.Stop();
 
-            // Should complete within 5 seconds (thread join timeout + safety margin)
-            Assert.True(stopwatch.ElapsedMilliseconds < 5500,
-                $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <5500ms");
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -52,19 +54,23 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         [Fact]
         public void Dispose_CalledMultipleTimes_IsIdempotent()
         {
+            var stopwatch = Stopwatch.StartNew();
+            
             var listener = SmartCardDeviceListener.Create();
 
-            // First disposal
             listener.Dispose();
 
-            // Subsequent disposals should not throw
             var exception1 = Record.Exception(() => listener.Dispose());
             var exception2 = Record.Exception(() => listener.Dispose());
             var exception3 = Record.Exception(() => listener.Dispose());
+            
+            stopwatch.Stop();
 
             Assert.Null(exception1);
             Assert.Null(exception2);
             Assert.Null(exception3);
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Test took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -73,20 +79,21 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         [Fact]
         public void RepeatedCreateDispose_NoLeaks()
         {
-            // Create and dispose 20 listeners
+            var stopwatch = Stopwatch.StartNew();
+            
             for (int i = 0; i < 20; i++)
             {
                 using var listener = SmartCardDeviceListener.Create();
-                // Listener created and immediately disposed
             }
 
-            // Force GC to ensure any finalizers run
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
+            
+            stopwatch.Stop();
 
-            // If we get here without exceptions, no resource leaks occurred
-            Assert.True(true);
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Test took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -96,19 +103,24 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         [Fact]
         public async Task ConcurrentDispose_IsThreadSafe()
         {
+            var stopwatch = Stopwatch.StartNew();
+            
             var listener = SmartCardDeviceListener.Create();
 
-            // Launch 10 concurrent Dispose() calls
             var tasks = new Task[10];
             for (int i = 0; i < 10; i++)
             {
                 tasks[i] = Task.Run(() => listener.Dispose());
             }
 
-            // Should not throw or deadlock
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(8000));
             var exception = await Record.ExceptionAsync(async () => await Task.WhenAll(tasks).WaitAsync(cts.Token));
+            
+            stopwatch.Stop();
+            
             Assert.Null(exception);
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Test took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -122,18 +134,17 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
 
             listener.Arrived += (s, e) =>
             {
-                handlerCanComplete.Wait(TimeSpan.FromSeconds(5));
+                handlerCanComplete.Wait(TimeSpan.FromMilliseconds(8000));
             };
 
-            // Dispose should complete even if event handlers are registered
             var stopwatch = Stopwatch.StartNew();
             listener.Dispose();
             stopwatch.Stop();
 
             handlerCanComplete.Set();
 
-            Assert.True(stopwatch.ElapsedMilliseconds < 5500,
-                $"Dispose took {stopwatch.ElapsedMilliseconds}ms");
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -142,24 +153,29 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         [Fact]
         public void Dispose_TerminatesListenerThread()
         {
+            var stopwatch = Stopwatch.StartNew();
+            
             int threadCountBefore = Process.GetCurrentProcess().Threads.Count;
 
             var listener = SmartCardDeviceListener.Create();
-            Thread.Sleep(100); // Give thread time to start
+            Thread.Sleep(100);
 
             int threadCountDuring = Process.GetCurrentProcess().Threads.Count;
             Assert.True(threadCountDuring >= threadCountBefore,
                 "Thread count should increase when listener is active");
 
             listener.Dispose();
-            Thread.Sleep(500); // Give thread time to terminate
+            Thread.Sleep(500);
 
             int threadCountAfter = Process.GetCurrentProcess().Threads.Count;
+            
+            stopwatch.Stop();
 
-            // Thread count should return to original (±2 for variance due to system activity)
             int threadDifference = Math.Abs(threadCountAfter - threadCountBefore);
             Assert.True(threadDifference <= 2,
                 $"Thread leak detected: {threadCountBefore} before, {threadCountAfter} after (difference: {threadDifference}, limit: ±2)");
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Test took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -169,27 +185,27 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         [Fact]
         public async Task ParallelCreateDispose_NoLeaksOrDeadlocks()
         {
-            // Create 100 listeners in parallel to amplify leak detection
-            // Increased from 10 to make potential resource leaks more visible
+            var stopwatch = Stopwatch.StartNew();
+            
             var tasks = new Task[100];
             for (int i = 0; i < 100; i++)
             {
                 tasks[i] = Task.Run(() =>
                 {
                     using var listener = SmartCardDeviceListener.Create();
-                    Thread.Sleep(50); // Hold briefly
+                    Thread.Sleep(50);
                 });
             }
-
-            // Should complete without timeout (adjusted for more listeners)
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-            await Task.WhenAll(tasks).WaitAsync(cts.Token);
-
+            
+            var exception = await Record.ExceptionAsync(() => Task.WhenAll(tasks));
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            
+            stopwatch.Stop();
 
-            // If we get here, no deadlocks or exceptions occurred
-            Assert.True(true);
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Test took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
+            Assert.Null(exception);
         }
 
         /// <summary>
@@ -199,19 +215,20 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         [Fact]
         public void SequentialCreateDispose_HighIterations_NoLeaks()
         {
-            // Create and dispose 500 listeners sequentially
-            // High iteration count helps detect resource leaks
+            var stopwatch = Stopwatch.StartNew();
+            
             for (int i = 0; i < 500; i++)
             {
                 using var listener = SmartCardDeviceListener.Create();
-                // Dispose happens at end of using block
             }
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            
+            stopwatch.Stop();
 
-            // If we get here without timeout or exception, disposal is working correctly
-            Assert.True(true);
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Test took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -221,15 +238,14 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         public void Dispose_UnusedListener_Succeeds()
         {
             var listener = SmartCardDeviceListener.Create();
-            // Don't subscribe to any events or do anything
 
             var stopwatch = Stopwatch.StartNew();
             var exception = Record.Exception(() => listener.Dispose());
             stopwatch.Stop();
 
             Assert.Null(exception);
-            Assert.True(stopwatch.ElapsedMilliseconds < 5500,
-                $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <5500ms");
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Dispose took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -238,43 +254,59 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         [Fact]
         public void Finalizer_DoesNotCrashGCThread()
         {
-            // Create listener and let it go out of scope without disposing
+            var stopwatch = Stopwatch.StartNew();
+            
             CreateAndAbandonListener();
 
-            // Force GC and finalizers to run
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
+            
+            stopwatch.Stop();
 
-            // If we get here, finalizer didn't crash
-            Assert.True(true);
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Test took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
         }
 
         private static void CreateAndAbandonListener()
         {
             _ = SmartCardDeviceListener.Create();
-            // Let it go out of scope without disposing
         }
 
         /// <summary>
-        /// Verifies that event handlers are cleared during disposal.
+        /// Verifies that no events fire after disposal.
+        /// This test verifies that the listener thread stops properly and no events
+        /// are raised after Dispose() completes, regardless of handler registration.
         /// </summary>
         [Fact]
-        public void Dispose_ClearsEventHandlers()
+        public void Dispose_StopsEventsFiring()
         {
+            var stopwatch = Stopwatch.StartNew();
+
             var listener = SmartCardDeviceListener.Create();
-            bool arrivedCalled = false;
-            bool removedCalled = false;
+            int arrivedCount = 0;
+            int removedCount = 0;
 
-            listener.Arrived += (s, e) => arrivedCalled = true;
-            listener.Removed += (s, e) => removedCalled = true;
+            listener.Arrived += (s, e) => Interlocked.Increment(ref arrivedCount);
+            listener.Removed += (s, e) => Interlocked.Increment(ref removedCount);
 
+            // Dispose and wait for thread to stop
             listener.Dispose();
 
-            // Event handlers should be cleared, but we can't easily test this
-            // without triggering events. This test mainly verifies no exceptions.
-            Assert.False(arrivedCalled);
-            Assert.False(removedCalled);
+            // Capture counts immediately after disposal
+            int arrivedAfterDispose = arrivedCount;
+            int removedAfterDispose = removedCount;
+
+            // Wait a bit to ensure no delayed events fire
+            Thread.Sleep(200);
+
+            stopwatch.Stop();
+
+            // Events might have fired before disposal (that's ok), but not after
+            Assert.Equal(arrivedAfterDispose, arrivedCount);
+            Assert.Equal(removedAfterDispose, removedCount);
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Test took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
         }
 
         /// <summary>
@@ -283,14 +315,18 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         [Fact]
         public void RapidCreateDisposeCycles_NoExceptions()
         {
+            var stopwatch = Stopwatch.StartNew();
+            
             for (int i = 0; i < 50; i++)
             {
                 var listener = SmartCardDeviceListener.Create();
                 listener.Dispose();
             }
+            
+            stopwatch.Stop();
 
-            // If we get here, no exceptions were thrown
-            Assert.True(true);
+            Assert.True(stopwatch.ElapsedMilliseconds < MaxWaitTime.TotalMilliseconds,
+                $"Test took {stopwatch.ElapsedMilliseconds}ms, expected <{MaxWaitTime.TotalMilliseconds} ms");
         }
     }
 }

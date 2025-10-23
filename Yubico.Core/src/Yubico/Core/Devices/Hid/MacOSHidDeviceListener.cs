@@ -46,6 +46,9 @@ namespace Yubico.Core.Devices.Hid
         private readonly object _disposeLock = new object();
 
         private readonly ILogger _log = Logging.Log.GetLogger<MacOSHidDeviceListener>();
+        
+        private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
+        private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
 
         // Start listening as soon as this object is constructed.
         public MacOSHidDeviceListener()
@@ -92,7 +95,7 @@ namespace Yubico.Core.Devices.Hid
             // From Dispose: Wait briefly to ensure clean shutdown, but don't block forever
             if (!fromFinalizer && threadToJoin != null)
             {
-                bool exited = threadToJoin.Join(TimeSpan.FromSeconds(1));
+                bool exited = threadToJoin.Join(MaxDisposalWaitTime);
                 if (!exited)
                 {
                     _log.LogWarning("Unexpected: Listener thread blocked during disposal despite cancellation flag.");
@@ -162,7 +165,6 @@ namespace Yubico.Core.Devices.Hid
             // - Efficiency: Only 10 wake-ups per second (minimal CPU/battery impact)
             // - Low latency: Device events processed within 0-100ms
             // - Consistency: Matches Linux poll() timeout for uniform cross-platform behavior
-            const double runLoopTimeout = 0.1; // 100 milliseconds (0.1 seconds)
             using IDisposable? logScope = _log.BeginScope("MacOSHidDeviceListener.StartListening()");
 
             _log.LogInformation("HID listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
@@ -191,7 +193,7 @@ namespace Yubico.Core.Devices.Hid
 
                 // MacOS returns both present and future device events. We're only interested in the future ones, so let's
                 // clear out the ones that are already present.
-                _ = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, true);
+                _ = CFRunLoopRunInMode(runLoopMode, CheckForChangesWaitTime.TotalSeconds, true);
                 _log.LogInformation("Flushed existing devices.");
 
                 // CRITICAL: Store delegates as instance fields to prevent garbage collection
@@ -212,7 +214,7 @@ namespace Yubico.Core.Devices.Hid
                 _log.LogInformation("Beginning run loop polling.");
                 while (!_shouldStop && (runLoopResult == kCFRunLoopRunHandledSource || runLoopResult == kCFRunLoopRunTimedOut))
                 {
-                    runLoopResult = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, true);
+                    runLoopResult = CFRunLoopRunInMode(runLoopMode, CheckForChangesWaitTime.TotalSeconds, true);
                 }
                 _log.LogInformation("Run loop exited.");
 

@@ -43,8 +43,8 @@ namespace Yubico.Core.Devices.SmartCard
         private bool _isDisposed;
         private readonly object _startStopLock = new object();
         private readonly object _disposeLock = new object();
-        private readonly TimeSpan _maxDisposalWaitTime = TimeSpan.FromSeconds(8);
-        private readonly TimeSpan _checkForChangesWaitTime = TimeSpan.FromMilliseconds(100);
+        private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
+        private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDeviceListener"/>.
@@ -112,7 +112,7 @@ namespace Yubico.Core.Devices.SmartCard
             {
                 try
                 {
-                    bool result = CheckForUpdates((int)_checkForChangesWaitTime.TotalMilliseconds, usePnpWorkaround);
+                    bool result = CheckForUpdates(usePnpWorkaround);
                     if (!result)
                     {
                         break;
@@ -193,7 +193,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             // Wait for thread to exit with timeout to prevent indefinite blocking
             // SmartCard operations can be slower, so use 3 second timeout
-            bool exited = threadToJoin.Join(_maxDisposalWaitTime);
+            bool exited = threadToJoin.Join(MaxDisposalWaitTime);
             if (!exited)
             {
                 _log.LogWarning("Smart card listener thread did not exit within timeout. Context may have been disposed prematurely.");
@@ -202,14 +202,14 @@ namespace Yubico.Core.Devices.SmartCard
             _listenerThread = null;
         }
 
-        private bool CheckForUpdates(int timeout, bool usePnpWorkaround)
+        private bool CheckForUpdates(bool usePnpWorkaround)
         {
             var arrivedDevices = new List<ISmartCardDevice>();
             var removedDevices = new List<ISmartCardDevice>();
-            bool sendEvents = timeout != 0;
+            bool sendEvents = CheckForChangesWaitTime != TimeSpan.Zero;
             var newStates = (SCARD_READER_STATE[])_readerStates.Clone();
 
-            uint getStatusChangeResult = SCardGetStatusChange(_context, timeout, newStates, newStates.Length);
+            uint getStatusChangeResult = SCardGetStatusChange(_context, (int)CheckForChangesWaitTime.TotalMilliseconds, newStates, newStates.Length);
             if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
             {
                 _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");

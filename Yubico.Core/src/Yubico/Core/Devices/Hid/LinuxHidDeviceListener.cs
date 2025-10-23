@@ -34,6 +34,8 @@ namespace Yubico.Core.Devices.Hid
         private readonly LinuxUdevMonitorSafeHandle _monitorObject;
         private readonly LinuxUdevSafeHandle _udevObject;
         private readonly ILogger _log = Logging.Log.GetLogger<LinuxHidDeviceListener>();
+        private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
+        private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
 
         public LinuxHidDeviceListener()
         {
@@ -124,7 +126,7 @@ namespace Yubico.Core.Devices.Hid
                 };
 
                 _isListening = true;
-                _listenerThread.Start();
+                _listenerThread.Start(_cancellationTokenSource.Token);
             }
         }
 
@@ -155,7 +157,7 @@ namespace Yubico.Core.Devices.Hid
             Thread? threadToJoin = _listenerThread;
             if (threadToJoin != null)
             {
-                bool exited = threadToJoin.Join(TimeSpan.FromSeconds(3));
+                bool exited = threadToJoin.Join(MaxDisposalWaitTime);
                 if (!exited)
                 {
                     _log.LogWarning("Listener thread did not exit within timeout. This should not happen with proper cancellation support.");
@@ -170,11 +172,11 @@ namespace Yubico.Core.Devices.Hid
             }
         }
 
-        private void ListenForReaderChanges()
+        private void ListenForReaderChanges(object? obj)
         {
             try
             {
-                CancellationToken cancellationToken = _cancellationTokenSource?.Token ?? CancellationToken.None;
+                var cancellationToken = (CancellationToken)(obj ?? CancellationToken.None);
 
                 while (!cancellationToken.IsCancellationRequested)
                 {
@@ -197,7 +199,7 @@ namespace Yubico.Core.Devices.Hid
         {
             // First check if there are any events available using poll with a short timeout
             // This allows the thread to remain responsive to cancellation
-            if (!HasPendingEvents(timeoutMs: 100))
+            if (!HasPendingEvents(timeoutMs: (int)CheckForChangesWaitTime.TotalMilliseconds))
             {
                 // No events available within timeout, return to allow cancellation check
                 return;

@@ -64,6 +64,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             PivMainMenuItem.BuildSelfSignedCert => RunBuildSelfSignedCert(),
             PivMainMenuItem.BuildCert => RunBuildCert(),
             PivMainMenuItem.RetrieveCert => RunRetrieveCert(),
+            PivMainMenuItem.GetMetadata => RunGetMetadata(),
             PivMainMenuItem.CreateAttestationStatement => RunCreateAttestationStatement(),
             PivMainMenuItem.GetAttestationCertificate => RunGetAttestationCert(),
             PivMainMenuItem.ResetPiv =>
@@ -82,6 +83,61 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             SampleMenu.WriteMessage(MessageType.Special, 0, "Unimplemented operation");
             return true;
         }
+
+        public bool RunGetMetadata()
+        {
+            if (_yubiKeyChosen is null)
+            {
+                SampleMenu.WriteMessage(MessageType.Special, 0, "You must choose a YubiKey first.");
+                return true; 
+            }
+
+            try
+            {
+                using (var pivSession = new PivSession(_yubiKeyChosen))
+                {
+                    _ = GetAsymmetricSlotNumber(out byte slotNumber);
+                    PivMetadata metadata = pivSession.GetMetadata(slotNumber);
+
+                    if (metadata is null)
+                    {
+                        SampleMenu.WriteMessage(MessageType.Special, 0, $"\nNo key or certificate found in slot {GetPivSlotName(slotNumber)}.\n");
+                        return true;
+                    }
+
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Slot: " + GetPivSlotName(slotNumber));
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Algorithm: " + metadata.Algorithm);
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Key status: " + metadata.KeyStatus);
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Pin policy: " + metadata.PinPolicy);
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Touch policy: " + metadata.TouchPolicy + "\n");
+                }
+            }
+            catch (Exception e)
+            {
+                SampleMenu.WriteMessage(MessageType.Special, 0, $"Error getting metadata: {e.Message}");
+            }
+
+            return true; // Keep the menu running
+        }
+        public static string GetPivSlotName(int slotNumber)
+        {
+            string name = (byte)slotNumber switch
+            {
+                0x9a => "PIV Authentication",
+                0x9c => "Digital Signature",
+                0x9d => "Key Management",
+                0x9e => "Card Authentication",
+                0xf9 => "Attestation",
+
+                // Handle the 20 "Retired" key management slots
+                >= 0x82 and <= 0x95 => $"Retired Key {slotNumber - 0x82 + 1}",
+
+                _ => "Unknown Slot"
+            };
+
+            return $"{name} ({(byte)slotNumber:X2})";
+        }
+
 
         public bool RunChangeRetryCount()
         {

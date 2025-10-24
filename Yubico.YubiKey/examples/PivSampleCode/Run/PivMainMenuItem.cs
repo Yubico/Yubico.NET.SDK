@@ -41,11 +41,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         BuildSelfSignedCert = 18,
         BuildCert = 19,
         RetrieveCert = 20,
+        GetMetadata = 21,
 
-        CreateAttestationStatement = 21,
-        GetAttestationCertificate = 22,
+        CreateAttestationStatement = 22,
+        GetAttestationCertificate = 23,
 
-        ResetPiv = 23,
-        Exit = 24,
+        ResetPiv = 24,
+        Exit = 25,
     }
 }

@@ -27,8 +27,9 @@ namespace Yubico.Core.Devices.SmartCard
     /// <summary>
     /// A listener class for smart card related events.
     /// </summary>
-    internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener, IDisposable
+    internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener
     {
+        private static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
         private readonly ILogger _log = Logging.Log.GetLogger<DesktopSmartCardDeviceListener>();
 
         // The resource manager context.
@@ -37,8 +38,13 @@ namespace Yubico.Core.Devices.SmartCard
         // The active smart card readers.
         private SCARD_READER_STATE[] _readerStates;
 
-        private bool _isListening;
         private Thread? _listenerThread;
+        private bool _isListening;
+        private bool _isDisposed;
+        private readonly object _startStopLock = new object();
+        private readonly object _disposeLock = new object();
+        private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
+        private static readonly TimeSpan CheckForChangesWaitTime = TimeSpan.FromMilliseconds(100);
 
         /// <summary>
         /// Constructs a <see cref="SmartCardDeviceListener"/>.
@@ -74,12 +80,18 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void StartListening()
         {
-            if (!_isListening)
+            lock (_startStopLock)
             {
+                if (_isListening)
+                {
+                    return;
+                }
+
                 _listenerThread = new Thread(ListenForReaderChanges)
                 {
                     IsBackground = true
                 };
+
                 _isListening = true;
                 Status = DeviceListenerStatus.Started;
                 _listenerThread.Start();
@@ -96,51 +108,70 @@ namespace Yubico.Core.Devices.SmartCard
             _log.LogInformation("Smart card listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
             bool usePnpWorkaround = UsePnpWorkaround();
-
-            while (_isListening && CheckForUpdates(-1, usePnpWorkaround))
+            while (_isListening)
             {
-
+                try
+                {
+                    bool result = CheckForUpdates(usePnpWorkaround);
+                    if (!result)
+                    {
+                        break;
+                    }    
+                }
+                catch (Exception e)
+                {
+                    _log.LogError(e, "Exception occurred while listening for smart card reader changes.");
+                    Status = DeviceListenerStatus.Error;
+                }
             }
         }
 
         #region IDisposable Support
 
-        private bool _disposedValue; // To detect redundant calls
-        internal static readonly string[] readerNames = new[] { "\\\\?\\Pnp\\Notifications" };
-
         /// <summary>
         /// Disposes the objects.
         /// </summary>
         /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            lock (_disposeLock)
             {
-                if (disposing)
+                if (_isDisposed)
                 {
-                    uint _ = SCardCancel(_context);
-                    _context.Dispose();
-                    StopListening();
+                    return;
                 }
-                _disposedValue = true;
+
+                _isDisposed = true;
+
+                try
+                {
+                    if (disposing)
+                    {
+                        // Cancel any blocking SCardGetStatusChange calls
+                        _ = SCardCancel(_context);
+
+                        // Stop the listener thread BEFORE disposing the context
+                        // This ensures the thread can exit gracefully while context is still valid
+                        StopListening();
+
+                        // Now it's safe to dispose the context
+                        _context.Dispose();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // CRITICAL: Never throw from Dispose, especially when called from finalizer
+                    if (disposing)
+                    {
+                        _log.LogWarning(ex, "Exception during DesktopSmartCardDeviceListener disposal");
+                    }
+                    // If !disposing (finalizer path), silently ignore to prevent GC thread crash
+                }
+                finally
+                {
+                    base.Dispose(disposing);
+                }
             }
-        }
-
-        ~DesktopSmartCardDeviceListener()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(false);
-        }
-
-        // This code added to correctly implement the disposable pattern.
-        /// <summary>
-        /// Calls Dispose(true).
-        /// </summary>
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         #endregion
@@ -150,27 +181,34 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void StopListening()
         {
-            if (_listenerThread is null)
+            // Use local variable to prevent race condition if multiple threads call StopListening()
+            Thread? threadToJoin = _listenerThread;
+            if (threadToJoin is null)
             {
                 return;
             }
 
-            ClearEventHandlers();
             _isListening = false;
             Status = DeviceListenerStatus.Stopped;
-            _listenerThread.Join();
+
+            // Wait for thread to exit with timeout to prevent indefinite blocking
+            bool exited = threadToJoin.Join(MaxDisposalWaitTime);
+            if (!exited)
+            {
+                _log.LogWarning("Smart card listener thread did not exit within timeout. Context may have been disposed prematurely.");
+            }
+
+            _listenerThread = null;
         }
 
-        private bool CheckForUpdates(int timeout, bool usePnpWorkaround)
+        private bool CheckForUpdates(bool usePnpWorkaround)
         {
             var arrivedDevices = new List<ISmartCardDevice>();
             var removedDevices = new List<ISmartCardDevice>();
-            bool sendEvents = timeout != 0;
-
+            bool sendEvents = CheckForChangesWaitTime != TimeSpan.Zero;
             var newStates = (SCARD_READER_STATE[])_readerStates.Clone();
 
-            uint getStatusChangeResult = SCardGetStatusChange(_context, timeout, newStates, newStates.Length);
-
+            uint getStatusChangeResult = SCardGetStatusChange(_context, (int)CheckForChangesWaitTime.TotalMilliseconds, newStates, newStates.Length);
             if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
             {
                 _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
@@ -281,10 +319,18 @@ namespace Yubico.Core.Devices.SmartCard
         // us of the change.
         private bool UsePnpWorkaround()
         {
-            SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(readerNames);
-            _ = SCardGetStatusChange(_context, 0, testState, testState.Length);
-            bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
-            return usePnpWorkaround;
+            try
+            {
+                SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(readerNames);
+                _ = SCardGetStatusChange(_context, 0, testState, testState.Length);
+                bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
+                return usePnpWorkaround;    
+            }
+            catch (Exception e)
+            {
+                _log.LogDebug(e, "Exception occurred while determining if PnP workaround is needed. Assuming it is not.");
+                return false;
+            }
         }
 
         /// <summary>

@@ -33,7 +33,12 @@ namespace Yubico.YubiKey.Oath
     public class Credential
     {
         private const int DefaultDigits = 6;
-        private const int MaximumNameLength = 64;
+
+        /// <summary>
+        /// The maximum length allowed for the credential name in bytes (UTF-8 encoding).
+        /// </summary>
+        public const int MaximumNameLength = 64;
+
         private const int MaximumUrlLength = 64;
         private const string uriScheme = "otpauth";
 

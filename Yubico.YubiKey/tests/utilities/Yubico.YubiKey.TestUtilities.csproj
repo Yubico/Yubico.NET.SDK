@@ -25,11 +25,13 @@ limitations under the License. -->
          be strong named, since it uses InternalsVisibleTo. -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+    <IsTestProject>true</IsTestProject>
+
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
-    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Bcl.Cryptography" Version="9.0.10" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.5.23" />
   </ItemGroup>

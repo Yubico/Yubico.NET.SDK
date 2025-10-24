@@ -120,7 +120,7 @@ namespace Yubico.YubiKey.Fido2
             switch (arg.Request)
             {
                 case KeyEntryRequest.VerifyFido2Pin:
-                    arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
+                    arg.SubmitValue(Encoding.UTF8.GetBytes("11234567"));
                     break;
                 case KeyEntryRequest.VerifyFido2Uv:
                     Console.WriteLine("Fingerprint requested.");

@@ -81,10 +81,11 @@ namespace Yubico.YubiKey
             _lazyInstance = null;
         }
 
-        internal static bool IsListenerRunning => !(_lazyInstance is null);
+        internal static bool IsListenerRunning => _lazyInstance is not null;
         internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
 
         private static YubiKeyDeviceListener? _lazyInstance;
+        private static readonly TimeSpan MaxDisposalWaitTime = TimeSpan.FromSeconds(8);
 
         private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
@@ -121,7 +122,20 @@ namespace Yubico.YubiKey
         private void ListenerHandler(string eventType, IDeviceEventArgs<IDevice> e)
         {
             LogEvent(eventType, e);
-            _ = _semaphore.Release();
+
+            try
+            {
+                _ = _semaphore.Release();
+            }
+            catch (SemaphoreFullException ex)
+            {
+                _log.LogWarning(ex, "Semaphore was already at maximum count. This can happen during rapid device connect/disconnect events.");
+            }
+            catch (ObjectDisposedException)
+            {
+                // Listener is shutting down, ignore
+                _log.LogDebug("Semaphore release called during disposal. Ignoring.");
+            }
         }
 
         private void SetupDeviceListeners()
@@ -139,10 +153,19 @@ namespace Yubico.YubiKey
             {
                 try
                 {
-                    await _semaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
                     // Give events a chance to coalesce.
-                    await Task.Delay(200, CancellationToken).ConfigureAwait(false);
-                    Update();
+                    await _semaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
+                    await Task.Delay(TimeSpan.FromMilliseconds(200), CancellationToken).ConfigureAwait(false);
+
+                    try
+                    {
+                        Update();
+                    }
+                    catch (Exception e)
+                    {
+                        _log.LogError(e, "The YubiKey device listener encountered an unhandled exception during an update. The listener will continue to run.");
+                    }
+                    
                     // Reset any outstanding events.
                     _ = await _semaphore.WaitAsync(0, CancellationToken).ConfigureAwait(false);
                 }
@@ -155,117 +178,117 @@ namespace Yubico.YubiKey
 
         private void Update()
         {
+            var addedYubiKeys = new List<IYubiKeyDevice>();
+            IEnumerable<IYubiKeyDevice> removedYubiKeys;
+
             _rwLock.EnterWriteLock();
             _log.LogInformation("Entering write-lock.");
-
-            ResetCacheMarkers();
-
-            var devicesToProcess = GetDevices();
-
-            _log.LogInformation("Cache currently aware of {Count} YubiKeys.", _internalCache.Count);
-
-            var addedYubiKeys = new List<IYubiKeyDevice>();
-
-            foreach (var device in devicesToProcess)
+            try
             {
-                _log.LogInformation("Processing device {Device}", device);
+                ResetCacheMarkers();
+                _log.LogInformation("Cache currently aware of {Count} YubiKeys.", _internalCache.Count);
 
-                // First check if we've already seen this device (very fast)
-                var existingEntry = _internalCache.Keys.FirstOrDefault(k => k.Contains(device));
-                if (existingEntry != null)
+                var devicesToProcess = GetDevices();
+                foreach (var device in devicesToProcess)
                 {
-                    MarkExistingYubiKey(existingEntry);
+                    _log.LogInformation("Processing device {Device}", device);
 
-                    continue;
-                }
+                    // First check if we've already seen this device (very fast)
+                    var existingEntry = _internalCache.Keys.FirstOrDefault(k => k.Contains(device));
+                    if (existingEntry != null)
+                    {
+                        MarkExistingYubiKey(existingEntry);
 
-                // Next, see if the device has any information about its parent, and if we can match that way (fast)
-                existingEntry = _internalCache.Keys.FirstOrDefault(k => k.HasSameParentDevice(device));
+                        continue;
+                    }
 
-                if (existingEntry is YubiKeyDevice parentDevice)
-                {
-                    MergeAndMarkExistingYubiKey(parentDevice, device);
+                    // Next, see if the device has any information about its parent, and if we can match that way (fast)
+                    existingEntry = _internalCache.Keys.FirstOrDefault(k => k.HasSameParentDevice(device));
 
-                    continue;
-                }
+                    if (existingEntry is YubiKeyDevice parentDevice)
+                    {
+                        MergeAndMarkExistingYubiKey(parentDevice, device);
 
-                // Lastly, let's talk to the YubiKey to get its device info and see if we match via serial number (slow)
-                YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo;
+                        continue;
+                    }
 
-                // This sort of call can fail for a number of reasons. Probably the most common will be when some other
-                // application is using one of the device interfaces exclusively - GPG is an example of this. It tends
-                // to take the smart card reader USB interface and not let go of it. So, for those of us that use GPG
-                // with YubiKeys for commit signing, the SDK is unlikely to be able to connect. There's not much we can
-                // do about that other than skip, and log a message that this has happened.
-                try
-                {
-                    deviceWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
-                }
-                catch (Exception ex) when (ex is SCardException || ex is PlatformApiException)
-                {
-                    _log.LogError("Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
+                    // Lastly, let's talk to the YubiKey to get its device info and see if we match via serial number (slow)
+                    YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo;
 
-                    continue;
-                }
+                    // This sort of call can fail for a number of reasons. Probably the most common will be when some other
+                    // application is using one of the device interfaces exclusively - GPG is an example of this. It tends
+                    // to take the smart card reader USB interface and not let go of it. So, for those of us that use GPG
+                    // with YubiKeys for commit signing, the SDK is unlikely to be able to connect. There's not much we can
+                    // do about that other than skip, and log a message that this has happened.
+                    try
+                    {
+                        deviceWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogError(ex, "Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
 
-                if (deviceWithInfo.Info.SerialNumber is null)
-                {
+                        continue;
+                    }
+
+                    if (deviceWithInfo.Info.SerialNumber is null)
+                    {
+                        CreateAndMarkNewYubiKey(deviceWithInfo, addedYubiKeys);
+
+                        continue;
+                    }
+
+                    existingEntry =
+                        _internalCache.Keys.FirstOrDefault(k => k.SerialNumber == deviceWithInfo.Info.SerialNumber);
+
+                    if (existingEntry is YubiKeyDevice mergeTarget)
+                    {
+                        MergeAndMarkExistingYubiKey(mergeTarget, deviceWithInfo);
+
+                        continue;
+                    }
+
                     CreateAndMarkNewYubiKey(deviceWithInfo, addedYubiKeys);
-
-                    continue;
                 }
 
-                existingEntry =
-                    _internalCache.Keys.FirstOrDefault(k => k.SerialNumber == deviceWithInfo.Info.SerialNumber);
+                removedYubiKeys = _internalCache
+                    .Where(e => !e.Value)
+                    .Select(e => e.Key)
+                    .ToList();
 
-                if (existingEntry is YubiKeyDevice mergeTarget)
+                // Remove from cache while holding lock
+                foreach (var removedKey in removedYubiKeys)
                 {
-                    MergeAndMarkExistingYubiKey(mergeTarget, deviceWithInfo);
-
-                    continue;
+                    _ = _internalCache.Remove(removedKey);
                 }
 
-                CreateAndMarkNewYubiKey(deviceWithInfo, addedYubiKeys);
+                _log.LogInformation("Exiting write-lock.");
+            }
+            finally
+            {
+                _rwLock.ExitWriteLock();
             }
 
-            IEnumerable<IYubiKeyDevice> removedYubiKeys = _internalCache
-                .Where(e => e.Value == false)
-                .Select(e => e.Key)
-                .ToList();
-
+            // Fire events AFTER releasing lock to prevent deadlocks
+            // If user's event handler calls FindAll(), it won't deadlock
             foreach (var removedKey in removedYubiKeys)
             {
                 OnDeviceRemoved(new YubiKeyDeviceEventArgs(removedKey));
-                _ = _internalCache.Remove(removedKey);
             }
 
             foreach (var addedKey in addedYubiKeys)
             {
                 OnDeviceArrived(new YubiKeyDeviceEventArgs(addedKey));
             }
-
-            _log.LogInformation("Exiting write-lock.");
-            _rwLock.ExitWriteLock();
         }
 
         private List<IDevice> GetDevices()
         {
             var devicesToProcess = new List<IDevice>();
 
-            IList<IDevice> hidKeyboardDevices = GetHidKeyboardDevices().ToList();
-            IList<IDevice> smartCardDevices = GetSmartCardDevices().ToList();
-            IList<IDevice> hidFidoDevices = new List<IDevice>();
-
-            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows && !SdkPlatformInfo.IsElevated)
-            {
-                _log.LogWarning(
-                    "SDK running in an un-elevated Windows process. " +
-                    "Skipping FIDO enumeration as this requires process elevation.");
-            }
-            else
-            {
-                hidFidoDevices = GetHidFidoDevices().ToList();
-            }
+            var hidKeyboardDevices = GetHidKeyboardDevices();
+            var smartCardDevices = GetSmartCardDevices();
+            var hidFidoDevices = GetHidFidoDevices();
 
             _log.LogInformation(
                 "Found {HidCount} HID Keyboard devices, {FidoCount} HID FIDO devices, and {SCardCount} Smart Card devices for processing.",
@@ -334,12 +357,52 @@ namespace Yubico.YubiKey
         /// <summary>
         /// Raises event on device arrival.
         /// </summary>
-        private void OnDeviceArrived(YubiKeyDeviceEventArgs e) => Arrived?.Invoke(typeof(YubiKeyDevice), e);
+        internal void OnDeviceArrived(YubiKeyDeviceEventArgs e)
+        {
+            if (Arrived is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (var @delegate in Arrived.GetInvocationList())
+            {
+                var handler = (EventHandler<YubiKeyDeviceEventArgs>)@delegate;
+                try
+                {
+                    handler.Invoke(typeof(YubiKeyDevice), e);
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's Arrived event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
+        }
 
         /// <summary>
         /// Raises event on device removal.
         /// </summary>
-        private void OnDeviceRemoved(YubiKeyDeviceEventArgs e) => Removed?.Invoke(typeof(YubiKeyDevice), e);
+        private void OnDeviceRemoved(YubiKeyDeviceEventArgs e)
+        {
+            if (Removed is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (var @delegate in Removed.GetInvocationList())
+            {
+                var handler = (EventHandler<YubiKeyDeviceEventArgs>)@delegate;
+                try
+                {
+                    handler.Invoke(typeof(YubiKeyDevice), e);
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's Removed event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
+        }
 
         private void LogEvent(string eventType, IDeviceEventArgs<IDevice> e)
         {
@@ -358,43 +421,59 @@ namespace Yubico.YubiKey
                 device);
         }
 
-        private static IEnumerable<IDevice> GetHidFidoDevices()
+        private IReadOnlyList<IDevice> GetHidFidoDevices()
+        {
+            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows && !SdkPlatformInfo.IsElevated)
+            {
+                _log.LogWarning(
+                    "SDK running in an un-elevated Windows process. " +
+                    "Skipping FIDO enumeration as this requires process elevation.");
+                return new List<IDevice>();
+            }
+
+            try
+            {
+                return HidDevice
+                    .GetHidDevices()
+                    .Where(d => d.IsYubicoDevice() && d.IsFido())
+                    .ToList();
+            }
+            catch (PlatformInterop.PlatformApiException e)
+            {
+                ErrorHandler(e);
+                return new List<IDevice>();
+            }
+        }
+
+        private static IReadOnlyList<IDevice> GetHidKeyboardDevices()
         {
             try
             {
                 return HidDevice
                     .GetHidDevices()
-                    .Where(d => d.IsYubicoDevice() && d.IsFido());
+                    .Where(d => d.IsYubicoDevice() && d.IsKeyboard()).ToList();
             }
-            catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
-
-            return Enumerable.Empty<IDevice>();
-        }
-
-        private static IEnumerable<IDevice> GetHidKeyboardDevices()
-        {
-            try
+            catch (PlatformInterop.PlatformApiException e)
             {
-                return HidDevice
-                    .GetHidDevices()
-                    .Where(d => d.IsYubicoDevice() && d.IsKeyboard());
+                ErrorHandler(e);
+                return new List<IDevice>();
             }
-            catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
-
-            return Enumerable.Empty<IDevice>();
         }
 
-        private static IEnumerable<IDevice> GetSmartCardDevices()
+        private static IReadOnlyList<IDevice> GetSmartCardDevices()
         {
             try
             {
                 return SmartCardDevice
                         .GetSmartCardDevices()
-                        .Where(d => d.IsYubicoDevice());
+                        .Where(d => d.IsYubicoDevice())
+                        .ToList();
             }
-            catch (PlatformInterop.SCardException e) { ErrorHandler(e); }
-
-            return Enumerable.Empty<IDevice>();
+            catch (PlatformInterop.SCardException e)
+            {
+                ErrorHandler(e);
+                return new List<IDevice>();
+            }
         }
 
         private static void ErrorHandler(Exception exception) => Log
@@ -411,42 +490,73 @@ namespace Yubico.YubiKey
             {
                 if (disposing)
                 {
-                    // Signal the listen thread that it's time to end.
+                    // Step 1: Signal shutdown to stop the listening loop
+                    _isListening = false;
+
+                    // Step 2: Cancel the token to unblock any semaphore waits
                     _tokenSource.Cancel();
 
-                    // Shut down the listener handlers.
-                    _hidListener.Arrived -= ArriveHandler;
-                    _hidListener.Removed -= RemoveHandler;
-                    if (_hidListener is IDisposable hidDisp)
+                    // Step 3: Wait for the background task to complete
+                    try
                     {
-                        hidDisp.Dispose();
+                        _ = _listenTask.Wait(MaxDisposalWaitTime);
+                    }
+                    catch (AggregateException)
+                    {
+                        // Task may have already completed or been cancelled, ignore
                     }
 
-                    _smartCardListener.Arrived -= ArriveHandler;
-                    _smartCardListener.Removed -= RemoveHandler;
-                    if (_smartCardListener is IDisposable scDisp)
+                    // Step 4: Now safe to dispose synchronization primitives
+                    // Wrap in try-catch to prevent disposal exceptions
+                    try
                     {
-                        scDisp.Dispose();
+                        _rwLock.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWarning(ex, "Exception disposing ReaderWriterLockSlim during cleanup");
                     }
 
-                    // Give the listen task a moment (likely is already done).
-                    _ = !_listenTask.Wait(100);
-                    _listenTask.Dispose();
+                    try
+                    {
+                        _semaphore.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWarning(ex, "Exception disposing SemaphoreSlim during cleanup");
+                    }
 
-                    // Get rid of synchronization objects.
-                    _rwLock.Dispose();
-                    _semaphore.Dispose();
                     _tokenSource.Dispose();
+
+                    // Step 5: Dispose platform listeners
+                    try
+                    {
+                        _hidListener.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWarning(ex, "Exception disposing HidDeviceListener during cleanup");
+                    }
+
+                    try
+                    {
+                        _smartCardListener.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogWarning(ex, "Exception disposing SmartCardDeviceListener during cleanup");
+                    }
 
                     if (ReferenceEquals(_lazyInstance, this))
                     {
                         _lazyInstance = null;
                     }
                 }
+
                 _isDisposed = true;
             }
         }
-
+        
         ~YubiKeyDeviceListener()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.

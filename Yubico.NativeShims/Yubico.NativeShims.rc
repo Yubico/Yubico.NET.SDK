@@ -1,0 +1,31 @@
+#include <windows.h>
+#include "Yubico.NativeShims.h"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     YUBICO_NATIVE_SHIMS_VERSION_MAJOR,YUBICO_NATIVE_SHIMS_VERSION_MINOR,YUBICO_NATIVE_SHIMS_VERSION_PATCH,0
+PRODUCTVERSION  YUBICO_NATIVE_SHIMS_VERSION_MAJOR,YUBICO_NATIVE_SHIMS_VERSION_MINOR,YUBICO_NATIVE_SHIMS_VERSION_PATCH,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       0
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_DLL
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName",        "Yubico AB"
+            VALUE "FileDescription",   "Yubico Native Shims Library"
+            VALUE "FileVersion",       YUBICO_NATIVE_SHIMS_VERSION
+            VALUE "InternalName",      "Yubico.NativeShims.dll"
+            VALUE "LegalCopyright",    "Copyright (c) 2025 Yubico AB. All rights reserved."
+            VALUE "OriginalFilename",  "Yubico.NativeShims.dll"
+            VALUE "ProductName",       "Yubico .NET SDK"
+            VALUE "ProductVersion",    YUBICO_NATIVE_SHIMS_VERSION
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

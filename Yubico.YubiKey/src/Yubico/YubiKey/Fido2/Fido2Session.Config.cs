@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public bool TryEnableEnterpriseAttestation()
         {
-            _log.LogInformation("Try to EnableEnterpriseAttestation.");
+            Logger.LogInformation("Try to EnableEnterpriseAttestation.");
 
             var epValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.ep);
 
@@ -162,7 +162,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public bool TryToggleAlwaysUv()
         {
-            _log.LogInformation("Try to ToggleAlwaysUv.");
+            Logger.LogInformation("Try to ToggleAlwaysUv.");
 
             var alwaysUvValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.alwaysUv);
             if (alwaysUvValue != OptionValue.True && alwaysUvValue != OptionValue.False)
@@ -322,7 +322,7 @@ namespace Yubico.YubiKey.Fido2
             IReadOnlyList<string>? relyingPartyIds = null,
             bool? forceChangePin = null)
         {
-            _log.LogInformation("Try to set the PIN config (setMinPINLength).");
+            Logger.LogInformation("Try to set the PIN config (setMinPINLength).");
 
             var setMinPinValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.setMinPINLength);
 

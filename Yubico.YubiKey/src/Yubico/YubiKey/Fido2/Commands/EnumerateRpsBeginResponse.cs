@@ -72,9 +72,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             var credentialManagementData = _response.GetData();
 
-            if (!(credentialManagementData.RelyingParty is null)
-                && !(credentialManagementData.RelyingPartyIdHash is null)
-                && !(credentialManagementData.TotalRelyingPartyCount is null))
+            if (credentialManagementData.RelyingParty is not null
+                && credentialManagementData.RelyingPartyIdHash is not null
+                && credentialManagementData.TotalRelyingPartyCount is not null)
             {
                 if (credentialManagementData.RelyingParty.IsMatchingRelyingPartyId(credentialManagementData.RelyingPartyIdHash.Value))
                 {

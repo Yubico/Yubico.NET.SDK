@@ -33,7 +33,7 @@ namespace Yubico.Core.Devices.SmartCard
     /// already attached to the system will be ignored.
     /// </para>
     /// </remarks>
-    public abstract class SmartCardDeviceListener
+    public abstract class SmartCardDeviceListener : IDisposable
     {
         private readonly ILogger _log = Logging.Log.GetLogger<SmartCardDeviceListener>();
 
@@ -81,7 +81,25 @@ namespace Yubico.Core.Devices.SmartCard
         protected void OnArrived(ISmartCardDevice device)
         {
             _log.LogInformation("ISmartCardDevice {Device} arrived.", device);
-            Arrived?.Invoke(this, new SmartCardDeviceEventArgs(device));
+
+            if (Arrived is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (Delegate? @delegate in Arrived.GetInvocationList())
+            {
+                var handler = (EventHandler<SmartCardDeviceEventArgs>)@delegate;
+                try
+                {
+                    handler.Invoke(this, new SmartCardDeviceEventArgs(device));
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's SmartCard Arrived event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
         }
 
         /// <summary>
@@ -94,7 +112,25 @@ namespace Yubico.Core.Devices.SmartCard
         protected void OnRemoved(ISmartCardDevice device)
         {
             _log.LogInformation("ISmartCardDevice {Device} removed.", device);
-            Removed?.Invoke(this, new SmartCardDeviceEventArgs(device));
+
+            if (Removed is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (Delegate? @delegate in Removed.GetInvocationList())
+            {
+                var handler = (EventHandler<SmartCardDeviceEventArgs>)@delegate;
+                try
+                {
+                    handler.Invoke(this, new SmartCardDeviceEventArgs(device));
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's SmartCard Removed event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
         }
 
         /// <summary>
@@ -104,6 +140,41 @@ namespace Yubico.Core.Devices.SmartCard
         {
             Arrived = null;
             Removed = null;
+        }
+
+        private bool _disposed;
+
+        /// <summary>
+        /// Disposes the objects.
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    ClearEventHandlers();
+                }
+                _disposed = true;
+            }
+        }
+
+        ~SmartCardDeviceListener()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(false);
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        /// <summary>
+        /// Calls Dispose(true).
+        /// </summary>
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

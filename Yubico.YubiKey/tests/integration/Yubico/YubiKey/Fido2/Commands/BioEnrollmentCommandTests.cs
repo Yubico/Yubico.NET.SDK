@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class BioEnrollmentCommandTests : NeedPinToken
     {
         public BioEnrollmentCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
         {
         }
 

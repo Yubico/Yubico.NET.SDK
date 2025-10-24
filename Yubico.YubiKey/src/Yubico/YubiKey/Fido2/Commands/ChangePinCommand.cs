@@ -162,10 +162,10 @@ namespace Yubico.YubiKey.Fido2.Commands
             CryptographicOperations.ZeroMemory(pin);
             byte[] encryptedPinHash = pinProtocol.Encrypt(digest, 0, PinHashLength);
 
-            byte[] dataToEncrypt = new byte[PinBlockLength];
-            newPin.CopyTo(dataToEncrypt.AsMemory());
-            byte[] encryptedPin = pinProtocol.Encrypt(dataToEncrypt, 0, dataToEncrypt.Length);
-            CryptographicOperations.ZeroMemory(dataToEncrypt);
+            byte[] pinData = new byte[PinBlockLength];
+            newPin.CopyTo(pinData.AsMemory());
+            byte[] encryptedPin = pinProtocol.Encrypt(pinData);
+            CryptographicOperations.ZeroMemory(pinData);
 
             byte[] dataToAuth = new byte[encryptedPin.Length + encryptedPinHash.Length];
             Array.Copy(encryptedPin, 0, dataToAuth, 0, encryptedPin.Length);

@@ -211,7 +211,7 @@ namespace Yubico.YubiKey.Pipelines
             byte[] responseInitPacket = _hidConnection.GetReport();
             while (responseInitPacket[4] == (CtapHidKeepAliveCmd | 0b1000_0000))
             {
-                if (!(QueryCancel is null) && QueryCancel(commandByte))
+                if (QueryCancel is not null && QueryCancel(commandByte))
                 {
                     _hidConnection.SetReport(
                         ConstructInitPacket(channelId, CtapHidCancelCmd, ReadOnlySpan<byte>.Empty, 0));

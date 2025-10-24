@@ -30,9 +30,13 @@ namespace Yubico.YubiKey
     {
         /// <summary>
         /// The object that represents the connection to the YubiKey. Most
-        /// applications will ignore this, but it can be used to call Commands
+        /// applications will ignore this, but it can be used to issue commands
         /// directly.
         /// </summary>
+        /// <remarks> This property gives you direct access to the existing connection to the YubiKey using the
+        /// <see cref="IYubiKeyConnection"/> interface. To send your own commands, call the
+        /// <see cref="IYubiKeyConnection.SendCommand{TResponse}"/>
+        /// </remarks>
         public IYubiKeyConnection Connection { get; protected set; }
 
         /// <summary>

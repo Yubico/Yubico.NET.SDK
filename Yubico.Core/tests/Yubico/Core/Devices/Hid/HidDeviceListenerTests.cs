@@ -100,5 +100,137 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             listener.FireArrival();
             listener.FireRemoval();
         }
+
+        [Fact]
+        public void OnArrived_EventHandlerThrows_DoesNotPropagate()
+        {
+            // Arrange
+            var listener = new FakeHidListener();
+
+            // Subscribe an event handler that throws
+            listener.Arrived += (sender, args) =>
+            {
+                throw new InvalidOperationException("Simulated handler exception");
+            };
+
+            // Act & Assert - Should NOT throw, exception should be caught internally
+            var exception = Record.Exception(() => listener.FireArrival());
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public void OnArrived_MultipleHandlers_OneThrows_OthersStillExecute()
+        {
+            // Arrange
+            var listener = new FakeHidListener();
+            bool handler1Called = false;
+            bool handler3Called = false;
+
+            listener.Arrived += (sender, args) => { handler1Called = true; };
+            listener.Arrived += (sender, args) =>
+            {
+                throw new InvalidOperationException("Handler 2 throws");
+            };
+            listener.Arrived += (sender, args) => { handler3Called = true; };
+
+            // Act
+            listener.FireArrival();
+
+            // Assert - Both handler1 and handler3 should execute despite handler2 throwing
+            Assert.True(handler1Called, "Handler 1 should have been called");
+            Assert.True(handler3Called, "Handler 3 should have been called despite handler 2 throwing");
+        }
+
+        [Fact]
+        public void OnRemoved_EventHandlerThrows_DoesNotPropagate()
+        {
+            // Arrange
+            var listener = new FakeHidListener();
+
+            // Subscribe an event handler that throws
+            listener.Removed += (sender, args) =>
+            {
+                throw new InvalidOperationException("Simulated handler exception");
+            };
+
+            // Act & Assert - Should NOT throw, exception should be caught internally
+            var exception = Record.Exception(() => listener.FireRemoval());
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public void OnRemoved_MultipleHandlers_OneThrows_OthersStillExecute()
+        {
+            // Arrange
+            var listener = new FakeHidListener();
+            bool handler1Called = false;
+            bool handler3Called = false;
+
+            listener.Removed += (sender, args) => { handler1Called = true; };
+            listener.Removed += (sender, args) =>
+            {
+                throw new InvalidOperationException("Handler 2 throws");
+            };
+            listener.Removed += (sender, args) => { handler3Called = true; };
+
+            // Act
+            listener.FireRemoval();
+
+            // Assert - Both handler1 and handler3 should execute despite handler2 throwing
+            Assert.True(handler1Called, "Handler 1 should have been called");
+            Assert.True(handler3Called, "Handler 3 should have been called despite handler 2 throwing");
+        }
+
+        [Fact]
+        public void Dispose_CalledOnce_Succeeds()
+        {
+            var listener = new FakeHidListener();
+            var exception = Record.Exception(() => listener.Dispose());
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public void Dispose_CalledTwice_IsIdempotent()
+        {
+            var listener = new FakeHidListener();
+
+            listener.Dispose();
+            var exception = Record.Exception(() => listener.Dispose());
+
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public void Dispose_CalledMultipleTimes_IsIdempotent()
+        {
+            var listener = new FakeHidListener();
+
+            for (int i = 0; i < 10; i++)
+            {
+                var exception = Record.Exception(() => listener.Dispose());
+                Assert.Null(exception);
+            }
+        }
+
+        [Fact]
+        public void Dispose_ClearsEventHandlers()
+        {
+            var listener = new FakeHidListener();
+            bool arrivedCalled = false;
+            bool removedCalled = false;
+
+            listener.Arrived += (s, e) => { arrivedCalled = true; };
+            listener.Removed += (s, e) => { removedCalled = true; };
+
+            listener.Dispose();
+
+            // Fire events after disposal
+            listener.FireArrival();
+            listener.FireRemoval();
+
+            // Handlers should have been cleared, so they shouldn't be called
+            Assert.False(arrivedCalled, "Arrived handler should not be called after Dispose");
+            Assert.False(removedCalled, "Removed handler should not be called after Dispose");
+        }
     }
 }

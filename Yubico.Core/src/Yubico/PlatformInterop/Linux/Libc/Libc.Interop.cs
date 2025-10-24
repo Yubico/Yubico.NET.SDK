@@ -110,5 +110,16 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "fcntl", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int fcntl(IntPtr fd, int cmd, int flags = 0);
+
+        [DllImport(Libraries.LinuxKernelLib, SetLastError = true)]
+        internal static extern int poll([In, Out] PollFd[] fds, uint nfds, int timeout);
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct PollFd
+        {
+            public int fd;
+            public short events;
+            public short revents;
+        }
     }
 }

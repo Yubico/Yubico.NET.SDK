@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using CommunityToolkit.Diagnostics;
 using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cose;
@@ -157,7 +158,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         {
             // This can be called only if there is currently nothing in the
             // object.
-            if (!(PlatformPublicKey is null))
+            if (PlatformPublicKey is not null)
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -165,16 +166,13 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                         ExceptionMessages.InvalidCallOrder));
             }
 
-            if (authenticatorPublicKey is null)
-            {
-                throw new ArgumentNullException(nameof(authenticatorPublicKey));
-            }
+            Guard.IsNotNull(authenticatorPublicKey, nameof(authenticatorPublicKey));
 
             // Currently, only protocol 1 and 2 are supported (the only protocols
             // in the standard). Both of them generate a new P-256 EC key pair.
             // If we ever support a different protocol that uses a different
             // algorithm, override this method.
-            if (!(authenticatorPublicKey is CoseEcPublicKey))
+            if (authenticatorPublicKey is not CoseEcPublicKey authPubKey)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -182,13 +180,11 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                         ExceptionMessages.InvalidPublicKeyData));
             }
 
-            var authPubKey = (CoseEcPublicKey)authenticatorPublicKey;
-
             // Create a local copy of the authenticatorPublicKey.
             AuthenticatorPublicKey = new CoseEcPublicKey(CoseEcCurve.P256, authPubKey.XCoordinate, authPubKey.YCoordinate);
 
             ECParameters? platformKeyPair = null;
-            byte[] sharedValue = Array.Empty<byte>();
+            byte[] sharedSecret = Array.Empty<byte>();
 
             try
             {
@@ -196,8 +192,9 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 platformKeyPair = ecdh.GenerateKeyPair(ECCurve.NamedCurves.nistP256);
 
                 PlatformPublicKey = new CoseEcPublicKey(platformKeyPair.Value);
-                sharedValue = ecdh.ComputeSharedSecret(authPubKey.ToEcParameters(), platformKeyPair.Value.D);
-                DeriveKeys(sharedValue);
+                sharedSecret = ecdh.ComputeSharedSecret(authPubKey.ToEcParameters(), platformKeyPair.Value.D);
+                
+                DeriveKeys(sharedSecret);
             }
             finally
             {
@@ -205,7 +202,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 {
                     CryptographicOperations.ZeroMemory(platformKeyPair.Value.D);
                 }
-                CryptographicOperations.ZeroMemory(sharedValue);
+                CryptographicOperations.ZeroMemory(sharedSecret);
             }
         }
 
@@ -241,6 +238,32 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// size (16 bytes).
         /// </exception>
         public abstract byte[] Encrypt(byte[] plaintext, int offset, int length);
+        
+        /// <summary>
+        /// Returns the AES-256-CBC encryption of plaintext using an IV specified
+        /// by the protocol and the <see cref="EncryptionKey"/>. With protocol 1
+        /// the IV is all 00 bytes. With protocol 2, it is a new, random value.
+        /// </summary>
+        /// <param name="plaintext">
+        /// The data to encrypt.
+        /// </param>
+        /// <returns>
+        /// A new byte array containing the encrypted data. With protocol 2, the
+        /// ciphertext is actually the concatenation of the IV and the encrypted
+        /// data.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>plaintext</c> argument is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The object has been created or initialized, but the
+        /// <see cref="Encapsulate"/> method has not been called.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The length of the <c>plaintext</c> is not a multiple of the AES block
+        /// size (16 bytes).
+        /// </exception>
+        public abstract byte[] Encrypt(ReadOnlyMemory<byte> plaintext);
 
         /// <summary>
         /// Returns the AES-256-CBC decryption of ciphertext using an IV specified
@@ -277,6 +300,35 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// size (16 bytes).
         /// </exception>
         public abstract byte[] Decrypt(byte[] ciphertext, int offset, int length);
+        
+        /// <summary>
+        /// Returns the AES-256-CBC decryption of ciphertext using an IV specified
+        /// by the protocol and the <see cref="EncryptionKey"/>. With protocol 1
+        /// the IV is all 00 bytes. With protocol 2, it is the first block size
+        /// bytes of <c>ciphertext</c>.
+        /// </summary>
+        /// <remarks>
+        /// Note that this method will verify that the input buffer, offset, and
+        /// length are valid.
+        /// </remarks>
+        /// <param name="ciphertext">
+        /// The data to decrypt.
+        /// </param>
+        /// <returns>
+        /// A new byte array containing the decrypted data.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>ciphertext</c> argument is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The object has been created or initialized, but the
+        /// <see cref="Encapsulate"/> method has not been called.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The length of the <c>ciphertext</c> is not a multiple of the AES block
+        /// size (16 bytes).
+        /// </exception>
+        public abstract byte[] Decrypt(ReadOnlyMemory<byte> ciphertext);
 
         /// <summary>
         /// Returns the result of computing HMAC-SHA-256 on the given message
@@ -317,7 +369,27 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <exception cref="ArgumentNullException">
         /// The <c>keyData</c> or <c>message</c> argument is null.
         /// </exception>
-        protected abstract byte[] Authenticate(byte[] keyData, byte[] message);
+        public abstract byte[] Authenticate(byte[] keyData, byte[] message);
+
+        /// <summary>
+        /// Returns the result of computing HMAC-SHA-256 on the given message
+        /// using the provided <c>keyData</c>. With protocol 1, the result is the
+        /// first 16 bytes of the HMAC, and with protocol 2 it is the entire
+        /// 32-byte result.
+        /// </summary>
+        /// <param name="keyData">
+        /// The key to use to authenticate.
+        /// </param>
+        /// <param name="message">
+        /// The data to be authenticated.
+        /// </param>
+        /// <returns>
+        /// A new byte array containing the authentication result.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>keyData</c> or <c>message</c> argument is null.
+        /// </exception>
+        public abstract byte[] Authenticate(ReadOnlyMemory<byte> keyData, ReadOnlyMemory<byte> message);
 
         /// <summary>
         /// Returns the result of computing HMAC-SHA-256 on the given message
@@ -327,7 +399,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// </summary>
         /// <remarks>
         /// It is possible to obtain the PIN token by calling the command
-        /// <see cref="Yubico.YubiKey.Fido2.Commands.GetPinTokenCommand"/>. The
+        /// <see cref="Commands.GetPinTokenCommand"/>. The
         /// YubiKey will return the PIN token encrypted using the shared secret.
         /// <para>
         /// Pass that encrypted PIN token to this method as the first argument.
@@ -353,14 +425,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <see cref="Encapsulate"/> method has not been called.
         /// </exception>
         public byte[] AuthenticateUsingPinToken(byte[] pinToken, byte[] message)
-        {
-            if (pinToken is null)
-            {
-                throw new ArgumentNullException(nameof(pinToken));
-            }
-
-            return AuthenticateUsingPinToken(pinToken, 0, pinToken.Length, message);
-        }
+        => AuthenticateUsingPinToken(pinToken.AsMemory(), message.AsMemory());
 
         /// <summary>
         /// Returns the result of computing HMAC-SHA-256 on the given message
@@ -397,17 +462,47 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <see cref="Encapsulate"/> method has not been called.
         /// </exception>
         public virtual byte[] AuthenticateUsingPinToken(byte[] pinToken, int offset, int length, byte[] message)
-        {
-            if (pinToken is null)
-            {
-                throw new ArgumentNullException(nameof(pinToken));
-            }
-            if (message is null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
+        => AuthenticateUsingPinToken(pinToken.AsMemory(offset, length), message.AsMemory());
 
-            byte[] tokenKey = Decrypt(pinToken, offset, length);
+        /// <summary>
+        /// Returns the result of computing HMAC-SHA-256 on the given message
+        /// using the <c>pinToken</c> as the key. With protocol 1, the result is
+        /// the first 16 bytes of the HMAC, and with protocol 2 it is the entire
+        /// 32-byte result.
+        /// </summary>
+        /// <remarks>
+        /// It is possible to obtain the PIN token by calling the command
+        /// <see cref="Commands.GetPinTokenCommand"/>. The
+        /// YubiKey will return the PIN token encrypted using the shared secret.
+        /// <para>
+        /// Pass that encrypted PIN token to this method as the first argument.
+        /// This method will decrypt the PIN token using the <c>EncryptionKey</c>
+        /// and then perform the authentication on the <c>message</c>.
+        /// </para>
+        /// </remarks>
+        /// <param name="pinToken">
+        /// The PIN token returned by the YubiKey. This is the encrypted value,
+        /// do not decrypt it.
+        /// </param>
+        /// <param name="message">
+        /// The data to be authenticated.
+        /// </param>
+        /// <returns>
+        /// A new byte array containing the authentication result.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>pinToken</c> or <c>message</c> argument is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The object has been created or initialized, but the
+        /// <see cref="Encapsulate"/> method has not been called.
+        /// </exception>
+        public byte[] AuthenticateUsingPinToken(ReadOnlyMemory<byte> pinToken, ReadOnlyMemory<byte> message)
+        {
+            Guard.IsNotNull(pinToken, nameof(pinToken));
+            Guard.IsNotNull(message, nameof(message));
+
+            byte[] tokenKey = Decrypt(pinToken);
             try
             {
                 return Authenticate(tokenKey, message);
@@ -423,7 +518,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// derive both the <see cref="EncryptionKey"/> and the
         /// <see cref="AuthenticationKey"/>.
         /// </summary>
-        /// <param name="buffer">
+        /// <param name="sharedSecret">
         /// The shared value computed by ECDH.
         /// </param>
         /// <exception cref="ArgumentNullException">
@@ -432,7 +527,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <exception cref="InvalidOperationException">
         /// The HMAC with SHA-256 provider failed.
         /// </exception>
-        protected abstract void DeriveKeys(byte[] buffer);
+        protected abstract void DeriveKeys(byte[] sharedSecret);
 
         /// <summary>
         /// Release resources, overwrite sensitive data.

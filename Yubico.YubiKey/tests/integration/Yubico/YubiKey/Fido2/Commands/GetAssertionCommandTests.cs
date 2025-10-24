@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class GetAssertionCommandTests : NeedPinToken
     {
         public GetAssertionCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
 

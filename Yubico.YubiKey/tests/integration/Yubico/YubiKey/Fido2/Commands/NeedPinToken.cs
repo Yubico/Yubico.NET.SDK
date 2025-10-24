@@ -20,20 +20,12 @@ namespace Yubico.YubiKey.Fido2.Commands
 {
     public class NeedPinToken : SimpleIntegrationTestConnection
     {
-        private readonly byte[] _pin;
+        private readonly byte[] _pin = FidoSessionIntegrationTestBase.TestPin1.ToArray();
 
-        protected NeedPinToken(YubiKeyApplication application, StandardTestDevice device, byte[]? pin)
+        protected NeedPinToken(YubiKeyApplication application, StandardTestDevice device)
             : base(application, device)
         {
-            if (pin is null)
-            {
-                _pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-            }
-            else
-            {
-                _pin = new byte[pin.Length];
-                pin.CopyTo(_pin, 0);
-            }
+            
         }
 
         protected bool GetPinToken(
@@ -47,7 +39,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             if (protocol.AuthenticatorPublicKey is null)
             {
                 var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-                GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
+                var getKeyRsp = Connection.SendCommand(getKeyCmd);
                 if (getKeyRsp.Status != ResponseStatus.Success)
                 {
                     return false;
@@ -78,7 +70,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 }
 
                 var setPinCmd = new SetPinCommand(protocol, _pin);
-                SetPinResponse setPinRsp = Connection.SendCommand(setPinCmd);
+                var setPinRsp = Connection.SendCommand(setPinCmd);
                 if (setPinRsp.Status != ResponseStatus.Success)
                 {
                     return false;

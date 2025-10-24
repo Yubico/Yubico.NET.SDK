@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Otp.Commands
         /// <summary>
         /// The required size for the FixedData buffer.
         /// </summary>
-        internal const int FixedDataLength = 16;
+        public const int FixedDataLength = 16;
 
         /// <summary>
         /// The required size for the Uid buffer.
@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Otp.Commands
         /// <summary>
         /// The required size for the AccessCode buffer.
         /// </summary>
-        internal const int AccessCodeLength = 6;
+        public const int AccessCodeLength = 6;
 
         /// <summary>
         /// The maximum length of a static password.

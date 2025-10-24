@@ -163,7 +163,7 @@ namespace Yubico.YubiKey.Fido2
                 NumberOfCredentials = (int?)map.ReadOptional<int>(KeyNumberCredentials);
                 UserSelected = (bool?)map.ReadOptional<bool>(KeyUserSelected);
                 _keyData = (byte[]?)map.ReadOptional<byte[]>(KeyLargeBlobKey);
-                if (!(_keyData is null))
+                if (_keyData is not null)
                 {
                     LargeBlobKey = new ReadOnlyMemory<byte>(_keyData);
                 }

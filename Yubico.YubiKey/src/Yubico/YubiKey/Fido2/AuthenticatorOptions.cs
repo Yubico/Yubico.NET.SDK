@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Fido2
     /// </para>
     /// <para>
     /// When specifying an option (e.g.,
-    /// see <see cref="MakeCredentialParameters.Options"/> of the
+    /// see <see cref="AuthenticatorOperationParameters{T}.Options"/> of the
     /// <c>MakeCredentialParameters</c> class) provide the string and boolean.
     /// You can use this class to specify the string (the key of key/value). This
     /// might be helpful if you rely on IDE features such as autocompletion or

@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 3.13)
-project(Yubico.NativeShims VERSION 1.12)
+
+# Set default version if not provided via command line
+if(NOT DEFINED PROJECT_VERSION)
+    set(PROJECT_VERSION "1.14.0")
+endif()
+
+# Set VCPKG manifest version to match project version
+set(VCPKG_MANIFEST_VERSION ${PROJECT_VERSION})
+
+project(Yubico.NativeShims VERSION ${PROJECT_VERSION})
 include(CheckCCompilerFlag)
 
 if (APPLE OR UNIX)
@@ -103,6 +112,15 @@ target_sources(
         ssl.gcmevp.c
         ssl.cmac.c
         )
+
+# Add Windows resource file for version info
+if(WIN32)
+    target_sources(
+        Yubico.NativeShims
+        PRIVATE
+            Yubico.NativeShims.rc
+            )
+endif()
 
 # Linker
 target_link_libraries(

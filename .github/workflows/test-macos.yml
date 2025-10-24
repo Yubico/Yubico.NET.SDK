@@ -43,10 +43,22 @@ jobs:
           sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
       
       - name: Test Yubico.YubiKey
-        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
+        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 
-      - name: Test Yubico.Core
-        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj            --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
+      - name: Test Yubico.Core - macOS HID Listener Disposal Tests
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~MacOSHidDeviceListenerDisposalTests" --logger trx --logger "console;verbosity=detailed" --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+
+      - name: Test Yubico.Core - SmartCard Listener Disposal Tests
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName~DesktopSmartCardDeviceListenerDisposalTests" --logger trx --logger "console;verbosity=detailed" --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
+        env:
+          Logging__LogLevel__Default: Information
+          Logging__LogLevel__Yubico: Information
+
+      - name: Test Yubico.Core - All Other Tests (Excluding Listener Disposal Tests)
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --filter "FullyQualifiedName!~DisposalTests" --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
 
       - name: Upload Test Result Files
         uses: actions/upload-artifact@v4

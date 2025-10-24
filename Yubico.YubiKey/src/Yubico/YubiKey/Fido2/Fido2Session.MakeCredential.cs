@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public MakeCredentialData MakeCredential(MakeCredentialParameters parameters)
         {
-            _log.LogInformation("Make credential.");
+            Logger.LogInformation("Make credential.");
 
             if (parameters is null)
             {
@@ -119,8 +119,9 @@ namespace Yubico.YubiKey.Fido2
                     CryptographicOperations.ZeroMemory(token);
                 }
 
+                parameters.EncodeHmacSecretExtension(AuthProtocol);
+                
                 var response = RunMakeCredential(parameters, keyCollector, out var ctapStatus);
-
                 switch (ctapStatus)
                 {
                     case CtapStatus.Ok:

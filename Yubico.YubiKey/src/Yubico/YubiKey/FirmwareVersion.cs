@@ -46,6 +46,7 @@ namespace Yubico.YubiKey
         internal static readonly FirmwareVersion V5_6_3 = new FirmwareVersion(5, 6, 3);
         internal static readonly FirmwareVersion V5_7_0 = new FirmwareVersion(5, 7, 0);
         internal static readonly FirmwareVersion V5_7_2 = new FirmwareVersion(5, 7, 2);
+        internal static readonly FirmwareVersion V5_8_0 = new FirmwareVersion(5, 8, 0);
 
         #endregion
 
@@ -115,7 +116,6 @@ namespace Yubico.YubiKey
 
         public static bool operator >(FirmwareVersion left, FirmwareVersion right)
         {
-            // CA1065, these operators shouldn't throw exceptions.
             if (left is null)
             {
                 return false;
@@ -126,18 +126,16 @@ namespace Yubico.YubiKey
 
         public static bool operator <(FirmwareVersion left, FirmwareVersion right)
         {
-            // CA1065, these operators shouldn't throw exceptions.
             if (right is null)
             {
-                return !(left is null);
+                return left is not null;
             }
 
-            return left is null ? false : left.CompareTo(right) < 0;
+            return left is not null && left.CompareTo(right) < 0;
         }
 
         public static bool operator >=(FirmwareVersion left, FirmwareVersion right)
         {
-            // CA1065, these operators shouldn't throw exceptions.
             if (left is null)
             {
                 return right is null;
@@ -148,13 +146,12 @@ namespace Yubico.YubiKey
 
         public static bool operator <=(FirmwareVersion left, FirmwareVersion right)
         {
-            // CA1065, these operators shouldn't throw exceptions.
             if (right is null)
             {
-                return !(left is null);
+                return left is not null;
             }
 
-            return left is null ? false : left.CompareTo(right) <= 0;
+            return left is not null && left.CompareTo(right) <= 0;
         }
 
         public static bool operator ==(FirmwareVersion left, FirmwareVersion right)
@@ -177,7 +174,7 @@ namespace Yubico.YubiKey
 
         public override bool Equals([NotNullWhen(true)] object? obj)
         {
-            if (!(obj is FirmwareVersion))
+            if (obj is not FirmwareVersion)
             {
                 return false;
             }
@@ -209,7 +206,7 @@ namespace Yubico.YubiKey
                 return 1;
             }
 
-            if (!(obj is FirmwareVersion))
+            if (obj is not FirmwareVersion)
             {
                 throw new ArgumentException(ExceptionMessages.ArgumentMustBeFirmwareVersion, nameof(obj));
             }

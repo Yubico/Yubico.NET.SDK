@@ -69,11 +69,13 @@ namespace Yubico.YubiKey.Otp
             ApplyFlag(Flag.UseNumericKeypad, setting);
 
         /// <summary>
-        /// Causes the trigger action of the YubiKey button to become faster.
+        /// Causes the trigger action of the YubiKey button to become faster on early model YubiKeys.
         /// </summary>
         /// <remarks>
-        /// This only applies when one configuration is written. If both configurations are active,
-        /// this setting has no effect.
+        /// This setting is enabled by default on current generation YubiKeys. As such, the method is 
+        /// maintained for backwards compatibility with older YubiKeys only. Moreover, the fast trigger 
+        /// feature only applies when one slot configuration is written. If both configurations (slot 1 and 
+        /// slot 2) are active / configured, this setting has no effect. 
         /// </remarks>
         public T UseFastTrigger(bool setting = true) =>
             ApplyFlag(Flag.FastTrigger, setting);

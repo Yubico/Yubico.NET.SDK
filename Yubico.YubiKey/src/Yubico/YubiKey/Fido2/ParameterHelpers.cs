@@ -64,13 +64,13 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(theKey));
             }
+            
             if (theValue is null)
             {
                 throw new ArgumentNullException(nameof(theValue));
             }
 
-            var returnDictionary =
-                currentDictionary is null ? new Dictionary<string, TValue>() : currentDictionary;
+            var returnDictionary = currentDictionary ?? new Dictionary<string, TValue>();
 
             // If the key already exists, replace the current value in the
             // dictionary with this one.

@@ -7,7 +7,6 @@ version: 2
 updates:
   - package-ecosystem: "nuget"
     directory: "/"
-    target-branch: "dependencies"
     schedule:
       interval: "weekly"
       day: "wednesday"
@@ -21,14 +20,3 @@ updates:
         patterns:
           - "*"
     open-pull-requests-limit: 10
-  - package-ecosystem: "dotnet-sdk"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "wednesday"
-      time: "09:00"
-      timezone: "Europe/Stockholm"
-    ignore:
-      - dependency-name: "*"
-        update-types: 
-          - "version-update:semver-major"

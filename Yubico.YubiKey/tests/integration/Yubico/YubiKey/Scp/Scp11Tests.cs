@@ -62,6 +62,7 @@ namespace Yubico.YubiKey.Scp
             }
         }
 
+        #region Application Sessions
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
@@ -158,6 +159,8 @@ namespace Yubico.YubiKey.Scp
             var result = session.ListCredentials();
             Assert.Single(result);
         }
+        
+        #endregion
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]

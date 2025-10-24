@@ -17,9 +17,11 @@ using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
 using System.Linq;
+using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.YubiKey.Utilities;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -37,7 +39,7 @@ namespace Yubico.YubiKey.Fido2
     /// Then pass that object to the <c>MakeCredential</c> method or command.
     /// </para>
     /// </remarks>
-    public class MakeCredentialParameters : ICborEncode
+    public class MakeCredentialParameters : AuthenticatorOperationParameters<MakeCredentialParameters>
     {
         private const int TagClientDataHash = 1;
         private const int TagRp = 2;
@@ -49,15 +51,15 @@ namespace Yubico.YubiKey.Fido2
         private const int TagPinUvAuth = 8;
         private const int TagProtocol = 9;
         private const int TagEnterpriseAttestation = 10;
-        private const string KeyCredBlob = "credBlob";
-        private const string KeyHmacSecret = "hmac-secret";
-        private const string KeyCredProtect = "credProtect";
-        private const string KeyMinPinLength = "minPinLength";
 
-        private readonly List<Tuple<string, CoseAlgorithmIdentifier>> _algorithms = new List<Tuple<string, CoseAlgorithmIdentifier>>();
+        private readonly List<Tuple<string, CoseAlgorithmIdentifier>> _algorithms =
+            new List<Tuple<string, CoseAlgorithmIdentifier>>();
+
         private List<CredentialId>? _excludeList;
-        private Dictionary<string, byte[]>? _extensions;
-        private Dictionary<string, bool>? _options;
+
+        private ReadOnlyMemory<byte>? _salt1;
+        private ReadOnlyMemory<byte>? _salt2;
+        private Memory<byte>? _hmacSecretEncoding;
 
         /// <summary>
         /// The original <c>clientDataHash</c> that was provided by the client.
@@ -113,38 +115,6 @@ namespace Yubico.YubiKey.Fido2
         /// To add an entry to the list, call <see cref="ExcludeCredential"/>.
         /// </remarks>
         public IReadOnlyList<CredentialId>? ExcludeList => _excludeList;
-
-        /// <summary>
-        /// The list of extensions. This is an optional parameter, so it can be
-        /// null.
-        /// </summary>
-        /// <remarks>
-        /// To add an entry to the list, call <see cref="AddExtension"/>.
-        /// <para>
-        /// Each extension is a key/value pair. All keys are strings, but each
-        /// extension has its own definition of a value. It could be an int, or
-        /// it could be a map containing a string and a boolean,. It is the
-        /// caller's responsibility to encode the value.
-        /// </para>
-        /// <para>
-        /// For each value, the standard (or the vendor in the case of
-        /// vendor-defined extensions) will define the structure of the value.
-        /// From that structure the value can be encoded following CBOR rules.
-        /// The result of the encoding the value is what is stored in this
-        /// dictionary.
-        /// </para>
-        /// </remarks>
-        public IReadOnlyDictionary<string, byte[]>? Extensions => _extensions;
-
-        /// <summary>
-        /// The list of authenticator options. Each standard-defined option is a
-        /// key/value pair, where the key is a string and the value is a boolean.
-        /// This is an optional parameter, so it can be null.
-        /// </summary>
-        /// <remarks>
-        /// To add options, call <see cref="AddOption"/>.
-        /// </remarks>
-        public IReadOnlyDictionary<string, bool>? Options => _options;
 
         /// <summary>
         /// The result of calling the PinProtocol's method
@@ -320,36 +290,19 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="ArgumentNullException">
         /// The <c>credentialId</c> arg is null.
         /// </exception>
-        public void ExcludeCredential(CredentialId credentialId) => _excludeList =
-            ParameterHelpers.AddToList<CredentialId>(credentialId, _excludeList);
+        public void ExcludeCredential(CredentialId credentialId) =>
+            _excludeList =
+                ParameterHelpers.AddToList<CredentialId>(credentialId, _excludeList);
 
         /// <summary>
-        /// Add an entry to the extensions list.
+        /// Specify that the credential being created should be designated for third-party payment authentication.
         /// </summary>
         /// <remarks>
-        /// If there is no list yet when this method is called, one will be
-        /// created. That is, even if the <see cref="Extensions"/> is null, you
-        /// can call the method to add an entry.
-        /// <para>
-        /// Each extension is a key/value pair. For each extension the key is a
-        /// string (such as "credProtect" or "hmac-secret"). However, each value
-        /// is different. There will be a definition of the value that
-        /// accompanies each key. It will be possible to encode that definition
-        /// using the rules of CBOR. The caller supplies the key and the encoded
-        /// value. This method copies a reference to the byte array value.
-        /// </para>
+        /// This enables the credential to be used in payment flows initiated by a party other than the Relying Party,
+        /// as defined by standards like W3C's Secure Payment Confirmation.
         /// </remarks>
-        /// <param name="extensionKey">
-        /// The key of key/value to add.
-        /// </param>
-        /// <param name="encodedValue">
-        /// The CBOR-encoded value of key/value to add.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// The <c>extensionKey</c> or <c>encodedValue</c> arg is null.
-        /// </exception>
-        public void AddExtension(string extensionKey, byte[] encodedValue) => _extensions =
-            ParameterHelpers.AddKeyValue<byte[]>(extensionKey, encodedValue, _extensions);
+        public void AddThirdPartyPaymentExtension() =>
+            AddExtension(Fido2ExtensionKeys.ThirdPartyPayment, true);
 
         /// <summary>
         /// Specify that the YubiKey should return the minimum PIN length with
@@ -393,17 +346,13 @@ namespace Yubico.YubiKey.Fido2
         /// </param>
         public void AddMinPinLengthExtension(AuthenticatorInfo authenticatorInfo)
         {
-            if (authenticatorInfo is null)
-            {
-                throw new ArgumentNullException(nameof(authenticatorInfo));
-            }
-
-            if (!authenticatorInfo.Extensions.Contains<string>(KeyMinPinLength))
+            Guard.IsNotNull(authenticatorInfo);
+            if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.MinPinLength))
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
 
-            AddExtension(KeyMinPinLength, new byte[] { 0xF5 });
+            AddExtension(Fido2ExtensionKeys.MinPinLength, true);
         }
 
         /// <summary>
@@ -462,19 +411,14 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void AddCredBlobExtension(byte[] credBlobValue, AuthenticatorInfo authenticatorInfo)
         {
-            if (authenticatorInfo is null)
-            {
-                throw new ArgumentNullException(nameof(authenticatorInfo));
-            }
-            if (credBlobValue is null)
-            {
-                throw new ArgumentNullException(nameof(credBlobValue));
-            }
+            Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
+            Guard.IsNotNull(credBlobValue, nameof(credBlobValue));
 
-            if (!authenticatorInfo.Extensions.Contains<string>(KeyCredBlob))
+            if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.CredBlob))
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
+
             if (credBlobValue.Length > authenticatorInfo.MaximumCredentialBlobLength)
             {
                 throw new ArgumentException(
@@ -484,11 +428,8 @@ namespace Yubico.YubiKey.Fido2
                         0, authenticatorInfo.MaximumCredentialBlobLength, credBlobValue.Length));
             }
 
-            var cborWriter = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            cborWriter.WriteByteString(credBlobValue);
-            byte[] encodedValue = cborWriter.Encode();
-
-            AddExtension(KeyCredBlob, encodedValue);
+            var credBlob = new CredBlob(credBlobValue);
+            AddExtension(Fido2ExtensionKeys.CredBlob, credBlob);
         }
 
         /// <summary>
@@ -536,17 +477,128 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void AddHmacSecretExtension(AuthenticatorInfo authenticatorInfo)
         {
-            if (authenticatorInfo is null)
-            {
-                throw new ArgumentNullException(nameof(authenticatorInfo));
-            }
-
-            if (!authenticatorInfo.Extensions.Contains<string>(KeyHmacSecret))
+            Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
+            if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.HmacSecret))
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
 
-            AddExtension(KeyHmacSecret, new byte[] { 0xF5 });
+            AddExtension(Fido2ExtensionKeys.HmacSecret, true);
+        }
+
+        /// <summary>
+        /// Adds the "hmac-secret-mc" extension to the make credential operation, which
+        /// is used to support HMAC-secret mechanism with backward compatibility.
+        /// This method specifies the required salt values for the operation.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The caller supplies the <c>AuthenticatorInfo</c> for the YubiKey,
+        /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or
+        /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
+        /// </para>
+        /// <para>
+        /// This method will determine from the <c>authenticatorInfo</c> whether
+        /// the YubiKey supports this extension.
+        /// </para>
+        /// <para>
+        /// The hmac-secret data will be returned when the credential is used to
+        /// get an assertion. When building the GetAssertion parameters, the
+        /// caller must specify that the YubiKey return the hmac-secret. See
+        /// <see cref="GetAssertionParameters.RequestHmacSecretExtension"/>. The
+        /// assertion returned will contain the hmac-secret output. The result
+        /// will be returned in the
+        /// <see cref="MakeCredentialData.AuthenticatorData"/> and can be
+        /// retrieved using
+        /// <see cref="AuthenticatorData.GetHmacSecretExtension"/>
+        /// </para>
+        /// </remarks>
+        /// <param name="authenticatorInfo">
+        /// The FIDO2 <c>AuthenticatorInfo</c> for the YubiKey being used.
+        /// </param>
+        /// <param name="salt1">
+        /// The first required salt value, which must be exactly 32 bytes in length.
+        /// If this condition is not met, an exception will be thrown.
+        /// </param>
+        /// <param name="salt2">
+        /// An optional second salt value, which must also be exactly 32 bytes in length
+        /// if provided. If this condition is not met, an exception will be thrown.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the length of either <paramref name="salt1"/> or <paramref name="salt2"/>
+        /// (if provided) does not equal the required 32 bytes.
+        /// </exception>
+        public void AddHmacSecretMcExtension(
+            AuthenticatorInfo authenticatorInfo,
+            ReadOnlyMemory<byte> salt1,
+            ReadOnlyMemory<byte>? salt2 = null)
+        {
+            Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
+
+            if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.HmacSecretMc))
+            {
+                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            }
+
+            if (salt1.Length != HmacSecretConstants.HmacSecretSaltLength)
+            {
+                throw new ArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt1));
+            }
+
+            if (salt2.HasValue && salt2.Value.Length != HmacSecretConstants.HmacSecretSaltLength)
+            {
+                throw new ArgumentException(ExceptionMessages.InvalidSaltLength, nameof(salt2));
+            }
+
+            _hmacSecretEncoding = null;
+            _salt1 = salt1;
+            _salt2 = salt2;
+        }
+
+        /// <summary>
+        /// Encode the "hmac-secret" extension. This should be called before issuing the
+        /// <see cref="Commands.MakeCredentialCommand"/>. The call will be valid only if
+        /// the <see cref="AddHmacSecretMcExtension"/> has been called, and the
+        /// <see cref="PinProtocols.PinUvAuthProtocolBase.Encapsulate"/> method
+        /// has been successfully called. 
+        /// &gt; [!NOTE]
+        /// &gt; If you use <see cref="Fido2Session.MakeCredential"/> you do not need to call this method.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// If the <c>AddHmacSecretMcExtension</c> method has not been called,
+        /// this method will do nothing. If it has been called, but the
+        /// <c>authProtocol</c> has not been encapsulated, this method will throw
+        /// an exception.
+        /// </para>
+        /// <para>
+        /// The result of this method is returned in the <see cref="MakeCredentialData"/>
+        /// <see cref="AuthenticatorData"/>
+        /// and can be retrieved using <see cref="AuthenticatorData.GetHmacSecretExtension"/>
+        /// </para>
+        /// </remarks>
+        /// <param name="authProtocol">
+        /// An instance of one of the subclasses of <c>PinUvAuthProtocolBase</c>,
+        /// for which the <c>Encapsulate</c> method has been called.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>authProtocol</c> arg is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The Encapsulate method for the <c>authProtocol</c> has not been
+        /// called.
+        /// </exception>
+        public void EncodeHmacSecretExtension(PinUvAuthProtocolBase authProtocol)
+        {
+            if (_salt1 is null)
+            {
+                return;
+            }
+
+            _hmacSecretEncoding = HmacSecretExtension.Encode(authProtocol, _salt1.Value, _salt2);
+
+            AddExtension(Fido2ExtensionKeys.HmacSecret, true);
+            AddExtension(Fido2ExtensionKeys.HmacSecretMc, _hmacSecretEncoding);
         }
 
         /// <summary>
@@ -652,11 +704,9 @@ namespace Yubico.YubiKey.Fido2
             {
                 return;
             }
-            if (authenticatorInfo is null)
-            {
-                throw new ArgumentNullException(nameof(authenticatorInfo));
-            }
-            if (!authenticatorInfo.Extensions.Contains<string>(KeyCredProtect))
+
+            Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
+            if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.CredProtect))
             {
                 if (enforceCredProtectPolicy && credProtectPolicy != CredProtectPolicy.UserVerificationOptional)
                 {
@@ -669,55 +719,29 @@ namespace Yubico.YubiKey.Fido2
             // The encoding is key/value where the key is "credProtect" and the
             // value is an unsigned int (major type 0). The only three possible
             // values are 1, 2, or 3, so the encoding is simply 0x01, 02,or 03.
-            AddExtension(KeyCredProtect, new byte[] { (byte)credProtectPolicy });
+            AddExtension(Fido2ExtensionKeys.CredProtect, (byte)credProtectPolicy);
         }
 
         /// <inheritdoc cref="AddCredProtectExtension(CredProtectPolicy,bool,AuthenticatorInfo)"/>
-        public void AddCredProtectExtension(CredProtectPolicy credProtectPolicy,
-                                            AuthenticatorInfo authenticatorInfo) =>
+        public void AddCredProtectExtension(
+            CredProtectPolicy credProtectPolicy,
+            AuthenticatorInfo authenticatorInfo) =>
             AddCredProtectExtension(credProtectPolicy, true, authenticatorInfo);
 
-        /// <summary>
-        /// Add an entry to the list of options.
-        /// </summary>
-        /// <remarks>
-        /// If the <c>Options</c> list already contains an entry with the given
-        /// <c>optionKey</c>, this method will replace it.
-        /// <para>
-        /// Note that the standard specifies valid option keys. Currently they
-        /// are "rk", "up", and "uv". This method will accept any key given and
-        /// pass it to the YubiKey. If an invalid key is used, the YubiKey will
-        /// return an error.
-        /// </para>
-        /// </remarks>
-        /// <param name="optionKey">
-        /// The option to add. This is the key of the option key/value pair.
-        /// </param>
-        /// <param name="optionValue">
-        /// The value this option will possess.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// The <c>optionKey</c> arg is null.
-        /// </exception>
-        public void AddOption(string optionKey, bool optionValue) => _options =
-            ParameterHelpers.AddKeyValue<bool>(optionKey, optionValue, _options);
-
         /// <inheritdoc/>
-        public byte[] CborEncode()
-        {
-            return new CborMapWriter<int>()
+        public override byte[] CborEncode() =>
+            new CborMapWriter<int>()
                 .Entry(TagClientDataHash, ClientDataHash)
                 .Entry(TagRp, RelyingParty)
                 .Entry(TagUserEntity, UserEntity)
                 .Entry(TagAlgorithmsList, EncodeAlgorithms, this)
                 .OptionalEntry<IReadOnlyList<ICborEncode>>(TagExcludeList, CborHelpers.EncodeArrayOfObjects, ExcludeList)
-                .OptionalEntry<Dictionary<string, byte[]>>(TagExtensions, ParameterHelpers.EncodeKeyValues<byte[]>, _extensions)
-                .OptionalEntry<Dictionary<string, bool>>(TagOptions, ParameterHelpers.EncodeKeyValues<bool>, _options)
+                .OptionalEntry(TagExtensions, ParameterHelpers.EncodeKeyValues, Extensions)
+                .OptionalEntry(TagOptions, ParameterHelpers.EncodeKeyValues, Options)
                 .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
                 .OptionalEntry(TagProtocol, (int?)Protocol)
                 .OptionalEntry(TagEnterpriseAttestation, (int?)EnterpriseAttestation)
                 .Encode();
-        }
 
         private byte[] EncodeAlgorithms(MakeCredentialParameters? localData)
         {
@@ -741,6 +765,7 @@ namespace Yubico.YubiKey.Fido2
                     .Entry(ParameterHelpers.TagAlg, alg)
                     .EndMap();
             }
+
             cbor.WriteEndArray();
 
             return cbor.Encode();

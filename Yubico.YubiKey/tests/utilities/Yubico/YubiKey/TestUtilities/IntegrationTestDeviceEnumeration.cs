@@ -129,11 +129,11 @@ namespace Yubico.YubiKey.TestUtilities
         /// caller is willing to accept. Defaults to the minimum version for the given device.</param>
         /// <returns>The allow-list filtered YubiKey that was found.</returns>
         public static IYubiKeyDevice GetTestDevice(
-            StandardTestDevice testDeviceType = StandardTestDevice.Fw5,
+            StandardTestDevice? testDeviceType = null,
             Transport transport = Transport.All,
             FirmwareVersion? minimumFirmwareVersion = null)
             => GetTestDevices(transport)
-                .SelectByStandardTestDevice(testDeviceType, minimumFirmwareVersion, transport);
+                .SelectByStandardTestDevice(testDeviceType ?? StandardTestDevice.Any, minimumFirmwareVersion, transport);
 
         /// <summary>
         /// Get YubiKey test device of specified transport and for which the

@@ -72,4 +72,4 @@ PIN complexity violations are reported for following FIDO2 operations:
 
 ### Example code
 
-For code samples demonstrating how to handle PIN complexity violations, see the [PivSampleCode](https://github.com/Yubico/Yubico.NET.SDK/blob/main/Yubico.YubiKey/examples/PivSampleCode/KeyCollector/SampleKeyCollector.cs), [Fido2SampleCode](https://github.com/Yubico/Yubico.NET.SDK/blob/main/Yubico.YubiKey/examples/Fido2SampleCode/KeyCollector/Fido2SampleKeyCollector.cs), and [PinComplexityTests](https://github.com/Yubico/Yubico.NET.SDK/blob/main/Yubico.YubiKey/tests/integration/Yubico/YubiKey/PinComplexityTests.cs) integration tests.
+For code samples demonstrating how to handle PIN complexity violations, see the [PivSampleCode](https://github.com/Yubico/Yubico.NET.SDK/blob/HEAD/Yubico.YubiKey/examples/PivSampleCode/KeyCollector/SampleKeyCollector.cs), [Fido2SampleCode](https://github.com/Yubico/Yubico.NET.SDK/blob/HEAD/Yubico.YubiKey/examples/Fido2SampleCode/KeyCollector/Fido2SampleKeyCollector.cs), and [PinComplexityTests](https://github.com/Yubico/Yubico.NET.SDK/blob/HEAD/Yubico.YubiKey/tests/integration/Yubico/YubiKey/PinComplexityTests.cs) integration tests.

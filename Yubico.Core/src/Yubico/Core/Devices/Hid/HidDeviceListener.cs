@@ -33,7 +33,7 @@ namespace Yubico.Core.Devices.Hid
     /// already attached to the system will be ignored.
     /// </para>
     /// </remarks>
-    public abstract class HidDeviceListener
+    public abstract class HidDeviceListener : IDisposable
     {
         private readonly ILogger _log = Logging.Log.GetLogger<HidDeviceListener>();
 
@@ -46,6 +46,8 @@ namespace Yubico.Core.Devices.Hid
         /// Subscribe to receive an event whenever a Human Interface Device (HID) is removed from the computer.
         /// </summary>
         public event EventHandler<HidDeviceEventArgs>? Removed;
+
+        private bool _disposed;
 
         /// <summary>
         /// Creates an instance of a <see cref="HidDeviceListener"/>.
@@ -76,7 +78,25 @@ namespace Yubico.Core.Devices.Hid
         protected void OnArrived(IHidDevice device)
         {
             _log.LogInformation("HID {Device} arrived.", device);
-            Arrived?.Invoke(this, new HidDeviceEventArgs(device));
+
+            if (Arrived is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (Delegate? @delegate in Arrived.GetInvocationList())
+            {
+                var handler = (EventHandler<HidDeviceEventArgs>)@delegate;
+                try
+                {
+                    handler.Invoke(this, new HidDeviceEventArgs(device));
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's HID Arrived event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
         }
 
         /// <summary>
@@ -89,7 +109,25 @@ namespace Yubico.Core.Devices.Hid
         protected void OnRemoved(IHidDevice device)
         {
             _log.LogInformation("HID {Device} removed.", device);
-            Removed?.Invoke(this, new HidDeviceEventArgs(device));
+
+            if (Removed is null)
+            {
+                return;
+            }
+
+            // Invoke each handler individually to ensure one throwing handler doesn't prevent others from executing
+            foreach (Delegate? @delegate in Removed.GetInvocationList())
+            {
+                var handler = (EventHandler<HidDeviceEventArgs>)@delegate;
+                try
+                {
+                    handler.Invoke(this, new HidDeviceEventArgs(device));
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Exception in user's HID Removed event handler. The exception has been caught to prevent SDK background thread crash.");
+                }
+            }
         }
 
         /// <summary>
@@ -99,6 +137,35 @@ namespace Yubico.Core.Devices.Hid
         {
             Arrived = null;
             Removed = null;
+        }
+
+        /// <summary>
+        /// Release the managed and unmanaged resources used by the
+        /// <see cref="HidDeviceListener" />.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Release the managed and unmanaged resources used by the
+        /// <see cref="HidDeviceListener" />.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                ClearEventHandlers();
+            }
+
+            _disposed = true;
         }
     }
 }

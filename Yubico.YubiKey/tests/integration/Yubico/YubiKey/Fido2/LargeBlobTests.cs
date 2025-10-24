@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Transactions;
 using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.TestUtilities;
@@ -45,15 +46,11 @@ namespace Yubico.YubiKey.Fido2
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void SetLargeBlob_Succeeds()
         {
-            bool isValid = Fido2ResetForTest.DoReset(_testDevice.SerialNumber);
-            Assert.True(isValid);
-
             using (var fido2Session = new Fido2Session(_testDevice))
             {
                 fido2Session.KeyCollector = Fido2ResetForTest.ResetForTestKeyCollectorDelegate;
-                isValid = fido2Session.TrySetPin(new ReadOnlyMemory<byte>(_pin));
-                Assert.True(isValid);
-
+                // isValid = fido2Session.TrySetPin(new ReadOnlyMemory<byte>(_pin));
+                // Assert.True(isValid);
                 var user1 = new UserEntity(new byte[] { 1, 2, 3, 4 })
                 {
                     Name = "TestUser1",
@@ -133,11 +130,13 @@ namespace Yubico.YubiKey.Fido2
 
                 bool isDecrypted = blobArray.Entries[0].TryDecrypt(key1, out Memory<byte> plaintext1);
                 Assert.True(isDecrypted);
-                isValid = plaintext1.Span.SequenceEqual(blobData1.AsSpan());
+                // bool isValid = Fido2ResetForTest.DoReset(_testDevice.SerialNumber);
+                // Assert.True(isValid);
+                var isValid = plaintext1.Span.SequenceEqual(blobData1.AsSpan());
                 Assert.True(isValid);
-                isDecrypted = blobArray.Entries[1].TryDecrypt(key1, out Memory<byte> plaintext2);
+                isDecrypted = blobArray.Entries[1].TryDecrypt(key1, out _);
                 Assert.False(isDecrypted);
-                isDecrypted = blobArray.Entries[1].TryDecrypt(key2, out plaintext2);
+                isDecrypted = blobArray.Entries[1].TryDecrypt(key2, out var plaintext2);
                 Assert.True(isDecrypted);
                 isValid = plaintext2.Span.SequenceEqual(blobData2.AsSpan());
                 Assert.True(isValid);

@@ -34,10 +34,8 @@ namespace Yubico.PlatformInterop
 
         internal static object? TryGetProperty<T>(GetObjectProperty<T> getObjectProperty, T objectId, DEVPROPKEY propertyKey)
         {
-            CmErrorCode errorCode;
-
             IntPtr propertyBufferSize = IntPtr.Zero;
-            errorCode = getObjectProperty(
+            CmErrorCode errorCode = getObjectProperty(
                 objectId,
                 propertyKey,
                 out DEVPROP_TYPE propertyType,
@@ -47,9 +45,10 @@ namespace Yubico.PlatformInterop
 
             if (errorCode == CmErrorCode.CR_NO_SUCH_VALUE)
             {
-                return default;
+                return null;
             }
-            else if (errorCode != CmErrorCode.CR_BUFFER_SMALL)
+            
+            if (errorCode != CmErrorCode.CR_BUFFER_SMALL)
             {
                 throw new PlatformApiException(
                     "CONFIG_RET",

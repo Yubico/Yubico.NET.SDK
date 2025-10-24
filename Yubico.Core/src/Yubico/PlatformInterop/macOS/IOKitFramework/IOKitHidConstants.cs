@@ -27,5 +27,20 @@ namespace Yubico.PlatformInterop
         public const int kIOHidReportTypeInput = 0;
         public const int kIOHidReportTypeOutput = 1;
         public const int kIOHidReportTypeFeature = 2;
+        
+        /// <summary>
+        /// No options specified.
+        /// </summary>
+        public const int kIOHIDOptionsTypeNone = 0x00;
+
+        /// <summary>
+        /// Seize the device, preventing other applications from accessing it.
+        /// </summary>
+        public const int kIOHIDOptionsTypeSeizeDevice = 0x01;
+
+        /// <summary>
+        /// Ignore the device, preventing it from being opened.
+        /// </summary>
+        public const int kIOHIDOptionsTypeIgnore = 0x02;
     }
 }

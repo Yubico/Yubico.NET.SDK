@@ -313,6 +313,21 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
         public ConfigureChallengeResponse UseButton(bool setConfig = true) =>
             Settings.UseButtonTrigger(setConfig);
+
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberApiVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
+        public ConfigureChallengeResponse SetSerialNumberApiVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberApiVisible(setConfig);
+
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberButtonVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
+        public ConfigureChallengeResponse SetSerialNumberButtonVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberButtonVisible(setConfig);
+
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberUsbVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
+        public ConfigureChallengeResponse SetSerialNumberUsbVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberUsbVisible(setConfig);
         #endregion
         #endregion
     }

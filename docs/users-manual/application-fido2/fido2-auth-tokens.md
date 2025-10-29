@@ -200,16 +200,17 @@ to simply build a new AuthParam each time.
 
 ## AuthTokens
 
-There are three kinds of AuthTokens:
+There are four kinds of AuthTokens:
 
 * PinToken
 * PinUvAuthToken Using PIN
 * PinUvAuthToken Using UV (fingerprint)
+* Persistent PinUvAuthToken (PPUAT)
 
 ### PinToken
 
 This is the AuthToken from FIDO2 version 2.0. There are no permissions associated with a
-PinToken. Even though it is a version 2.0 constuction, it can be used in FIDO2 version
+PinToken. Even though it is a version 2.0 construction, it can be used in FIDO2 version
 2.1. However, while some commands will successfully execute using an AuthParam built from
 a PinToken, there are other commands that will return an error if provided an AuthParam
 built from a PinToken.
@@ -277,13 +278,74 @@ for authentication, and use the PIN only if the UV fails.
 However, that is "SHOULD" not "SHALL". Hence, it is possible a client only calls on the
 code that uses the PIN. Or tries PIN first, then UV.
 
+### Persistent PinUvAuthToken (PPUAT)
+
+YubiKeys with firmware version 5.8 and later support CTAP 2.2's Persistent PinUvAuthToken (PPUAT). A PPUAT can be frequently reused and remains active for a longer period of time compared to a traditional PinUvAuthToken. However, it can only be used for read-only credential management operations, including ``EnumerateRelyingParties``, ``EnumerateCredentialsForRelyingParty``, and ``GetCredentialMetadata``.
+
+The key benefit of PPUATs is that they enable a better user experience by allowing applications to list discoverable credentials from YubiKeys without requiring repeated PIN entry.
+
+The process of creating a PPUAT with the SDK is fundamentally the same as creating a PinUvAuthToken — the difference lies in the *permissions* assigned to the token. When building an AuthToken, if you assign the [PersistentCredentialManagementReadOnly](xref:Yubico.YubiKey.Fido2.Commands.PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly) permission (as opposed to the standard [CredentialManagement](xref:Yubico.YubiKey.Fido2.Commands.PinUvAuthTokenPermissions.CredentialManagement) permission), you will create a PPUAT.
+
+With the SDK's Fido2Session, there are a few ways to initiate PPUAT creation:
+
+- [GetPersistentPinUvAuthToken()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetPersistentPinUvAuthToken)
+- the read-only credential management session methods ([EnumerateRelyingParties()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateRelyingParties), [EnumerateCredentialsForRelyingParty()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateCredentialsForRelyingParty%28Yubico.YubiKey.Fido2.RelyingParty%29), and [GetCredentialMetadata()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata))
+- [TryVerifyPin()](xref:Yubico.YubiKey.Fido2.Fido2Session.TryVerifyPin%28System.ReadOnlyMemory%7BSystem.Byte%7D%2CSystem.Nullable%7BYubico.YubiKey.Fido2.Commands.PinUvAuthTokenPermissions%7D%2CSystem.String%2CSystem.Nullable%7BSystem.Int32%7D%40%2CSystem.Nullable%7BSystem.Boolean%7D%40%29)
+
+``GetPersistentPinUvAuthToken()`` will, as the name implies, get a new PPUAT. Note that this method requires a KeyCollector to perform the UV or PIN verification step.
+
+```csharp
+    using (Fido2Session fido2Session = new Fido2Session(yubiKeyDevice))
+    {
+        // Your app's key collector.
+        fido2Session.KeyCollector = SomeKeyCollectorDelegate;
+
+        fido2Session.GetPersistentPinUvAuthToken();
+    }
+```
+
+Alternatively, the PPUAT can be created as part of a call to one of the read-only credential management session methods (again, as long as a KeyCollector is provided). During one of these operations, the SDK will preferentially (and automatically) create and use a PPUAT instead of a standard PinUvAuthToken if the YubiKey supports CTAP 2.2.
+
+```csharp
+    using (Fido2Session fido2Session = new Fido2Session(yubiKeyDevice))
+    {
+        // Your app's key collector.
+        fido2Session.KeyCollector = SomeKeyCollectorDelegate;
+
+        // If an active PPUAT does not exist, the SDK will get one using SomeKeyCollectorDelegate.
+        fido2Session.EnumerateRelyingParties(); 
+    }
+```
+
+To use the Fido2Session methods without a KeyCollector, you will have to manually perform the PIN verification via ``TryVerifyPin()``, which will need to be passed both the PIN and the ``PersistentCredentialManagementReadOnly`` permission in order to create a PPUAT under the hood. Once the PPUAT is set, you can call the read-only credential management session methods, and the SDK will use that PPUAT to authenticate the operation.
+
+```csharp
+    using (Fido2Session fido2Session = new Fido2Session(yubiKeyDevice))
+    {
+        // currentPin is the PIN collected from the user (collection process defined elsewhere).
+        fido2Session.TryVerifyPin(currentPin, PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
+    }
+```
+
+Additionally, active PPUATs can also be passed in as a parameter upon instantiation of a new Fido2Session, allowing you to further reduce the frequency of PIN/UV verification.
+
+```csharp
+    // Pass in the PPUAT (set elsewhere).
+    using (Fido2Session fido2Session = Fido2Session(yubiKeyDevice,ppuat))
+    {
+        // Execute read-only credential management operations, assuming PPUAT is valid.
+    }
+```
+
+As for the lower-level FIDO2 command classes for read-only credential management ([EnumerateRpsBeginCommand()](xref:Yubico.YubiKey.Fido2.Commands.EnumerateRpsBeginCommand), [EnumerateRpsGetNextCommand()](xref:Yubico.YubiKey.Fido2.Commands.EnumerateRpsGetNextCommand), [EnumerateCredentialsBeginCommand()](xref:Yubico.YubiKey.Fido2.Commands.EnumerateCredentialsBeginCommand), [EnumerateCredentialsGetNextCommand()](xref:Yubico.YubiKey.Fido2.Commands.EnumerateCredentialsGetNextCommand), [GetCredentialMetadataCommand()](xref:Yubico.YubiKey.Fido2.Commands.GetCredentialMetadataCommand)), the PPUAT must be passed in to those methods directly as a parameter. And to create a PPUAT via the command classes, call [GetPinUvAuthTokenUsingPinCommand()](xref:Yubico.YubiKey.Fido2.Commands.GetPinUvAuthTokenUsingPinCommand) or [GetPinUvAuthTokenUsingUvCommand()](xref:Yubico.YubiKey.Fido2.Commands.GetPinUvAuthTokenUsingUvCommand), both of which need to be passed the ``PersistentCredentialManagementReadOnly`` permission.
+
 ## Permissions
 
 FIDO2 version 2.0 does not have permissions. That means that if your application is
 connected to a YubiKey that supports only version 2.0, you will retrieve a PinToken and
 that PinToken will have the permission to call on the YubiKey to do anything it supports.
 
-Permissions were introduced in FIDO2 version 2.1. The standard lists six possible
+[Permissions](xref:Yubico.YubiKey.Fido2.Commands.PinUvAuthTokenPermissions) were introduced in FIDO2 version 2.1. The standard lists the following possible
 permissions:
 
 * Make Credential
@@ -292,6 +354,7 @@ permissions:
 * Bio Enrollment
 * Large Blob Write
 * Authenticator Configuration
+* Persistent Credential Management Read Only
 
 If you are programming for a YubiKey that supports FIDO2 version 2.1, then when you obtain
 an AuthToken, you should get a PinUvAuthToken with permissions. For example, if you know

@@ -23,9 +23,9 @@ using Yubico.YubiKit.Core.YubiKey;
 namespace Yubico.YubiKit.Management;
 
 public sealed class ManagementSession<TConnection>(
-    TConnection _connection,
-    IProtocolFactory<TConnection> _protocolFactory,
-    ILogger<ManagementSession<TConnection>> _logger)
+    TConnection connection,
+    IProtocolFactory<TConnection> protocolFactory,
+    ILogger<ManagementSession<TConnection>> logger)
     : ApplicationSession
     where TConnection : IConnection
 {
@@ -34,7 +34,7 @@ public sealed class ManagementSession<TConnection>(
     private const byte INS_SET_DEVICE_CONFIG = 0x1C;
 
     private const int TagMoreDeviceInfo = 0x10;
-    private readonly IProtocol _protocol = _protocolFactory.Create(_connection);
+    private readonly IProtocol _protocol = protocolFactory.Create(connection);
 
     private static readonly Feature FeatureDeviceInfo =
         new("Device Info", 4, 1, 0);
@@ -76,7 +76,7 @@ public sealed class ManagementSession<TConnection>(
         EnsureSupports(FeatureDeviceInfo);
 
         byte page = 0;
-        IEnumerable<Tlv> allPagesTlvs = [];
+        var allPagesTlvs = new List<Tlv>();
 
         var hasMoreData = true;
         while (hasMoreData)
@@ -87,15 +87,18 @@ public sealed class ManagementSession<TConnection>(
             if (encodedResult.Length - 1 != encodedResult.Span[0])
                 throw new BadResponseException("Invalid length");
 
-            var pageTlvs = TlvHelper.Decode(encodedResult.Span[1..]).ToList();
+            var pageTlvs = TlvHelper.Decode(encodedResult.Span[1..]);
             var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
             hasMoreData = moreData?.Length == 1 && moreData.GetValueSpan()[0] == 1;
-            allPagesTlvs = allPagesTlvs.Concat(pageTlvs);
+
+            // Transfer ownership of Tlv objects to allPagesTlvs
+            allPagesTlvs.AddRange(pageTlvs);
 
             ++page;
         }
 
-        return DeviceInfo.CreateFromTlvs([.. allPagesTlvs], _version);
+        using var allTlvs = new DisposableTlvCollection(allPagesTlvs);
+        return DeviceInfo.CreateFromTlvs([.. allTlvs], _version);
     }
 
     public async Task SetDeviceConfigAsync(

@@ -25,7 +25,7 @@ public readonly record struct CommandApdu
     {
     }
 
-    public CommandApdu(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte>? data = null, int le = 0)
+    private CommandApdu(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte>? data = null, int le = 0)
     {
         Cla = cla;
         Ins = ins;
@@ -36,13 +36,13 @@ public readonly record struct CommandApdu
     }
 
     public CommandApdu(int cla, int ins, int p1, int p2, ReadOnlyMemory<byte>? data = null, int le = 0)
-    : this(
-        ByteUtils.ValidateByte(cla, nameof(cla)),
-        ByteUtils.ValidateByte(ins, nameof(ins)),
-        ByteUtils.ValidateByte(p1, nameof(p1)),
-        ByteUtils.ValidateByte(p2, nameof(p2)),
-        data,
-        le)
+        : this(
+            ByteUtils.ValidateByte(cla, nameof(cla)),
+            ByteUtils.ValidateByte(ins, nameof(ins)),
+            ByteUtils.ValidateByte(p1, nameof(p1)),
+            ByteUtils.ValidateByte(p2, nameof(p2)),
+            data,
+            le)
     {
     }
 

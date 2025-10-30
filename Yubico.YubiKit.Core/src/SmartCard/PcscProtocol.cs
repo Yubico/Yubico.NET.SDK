@@ -13,14 +13,14 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using System.Buffers;
+using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
 public interface IProtocol : IDisposable
 {
-    void Configure(FirmwareVersion version, Configuration? configuration = null);
+    void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null);
 }
 
 public interface ISmartCardProtocol : IProtocol
@@ -33,24 +33,23 @@ public interface ISmartCardProtocol : IProtocol
         CancellationToken cancellationToken = default);
 }
 
-public readonly record struct Configuration
+public readonly record struct ProtocolConfiguration
 {
     public bool? ForceShortApdus { get; init; }
 }
 
 internal class PcscProtocol : ISmartCardProtocol
 {
-    private bool _useExtendedApdus = true;
-    private int MaxApduSize = SmartCardMaxApduSizes.Neo; // Lowest as default
-    private IApduProcessor _processor;
-
     private const byte INS_SELECT = 0xA4;
     private const byte P1_SELECT = 0x04;
     private const byte P2_SELECT = 0x00;
     private const byte INS_SEND_REMAINING = 0xC0;
+    private readonly ISmartCardConnection _connection;
     private readonly byte _insSendRemaining;
     private readonly ILogger<PcscProtocol> _logger;
-    private readonly ISmartCardConnection _connection;
+    private IApduProcessor _processor;
+    private bool _useExtendedApdus = true;
+    private int MaxApduSize = SmartCardMaxApduSizes.Neo; // Lowest as default
 
 
     public PcscProtocol(
@@ -100,6 +99,19 @@ internal class PcscProtocol : ISmartCardProtocol
         return response.Data;
     }
 
+    public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration)
+    {
+        if (firmwareVersion.IsAtLeast(4, 0, 0))
+        {
+            var forceShortApdu = configuration.HasValue && configuration.Value.ForceShortApdus == true;
+            _useExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;
+            MaxApduSize = firmwareVersion.IsAtLeast(4, 3, 0)
+                ? SmartCardMaxApduSizes.Yk43
+                : SmartCardMaxApduSizes.Yk4;
+            ReconfigureProcessor();
+        }
+    }
+
     #endregion
 
     private IApduProcessor BuildBaseProcessor()
@@ -111,81 +123,13 @@ internal class PcscProtocol : ISmartCardProtocol
         return new ChainedResponseProcessor(processor, _insSendRemaining);
     }
 
-    public void Configure(FirmwareVersion firmwareVersion, Configuration? configuration)
-    {
-        if (firmwareVersion.IsAtLeast(4, 0, 0))
-        {
-            bool forceShortApdu = configuration.HasValue && configuration.Value.ForceShortApdus == true;
-            _useExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;
-            MaxApduSize = firmwareVersion.IsAtLeast(4, 3, 0)
-                ? SmartCardMaxApduSizes.Yk43
-                : SmartCardMaxApduSizes.Yk4;
-            ReconfigureProcessor();
-        }
-    }
-
     private void ReconfigureProcessor()
     {
         var newProcessor = BuildBaseProcessor();
         if (_processor is ScpProcessor scpp)
-        {
             // Keep existing SCP state
             newProcessor = new ScpProcessor(newProcessor, scpp.Formatter, scpp.State);
-        }
 
         _processor = newProcessor;
     }
-}
-
-internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, ScpState state) : IApduProcessor
-{
-    public IApduFormatter Formatter { get; } = formatter;
-
-    public Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default)
-        => Transmit(command, encrypt: true, cancellationToken);
-
-    internal ScpState State { get; } = state;
-    private readonly ExtendedApduFormatter _extendedApduFormatter = new(SmartCardMaxApduSizes.Yk43);
-    public async Task<ResponseApdu> Transmit(CommandApdu command, bool encrypt, CancellationToken cancellationToken)
-    {
-        Span<byte> dataPostEnc = ArrayPool<byte>.Shared.Rent(command.Data.Length);
-        command.Data.Span.CopyTo(dataPostEnc);
-        if (encrypt)
-        {
-            State.Encrypt(dataPostEnc);
-        }
-
-        Span<byte> dataPostMac = ArrayPool<byte>.Shared.Rent(dataPostEnc.Length);
-        dataPostEnc.CopyTo(dataPostMac);
-
-        var cla = command.Cla | 0x04; // isEncrypted
-
-        ReadOnlySpan<byte> dataPostFormat = ArrayPool<byte>.Shared.Rent(dataPostEnc.Length); // TODO size?
-        var newApdu = command with { Cla = (byte)cla, Data = dataPostMac.ToArray() };
-        if (dataPostMac.Length > SmartCardMaxApduSizes.ShortApduMaxChunkSize)
-        {
-            dataPostFormat = _extendedApduFormatter.Format(newApdu).Span;
-        }
-        else
-        {
-            dataPostFormat = Formatter.Format(newApdu).Span;
-        }
-
-        ReadOnlySpan<byte> mac = State.MacEncode(dataPostFormat[..^8]);
-        mac.CopyTo(dataPostMac);
-
-        var response = await @delegate.TransmitAsync(newApdu with { Data = dataPostMac.ToArray() }, cancellationToken);
-        var responseData = response.Data;
-
-        if (responseData.Length > 0)
-        {
-            responseData = State.MacDecode(responseData, response.SW);
-        }
-    }
-}
-
-
-internal record ScpState
-{
-
 }

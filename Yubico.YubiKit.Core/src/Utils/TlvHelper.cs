@@ -23,13 +23,17 @@ namespace Yubico.YubiKit.Core.Utils;
 public static class TlvHelper
 {
     /// <summary>
-    ///     Decodes a sequence of BER-TLV encoded data into a list of Tlvs.
+    ///     Decodes a sequence of BER-TLV encoded data into a disposable collection of Tlvs.
     /// </summary>
     /// <param name="tlvData">Sequence of TLV encoded data</param>
-    /// <returns>List of <see cref="Tlv" /></returns>
-    public static IEnumerable<Tlv> Decode(ReadOnlySpan<byte> tlvData)
+    /// <returns>A disposable collection of <see cref="Tlv" /> objects that must be disposed to securely clear sensitive data.</returns>
+    /// <remarks>
+    ///     The returned collection must be disposed using a <c>using</c> declaration to ensure
+    ///     all TLV objects are properly disposed and their sensitive data is securely zeroed.
+    /// </remarks>
+    public static DisposableTlvCollection Decode(ReadOnlySpan<byte> tlvData)
     {
-        var tlvs = new HashSet<Tlv>();
+        var tlvs = new List<Tlv>();
         var buffer = tlvData;
         while (!buffer.IsEmpty)
         {
@@ -37,7 +41,7 @@ public static class TlvHelper
             tlvs.Add(tlv);
         }
 
-        return tlvs;
+        return new DisposableTlvCollection(tlvs);
     }
 
     /// <summary>
@@ -52,7 +56,7 @@ public static class TlvHelper
         var buffer = tlvData;
         while (!buffer.IsEmpty)
         {
-            var tlv = Tlv.ParseFrom(ref buffer);
+            using var tlv = Tlv.ParseFrom(ref buffer);
             tlvs[tlv.Tag] = tlv.Value;
         }
 
@@ -93,10 +97,10 @@ public static class TlvHelper
     /// <exception cref="InvalidOperationException">If the TLV tag differs from expectedTag</exception>
     public static Memory<byte> GetValue(int expectedTag, ReadOnlySpan<byte> tlvData)
     {
-        var tlv = Tlv.Parse(tlvData);
-        return tlv.Tag != expectedTag
-            ? throw new InvalidOperationException($"Expected tag: {expectedTag:X2}, got {tlv.Tag:X2}")
-            : tlv.Value.ToArray();
+        using var tlv = Tlv.Parse(tlvData);
+        if (tlv.Tag != expectedTag)
+            throw new InvalidOperationException($"Expected tag: {expectedTag:X2}, got {tlv.Tag:X2}");
+        return tlv.Value.ToArray();
     }
 
     public static Memory<byte> EncodeDictionary(IReadOnlyDictionary<int, byte[]?> tlvData)
@@ -116,7 +120,7 @@ public static class TlvHelper
 
             foreach (var (tag, value) in tlvData.OrderBy(kvp => kvp.Key))
             {
-                var tlv = new Tlv(tag, value ?? []);
+                using var tlv = new Tlv(tag, value ?? []);
                 var tlvBytes = tlv.GetBytes().Span;
                 tlvBytes.CopyTo(buffer[position..]);
                 position += tlvBytes.Length;

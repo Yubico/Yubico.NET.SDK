@@ -20,19 +20,19 @@ internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFo
     private const int HasMoreData = 0x10;
     private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
 
-    public override async Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default)
+    public override async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true, CancellationToken cancellationToken = default)
     {
         var data = command.Data;
         if (data.Length <= ShortApduMaxChunk)
-            return await base.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            return await base.TransmitAsync(command, useScp, cancellationToken).ConfigureAwait(false);
 
         var offset = 0;
         while (offset + ShortApduMaxChunk < data.Length)
         {
             var chunk = data[offset..ShortApduMaxChunk];
             var chainedCommand = command with { Cla = (byte)(command.Cla | HasMoreData), Data = chunk };
-            
-            var result = await base.TransmitAsync(chainedCommand, cancellationToken).ConfigureAwait(false);
+
+            var result = await base.TransmitAsync(chainedCommand, useScp, cancellationToken).ConfigureAwait(false);
             if (result.SW != SWConstants.Success)
                 return result;
 
@@ -41,6 +41,6 @@ internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFo
 
         var finalChunk = data[offset..];
         var finalCommand = new CommandApdu(command.Cla, command.Ins, command.P1, command.P2, finalChunk, command.Le);
-        return await base.TransmitAsync(finalCommand, cancellationToken).ConfigureAwait(false);
+        return await base.TransmitAsync(finalCommand, useScp, cancellationToken).ConfigureAwait(false);
     }
 }

@@ -26,15 +26,15 @@ internal class ChainedResponseProcessor(
 
     public IApduFormatter Formatter => _apduTransmitter.Formatter;
 
-    public async Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default)
+    public async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true, CancellationToken cancellationToken = default)
     {
         using var ms = new MemoryStream();
 
-        var response = await _apduTransmitter.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _apduTransmitter.TransmitAsync(command, useScp, cancellationToken).ConfigureAwait(false);
         while (response.SW1 == SW1_HAS_MORE_DATA)
         {
             ms.Write(response.Data.Span);
-            response = await _apduTransmitter.TransmitAsync(GetMoreDataApdu, cancellationToken).ConfigureAwait(false);
+            response = await _apduTransmitter.TransmitAsync(GetMoreDataApdu, useScp, cancellationToken).ConfigureAwait(false);
         }
 
         ms.Write(response.Data.Span);

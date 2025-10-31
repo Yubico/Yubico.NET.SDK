@@ -82,5 +82,5 @@ public readonly record struct ResponseApdu
     /// </summary>
     public override string ToString() => $"SW1: 0x{SW1:X2} SW2: 0x{SW2:X2} Data: {Data.Span.Length} bytes";
 
-    public bool IsOK() => SW != SWConstants.Success;
+    public bool IsOK() => SW == SWConstants.Success;
 }

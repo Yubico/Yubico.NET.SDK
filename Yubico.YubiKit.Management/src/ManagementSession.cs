@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 
@@ -25,7 +26,8 @@ namespace Yubico.YubiKit.Management;
 public sealed class ManagementSession<TConnection>(
     TConnection connection,
     IProtocolFactory<TConnection> protocolFactory,
-    ILogger<ManagementSession<TConnection>> logger)
+    ILogger<ManagementSession<TConnection>> logger,
+    ScpKeyParams? scpKeyParams = null)
     : ApplicationSession
     where TConnection : IConnection
 {
@@ -34,7 +36,6 @@ public sealed class ManagementSession<TConnection>(
     private const byte INS_SET_DEVICE_CONFIG = 0x1C;
 
     private const int TagMoreDeviceInfo = 0x10;
-    private readonly IProtocol _protocol = protocolFactory.Create(connection);
 
     private static readonly Feature FeatureDeviceInfo =
         new("Device Info", 4, 1, 0);
@@ -45,17 +46,20 @@ public sealed class ManagementSession<TConnection>(
     private static readonly Feature FeatureDeviceReset =
         new("Device Reset", 5, 6, 0);
 
+    private readonly IProtocol _protocol = protocolFactory.Create(connection);
+
     private bool _isInitialized;
     private FirmwareVersion? _version;
 
     public static async Task<ManagementSession<TConnection>> CreateAsync(
         TConnection connection,
         ILogger<ManagementSession<TConnection>>? logger = null,
+        ScpKeyParams? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
         logger ??= NullLogger<ManagementSession<TConnection>>.Instance;
         var protocolFactory = PcscProtocolFactory<TConnection>.Create();
-        var session = new ManagementSession<TConnection>(connection, protocolFactory, logger);
+        var session = new ManagementSession<TConnection>(connection, protocolFactory, logger, scpKeyParams);
 
         await session.InitializeAsync(cancellationToken).ConfigureAwait(false);
         return session;
@@ -68,6 +72,11 @@ public sealed class ManagementSession<TConnection>(
 
         _version = await SetVersionAsync(cancellationToken).ConfigureAwait(false);
         _protocol.Configure(_version);
+
+        // Initialize SCP if key parameters were provided
+        if (scpKeyParams is not null && _protocol is ISmartCardProtocol smartCardProtocol)
+            await smartCardProtocol.InitScpAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
+
         _isInitialized = true;
     }
 
@@ -119,7 +128,14 @@ public sealed class ManagementSession<TConnection>(
             throw new ArgumentException("New lock code must be 16 bytes", nameof(newLockCode));
 
         var configBytes = config.GetBytes(reboot, currentLockCode, newLockCode);
-        var apdu = new CommandApdu { Cla = 0, Ins = INS_SET_DEVICE_CONFIG, P1 = 0, P2 = 0, Data = configBytes };
+        var apdu = new CommandApdu
+        {
+            Cla = 0,
+            Ins = INS_SET_DEVICE_CONFIG,
+            P1 = 0,
+            P2 = 0,
+            Data = configBytes
+        };
 
         await TransmitAsync(apdu, cancellationToken).ConfigureAwait(false);
     }
@@ -128,7 +144,8 @@ public sealed class ManagementSession<TConnection>(
     {
         EnsureSupports(FeatureDeviceReset);
 
-        await TransmitAsync(new CommandApdu { Cla = 0, Ins = INS_DEVICE_RESET, P1 = 0, P2 = 0 }, cancellationToken).ConfigureAwait(false);
+        await TransmitAsync(new CommandApdu { Cla = 0, Ins = INS_DEVICE_RESET, P1 = 0, P2 = 0 }, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private async Task<FirmwareVersion> SetVersionAsync(CancellationToken cancellationToken)
@@ -140,8 +157,8 @@ public sealed class ManagementSession<TConnection>(
         var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
 
         return versionParts.Length == 3
-           ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
-           : new FirmwareVersion();
+            ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
+            : new FirmwareVersion();
     }
 
     private async Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken)
@@ -154,10 +171,8 @@ public sealed class ManagementSession<TConnection>(
 
             return response;
         }
-        else
-        {
-            throw new NotSupportedException("Protocol not supported");
-        }
+
+        throw new NotSupportedException("Protocol not supported");
     }
 
     private async Task<ReadOnlyMemory<byte>> TransmitAsync(CommandApdu command, CancellationToken cancellationToken)
@@ -170,10 +185,8 @@ public sealed class ManagementSession<TConnection>(
 
             return response;
         }
-        else
-        {
-            throw new NotSupportedException("Protocol not supported");
-        }
+
+        throw new NotSupportedException("Protocol not supported");
     }
 
     internal void EnsureSupports(Feature feature)

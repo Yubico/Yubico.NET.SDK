@@ -21,7 +21,7 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// <summary>
 /// Manages static SCP03 keys and derives session keys from them.
 /// </summary>
-internal sealed class StaticKeys : IDisposable
+public sealed class StaticKeys : IDisposable
 {
     private static readonly byte[] DefaultKeyBytes = [0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F];
 
@@ -84,7 +84,7 @@ internal sealed class StaticKeys : IDisposable
     /// <param name="context">The 16-byte context (host challenge || card challenge).</param>
     /// <returns>The derived session keys.</returns>
     /// <exception cref="ArgumentException">Thrown if context is not 16 bytes.</exception>
-    public SessionKeys Derive(ReadOnlySpan<byte> context)
+    internal SessionKeys Derive(ReadOnlySpan<byte> context)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 

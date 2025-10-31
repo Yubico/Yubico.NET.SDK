@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// SCP key parameters for SCP03 authentication.
 /// SCP03 uses three keys (enc, mac, dek) with shared KVN but different KIDs.
 /// </summary>
-internal sealed record Scp03KeyParams : ScpKeyParams
+public sealed record Scp03KeyParams : ScpKeyParams
 {
     /// <summary>
     /// Gets the key reference for this SCP03 key set.
@@ -30,7 +30,7 @@ internal sealed record Scp03KeyParams : ScpKeyParams
     /// <summary>
     /// Gets the static keys used for derivation.
     /// </summary>
-    internal StaticKeys Keys { get; init; }
+    public StaticKeys Keys { get; init; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Scp03KeyParams"/> record.

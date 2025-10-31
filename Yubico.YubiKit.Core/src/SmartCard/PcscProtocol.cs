@@ -31,6 +31,8 @@ public interface ISmartCardProtocol : IProtocol
 
     Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default);
+
+    Task<DataEncryptor?> InitScpAsync(ScpKeyParams keyParams, CancellationToken cancellationToken = default);
 }
 
 public readonly record struct ProtocolConfiguration
@@ -73,7 +75,7 @@ internal class PcscProtocol : ISmartCardProtocol
     {
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
 
-        var response = await _processor.TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        var response = await _processor.TransmitAsync(command, true, cancellationToken).ConfigureAwait(false);
         if (!response.IsOK())
             throw new InvalidOperationException(
                 $"Command failed with status: {response.SW1:X2}{response.SW2:X2}");
@@ -90,6 +92,7 @@ internal class PcscProtocol : ISmartCardProtocol
         var response =
             await _processor.TransmitAsync(
                 new CommandApdu { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId },
+                false,
                 cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
@@ -112,6 +115,25 @@ internal class PcscProtocol : ISmartCardProtocol
         }
     }
 
+    public async Task<DataEncryptor?> InitScpAsync(ScpKeyParams keyParams,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return keyParams switch
+            {
+                Scp03KeyParams scp03 => await InitScp03Async(scp03, cancellationToken).ConfigureAwait(false),
+                Scp11KeyParams scp11 => await InitScp11Async(scp11, cancellationToken).ConfigureAwait(false),
+                _ => throw new ArgumentException($"Unsupported ScpKeyParams type: {keyParams.GetType().Name}",
+                    nameof(keyParams))
+            };
+        }
+        catch (ApduException ex) when (ex.SW == SWConstants.ClaNotSupported)
+        {
+            throw new NotSupportedException("SCP is not supported by this YubiKey", ex);
+        }
+    }
+
     #endregion
 
     private IApduProcessor BuildBaseProcessor()
@@ -131,5 +153,59 @@ internal class PcscProtocol : ISmartCardProtocol
             newProcessor = new ScpProcessor(newProcessor, scpp.Formatter, scpp.State);
 
         _processor = newProcessor;
+    }
+
+    private async Task<DataEncryptor?> InitScp03Async(Scp03KeyParams keyParams, CancellationToken cancellationToken)
+    {
+        // Build base processor without SCP
+        var baseProcessor = BuildBaseProcessor();
+
+        // Initialize SCP03 session (sends INITIALIZE UPDATE)
+        var (state, hostCryptogram) = await ScpState.Scp03InitAsync(
+            baseProcessor,
+            keyParams,
+            null,
+            cancellationToken).ConfigureAwait(false);
+
+        // Wrap base processor with SCP
+        var scpProcessor = new ScpProcessor(baseProcessor, baseProcessor.Formatter, state);
+
+        // Send EXTERNAL AUTHENTICATE with host cryptogram
+        // Security level: 0x33 (C-MAC + C-DECRYPTION + R-MAC + R-ENCRYPTION)
+        // Must use useScp=false to bypass SCP for this specific command
+        var authCommand = new CommandApdu(0x84, 0x82, 0x33, 0x00, hostCryptogram);
+        var authResponse = await scpProcessor.TransmitAsync(authCommand, false, false, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (authResponse.SW != SWConstants.Success)
+            throw new ApduException($"EXTERNAL AUTHENTICATE failed with SW=0x{authResponse.SW:X4}")
+            {
+                SW = authResponse.SW
+            };
+
+        // Replace the processor with SCP-enabled processor
+        _processor = scpProcessor;
+
+        return state.GetDataEncryptor();
+    }
+
+    private async Task<DataEncryptor?> InitScp11Async(Scp11KeyParams keyParams, CancellationToken cancellationToken)
+    {
+        // Build base processor without SCP
+        var baseProcessor = BuildBaseProcessor();
+
+        // Initialize SCP11 session (performs ECDH key agreement)
+        var state = await ScpState.Scp11InitAsync(
+            baseProcessor,
+            keyParams,
+            cancellationToken).ConfigureAwait(false);
+
+        // Wrap base processor with SCP
+        var scpProcessor = new ScpProcessor(baseProcessor, baseProcessor.Formatter, state);
+
+        // Replace the processor with SCP-enabled processor
+        _processor = scpProcessor;
+
+        return state.GetDataEncryptor();
     }
 }

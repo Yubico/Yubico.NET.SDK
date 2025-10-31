@@ -217,9 +217,10 @@ internal sealed class ScpState
                 keyParams.KeyRef.Kvn,
                 0x00,
                 hostChallenge),
+            false,
             cancellationToken).ConfigureAwait(false);
 
-        if (resp.SW != SWConstants.Success) throw new ApduException($"INITIALIZE UPDATE failed with SW=0x{resp.SW:X4}");
+        if (!resp.IsOK()) throw new ApduException($"INITIALIZE UPDATE failed with SW=0x{resp.SW:X4}");
 
         var responseData = resp.Data.Span;
         var diversificationData = responseData[..10];
@@ -281,6 +282,7 @@ internal sealed class ScpState
                         oceRef.Kvn,
                         p2,
                         certData),
+                    false,
                     cancellationToken).ConfigureAwait(false);
                 if (resp.SW != SWConstants.Success)
                     throw new ApduException($"PERFORM SECURITY OPERATION failed {resp.SW}");
@@ -329,6 +331,7 @@ internal sealed class ScpState
                 keyParams.KeyRef.Kvn,
                 keyParams.KeyRef.Kid,
                 data),
+            false,
             cancellationToken).ConfigureAwait(false);
 
         if (response.SW != SWConstants.Success) throw new ApduException($"SCP11 authentication failed {response.SW}");

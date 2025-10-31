@@ -38,8 +38,9 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
     /// <summary>
     ///     Transmits a command APDU with SCP encryption and MAC, and processes the response.
     /// </summary>
-    public Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default)
-        => TransmitAsync(command, true, cancellationToken);
+    public Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true,
+        CancellationToken cancellationToken = default)
+        => TransmitAsync(command, useScp, true, cancellationToken);
 
     #endregion
 
@@ -47,13 +48,16 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
     ///     Transmits a command APDU with optional SCP encryption and MAC.
     /// </summary>
     /// <param name="command">The command to transmit.</param>
-    /// <param name="encrypt">Whether to encrypt the command data.</param>
+    /// <param name="useScp">Whether to apply SCP (MAC, encryption, SCP bit). If false, passes through to delegate.</param>
+    /// <param name="encrypt">Whether to encrypt the command data (only applies if useScp is true).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The response APDU with MAC verified and data decrypted if applicable.</returns>
-    public async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool encrypt,
+    public async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp, bool encrypt,
         CancellationToken cancellationToken)
     {
-        byte[]? rentedData = null;
+        // If SCP is not requested, pass through to delegate directly
+        if (!useScp) return await @delegate.TransmitAsync(command, false, cancellationToken).ConfigureAwait(false);
+
         byte[]? rentedMacData = null;
 
         try
@@ -97,8 +101,8 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
             // Step 6: Create final command with MAC appended
             CommandApdu finalCommand = new(cla, command.Ins, command.P1, command.P2, dataWithMac.ToArray(), command.Le);
 
-            // Step 7: Transmit the command
-            var response = await @delegate.TransmitAsync(finalCommand, cancellationToken).ConfigureAwait(false);
+            // Step 7: Transmit the command (useScp=false because we already wrapped it with SCP)
+            var response = await @delegate.TransmitAsync(finalCommand, false, cancellationToken).ConfigureAwait(false);
 
             // Step 8: Verify and remove MAC from response
             if (response.Data.Length > 0)
@@ -119,7 +123,6 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
         }
         finally
         {
-            if (rentedData != null) ArrayPool<byte>.Shared.Return(rentedData);
             if (rentedMacData != null) ArrayPool<byte>.Shared.Return(rentedMacData);
         }
     }

@@ -23,7 +23,7 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// <summary>
 /// SCP key parameters for SCP11 authentication (supports SCP11a, SCP11b, SCP11c).
 /// </summary>
-internal sealed record Scp11KeyParams : ScpKeyParams
+public sealed record Scp11KeyParams : ScpKeyParams
 {
     /// <summary>
     /// Gets the key reference for this SCP11 key.

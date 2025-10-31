@@ -17,5 +17,5 @@ namespace Yubico.YubiKit.Core.SmartCard;
 public interface IApduProcessor
 {
     IApduFormatter Formatter { get; }
-    Task<ResponseApdu> TransmitAsync(CommandApdu command, CancellationToken cancellationToken = default);
+    Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true, CancellationToken cancellationToken = default);
 }

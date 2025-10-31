@@ -20,7 +20,7 @@ internal class ExtendedApduProcessor(ISmartCardConnection connection, IApduForma
 
     public IApduFormatter Formatter => formatter;
 
-    public virtual async Task<ResponseApdu> TransmitAsync(CommandApdu command,
+    public virtual async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true,
         CancellationToken cancellationToken = default)
     {
         var payload = formatter.Format(

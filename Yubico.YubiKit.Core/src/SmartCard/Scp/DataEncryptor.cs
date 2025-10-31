@@ -21,4 +21,4 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// </summary>
 /// <param name="data">The data to encrypt.</param>
 /// <returns>The encrypted data.</returns>
-internal delegate byte[] DataEncryptor(ReadOnlySpan<byte> data);
+public delegate byte[] DataEncryptor(ReadOnlySpan<byte> data);

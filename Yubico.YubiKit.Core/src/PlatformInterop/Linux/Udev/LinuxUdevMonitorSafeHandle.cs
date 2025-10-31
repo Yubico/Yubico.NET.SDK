@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Linux.Udev;
@@ -27,7 +26,6 @@ internal class LinuxUdevMonitorSafeHandle : SafeHandle
 
     public override bool IsInvalid => handle == IntPtr.Zero;
 
-    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
     protected override bool ReleaseHandle()
     {
         NativeMethods.udev_monitor_unref(handle);

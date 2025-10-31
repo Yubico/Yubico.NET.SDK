@@ -13,11 +13,9 @@
 // limitations under the License.
 
 using System.Diagnostics;
-using System.Runtime.Serialization;
 
 namespace Yubico.YubiKit.Core.PlatformInterop;
 
-[Serializable]
 public class PlatformApiException : Exception
 {
     public PlatformApiException() :
@@ -31,10 +29,6 @@ public class PlatformApiException : Exception
     }
 
     public PlatformApiException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
-
-    protected PlatformApiException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 

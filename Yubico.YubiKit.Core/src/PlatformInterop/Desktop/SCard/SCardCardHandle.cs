@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Win32.SafeHandles;
-using System.Runtime.ConstrainedExecution;
 
 namespace Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 
@@ -35,7 +34,6 @@ internal class SCardCardHandle : SafeHandleZeroOrMinusOneIsInvalid
 
     public SCARD_DISPOSITION ReleaseDisposition { get; set; } = SCARD_DISPOSITION.RESET_CARD;
 
-    [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
     protected override bool ReleaseHandle() =>
         NativeMethods.SCardDisconnect(handle, ReleaseDisposition) == ErrorCode.SCARD_S_SUCCESS;
 }

@@ -37,8 +37,8 @@ public abstract class IntegrationTestBase : IDisposable
         DeviceMonitorService = ServiceProvider.GetRequiredService<DeviceMonitorService>();
         DeviceListenerService = ServiceProvider.GetRequiredService<DeviceListenerService>();
 
-        // DeviceMonitorService.StartAsync(CancellationToken.None).Wait();
-        // DeviceListenerService.StartAsync(CancellationToken.None).Wait();
+        DeviceMonitorService.StartAsync(CancellationToken.None).Wait();
+        DeviceListenerService.StartAsync(CancellationToken.None).Wait();
     }
 
     private static Action<YubiKeyManagerOptions> DefaultOptions =>

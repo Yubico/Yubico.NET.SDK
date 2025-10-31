@@ -23,7 +23,7 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// <summary>
 ///     Internal SCP state class for managing SCP state, handling encryption/decryption and MAC.
 /// </summary>
-internal sealed class ScpState
+internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpState>? logger = null)
 {
     // SecurityDomainSession instruction codes (temporary - will move to SecurityDomainSession class)
     private const byte InsInitializeUpdate = 0x50;
@@ -32,16 +32,16 @@ internal sealed class ScpState
     private const byte InsExternalAuthenticate = 0x82;
 
     // Encryption/Padding Constants
-    private const byte PaddingByte = 0x80;                    // ISO/IEC 9797-1 Padding Method 2
-    private const byte IvPrefixForDecryption = 0x80;          // IV generation prefix for response decryption
+    private const byte PaddingByte = 0x80; // ISO/IEC 9797-1 Padding Method 2
+    private const byte IvPrefixForDecryption = 0x80; // IV generation prefix for response decryption
 
     // Key Derivation Constants
-    private const byte DerivationTypeCardCryptogram = 0x00;   // Derivation type for card cryptogram verification
-    private const byte DerivationTypeHostCryptogram = 0x01;   // Derivation type for host cryptogram generation
-    private const byte DerivationTypeSEnc = 0x04;             // Derivation type for S-ENC (session encryption key)
-    private const byte DerivationTypeSMac = 0x06;             // Derivation type for S-MAC (session MAC key)
-    private const byte DerivationTypeSRMac = 0x07;            // Derivation type for S-RMAC (session response MAC key)
-    private const byte DerivationContextLength = 0x40;        // Context length in bits (64 bits = 8 bytes)
+    private const byte DerivationTypeCardCryptogram = 0x00; // Derivation type for card cryptogram verification
+    private const byte DerivationTypeHostCryptogram = 0x01; // Derivation type for host cryptogram generation
+    private const byte DerivationTypeSEnc = 0x04; // Derivation type for S-ENC (session encryption key)
+    private const byte DerivationTypeSMac = 0x06; // Derivation type for S-MAC (session MAC key)
+    private const byte DerivationTypeSRMac = 0x07; // Derivation type for S-RMAC (session response MAC key)
+    private const byte DerivationContextLength = 0x40; // Context length in bits (64 bits = 8 bytes)
 
     // SCP11 Constants
     private const byte Scp11aKeyId = 0x13;
@@ -51,32 +51,23 @@ internal sealed class ScpState
     private const byte Scp11bTypeParam = 0x00;
     private const byte Scp11cTypeParam = 0x03;
     private const byte Scp11MoreFragmentsFlag = 0x80;
-    private const byte Scp11KeyUsage = 0x3C;          // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
-    private const byte Scp11KeyType = 0x88;            // AES
-    private readonly SessionKeys _keys;
+    private const byte Scp11KeyUsage = 0x3C; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
+    private const byte Scp11KeyType = 0x88; // AES
 
-    private readonly ILogger<ScpState>? _logger;
-    private int _encCounter = 1;      // Counter for command encryption (host->card)
-    private int _respCounter = 1;     // Counter for response decryption (card->host)
-    private byte[] _macChain;
-
-    public ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpState>? logger = null)
-    {
-        _keys = keys;
-        _macChain = macChain;
-        _logger = logger;
-    }
+    private int _encCounter = 1; // Counter for command encryption (host->card)
+    private byte[] _macChain = macChain;
+    private int _respCounter = 1; // Counter for response decryption (card->host)
 
     public DataEncryptor? GetDataEncryptor()
     {
-        if (_keys.Dek.IsEmpty) return null; // TODO - should we throw an exception?
-        return data => CbcEncrypt(_keys.Dek, data);
+        if (keys.Dek.IsEmpty) return null; // TODO - should we throw an exception?
+        return data => CbcEncrypt(keys.Dek, data);
     }
 
     public byte[] Encrypt(ReadOnlySpan<byte> data)
     {
         // Pad the data
-        _logger?.LogTrace("Plaintext data: {Data}", Convert.ToHexString(data));
+        logger?.LogTrace("Plaintext data: {Data}", Convert.ToHexString(data));
 
         var padLen = 16 - (data.Length % 16);
         var paddedLength = data.Length + padLen;
@@ -87,7 +78,7 @@ internal sealed class ScpState
 
         byte[]? iv = null;
         using var aes = Aes.Create();
-        aes.Key = _keys.Senc.ToArray();
+        aes.Key = keys.Senc.ToArray();
 
         try
         {
@@ -121,7 +112,7 @@ internal sealed class ScpState
         byte[]? iv = null;
         byte[]? decrypted = null;
         using var aes = Aes.Create();
-        aes.Key = _keys.Senc.ToArray();
+        aes.Key = keys.Senc.ToArray();
 
         try
         {
@@ -146,7 +137,7 @@ internal sealed class ScpState
             for (var i = decrypted.Length - 1; i > 0; i--)
                 if (decrypted[i] == PaddingByte)
                 {
-                    _logger?.LogTrace("Plaintext resp: {Data}", Convert.ToHexString(decrypted.AsSpan(0, i)));
+                    logger?.LogTrace("Plaintext resp: {Data}", Convert.ToHexString(decrypted.AsSpan(0, i)));
                     var result = decrypted[..i];
                     return result;
                 }
@@ -174,7 +165,7 @@ internal sealed class ScpState
             Console.WriteLine($"[MAC DEBUG] MAC chain: {Convert.ToHexString(_macChain)}");
             Console.WriteLine($"[MAC DEBUG] Data: {Convert.ToHexString(data)}");
 
-            using var mac = new AesCmac(_keys.Smac);
+            using var mac = new AesCmac(keys.Smac);
             mac.AppendData(_macChain);
             mac.AppendData(data);
             _macChain = mac.GetHashAndReset();
@@ -204,7 +195,7 @@ internal sealed class ScpState
             data[..(data.Length - 8)].CopyTo(msg);
             BinaryPrimitives.WriteInt16BigEndian(msg[(data.Length - 8)..], sw);
 
-            using var mac = new AesCmac(_keys.Srmac);
+            using var mac = new AesCmac(keys.Srmac);
             mac.AppendData(_macChain);
             mac.AppendData(msg);
             Span<byte> computedMac = stackalloc byte[16];
@@ -260,7 +251,7 @@ internal sealed class ScpState
         var cardChallenge = responseData[13..21];
         var cardCryptogram = responseData[21..29];
 
-        Console.WriteLine($"[DEBUG] INITIALIZE UPDATE response:");
+        Console.WriteLine("[DEBUG] INITIALIZE UPDATE response:");
         Console.WriteLine($"[DEBUG]   Key Info: {Convert.ToHexString(keyInfo)}");
         Console.WriteLine($"[DEBUG]   Key Info[0] (Key Diversification): 0x{keyInfo[0]:X2}");
         Console.WriteLine($"[DEBUG]   Key Info[1] (Key Version): 0x{keyInfo[1]:X2}");
@@ -281,16 +272,19 @@ internal sealed class ScpState
         Console.WriteLine($"[DEBUG] S-RMAC: {Convert.ToHexString(sessionKeys.Srmac)}");
 
         Span<byte> genCardCryptogram = stackalloc byte[8];
-        StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeCardCryptogram, context, DerivationContextLength, genCardCryptogram);
+        StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeCardCryptogram, context, DerivationContextLength,
+            genCardCryptogram);
 
         Console.WriteLine($"[DEBUG] Generated card cryptogram: {Convert.ToHexString(genCardCryptogram)}");
         Console.WriteLine($"[DEBUG] Received card cryptogram:  {Convert.ToHexString(cardCryptogram)}");
 
         if (!CryptographicOperations.FixedTimeEquals(genCardCryptogram, cardCryptogram))
-            throw new BadResponseException($"Wrong SCP03 key set - Expected: {Convert.ToHexString(cardCryptogram)}, Got: {Convert.ToHexString(genCardCryptogram)}");
+            throw new BadResponseException(
+                $"Wrong SCP03 key set - Expected: {Convert.ToHexString(cardCryptogram)}, Got: {Convert.ToHexString(genCardCryptogram)}");
 
         Span<byte> hostCryptogramBytes = stackalloc byte[8];
-        StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeHostCryptogram, context, DerivationContextLength, hostCryptogramBytes);
+        StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeHostCryptogram, context, DerivationContextLength,
+            hostCryptogramBytes);
 
         return (new ScpState(sessionKeys, new byte[16]), hostCryptogramBytes.ToArray());
     }
@@ -303,7 +297,7 @@ internal sealed class ScpState
         // GPC v2.3 Amendment F (SCP11) v1.4 §7.1.1
         var kid = keyParams.KeyRef.Kid;
 
-        byte scpTypeParam = kid switch
+        var scpTypeParam = kid switch
         {
             ScpKid.SCP11a => Scp11aTypeParam,
             ScpKid.SCP11b => Scp11bTypeParam,

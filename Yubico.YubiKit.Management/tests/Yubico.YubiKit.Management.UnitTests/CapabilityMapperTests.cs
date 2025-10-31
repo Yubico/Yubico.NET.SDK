@@ -1,8 +1,7 @@
-
 using System.Buffers.Binary;
-using Yubico.YubiKit.Management;
 
-namespace Yubico.YubiKit.Core.UnitTests;
+namespace Yubico.YubiKit.Management.UnitTests;
+
 public class CapabilityMapperTests
 {
     [Theory]
@@ -14,9 +13,9 @@ public class CapabilityMapperTests
     [InlineData(0x10, DeviceCapabilities.HsmAuth)]
     public void FromFips_SingleBit_MapsCorrectly(int fipsValue, DeviceCapabilities expected)
     {
-        byte[] buffer = CreateBigEndianBytes(fipsValue);
+        var buffer = CreateBigEndianBytes(fipsValue);
 
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
         Assert.Equal(expected, result);
     }
@@ -25,13 +24,16 @@ public class CapabilityMapperTests
     [InlineData(0x03, DeviceCapabilities.Fido2 | DeviceCapabilities.Piv)]
     [InlineData(0x05, DeviceCapabilities.Fido2 | DeviceCapabilities.OpenPgp)]
     [InlineData(0x07, DeviceCapabilities.Fido2 | DeviceCapabilities.Piv | DeviceCapabilities.OpenPgp)]
-    [InlineData(0x0F, DeviceCapabilities.Fido2 | DeviceCapabilities.Piv | DeviceCapabilities.OpenPgp | DeviceCapabilities.Oath)]
-    [InlineData(0x1F, DeviceCapabilities.Fido2 | DeviceCapabilities.Piv | DeviceCapabilities.OpenPgp | DeviceCapabilities.Oath | DeviceCapabilities.HsmAuth)]
+    [InlineData(0x0F,
+        DeviceCapabilities.Fido2 | DeviceCapabilities.Piv | DeviceCapabilities.OpenPgp | DeviceCapabilities.Oath)]
+    [InlineData(0x1F,
+        DeviceCapabilities.Fido2 | DeviceCapabilities.Piv | DeviceCapabilities.OpenPgp | DeviceCapabilities.Oath |
+        DeviceCapabilities.HsmAuth)]
     public void FromFips_MultipleBits_MapsCorrectly(int fipsValue, DeviceCapabilities expected)
     {
-        byte[] buffer = CreateBigEndianBytes(fipsValue);
+        var buffer = CreateBigEndianBytes(fipsValue);
 
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
         Assert.Equal(expected, result);
     }
@@ -39,11 +41,11 @@ public class CapabilityMapperTests
     [Fact]
     public void FromFips_AllFipsCapabilities_ReturnsExpected()
     {
-        byte[] buffer = CreateBigEndianBytes(0x1F); // All 5 FIPS bits set
+        var buffer = CreateBigEndianBytes(0x1F); // All 5 FIPS bits set
 
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
-        DeviceCapabilities expected =
+        var expected =
             DeviceCapabilities.Fido2 |
             DeviceCapabilities.Piv |
             DeviceCapabilities.OpenPgp |
@@ -54,21 +56,21 @@ public class CapabilityMapperTests
     }
 
     [Theory]
-    [InlineData(0x20)]  // Bit 5 - undefined
-    [InlineData(0x40)]  // Bit 6 - undefined
-    [InlineData(0x80)]  // Bit 7 - undefined
-    [InlineData(0xE0)]  // Bits 5-7 all set
-    [InlineData(0xFF)]  // All bits including undefined
+    [InlineData(0x20)] // Bit 5 - undefined
+    [InlineData(0x40)] // Bit 6 - undefined
+    [InlineData(0x80)] // Bit 7 - undefined
+    [InlineData(0xE0)] // Bits 5-7 all set
+    [InlineData(0xFF)] // All bits including undefined
     public void FromFips_UnknownBits_AreIgnored(int fipsValue)
     {
-        byte[] buffer = CreateBigEndianBytes(fipsValue);
+        var buffer = CreateBigEndianBytes(fipsValue);
 
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
         // Should only include known FIPS capabilities (bits 0-4)
-        DeviceCapabilities knownBits = (DeviceCapabilities)(fipsValue & 0x1F);
-        byte[] knownBuffer = CreateBigEndianBytes((int)knownBits);
-        DeviceCapabilities expected = CapabilityMapper.FromFips(knownBuffer);
+        var knownBits = (DeviceCapabilities)(fipsValue & 0x1F);
+        var knownBuffer = CreateBigEndianBytes((int)knownBits);
+        var expected = CapabilityMapper.FromFips(knownBuffer);
 
         Assert.Equal(expected, result);
     }
@@ -76,9 +78,9 @@ public class CapabilityMapperTests
     [Fact]
     public void FromFips_UnknownBitsCombinedWithKnown_MapsKnownOnly()
     {
-        byte[] buffer = CreateBigEndianBytes(0xE1); // Bits 7,6,5 (unknown) + bit 0 (Fido2)
+        var buffer = CreateBigEndianBytes(0xE1); // Bits 7,6,5 (unknown) + bit 0 (Fido2)
 
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
         Assert.Equal(DeviceCapabilities.Fido2, result);
     }
@@ -86,9 +88,9 @@ public class CapabilityMapperTests
     [Fact]
     public void FromFips_EmptyBuffer_ReturnsNone()
     {
-        byte[] buffer = Array.Empty<byte>();
+        var buffer = Array.Empty<byte>();
 
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
         Assert.Equal(DeviceCapabilities.None, result);
     }
@@ -97,9 +99,9 @@ public class CapabilityMapperTests
     public void FromFips_HighByte_IsProcessed()
     {
         // Test that high byte is properly handled (16-bit value)
-        byte[] buffer = new byte[] { 0x01, 0x00 }; // 0x0100 big-endian
+        var buffer = new byte[] { 0x01, 0x00 }; // 0x0100 big-endian
 
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
         // Bit 8 should be ignored (undefined in FIPS mapping)
         Assert.Equal(DeviceCapabilities.None, result);
@@ -115,9 +117,9 @@ public class CapabilityMapperTests
     [InlineData(0x0200, DeviceCapabilities.Fido2)]
     public void FromApp_TwoBytes_DirectCast(int appValue, DeviceCapabilities expected)
     {
-        byte[] buffer = CreateBigEndianBytes(appValue);
+        var buffer = CreateBigEndianBytes(appValue);
 
-        DeviceCapabilities result = CapabilityMapper.FromApp(buffer);
+        var result = CapabilityMapper.FromApp(buffer);
 
         Assert.Equal(expected, result);
     }
@@ -130,9 +132,9 @@ public class CapabilityMapperTests
     [InlineData(0x20, DeviceCapabilities.Oath)]
     public void FromApp_OneByte_DirectCast(byte appValue, DeviceCapabilities expected)
     {
-        byte[] buffer = new byte[] { appValue };
+        var buffer = new[] { appValue };
 
-        DeviceCapabilities result = CapabilityMapper.FromApp(buffer);
+        var result = CapabilityMapper.FromApp(buffer);
 
         Assert.Equal(expected, result);
     }
@@ -140,10 +142,10 @@ public class CapabilityMapperTests
     [Fact]
     public void FromApp_MultipleCaps_DirectCast()
     {
-        int allCaps = (int)DeviceCapabilities.All;
-        byte[] buffer = CreateBigEndianBytes(allCaps);
+        var allCaps = (int)DeviceCapabilities.All;
+        var buffer = CreateBigEndianBytes(allCaps);
 
-        DeviceCapabilities result = CapabilityMapper.FromApp(buffer);
+        var result = CapabilityMapper.FromApp(buffer);
 
         Assert.Equal(DeviceCapabilities.All, result);
     }
@@ -151,9 +153,9 @@ public class CapabilityMapperTests
     [Fact]
     public void FromApp_EmptyBuffer_ReturnsNone()
     {
-        byte[] buffer = Array.Empty<byte>();
+        var buffer = Array.Empty<byte>();
 
-        DeviceCapabilities result = CapabilityMapper.FromApp(buffer);
+        var result = CapabilityMapper.FromApp(buffer);
 
         Assert.Equal(DeviceCapabilities.None, result);
     }
@@ -162,9 +164,9 @@ public class CapabilityMapperTests
     public void FromFips_DoesNotIncludeOtpOrU2f()
     {
         // FIPS should never map to Otp or U2f (not FIPS-approved)
-        byte[] buffer = CreateBigEndianBytes(0xFF);
+        var buffer = CreateBigEndianBytes(0xFF);
 
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
         Assert.False(result.HasFlag(DeviceCapabilities.Otp));
         Assert.False(result.HasFlag(DeviceCapabilities.U2f));
@@ -173,10 +175,10 @@ public class CapabilityMapperTests
     [Fact]
     public void FromApp_CanIncludeOtpAndU2f()
     {
-        int appValue = (int)(DeviceCapabilities.Otp | DeviceCapabilities.U2f);
-        byte[] buffer = CreateBigEndianBytes(appValue);
+        var appValue = (int)(DeviceCapabilities.Otp | DeviceCapabilities.U2f);
+        var buffer = CreateBigEndianBytes(appValue);
 
-        DeviceCapabilities result = CapabilityMapper.FromApp(buffer);
+        var result = CapabilityMapper.FromApp(buffer);
 
         Assert.True(result.HasFlag(DeviceCapabilities.Otp));
         Assert.True(result.HasFlag(DeviceCapabilities.U2f));
@@ -191,7 +193,7 @@ public class CapabilityMapperTests
     public void FromFips_RoundTrip_EachFipsCapability(DeviceCapabilities capability)
     {
         // Find which FIPS bit corresponds to this capability
-        int fipsBit = capability switch
+        var fipsBit = capability switch
         {
             DeviceCapabilities.Fido2 => 0x01,
             DeviceCapabilities.Piv => 0x02,
@@ -201,9 +203,9 @@ public class CapabilityMapperTests
             _ => throw new ArgumentException("Not a FIPS capability")
         };
 
-        byte[] buffer = CreateBigEndianBytes(fipsBit);
+        var buffer = CreateBigEndianBytes(fipsBit);
 
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
         Assert.Equal(capability, result);
     }
@@ -212,11 +214,11 @@ public class CapabilityMapperTests
     public void FromFips_BigEndianEncoding_IsRespected()
     {
         // Manually construct big-endian bytes
-        byte[] buffer = new byte[] { 0x00, 0x1F }; // Big-endian 0x001F
+        var buffer = new byte[] { 0x00, 0x1F }; // Big-endian 0x001F
 
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
-        DeviceCapabilities expected =
+        var expected =
             DeviceCapabilities.Fido2 |
             DeviceCapabilities.Piv |
             DeviceCapabilities.OpenPgp |
@@ -230,11 +232,11 @@ public class CapabilityMapperTests
     public void FromApp_BigEndianEncoding_IsRespected()
     {
         // Manually construct big-endian bytes for HsmAuth | Fido2
-        byte[] buffer = new byte[] { 0x03, 0x00 }; // Big-endian 0x0300
+        var buffer = new byte[] { 0x03, 0x00 }; // Big-endian 0x0300
 
-        DeviceCapabilities result = CapabilityMapper.FromApp(buffer);
+        var result = CapabilityMapper.FromApp(buffer);
 
-        DeviceCapabilities expected = DeviceCapabilities.HsmAuth | DeviceCapabilities.Fido2;
+        var expected = DeviceCapabilities.HsmAuth | DeviceCapabilities.Fido2;
 
         Assert.Equal(expected, result);
     }
@@ -244,7 +246,7 @@ public class CapabilityMapperTests
     {
         ReadOnlyMemory<byte> memory = default;
 
-        DeviceCapabilities result = CapabilityMapper.FromFips(memory);
+        var result = CapabilityMapper.FromFips(memory);
 
         Assert.Equal(DeviceCapabilities.None, result);
     }
@@ -254,7 +256,7 @@ public class CapabilityMapperTests
     {
         ReadOnlyMemory<byte> memory = default;
 
-        DeviceCapabilities result = CapabilityMapper.FromApp(memory);
+        var result = CapabilityMapper.FromApp(memory);
 
         Assert.Equal(DeviceCapabilities.None, result);
     }
@@ -265,7 +267,7 @@ public class CapabilityMapperTests
     [InlineData(new byte[] { 0x00, 0x00, 0x00 })]
     public void FromFips_ZeroValue_ReturnsNone(byte[] buffer)
     {
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
         Assert.Equal(DeviceCapabilities.None, result);
     }
@@ -276,10 +278,10 @@ public class CapabilityMapperTests
         // Single byte can only represent lower 8 capabilities
         byte[] buffer = [0xFF];
 
-        DeviceCapabilities result = CapabilityMapper.FromApp(buffer);
+        var result = CapabilityMapper.FromApp(buffer);
 
         // Should only have Otp, U2f, OpenPgp, Piv, Oath (not HsmAuth or Fido2)
-        DeviceCapabilities expected =
+        var expected =
             DeviceCapabilities.Otp |
             DeviceCapabilities.U2f |
             DeviceCapabilities.OpenPgp |
@@ -292,12 +294,12 @@ public class CapabilityMapperTests
     [Fact]
     public void FromFips_MaxInt16_ParsesCorrectly()
     {
-        byte[] buffer = new byte[] { 0x7F, 0xFF }; // Max positive int16
+        var buffer = new byte[] { 0x7F, 0xFF }; // Max positive int16
 
         // Should ignore all high bits, only process bits 0-4
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
-        DeviceCapabilities expected =
+        var expected =
             DeviceCapabilities.Fido2 |
             DeviceCapabilities.Piv |
             DeviceCapabilities.OpenPgp |
@@ -310,22 +312,20 @@ public class CapabilityMapperTests
     [Fact]
     public void FromFips_NegativeInt16_ParsesCorrectly()
     {
-        byte[] buffer = new byte[] { 0x80, 0x00 }; // -32768 as int16, 0x8000 as uint16
+        var buffer = new byte[] { 0x80, 0x00 }; // -32768 as int16, 0x8000 as uint16
 
         // Should ignore high bits beyond bit 4
-        DeviceCapabilities result = CapabilityMapper.FromFips(buffer);
+        var result = CapabilityMapper.FromFips(buffer);
 
         Assert.Equal(DeviceCapabilities.None, result);
     }
 
     private static byte[] CreateBigEndianBytes(int value)
     {
-        byte[] buffer = new byte[2];
+        var buffer = new byte[2];
         BinaryPrimitives.WriteInt16BigEndian(buffer, (short)value);
         return buffer;
     }
-
-
 }
 
 // Add this to your enum if not present

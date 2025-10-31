@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core.Integra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Core.UnitTests", "Yubico.YubiKit.Core\tests\Yubico.YubiKit.Core.UnitTests\Yubico.YubiKit.Core.UnitTests.csproj", "{C344BDA9-9415-4F4A-9667-EBBE4EF6ABA6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Management.UnitTests", "Yubico.YubiKit.Management\tests\Yubico.YubiKit.Management.UnitTests\Yubico.YubiKit.Management.UnitTests.csproj", "{580B62D6-CCF0-43B9-A414-FBD7F47136FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,10 @@ Global
 		{C344BDA9-9415-4F4A-9667-EBBE4EF6ABA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C344BDA9-9415-4F4A-9667-EBBE4EF6ABA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C344BDA9-9415-4F4A-9667-EBBE4EF6ABA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{580B62D6-CCF0-43B9-A414-FBD7F47136FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{580B62D6-CCF0-43B9-A414-FBD7F47136FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{580B62D6-CCF0-43B9-A414-FBD7F47136FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{580B62D6-CCF0-43B9-A414-FBD7F47136FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,5 +61,6 @@ Global
 		{145CCD23-4ED6-443D-B520-3ED1F375A63F} = {29556DAF-D256-48EA-BE95-94E86BFE0D22}
 		{77FE41B9-A511-4546-B546-622E549CF6DF} = {6BC51303-7F02-4271-99ED-4FB0EF4845D8}
 		{C344BDA9-9415-4F4A-9667-EBBE4EF6ABA6} = {6BC51303-7F02-4271-99ED-4FB0EF4845D8}
+		{580B62D6-CCF0-43B9-A414-FBD7F47136FB} = {29556DAF-D256-48EA-BE95-94E86BFE0D22}
 	EndGlobalSection
 EndGlobal

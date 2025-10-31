@@ -6,6 +6,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The project targets .NET 8 and .NET 10, uses C# preview language features (LangVersion=preview), and has nullable reference types enabled throughout.
 
+## Quick Reference - Critical Rules
+
+**Memory Management:**
+- ✅ Sync + ≤512 bytes → `Span<byte>` with `stackalloc`
+- ✅ Sync + >512 bytes → `ArrayPool<byte>.Shared.Rent()`
+- ✅ Async → `Memory<byte>` or `IMemoryOwner<byte>`
+- ❌ NEVER use `.ToArray()` unless data must escape scope
+- ❌ NEVER forget to return `ArrayPool` buffers (use try/finally)
+
+**Security:**
+- ✅ ALWAYS zero sensitive data: `CryptographicOperations.ZeroMemory()`
+- ✅ ALWAYS dispose crypto objects: `using var aes = Aes.Create()`
+- ❌ NEVER log PINs, keys, or sensitive payloads
+- ❌ NEVER use timing-vulnerable comparisons (use `FixedTimeEquals`)
+
+**Modern C#:**
+- ✅ ALWAYS use `is null` / `is not null` (never `== null`)
+- ✅ ALWAYS use switch expressions (never old switch statements)
+- ✅ ALWAYS use file-scoped namespaces
+- ✅ ALWAYS use collection expressions `[..]` (C# 12)
+- ❌ NEVER suppress nullable warnings with `!` without justification
+
+**Code Quality:**
+- ✅ ALWAYS follow `.editorconfig` (run `dotnet format` before commit)
+- ✅ ALWAYS handle `CancellationToken` in async methods
+- ✅ ALWAYS use `readonly` on fields that don't change
+- ❌ NEVER use `#region` (split large classes instead)
+- ❌ NEVER use exceptions for control flow
+
+**Crypto APIs:**
+- ✅ USE: `SHA256.HashData(data, outputSpan)` (Span-based)
+- ❌ AVOID: `SHA256.Create().ComputeHash(data)` (allocates array)
+
 ## Build and Test Commands
 
 ### Build
@@ -224,6 +257,278 @@ Need byte buffer?
    ├─ Caller provides? → Accept Span<byte> or Memory<byte> ✅
    └─ Must allocate? → new byte[] ⚠️ LAST RESORT
 ```
+
+### Type Selection: readonly struct vs struct vs class
+
+Choose the appropriate type based on size, mutability, and usage patterns.
+
+#### Use `readonly struct` (PREFERRED for value types)
+
+**✅ When:**
+- Type is ≤16 bytes (2 machine words)
+- Immutable data (no fields change after construction)
+- Passed by value frequently
+- Used in hot paths (APDU processing, protocol handling)
+
+**✅ Benefits:**
+- Prevents defensive copies
+- Clear immutability contract
+- Potential stack allocation
+- No GC pressure
+```csharp
+// ✅ BEST - Small, immutable, value semantics
+public readonly struct StatusWord
+{
+    public StatusWord(byte sw1, byte sw2) => (SW1, SW2) = (sw1, sw2);
+    
+    public byte SW1 { get; }
+    public byte SW2 { get; }
+    public ushort Value => (ushort)((SW1 << 8) | SW2);
+    
+    public bool IsSuccess => Value == 0x9000;
+}
+
+// ✅ GOOD - Wraps small data
+public readonly struct SlotNumber
+{
+    public SlotNumber(byte value) => Value = value;
+    public byte Value { get; }
+}
+
+// ✅ GOOD - Protocol metadata
+public readonly struct ApduHeader
+{
+    public ApduHeader(byte cla, byte ins, byte p1, byte p2)
+    {
+        CLA = cla;
+        INS = ins;
+        P1 = p1;
+        P2 = p2;
+    }
+    
+    public byte CLA { get; }
+    public byte INS { get; }
+    public byte P1 { get; }
+    public byte P2 { get; }
+}
+```
+
+**❌ Don't use for:**
+- Types >16 bytes (expensive copying)
+- Mutable data
+- Types stored in collections (boxing overhead)
+
+#### Use `struct` (mutable value types)
+
+**⚠️ Use sparingly - only when mutation is truly needed:**
+- Temporary computation buffers
+- Performance-critical mutable state (rare)
+```csharp
+// ⚠️ Acceptable - Mutable builder pattern
+public struct ApduBuilder
+{
+    private byte _cla;
+    private byte _ins;
+    private byte[] _data;
+    
+    public ApduBuilder WithCommand(byte cla, byte ins)
+    {
+        _cla = cla;
+        _ins = ins;
+        return this;
+    }
+    
+    public CommandApdu Build() => new(_cla, _ins, 0, 0, _data);
+}
+```
+
+**❌ Problems with mutable structs:**
+- Defensive copies hurt performance
+- Confusing semantics (copy on assign)
+- Hard to reason about
+
+**Better alternatives:**
+```csharp
+// ✅ BETTER - Immutable with builder
+public readonly struct CommandApdu
+{
+    // ... immutable properties
+    
+    public static Builder CreateBuilder() => new();
+    
+    public class Builder  // Class builder for mutable state
+    {
+        private byte _cla;
+        private byte _ins;
+        
+        public Builder WithCommand(byte cla, byte ins)
+        {
+            _cla = cla;
+            _ins = ins;
+            return this;
+        }
+        
+        public CommandApdu Build() => new(_cla, _ins, 0, 0);
+    }
+}
+```
+
+#### Use `class` (reference types)
+
+**✅ When:**
+- Type is >16 bytes
+- Contains reference types (arrays, strings, objects)
+- Needs identity semantics (not value semantics)
+- Represents entities or services
+- Implements interfaces with mutable operations
+```csharp
+// ✅ GOOD - Large data structure
+public class DeviceInfo
+{
+    public string SerialNumber { get; init; }
+    public Version FirmwareVersion { get; init; }
+    public FormFactor FormFactor { get; init; }
+    public IReadOnlyList<Transport> AvailableTransports { get; init; }
+    // ... more properties (>16 bytes total)
+}
+
+// ✅ GOOD - Contains managed resources
+public sealed class SmartCardConnection : IConnection
+{
+    private readonly SafeHandle _handle;
+    private readonly ILogger _logger;
+    
+    // ... implementation
+}
+
+// ✅ GOOD - Service/manager
+public class YubiKeyManager : IYubiKeyManager
+{
+    private readonly IDeviceRepository _repository;
+    private readonly IYubiKeyFactory _factory;
+    
+    // ... implementation
+}
+```
+
+#### Special Case: APDU Types
+
+For APDU-related types in this codebase:
+```csharp
+// ✅ CommandApdu - Use readonly struct if small OR class if contains byte[]
+// Option A: Small header-only commands
+public readonly struct CommandApduHeader
+{
+    public CommandApduHeader(byte cla, byte ins, byte p1, byte p2)
+    {
+        CLA = cla; INS = ins; P1 = p1; P2 = p2;
+    }
+    
+    public byte CLA { get; }
+    public byte INS { get; }
+    public byte P1 { get; }
+    public byte P2 { get; }
+}
+
+// Option B: Full APDU with data - use class (contains byte array)
+public sealed class CommandApdu
+{
+    private readonly ReadOnlyMemory<byte> _data;
+    
+    public CommandApdu(ReadOnlySpan<byte> data)
+    {
+        _data = data.ToArray();
+    }
+    
+    public ReadOnlySpan<byte> AsSpan() => _data.Span;
+}
+
+// ✅ ResponseApdu - Class (contains byte array)
+public sealed class ResponseApdu
+{
+    private readonly ReadOnlyMemory<byte> _data;
+    
+    public ResponseApdu(ReadOnlySpan<byte> data)
+    {
+        _data = data.ToArray();
+    }
+    
+    public ReadOnlySpan<byte> Data => _data.Span[..^2];
+    public StatusWord SW => new(_data.Span[^2], _data.Span[^1]);
+}
+```
+
+#### Size Guidelines
+
+**16-byte threshold explained:**
+```csharp
+// ✅ 16 bytes - OK for readonly struct
+public readonly struct DeviceId
+{
+    public Guid Value { get; }  // 16 bytes (128 bits)
+}
+
+// ✅ 8 bytes - Excellent for readonly struct
+public readonly struct Timestamp
+{
+    public long Ticks { get; }  // 8 bytes
+}
+
+// ❌ 24+ bytes - Use class instead
+public struct DeviceInfo  // BAD - too large, expensive to copy
+{
+    public Guid Id { get; }              // 16 bytes
+    public long Timestamp { get; }        // 8 bytes
+    public int FirmwareVersion { get; }   // 4 bytes
+    // Total: 28 bytes - too large!
+}
+
+// ✅ Convert to class
+public sealed class DeviceInfo
+{
+    public Guid Id { get; init; }
+    public long Timestamp { get; init; }
+    public int FirmwareVersion { get; init; }
+}
+```
+
+#### Common Mistakes
+
+**❌ BAD: Large struct**
+```csharp
+public struct ApduCommand  // 32+ bytes!
+{
+    public byte[] Data { get; set; }  // Reference type in struct!
+    public DateTime Timestamp { get; set; }
+    public Guid CorrelationId { get; set; }
+}
+```
+
+**❌ BAD: Mutable struct in collection**
+```csharp
+var list = new List<MutableStruct>();
+list[0].Value = 10;  // Modifies COPY, not original!
+```
+
+**✅ GOOD: readonly struct or class**
+```csharp
+public readonly struct ApduHeader { /* 4 bytes */ }
+public sealed class ApduCommand { /* Contains byte[] */ }
+```
+
+#### Decision Matrix
+
+| Criterion | readonly struct | struct | class |
+|-----------|----------------|--------|-------|
+| Size | ≤16 bytes | ≤16 bytes | Any size |
+| Mutability | Immutable | Mutable | Either |
+| Contains references | No | No | Yes |
+| Hot path | ✅ Ideal | ⚠️ Careful | ✅ OK |
+| Stack allocation | ✅ Yes | ✅ Yes | ❌ Heap only |
+| Defensive copies | ✅ None | ❌ Many | N/A |
+| GC pressure | ✅ None | ✅ None | ❌ Yes |
+
+**When in doubt:** Use `class` for correctness, profile if performance critical, then consider `readonly struct` if ≤16 bytes and immutable.
 
 ### Anti-Patterns
 

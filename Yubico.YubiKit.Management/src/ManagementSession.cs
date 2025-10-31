@@ -74,7 +74,8 @@ public sealed class ManagementSession<TConnection>(
         _protocol.Configure(_version);
 
         // Initialize SCP if key parameters were provided
-        if (scpKeyParams is not null && _protocol is ISmartCardProtocol smartCardProtocol)
+        if (scpKeyParams is not null &&
+            _protocol is ISmartCardProtocol smartCardProtocol)
             await smartCardProtocol.InitScpAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
 
         _isInitialized = true;

@@ -93,7 +93,7 @@ public readonly record struct DeviceInfo
         var isNfcRestricted = tlvDict.TryGetValue(TAG_NFC_RESTRICTED, out var nfcRestrictedBytes) &&
                               nfcRestrictedBytes.Span[0] == 1;
         var hasPinComplexity = tlvDict.TryGetValue(TAG_PIN_COMPLEXITY, out var hasPinComplexityBytes) &&
-                                       hasPinComplexityBytes.Span[0] == 1;
+                               hasPinComplexityBytes.Span[0] == 1;
 
         string? partNumber = null;
         if (tlvDict.TryGetSpan(TAG_PART_NUMBER, out var partNumberBytes))
@@ -155,7 +155,6 @@ public readonly record struct DeviceInfo
             StmVersion = stmVersion
         };
     }
-
 
     private static (FirmwareVersion, VersionQualifier) DetermineFirmwareVersion(
         Dictionary<int, ReadOnlyMemory<byte>> dict,
@@ -237,29 +236,21 @@ public static class CapabilityMapper // TODO internal
     public static DeviceCapabilities FromFips(ReadOnlyMemory<byte> value)
     {
         if (value.IsEmpty) return 0;
-        if (value.Length == 1 && value.Span[0] == 0)
-        {
-            return DeviceCapabilities.None;
-        }
+        if (value.Length == 1 && value.Span[0] == 0) return DeviceCapabilities.None;
 
         int fips = BinaryPrimitives.ReadInt16BigEndian(value.Span);
         DeviceCapabilities capabilities = 0;
 
         foreach (var (bit, cap) in FipsMapping)
-        {
             if ((fips & bit) != 0)
                 capabilities |= cap;
-        }
 
         return capabilities;
     }
 
     public static DeviceCapabilities FromApp(ReadOnlyMemory<byte> appData)
     {
-        if (appData.IsEmpty)
-        {
-            return DeviceCapabilities.None;
-        }
+        if (appData.IsEmpty) return DeviceCapabilities.None;
 
         return appData.Length == 1
             ? (DeviceCapabilities)appData.Span[0]

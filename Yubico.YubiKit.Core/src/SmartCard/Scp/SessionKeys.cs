@@ -23,9 +23,9 @@ internal sealed class SessionKeys : IDisposable
 {
     private byte[]? _dek;
     private bool _disposed;
-    private byte[] _senc;
-    private byte[] _smac;
-    private byte[] _srmac;
+    private byte[]? _senc;
+    private byte[]? _smac;
+    private byte[]? _srmac;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="SessionKeys" /> class.

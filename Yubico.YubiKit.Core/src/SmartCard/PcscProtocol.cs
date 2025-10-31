@@ -46,6 +46,11 @@ internal class PcscProtocol : ISmartCardProtocol
     private const byte P1_SELECT = 0x04;
     private const byte P2_SELECT = 0x00;
     private const byte INS_SEND_REMAINING = 0xC0;
+
+    // SCP03 Constants
+    private const byte CLA_SECURE_MESSAGING = 0x84;           // CLA with SM bit set
+    private const byte INS_EXTERNAL_AUTHENTICATE = 0x82;      // EXTERNAL AUTHENTICATE instruction
+    private const byte SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC = 0x33;  // Security level: C-MAC + C-DECRYPTION + R-MAC + R-ENCRYPTION
     private readonly ISmartCardConnection _connection;
     private readonly byte _insSendRemaining;
     private readonly ILogger<PcscProtocol> _logger;
@@ -167,14 +172,19 @@ internal class PcscProtocol : ISmartCardProtocol
             null,
             cancellationToken).ConfigureAwait(false);
 
-        // Wrap base processor with SCP
+        // Create SCP processor with base processor's formatter
         var scpProcessor = new ScpProcessor(baseProcessor, baseProcessor.Formatter, state);
 
         // Send EXTERNAL AUTHENTICATE with host cryptogram
-        // Security level: 0x33 (C-MAC + C-DECRYPTION + R-MAC + R-ENCRYPTION)
-        // Must use useScp=false to bypass SCP for this specific command
-        var authCommand = new CommandApdu(0x84, 0x82, 0x33, 0x00, hostCryptogram);
-        var authResponse = await scpProcessor.TransmitAsync(authCommand, false, false, cancellationToken)
+        // NOTE: Command must have CLA with SM bit already set - MAC is computed over this CLA
+        // Matches Java: new Apdu(0x84, 0x82, 0x33, 0, pair.second)
+        var authCommand = new CommandApdu(
+            CLA_SECURE_MESSAGING,
+            INS_EXTERNAL_AUTHENTICATE,
+            SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC,
+            0x00,
+            hostCryptogram);
+        var authResponse = await scpProcessor.TransmitAsync(authCommand, true, false, cancellationToken)
             .ConfigureAwait(false);
 
         if (authResponse.SW != SWConstants.Success)

@@ -25,6 +25,16 @@ public sealed class StaticKeys : IDisposable
 {
     private static readonly byte[] DefaultKeyBytes = [0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F];
 
+    // Key Derivation Constants
+    private const byte DerivationTypeSEnc = 0x04;             // Derivation type for S-ENC (session encryption key)
+    private const byte DerivationTypeSMac = 0x06;             // Derivation type for S-MAC (session MAC key)
+    private const byte DerivationTypeSRMac = 0x07;            // Derivation type for S-RMAC (session response MAC key)
+    private const byte DerivationDataSeparator = 0x00;        // Separator byte in derivation data
+    private const byte DerivationDataCounter = 0x01;          // Counter byte in derivation data
+    private const short SessionKeyLengthBits = 128;           // Session key length in bits (128-bit AES)
+    private const int ContextLength = 16;                     // Context length in bytes
+    private const int DerivationDataPrefixLength = 11;        // Number of zero bytes at start of derivation data
+
     private byte[]? _enc;
     private byte[]? _mac;
     private byte[]? _dek;
@@ -88,35 +98,29 @@ public sealed class StaticKeys : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (context.Length != 16)
+        if (context.Length != ContextLength)
         {
-            throw new ArgumentException("Context must be 16 bytes", nameof(context));
+            throw new ArgumentException($"Context must be {ContextLength} bytes", nameof(context));
         }
 
-        Span<byte> senc = stackalloc byte[16];
-        Span<byte> smac = stackalloc byte[16];
-        Span<byte> srmac = stackalloc byte[16];
-        Span<byte> dek = stackalloc byte[16];
+        Span<byte> senc = stackalloc byte[ContextLength];
+        Span<byte> smac = stackalloc byte[ContextLength];
+        Span<byte> srmac = stackalloc byte[ContextLength];
 
         // Derive S-ENC from ENC
-        DeriveKey(_enc, 0x04, context, 128, senc);
+        DeriveKey(_enc, DerivationTypeSEnc, context, SessionKeyLengthBits, senc);
 
         // Derive S-MAC and S-RMAC from MAC
-        DeriveKey(_mac, 0x06, context, 128, smac);
-        DeriveKey(_mac, 0x07, context, 128, srmac);
+        DeriveKey(_mac, DerivationTypeSMac, context, SessionKeyLengthBits, smac);
+        DeriveKey(_mac, DerivationTypeSRMac, context, SessionKeyLengthBits, srmac);
 
-        // Derive DEK if available
-        bool hasDek = false;
-        if (_dek != null)
-        {
-            DeriveKey(_dek, 0x04, context, 128, dek);
-            hasDek = true;
-        }
+        // DEK is NOT derived - it's passed through as-is (used for PUTKEY operations)
+        // This matches the Java implementation
 
         try
         {
-            return hasDek
-                ? new SessionKeys(senc, smac, srmac, dek)
+            return _dek is not null
+                ? new SessionKeys(senc, smac, srmac, _dek)
                 : new SessionKeys(senc, smac, srmac);
         }
         finally
@@ -125,10 +129,6 @@ public sealed class StaticKeys : IDisposable
             CryptographicOperations.ZeroMemory(senc);
             CryptographicOperations.ZeroMemory(smac);
             CryptographicOperations.ZeroMemory(srmac);
-            if (hasDek)
-            {
-                CryptographicOperations.ZeroMemory(dek);
-            }
         }
     }
 
@@ -147,17 +147,26 @@ public sealed class StaticKeys : IDisposable
             throw new ArgumentException("Output buffer too small", nameof(output));
         }
 
-        // Build derivation data: 11 zero bytes || derivationType || length(2 bytes BE) || 0x01 || context
-        Span<byte> derivationData = stackalloc byte[11 + 1 + 2 + 1 + context.Length];
-        derivationData[..11].Clear(); // 11 zero bytes
-        derivationData[11] = derivationType;
-        BinaryPrimitives.WriteInt16BigEndian(derivationData[12..14], lengthBits);
-        derivationData[14] = 0x01;
-        context.CopyTo(derivationData[15..]);
+        // Build derivation data: 11 zero bytes || derivationType || 0x00 || length(2 bytes BE) || 0x01 || context
+        // This matches the Java implementation structure exactly
+        Span<byte> derivationData = stackalloc byte[DerivationDataPrefixLength + 1 + 1 + 2 + 1 + context.Length];
+        derivationData[..DerivationDataPrefixLength].Clear(); // Zero bytes prefix
+        derivationData[DerivationDataPrefixLength] = derivationType;
+        derivationData[DerivationDataPrefixLength + 1] = DerivationDataSeparator;
+        BinaryPrimitives.WriteInt16BigEndian(derivationData[(DerivationDataPrefixLength + 2)..(DerivationDataPrefixLength + 4)], lengthBits);
+        derivationData[DerivationDataPrefixLength + 4] = DerivationDataCounter;
+        context.CopyTo(derivationData[(DerivationDataPrefixLength + 5)..]);
+
+        Console.WriteLine($"[DEBUG] DeriveKey type=0x{derivationType:X2}, length=0x{lengthBits:X4}");
+        Console.WriteLine($"[DEBUG] DeriveKey key: {Convert.ToHexString(key)}");
+        Console.WriteLine($"[DEBUG] DeriveKey data: {Convert.ToHexString(derivationData)}");
 
         using var cmac = new AesCmac(key);
         cmac.AppendData(derivationData);
         byte[] mac = cmac.GetHashAndReset();
+
+        Console.WriteLine($"[DEBUG] DeriveKey MAC (full 16 bytes): {Convert.ToHexString(mac)}");
+        Console.WriteLine($"[DEBUG] DeriveKey output ({lengthBits / 8} bytes): {Convert.ToHexString(mac.AsSpan(0, lengthBits / 8))}");
 
         try
         {

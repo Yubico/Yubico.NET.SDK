@@ -56,7 +56,7 @@ internal class ShortApduFormatter : IApduFormatter
         return buffer.ToArray();
     }
 
-    public ReadOnlyMemory<byte> Format(CommandApdu apdu) => throw new NotImplementedException();
+    public ReadOnlyMemory<byte> Format(CommandApdu apdu) => Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
 
     #endregion
 }

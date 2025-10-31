@@ -23,11 +23,15 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// </summary>
 internal sealed class AesCmac : IDisposable
 {
-    private const int BlockSize = 16;
+    private const int BlockSize = 16;                  // AES block size in bytes
+    private const int Aes128KeyLength = 16;            // AES-128 key length in bytes
+    private const byte PaddingByte = 0x80;             // ISO/IEC 9797-1 Padding Method 2
+    private const byte ReductionPolynomial = 0x87;     // Rb for AES block size (NIST SP 800-38B)
     private readonly byte[] _key;
     private readonly byte[] _subkey1;
     private readonly byte[] _subkey2;
-    private readonly byte[] _buffer;
+    private readonly byte[] _buffer;          // Buffers incomplete input data
+    private readonly byte[] _cbcState;        // Tracks the running CBC-MAC state
     private int _bufferOffset;
     private bool _disposed;
 
@@ -38,13 +42,14 @@ internal sealed class AesCmac : IDisposable
     /// <exception cref="ArgumentException">Thrown if the key is not 16 bytes.</exception>
     public AesCmac(ReadOnlySpan<byte> key)
     {
-        if (key.Length != 16)
+        if (key.Length != Aes128KeyLength)
         {
-            throw new ArgumentException("AES-CMAC key must be 16 bytes", nameof(key));
+            throw new ArgumentException($"AES-CMAC key must be {Aes128KeyLength} bytes", nameof(key));
         }
 
         _key = key.ToArray();
         _buffer = new byte[BlockSize];
+        _cbcState = new byte[BlockSize];  // Starts as all zeros (initial IV)
         _subkey1 = new byte[BlockSize];
         _subkey2 = new byte[BlockSize];
 
@@ -58,6 +63,10 @@ internal sealed class AesCmac : IDisposable
     public void AppendData(ReadOnlySpan<byte> data)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+
+        Console.WriteLine($"[CMAC DEBUG] AppendData called with {data.Length} bytes");
+        Console.WriteLine($"[CMAC DEBUG] Data: {Convert.ToHexString(data)}");
+        Console.WriteLine($"[CMAC DEBUG] Initial bufferOffset: {_bufferOffset}");
 
         int offset = 0;
         int remaining = data.Length;
@@ -78,15 +87,35 @@ internal sealed class AesCmac : IDisposable
             }
         }
 
-        // Process complete blocks
-        while (remaining >= BlockSize)
+        // Process complete blocks, but always keep at least one block buffered for finalization
+        while (remaining > BlockSize || (remaining == BlockSize && _bufferOffset == 0))
         {
-            ProcessBlock(data[offset..(offset + BlockSize)]);
-            offset += BlockSize;
-            remaining -= BlockSize;
+            // If buffer is full, process it first
+            if (_bufferOffset == BlockSize)
+            {
+                ProcessBlock(_buffer);
+                _bufferOffset = 0;
+            }
+
+            // If we still have more than one block remaining, process directly from input
+            if (remaining > BlockSize)
+            {
+                ProcessBlock(data[offset..(offset + BlockSize)]);
+                offset += BlockSize;
+                remaining -= BlockSize;
+            }
+            else
+            {
+                // This is the last complete block - buffer it for finalization
+                data[offset..(offset + BlockSize)].CopyTo(_buffer);
+                _bufferOffset = BlockSize;
+                offset += BlockSize;
+                remaining -= BlockSize;
+                break;
+            }
         }
 
-        // Buffer remaining data
+        // Buffer remaining data (this handles the case where remaining < BlockSize)
         if (remaining > 0)
         {
             data[offset..(offset + remaining)].CopyTo(_buffer.AsSpan(_bufferOffset));
@@ -102,41 +131,61 @@ internal sealed class AesCmac : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        byte[] lastBlock = new byte[BlockSize];
+        Console.WriteLine($"[CMAC DEBUG] GetHashAndReset called");
+        Console.WriteLine($"[CMAC DEBUG]   _bufferOffset: {_bufferOffset}");
+        Console.WriteLine($"[CMAC DEBUG]   _buffer: {Convert.ToHexString(_buffer)}");
+        Console.WriteLine($"[CMAC DEBUG]   _cbcState: {Convert.ToHexString(_cbcState)}");
+
+        using var aes = Aes.Create();
+        aes.Key = _key;
+
+        // Prepare the final block according to RFC 4493
+        Span<byte> lastBlock = stackalloc byte[BlockSize];
 
         if (_bufferOffset == BlockSize)
         {
-            // Complete final block - XOR with K1
+            Console.WriteLine($"[CMAC DEBUG]   Complete final block - use K1");
+            Console.WriteLine($"[CMAC DEBUG]   K1: {Convert.ToHexString(_subkey1)}");
+
+            // Complete block: XOR with CBC state, then XOR with K1
             for (int i = 0; i < BlockSize; i++)
             {
-                lastBlock[i] = (byte)(_buffer[i] ^ _subkey1[i]);
+                lastBlock[i] = (byte)(_cbcState[i] ^ _buffer[i] ^ _subkey1[i]);
             }
         }
         else
         {
-            // Incomplete final block - pad and XOR with K2
-            _buffer.AsSpan(0, _bufferOffset).CopyTo(lastBlock);
-            lastBlock[_bufferOffset] = 0x80;
-            // Remaining bytes are already zero
+            Console.WriteLine($"[CMAC DEBUG]   Incomplete final block - pad and use K2");
+            Console.WriteLine($"[CMAC DEBUG]   K2: {Convert.ToHexString(_subkey2)}");
+
+            // Incomplete block: pad with padding byte, then XOR with CBC state and K2
+            for (int i = 0; i < _bufferOffset; i++)
+            {
+                lastBlock[i] = _buffer[i];
+            }
+            lastBlock[_bufferOffset] = PaddingByte;
+            // Rest is already zero
 
             for (int i = 0; i < BlockSize; i++)
             {
-                lastBlock[i] ^= _subkey2[i];
+                lastBlock[i] = (byte)(lastBlock[i] ^ _cbcState[i] ^ _subkey2[i]);
             }
         }
 
-        // Final encryption
-        using var aes = Aes.Create();
-        aes.Key = _key;
+        Console.WriteLine($"[CMAC DEBUG]   lastBlock (ready for encryption): {Convert.ToHexString(lastBlock)}");
 
-        Span<byte> iv = stackalloc byte[BlockSize]; // Zero IV
+        // Final encryption
+        Span<byte> iv = stackalloc byte[BlockSize];
         var result = new byte[BlockSize];
         var bytesWritten = aes.EncryptCbc(lastBlock, iv, result, PaddingMode.None);
         if (bytesWritten != BlockSize)
             throw new InvalidOperationException("Final CMAC encryption failed");
 
+        Console.WriteLine($"[CMAC DEBUG]   Final MAC: {Convert.ToHexString(result)}");
+
         // Reset state
         Array.Clear(_buffer);
+        Array.Clear(_cbcState);
         _bufferOffset = 0;
 
         return result;
@@ -156,6 +205,7 @@ internal sealed class AesCmac : IDisposable
         CryptographicOperations.ZeroMemory(_subkey1);
         CryptographicOperations.ZeroMemory(_subkey2);
         CryptographicOperations.ZeroMemory(_buffer);
+        CryptographicOperations.ZeroMemory(_cbcState);
 
         _disposed = true;
     }
@@ -183,8 +233,6 @@ internal sealed class AesCmac : IDisposable
 
     private static void LeftShiftOneAnd(ReadOnlySpan<byte> input, Span<byte> output)
     {
-        const byte Rb = 0x87; // Reduction polynomial for AES block size
-
         byte overflow = 0;
         for (int i = BlockSize - 1; i >= 0; i--)
         {
@@ -195,28 +243,37 @@ internal sealed class AesCmac : IDisposable
         // If MSB of input was 1, XOR with Rb
         if (overflow != 0)
         {
-            output[BlockSize - 1] ^= Rb;
+            output[BlockSize - 1] ^= ReductionPolynomial;
         }
     }
 
     private void ProcessBlock(ReadOnlySpan<byte> block)
     {
+        Console.WriteLine($"[CMAC DEBUG] ProcessBlock called");
+        Console.WriteLine($"[CMAC DEBUG]   Input block: {Convert.ToHexString(block)}");
+        Console.WriteLine($"[CMAC DEBUG]   _cbcState before: {Convert.ToHexString(_cbcState)}");
+
         using var aes = Aes.Create();
         aes.Key = _key;
 
-        // XOR block with previous output (CBC mode)
+        // XOR block with previous CBC state
+        Span<byte> temp = stackalloc byte[BlockSize];
         for (int i = 0; i < BlockSize; i++)
         {
-            _buffer[i] ^= block[i];
+            temp[i] = (byte)(_cbcState[i] ^ block[i]);
         }
 
-        // Encrypt
-        Span<byte> iv = stackalloc byte[BlockSize]; // Zero IV
+        Console.WriteLine($"[CMAC DEBUG]   After XOR with state: {Convert.ToHexString(temp)}");
+
+        // Encrypt to get new CBC state
+        Span<byte> iv = stackalloc byte[BlockSize]; // Zero IV for ECB-like operation
         Span<byte> encrypted = stackalloc byte[BlockSize];
-        var bytesWritten = aes.EncryptCbc(_buffer, iv, encrypted, PaddingMode.None);
+        var bytesWritten = aes.EncryptCbc(temp, iv, encrypted, PaddingMode.None);
         if (bytesWritten != BlockSize)
             throw new InvalidOperationException("Block encryption failed");
 
-        encrypted.CopyTo(_buffer);
+        // Update CBC state
+        encrypted.CopyTo(_cbcState);
+        Console.WriteLine($"[CMAC DEBUG]   _cbcState after: {Convert.ToHexString(_cbcState)}");
     }
 }

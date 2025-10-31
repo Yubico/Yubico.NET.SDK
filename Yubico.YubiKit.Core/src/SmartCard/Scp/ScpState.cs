@@ -30,10 +30,34 @@ internal sealed class ScpState
     private const byte InsPerformSecurityOperation = 0x2A;
     private const byte InsInternalAuthenticate = 0x88;
     private const byte InsExternalAuthenticate = 0x82;
+
+    // Encryption/Padding Constants
+    private const byte PaddingByte = 0x80;                    // ISO/IEC 9797-1 Padding Method 2
+    private const byte IvPrefixForDecryption = 0x80;          // IV generation prefix for response decryption
+
+    // Key Derivation Constants
+    private const byte DerivationTypeCardCryptogram = 0x00;   // Derivation type for card cryptogram verification
+    private const byte DerivationTypeHostCryptogram = 0x01;   // Derivation type for host cryptogram generation
+    private const byte DerivationTypeSEnc = 0x04;             // Derivation type for S-ENC (session encryption key)
+    private const byte DerivationTypeSMac = 0x06;             // Derivation type for S-MAC (session MAC key)
+    private const byte DerivationTypeSRMac = 0x07;            // Derivation type for S-RMAC (session response MAC key)
+    private const byte DerivationContextLength = 0x40;        // Context length in bits (64 bits = 8 bytes)
+
+    // SCP11 Constants
+    private const byte Scp11aKeyId = 0x13;
+    private const byte Scp11bKeyId = 0x15;
+    private const byte Scp11cKeyId = 0x17;
+    private const byte Scp11aTypeParam = 0x01;
+    private const byte Scp11bTypeParam = 0x00;
+    private const byte Scp11cTypeParam = 0x03;
+    private const byte Scp11MoreFragmentsFlag = 0x80;
+    private const byte Scp11KeyUsage = 0x3C;          // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
+    private const byte Scp11KeyType = 0x88;            // AES
     private readonly SessionKeys _keys;
 
     private readonly ILogger<ScpState>? _logger;
-    private int _encCounter = 1;
+    private int _encCounter = 1;      // Counter for command encryption (host->card)
+    private int _respCounter = 1;     // Counter for response decryption (card->host)
     private byte[] _macChain;
 
     public ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpState>? logger = null)
@@ -59,7 +83,7 @@ internal sealed class ScpState
         var padded = new byte[paddedLength];
 
         data.CopyTo(padded);
-        padded[data.Length] = 0x80;
+        padded[data.Length] = PaddingByte;
 
         byte[]? iv = null;
         using var aes = Aes.Create();
@@ -101,10 +125,11 @@ internal sealed class ScpState
 
         try
         {
-            // Generate IV using ECB encryption of counter with 0x80 prefix
+            // Generate IV using ECB encryption of counter with prefix
+            // Use separate response counter that increments independently
             Span<byte> ivData = stackalloc byte[16];
-            ivData[0] = 0x80;
-            BinaryPrimitives.WriteInt32BigEndian(ivData[12..], _encCounter - 1);
+            ivData[0] = IvPrefixForDecryption;
+            BinaryPrimitives.WriteInt32BigEndian(ivData[12..], _respCounter++);
 
             iv = new byte[16];
             var ivBytesWritten = aes.EncryptEcb(ivData, iv, PaddingMode.None);
@@ -119,7 +144,7 @@ internal sealed class ScpState
 
             // Find and remove padding
             for (var i = decrypted.Length - 1; i > 0; i--)
-                if (decrypted[i] == 0x80)
+                if (decrypted[i] == PaddingByte)
                 {
                     _logger?.LogTrace("Plaintext resp: {Data}", Convert.ToHexString(decrypted.AsSpan(0, i)));
                     var result = decrypted[..i];
@@ -145,10 +170,17 @@ internal sealed class ScpState
     {
         try
         {
+            Console.WriteLine($"[MAC DEBUG] Computing MAC over {data.Length} bytes");
+            Console.WriteLine($"[MAC DEBUG] MAC chain: {Convert.ToHexString(_macChain)}");
+            Console.WriteLine($"[MAC DEBUG] Data: {Convert.ToHexString(data)}");
+
             using var mac = new AesCmac(_keys.Smac);
             mac.AppendData(_macChain);
             mac.AppendData(data);
             _macChain = mac.GetHashAndReset();
+
+            Console.WriteLine($"[MAC DEBUG] Full MAC (16 bytes): {Convert.ToHexString(_macChain)}");
+            Console.WriteLine($"[MAC DEBUG] C-MAC (first 8 bytes): {Convert.ToHexString(_macChain.AsSpan()[..8])}");
 
             return _macChain[..8].ToArray();
         }
@@ -228,20 +260,37 @@ internal sealed class ScpState
         var cardChallenge = responseData[13..21];
         var cardCryptogram = responseData[21..29];
 
+        Console.WriteLine($"[DEBUG] INITIALIZE UPDATE response:");
+        Console.WriteLine($"[DEBUG]   Key Info: {Convert.ToHexString(keyInfo)}");
+        Console.WriteLine($"[DEBUG]   Key Info[0] (Key Diversification): 0x{keyInfo[0]:X2}");
+        Console.WriteLine($"[DEBUG]   Key Info[1] (Key Version): 0x{keyInfo[1]:X2}");
+        Console.WriteLine($"[DEBUG]   Key Info[2] (SCP ID): 0x{keyInfo[2]:X2}");
+
         Span<byte> context = stackalloc byte[16];
         hostChallenge.AsSpan().CopyTo(context);
         cardChallenge.CopyTo(context[8..]);
 
+        Console.WriteLine($"[DEBUG] Host challenge: {Convert.ToHexString(hostChallenge)}");
+        Console.WriteLine($"[DEBUG] Card challenge: {Convert.ToHexString(cardChallenge)}");
+        Console.WriteLine($"[DEBUG] Context: {Convert.ToHexString(context)}");
+
         var sessionKeys = keyParams.Keys.Derive(context);
 
+        Console.WriteLine($"[DEBUG] S-ENC:  {Convert.ToHexString(sessionKeys.Senc)}");
+        Console.WriteLine($"[DEBUG] S-MAC:  {Convert.ToHexString(sessionKeys.Smac)}");
+        Console.WriteLine($"[DEBUG] S-RMAC: {Convert.ToHexString(sessionKeys.Srmac)}");
+
         Span<byte> genCardCryptogram = stackalloc byte[8];
-        StaticKeys.DeriveKey(sessionKeys.Smac, 0x00, context, 0x40, genCardCryptogram);
+        StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeCardCryptogram, context, DerivationContextLength, genCardCryptogram);
+
+        Console.WriteLine($"[DEBUG] Generated card cryptogram: {Convert.ToHexString(genCardCryptogram)}");
+        Console.WriteLine($"[DEBUG] Received card cryptogram:  {Convert.ToHexString(cardCryptogram)}");
 
         if (!CryptographicOperations.FixedTimeEquals(genCardCryptogram, cardCryptogram))
-            throw new BadResponseException("Wrong SCP03 key set");
+            throw new BadResponseException($"Wrong SCP03 key set - Expected: {Convert.ToHexString(cardCryptogram)}, Got: {Convert.ToHexString(genCardCryptogram)}");
 
         Span<byte> hostCryptogramBytes = stackalloc byte[8];
-        StaticKeys.DeriveKey(sessionKeys.Smac, 0x01, context, 0x40, hostCryptogramBytes);
+        StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeHostCryptogram, context, DerivationContextLength, hostCryptogramBytes);
 
         return (new ScpState(sessionKeys, new byte[16]), hostCryptogramBytes.ToArray());
     }
@@ -256,9 +305,9 @@ internal sealed class ScpState
 
         byte scpTypeParam = kid switch
         {
-            ScpKid.SCP11a => 0x1,
-            ScpKid.SCP11b => 0x0,
-            ScpKid.SCP11c => 0x3,
+            ScpKid.SCP11a => Scp11aTypeParam,
+            ScpKid.SCP11b => Scp11bTypeParam,
+            ScpKid.SCP11c => Scp11cTypeParam,
             _ => throw new ArgumentException("Invalid SCP11 KID")
         };
 
@@ -274,7 +323,7 @@ internal sealed class ScpState
             for (var i = 0; i <= n; i++)
             {
                 var certData = keyParams.Certificates[i].GetRawCertData();
-                var p2 = (byte)(oceRef.Kid | (i < n ? 0x80 : 0x00));
+                var p2 = (byte)(oceRef.Kid | (i < n ? Scp11MoreFragmentsFlag : 0x00));
                 var resp = await processor.TransmitAsync(
                     new CommandApdu(
                         0x80,
@@ -289,8 +338,8 @@ internal sealed class ScpState
             }
         }
 
-        byte[] keyUsage = [0x3C]; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
-        byte[] keyType = [0x88]; // AES
+        byte[] keyUsage = [Scp11KeyUsage]; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
+        byte[] keyType = [Scp11KeyType]; // AES
         byte[] keyLen = [16]; // 128-bit
 
         // Host ephemeral key

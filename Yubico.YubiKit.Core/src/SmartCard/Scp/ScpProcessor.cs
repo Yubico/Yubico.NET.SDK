@@ -21,6 +21,10 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// </summary>
 internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, ScpState state) : IApduProcessor
 {
+    // SCP Constants
+    private const byte ClaBitSecureMessaging = 0x04;  // Bit 2 in CLA byte indicates secure messaging
+    private const int MacLength = 8;                   // AES-CMAC output truncated to 8 bytes
+
     private readonly ExtendedApduFormatter _extendedApduFormatter = new(SmartCardMaxApduSizes.Yk43);
 
     /// <summary>
@@ -70,52 +74,85 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
                 commandData = encryptedData;
             }
 
-            // Step 2: Build APDU with encrypted data and SCP CLA bit
-            var cla = (byte)(command.Cla | 0x04); // Set SCP bit in CLA
-            CommandApdu scpCommand = new(cla, command.Ins, command.P1, command.P2, commandData, command.Le);
+            // Step 2: Ensure CLA has SM bit set (bit 2)
+            var cla = (byte)(command.Cla | ClaBitSecureMessaging);
 
-            // Step 3: Format the APDU for transmission
+            // Step 3: Allocate buffer for data + MAC (matching Java approach)
+            rentedMacData = ArrayPool<byte>.Shared.Rent(commandData.Length + MacLength);
+            var macedData = rentedMacData.AsSpan(0, commandData.Length + MacLength);
+            commandData.Span.CopyTo(macedData);
+            // Leave last 8 bytes zeroed for now
+
+            // Step 4: Create command with FULL length (data + MAC space)
+            // This ensures Lc in formatted APDU = data.length + 8
+            CommandApdu scpCommand = new(cla, command.Ins, command.P1, command.P2, macedData.ToArray(), command.Le);
+
+            // Step 5: Format the APDU with full length
             ReadOnlyMemory<byte> formattedApdu;
-            if (commandData.Length > SmartCardMaxApduSizes.ShortApduMaxChunkSize)
+            bool isExtendedApdu;
+            if (macedData.Length > SmartCardMaxApduSizes.ShortApduMaxChunkSize)
+            {
                 formattedApdu = _extendedApduFormatter.Format(scpCommand);
+                isExtendedApdu = true;
+            }
             else
+            {
                 formattedApdu = Formatter.Format(scpCommand);
+                isExtendedApdu = Formatter is ExtendedApduFormatter;
+            }
 
-            // Step 4: Compute MAC over the formatted APDU (excluding Le field if present)
-            // The MAC is computed over CLA, INS, P1, P2, Lc, Data
+            // Step 6: Compute MAC over formatted APDU minus last MacLength bytes (the MAC space)
+            // Exclude Le field if present
             var apduToMac = formattedApdu.Span;
-            // If Le is present, exclude it from MAC calculation
-            var macLength = apduToMac.Length;
+            var macLength = apduToMac.Length - MacLength; // Don't MAC the MAC space
             if (scpCommand.Le > 0)
                 // Extended APDU has 3-byte Le, short APDU has 1-byte Le
-                macLength -= commandData.Length > SmartCardMaxApduSizes.ShortApduMaxChunkSize ? 3 : 1;
+                macLength -= isExtendedApdu ? 3 : 1;
 
             var mac = State.Mac(apduToMac[..macLength]);
 
-            // Step 5: Append MAC to command data
-            rentedMacData = ArrayPool<byte>.Shared.Rent(commandData.Length + 8);
-            var dataWithMac = rentedMacData.AsSpan(0, commandData.Length + 8);
-            commandData.Span.CopyTo(dataWithMac);
-            mac.AsSpan().CopyTo(dataWithMac[commandData.Length..]);
+            Console.WriteLine($"[SCP DEBUG] Original command: CLA={command.Cla:X2} INS={command.Ins:X2} P1={command.P1:X2} P2={command.P2:X2}");
+            Console.WriteLine($"[SCP DEBUG] Original data ({commandData.Length} bytes): {Convert.ToHexString(commandData.Span)}");
+            Console.WriteLine($"[SCP DEBUG] MACed data length (with space): {macedData.Length} bytes");
+            Console.WriteLine($"[SCP DEBUG] APDU to MAC ({macLength} bytes): {Convert.ToHexString(apduToMac[..macLength])}");
+            Console.WriteLine($"[SCP DEBUG] Computed MAC: {Convert.ToHexString(mac.AsSpan())}");
 
-            // Step 6: Create final command with MAC appended
-            CommandApdu finalCommand = new(cla, command.Ins, command.P1, command.P2, dataWithMac.ToArray(), command.Le);
+            // Step 7: Fill in the MAC in the last 8 bytes
+            mac.AsSpan().CopyTo(macedData[commandData.Length..]);
 
-            // Step 7: Transmit the command (useScp=false because we already wrapped it with SCP)
+            Console.WriteLine($"[SCP DEBUG] Final data with MAC ({macedData.Length} bytes): {Convert.ToHexString(macedData)}");
+
+            // Step 8: Create final command with MAC filled in
+            CommandApdu finalCommand = new(cla, command.Ins, command.P1, command.P2, macedData.ToArray(), command.Le);
+            Console.WriteLine($"[SCP DEBUG] Final command: CLA={cla:X2} INS={finalCommand.Ins:X2} P1={finalCommand.P1:X2} P2={finalCommand.P2:X2} Data={Convert.ToHexString(finalCommand.Data.Span)}");
+
+            // Step 9: Transmit the command (useScp=false because we already wrapped it with SCP)
             var response = await @delegate.TransmitAsync(finalCommand, false, cancellationToken).ConfigureAwait(false);
 
-            // Step 8: Verify and remove MAC from response
+            // Step 10: Verify and remove MAC from response
+            Console.WriteLine($"[SCP DEBUG] Response SW: 0x{response.SW:X4}");
+            Console.WriteLine($"[SCP DEBUG] Response data length: {response.Data.Length}");
+            Console.WriteLine($"[SCP DEBUG] Response data: {Convert.ToHexString(response.Data.Span)}");
+
             if (response.Data.Length > 0)
             {
                 var unmacdData = State.Unmac(response.Data.Span, response.SW);
+                Console.WriteLine($"[SCP DEBUG] Unmacd data length: {unmacdData.Length}");
+                Console.WriteLine($"[SCP DEBUG] Unmacd data: {Convert.ToHexString(unmacdData)}");
+                Console.WriteLine($"[SCP DEBUG] First byte (length field): {unmacdData[0]}");
 
-                // Step 9: Decrypt response data if it was encrypted
+                // Step 11: Decrypt response data if it was encrypted
+                Console.WriteLine($"[SCP DEBUG] encrypt={encrypt}, unmacdData.Length={unmacdData.Length}");
                 if (encrypt && unmacdData.Length > 0)
                 {
+                    Console.WriteLine($"[SCP DEBUG] Decrypting response data...");
                     var decryptedData = State.Decrypt(unmacdData);
+                    Console.WriteLine($"[SCP DEBUG] Decrypted data length: {decryptedData.Length}");
+                    Console.WriteLine($"[SCP DEBUG] Decrypted data: {Convert.ToHexString(decryptedData)}");
                     return new ResponseApdu(decryptedData, response.SW);
                 }
 
+                Console.WriteLine($"[SCP DEBUG] NOT decrypting (encrypt={encrypt})");
                 return new ResponseApdu(unmacdData, response.SW);
             }
 

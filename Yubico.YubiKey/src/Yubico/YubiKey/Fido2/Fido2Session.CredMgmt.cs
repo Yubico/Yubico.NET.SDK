@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Fido2
         private Memory<byte>? _authTokenPersistent;
 
         /// <summary>
-        /// The Persistent PinUvAuthToken (PPUAT) which can be set by the user upon instantiation of the Fido2Session
+        /// The <xref href="Fido2AuthTokens#persistent-pinuvauthtoken-ppuat">Persistent PinUvAuthToken (PPUAT)</xref> which can be set by the user upon instantiation of the Fido2Session
         /// or automatically by the SDK when calling certain credential management operations such as 
         /// <see cref="EnumerateRelyingParties"/>, 
         /// <see cref="EnumerateCredentialsForRelyingParty(RelyingParty)"/>, 
@@ -75,8 +75,8 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="PinUvAuthTokenPermissions.CredentialManagement"/>.
         /// </para>
         /// <para>
-        /// If there is no <c>Fido2Session</c> property <see cref="AuthToken"/>,
-        /// or it does not work (i.e. it is expired or does not have the
+        /// If there is no <c>Fido2Session</c> <see cref="AuthToken"/> or <see cref="AuthTokenPersistent"/> property,
+        /// or neither property works (i.e. the property is expired or does not have the
         /// appropriate permission), this method will use the <c>KeyCollector</c>
         /// to obtain a new one.
         /// </para>
@@ -496,7 +496,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Retrieves a persistent PIN/UV authentication token to be used with
+        /// Retrieves a <xref href="Fido2AuthTokens#persistent-pinuvauthtoken-ppuat">Persistent PinUvAuthToken (PPUAT)</xref> to be used with
         /// FIDO2 credential management operations that require read-only access.
         /// </summary>
         /// <remarks>

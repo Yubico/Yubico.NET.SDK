@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         AuthenticatorConfiguration = 0x20,
         
         /// <summary>
-        /// This allows the auth token to be used with the 
+        /// This allows the auth token (specifically, a <xref href="Fido2AuthTokens#persistent-pinuvauthtoken-ppuat">Persistent PinUvAuthToken</xref>) to be used with the 
         /// <see cref="CredentialManagementCommand"/>,
         /// <see cref="GetCredentialMetadataCommand"/>,
         /// <see cref="EnumerateCredentialsBeginCommand"/>,

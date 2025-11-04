@@ -22,15 +22,15 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, ScpState state) : IApduProcessor
 {
     // SCP Constants
-    private const byte ClaBitSecureMessaging = 0x04;  // Bit 2 in CLA byte indicates secure messaging
-    private const int MacLength = 8;                   // AES-CMAC output truncated to 8 bytes
+    private const byte ClaBitSecureMessaging = 0x04; // Bit 2 in CLA byte indicates secure messaging
+    private const int MacLength = 8; // AES-CMAC output truncated to 8 bytes
 
     private readonly ExtendedApduFormatter _extendedApduFormatter = new(SmartCardMaxApduSizes.Yk43);
 
     /// <summary>
     ///     Gets the SCP state for this processor.
     /// </summary>
-    internal ScpState State { get; } = state;
+    private ScpState State { get; } = state;
 
     #region IApduProcessor Members
 
@@ -111,20 +111,25 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
 
             var mac = State.Mac(apduToMac[..macLength]);
 
-            Console.WriteLine($"[SCP DEBUG] Original command: CLA={command.Cla:X2} INS={command.Ins:X2} P1={command.P1:X2} P2={command.P2:X2}");
-            Console.WriteLine($"[SCP DEBUG] Original data ({commandData.Length} bytes): {Convert.ToHexString(commandData.Span)}");
+            Console.WriteLine(
+                $"[SCP DEBUG] Original command: CLA={command.Cla:X2} INS={command.Ins:X2} P1={command.P1:X2} P2={command.P2:X2}");
+            Console.WriteLine(
+                $"[SCP DEBUG] Original data ({commandData.Length} bytes): {Convert.ToHexString(commandData.Span)}");
             Console.WriteLine($"[SCP DEBUG] MACed data length (with space): {macedData.Length} bytes");
-            Console.WriteLine($"[SCP DEBUG] APDU to MAC ({macLength} bytes): {Convert.ToHexString(apduToMac[..macLength])}");
+            Console.WriteLine(
+                $"[SCP DEBUG] APDU to MAC ({macLength} bytes): {Convert.ToHexString(apduToMac[..macLength])}");
             Console.WriteLine($"[SCP DEBUG] Computed MAC: {Convert.ToHexString(mac.AsSpan())}");
 
             // Step 7: Fill in the MAC in the last 8 bytes
             mac.AsSpan().CopyTo(macedData[commandData.Length..]);
 
-            Console.WriteLine($"[SCP DEBUG] Final data with MAC ({macedData.Length} bytes): {Convert.ToHexString(macedData)}");
+            Console.WriteLine(
+                $"[SCP DEBUG] Final data with MAC ({macedData.Length} bytes): {Convert.ToHexString(macedData)}");
 
             // Step 8: Create final command with MAC filled in
             CommandApdu finalCommand = new(cla, command.Ins, command.P1, command.P2, macedData.ToArray(), command.Le);
-            Console.WriteLine($"[SCP DEBUG] Final command: CLA={cla:X2} INS={finalCommand.Ins:X2} P1={finalCommand.P1:X2} P2={finalCommand.P2:X2} Data={Convert.ToHexString(finalCommand.Data.Span)}");
+            Console.WriteLine(
+                $"[SCP DEBUG] Final command: CLA={cla:X2} INS={finalCommand.Ins:X2} P1={finalCommand.P1:X2} P2={finalCommand.P2:X2} Data={Convert.ToHexString(finalCommand.Data.Span)}");
 
             // Step 9: Transmit the command (useScp=false because we already wrapped it with SCP)
             var response = await @delegate.TransmitAsync(finalCommand, false, cancellationToken).ConfigureAwait(false);
@@ -145,7 +150,7 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
                 Console.WriteLine($"[SCP DEBUG] encrypt={encrypt}, unmacdData.Length={unmacdData.Length}");
                 if (encrypt && unmacdData.Length > 0)
                 {
-                    Console.WriteLine($"[SCP DEBUG] Decrypting response data...");
+                    Console.WriteLine("[SCP DEBUG] Decrypting response data...");
                     var decryptedData = State.Decrypt(unmacdData);
                     Console.WriteLine($"[SCP DEBUG] Decrypted data length: {decryptedData.Length}");
                     Console.WriteLine($"[SCP DEBUG] Decrypted data: {Convert.ToHexString(decryptedData)}");

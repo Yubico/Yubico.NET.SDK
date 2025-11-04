@@ -46,9 +46,9 @@ public sealed class ManagementSession<TConnection>(
     private static readonly Feature FeatureDeviceReset =
         new("Device Reset", 5, 6, 0);
 
-    private readonly IProtocol _protocol = protocolFactory.Create(connection);
-
     private bool _isInitialized;
+
+    private IProtocol _protocol = protocolFactory.Create(connection);
     private FirmwareVersion? _version;
 
     public static async Task<ManagementSession<TConnection>> CreateAsync(
@@ -74,9 +74,8 @@ public sealed class ManagementSession<TConnection>(
         _protocol.Configure(_version);
 
         // Initialize SCP if key parameters were provided
-        if (scpKeyParams is not null &&
-            _protocol is ISmartCardProtocol smartCardProtocol)
-            await smartCardProtocol.InitScpAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
+        if (scpKeyParams is not null && _protocol is ISmartCardProtocol smartCardProtocol)
+            _protocol = await smartCardProtocol.WithScpAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
 
         _isInitialized = true;
     }
@@ -92,7 +91,6 @@ public sealed class ManagementSession<TConnection>(
         while (hasMoreData)
         {
             var apdu = new CommandApdu { Cla = 0, Ins = INS_GET_DEVICE_INFO, P1 = page, P2 = 0 };
-
             var encodedResult = await TransmitAsync(apdu, cancellationToken).ConfigureAwait(false);
             if (encodedResult.Length - 1 != encodedResult.Span[0])
                 throw new BadResponseException("Invalid length");
@@ -111,7 +109,7 @@ public sealed class ManagementSession<TConnection>(
         return DeviceInfo.CreateFromTlvs([.. allTlvs], _version);
     }
 
-    public async Task SetDeviceConfigAsync(
+    public Task SetDeviceConfigAsync(
         DeviceConfig config,
         bool reboot,
         byte[]? currentLockCode = null,
@@ -138,7 +136,7 @@ public sealed class ManagementSession<TConnection>(
             Data = configBytes
         };
 
-        await TransmitAsync(apdu, cancellationToken).ConfigureAwait(false);
+        return TransmitAsync(apdu, cancellationToken);
     }
 
     public async Task ResetDeviceAsync(CancellationToken cancellationToken = default)
@@ -176,26 +174,17 @@ public sealed class ManagementSession<TConnection>(
         throw new NotSupportedException("Protocol not supported");
     }
 
-    private async Task<ReadOnlyMemory<byte>> TransmitAsync(CommandApdu command, CancellationToken cancellationToken)
-    {
-        if (_protocol is ISmartCardProtocol smartCardProtocol)
-        {
-            var response = await smartCardProtocol
-                .TransmitAndReceiveAsync(command, cancellationToken)
-                .ConfigureAwait(false);
+    private Task<ReadOnlyMemory<byte>> TransmitAsync(CommandApdu command, CancellationToken cancellationToken) =>
+        _protocol is not ISmartCardProtocol smartCardProtocol
+            ? throw new NotSupportedException("Protocol not supported")
+            : smartCardProtocol.TransmitAndReceiveAsync(command, cancellationToken);
 
-            return response;
-        }
-
-        throw new NotSupportedException("Protocol not supported");
-    }
-
-    internal void EnsureSupports(Feature feature)
+    private void EnsureSupports(Feature feature)
     {
         if (!IsSupported(feature)) throw new NotSupportedException($"{feature.Name} is not supported on this YubiKey.");
     }
 
-    internal bool IsSupported(Feature feature)
+    private bool IsSupported(Feature feature)
     {
         if (!_isInitialized)
             throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.SmartCard;
@@ -23,6 +22,9 @@ public interface IProtocol : IDisposable
     void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null);
 }
 
+/// <summary>
+///     Protocol interface for SmartCard communication.
+/// </summary>
 public interface ISmartCardProtocol : IProtocol
 {
     Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
@@ -31,8 +33,6 @@ public interface ISmartCardProtocol : IProtocol
 
     Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
         CancellationToken cancellationToken = default);
-
-    Task<DataEncryptor?> InitScpAsync(ScpKeyParams keyParams, CancellationToken cancellationToken = default);
 }
 
 public readonly record struct ProtocolConfiguration
@@ -47,16 +47,10 @@ internal class PcscProtocol : ISmartCardProtocol
     private const byte P2_SELECT = 0x00;
     private const byte INS_SEND_REMAINING = 0xC0;
 
-    // SCP03 Constants
-    private const byte CLA_SECURE_MESSAGING = 0x84;           // CLA with SM bit set
-    private const byte INS_EXTERNAL_AUTHENTICATE = 0x82;      // EXTERNAL AUTHENTICATE instruction
-    private const byte SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC = 0x33;  // Security level: C-MAC + C-DECRYPTION + R-MAC + R-ENCRYPTION
     private readonly ISmartCardConnection _connection;
-    private readonly byte _insSendRemaining;
+    internal readonly byte _insSendRemaining;
     private readonly ILogger<PcscProtocol> _logger;
     private IApduProcessor _processor;
-    private bool _useExtendedApdus = true;
-    private int MaxApduSize = SmartCardMaxApduSizes.Neo; // Lowest as default
 
 
     public PcscProtocol(
@@ -69,6 +63,12 @@ internal class PcscProtocol : ISmartCardProtocol
         _insSendRemaining = insSendRemaining.Length > 0 ? insSendRemaining.Span[0] : INS_SEND_REMAINING;
         _processor = BuildBaseProcessor();
     }
+
+    public bool UseExtendedApdus { get; private set; } = true;
+
+    public int MaxApduSize { get; private set; } = SmartCardMaxApduSizes.Neo; // Lowest as default
+
+    public FirmwareVersion? FirmwareVersion { get; private set; }
 
     #region ISmartCardProtocol Members
 
@@ -109,33 +109,16 @@ internal class PcscProtocol : ISmartCardProtocol
 
     public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration)
     {
-        if (firmwareVersion.IsAtLeast(4, 0, 0))
+        FirmwareVersion = firmwareVersion;
+        if (FirmwareVersion.IsAtLeast(4, 0, 0))
         {
-            var forceShortApdu = configuration.HasValue && configuration.Value.ForceShortApdus == true;
-            _useExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;
+            var forceShortApdu = configuration is { ForceShortApdus: true };
+            UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;
             MaxApduSize = firmwareVersion.IsAtLeast(4, 3, 0)
                 ? SmartCardMaxApduSizes.Yk43
                 : SmartCardMaxApduSizes.Yk4;
-            ReconfigureProcessor();
-        }
-    }
 
-    public async Task<DataEncryptor?> InitScpAsync(ScpKeyParams keyParams,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            return keyParams switch
-            {
-                Scp03KeyParams scp03 => await InitScp03Async(scp03, cancellationToken).ConfigureAwait(false),
-                Scp11KeyParams scp11 => await InitScp11Async(scp11, cancellationToken).ConfigureAwait(false),
-                _ => throw new ArgumentException($"Unsupported ScpKeyParams type: {keyParams.GetType().Name}",
-                    nameof(keyParams))
-            };
-        }
-        catch (ApduException ex) when (ex.SW == SWConstants.ClaNotSupported)
-        {
-            throw new NotSupportedException("SCP is not supported by this YubiKey", ex);
+            ReconfigureProcessor();
         }
     }
 
@@ -143,79 +126,15 @@ internal class PcscProtocol : ISmartCardProtocol
 
     private IApduProcessor BuildBaseProcessor()
     {
-        var processor = _useExtendedApdus
+        var processor = UseExtendedApdus
             ? new ExtendedApduProcessor(_connection, new ExtendedApduFormatter(MaxApduSize))
             : new CommandChainingProcessor(_connection, new ShortApduFormatter());
 
-        return new ChainedResponseProcessor(processor, _insSendRemaining);
+        return new ChainedResponseProcessor(FirmwareVersion, processor, _insSendRemaining);
     }
 
-    private void ReconfigureProcessor()
-    {
-        var newProcessor = BuildBaseProcessor();
-        if (_processor is ScpProcessor scpp)
-            // Keep existing SCP state
-            newProcessor = new ScpProcessor(newProcessor, scpp.Formatter, scpp.State);
+    private void ReconfigureProcessor() =>
+        _processor = BuildBaseProcessor();
 
-        _processor = newProcessor;
-    }
-
-    private async Task<DataEncryptor?> InitScp03Async(Scp03KeyParams keyParams, CancellationToken cancellationToken)
-    {
-        // Build base processor without SCP
-        var baseProcessor = BuildBaseProcessor();
-
-        // Initialize SCP03 session (sends INITIALIZE UPDATE)
-        var (state, hostCryptogram) = await ScpState.Scp03InitAsync(
-            baseProcessor,
-            keyParams,
-            null,
-            cancellationToken).ConfigureAwait(false);
-
-        // Create SCP processor with base processor's formatter
-        var scpProcessor = new ScpProcessor(baseProcessor, baseProcessor.Formatter, state);
-
-        // Send EXTERNAL AUTHENTICATE with host cryptogram
-        // NOTE: Command must have CLA with SM bit already set - MAC is computed over this CLA
-        // Matches Java: new Apdu(0x84, 0x82, 0x33, 0, pair.second)
-        var authCommand = new CommandApdu(
-            CLA_SECURE_MESSAGING,
-            INS_EXTERNAL_AUTHENTICATE,
-            SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC,
-            0x00,
-            hostCryptogram);
-        var authResponse = await scpProcessor.TransmitAsync(authCommand, true, false, cancellationToken)
-            .ConfigureAwait(false);
-
-        if (authResponse.SW != SWConstants.Success)
-            throw new ApduException($"EXTERNAL AUTHENTICATE failed with SW=0x{authResponse.SW:X4}")
-            {
-                SW = authResponse.SW
-            };
-
-        // Replace the processor with SCP-enabled processor
-        _processor = scpProcessor;
-
-        return state.GetDataEncryptor();
-    }
-
-    private async Task<DataEncryptor?> InitScp11Async(Scp11KeyParams keyParams, CancellationToken cancellationToken)
-    {
-        // Build base processor without SCP
-        var baseProcessor = BuildBaseProcessor();
-
-        // Initialize SCP11 session (performs ECDH key agreement)
-        var state = await ScpState.Scp11InitAsync(
-            baseProcessor,
-            keyParams,
-            cancellationToken).ConfigureAwait(false);
-
-        // Wrap base processor with SCP
-        var scpProcessor = new ScpProcessor(baseProcessor, baseProcessor.Formatter, state);
-
-        // Replace the processor with SCP-enabled processor
-        _processor = scpProcessor;
-
-        return state.GetDataEncryptor();
-    }
+    internal IApduProcessor GetBaseProcessor() => BuildBaseProcessor();
 }

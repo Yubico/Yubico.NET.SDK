@@ -12,29 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.YubiKey;
+
 namespace Yubico.YubiKit.Core.SmartCard;
 
 internal class ChainedResponseProcessor(
+    FirmwareVersion? firmwareVersion,
     IApduProcessor apduTransmitter,
     byte insSendRemaining) : IApduProcessor
 {
     private static readonly byte SW1_HAS_MORE_DATA = 0x61;
-    private readonly IApduProcessor _apduTransmitter = apduTransmitter;
-    private readonly CommandApdu GetMoreDataApdu = new((byte)0, insSendRemaining, (byte)0, (byte)0);
+    private readonly CommandApdu GetMoreDataApdu = new(0, insSendRemaining, 0, 0);
+
+    public FirmwareVersion? FirmwareVersion { get; } = firmwareVersion;
 
     #region IApduProcessor Members
 
-    public IApduFormatter Formatter => _apduTransmitter.Formatter;
+    public IApduFormatter Formatter => apduTransmitter.Formatter;
 
-    public async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true, CancellationToken cancellationToken = default)
+    public async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true,
+        CancellationToken cancellationToken = default)
     {
         using var ms = new MemoryStream();
 
-        var response = await _apduTransmitter.TransmitAsync(command, useScp, cancellationToken).ConfigureAwait(false);
+        var response = await apduTransmitter.TransmitAsync(command, useScp, cancellationToken).ConfigureAwait(false);
         while (response.SW1 == SW1_HAS_MORE_DATA)
         {
             ms.Write(response.Data.Span);
-            response = await _apduTransmitter.TransmitAsync(GetMoreDataApdu, useScp, cancellationToken).ConfigureAwait(false);
+            response = await apduTransmitter.TransmitAsync(GetMoreDataApdu, useScp, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         ms.Write(response.Data.Span);

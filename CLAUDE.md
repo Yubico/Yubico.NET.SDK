@@ -943,6 +943,128 @@ bool isValid = expected.SequenceEqual(actual);
 
 ## Testing
 
+### Test Philosophy: Value Over Coverage
+
+**CRITICAL: Only write tests that provide real value. Don't create tests just to increase coverage metrics.**
+
+#### ❌ DON'T Write These Tests
+
+**Validation-Only Tests** - Tests that only check input validation provide minimal value:
+```csharp
+// ❌ BAD - Only tests ArgumentNullException.ThrowIfNull()
+[Fact]
+public void Method_WithNullInput_ThrowsArgumentNullException()
+{
+    var sut = new MyClass();
+    Assert.Throws<ArgumentNullException>(() => sut.Process(null));
+}
+
+// ❌ BAD - Only tests basic type checking
+[Fact]
+public void Method_WithWrongType_ThrowsArgumentException()
+{
+    var sut = new MyClass();
+    Assert.Throws<ArgumentException>(() => sut.Process(wrongType));
+}
+```
+
+**Why these are bad:**
+- They test framework behavior, not your code
+- They give false sense of security ("95% coverage!")
+- They don't catch real bugs
+- They add maintenance burden without value
+
+**Skipped Tests** - Don't create tests you know will never run:
+```csharp
+// ❌ BAD - Creating a test that will never be implemented
+[Fact(Skip = "Requires mocking static methods which can't be done")]
+public void Method_ActualBehavior_WorksCorrectly()
+{
+    // This will never run
+}
+```
+
+**Why this is bad:**
+- False advertising - looks like you have tests but they don't run
+- Maintenance burden - someone has to read and understand why it's skipped
+- If you can't test it, that's valuable information - document it, don't fake it
+
+#### ✅ DO Write These Tests
+
+**Behavior Tests** - Tests that verify actual functionality:
+```csharp
+// ✅ GOOD - Tests real protocol configuration logic
+[Fact]
+public void Configure_FirmwareBelow400_UsesNeoMaxSize()
+{
+    var protocol = new PcscProtocol(logger, connection);
+
+    protocol.Configure(new FirmwareVersion(3, 5, 0));
+
+    Assert.Equal(254, protocol.MaxApduSize);
+}
+```
+
+**Integration Tests** - When unit testing is impossible/impractical:
+```csharp
+// ✅ GOOD - Tests actual SCP handshake with real hardware
+[Fact]
+public async Task CreateSession_WithSCP03_AuthenticatesAndCommunicates()
+{
+    var device = await YubiKey.FindFirstAsync();
+    using var session = await ManagementSession.CreateAsync(
+        device, scpKeyParams: scp03Keys);
+
+    var deviceInfo = await session.GetDeviceInfoAsync();
+    Assert.NotEqual(0, deviceInfo.SerialNumber);
+}
+```
+
+#### When You Can't Write Meaningful Tests
+
+If you can't test actual behavior due to:
+- Static methods that can't be mocked
+- Complex external dependencies
+- Architectural limitations
+
+**Then:**
+1. **Document the limitation** clearly in code comments
+2. **Point to integration tests** that exercise the code path
+3. **Don't create fake tests** just to have coverage
+
+**Example:**
+```csharp
+/// <summary>
+///     ScpInitializer routes SCP initialization requests.
+///
+///     LIMITATION: Cannot unit test actual SCP initialization because
+///     ScpState.Scp03InitAsync is a static method. This is tested via
+///     integration tests in ManagementTests.CreateManagementSession_with_SCP03_DefaultKeys.
+/// </summary>
+public class ScpInitializer
+{
+    // Only test the routing logic, not the static method calls
+}
+```
+
+#### Red Flags in Test Reviews
+
+🚩 **"This test only validates inputs"** - Remove it or test real behavior
+🚩 **"Skip = 'requires mocking X'"** - Either use integration tests or document why it's not testable
+🚩 **"Test passes but doesn't verify functionality"** - You're testing the wrong thing
+🚩 **"Need to mock 5+ dependencies to test this"** - Architectural problem, not a testing problem
+🚩 **"This increases coverage from 85% to 90%"** - Coverage metrics are not the goal
+
+#### Test Value Checklist
+
+Before writing a test, ask:
+- ✅ Does this test actual behavior or just input validation?
+- ✅ Would this catch a real bug if behavior changed?
+- ✅ Can I explain what value this test provides?
+- ✅ Would I trust this test to catch regressions?
+
+If you answered "no" to any of these, don't write the test.
+
 ### Test Structure
 
 - **UnitTests**: xUnit, no hardware required
@@ -958,10 +1080,10 @@ public async Task ConnectAsync_WhenDeviceAvailable_ReturnsConnection()
 {
     // Arrange
     var device = new MockYubiKey { IsConnected = true };
-    
+
     // Act
     var connection = await device.ConnectAsync<ISmartCardConnection>();
-    
+
     // Assert
     Assert.NotNull(connection);
     Assert.True(connection.IsConnected);
@@ -985,7 +1107,7 @@ public void Test1()
 public async Task IntegrationTest_WithRealDevice()
 {
     await using var connection = await _device.ConnectAsync<ISmartCardConnection>();
-    
+
     try
     {
         var result = await connection.TransmitAsync(apdu);

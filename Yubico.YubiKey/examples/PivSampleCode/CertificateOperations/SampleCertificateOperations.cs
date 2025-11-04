@@ -17,6 +17,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
@@ -41,18 +42,18 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             // Build the AsymmetricAlgorithm object from the public key.
-            using var dotNetPubKey = KeyConverter.GetDotNetFromPivPublicKey(slotContents.PublicKey);
+            using var dotNetPubKey = KeyConverter.GetDotNetFromPublicKey(slotContents.PublicKey);
 
             // Build a cert request object.
             // This sample code uses SHA-256 for all algorithms except ECC P-384.
             // With RSA it always uses PSS.
             slotContents.CertRequest = slotContents.Algorithm switch
             {
-                PivAlgorithm.EccP256 => new CertificateRequest(
+                KeyType.ECP256 => new CertificateRequest(
                     distinguishedName,
                     (ECDsa)dotNetPubKey,
                     HashAlgorithmName.SHA256),
-                PivAlgorithm.EccP384 => new CertificateRequest(
+                KeyType.ECP384 => new CertificateRequest(
                     distinguishedName,
                     (ECDsa)dotNetPubKey,
                     HashAlgorithmName.SHA384),
@@ -377,9 +378,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // verification method needs.
             var algorithm = pubKey.KeySize switch
             {
-                256 => PivAlgorithm.EccP256,
-                384 => PivAlgorithm.EccP384,
-                _ => PivAlgorithm.None,
+                256 => KeyType.ECP256,
+                384 => KeyType.ECP384,
+                _ => KeyType.None,
             };
 
             byte[] nonStandardSignature = DsaSignatureConverter.GetNonStandardDsaFromStandard(signature, algorithm);
@@ -458,9 +459,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // verification method needs.
             var algorithm = pubKey.KeySize switch
             {
-                256 => PivAlgorithm.EccP256,
-                384 => PivAlgorithm.EccP384,
-                _ => PivAlgorithm.None,
+                256 => KeyType.ECP256,
+                384 => KeyType.ECP384,
+                _ => KeyType.None,
             };
 
             // The signature is a BIT FIELD so the first octet is the unused
@@ -488,7 +489,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // using key word on the return object:
         //   using AsymmetricAlgorithm pubKey =
         //     SampleCertificateOperations.GetPublicKeyFromCertificate(cert);
-        public static AsymmetricAlgorithm GetPublicKeyFromCertificate(X509Certificate2 certificate)
+        public static AsymmetricAlgorithm GetPublicKeyFromCertificate(X509Certificate2 certificate) //Redone with ECPublicKey
         {
             if (certificate is null)
             {
@@ -497,10 +498,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             if (string.Equals(certificate.PublicKey.Oid.FriendlyName, "ECC", StringComparison.Ordinal))
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                var pivPub = new PivEccPublicKey(certificate.PublicKey.EncodedKeyValue.RawData);
-#pragma warning restore CS0618 // Type or member is obsolete
-                return KeyConverter.GetDotNetFromPivPublicKey(pivPub);
+                byte[] spkiBytes = certificate.PublicKey.ExportSubjectPublicKeyInfo();
+                ECPublicKey ecPubKey = ECPublicKey.CreateFromSubjectPublicKeyInfo(spkiBytes);
+                return KeyConverter.GetDotNetFromPublicKey(ecPubKey);
             }
 
             var returnValue = RSA.Create();

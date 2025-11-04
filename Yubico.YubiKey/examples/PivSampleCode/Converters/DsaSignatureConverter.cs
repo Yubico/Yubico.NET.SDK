@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
@@ -67,7 +68,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // the given algorithm, this method will throw an exception.
         // If the algorithm is not DSA or ECDSA (e.g. it is Rsa1024 or
         // TripleDes), the method will throw an exception.
-        public static byte[] GetNonStandardDsaFromStandard(byte[] signature, PivAlgorithm algorithm)
+        public static byte[] GetNonStandardDsaFromStandard(byte[] signature, KeyType algorithm) //changed PivAlgorithm to KeyType
         {
             if (signature is null)
             {
@@ -76,8 +77,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             int elementLength = algorithm switch
             {
-                PivAlgorithm.EccP256 => 32,
-                PivAlgorithm.EccP384 => 48,
+                KeyType.ECP256 => 32,
+                KeyType.ECP384 => 48,
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,

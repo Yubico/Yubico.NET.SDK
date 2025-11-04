@@ -16,6 +16,7 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Sample.SharedCode;
 
@@ -106,7 +107,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     }
 
                     SampleMenu.WriteMessage(MessageType.Title, 0, "Slot: " + GetPivSlotName(slotNumber));
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "Algorithm: " + metadata.Algorithm);
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Algorithm: " + metadata.PublicKeyParameters.KeyType);
                     SampleMenu.WriteMessage(MessageType.Title, 0, "Key status: " + metadata.KeyStatus);
                     SampleMenu.WriteMessage(MessageType.Title, 0, "Pin policy: " + metadata.PinPolicy);
                     SampleMenu.WriteMessage(MessageType.Title, 0, "Touch policy: " + metadata.TouchPolicy + "\n");
@@ -129,7 +130,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 0x9e => "Card Authentication",
                 0xf9 => "Attestation",
 
-                // Handle the 20 "Retired" key management slots
                 >= 0x82 and <= 0x95 => $"Retired Key {slotNumber - 0x82 + 1}",
 
                 _ => "Unknown Slot"
@@ -308,27 +308,30 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 return false;
             }
-
-            var pivPrivateKey = KeyConverter.GetPivPrivateKeyFromPem(pemKey.ToCharArray());
-            var pivPublicKey = KeyConverter.GetPivPublicKeyFromPem(pemKey.ToCharArray());
-
+ 
+            var privateKey = KeyConverter.GetPrivateKeyFromPem(pemKey.ToCharArray()); 
+            var publicKey = KeyConverter.GetPublicKeyFromPem(pemKey.ToCharArray()); 
+            
             if (KeyPairs.RunImportPrivateKey(
-                _yubiKeyChosen,
-                _keyCollector.SampleKeyCollectorDelegate,
-                pivPrivateKey,
-                pivPublicKey,
+                _yubiKeyChosen, 
+                _keyCollector.SampleKeyCollectorDelegate, 
+                privateKey,    
+                publicKey,      
                 slotNumber,
                 pinPolicy,
                 touchPolicy,
-                out var newSlotContents))
+                out SamplePivSlotContents newSlotContents)) 
             {
-                newSlotContents.PrintPublicKeyPem();
-                AddSlotContents(newSlotContents);
+                if (newSlotContents is not null)
+                {
+                    AddSlotContents(newSlotContents);
+                }
                 return true;
             }
 
             return false;
         }
+
 
         public static bool WriteImportCertMessage()
         {
@@ -359,7 +362,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // This sample code will use SHA-384 for EccP384, and SHA-256
             // for all other algorithms.
             var hashAlgorithm = HashAlgorithmName.SHA384;
-            if (signSlotContents.Algorithm != PivAlgorithm.EccP384)
+            if (signSlotContents.Algorithm != KeyType.ECP384)
             {
                 hashAlgorithm = HashAlgorithmName.SHA256;
             }
@@ -420,7 +423,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 return RunInvalidEntry();
             }
-            if (!decryptSlotContents.Algorithm.IsRsa())
+            if (!decryptSlotContents.Algorithm.IsRSA())
             {
                 return RunInvalidEntry();
             }
@@ -471,9 +474,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             return true;
         }
-
-        public bool RunKeyAgree()
+        public bool RunKeyAgree() // New method to implement IPublicKey
         {
+
             if (!GetAsymmetricSlotNumber(out byte slotNumber))
             {
                 return RunInvalidEntry();
@@ -485,7 +488,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 return RunInvalidEntry();
             }
-            if (!keyAgreeSlotContents.Algorithm.IsEcc())
+            if (keyAgreeSlotContents.GetType() != typeof(ECPublicKey))
             {
                 return RunInvalidEntry();
             }
@@ -504,7 +507,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // returning it as well so that we can compare the two
             // results to make sure they match.
             var hashAlgorithm = HashAlgorithmName.SHA256;
-            if (keyAgreeSlotContents.Algorithm == PivAlgorithm.EccP384)
+            if (keyAgreeSlotContents.Algorithm == KeyType.ECP384)
             {
                 hashAlgorithm = HashAlgorithmName.SHA384;
             }
@@ -512,19 +515,32 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             if (!PublicKeyOperations.SampleKeyAgreeEcc(
                 keyAgreeSlotContents.PublicKey,
                 hashAlgorithm,
-                out char[] correspondentPublicKey,
+                out char[] correspondentPublicKeyPem,
                 out byte[] correspondentSharedSecret))
             {
                 return false;
             }
 
-            var correspondentKey = KeyConverter.GetPivPublicKeyFromPem(correspondentPublicKey);
+            IPublicKey correspondentKey;
+            try
+            {
+                byte[] derEncodedKey = PemOperations.GetEncodingFromPem(
+                correspondentPublicKeyPem,
+                "PUBLIC KEY");
+
+                correspondentKey = ECPublicKey.CreateFromSubjectPublicKeyInfo(derEncodedKey);
+            }
+            catch (Exception e)
+            {
+                SampleMenu.WriteMessage(MessageType.Special, 0, $"Failed to decode key: {e.Message}");
+                return false;
+            }
 
             if (!PrivateKeyOperations.RunKeyAgree(
                 _yubiKeyChosen,
                 _keyCollector.SampleKeyCollectorDelegate,
                 slotNumber,
-                correspondentKey,
+                correspondentKey, 
                 out byte[] computedSecret))
             {
                 return false;
@@ -547,6 +563,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             return true;
         }
+
+
 
         public bool RunGetCertRequest()
         {
@@ -762,10 +780,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         // Ask the user to specify an algorithm. Offer and accept only asymmetric
         // algorithms.
-        private bool GetAsymmetricAlgorithm(out PivAlgorithm algorithm)
+
+        private bool GetAsymmetricAlgorithm(out KeyType algorithm) // New method using KeyType instead of PivAlgorithm
         {
-            algorithm = PivAlgorithm.None;
-            string[] menuItems = new string[] {
+            algorithm = KeyType.None;
+            string[] menuItems = new string[] { // TODO till RSA 3072 4096, ED25519, X25519
                 "RSA 1024",
                 "RSA 2048",
                 "ECC P-256",
@@ -776,14 +795,14 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             algorithm = response switch
             {
-                0 => PivAlgorithm.Rsa1024,
-                1 => PivAlgorithm.Rsa2048,
-                2 => PivAlgorithm.EccP256,
-                3 => PivAlgorithm.EccP384,
-                _ => PivAlgorithm.None,
+                0 => KeyType.RSA1024,
+                1 => KeyType.RSA2048,
+                2 => KeyType.ECP256,
+                3 => KeyType.ECP384,
+                _ => KeyType.None,
             };
 
-            return algorithm != PivAlgorithm.None;
+            return algorithm != KeyType.None;
         }
 
         // Ask the user to specify a PIN-only mode. Offer and accept only valid
@@ -891,7 +910,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         }
 
         // Get a pre-built key of the given algorithm.
-        private static bool GetPemPrivateKey(PivAlgorithm algorithm, out string pemKey)
+        private static bool GetPemPrivateKey(KeyType algorithm, out string pemKey) //Redone for KeyType
         {
             pemKey = null;
 
@@ -900,7 +919,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 default:
                     return false;
 
-                case PivAlgorithm.Rsa1024:
+                case KeyType.RSA1024:
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAM3/hGLkpff2hl/G\n" +
@@ -920,7 +939,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         "-----END PRIVATE KEY-----";
                     break;
 
-                case PivAlgorithm.Rsa2048:
+                case KeyType.RSA2048:
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCsdrf1M3aXyE7/\n" +
@@ -952,7 +971,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         "-----END PRIVATE KEY-----";
                     break;
 
-                case PivAlgorithm.EccP256:
+                case KeyType.ECP256:
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgoFe+ousm98sd74Ky\n" +
@@ -961,7 +980,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         "-----END PRIVATE KEY-----";
                     break;
 
-                case PivAlgorithm.EccP384:
+                case KeyType.ECP384:
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDD4CfYAlVwOaNM/iPr1\n" +

@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             byte[] dataToSign,
             HashAlgorithmName hashAlgorithm,
             RSASignaturePadding paddingScheme,
-            PivAlgorithm keyAlgorithm,
+            KeyType keyAlgorithm,
             out byte[] signature)
         {
             if (paddingScheme is null)
@@ -39,12 +39,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             signature = Array.Empty<byte>();
-            int keySizeBits = keyAlgorithm.KeySizeBits();
+            int keySizeBits = keyAlgorithm.GetKeySizeBits();
 
             // Before signing the data, we need to digest it.
             byte[] digest = MessageDigestOperations.ComputeMessageDigest(dataToSign, hashAlgorithm);
 
-            if (keyAlgorithm.IsEcc())
+            if (keyAlgorithm.IsEllipticCurve())
             {
                 // If the key is ECC, the digested data must be exactly the key
                 // size. For example, if the key is EccP384, then the digest
@@ -160,19 +160,17 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             return isValid;
         }
 
-        public static bool RunKeyAgree(
+        public static bool RunKeyAgree( // New method to implement IPublicKey
             IYubiKeyDevice yubiKey,
             Func<KeyEntryData, bool> KeyCollectorDelegate,
             byte slotNumber,
-            PivPublicKey correspondentPublicKey,
+            IPublicKey correspondentPublicKey,
             out byte[] computedSecret)
         {
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = KeyCollectorDelegate;
-#pragma warning disable CS0618 // Type or member is obsolete
                 computedSecret = pivSession.KeyAgree(slotNumber, correspondentPublicKey);
-#pragma warning restore CS0618 // Type or member is obsolete
             }
 
             return true;

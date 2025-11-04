@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management.IntegrationTests;
 
@@ -83,7 +84,7 @@ public class ManagementTests : IntegrationTestBase
         var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
 
         var newConfig = DeviceConfig.CreateBuilder()
-            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
+            .WithCapabilities(Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
             .WithAutoEjectTimeout(newAutoEject)
             .Build();
 
@@ -94,7 +95,7 @@ public class ManagementTests : IntegrationTestBase
 
         // Restore original setting
         var restoreConfig = DeviceConfig.CreateBuilder()
-            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
+            .WithCapabilities(Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
             .WithAutoEjectTimeout(originalAutoEject)
             .Build();
 
@@ -112,7 +113,7 @@ public class ManagementTests : IntegrationTestBase
         var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
 
         var newConfig = DeviceConfig.CreateBuilder()
-            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
+            .WithCapabilities(Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
             .WithAutoEjectTimeout(newAutoEject)
             .Build();
 
@@ -123,7 +124,7 @@ public class ManagementTests : IntegrationTestBase
 
         // Restore original setting
         var restoreConfig = DeviceConfig.CreateBuilder()
-            .WithCapabilities(Core.YubiKey.Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
+            .WithCapabilities(Transport.Usb, (int)DeviceCapabilities.All) // TODO Whats a good default value here?
             .WithAutoEjectTimeout(originalAutoEject)
             .Build();
 
@@ -139,15 +140,13 @@ public class ManagementTests : IntegrationTestBase
         var device = devices.FirstOrDefault();
 
         if (device == null)
-        {
             // Skip test if no device is found
             return;
-        }
 
         // Create SCP03 key parameters using default keys
         // Default SCP03 keys: 0x404142434445464748494A4B4C4D4E4F
         using var staticKeys = StaticKeys.GetDefaultKeys();
-        var keyRef = new KeyRef(Kid: 0x01, Kvn: 0xFF); // Default key set
+        var keyRef = new KeyRef(0x01, 0xFF); // Default key set
         var scpKeyParams = new Scp03KeyParams(keyRef, staticKeys);
 
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
@@ -170,20 +169,15 @@ public class ManagementTests : IntegrationTestBase
         var device = devices.FirstOrDefault();
 
         if (device == null)
-        {
             // Skip test if no device is found
             return;
-        }
 
         // Create SCP03 key parameters with intentionally wrong keys
         var wrongKeyBytes = new byte[16];
-        for (int i = 0; i < 16; i++)
-        {
-            wrongKeyBytes[i] = (byte)(0xFF - i); // Different from default
-        }
+        for (var i = 0; i < 16; i++) wrongKeyBytes[i] = (byte)(0xFF - i); // Different from default
 
         using var staticKeys = new StaticKeys(wrongKeyBytes, wrongKeyBytes, wrongKeyBytes);
-        var keyRef = new KeyRef(Kid: 0x01, Kvn: 0xFF);
+        var keyRef = new KeyRef(0x01, 0xFF);
         var scpKeyParams = new Scp03KeyParams(keyRef, staticKeys);
 
         using var connection = await device.ConnectAsync<ISmartCardConnection>();

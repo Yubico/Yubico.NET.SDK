@@ -38,21 +38,6 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     public byte Minor { get; }
     public byte Patch { get; }
 
-    public bool IsAtLeast(int major, int minor, int patch)
-    {
-        return CompareVersion(major, minor, patch) >= 0;
-    }
-
-    public bool IsLessThan(int major, int minor, int patch)
-    {
-        return CompareVersion(major, minor, patch) < 0;
-    }
-
-    private int CompareVersion(int major, int minor, int patch)
-    {
-        return (Major << 16 | Minor << 8 | Patch).CompareTo(major << 16 | minor << 8 | patch);
-    }
-
     public static FirmwareVersion Default => new(0);
 
     #region IComparable Members
@@ -105,6 +90,13 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     public bool Equals(FirmwareVersion? other) => CompareTo(other) == 0;
 
     #endregion
+
+    public bool IsAtLeast(int major, int minor, int patch) => CompareVersion(major, minor, patch) >= 0;
+
+    public bool IsLessThan(int major, int minor, int patch) => CompareVersion(major, minor, patch) < 0;
+
+    private int CompareVersion(int major, int minor, int patch) =>
+        ((Major << 16) | (Minor << 8) | Patch).CompareTo((major << 16) | (minor << 8) | patch);
 
     /// <summary>
     ///     Parse a string of the form "major.minor.patch"

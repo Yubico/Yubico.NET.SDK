@@ -111,7 +111,6 @@ public sealed record DeviceConfig
         return result;
     }
 
-    
 
     public static Builder CreateBuilder() => new();
 
@@ -174,9 +173,7 @@ public sealed record DeviceConfig
         public DeviceConfig Build()
         {
             if (_enabledCapabilities.TryGetValue(Transport.Usb, out var usb) && usb == 0)
-            {
                 throw new InvalidOperationException("At least one USB capability must be enabled.");
-            }
 
             return new DeviceConfig
             {

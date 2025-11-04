@@ -12,33 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.YubiKit.Core.SmartCard.Scp;
 
 /// <summary>
-/// Reference to an SCP key, uniquely identified by KID (Key ID) and KVN (Key Version Number).
+///     Reference to an SCP key, uniquely identified by KID (Key ID) and KVN (Key Version Number).
 /// </summary>
 public readonly record struct KeyRef(byte Kid, byte Kvn)
 {
     /// <summary>
-    /// Gets the Key ID.
+    ///     Gets the Key ID.
     /// </summary>
     public byte Kid { get; init; } = Kid;
 
     /// <summary>
-    /// Gets the Key Version Number.
+    ///     Gets the Key Version Number.
     /// </summary>
     public byte Kvn { get; init; } = Kvn;
 
     /// <summary>
-    /// Returns a byte array representation of this key reference.
+    ///     Returns a byte array representation of this key reference.
     /// </summary>
     /// <returns>A two-byte array containing [Kid, Kvn].</returns>
     public byte[] GetBytes() => [Kid, Kvn];
 
     /// <summary>
-    /// Returns a string representation of this key reference.
+    ///     Returns a string representation of this key reference.
     /// </summary>
     public override string ToString() => $"KeyRef{{kid=0x{Kid:X2}, kvn=0x{Kvn:X2}}}";
 }

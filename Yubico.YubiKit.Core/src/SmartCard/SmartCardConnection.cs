@@ -26,12 +26,13 @@ public interface IConnection : IDisposable
 
 public interface ISmartCardConnection : IConnection
 {
+    Transport Transport { get; }
     // IDisposable BeginTransaction(out bool cardWasReset);
 
     Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         ReadOnlyMemory<byte> command,
         CancellationToken cancellationToken = default);
-    public Transport Transport { get; }
+
     bool SupportsExtendedApdu();
     // byte[] getAtr();
 }
@@ -87,6 +88,9 @@ internal class SmartCardConnection(IPcscDevice smartCardDevice, ILogger<SmartCar
 
         return (ReadOnlyMemory<byte>)outputBuffer;
     }
+
+    public Transport Transport => Transport.Usb; // TODO determine transport
+    public bool SupportsExtendedApdu() => true; // TODO determine who supports extended APDUs
 
     #endregion
 
@@ -144,7 +148,4 @@ internal class SmartCardConnection(IPcscDevice smartCardDevice, ILogger<SmartCar
         await connection.InitializeAsync(cancellationToken).ConfigureAwait(false);
         return connection;
     }
-
-    public Transport Transport => Transport.Usb; // TODO determine transport
-    public bool SupportsExtendedApdu() => true; // TODO determine who supports extended APDUs
-}   
+}

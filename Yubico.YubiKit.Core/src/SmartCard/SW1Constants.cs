@@ -40,3 +40,4 @@
 //     public const byte ClassNotSupported = 0x6E;
 //     public const byte NoPreciseDiagnosis = 0x6F;
 // }
+

@@ -18,6 +18,7 @@ namespace Yubico.YubiKit.Management;
 public enum DeviceCapabilities
 {
     None = 0,
+
     /// <summary>
     ///     Identifies the YubiOTP application.
     /// </summary>

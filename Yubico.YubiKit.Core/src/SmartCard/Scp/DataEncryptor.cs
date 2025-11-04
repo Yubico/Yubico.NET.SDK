@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.YubiKit.Core.SmartCard.Scp;
 
 /// <summary>
-/// Delegate for encrypting data using the DEK (Data Encryption Key) of a current SCP session.
+///     Delegate for encrypting data using the DEK (Data Encryption Key) of a current SCP session.
 /// </summary>
 /// <param name="data">The data to encrypt.</param>
 /// <returns>The encrypted data.</returns>

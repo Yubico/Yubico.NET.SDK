@@ -48,8 +48,8 @@ internal class PcscProtocol : ISmartCardProtocol
     private const byte INS_SEND_REMAINING = 0xC0;
 
     private readonly ISmartCardConnection _connection;
-    internal readonly byte _insSendRemaining;
     private readonly ILogger<PcscProtocol> _logger;
+    internal readonly byte InsSendRemaining;
     private IApduProcessor _processor;
 
 
@@ -60,7 +60,7 @@ internal class PcscProtocol : ISmartCardProtocol
     {
         _logger = logger;
         _connection = connection;
-        _insSendRemaining = insSendRemaining.Length > 0 ? insSendRemaining.Span[0] : INS_SEND_REMAINING;
+        InsSendRemaining = insSendRemaining.Length > 0 ? insSendRemaining.Span[0] : INS_SEND_REMAINING;
         _processor = BuildBaseProcessor();
     }
 
@@ -130,7 +130,7 @@ internal class PcscProtocol : ISmartCardProtocol
             ? new ExtendedApduProcessor(_connection, new ExtendedApduFormatter(MaxApduSize))
             : new CommandChainingProcessor(_connection, new ShortApduFormatter());
 
-        return new ChainedResponseProcessor(FirmwareVersion, processor, _insSendRemaining);
+        return new ChainedResponseProcessor(FirmwareVersion, processor, InsSendRemaining);
     }
 
     private void ReconfigureProcessor() =>

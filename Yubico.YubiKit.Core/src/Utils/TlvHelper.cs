@@ -105,18 +105,15 @@ public static class TlvHelper
 
     public static Memory<byte> EncodeDictionary(IReadOnlyDictionary<int, byte[]?> tlvData)
     {
-        if (tlvData.Count == 0)
-        {
-            return Array.Empty<byte>();
-        }
+        if (tlvData.Count == 0) return Array.Empty<byte>();
 
-        int estimatedSize = tlvData.Sum(kvp => 2 + (kvp.Value?.Length ?? 0));
-        byte[] rented = ArrayPool<byte>.Shared.Rent(estimatedSize);
+        var estimatedSize = tlvData.Sum(kvp => 2 + (kvp.Value?.Length ?? 0));
+        var rented = ArrayPool<byte>.Shared.Rent(estimatedSize);
 
         try
         {
-            int position = 0;
-            Span<byte> buffer = rented.AsSpan();
+            var position = 0;
+            var buffer = rented.AsSpan();
 
             foreach (var (tag, value) in tlvData.OrderBy(kvp => kvp.Key))
             {
@@ -127,7 +124,7 @@ public static class TlvHelper
             }
 
             // Copy only the written portion
-            byte[] result = new byte[position];
+            var result = new byte[position];
             buffer[..position].CopyTo(result);
             return result;
         }

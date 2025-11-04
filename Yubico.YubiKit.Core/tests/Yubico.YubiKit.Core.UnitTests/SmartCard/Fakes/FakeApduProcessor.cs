@@ -22,23 +22,11 @@ namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Fakes;
 internal class FakeApduProcessor : IApduProcessor
 {
     private readonly Queue<ResponseApdu> _responses = new();
-
-    public IApduFormatter Formatter { get; set; } = new FakeApduFormatter();
     public List<CommandApdu> TransmittedCommands { get; } = [];
 
-    public void EnqueueResponse(ResponseApdu response)
-    {
-        _responses.Enqueue(response);
-    }
+    #region IApduProcessor Members
 
-    public void EnqueueResponse(byte sw1, byte sw2, ReadOnlyMemory<byte> data = default)
-    {
-        var responseBytes = new byte[data.Length + 2];
-        data.Span.CopyTo(responseBytes);
-        responseBytes[^2] = sw1;
-        responseBytes[^1] = sw2;
-        _responses.Enqueue(new ResponseApdu(responseBytes));
-    }
+    public IApduFormatter Formatter { get; set; } = new FakeApduFormatter();
 
     public async Task<ResponseApdu> TransmitAsync(
         CommandApdu command,
@@ -54,6 +42,19 @@ internal class FakeApduProcessor : IApduProcessor
 
         return await Task.FromResult(_responses.Dequeue());
     }
+
+    #endregion
+
+    public void EnqueueResponse(ResponseApdu response) => _responses.Enqueue(response);
+
+    public void EnqueueResponse(byte sw1, byte sw2, ReadOnlyMemory<byte> data = default)
+    {
+        var responseBytes = new byte[data.Length + 2];
+        data.Span.CopyTo(responseBytes);
+        responseBytes[^2] = sw1;
+        responseBytes[^1] = sw2;
+        _responses.Enqueue(new ResponseApdu(responseBytes));
+    }
 }
 
 /// <summary>
@@ -61,6 +62,8 @@ internal class FakeApduProcessor : IApduProcessor
 /// </summary>
 internal class FakeApduFormatter : IApduFormatter
 {
+    #region IApduFormatter Members
+
     public ReadOnlyMemory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le)
     {
         var buffer = new List<byte> { cla, ins, p1, p2 };
@@ -77,8 +80,8 @@ internal class FakeApduFormatter : IApduFormatter
         return buffer.ToArray();
     }
 
-    public ReadOnlyMemory<byte> Format(CommandApdu apdu)
-    {
-        return Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
-    }
+    public ReadOnlyMemory<byte> Format(CommandApdu apdu) =>
+        Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
+
+    #endregion
 }

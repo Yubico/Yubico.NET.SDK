@@ -137,7 +137,7 @@ public class PcscProtocolTests
 
         // Assert - Should use custom INS_SEND_REMAINING
         Assert.NotNull(protocol);
-        Assert.Equal(customIns, protocol._insSendRemaining);
+        Assert.Equal(customIns, protocol.InsSendRemaining);
     }
 
     [Fact]
@@ -148,7 +148,7 @@ public class PcscProtocolTests
 
         // Assert - Should use default 0xC0
         Assert.NotNull(protocol);
-        Assert.Equal((byte)0xC0, protocol._insSendRemaining);
+        Assert.Equal((byte)0xC0, protocol.InsSendRemaining);
     }
 
     #endregion

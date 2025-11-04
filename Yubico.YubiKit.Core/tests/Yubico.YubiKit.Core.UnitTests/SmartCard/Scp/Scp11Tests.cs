@@ -14,7 +14,7 @@
 
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKit.Core.SmartCard;
+using System.Text;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 
 namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Scp;
@@ -189,8 +189,7 @@ public class Scp11Tests
     }
 
     [Fact(Skip = "Requires actual YubiKey hardware with firmware >= 5.7.2")]
-    public async Task Scp11b_FullAuthentication_WithRealDevice_Succeeds()
-    {
+    public async Task Scp11b_FullAuthentication_WithRealDevice_Succeeds() =>
         // This test would perform a full SCP11b authentication with a real YubiKey.
         //
         // Prerequisites:
@@ -205,13 +204,10 @@ public class Scp11Tests
         // 5. Create Scp11KeyParams
         // 6. Initialize SCP session
         // 7. Verify encrypted communication works
-
         await Task.CompletedTask;
-    }
 
     [Fact(Skip = "Requires SecurityDomain session and YubiKey hardware")]
-    public async Task Scp11a_WithAllowList_FullFlow_Succeeds()
-    {
+    public async Task Scp11a_WithAllowList_FullFlow_Succeeds() =>
         // This test would verify complete SCP11a flow with allowlist.
         //
         // Prerequisites:
@@ -226,9 +222,7 @@ public class Scp11Tests
         // 5. Store allowlist with matching certificate serials
         // 6. Authenticate with SCP11a (should succeed)
         // 7. Delete keys to clean up
-
         await Task.CompletedTask;
-    }
 
     #region Helper Methods
 
@@ -238,21 +232,19 @@ public class Scp11Tests
     private static List<X509Certificate2> ParseTestCertificates()
     {
         var certs = new List<X509Certificate2>();
-        var pemString = System.Text.Encoding.UTF8.GetString(Scp11TestData.OceCerts.Span);
+        var pemString = Encoding.UTF8.GetString(Scp11TestData.OceCerts.Span);
 
         var pemParts = pemString.Split(
             ["-----BEGIN CERTIFICATE-----", "-----END CERTIFICATE-----"],
             StringSplitOptions.RemoveEmptyEntries);
 
         foreach (var part in pemParts)
-        {
             if (!string.IsNullOrWhiteSpace(part))
             {
                 var certBytes = Convert.FromBase64String(part.Trim());
                 var cert = X509CertificateLoader.LoadCertificate(certBytes);
                 certs.Add(cert);
             }
-        }
 
         return certs;
     }

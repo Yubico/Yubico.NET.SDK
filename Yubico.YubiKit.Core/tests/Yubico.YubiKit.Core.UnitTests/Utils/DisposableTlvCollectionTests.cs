@@ -37,11 +37,7 @@ public class DisposableTlvCollectionTests
     public void Constructor_WithIEnumerable_CreatesCollectionWithCorrectCount()
     {
         // Arrange
-        var tlvs = new List<Tlv>
-        {
-            new Tlv(0x01, [0x11]),
-            new Tlv(0x02, [0x22])
-        };
+        var tlvs = new List<Tlv> { new(0x01, [0x11]), new(0x02, [0x22]) };
 
         // Act
         using var collection = new DisposableTlvCollection(tlvs);
@@ -117,10 +113,7 @@ public class DisposableTlvCollectionTests
         // Act
         using var collection = new DisposableTlvCollection(tlv1, tlv2, tlv3);
         var tags = new List<int>();
-        foreach (var tlv in collection)
-        {
-            tags.Add(tlv.Tag);
-        }
+        foreach (var tlv in collection) tags.Add(tlv.Tag);
 
         // Assert
         Assert.Equal([0x01, 0x02, 0x03], tags);
@@ -213,10 +206,7 @@ public class DisposableTlvCollectionTests
         // Act
         using var collection = new DisposableTlvCollection();
         var count = 0;
-        foreach (var _ in collection)
-        {
-            count++;
-        }
+        foreach (var _ in collection) count++;
 
         // Assert
         Assert.Equal(0, count);

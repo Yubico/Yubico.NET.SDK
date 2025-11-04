@@ -55,7 +55,7 @@ public class DeviceRepositorySimple : IDeviceRepository
 
                 if (previousDeviceIds.Contains(id))
                     continue;
-                
+
                 _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, device));
                 yield return new DeviceEvent(DeviceAction.Added, device);
             }

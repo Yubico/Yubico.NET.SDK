@@ -20,7 +20,8 @@ internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFo
     private const int HasMoreData = 0x10;
     private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
 
-    public override async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true, CancellationToken cancellationToken = default)
+    public override async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true,
+        CancellationToken cancellationToken = default)
     {
         var data = command.Data;
         if (data.Length <= ShortApduMaxChunk)

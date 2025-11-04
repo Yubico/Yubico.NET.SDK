@@ -12,50 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Yubico.YubiKit.Core.SmartCard.Scp;
 
 /// <summary>
-/// SCP key parameters for SCP11 authentication (supports SCP11a, SCP11b, SCP11c).
+///     SCP key parameters for SCP11 authentication (supports SCP11a, SCP11b, SCP11c).
 /// </summary>
 public sealed record Scp11KeyParams : ScpKeyParams
 {
     /// <summary>
-    /// Gets the key reference for this SCP11 key.
-    /// </summary>
-    public KeyRef KeyRef { get; init; }
-
-    /// <summary>
-    /// Gets the public key of the Security Domain ECKA.
-    /// Required for all SCP11 variants.
-    /// </summary>
-    public ECDiffieHellmanPublicKey PkSdEcka { get; init; }
-
-    /// <summary>
-    /// Gets the private key of the Off-Card Entity ECKA.
-    /// Required for SCP11a and SCP11c, null for SCP11b.
-    /// </summary>
-    public ECDiffieHellman? SkOceEcka { get; init; }
-
-    /// <summary>
-    /// Gets the Off-Card Entity key reference.
-    /// Required for SCP11a and SCP11c, null for SCP11b.
-    /// </summary>
-    public KeyRef? OceKeyRef { get; init; }
-
-    /// <summary>
-    /// Gets the certificate chain for the Off-Card Entity.
-    /// Required for SCP11a and SCP11c (non-empty), empty for SCP11b.
-    /// </summary>
-    public IReadOnlyList<X509Certificate2> Certificates { get; init; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Scp11KeyParams"/> record for SCP11a or SCP11c.
+    ///     Initializes a new instance of the <see cref="Scp11KeyParams" /> record for SCP11a or SCP11c.
     /// </summary>
     /// <param name="keyRef">The key reference (KID must be 0x11, 0x13, or 0x15).</param>
     /// <param name="pkSdEcka">The Security Domain public key.</param>
@@ -82,19 +50,15 @@ public sealed record Scp11KeyParams : ScpKeyParams
         if (keyRef.Kid == ScpKid.SCP11a || keyRef.Kid == ScpKid.SCP11c)
         {
             if (skOceEcka == null)
-            {
                 throw new ArgumentNullException(nameof(skOceEcka), $"SCP11a and SCP11c require {nameof(skOceEcka)}");
-            }
 
             if (Certificates.Count == 0)
-            {
                 throw new ArgumentException("SCP11a and SCP11c require a certificate chain", nameof(certificates));
-            }
         }
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Scp11KeyParams"/> record for SCP11b.
+    ///     Initializes a new instance of the <see cref="Scp11KeyParams" /> record for SCP11b.
     /// </summary>
     /// <param name="keyRef">The key reference (KID must be 0x13 for SCP11b).</param>
     /// <param name="pkSdEcka">The Security Domain public key.</param>
@@ -103,11 +67,43 @@ public sealed record Scp11KeyParams : ScpKeyParams
     {
     }
 
+    /// <summary>
+    ///     Gets the public key of the Security Domain ECKA.
+    ///     Required for all SCP11 variants.
+    /// </summary>
+    public ECDiffieHellmanPublicKey PkSdEcka { get; init; }
+
+    /// <summary>
+    ///     Gets the private key of the Off-Card Entity ECKA.
+    ///     Required for SCP11a and SCP11c, null for SCP11b.
+    /// </summary>
+    public ECDiffieHellman? SkOceEcka { get; init; }
+
+    /// <summary>
+    ///     Gets the Off-Card Entity key reference.
+    ///     Required for SCP11a and SCP11c, null for SCP11b.
+    /// </summary>
+    public KeyRef? OceKeyRef { get; init; }
+
+    /// <summary>
+    ///     Gets the certificate chain for the Off-Card Entity.
+    ///     Required for SCP11a and SCP11c (non-empty), empty for SCP11b.
+    /// </summary>
+    public IReadOnlyList<X509Certificate2> Certificates { get; init; }
+
+    #region ScpKeyParams Members
+
+    /// <summary>
+    ///     Gets the key reference for this SCP11 key.
+    /// </summary>
+    public KeyRef KeyRef { get; init; }
+
+    #endregion
+
     private static void ValidateKid(byte kid)
     {
         if (kid != ScpKid.SCP11a && kid != ScpKid.SCP11b && kid != ScpKid.SCP11c)
-        {
-            throw new ArgumentException($"Invalid SCP11 KID: 0x{kid:X2}. Must be 0x11 (SCP11a), 0x13 (SCP11b), or 0x15 (SCP11c).");
-        }
+            throw new ArgumentException(
+                $"Invalid SCP11 KID: 0x{kid:X2}. Must be 0x11 (SCP11a), 0x13 (SCP11b), or 0x15 (SCP11c).");
     }
 }

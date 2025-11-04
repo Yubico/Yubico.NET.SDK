@@ -47,6 +47,24 @@ public sealed class DisposableTlvCollection : IDisposable, IReadOnlyList<Tlv>
         _tlvs = new List<Tlv>(tlvs);
     }
 
+    #region IDisposable Members
+
+    /// <summary>
+    ///     Disposes all TLV objects in the collection, securely zeroing their data.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed) return;
+
+        foreach (var tlv in _tlvs) tlv.Dispose();
+
+        _disposed = true;
+    }
+
+    #endregion
+
+    #region IReadOnlyList<Tlv> Members
+
     /// <summary>
     ///     Gets the TLV object at the specified index.
     /// </summary>
@@ -60,31 +78,18 @@ public sealed class DisposableTlvCollection : IDisposable, IReadOnlyList<Tlv>
     public int Count => _tlvs.Count;
 
     /// <summary>
-    ///     Returns a span view of the collection for efficient iteration.
-    /// </summary>
-    /// <returns>A span containing all TLV objects in the collection.</returns>
-    public ReadOnlySpan<Tlv> AsSpan() => CollectionsMarshal.AsSpan(_tlvs);
-
-    /// <summary>
-    ///     Disposes all TLV objects in the collection, securely zeroing their data.
-    /// </summary>
-    public void Dispose()
-    {
-        if (_disposed) return;
-
-        foreach (var tlv in _tlvs)
-        {
-            tlv.Dispose();
-        }
-
-        _disposed = true;
-    }
-
-    /// <summary>
     ///     Returns an enumerator that iterates through the collection.
     /// </summary>
     /// <returns>An enumerator for the collection.</returns>
     public IEnumerator<Tlv> GetEnumerator() => _tlvs.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    #endregion
+
+    /// <summary>
+    ///     Returns a span view of the collection for efficient iteration.
+    /// </summary>
+    /// <returns>A span containing all TLV objects in the collection.</returns>
+    public ReadOnlySpan<Tlv> AsSpan() => CollectionsMarshal.AsSpan(_tlvs);
 }

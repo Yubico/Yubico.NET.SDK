@@ -15,27 +15,27 @@
 namespace Yubico.YubiKit.Core.SmartCard.Scp;
 
 /// <summary>
-/// Constants for SCP (Secure Channel Protocol) Key Identifier values.
+///     Constants for SCP (Secure Channel Protocol) Key Identifier values.
 /// </summary>
 internal static class ScpKid
 {
     /// <summary>
-    /// Key ID for SCP03 protocol.
+    ///     Key ID for SCP03 protocol.
     /// </summary>
     public const byte SCP03 = 0x1;
 
     /// <summary>
-    /// Key ID for SCP11a protocol (mutual authentication with certificate chain).
+    ///     Key ID for SCP11a protocol (mutual authentication with certificate chain).
     /// </summary>
     public const byte SCP11a = 0x11;
 
     /// <summary>
-    /// Key ID for SCP11b protocol (authentication without off-card entity verification).
+    ///     Key ID for SCP11b protocol (authentication without off-card entity verification).
     /// </summary>
     public const byte SCP11b = 0x13;
 
     /// <summary>
-    /// Key ID for SCP11c protocol (mutual authentication with certificate chain, variant C).
+    ///     Key ID for SCP11c protocol (mutual authentication with certificate chain, variant C).
     /// </summary>
     public const byte SCP11c = 0x15;
 }

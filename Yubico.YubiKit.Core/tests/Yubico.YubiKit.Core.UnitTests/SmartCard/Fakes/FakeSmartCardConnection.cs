@@ -26,13 +26,11 @@ internal class FakeSmartCardConnection : ISmartCardConnection
     private bool _disposed;
 
     public bool SupportsExtendedApduValue { get; set; } = true;
-    public Transport Transport { get; set; } = Transport.Usb;
     public List<ReadOnlyMemory<byte>> TransmittedCommands { get; } = [];
 
-    public void EnqueueResponse(ReadOnlyMemory<byte> response)
-    {
-        _responses.Enqueue(response);
-    }
+    #region ISmartCardConnection Members
+
+    public Transport Transport { get; set; } = Transport.Usb;
 
     public bool SupportsExtendedApdu() => SupportsExtendedApduValue;
 
@@ -53,8 +51,9 @@ internal class FakeSmartCardConnection : ISmartCardConnection
         return await Task.FromResult(_responses.Dequeue());
     }
 
-    public void Dispose()
-    {
-        _disposed = true;
-    }
+    public void Dispose() => _disposed = true;
+
+    #endregion
+
+    public void EnqueueResponse(ReadOnlyMemory<byte> response) => _responses.Enqueue(response);
 }

@@ -73,7 +73,7 @@ public class ScpProtocolAdapterTests
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
-        DataEncryptor expectedEncryptor = (data) => data.ToArray(); // Simple pass-through encryptor
+        DataEncryptor expectedEncryptor = data => data.ToArray(); // Simple pass-through encryptor
         var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, expectedEncryptor);
 
         // Act
@@ -106,7 +106,7 @@ public class ScpProtocolAdapterTests
         var firmware = new FirmwareVersion(5, 7, 2);
 
         // Act - Should not throw
-        adapter.Configure(firmware, null);
+        adapter.Configure(firmware);
 
         // Assert - Configuration is applied to base protocol
         Assert.NotNull(adapter);
@@ -140,8 +140,7 @@ public class ScpProtocolAdapterTests
         var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => adapter.TransmitAndReceiveAsync(command));
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => adapter.TransmitAndReceiveAsync(command));
         Assert.Contains("6982", ex.Message);
     }
 }

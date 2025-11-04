@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.IntegrationTests.Infrastructure;
+namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 /// <summary>
 ///     Interface for providers that supply allowed serial numbers for integration testing.

@@ -30,6 +30,13 @@
     <ItemGroup>
         <ProjectReference Include="..\..\..\Yubico.YubiKit.Management\src\Yubico.YubiKit.Management.csproj"/>
         <ProjectReference Include="..\..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj"/>
+        <ProjectReference Include="..\..\..\Yubico.YubiKit.Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Xunit.SkippableFact">
+            <HintPath>..\..\..\..\..\..\.nuget\packages\xunit.skippablefact\1.4.13\lib\netstandard2.0\Xunit.SkippableFact.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

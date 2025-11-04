@@ -14,7 +14,7 @@
 
 using Microsoft.Extensions.Configuration;
 
-namespace Yubico.YubiKit.Core.IntegrationTests.Infrastructure;
+namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 /// <summary>
 ///     Provides allowed serial numbers from appsettings.json configuration.

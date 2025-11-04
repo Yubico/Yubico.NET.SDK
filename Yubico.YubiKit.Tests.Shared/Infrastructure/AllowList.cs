@@ -17,7 +17,7 @@ using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
-namespace Yubico.YubiKit.Core.IntegrationTests.Infrastructure;
+namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 /// <summary>
 ///     Implements allow list verification to prevent integration tests from running on production YubiKeys.

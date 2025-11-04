@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.IntegrationTests.Infrastructure;
+namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 /// <summary>
 ///     Exception thrown when allow list validation fails.

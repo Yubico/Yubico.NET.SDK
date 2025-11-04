@@ -151,6 +151,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             int bufferSize = _algorithm switch
             {
                 KeyType.ECP256 => 32,
+                KeyType.Ed25519 => 32,
                 KeyType.ECP384 => 48,
                 _ => digester.HashSize / 8,
             };

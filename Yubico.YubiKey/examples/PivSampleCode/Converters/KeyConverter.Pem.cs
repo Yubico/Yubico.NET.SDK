@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
     // constructions.
     public static partial class KeyConverter
     {
-        // Build a new PivPublicKey object from a PEM key string.
+        // Build a new PublicKey object from a PEM key string.
         // This method expects the buffer to contain one key only. It can be of
         // either form
         //    -----BEGIN PUBLIC KEY-----
@@ -34,47 +34,35 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         //    -----BEGIN PRIVATE KEY-----
         //    <base64 data>
         //    -----END PRIVATE KEY-----
-        // public static PivPublicKey GetPivPublicKeyFromPem(char[] pemKeyString)
-        // {
-        //     using var dotNetObject = GetDotNetFromPem(pemKeyString, false);
-        //     return GetPivPublicKeyFromDotNet(dotNetObject);
-        // }
+        
 
-        public static PublicKey GetPublicKeyFromPem(char[] pemKeyString) // New method to return the PublicKey class
+        public static PublicKey GetPublicKeyFromPem(char[] pemKeyString)
         {
             using var dotNetObject = GetDotNetFromPem(pemKeyString, false);
             return GetPublicKeyFromDotNet(dotNetObject);
         }
 
-        // Build the PEM string from a PivPublicKey.
+        // Build the PEM string from a PublicKey.
         // This method will build the following PEM format.
         //    -----BEGIN PUBLIC KEY-----
         //    <base64 data>
         //    -----END PUBLIC KEY-----
-        // public static char[] GetPemFromPivPublicKey(PivPublicKey pivPublicKey)
-        // {
-        //     using var dotNetObject = GetDotNetFromPivPublicKey(pivPublicKey);
-        //     return GetPemFromDotNet(dotNetObject, false);
-        // }
+        
 
-        public static char[] GetPemFromPublicKey(IPublicKey publicKey) // New method to accept the PublicKey class
+        public static char[] GetPemFromPublicKey(IPublicKey publicKey)
         {
             using var dotNetObject = GetDotNetFromPublicKey(publicKey);
             return GetPemFromDotNet(dotNetObject, false);
         }
 
-        // Build a new PivPrivateKey object from a PEM key string.
+        // Build a new PrivateKey object from a PEM key string.
         // This method expects the PEM key to be of the form
         //    -----BEGIN PRIVATE KEY-----
         //    <base64 data>
         //    -----END PRIVATE KEY-----
-        // public static PivPrivateKey GetPivPrivateKeyFromPem(char[] pemKeyString)
-        // {
-        //     using var dotNetObject = GetDotNetFromPem(pemKeyString, true);
-        //     return GetPivPrivateKeyFromDotNet(dotNetObject);
-        // }
+        
 
-        public static PrivateKey GetPrivateKeyFromPem(char[] pemKeyString) // New method to return the PrivateKey class
+        public static PrivateKey GetPrivateKeyFromPem(char[] pemKeyString)
         {
             using var dotNetObject = GetDotNetFromPem(pemKeyString, true);
             return GetPrivateKeyFromDotNet(dotNetObject);

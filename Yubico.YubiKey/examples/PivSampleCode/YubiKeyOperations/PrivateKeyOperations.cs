@@ -160,7 +160,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             return isValid;
         }
 
-        public static bool RunKeyAgree( // New method to implement IPublicKey
+        public static bool RunKeyAgree(
             IYubiKeyDevice yubiKey,
             Func<KeyEntryData, bool> KeyCollectorDelegate,
             byte slotNumber,

@@ -16,7 +16,7 @@ using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.Piv;
-using Yubico.YubiKey.Cryptography; // Updated namespace
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
 {
@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // Hence, look at the isVerified result (not the return value) to
         // determine if the signature verified or not.
         // If the publicKey is ECC, the paddingScheme argument is ignored.
-        public static bool SampleVerifySignature( //Redone for the IPublicKey class
+        public static bool SampleVerifySignature(
             IPublicKey publicKey,
             byte[] dataToVerify,
             HashAlgorithmName hashAlgorithm,
@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             // The algorithm is either RSA or ECC, otherwise the KeyConverter
             // call would have thrown an exception.
-            if (publicKey.GetType() == typeof(RSAPublicKey))
+            if (publicKey.KeyType.IsRSA())
             {
                 var rsaObject = (RSA)asymObject;
                 isVerified = rsaObject.VerifyData(dataToVerify, signature, hashAlgorithm, paddingScheme);
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // return it in the out arg encryptedData. If the method is unable to
         // perform the operation, it will set encryptedData to be an empty array
         // and return false.
-        public static bool SampleEncryptRsa( //Redone for the IPublicKey class
+        public static bool SampleEncryptRsa(
             IPublicKey publicKey,
             byte[] dataToEncrypt,
             RSAEncryptionPadding paddingScheme,
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 throw new ArgumentNullException(nameof(publicKey));
             }
 
-            if (publicKey.GetType() != typeof(RSAPublicKey))
+            if (!publicKey.KeyType.IsRSA())
             {
                 return false;
             }
@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // Of course, in the real world, the correspondent would not send the
         // shared secret, but for this sample, we're returning it as well so that
         // we can compare the two results to make sure they match.
-        public static bool SampleKeyAgreeEcc( //Redone for the IPublicKey class
+        public static bool SampleKeyAgreeEcc(
             IPublicKey publicKey,
             HashAlgorithmName hashAlgorithm,
             out char[] correspondentPublicKey,
@@ -131,7 +131,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 throw new ArgumentNullException(nameof(publicKey));
             }
             
-            if (publicKey.GetType() != typeof(ECPublicKey))
+            if (!publicKey.KeyType.IsEllipticCurve())
             {
                 return false;
             }

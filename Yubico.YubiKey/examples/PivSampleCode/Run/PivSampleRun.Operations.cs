@@ -474,7 +474,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             return true;
         }
-        public bool RunKeyAgree() // New method to implement IPublicKey
+        public bool RunKeyAgree()
         {
 
             if (!GetAsymmetricSlotNumber(out byte slotNumber))
@@ -781,14 +781,18 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // Ask the user to specify an algorithm. Offer and accept only asymmetric
         // algorithms.
 
-        private bool GetAsymmetricAlgorithm(out KeyType algorithm) // New method using KeyType instead of PivAlgorithm
+        private bool GetAsymmetricAlgorithm(out KeyType algorithm)
         {
             algorithm = KeyType.None;
-            string[] menuItems = new string[] { // TODO till RSA 3072 4096, ED25519, X25519
+            string[] menuItems = new string[] {
                 "RSA 1024",
                 "RSA 2048",
+                "RSA 3072",
+                "RSA 4096",
                 "ECC P-256",
-                "ECC P-384"
+                "ECC P-384",
+                "ED25519",    
+                "X25519"      
             };
 
             int response = _menuObject.RunMenu("Which algorithm?", menuItems);
@@ -797,8 +801,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 0 => KeyType.RSA1024,
                 1 => KeyType.RSA2048,
-                2 => KeyType.ECP256,
-                3 => KeyType.ECP384,
+                2 => KeyType.RSA3072,
+                3 => KeyType.RSA4096,
+                4 => KeyType.ECP256,
+                5 => KeyType.ECP384,
+                6 => KeyType.Ed25519,
+                7 => KeyType.X25519,
                 _ => KeyType.None,
             };
 
@@ -910,7 +918,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         }
 
         // Get a pre-built key of the given algorithm.
-        private static bool GetPemPrivateKey(KeyType algorithm, out string pemKey) //Redone for KeyType
+        private static bool GetPemPrivateKey(KeyType algorithm, out string pemKey)
         {
             pemKey = null;
 

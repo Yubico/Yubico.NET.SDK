@@ -31,27 +31,18 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public PivTouchPolicy TouchPolicy { get; set; }
 
-        public IPublicKey PublicKey { get; set; } //New field
+        public IPublicKey PublicKey { get; set; }
 
         public CertificateRequest CertRequest { get; set; }
 
         private byte[] _certRequestDer;
-
-        // public SamplePivSlotContents()
-        // {
-        //     Algorithm = PivAlgorithm.None;
-        //     PublicKey = new PivPublicKey();
-        //     _certRequestDer = Array.Empty<byte>();
-        // }
         
-        // New constructor to accept IPublicKey, might be overengineering?
-        public SamplePivSlotContents(IPublicKey publicKey) //Need to remove input arg later
+        public SamplePivSlotContents(IPublicKey publicKey)
         {
             Algorithm = KeyType.None;
             PublicKey = publicKey;
             _certRequestDer = Array.Empty<byte>();
         }
-        
 
         public void PrintPublicKeyPem()
         {

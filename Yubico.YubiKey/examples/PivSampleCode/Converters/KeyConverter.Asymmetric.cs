@@ -26,178 +26,57 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
     // (the C# classes RSA and ECDsa) into PivPublicKey and PivPrivateKey.
     public static partial class KeyConverter
     {
-        // Build a PivPublicKey object from an AsymmetricAlgorithm object.
-//         public static PivPublicKey GetPivPublicKeyFromDotNet(AsymmetricAlgorithm dotNetObject)
-//         {
-//             if (dotNetObject is null)
-//             {
-//                 throw new ArgumentNullException(nameof(dotNetObject));
-//             }
+        // Build a PublicKey object from an AsymmetricAlgorithm object.
+        public static Cryptography.PublicKey GetPublicKeyFromDotNet(AsymmetricAlgorithm dotNetObject) 
+        {
+            if (dotNetObject is null)
+            {
+                throw new ArgumentNullException(nameof(dotNetObject));
+            }
 
-//             // Look at the SignatureAlgorithm property. If it is "RSA", we can
-//             // cast the input to RSA.
-//             if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmRsa, StringComparison.Ordinal))
-//             {
-//                 var rsaParams = ((RSA)dotNetObject).ExportParameters(false);
-//                 // This constructor will validate the modulus and exponent.
-//                 var rsaPubKey = new PivRsaPublicKey(rsaParams.Modulus, rsaParams.Exponent);
-//                 return (PivPublicKey)rsaPubKey;
-//             }
+            // Look at the SignatureAlgorithm property. If it is "RSA", we can
+            // cast the input to RSA.
+            if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmRsa, StringComparison.Ordinal))
+            {
+                var rsaParams = ((RSA)dotNetObject).ExportParameters(false);
+                // This constructor will validate the modulus and exponent.
+                var rsaPubKey = RSAPublicKey.CreateFromParameters(rsaParams);
+                return rsaPubKey;
+            }
+            var eccParams = new ECParameters();
 
-//             var eccParams = new ECParameters();
+            // If the SignatureAlgorithm is "ECDsa", we can cast to ECDsa.
+            if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmEcdsa, StringComparison.Ordinal))
+            {
+                eccParams = ((ECDsa)dotNetObject).ExportParameters(false);
+            }
+            else if (string.Equals(dotNetObject.KeyExchangeAlgorithm, AlgorithmEcdh, StringComparison.Ordinal))
+            {
+                eccParams = ((ECDiffieHellman)dotNetObject).ExportParameters(false);
+            }
 
-//             // If the SignatureAlgorithm is "ECDsa", we can cast to ECDsa.
-//             if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmEcdsa, StringComparison.Ordinal))
-//             {
-//                 eccParams = ((ECDsa)dotNetObject).ExportParameters(false);
-//             }
-//             else if (string.Equals(dotNetObject.KeyExchangeAlgorithm, AlgorithmEcdh, StringComparison.Ordinal))
-//             {
-//                 eccParams = ((ECDiffieHellman)dotNetObject).ExportParameters(false);
-//             }
+            if (ValidateEccParameters(eccParams))
+            {
+                var eccPubKey = ECPublicKey.CreateFromParameters(eccParams);
+                return eccPubKey;
+            }
 
-//             if (ValidateEccParameters(eccParams))
-//             {
-//                 int keySize = dotNetObject.KeySize / 8;
+            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,InvalidKeyDataMessage));
 
-//                 byte[] point = new byte[(keySize * 2) + 1];
-//                 point[0] = 4;
-//                 int offset = 1 + (keySize - eccParams.Q.X.Length);
-//                 Array.Copy(eccParams.Q.X, 0, point, offset, eccParams.Q.X.Length);
-//                 offset += keySize + (keySize - eccParams.Q.Y.Length);
-//                 Array.Copy(eccParams.Q.Y, 0, point, offset, eccParams.Q.Y.Length);
-
-// #pragma warning disable CS0618 // Type or member is obsolete
-//                 var eccPubKey = new PivEccPublicKey(point);
-// #pragma warning restore CS0618 // Type or member is obsolete
-//                 return (PivPublicKey)eccPubKey;
-//             }
-
-//             throw new InvalidOperationException(
-//                 string.Format(
-//                     CultureInfo.CurrentCulture,
-//                     InvalidKeyDataMessage));
-//         }
+        }
 
         // Build an AsymmetricAlgorithm object (either RSA or ECDsa) from a
-        // PivPublicKey.
-        // public static AsymmetricAlgorithm GetDotNetFromPivPublicKey(PivPublicKey pivPublicKey)
-        // {
-        //     if (pivPublicKey is null)
-        //     {
-        //         throw new ArgumentNullException(nameof(pivPublicKey));
-        //     }
+        // PublicKey.
 
-        //     if (pivPublicKey.Algorithm.IsRsa())
-        //     {
-        //         var rsaPublic = (PivRsaPublicKey)pivPublicKey;
 
-        //         var rsaParams = new RSAParameters
-        //         {
-        //             Modulus = rsaPublic.Modulus.ToArray(),
-        //             Exponent = rsaPublic.PublicExponent.ToArray()
-        //         };
-
-        //         return RSA.Create(rsaParams);
-        //     }
-
-        //     var eccCurve = ECCurve.CreateFromValue("1.2.840.10045.3.1.7");
-        //     if (pivPublicKey.Algorithm != PivAlgorithm.EccP256)
-        //     {
-        //         if (pivPublicKey.Algorithm != PivAlgorithm.EccP384)
-        //         {
-        //             throw new InvalidOperationException(
-        //                 string.Format(
-        //                     CultureInfo.CurrentCulture,
-        //                     InvalidKeyDataMessage));
-        //         }
-        //         eccCurve = ECCurve.CreateFromValue("1.3.132.0.34");
-        //     }
-        //     var eccParams = new ECParameters
-        //     {
-        //         Curve = (ECCurve)eccCurve
-        //     };
-
-        //     var eccPublic = (PivEccPublicKey)pivPublicKey;
-        //     int coordLength = (eccPublic.PublicPoint.Length - 1) / 2;
-        //     eccParams.Q.X = eccPublic.PublicPoint.Slice(1, coordLength).ToArray();
-        //     eccParams.Q.Y = eccPublic.PublicPoint.Slice(1 + coordLength, coordLength).ToArray();
-
-        //     return ECDsa.Create(eccParams);
-        // }
-
-        // Build a PivPrivateKey object from an AsymmetricAlgorithm object that
-        // contains a private key.
-        // public static PivPrivateKey GetPivPrivateKeyFromDotNet(AsymmetricAlgorithm dotNetObject)
-        // {
-        //     if (dotNetObject is null)
-        //     {
-        //         throw new ArgumentNullException(nameof(dotNetObject));
-        //     }
-
-        //     var rsaParams = new RSAParameters();
-        //     var eccParams = new ECParameters();
-
-        //     try
-        //     {
-        //         // Look at the SignatureAlgorithm property. If it is "RSA", we can
-        //         // cast the input to RSA.
-        //         if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmRsa, StringComparison.Ordinal))
-        //         {
-        //             rsaParams = ((RSA)dotNetObject).ExportParameters(true);
-        //             var rsaPriKey = new PivRsaPrivateKey(
-        //                 rsaParams.P,
-        //                 rsaParams.Q,
-        //                 rsaParams.DP,
-        //                 rsaParams.DQ,
-        //                 rsaParams.InverseQ);
-        //             return (PivPrivateKey)rsaPriKey;
-        //         }
-
-        //         // If the SignatureAlgorithm is "ECDsa", we can cast to ECDsa.
-        //         if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmEcdsa, StringComparison.Ordinal))
-        //         {
-        //             eccParams = ((ECDsa)dotNetObject).ExportParameters(true);
-        //         }
-        //         else if (string.Equals(dotNetObject.KeyExchangeAlgorithm, AlgorithmEcdh, StringComparison.Ordinal))
-        //         {
-        //             eccParams = ((ECDiffieHellman)dotNetObject).ExportParameters(true);
-        //         }
-
-        //         if (ValidateEccParameters(eccParams))
-        //         {
-        //             int keySize = dotNetObject.KeySize / 8;
-
-        //             byte[] privateValue = new byte[keySize];
-        //             int offset = keySize - eccParams.D.Length;
-        //             Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
-        //             var eccPriKey = new PivEccPrivateKey(privateValue);
-        //             return (PivPrivateKey)eccPriKey;
-        //         }
-        //     }
-        //     finally
-        //     {
-        //         ClearRsaParameters(rsaParams);
-        //         ClearEccParameters(eccParams);
-        //     }
-
-        //     throw new InvalidOperationException(
-        //         string.Format(
-        //             CultureInfo.CurrentCulture,
-        //             InvalidKeyDataMessage));
-        // }
-
-        public static AsymmetricAlgorithm GetDotNetFromPublicKey(IPublicKey publicKey) //new method to accept the PublicKey class
+        public static AsymmetricAlgorithm GetDotNetFromPublicKey(IPublicKey publicKey)
         {
             if (publicKey is null)
             {
                 throw new ArgumentNullException(nameof(publicKey));
             }
 
-            if (publicKey.KeyType == KeyType.RSA1024 ||
-                publicKey.KeyType == KeyType.RSA2048 ||
-                publicKey.KeyType == KeyType.RSA3072 ||
-                publicKey.KeyType == KeyType.RSA4096)
+            if (publicKey.KeyType.IsRSA())
             {
                 var rsaPubKey = (RSAPublicKey)publicKey;
 
@@ -234,7 +113,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             return ECDsa.Create(eccParams);
         }
-        public static PrivateKey GetPrivateKeyFromDotNet(AsymmetricAlgorithm dotNetObject) //new method to return the PrivateKey class
+        // Build a PrivateKey object from an AsymmetricAlgorithm object that
+        // contains a private key.
+        public static PrivateKey GetPrivateKeyFromDotNet(AsymmetricAlgorithm dotNetObject)
         {
             if (dotNetObject is null)
             {
@@ -278,45 +159,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 ClearEccParameters(eccParams);
             }
 
-            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,InvalidKeyDataMessage));
-        }
-        public static Yubico.YubiKey.Cryptography.PublicKey GetPublicKeyFromDotNet(AsymmetricAlgorithm dotNetObject) //new method to return the PublicKey class
-        {
-            if (dotNetObject is null)
-            {
-                throw new ArgumentNullException(nameof(dotNetObject));
-            }
-
-            // Look at the SignatureAlgorithm property. If it is "RSA", we can
-            // cast the input to RSA.
-            if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmRsa, StringComparison.Ordinal))
-            {
-                var rsaParams = ((RSA)dotNetObject).ExportParameters(false);
-                // This constructor will validate the modulus and exponent.
-                var rsaPubKey = RSAPublicKey.CreateFromParameters(rsaParams);
-                return rsaPubKey;
-            }
-            var eccParams = new ECParameters();
-
-            // If the SignatureAlgorithm is "ECDsa", we can cast to ECDsa.
-            if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmEcdsa, StringComparison.Ordinal))
-            {
-                eccParams = ((ECDsa)dotNetObject).ExportParameters(false);
-            }
-            else if (string.Equals(dotNetObject.KeyExchangeAlgorithm, AlgorithmEcdh, StringComparison.Ordinal))
-            {
-                eccParams = ((ECDiffieHellman)dotNetObject).ExportParameters(false);
-            }
-
-            if (ValidateEccParameters(eccParams))
-            {
-                // Use the factory method that takes ECParameters directly
-                var eccPubKey = ECPublicKey.CreateFromParameters(eccParams);
-                return eccPubKey;
-            }
-
-            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,InvalidKeyDataMessage));
-
+            throw new InvalidOperationException(
+                string.Format(
+                CultureInfo.CurrentCulture,
+                InvalidKeyDataMessage));
         }
     }
 }

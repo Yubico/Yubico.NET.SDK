@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 {
     public static class KeyPairs
     {
-        public static bool RunGenerateKeyPair( //New signature with KeyType instead of PivAlgorithm
+        public static bool RunGenerateKeyPair(
             IYubiKeyDevice yubiKey,
             Func<KeyEntryData, bool> KeyCollectorDelegate,
             byte slotNumber,
@@ -52,40 +52,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             return true;
             
         }
-//         public static bool RunGenerateKeyPair(
-//             IYubiKeyDevice yubiKey,
-//             Func<KeyEntryData, bool> KeyCollectorDelegate,
-//             byte slotNumber,
-//             PivAlgorithm algorithm,
-//             PivPinPolicy pinPolicy,
-//             PivTouchPolicy touchPolicy,
-//             out SamplePivSlotContents slotContents)
-//         {
-//             using (var pivSession = new PivSession(yubiKey))
-//             {
-//                 pivSession.KeyCollector = KeyCollectorDelegate;
 
-// #pragma warning disable CS0618 // Type or member is obsolete
-//                 var pivPublicKey = pivSession.GenerateKeyPair(slotNumber, algorithm, pinPolicy, touchPolicy);
-// #pragma warning restore CS0618 // Type or member is obsolete
-
-//                 // At this point you will likely want to save the public key and
-//                 // other information. For this sample, we're simply going to
-//                 // build a SlotContents object.
-//                 slotContents = new SamplePivSlotContents()
-//                 {
-//                     SlotNumber = slotNumber,
-//                     Algorithm = algorithm,
-//                     PinPolicy = pinPolicy,
-//                     TouchPolicy = touchPolicy,
-//                     PublicKey = pivPublicKey,
-//                 };
-//             }
-
-//             return true;
-//         }
-
-        public static bool RunImportPrivateKey( // New method to implement IPrivateKey
+        public static bool RunImportPrivateKey(
             IYubiKeyDevice yubiKey,
             Func<KeyEntryData, bool> KeyCollectorDelegate,
             PrivateKey privateKey,
@@ -93,8 +61,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             byte slotNumber,
             PivPinPolicy pinPolicy,
             PivTouchPolicy touchPolicy,
-            out SamplePivSlotContents slotContents
-        )
+            out SamplePivSlotContents slotContents)
         {
             if (privateKey is null)
             {
@@ -122,57 +89,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     Algorithm = privateKey.KeyType,
                     PinPolicy = pinPolicy,
                     TouchPolicy = touchPolicy,
+                    PublicKey = publicKey,
                 };
             }
 
             return true;
         }
-
-        // public static bool RunImportPrivateKey(
-        //     IYubiKeyDevice yubiKey,
-        //     Func<KeyEntryData, bool> KeyCollectorDelegate,
-        //     PivPrivateKey privateKey,
-        //     PivPublicKey publicKey,
-        //     byte slotNumber,
-        //     PivPinPolicy pinPolicy,
-        //     PivTouchPolicy touchPolicy,
-        //     out SamplePivSlotContents slotContents)
-        // {
-        //     if (privateKey is null)
-        //     {
-        //         throw new ArgumentNullException(nameof(privateKey));
-        //     }
-        //     if (publicKey is null)
-        //     {
-        //         throw new ArgumentNullException(nameof(publicKey));
-        //     }
-
-        //     using (var pivSession = new PivSession(yubiKey))
-        //     {
-        //         pivSession.KeyCollector = KeyCollectorDelegate;
-
-        //         #pragma warning disable CS0618 // Type or member is obsolete
-        //         pivSession.ImportPrivateKey(slotNumber, privateKey, pinPolicy, touchPolicy);
-        //         #pragma warning restore CS0618 // Type or member is obsolete
-
-        //         // At this point you will likely want to save the public key and
-        //         // other information. For this sample, we're simply going to
-        //         // build a SlotContents object.
-        //         // The Import method does not need the public key, so we're
-        //         // building it with no public key. If you want, you can add the
-        //         // public key.
-        //         slotContents = new SamplePivSlotContents()
-        //         {
-        //             SlotNumber = slotNumber,
-        //             Algorithm = privateKey.Algorithm,
-        //             PinPolicy = pinPolicy,
-        //             TouchPolicy = touchPolicy,
-        //             PublicKey = PivPublicKey.Create(publicKey.YubiKeyEncodedPublicKey),
-        //         };
-        //     }
-
-        //     return true;
-        // }
 
         public static void RunRetrieveCert(
             IYubiKeyDevice yubiKey,

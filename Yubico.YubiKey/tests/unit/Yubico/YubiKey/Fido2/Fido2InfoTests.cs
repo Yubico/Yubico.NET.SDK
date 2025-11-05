@@ -31,6 +31,8 @@ namespace Yubico.YubiKey.Fido2
             var fido2Info = new AuthenticatorInfo(GetSampleEncoded());
             Assert.NotNull(fido2Info);
             Assert.NotNull(fido2Info.EncIdentifier);
+            Assert.NotNull(fido2Info.EncCredStoreState);
+            Assert.NotNull(fido2Info.AuthenticatorConfigCommands);
         }
 
         [Fact]
@@ -625,6 +627,87 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(expectedValue, isSupported);
         }
 
+        [Fact]
+        public void Decode_AuthenticatorConfigCommands_Correct()
+        {
+            int[] correctInts = new int[] { 1, 2, 3 };
+
+            byte[] encodedData = GetSampleEncoded();
+
+            var fido2Info = new AuthenticatorInfo(encodedData);
+            Assert.NotNull(fido2Info.AuthenticatorConfigCommands);
+            if (fido2Info.AuthenticatorConfigCommands is null)
+            {
+                return;
+            }
+
+            bool isValid = CompareIntLists(correctInts, fido2Info.AuthenticatorConfigCommands);
+
+            Assert.True(isValid);
+        }
+
+        [Fact]
+        public void Decode_NoAuthenticatorConfigCommands_Null()
+        {
+            byte[] encodedData = GetMinimumEncoded();
+
+            var fido2Info = new AuthenticatorInfo(encodedData);
+            Assert.Null(fido2Info.AuthenticatorConfigCommands);
+        }
+
+        [Fact]
+        public void Decode_EncCredStoreState_Correct()
+        {
+            byte[] correctValue = "encCredStoreStateByte"u8.ToArray();
+
+            byte[] encodedData = GetSampleEncoded();
+
+            var fido2Info = new AuthenticatorInfo(encodedData);
+            Assert.NotNull(fido2Info.EncCredStoreState);
+            if (fido2Info.EncCredStoreState is null)
+            {
+                return;
+            }
+
+            bool isValid = MemoryExtensions.SequenceEqual(correctValue, fido2Info.EncCredStoreState.Value.Span);
+
+            Assert.True(isValid);
+        }
+
+        [Fact]
+        public void Decode_NoEncCredStoreState_Null()
+        {
+            byte[] encodedData = GetMinimumEncoded();
+
+            var fido2Info = new AuthenticatorInfo(encodedData);
+            Assert.Null(fido2Info.EncCredStoreState);
+        }
+
+        private static bool CompareIntLists(
+            int[] correctInts,
+            IReadOnlyList<int>? candidate)
+        {
+            if (candidate is null)
+            {
+                return false;
+            }
+
+            if (correctInts.Length != candidate.Count)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < correctInts.Length; index++)
+            {
+                if (!candidate.Contains(correctInts[index]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private static bool CompareLongLists(
             long[] correctInts,
             IReadOnlyList<long>? candidate)
@@ -744,7 +827,9 @@ namespace Yubico.YubiKey.Fido2
                 .Entry(26, new[] { AuthenticatorTransports.Usb }) // TransportsForReset
                 .Entry(27, true) // PinComplexityPolicy
                 .Entry(28, "Example.com"u8.ToArray()) // PinComplexityPolicyUrl
-                .Entry(29, 33); // MaxPinLength
+                .Entry(29, 33) // MaxPinLength
+                .Entry(30, "encCredStoreStateByte"u8.ToArray()) // EncCredStoreState
+                .Entry(31, new[] { 1, 2, 3 }); // AuthenticatorConfigCommands
 
             var encoded = cborMapWriter.Encode();
             return encoded;

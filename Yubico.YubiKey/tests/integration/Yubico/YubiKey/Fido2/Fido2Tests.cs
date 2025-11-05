@@ -72,6 +72,41 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
         Assert.True(identifier1.Value.Span.SequenceEqual(identifier2.Value.Span));
     }
 
+    [SkippableFact(typeof(DeviceNotFoundException))]
+    public void AuthenticatorInfo_GetCredStoreState_BothRuns_Returns_SameCredStoreState()
+    {
+        ReadOnlyMemory<byte>? credStoreState1;
+        ReadOnlyMemory<byte>? credStoreState2;
+        ReadOnlyMemory<byte>? ppuat;
+
+        // First run
+        using (var session = GetSession(minFw: FirmwareVersion.V5_8_0))
+        {
+            session.VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
+            Assert.NotNull(session.AuthTokenPersistent);
+
+            ppuat = session.AuthTokenPersistent.Value.ToArray();
+            credStoreState1 = session.AuthenticatorInfo.GetCredStoreState(ppuat.Value);
+
+            Assert.NotNull(credStoreState1);
+            Assert.NotEmpty(credStoreState1.Value.ToArray());
+        }
+
+        // Second run, reuse ppuat
+        using (var session = GetSession(persistentPinUvAuthToken: ppuat.Value))
+        {
+            session.VerifyPin(PinUvAuthTokenPermissions.PersistentCredentialManagementReadOnly);
+            Assert.NotNull(session.AuthTokenPersistent);
+
+            credStoreState2 = session.AuthenticatorInfo.GetCredStoreState(ppuat.Value);
+
+            Assert.NotNull(credStoreState2);
+            Assert.NotEmpty(credStoreState2.Value.ToArray());
+        }
+
+        Assert.True(credStoreState1.Value.Span.SequenceEqual(credStoreState2.Value.Span));
+    }
+
     #endregion
 
     #region CredentialManagement

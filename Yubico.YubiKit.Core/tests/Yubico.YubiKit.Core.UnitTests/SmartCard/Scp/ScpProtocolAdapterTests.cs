@@ -42,7 +42,7 @@ public class ScpProtocolAdapterTests
         var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act
-        var result = await adapter.TransmitAndReceiveAsync(command);
+        var result = await adapter.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(expectedData, result.ToArray());
@@ -61,7 +61,7 @@ public class ScpProtocolAdapterTests
         var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
 
         // Act
-        var result = await adapter.SelectAsync(appId);
+        var result = await adapter.SelectAsync(appId, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(responseData, result.ToArray());
@@ -125,7 +125,8 @@ public class ScpProtocolAdapterTests
         // Assert - Base connection should be disposed
         Assert.Throws<ObjectDisposedException>(() =>
         {
-            _fakeConnection.TransmitAndReceiveAsync(new byte[] { 0x00 }).GetAwaiter().GetResult();
+            _fakeConnection.TransmitAndReceiveAsync(new byte[] { 0x00 }, TestContext.Current.CancellationToken)
+                .GetAwaiter().GetResult();
         });
     }
 
@@ -140,7 +141,8 @@ public class ScpProtocolAdapterTests
         var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => adapter.TransmitAndReceiveAsync(command));
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            adapter.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
         Assert.Contains("6982", ex.Message);
     }
 }

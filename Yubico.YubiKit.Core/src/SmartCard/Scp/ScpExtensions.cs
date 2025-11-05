@@ -19,60 +19,66 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// </summary>
 public static class ScpExtensions
 {
-    /// <summary>
-    ///     Initializes SCP on this protocol and returns an SCP-wrapped protocol instance.
-    ///     This is a convenience method that combines SCP initialization and protocol wrapping.
-    /// </summary>
-    /// <param name="protocol">The base protocol to enable SCP on</param>
-    /// <param name="keyParams">SCP key parameters (SCP03 or SCP11)</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>
-    ///     An SCP-enabled protocol that encrypts and MACs all commands.
-    ///     All subsequent operations through this protocol will use SCP.
-    /// </returns>
-    /// <exception cref="ArgumentException">Thrown when protocol is not PcscProtocol</exception>
-    /// <exception cref="NotSupportedException">Thrown when device doesn't support SCP</exception>
-    /// <exception cref="ApduException">Thrown when SCP initialization fails</exception>
-    /// <example>
-    ///     <code>
-    /// // Enable SCP03 on a protocol
-    /// ISmartCardProtocol protocol = new PcscProtocol(logger, connection);
-    /// protocol = await protocol.WithScpAsync(scp03KeyParams);
-    /// 
-    /// // Now all commands go through SCP
-    /// var response = await protocol.TransmitAndReceiveAsync(command);
-    /// </code>
-    /// </example>
-    public static async Task<ISmartCardProtocol> WithScpAsync(
-        this ISmartCardProtocol protocol,
-        ScpKeyParams keyParams,
-        CancellationToken cancellationToken = default)
+    #region Nested type: <extension>
+
+    extension(ISmartCardProtocol protocol)
     {
-        ArgumentNullException.ThrowIfNull(protocol);
-        ArgumentNullException.ThrowIfNull(keyParams);
-
-        if (protocol is not PcscProtocol pcscProtocol)
-            throw new ArgumentException(
-                "SCP is only supported on PcscProtocol. " +
-                "Ensure the protocol was created via PcscProtocolFactory.",
-                nameof(protocol));
-
-        // Validate firmware version if available
-        if (pcscProtocol.FirmwareVersion is not null)
+        /// <summary>
+        ///     Initializes SCP on this protocol and returns an SCP-wrapped protocol instance.
+        ///     This is a convenience method that combines SCP initialization and protocol wrapping.
+        /// </summary>
+        /// <param name="protocol">The base protocol to enable SCP on</param>
+        /// <param name="keyParams">SCP key parameters (SCP03 or SCP11)</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>
+        ///     An SCP-enabled protocol that encrypts and MACs all commands.
+        ///     All subsequent operations through this protocol will use SCP.
+        /// </returns>
+        /// <exception cref="ArgumentException">Thrown when protocol is not PcscProtocol</exception>
+        /// <exception cref="NotSupportedException">Thrown when device doesn't support SCP</exception>
+        /// <exception cref="ApduException">Thrown when SCP initialization fails</exception>
+        /// <example>
+        ///     <code>
+        /// // Enable SCP03 on a protocol
+        /// ISmartCardProtocol protocol = new PcscProtocol(logger, connection);
+        /// protocol = await protocol.WithScpAsync(scp03KeyParams);
+        /// 
+        /// // Now all commands go through SCP
+        /// var response = await protocol.TransmitAndReceiveAsync(command);
+        /// </code>
+        /// </example>
+        public async Task<ISmartCardProtocol> WithScpAsync(
+            ScpKeyParams keyParams,
+            CancellationToken cancellationToken = default)
         {
-            if (keyParams is Scp03KeyParams && !pcscProtocol.FirmwareVersion.IsAtLeast(5, 3, 0))
-                throw new NotSupportedException("SCP03 requires YubiKey firmware 5.3.0 or newer");
+            ArgumentNullException.ThrowIfNull(protocol);
+            ArgumentNullException.ThrowIfNull(keyParams);
 
-            if (keyParams is Scp11KeyParams && !pcscProtocol.FirmwareVersion.IsAtLeast(5, 7, 2))
-                throw new NotSupportedException("SCP11 requires YubiKey firmware 5.7.2 or newer");
+            if (protocol is not PcscProtocol pcscProtocol)
+                throw new ArgumentException(
+                    "SCP is only supported on PcscProtocol. " +
+                    "Ensure the protocol was created via PcscProtocolFactory.",
+                    nameof(protocol));
+
+            // Validate firmware version if available
+            if (pcscProtocol.FirmwareVersion is not null)
+                switch (keyParams)
+                {
+                    case Scp03KeyParams when !pcscProtocol.FirmwareVersion.IsAtLeast(5, 3, 0):
+                        throw new NotSupportedException("SCP03 requires YubiKey firmware 5.3.0 or newer");
+                    case Scp11KeyParams when !pcscProtocol.FirmwareVersion.IsAtLeast(5, 7, 2):
+                        throw new NotSupportedException("SCP11 requires YubiKey firmware 5.7.2 or newer");
+                }
+
+            var (scpProcessor, encryptor) = await ScpInitializer.InitializeScpAsync(
+                    pcscProtocol.GetBaseProcessor(),
+                    keyParams,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            return new ScpProtocolAdapter(protocol, scpProcessor, encryptor);
         }
-
-        var (scpProcessor, encryptor) = await ScpInitializer.InitializeScpAsync(
-                pcscProtocol.GetBaseProcessor(),
-                keyParams,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        return new ScpProtocolAdapter(protocol, scpProcessor, encryptor);
     }
+
+    #endregion
 }

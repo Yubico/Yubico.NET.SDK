@@ -37,12 +37,9 @@ public class ScpExtensionsTests
         ISmartCardProtocol protocol = new PcscProtocol(_logger, _fakeConnection);
         protocol.Configure(new FirmwareVersion(5, 2, 9)); // Just below 5.3.0
 
-        using var staticKeys = StaticKeys.GetDefaultKeys();
-        var keyParams = new Scp03KeyParams(new KeyRef(0x01, 0xFF), staticKeys);
-
         // Act & Assert
         var ex = await Assert.ThrowsAsync<NotSupportedException>(async () =>
-            await protocol.WithScpAsync(keyParams));
+            await protocol.WithScpAsync(Scp03KeyParams.Default));
 
         Assert.Contains("SCP03", ex.Message);
         Assert.Contains("5.3.0", ex.Message);
@@ -62,7 +59,7 @@ public class ScpExtensionsTests
         // Should proceed to initialization (will fail because fake connection doesn't respond,
         // but we're only testing that firmware check passes)
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams));
+            await protocol.WithScpAsync(Scp03KeyParams.Default));
 
         // Should NOT be NotSupportedException about firmware
         Assert.IsNotType<NotSupportedException>(ex);

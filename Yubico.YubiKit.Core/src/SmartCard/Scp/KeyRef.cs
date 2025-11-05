@@ -29,6 +29,8 @@ public readonly record struct KeyRef(byte Kid, byte Kvn)
     /// </summary>
     public byte Kvn { get; init; } = Kvn;
 
+    public static KeyRef Default => new(0x01, 0xFF);
+
     /// <summary>
     ///     Returns a byte array representation of this key reference.
     /// </summary>

@@ -38,14 +38,12 @@ public sealed record Scp03KeyParams : ScpKeyParams
     /// <summary>
     ///     Gets the static keys used for derivation.
     /// </summary>
-    public StaticKeys Keys { get; init; }
+    public StaticKeys Keys { get; }
 
-    #region ScpKeyParams Members
+    public static Scp03KeyParams Default => new(KeyRef.Default, StaticKeys.GetDefaultKeys());
 
     /// <summary>
     ///     Gets the key reference for this SCP03 key set.
     /// </summary>
-    public KeyRef KeyRef { get; init; }
-
-    #endregion
+    public KeyRef KeyRef { get; }
 }

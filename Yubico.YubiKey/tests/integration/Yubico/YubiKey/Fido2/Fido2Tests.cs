@@ -38,6 +38,27 @@ public class Fido2Tests : FidoSessionIntegrationTestBase
     }
 
     [SkippableFact(typeof(DeviceNotFoundException))]
+    public void Session_AuthenticatorCredStoreState_Returns_SameCredStoreState()
+    {
+        ReadOnlyMemory<byte>? credStoreState1;
+
+        // First run
+        using (var session = GetSession(minFw: FirmwareVersion.V5_8_0))
+        {
+            credStoreState1 = session.AuthenticatorCredStoreState;
+            Assert.True(credStoreState1.HasValue);
+            Assert.NotEmpty(credStoreState1.Value.ToArray());
+        }
+
+        // Second run
+        using (var session = GetSession())
+        {
+            var credStoreState2 = session.AuthenticatorCredStoreState;
+            Assert.True(credStoreState2!.Value.Span.SequenceEqual(credStoreState1.Value.Span));
+        }
+    }
+
+    [SkippableFact(typeof(DeviceNotFoundException))]
     public void AuthenticatorInfo_GetIdentifier_BothRuns_Returns_SameIdentifier()
     {
         ReadOnlyMemory<byte>? identifier1;

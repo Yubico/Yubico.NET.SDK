@@ -154,6 +154,39 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
+        /// Retrieves and decrypts the authenticator's credential store state.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method leverages the <c>encCredStoreState</c> value obtained from the authenticator's
+        /// <c>authenticatorGetInfo</c> response. The <c>encCredStoreState</c> is an encrypted byte string
+        /// that platforms can use to detect credential store changes across resets.
+        /// </para>
+        /// <para>
+        /// A valid and active persistent PIN/UV Authentication Token (<c>persistentPinUvAuthToken</c>) is required to decrypt the state.
+        /// The authenticator must also support and return the `encCredStoreState` in its `getInfo` response (YubiKeys v5.8.0 and later).
+        /// </para>
+        /// <para>
+        /// By comparing the credential store state before and after operations (or across sessions), platforms can detect
+        /// when credentials have been added, removed, or when the authenticator has been reset.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// A byte array containing the decrypted 128-bit (16-byte) credential store state.
+        /// Returns null if the state cannot be decrypted (e.g., if the PPUAT is invalid or the <c>encCredStoreState</c> is missing).
+        /// </returns>
+        public ReadOnlyMemory<byte>? AuthenticatorCredStoreState
+        {
+            get
+            {
+                var ppuat = GetReadOnlyCredMgmtToken();
+                return ppuat.HasValue
+                    ? AuthenticatorInfo.GetCredStoreState(ppuat.Value)
+                    : null;
+            }
+        }
+
+        /// <summary>
         /// Creates an instance of <see cref="Fido2Session" />, the object that represents the FIDO2 application on the
         /// YubiKey.
         /// </summary>

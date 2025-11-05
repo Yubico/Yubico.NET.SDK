@@ -597,30 +597,8 @@ namespace Yubico.YubiKey.Fido2
         /// <returns>
         /// The decrypted identifier as a read-only memory block of bytes, or null if the encrypted identifier is not set.
         /// </returns>
-        public ReadOnlyMemory<byte>? GetIdentifier(ReadOnlyMemory<byte> persistentUvAuthToken)
-        {
-            if (EncIdentifier is null)
-            {
-                return null;
-            }
-
-            if (persistentUvAuthToken.Length == 0)
-            {
-                return null;
-            }
-
-            Span<byte> iv = stackalloc byte[16];
-            Span<byte> ct = stackalloc byte[16];
-            Span<byte> salt = stackalloc byte[32];
-            EncIdentifier.Value.Span[..16].CopyTo(iv);
-            EncIdentifier.Value.Span[16..].CopyTo(ct);
-
-            var key = HkdfUtilities.DeriveKey(persistentUvAuthToken.Span, salt, "encIdentifier"u8, 16);
-            var decryptedIdentifier = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);
-            CryptographicOperations.ZeroMemory(key.Span);
-
-            return decryptedIdentifier;
-        }
+        public ReadOnlyMemory<byte>? GetIdentifier(ReadOnlyMemory<byte> persistentUvAuthToken) =>
+            DecryptEncryptedField(EncIdentifier, persistentUvAuthToken, "encIdentifier"u8);
 
         /// <summary>
         /// Retrieves the credential store state derived from the encrypted credential store state, using the provided persistent UV authentication token.
@@ -631,9 +609,38 @@ namespace Yubico.YubiKey.Fido2
         /// <returns>
         /// The decrypted credential store state as a read-only memory block of bytes, or null if the encrypted credential store state is not set.
         /// </returns>
-        public ReadOnlyMemory<byte>? GetCredStoreState(ReadOnlyMemory<byte> persistentPinUvAuthToken)
+        public ReadOnlyMemory<byte>? GetCredStoreState(ReadOnlyMemory<byte> persistentPinUvAuthToken) =>
+            DecryptEncryptedField(EncCredStoreState, persistentPinUvAuthToken, "encCredStoreState"u8);
+
+        /// <summary>
+        /// Decrypts an encrypted field using the provided persistent PIN/UV authentication token.
+        /// </summary>
+        /// <remarks>
+        /// This method implements the CTAP 2.2/2.3 decryption scheme for encrypted authenticator fields:
+        /// - Uses HKDF-SHA-256 to derive a 16-byte decryption key from the persistent token
+        /// - Salt: 32 bytes of zeros
+        /// - Info parameter: Field-specific context string (e.g., "encIdentifier", "encCredStoreState")
+        /// - Decrypts using AES-128-CBC
+        /// - Encrypted data format: 16-byte IV + 16-byte ciphertext
+        /// </remarks>
+        /// <param name="encryptedData">
+        /// The encrypted field data (32 bytes: 16-byte IV + 16-byte ciphertext), or null if not available.
+        /// </param>
+        /// <param name="persistentPinUvAuthToken">
+        /// The persistent PIN/UV authentication token used to derive the decryption key.
+        /// </param>
+        /// <param name="hkdfInfo">
+        /// The HKDF info parameter (context string) specific to the field being decrypted.
+        /// </param>
+        /// <returns>
+        /// The decrypted plaintext (16 bytes), or null if the encrypted data is not available or the token is empty.
+        /// </returns>
+        private static ReadOnlyMemory<byte>? DecryptEncryptedField(
+            ReadOnlyMemory<byte>? encryptedData,
+            ReadOnlyMemory<byte> persistentPinUvAuthToken,
+            ReadOnlySpan<byte> hkdfInfo)
         {
-            if (EncCredStoreState is null)
+            if (encryptedData is null)
             {
                 return null;
             }
@@ -646,14 +653,14 @@ namespace Yubico.YubiKey.Fido2
             Span<byte> iv = stackalloc byte[16];
             Span<byte> ct = stackalloc byte[16];
             Span<byte> salt = stackalloc byte[32];
-            EncCredStoreState.Value.Span[..16].CopyTo(iv);
-            EncCredStoreState.Value.Span[16..].CopyTo(ct);
+            encryptedData.Value.Span[..16].CopyTo(iv);
+            encryptedData.Value.Span[16..].CopyTo(ct);
 
-            var key = HkdfUtilities.DeriveKey(persistentPinUvAuthToken.Span, salt, "encCredStoreState"u8, 16);
-            var decryptedCredStoreState = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);
+            var key = HkdfUtilities.DeriveKey(persistentPinUvAuthToken.Span, salt, hkdfInfo, 16);
+            var decrypted = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);
             CryptographicOperations.ZeroMemory(key.Span);
 
-            return decryptedCredStoreState;
+            return decrypted;
         }
 
         /// <summary>

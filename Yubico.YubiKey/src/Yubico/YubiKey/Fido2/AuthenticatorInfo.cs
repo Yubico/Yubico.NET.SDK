@@ -59,6 +59,8 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyPinComplexityPolicy = 0x1B;
         private const int KeyPinComplexityPolicyUrl = 0x1C;
         private const int KeyMaxPinLength = 0x1D;
+        private const int KeyEncCredStoreState = 0x1E;
+        private const int KeyAuthenticatorConfigCommands = 0x1F;
 
         /// <summary>
         /// An <see cref="Aaguid"/> is defined in the standard as 16 bytes, no
@@ -366,6 +368,26 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public IReadOnlyList<string> AttestationFormats { get; } = new List<string>();
 
+        /// <summary>
+        /// If present, an encrypted credential store state that the platform can use to detect credential store changes across resets.
+        /// The platform must use the persistent UV auth token as input to decrypt the state.
+        /// If <c>null</c>, the authenticator does not support this feature.
+        /// The encrypted state is 32 bytes: the first 16 bytes are the IV,
+        /// and the second 16 bytes are the ciphertext.
+        /// The encryption algorithm is AES-128-CBC.
+        /// The key is derived from the persistent UV auth token using HKDF-SHA-256
+        /// with the info string "encCredStoreState" and a salt of 32 bytes of 0x00.
+        /// The plaintext is 16 bytes.
+        /// </summary>
+        public ReadOnlyMemory<byte>? EncCredStoreState { get; }
+
+        /// <summary>
+        /// If present, a list of authenticator config commands supported by the authenticator.
+        /// If <c>null</c>, the authenticator does not support the authenticatorConfig command or does not report supported commands.
+        /// An empty list indicates that the authenticatorConfig command is supported but no specific commands are available.
+        /// </summary>
+        public IReadOnlyList<int>? AuthenticatorConfigCommands { get; }
+
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private AuthenticatorInfo()
@@ -503,6 +525,14 @@ namespace Yubico.YubiKey.Fido2
                 MaximumPinLength = cborMap.Contains(KeyMaxPinLength)
                     ? cborMap.ReadInt32(KeyMaxPinLength)
                     : 63;
+
+                EncCredStoreState = cborMap.Contains(KeyEncCredStoreState)
+                    ? cborMap.ReadByteString(KeyEncCredStoreState)
+                    : null;
+
+                AuthenticatorConfigCommands = cborMap.Contains(KeyAuthenticatorConfigCommands)
+                    ? cborMap.ReadArray<int>(KeyAuthenticatorConfigCommands)
+                    : null;
             }
             catch (CborContentException cborException)
             {
@@ -590,6 +620,40 @@ namespace Yubico.YubiKey.Fido2
             CryptographicOperations.ZeroMemory(key.Span);
 
             return decryptedIdentifier;
+        }
+
+        /// <summary>
+        /// Retrieves the credential store state derived from the encrypted credential store state, using the provided persistent UV authentication token.
+        /// </summary>
+        /// <param name="persistentPinUvAuthToken">
+        /// The persistent PIN/UV authentication token used to derive the key for decryption.
+        /// </param>
+        /// <returns>
+        /// The decrypted credential store state as a read-only memory block of bytes, or null if the encrypted credential store state is not set.
+        /// </returns>
+        public ReadOnlyMemory<byte>? GetCredStoreState(ReadOnlyMemory<byte> persistentPinUvAuthToken)
+        {
+            if (EncCredStoreState is null)
+            {
+                return null;
+            }
+
+            if (persistentPinUvAuthToken.Length == 0)
+            {
+                return null;
+            }
+
+            Span<byte> iv = stackalloc byte[16];
+            Span<byte> ct = stackalloc byte[16];
+            Span<byte> salt = stackalloc byte[32];
+            EncCredStoreState.Value.Span[..16].CopyTo(iv);
+            EncCredStoreState.Value.Span[16..].CopyTo(ct);
+
+            var key = HkdfUtilities.DeriveKey(persistentPinUvAuthToken.Span, salt, "encCredStoreState"u8, 16);
+            var decryptedCredStoreState = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);
+            CryptographicOperations.ZeroMemory(key.Span);
+
+            return decryptedCredStoreState;
         }
 
         /// <summary>

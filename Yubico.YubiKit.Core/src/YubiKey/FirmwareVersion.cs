@@ -78,9 +78,7 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     public int CompareTo(FirmwareVersion? other)
     {
         if (ReferenceEquals(this, other)) return 0;
-        if (other is null) return 1;
-
-        return CompareVersion(other.Major, other.Minor, other.Patch);
+        return other is null ? 1 : CompareVersion(other.Major, other.Minor, other.Patch);
     }
 
     #endregion
@@ -90,6 +88,25 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     public bool Equals(FirmwareVersion? other) => CompareTo(other) == 0;
 
     #endregion
+
+    /// <summary>
+    ///     Parses a firmware version string in format "major.minor.patch".
+    /// </summary>
+    public static FirmwareVersion? FromString(string version)
+    {
+        var parts = version.Split('.');
+        if (parts.Length != 3)
+            return null;
+
+        if (!int.TryParse(parts[0], out var major) || major < 0 || major > 255)
+            return null;
+        if (!int.TryParse(parts[1], out var minor) || minor < 0 || minor > 255)
+            return null;
+        if (!int.TryParse(parts[2], out var patch) || patch < 0 || patch > 255)
+            return null;
+
+        return new FirmwareVersion(major, minor, patch);
+    }
 
     public bool IsAtLeast(int major, int minor, int patch) => CompareVersion(major, minor, patch) >= 0;
 

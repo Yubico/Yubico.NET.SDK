@@ -108,7 +108,22 @@ public class AllowList
     /// </summary>
     /// <param name="serialNumber">The serial number to check.</param>
     /// <returns>True if the serial number is allowed; otherwise, false.</returns>
-    private bool IsDeviceAllowed(int serialNumber) => _allowedSerials.Contains(serialNumber);
+    public bool IsDeviceAllowed(int serialNumber) => _allowedSerials.Contains(serialNumber);
+
+    /// <summary>
+    ///     Attempts to read the serial number from a YubiKey device without verification.
+    /// </summary>
+    /// <param name="device">The device to read from.</param>
+    /// <returns>The device serial number, or null if it could not be read.</returns>
+    /// <remarks>
+    ///     This method does NOT verify against the allow list. It only reads the serial number.
+    ///     Use <see cref="VerifyAsync"/> for verification with hard fail.
+    /// </remarks>
+    public async Task<int?> GetSerialNumberAsync(IYubiKey device)
+    {
+        ArgumentNullException.ThrowIfNull(device);
+        return await GetDeviceSerialNumberAsync(device).ConfigureAwait(false);
+    }
 
     /// <summary>
     ///     Attempts to read the serial number from a YubiKey device.

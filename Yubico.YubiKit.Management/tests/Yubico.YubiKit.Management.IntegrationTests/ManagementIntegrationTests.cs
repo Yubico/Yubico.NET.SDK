@@ -12,79 +12,71 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Management.IntegrationTests;
 
 /// <summary>
 ///     Integration tests for Management application.
-///     Demonstrates usage of the test infrastructure.
+///     Demonstrates usage of the YubiKeyTheory attribute and extension methods.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         These tests use <see cref="ManagementTestFixture" /> which provides:
-///         - Automatic device acquisition and allow list verification
-///         - Device information via <see cref="ManagementTestFixture.State" />
-///         - Test requirement helpers (RequireFirmware, RequireFormFactor, etc.)
+///         These tests use <see cref="YubiKeyTheoryAttribute" /> which provides:
+///         - Automatic device discovery and allow list verification
+///         - Declarative filtering via attribute properties
+///         - Runs on ALL devices matching the specified criteria
 ///     </para>
 ///     <para>
 ///         IMPORTANT: Tests will only run on YubiKeys listed in appsettings.json.
 ///         Add your test device serial numbers to the AllowedSerialNumbers array.
 ///     </para>
 /// </remarks>
-public class ManagementIntegrationTests : ManagementTestFixture
+public class ManagementIntegrationTests
 {
     /// <summary>
-    ///     Example test: Verify we can read device information.
+    ///     Verify we can read device information.
     /// </summary>
-    [SkippableFact]
-    public async Task GetDeviceInfo_ReturnsValidInformation() =>
-        // The fixture automatically acquires the device and verifies the allow list
-        // before this test runs (via IAsyncLifetime.InitializeAsync)
-        await State.WithManagementAsync(async (mgmt, state) =>
+    [YubiKeyTheory]
+    public async Task GetDeviceInfo_ReturnsValidInformation(YubiKeyTestState state) =>
+        await state.WithManagementAsync(async (mgmt, deviceInfo) =>
         {
             // Get device info via Management session
-            var deviceInfo = await mgmt.GetDeviceInfoAsync();
+            var info = await mgmt.GetDeviceInfoAsync();
 
             // Verify we got valid device information
-            Assert.True(deviceInfo.SerialNumber > 0);
+            Assert.True(info.SerialNumber > 0);
 
-            // Device info should match what the fixture cached
-            Assert.Equal(state.DeviceInfo.SerialNumber, deviceInfo.SerialNumber);
-            Assert.Equal(state.DeviceInfo.FirmwareVersion, deviceInfo.FirmwareVersion);
+            // Device info should match what we cached
+            Assert.Equal(deviceInfo.SerialNumber, info.SerialNumber);
+            Assert.Equal(deviceInfo.FirmwareVersion, info.FirmwareVersion);
         });
 
     /// <summary>
-    ///     Example test: Verify device has expected capabilities.
+    ///     Verify device has expected capabilities.
     /// </summary>
-    [SkippableFact]
-    public async Task DeviceCapabilities_HasManagementSupport()
-    {
-        // Require minimum firmware version
-        RequireFirmware(4, 1, 0); // Management application requires 4.1.0+
-
-        await State.WithManagementAsync((mgmt, state) =>
+    [YubiKeyTheory(MinFirmware = "4.1.0")] // Management requires 4.1.0+
+    public async Task DeviceCapabilities_HasManagementSupport(YubiKeyTestState state) =>
+        await state.WithManagementAsync((mgmt, deviceInfo) =>
         {
             // Verify device has USB support (all devices should have this)
             Assert.True(state.IsUsbTransport);
 
             // Verify firmware version is accessible
-            Assert.NotNull(state.FirmwareVersion);
-            Assert.True(state.FirmwareVersion.Major >= 4);
+            Assert.NotNull(deviceInfo.FirmwareVersion);
+            Assert.True(deviceInfo.FirmwareVersion.Major >= 4);
         });
-    }
 
     /// <summary>
-    ///     Example test: Conditional execution based on form factor.
+    ///     Verify form factor matches expected type.
     /// </summary>
-    [SkippableFact]
-    public async Task FormFactor_MatchesExpectedType() =>
-        await State.WithManagementAsync((mgmt, state) =>
+    [YubiKeyTheory]
+    public async Task FormFactor_MatchesExpectedType(YubiKeyTestState state) =>
+        await state.WithManagementAsync((mgmt, deviceInfo) =>
         {
             // Form factor should be one of the known types
             Assert.True(
-                state.FormFactor is FormFactor.UsbAKeychain
+                deviceInfo.FormFactor is FormFactor.UsbAKeychain
                     or FormFactor.UsbCKeychain
                     or FormFactor.UsbABiometricKeychain
                     or FormFactor.UsbCBiometricKeychain
@@ -95,42 +87,30 @@ public class ManagementIntegrationTests : ManagementTestFixture
         });
 
     /// <summary>
-    ///     Example test: Skip test if device doesn't meet requirements.
+    ///     Test filtered by form factor - only runs on Bio keys.
     /// </summary>
-    [SkippableFact]
-    public async Task BiometricFeatures_RequiresBioKey()
-    {
-        // This test will be skipped unless the device is a Bio key
-        RequireFormFactor(FormFactor.UsbABiometricKeychain);
-
-        await State.WithManagementAsync((mgmt, state) =>
+    [YubiKeyTheory(FormFactor = FormFactor.UsbABiometricKeychain)]
+    public async Task BiometricFeatures_RequiresBioKey(YubiKeyTestState state) =>
+        await state.WithManagementAsync((mgmt, deviceInfo) =>
         {
-            // If we get here, we know we have a Bio key
-            Assert.Equal(FormFactor.UsbABiometricKeychain, state.FormFactor);
+            // If we get here, we know we have a Bio key (filter guaranteed it)
+            Assert.Equal(FormFactor.UsbABiometricKeychain, deviceInfo.FormFactor);
 
             // Bio-specific tests would go here
         });
-    }
 
     /// <summary>
-    ///     Example test: Multiple requirements at once.
+    ///     Test with multiple filter criteria.
     /// </summary>
-    [SkippableFact]
-    public async Task AdvancedFeatures_RequireSpecificConfiguration()
-    {
-        // Require minimum firmware AND specific transport
-        RequireDevice(
-            new FirmwareVersion(5),
-            transport: Transport.Usb);
-
-        await State.WithManagementAsync(async (mgmt, state) =>
+    [YubiKeyTheory(MinFirmware = "5.0.0", RequireUsb = true)]
+    public async Task AdvancedFeatures_RequireSpecificConfiguration(YubiKeyTestState state) =>
+        await state.WithManagementAsync(async (mgmt, deviceInfo) =>
         {
-            // If we get here, device meets all requirements
-            Assert.True(state.FirmwareVersion.Major >= 5);
+            // Device meets all requirements (guaranteed by attribute filter)
+            Assert.True(deviceInfo.FirmwareVersion.Major >= 5);
             Assert.True(state.IsUsbTransport);
 
-            var deviceInfo = await mgmt.GetDeviceInfoAsync();
-            Assert.True(deviceInfo.SerialNumber > 0);
+            var info = await mgmt.GetDeviceInfoAsync();
+            Assert.True(info.SerialNumber > 0);
         });
-    }
 }

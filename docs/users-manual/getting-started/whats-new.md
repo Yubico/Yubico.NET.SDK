@@ -39,7 +39,6 @@ Bug Fixes:
 - Fixed logic in FIDO2 `AddPermissions` that was incorrectly throwing exceptions. ([#316](https://github.com/Yubico/Yubico.NET.SDK/pull/316))
 - Refactored authentication token retrieval to use more suitable logic in FIDO2 `GetAuthToken`. ([#316](https://github.com/Yubico/Yubico.NET.SDK/pull/316))
 
-
 Features:
 
 - Implemented polling mechanism for udev events in Linux HID device listener to improve responsiveness during shutdown ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
@@ -83,7 +82,7 @@ Features:
 
 - Support has been added for the following CTAP 2.2 and YubiKey firmware version 5.8 features ([#299](https://github.com/Yubico/Yubico.NET.SDK/pull/299)):
 
-  - Persistent PinUvAuthToken (PPUAT): The [GetPersistentPinUvAuthToken()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetPersistentPinUvAuthToken) method has been added to retrieve PPUATs for use with read-only FIDO2 credential management operations, including [EnumerateRelyingParties()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateRelyingParties), [EnumerateCredentialsForRelyingParty()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateCredentialsForRelyingParty%28Yubico.YubiKey.Fido2.RelyingParty%29), and [GetCredentialMetadata()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata). PPUATs enable applications to list discoverable credentials from YubiKeys without requiring repeated PIN entry.
+  - [Persistent PinUvAuthToken (PPUAT)](xref:Fido2AuthTokens#persistent-pinuvauthtoken-ppuat): The [GetPersistentPinUvAuthToken()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetPersistentPinUvAuthToken) method has been added to retrieve PPUATs for use with read-only FIDO2 credential management operations, including [EnumerateRelyingParties()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateRelyingParties), [EnumerateCredentialsForRelyingParty()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateCredentialsForRelyingParty%28Yubico.YubiKey.Fido2.RelyingParty%29), and [GetCredentialMetadata()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata). PPUATs enable applications to list discoverable credentials from YubiKeys without requiring repeated PIN entry.
 
   - thirdPartyPayment extension: The [GetThirdPartyPaymentExtension](xref:Yubico.YubiKey.Fido2.AuthenticatorData.GetThirdPartyPaymentExtension) method has been added to check for and return the status of the thirdPartyPayment extension. The thirdPartyPayment extension enables YubiKeys to be used for cross-domain credentials without redirects, as required by Secure Payment Confirmation (SPC) workflows.
 

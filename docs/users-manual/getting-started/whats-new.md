@@ -57,9 +57,15 @@ Refactoring:
 
 Dependencies:
 
-- Updated Microsoft Extensions packages from 9.0.9 to 9.0.10: `Microsoft.Bcl.AsyncInterfaces`, `Microsoft.Bcl.Cryptography`, `Microsoft.Extensions.Configuration.Json`, `Microsoft.Extensions.Logging.Abstractions`, `Microsoft.Extensions.Logging.Console`, `Microsoft.Extensions.Options.ConfigurationExtensions`, `System.Configuration.ConfigurationManager`, `System.Formats.Asn1`, `System.Formats.Cbor`. ([#317](https://github.com/Yubico/Yubico.NET.SDK/pull/317), [#327](https://github.com/Yubico/Yubico.NET.SDK/pull/327))
-- Updated test frameworks: `Microsoft.NET.Test.Sdk` (17.10.0 → 18.0.0), `coverlet.collector` (6.0.2 → 6.0.4), `xunit` (2.8.1 → 2.9.3), `xunit.runner.visualstudio` (2.8.1/3.1.4 → 3.1.5), `Xunit.SkippableFact` (1.4.13 → 1.5.23). ([#317](https://github.com/Yubico/Yubico.NET.SDK/pull/317))
-- Updated build tools: `Microsoft.SourceLink.GitHub` (1.1.1 → 8.0.0). ([#317](https://github.com/Yubico/Yubico.NET.SDK/pull/317))
+- Several dependencies across the following projects have been updated to newer versions ([#317](https://github.com/Yubico/Yubico.NET.SDK/pull/317), [#327](https://github.com/Yubico/Yubico.NET.SDK/pull/327)):
+
+  - Yubico.Core
+  - Yubico.Core.UnitTests
+  - Yubico.YubiKey
+  - Yubico.YubiKey.IntegrationTests
+  - Yubico.YubiKey.TestApp
+  - Yubico.YubiKey.UnitTests
+  - Yubico.YubiKey.TestUtilities
 
 Documentation:
 

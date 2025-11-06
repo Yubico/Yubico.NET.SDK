@@ -142,6 +142,127 @@ namespace Yubico.YubiKey
             }
         }
 
+        // Tests for GitHub Issue #192 - Properties should update after configuration changes
+        [Fact]
+        public void SetIsNfcRestricted_UpdatesPropertyImmediately()
+        {
+            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            {
+                // Get initial value
+                bool initialValue = device.IsNfcRestricted;
+
+                // Set to opposite value
+                device.SetIsNfcRestricted(!initialValue);
+
+                // Verify property updated immediately
+                Assert.Equal(!initialValue, device.IsNfcRestricted);
+
+                // Restore original value
+                device.SetIsNfcRestricted(initialValue);
+
+                // Verify restored
+                Assert.Equal(initialValue, device.IsNfcRestricted);
+            }
+        }
+
+        [Fact]
+        public void SetDeviceFlags_UpdatesPropertyImmediately()
+        {
+            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            {
+                // Get initial flags
+                DeviceFlags initialFlags = device.DeviceFlags;
+
+                // Toggle RemoteWakeup flag
+                DeviceFlags newFlags = initialFlags.HasFlag(DeviceFlags.RemoteWakeup)
+                    ? initialFlags & ~DeviceFlags.RemoteWakeup
+                    : initialFlags | DeviceFlags.RemoteWakeup;
+
+                device.SetDeviceFlags(newFlags);
+
+                // Verify property updated immediately
+                Assert.Equal(newFlags, device.DeviceFlags);
+
+                // Restore original flags
+                device.SetDeviceFlags(initialFlags);
+
+                // Verify restored
+                Assert.Equal(initialFlags, device.DeviceFlags);
+            }
+        }
+
+        [Fact]
+        public void SetAutoEjectTimeout_UpdatesPropertyImmediately()
+        {
+            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            {
+                // Get initial value
+                int initialTimeout = device.AutoEjectTimeout;
+
+                // Set to different value
+                int newTimeout = initialTimeout == 0 ? 5 : 0;
+                device.SetAutoEjectTimeout(newTimeout);
+
+                // Verify property updated immediately
+                Assert.Equal(newTimeout, device.AutoEjectTimeout);
+
+                // Restore original value
+                device.SetAutoEjectTimeout(initialTimeout);
+
+                // Verify restored
+                Assert.Equal(initialTimeout, device.AutoEjectTimeout);
+            }
+        }
+
+        [Fact]
+        public void SetChallengeResponseTimeout_UpdatesPropertyImmediately()
+        {
+            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            {
+                // Get initial value
+                byte initialTimeout = device.ChallengeResponseTimeout;
+
+                // Set to different value
+                byte newTimeout = (byte)(initialTimeout == 15 ? 20 : 15);
+                device.SetChallengeResponseTimeout(newTimeout);
+
+                // Verify property updated immediately
+                Assert.Equal(newTimeout, device.ChallengeResponseTimeout);
+
+                // Restore original value
+                device.SetChallengeResponseTimeout(initialTimeout);
+
+                // Verify restored
+                Assert.Equal(initialTimeout, device.ChallengeResponseTimeout);
+            }
+        }
+
+        [Fact]
+        public void LockUnlockConfiguration_UpdatesPropertyImmediately()
+        {
+            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            {
+                // If already locked, unlock it first
+                if (device.ConfigurationLocked)
+                {
+                    device.UnlockConfiguration(TestLockCode);
+                    Assert.False(device.ConfigurationLocked);
+                }
+
+                // Lock configuration
+                device.LockConfiguration(TestLockCode);
+
+                // Verify property updated immediately
+                Assert.True(device.ConfigurationLocked);
+
+                // Unlock configuration
+                device.UnlockConfiguration(TestLockCode);
+
+                // Verify property updated immediately
+                Assert.False(device.ConfigurationLocked);
+            }
+        }
+
         // Set the out arg device to the first SKY device found, return true.
         // If no SKY is found, set device to Hollow and return false.
         private bool TryGetSkyDevice(out IYubiKeyDevice skyDevice)

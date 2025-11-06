@@ -373,6 +373,12 @@ namespace Yubico.YubiKey
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
+
+            // Update cached property to reflect the new configuration
+            if (_yubiKeyDeviceInfo is YubiKeyDeviceInfo deviceInfo)
+            {
+                deviceInfo.ChallengeResponseTimeout = (byte)seconds;
+            }
         }
 
         /// <inheritdoc/>
@@ -394,6 +400,12 @@ namespace Yubico.YubiKey
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
+
+            // Update cached property to reflect the new configuration
+            if (_yubiKeyDeviceInfo is YubiKeyDeviceInfo deviceInfo)
+            {
+                deviceInfo.AutoEjectTimeout = seconds;
+            }
         }
 
         /// <inheritdoc/>
@@ -411,6 +423,12 @@ namespace Yubico.YubiKey
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
+
+            // Update cached property to reflect the new configuration
+            if (_yubiKeyDeviceInfo is YubiKeyDeviceInfo deviceInfo)
+            {
+                deviceInfo.IsNfcRestricted = enabled;
+            }
         }
 
         /// <inheritdoc/>
@@ -425,6 +443,12 @@ namespace Yubico.YubiKey
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(response.StatusMessage);
+            }
+
+            // Update cached property to reflect the new configuration
+            if (_yubiKeyDeviceInfo is YubiKeyDeviceInfo deviceInfo)
+            {
+                deviceInfo.DeviceFlags = deviceFlags;
             }
         }
 
@@ -457,6 +481,12 @@ namespace Yubico.YubiKey
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
+
+            // Update cached property to reflect the new configuration
+            if (_yubiKeyDeviceInfo is YubiKeyDeviceInfo deviceInfo)
+            {
+                deviceInfo.ConfigurationLocked = true;
+            }
         }
 
         /// <inheritdoc/>
@@ -482,6 +512,12 @@ namespace Yubico.YubiKey
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(response.StatusMessage);
+            }
+
+            // Update cached property to reflect the new configuration
+            if (_yubiKeyDeviceInfo is YubiKeyDeviceInfo deviceInfo)
+            {
+                deviceInfo.ConfigurationLocked = false;
             }
         }
 

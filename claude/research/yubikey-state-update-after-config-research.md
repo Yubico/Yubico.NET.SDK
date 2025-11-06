@@ -681,10 +681,40 @@ void SetEnabledUsbCapabilities(YubiKeyCapabilities yubiKeyCapabilities);
 4. Estimate effort and prioritize
 
 ### Implementation Phases
-1. **Phase 1:** Implement automatic refresh (1-2 weeks)
-2. **Phase 2:** Add tests and documentation (1 week)
-3. **Phase 3:** Beta testing with early adopters (2 weeks)
-4. **Phase 4:** Release with clear release notes
+
+**CURRENT IMPLEMENTATION (In Progress):**
+
+**Phase 1A: Quick Wins - Non-Resetting Methods (IMPLEMENTING NOW)**
+Fix methods that don't trigger device reset - these can update properties immediately:
+- ✅ `SetIsNfcRestricted()` - Update `IsNfcRestricted` property after success
+- ✅ `SetDeviceFlags()` - Update `DeviceFlags` property after success
+- ✅ `SetAutoEjectTimeout()` - Update `AutoEjectTimeout` property after success
+- ✅ `SetChallengeResponseTimeout()` - Update `ChallengeResponseTimeout` property after success
+- ✅ `LockConfiguration()` / `UnlockConfiguration()` - Update `ConfigurationLocked` property after success
+
+**Implementation approach:**
+- After successful `SendConfiguration()` call, directly update `_yubiKeyDeviceInfo`
+- Since device doesn't reset, no reconnection logic needed
+- Add integration tests to verify property updates immediately
+- **Estimated effort:** 1-2 days
+
+**FUTURE IMPLEMENTATION (Saved for later):**
+
+**Phase 1B: Complex - Resetting Methods**
+Fix methods that trigger device reset - require retry/reconnection logic:
+- ⏳ `SetEnabledUsbCapabilities()` - Requires wait + retry + reconnection
+- ⏳ `SetEnabledNfcCapabilities()` - Requires wait + retry + reconnection
+- ⏳ `SetLegacyDeviceConfiguration()` - Requires wait + retry + reconnection
+
+**Implementation approach:**
+- Implement `RefreshDeviceInfoAfterReset()` with retry logic (40 attempts × 200ms)
+- Handle transport availability changes
+- More complex due to device reboot timing
+- **Estimated effort:** 1-2 weeks
+
+**Phase 2:** Documentation and migration guide (1 week)
+**Phase 3:** Beta testing with early adopters (2 weeks)
+**Phase 4:** Release with clear release notes
 
 ### Long-Term Improvements
 1. Consider async API additions
@@ -708,3 +738,18 @@ The implementation should:
 - Add tests to verify state refresh
 
 This change will eliminate the need for the `RenewDeviceEnumeration` workaround used throughout the test suite and provide a more intuitive API for end users.
+
+---
+
+## GitHub Issue Reference
+
+This research and implementation addresses **GitHub Issue #192**: "IsNfcRestricted cache is not invalidated after SetIsNfcRestricted(true) is run"
+
+**User's reported issue:**
+```csharp
+var yubiKey = YubiKeyDevice.FindAll().First();
+yubiKey.SetIsNfcRestricted(true);
+yubiKey.IsNfcRestricted  // Returns old cached value, not updated value
+```
+
+The issue affects all configuration methods, but Phase 1A implementation focuses on the non-resetting methods (including `SetIsNfcRestricted()`) which can be fixed immediately without complex retry logic.

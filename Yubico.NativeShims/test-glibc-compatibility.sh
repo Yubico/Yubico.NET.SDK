@@ -62,11 +62,11 @@ fi
 echo ""
 echo -e "Highest GLIBC version required: ${YELLOW}$MAX_GLIBC${NC}"
 
-# Compare with target version 2.28
-if [ "$(printf '%s\n' "2.28" "$MAX_GLIBC" | sort -V | head -n1)" = "2.28" ]; then
+# Compare with target version 2.28 (check if MAX_GLIBC <= 2.28)
+if [ "$(printf '%s\n' "$MAX_GLIBC" "2.28" | sort -V | tail -n1)" = "2.28" ]; then
     if [ "$MAX_GLIBC" = "2.28" ]; then
         echo -e "${GREEN}✓ Requires exactly GLIBC 2.28${NC}"
-    elif [ "$(printf '%s\n' "2.28" "$MAX_GLIBC" | sort -V | tail -n1)" = "$MAX_GLIBC" ]; then
+    else
         echo -e "${GREEN}✓ Compatible with GLIBC 2.28+ (requires $MAX_GLIBC)${NC}"
     fi
 else
@@ -91,7 +91,7 @@ echo ""
 # 5. Check for any suspicious symbols
 echo "5. Checking for symbols that might require newer glibc..."
 echo ""
-SUSPICIOUS_SYMBOLS=$(objdump -T "$LIBRARY_PATH" | grep -E "GLIBC_2\.(3[0-9]|[4-9][0-9])" || true)
+SUSPICIOUS_SYMBOLS=$(objdump -T "$LIBRARY_PATH" | grep -E "GLIBC_2\.(29|[3-9][0-9])" || true)
 if [ -z "$SUSPICIOUS_SYMBOLS" ]; then
     echo -e "${GREEN}✓ No symbols requiring glibc > 2.28 found${NC}"
 else
@@ -108,12 +108,15 @@ echo "================================================"
 echo -e "Library: ${YELLOW}$LIBRARY_PATH${NC}"
 echo -e "Maximum GLIBC required: ${YELLOW}$MAX_GLIBC${NC}"
 
-if [ "$(printf '%s\n' "2.28" "$MAX_GLIBC" | sort -V | head -n1)" = "2.28" ] && \
-   [ "$(printf '%s\n' "2.33" "$MAX_GLIBC" | sort -V | tail -n1)" = "2.33" ]; then
+# Check if MAX_GLIBC <= 2.28
+if [ "$(printf '%s\n' "$MAX_GLIBC" "2.28" | sort -V | tail -n1)" = "2.28" ]; then
     echo -e "Status: ${GREEN}✓ COMPATIBLE with glibc 2.28${NC}"
     echo ""
-    echo "This library should work on:"
-    echo "  - Ubuntu 18.04+ (glibc 2.27)"
+    echo "This library should work on distributions with glibc >= $MAX_GLIBC:"
+    if [ "$(printf '%s\n' "$MAX_GLIBC" "2.27" | sort -V | tail -n1)" = "2.27" ]; then
+        echo "  - Ubuntu 18.04+ (glibc 2.27)"
+    fi
+    echo "  - Ubuntu 20.04+ (glibc 2.31)"
     echo "  - Debian 10+ (glibc 2.28)"
     echo "  - RHEL 8+ (glibc 2.28)"
     echo "  - CentOS 8+ (glibc 2.28)"

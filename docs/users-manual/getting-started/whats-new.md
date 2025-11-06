@@ -36,8 +36,10 @@ Bug Fixes:
 - **Linux**: Corrected file descriptor type from pointer to `int` in `PollFd.fd` to align with Linux `pollfd` struct specification and ensure compatibility with `poll()` system call. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
 - **Windows**: Enhanced `CmDevice` initialization and error handling during device enumeration. ([#318](https://github.com/Yubico/Yubico.NET.SDK/pull/318))
 - **Windows**: Wrapped Windows HID event handler logic inside try-catch blocks. ([#318](https://github.com/Yubico/Yubico.NET.SDK/pull/318), [#144](https://github.com/Yubico/Yubico.NET.SDK/issues/144))
-- Fixed logic in FIDO2 `AddPermissions` that was incorrectly throwing exceptions. ([#316](https://github.com/Yubico/Yubico.NET.SDK/pull/316))
-- Refactored authentication token retrieval to use more suitable logic in FIDO2 `GetAuthToken`. ([#316](https://github.com/Yubico/Yubico.NET.SDK/pull/316))
+
+
+
+- The validation logic in the ``AddPermissions()`` method has been improved, which resolved an issue where the Fido2Session would incorrectly throw exceptions during calls to ``AddPermissions()`` on older YubiKeys. ([#316](https://github.com/Yubico/Yubico.NET.SDK/pull/316))
 
 Features:
 

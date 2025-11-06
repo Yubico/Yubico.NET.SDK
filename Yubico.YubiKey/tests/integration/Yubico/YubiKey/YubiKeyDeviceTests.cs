@@ -28,257 +28,258 @@ namespace Yubico.YubiKey
         private static byte[] TestLockCode =>
             new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void Sky_SetLock_Succeeds()
         {
-            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            var device = GetSkyDevice();
+
+            if (!device.ConfigurationLocked)
             {
-                if (!device.ConfigurationLocked)
-                {
-                    device.LockConfiguration(TestLockCode);
-                }
-
-                device.UnlockConfiguration(TestLockCode);
-
-                // What we really want is to refresh the device and verify that
-                // the ConfigurationLocked property is properly set. But until
-                // that feature is available, just do this.
-                Assert.False(device.IsFipsSeries);
+                device.LockConfiguration(TestLockCode);
             }
+
+            device.UnlockConfiguration(TestLockCode);
+
+            // What we really want is to refresh the device and verify that
+            // the ConfigurationLocked property is properly set. But until
+            // that feature is available, just do this.
+            Assert.False(device.IsFipsSeries);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void Sky_SetAutoEjectTimeout_Succeeds()
         {
-            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            var device = GetSkyDevice();
+
+            if (device.AutoEjectTimeout == 0)
             {
-                if (device.AutoEjectTimeout == 0)
-                {
-                    device.SetAutoEjectTimeout(5);
-                }
-
-                device.SetAutoEjectTimeout(0);
-
-                // What we really want is to refresh the device and verify that
-                // the ConfigurationLocked property is properly set. But until
-                // that feature is available, just do this.
-                Assert.False(device.IsFipsSeries);
+                device.SetAutoEjectTimeout(5);
             }
+
+            device.SetAutoEjectTimeout(0);
+
+            // What we really want is to refresh the device and verify that
+            // the ConfigurationLocked property is properly set. But until
+            // that feature is available, just do this.
+            Assert.False(device.IsFipsSeries);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void Sky_SetChallengeResponseTimeout_Succeeds()
         {
-            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            var device = GetSkyDevice();
+
+            if (device.ChallengeResponseTimeout == 15)
             {
-                if (device.ChallengeResponseTimeout == 15)
-                {
-                    device.SetChallengeResponseTimeout(20);
-                }
-
-                device.SetChallengeResponseTimeout(15);
-
-                // What we really want is to refresh the device and verify that
-                // the ConfigurationLocked property is properly set. But until
-                // that feature is available, just do this.
-                Assert.False(device.IsFipsSeries);
+                device.SetChallengeResponseTimeout(20);
             }
+
+            device.SetChallengeResponseTimeout(15);
+
+            // What we really want is to refresh the device and verify that
+            // the ConfigurationLocked property is properly set. But until
+            // that feature is available, just do this.
+            Assert.False(device.IsFipsSeries);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void Sky_SetDeviceFlags_Succeeds()
         {
-            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            var device = GetSkyDevice();
+
+            if (device.DeviceFlags == DeviceFlags.None)
             {
-                if (device.DeviceFlags == DeviceFlags.None)
-                {
-                    device.SetDeviceFlags(DeviceFlags.RemoteWakeup);
-                }
-
-                device.SetDeviceFlags(DeviceFlags.None);
-
-                // What we really want is to refresh the device and verify that
-                // the ConfigurationLocked property is properly set. But until
-                // that feature is available, just do this.
-                Assert.False(device.IsFipsSeries);
+                device.SetDeviceFlags(DeviceFlags.RemoteWakeup);
             }
+
+            device.SetDeviceFlags(DeviceFlags.None);
+
+            // What we really want is to refresh the device and verify that
+            // the ConfigurationLocked property is properly set. But until
+            // that feature is available, just do this.
+            Assert.False(device.IsFipsSeries);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void Sky_SetEnabledNfcCapabilities_Succeeds()
         {
-            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            var device = GetSkyDevice();
+
+            if (device.EnabledNfcCapabilities == (YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f))
             {
-                if (device.EnabledNfcCapabilities == (YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f))
-                {
-                    device.SetEnabledNfcCapabilities(YubiKeyCapabilities.Fido2);
-                }
-
-                device.SetEnabledNfcCapabilities(YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f);
-
-                // What we really want is to refresh the device and verify that
-                // the ConfigurationLocked property is properly set. But until
-                // that feature is available, just do this.
-                Assert.False(device.IsFipsSeries);
+                device.SetEnabledNfcCapabilities(YubiKeyCapabilities.Fido2);
             }
+
+            device.SetEnabledNfcCapabilities(YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f);
+
+            // What we really want is to refresh the device and verify that
+            // the ConfigurationLocked property is properly set. But until
+            // that feature is available, just do this.
+            Assert.False(device.IsFipsSeries);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void Sky_SetEnabledUsbCapabilities_Succeeds()
         {
-            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            var device = GetSkyDevice();
+
+            if (device.EnabledUsbCapabilities == (YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f))
             {
-                if (device.EnabledUsbCapabilities == (YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f))
-                {
-                    device.SetEnabledUsbCapabilities(YubiKeyCapabilities.Fido2);
-                }
-
-                device.SetEnabledUsbCapabilities(YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f);
-
-                // What we really want is to refresh the device and verify that
-                // the ConfigurationLocked property is properly set. But until
-                // that feature is available, just do this.
-                Assert.False(device.IsFipsSeries);
+                device.SetEnabledUsbCapabilities(YubiKeyCapabilities.Fido2);
             }
+
+            device.SetEnabledUsbCapabilities(YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f);
+
+            // What we really want is to refresh the device and verify that
+            // the ConfigurationLocked property is properly set. But until
+            // that feature is available, just do this.
+            Assert.False(device.IsFipsSeries);
         }
 
         // Tests for GitHub Issue #192 - Properties should update after configuration changes
-        [Fact]
-        public void SetIsNfcRestricted_UpdatesPropertyImmediately()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void SetIsNfcRestricted_UpdatesPropertyImmediately(StandardTestDevice testDeviceType)
         {
-            if (TryGetSkyDevice(out IYubiKeyDevice device))
-            {
-                // Get initial value
-                bool initialValue = device.IsNfcRestricted;
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-                // Set to opposite value
-                device.SetIsNfcRestricted(!initialValue);
+            // Get initial value
+            var initialValue = device.IsNfcRestricted;
 
-                // Verify property updated immediately
-                Assert.Equal(!initialValue, device.IsNfcRestricted);
+            // Set to opposite value
+            device.SetIsNfcRestricted(!initialValue);
 
-                // Restore original value
-                device.SetIsNfcRestricted(initialValue);
+            // Verify property updated immediately
+            Assert.Equal(!initialValue, device.IsNfcRestricted);
 
-                // Verify restored
-                Assert.Equal(initialValue, device.IsNfcRestricted);
-            }
+            // Restore original value
+            device.SetIsNfcRestricted(initialValue);
+
+            // Verify restored
+            Assert.Equal(initialValue, device.IsNfcRestricted);
         }
 
-        [Fact]
-        public void SetDeviceFlags_UpdatesPropertyImmediately()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void SetDeviceFlags_UpdatesPropertyImmediately(StandardTestDevice testDeviceType)
         {
-            if (TryGetSkyDevice(out IYubiKeyDevice device))
-            {
-                // Get initial flags
-                DeviceFlags initialFlags = device.DeviceFlags;
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-                // Toggle RemoteWakeup flag
-                DeviceFlags newFlags = initialFlags.HasFlag(DeviceFlags.RemoteWakeup)
-                    ? initialFlags & ~DeviceFlags.RemoteWakeup
-                    : initialFlags | DeviceFlags.RemoteWakeup;
+            // Get initial flags
+            var initialFlags = device.DeviceFlags;
 
-                device.SetDeviceFlags(newFlags);
+            // Toggle RemoteWakeup flag
+            var newFlags = initialFlags.HasFlag(DeviceFlags.RemoteWakeup)
+                ? initialFlags & ~DeviceFlags.RemoteWakeup
+                : initialFlags | DeviceFlags.RemoteWakeup;
 
-                // Verify property updated immediately
-                Assert.Equal(newFlags, device.DeviceFlags);
+            device.SetDeviceFlags(newFlags);
 
-                // Restore original flags
-                device.SetDeviceFlags(initialFlags);
+            // Verify property updated immediately
+            Assert.Equal(newFlags, device.DeviceFlags);
 
-                // Verify restored
-                Assert.Equal(initialFlags, device.DeviceFlags);
-            }
+            // Restore original flags
+            device.SetDeviceFlags(initialFlags);
+
+            // Verify restored
+            Assert.Equal(initialFlags, device.DeviceFlags);
         }
 
-        [Fact]
-        public void SetAutoEjectTimeout_UpdatesPropertyImmediately()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void SetAutoEjectTimeout_UpdatesPropertyImmediately(StandardTestDevice testDeviceType)
         {
-            if (TryGetSkyDevice(out IYubiKeyDevice device))
-            {
-                // Get initial value
-                int initialTimeout = device.AutoEjectTimeout;
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-                // Set to different value
-                int newTimeout = initialTimeout == 0 ? 5 : 0;
-                device.SetAutoEjectTimeout(newTimeout);
+            // Get initial value
+            var initialTimeout = device.AutoEjectTimeout;
 
-                // Verify property updated immediately
-                Assert.Equal(newTimeout, device.AutoEjectTimeout);
+            // Set to different value
+            var newTimeout = initialTimeout == 0 ? 5 : 0;
+            device.SetAutoEjectTimeout(newTimeout);
 
-                // Restore original value
-                device.SetAutoEjectTimeout(initialTimeout);
+            // Verify property updated immediately
+            Assert.Equal(newTimeout, device.AutoEjectTimeout);
 
-                // Verify restored
-                Assert.Equal(initialTimeout, device.AutoEjectTimeout);
-            }
+            // Restore original value
+            device.SetAutoEjectTimeout(initialTimeout);
+
+            // Verify restored
+            Assert.Equal(initialTimeout, device.AutoEjectTimeout);
         }
 
-        [Fact]
-        public void SetChallengeResponseTimeout_UpdatesPropertyImmediately()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void SetChallengeResponseTimeout_UpdatesPropertyImmediately(StandardTestDevice testDeviceType)
         {
-            if (TryGetSkyDevice(out IYubiKeyDevice device))
-            {
-                // Get initial value
-                byte initialTimeout = device.ChallengeResponseTimeout;
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-                // Set to different value
-                byte newTimeout = (byte)(initialTimeout == 15 ? 20 : 15);
-                device.SetChallengeResponseTimeout(newTimeout);
+            // Get initial value
+            var initialTimeout = device.ChallengeResponseTimeout;
 
-                // Verify property updated immediately
-                Assert.Equal(newTimeout, device.ChallengeResponseTimeout);
+            // Set to different value
+            var newTimeout = (byte)(initialTimeout == 15 ? 20 : 15);
+            device.SetChallengeResponseTimeout(newTimeout);
 
-                // Restore original value
-                device.SetChallengeResponseTimeout(initialTimeout);
+            // Verify property updated immediately
+            Assert.Equal(newTimeout, device.ChallengeResponseTimeout);
 
-                // Verify restored
-                Assert.Equal(initialTimeout, device.ChallengeResponseTimeout);
-            }
+            // Restore original value
+            device.SetChallengeResponseTimeout(initialTimeout);
+
+            // Verify restored
+            Assert.Equal(initialTimeout, device.ChallengeResponseTimeout);
         }
 
-        [Fact]
-        public void LockUnlockConfiguration_UpdatesPropertyImmediately()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void LockUnlockConfiguration_UpdatesPropertyImmediately(StandardTestDevice testDeviceType)
         {
-            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            // If already locked, unlock it first
+            if (device.ConfigurationLocked)
             {
-                // If already locked, unlock it first
-                if (device.ConfigurationLocked)
-                {
-                    device.UnlockConfiguration(TestLockCode);
-                    Assert.False(device.ConfigurationLocked);
-                }
-
-                // Lock configuration
-                device.LockConfiguration(TestLockCode);
-
-                // Verify property updated immediately
-                Assert.True(device.ConfigurationLocked);
-
-                // Unlock configuration
                 device.UnlockConfiguration(TestLockCode);
-
-                // Verify property updated immediately
                 Assert.False(device.ConfigurationLocked);
             }
+
+            // Lock configuration
+            device.LockConfiguration(TestLockCode);
+
+            // Verify property updated immediately
+            Assert.True(device.ConfigurationLocked);
+
+            // Unlock configuration
+            device.UnlockConfiguration(TestLockCode);
+
+            // Verify property updated immediately
+            Assert.False(device.ConfigurationLocked);
         }
 
-        // Set the out arg device to the first SKY device found, return true.
-        // If no SKY is found, set device to Hollow and return false.
-        private bool TryGetSkyDevice(out IYubiKeyDevice skyDevice)
+        /// <summary>
+        /// Gets the first Sky device found in the allow-listed test devices.
+        /// </summary>
+        /// <returns>The first Sky YubiKey device found.</returns>
+        /// <exception cref="DeviceNotFoundException">Thrown when no Sky device is found.</exception>
+        private static IYubiKeyDevice GetSkyDevice()
         {
-            IEnumerable<IYubiKeyDevice> devices = YubiKeyDevice.FindAll();
-            foreach (IYubiKeyDevice device in devices)
+            IEnumerable<IYubiKeyDevice> devices = IntegrationTestDeviceEnumeration.GetTestDevices();
+
+            foreach (var device in devices)
             {
                 if (device.IsSkySeries)
                 {
-                    skyDevice = device;
-                    return true;
+                    return device;
                 }
             }
 
-            skyDevice = new HollowYubiKeyDevice();
-            return false;
+            throw new DeviceNotFoundException("No Sky series YubiKey found in allow-listed test devices.");
         }
 
         [SkippableTheory(typeof(DeviceNotFoundException))]
@@ -287,12 +288,12 @@ namespace Yubico.YubiKey
         public void SetEnabledNfcCapabilities_DisableFido2_OnlyFido2Disabled(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
             // Turn off FIDO2
-            YubiKeyCapabilities desiredCapabilities =
+            var desiredCapabilities =
                 testDevice.AvailableNfcCapabilities & ~YubiKeyCapabilities.Fido2;
             testDevice.SetEnabledNfcCapabilities(desiredCapabilities);
             testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
@@ -306,12 +307,12 @@ namespace Yubico.YubiKey
         public void SetEnabledUsbCapabilities_EnableFido2OverOtp_Fido2AndOtpEnabled(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
             // Enable only Otp USB capabilities
-            YubiKeyCapabilities desiredCapabilities = YubiKeyCapabilities.Otp;
+            var desiredCapabilities = YubiKeyCapabilities.Otp;
             testDevice.SetEnabledUsbCapabilities(desiredCapabilities);
             testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
 
@@ -331,12 +332,12 @@ namespace Yubico.YubiKey
         public void SetEnabledUsbCapabilities_DisableFido2_OnlyFido2Disabled(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
             // Turn off FIDO2
-            YubiKeyCapabilities desiredCapabilities =
+            var desiredCapabilities =
                 testDevice.AvailableUsbCapabilities & ~YubiKeyCapabilities.Fido2;
             testDevice.SetEnabledUsbCapabilities(desiredCapabilities);
             testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
@@ -350,11 +351,11 @@ namespace Yubico.YubiKey
         public void SetChallengeResponseTimeout_255seconds_ValueSetTo255(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
-            int expectedTimeout = 255;
+            var expectedTimeout = 255;
             testDevice.SetChallengeResponseTimeout(expectedTimeout);
             testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
 
@@ -367,12 +368,12 @@ namespace Yubico.YubiKey
         public void SetChallengeResponseTimeout_ZeroSeconds_DefaultValueSet(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
-            int requestedTimeout = 0;
-            int expectedTimeout = 15;
+            var requestedTimeout = 0;
+            var expectedTimeout = 15;
             testDevice.SetChallengeResponseTimeout(requestedTimeout);
             testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
 
@@ -388,7 +389,7 @@ namespace Yubico.YubiKey
             StandardTestDevice testDeviceType,
             int expectedTimeout)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -408,11 +409,11 @@ namespace Yubico.YubiKey
         public void SetDeviceFlags_RemoteWakeupAndTouchEject_BothFlagsSet(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
-            DeviceFlags expectedDeviceFlags = DeviceFlags.RemoteWakeup | DeviceFlags.TouchEject;
+            var expectedDeviceFlags = DeviceFlags.RemoteWakeup | DeviceFlags.TouchEject;
             testDevice.SetDeviceFlags(expectedDeviceFlags);
             testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
 
@@ -424,7 +425,7 @@ namespace Yubico.YubiKey
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void LockConfiguration_ValidLockCode_DeviceIsLocked(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -440,7 +441,7 @@ namespace Yubico.YubiKey
         public void LockConfiguration_SetLockCodeOnLockedDevice_ThrowsException(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -461,7 +462,7 @@ namespace Yubico.YubiKey
         public void UnlockConfiguration_CorrectLockCode_DeviceNotLocked(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
             testDevice.LockConfiguration(TestLockCode);
@@ -483,7 +484,7 @@ namespace Yubico.YubiKey
         public void UnlockConfiguration_IncorrectLockCode_ThrowsException(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
             testDevice.LockConfiguration(TestLockCode);
@@ -503,7 +504,7 @@ namespace Yubico.YubiKey
         public void UnlockConfiguration_AllZeroLockCodeOnUnlockedDevice_CommandSuccessful(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -516,7 +517,7 @@ namespace Yubico.YubiKey
         public void UnlockConfiguration_NonZeroLockCodeOnUnlockedDevice_ThrowsException(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -531,12 +532,12 @@ namespace Yubico.YubiKey
         public void SetLegacyDeviceConfig_DisableFidoInterface_OnlyFidoDisabled(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
             // Turn off FIDO2
-            YubiKeyCapabilities desiredCapabilities =
+            var desiredCapabilities =
                 YubiKeyCapabilities.Otp | YubiKeyCapabilities.Ccid;
             testDevice.SetLegacyDeviceConfiguration(desiredCapabilities, 0, false);
             testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
@@ -553,7 +554,7 @@ namespace Yubico.YubiKey
         public void SetLegacyDeviceConfig_ChallengeResponse255Seconds_TimeoutSetTo255(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -571,7 +572,7 @@ namespace Yubico.YubiKey
         public void SetLegacyDeviceConfig_ChallengeResponseZeroSeconds_DefaultValueSet(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -636,7 +637,7 @@ namespace Yubico.YubiKey
         {
             IYubiKeyCommand<IYubiKeyResponse> command;
 
-            if (yubiKey.TryConnect(YubiKeyApplication.Management, out IYubiKeyConnection? connection))
+            if (yubiKey.TryConnect(YubiKeyApplication.Management, out var connection))
             {
                 command = new SetDeviceInfoCommand(baseCommand);
             }
@@ -661,7 +662,7 @@ namespace Yubico.YubiKey
         {
             IYubiKeyCommand<IYubiKeyResponse> command;
 
-            if (yubiKey.TryConnect(YubiKeyApplication.Management, out IYubiKeyConnection? connection))
+            if (yubiKey.TryConnect(YubiKeyApplication.Management, out var connection))
             {
                 command = new SetLegacyDeviceConfigCommand(baseCommand);
             }

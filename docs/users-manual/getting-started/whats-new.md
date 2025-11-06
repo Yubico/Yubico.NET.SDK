@@ -63,9 +63,7 @@ Dependencies:
 
 Documentation:
 
-- Fixed FIDO2 PIN information and general improvements in FIDO2/U2F documentation. ([#321](https://github.com/Yubico/Yubico.NET.SDK/pull/321))
-- Edited product name references for consistency. ([#322](https://github.com/Yubico/Yubico.NET.SDK/pull/322))
-- Removed statements in U2F documentation that were redundant with FIDO2 docs. ([#322](https://github.com/Yubico/Yubico.NET.SDK/pull/322))
+- Errors in the User's Manual documentation regarding YubiKey support for FIDO2 PINs and U2F private key behavior have been corrected. ([#321](https://github.com/Yubico/Yubico.NET.SDK/pull/321), [#322](https://github.com/Yubico/Yubico.NET.SDK/pull/322))
 
 Miscellaneous:
 

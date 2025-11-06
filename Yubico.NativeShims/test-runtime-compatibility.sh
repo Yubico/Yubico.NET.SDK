@@ -134,13 +134,12 @@ cat > "$TEST_DIR/Dockerfile" << 'EOF'
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-# Install .NET 6
-RUN apt-get update && apt-get install -y wget && \
-    wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-    dpkg -i packages-microsoft-prod.deb && \
-    rm packages-microsoft-prod.deb && \
-    apt-get update && \
-    apt-get install -y dotnet-sdk-6.0 && \
+# Install .NET 6 SDK using Microsoft's install script (works on all distros)
+RUN apt-get update && apt-get install -y wget ca-certificates && \
+    wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh && \
+    chmod +x dotnet-install.sh && \
+    ./dotnet-install.sh --channel 6.0 --install-dir /usr/share/dotnet && \
+    ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -167,14 +166,12 @@ declare -a TEST_IMAGES=(
     "ubuntu:18.04"  # glibc 2.27
     "ubuntu:20.04"  # glibc 2.31
     "debian:10"     # glibc 2.28
-    "centos:8"      # glibc 2.28
 )
 
 declare -a TEST_NAMES=(
     "Ubuntu 18.04 (glibc 2.27)"
     "Ubuntu 20.04 (glibc 2.31)"
     "Debian 10 (glibc 2.28)"
-    "CentOS 8 (glibc 2.28)"
 )
 
 TOTAL_TESTS=${#TEST_IMAGES[@]}
@@ -212,7 +209,10 @@ echo ""
 
 if [ $FAILED -eq 0 ]; then
     echo -e "${GREEN}✓ ALL TESTS PASSED${NC}"
-    echo "The library is compatible with glibc 2.28+"
+    echo "The library successfully loads on Debian-based systems with glibc 2.27+"
+    echo ""
+    echo "Note: RHEL/CentOS compatibility should be verified separately"
+    echo "      (requires yum-based package manager support)"
     exit 0
 else
     echo -e "${RED}✗ SOME TESTS FAILED${NC}"

@@ -78,11 +78,35 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install Zig
+      - name: Install Zig (pinned version)
         run: |
-          echo 'Installing Zig compiler via snap'
-          sudo snap install zig --classic --beta
-          zig version
+          ZIG_VERSION="0.15.2"
+          ZIG_ARCH="x86_64-linux"
+          ZIG_TARBALL="zig-${ZIG_ARCH}-${ZIG_VERSION}.tar.xz"
+          ZIG_URL="https://ziglang.org/download/${ZIG_VERSION}/${ZIG_TARBALL}"
+          ZIG_MINISIG_URL="${ZIG_URL}.minisig"
+          # Official Zig minisign public key
+          ZIG_PUBKEY="RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U"
+
+          echo "Installing minisign for signature verification..."
+          sudo apt-get update -qq
+          sudo apt-get install -y minisign
+
+          echo "Downloading Zig ${ZIG_VERSION}..."
+          wget -q "${ZIG_URL}"
+          wget -q "${ZIG_MINISIG_URL}"
+
+          echo "Verifying signature with minisign..."
+          echo "${ZIG_PUBKEY}" > zig.pub
+          minisign -Vm "${ZIG_TARBALL}" -p zig.pub
+
+          echo "Signature verified! Extracting and installing..."
+          tar -xf "${ZIG_TARBALL}"
+          sudo mv "zig-${ZIG_ARCH}-${ZIG_VERSION}" /usr/local/zig
+          echo "/usr/local/zig" >> $GITHUB_PATH
+
+          echo "Zig installed successfully:"
+          /usr/local/zig/zig version
       - name: Setup Zig CC wrappers
         run: |
           echo 'Creating Zig CC wrapper scripts'
@@ -105,6 +129,16 @@ jobs:
 
           echo "CC=$HOME/zig-wrappers/zig-cc" >> $GITHUB_ENV
           echo "CXX=$HOME/zig-wrappers/zig-c++" >> $GITHUB_ENV
+      - name: Verify Zig wrappers
+        run: |
+          echo "Verifying Zig wrapper scripts..."
+          test -x $HOME/zig-wrappers/zig-cc || { echo "ERROR: zig-cc not executable"; exit 1; }
+          test -x $HOME/zig-wrappers/zig-c++ || { echo "ERROR: zig-c++ not executable"; exit 1; }
+
+          echo "Testing zig-cc wrapper:"
+          $HOME/zig-wrappers/zig-cc --version | grep -q "zig" || { echo "ERROR: zig-cc not using Zig"; exit 1; }
+
+          echo "✅ Zig wrappers verified successfully"
       - run: |
           echo 'Running build script: Linux (amd64) with Zig targeting glibc 2.28'
           cd Yubico.NativeShims
@@ -114,6 +148,70 @@ jobs:
           else
             sh ./build-linux-amd64.sh
           fi
+      - name: Verify CMake used Zig
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Verifying CMake configuration..."
+
+          if ! grep -q "CMAKE_C_COMPILER:FILEPATH.*zig" linux-x64/CMakeCache.txt; then
+            echo "❌ ERROR: CMAKE_C_COMPILER does not reference zig"
+            echo "Found:"
+            grep "CMAKE_C_COMPILER:FILEPATH" linux-x64/CMakeCache.txt || true
+            exit 1
+          fi
+
+          if ! grep -q "CMAKE_CXX_COMPILER:FILEPATH.*zig" linux-x64/CMakeCache.txt; then
+            echo "❌ ERROR: CMAKE_CXX_COMPILER does not reference zig"
+            echo "Found:"
+            grep "CMAKE_CXX_COMPILER:FILEPATH" linux-x64/CMakeCache.txt || true
+            exit 1
+          fi
+
+          echo "✅ CMake correctly configured to use Zig"
+      - name: Test on Ubuntu 20.04 (glibc 2.31)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing binary compatibility on Ubuntu 20.04..."
+          docker run --rm \
+            -v $PWD/linux-x64:/test:ro \
+            ubuntu:20.04 \
+            bash -c '
+              set -e
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Files found:"
+              ls -lh *.so
+              echo ""
+              echo "File types:"
+              file *.so
+              echo ""
+              echo "Library dependencies:"
+              ldd *.so || true
+              echo ""
+              echo "GLIBC version requirements:"
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo ""
+              echo "✅ Binary loads successfully on Ubuntu 20.04 (glibc 2.31)"
+            '
+      - name: Test on Debian 10 (glibc 2.28 - target platform)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing binary on actual target glibc version..."
+          docker run --rm \
+            -v $PWD/linux-x64:/test:ro \
+            debian:10 \
+            bash -c '
+              set -e
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Testing on Debian 10 (glibc 2.28)..."
+              ldd --version | head -n1
+              ldd *.so
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo "✅ Binary compatible with glibc 2.28"
+            '
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x64
@@ -124,11 +222,35 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install Zig
+      - name: Install Zig (pinned version)
         run: |
-          echo 'Installing Zig compiler via snap'
-          sudo snap install zig --classic --beta
-          zig version
+          ZIG_VERSION="0.15.2"
+          ZIG_ARCH="x86_64-linux"
+          ZIG_TARBALL="zig-${ZIG_ARCH}-${ZIG_VERSION}.tar.xz"
+          ZIG_URL="https://ziglang.org/download/${ZIG_VERSION}/${ZIG_TARBALL}"
+          ZIG_MINISIG_URL="${ZIG_URL}.minisig"
+          # Official Zig minisign public key
+          ZIG_PUBKEY="RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U"
+
+          echo "Installing minisign for signature verification..."
+          sudo apt-get update -qq
+          sudo apt-get install -y minisign
+
+          echo "Downloading Zig ${ZIG_VERSION}..."
+          wget -q "${ZIG_URL}"
+          wget -q "${ZIG_MINISIG_URL}"
+
+          echo "Verifying signature with minisign..."
+          echo "${ZIG_PUBKEY}" > zig.pub
+          minisign -Vm "${ZIG_TARBALL}" -p zig.pub
+
+          echo "Signature verified! Extracting and installing..."
+          tar -xf "${ZIG_TARBALL}"
+          sudo mv "zig-${ZIG_ARCH}-${ZIG_VERSION}" /usr/local/zig
+          echo "/usr/local/zig" >> $GITHUB_PATH
+
+          echo "Zig installed successfully:"
+          /usr/local/zig/zig version
       - name: Setup Zig CC wrappers
         run: |
           echo 'Creating Zig CC wrapper scripts for ARM64 cross-compilation'
@@ -151,6 +273,16 @@ jobs:
 
           echo "CC=$HOME/zig-wrappers/zig-cc" >> $GITHUB_ENV
           echo "CXX=$HOME/zig-wrappers/zig-c++" >> $GITHUB_ENV
+      - name: Verify Zig wrappers
+        run: |
+          echo "Verifying Zig wrapper scripts..."
+          test -x $HOME/zig-wrappers/zig-cc || { echo "ERROR: zig-cc not executable"; exit 1; }
+          test -x $HOME/zig-wrappers/zig-c++ || { echo "ERROR: zig-c++ not executable"; exit 1; }
+
+          echo "Testing zig-cc wrapper:"
+          $HOME/zig-wrappers/zig-cc --version | grep -q "zig" || { echo "ERROR: zig-cc not using Zig"; exit 1; }
+
+          echo "✅ Zig wrappers verified successfully"
       - run: |
           echo 'Running build script: Linux (arm64) with Zig targeting glibc 2.28'
           cd Yubico.NativeShims
@@ -160,6 +292,70 @@ jobs:
           else
             sh ./build-linux-arm64.sh
           fi
+      - name: Verify CMake used Zig
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Verifying CMake configuration..."
+
+          if ! grep -q "CMAKE_C_COMPILER:FILEPATH.*zig" linux-arm64/CMakeCache.txt; then
+            echo "❌ ERROR: CMAKE_C_COMPILER does not reference zig"
+            echo "Found:"
+            grep "CMAKE_C_COMPILER:FILEPATH" linux-arm64/CMakeCache.txt || true
+            exit 1
+          fi
+
+          if ! grep -q "CMAKE_CXX_COMPILER:FILEPATH.*zig" linux-arm64/CMakeCache.txt; then
+            echo "❌ ERROR: CMAKE_CXX_COMPILER does not reference zig"
+            echo "Found:"
+            grep "CMAKE_CXX_COMPILER:FILEPATH" linux-arm64/CMakeCache.txt || true
+            exit 1
+          fi
+
+          echo "✅ CMake correctly configured to use Zig"
+      - name: Test on Ubuntu 20.04 (glibc 2.31)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing ARM64 binary compatibility on Ubuntu 20.04..."
+          docker run --rm --platform linux/arm64 \
+            -v $PWD/linux-arm64:/test:ro \
+            ubuntu:20.04 \
+            bash -c '
+              set -e
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Files found:"
+              ls -lh *.so
+              echo ""
+              echo "File types:"
+              file *.so
+              echo ""
+              echo "Library dependencies:"
+              ldd *.so || true
+              echo ""
+              echo "GLIBC version requirements:"
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo ""
+              echo "✅ ARM64 binary loads successfully on Ubuntu 20.04 (glibc 2.31)"
+            '
+      - name: Test on Debian 10 (glibc 2.28 - target platform)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing ARM64 binary on actual target glibc version..."
+          docker run --rm --platform linux/arm64 \
+            -v $PWD/linux-arm64:/test:ro \
+            debian:10 \
+            bash -c '
+              set -e
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Testing on Debian 10 (glibc 2.28)..."
+              ldd --version | head -n1
+              ldd *.so
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo "✅ ARM64 binary compatible with glibc 2.28"
+            '
       - uses: actions/upload-artifact@v4
         with:
           name: linux-arm64

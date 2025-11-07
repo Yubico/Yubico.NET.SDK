@@ -97,10 +97,9 @@ jobs:
           wget -q "${ZIG_MINISIG_URL}"
 
           echo "Verifying signature with minisign..."
-          echo "${ZIG_PUBKEY}" > zig.pub
-          minisign -Vm "${ZIG_TARBALL}" -p zig.pub
+          minisign -Vm "${ZIG_TARBALL}" -P "${ZIG_PUBKEY}"
 
-          echo "Signature verified! Extracting and installing..."
+          echo "✅ Signature verified! Extracting and installing..."
           tar -xf "${ZIG_TARBALL}"
           sudo mv "zig-${ZIG_ARCH}-${ZIG_VERSION}" /usr/local/zig
           echo "/usr/local/zig" >> $GITHUB_PATH
@@ -241,10 +240,9 @@ jobs:
           wget -q "${ZIG_MINISIG_URL}"
 
           echo "Verifying signature with minisign..."
-          echo "${ZIG_PUBKEY}" > zig.pub
-          minisign -Vm "${ZIG_TARBALL}" -p zig.pub
+          minisign -Vm "${ZIG_TARBALL}" -P "${ZIG_PUBKEY}"
 
-          echo "Signature verified! Extracting and installing..."
+          echo "✅ Signature verified! Extracting and installing..."
           tar -xf "${ZIG_TARBALL}"
           sudo mv "zig-${ZIG_ARCH}-${ZIG_VERSION}" /usr/local/zig
           echo "/usr/local/zig" >> $GITHUB_PATH

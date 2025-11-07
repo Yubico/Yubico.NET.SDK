@@ -979,7 +979,104 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         "zoEv0zhhtMJE0ETIBh3fbLQj\n" +
                         "-----END PRIVATE KEY-----";
                     break;
-
+                case KeyType.RSA3072:
+                    pemKey =
+                        "-----BEGIN PRIVATE KEY-----\n" +
+                        "MIIG/QIBADANBgkqhkiG9w0BAQEFAASCBucwggbjAgEAAoIBgQCYgde5qDyav2I7\n" +
+                        "FO0C5eXSymXiWOo195r6bchQIi/MK3aGzkgVyhCP0wnyyU2Q7HTxJNvB4ObhHll+\n" +
+                        "fWVMHxp1PY2vFLj+V82dShy6eL8rzjrNKrVAf1Mp4A+fkNGBbahhjB0bgOLabYJ0\n" +
+                        "IrX6kuBpyDFNQW/53hd19P3Ftit2IHYltIUr7k+tsGGXl2k9FaieWbPAMdQW//wi\n" +
+                        "cPB+rr/7JKTglcu3IF8bQhoWZ19rbA1tDiMVbIY7LUhtVAxLMfl7E2jinyUG3nLJ\n" +
+                        "9Eo5/gnuBemHOaP+oCiwXia/oRUtmtUoyGRgqNQWE5TVuPzm24mIHIlbNW8fqVho\n" +
+                        "aDKpetnjQnVjsvKtcvPNMvF1J1zL4rXkDC407unpZ+UHDeYU/qWB5wv7O7xhmzD5\n" +
+                        "SlW+WIJ041k4u+lI7gfOQ2SkJMtKleywHPq89Chde82iR328DqjtlGLJzorrQ1BT\n" +
+                        "jzf1eVbGF7BZY/HWKOI//1A1tNDRH+4YvWnXbbCeLC8j8I6EM0cCAwEAAQKCAYAF\n" +
+                        "55XcBbjkkoWRttUYwdPst5KYRkvTIq7cBIVQub7saPMu2iyNg2qx8HOeWpyBM7zk\n" +
+                        "KHXFtn9AUHXm+tROmfzi2ysLXOiiS4rJDNLt7IZ76LRht/lkJON2zjEGQyVWNuuu\n" +
+                        "n/q+IBBbpDyWLuqpNMFkw+NJk9k4Of9IihK+2LdedhIWkm9LH+/zA2g6TIELl2h7\n" +
+                        "sQqcZcSwNOFxmyCeMJ/h1mDEo6gYHM2+qjseV1d11K1azCuGXp9+PQ0xbNainRQP\n" +
+                        "YobfJS9VA40MiICEg6zmytU1jpQFnY3pD7GudgGbZWfTXKJs9Z7088qxB37UEJn2\n" +
+                        "qSrysc806nqt4F0c8VqJ3PGMOEdaCfXtKo8V2anDHjxlmC5B/W6Ozo/+C8PO8IJ6\n" +
+                        "aFa3mjcpYLBblynF3GpE5XaFTQT+Gz6dohmbiegjgVhazRwfHiugdZjiSfND43wn\n" +
+                        "jqDFOKYfLG+5/kXWokWEsKKaXJZrnv3kHohZGbHc4lSF25lH82MyJOjiH8q43FkC\n" +
+                        "gcEAz9HsJxhijEnVYFzH7cj2D3m58EZHCgdumdEBs5lhOdUtuarudIUZnm3qslmy\n" +
+                        "aGBv6FtKesVUQZ1St/ChIswtxvD2DK7vfMvol3zXVda+dKYpF46/7eyrHMrJsYh7\n" +
+                        "zlatqUF8heukpIrnG82GiZk5IeQvoQIslFGFc6p4gSiYo0XqnomHeYbwsEFr67u2\n" +
+                        "v2j6vU1TXXTfawMVDtReomObyGXzD8uEJ48vgTH6dLqDvbEty7hcDJfy54jq8iTj\n" +
+                        "BQvVAoHBALvdHZCuuYpAJJPKDNGlYzPytfogn/KPnSasWIvPMoJepHic6DEajker\n" +
+                        "MGGVLlRTYvxHTul7ZP070yCc4P89bKYQ8kxmOOmdOHThZiw770bz9SgzrKak4ud1\n" +
+                        "apz0wKsSH6AvxJ0HvNEI7hZG21SmafDlwaikDm83CoxnzgG9fyCinH9RfudDiPir\n" +
+                        "8zBRTkHX0ZjSf5vT1YeewYfh/caSzKFso90EkJwJB6TKQtf00PuFsWkdmL56nzst\n" +
+                        "YgjYuHIcqwKBwDC54YrRFtoZvaPYXTANfFPokIYblDBvyaja7nEzty4eI5hy0XIU\n" +
+                        "ewtAblTe3wvGALcUIIRkm/q+blSeYMmN4fXRLX+PzKsQDDrolHyV2xXyl5Pkbm/U\n" +
+                        "m9ImYd/0RkL8477Zkd68f1/tCX7lU3QTrueZXul7XwRvkMCr6ZEu+Yreq8H8MP13\n" +
+                        "fBt3W1xsKM78SD32UWOKMZAfquJNPNsKS85SyQidCSFVWygJldWknZruXfR0B3EU\n" +
+                        "d2l+Gsgnier2+QKBwQCef77a+9+EmfuCST0pf+1Dven0/6OTJcHECDKouoZ14d3H\n" +
+                        "+TIZg7s5EmC+Y/vzn2rrSEp2yOn6kYfegx19m1hYgAG9nZ001LX2PtlSRrrpVRio\n" +
+                        "83geHQ1nlPP/Oqx3aNIP911d01Jl1q/xUZTpRYIqgd4zJz8abAjVTxtK8pMYeLmq\n" +
+                        "3ZpBCgS9MW37fQ2Wlby7wBVz5nTIeJP1ziCrcd198EgMSDatvxyY1yEwTNgo7bIx\n" +
+                        "6oudYZ2IcxC8QATWGgMCgcBi2AWkmiJ7717YN+w/RulgNovQD1sbiRC0nTOhLuWz\n" +
+                        "v9ZLzaIux0LB6jqvgdFb9iuD6vLHhJGti2lBOKlKA1RxvHpZZB/MnAW8v67Qz01q\n" +
+                        "fpVU7f9q9ctVYHaF3vPN1fLxZNAkAg6u+nyVhZpkUC97J5TQIzfhEqsjkpL5u7EX\n" +
+                        "RN132FhLFpdzjcWnI0UIAa7BltuTTVbOzOGnuKeuSeanEqShvr4vvD3wfzR+0LYA\n" +
+                        "sDzWnEdDtARm+OFyjvo4qU0=\n" +
+                        "-----END PRIVATE KEY-----";;
+                    break;
+                case KeyType.RSA4096:
+                    pemKey =
+                        "-----BEGIN PRIVATE KEY-----\n" +
+                        "MIIJQgIBADANBgkqhkiG9w0BAQEFAASCCSwwggkoAgEAAoICAQDGveAL2mUaE14e\n" +
+                        "4jxuSNsIOX92UmVkdugMze373fWyHLbCLfAkiNj5lnGtV8Z5zZg8qkVS5+EtKWne\n" +
+                        "dvbSfhE7dcntqNrnXqqtMWoNHAP9Kix2Dlzb8gNLn2SOQa16TfEbzFGBVRXwVYOb\n" +
+                        "6ZTEL3LWl4AKydvqUPa2Onbrj5rNBccynpgze7v32OsWXa3truqdjZKERmazs4zX\n" +
+                        "wLjKTK50LVviZrl8luVeePPFrohPvKCfK8SjkF8tzIQzq6dZOMIxKWODBa7K8BDO\n" +
+                        "RjdcUM6najxjDJ55F3mWGMzSHngCHwTdvbz50CNxULCiSGy7vNPflFq8xM+6xI4t\n" +
+                        "pMIsUXYsoAHSS62sMw7JTpYxSZ2l2HcHBYuH8w7+Rv5/wo9BM17vlKddizFCcCmk\n" +
+                        "FxJZbN9zkNCaSMlBOvN9MGdi2GznXEXunLXeu8TZp7JXCT9fXvBIxpVhih9N6e1r\n" +
+                        "ENpTRDdV8ElteuwsSaDE1Q8DWbLrLTyAQKB5W+elRGGJQC7AQTuC4QUgr0qIj9vm\n" +
+                        "ZkO+ziFstOnd9OvkftwcDSrUU8imd19UFlUw7X5IhnHw8DolJ3r+FKY9meWDOWXi\n" +
+                        "bysNTn/5/izBdonX0vw6Hffzfhd4al0Hze8uvY3lzZMPtv/0rDAkDfkO5zY/sOgo\n" +
+                        "P2GjJkS7u4cyNoH+lbAvZMyuZz/JuwIDAQABAoICABWM8FcIsw7dS8b4jEn/L3UY\n" +
+                        "Wwh3DdSTij0dNXGq02Ihd/Xdal1j03dZB3GfA4AguaHWatb/Gu09QOQlLUWM8wxq\n" +
+                        "DN/u//G307UdFx1dzNbudEzG6O3Ws+HG4m4ElC2fdwYnJS1rjwn1E+TbssyFQqQf\n" +
+                        "YHyLAARMDDydYVjQxR33Qu7rwKBQigTpqjBOLzaHUZyNBfa+9ZMF5L9egAs7vm0N\n" +
+                        "oBmQPwvSBwQ0BGcKsnBHCXnJErUTyiZat3ks42Qq4e/Xx5klDBuoZYIgng8uGgKQ\n" +
+                        "ZATvkN2bnI0YmlksgaHlQC9VTEEgfz9h2w114giHhMgJO7+dbdMYTjyH0aBhovkp\n" +
+                        "43Dv2VMyxZRPtaHqQ5eIls3yRXNMPX7BLWskv5MJxAsUqn13hcUwpf5ioNYXtl9Z\n" +
+                        "Ey1yn4x4KBR7TvGJOwWJteRiBV1gIx+6fAwRzugYLGyN/nK8eYCbBvxTceHNpndv\n" +
+                        "NnSvlfa2UwiiQS1ncOQRynzd1NDUWILxErcq8nMO2jcucjOLVs0g6yC5yzb6T/Vs\n" +
+                        "wQ0QHtJ5BXIA1PbcqaLqYK5iZOysDTWXGWRYg7BjE0VIN+otzC0XusD1hAYZPeKN\n" +
+                        "v8522uNUmLVt7xDQMVFUJ/KDIFJ1y/z0gNrsWqedlvTY8xplH7IsW9pb7bOlSYSX\n" +
+                        "HMunCDeYsWip2emirRPRAoIBAQDid6XU66FaMn9JVPtuzUzVTABjj5mXxj+mOsss\n" +
+                        "/ngRQmQQT2jTrXLfc2nY1MDxcnMi/NGtPS818s++9nfIMvvGbUS871eyFvYKXCzq\n" +
+                        "1Q802CXbrjOWKDWE/w54KUvS1djKtWIygW5X1fKdWP6PwF/pKoUJ0mglxWdtj3AE\n" +
+                        "BtXhVj79zHjOTPyI9314EHsi1TDQYv/l9RmKTHLtnt6p+H8o0kLVnXYZW8dGLBJf\n" +
+                        "xh3iSjZyHmAhHPx+ZBbawJV+M2XJPJl+pd0uYMQURvn+tJ9HJXnem94fMfBz7Ih6\n" +
+                        "88ZMS9VR3Bf6KphPyGqWw4s0LT4MtGKBcxxM2aiR4NjCjWxLAoIBAQDgqKNCLCXA\n" +
+                        "yXIofNMVGXJGt7tb9Vq1PfAU85rbiHjTLm+lNlv+0IhsDSsuVAxZeZuQxN5/vLwP\n" +
+                        "dzUX1e7t++V4lHMxnJT/La/TvWxszY+d32jOTOazmdPy5VfYB/ZnFh/74p1bKWci\n" +
+                        "xnIiCCDUKt28HbOEH128vaLPQAh/DA0gUo8QAKhmViEseS5gmDXDXRo0A2OE0Y8u\n" +
+                        "ISPc4vwt0h0vC43RoOgXxd2fMfNRLUzSZXy06d7QpkWjwmxg2Vyf3cdId8IkeYqX\n" +
+                        "yBM4fF8g0fGGvVbRBIv2eWX+3Eca/kuUqdgKjkgYrz5C4aWRIM03MlnMh2MMi6oJ\n" +
+                        "i3WKlWWgIdJRAoIBACZAy5QhkQmpSfLbFfVrXDUTN2WZ1fnbFNlBSRx6h1FzA2/1\n" +
+                        "2eEXhTXVSuXDWivuhyA70DcRBK56Kzk4bJc2dWzY/CllzExasIijdTrdbkog0JRA\n" +
+                        "4pnUhOXIJ2uInjQoxwvGg6XAUyEnFGobpDQn7It4ESzNi6YFqCjLd8JWXT5I0S8R\n" +
+                        "oL5IJsgD9f+X2RTTKgGpF0yCkCPaMfeNRFM1lFUS3xMyG8bAx/JEc34V+upEWtn/\n" +
+                        "44D0Ynn+8hVVPmsox2Ksh8jqv2ecFMLQEl5BqD3eSK2fam+egd0y8QLDtpUgohHH\n" +
+                        "uY0aMMwZMFfzA8p2ceq3dYQkK32Xrm+lqTeDp+0CggEARUr+gAyJ4HrB4UcO/DUL\n" +
+                        "EFDfUy/MOJbQFEZG/2uKiOiLuxOXMHM1gM5XAUUfQgHGP9LZJeEayFJmZ+Gufmzx\n" +
+                        "jE2NckHvmv2Ge/KzHKQSpgkglHEXv1G1E/g1LgbWs1kZqGFvU4zjqNA4p9KF/arz\n" +
+                        "FXC7zAa4rNx4+R+w/y7CZbPROIhbaKUsOkFuUpDgFFAFIwHgkjjoxrumCh1g1uk1\n" +
+                        "4yrXJU9SBvMatl17xRAJ3+M5obt45DZEyIvRTdX9QbnwG6QEl6d9Xe9yLjv+Q2s9\n" +
+                        "6edAfdu/J9it4vwiWmsQ+NuiLS9RgXub4pkiri7F3T6EgBdKL7ZsTeFb8dC+tbN4\n" +
+                        "4QKCAQEAr/HPEi+QlEniXweYMFlduCO7wc+DXjXyn4A8GHSyCM49d0b8wRwYr+C1\n" +
+                        "LIlKeqyZkP/CbhSAuiIv4kdXHZ1mxxx2Ooz+oO37wX68aEiQyisdm8s4OzMZHTOD\n" +
+                        "0RvQBQYMShI7qO+9d4ZN6ziFueJPnRO492ysZQSd8FwjBcsCD/w4an0/ZQQBzRJr\n" +
+                        "P4z1QfOPGoKgTofMa6tTJFTM6HsCEeEHgWtTaxpQBAiCJorIgJM3ybIYWRtqvvt9\n" +
+                        "s1Mtg5dSmuX6gU5ZGA2hNUoNBcTH0vobOuxW85uJKGZt89TxDxpeLUvyILQHpmX9\n" +
+                        "tPUHi94EBqDVlCctWL04ro3DY1dEsw==\n" +
+                        "-----END PRIVATE KEY-----";
+                    break;
                 case KeyType.ECP256:
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
@@ -996,6 +1093,24 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         "aEakUvQ2huBBo44IYCereLDAvQ9gMDo/6ri3kzriyIhSCKqhZANiAAS8Ffkt7aZ3\n" +
                         "oQY948aRlXbpTAUhfvajnRPNSBo1g24SFel3TpGgq2u4nIlvV4oE896ikU5U7X45\n" +
                         "3tD+iq9lgB+8QNDJP6C6KginR3H1jMNRPMvaNrQC/VBpse+1Z1t5pvo=\n" +
+                        "-----END PRIVATE KEY-----";
+                    break;
+                case KeyType.Ed25519:
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Pre-built key not available for that algorithm." + "\n");
+                    return false;
+
+                    pemKey =
+                        "-----BEGIN PRIVATE KEY-----\n" +
+                        "MC4CAQAwBQYDK2VwBCIEIDuLFRxirWSFqyiMTPB65M4sWI+smRcCdyMEL8RtN7ib\n" +
+                        "-----END PRIVATE KEY-----";
+                    break;
+                case KeyType.X25519:
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Pre-built key not available for that algorithm." + "\n");
+                    return false;
+                    
+                    pemKey =
+                        "-----BEGIN PRIVATE KEY-----\n" +
+                        "MC4CAQAwBQYDK2VuBCIEIGCCufpem+pMrhHcQwUvrUxh0KQ9zrNjuAVxM/E4d5hN\n" +
                         "-----END PRIVATE KEY-----";
                     break;
             }

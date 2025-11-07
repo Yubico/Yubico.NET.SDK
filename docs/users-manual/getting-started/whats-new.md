@@ -22,44 +22,19 @@ Here you can find all of the updates and release notes for published versions of
 
 Release date: October 23rd, 2025
 
-This patch release addresses critical stability issues in the YubiKey device listener system across all platforms (Windows, macOS, Linux). The primary focus is on improving resource management, disposal patterns, and exception handling to prevent memory leaks, orphaned threads, and race conditions during device enumeration and monitoring.
-
 Bug Fixes:
-
-- Fixed critical disposal timing and resource management issues in `DesktopSmartCardDeviceListener` and `WindowsHidDeviceListener` to prevent resource leaks and ensure idempotent disposal operations. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Corrected race conditions in the `StopListening` method across multiple device listeners that could cause deadlocks or orphaned resources. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- **MacOS**: Fixed delegate lifecycle issue that could cause callbacks on disposed delegates. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325), [#320](https://github.com/Yubico/Yubico.NET.SDK/issues/320))
-- Added comprehensive try-catch blocks around event handler invocations to prevent user exceptions from crashing background listener threads. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Wrapped listener thread logic in try-catch blocks for `MacOSHidDeviceListener`, `DesktopSmartCardDeviceListener`, and `LinuxHidDeviceListener` with improved logging. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Added try-catch around cleanup in `ListeningThread` to prevent P/Invoke exceptions during shutdown. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Enhanced device update logic and event firing to prevent deadlocks. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- **Linux**: Corrected file descriptor type from pointer to `int` in `PollFd.fd` to align with Linux `pollfd` struct specification and ensure compatibility with `poll()` system call. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- **Windows**: Enhanced `CmDevice` initialization and error handling during device enumeration. ([#318](https://github.com/Yubico/Yubico.NET.SDK/pull/318))
-- **Windows**: Wrapped Windows HID event handler logic inside try-catch blocks. ([#318](https://github.com/Yubico/Yubico.NET.SDK/pull/318), [#144](https://github.com/Yubico/Yubico.NET.SDK/issues/144))
-
-
 
 - The validation logic in the ``AddPermissions()`` method has been improved, which resolved an issue where the Fido2Session would incorrectly throw exceptions during calls to ``AddPermissions()`` on older YubiKeys. ([#316](https://github.com/Yubico/Yubico.NET.SDK/pull/316))
 
-Features:
+- Multiple updates have been added to prevent background thread crashes caused by rapidly unplugging and reinserting YubiKeys ([#318](https://github.com/Yubico/Yubico.NET.SDK/pull/318), [#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325)):
 
-- Implemented polling mechanism for udev events in Linux HID device listener to improve responsiveness during shutdown ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Added comprehensive disposal pattern implementation for `smartcardDeviceListener` with proper resource cleanup. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-
-Testing:
-
-- Added comprehensive manual and stress tests for HID device listener to verify device arrival/removal events with detailed execution instructions. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Added integration tests for SmartCard device listener with support for rapid insertion/removal scenarios. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Introduced disposal and resource management tests for Linux, macOS, and Windows HID Device Listeners with thread safety and timing validations. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-
-Refactoring:
-
-- Centralized timeout configurations across HID and SmartCard listeners with shared constants (`MaxDisposalWaitTime`, `CheckForChangesWaitTime`) for uniform timing behaviors. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Improved disposal timing and handler invocation consistency in `YubiKeyDeviceListener`. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
+  - Improved device listening and disposal behavior, including logging, error messages, and exception handling, across base, HID (Linux, Windows, macOS), and smart card device listener classes.
+  - Added and improved device listener disposal and integration tests.
+  - Added new ``CmDevice`` class methods (``FromDevicePath``, ``FromDeviceInstance``).
 
 Dependencies:
 
-- Several dependencies across the following projects have been updated to newer versions ([#317](https://github.com/Yubico/Yubico.NET.SDK/pull/317), [#327](https://github.com/Yubico/Yubico.NET.SDK/pull/327)):
+- Multiple dependencies across the following projects have been updated to newer versions ([#317](https://github.com/Yubico/Yubico.NET.SDK/pull/317), [#327](https://github.com/Yubico/Yubico.NET.SDK/pull/327)):
 
   - Yubico.Core
   - Yubico.Core.UnitTests
@@ -72,11 +47,6 @@ Dependencies:
 Documentation:
 
 - Errors in the User's Manual documentation regarding YubiKey support for FIDO2 PINs and U2F private key behavior have been corrected. ([#321](https://github.com/Yubico/Yubico.NET.SDK/pull/321), [#322](https://github.com/Yubico/Yubico.NET.SDK/pull/322))
-
-Miscellaneous:
-
-- Removed deprecated PythonForNet example files and project configuration. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Updated dev-container configuration. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
 
 _________
 

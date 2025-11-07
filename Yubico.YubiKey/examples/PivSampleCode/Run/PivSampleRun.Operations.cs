@@ -306,7 +306,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             if (!GetPemPrivateKey(algorithm, out string pemKey))
             {
-                return false;
+                return true;
             }
  
             var privateKey = KeyConverter.GetPrivateKeyFromPem(pemKey.ToCharArray()); 
@@ -925,6 +925,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             switch (algorithm)
             {
                 default:
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Pre-built key not available for that algorithm." + "\n");
                     return false;
 
                 case KeyType.RSA1024:

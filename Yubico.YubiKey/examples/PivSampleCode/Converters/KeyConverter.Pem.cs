@@ -51,8 +51,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public static char[] GetPemFromPublicKey(IPublicKey publicKey)
         {
-            using var dotNetObject = GetDotNetFromPublicKey(publicKey);
-            return GetPemFromDotNet(dotNetObject, false);
+            return PemOperations.BuildPem(PublicKeyTitle, publicKey.ExportSubjectPublicKeyInfo());
         }
 
         // Build a new PrivateKey object from a PEM key string.

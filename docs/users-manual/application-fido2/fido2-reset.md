@@ -33,9 +33,6 @@ However, there are some caveats:
 
 ## Steps
 
-Resetting the FIDO2 application is something you hope you never need to do. Generally, the
-only reason to reset the FIDO2 application is if the password has been blocked.
-
 To perform a FIDO2 reset, complete the following:
 
 1. "Reboot" the YubiKey by removing it from and reinserting it into the host device. Connect to the YubiKey and its FIDO2 application once it has been reinserted. This will likely be done using a listener class (see [YubiKeyDeviceListener](xref:Yubico.YubiKey.YubiKeyDeviceListener)).

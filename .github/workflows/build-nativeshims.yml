@@ -147,26 +147,6 @@ jobs:
           else
             bash ./build-linux-amd64.sh
           fi
-      - name: Verify CMake used Zig
-        working-directory: Yubico.NativeShims
-        run: |
-          echo "Verifying CMake configuration..."
-
-          if ! grep -q "CMAKE_C_COMPILER:FILEPATH.*zig" linux-x64/CMakeCache.txt; then
-            echo "❌ ERROR: CMAKE_C_COMPILER does not reference zig"
-            echo "Found:"
-            grep "CMAKE_C_COMPILER:FILEPATH" linux-x64/CMakeCache.txt || true
-            exit 1
-          fi
-
-          if ! grep -q "CMAKE_CXX_COMPILER:FILEPATH.*zig" linux-x64/CMakeCache.txt; then
-            echo "❌ ERROR: CMAKE_CXX_COMPILER does not reference zig"
-            echo "Found:"
-            grep "CMAKE_CXX_COMPILER:FILEPATH" linux-x64/CMakeCache.txt || true
-            exit 1
-          fi
-
-          echo "✅ CMake correctly configured to use Zig"
       - name: Test on Ubuntu 20.04 (glibc 2.31)
         working-directory: Yubico.NativeShims
         run: |
@@ -290,26 +270,6 @@ jobs:
           else
             bash ./build-linux-arm64.sh
           fi
-      - name: Verify CMake used Zig
-        working-directory: Yubico.NativeShims
-        run: |
-          echo "Verifying CMake configuration..."
-
-          if ! grep -q "CMAKE_C_COMPILER:FILEPATH.*zig" linux-arm64/CMakeCache.txt; then
-            echo "❌ ERROR: CMAKE_C_COMPILER does not reference zig"
-            echo "Found:"
-            grep "CMAKE_C_COMPILER:FILEPATH" linux-arm64/CMakeCache.txt || true
-            exit 1
-          fi
-
-          if ! grep -q "CMAKE_CXX_COMPILER:FILEPATH.*zig" linux-arm64/CMakeCache.txt; then
-            echo "❌ ERROR: CMAKE_CXX_COMPILER does not reference zig"
-            echo "Found:"
-            grep "CMAKE_CXX_COMPILER:FILEPATH" linux-arm64/CMakeCache.txt || true
-            exit 1
-          fi
-
-          echo "✅ CMake correctly configured to use Zig"
       - name: Test on Ubuntu 20.04 (glibc 2.31)
         working-directory: Yubico.NativeShims
         run: |

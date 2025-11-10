@@ -35,6 +35,8 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: |
           echo 'Running build script: Windows'
           cd Yubico.NativeShims
@@ -78,6 +80,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: |
           echo 'Running build script: Linux (amd64)'
           cd Yubico.NativeShims
@@ -97,6 +101,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: |
           echo 'Running build script: Linux (arm64)'
           cd Yubico.NativeShims
@@ -116,6 +122,8 @@ jobs:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: |
           echo 'Running build script: macOS'
           cd Yubico.NativeShims

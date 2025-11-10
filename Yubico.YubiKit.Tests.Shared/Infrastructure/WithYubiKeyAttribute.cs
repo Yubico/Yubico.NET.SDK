@@ -12,35 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Xunit;
+using System.Reflection;
 using Xunit.Sdk;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 /// <summary>
-///     xUnit theory attribute that provides YubiKey devices as test parameters.
-///     Combines [Theory] and [YubiKeyData] into a single attribute for cleaner test syntax.
+///     xUnit data attribute that provides filtered YubiKey devices as test parameters.
+///     Use with [Theory] to run tests on devices matching specified criteria.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         This attribute simplifies YubiKey integration tests by eliminating the need for
-///         both [Theory] and [YubiKeyData] attributes. It automatically discovers and filters
-///         devices based on the specified criteria.
+///         This attribute works with xUnit's [Theory] to provide YubiKey devices as test data.
+///         It automatically discovers, filters, and provides devices based on the specified criteria.
+///         Multiple [WithYubiKey] attributes can be applied to run tests with different device configurations.
 ///     </para>
 ///     <para>
 ///         Usage:
 ///         <code>
-///     [YubiKeyTheory]
-///     public async Task TestName(YubiKeyTestDevice device)
+///     // Single configuration
+///     [Theory]
+///     [WithYubiKey(MinFirmware = "5.7.2")]
+///     public async Task TestName(YubiKeyTestState device)
 ///     {
-///         // Test runs on ALL authorized devices
+///         // Test runs on devices with firmware >= 5.7.2
 ///     }
 ///
-///     [YubiKeyTheory(MinFirmware = "5.7.2", FormFactor = FormFactor.UsbAKeychain)]
-///     public async Task TestName(YubiKeyTestDevice device)
+///     // Multiple configurations
+///     [Theory]
+///     [WithYubiKey(MinFirmware = "5.0")]
+///     [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
+///     [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
+///     public async Task TestName(YubiKeyTestState device)
 ///     {
-///         // Test runs only on matching devices
+///         // Test runs on devices matching ANY of the above criteria
 ///     }
 ///
 ///     // Custom filter example
@@ -49,19 +55,11 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 ///         public bool Matches(YubiKeyTestState device) => device.SerialNumber > 10_000_000;
 ///         public string GetDescription() => "Production keys (SN > 10000000)";
 ///     }
-///
-///     [YubiKeyTheory(CustomFilter = typeof(ProductionKeysOnly))]
-///     public async Task TestOnProductionKeys(YubiKeyTestDevice device)
-///     {
-///         // Test runs only on devices matching custom filter
-///     }
 ///         </code>
 ///     </para>
 /// </remarks>
-[XunitTestCaseDiscoverer("Yubico.YubiKit.Tests.Shared.Infrastructure.YubiKeyTheoryDiscoverer",
-    "Yubico.YubiKit.Tests.Shared")]
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-public class YubiKeyTheoryAttribute : FactAttribute
+public class WithYubiKeyAttribute : DataAttribute
 {
     /// <summary>
     ///     Gets or sets the minimum firmware version required.
@@ -122,10 +120,66 @@ public class YubiKeyTheoryAttribute : FactAttribute
     ///         public string GetDescription() => "Production keys (SN > 10000000)";
     ///     }
     ///
-    ///     [YubiKeyTheory(CustomFilter = typeof(ProductionKeysOnly))]
-    ///     public async Task Test(YubiKeyTestDevice device) { }
+    ///     [Theory]
+    ///     [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
+    ///     public async Task Test(YubiKeyTestState device) { }
     ///         </code>
     ///     </para>
     /// </remarks>
     public Type? CustomFilter { get; set; }
+
+    /// <summary>
+    ///     Returns filtered YubiKey devices as test data.
+    ///     Called by xUnit's Theory discoverer.
+    /// </summary>
+    public override IEnumerable<object[]> GetData(MethodInfo testMethod)
+    {
+        // Get all authorized devices from shared infrastructure
+        var allDevices = YubiKeyTestInfrastructure.AllAuthorizedDevices;
+        if (allDevices.Count == 0)
+        {
+            Console.WriteLine(
+                $"[WithYubiKey] No authorized devices available for test '{testMethod.Name}'");
+            yield break;
+        }
+
+        // Filter devices using shared infrastructure
+        var filteredDevices = YubiKeyTestInfrastructure.FilterDevices(
+            allDevices,
+            MinFirmware,
+            FormFactor,
+            RequireUsb,
+            RequireNfc,
+            Capability,
+            FipsCapable,
+            FipsApproved,
+            CustomFilter).ToList();
+
+        if (filteredDevices.Count == 0)
+        {
+            var criteria = YubiKeyTestInfrastructure.GetFilterCriteriaDescription(
+                MinFirmware,
+                FormFactor,
+                RequireUsb,
+                RequireNfc,
+                Capability,
+                FipsCapable,
+                FipsApproved,
+                CustomFilter);
+
+            Console.WriteLine(
+                $"[WithYubiKey] No devices match criteria for test '{testMethod.Name}'. " +
+                $"Criteria: {criteria}");
+            yield break;
+        }
+
+        Console.WriteLine(
+            $"[WithYubiKey] Test '{testMethod.Name}' will run on {filteredDevices.Count} device(s)");
+
+        // Yield each matching device as test data
+        foreach (var device in filteredDevices)
+        {
+            yield return [device];
+        }
+    }
 }

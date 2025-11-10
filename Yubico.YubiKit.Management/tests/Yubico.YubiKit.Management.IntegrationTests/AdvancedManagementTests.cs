@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Diagnostics;
+using Xunit;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Tests.Shared;
@@ -44,7 +45,8 @@ public class AdvancedManagementTests
     ///     Basic example: Runs on ALL authorized devices.
     ///     Test executes once per device in the allow list.
     /// </summary>
-    [YubiKeyTheory]
+    [Theory]
+    [WithYubiKey]
     public async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState state)
     {
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
@@ -67,7 +69,8 @@ public class AdvancedManagementTests
     ///     Firmware filtering: Only runs on devices with firmware >= 5.3.0.
     ///     Demonstrates SCP03/SCP11 testing on modern firmware.
     /// </summary>
-    [YubiKeyTheory(MinFirmware = "5.3.0")]
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.3.0")]
     public async Task ModernFeatures_FirmwareAtLeast530_SupportsAdvancedProtocols(YubiKeyTestState state)
     {
         // This test only runs on devices with firmware 5.3.0 or newer
@@ -84,7 +87,8 @@ public class AdvancedManagementTests
     ///     Form factor filtering: Only runs on Bio keys.
     ///     Perfect for testing biometric-specific features.
     /// </summary>
-    [YubiKeyTheory(FormFactor = FormFactor.UsbABiometricKeychain)]
+    [Theory]
+    [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
     public async Task BiometricFeatures_BioKeys_HaveExpectedCapabilities(YubiKeyTestState state)
     {
         // This test only runs on USB-A Bio keys
@@ -106,7 +110,8 @@ public class AdvancedManagementTests
     ///     Transport filtering: Only runs on devices with USB transport.
     ///     Useful for USB-specific feature testing.
     /// </summary>
-    [YubiKeyTheory(RequireUsb = true)]
+    [Theory]
+    [WithYubiKey(RequireUsb = true)]
     public async Task UsbTransport_UsbDevices_SupportsFullCapabilities(YubiKeyTestState state)
     {
         // This test only runs on devices with USB transport
@@ -126,7 +131,8 @@ public class AdvancedManagementTests
     ///     Capability filtering: Only runs on devices with PIV capability enabled.
     ///     Demonstrates capability-specific testing.
     /// </summary>
-    [YubiKeyTheory(Capability = DeviceCapabilities.Piv)]
+    [Theory]
+    [WithYubiKey(Capability = DeviceCapabilities.Piv)]
     public async Task PivCapability_EnabledDevices_SupportsManagement(YubiKeyTestState state)
     {
         // This test only runs on devices with PIV capability enabled
@@ -147,7 +153,8 @@ public class AdvancedManagementTests
     ///     FIPS-capable filtering: Only runs on FIPS-capable devices for PIV.
     ///     Critical for FIPS compliance testing.
     /// </summary>
-    [YubiKeyTheory(FipsCapable = DeviceCapabilities.Piv)]
+    [Theory]
+    [WithYubiKey(FipsCapable = DeviceCapabilities.Piv)]
     public async Task FipsCapable_PivDevices_HasFipsSupport(YubiKeyTestState state)
     {
         // This test only runs on devices that are FIPS-capable for PIV
@@ -166,7 +173,8 @@ public class AdvancedManagementTests
     ///     FIPS-approved filtering: Only runs on devices in FIPS-approved mode.
     ///     Ensures operations meet FIPS 140-2 requirements.
     /// </summary>
-    [YubiKeyTheory(FipsApproved = DeviceCapabilities.Piv)]
+    [Theory]
+    [WithYubiKey(FipsApproved = DeviceCapabilities.Piv)]
     public async Task FipsApproved_PivDevices_InFipsMode(YubiKeyTestState state)
     {
         // This test only runs on devices in FIPS-approved mode for PIV
@@ -186,7 +194,8 @@ public class AdvancedManagementTests
     ///     Only runs on modern USB keys with PIV capability.
     ///     Perfect for testing specific feature combinations.
     /// </summary>
-    [YubiKeyTheory(MinFirmware = "5.0.0", RequireUsb = true, Capability = DeviceCapabilities.Piv)]
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.0.0", RequireUsb = true, Capability = DeviceCapabilities.Piv)]
     public async Task AdvancedPiv_ModernUsbKeysWithPiv_FullySupported(YubiKeyTestState state)
     {
         // This test has multiple requirements:
@@ -213,7 +222,8 @@ public class AdvancedManagementTests
     ///     Advanced example: Testing device-specific behavior differences.
     ///     Demonstrates how to handle different device characteristics.
     /// </summary>
-    [YubiKeyTheory]
+    [Theory]
+    [WithYubiKey]
     public async Task DeviceCharacteristics_VariesByDevice_HandledCorrectly(YubiKeyTestState state)
     {
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
@@ -241,7 +251,8 @@ public class AdvancedManagementTests
     ///     Form factor filtering: Runs on USB-A Keychain devices.
     ///     Tests device info consistency across multiple reads.
     /// </summary>
-    [YubiKeyTheory(FormFactor = FormFactor.UsbAKeychain)]
+    [Theory]
+    [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
     public async Task DeviceInfo_UsbAKeychain_RemainsConsistent(YubiKeyTestState state)
     {
         Assert.Equal(FormFactor.UsbAKeychain, state.FormFactor);
@@ -263,7 +274,8 @@ public class AdvancedManagementTests
     ///     Form factor filtering: Runs on USB-A Biometric devices.
     ///     Tests device info consistency across multiple reads.
     /// </summary>
-    [YubiKeyTheory(FormFactor = FormFactor.UsbABiometricKeychain)]
+    [Theory]
+    [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
     public async Task DeviceInfo_UsbABiometric_RemainsConsistent(YubiKeyTestState state)
     {
         Assert.Equal(FormFactor.UsbABiometricKeychain, state.FormFactor);
@@ -285,7 +297,8 @@ public class AdvancedManagementTests
     ///     Complex scenario: Testing across USB-C Keychain devices specifically.
     ///     Demonstrates form factor-specific testing.
     /// </summary>
-    [YubiKeyTheory(FormFactor = FormFactor.UsbCKeychain)]
+    [Theory]
+    [WithYubiKey(FormFactor = FormFactor.UsbCKeychain)]
     public async Task UsbCKeychain_UsbCKeychainDevices_ConsistentBehavior(YubiKeyTestState state)
     {
         // This test runs only on USB-C Keychain form factors
@@ -305,7 +318,8 @@ public class AdvancedManagementTests
     ///     Real-world scenario: Verifying serial number consistency.
     ///     Ensures device identity remains stable across sessions.
     /// </summary>
-    [YubiKeyTheory]
+    [Theory]
+    [WithYubiKey]
     public async Task SerialNumber_MultipleReads_RemainsConsistent(YubiKeyTestState state)
     {
         // Read serial number multiple times
@@ -328,7 +342,8 @@ public class AdvancedManagementTests
     ///     Performance test: Measure device info retrieval time.
     ///     Useful for benchmarking across different device types.
     /// </summary>
-    [YubiKeyTheory]
+    [Theory]
+    [WithYubiKey]
     public async Task Performance_GetDeviceInfo_CompletesQuickly(YubiKeyTestState state)
     {
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
@@ -351,7 +366,8 @@ public class AdvancedManagementTests
     ///     Comprehensive example: Full device validation across all properties.
     ///     Demonstrates accessing all device information through YubiKeyTestState.
     /// </summary>
-    [YubiKeyTheory]
+    [Theory]
+    [WithYubiKey]
     public async Task ComprehensiveValidation_AllDeviceProperties_Accessible(YubiKeyTestState state)
     {
         // Demonstrate accessing device properties

@@ -43,10 +43,10 @@ git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && $
 # security.ubuntu.com only hosts amd64/i386, not arm64
 # We need to restrict default sources to amd64 and add arm64 sources from ports.ubuntu.com
 
-# Restrict main sources.list to amd64 only
+# Restrict main sources.list to amd64 only (handles both http and https)
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
-sudo sed -i 's/^deb http/deb [arch=amd64] http/' /etc/apt/sources.list
-sudo sed -i 's/^deb-src http/deb-src [arch=amd64] http/' /etc/apt/sources.list
+sudo sed -i 's/^deb \(https\?\)/deb [arch=amd64] \1/' /etc/apt/sources.list
+sudo sed -i 's/^deb-src \(https\?\)/deb-src [arch=amd64] \1/' /etc/apt/sources.list
 
 # Add arm64 sources pointing to ports.ubuntu.com
 echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main restricted universe multiverse

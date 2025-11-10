@@ -80,11 +80,9 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: "./global.json"
-
-      # Add local NuGet repository if version is not a plain release (i.e., has a suffix, e.g., -prerelease)
-      - name: Add local NuGet repository for non-release versions
-        if: ${{ github.event.inputs.version && (contains(github.event.inputs.version, '-')) }}
-        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+          source-url: https://nuget.pkg.github.com/Yubico/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set build version
         if: ${{ github.event.inputs.version }}
@@ -96,7 +94,9 @@ jobs:
 
       # Build the project
       - name: Build Yubico.NET.SDK.sln
-        run: dotnet pack --configuration Release --nologo --verbosity minimal -p:treatWarningsAsErrors=true Yubico.NET.SDK.sln 
+        run: dotnet pack --configuration Release --nologo --verbosity minimal -p:treatWarningsAsErrors=true Yubico.NET.SDK.sln
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
       # Build the documentation
       - name: Build docs
@@ -188,12 +188,18 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: Nuget Packages
+      - uses: actions/setup-dotnet@v4
+        with:
+          source-url: https://nuget.pkg.github.com/Yubico/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           $core = (Get-ChildItem -Recurse Yubico.Core/*.nupkg)[0].FullName
           $yubikey = (Get-ChildItem -Recurse Yubico.YubiKey/*.nupkg)[0].FullName
-          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
           dotnet nuget push $core --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
           dotnet nuget push $yubikey --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-summary:
     name: Build summary

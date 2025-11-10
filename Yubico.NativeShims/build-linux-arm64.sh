@@ -40,10 +40,10 @@ sudo apt-get install cmake -yq
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
 
 # Install arm64 version of libpcsclite
-# First, restrict existing sources to amd64 only to prevent 404 errors
+# First, restrict the main Ubuntu sources to amd64 only to prevent 404 errors
 # when apt tries to fetch arm64 packages from security.ubuntu.com
-sudo sed -i 's/^deb /deb [arch=amd64] /' /etc/apt/sources.list
-sudo sed -i 's/^deb /deb [arch=amd64] /' /etc/apt/sources.list.d/*.list 2>/dev/null || true
+# Only modify sources.list, not sources.list.d which may have special formatting
+sudo sed -i 's/^deb \([^[]\)/deb [arch=amd64] \1/' /etc/apt/sources.list
 
 # Now add arm64 sources pointing to ports.ubuntu.com
 echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main restricted universe multiverse

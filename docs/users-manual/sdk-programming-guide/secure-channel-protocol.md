@@ -148,7 +148,11 @@ using (var oathSession = new OathSession(yubiKeyDevice, scp03Params))
 }
 
 // Using SCP11b
-var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, kvn);
+// Retrieve public key from YubiKey (see full example above for certificate verification)
+var keyVersionNumber = 0x1; // Example kvn
+var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, keyVersionNumber);
+var publicKey = GetScp11PublicKey(yubiKeyDevice, keyReference); // Your implementation
+var scp11Params = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(publicKey));
 using (var oathSession = new OathSession(yubiKeyDevice, scp11Params))
 {
     // All OathSession-commands are now automatically protected by SCP11

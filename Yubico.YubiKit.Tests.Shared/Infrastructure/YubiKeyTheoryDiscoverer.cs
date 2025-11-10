@@ -49,6 +49,7 @@ public class YubiKeyTheoryDiscoverer(IMessageSink diagnosticMessageSink) : IXuni
         var capability = factAttribute.GetNamedArgument<DeviceCapabilities>(nameof(YubiKeyTheoryAttribute.Capability));
         var fipsCapable = factAttribute.GetNamedArgument<DeviceCapabilities>(nameof(YubiKeyTheoryAttribute.FipsCapable));
         var fipsApproved = factAttribute.GetNamedArgument<DeviceCapabilities>(nameof(YubiKeyTheoryAttribute.FipsApproved));
+        var customFilterType = factAttribute.GetNamedArgument<Type?>(nameof(YubiKeyTheoryAttribute.CustomFilter));
 
         // Filter devices using shared infrastructure (materialize to avoid multiple enumerations)
         var filteredDevices = YubiKeyTestInfrastructure.FilterDevices(
@@ -59,7 +60,8 @@ public class YubiKeyTheoryDiscoverer(IMessageSink diagnosticMessageSink) : IXuni
             requireNfc,
             capability,
             fipsCapable,
-            fipsApproved).ToList();
+            fipsApproved,
+            customFilterType).ToList();
 
         if (filteredDevices.Count == 0)
         {
@@ -70,7 +72,8 @@ public class YubiKeyTheoryDiscoverer(IMessageSink diagnosticMessageSink) : IXuni
                 requireNfc,
                 capability,
                 fipsCapable,
-                fipsApproved);
+                fipsApproved,
+                customFilterType);
 
             diagnosticMessageSink.OnMessage(new DiagnosticMessage(
                 $"[YubiKeyTheory] No devices match criteria for test '{testMethod.Method.Name}'. " +

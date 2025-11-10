@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Management.IntegrationTests;
@@ -70,7 +71,7 @@ public class ManagementIntegrationTests
     /// <summary>
     ///     Verify form factor matches expected type.
     /// </summary>
-    [YubiKeyTheory]
+    [YubiKeyTheory(FormFactor = FormFactor.UsbABiometricKeychain)]
     public async Task FormFactor_MatchesExpectedType(YubiKeyTestState state) =>
         await state.WithManagementAsync((mgmt, deviceInfo) =>
         {
@@ -102,14 +103,13 @@ public class ManagementIntegrationTests
     /// <summary>
     ///     Test with multiple filter criteria.
     /// </summary>
-    [YubiKeyTheory(MinFirmware = "5.0.0", RequireUsb = true)]
+    [YubiKeyTheory(RequireUsb = true, CustomFilter = typeof(ModernFirmwareFilter))]
     public async Task AdvancedFeatures_RequireSpecificConfiguration(YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, deviceInfo) =>
         {
             // Device meets all requirements (guaranteed by attribute filter)
             Assert.True(deviceInfo.FirmwareVersion.Major >= 5);
             Assert.True(state.IsUsbTransport);
-
             var info = await mgmt.GetDeviceInfoAsync();
             Assert.True(info.SerialNumber > 0);
         });

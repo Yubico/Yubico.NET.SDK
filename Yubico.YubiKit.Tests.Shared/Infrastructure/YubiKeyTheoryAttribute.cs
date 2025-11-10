@@ -42,11 +42,25 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 ///     {
 ///         // Test runs only on matching devices
 ///     }
+///
+///     // Custom filter example
+///     public class ProductionKeysOnly : IYubiKeyFilter
+///     {
+///         public bool Matches(YubiKeyTestState device) => device.SerialNumber > 10_000_000;
+///         public string GetDescription() => "Production keys (SN > 10000000)";
+///     }
+///
+///     [YubiKeyTheory(CustomFilter = typeof(ProductionKeysOnly))]
+///     public async Task TestOnProductionKeys(YubiKeyTestDevice device)
+///     {
+///         // Test runs only on devices matching custom filter
+///     }
 ///         </code>
 ///     </para>
 /// </remarks>
-[XunitTestCaseDiscoverer("Yubico.YubiKit.Tests.Shared.Infrastructure.YubiKeyTheoryDiscoverer", "Yubico.YubiKit.Tests.Shared")]
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+[XunitTestCaseDiscoverer("Yubico.YubiKit.Tests.Shared.Infrastructure.YubiKeyTheoryDiscoverer",
+    "Yubico.YubiKit.Tests.Shared")]
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class YubiKeyTheoryAttribute : FactAttribute
 {
     /// <summary>
@@ -88,4 +102,30 @@ public class YubiKeyTheoryAttribute : FactAttribute
     ///     Use DeviceCapabilities.None (default) to skip FIPS-approved filtering.
     /// </summary>
     public DeviceCapabilities FipsApproved { get; set; } = DeviceCapabilities.None;
+
+    /// <summary>
+    ///     Gets or sets a custom filter type for advanced filtering logic.
+    ///     Must implement <see cref="IYubiKeyFilter"/> and have a parameterless constructor.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Use this property to specify complex filtering logic that cannot be expressed
+    ///         through the built-in properties. The custom filter is applied AFTER all
+    ///         built-in filters (MinFirmware, FormFactor, etc.).
+    ///     </para>
+    ///     <para>
+    ///         Example:
+    ///         <code>
+    ///     public class ProductionKeysOnly : IYubiKeyFilter
+    ///     {
+    ///         public bool Matches(YubiKeyTestState device) => device.SerialNumber > 10_000_000;
+    ///         public string GetDescription() => "Production keys (SN > 10000000)";
+    ///     }
+    ///
+    ///     [YubiKeyTheory(CustomFilter = typeof(ProductionKeysOnly))]
+    ///     public async Task Test(YubiKeyTestDevice device) { }
+    ///         </code>
+    ///     </para>
+    /// </remarks>
+    public Type? CustomFilter { get; set; }
 }

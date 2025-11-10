@@ -16,7 +16,7 @@ using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Management;
 
-namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
+namespace Yubico.YubiKit.Tests.Shared;
 
 /// <summary>
 ///     Extension methods for <see cref="YubiKeyTestState" /> providing convenient helpers

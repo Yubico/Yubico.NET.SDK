@@ -15,8 +15,9 @@
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
-namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
+namespace Yubico.YubiKit.Tests.Shared;
 
 /// <summary>
 ///     Wrapper class for YubiKey devices used in parameterized tests.

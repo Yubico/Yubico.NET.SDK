@@ -16,8 +16,9 @@ using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
-namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
+namespace Yubico.YubiKit.Tests.Shared;
 
 /// <summary>
 ///     Test state for Management application integration tests.

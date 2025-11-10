@@ -68,6 +68,7 @@ internal static class YubiKeyTestInfrastructure
     /// <param name="capability">Required capability.</param>
     /// <param name="fipsCapable">Required FIPS-capable capability.</param>
     /// <param name="fipsApproved">Required FIPS-approved capability.</param>
+    /// <param name="customFilterType">Optional custom filter type implementing IYubiKeyFilter.</param>
     /// <returns>Filtered list of devices matching all criteria.</returns>
     public static IEnumerable<YubiKeyTestState> FilterDevices(
         IEnumerable<YubiKeyTestState> devices,
@@ -77,7 +78,8 @@ internal static class YubiKeyTestInfrastructure
         bool requireNfc,
         DeviceCapabilities capability,
         DeviceCapabilities fipsCapable,
-        DeviceCapabilities fipsApproved)
+        DeviceCapabilities fipsApproved,
+        Type? customFilterType = null)
     {
         var filtered = devices;
 
@@ -113,6 +115,14 @@ internal static class YubiKeyTestInfrastructure
         if (fipsApproved != DeviceCapabilities.None)
             filtered = filtered.Where(d => d.IsFipsApproved(fipsApproved));
 
+        // Apply custom filter if provided
+        if (customFilterType is not null)
+        {
+            var filter = InstantiateCustomFilter(customFilterType);
+            if (filter is not null)
+                filtered = filtered.Where(d => filter.Matches(d));
+        }
+
         return filtered;
     }
 
@@ -126,7 +136,8 @@ internal static class YubiKeyTestInfrastructure
         bool requireNfc,
         DeviceCapabilities capability,
         DeviceCapabilities fipsCapable,
-        DeviceCapabilities fipsApproved)
+        DeviceCapabilities fipsApproved,
+        Type? customFilterType = null)
     {
         var criteria = new List<string>();
 
@@ -151,7 +162,63 @@ internal static class YubiKeyTestInfrastructure
         if (fipsApproved != DeviceCapabilities.None)
             criteria.Add($"FipsApproved = {fipsApproved}");
 
+        if (customFilterType is not null)
+        {
+            var filter = InstantiateCustomFilter(customFilterType);
+            if (filter is not null)
+                criteria.Add($"CustomFilter = {filter.GetDescription()}");
+            else
+                criteria.Add($"CustomFilter = {customFilterType.Name} (failed to instantiate)");
+        }
+
         return criteria.Count > 0 ? string.Join(", ", criteria) : "None (all devices)";
+    }
+
+    /// <summary>
+    ///     Instantiates a custom filter from the specified type.
+    /// </summary>
+    /// <param name="filterType">The type implementing IYubiKeyFilter.</param>
+    /// <returns>An instance of the filter, or null if instantiation fails.</returns>
+    private static IYubiKeyFilter? InstantiateCustomFilter(Type filterType)
+    {
+        try
+        {
+            // Validate type implements IYubiKeyFilter
+            if (!typeof(IYubiKeyFilter).IsAssignableFrom(filterType))
+            {
+                Console.Error.WriteLine(
+                    $"[YubiKey Infrastructure] ERROR: Custom filter type '{filterType.FullName}' " +
+                    $"does not implement IYubiKeyFilter");
+                return null;
+            }
+
+            // Validate type has parameterless constructor
+            var constructor = filterType.GetConstructor(Type.EmptyTypes);
+            if (constructor is null)
+            {
+                Console.Error.WriteLine(
+                    $"[YubiKey Infrastructure] ERROR: Custom filter type '{filterType.FullName}' " +
+                    $"does not have a parameterless constructor");
+                return null;
+            }
+
+            // Instantiate the filter
+            var filter = Activator.CreateInstance(filterType) as IYubiKeyFilter;
+            if (filter is null)
+            {
+                Console.Error.WriteLine(
+                    $"[YubiKey Infrastructure] ERROR: Failed to instantiate custom filter '{filterType.FullName}'");
+                return null;
+            }
+
+            return filter;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(
+                $"[YubiKey Infrastructure] ERROR: Exception while instantiating custom filter '{filterType.FullName}': {ex.Message}");
+            return null;
+        }
     }
 
     #region Static Device Initialization

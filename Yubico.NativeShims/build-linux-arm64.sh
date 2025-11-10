@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-# Get version parameter
-VERSION=$1
+# Get version parameter (empty string if not provided)
+VERSION="${1:-}"
 
 # Set environment variables
 export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \

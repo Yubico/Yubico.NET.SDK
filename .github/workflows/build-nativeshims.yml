@@ -143,9 +143,9 @@ jobs:
           cd Yubico.NativeShims
           if [ ! -z "${{ github.event.inputs.version }}" ]; then
             BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
-            sh ./build-linux-amd64.sh "$BASE_VERSION"
+            bash ./build-linux-amd64.sh "$BASE_VERSION"
           else
-            sh ./build-linux-amd64.sh
+            bash ./build-linux-amd64.sh
           fi
       - name: Verify CMake used Zig
         working-directory: Yubico.NativeShims
@@ -286,9 +286,9 @@ jobs:
           cd Yubico.NativeShims
           if [ ! -z "${{ github.event.inputs.version }}" ]; then
             BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
-            sh ./build-linux-arm64.sh "$BASE_VERSION"
+            bash ./build-linux-arm64.sh "$BASE_VERSION"
           else
-            sh ./build-linux-arm64.sh
+            bash ./build-linux-arm64.sh
           fi
       - name: Verify CMake used Zig
         working-directory: Yubico.NativeShims

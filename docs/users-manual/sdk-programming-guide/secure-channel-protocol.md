@@ -118,14 +118,18 @@ using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 ```csharp
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
-using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
-using (var pivSession = new PivSession(yubiKeyDevice, scp03params))
+using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys);
+using (var pivSession = new PivSession(yubiKeyDevice, scp03Params))
 {
     // All PivSession-commands are now automatically protected by SCP03
 }
 
 // Using SCP11b
-var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, kvn);
+// Retrieve public key from YubiKey (see full example above for certificate verification)
+var keyVersionNumber = 0x1; // Example kvn
+var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, keyVersionNumber);
+var publicKey = GetScp11PublicKey(yubiKeyDevice, keyReference); // Your implementation
+var scp11Params = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(publicKey));
 using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 {
     // All PivSession-commands are now automatically protected by SCP11

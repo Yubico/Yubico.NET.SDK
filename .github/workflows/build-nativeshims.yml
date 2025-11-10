@@ -182,6 +182,10 @@ jobs:
             debian:10 \
             bash -c '
               set -e
+              # Debian 10 is EOL, update sources to use archive repository
+              sed -i "s|http://deb.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
+              sed -i "s|http://security.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
+              sed -i "/buster-updates/d" /etc/apt/sources.list
               apt-get update -qq
               apt-get install -y libpcsclite1 file binutils
               cd /test
@@ -305,6 +309,10 @@ jobs:
             debian:10 \
             bash -c '
               set -e
+              # Debian 10 is EOL, update sources to use archive repository
+              sed -i "s|http://deb.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
+              sed -i "s|http://security.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
+              sed -i "/buster-updates/d" /etc/apt/sources.list
               apt-get update -qq
               apt-get install -y libpcsclite1 file binutils
               cd /test

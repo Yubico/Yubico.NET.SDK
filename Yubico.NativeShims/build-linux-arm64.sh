@@ -40,21 +40,28 @@ sudo apt-get install cmake -yq
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
 
 # Install arm64 version of libpcsclite
-# First, restrict the main Ubuntu sources to amd64 only to prevent 404 errors
-# when apt tries to fetch arm64 packages from security.ubuntu.com
-# Only modify sources.list, not sources.list.d which may have special formatting
-sudo sed -i 's/^deb \([^[]\)/deb [arch=amd64] \1/' /etc/apt/sources.list
+# Temporarily back up default sources to prevent 404 errors when adding arm64 architecture
+# (security.ubuntu.com doesn't host arm64 packages)
+sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+sudo mv /etc/apt/sources.list.d /etc/apt/sources.list.d.bak
 
-# Now add arm64 sources pointing to ports.ubuntu.com
+# Create minimal sources for arm64 packages from ports.ubuntu.com
+sudo mkdir -p /etc/apt/sources.list.d
 echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main restricted universe multiverse
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted universe multiverse
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security main restricted universe multiverse
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-backports main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/arm64.list
 
-# Add arm64 architecture
+# Add arm64 architecture and install
 sudo dpkg --add-architecture arm64
 sudo apt-get update -qq
 sudo apt-get install libpcsclite-dev:arm64 -yq
+
+# Restore original sources
+sudo mv /etc/apt/sources.list.bak /etc/apt/sources.list
+sudo rm -rf /etc/apt/sources.list.d
+sudo mv /etc/apt/sources.list.d.bak /etc/apt/sources.list.d
+sudo apt-get update -qq
 
 ## Build
 if [ ! -f ./CMakeLists.txt ]; then

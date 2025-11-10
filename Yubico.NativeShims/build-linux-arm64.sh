@@ -43,16 +43,44 @@ git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && $
 # security.ubuntu.com only hosts amd64/i386, not arm64
 # We need to restrict default sources to amd64 and add arm64 sources from ports.ubuntu.com
 
-# Restrict main sources.list to amd64 only (handles both http and https)
-sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
-sudo sed -i 's/^deb \(https\?\)/deb [arch=amd64] \1/' /etc/apt/sources.list
-sudo sed -i 's/^deb-src \(https\?\)/deb-src [arch=amd64] \1/' /etc/apt/sources.list
+# Ubuntu 24.04 uses DEB822 format in /etc/apt/sources.list.d/ubuntu.sources
+# We need to add Architectures: amd64 to existing sources and create arm64 sources
 
-# Add arm64 sources pointing to ports.ubuntu.com
-echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main restricted universe multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted universe multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security main restricted universe multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-backports main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/arm64.list
+# Backup the original ubuntu.sources if it exists
+if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+    sudo cp /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list.d/ubuntu.sources.bak
+
+    # Add "Architectures: amd64" to each stanza in ubuntu.sources
+    # This awk script adds the Architectures line after the Types line in each stanza
+    sudo awk '
+        /^Types:/ { print; print "Architectures: amd64"; next }
+        { print }
+    ' /etc/apt/sources.list.d/ubuntu.sources.bak | sudo tee /etc/apt/sources.list.d/ubuntu.sources > /dev/null
+fi
+
+# Also handle traditional sources.list if it exists and has content
+if [ -f /etc/apt/sources.list ] && [ -s /etc/apt/sources.list ]; then
+    sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+    sudo sed -i 's/^deb \(https\?\)/deb [arch=amd64] \1/' /etc/apt/sources.list
+    sudo sed -i 's/^deb-src \(https\?\)/deb-src [arch=amd64] \1/' /etc/apt/sources.list
+fi
+
+# Create arm64 sources in DEB822 format
+sudo tee /etc/apt/sources.list.d/ubuntu-ports-arm64.sources > /dev/null <<EOF
+Types: deb
+URIs: http://ports.ubuntu.com/ubuntu-ports/
+Suites: noble noble-updates noble-backports
+Components: main restricted universe multiverse
+Architectures: arm64
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+Types: deb
+URIs: http://ports.ubuntu.com/ubuntu-ports/
+Suites: noble-security
+Components: main restricted universe multiverse
+Architectures: arm64
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+EOF
 
 # Add arm64 architecture and install
 sudo dpkg --add-architecture arm64

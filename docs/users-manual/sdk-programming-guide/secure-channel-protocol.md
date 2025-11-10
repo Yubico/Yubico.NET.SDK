@@ -137,7 +137,7 @@ using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
-using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
+using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
 using (var oathSession = new OathSession(yubiKeyDevice, scp03params))
 {
     // All oathSession-commands are now automatically protected by SCP03
@@ -156,7 +156,7 @@ using (var oathSession = new OathSession(yubiKeyDevice, scp11Params))
 
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
-using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
+using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
 using (var otpSession = new OtpSession(yubiKeyDevice, scp03params))
 {
     // All otpSession-commands are now automatically protected by SCP03
@@ -174,7 +174,7 @@ using (var otpSession = new OtpSession(yubiKeyDevice, scp11Params))
 ```csharp
 // Using SCP03
 StaticKeys scp03Keys = RetrieveScp03KeySet();  // Your static keys
-using Scp03KeyParamaters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
+using Scp03KeyParameters scp03Params = Scp03KeyParameters.FromStaticKeys(scp03Keys); 
 using (var yubiHsmSession = new YubiHsmAuthSession(yubiKeyDevice, scp03params))
 {
     // All YubiHsmSession-commands are now automatically protected by SCP03

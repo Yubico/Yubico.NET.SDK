@@ -207,46 +207,53 @@ This document outlines the remediation plan for security findings and recommenda
 
 ### 7. Update SCP11 Documentation (LOW)
 
-**Risk**: Incomplete documentation may lead to incorrect implementation
+**Risk**: Incomplete documentation with code errors may lead to incorrect implementation
 
 **Current State**:
-- `docs/users-manual/sdk-programming-guide/secure-channel-protocol.md:82-99`
-- Example code is incomplete; missing intermediate steps for SCP11b setup
+- `docs/users-manual/sdk-programming-guide/secure-channel-protocol.md`
+- Multiple code examples have bugs and missing variable definitions
+
+**Specific Issues Found**:
+- **Line 100**: References `certificateList` but variable is named `certificates`
+- **Line 110**: Uses `session.GenerateKeyPair` but variable is `pivSession`
+- **Line 128**: References undefined variable `kvn` (should be `keyVersionNumber`)
+- **Line 129**: References undefined variable `scp11Params` (not created in this example)
+- **Line 140**: Typo `Scp03KeyParamaters` should be `Scp03KeyParameters`
+- **Line 141**: Inconsistent casing `scp03params` vs `scp03Params`
+- **Lines 147-148**: OATH example has same undefined `kvn` and `scp11Params` variables
 
 **Implementation Steps**:
-1. Review the secure-channel-protocol.md documentation
-2. Add complete code snippet showing:
-   - KeyReference creation
-   - Certificate retrieval and verification
-   - Scp11KeyParameters instantiation
-   - PivSession creation with SCP11 parameters
-3. Ensure example is compilable and follows SDK best practices
+1. Fix variable name bugs in main SCP11b example (lines 83-112)
+2. Complete the PIV SCP11b example (lines 127-132) with all required variable definitions
+3. Complete the OATH SCP11b example (lines 146-151) with all required variable definitions
+4. Fix typos in SCP03 examples
+5. Ensure all code examples are complete, consistent, and compilable
+6. Test that code snippets follow SDK best practices
 
-**Suggested Complete Example**:
+**Complete Example Pattern** (to be applied consistently):
 ```csharp
-// Using SCP11b
-using var scp03Params = Scp03KeyParameters.DefaultKey;
+// Using SCP11b - Complete example
+using var scp03Params = Scp03KeyParameters.DefaultKey; // For initial SecurityDomain session
 using var sdSession = new SecurityDomainSession(yubiKeyDevice, scp03Params);
 
 var keyVersionNumber = 0x1;
-var keyId = ScpKeyIds.Scp11B;
-var keyReference = KeyReference.Create(keyId, keyVersionNumber);
+var keyReference = KeyReference.Create(ScpKeyIds.Scp11B, keyVersionNumber);
 
+// Get certificate from YubiKey
 var certificates = sdSession.GetCertificates(keyReference);
 
-// Verify certificate chain (implementation required)
-CertificateChainVerifier.Verify(certificates);
+// Verify the YubiKey's certificate chain against a trusted root
+CertificateChainVerifier.Verify(certificates); // Use 'certificates', not 'certificateList'
 
-// Extract public key from certificate
-var publicKey = ExtractPublicKeyFromCertificate(certificates[0]);
-
-// Create SCP11 parameters
+// Extract public key from verified certificate
+var publicKey = certificates.Last().GetECDsaPublicKey();
 var scp11Params = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters(publicKey));
 
-// Use SCP11 for PIV session
+// Use SCP11b parameters to open protected session
 using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 {
     // All PivSession commands are now automatically protected by SCP11
+    pivSession.GenerateKeyPair(PivSlot.Retired12, PivAlgorithm.EccP256, PivPinPolicy.Always);
 }
 ```
 

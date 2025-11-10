@@ -138,9 +138,18 @@ public class WithYubiKeyAttribute : DataAttribute
         var allDevices = YubiKeyTestInfrastructure.AllAuthorizedDevices;
         if (allDevices.Count == 0)
         {
-            Console.WriteLine(
-                $"[WithYubiKey] No authorized devices available for test '{testMethod.Name}'");
-            yield break;
+            var errorMessage =
+                $"No authorized YubiKey devices available for test '{testMethod.Name}'.\n" +
+                $"\n" +
+                $"This means either:\n" +
+                $"  1. No YubiKeys are connected to this machine\n" +
+                $"  2. Connected YubiKeys are not in the allow list (appsettings.json)\n" +
+                $"\n" +
+                $"To fix: Check YubiKeyTestInfrastructure initialization output for details.";
+
+            Console.Error.WriteLine($"[WithYubiKey] {errorMessage}");
+
+            throw new InvalidOperationException(errorMessage);
         }
 
         // Filter devices using shared infrastructure
@@ -167,10 +176,21 @@ public class WithYubiKeyAttribute : DataAttribute
                 FipsApproved,
                 CustomFilter);
 
-            Console.WriteLine(
-                $"[WithYubiKey] No devices match criteria for test '{testMethod.Name}'. " +
-                $"Criteria: {criteria}");
-            yield break;
+            var availableDevices = string.Join(", ", allDevices.Select(d =>
+                $"SN:{d.SerialNumber} (FW:{d.FirmwareVersion}, {d.FormFactor})"));
+
+            var errorMessage =
+                $"No YubiKey devices match criteria for test '{testMethod.Name}'.\n" +
+                $"\n" +
+                $"Required criteria: {criteria}\n" +
+                $"\n" +
+                $"Available devices ({allDevices.Count}): {availableDevices}\n" +
+                $"\n" +
+                $"To fix: Connect a YubiKey matching the criteria, or adjust the test requirements.";
+
+            Console.Error.WriteLine($"[WithYubiKey] {errorMessage}");
+
+            throw new InvalidOperationException(errorMessage);
         }
 
         Console.WriteLine(

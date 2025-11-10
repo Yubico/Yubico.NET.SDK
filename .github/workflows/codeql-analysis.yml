@@ -57,16 +57,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Setup .NET with authenticated NuGet source
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          source-url: https://nuget.pkg.github.com/Yubico/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
 
       # Build the project
-      - name: Add local NuGet repository
-        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
-
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration Release --nologo --verbosity minimal Yubico.NET.SDK.sln
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

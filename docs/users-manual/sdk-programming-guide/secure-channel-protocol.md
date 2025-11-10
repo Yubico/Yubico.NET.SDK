@@ -107,7 +107,7 @@ var scp11Params = new Scp11KeyParameters(keyReference, new ECPublicKeyParameters
 using (var pivSession = new PivSession(yubiKeyDevice, scp11Params))
 {
     // All PivSession-commands are now automatically protected by SCP11
-    session.GenerateKeyPair(PivSlot.Retired12, PivAlgorithm.EccP256, PivPinPolicy.Always); // Protected by SCP11
+    pivSession.GenerateKeyPair(PivSlot.Retired12, PivAlgorithm.EccP256, PivPinPolicy.Always); // Protected by SCP11
 }
 ```
 

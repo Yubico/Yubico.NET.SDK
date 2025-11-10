@@ -274,6 +274,10 @@ jobs:
           else
             bash ./build-linux-arm64.sh
           fi
+      - name: Set up QEMU for ARM64 testing
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
       - name: Test on Ubuntu 20.04 (glibc 2.31)
         working-directory: Yubico.NativeShims
         run: |

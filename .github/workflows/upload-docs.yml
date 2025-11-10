@@ -45,6 +45,8 @@ jobs:
     steps:
       # Checkout the local repository as we need the Dockerfile and other things even for this step.
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       # Grab the just-built documentation artifact and inflate the archive at the expected location.
       - uses: actions/download-artifact@v4

@@ -30,6 +30,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: self
+          persist-credentials: false
 
       - id: auth
         name: Authenticate to Google Cloud
@@ -54,6 +55,7 @@ jobs:
           ref: ${{ inputs.gitops-branch }}
           token: ${{ steps.generate_token.outputs.token }}
           path: gitops
+          persist-credentials: false
 
       - name: Update GitOps resources
         run: sed -i "s#/yesdk/yesdk-docserver:.*\$#/yesdk/yesdk-docserver:$IMAGE_TAG#" ./k8s/yesdk/kustomization.yaml
@@ -82,6 +84,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
     - name: Authenticate to Google Cloud to read commit status
       uses: google-github-actions/auth@v2

@@ -97,7 +97,7 @@ var keyReference = KeyReference.Create(keyId, keyVersionNumber);
 var certificates = sdSession.GetCertificates(keyReference); 
 
 // Verify the Yubikey's certificate chain against a trusted root using your implementation
-CertificateChainVerifier.Verify(certificateList)
+CertificateChainVerifier.Verify(certificates)
 
 // Use the verified leaf certificate to construct ECPublicKeyParameters
 var publicKey = certificates.Last().GetECDsaPublicKey();

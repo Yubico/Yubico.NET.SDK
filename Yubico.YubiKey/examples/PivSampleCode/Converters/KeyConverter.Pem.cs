@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 
+
 namespace Yubico.YubiKey.Sample.PivSampleCode
 {
     // This file contains methods related to converting into and out of PEM
@@ -38,8 +39,46 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public static PublicKey GetPublicKeyFromPem(char[] pemKeyString)
         {
-            using var dotNetObject = GetDotNetFromPem(pemKeyString, false);
-            return GetPublicKeyFromDotNet(dotNetObject);
+            byte[] encodedKey = GetEncodedKey(pemKeyString, false, out int algorithmFlag);
+
+            try
+            {
+                // algorithmFlag is used as a bitfield. AlgorithmFlagPrivate has value 1
+                // and other algorithm flags are distinct powers-of-two. Use bitwise
+                // checks instead of integer equality to avoid confusion about "+1".
+                bool isCurve25519 = (algorithmFlag & AlgorithmFlagCurve25519) != 0;
+
+                if (isCurve25519)
+                {
+                    bool isPemPrivateFlag = (algorithmFlag & AlgorithmFlagPrivate) != 0;
+
+                    if (isPemPrivateFlag)
+                    {
+                        // We received a PKCS#8 private key encoding. The private-key
+                        // structure for Curve25519 does not necessarily contain the
+                        // public key material, and this sample code does not have an
+                        // implementation to derive the Curve25519 public key from the
+                        // private scalar. Attempting to parse the PKCS#8 bytes as a
+                        // SubjectPublicKeyInfo will cause ASN.1 decoding errors (you
+                        // observed the INTEGER vs SEQUENCE exception).
+                        throw new CryptographicException(
+                            "PEM contains a Curve25519 private key; this method requires a PUBLIC KEY PEM for Curve25519 or an implementation to derive the public key from the private key.");
+                    }
+
+                    // For a PUBLIC KEY PEM, encodedKey is a SubjectPublicKeyInfo and
+                    // we can decode it directly.
+                    return Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(encodedKey);
+                }
+
+                // For all other cases (including non-private curve25519 or
+                // RSA/ECDSA), fall back to the existing DotNet path.
+                using var dotNetObject = GetDotNetFromPem(pemKeyString, false);
+                return GetPublicKeyFromDotNet(dotNetObject);
+            }
+            finally
+            {
+                OverwriteBytes(encodedKey);
+            }
         }
 
         // Build the PEM string from a PublicKey.
@@ -63,8 +102,29 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public static PrivateKey GetPrivateKeyFromPem(char[] pemKeyString)
         {
-            using var dotNetObject = GetDotNetFromPem(pemKeyString, true);
-            return GetPrivateKeyFromDotNet(dotNetObject);
+            byte[] encodedKey = GetEncodedKey(pemKeyString, true, out int algorithmFlag);
+
+            try
+            {
+                // algorithmFlag is used as a bitfield. AlgorithmFlagPrivate has value 1
+                // and other algorithm flags are distinct powers-of-two. Use bitwise checks
+                bool isCurve25519 = (algorithmFlag & AlgorithmFlagCurve25519) != 0;
+
+                if (isCurve25519)
+                {
+                    // For Curve25519, decode the PKCS#8 format directly.
+                    return Curve25519PrivateKey.CreateFromPkcs8(encodedKey);
+                }
+
+                // For all other cases (including non-private curve25519 or
+                // RSA/ECDSA), fall back to the existing DotNet path.
+                using var dotNetObject = GetDotNetFromPem(pemKeyString, true);
+                return GetPrivateKeyFromDotNet(dotNetObject);
+            }
+            finally
+            {
+                OverwriteBytes(encodedKey);
+            }
         }
 
         // Build an AsymmetricAlgorithm object from a PEM key.
@@ -130,6 +190,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         var eccObject = ECDsa.Create();
                         eccObject.ImportSubjectPublicKeyInfo(encodedKey, out _);
                         return eccObject;
+
+                    case AlgorithmFlagCurve25519:
+                    case AlgorithmFlagCurve25519 | AlgorithmFlagPrivate:
+                        throw new NotSupportedException(
+                            "Curve25519 keys cannot be converted to AsymmetricAlgorithm. Use GetPrivateKeyFromPem instead.");
 
                     case AlgorithmFlagEcdsa | AlgorithmFlagPrivate:
                         using (var eccPrivateObject = ECDsa.Create())
@@ -271,21 +336,95 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 //           2A 86 48 86 F7 0D 01 01 01
                 //   ECC: 06 07
                 //           2A 86 48 CE 3D 02 01
-                // For this sample code, we'll look at oid[5], if it's 86,
-                // RSA, if CE it's ECC. If it's something else, we'll return an
-                // empty array and algorithmFlag set to None.
-                switch (encodedKey[offset + 5])
+                // Read the OID length and value bytes in a robust, ASN.1-aware way
+                // encodedKey[offset] is the OID tag (0x06). The length byte(s)
+                // follow at offset+1, and the value bytes follow the length field.
+                int oidLenIndex = offset + 1;
+                if (oidLenIndex >= encodedKey.Length)
                 {
-                    default:
+                    return Array.Empty<byte>();
+                }
+
+                int firstLen = encodedKey[oidLenIndex] & 0xFF;
+                int oidLen;
+                int oidValueStart;
+
+                if (firstLen <= 0x7F)
+                {
+                    oidLen = firstLen;
+                    oidValueStart = oidLenIndex + 1;
+                }
+                else
+                {
+                    // Long-form length. Support up to 3 length bytes as in GetNextTagOffset.
+                    if (firstLen == 0x80 || firstLen > 0x83)
+                    {
                         return Array.Empty<byte>();
+                    }
 
-                    case 0x86:
-                        algorithmFlag = AlgorithmFlagRsa;
-                        break;
+                    int count = firstLen & 0x0F;
+                    if (encodedKey.Length < oidLenIndex + 1 + count)
+                    {
+                        return Array.Empty<byte>();
+                    }
 
-                    case 0xCE:
-                        algorithmFlag = AlgorithmFlagEcdsa;
-                        break;
+                    oidLen = 0;
+                    for (int i = 0; i < count; i++)
+                    {
+                        oidLen = (oidLen << 8) + (encodedKey[oidLenIndex + 1 + i] & 0xFF);
+                    }
+
+                    oidValueStart = oidLenIndex + 1 + count;
+                }
+
+                if (oidValueStart + oidLen > encodedKey.Length)
+                {
+                    return Array.Empty<byte>();
+                }
+
+                // Known OID value byte sequences (DER encoded value bytes):
+                // RSA:      1.2.840.113549.1.1.1 -> 2A 86 48 86 F7 0D 01 01 01
+                // ECDSA:    1.2.840.10045.2.1     -> 2A 86 48 CE 3D 02 01
+                // Ed25519:  1.3.101.112           -> 2B 65 70
+                // X25519:   1.3.101.110           -> 2B 65 6E
+                byte[] oidRsa = new byte[] { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01 };
+                byte[] oidEcdsa = new byte[] { 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01 };
+                byte[] oidEd25519 = new byte[] { 0x2B, 0x65, 0x70 };
+                byte[] oidX25519 = new byte[] { 0x2B, 0x65, 0x6E };
+
+                bool Matches(byte[] candidate)
+                {
+                    if (candidate.Length != oidLen)
+                    {
+                        return false;
+                    }
+
+                    for (int i = 0; i < candidate.Length; i++)
+                    {
+                        if (encodedKey[oidValueStart + i] != candidate[i])
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+                if (Matches(oidRsa))
+                {
+                    algorithmFlag = AlgorithmFlagRsa;
+                }
+                else if (Matches(oidEcdsa))
+                {
+                    algorithmFlag = AlgorithmFlagEcdsa;
+                }
+                else if (Matches(oidEd25519) || Matches(oidX25519))
+                {
+                    algorithmFlag = AlgorithmFlagCurve25519;
+                }
+                else
+                {
+                    return Array.Empty<byte>();
                 }
 
                 if (isPemPrivate)

@@ -1096,18 +1096,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         "-----END PRIVATE KEY-----";
                     break;
                 case KeyType.Ed25519:
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "Pre-built key not available for that algorithm." + "\n");
-                    return false;
-
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MC4CAQAwBQYDK2VwBCIEIDuLFRxirWSFqyiMTPB65M4sWI+smRcCdyMEL8RtN7ib\n" +
                         "-----END PRIVATE KEY-----";
                     break;
                 case KeyType.X25519:
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "Pre-built key not available for that algorithm." + "\n");
-                    return false;
-                    
                     pemKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MC4CAQAwBQYDK2VuBCIEIGCCufpem+pMrhHcQwUvrUxh0KQ9zrNjuAVxM/E4d5hN\n" +

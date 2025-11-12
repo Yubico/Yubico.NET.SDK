@@ -76,10 +76,10 @@ jobs:
       symbols-packages-id: ${{ steps.symbols-upload.outputs.artifact-id }}
       assemblies-id: ${{ steps.assemblies-upload.outputs.artifact-id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
         with:
           persist-credentials: false
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9  # v4.3.1
         with:
           global-json-file: "./global.json"
           source-url: https://nuget.pkg.github.com/Yubico/index.json
@@ -109,7 +109,7 @@ jobs:
       # Upload documentation log
       - name: "Save build artifacts: Docs log"
         id: docs-log-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: Documentation log
           path: docfx.log
@@ -118,7 +118,7 @@ jobs:
       # Upload documentation
       - name: "Save build artifacts: Docs"
         id: docs-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: Documentation
           path: docs/_site/
@@ -127,7 +127,7 @@ jobs:
       # Upload NuGet packages
       - name: "Save build artifacts: Nuget Packages"
         id: nuget-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: Nuget Packages
           path: |
@@ -138,7 +138,7 @@ jobs:
       # Upload symbols
       - name: "Save build artifacts: Symbols Packages"
         id: symbols-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: Symbols Packages
           path: |
@@ -149,7 +149,7 @@ jobs:
       # Upload assemblies
       - name: "Save build artifacts: Assemblies"
         id: assemblies-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: Assemblies
           path: |
@@ -159,7 +159,7 @@ jobs:
       
       # Generate artifact attestation
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be  # v2.4.0
         with:
           subject-path: |
             Yubico.Core/src/bin/Release/*.nupkg
@@ -187,10 +187,10 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
         with:
           name: Nuget Packages
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9  # v4.3.1
         with:
           source-url: https://nuget.pkg.github.com/Yubico/index.json
         env:

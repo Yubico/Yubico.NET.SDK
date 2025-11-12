@@ -326,26 +326,27 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     SampleMenu.WriteMessage(MessageType.Title, 0, "Private key imported successfully.\n");
                     return true;
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
                     SampleMenu.WriteMessage(MessageType.Special, 0, $"Failed to import key: {ex.Message}\n");
                     return false;
                 }
             }
             // For all other algorithms, derive the public key from the private key
+            // Using .NET's AsymmetricAlgorithm class
             else
             {
-                var publicKey = KeyConverter.GetPublicKeyFromPem(pemKey.ToCharArray()); 
-            
+                var publicKey = KeyConverter.GetPublicKeyFromPem(pemKey.ToCharArray());
+
                 if (KeyPairs.RunImportPrivateKey(
-                _yubiKeyChosen, 
-                _keyCollector.SampleKeyCollectorDelegate, 
-                privateKey,    
-                publicKey,      
+                _yubiKeyChosen,
+                _keyCollector.SampleKeyCollectorDelegate,
+                privateKey,
+                publicKey,
                 slotNumber,
                 pinPolicy,
                 touchPolicy,
-                out SamplePivSlotContents newSlotContents)) 
+                out SamplePivSlotContents newSlotContents))
                 {
                     if (newSlotContents is not null)
                     {

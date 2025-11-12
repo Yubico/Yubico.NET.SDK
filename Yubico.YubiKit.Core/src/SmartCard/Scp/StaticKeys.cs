@@ -84,23 +84,9 @@ public sealed class StaticKeys : IDisposable
     {
         if (_disposed) return;
 
-        if (_enc != null)
-        {
-            CryptographicOperations.ZeroMemory(_enc);
-            _enc = null;
-        }
-
-        if (_mac != null)
-        {
-            CryptographicOperations.ZeroMemory(_mac);
-            _mac = null;
-        }
-
-        if (_dek != null)
-        {
-            CryptographicOperations.ZeroMemory(_dek);
-            _dek = null;
-        }
+        CryptographicOperations.ZeroMemory(_enc);
+        CryptographicOperations.ZeroMemory(_mac);
+        CryptographicOperations.ZeroMemory(_dek);
 
         _disposed = true;
     }

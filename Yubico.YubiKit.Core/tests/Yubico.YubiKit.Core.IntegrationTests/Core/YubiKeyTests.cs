@@ -13,13 +13,13 @@
 // limitations under the License.
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
-
+using Yubico.YubiKit.Core.YubiKey;
 public class YubiKeyTests
 {
     [Fact]
     public async Task FindAllAsync_ReturnsAtLeastOne()
     {
-        var devices = await YubiKey.YubiKey.FindAllAsync();
+        var devices = await YubiKey.FindAllAsync();
         Assert.NotEmpty(devices);
     }
 
@@ -28,7 +28,7 @@ public class YubiKeyTests
     {
         var insertedDevice = false;
         var removedDevice = false;
-        await foreach (var change in YubiKey.YubiKey.MonitorAsync(TimeSpan.FromSeconds(1), CancellationToken.None))
+        await foreach (var change in YubiKey.MonitorAsync(TimeSpan.FromSeconds(1), CancellationToken.None))
             if (change.Action == DeviceAction.Added)
             {
                 Assert.NotNull(change.Device);
@@ -36,7 +36,7 @@ public class YubiKeyTests
                 break;
             }
 
-        await foreach (var change in YubiKey.YubiKey.MonitorAsync(TimeSpan.FromSeconds(1), CancellationToken.None))
+        await foreach (var change in YubiKey.MonitorAsync(TimeSpan.FromSeconds(1), CancellationToken.None))
             if (change.Action == DeviceAction.Removed)
             {
                 Assert.Null(change.Device);

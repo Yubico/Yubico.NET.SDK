@@ -22,6 +22,8 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// </summary>
 public sealed record Scp11KeyParams : ScpKeyParams
 {
+    private bool _disposed;
+
     /// <summary>
     ///     Initializes a new instance of the <see cref="Scp11KeyParams" /> record for SCP11a or SCP11c.
     /// </summary>
@@ -95,6 +97,25 @@ public sealed record Scp11KeyParams : ScpKeyParams
     ///     Gets the key reference for this SCP11 key.
     /// </summary>
     public KeyRef KeyRef { get; }
+
+    override public void Dispose()
+    {
+        if (_disposed) return;
+        
+        try
+        {
+            SkOceEcka?.Dispose();
+            PkSdEcka.Dispose();
+            foreach (var cert in Certificates)
+            {
+                cert.Dispose();
+            }
+        }
+        finally
+        {
+            _disposed = true;
+        }
+    }
 
     private static void ValidateKid(byte kid)
     {

@@ -52,7 +52,7 @@ public class ManagementTests : IntegrationTestBase
     public async Task CreateManagementSession_with_ExtensionMethod()
     {
         var devices = await YubiKeyManager.FindAllAsync();
-        var device = devices.First();
+        var device = devices[0];
 
         using var mgmtSession = await device.CreateManagementSessionAsync();
 
@@ -64,10 +64,8 @@ public class ManagementTests : IntegrationTestBase
     public async Task GetDeviceInfoAsync_with_YubiKeyExtensionMethod()
     {
         var devices = await YubiKeyManager.FindAllAsync();
-        var device = devices.FirstOrDefault();
-        Assert.NotNull(device);
+        var deviceInfo = await devices[0]!.GetDeviceInfoAsync();
 
-        var deviceInfo = await device.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
     }
 
@@ -75,7 +73,7 @@ public class ManagementTests : IntegrationTestBase
     private async Task SetDeviceConfigAsync_with_ManagementSession()
     {
         var devices = await YubiKeyManager.FindAllAsync();
-        var device = devices.First();
+        var device = devices[0];
 
         using var mgmtSession = await device.CreateManagementSessionAsync();
 
@@ -106,7 +104,7 @@ public class ManagementTests : IntegrationTestBase
     public async Task SetDeviceConfigAsync_with_YubiKeyExtensionMethod()
     {
         var devices = await YubiKeyManager.FindAllAsync();
-        var device = devices.First();
+        var device = devices[0];
 
         var originalInfo = await device.GetDeviceInfoAsync();
         var originalAutoEject = originalInfo.AutoEjectTimeout;
@@ -137,11 +135,7 @@ public class ManagementTests : IntegrationTestBase
         // This test requires a YubiKey with default SCP03 keys configured (KVN 0xFF)
         // Skip this test if no suitable YubiKey is available
         var devices = await YubiKeyManager.FindAllAsync();
-        var device = devices.FirstOrDefault();
-
-        if (device == null)
-            // Skip test if no device is found
-            return;
+        var device = devices[0];
 
         // Create SCP03 key parameters using default keys
         // Default SCP03 keys: 0x404142434445464748494A4B4C4D4E4F

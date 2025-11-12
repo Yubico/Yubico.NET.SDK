@@ -18,16 +18,6 @@ using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
-public interface IYubiKey
-{
-    string DeviceId { get; }
-
-    Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-        where TConnection : class, IConnection;
-}
-
-// An idea is to connect this class over the smartCardConnection to the ManagementSession, and get some deviceInfo..
-// Such as serial, fw version. 
 internal class PcscYubiKey(
     IPcscDevice pcscDevice,
     ISmartCardConnectionFactory connectionFactory,

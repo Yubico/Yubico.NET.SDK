@@ -20,6 +20,8 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// </summary>
 public sealed record Scp03KeyParams : ScpKeyParams
 {
+    private bool _disposed;
+
     /// <summary>
     ///     Initializes a new instance of the <see cref="Scp03KeyParams" /> record.
     /// </summary>
@@ -46,4 +48,19 @@ public sealed record Scp03KeyParams : ScpKeyParams
     ///     Gets the key reference for this SCP03 key set.
     /// </summary>
     public KeyRef KeyRef { get; }
+
+    override public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        try
+        {
+            Keys.Dispose();
+        }
+        finally
+        {
+            _disposed = true;
+        }
+    }
 }

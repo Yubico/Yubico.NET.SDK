@@ -308,11 +308,36 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 return true;
             }
- 
-            var privateKey = KeyConverter.GetPrivateKeyFromPem(pemKey.ToCharArray()); 
-            var publicKey = KeyConverter.GetPublicKeyFromPem(pemKey.ToCharArray()); 
+
+            var privateKey = KeyConverter.GetPrivateKeyFromPem(pemKey.ToCharArray());
+
+            // Special case for curve25519 keys, as they are not supported
+            // by .NET's AsymmetricAlgorithm classes.
+            // Therefore a public key cannot be derived from the private key without external libraries
+            if (algorithm.IsCurve25519())
+            {
+                try
+                {
+                    using (var pivSession = new PivSession(_yubiKeyChosen))
+                    {
+                        pivSession.KeyCollector = _keyCollector.SampleKeyCollectorDelegate;
+                        pivSession.ImportPrivateKey(slotNumber, privateKey, pinPolicy, touchPolicy);
+                    }
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Private key imported successfully.\n");
+                    return true;
+                }
+                catch (Exception ex) 
+                {
+                    SampleMenu.WriteMessage(MessageType.Special, 0, $"Failed to import key: {ex.Message}\n");
+                    return false;
+                }
+            }
+            // For all other algorithms, derive the public key from the private key
+            else
+            {
+                var publicKey = KeyConverter.GetPublicKeyFromPem(pemKey.ToCharArray()); 
             
-            if (KeyPairs.RunImportPrivateKey(
+                if (KeyPairs.RunImportPrivateKey(
                 _yubiKeyChosen, 
                 _keyCollector.SampleKeyCollectorDelegate, 
                 privateKey,    
@@ -321,15 +346,16 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 pinPolicy,
                 touchPolicy,
                 out SamplePivSlotContents newSlotContents)) 
-            {
-                if (newSlotContents is not null)
                 {
-                    AddSlotContents(newSlotContents);
+                    if (newSlotContents is not null)
+                    {
+                        AddSlotContents(newSlotContents);
+                    }
+                    return true;
                 }
-                return true;
-            }
 
-            return false;
+                return false;
+            }
         }
 
 

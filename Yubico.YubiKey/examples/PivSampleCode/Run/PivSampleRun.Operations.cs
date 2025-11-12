@@ -515,7 +515,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 return RunInvalidEntry();
             }
-            if (keyAgreeSlotContents.GetType() != typeof(ECPublicKey))
+            if (!keyAgreeSlotContents.PublicKey.KeyType.IsECDsa())
             {
                 return RunInvalidEntry();
             }

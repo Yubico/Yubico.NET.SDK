@@ -114,13 +114,13 @@ jobs:
           # Create x86_64 C compiler wrapper
           cat > $HOME/zig-wrappers/zig-cc << 'EOF'
           #!/bin/bash
-          exec zig cc -target x86_64-linux-gnu.2.28 "$@"
+          exec zig cc -target x86_64-linux-gnu.2.23 "$@"
           EOF
 
           # Create x86_64 C++ compiler wrapper
           cat > $HOME/zig-wrappers/zig-c++ << 'EOF'
           #!/bin/bash
-          exec zig c++ -target x86_64-linux-gnu.2.28 "$@"
+          exec zig c++ -target x86_64-linux-gnu.2.23 "$@"
           EOF
 
           chmod +x $HOME/zig-wrappers/zig-cc
@@ -139,7 +139,7 @@ jobs:
 
           echo "✅ Zig wrappers verified successfully"
       - run: |
-          echo 'Running build script: Linux (amd64) with Zig targeting glibc 2.28'
+          echo 'Running build script: Linux (amd64) with Zig targeting glibc 2.23'
           cd Yubico.NativeShims
           if [ ! -z "${{ github.event.inputs.version }}" ]; then
             BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
@@ -147,6 +147,29 @@ jobs:
           else
             bash ./build-linux-amd64.sh
           fi
+      - name: Test on Ubuntu 18.04 (glibc 2.27)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing binary compatibility on Ubuntu 18.04 (close to target glibc 2.23)..."
+          docker run --rm \
+            -v $PWD/linux-x64:/test:ro \
+            ubuntu:18.04 \
+            bash -c '
+              set -e
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Testing on Ubuntu 18.04 (glibc 2.27)..."
+              ldd --version | head -n1
+              echo ""
+              echo "Library dependencies:"
+              ldd *.so || true
+              echo ""
+              echo "GLIBC version requirements:"
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo ""
+              echo "✅ Binary compatible with Ubuntu 18.04 (glibc 2.27)"
+            '
       - name: Test on Ubuntu 20.04 (glibc 2.31)
         working-directory: Yubico.NativeShims
         run: |
@@ -173,10 +196,10 @@ jobs:
               echo ""
               echo "✅ Binary loads successfully on Ubuntu 20.04 (glibc 2.31)"
             '
-      - name: Test on Debian 10 (glibc 2.28 - target platform)
+      - name: Test on Debian 10 (glibc 2.28)
         working-directory: Yubico.NativeShims
         run: |
-          echo "Testing binary on actual target glibc version..."
+          echo "Testing binary compatibility on Debian 10 (target: glibc 2.23)..."
           docker run --rm \
             -v $PWD/linux-x64:/test:ro \
             debian:10 \
@@ -189,11 +212,11 @@ jobs:
               apt-get update -qq
               apt-get install -y libpcsclite1 file binutils
               cd /test
-              echo "Testing on Debian 10 (glibc 2.28)..."
+              echo "Testing on Debian 10 (glibc 2.28, target is 2.23)..."
               ldd --version | head -n1
               ldd *.so
               readelf -V *.so | grep GLIBC_2 | sort -u
-              echo "✅ Binary compatible with glibc 2.28"
+              echo "✅ Binary compatible with Debian 10 (glibc 2.28)"
             '
       - uses: actions/upload-artifact@v4
         with:
@@ -241,13 +264,13 @@ jobs:
           # Create aarch64 C compiler wrapper
           cat > $HOME/zig-wrappers/zig-cc << 'EOF'
           #!/bin/bash
-          exec zig cc -target aarch64-linux-gnu.2.28 "$@"
+          exec zig cc -target aarch64-linux-gnu.2.23 "$@"
           EOF
 
           # Create aarch64 C++ compiler wrapper
           cat > $HOME/zig-wrappers/zig-c++ << 'EOF'
           #!/bin/bash
-          exec zig c++ -target aarch64-linux-gnu.2.28 "$@"
+          exec zig c++ -target aarch64-linux-gnu.2.23 "$@"
           EOF
 
           chmod +x $HOME/zig-wrappers/zig-cc
@@ -266,7 +289,7 @@ jobs:
 
           echo "✅ Zig wrappers verified successfully"
       - run: |
-          echo 'Running build script: Linux (arm64) with Zig targeting glibc 2.28'
+          echo 'Running build script: Linux (arm64) with Zig targeting glibc 2.23'
           cd Yubico.NativeShims
           if [ ! -z "${{ github.event.inputs.version }}" ]; then
             BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
@@ -278,6 +301,29 @@ jobs:
         uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
+      - name: Test on Ubuntu 18.04 (glibc 2.27)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing ARM64 binary compatibility on Ubuntu 18.04 (close to target glibc 2.23)..."
+          docker run --rm --platform linux/arm64 \
+            -v $PWD/linux-arm64:/test:ro \
+            ubuntu:18.04 \
+            bash -c '
+              set -e
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Testing on Ubuntu 18.04 (glibc 2.27)..."
+              ldd --version | head -n1
+              echo ""
+              echo "Library dependencies:"
+              ldd *.so || true
+              echo ""
+              echo "GLIBC version requirements:"
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo ""
+              echo "✅ ARM64 binary compatible with Ubuntu 18.04 (glibc 2.27)"
+            '
       - name: Test on Ubuntu 20.04 (glibc 2.31)
         working-directory: Yubico.NativeShims
         run: |
@@ -304,10 +350,10 @@ jobs:
               echo ""
               echo "✅ ARM64 binary loads successfully on Ubuntu 20.04 (glibc 2.31)"
             '
-      - name: Test on Debian 10 (glibc 2.28 - target platform)
+      - name: Test on Debian 10 (glibc 2.28)
         working-directory: Yubico.NativeShims
         run: |
-          echo "Testing ARM64 binary on actual target glibc version..."
+          echo "Testing ARM64 binary compatibility on Debian 10 (target: glibc 2.23)..."
           docker run --rm --platform linux/arm64 \
             -v $PWD/linux-arm64:/test:ro \
             debian:10 \
@@ -320,11 +366,11 @@ jobs:
               apt-get update -qq
               apt-get install -y libpcsclite1 file binutils
               cd /test
-              echo "Testing on Debian 10 (glibc 2.28)..."
+              echo "Testing on Debian 10 (glibc 2.28, target is 2.23)..."
               ldd --version | head -n1
               ldd *.so
               readelf -V *.so | grep GLIBC_2 | sort -u
-              echo "✅ ARM64 binary compatible with glibc 2.28"
+              echo "✅ ARM64 binary compatible with Debian 10 (glibc 2.28)"
             '
       - uses: actions/upload-artifact@v4
         with:

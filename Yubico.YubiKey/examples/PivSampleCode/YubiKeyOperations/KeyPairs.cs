@@ -34,18 +34,18 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 pivSession.KeyCollector = KeyCollectorDelegate;
 
-                var PublicKey = pivSession.GenerateKeyPair(slotNumber, algorithm, pinPolicy, touchPolicy);
+                var publicKey = pivSession.GenerateKeyPair(slotNumber, algorithm, pinPolicy, touchPolicy);
 
                 // At this point you will likely want to save the public key and
                 // other information. For this sample, we're simply going to
                 // build a SlotContents object.
-                slotContents = new SamplePivSlotContents(PublicKey)
+                slotContents = new SamplePivSlotContents(publicKey)
                 {
                     SlotNumber = slotNumber,
                     Algorithm = algorithm,
                     PinPolicy = pinPolicy,
                     TouchPolicy = touchPolicy,
-                    PublicKey = PublicKey,
+                    PublicKey = publicKey,
                 };
             }
 
@@ -63,14 +63,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             PivTouchPolicy touchPolicy,
             out SamplePivSlotContents slotContents)
         {
-            if (privateKey is null)
-            {
-                throw new ArgumentNullException(nameof(privateKey));
-            }
-            if (publicKey is null)
-            {
-                throw new ArgumentNullException(nameof(publicKey));
-            }
+            ArgumentNullException.ThrowIfNull(privateKey);
+            ArgumentNullException.ThrowIfNull(publicKey);
 
             using (var pivSession = new PivSession(yubiKey))
             {

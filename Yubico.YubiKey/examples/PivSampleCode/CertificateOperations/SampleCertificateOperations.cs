@@ -61,6 +61,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     distinguishedName,
                     (ECDsa)dotNetPubKey,
                     HashAlgorithmName.SHA256),
+                KeyType.X25519 => new CertificateRequest(
+                    distinguishedName,
+                    (ECDsa)dotNetPubKey,
+                    HashAlgorithmName.SHA256),
                 _ => new CertificateRequest(
                     distinguishedName,
                     (RSA)dotNetPubKey,
@@ -381,17 +385,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // standards specify. However, that is not the format the C#
             // verification method needs.
 
-            var algorithm = pubKey.KeySize switch
-            {
-                256 => KeyType.ECP256,
-                384 => KeyType.ECP384,
-                _ => KeyType.None,
-            };
-            // OIDs for the curves, needed to distinguish Ed25519
-            const string OidEd25519 = "1.3.101.112";
-            const string OidSecp256r1 = "1.2.840.10045.3.1.7"; // This is ECP256
-            const string OidSecp384r1 = "1.3.132.0.34";    // This is ECP384
-
+            var algorithm = KeyType.None;
+ 
             // Get the OID string from the public key's curve parameters
             var ecKey = pubKey as ECAlgorithm;
             var oid = ecKey.ExportParameters(false).Curve.Oid.Value;
@@ -400,13 +395,14 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 algorithm = oid switch
                 {
-                    OidEd25519 => KeyType.Ed25519,
-                    OidSecp256r1 => KeyType.ECP256,
-                    OidSecp384r1 => KeyType.ECP384,
+                    Oids.ECP256 => KeyType.ECP256,
+                    Oids.ECP384 => KeyType.ECP384,
+                    Oids.X25519 => KeyType.X25519,
+                    Oids.Ed25519 => KeyType.Ed25519,
                     _ => KeyType.None,
                 };
             }
-            
+
 
             byte[] nonStandardSignature = DsaSignatureConverter.GetNonStandardDsaFromStandard(signature, algorithm);
 
@@ -482,16 +478,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // The YubiKey returns the signature in a format that virtually all
             // standards specify. However, that is not the format the C#
             // verification method needs.
-            var algorithm = pubKey.KeySize switch
-            {
-                256 => KeyType.ECP256,
-                384 => KeyType.ECP384,
-                _ => KeyType.None,
-            };
-            // OIDs for the curves, needed to distinguish Ed25519
-            const string OidEd25519 = "1.3.101.112";
-            const string OidSecp256r1 = "1.2.840.10045.3.1.7"; // This is ECP256
-            const string OidSecp384r1 = "1.3.132.0.34";    // This is ECP384
+            
+            var algorithm = KeyType.None;
 
             // Get the OID string from the public key's curve parameters
             var ecKey = pubKey as ECAlgorithm;
@@ -500,9 +488,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 algorithm = oid switch
                 {
-                    OidEd25519 => KeyType.Ed25519,
-                    OidSecp256r1 => KeyType.ECP256,
-                    OidSecp384r1 => KeyType.ECP384,
+                    Oids.Ed25519 => KeyType.Ed25519,
+                    Oids.X25519 => KeyType.X25519,
+                    Oids.ECP256 => KeyType.ECP256,
+                    Oids.ECP384 => KeyType.ECP384,
                     _ => KeyType.None,
                 };
             }
@@ -532,7 +521,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // using key word on the return object:
         //   using AsymmetricAlgorithm pubKey =
         //     SampleCertificateOperations.GetPublicKeyFromCertificate(cert);
-        public static AsymmetricAlgorithm GetPublicKeyFromCertificate(X509Certificate2 certificate) //Redone with ECPublicKey
+        public static AsymmetricAlgorithm GetPublicKeyFromCertificate(X509Certificate2 certificate)
         {
             if (certificate is null)
             {

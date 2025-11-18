@@ -75,16 +75,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 throw new ArgumentNullException(nameof(signature));
             }
 
-            int elementLength = algorithm switch
-            {
-                KeyType.ECP256 => 32,
-                KeyType.Ed25519 => 32,
-                KeyType.ECP384 => 48,
-                _ => throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        InvalidAlgorithmMessage)),
-            };
+            int elementLength = algorithm.GetKeySizeBytes();
 
             var tlvReader = new TlvReader(signature);
             ReadOnlyMemory<byte> rValue = Memory<byte>.Empty;

@@ -50,20 +50,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
                 if (isCurve25519)
                 {
-                    bool isPemPrivateFlag = (algorithmFlag & AlgorithmFlagPrivate) != 0;
-
-                    if (isPemPrivateFlag)
-                    {
-                        // We received a PKCS#8 private key encoding. The private-key
-                        // structure for Curve25519 does not necessarily contain the
-                        // public key material, and this sample code does not have an
-                        // implementation to derive the Curve25519 public key from the
-                        // private scalar. Attempting to parse the PKCS#8 bytes as a
-                        // SubjectPublicKeyInfo will cause ASN.1 decoding error
-                        throw new CryptographicException(
-                            "PEM contains a Curve25519 private key; this method requires a PUBLIC KEY PEM for Curve25519 or an implementation to derive the public key from the private key.");
-                    }
-
                     // For a PUBLIC KEY PEM, encodedKey is a SubjectPublicKeyInfo and
                     // we can decode it directly.
                     return Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(encodedKey);
@@ -189,11 +175,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         var eccObject = ECDsa.Create();
                         eccObject.ImportSubjectPublicKeyInfo(encodedKey, out _);
                         return eccObject;
-
-                    case AlgorithmFlagCurve25519:
-                    case AlgorithmFlagCurve25519 | AlgorithmFlagPrivate:
-                        throw new NotSupportedException(
-                            "Curve25519 keys cannot be converted to AsymmetricAlgorithm. Use GetPrivateKeyFromPem instead.");
 
                     case AlgorithmFlagEcdsa | AlgorithmFlagPrivate:
                         using (var eccPrivateObject = ECDsa.Create())

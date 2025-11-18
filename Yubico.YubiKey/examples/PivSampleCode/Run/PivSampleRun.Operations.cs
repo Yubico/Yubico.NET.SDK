@@ -501,6 +501,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             return true;
         }
+
         public bool RunKeyAgree()
         {
 
@@ -590,8 +591,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             return true;
         }
-
-
 
         public bool RunGetCertRequest()
         {
@@ -807,7 +806,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         // Ask the user to specify an algorithm. Offer and accept only asymmetric
         // algorithms.
-
         private bool GetAsymmetricAlgorithm(out KeyType algorithm)
         {
             algorithm = KeyType.None;

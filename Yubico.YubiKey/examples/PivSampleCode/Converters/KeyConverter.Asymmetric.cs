@@ -67,51 +67,16 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         // Build an AsymmetricAlgorithm object (either RSA or ECDsa) from a
         // PublicKey.
-
-
         public static AsymmetricAlgorithm GetDotNetFromPublicKey(IPublicKey publicKey)
         {
-            if (publicKey is null)
-            {
-                throw new ArgumentNullException(nameof(publicKey));
-            }
-
+            ArgumentNullException.ThrowIfNull(publicKey);
             if (publicKey.KeyType.IsRSA())
             {
-                var rsaPubKey = (RSAPublicKey)publicKey;
-
-                var rsaParams = new RSAParameters
-                {
-                    Modulus = rsaPubKey.Parameters.Modulus,
-                    Exponent = rsaPubKey.Parameters.Exponent
-                };
-
-                return RSA.Create(rsaParams);
+                var rsaPublicKey = (RSAPublicKey)publicKey;
+                return RSA.Create(rsaPublicKey.Parameters);
             }
-
-            var eccCurve = ECCurve.CreateFromValue("1.2.840.10045.3.1.7");
-            if (publicKey.KeyType != KeyType.ECP256)
-            {
-                if (publicKey.KeyType != KeyType.ECP384)
-                {
-                    throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            InvalidKeyDataMessage));
-                }
-                eccCurve = ECCurve.CreateFromValue("1.3.132.0.34");
-            }
-            var eccParams = new ECParameters
-            {
-                Curve = (ECCurve)eccCurve
-            };
-
-            var ecPublic = (ECPublicKey)publicKey;
-            int coordLength = (ecPublic.PublicPoint.Length - 1) / 2;
-            eccParams.Q.X = ecPublic.PublicPoint.Slice(1, coordLength).ToArray();
-            eccParams.Q.Y = ecPublic.PublicPoint.Slice(1 + coordLength, coordLength).ToArray();
-
-            return ECDsa.Create(eccParams);
+            var ecPublicKey = (ECPublicKey)publicKey;
+            return ECDsa.Create(ecPublicKey.Parameters);
         }
         // Build a PrivateKey object from an AsymmetricAlgorithm object that
         // contains a private key.
@@ -133,8 +98,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 {
                     rsaParams = ((RSA)dotNetObject).ExportParameters(true);
                     
-                    var rsaPriKey = RSAPrivateKey.CreateFromParameters(rsaParams);
-                    return rsaPriKey;
+                    return RSAPrivateKey.CreateFromParameters(rsaParams);
                 }
 
                 // If the SignatureAlgorithm is "ECDsa", we can cast to ECDsa.
@@ -149,8 +113,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
                 if (ValidateEccParameters(eccParams))
                 {
-                    var eccPriKey = ECPrivateKey.CreateFromParameters(eccParams);
-                    return eccPriKey;
+                    return ECPrivateKey.CreateFromParameters(eccParams);
                 }
             }
             finally

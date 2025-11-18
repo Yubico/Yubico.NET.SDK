@@ -53,14 +53,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             IPublicKey publicKey,
             RSASignaturePaddingMode rsaPaddingMode = RSASignaturePaddingMode.Pss)
         {
-            if (pivSession is null)
-            {
-                throw new ArgumentNullException(nameof(pivSession));
-            }
-            if (publicKey is null)
-            {
-                throw new ArgumentNullException(nameof(publicKey));
-            }
+            
+            ArgumentNullException.ThrowIfNull(pivSession);
+            ArgumentNullException.ThrowIfNull(publicKey);
+            
             if (!PivSlot.IsValidSlotNumberForSigning(slotNumber))
             {
                 throw new ArgumentException(
@@ -148,13 +144,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // If the algorithm is P-256, then make sure the digest is exactly 32
             // bytes. If it's P-384, the digest must be exactly 48 bytes.
             // We'll prepend 00 bytes if necessary.
-            int bufferSize = _algorithm switch
-            {
-                KeyType.ECP256 => 32,
-                KeyType.Ed25519 => 32,
-                KeyType.ECP384 => 48,
-                _ => digester.HashSize / 8,
-            };
+            int bufferSize = _algorithm.GetKeySizeBytes();
 
             byte[] digest = new byte[bufferSize];
             int offset = bufferSize - (digester.HashSize / 8);

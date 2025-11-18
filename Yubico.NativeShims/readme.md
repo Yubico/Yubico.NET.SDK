@@ -28,6 +28,7 @@ Yubico.NativeShims is a cross-platform C library designed to bridge the gap in n
 
 ### Linux Build
 
+- Compiled with Zig compiler targeting glibc 2.28 for broad Linux distribution compatibility.
 - Should ideally be run in a container (targeting Ubuntu 20.04) to avoid making changes to your environment.
 - Run `sh ./build-linux-amd64` or `sh ./build-linux-arm64` depending on the target architecture.
 

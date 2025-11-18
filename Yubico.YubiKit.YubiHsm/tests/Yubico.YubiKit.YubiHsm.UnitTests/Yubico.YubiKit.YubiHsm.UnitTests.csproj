@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+
+    <!-- Enable Microsoft Testing Platform with xunit v3 -->
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Package versions come from Directory.Packages.props -->
+    <!-- When using Microsoft Testing Platform, DON'T use Microsoft.NET.Test.Sdk or xunit.runner.visualstudio -->
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Yubico.YubiKit.YubiHsm.csproj"/>
+  </ItemGroup>
+
+</Project>

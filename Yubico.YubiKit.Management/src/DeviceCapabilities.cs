@@ -54,5 +54,9 @@ public enum DeviceCapabilities
     /// </summary>
     Fido2 = 0x02_00,
 
+    /// <summary>
+    ///     Represents a combination of all available device capabilities.
+    ///     This includes Otp, U2f, OpenPgp, Piv, Oath, HsmAuth, and Fido2.
+    /// </summary>
     All = Otp | U2f | OpenPgp | Piv | Oath | HsmAuth | Fido2
 }

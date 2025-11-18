@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFrameworks inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.YubiHsm</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.YubiHsm</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>YubiHSM support for YubiKey devices including hardware security module operations, key management, and cryptographic operations.</Description>
+    <PackageTags>yubikey;yubico;yubihsm;hsm;hardware-security-module;crypto</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

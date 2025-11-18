@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFrameworks inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.YubiOtp</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.YubiOtp</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>YubiOTP support for YubiKey devices including Yubico OTP slot configuration, challenge-response, and static password programming.</Description>
+    <PackageTags>yubikey;yubico;yubiotp;otp;challenge-response;static-password</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

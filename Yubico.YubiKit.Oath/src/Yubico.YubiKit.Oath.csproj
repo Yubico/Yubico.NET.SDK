@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFrameworks inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.Oath</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.Oath</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>OATH (One-Time Password) support for YubiKey devices including TOTP and HOTP credential management and code generation.</Description>
+    <PackageTags>yubikey;yubico;oath;totp;hotp;otp;2fa;mfa;authenticator</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

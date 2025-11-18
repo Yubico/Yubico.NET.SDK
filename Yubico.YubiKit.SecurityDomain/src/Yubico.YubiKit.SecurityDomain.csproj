@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFrameworks inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.SecurityDomain</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.SecurityDomain</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>Security Domain and SCP (Secure Channel Protocol) support for YubiKey devices including SCP03 secure messaging and key management.</Description>
+    <PackageTags>yubikey;yubico;security-domain;scp;scp03;secure-channel;globalplatform</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

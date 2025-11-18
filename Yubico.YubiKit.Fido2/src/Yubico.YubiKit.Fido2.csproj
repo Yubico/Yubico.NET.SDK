@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFrameworks inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.Fido2</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.Fido2</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>FIDO2 and WebAuthn support for YubiKey devices including credential management, biometric authentication, and passwordless login.</Description>
+    <PackageTags>yubikey;yubico;fido2;webauthn;ctap2;passwordless;biometric</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

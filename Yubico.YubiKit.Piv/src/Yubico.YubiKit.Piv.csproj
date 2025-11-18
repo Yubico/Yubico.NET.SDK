@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- TargetFrameworks inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.Piv</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.Piv</AssemblyName>
+
+    <!-- Package Metadata -->
+    <Description>PIV (Personal Identity Verification) application support for YubiKey devices including certificate management, key generation, and digital signatures.</Description>
+    <PackageTags>yubikey;yubico;piv;smart-card;certificates;pkcs11</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

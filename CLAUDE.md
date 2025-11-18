@@ -4,7 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The project targets .NET 8 and .NET 10, uses C# preview language features (LangVersion=preview), and has nullable reference types enabled throughout.
+Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The project targets .NET 10, uses C# preview language features (LangVersion=preview), and has nullable reference types enabled throughout.
+
+**Reference Documentation:**
+- `docs/net10/` contains Microsoft Learn PDFs documenting new .NET 10 features
+- We actively use new .NET 10 library features, C# 14 language features, and SDK/tooling improvements
+- When implementing features, consult these docs to leverage the latest platform capabilities
 
 ## Quick Reference - Critical Rules
 
@@ -41,29 +46,79 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 
 ## Build and Test Commands
 
-### Build
+**IMPORTANT: Use the build script (`build.cs`) for all build, test, and packaging operations.**
+
+The project uses a Bullseye-based build script that provides consistent, well-tested build workflows.
+
+### Quick Start
+
 ```bash
+# Build the solution
+dotnet build.cs build
+
+# Run unit tests
+dotnet build.cs test
+
+# Run tests with code coverage
+dotnet build.cs coverage
+
+# Create NuGet packages
+dotnet build.cs pack
+
+# Publish packages to local feed
+dotnet build.cs publish
+```
+
+### Available Build Targets
+
+- **clean** - Remove artifacts (add `--clean` to also run `dotnet clean`)
+- **restore** - Restore NuGet dependencies
+- **build** - Build the solution
+- **test** - Run unit tests with nice summary output
+- **coverage** - Run tests with code coverage (saves to `artifacts/coverage/`)
+- **pack** - Create NuGet packages
+- **setup-feed** - Configure local NuGet feed
+- **publish** - Publish packages to local feed
+- **default** - Run tests and publish
+
+### Build Script Options
+
+```bash
+# Override package version
+dotnet build.cs pack --package-version 1.0.0-preview.2
+
+# Include XML documentation in packages
+dotnet build.cs pack --include-docs
+
+# Dry run (show what would be published)
+dotnet build.cs publish --dry-run
+
+# Full clean build
+dotnet build.cs build --clean
+
+# Custom NuGet feed
+dotnet build.cs publish --nuget-feed-name MyFeed --nuget-feed-path ~/my-feed
+```
+
+### Direct dotnet Commands (Fallback)
+
+If you need to bypass the build script:
+
+```bash
+# Build directly
 dotnet build Yubico.YubiKit.sln
-```
 
-### Run All Tests
-```bash
+# Run all tests directly
 dotnet test Yubico.YubiKit.sln
-```
 
-### Run Specific Test Projects
-```bash
-# Unit tests only
-dotnet test Yubico.YubiKit.Tests.UnitTests/Yubico.YubiKit.Tests.UnitTests.csproj
+# Run specific test project
+dotnet test Yubico.YubiKit.Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj
 
-# Integration tests only (requires YubiKey hardware)
-dotnet test Yubico.YubiKit.Tests.IntegrationTests/Yubico.YubiKit.Tests.IntegrationTests.csproj
-```
-
-### Run Tests with Coverage
-```bash
+# Run with coverage directly
 dotnet test --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 ```
+
+**Note:** Prefer using `dotnet build.cs [target]` for better output formatting, error handling, and consistent workflows.
 
 ## Architecture
 

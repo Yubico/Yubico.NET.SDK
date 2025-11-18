@@ -3,6 +3,44 @@
 #:package Bullseye
 #:package SimpleExec
 
+/*
+ * Yubico.YubiKit Build Script
+ * ============================
+ *
+ * .NET 10 build automation script using Bullseye task runner.
+ *
+ * USAGE:
+ *   dotnet build.cs [target] [options]
+ *
+ * TARGETS:
+ *   clean      - Remove artifacts directory
+ *   restore    - Restore NuGet dependencies
+ *   build      - Build the solution
+ *   test       - Run unit tests with summary output
+ *   coverage   - Run tests with code coverage
+ *   pack       - Create NuGet packages
+ *   setup-feed - Configure local NuGet feed
+ *   publish    - Publish packages to local feed
+ *   default    - Run tests and publish
+ *
+ * OPTIONS:
+ *   --package-version <version>    Override NuGet package version
+ *   --nuget-feed-name <name>       NuGet feed name (default: Yubico.YubiKit-LocalNuGet)
+ *   --nuget-feed-path <path>       NuGet feed path (default: artifacts/nuget-feed)
+ *   --include-docs                 Include XML documentation in packages
+ *   --dry-run                      Show what would be published without publishing
+ *   --clean                        Run dotnet clean before build
+ *
+ * EXAMPLES:
+ *   dotnet build.cs build
+ *   dotnet build.cs test
+ *   dotnet build.cs coverage
+ *   dotnet build.cs publish --package-version 1.0.0-preview.1
+ *   dotnet build.cs publish --dry-run
+ *
+ * See BUILD.md for full documentation.
+ */
+
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
@@ -134,6 +172,84 @@ Target("test", DependsOn("build"), () =>
     if (failed > 0)
     {
         throw new InvalidOperationException($"{failed} test project(s) failed");
+    }
+});
+
+Target("coverage", DependsOn("build"), () =>
+{
+    PrintHeader("Running tests with coverage");
+
+    var coverageResultsDir = Path.Combine(artifactsDir, "coverage");
+    Directory.CreateDirectory(coverageResultsDir);
+
+    var testResults = new List<(string Project, bool Passed)>();
+
+    foreach (var project in testProjects)
+    {
+        var projectName = Path.GetFileNameWithoutExtension(project);
+        Console.WriteLine($"\n{'='} Running coverage for: {projectName} {'='}");
+
+        try
+        {
+            Run("dotnet", $"test {project} -c {configuration} --no-build --settings coverlet.runsettings.xml --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
+            testResults.Add((projectName, true));
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"✓ {projectName} - Coverage collected");
+            Console.ResetColor();
+        }
+        catch (Exception)
+        {
+            testResults.Add((projectName, false));
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"✗ {projectName} - Coverage collection failed");
+            Console.ResetColor();
+        }
+    }
+
+    // Print summary
+    Console.WriteLine("\n" + new string('=', 60));
+    Console.WriteLine("COVERAGE SUMMARY");
+    Console.WriteLine(new string('=', 60));
+
+    var passed = testResults.Count(r => r.Passed);
+    var failed = testResults.Count(r => !r.Passed);
+
+    foreach (var (project, success) in testResults)
+    {
+        Console.ForegroundColor = success ? ConsoleColor.Green : ConsoleColor.Red;
+        Console.WriteLine($"  {(success ? "✓" : "✗")} {project}");
+        Console.ResetColor();
+    }
+
+    Console.WriteLine(new string('=', 60));
+    Console.ForegroundColor = passed > 0 ? ConsoleColor.Green : ConsoleColor.Gray;
+    Console.Write($"Collected: {passed}");
+    Console.ResetColor();
+    Console.Write(" | ");
+    Console.ForegroundColor = failed > 0 ? ConsoleColor.Red : ConsoleColor.Gray;
+    Console.Write($"Failed: {failed}");
+    Console.ResetColor();
+    Console.Write($" | Total: {testResults.Count}\n");
+    Console.WriteLine(new string('=', 60));
+
+    // Find coverage files
+    var coverageFiles = Directory.GetFiles(coverageResultsDir, "coverage.cobertura.xml", SearchOption.AllDirectories);
+    if (coverageFiles.Length > 0)
+    {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine($"\nCoverage reports generated:");
+        foreach (var file in coverageFiles)
+        {
+            Console.WriteLine($"  {file}");
+        }
+        Console.ResetColor();
+    }
+
+    PrintInfo($"Coverage results saved to {coverageResultsDir}");
+
+    if (failed > 0)
+    {
+        throw new InvalidOperationException($"{failed} test project(s) failed during coverage collection");
     }
 });
 

@@ -18,7 +18,8 @@ dotnet build.cs [target] [options]
 - **clean** - Remove artifacts directory (and optionally run `dotnet clean`)
 - **restore** - Restore NuGet dependencies (depends on: clean)
 - **build** - Build the solution (depends on: clean, restore)
-- **test** - Run unit tests (depends on: clean, restore, build)
+- **test** - Run unit tests with nice summary output (depends on: clean, restore, build)
+- **coverage** - Run tests with code coverage collection (depends on: clean, restore, build)
 - **pack** - Create NuGet packages (depends on: clean, restore, build)
 - **setup-feed** - Configure local NuGet feed
 - **publish** - Publish packages to local feed (depends on: pack, setup-feed)
@@ -44,6 +45,9 @@ dotnet build.cs build
 
 # Run tests
 dotnet build.cs test
+
+# Run tests with code coverage
+dotnet build.cs coverage
 
 # Create and publish packages with custom version
 dotnet build.cs publish --package-version 1.0.0-preview.2
@@ -75,4 +79,5 @@ default
 ## Output
 
 - **Packages**: `artifacts/packages/*.nupkg`
+- **Coverage reports**: `artifacts/coverage/**/coverage.cobertura.xml`
 - **Local NuGet feed**: `artifacts/nuget-feed/`

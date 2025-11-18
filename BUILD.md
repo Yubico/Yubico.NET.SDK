@@ -33,10 +33,14 @@ dotnet build.cs [target] [options]
 - `--include-docs` - Include XML documentation in packages
 - `--dry-run` - Show what would be published without actually publishing
 - `--clean` - Run `dotnet clean` before build
+- `-h, --help` - Show help message with all targets, options, and discovered projects
 
 ### Examples
 
 ```bash
+# Show help (use -- separator to pass args to script)
+dotnet build.cs -- --help
+
 # Clean artifacts
 dotnet build.cs clean
 
@@ -81,3 +85,12 @@ default
 - **Packages**: `artifacts/packages/*.nupkg`
 - **Coverage reports**: `artifacts/coverage/**/coverage.cobertura.xml`
 - **Local NuGet feed**: `artifacts/nuget-feed/`
+
+## Project Discovery
+
+The build script automatically discovers projects using glob patterns:
+
+- **Packable projects**: All `Yubico.YubiKit.*/src/*.csproj` files
+- **Test projects**: All `Yubico.YubiKit.*.UnitTests/*.csproj` files under `tests/` directories
+
+This means you don't need to manually update the build script when adding new projects that follow the standard structure. Run `dotnet build.cs -- --help` to see the current list of discovered projects.

@@ -45,30 +45,36 @@ using static Bullseye.Targets;
 using static SimpleExec.Command;
 
 // Configuration
+var repoRoot = GetRepoRoot();
 var solutionFile = "Yubico.YubiKit.sln";
 var configuration = "Release";
 var packageVersion = GetArgument("--package-version");
 var nugetFeedName = GetArgument("--nuget-feed-name") ?? "Yubico.YubiKit-LocalNuGet";
-var nugetFeedPath = GetArgument("--nuget-feed-path") ?? Path.Combine(GetRepoRoot(), "artifacts", "nuget-feed");
+var nugetFeedPath = GetArgument("--nuget-feed-path") ?? Path.Combine(repoRoot, "artifacts", "nuget-feed");
 var includeDocs = HasFlag("--include-docs");
 var dryRun = HasFlag("--dry-run");
 var shouldClean = HasFlag("--clean");
 
-// Projects to pack
-var packableProjects = new[]
-{
-    "Yubico.YubiKit.Core/src/Yubico.YubiKit.Core.csproj",
-    "Yubico.YubiKit.Management/src/Yubico.YubiKit.Management.csproj"
-};
+// Dynamically discover projects using glob patterns
 
-// Test projects
-var testProjects = new[]
-{
-    "Yubico.YubiKit.Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
-    "Yubico.YubiKit.Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj"
-};
+// Projects to pack - all Yubico.YubiKit.*/src/*.csproj
+var packableProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
+    .Where(p => p.Contains($"{Path.DirectorySeparatorChar}src{Path.DirectorySeparatorChar}") &&
+                p.Contains("Yubico.YubiKit."))
+    .Select(p => Path.GetRelativePath(repoRoot, p))
+    .OrderBy(p => p)
+    .ToArray();
 
-var artifactsDir = Path.Combine(GetRepoRoot(), "artifacts");
+// Test projects - all Yubico.YubiKit.*.UnitTests/*.csproj
+var testProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
+    .Where(p => p.Contains($"{Path.DirectorySeparatorChar}tests{Path.DirectorySeparatorChar}") &&
+                p.Contains(".UnitTests") &&
+                p.Contains("Yubico.YubiKit."))
+    .Select(p => Path.GetRelativePath(repoRoot, p))
+    .OrderBy(p => p)
+    .ToArray();
+
+var artifactsDir = Path.Combine(repoRoot, "artifacts");
 var packagesDir = Path.Combine(artifactsDir, "packages");
 
 // Define Bullseye targets
@@ -339,6 +345,13 @@ Target("publish", DependsOn("pack", "setup-feed"), () =>
 
 Target("default", DependsOn("test", "publish"));
 
+// Handle --help before Bullseye processes args
+if (args.Contains("--help") || args.Contains("-h"))
+{
+    PrintHelp();
+    return;
+}
+
 // Run Bullseye
 await RunTargetsAndExitAsync(args);
 
@@ -367,3 +380,62 @@ bool HasFlag(string name)
 
 void PrintInfo(string message) => Console.WriteLine($"✓ {message}");
 void PrintHeader(string message) => Console.WriteLine($"\n=== {message} ===\n");
+
+void PrintHelp()
+{
+    Console.WriteLine(@"
+Yubico.YubiKit Build Script
+============================
+
+.NET 10 build automation script using Bullseye task runner.
+
+USAGE:
+  dotnet build.cs [target] [options]
+  dotnet build.cs -- --help    (use -- separator for help)
+
+TARGETS:
+  clean      - Remove artifacts directory
+  restore    - Restore NuGet dependencies
+  build      - Build the solution
+  test       - Run unit tests with summary output
+  coverage   - Run tests with code coverage
+  pack       - Create NuGet packages
+  setup-feed - Configure local NuGet feed
+  publish    - Publish packages to local feed
+  default    - Run tests and publish
+
+OPTIONS:
+  --package-version <version>    Override NuGet package version
+  --nuget-feed-name <name>       NuGet feed name (default: Yubico.YubiKit-LocalNuGet)
+  --nuget-feed-path <path>       NuGet feed path (default: artifacts/nuget-feed)
+  --include-docs                 Include XML documentation in packages
+  --dry-run                      Show what would be published without publishing
+  --clean                        Run dotnet clean before build
+  -h, --help                     Show this help message
+
+EXAMPLES:
+  dotnet build.cs build
+  dotnet build.cs test
+  dotnet build.cs coverage
+  dotnet build.cs publish --package-version 1.0.0-preview.1
+  dotnet build.cs publish --dry-run
+");
+
+    Console.ForegroundColor = ConsoleColor.Cyan;
+    Console.WriteLine($"Discovered {packableProjects.Length} packable projects:");
+    Console.ResetColor();
+    foreach (var proj in packableProjects)
+    {
+        Console.WriteLine($"  • {Path.GetFileNameWithoutExtension(proj)}");
+    }
+
+    Console.ForegroundColor = ConsoleColor.Cyan;
+    Console.WriteLine($"\nDiscovered {testProjects.Length} test projects:");
+    Console.ResetColor();
+    foreach (var proj in testProjects)
+    {
+        Console.WriteLine($"  • {Path.GetFileNameWithoutExtension(proj)}");
+    }
+
+    Console.WriteLine("\nSee BUILD.md for full documentation.");
+}

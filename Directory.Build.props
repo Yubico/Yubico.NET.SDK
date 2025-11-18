@@ -1,0 +1,52 @@
+<Project>
+  <PropertyGroup>
+    <!-- Common Language Settings -->
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+    <!-- SDK Version (from Directory.Packages.props) -->
+    <Version>$(YubiKitVersion)</Version>
+
+    <!-- Multi-targeting -->
+    <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net8.0;net10.0</TargetFrameworks>
+
+    <!-- Package Metadata -->
+    <Authors>Yubico</Authors>
+    <Company>Yubico</Company>
+    <Copyright>Copyright © Yubico $([System.DateTime]::Now.Year)</Copyright>
+    <PackageProjectUrl>https://github.com/Yubico/Yubico.NET.SDK</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Yubico/Yubico.NET.SDK</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+
+    <!-- Deterministic Builds -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <!-- Source Link -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Package Output -->
+    <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Source Link Package (for all projects) -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All"/>
+  </ItemGroup>
+
+  <!-- Determine if this is a test project -->
+  <PropertyGroup>
+    <IsTestProject Condition="$(MSBuildProjectName.Contains('Test'))">true</IsTestProject>
+    <IsPackable Condition="'$(IsTestProject)' == 'true'">false</IsPackable>
+    <!-- Disable XML documentation for test projects -->
+    <GenerateDocumentationFile Condition="'$(IsTestProject)' == 'true'">false</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>

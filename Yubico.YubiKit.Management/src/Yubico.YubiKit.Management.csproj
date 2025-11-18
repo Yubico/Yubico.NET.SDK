@@ -1,17 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <LangVersion>preview</LangVersion>
-        <AssemblyName>Yubico.YubiKit.Management</AssemblyName>
-        <RootNamespace>Yubico.YubiKit.Management</RootNamespace>
-    </PropertyGroup>
+  <PropertyGroup>
+    <!-- TargetFrameworks inherited from Directory.Build.props -->
+    <RootNamespace>Yubico.YubiKit.Management</RootNamespace>
+    <AssemblyName>Yubico.YubiKit.Management</AssemblyName>
 
+    <!-- Package Metadata -->
+    <Description>Management interface for YubiKey devices including device info queries, firmware version detection, and capability management.</Description>
+    <PackageTags>yubikey;yubico;management;device-info;configuration</PackageTags>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj"/>
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Yubico.YubiKit.Core\src\Yubico.YubiKit.Core.csproj" />
+  </ItemGroup>
 
 </Project>

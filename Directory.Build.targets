@@ -1,0 +1,18 @@
+<Project>
+  <!-- Add common analyzer packages to all projects -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Shared Internals Visibility for non-test projects -->
+  <ItemGroup Condition="'$(IsTestProject)' != 'true'">
+    <InternalsVisibleTo Include="$(AssemblyName).UnitTests" />
+    <InternalsVisibleTo Include="$(AssemblyName).IntegrationTests" />
+    <!-- Legacy compatibility -->
+    <InternalsVisibleTo Include="Yubico.YubiKit.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.IntegrationTests" />
+  </ItemGroup>
+</Project>

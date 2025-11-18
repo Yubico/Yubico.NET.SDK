@@ -69,11 +69,71 @@ Target("test", DependsOn("build"), () =>
 {
     PrintHeader("Running unit tests");
 
+    var testResults = new List<(string Project, bool Passed, string? Error)>();
+
     foreach (var project in testProjects)
     {
-        Console.WriteLine($"\nTesting: {Path.GetFileNameWithoutExtension(project)}");
-        Run("dotnet", $"test {project} -c {configuration} --no-build --verbosity normal");
-        PrintInfo($"Tests passed for {Path.GetFileNameWithoutExtension(project)}");
+        var projectName = Path.GetFileNameWithoutExtension(project);
+        Console.WriteLine($"\n{'='} Testing: {projectName} {'='}");
+
+        try
+        {
+            Run("dotnet", $"test {project} -c {configuration} --no-build --logger \"console;verbosity=normal\"");
+            testResults.Add((projectName, true, null));
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"✓ {projectName} - All tests passed");
+            Console.ResetColor();
+        }
+        catch (Exception ex)
+        {
+            testResults.Add((projectName, false, ex.Message));
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"✗ {projectName} - Tests failed");
+            Console.ResetColor();
+        }
+    }
+
+    // Print summary
+    Console.WriteLine("\n" + new string('=', 60));
+    Console.WriteLine("TEST SUMMARY");
+    Console.WriteLine(new string('=', 60));
+
+    var passed = testResults.Count(r => r.Passed);
+    var failed = testResults.Count(r => !r.Passed);
+
+    foreach (var (project, success, error) in testResults)
+    {
+        if (success)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"  ✓ {project}");
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"  ✗ {project}");
+            if (!string.IsNullOrEmpty(error) && error.Contains("Test Run Aborted"))
+            {
+                Console.WriteLine($"    (Test run aborted - check for initialization errors)");
+            }
+        }
+        Console.ResetColor();
+    }
+
+    Console.WriteLine(new string('=', 60));
+    Console.ForegroundColor = passed > 0 ? ConsoleColor.Green : ConsoleColor.Gray;
+    Console.Write($"Passed: {passed}");
+    Console.ResetColor();
+    Console.Write(" | ");
+    Console.ForegroundColor = failed > 0 ? ConsoleColor.Red : ConsoleColor.Gray;
+    Console.Write($"Failed: {failed}");
+    Console.ResetColor();
+    Console.Write($" | Total: {testResults.Count}\n");
+    Console.WriteLine(new string('=', 60));
+
+    if (failed > 0)
+    {
+        throw new InvalidOperationException($"{failed} test project(s) failed");
     }
 });
 

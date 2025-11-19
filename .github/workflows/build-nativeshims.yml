@@ -379,7 +379,7 @@ jobs:
 
   build-macos:
     name: Build macOS
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
@@ -391,10 +391,6 @@ jobs:
           else
             sh ./build-macOS.sh
           fi
-      - uses: actions/upload-artifact@v4
-        with:
-          name: osx-x64
-          path: Yubico.NativeShims/osx-x64/**
       - uses: actions/upload-artifact@v4
         with:
           name: osx-arm64

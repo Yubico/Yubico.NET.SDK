@@ -19,7 +19,7 @@ limitations under the License. -->
 # .NET YubiKey SDK: Core API reference
 
 This section of the documentation contains the specific information about each class in
-the Yubico.Core library.
+the [Yubico.Core](https://github.com/Yubico/Yubico.NET.SDK/tree/HEAD/Yubico.Core) library.
 
 For a high-level overview and discussions of the concepts and operations of the YubiKey
 and this SDK, visit the [User's Manual](../users-manual/intro.md).

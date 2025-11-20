@@ -174,8 +174,8 @@ namespace Yubico.YubiKey
             YubiKeyCapabilities desiredCapabilities =
                 testDevice.AvailableNfcCapabilities & ~YubiKeyCapabilities.Fido2;
             testDevice.SetEnabledNfcCapabilities(desiredCapabilities);
-            testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
 
+            // Properties are now automatically updated after reset
             Assert.Equal(desiredCapabilities, testDevice.EnabledNfcCapabilities);
         }
 
@@ -192,15 +192,15 @@ namespace Yubico.YubiKey
             // Enable only Otp USB capabilities
             YubiKeyCapabilities desiredCapabilities = YubiKeyCapabilities.Otp;
             testDevice.SetEnabledUsbCapabilities(desiredCapabilities);
-            testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
 
+            // Properties are now automatically updated after reset
             Assert.Equal(desiredCapabilities, testDevice.EnabledUsbCapabilities);
 
             // Turn on FIDO2
             desiredCapabilities = testDevice.EnabledUsbCapabilities | YubiKeyCapabilities.Fido2;
             testDevice.SetEnabledUsbCapabilities(desiredCapabilities);
-            testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
 
+            // Properties are now automatically updated after reset
             Assert.Equal(desiredCapabilities, testDevice.EnabledUsbCapabilities);
         }
 
@@ -218,8 +218,8 @@ namespace Yubico.YubiKey
             YubiKeyCapabilities desiredCapabilities =
                 testDevice.AvailableUsbCapabilities & ~YubiKeyCapabilities.Fido2;
             testDevice.SetEnabledUsbCapabilities(desiredCapabilities);
-            testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
 
+            // Properties are now automatically updated after reset
             Assert.Equal(desiredCapabilities, testDevice.EnabledUsbCapabilities);
         }
 

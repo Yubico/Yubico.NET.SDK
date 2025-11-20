@@ -220,11 +220,17 @@ namespace Yubico.YubiKey
         /// </para>
         ///
         /// <para>
-        /// The YubiKey will reboot as part of this change. This will cause
-        /// this <c>IYubiKeyDevice</c> object to become stale, and future connection
-        /// attempts using this object are likely to fail. To get fresh
-        /// <c>IYubiKeys</c>, use the YubiKey enumeration functions such as
-        /// <see cref="YubiKeyDevice.FindAll"/> and <see cref="YubiKeyDevice.FindByTransport(Transport)"/>.
+        /// The YubiKey will reboot as part of this change. After the method completes,
+        /// the device properties will be automatically updated to reflect the new
+        /// configuration. This operation may block for up to 10 seconds while waiting
+        /// for the device to reconnect.
+        /// </para>
+        ///
+        /// <para>
+        /// Note: In rare cases where the background listener cannot detect the device reset,
+        /// automatic refresh may not occur and properties may be stale. You can manually
+        /// re-enumerate devices using <see cref="YubiKeyDevice.FindAll"/> to obtain an
+        /// updated instance.
         /// </para>
         ///
         /// <para>
@@ -242,23 +248,14 @@ namespace Yubico.YubiKey
         ///     YubiKey.FindAll()
         ///     .Where(d => d.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Piv));
         ///
+        /// int i = 1;
         /// foreach (IYubiKeyDevice yubiKey in yubiKeys)
         /// {
-        ///     device.SetEnabledNfcCapabilities(YubiKeyCapabilities.Piv);
-        /// }
+        ///     // Set the capability - device will reset and properties will update automatically
+        ///     yubiKey.SetEnabledNfcCapabilities(YubiKeyCapabilities.Piv);
         ///
-        /// // The devices may need a little time to finish rebooting
-        /// sleep(100);
-        ///
-        /// // Get fresh IYubiKeys
-        /// IEnumerable&lt;IYubiKeyDevice&gt; freshYubiKeys =
-        ///     YubiKey.FindAll()
-        ///     .Where(d => d.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-        ///
-        /// int i = 1;
-        /// foreach (IYubiKeyDevice yubiKey in freshYubiKeys)
-        /// {
-        ///     Console.PrintLine($"{i:} {yubiKey.SerialNumber} - {yubiKey.EnabledNfcCapabilities}");
+        ///     // Properties are now up-to-date
+        ///     Console.PrintLine($"{i++}: {yubiKey.SerialNumber} - {yubiKey.EnabledNfcCapabilities}");
         /// }
         /// </code>
         /// </example>
@@ -312,11 +309,17 @@ namespace Yubico.YubiKey
         /// </para>
         ///
         /// <para>
-        /// The YubiKey will reboot as part of this change. This will cause
-        /// this <c>IYubiKeyDevice</c> object to become stale, and future connection
-        /// attempts using this object are likely to fail. To get fresh
-        /// <c>IYubiKeys</c>, use the YubiKey enumeration functions such as
-        /// <see cref="YubiKeyDevice.FindAll"/> and <see cref="YubiKeyDevice.FindByTransport(Transport)"/>.
+        /// The YubiKey will reboot as part of this change. After the method completes,
+        /// the device properties will be automatically updated to reflect the new
+        /// configuration. This operation may block for up to 10 seconds while waiting
+        /// for the device to reconnect.
+        /// </para>
+        ///
+        /// <para>
+        /// Note: In rare cases where the background listener cannot detect the device reset,
+        /// automatic refresh may not occur and properties may be stale. You can manually
+        /// re-enumerate devices using <see cref="YubiKeyDevice.FindAll"/> to obtain an
+        /// updated instance.
         /// </para>
         ///
         /// <para>
@@ -335,23 +338,14 @@ namespace Yubico.YubiKey
         ///     YubiKey.FindAll()
         ///     .Where(d => d.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
         ///
+        /// int i = 1;
         /// foreach (IYubiKeyDevice yubiKey in yubiKeys)
         /// {
-        ///     device.SetEnabledUsbCapabilities(YubiKeyCapabilities.Piv);
-        /// }
+        ///     // Set the capability - device will reset and properties will update automatically
+        ///     yubiKey.SetEnabledUsbCapabilities(YubiKeyCapabilities.Piv);
         ///
-        /// // The devices may need a little time to finish rebooting
-        /// sleep(100);
-        ///
-        /// // Get fresh IYubiKeys
-        /// IEnumerable&lt;IYubiKeyDevice&gt; freshYubiKeys =
-        ///     YubiKey.FindAll()
-        ///     .Where(d => d.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-        ///
-        /// int i = 1;
-        /// foreach (IYubiKeyDevice yubiKey in freshYubiKeys)
-        /// {
-        ///     Console.PrintLine($"{i:} {yubiKey.SerialNumber} - {yubiKey.EnabledUsbCapabilities}");
+        ///     // Properties are now up-to-date
+        ///     Console.PrintLine($"{i++}: {yubiKey.SerialNumber} - {yubiKey.EnabledUsbCapabilities}");
         /// }
         /// </code>
         /// </example>

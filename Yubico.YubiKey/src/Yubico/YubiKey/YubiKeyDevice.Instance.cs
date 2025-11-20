@@ -13,8 +13,10 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
@@ -330,6 +332,9 @@ namespace Yubico.YubiKey
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
+
+            // Refresh device state after reset
+            RefreshAfterDeviceReset();
         }
 
         /// <inheritdoc/>
@@ -352,6 +357,9 @@ namespace Yubico.YubiKey
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
+
+            // Refresh device state after reset
+            RefreshAfterDeviceReset();
         }
 
         /// <inheritdoc/>
@@ -536,6 +544,7 @@ namespace Yubico.YubiKey
             #endregion
 
             IYubiKeyResponse response;
+            bool deviceWillReset = false;
 
             // Newer YubiKeys should use SetDeviceInfo
             if (FirmwareVersion.Major >= 5)
@@ -555,6 +564,7 @@ namespace Yubico.YubiKey
                 };
 
                 response = SendConfiguration(setDeviceInfoCommand);
+                deviceWillReset = true;
             }
             else
             {
@@ -570,6 +580,12 @@ namespace Yubico.YubiKey
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(response.StatusMessage);
+            }
+
+            // Refresh device state after reset (only for FW5+ which sets ResetAfterConfig)
+            if (deviceWillReset)
+            {
+                RefreshAfterDeviceReset();
             }
         }
 
@@ -710,6 +726,103 @@ namespace Yubico.YubiKey
             {
                 connection?.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Waits for the YubiKey to reconnect after a device reset and updates this
+        /// instance with the reconnected device's information.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// During a USB capability change, the YubiKey performs a full USB disconnect/reconnect.
+        /// This causes the listener to remove this instance from its cache and create a new
+        /// instance for the reconnected device. This method polls FindAll() to locate the
+        /// reconnected device (by serial number or ParentDeviceId) and copies its state
+        /// to this instance, keeping the user's reference valid.
+        /// </para>
+        /// </remarks>
+        private void RefreshAfterDeviceReset()
+        {
+            // Store identity information to match the reconnected device
+            int? originalSerial = SerialNumber;
+
+            const int maxAttempts = 50;
+            const int pollIntervalMs = 200;
+
+            _log.LogInformation(
+                "Waiting for YubiKey to reconnect after reset (Serial: {Serial})...",
+                originalSerial?.ToString(CultureInfo.CurrentCulture) ?? "none");
+
+            // Poll until we find the reconnected device
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                System.Threading.Thread.Sleep(pollIntervalMs);
+
+                // Search for the reconnected device
+                IEnumerable<IYubiKeyDevice> devices;
+                try
+                {
+                    devices = FindAll();
+                }
+                catch (Exception ex)
+                {
+                    _log.LogWarning(ex, "Failed to enumerate devices during refresh attempt {Attempt}", attempt + 1);
+                    continue;
+                }
+
+                // Find device matching our identity
+                // Match by serial number if available
+                // For devices without serial, we'll rely on single-device scenarios
+                IYubiKeyDevice? reconnected = null;
+
+                if (originalSerial.HasValue)
+                {
+                    // Match by serial number
+                    reconnected = devices.FirstOrDefault(d => d.SerialNumber == originalSerial);
+                }
+                else
+                {
+                    // No serial number - try to match by HasSameParentDevice if only one candidate
+                    var candidates = devices.Where(d => !ReferenceEquals(d, this)).ToList();
+                    if (candidates.Count == 1)
+                    {
+                        reconnected = candidates[0];
+                    }
+                }
+
+                // Make sure we found a DIFFERENT instance (not ourselves still cached)
+                if (reconnected != null && !ReferenceEquals(reconnected, this))
+                {
+                    _log.LogInformation(
+                        "Found reconnected device (attempt {Attempt}, took ~{Ms}ms). Copying state to current instance.",
+                        attempt + 1,
+                        (attempt + 1) * pollIntervalMs);
+
+                    // Copy the reconnected device's state to this instance
+                    // This keeps the user's reference valid with updated information
+                    if (reconnected is YubiKeyDevice reconnectedImpl)
+                    {
+                        _yubiKeyDeviceInfo = reconnectedImpl._yubiKeyDeviceInfo;
+                        _smartCardDevice = reconnectedImpl._smartCardDevice;
+                        _hidKeyboardDevice = reconnectedImpl._hidKeyboardDevice;
+                        _hidFidoDevice = reconnectedImpl._hidFidoDevice;
+
+                        _log.LogInformation(
+                            "Successfully updated device state. New capabilities: USB={UsbCap}, NFC={NfcCap}",
+                            EnabledUsbCapabilities,
+                            EnabledNfcCapabilities);
+                        return;
+                    }
+                }
+            }
+
+            // Timeout - device never reconnected
+            _log.LogWarning(
+                "YubiKey did not reconnect within {Seconds} seconds. " +
+                "Properties may be stale. Device may have been unplugged or is in an error state.",
+                maxAttempts * pollIntervalMs / 1000);
+
+            // Don't throw - gracefully degrade to stale properties
         }
 
         private void MergeDevice(IDevice device)

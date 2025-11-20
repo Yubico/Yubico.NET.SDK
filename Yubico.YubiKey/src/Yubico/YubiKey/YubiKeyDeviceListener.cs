@@ -202,17 +202,11 @@ namespace Yubico.YubiKey
                         continue;
                     }
 
-                    // Next, see if the device has any information about its parent, and if we can match that way (fast)
+                    // Next, see if the device has any information about its parent, and if we can match that way
+                    // We need to query device info even for parent matches to ensure capabilities are up-to-date after resets
                     existingEntry = _internalCache.Keys.FirstOrDefault(k => k.HasSameParentDevice(device));
 
-                    if (existingEntry is YubiKeyDevice parentDevice)
-                    {
-                        MergeAndMarkExistingYubiKey(parentDevice, device);
-
-                        continue;
-                    }
-
-                    // Lastly, let's talk to the YubiKey to get its device info and see if we match via serial number (slow)
+                    // Query the device for info - needed for both parent matching and serial matching
                     YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo;
 
                     // This sort of call can fail for a number of reasons. Probably the most common will be when some other
@@ -227,6 +221,14 @@ namespace Yubico.YubiKey
                     catch (Exception ex)
                     {
                         _log.LogError(ex, "Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
+
+                        continue;
+                    }
+
+                    // If we found a parent device match, merge with full device info
+                    if (existingEntry is YubiKeyDevice parentDevice)
+                    {
+                        MergeAndMarkExistingYubiKey(parentDevice, deviceWithInfo);
 
                         continue;
                     }

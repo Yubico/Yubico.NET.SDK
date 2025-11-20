@@ -670,7 +670,7 @@ namespace Yubico.YubiKey
         /// <see cref="UnlockConfiguration(ReadOnlySpan{byte})"/>.
         /// </para>
         /// </remarks>
-        /// <param name="enabled">Set this value to true to restrict NFC, false to unrestrict.</param>
+        /// <param name="enabled">Set this value to true to restrict NFC, false to allow NFC.</param>
         /// <exception cref="InvalidOperationException">
         /// The command failed to complete.
         /// </exception>

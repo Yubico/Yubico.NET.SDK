@@ -401,7 +401,7 @@ namespace Yubico.YubiKey
         ///
         /// <para>
         /// Modifies the value of <see cref="IYubiKeyDeviceInfo.ChallengeResponseTimeout"/>.
-        /// After successful execution, the <see cref="ChallengeResponseTimeout"/> property
+        /// After successful execution, the <see cref="IYubiKeyDeviceInfo.ChallengeResponseTimeout"/> property
         /// will immediately reflect the new value. This requires the YubiKey's configuration
         /// to be unlocked (see <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> and
         /// <see cref="UnlockConfiguration(ReadOnlySpan{byte})"/>.
@@ -434,7 +434,7 @@ namespace Yubico.YubiKey
         ///
         /// <para>
         /// Modifies the value of <see cref="IYubiKeyDeviceInfo.AutoEjectTimeout"/>.
-        /// After successful execution, the <see cref="AutoEjectTimeout"/> property
+        /// After successful execution, the <see cref="IYubiKeyDeviceInfo.AutoEjectTimeout"/> property
         /// will immediately reflect the new value. This requires the YubiKey's configuration
         /// to be unlocked (see <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> and
         /// <see cref="UnlockConfiguration(ReadOnlySpan{byte})"/>.
@@ -507,7 +507,7 @@ namespace Yubico.YubiKey
         ///
         /// <para>
         /// See <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/>. After successful execution,
-        /// the <see cref="ConfigurationLocked"/> property will immediately be set to <c>true</c>.
+        /// the <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> property will immediately be set to <c>true</c>.
         /// </para>
         /// <para>
         /// Once the lock code is set, no changes can be made to the YubiKey's user-settable
@@ -546,7 +546,7 @@ namespace Yubico.YubiKey
         /// <remarks>
         /// <para>
         /// See <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/>. After successful execution,
-        /// the <see cref="ConfigurationLocked"/> property will immediately be set to <c>false</c>.
+        /// the <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> property will immediately be set to <c>false</c>.
         /// </para>
         /// <para>
         /// By removing the lock code, changes can be made to the YubiKey's user-settable
@@ -661,7 +661,7 @@ namespace Yubico.YubiKey
         /// </summary>
         /// <remarks>
         /// <para>
-        /// After successful execution, the <see cref="IsNfcRestricted"/> property
+        /// After successful execution, the <see cref="IYubiKeyDeviceInfo.IsNfcRestricted"/> property
         /// will immediately reflect the new value.
         /// </para>
         /// <para>

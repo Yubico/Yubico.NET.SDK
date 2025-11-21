@@ -18,7 +18,13 @@ limitations under the License. -->
 
 # Third-party payment extension (thirdPartyPayment)
 
-To verify that a YubiKey supports the thirdPartyPayment extension, check the key's ``AuthenticatorInfo``:
+
+
+## Creating a thirdPartyPayment-enabled credential
+
+YubiKey credentials can only be used for a third-party payment transaction if the credential itself is thirdPartyPayment-enabled, and enablement must occur when the credential is first created. Enablement simply means that the credential's thirdPartyPayment bit flag has been set to ``true``.
+
+Only YubiKeys with firmware version 5.8 and higher support the thirdPartyPayment extension. To verify whether a particular YubiKey supports the feature, check the key's ``AuthenticatorInfo``:
 
 ```C#
 using (Fido2Session fido2Session = new Fido2Session(yubiKey))
@@ -30,7 +36,9 @@ using (Fido2Session fido2Session = new Fido2Session(yubiKey))
 }
 ```
 
-## Creating a thirdPartyPayment-enabled credential
+### MakeCredential example with thirdPartyPayment
+
+To create a thirdPartyPayment-enabled credential, we must add the thirdPartyPayment extension to the parameters for ``MakeCredential()``:
 
 ```C#
 using (Fido2Session fido2Session = new Fido2Session(yubiKey))
@@ -56,7 +64,7 @@ using (Fido2Session fido2Session = new Fido2Session(yubiKey))
 }
 ```
 
-After calling ``MakeCredential()``, we can check the ``AuthenticatorData`` to verify that the credential was successfully created with the thirdPartyPayment extension enabled:
+After calling ``MakeCredential()``, we can check the ``AuthenticatorData`` to verify extension enablement:
 
 ```C#
 using (Fido2Session fido2Session = new Fido2Session(yubiKey))

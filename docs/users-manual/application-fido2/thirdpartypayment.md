@@ -69,6 +69,17 @@ using (Fido2Session fido2Session = new Fido2Session(yubiKey))
 
 ## Authenticating a third-party payment transaction
 
+To successfully authenticate a third-party payment transaction using a YubiKey, the following must occur:
+
+- The YubiKey credential used for ``GetAssertion`` must be [third-party payment enabled](#creating-a-thirdpartypayment-enabled-credential).
+- The thirdPartyPayment extension must be added to the parameters for ``GetAssertion``.
+
+During ``GetAssertion``, the YubiKey will return a boolean value for the thirdPartyPayment extension. If both requirements have been met, the value returned will be ``true``.
+
+### GetAssertion example with thirdPartyPayment
+
+To get an assertion with thirdPartyPayment, do the following:
+
 ```C#
 using (Fido2Session fido2Session = new Fido2Session(yubiKey))
 {

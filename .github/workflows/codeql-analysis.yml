@@ -73,7 +73,7 @@ jobs:
         with:
           # Override automatic language detection to only analyze C#
           # C/C++ code in Yubico.NativeShims is built separately (requires CMake/vcpkg)
-          languages: ['csharp']
+          languages: ['csharp', 'actions']
 
       # Build the project
       - name: Build Yubico.NET.SDK.sln

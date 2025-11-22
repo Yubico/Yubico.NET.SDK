@@ -18,13 +18,17 @@ limitations under the License. -->
 
 # Third-party payment extension (thirdPartyPayment)
 
+CTAP 2.2 and YubiKeys with firmware 5.8+ support the [thirdPartyPayment extension](https://fidoalliance.org/specs/fido-v2.2-ps-20250714/fido-client-to-authenticator-protocol-v2.2-ps-20250714.html#sctn-thirdPartyPayment-extension), which allows credentials to be used for payment authentication scenarios where the transaction initiator is not the relying party.
 
+For example, suppose a user creates a thirdPartyPayment-enabled credential with their bank. The user then purchases an item from an online merchant and pays using their bank account, and the transaction is validated with their bank credential on their YubiKey.
+
+According to the CTAP 2.2 standard, implementation of the payment authentication flow is up to the platform. See the W3C's [Secure Payment Confirmation (SPC)](https://www.w3.org/TR/secure-payment-confirmation/) for an example of a possible implementation.
 
 ## Creating a thirdPartyPayment-enabled credential
 
-YubiKey credentials can only be used for a third-party payment transaction if the credential itself is thirdPartyPayment-enabled, and enablement must occur when the credential is first created. Enablement simply means that the credential's thirdPartyPayment bit flag has been set to ``true``.
+YubiKey credentials (discoverable and non-discoverable) can only be used for a third-party payment transaction if the credential itself is thirdPartyPayment-enabled, and enablement must occur when the credential is first created. Enablement simply means that the credential's thirdPartyPayment bit flag has been set to ``true``.
 
-Only YubiKeys with firmware version 5.8 and higher support the thirdPartyPayment extension. To verify whether a particular YubiKey supports the feature, check the key's ``AuthenticatorInfo``:
+Only YubiKeys with firmware version 5.8 and later support the thirdPartyPayment extension. To verify whether a particular YubiKey supports the feature, check the key's ``AuthenticatorInfo``:
 
 ```C#
 using (Fido2Session fido2Session = new Fido2Session(yubiKey))

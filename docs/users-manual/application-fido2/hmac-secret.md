@@ -2,7 +2,7 @@
 uid: Fido2HmacSecret
 ---
 
-<!-- Copyright 2023 Yubico AB
+<!-- Copyright 2025 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# FIDO2 HMAC secret ("hmac-secret" extension)
+# FIDO2 hmac-secret and hmac-secret-mc extensions
 
 When you get the [AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo), you can
 check the extensions to see if "hmac-secret" is supported.

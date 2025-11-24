@@ -18,19 +18,6 @@ limitations under the License. -->
 
 # FIDO2 hmac-secret and hmac-secret-mc extensions
 
-When you get the [AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo), you can
-check the extensions to see if "hmac-secret" is supported.
-
-```C#
-    using (fido2Session = new Fido2Session(yubiKeyDevice))
-    {
-        if (fido2Session.AuthenticatorInfo.Extensions.Contains<string>("hmac-secret"))
-        {
-            . . .
-        }
-    }
-```
-
 If it is, when making a credential you can specify that the YubiKey create a secret value
 associated with that credential. Later on when getting an assertion, you can ask the
 YubiKey to retrieve that secret. What you do with that secret is up to you. The standard
@@ -42,7 +29,27 @@ YubiKey and a salt provided by the client. The standard says, "The authenticator
 platform each only have the part of the complete secret to prevent offline attacks."
 Hence, for all clients to share this secret, each client must use the same salt.
 
-## Requesting the YubiKey create this secret
+## hmac-secret vs hmac-secret-mc
+
+## Verify support for hmac-secret and hmac-secret-mc
+
+To verify whether a particular YubiKey supports the hmac-secret and hmac-secret-mc extensions, check the key's [AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo):
+
+```C#
+    using (fido2Session = new Fido2Session(yubiKeyDevice))
+    {
+        if (fido2Session.AuthenticatorInfo.Extensions.Contains<string>("hmac-secret"))
+        {
+            . . .
+        }
+        else if (fido2Session.AuthenticatorInfo.Extensions.Contains<string>("hmac-secret-mc"))
+        {
+            . . .
+        }
+    }
+```
+
+## Enabling the hmac-secret extension and requesting the secret
 
 The YubiKey will generate a secret for a credential only if instructed to do so at the
 time the credential is made. It is not possible to "add" this secret to an existing
@@ -58,8 +65,6 @@ credential.
     }
 ```
 
-## Requesting the secret
-
 When getting an assertion, you specify you want the YubiKey to return the assertion and
 the secret value. If you don't, the YubiKey will return the assertion, but it won't return
 the secret.
@@ -74,7 +79,9 @@ the secret.
     }
 ```
 
-## Extracting the secret
+## Enabling the hmac-secret-mc extension and requesting the secret
+
+## Extracting and decrypting the secret
 
 Once you have an assertion, you will find the secret in the `Extensions` in the
 `GetAssertionData.AuthenticatorData` property. There is a method in that class that will
@@ -90,8 +97,6 @@ parse and decrypt the value returned.
 ```
 
 The result will be an array 32 bytes long.
-
-## Decrypting the value returned
 
 In order to generate the "hmac-secret", the YubiKey will perform HMAC with SHA-256 using
 the secret value it has associated with the credential as the key, and the salt provided

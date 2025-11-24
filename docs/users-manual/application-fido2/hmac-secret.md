@@ -31,6 +31,12 @@ Hence, for all clients to share this secret, each client must use the same salt.
 
 ## hmac-secret vs hmac-secret-mc
 
+The fundamental difference between the hmac-secret and hmac-secret-mc extensions is when the secret is requested by the YubiKey.
+
+With hmac-secret, the secret is requested during ``GetAssertions()``. However, with hmac-secret-mc, the secret is requested during ``MakeCredential()``.
+
+hmac-secret-mc is useful in situations where the secret is needed immediately upon creation of a new credential. By returning the secret in a single operation instead of two (``MakeCredential()`` followed by ``GetAssertions()``), the amount of required user interaction, including user presence and PIN/UV validation, is reduced.
+
 ## Verify support for hmac-secret and hmac-secret-mc
 
 To verify whether a particular YubiKey supports the hmac-secret and hmac-secret-mc extensions, check the key's [AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo):

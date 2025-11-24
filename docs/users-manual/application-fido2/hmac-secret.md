@@ -71,7 +71,7 @@ To enable the hmac-secret extension, we must add it to the parameters for ``Make
     }
 ```
 
-Once the extension has been added to a credential, we can return the secret with ``GetAssertions()``. However, we must first add the request for the secret along with the salt to the parameters for ``GetAssertions()`` via ``RequestHmacSecretExtension(salt)``.
+Once the extension has been added to a credential, we can return the secret with ``GetAssertions()``. However, we must first add the request for the secret along with the salt(s) to the parameters for ``GetAssertions()`` via ``RequestHmacSecretExtension(salt)``.
 
 ```csharp
     using (fido2Session = new Fido2Session(yubiKeyDevice))
@@ -86,6 +86,10 @@ Once the extension has been added to a credential, we can return the secret with
 The secret will be returned in the ``GetAssertionData``.
 
 ## Enabling the hmac-secret-mc extension and requesting the secret
+
+With hmac-secret-mc, the extension needs to be enabled for a credential during ``MakeCredential()`` *and* the salt(s) must be provided in order to return the secret. To do so, we must add the extension and salt(s) to the parameters for ``MakeCredential()`` prior to calling the ``MakeCredential()`` method.
+
+If the operation is successful, the secret will be returned in the ``MakeCredentialData``.
 
 ## Extracting and decrypting the secret
 

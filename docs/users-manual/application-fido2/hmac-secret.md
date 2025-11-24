@@ -57,9 +57,9 @@ To verify whether a particular YubiKey supports the hmac-secret and hmac-secret-
 
 ## Enabling the hmac-secret extension and requesting the secret
 
-The YubiKey will generate a secret for a credential only if instructed to do so at the
-time the credential is made. It is not possible to "add" this secret to an existing
-credential.
+With hmac-secret, the extension needs to be enabled for a credential during ``MakeCredential()`` in order to return the secret during ``GetAssertions()``. It is not possible to add the extension to an existing credential.
+
+To enable the hmac-secret extension, we must add it to the parameters for ``MakeCredential()`` prior to calling the ``MakeCredential()`` method:
 
 ```csharp
     using (fido2Session = new Fido2Session(yubiKeyDevice))
@@ -71,9 +71,7 @@ credential.
     }
 ```
 
-When getting an assertion, you specify you want the YubiKey to return the assertion and
-the secret value. If you don't, the YubiKey will return the assertion, but it won't return
-the secret.
+Once the extension has been added to a credential, we can return the secret with ``GetAssertions()``. However, we must first add the request for the secret along with the salt to the parameters for ``GetAssertions()`` via ``RequestHmacSecretExtension(salt)``.
 
 ```csharp
     using (fido2Session = new Fido2Session(yubiKeyDevice))
@@ -84,6 +82,8 @@ the secret.
             IReadOnlyList<GetAssertionData> assertionDataList = fido2Session.GetAssertions(makeCredentialParameters);
     }
 ```
+
+The secret will be returned in the ``GetAssertionData``.
 
 ## Enabling the hmac-secret-mc extension and requesting the secret
 

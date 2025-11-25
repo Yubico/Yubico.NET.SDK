@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         private readonly PivSession _pivSession;
         private readonly byte _slotNumber;
-        private readonly PivAlgorithm _algorithm;
+        private readonly KeyType _algorithm;
 
         private readonly RSASignaturePaddingMode _rsaPaddingMode;
         private readonly X509SignatureGenerator _defaultGenerator;
@@ -50,17 +50,13 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         public YubiKeySignatureGenerator(
             PivSession pivSession,
             byte slotNumber,
-            PivPublicKey pivPublicKey,
+            IPublicKey publicKey,
             RSASignaturePaddingMode rsaPaddingMode = RSASignaturePaddingMode.Pss)
         {
-            if (pivSession is null)
-            {
-                throw new ArgumentNullException(nameof(pivSession));
-            }
-            if (pivPublicKey is null)
-            {
-                throw new ArgumentNullException(nameof(pivPublicKey));
-            }
+            
+            ArgumentNullException.ThrowIfNull(pivSession);
+            ArgumentNullException.ThrowIfNull(publicKey);
+            
             if (!PivSlot.IsValidSlotNumberForSigning(slotNumber))
             {
                 throw new ArgumentException(
@@ -71,18 +67,18 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             _pivSession = pivSession;
             _slotNumber = slotNumber;
-            _algorithm = pivPublicKey.Algorithm;
+            _algorithm = publicKey.KeyType;
             _rsaPaddingMode = rsaPaddingMode;
 
-            using var dotNetPublicKey = KeyConverter.GetDotNetFromPivPublicKey(pivPublicKey);
+            using var dotNetPublicKey = KeyConverter.GetDotNetFromPublicKey(publicKey);
 
-            if (_algorithm.IsRsa())
+            if (_algorithm.IsRSA())
             {
                 var paddingScheme = rsaPaddingMode == RSASignaturePaddingMode.Pss ?
                     RSASignaturePadding.Pss : RSASignaturePadding.Pkcs1;
                 _defaultGenerator = X509SignatureGenerator.CreateForRSA((RSA)dotNetPublicKey, paddingScheme);
             }
-            else if (_algorithm.IsEcc())
+            else if (_algorithm.IsEllipticCurve())
             {
                 _defaultGenerator = X509SignatureGenerator.CreateForECDsa((ECDsa)dotNetPublicKey);
             }
@@ -122,7 +118,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             byte[] dataToSign = DigestData(data, hashAlgorithm);
 
-            if (_algorithm.IsRsa())
+            if (_algorithm.IsRSA())
             {
                 dataToSign = PadRsa(dataToSign, hashAlgorithm);
             }
@@ -148,12 +144,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // If the algorithm is P-256, then make sure the digest is exactly 32
             // bytes. If it's P-384, the digest must be exactly 48 bytes.
             // We'll prepend 00 bytes if necessary.
-            int bufferSize = _algorithm switch
-            {
-                PivAlgorithm.EccP256 => 32,
-                PivAlgorithm.EccP384 => 48,
-                _ => digester.HashSize / 8,
-            };
+            int bufferSize = _algorithm.GetKeySizeBytes();
 
             byte[] digest = new byte[bufferSize];
             int offset = bufferSize - (digester.HashSize / 8);
@@ -190,10 +181,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             if (_rsaPaddingMode == RSASignaturePaddingMode.Pss)
             {
-                return RsaFormat.FormatPkcs1Pss(digest, digestAlgorithm, _algorithm.KeySizeBits());
+                return RsaFormat.FormatPkcs1Pss(digest, digestAlgorithm, _algorithm.GetKeySizeBits());
             }
 
-            return RsaFormat.FormatPkcs1Sign(digest, digestAlgorithm, _algorithm.KeySizeBits());
+            return RsaFormat.FormatPkcs1Sign(digest, digestAlgorithm, _algorithm.GetKeySizeBits());
         }
     }
 }

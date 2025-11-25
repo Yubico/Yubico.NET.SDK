@@ -14,6 +14,7 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Sample.SharedCode;
 
@@ -24,28 +25,28 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
     {
         public byte SlotNumber { get; set; }
 
-        public PivAlgorithm Algorithm { get; set; }
+        public KeyType Algorithm { get; set; }
 
         public PivPinPolicy PinPolicy { get; set; }
 
         public PivTouchPolicy TouchPolicy { get; set; }
 
-        public PivPublicKey PublicKey { get; set; }
+        public IPublicKey PublicKey { get; set; }
 
         public CertificateRequest CertRequest { get; set; }
 
         private byte[] _certRequestDer;
-
-        public SamplePivSlotContents()
+        
+        public SamplePivSlotContents(IPublicKey publicKey)
         {
-            Algorithm = PivAlgorithm.None;
-            PublicKey = new PivPublicKey();
+            Algorithm = KeyType.None;
+            PublicKey = publicKey;
             _certRequestDer = Array.Empty<byte>();
         }
 
         public void PrintPublicKeyPem()
         {
-            char[] pubKeyPem = KeyConverter.GetPemFromPivPublicKey(PublicKey);
+            char[] pubKeyPem = KeyConverter.GetPemFromPublicKey(PublicKey);
             SampleMenu.WriteMessage(MessageType.Title, 0, "\n" + new string(pubKeyPem) + "\n");
         }
 

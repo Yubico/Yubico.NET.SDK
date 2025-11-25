@@ -14,7 +14,9 @@
 
 using System;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
 {
@@ -36,7 +38,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // determine if the signature verified or not.
         // If the publicKey is ECC, the paddingScheme argument is ignored.
         public static bool SampleVerifySignature(
-            PivPublicKey publicKey,
+            IPublicKey publicKey,
             byte[] dataToVerify,
             HashAlgorithmName hashAlgorithm,
             RSASignaturePadding paddingScheme,
@@ -48,11 +50,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 throw new ArgumentNullException(nameof(publicKey));
             }
 
-            using var asymObject = KeyConverter.GetDotNetFromPivPublicKey(publicKey);
+            using var asymObject = KeyConverter.GetDotNetFromPublicKey(publicKey);
 
             // The algorithm is either RSA or ECC, otherwise the KeyConverter
             // call would have thrown an exception.
-            if (publicKey.Algorithm.IsRsa())
+            if (publicKey.KeyType.IsRSA())
             {
                 var rsaObject = (RSA)asymObject;
                 isVerified = rsaObject.VerifyData(dataToVerify, signature, hashAlgorithm, paddingScheme);
@@ -64,7 +66,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 // This .NET class and method require the ECC signature to be in
                 // a non-standard format.
                 byte[] nonStandardSignature = DsaSignatureConverter.GetNonStandardDsaFromStandard(
-                    signature, publicKey.Algorithm);
+                    signature, publicKey.KeyType);
                 isVerified = eccObject.VerifyData(dataToVerify, nonStandardSignature, hashAlgorithm);
             }
 
@@ -80,7 +82,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // perform the operation, it will set encryptedData to be an empty array
         // and return false.
         public static bool SampleEncryptRsa(
-            PivPublicKey publicKey,
+            IPublicKey publicKey,
             byte[] dataToEncrypt,
             RSAEncryptionPadding paddingScheme,
             out byte[] encryptedData)
@@ -92,12 +94,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 throw new ArgumentNullException(nameof(publicKey));
             }
 
-            if (!publicKey.Algorithm.IsRsa())
+            if (!publicKey.KeyType.IsRSA())
             {
                 return false;
             }
 
-            using var rsaObject = (RSA)KeyConverter.GetDotNetFromPivPublicKey(publicKey);
+            using var rsaObject = (RSA)KeyConverter.GetDotNetFromPublicKey(publicKey);
 
             encryptedData = rsaObject.Encrypt(dataToEncrypt, paddingScheme);
 
@@ -116,7 +118,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // shared secret, but for this sample, we're returning it as well so that
         // we can compare the two results to make sure they match.
         public static bool SampleKeyAgreeEcc(
-            PivPublicKey publicKey,
+            IPublicKey publicKey,
             HashAlgorithmName hashAlgorithm,
             out char[] correspondentPublicKey,
             out byte[] sharedSecret)
@@ -128,8 +130,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 throw new ArgumentNullException(nameof(publicKey));
             }
-
-            if (!publicKey.Algorithm.IsEcc())
+            
+            if (!publicKey.KeyType.IsEllipticCurve())
             {
                 return false;
             }
@@ -138,7 +140,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // The KeyConverter will build an ECDsa object, but we can build the
             // ECDH object from the EC parameters. So get the ECDsa object, then
             // get the parameters.
-            using var ecDsaObject = (ECDsa)KeyConverter.GetDotNetFromPivPublicKey(publicKey);
+            using var ecDsaObject = (ECDsa)KeyConverter.GetDotNetFromPublicKey(publicKey);
             var ecParams = ecDsaObject.ExportParameters(false);
 
             // This is the .NET version of the public key associated with the

@@ -78,15 +78,146 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - name: Install Zig (pinned version)
+        run: |
+          ZIG_VERSION="0.15.2"
+          ZIG_ARCH="x86_64-linux"
+          ZIG_TARBALL="zig-${ZIG_ARCH}-${ZIG_VERSION}.tar.xz"
+          ZIG_URL="https://ziglang.org/download/${ZIG_VERSION}/${ZIG_TARBALL}"
+          ZIG_MINISIG_URL="${ZIG_URL}.minisig"
+          # Official Zig minisign public key
+          ZIG_PUBKEY="RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U"
+
+          echo "Installing minisign for signature verification..."
+          sudo apt-get update -qq
+          sudo apt-get install -y minisign
+
+          echo "Downloading Zig ${ZIG_VERSION}..."
+          wget -q "${ZIG_URL}"
+          wget -q "${ZIG_MINISIG_URL}"
+
+          echo "Verifying signature with minisign..."
+          minisign -Vm "${ZIG_TARBALL}" -P "${ZIG_PUBKEY}"
+
+          echo "✅ Signature verified! Extracting and installing..."
+          tar -xf "${ZIG_TARBALL}"
+          sudo mv "zig-${ZIG_ARCH}-${ZIG_VERSION}" /usr/local/zig
+          echo "/usr/local/zig" >> $GITHUB_PATH
+
+          echo "Zig installed successfully:"
+          /usr/local/zig/zig version
+      - name: Setup Zig CC wrappers
+        run: |
+          echo 'Creating Zig CC wrapper scripts'
+          mkdir -p $HOME/zig-wrappers
+
+          # Create x86_64 C compiler wrapper
+          cat > $HOME/zig-wrappers/zig-cc << 'EOF'
+          #!/bin/bash
+          exec zig cc -target x86_64-linux-gnu.2.23 "$@"
+          EOF
+
+          # Create x86_64 C++ compiler wrapper
+          cat > $HOME/zig-wrappers/zig-c++ << 'EOF'
+          #!/bin/bash
+          exec zig c++ -target x86_64-linux-gnu.2.23 "$@"
+          EOF
+
+          chmod +x $HOME/zig-wrappers/zig-cc
+          chmod +x $HOME/zig-wrappers/zig-c++
+
+          echo "CC=$HOME/zig-wrappers/zig-cc" >> $GITHUB_ENV
+          echo "CXX=$HOME/zig-wrappers/zig-c++" >> $GITHUB_ENV
+      - name: Verify Zig wrappers
+        run: |
+          echo "Verifying Zig wrapper scripts..."
+          test -x $HOME/zig-wrappers/zig-cc || { echo "ERROR: zig-cc not executable"; exit 1; }
+          test -x $HOME/zig-wrappers/zig-c++ || { echo "ERROR: zig-c++ not executable"; exit 1; }
+
+          echo "Testing zig-cc wrapper:"
+          $HOME/zig-wrappers/zig-cc --version | grep -q "zig" || { echo "ERROR: zig-cc not using Zig"; exit 1; }
+
+          echo "✅ Zig wrappers verified successfully"
       - run: |
-          echo 'Running build script: Linux (amd64)'
+          echo 'Running build script: Linux (amd64) with Zig targeting glibc 2.23'
           cd Yubico.NativeShims
           if [ ! -z "${{ github.event.inputs.version }}" ]; then
             BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
-            sh ./build-linux-amd64.sh "$BASE_VERSION"
+            bash ./build-linux-amd64.sh "$BASE_VERSION"
           else
-            sh ./build-linux-amd64.sh
+            bash ./build-linux-amd64.sh
           fi
+      - name: Test on Ubuntu 18.04 (glibc 2.27)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing binary compatibility on Ubuntu 18.04 (close to target glibc 2.23)..."
+          docker run --rm \
+            -v $PWD/linux-x64:/test:ro \
+            ubuntu:18.04 \
+            bash -c '
+              set -e
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Testing on Ubuntu 18.04 (glibc 2.27)..."
+              ldd --version | head -n1
+              echo ""
+              echo "Library dependencies:"
+              ldd *.so || true
+              echo ""
+              echo "GLIBC version requirements:"
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo ""
+              echo "✅ Binary compatible with Ubuntu 18.04 (glibc 2.27)"
+            '
+      - name: Test on Ubuntu 20.04 (glibc 2.31)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing binary compatibility on Ubuntu 20.04..."
+          docker run --rm \
+            -v $PWD/linux-x64:/test:ro \
+            ubuntu:20.04 \
+            bash -c '
+              set -e
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Files found:"
+              ls -lh *.so
+              echo ""
+              echo "File types:"
+              file *.so
+              echo ""
+              echo "Library dependencies:"
+              ldd *.so || true
+              echo ""
+              echo "GLIBC version requirements:"
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo ""
+              echo "✅ Binary loads successfully on Ubuntu 20.04 (glibc 2.31)"
+            '
+      - name: Test on Debian 10 (glibc 2.28)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing binary compatibility on Debian 10 (target: glibc 2.23)..."
+          docker run --rm \
+            -v $PWD/linux-x64:/test:ro \
+            debian:10 \
+            bash -c '
+              set -e
+              # Debian 10 is EOL, update sources to use archive repository
+              sed -i "s|http://deb.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
+              sed -i "s|http://security.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
+              sed -i "/buster-updates/d" /etc/apt/sources.list
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Testing on Debian 10 (glibc 2.28, target is 2.23)..."
+              ldd --version | head -n1
+              ldd *.so
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo "✅ Binary compatible with Debian 10 (glibc 2.28)"
+            '
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x64
@@ -97,15 +228,150 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - name: Install Zig (pinned version)
+        run: |
+          ZIG_VERSION="0.15.2"
+          ZIG_ARCH="x86_64-linux"
+          ZIG_TARBALL="zig-${ZIG_ARCH}-${ZIG_VERSION}.tar.xz"
+          ZIG_URL="https://ziglang.org/download/${ZIG_VERSION}/${ZIG_TARBALL}"
+          ZIG_MINISIG_URL="${ZIG_URL}.minisig"
+          # Official Zig minisign public key
+          ZIG_PUBKEY="RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U"
+
+          echo "Installing minisign for signature verification..."
+          sudo apt-get update -qq
+          sudo apt-get install -y minisign
+
+          echo "Downloading Zig ${ZIG_VERSION}..."
+          wget -q "${ZIG_URL}"
+          wget -q "${ZIG_MINISIG_URL}"
+
+          echo "Verifying signature with minisign..."
+          minisign -Vm "${ZIG_TARBALL}" -P "${ZIG_PUBKEY}"
+
+          echo "✅ Signature verified! Extracting and installing..."
+          tar -xf "${ZIG_TARBALL}"
+          sudo mv "zig-${ZIG_ARCH}-${ZIG_VERSION}" /usr/local/zig
+          echo "/usr/local/zig" >> $GITHUB_PATH
+
+          echo "Zig installed successfully:"
+          /usr/local/zig/zig version
+      - name: Setup Zig CC wrappers
+        run: |
+          echo 'Creating Zig CC wrapper scripts for ARM64 cross-compilation'
+          mkdir -p $HOME/zig-wrappers
+
+          # Create aarch64 C compiler wrapper
+          cat > $HOME/zig-wrappers/zig-cc << 'EOF'
+          #!/bin/bash
+          exec zig cc -target aarch64-linux-gnu.2.23 "$@"
+          EOF
+
+          # Create aarch64 C++ compiler wrapper
+          cat > $HOME/zig-wrappers/zig-c++ << 'EOF'
+          #!/bin/bash
+          exec zig c++ -target aarch64-linux-gnu.2.23 "$@"
+          EOF
+
+          chmod +x $HOME/zig-wrappers/zig-cc
+          chmod +x $HOME/zig-wrappers/zig-c++
+
+          echo "CC=$HOME/zig-wrappers/zig-cc" >> $GITHUB_ENV
+          echo "CXX=$HOME/zig-wrappers/zig-c++" >> $GITHUB_ENV
+      - name: Verify Zig wrappers
+        run: |
+          echo "Verifying Zig wrapper scripts..."
+          test -x $HOME/zig-wrappers/zig-cc || { echo "ERROR: zig-cc not executable"; exit 1; }
+          test -x $HOME/zig-wrappers/zig-c++ || { echo "ERROR: zig-c++ not executable"; exit 1; }
+
+          echo "Testing zig-cc wrapper:"
+          $HOME/zig-wrappers/zig-cc --version | grep -q "zig" || { echo "ERROR: zig-cc not using Zig"; exit 1; }
+
+          echo "✅ Zig wrappers verified successfully"
       - run: |
-          echo 'Running build script: Linux (arm64)'
+          echo 'Running build script: Linux (arm64) with Zig targeting glibc 2.23'
           cd Yubico.NativeShims
           if [ ! -z "${{ github.event.inputs.version }}" ]; then
             BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
-            sh ./build-linux-arm64.sh "$BASE_VERSION"
+            bash ./build-linux-arm64.sh "$BASE_VERSION"
           else
-            sh ./build-linux-arm64.sh
+            bash ./build-linux-arm64.sh
           fi
+      - name: Set up QEMU for ARM64 testing
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - name: Test on Ubuntu 18.04 (glibc 2.27)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing ARM64 binary compatibility on Ubuntu 18.04 (close to target glibc 2.23)..."
+          docker run --rm --platform linux/arm64 \
+            -v $PWD/linux-arm64:/test:ro \
+            ubuntu:18.04 \
+            bash -c '
+              set -e
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Testing on Ubuntu 18.04 (glibc 2.27)..."
+              ldd --version | head -n1
+              echo ""
+              echo "Library dependencies:"
+              ldd *.so || true
+              echo ""
+              echo "GLIBC version requirements:"
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo ""
+              echo "✅ ARM64 binary compatible with Ubuntu 18.04 (glibc 2.27)"
+            '
+      - name: Test on Ubuntu 20.04 (glibc 2.31)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing ARM64 binary compatibility on Ubuntu 20.04..."
+          docker run --rm --platform linux/arm64 \
+            -v $PWD/linux-arm64:/test:ro \
+            ubuntu:20.04 \
+            bash -c '
+              set -e
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Files found:"
+              ls -lh *.so
+              echo ""
+              echo "File types:"
+              file *.so
+              echo ""
+              echo "Library dependencies:"
+              ldd *.so || true
+              echo ""
+              echo "GLIBC version requirements:"
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo ""
+              echo "✅ ARM64 binary loads successfully on Ubuntu 20.04 (glibc 2.31)"
+            '
+      - name: Test on Debian 10 (glibc 2.28)
+        working-directory: Yubico.NativeShims
+        run: |
+          echo "Testing ARM64 binary compatibility on Debian 10 (target: glibc 2.23)..."
+          docker run --rm --platform linux/arm64 \
+            -v $PWD/linux-arm64:/test:ro \
+            debian:10 \
+            bash -c '
+              set -e
+              # Debian 10 is EOL, update sources to use archive repository
+              sed -i "s|http://deb.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
+              sed -i "s|http://security.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
+              sed -i "/buster-updates/d" /etc/apt/sources.list
+              apt-get update -qq
+              apt-get install -y libpcsclite1 file binutils
+              cd /test
+              echo "Testing on Debian 10 (glibc 2.28, target is 2.23)..."
+              ldd --version | head -n1
+              ldd *.so
+              readelf -V *.so | grep GLIBC_2 | sort -u
+              echo "✅ ARM64 binary compatible with Debian 10 (glibc 2.28)"
+            '
       - uses: actions/upload-artifact@v4
         with:
           name: linux-arm64

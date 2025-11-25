@@ -45,7 +45,7 @@ hmac-secret-mc is useful in situations where the secret is needed immediately up
 The hmac-secret-mc extension is only supported for YubiKeys with firmware version 5.8 and later. To verify whether a particular YubiKey supports the hmac-secret and hmac-secret-mc extensions, check the key's [AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo):
 
 ```C#
-    using (fido2Session = new Fido2Session(yubiKeyDevice))
+    using (fido2Session = new Fido2Session(yubiKey))
     {
         if (fido2Session.AuthenticatorInfo.Extensions.Contains<string>("hmac-secret"))
         {
@@ -65,24 +65,46 @@ With hmac-secret, the extension needs to be enabled for a credential during ``Ma
 To enable the hmac-secret extension, we must add it to the parameters for MakeCredential prior to calling the ``MakeCredential()`` method:
 
 ```csharp
-    using (fido2Session = new Fido2Session(yubiKeyDevice))
+    using (fido2Session = new Fido2Session(yubiKey))
     {
-            var makeCredentialParameters = new MakeCredentialParameters(rp, userEntity);
-            makeCredentialParameters.AddHmacSecretExtension(fido2Session.AuthenticatorInfo);
-            . . .
-            MakeCredentialData credentialData = fido2Session.MakeCredential(makeCredentialParameters);
+        // Your app's key collector, which will be used to check user presence and perform PIN/UV 
+        // verification during MakeCredential().
+        fido2Session.KeyCollector = SomeKeyCollectorDelegate;
+
+        // Create the parameters for MakeCredential (relyingParty, userEntity, and clientDataHashValue
+        // set elsewhere).
+        var makeCredentialParameters = new MakeCredentialParameters(relyingParty, userEntity)
+        {
+            ClientDataHash = clientDataHashValue
+
+        };
+
+        // Add the hmac-secret extension plus the "rk" option (to make the credential discoverable).
+        makeCredentialParameters.AddHmacSecretExtension(fido2Session.AuthenticatorInfo);
+        makeCredentialParameters.AddOption(AuthenticatorOptions.rk, true);
+
+        // Create the hmac-secret enabled credential.
+        MakeCredentialData credentialData = fido2Session.MakeCredential(makeCredentialParameters);
     }
 ```
 
-Once the extension has been added to a credential, we can return the secret with ``GetAssertions()``. However, we must first add the request for the secret along with the salt(s) to the parameters for GetAssertion via ``RequestHmacSecretExtension(salt1, salt2)``.
+Once the extension has been added to a credential, we can return the secret with ``GetAssertions()``. However, we must first add the request for the secret along with the salt(s) to the parameters for GetAssertion via ``RequestHmacSecretExtension(salt1, salt2)``. Providing a second salt is not required.
 
 ```csharp
     using (fido2Session = new Fido2Session(yubiKeyDevice))
     {
-            var getAssertionParameters = new GetAssertionParameters(rp, clientDataHash);
-            getAssertionParameters.RequestHmacSecretExtension(salt);
-            . . .
-            IReadOnlyList<GetAssertionData> assertionDataList = fido2Session.GetAssertions(makeCredentialParameters);
+        // Your app's key collector, which will be used to check user presence and perform PIN/UV 
+        // verification during GetAssertions().
+        fido2Session.KeyCollector = SomeKeyCollectorDelegate;
+
+        // Create the parameters for GetAssertion (relyingParty and clientDataHash set elsewhere)
+        var getAssertionParameters = new GetAssertionParameters(relyingParty, clientDataHashCreate);
+
+        // Add the request for the hmac secret and provide a salt (set elsewhere). 
+        getAssertionParameters.RequestHmacSecretExtension(salt1);
+
+        // Get the assertion and hmac secret using the parameters set above.
+        IReadOnlyList<GetAssertionData> assertionDataList = fido2Session.GetAssertions(getAssertionParameters);
     }
 ```
 
@@ -103,11 +125,12 @@ If the secret was generated using one salt, the result will be a 32-byte value. 
 To perform the extraction and decryption on ``GetAssertionData`` (hmac-secret), perform an operation like shown in the following code sample. Note that if authenticator data was returned for more that one credential, we must specify which credential's secret we'd like to extract.
 
 ```csharp
-    using (fido2Session = new Fido2Session(yubiKeyDevice))
+    using (fido2Session = new Fido2Session(yubiKey))
     {
-            . . .
-            byte[] hmacSecretValue = assertionDataList[0].AuthenticatorData.GetHmacSecretExtension(
-                fido2Session.AuthProtocol);
+        . . .
+        // If the YubiKey contains multiple credentials for the relyingParty, this returns the hmac secret 
+        // from the first credential's data.
+        byte[] hmacSecretValue = assertionDataList[0].AuthenticatorData.GetHmacSecretExtension(fido2Session.AuthProtocol);
     }
 ```
 

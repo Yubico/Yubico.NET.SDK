@@ -29,11 +29,37 @@ YubiKey and a salt provided by the client. The standard says, "The authenticator
 platform each only have the part of the complete secret to prevent offline attacks."
 Hence, for all clients to share this secret, each client must use the same salt.
 
+In order to generate the "hmac-secret", the YubiKey will perform HMAC with SHA-256 using
+the secret value it has associated with the credential as the key, and the salt provided
+(along with possibly other data) as the data to MAC. It will then encrypt that result
+using the shared key (the key shared between the client and the YubiKey, the result of the
+ECDH operation used to encrypt all communications between the client and the YubiKey).
+
+## Salts
+
+It is possible to pass in two 32-byte salts to the
+`GetAssertionParameters.RequestHmacSecretExtension` method. In that case, the YubiKey will
+return two values. The standard says the second value is used "...when the platform wants
+to roll over the symmetric secret...".
+
+```csharp
+    using (fido2Session = new Fido2Session(yubiKeyDevice))
+    {
+            var getAssertionParameters = new GetAssertionParameters(rp, clientDataHash);
+            getAssertionParameters.RequestHmacSecretExtension(salt1, salt2);
+            . . .
+            IReadOnlyList<GetAssertionData> assertionDataList = fido2Session.GetAssertions(makeCredentialParameters);
+            . . .
+            byte[] hmacSecretValue = assertionDataList[0].AuthenticatorData.GetHmacSecretExtension(
+                fido2Session.AuthProtocol);
+    }
+```
+
 ## hmac-secret vs hmac-secret-mc
 
-The fundamental difference between the hmac-secret and hmac-secret-mc extensions is when the secret is requested by the YubiKey.
+The fundamental difference between the hmac-secret and hmac-secret-mc extensions is when the secret is returned by the YubiKey.
 
-With hmac-secret, the secret is requested during ``GetAssertions()``. However, with hmac-secret-mc, the secret is requested during ``MakeCredential()``.
+With hmac-secret, the secret is returned during ``GetAssertions()``. However, with hmac-secret-mc, the secret is returned during ``MakeCredential()``.
 
 hmac-secret-mc is useful in situations where the secret is needed immediately upon creation of a new credential. By returning the secret in a single operation instead of two (``MakeCredential()`` followed by ``GetAssertions()``), the amount of required user interaction, including user presence and PIN/UV validation, is reduced.
 
@@ -93,9 +119,11 @@ If the operation is successful, the secret will be returned in the ``MakeCredent
 
 ## Extracting and decrypting the secret
 
-Once you have an assertion, you will find the secret in the `Extensions` in the
-`GetAssertionData.AuthenticatorData` property. There is a method in that class that will
-parse and decrypt the value returned.
+Once the secret has been returned, we can extract and decrypt it using the ``AuthenticatorData.GetHmacSecretExtension`` method.
+
+If the secret was generated using one salt, the result will be a 32-byte value. In the case of two salts, the result will be 64 bytes in length, with the first 32 bytes representing the value generated with `salt1` and the second 32 bytes representing the value generated with `salt2`.
+
+To perform the extraction and decryption on ``GetAssertionData`` (hmac-secret), do something like the following code sample. Note that if authenticator data was returned for more that one credential, we must specify which credential's secret we'd like to extract.
 
 ```csharp
     using (fido2Session = new Fido2Session(yubiKeyDevice))
@@ -106,37 +134,5 @@ parse and decrypt the value returned.
     }
 ```
 
-The result will be an array 32 bytes long.
+With the extraction and decryption on ``MakeCredentialData`` (hmac-secret-mc), we do not need to specify a particular credential given that only one was created at the time the secret was returned:
 
-In order to generate the "hmac-secret", the YubiKey will perform HMAC with SHA-256 using
-the secret value it has associated with the credential as the key, and the salt provided
-(along with possibly other data) as the data to MAC. It will then encrypt that result
-using the shared key (the key shared between the client and the YubiKey, the result of the
-ECDH operation used to encrypt all communications between the client and the YubiKey).
-
-The value returned by the YubiKey is 32 bytes. The
-`AuthenticatorData.GetHmacSecretExtension` method will decrypt that value and return the
-result.
-
-## Two salts
-
-It is possible to pass in two 32-byte salts to the
-`GetAssertionParameters.RequestHmacSecretExtension` method. In that case, the YubiKey will
-return two values. The standard says the second value is used "...when the platform wants
-to roll over the symmetric secret...".
-
-```csharp
-    using (fido2Session = new Fido2Session(yubiKeyDevice))
-    {
-            var getAssertionParameters = new GetAssertionParameters(rp, clientDataHash);
-            getAssertionParameters.RequestHmacSecretExtension(salt1, salt2);
-            . . .
-            IReadOnlyList<GetAssertionData> assertionDataList = fido2Session.GetAssertions(makeCredentialParameters);
-            . . .
-            byte[] hmacSecretValue = assertionDataList[0].AuthenticatorData.GetHmacSecretExtension(
-                fido2Session.AuthProtocol);
-    }
-```
-
-The result will be an array 64 bytes long. The first 32 bytes make up the result based on
-`salt1`, and the second 32 bytes make up the result based on `salt2`.

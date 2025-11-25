@@ -364,25 +364,22 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
             var salt = ReadOnlyMemory<byte>.Empty;
             bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out var authenticatorInfo);
-            if (isValid)
+            if (isValid && authenticatorInfo.Extensions.Contains("hmac-secret"))
             {
-                if (authenticatorInfo.Extensions.Contains("hmac-secret"))
-                {
-                    SampleMenu.WriteMessage(
-                        MessageType.Title, 0,
-                        "\nWould you like the hmac-secret returned with the assertions?\n" +
-                        "If not, type Enter.\n" +
-                        "Otherwise, enter a string that will be used to derive a salt.\n" +
-                        "Normally, a salt is 32 random bytes or the digest of some identifying data.\n" +
-                        "This sample code will perform SHA-256 on the input you provide and send that\n" +
-                        "digest to the YubiKey as the salt.\n");
-                    _ = SampleMenu.ReadResponse(out string dataToDigest);
-                    byte[] dataBytes = System.Text.Encoding.Unicode.GetBytes(dataToDigest);
-                    var digester = CryptographyProviders.Sha256Creator();
-                    _ = digester.TransformFinalBlock(dataBytes, 0, dataBytes.Length);
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "\nWould you like the hmac-secret returned with the assertions?\n" +
+                    "If not, type Enter.\n" +
+                    "Otherwise, enter a string that will be used to derive a salt.\n" +
+                    "Normally, a salt is 32 random bytes or the digest of some identifying data.\n" +
+                    "This sample code will perform SHA-256 on the input you provide and send that\n" +
+                    "digest to the YubiKey as the salt.\n");
+                _ = SampleMenu.ReadResponse(out string dataToDigest);
+                byte[] dataBytes = System.Text.Encoding.Unicode.GetBytes(dataToDigest);
+                var digester = CryptographyProviders.Sha256Creator();
+                _ = digester.TransformFinalBlock(dataBytes, 0, dataBytes.Length);
 
-                    salt = new ReadOnlyMemory<byte>(digester.Hash);
-                }
+                salt = new ReadOnlyMemory<byte>(digester.Hash);
             }
 
             _keyCollector.Operation = Fido2KeyCollectorOperation.GetAssertion;

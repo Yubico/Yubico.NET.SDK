@@ -471,41 +471,41 @@ namespace Yubico.YubiKey.Piv
                 return PivPinOnlyMode.None;
             }
 
-            if (response.Status == ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                if (adminData.TryDecode(response.GetData()))
+                return PivPinOnlyMode.PinDerivedUnavailable;
+            }
+            if (!adminData.TryDecode(response.GetData()))
+            {
+                return PivPinOnlyMode.PinDerivedUnavailable;
+            }
+            if (adminData.Salt is null)
+            {
+                return PivPinOnlyMode.None;
+            }
+            
+            // If we have already collected the PIN, this call will do
+            // nothing (it won't collect it again).
+            specialKeyCollector.VerifyPinAndSave(this, userKeyCollector);
+            // If we're already PIN-protected, then the current mgmt key
+            // is the PIN-protected value. So put the derived key into
+            // the new buffer and compare.
+            // If not, put it into the current buffer and authenticate.
+            _ = specialKeyCollector.DeriveKeyData(
+                (ReadOnlyMemory<byte>)adminData.Salt, ManagementKeyAlgorithm, isPinProtected);
+            if (isPinProtected)
+            {
+                if (specialKeyCollector.GetCurrentMgmtKey().Span
+                    .SequenceEqual(specialKeyCollector.GetNewMgmtKey().Span))
                 {
-                    if (adminData.Salt is null)
-                    {
-                        return PivPinOnlyMode.None;
-                    }
-
-                    // If we have already collected the PIN, this call will do
-                    // nothing (it won't collect it again).
-                    specialKeyCollector.VerifyPinAndSave(this, userKeyCollector);
-
-                    // If we're already PIN-protected, then the current mgmt key
-                    // is the PIN-protected value. So put the derived key into
-                    // the new buffer and compare.
-                    // If not, put it into the current buffer and authenticate.
-                    _ = specialKeyCollector.DeriveKeyData(
-                        (ReadOnlyMemory<byte>)adminData.Salt, ManagementKeyAlgorithm, isPinProtected);
-
-                    if (isPinProtected)
-                    {
-                        if (specialKeyCollector.GetCurrentMgmtKey().Span
-                            .SequenceEqual(specialKeyCollector.GetNewMgmtKey().Span))
-                        {
-                            return PivPinOnlyMode.PinDerived;
-                        }
-                    }
-                    else
-                    {
-                        if (TryAuthenticateWithKeyCollector(true))
-                        {
-                            return PivPinOnlyMode.PinDerived;
-                        }
-                    }
+                    return PivPinOnlyMode.PinDerived;
+                }
+            }
+            else
+            {
+                if (TryAuthenticateWithKeyCollector(true))
+                {
+                    return PivPinOnlyMode.PinDerived;
                 }
             }
 
@@ -1379,16 +1379,18 @@ namespace Yubico.YubiKey.Piv
             // If not 3DES, it is not weak.
             public bool IsKeyDataWeak(PivAlgorithm algorithm)
             {
-                if (algorithm == PivAlgorithm.TripleDes)
+                if (algorithm != PivAlgorithm.TripleDes)
                 {
-                    if (_keyData.Span.Slice(start: 0, length: 8).SequenceEqual(_keyData.Span.Slice(start: 8, length: 8))
-                        || _keyData.Span.Slice(start: 8, length: 8)
-                            .SequenceEqual(_keyData.Span.Slice(start: 16, length: 8)))
-                    {
-                        return true;
-                    }
+                    return false;
                 }
 
+                if (_keyData.Span.Slice(start: 0, length: 8).SequenceEqual(_keyData.Span.Slice(start: 8, length: 8))
+                    || _keyData.Span.Slice(start: 8, length: 8)
+                    .SequenceEqual(_keyData.Span.Slice(start: 16, length: 8)))
+                {
+                    return true;
+                }
+                
                 return false;
             }
         }

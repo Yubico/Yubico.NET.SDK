@@ -541,27 +541,31 @@ namespace Yubico.YubiKey.Piv
             // It will also return true if the mode is None (YubiKey is not
             // Pin-derived), in which case neither the PIN nor mgmt key is
             // verified/authenticated.
-            if (TryGetChangePinMode(pin, out var mode, out retriesRemaining))
+            if (!TryGetChangePinMode(pin, out var mode, out retriesRemaining))
             {
-                if (ManagementKeyAuthenticated || TryAuthenticateManagementKey(managementKey, true))
+                return false;
+            }
+
+            if (!ManagementKeyAuthenticated && !TryAuthenticateManagementKey(managementKey, true))
+            {
+                return false;
+            }
+
+            if (!PinVerified && !TryVerifyPin(pin, out retriesRemaining))
+            {
+                return false;
+            }
+
+            var setRetriesResponse = Connection.SendCommand(setRetriesCommand);
+            if (setRetriesResponse.Status == ResponseStatus.Success)
+            {
+                if (mode != PivPinOnlyMode.None)
                 {
-                    if (PinVerified || TryVerifyPin(pin, out retriesRemaining))
-                    {
-                        var setRetriesResponse = Connection.SendCommand(setRetriesCommand);
-                        if (setRetriesResponse.Status == ResponseStatus.Success)
-                        {
-                            if (mode != PivPinOnlyMode.None)
-                            {
-                                // By passing Empty, this method will use the default PIN.
-                                SetPinOnlyMode(ReadOnlyMemory<byte>.Empty, mode, out _);
-                            }
-
-                            UpdateAdminData();
-
-                            return true;
-                        }
-                    }
+                    // By passing Empty, this method will use the default PIN.
+                    SetPinOnlyMode(ReadOnlyMemory<byte>.Empty, mode, out _);
                 }
+                UpdateAdminData();
+                return true;
             }
 
             return false;

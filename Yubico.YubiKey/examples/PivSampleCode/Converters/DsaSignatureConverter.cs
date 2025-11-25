@@ -83,33 +83,29 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             int offsetR = 0;
             int offsetS = 0;
             bool isValid = false;
-            if (tlvReader.TryReadNestedTlv(out var seqReader, 0x30))
+            if (tlvReader.TryReadNestedTlv(out var seqReader, 0x30) &&
+                seqReader.TryReadValue(out rValue, 0x02) &&
+                seqReader.TryReadValue(out sValue, 0x02))
             {
-                if (seqReader.TryReadValue(out rValue, 0x02))
+                // Skip any leading 00 bytes.
+                while (rValue.Span[offsetR] == 0)
                 {
-                    if (seqReader.TryReadValue(out sValue, 0x02))
+                    offsetR++;
+                    if (offsetR == rValue.Length - 1)
                     {
-                        // Skip any leading 00 bytes.
-                        while (rValue.Span[offsetR] == 0)
-                        {
-                            offsetR++;
-                            if (offsetR == rValue.Length - 1)
-                            {
-                                break;
-                            }
-                        }
-                        while (sValue.Span[offsetS] == 0)
-                        {
-                            offsetS++;
-                            if (offsetS == sValue.Length - 1)
-                            {
-                                break;
-                            }
-                        }
-
-                        isValid = rValue.Length - offsetR <= elementLength && sValue.Length - offsetS <= elementLength;
+                        break;
                     }
                 }
+                while (sValue.Span[offsetS] == 0)
+                {
+                    offsetS++;
+                    if (offsetS == sValue.Length - 1)
+                    {
+                        break;
+                    }
+                }
+
+                isValid = rValue.Length - offsetR <= elementLength && sValue.Length - offsetS <= elementLength;
             }
 
             if (isValid)

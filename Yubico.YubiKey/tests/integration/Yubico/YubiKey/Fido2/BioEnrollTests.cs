@@ -138,12 +138,11 @@ namespace Yubico.YubiKey.Fido2
         {
             bool callCancel = _callCancelCount == 0 ? false : true;
 
-            if (_callCancelCount > 0 && !(arg.LastBioEnrollSampleResult is null))
+            if (_callCancelCount > 0 && 
+                arg.LastBioEnrollSampleResult is not null && 
+                arg.LastBioEnrollSampleResult.RemainingSampleCount != _callCancelCount)
             {
-                if (arg.LastBioEnrollSampleResult.RemainingSampleCount != _callCancelCount)
-                {
-                    callCancel = false;
-                }
+                callCancel = false;
             }
 
             switch (arg.Request)

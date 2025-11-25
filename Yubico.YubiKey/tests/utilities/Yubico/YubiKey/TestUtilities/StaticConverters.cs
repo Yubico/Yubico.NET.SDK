@@ -204,12 +204,9 @@ namespace Yubico.YubiKey.TestUtilities
         /// </remarks>
         public static T ParseEnum<T>(string s) where T : struct
         {
-            if (Enum.TryParse<T>(s, true, out T value))
+            if (Enum.TryParse<T>(s, true, out T value) && Enum.IsDefined(typeof(T), value))
             {
-                if (Enum.IsDefined(typeof(T), value))
-                {
-                    return value;
-                }
+                return value;
             }
             throw new ArgumentException($"Value [{s}] could not be parsed as type [{typeof(T).Name}].");
         }

@@ -136,20 +136,32 @@ namespace Yubico.YubiKey.U2f
             _log.LogInformation("Create a new instance of U2F RegistrationData by decoding.");
             bool isValid = false;
             int certLength = 1;
-            if (encodedResponse.Length > MinEncodedLength)
+
+            if (encodedResponse.Length <= MinEncodedLength)
             {
-                if (encodedResponse.Span[MsgReservedOffset] == MsgReservedValue &&
-                    encodedResponse.Span[MsgKeyHandleOffset] == KeyHandleLength &&
-                    encodedResponse.Span[MsgPublicKeyOffset] == PublicKeyTag)
-                {
-                    var certAndSignatureBytes = encodedResponse.Slice(MsgCertOffset);
-                    var tlvReader = new TlvReader(certAndSignatureBytes);
-                    if (tlvReader.TryReadEncoded(out var cert, CertTag))
-                    {
-                        certLength = cert.Length;
-                        isValid = true;
-                    }
-                }
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidDataEncoding));
+            }
+
+            if (encodedResponse.Span[MsgReservedOffset] != MsgReservedValue ||
+                encodedResponse.Span[MsgKeyHandleOffset] != KeyHandleLength ||
+                encodedResponse.Span[MsgPublicKeyOffset] != PublicKeyTag)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidDataEncoding));
+            }
+
+            var certAndSignatureBytes = encodedResponse.Slice(MsgCertOffset);
+            var tlvReader = new TlvReader(certAndSignatureBytes);
+
+            if (tlvReader.TryReadEncoded(out var cert, CertTag))
+            {
+                certLength = cert.Length;
+                isValid = true;
             }
 
             if (!isValid)

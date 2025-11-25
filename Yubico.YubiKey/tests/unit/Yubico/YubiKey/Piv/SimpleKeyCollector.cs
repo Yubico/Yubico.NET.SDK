@@ -53,12 +53,9 @@ namespace Yubico.YubiKey.Piv
                     return false;
                 }
 
-                if (!(keyEntryData.RetriesRemaining is null))
+                if (keyEntryData.RetriesRemaining is not null && keyEntryData.RetriesRemaining == 1)
                 {
-                    if (keyEntryData.RetriesRemaining == 1)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 

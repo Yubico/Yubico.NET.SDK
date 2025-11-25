@@ -262,25 +262,19 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // Then verify the len(y) is supported.
         private void ReadPssParams(ReadOnlyMemory<byte> algIdParams)
         {
-            if (algIdParams.Length == 2)
+            if (algIdParams.Length == 2 && algIdParams.Span[0] == 0x30 && algIdParams.Span[1] == 0)
             {
-                if (algIdParams.Span[0] == 0x30 && algIdParams.Span[1] == 0)
-                {
-                    PssSaltLength = 20;
-                }
+                PssSaltLength = 20;
             }
-            else if (algIdParams.Length == 50)
+            else if (algIdParams.Length == 50 && algIdParams.Span[16] == algIdParams.Span[44])
             {
-                if (algIdParams.Span[16] == algIdParams.Span[44])
+                PssSaltLength = algIdParams.Span[16] switch
                 {
-                    PssSaltLength = algIdParams.Span[16] switch
-                    {
-                        1 => 32,
-                        2 => 48,
-                        3 => 64,
-                        _ => 0,
-                    };
-                }
+                    1 => 32,
+                    2 => 48,
+                    3 => 64,
+                    _ => 0,
+                };
             }
 
             switch (PssSaltLength)

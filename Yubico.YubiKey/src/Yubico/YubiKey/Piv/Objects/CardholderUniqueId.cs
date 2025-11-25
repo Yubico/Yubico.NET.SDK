@@ -276,18 +276,18 @@ namespace Yubico.YubiKey.Piv.Objects
         // return false.
         private bool TryReadFascNumber(bool isValid, TlvReader tlvReader)
         {
-            if (isValid)
+            if (!isValid)
             {
-                _log.LogInformation("Decode data into CardholderUniqueId: FascNumber.");
-                if (tlvReader.TryReadValue(out var encodedFascn, FascNumberTag))
-                {
-                    if (MemoryExtensions.SequenceEqual<byte>(encodedFascn.Span, FascNumber.Span))
-                    {
-                        var dest = new Memory<byte>(_fascNumber);
-                        encodedFascn.CopyTo(dest);
-                        return true;
-                    }
-                }
+                return false;
+            }
+
+            _log.LogInformation("Decode data into CardholderUniqueId: FascNumber.");
+            if (tlvReader.TryReadValue(out var encodedFascn, FascNumberTag) &&
+                MemoryExtensions.SequenceEqual<byte>(encodedFascn.Span, FascNumber.Span))
+            {
+                var dest = new Memory<byte>(_fascNumber);
+                encodedFascn.CopyTo(dest);
+                return true;
             }
 
             return false;
@@ -300,18 +300,18 @@ namespace Yubico.YubiKey.Piv.Objects
         // return false.
         private bool TryReadGuid(bool isValid, TlvReader tlvReader)
         {
-            if (isValid)
+            if (!isValid)
             {
-                _log.LogInformation("Decode data into CardholderUniqueId: Guid.");
-                if (tlvReader.TryReadValue(out var encodedGuidBytes, GuidTag))
-                {
-                    if (encodedGuidBytes.Length == GuidLength)
-                    {
-                        var dest = new Memory<byte>(_guidValue);
-                        encodedGuidBytes.CopyTo(dest);
-                        return true;
-                    }
-                }
+                return false;
+            }
+
+            _log.LogInformation("Decode data into CardholderUniqueId: Guid.");
+            if (tlvReader.TryReadValue(out var encodedGuidBytes, GuidTag) &&
+                encodedGuidBytes.Length == GuidLength)
+            {
+                var dest = new Memory<byte>(_guidValue);
+                encodedGuidBytes.CopyTo(dest);
+                return true;
             }
 
             return false;
@@ -319,17 +319,17 @@ namespace Yubico.YubiKey.Piv.Objects
 
         private bool TryReadExpirationDate(bool isValid, TlvReader tlvReader)
         {
-            if (isValid)
+            if (!isValid)
             {
-                _log.LogInformation("Decode data into CardholderUniqueId: ExpirationDate.");
-                if (tlvReader.TryReadString(out string theDate, ExpirationDateTag, System.Text.Encoding.ASCII))
-                {
-                    if (theDate.Equals(FixedDate, StringComparison.Ordinal))
-                    {
-                        ExpirationDate = new DateTime(FixedDateYear, FixedDateMonth, FixedDateDay);
-                        return true;
-                    }
-                }
+                return false;
+            }
+
+            _log.LogInformation("Decode data into CardholderUniqueId: ExpirationDate.");
+            if (tlvReader.TryReadString(out string theDate, ExpirationDateTag, System.Text.Encoding.ASCII) &&
+                theDate.Equals(FixedDate, StringComparison.Ordinal))
+            {
+                ExpirationDate = new DateTime(FixedDateYear, FixedDateMonth, FixedDateDay);
+                return true;
             }
 
             return false;
@@ -337,19 +337,19 @@ namespace Yubico.YubiKey.Piv.Objects
 
         private bool TryReadTrailingElements(bool isValid, TlvReader tlvReader)
         {
-            if (isValid)
+            if (!isValid)
             {
-                _log.LogInformation("Decode data into CardholderUniqueId: TrailingElements.");
-                if (tlvReader.TryReadValue(out var signatureBytes, SignatureTag))
-                {
-                    if (signatureBytes.Length == 0 && tlvReader.TryReadValue(out var lrc, LrcTag))
-                    {
-                        if (lrc.Length == 0 && !tlvReader.HasData)
-                        {
-                            return true;
-                        }
-                    }
-                }
+                return false;
+            }
+
+            _log.LogInformation("Decode data into CardholderUniqueId: TrailingElements.");
+            if (tlvReader.TryReadValue(out var signatureBytes, SignatureTag) &&
+                signatureBytes.Length == 0 &&
+                tlvReader.TryReadValue(out var lrc, LrcTag) &&
+                lrc.Length == 0 &&
+                !tlvReader.HasData)
+            {
+                return true;
             }
 
             return false;

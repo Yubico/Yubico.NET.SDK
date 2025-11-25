@@ -84,12 +84,9 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 // inserted. If so, keep using it. If not, find another default.
                 // does not require a chosen YubiKey, this method will do nothing
                 // and return true.
-                if (DefaultChooseYubiKey(menuItem))
+                if (DefaultChooseYubiKey(menuItem) && !RunMenuItem(menuItem))
                 {
-                    if (!RunMenuItem(menuItem))
-                    {
-                        menuItem = Fido2MainMenuItem.Exit;
-                    }
+                    menuItem = Fido2MainMenuItem.Exit;
                 }
 
             } while (menuItem != Fido2MainMenuItem.Exit);

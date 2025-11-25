@@ -349,20 +349,21 @@ namespace Yubico.YubiKey.Piv.Objects
         // return false.
         private bool TryReadUniqueId(bool isValid, TlvReader tlvReader)
         {
-            if (isValid)
+            if (!isValid)
             {
-                _log.LogInformation("Decode data into CardCapabilityContainer: UniqueId.");
-                if (tlvReader.TryReadValue(out var encodedUniqueId, UniqueCardIdTag))
-                {
-                    if (encodedUniqueId.Length == UniqueCardIdLength &&
-                        MemoryExtensions.SequenceEqual<byte>(encodedUniqueId.Slice(AidOffset, AidLength).Span, ApplicationIdentifier.Span))
-                    {
-                        var dest = new Memory<byte>(_uniqueCardIdentifier);
-                        encodedUniqueId.CopyTo(dest);
-                        return true;
-                    }
-                }
+                return false;
             }
+
+            _log.LogInformation("Decode data into CardCapabilityContainer: UniqueId.");
+            if (tlvReader.TryReadValue(out var encodedUniqueId, UniqueCardIdTag) &&
+                encodedUniqueId.Length == UniqueCardIdLength &&
+                MemoryExtensions.SequenceEqual<byte>(encodedUniqueId.Slice(AidOffset, AidLength).Span, ApplicationIdentifier.Span))
+            {
+                var dest = new Memory<byte>(_uniqueCardIdentifier);
+                encodedUniqueId.CopyTo(dest);
+                return true;
+            }
+            
 
             return false;
         }

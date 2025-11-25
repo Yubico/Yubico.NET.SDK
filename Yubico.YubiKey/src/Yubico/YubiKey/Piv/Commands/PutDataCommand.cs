@@ -215,16 +215,13 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _tag;
             set
             {
-                if (value < MinimumVendorTag || value > MaximumVendorTag)
+                if ((value < MinimumVendorTag || value > MaximumVendorTag) && value != BiometricGroupTemplateTag)
                 {
-                    if (value != BiometricGroupTemplateTag)
-                    {
-                        throw new ArgumentException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.InvalidDataTag,
-                                value));
-                    }
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidDataTag,
+                            value));
                 }
                 _tag = value;
             }
@@ -456,21 +453,20 @@ namespace Yubico.YubiKey.Piv.Commands
         //   53 03 01 02 03 04
         private static bool IsDataEncoded(ReadOnlyMemory<byte> encoding)
         {
-            if (encoding.Length != 0)
+            if (encoding.Length == 0)
             {
-                var tlvReader = new TlvReader(encoding);
-                if (tlvReader.PeekTag() == PivPutDataTag)
-                {
-                    if (tlvReader.TryReadValue(out _, PivPutDataTag))
-                    {
-                        if (!tlvReader.HasData)
-                        {
-                            return true;
-                        }
-                    }
-                }
+                return false;
             }
 
+            var tlvReader = new TlvReader(encoding);
+
+            if (tlvReader.PeekTag() == PivPutDataTag &&
+                tlvReader.TryReadValue(out _, PivPutDataTag) &&
+                !tlvReader.HasData)
+            {
+                return true;
+            }
+            
             return false;
         }
 

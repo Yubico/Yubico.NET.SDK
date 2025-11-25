@@ -67,12 +67,9 @@ namespace Yubico.YubiKey.Management.Commands
 
             set
             {
-                if (value.HasValue)
+                if (value.HasValue && (value < ushort.MinValue || value > ushort.MaxValue))
                 {
-                    if (value < ushort.MinValue || value > ushort.MaxValue)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(value));
-                    }
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 _autoEjectTimeout = (ushort?)value;

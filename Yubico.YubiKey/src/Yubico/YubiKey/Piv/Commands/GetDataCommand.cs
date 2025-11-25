@@ -145,16 +145,15 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _tag;
             set
             {
-                if (value < MinimumVendorTag || value > MaximumVendorTag)
+                if ((value < MinimumVendorTag || value > MaximumVendorTag) &&
+                    value != DiscoveryTag && 
+                    value != BiometricGroupTemplateTag)
                 {
-                    if (value != DiscoveryTag && value != BiometricGroupTemplateTag)
-                    {
-                        throw new ArgumentException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.InvalidDataTag,
-                                value));
-                    }
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidDataTag,
+                            value));
                 }
                 _tag = value;
             }

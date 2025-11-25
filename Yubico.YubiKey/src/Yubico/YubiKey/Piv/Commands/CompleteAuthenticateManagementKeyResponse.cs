@@ -150,14 +150,12 @@ namespace Yubico.YubiKey.Piv.Commands
                     // means the OffCard authenticated. If the expected response
                     // is correct, change it to fully authenticated.
                     var tlvReader = new TlvReader(ResponseApdu.Data);
-                    if (tlvReader.TryReadNestedTlv(out tlvReader, EncodingTag))
+                    if (tlvReader.TryReadNestedTlv(out var seqReader, EncodingTag) &&
+                        seqReader.TryReadValue(out var tlvBytes, ResponseTag))
                     {
-                        if (tlvReader.TryReadValue(out var tlvBytes, ResponseTag))
-                        {
-                            return tlvBytes.Span.SequenceEqual(YubiKeyAuthenticationExpectedResponse.Span)
-                                ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
-                                : AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed;
-                        }
+                        return tlvBytes.Span.SequenceEqual(YubiKeyAuthenticationExpectedResponse.Span)
+                            ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
+                            : AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed;
                     }
 
                     throw new MalformedYubiKeyResponseException(

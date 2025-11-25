@@ -28,13 +28,10 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void GetList_Succeeds()
         {
-            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows && !SdkPlatformInfo.IsElevated)
             {
-                if (!SdkPlatformInfo.IsElevated)
-                {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
-                    Assert.True(false);
-                }
+                _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
+                Assert.True(false);
             }
 
             IEnumerable<IYubiKeyDevice> yubiKeys = YubiKeyDevice.FindByTransport(Transport.HidFido);
@@ -46,13 +43,10 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void U2fCommand_Succeeds()
         {
-            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows && !SdkPlatformInfo.IsElevated)
             {
-                if (!SdkPlatformInfo.IsElevated)
-                {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
-                    Assert.True(false);
-                }
+                _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
+                Assert.True(false);
             }
 
             IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
@@ -119,13 +113,10 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void GetProtocolVersion_Succeeds()
         {
-            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows && !SdkPlatformInfo.IsElevated)
             {
-                if (!SdkPlatformInfo.IsElevated)
-                {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
-                    Assert.True(false);
-                }
+                _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
+                Assert.True(false);
             }
 
             IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
@@ -154,13 +145,10 @@ namespace Yubico.YubiKey.U2f
         [InlineData(new byte[] { 0x01, 0x02, 0x03 })]
         public void EchoCommand_GetCorrectData(ReadOnlyMemory<byte> sendData)
         {
-            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows && !SdkPlatformInfo.IsElevated)
             {
-                if (!SdkPlatformInfo.IsElevated)
-                {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
-                    Assert.True(false);
-                }
+                _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
+                Assert.True(false);
             }
 
             IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();

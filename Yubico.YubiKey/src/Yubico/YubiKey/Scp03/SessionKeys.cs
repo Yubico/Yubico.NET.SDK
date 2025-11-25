@@ -56,16 +56,13 @@ namespace Yubico.YubiKey.Scp03
         // Overwrite the memory of the keys
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!_disposed && disposing)
             {
-                if (disposing)
-                {
-                    CryptographicOperations.ZeroMemory(_sessionMacKey.AsSpan());
-                    CryptographicOperations.ZeroMemory(_sessionEncryptionKey.AsSpan());
-                    CryptographicOperations.ZeroMemory(_sessionRmacKey.AsSpan());
-
-                    _disposed = true;
-                }
+                CryptographicOperations.ZeroMemory(_sessionMacKey.AsSpan());
+                CryptographicOperations.ZeroMemory(_sessionEncryptionKey.AsSpan());
+                CryptographicOperations.ZeroMemory(_sessionRmacKey.AsSpan());
+            
+                _disposed = true;
             }
         }
     }

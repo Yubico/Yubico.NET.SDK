@@ -190,12 +190,9 @@ namespace Yubico.YubiKey.TestUtilities
                 var resetCmd = new ResetCommand();
                 ResetResponse resetRsp = fido2Session.Connection.SendCommand(resetCmd);
 
-                if (resetRsp.Status == ResponseStatus.Success && _setPin)
+                if (resetRsp.Status == ResponseStatus.Success && _setPin && !fido2Session.TrySetPin(_pin))
                 {
-                    if (!fido2Session.TrySetPin(_pin))
-                    {
-                        return ResponseStatus.Failed;
-                    }
+                    return ResponseStatus.Failed;
                 }
 
                 return resetRsp.Status;

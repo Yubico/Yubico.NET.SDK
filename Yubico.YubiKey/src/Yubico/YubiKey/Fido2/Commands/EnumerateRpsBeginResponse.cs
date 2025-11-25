@@ -72,15 +72,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             var credentialManagementData = _response.GetData();
 
-            if (credentialManagementData.RelyingParty is not null
-                && credentialManagementData.RelyingPartyIdHash is not null
-                && credentialManagementData.TotalRelyingPartyCount is not null)
+            if (credentialManagementData.RelyingParty is not null &&
+                credentialManagementData.RelyingPartyIdHash is not null &&
+                credentialManagementData.TotalRelyingPartyCount is not null &&
+                credentialManagementData.RelyingParty.IsMatchingRelyingPartyId(credentialManagementData.RelyingPartyIdHash.Value))
             {
-                if (credentialManagementData.RelyingParty.IsMatchingRelyingPartyId(credentialManagementData.RelyingPartyIdHash.Value))
-                {
-                    return (credentialManagementData.TotalRelyingPartyCount.Value, credentialManagementData.RelyingParty);
-                }
-            }
+                return (credentialManagementData.TotalRelyingPartyCount.Value, credentialManagementData.RelyingParty);
+            }   
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
         }

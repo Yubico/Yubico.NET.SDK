@@ -312,28 +312,31 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 response.Content.ReadAsStringAsync().Result,
                 typeof(YubiOtpResponse))!;
 
-            if (!response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
-                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                return yubiOtp?.FinishUrl ?? throw new InvalidOperationException(
+                "The Yubico OTP server returned an invalid response.");
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                string[] errors = yubiOtp.Errors ?? Array.Empty<string>();
+                if (errors.Length == 0)
                 {
-                    string[] errors = yubiOtp.Errors ?? Array.Empty<string>();
-                    if (errors.Length == 0)
-                    {
-                        throw new InvalidOperationException(
-                            "Upload to Yubico OTP server failed with BAD_REQUEST (no details from server).");
-                    }
-                    if (errors.Length == 1)
-                    {
-                        throw new InvalidOperationException(
-                            $"Upload to Yubico OTP server failed with BAD_REQUEST ({GetYubiOtpErrors(errors).First()}).");
-                    }
-                    IEnumerable<Exception> exceptions = GetYubiOtpErrors(errors)
-                        .Select(e => new InvalidOperationException(
-                            $"Upload to Yubico OTP server failed with BAD_REQUEST ({e})"));
-                    throw new AggregateException(
-                        "Errors encountered uploading to Yubico OTP server. See inner exceptions for details",
-                        exceptions);
+                    throw new InvalidOperationException(
+                        "Upload to Yubico OTP server failed with BAD_REQUEST (no details from server).");
                 }
+                if (errors.Length == 1)
+                {
+                    throw new InvalidOperationException(
+                        $"Upload to Yubico OTP server failed with BAD_REQUEST ({GetYubiOtpErrors(errors).First()}).");
+                }
+                IEnumerable<Exception> exceptions = GetYubiOtpErrors(errors)
+                    .Select(e => new InvalidOperationException(
+                        $"Upload to Yubico OTP server failed with BAD_REQUEST ({e})"));
+                throw new AggregateException(
+                    "Errors encountered uploading to Yubico OTP server. See inner exceptions for details",
+                    exceptions);
             }
 
             return yubiOtp?.FinishUrl ?? throw new InvalidOperationException(

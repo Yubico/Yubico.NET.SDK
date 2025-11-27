@@ -17,6 +17,9 @@ limitations under the License. -->
 The SDK allows you to integrate the YubiKey and its applications into your .NET-based
 application or library.
 
+## GitHub repository
+The SDK is open source and available on [GitHub](https://github.com/Yubico/Yubico.NET.SDK). Contributions, issue reports, and feedback are welcome.
+
 ## SDK documentation
 
 The documentation for the .NET YubiKey SDK is split into two main sections:

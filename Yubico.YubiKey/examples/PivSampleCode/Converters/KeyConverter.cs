@@ -127,6 +127,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         private const int AlgorithmFlagPrivate = 1;
         private const int AlgorithmFlagRsa = 2;
         private const int AlgorithmFlagEcdsa = 4;
+        private const int AlgorithmFlagCurve25519 = 8;
 
         private const string AlgorithmRsa = "RSA";
         private const string AlgorithmEcdsa = "ECDsa";

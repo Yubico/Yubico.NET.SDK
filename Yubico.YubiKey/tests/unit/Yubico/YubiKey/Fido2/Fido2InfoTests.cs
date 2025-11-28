@@ -680,7 +680,7 @@ namespace Yubico.YubiKey.Fido2
             byte[] encodedData = GetMinimumEncoded();
 
             var fido2Info = new AuthenticatorInfo(encodedData);
-            Assert.Null(fido2Info.EncCredStoreState);
+            Assert.Equal(ReadOnlyMemory<byte>.Empty, fido2Info.EncCredStoreState);
         }
 
         private static bool CompareIntLists(

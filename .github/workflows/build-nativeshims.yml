@@ -114,13 +114,13 @@ jobs:
           # Create x86_64 C compiler wrapper
           cat > $HOME/zig-wrappers/zig-cc << 'EOF'
           #!/bin/bash
-          exec zig cc -target x86_64-linux-gnu.2.23 "$@"
+          exec zig cc -target x86_64-linux-gnu.2.23 -O2 -s "$@"
           EOF
 
           # Create x86_64 C++ compiler wrapper
           cat > $HOME/zig-wrappers/zig-c++ << 'EOF'
           #!/bin/bash
-          exec zig c++ -target x86_64-linux-gnu.2.23 "$@"
+          exec zig c++ -target x86_64-linux-gnu.2.23 -O2 -s "$@"
           EOF
 
           chmod +x $HOME/zig-wrappers/zig-cc
@@ -264,13 +264,13 @@ jobs:
           # Create aarch64 C compiler wrapper
           cat > $HOME/zig-wrappers/zig-cc << 'EOF'
           #!/bin/bash
-          exec zig cc -target aarch64-linux-gnu.2.23 "$@"
+          exec zig cc -target aarch64-linux-gnu.2.23 -O2 -s "$@"
           EOF
 
           # Create aarch64 C++ compiler wrapper
           cat > $HOME/zig-wrappers/zig-c++ << 'EOF'
           #!/bin/bash
-          exec zig c++ -target aarch64-linux-gnu.2.23 "$@"
+          exec zig c++ -target aarch64-linux-gnu.2.23 -O2 -s "$@"
           EOF
 
           chmod +x $HOME/zig-wrappers/zig-cc

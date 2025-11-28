@@ -646,8 +646,8 @@ namespace Yubico.YubiKey.Fido2
             byte[] encodedData = GetSampleEncoded();
 
             var fido2Info = new AuthenticatorInfo(encodedData);
-            Assert.NotNull(fido2Info.EncCredStoreState);
-
+            
+            Assert.True(fido2Info.EncCredStoreState.HasValue);
             Assert.Equal(correctValue, fido2Info.EncCredStoreState.Value);
         }
 
@@ -657,7 +657,49 @@ namespace Yubico.YubiKey.Fido2
             byte[] encodedData = GetMinimumEncoded();
 
             var fido2Info = new AuthenticatorInfo(encodedData);
-            Assert.Equal(ReadOnlyMemory<byte>.Empty, fido2Info.EncCredStoreState);
+            Assert.False(fido2Info.EncCredStoreState.HasValue);
+        }
+
+        [Fact]
+        public void Decode_PinComplexityPolicyUrl_Correct()
+        {
+            byte[] correctValue = "Example.com"u8.ToArray();
+            byte[] encodedData = GetSampleEncoded();
+
+            var fido2Info = new AuthenticatorInfo(encodedData);
+            
+            Assert.True(fido2Info.PinComplexityPolicyUrl.HasValue);
+            Assert.Equal(correctValue, fido2Info.PinComplexityPolicyUrl.Value);
+        }
+
+        [Fact]
+        public void Decode_NoPinComplexityPolicyUrl_Null()
+        {
+            byte[] encodedData = GetMinimumEncoded();
+
+            var fido2Info = new AuthenticatorInfo(encodedData);
+            Assert.False(fido2Info.PinComplexityPolicyUrl.HasValue);
+        }
+
+        [Fact]
+        public void Decode_EncIdentifier_Correct()
+        {
+            byte[] correctValue = "encIdentifierBytes"u8.ToArray();
+            byte[] encodedData = GetSampleEncoded();
+
+            var fido2Info = new AuthenticatorInfo(encodedData);
+            
+            Assert.True(fido2Info.EncIdentifier.HasValue);
+            Assert.Equal(correctValue, fido2Info.EncIdentifier.Value);
+        }
+
+        [Fact]
+        public void Decode_NoEncIdentifier_Null()
+        {
+            byte[] encodedData = GetMinimumEncoded();
+
+            var fido2Info = new AuthenticatorInfo(encodedData);
+            Assert.False(fido2Info.EncIdentifier.HasValue);
         }
 
         internal static byte[] GetSampleEncoded()

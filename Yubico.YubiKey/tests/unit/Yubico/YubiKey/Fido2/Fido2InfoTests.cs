@@ -60,9 +60,7 @@ namespace Yubico.YubiKey.Fido2
             byte[] encodedData = GetSampleEncoded();
 
             var fido2Info = new AuthenticatorInfo(encodedData);
-            bool isValid = CompareStringLists(correctStrings, fido2Info.Versions);
-
-            Assert.True(isValid);
+            Assert.Equal(correctStrings, fido2Info.Versions);
         }
 
         [Fact]
@@ -77,15 +75,7 @@ namespace Yubico.YubiKey.Fido2
             byte[] encodedData = GetSampleEncoded();
 
             var fido2Info = new AuthenticatorInfo(encodedData);
-            Assert.NotNull(fido2Info.Extensions);
-            if (fido2Info.Extensions is null)
-            {
-                return;
-            }
-
-            bool isValid = CompareStringLists(correctStrings, fido2Info.Extensions);
-
-            Assert.True(isValid);
+            Assert.Equal(correctStrings, fido2Info.Extensions);
         }
 
         [Fact]
@@ -267,8 +257,8 @@ namespace Yubico.YubiKey.Fido2
         {
             string[] correctStrings = new string[]
             {
-                "usb",
-                "nfc"
+                "nfc",
+                "usb"
             };
 
             byte[] encodedData = GetSampleEncoded();
@@ -280,9 +270,7 @@ namespace Yubico.YubiKey.Fido2
                 return;
             }
 
-            bool isValid = CompareStringLists(correctStrings, fido2Info.Transports);
-
-            Assert.True(isValid);
+            Assert.Equal(correctStrings, fido2Info.Transports);
         }
 
         [Fact]
@@ -566,13 +554,11 @@ namespace Yubico.YubiKey.Fido2
         public void Decode_VendorIds_Correct()
         {
             long[] correctIds = new long[] { 0x4d0619f94a0ee581, 0x0000000080000000 };
-
             byte[] encodedData = GetSampleEncoded();
 
             var fido2Info = new AuthenticatorInfo(encodedData);
-            bool isValid = CompareLongLists(correctIds, fido2Info.VendorPrototypeConfigCommands);
 
-            Assert.True(isValid);
+            Assert.Equal(correctIds, fido2Info.VendorPrototypeConfigCommands);
         }
 
         [Fact]
@@ -641,9 +627,7 @@ namespace Yubico.YubiKey.Fido2
                 return;
             }
 
-            bool isValid = CompareIntLists(correctInts, fido2Info.AuthenticatorConfigCommands);
-
-            Assert.True(isValid);
+            Assert.Equal(correctInts, fido2Info.AuthenticatorConfigCommands);
         }
 
         [Fact]
@@ -659,19 +643,12 @@ namespace Yubico.YubiKey.Fido2
         public void Decode_EncCredStoreState_Correct()
         {
             byte[] correctValue = "encCredStoreStateByte"u8.ToArray();
-
             byte[] encodedData = GetSampleEncoded();
 
             var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.NotNull(fido2Info.EncCredStoreState);
-            if (fido2Info.EncCredStoreState is null)
-            {
-                return;
-            }
 
-            bool isValid = MemoryExtensions.SequenceEqual(correctValue, fido2Info.EncCredStoreState.Value.Span);
-
-            Assert.True(isValid);
+            Assert.Equal(correctValue, fido2Info.EncCredStoreState.Value);
         }
 
         [Fact]
@@ -681,76 +658,6 @@ namespace Yubico.YubiKey.Fido2
 
             var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(ReadOnlyMemory<byte>.Empty, fido2Info.EncCredStoreState);
-        }
-
-        private static bool CompareIntLists(
-            int[] correctInts,
-            IReadOnlyList<int>? candidate)
-        {
-            if (candidate is null)
-            {
-                return false;
-            }
-
-            if (correctInts.Length != candidate.Count)
-            {
-                return false;
-            }
-
-            for (int index = 0; index < correctInts.Length; index++)
-            {
-                if (!candidate.Contains(correctInts[index]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool CompareLongLists(
-            long[] correctInts,
-            IReadOnlyList<long>? candidate)
-        {
-            if (candidate is null)
-            {
-                return false;
-            }
-
-            if (correctInts.Length != candidate.Count)
-            {
-                return false;
-            }
-
-            for (int index = 0; index < correctInts.Length; index++)
-            {
-                if (!candidate.Contains(correctInts[index]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool CompareStringLists(
-            string[] correctStrings,
-            IReadOnlyList<string> candidate)
-        {
-            if (correctStrings.Length != candidate.Count)
-            {
-                return false;
-            }
-
-            for (int index = 0; index < correctStrings.Length; index++)
-            {
-                if (!candidate.Contains(correctStrings[index]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         internal static byte[] GetSampleEncoded()

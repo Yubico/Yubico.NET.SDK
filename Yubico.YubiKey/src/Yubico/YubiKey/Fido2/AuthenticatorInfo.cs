@@ -81,6 +81,26 @@ namespace Yubico.YubiKey.Fido2
         public const int DefaultMinimumPinLength = 4;
 
         /// <summary>
+        /// The length of the IV and ciphertext blocks used in AES-128-CBC encryption for encrypted fields.
+        /// </summary>
+        private const int AesBlockLength = 16;
+
+        /// <summary>
+        /// The length of the salt used in HKDF key derivation for encrypted fields.
+        /// </summary>
+        private const int HkdfSaltLength = 32;
+
+        /// <summary>
+        /// The HKDF info string used to derive the decryption key for the encrypted identifier.
+        /// </summary>
+        private static ReadOnlySpan<byte> HkdfInfoEncIdentifier => "encIdentifier"u8;
+
+        /// <summary>
+        /// The HKDF info string used to derive the decryption key for the encrypted credential store state.
+        /// </summary>
+        private static ReadOnlySpan<byte> HkdfInfoEncCredStoreState => "encCredStoreState"u8;
+
+        /// <summary>
         /// The string in the <see cref="Versions"/> property that indicates
         /// FIDO U2F.
         /// </summary>
@@ -598,7 +618,7 @@ namespace Yubico.YubiKey.Fido2
         /// The decrypted identifier as a read-only memory block of bytes, or null if the encrypted identifier is not set.
         /// </returns>
         public ReadOnlyMemory<byte>? GetIdentifier(ReadOnlyMemory<byte> persistentUvAuthToken) =>
-            DecryptEncryptedField(EncIdentifier, persistentUvAuthToken, "encIdentifier"u8);
+            DecryptEncryptedField(EncIdentifier, persistentUvAuthToken, HkdfInfoEncIdentifier);
 
         /// <summary>
         /// Retrieves the credential store state derived from the encrypted credential store state, using the provided persistent UV authentication token.
@@ -610,7 +630,7 @@ namespace Yubico.YubiKey.Fido2
         /// The decrypted credential store state as a read-only memory block of bytes, or null if the encrypted credential store state is not set.
         /// </returns>
         public ReadOnlyMemory<byte>? GetCredStoreState(ReadOnlyMemory<byte> persistentPinUvAuthToken) =>
-            DecryptEncryptedField(EncCredStoreState, persistentPinUvAuthToken, "encCredStoreState"u8);
+            DecryptEncryptedField(EncCredStoreState, persistentPinUvAuthToken, HkdfInfoEncCredStoreState);
 
         /// <summary>
         /// Decrypts an encrypted field using the provided persistent PIN/UV authentication token.
@@ -650,13 +670,13 @@ namespace Yubico.YubiKey.Fido2
                 return null;
             }
 
-            Span<byte> iv = stackalloc byte[16];
-            Span<byte> ct = stackalloc byte[16];
-            Span<byte> salt = stackalloc byte[32];
-            encryptedData.Value.Span[..16].CopyTo(iv);
-            encryptedData.Value.Span[16..].CopyTo(ct);
+            Span<byte> iv = stackalloc byte[AesBlockLength];
+            Span<byte> ct = stackalloc byte[AesBlockLength];
+            Span<byte> salt = stackalloc byte[HkdfSaltLength];
+            encryptedData.Value.Span[..AesBlockLength].CopyTo(iv);
+            encryptedData.Value.Span[AesBlockLength..].CopyTo(ct);
 
-            var key = HkdfUtilities.DeriveKey(persistentPinUvAuthToken.Span, salt, hkdfInfo, 16);
+            var key = HkdfUtilities.DeriveKey(persistentPinUvAuthToken.Span, salt, hkdfInfo, AesBlockLength);
             var decrypted = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);
             CryptographicOperations.ZeroMemory(key.Span);
 

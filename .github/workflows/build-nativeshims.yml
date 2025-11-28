@@ -34,7 +34,9 @@ jobs:
     name: Build Windows
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+        with:
+          persist-credentials: false
       - run: |
           echo 'Running build script: Windows'
           cd Yubico.NativeShims
@@ -50,25 +52,25 @@ jobs:
           } else {
             & ./build-windows.ps1
           }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: win-x64
           path: Yubico.NativeShims/win-x64/**
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: win-x86
           path: Yubico.NativeShims/win-x86/**
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: win-arm64
           path: Yubico.NativeShims/win-arm64/**
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: nuspec
           path: | 
             Yubico.NativeShims/*.nuspec
             Yubico.NativeShims/readme.md
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: msbuild
           path: Yubico.NativeShims/msbuild/*
@@ -77,7 +79,9 @@ jobs:
     name: Build Linux (amd64)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+        with:
+          persist-credentials: false
       - name: Install Zig (pinned version)
         run: |
           ZIG_VERSION="0.15.2"
@@ -218,7 +222,7 @@ jobs:
               readelf -V *.so | grep GLIBC_2 | sort -u
               echo "✅ Binary compatible with Debian 10 (glibc 2.28)"
             '
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: linux-x64
           path: Yubico.NativeShims/linux-x64/*.so
@@ -227,7 +231,9 @@ jobs:
     name: Build Linux (arm64)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+        with:
+          persist-credentials: false
       - name: Install Zig (pinned version)
         run: |
           ZIG_VERSION="0.15.2"
@@ -372,7 +378,7 @@ jobs:
               readelf -V *.so | grep GLIBC_2 | sort -u
               echo "✅ ARM64 binary compatible with Debian 10 (glibc 2.28)"
             '
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: linux-arm64
           path: Yubico.NativeShims/linux-arm64/*.so
@@ -381,7 +387,9 @@ jobs:
     name: Build macOS
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+        with:
+          persist-credentials: false
       - run: |
           echo 'Running build script: macOS'
           cd Yubico.NativeShims
@@ -391,11 +399,11 @@ jobs:
           else
             sh ./build-macOS.sh
           fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: osx-x64
           path: Yubico.NativeShims/osx-x64/**
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: osx-arm64
           path: Yubico.NativeShims/osx-arm64/**
@@ -414,7 +422,7 @@ jobs:
       GITHUB_REPO_URL: https://github.com/${{ github.repository }}
     steps:
       - name: Download contents, set metadata and package
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
       - run: |
           mv nuspec/*.nuspec .
           mv nuspec/readme.md .
@@ -429,13 +437,13 @@ jobs:
       - run: nuget pack Yubico.NativeShims.nuspec
 
       - name: Upload Nuget Package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: NuGet Package NativeShims
           path: Yubico.NativeShims.*.nupkg
 
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be  # v2.4.0
         with:
           subject-path: |
             Yubico.NativeShims/**/*.dll
@@ -452,7 +460,7 @@ jobs:
       packages: write
     if: ${{ github.event.inputs.push-to-dev == 'true' }}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
         with:
           name: NuGet Package NativeShims
       - run: |

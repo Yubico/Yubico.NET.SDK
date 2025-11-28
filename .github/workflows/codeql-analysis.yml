@@ -26,7 +26,7 @@ on:
       - '**.cs'
       - '**.csproj'
       - '**.sln'
-      - '.github/workflows/codeql-analysis.yml'
+      - '.github/workflows/*.yml'
   pull_request:
     branches:
       - main
@@ -37,7 +37,7 @@ on:
       - '**.cs'
       - '**.csproj'
       - '**.sln'
-      - '.github/workflows/codeql-analysis.yml'
+      - '.github/workflows/*.yml'
 
 permissions:
   # required for all workflows
@@ -55,20 +55,31 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+        with:
+          persist-credentials: false
+
+      # Setup .NET with authenticated NuGet source
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9  # v4.3.1
+        with:
+          source-url: https://nuget.pkg.github.com/Yubico/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@5d5cd550d3e189c569da8f16ea8de2d821c9bf7a  # v3.31.2
         with:
-          languages: csharp
+          # Override automatic language detection to only analyze C#
+          # C/C++ code in Yubico.NativeShims is built separately (requires CMake/vcpkg)
+          languages: ['csharp', 'actions']
 
       # Build the project
-      - name: Add local NuGet repository
-        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
-
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration Release --nologo --verbosity minimal Yubico.NET.SDK.sln
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@5d5cd550d3e189c569da8f16ea8de2d821c9bf7a  # v3.31.2

@@ -33,13 +33,15 @@ jobs:
     runs-on: windows-latest
   
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9  # v4.3.1
         with:
           global-json-file: "./global.json"
-      
-      - name: Add local NuGet repository
-        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+          source-url: https://nuget.pkg.github.com/Yubico/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       #- name: Build Yubico.NET.SDK.sln
       #  run: dotnet build --nologo --verbosity normal Yubico.NET.SDK.sln
       - name: "Add DOTNET to path explicitly to address bug where it cannot be found"

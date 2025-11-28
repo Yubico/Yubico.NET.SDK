@@ -340,7 +340,7 @@ namespace Yubico.YubiKey.Fido2
         /// If <c>false</c>, the authenticator is not enforcing a PIN complexity policy
         /// If <c>null</c>, the authenticator does not support this feature.
         /// </summary>
-        public ReadOnlyMemory<byte> PinComplexityPolicyUrl { get; }
+        public ReadOnlyMemory<byte>? PinComplexityPolicyUrl { get; }
 
         /// <summary>
         /// If present, indicates whether the authenticator is enforcing an additional current PIN complexity policy beyond minPINLength.
@@ -526,9 +526,10 @@ namespace Yubico.YubiKey.Fido2
 
                 LongTouchForReset = cborMap.Contains(KeyLongTouchForReset) && cborMap.ReadBoolean(KeyLongTouchForReset);
 
-                EncIdentifier = cborMap.Contains(KeyEncIdentifier)
-                    ? cborMap.ReadByteString(KeyEncIdentifier)
-                    : null;
+                if (cborMap.Contains(KeyEncIdentifier))
+                {
+                    EncIdentifier = cborMap.ReadByteString(KeyEncIdentifier);
+                }
 
                 TransportsForReset = cborMap.Contains(KeyTransportsForReset)
                     ? cborMap.ReadArray<string>(KeyTransportsForReset)
@@ -538,17 +539,19 @@ namespace Yubico.YubiKey.Fido2
                     ? cborMap.ReadBoolean(KeyPinComplexityPolicy)
                     : null;
 
-                PinComplexityPolicyUrl = cborMap.Contains(KeyPinComplexityPolicyUrl)
-                    ? cborMap.ReadByteString(KeyPinComplexityPolicyUrl)
-                    : null;
+                if (cborMap.Contains(KeyPinComplexityPolicyUrl))
+                {
+                    PinComplexityPolicyUrl = cborMap.ReadByteString(KeyPinComplexityPolicyUrl);
+                }
 
                 MaximumPinLength = cborMap.Contains(KeyMaxPinLength)
                     ? cborMap.ReadInt32(KeyMaxPinLength)
                     : 63;
 
-                EncCredStoreState = cborMap.Contains(KeyEncCredStoreState)
-                    ? cborMap.ReadByteString(KeyEncCredStoreState)
-                    : null;
+                if (cborMap.Contains(KeyEncCredStoreState))
+                {
+                    EncCredStoreState = cborMap.ReadByteString(KeyEncCredStoreState);
+                }
 
                 AuthenticatorConfigCommands = cborMap.Contains(KeyAuthenticatorConfigCommands)
                     ? cborMap.ReadArray<int>(KeyAuthenticatorConfigCommands)
@@ -613,9 +616,21 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <param name="persistentUvAuthToken">
         /// The persistent UV authentication token used to derive the key for decryption.
+        /// Must be a valid, decrypted token (not encrypted).
         /// </param>
         /// <returns>
-        /// The decrypted identifier as a read-only memory block of bytes, or null if the encrypted identifier is not set.
+        /// <para>
+        /// A nullable <see cref="ReadOnlyMemory{T}"/> containing the decrypted 16-byte identifier.
+        /// </para>
+        /// <para>
+        /// Returns <c>null</c> if:
+        /// - The authenticator does not support <c>encIdentifier</c> (firmware &lt; 5.8.0)
+        /// - The <paramref name="persistentUvAuthToken"/> is empty or invalid
+        /// </para>
+        /// <para>
+        /// Check <c>result.HasValue</c> before accessing <c>result.Value</c>.
+        /// When <c>HasValue</c> is true, the value will always be a valid 16-byte identifier.
+        /// </para>
         /// </returns>
         public ReadOnlyMemory<byte>? GetIdentifier(ReadOnlyMemory<byte> persistentUvAuthToken) =>
             DecryptEncryptedField(EncIdentifier, persistentUvAuthToken, HkdfInfoEncIdentifier);
@@ -625,9 +640,21 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <param name="persistentPinUvAuthToken">
         /// The persistent PIN/UV authentication token used to derive the key for decryption.
+        /// Must be a valid, decrypted token (not encrypted).
         /// </param>
         /// <returns>
-        /// The decrypted credential store state as a read-only memory block of bytes, or null if the encrypted credential store state is not set.
+        /// <para>
+        /// A nullable <see cref="ReadOnlyMemory{T}"/> containing the decrypted 16-byte credential store state.
+        /// </para>
+        /// <para>
+        /// Returns <c>null</c> if:
+        /// - The authenticator does not support <c>encCredStoreState</c> (firmware &lt; 5.8.0)
+        /// - The <paramref name="persistentPinUvAuthToken"/> is empty or invalid
+        /// </para>
+        /// <para>
+        /// Check <c>result.HasValue</c> before accessing <c>result.Value</c>.
+        /// When <c>HasValue</c> is true, the value will always be a valid 16-byte state.
+        /// </para>
         /// </returns>
         public ReadOnlyMemory<byte>? GetCredStoreState(ReadOnlyMemory<byte> persistentPinUvAuthToken) =>
             DecryptEncryptedField(EncCredStoreState, persistentPinUvAuthToken, HkdfInfoEncCredStoreState);

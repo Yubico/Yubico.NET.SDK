@@ -673,14 +673,15 @@ namespace Yubico.YubiKey.Fido2
             Span<byte> iv = stackalloc byte[AesBlockLength];
             Span<byte> ct = stackalloc byte[AesBlockLength];
             Span<byte> salt = stackalloc byte[HkdfSaltLength];
+
             encryptedData.Value.Span[..AesBlockLength].CopyTo(iv);
             encryptedData.Value.Span[AesBlockLength..].CopyTo(ct);
 
-            var key = HkdfUtilities.DeriveKey(persistentPinUvAuthToken.Span, salt, hkdfInfo, AesBlockLength);
-            var decrypted = AesUtilities.AesCbcDecrypt(key.Span, iv, ct);
-            CryptographicOperations.ZeroMemory(key.Span);
+            using var keyHandle = new ZeroingMemoryHandle(
+                HkdfUtilities.DeriveKey(persistentPinUvAuthToken.Span, salt, hkdfInfo, AesBlockLength)
+            );
 
-            return decrypted;
+            return AesUtilities.AesCbcDecrypt(keyHandle.Data.Span, iv, ct);
         }
 
         /// <summary>

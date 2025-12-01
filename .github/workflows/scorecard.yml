@@ -4,17 +4,15 @@
 
 name: Scorecard supply-chain security
 on:
-  workflow_dispatch:
-
   # For Branch-Protection check. Only the default branch is supported. See
   # https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection
-  # branch_protection_rule:
+  branch_protection_rule:
   # To guarantee Maintained check is occasionally updated. See
   # https://github.com/ossf/scorecard/blob/main/docs/checks.md#maintained
   schedule:
     - cron: '39 6 * * 0'
   push:
-    branches: [ "oskar/ossf-scorecard" ]
+    branches: [ "develop" ]
 
 # Declare default permissions as read only.
 permissions: read-all
@@ -24,7 +22,7 @@ jobs:
     name: Scorecard analysis
     runs-on: ubuntu-latest
     # `publish_results: true` only works when run from the default branch. conditional can be removed if disabled.
-    if: github.ref == 'refs/heads/oskar/ossf-scorecard'
+    if: github.event.repository.default_branch == github.ref_name || github.event_name == 'pull_request'
     permissions:
       # Needed to upload the results to code-scanning dashboard.
       security-events: write
@@ -41,7 +39,6 @@ jobs:
           persist-credentials: false
 
       - name: "Run analysis"
-        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         uses: ossf/scorecard-action@f49aabe0b5af0936a0987cfb85d86b75731b0186 # v2.4.1
         with:
           results_file: results.sarif

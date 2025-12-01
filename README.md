@@ -18,6 +18,7 @@ limitations under the License. -->
 > ![tests-ubuntu-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-ubuntu.yml/badge.svg)
 > ![tests-macos-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-macos.yml/badge.svg)
 > ![codeql-analysis-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/codeql-analysis.yml/badge.svg)
+> [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Yubico/Yubico.NET.SDK/badge)](https://scorecard.dev/viewer/?uri=github.com/Yubico/Yubico.NET.SDK)
 
 # .NET YubiKey SDK
 

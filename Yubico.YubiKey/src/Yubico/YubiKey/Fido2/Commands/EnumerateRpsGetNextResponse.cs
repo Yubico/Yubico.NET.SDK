@@ -43,9 +43,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         public RelyingParty GetData()
         {
             var credentialManagementData = _response.GetData();
-            if (credentialManagementData.RelyingParty is not null &&
+
+            bool conditionsMet = 
+                credentialManagementData.RelyingParty is not null &&
                 credentialManagementData.RelyingPartyIdHash is not null &&
-                credentialManagementData.RelyingParty.IsMatchingRelyingPartyId(credentialManagementData.RelyingPartyIdHash.Value))
+                credentialManagementData.RelyingParty.IsMatchingRelyingPartyId(credentialManagementData.RelyingPartyIdHash.Value);
+
+            if (conditionsMet)
             {
                 return credentialManagementData.RelyingParty;
             }

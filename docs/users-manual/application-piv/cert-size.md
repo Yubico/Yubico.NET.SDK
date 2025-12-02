@@ -24,13 +24,13 @@ It is possible to store up to 24 private key/certificate pairs in the PIV slots 
 
 If you attempt to load a certificate that is larger than the key's maximum allowable certificate size (as indicated in the table below), the YubiKey will reject it, and the SDK will throw an exception.
 
-|    YubiKey Version    | Maximum Size in Bytes |
-|:---------------------:|:---------------------:|
-| before 4.0 (e.g. NEO) |         2025          |
-|          4.x          |         3052          |
-|       4.x FIPS        |         3052          |
-|          5.x          |         3052          |
-|       5.x FIPS        |         3052          |
+| YubiKey (Model and Firmware)     | Maximum Size in Bytes |
+|:--------------------------------:|:---------------------:|
+| NEO (prior to 4.x)               |         2025          |
+| 4 Series (4.x)                   |         3052          |
+| 4 FIPS Series (4.x)              |         3052          |
+| 5 Series (5.x)                   |         3052          |
+| 5 FIPS Series (5.x)              |         3052          |
 
 ## Total space available for certificates
 
@@ -43,10 +43,10 @@ Note that that total amount of storage on a YubiKey (for certificates, PUT DATA 
 etc.) is about 51,000 bytes. Hence, if a YubiKey is loaded with 49,000 bytes of certificates,
 there will be very little space left for anything else.
 
-|    YubiKey Version    | Maximum Total Certificate<br/>Space Available | Maximum Average<br/>Certificate Size | Number of Certificates<br/>at Maximum Size |
-|:---------------------:|:---------------------------------------------:|:------------------------------------:|:------------------------------------------:|
-| before 4.0 (e.g. NEO) |                  8100                         |    4 certs at 2025 bytes             |        4 certs at 2025 bytes               |
-|          4.x          |              about 49,800                     |   24 certs at 2075 bytes             |       16 certs at 3052 bytes               |
-|       4.x FIPS        |              about 49,800                     |   24 certs at 2075 bytes             |       16 certs at 3052 bytes               |
-|          5.x          |              about 50,000                     |   24 certs at 2084 bytes             |       16 certs at 3052 bytes               |
-|       5.x FIPS        |              about 49,890                     |   24 certs at 2079 bytes             |       16 certs at 3052 bytes               |
+| YubiKey<br/>(Model and Firmware) | Maximum Total Certificate<br/>Space Available | Maximum Average<br/>Certificate Size | Number of Certificates<br/>at Maximum Size |
+|:--------------------------------:|:---------------------------------------------:|:------------------------------------:|:------------------------------------------:|
+| NEO (prior to 4.x)               |                  8100                         |    4 certs at 2025 bytes             |        4 certs at 2025 bytes               |
+|    4 Series (4.x)                |              about 49,800                     |   24 certs at 2075 bytes             |       16 certs at 3052 bytes               |
+|  4 FIPS Series (4.x)             |              about 49,800                     |   24 certs at 2075 bytes             |       16 certs at 3052 bytes               |
+|    5 Series (5.x)                |              about 50,000                     |   24 certs at 2084 bytes             |       16 certs at 3052 bytes               |
+|  5 FIPS Series (5.x)             |              about 49,890                     |   24 certs at 2079 bytes             |       16 certs at 3052 bytes               |

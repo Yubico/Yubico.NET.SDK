@@ -25,7 +25,7 @@ It is possible to store up to 24 private key/certificate pairs in the PIV slots 
 
 ## Maximum size for a single certificate
 
-If you attempt to load a certificate that is larger than the key's maximum allowable certificate size (as indicated in the table below), the YubiKey will reject it, and the SDK will throw an exception.
+If you attempt to load a certificate that is larger than the YubiKey's maximum allowable certificate size (as indicated in the table below), the YubiKey will reject it, and the SDK will throw an exception.
 
 | YubiKey (Model and Firmware)     | Maximum Size in Bytes |
 |:--------------------------------:|:---------------------:|
@@ -37,7 +37,7 @@ If you attempt to load a certificate that is larger than the key's maximum allow
 
 ## Total space available for certificates
 
-Although YubiKeys with firmware version 4.x and higher will allow 3052-byte certificates, they will not be able to store 24 certificates of that size due to the key's total certificate space limit. Even if a YubiKey has empty certificate slots available, you cannot fill them once the maximum certificate space has been reached.  
+Although YubiKeys with firmware version 4.x and higher will allow 3052-byte certificates, they will not be able to store 24 certificates of that size due to the YubiKey's total certificate space limit. Even if a YubiKey has empty certificate slots available, you cannot fill them once the maximum certificate space has been reached.  
 
 However, a YubiKey NEO, which only has four slots, will be able to hold four certificates of the maximum
 length.

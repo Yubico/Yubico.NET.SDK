@@ -330,6 +330,9 @@ namespace Yubico.YubiKey
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
+            // Give the operating system a short moment to handle the re-enumeration so
+            // callers that immediately attempt to access the device don't hit errors.
+            System.Threading.Thread.Sleep(100);
         }
 
         /// <inheritdoc/>
@@ -352,6 +355,9 @@ namespace Yubico.YubiKey
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
+            // Give the operating system a short moment to handle the re-enumeration so
+            // callers that immediately attempt to access the device don't hit errors.
+            System.Threading.Thread.Sleep(100);
         }
 
         /// <inheritdoc/>

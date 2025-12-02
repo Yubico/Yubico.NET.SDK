@@ -19,7 +19,6 @@ limitations under the License. -->
 > ![tests-macos-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-macos.yml/badge.svg)
 > ![codeql-analysis-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/codeql-analysis.yml/badge.svg)
 
-
 # .NET YubiKey SDK
 
 Enterprise-grade cross-platform SDK for YubiKey integration, built on .NET.

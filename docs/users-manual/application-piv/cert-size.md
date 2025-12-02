@@ -36,17 +36,17 @@ If you attempt to load a certificate that is larger than the key's maximum allow
 
 Although YubiKeys with firmware version 4.x and higher will allow 3052-byte certificates, they will not be able to store 24 certificates of that size due to the key's total certificate space limit. Even if a YubiKey has empty certificate slots available, you cannot fill them once the maximum certificate space has been reached.  
 
-However, a YubiKey NEO, which only has four slots, will be able to hold four certs of the maximum
+However, a YubiKey NEO, which only has four slots, will be able to hold four certificates of the maximum
 length.
 
-Note that that total amount of storage on a YubiKey (for certs, PUT DATA objects,
-etc.) is about 51,000 bytes. Hence, if a YubiKey is loaded with 49,000 bytes of certs,
+Note that that total amount of storage on a YubiKey (for certificates, PUT DATA objects,
+etc.) is about 51,000 bytes. Hence, if a YubiKey is loaded with 49,000 bytes of certificates,
 there will be very little space left for anything else.
 
-|    YubiKey Version    | Maximum Total Cert<br/>Space Available | Maximum Average<br/>Cert Size | Number of Certs<br/>at Maximum Size |
-|:---------------------:|:--------------------------------------:|:-----------------------------:|:-----------------------------------:|
-| before 4.0 (e.g. NEO) |                  8100                  |    4 certs at 2025 bytes      |        4 certs at 2025 bytes        |
-|          4.x          |              about 49,800              |   24 certs at 2075 bytes      |       16 certs at 3052 bytes        |
-|       4.x FIPS        |              about 49,800              |   24 certs at 2075 bytes      |       16 certs at 3052 bytes        |
-|          5.x          |              about 50,000              |   24 certs at 2084 bytes      |       16 certs at 3052 bytes        |
-|       5.x FIPS        |              about 49,890              |   24 certs at 2079 bytes      |       16 certs at 3052 bytes        |
+|    YubiKey Version    | Maximum Total Certificate<br/>Space Available | Maximum Average<br/>Certificate Size | Number of Certificates<br/>at Maximum Size |
+|:---------------------:|:---------------------------------------------:|:------------------------------------:|:------------------------------------------:|
+| before 4.0 (e.g. NEO) |                  8100                         |    4 certs at 2025 bytes             |        4 certs at 2025 bytes               |
+|          4.x          |              about 49,800                     |   24 certs at 2075 bytes             |       16 certs at 3052 bytes               |
+|       4.x FIPS        |              about 49,800                     |   24 certs at 2075 bytes             |       16 certs at 3052 bytes               |
+|          5.x          |              about 50,000                     |   24 certs at 2084 bytes             |       16 certs at 3052 bytes               |
+|       5.x FIPS        |              about 49,890                     |   24 certs at 2079 bytes             |       16 certs at 3052 bytes               |

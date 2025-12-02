@@ -20,6 +20,9 @@ limitations under the License. -->
 
 It is possible to store up to 24 private key/certificate pairs in the PIV slots for YubiKeys with firmware version 4.x and higher. However, there are limits to the size of each certificate and the total space available for all certificates.
 
+> [!NOTE]
+> In practice, the size of a key/certificate pair is determined by the choice of algorithm and key length (e.g. RSA 1024 vs RSA 4096), certificate complexity (e.g. use of OIDs, size attributes), the presence of PIV attestation objects, etc.
+
 ## Maximum size for a single certificate
 
 If you attempt to load a certificate that is larger than the key's maximum allowable certificate size (as indicated in the table below), the YubiKey will reject it, and the SDK will throw an exception.

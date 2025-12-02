@@ -30,6 +30,8 @@ Features:
 
 Bug Fixes:
 
+- The ``YubiKeyDevice`` properties ``ChallengeResponseTimeout``, ``AutoEjectTimeout``, ``IsNfcRestricted``, ``DeviceFlags``, and ``ConfigurationLocked`` have been modified so that they are set immediately after their respective configuration methods are called instead of after a refresh. ``YubiKeyDevice`` integration tests have also been updated to improve error handling and validate the modified ``YubiKeyDevice`` properties. ([#348](https://github.com/Yubico/Yubico.NET.SDK/pull/348))
+
 - Error handling and logging in the ``DesktopSmartCardDeviceListener`` class have been simplified and improved via a new private method, ``HandleSCardGetStatusChangeResult``, which processes common ``SCardGetStatusChange`` result codes, including those for cancellation, timeouts, and non-critical errors. ([#339](https://github.com/Yubico/Yubico.NET.SDK/pull/339))
 
 Documentation:

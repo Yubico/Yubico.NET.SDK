@@ -62,7 +62,7 @@ Features:
 
   - [thirdPartyPayment extension](xref:Fido2ThirdPartyPayment): This extension enables YubiKeys to be used for payment authentication scenarios, including Secure Payment Confirmation (SPC) workflows, where the transaction initiator is not the relying party.
 
-  - hmac-secret-mc extension: [GetHmacSecretExtension](xref:Yubico.YubiKey.Fido2.AuthenticatorData.GetHmacSecretExtension%28Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase%29) now handles both hmac-secret and hmac-secret-mc extensions when extracting and decrypting secrets. The hmac-secret-mc extension enables PRF (Pseudo-Random Function) during [MakeCredential()](xref:Yubico.YubiKey.Fido2.Fido2Session.MakeCredential%28Yubico.YubiKey.Fido2.MakeCredentialParameters%29).
+  - [hmac-secret-mc extension](xref:Fido2HmacSecret): This extension enables the retrieval of a symmetric secret during ``MakeCredential()``. The secret, which can be used for encryption/decryption, supports the use of PRF (Pseudo-Random Function) with YubiKeys.
 
   - Additional ``AuthenticatorInfo`` properties: The SDK now supports parsing of several new [AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo) properties, which are returned when calling the [GetInfoCommand()](xref:Yubico.YubiKey.Fido2.Commands.GetInfoCommand). Properties include ``AttestationFormats``, ``UvCountSinceLastPinEntry``, ``LongTouchForReset``, ``EncIdentifier``, ``TransportsForReset``, ``PinComplexityPolicy``, ``PinComplexityPolicyUrl``, and ``MaxPinLength``.
 

@@ -76,15 +76,15 @@ jobs:
       symbols-packages-id: ${{ steps.symbols-upload.outputs.artifact-id }}
       assemblies-id: ${{ steps.assemblies-upload.outputs.artifact-id }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602  # v5.0.1
         with:
           global-json-file: "./global.json"
-
-      # Add local NuGet repository if version is not a plain release (i.e., has a suffix, e.g., -prerelease)
-      - name: Add local NuGet repository for non-release versions
-        if: ${{ github.event.inputs.version && (contains(github.event.inputs.version, '-')) }}
-        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+          source-url: https://nuget.pkg.github.com/Yubico/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set build version
         if: ${{ github.event.inputs.version }}
@@ -96,7 +96,9 @@ jobs:
 
       # Build the project
       - name: Build Yubico.NET.SDK.sln
-        run: dotnet pack --configuration Release --nologo --verbosity minimal -p:treatWarningsAsErrors=true Yubico.NET.SDK.sln 
+        run: dotnet pack --configuration Release --nologo --verbosity minimal -p:treatWarningsAsErrors=true Yubico.NET.SDK.sln
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
       # Build the documentation
       - name: Build docs
@@ -107,7 +109,7 @@ jobs:
       # Upload documentation log
       - name: "Save build artifacts: Docs log"
         id: docs-log-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
         with:
           name: Documentation log
           path: docfx.log
@@ -116,7 +118,7 @@ jobs:
       # Upload documentation
       - name: "Save build artifacts: Docs"
         id: docs-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
         with:
           name: Documentation
           path: docs/_site/
@@ -125,7 +127,7 @@ jobs:
       # Upload NuGet packages
       - name: "Save build artifacts: Nuget Packages"
         id: nuget-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
         with:
           name: Nuget Packages
           path: |
@@ -136,7 +138,7 @@ jobs:
       # Upload symbols
       - name: "Save build artifacts: Symbols Packages"
         id: symbols-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
         with:
           name: Symbols Packages
           path: |
@@ -147,7 +149,7 @@ jobs:
       # Upload assemblies
       - name: "Save build artifacts: Assemblies"
         id: assemblies-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
         with:
           name: Assemblies
           path: |
@@ -157,7 +159,7 @@ jobs:
       
       # Generate artifact attestation
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a  # v3.0.0
         with:
           subject-path: |
             Yubico.Core/src/bin/Release/*.nupkg
@@ -185,15 +187,21 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53  # v6.0.0
         with:
           name: Nuget Packages
+      - uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602  # v5.0.1
+        with:
+          source-url: https://nuget.pkg.github.com/Yubico/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           $core = (Get-ChildItem -Recurse Yubico.Core/*.nupkg)[0].FullName
           $yubikey = (Get-ChildItem -Recurse Yubico.YubiKey/*.nupkg)[0].FullName
-          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
           dotnet nuget push $core --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
           dotnet nuget push $yubikey --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-summary:
     name: Build summary

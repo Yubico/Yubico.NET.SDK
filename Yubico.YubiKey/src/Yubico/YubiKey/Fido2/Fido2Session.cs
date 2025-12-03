@@ -129,18 +129,33 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// <para>
-        /// This method leverages the <c>encIdentifier</c> value obtained from the authenticator's
+        /// This property leverages the <c>encIdentifier</c> value obtained from the authenticator's
         /// <c>authenticatorGetInfo</c> response. The <c>encIdentifier</c> is an encrypted byte string
         /// containing a device identifier that is unique to the authenticator.
         /// </para>
         /// <para>
-        /// A valid and active persistent PIN/UV Authentication Token (<c>persistentPinUvAuthToken</c>) is required to decrypt the identifier.
-        /// The authenticator must also support and return the `encIdentifier` in its `getInfo` response (YubiKeys v5.8.0 and later).
+        /// A valid and active persistent PIN/UV Authentication Token is automatically obtained if needed.
+        /// The authenticator must support and return the `encIdentifier` in its `getInfo` response (YubiKeys v5.8.0 and later).
+        /// </para>
+        /// <para>
+        /// The identifier remains constant across PIN changes and resets, allowing platforms to track
+        /// the same physical authenticator across different sessions and states.
         /// </para>
         /// </remarks>
         /// <returns>
-        /// A byte array containing the decrypted 128-bit (16-byte) unique device identifier.
-        /// Returns null or throws an exception if the identifier cannot be decrypted (e.g., if the PPUAT is invalid or the <c>encIdentifier</c> is missing).
+        /// <para>
+        /// A nullable <see cref="ReadOnlyMemory{T}"/> containing the decrypted 16-byte unique device identifier.
+        /// </para>
+        /// <para>
+        /// Returns <c>null</c> if:
+        /// - The YubiKey firmware does not support this feature (firmware &lt; 5.8.0)
+        /// - The persistent PIN/UV auth token could not be obtained
+        /// - The user cancels PIN entry when prompted
+        /// </para>
+        /// <para>
+        /// Always check <c>result.HasValue</c> before accessing <c>result.Value</c>.
+        /// When <c>HasValue</c> is true, the value will always contain a valid 16-byte identifier.
+        /// </para>
         /// </returns>
         public ReadOnlyMemory<byte>? AuthenticatorIdentifier
         {
@@ -149,6 +164,51 @@ namespace Yubico.YubiKey.Fido2
                 var ppuat = GetReadOnlyCredMgmtToken();
                 return ppuat.HasValue
                     ? AuthenticatorInfo.GetIdentifier(ppuat.Value)
+                    : null;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves and decrypts the authenticator's credential store state.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This property leverages the <c>encCredStoreState</c> value obtained from the authenticator's
+        /// <c>authenticatorGetInfo</c> response. The <c>encCredStoreState</c> is an encrypted byte string
+        /// that platforms can use to detect credential store changes across resets.
+        /// </para>
+        /// <para>
+        /// A valid and active persistent PIN/UV Authentication Token is automatically obtained if needed.
+        /// The authenticator must support and return the `encCredStoreState` in its `getInfo` response (YubiKeys v5.8.0 and later).
+        /// </para>
+        /// <para>
+        /// By comparing the credential store state before and after operations (or across sessions), platforms can detect
+        /// when credentials have been added, removed, or when the authenticator has been reset. The state changes
+        /// whenever the credential store is modified.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// <para>
+        /// A nullable <see cref="ReadOnlyMemory{T}"/> containing the decrypted 16-byte credential store state.
+        /// </para>
+        /// <para>
+        /// Returns <c>null</c> if:
+        /// - The YubiKey firmware does not support this feature (firmware &lt; 5.8.0)
+        /// - The persistent PIN/UV auth token could not be obtained
+        /// - The user cancels PIN entry when prompted
+        /// </para>
+        /// <para>
+        /// Always check <c>result.HasValue</c> before accessing <c>result.Value</c>.
+        /// When <c>HasValue</c> is true, the value will always contain a valid 16-byte state.
+        /// </para>
+        /// </returns>
+        public ReadOnlyMemory<byte>? AuthenticatorCredStoreState
+        {
+            get
+            {
+                var ppuat = GetReadOnlyCredMgmtToken();
+                return ppuat.HasValue
+                    ? AuthenticatorInfo.GetCredStoreState(ppuat.Value)
                     : null;
             }
         }

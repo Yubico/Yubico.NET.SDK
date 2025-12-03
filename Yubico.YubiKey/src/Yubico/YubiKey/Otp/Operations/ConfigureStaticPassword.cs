@@ -327,6 +327,21 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <inheritdoc cref="OtpSettings{T}.AllowManualUpdate(bool)"/>
         public ConfigureStaticPassword AllowManualUpdate(bool setConfig = true) =>
             Settings.AllowManualUpdate(setConfig);
+
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberApiVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureStaticPassword"/> instance.</returns>
+        public ConfigureStaticPassword SetSerialNumberApiVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberApiVisible(setConfig);
+
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberButtonVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureStaticPassword"/> instance.</returns>
+        public ConfigureStaticPassword SetSerialNumberButtonVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberButtonVisible(setConfig);
+
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberUsbVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureStaticPassword"/> instance.</returns>
+        public ConfigureStaticPassword SetSerialNumberUsbVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberUsbVisible(setConfig);
         #endregion
         #endregion
 

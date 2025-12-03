@@ -177,5 +177,22 @@ namespace Yubico.YubiKey.Otp.Operations
             _languageCode = languageCode;
             return this;
         }
+
+        #region Flags to Relay
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberApiVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureNdef"/> instance.</returns>
+        public ConfigureNdef SetSerialNumberApiVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberApiVisible(setConfig);
+
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberButtonVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureNdef"/> instance.</returns>
+        public ConfigureNdef SetSerialNumberButtonVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberButtonVisible(setConfig);
+
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberUsbVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureNdef"/> instance.</returns>
+        public ConfigureNdef SetSerialNumberUsbVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberUsbVisible(setConfig);
+        #endregion
     }
 }

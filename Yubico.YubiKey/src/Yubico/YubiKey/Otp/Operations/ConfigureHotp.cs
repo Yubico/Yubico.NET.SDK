@@ -262,6 +262,21 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
         public ConfigureHotp SendReferenceString(bool setConfig = true) =>
             Settings.SendReferenceString(setConfig);
+
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberApiVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
+        public ConfigureHotp SetSerialNumberApiVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberApiVisible(setConfig);
+
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberButtonVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
+        public ConfigureHotp SetSerialNumberButtonVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberButtonVisible(setConfig);
+
+        /// <inheritdoc cref="OtpSettings{T}.SetSerialNumberUsbVisible(bool)"/>
+        /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
+        public ConfigureHotp SetSerialNumberUsbVisible(bool setConfig = true) =>
+            Settings.SetSerialNumberUsbVisible(setConfig);
         #endregion
         #endregion
 

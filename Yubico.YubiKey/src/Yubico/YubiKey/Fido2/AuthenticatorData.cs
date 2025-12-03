@@ -227,7 +227,7 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public byte[] GetCredBlobExtension()
         {
-            if (!TryGetExtensionData(Fido2ExtensionKeys.CredBlob, out var encodedData))
+            if (!TryGetExtensionData(Fido2.Extensions.CredBlob, out var encodedData))
             {
                 return Array.Empty<byte>();
             }
@@ -250,7 +250,7 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public bool GetThirdPartyPaymentExtension()
         {
-            if (!TryGetExtensionData(Fido2ExtensionKeys.ThirdPartyPayment, out var encodedData))
+            if (!TryGetExtensionData(Fido2.Extensions.ThirdPartyPayment, out var encodedData))
             {
                 return false;
             }
@@ -276,7 +276,7 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public int? GetMinPinLengthExtension()
         {
-            if (!TryGetExtensionData(Fido2ExtensionKeys.MinPinLength, out var encodedData))
+            if (!TryGetExtensionData(Fido2.Extensions.MinPinLength, out var encodedData))
             {
                 return null;
             }
@@ -339,13 +339,13 @@ namespace Yubico.YubiKey.Fido2
         {
             Guard.IsNotNull(authProtocol, nameof(authProtocol));
 
-            if (!TryGetExtensionData(Fido2ExtensionKeys.HmacSecret, out var encodedData))
+            if (!TryGetExtensionData(Fido2.Extensions.HmacSecret, out var encodedData))
             {
                 return Array.Empty<byte>();
             }
 
             bool hasHmacMcSecret = encodedData.Span[0] == CborHelpers.True;
-            if (hasHmacMcSecret && !TryGetExtensionData(Fido2ExtensionKeys.HmacSecretMc, out encodedData))
+            if (hasHmacMcSecret && !TryGetExtensionData(Fido2.Extensions.HmacSecretMc, out encodedData))
             {
                 return Array.Empty<byte>();
             }
@@ -374,7 +374,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public CredProtectPolicy GetCredProtectExtension()
         {
-            if (!TryGetExtensionData(Fido2ExtensionKeys.CredProtect, out var encodedValue))
+            if (!TryGetExtensionData(Fido2.Extensions.CredProtect, out var encodedValue))
             {
                 return CredProtectPolicy.None;
             }

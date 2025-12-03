@@ -28,7 +28,7 @@ Features:
 
 - It is now possible to toggle serial number visibility (over [API](xref:Yubico.YubiKey.Otp.OtpSettings%601.SetSerialNumberApiVisible%28System.Boolean%29), [USB](xref:Yubico.YubiKey.Otp.OtpSettings%601.SetSerialNumberUsbVisible%28System.Boolean%29), or [button press](xref:Yubico.YubiKey.Otp.OtpSettings%601.SetSerialNumberButtonVisible%28System.Boolean%29)) when calling any of the OTP application slot configuration methods, including ``ConfigureChallengeResponse``, ``ConfigureHotp``, ``ConfigureStaticPassword``, ``ConfigureYubicoOtp``, and ``ConfigureNdef``. ([#328](https://github.com/Yubico/Yubico.NET.SDK/pull/328))
 
-- The Yubico.NativeShims library's Linux build is now compiled with Zig and targets glibc 2.28 for broad Linux distribution compatibility. ([#337](https://github.com/Yubico/Yubico.NET.SDK/pull/337))
+- The Yubico.NativeShims library's Linux build is now compiled with Zig and targets glibc 2.23 for broad Linux distribution compatibility. ([#337](https://github.com/Yubico/Yubico.NET.SDK/pull/337))
 
 Bug Fixes:
 

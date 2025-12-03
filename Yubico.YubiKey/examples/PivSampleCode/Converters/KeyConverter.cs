@@ -127,6 +127,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         private const int AlgorithmFlagPrivate = 1;
         private const int AlgorithmFlagRsa = 2;
         private const int AlgorithmFlagEcdsa = 4;
+        private const int AlgorithmFlagCurve25519 = 8;
 
         private const string AlgorithmRsa = "RSA";
         private const string AlgorithmEcdsa = "ECDsa";
@@ -140,12 +141,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // Make sure the params are P256 or P384.
         private static bool ValidateEccParameters(ECParameters eccParams)
         {
-            if (!string.Equals(eccParams.Curve.Oid.Value, OidP256, StringComparison.Ordinal))
+            if (!string.Equals(eccParams.Curve.Oid.Value, OidP256, StringComparison.Ordinal) &&
+                !string.Equals(eccParams.Curve.Oid.Value, OidP384, StringComparison.Ordinal))
             {
-                if (!string.Equals(eccParams.Curve.Oid.Value, OidP384, StringComparison.Ordinal))
-                {
-                    return false;
-                }
+                return false;
             }
 
             return true;

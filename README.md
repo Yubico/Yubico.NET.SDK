@@ -71,9 +71,12 @@ IYubiKeyDevice? GetFirstYubiKey()
 ## SDK Support
 
 Supported Target Frameworks:
-- .NET Framework 4.7
+- .NET Framework 4.7.2
 - .NET Standard 2.1
 - .NET 6 and above
+
+Linux Compatibility:
+- Native libraries built with glibc 2.28+ support
 
 ## SDK Packages
 

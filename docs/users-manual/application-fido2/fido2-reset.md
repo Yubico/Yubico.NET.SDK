@@ -33,19 +33,16 @@ However, there are some caveats:
 
 ## Steps
 
-Resetting the FIDO2 application is something you hope you never need to do. Generally, the
-only reason to reset the FIDO2 application is if the password has been blocked.
-
 To perform a FIDO2 reset, complete the following:
 
-1. "Reboot" the YubiKey by removing it from and reinserting it into the host device. Connect to the YubiKey and its FIDO2 application once it has been reinserted. This will likely be done using a listener class (see [YubiKeyDeviceListener](xref:Yubico.YubiKey.YubiKeyDeviceListener)).
+1. "Reboot" the YubiKey by disconnecting it and reinserting it into the host device (USB) or placing it on an NFC reader. Connect to the YubiKey and its FIDO2 application once it has been reinserted. This will likely be done using a listener class (see [YubiKeyDeviceListener](xref:Yubico.YubiKey.YubiKeyDeviceListener)).
 
 1. Within a time limit from the reboot (10 seconds for YubiKeys with firmware version 5.5.4 and later or 5 seconds for firmware versions prior to 5.5.2), send the [ResetCommand](xref:Yubico.YubiKey.Fido2.Commands.ResetCommand).
 
    > [!NOTE]
    > The reboot requirement and 10-second timeout are mandated by the [CTAP 2.1 standard](https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#authenticatorReset).
 
-1. The YubiKey will not respond with the [ResetResponse](xref:Yubico.YubiKey.Fido2.Commands.ResetResponse) immediately. Within 30 seconds, a user must touch the contact of the YubiKey. If the touch does not occur in time, the YubiKey will return the `ResetResponse` with a `StatusWord` of `0x6F3A`, the CTAP error of timeout (the `Status` property will be `Failed`). If the user touches the contact within the time limit, then the FIDO2 application will be reset (the `StatusWord` property will be `0x9000`, and the `Status` property will be `Success`).
+1. The YubiKey will not respond with the [ResetResponse](xref:Yubico.YubiKey.Fido2.Commands.ResetResponse) immediately. For USB connections, a user must touch the contact of the YubiKey within 30 seconds. If the touch does not occur in time, the YubiKey will return the `ResetResponse` with a `StatusWord` of `0x6F3A`, the CTAP error of timeout (the `Status` property will be `Failed`). If the user touches the contact within the time limit, then the FIDO2 application will be reset (the `StatusWord` property will be `0x9000`, and the `Status` property will be `Success`). For NFC connections, the YubiKey must remain in contact with the NFC reader throughout the operation.
 
    See the [FIDO2 reset APDU documentation](xref:Fido2ResetApdu) for information on other possible `StatusWord` responses.
 

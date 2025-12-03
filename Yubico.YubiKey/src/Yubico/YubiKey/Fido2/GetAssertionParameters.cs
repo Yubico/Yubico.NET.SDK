@@ -14,10 +14,8 @@
 
 using System;
 using System.Collections.Generic;
-using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.PinProtocols;
-using Yubico.YubiKey.Utilities;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -86,7 +84,7 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// If you are getting assertions using
-        /// <see cref="Fido2Session.GetAssertions"/>, you do NOT need to set this
+        /// <see cref="Fido2Session.GetAssertions"/>, you do not need to set this
         /// property, the SDK will take care of it. But if you are getting
         /// assertions using the <see cref="Commands.GetAssertionCommand"/>, then
         /// you must set this property.
@@ -191,7 +189,7 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// </remarks>
         public void RequestCredBlobExtension() =>
-            AddExtension(Fido2ExtensionKeys.CredBlob, true);
+            AddExtension(Fido2.Extensions.CredBlob, true);
 
         /// <summary>
         /// Requests the third-party payment status of a credential during an assertion.
@@ -201,7 +199,7 @@ namespace Yubico.YubiKey.Fido2
         /// will return `true` for this extension in the assertion response. Otherwise, it will return `false`.
         /// </remarks>
         public void RequestThirdPartyPayment() =>
-            AddExtension(Fido2ExtensionKeys.ThirdPartyPayment, true);
+            AddExtension(Fido2.Extensions.ThirdPartyPayment, true);
 
         /// <summary>
         /// Specify that the YubiKey should return the "hmac-secret" with the
@@ -393,7 +391,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             _hmacSecretEncoding = HmacSecretExtension.Encode(authProtocol, _salt1.Value, _salt2);
-            AddExtension(Fido2ExtensionKeys.HmacSecret, _hmacSecretEncoding);
+            AddExtension(Fido2.Extensions.HmacSecret, _hmacSecretEncoding);
         }
 
         /// <inheritdoc/>

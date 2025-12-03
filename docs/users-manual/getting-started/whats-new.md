@@ -22,56 +22,31 @@ Here you can find all of the updates and release notes for published versions of
 
 Release date: October 23rd, 2025
 
-This patch release addresses critical stability issues in the YubiKey device listener system across all platforms (Windows, macOS, Linux). The primary focus is on improving resource management, disposal patterns, and exception handling to prevent memory leaks, orphaned threads, and race conditions during device enumeration and monitoring.
-
 Bug Fixes:
 
-- Fixed critical disposal timing and resource management issues in `DesktopSmartCardDeviceListener` and `WindowsHidDeviceListener` to prevent resource leaks and ensure idempotent disposal operations. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Corrected race conditions in the `StopListening` method across multiple device listeners that could cause deadlocks or orphaned resources. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- **MacOS**: Fixed delegate lifecycle issue that could cause callbacks on disposed delegates. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325), [#320](https://github.com/Yubico/Yubico.NET.SDK/issues/320))
-- Added comprehensive try-catch blocks around event handler invocations to prevent user exceptions from crashing background listener threads. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Wrapped listener thread logic in try-catch blocks for `MacOSHidDeviceListener`, `DesktopSmartCardDeviceListener`, and `LinuxHidDeviceListener` with improved logging. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Added try-catch around cleanup in `ListeningThread` to prevent P/Invoke exceptions during shutdown. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Enhanced device update logic and event firing to prevent deadlocks. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- **Linux**: Corrected file descriptor type from pointer to `int` in `PollFd.fd` to align with Linux `pollfd` struct specification and ensure compatibility with `poll()` system call. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- **Windows**: Enhanced `CmDevice` initialization and error handling during device enumeration. ([#318](https://github.com/Yubico/Yubico.NET.SDK/pull/318))
-- **Windows**: Wrapped Windows HID event handler logic inside try-catch blocks. ([#318](https://github.com/Yubico/Yubico.NET.SDK/pull/318), [#144](https://github.com/Yubico/Yubico.NET.SDK/issues/144))
-- Fixed logic in FIDO2 `AddPermissions` that was incorrectly throwing exceptions. ([#316](https://github.com/Yubico/Yubico.NET.SDK/pull/316))
-- Refactored authentication token retrieval to use more suitable logic in FIDO2 `GetAuthToken`. ([#316](https://github.com/Yubico/Yubico.NET.SDK/pull/316))
+- The validation logic in the ``AddPermissions()`` method has been improved, which resolved an issue where the Fido2Session would incorrectly throw exceptions during calls to ``AddPermissions()`` on older YubiKeys. ([#316](https://github.com/Yubico/Yubico.NET.SDK/pull/316))
 
+- Multiple updates have been added to prevent background thread crashes caused by rapidly unplugging and reinserting YubiKeys ([#318](https://github.com/Yubico/Yubico.NET.SDK/pull/318), [#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325)):
 
-Features:
-
-- Implemented polling mechanism for udev events in Linux HID device listener to improve responsiveness during shutdown ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Added comprehensive disposal pattern implementation for `smartcardDeviceListener` with proper resource cleanup. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-
-Testing:
-
-- Added comprehensive manual and stress tests for HID device listener to verify device arrival/removal events with detailed execution instructions. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Added integration tests for SmartCard device listener with support for rapid insertion/removal scenarios. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Introduced disposal and resource management tests for Linux, macOS, and Windows HID Device Listeners with thread safety and timing validations. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-
-Refactoring:
-
-- Centralized timeout configurations across HID and SmartCard listeners with shared constants (`MaxDisposalWaitTime`, `CheckForChangesWaitTime`) for uniform timing behaviors. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Improved disposal timing and handler invocation consistency in `YubiKeyDeviceListener`. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
+  - Improved device listening and disposal behavior, including logging, error messages, and exception handling, across base, HID (Linux, Windows, macOS), and smart card device listener classes.
+  - Added and improved device listener disposal and integration tests.
+  - Added new ``CmDevice`` class methods (``FromDevicePath``, ``FromDeviceInstance``).
 
 Dependencies:
 
-- Updated Microsoft Extensions packages from 9.0.9 to 9.0.10: `Microsoft.Bcl.AsyncInterfaces`, `Microsoft.Bcl.Cryptography`, `Microsoft.Extensions.Configuration.Json`, `Microsoft.Extensions.Logging.Abstractions`, `Microsoft.Extensions.Logging.Console`, `Microsoft.Extensions.Options.ConfigurationExtensions`, `System.Configuration.ConfigurationManager`, `System.Formats.Asn1`, `System.Formats.Cbor`. ([#317](https://github.com/Yubico/Yubico.NET.SDK/pull/317), [#327](https://github.com/Yubico/Yubico.NET.SDK/pull/327))
-- Updated test frameworks: `Microsoft.NET.Test.Sdk` (17.10.0 → 18.0.0), `coverlet.collector` (6.0.2 → 6.0.4), `xunit` (2.8.1 → 2.9.3), `xunit.runner.visualstudio` (2.8.1/3.1.4 → 3.1.5), `Xunit.SkippableFact` (1.4.13 → 1.5.23). ([#317](https://github.com/Yubico/Yubico.NET.SDK/pull/317))
-- Updated build tools: `Microsoft.SourceLink.GitHub` (1.1.1 → 8.0.0). ([#317](https://github.com/Yubico/Yubico.NET.SDK/pull/317))
+- Multiple dependencies across the following projects have been updated to newer versions ([#317](https://github.com/Yubico/Yubico.NET.SDK/pull/317), [#327](https://github.com/Yubico/Yubico.NET.SDK/pull/327)):
+
+  - Yubico.Core
+  - Yubico.Core.UnitTests
+  - Yubico.YubiKey
+  - Yubico.YubiKey.IntegrationTests
+  - Yubico.YubiKey.TestApp
+  - Yubico.YubiKey.UnitTests
+  - Yubico.YubiKey.TestUtilities
 
 Documentation:
 
-- Fixed FIDO2 PIN information and general improvements in FIDO2/U2F documentation. ([#321](https://github.com/Yubico/Yubico.NET.SDK/pull/321))
-- Edited product name references for consistency. ([#322](https://github.com/Yubico/Yubico.NET.SDK/pull/322))
-- Removed statements in U2F documentation that were redundant with FIDO2 docs. ([#322](https://github.com/Yubico/Yubico.NET.SDK/pull/322))
-
-Miscellaneous:
-
-- Removed deprecated PythonForNet example files and project configuration. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
-- Updated dev-container configuration. ([#325](https://github.com/Yubico/Yubico.NET.SDK/pull/325))
+- Errors in the User's Manual documentation regarding YubiKey support for FIDO2 PINs and U2F private key behavior have been corrected. ([#321](https://github.com/Yubico/Yubico.NET.SDK/pull/321), [#322](https://github.com/Yubico/Yubico.NET.SDK/pull/322))
 
 _________
 
@@ -83,11 +58,11 @@ Features:
 
 - Support has been added for the following CTAP 2.2 and YubiKey firmware version 5.8 features ([#299](https://github.com/Yubico/Yubico.NET.SDK/pull/299)):
 
-  - Persistent PinUvAuthToken (PPUAT): The [GetPersistentPinUvAuthToken()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetPersistentPinUvAuthToken) method has been added to retrieve PPUATs for use with read-only FIDO2 credential management operations, including [EnumerateRelyingParties()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateRelyingParties), [EnumerateCredentialsForRelyingParty()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateCredentialsForRelyingParty%28Yubico.YubiKey.Fido2.RelyingParty%29), and [GetCredentialMetadata()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata). PPUATs enable applications to list discoverable credentials from YubiKeys without requiring repeated PIN entry.
+  - [Persistent PinUvAuthToken (PPUAT)](xref:Fido2AuthTokens#persistent-pinuvauthtoken-ppuat): The [GetPersistentPinUvAuthToken()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetPersistentPinUvAuthToken) method has been added to retrieve PPUATs for use with read-only FIDO2 credential management operations, including [EnumerateRelyingParties()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateRelyingParties), [EnumerateCredentialsForRelyingParty()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateCredentialsForRelyingParty%28Yubico.YubiKey.Fido2.RelyingParty%29), and [GetCredentialMetadata()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata). PPUATs enable applications to list discoverable credentials from YubiKeys without requiring repeated PIN entry.
 
   - thirdPartyPayment extension: The [GetThirdPartyPaymentExtension](xref:Yubico.YubiKey.Fido2.AuthenticatorData.GetThirdPartyPaymentExtension) method has been added to check for and return the status of the thirdPartyPayment extension. The thirdPartyPayment extension enables YubiKeys to be used for cross-domain credentials without redirects, as required by Secure Payment Confirmation (SPC) workflows.
 
-  - hmac-secret-mc extension: [GetHmacSecretExtension](xref:Yubico.YubiKey.Fido2.AuthenticatorData.GetHmacSecretExtension%28Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase%29) now handles both hmac-secret and hmac-secret-mc extensions when extracting and decrypting secrets. The hmac-secret-mc extension enables PRF (Pseudo-Random Function) during [MakeCredential()](xref:Yubico.YubiKey.Fido2.Fido2Session.MakeCredential%28Yubico.YubiKey.Fido2.MakeCredentialParameters%29).
+  - [hmac-secret-mc extension](xref:Fido2HmacSecret): This extension enables the retrieval of a symmetric secret during ``MakeCredential()``. The secret, which can be used for encryption/decryption, supports the use of PRF (Pseudo-Random Function) with YubiKeys.
 
   - Additional ``AuthenticatorInfo`` properties: The SDK now supports parsing of several new [AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo) properties, which are returned when calling the [GetInfoCommand()](xref:Yubico.YubiKey.Fido2.Commands.GetInfoCommand). Properties include ``AttestationFormats``, ``UvCountSinceLastPinEntry``, ``LongTouchForReset``, ``EncIdentifier``, ``TransportsForReset``, ``PinComplexityPolicy``, ``PinComplexityPolicyUrl``, and ``MaxPinLength``.
 

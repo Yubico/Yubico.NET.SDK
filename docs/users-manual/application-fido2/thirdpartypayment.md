@@ -33,7 +33,7 @@ Only YubiKeys with firmware version 5.8 and later support the thirdPartyPayment 
 ```C#
 using (Fido2Session fido2Session = new Fido2Session(yubiKey))
 {
-    if (fido2Session.AuthenticatorInfo.Extensions.Contains<string>("thirdPartyPayment"))
+    if (fido2Session.AuthenticatorInfo.IsExtensionSupported(Extensions.ThirdPartyPayment))
     {
         ...
     }

@@ -20,3 +20,15 @@ updates:
         patterns:
           - "*"
     open-pull-requests-limit: 10
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "Europe/Stockholm"
+    groups:
+      github-actions:
+        patterns:
+          - "*"

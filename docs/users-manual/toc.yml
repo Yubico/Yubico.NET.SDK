@@ -337,7 +337,7 @@
               href: application-fido2/cred-blobs.md
             - name: Large blobs
               href: application-fido2/large-blobs.md
-        - name: HMAC secret extension
+        - name: HMAC secret extensions
           href: application-fido2/hmac-secret.md
         - name: Commands
           items:

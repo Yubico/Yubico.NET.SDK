@@ -284,7 +284,7 @@ namespace Yubico.YubiKey.Otp
         /// <inheritdoc cref="OtpStatus.LongPressRequiresTouch"/>
         public bool LongPressRequiresTouch => _otpStatus.LongPressRequiresTouch;
 
-        internal FirmwareVersion FirmwareVersion => _otpStatus.FirmwareVersion;
+        internal FirmwareVersion FirmwareVersion => YubiKey.FirmwareVersion;
 
         FirmwareVersion IOtpSession.FirmwareVersion => FirmwareVersion;
 

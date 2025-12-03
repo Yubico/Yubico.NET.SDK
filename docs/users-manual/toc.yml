@@ -339,7 +339,7 @@
               href: application-fido2/large-blobs.md
         - name: Additional extensions
           items:
-            - name: HMAC secret extension
+            - name: HMAC secret extensions
               href: application-fido2/hmac-secret.md
             - name: Third-party payment extension
               href: application-fido2/thirdpartypayment.md

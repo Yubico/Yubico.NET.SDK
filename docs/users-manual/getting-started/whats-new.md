@@ -16,6 +16,32 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.15.x Releases
+
+### 1.15.0
+
+Release date: December 3rd, 2025
+
+Features:
+
+- The SDK now supports CTAP 2.3's ``EncCredStoreState`` (encrypted credential store state) ``AuthenticatorInfo`` property, which is available on YubiKeys with firmware version 5.8 and above. This property, which must be decrypted using a YubiKey's PPUAT, can be used by platforms to detect when credentials have been added and removed or when the YubiKey has been reset. The Fido2Session property, [AuthenticatorCredStoreState](xref:Yubico.YubiKey.Fido2.Fido2Session.AuthenticatorCredStoreState), has been added to simplify the process of retrieving and decrypting the ``EncCredStoreState`` value. ([#354](https://github.com/Yubico/Yubico.NET.SDK/pull/354))
+
+- It is now possible to toggle serial number visibility (over [API](xref:Yubico.YubiKey.Otp.OtpSettings%601.SetSerialNumberApiVisible%28System.Boolean%29), [USB](xref:Yubico.YubiKey.Otp.OtpSettings%601.SetSerialNumberUsbVisible%28System.Boolean%29), or [button press](xref:Yubico.YubiKey.Otp.OtpSettings%601.SetSerialNumberButtonVisible%28System.Boolean%29)) when calling any of the OTP application slot configuration methods, including ``ConfigureChallengeResponse``, ``ConfigureHotp``, ``ConfigureStaticPassword``, ``ConfigureYubicoOtp``, and ``ConfigureNdef``. ([#328](https://github.com/Yubico/Yubico.NET.SDK/pull/328))
+
+- The Yubico.NativeShims library's Linux build is now compiled with Zig and targets glibc 2.23 for broad Linux distribution compatibility. ([#337](https://github.com/Yubico/Yubico.NET.SDK/pull/337))
+
+Bug Fixes:
+
+- The ``YubiKeyDevice`` properties, ``ChallengeResponseTimeout``, ``AutoEjectTimeout``, ``IsNfcRestricted``, ``DeviceFlags``, and ``ConfigurationLocked``, have been modified so that they are set immediately after their respective configuration methods are called instead of after a refresh. ``YubiKeyDevice`` integration tests have also been updated to improve error handling and validate the modified ``YubiKeyDevice`` properties. ([#348](https://github.com/Yubico/Yubico.NET.SDK/pull/348))
+
+Documentation:
+
+- Comprehensive docs covering SDK support for the [Persistent PinUvAuthToken (PPUAT)](xref:Fido2AuthTokens#persistent-pinuvauthtoken-ppuat) have been added to the User's Manual. ([#333](https://github.com/Yubico/Yubico.NET.SDK/pull/333))
+
+- NFC instructions have been added to the [FIDO2 reset](xref:Fido2Reset) docs. ([#341](https://github.com/Yubico/Yubico.NET.SDK/pull/341))
+
+- The [PIV sample code](https://github.com/Yubico/Yubico.NET.SDK/tree/HEAD/Yubico.YubiKey/examples/PivSampleCode) has been updated to use the newer ``IPublicKey`` and ``IPrivateKey`` classes and support the Ed25519 and X25519 key types. ([#343](https://github.com/Yubico/Yubico.NET.SDK/pull/343))
+
 ## 1.14.x Releases
 
 ### 1.14.1

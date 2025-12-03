@@ -400,9 +400,10 @@ namespace Yubico.YubiKey
         /// </para>
         ///
         /// <para>
-        /// Modifies the value of <see cref="IYubiKeyDeviceInfo.ChallengeResponseTimeout"/>. This
-        /// requires the YubiKey's configuration to be unlocked (see
-        /// <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> and
+        /// Modifies the value of <see cref="IYubiKeyDeviceInfo.ChallengeResponseTimeout"/>.
+        /// After successful execution, the <see cref="IYubiKeyDeviceInfo.ChallengeResponseTimeout"/> property
+        /// will immediately reflect the new value. This requires the YubiKey's configuration
+        /// to be unlocked (see <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> and
         /// <see cref="UnlockConfiguration(ReadOnlySpan{byte})"/>.
         /// </para>
         /// </remarks>
@@ -432,9 +433,10 @@ namespace Yubico.YubiKey
         /// </para>
         ///
         /// <para>
-        /// Modifies the value of <see cref="IYubiKeyDeviceInfo.AutoEjectTimeout"/>. This
-        /// requires the YubiKey's configuration to be unlocked (see
-        /// <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> and
+        /// Modifies the value of <see cref="IYubiKeyDeviceInfo.AutoEjectTimeout"/>.
+        /// After successful execution, the <see cref="IYubiKeyDeviceInfo.AutoEjectTimeout"/> property
+        /// will immediately reflect the new value. This requires the YubiKey's configuration
+        /// to be unlocked (see <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> and
         /// <see cref="UnlockConfiguration(ReadOnlySpan{byte})"/>.
         /// </para>
         /// <para>
@@ -464,6 +466,11 @@ namespace Yubico.YubiKey
         /// Modifies the value of <see cref="IYubiKeyDeviceInfo.DeviceFlags"/>.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// After successful execution, the <see cref="DeviceFlags"/> property
+        /// will immediately reflect the new value.
+        /// </para>
+        ///
         /// <para>
         /// YubiKeys prior to firmware version 5 can use
         /// <see cref="SetLegacyDeviceConfiguration(YubiKeyCapabilities, byte, bool, int)"/> to enable
@@ -499,7 +506,8 @@ namespace Yubico.YubiKey
         /// </para>
         ///
         /// <para>
-        /// See <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/>.
+        /// See <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/>. After successful execution,
+        /// the <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> property will immediately be set to <c>true</c>.
         /// </para>
         /// <para>
         /// Once the lock code is set, no changes can be made to the YubiKey's user-settable
@@ -537,7 +545,8 @@ namespace Yubico.YubiKey
         ///
         /// <remarks>
         /// <para>
-        /// See <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/>.
+        /// See <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/>. After successful execution,
+        /// the <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> property will immediately be set to <c>false</c>.
         /// </para>
         /// <para>
         /// By removing the lock code, changes can be made to the YubiKey's user-settable
@@ -648,11 +657,25 @@ namespace Yubico.YubiKey
             int autoEjectTimeout = 0);
 
         /// <summary>
-        /// Sets the <see cref="IYubiKeyDeviceInfo.IsNfcRestricted"/> on the <see cref="YubiKeyDeviceInfo"/>
+        /// Sets the <see cref="IYubiKeyDeviceInfo.IsNfcRestricted"/> value.
         /// </summary>
-        /// <param name="enabled">Set this value to true to enable, otherwise false</param>
+        /// <remarks>
+        /// <para>
+        /// After successful execution, the <see cref="IYubiKeyDeviceInfo.IsNfcRestricted"/> property
+        /// will immediately reflect the new value.
+        /// </para>
+        /// <para>
+        /// This operation requires the YubiKey's configuration to be unlocked (see
+        /// <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> and
+        /// <see cref="UnlockConfiguration(ReadOnlySpan{byte})"/>.
+        /// </para>
+        /// </remarks>
+        /// <param name="enabled">Set this value to true to restrict NFC, false to allow NFC.</param>
         /// <exception cref="InvalidOperationException">
         /// The command failed to complete.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// This feature is not supported on this YubiKey version.
         /// </exception>
         void SetIsNfcRestricted(bool enabled);
 

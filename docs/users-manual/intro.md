@@ -17,3 +17,5 @@ limitations under the License. -->
 This manual gives general information about the SDK and how to use it. After reading about
 a topic, you can get programming details from the [API Documentation](../yubikey-api/index.md)
 section.
+
+The SDK is open source and available on [GitHub](https://github.com/Yubico/Yubico.NET.SDK).

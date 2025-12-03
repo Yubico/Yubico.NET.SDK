@@ -17,6 +17,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
@@ -41,21 +42,29 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             // Build the AsymmetricAlgorithm object from the public key.
-            using var dotNetPubKey = KeyConverter.GetDotNetFromPivPublicKey(slotContents.PublicKey);
+            using var dotNetPubKey = KeyConverter.GetDotNetFromPublicKey(slotContents.PublicKey);
 
             // Build a cert request object.
             // This sample code uses SHA-256 for all algorithms except ECC P-384.
             // With RSA it always uses PSS.
             slotContents.CertRequest = slotContents.Algorithm switch
             {
-                PivAlgorithm.EccP256 => new CertificateRequest(
+                KeyType.ECP256 => new CertificateRequest(
                     distinguishedName,
                     (ECDsa)dotNetPubKey,
                     HashAlgorithmName.SHA256),
-                PivAlgorithm.EccP384 => new CertificateRequest(
+                KeyType.ECP384 => new CertificateRequest(
                     distinguishedName,
                     (ECDsa)dotNetPubKey,
                     HashAlgorithmName.SHA384),
+                KeyType.Ed25519 => new CertificateRequest(
+                    distinguishedName,
+                    (ECDsa)dotNetPubKey,
+                    HashAlgorithmName.SHA256),
+                KeyType.X25519 => new CertificateRequest(
+                    distinguishedName,
+                    (ECDsa)dotNetPubKey,
+                    HashAlgorithmName.SHA256),
                 _ => new CertificateRequest(
                     distinguishedName,
                     (RSA)dotNetPubKey,
@@ -375,12 +384,25 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // The YubiKey returns the signature in a format that virtually all
             // standards specify. However, that is not the format the C#
             // verification method needs.
-            var algorithm = pubKey.KeySize switch
+
+            var algorithm = KeyType.None;
+ 
+            // Get the OID string from the public key's curve parameters
+            var ecKey = pubKey as ECAlgorithm;
+            var oid = ecKey.ExportParameters(false).Curve.Oid.Value;
+            
+            if (ecKey != null)
             {
-                256 => PivAlgorithm.EccP256,
-                384 => PivAlgorithm.EccP384,
-                _ => PivAlgorithm.None,
-            };
+                algorithm = oid switch
+                {
+                    Oids.ECP256 => KeyType.ECP256,
+                    Oids.ECP384 => KeyType.ECP384,
+                    Oids.X25519 => KeyType.X25519,
+                    Oids.Ed25519 => KeyType.Ed25519,
+                    _ => KeyType.None,
+                };
+            }
+
 
             byte[] nonStandardSignature = DsaSignatureConverter.GetNonStandardDsaFromStandard(signature, algorithm);
 
@@ -456,12 +478,23 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // The YubiKey returns the signature in a format that virtually all
             // standards specify. However, that is not the format the C#
             // verification method needs.
-            var algorithm = pubKey.KeySize switch
+            
+            var algorithm = KeyType.None;
+
+            // Get the OID string from the public key's curve parameters
+            var ecKey = pubKey as ECAlgorithm;
+            var oid = ecKey.ExportParameters(false).Curve.Oid.Value;
+            if (ecKey != null)
             {
-                256 => PivAlgorithm.EccP256,
-                384 => PivAlgorithm.EccP384,
-                _ => PivAlgorithm.None,
-            };
+                algorithm = oid switch
+                {
+                    Oids.Ed25519 => KeyType.Ed25519,
+                    Oids.X25519 => KeyType.X25519,
+                    Oids.ECP256 => KeyType.ECP256,
+                    Oids.ECP384 => KeyType.ECP384,
+                    _ => KeyType.None,
+                };
+            }
 
             // The signature is a BIT FIELD so the first octet is the unused
             // bits. That's why in the following we use a Slice of the signature
@@ -497,10 +530,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             if (string.Equals(certificate.PublicKey.Oid.FriendlyName, "ECC", StringComparison.Ordinal))
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                var pivPub = new PivEccPublicKey(certificate.PublicKey.EncodedKeyValue.RawData);
-#pragma warning restore CS0618 // Type or member is obsolete
-                return KeyConverter.GetDotNetFromPivPublicKey(pivPub);
+                byte[] spkiBytes = certificate.PublicKey.ExportSubjectPublicKeyInfo();
+                ECPublicKey ecPubKey = ECPublicKey.CreateFromSubjectPublicKeyInfo(spkiBytes);
+                return KeyConverter.GetDotNetFromPublicKey(ecPubKey);
             }
 
             var returnValue = RSA.Create();

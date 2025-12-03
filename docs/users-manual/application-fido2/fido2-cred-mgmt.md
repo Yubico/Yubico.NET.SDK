@@ -73,7 +73,7 @@ The commands are
 * [DeleteCredentialCommand](xref:Yubico.YubiKey.Fido2.Commands.DeleteCredentialCommand)
 * [UpdateUserInfoCommand](xref:Yubico.YubiKey.Fido2.Commands.UpdateUserInfoCommand)
 
-Some of the commands require a PinToken. You will be responsible for building a PinToken
+Some of the commands require a PinToken. You will be responsible for building a AuthToken
 (see next section).
 
 The Fido2Session methods are
@@ -84,7 +84,7 @@ The Fido2Session methods are
 * [DeleteCredential](xref:Yubico.YubiKey.Fido2.Fido2Session.DeleteCredential%2a)
 * [UpdateUserInfoForCredential](xref:Yubico.YubiKey.Fido2.Fido2Session.UpdateUserInfoForCredential%2a)
 
-If you use these methods, the SDK will build the proper PinToken if needed.
+If you use these methods, the SDK will build the proper AuthToken if needed.
 
 ## PIN/UV Auth Param
 
@@ -92,6 +92,8 @@ In order to perform some credential management operations, it is necessary to co
 PIN/UV Auth Param. The SDK will build the PIN/UV Auth Param, you do not need to supply it.
 The PIN/UV Auth Param is built using an `AuthToken`. If you use the Fido2Session methods,
 the SDK will also obtain the `AuthToken`.
+
+If supported by the YubiKey (firmware 5.8 or later), the read-only credential management operations (Get Metadata, Enumerate Relying Parties, and Enumerate Credentials) can use a special type of AuthToken called the Persistent PinUvAuthToken (PPUAT). PPUATs allow for frequent reuse, reducing the need for repeated PIN entry.
 
 See the User's Manual [entry on AuthTokens](xref:Fido2AuthTokens) for a detailed
 discussion on how they work.

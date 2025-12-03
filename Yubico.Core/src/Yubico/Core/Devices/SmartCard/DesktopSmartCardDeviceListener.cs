@@ -209,20 +209,10 @@ namespace Yubico.Core.Devices.SmartCard
             var newStates = (SCARD_READER_STATE[])_readerStates.Clone();
 
             uint getStatusChangeResult = SCardGetStatusChange(_context, (int)CheckForChangesWaitTime.TotalMilliseconds, newStates, newStates.Length);
-            if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
+            if (!HandleSCardGetStatusChangeResult(getStatusChangeResult, newStates))
             {
-                _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
                 return false;
             }
-
-            if (UpdateContextIfNonCritical(getStatusChangeResult))
-            {
-                _log.LogInformation("GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
-                return true;
-            }
-
-            _log.SCardApiCall(nameof(SCardGetStatusChange), getStatusChangeResult);
-            _log.LogInformation("Reader states:\n{States}", newStates);
 
             while (ReaderListChangeDetected(ref newStates, usePnpWorkaround))
             {
@@ -258,20 +248,10 @@ namespace Yubico.Core.Devices.SmartCard
                     _log.LogInformation("Additional smart card readers were found. Calling GetStatusChange for more information.");
                     getStatusChangeResult = SCardGetStatusChange(_context, 0, updatedStates, updatedStates.Length);
 
-                    if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
+                    if (!HandleSCardGetStatusChangeResult(getStatusChangeResult, updatedStates))
                     {
-                        _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
                         return false;
                     }
-
-                    if (UpdateContextIfNonCritical(getStatusChangeResult))
-                    {
-                        _log.LogInformation("GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
-                        return true;
-                    }
-
-                    _log.SCardApiCall(nameof(SCardGetStatusChange), getStatusChangeResult);
-                    _log.LogInformation("Reader states:\n{States}", newStates);
                 }
 
                 newStates = updatedStates;
@@ -280,20 +260,10 @@ namespace Yubico.Core.Devices.SmartCard
             if (RelevantChangesDetected(newStates))
             {
                 getStatusChangeResult = SCardGetStatusChange(_context, 0, newStates, newStates.Length);
-                if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
+                if (!HandleSCardGetStatusChangeResult(getStatusChangeResult, newStates))
                 {
-                    _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
                     return false;
                 }
-
-                if (UpdateContextIfNonCritical(getStatusChangeResult))
-                {
-                    _log.LogInformation("GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
-                    return true;
-                }
-
-                _log.SCardApiCall(nameof(SCardGetStatusChange), getStatusChangeResult);
-                _log.LogInformation("Reader states:\n{States}", newStates);
             }
 
             if (sendEvents)
@@ -476,6 +446,41 @@ namespace Yubico.Core.Devices.SmartCard
             {
                 OnRemoved(removedDevice);
             }
+        }
+
+        /// <summary>
+        /// Handles common SCardGetStatusChange result codes including cancellation, timeouts, and non-critical errors.
+        /// Logs appropriately based on the result code.
+        /// </summary>
+        /// <param name="result">The result code from SCardGetStatusChange</param>
+        /// <param name="states">The reader states for logging purposes</param>
+        /// <returns>False if cancelled (caller should return false), true otherwise (caller should continue)</returns>
+        private bool HandleSCardGetStatusChangeResult(uint result, SCARD_READER_STATE[] states)
+        {
+            if (result == ErrorCode.SCARD_E_CANCELLED)
+            {
+                _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
+                return false;
+            }
+
+            // Timeout is expected behavior in polling - don't log as it occurs every 100ms
+            if (result == ErrorCode.SCARD_E_TIMEOUT)
+            {
+                return true;
+            }
+
+            // Non-critical errors that need context update
+            if (UpdateContextIfNonCritical(result))
+            {
+                _log.LogInformation("GetStatusChange indicated non-critical status {Status:X}.", result);
+                return true;
+            }
+
+            // Log actual errors and reader states for debugging
+            _log.SCardApiCall(nameof(SCardGetStatusChange), result);
+            _log.LogInformation("Reader states:\n{States}", states);
+
+            return true;
         }
 
         /// <summary>

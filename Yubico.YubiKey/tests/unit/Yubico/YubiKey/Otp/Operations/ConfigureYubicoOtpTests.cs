@@ -59,6 +59,27 @@ namespace Yubico.YubiKey.Otp.Operations
             Assert.Equal(ExceptionMessages.CantSpecifyKeyAndGenerate, ex.Message);
         }
 
+        [Fact]
+        public void TestSetSerialNumberApiVisible_ReturnsInstance()
+        {
+            ConfigureYubicoOtp result = _op.SetSerialNumberApiVisible(true);
+            Assert.Same(_op, result);
+        }
+
+        [Fact]
+        public void TestSetSerialNumberButtonVisible_ReturnsInstance()
+        {
+            ConfigureYubicoOtp result = _op.SetSerialNumberButtonVisible(true);
+            Assert.Same(_op, result);
+        }
+
+        [Fact]
+        public void TestSetSerialNumberUsbVisible_ReturnsInstance()
+        {
+            ConfigureYubicoOtp result = _op.SetSerialNumberUsbVisible(true);
+            Assert.Same(_op, result);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)

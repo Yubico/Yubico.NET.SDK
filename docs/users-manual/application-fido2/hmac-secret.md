@@ -47,11 +47,11 @@ The hmac-secret-mc extension is only supported for YubiKeys with firmware versio
 ```C#
     using (fido2Session = new Fido2Session(yubiKey))
     {
-        if (fido2Session.AuthenticatorInfo.Extensions.Contains<string>("hmac-secret"))
+        if (fido2Session.AuthenticatorInfo.IsExtensionSupported(Extensions.HmacSecret))
         {
             . . .
         }
-        else if (fido2Session.AuthenticatorInfo.Extensions.Contains<string>("hmac-secret-mc"))
+        else if (fido2Session.AuthenticatorInfo.IsExtensionSupported(Extensions.HmacSecretMc))
         {
             . . .
         }

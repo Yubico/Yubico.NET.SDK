@@ -363,7 +363,6 @@ namespace Yubico.YubiKey.Piv.Objects
                 encodedUniqueId.CopyTo(dest);
                 return true;
             }
-            
 
             return false;
         }

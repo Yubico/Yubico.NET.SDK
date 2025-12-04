@@ -77,9 +77,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             credentialManagementData.TotalRelyingPartyCount is not null &&
             credentialManagementData.RelyingParty.IsMatchingRelyingPartyId(credentialManagementData.RelyingPartyIdHash.Value))
             {
-            
                 return (credentialManagementData.TotalRelyingPartyCount.Value, credentialManagementData.RelyingParty);
-
             }
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);

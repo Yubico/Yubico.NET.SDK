@@ -20,7 +20,7 @@ Here you can find all of the updates and release notes for published versions of
 
 ### 1.15.0
 
-Release date: December 3rd, 2025
+Release date: December 4th, 2025
 
 Features:
 
@@ -35,6 +35,11 @@ Bug Fixes:
 - The ``YubiKeyDevice`` properties, ``ChallengeResponseTimeout``, ``AutoEjectTimeout``, ``IsNfcRestricted``, ``DeviceFlags``, and ``ConfigurationLocked``, have been modified so that they are set immediately after their respective configuration methods are called instead of after a refresh. ``YubiKeyDevice`` integration tests have also been updated to improve error handling and validate the modified ``YubiKeyDevice`` properties. ([#348](https://github.com/Yubico/Yubico.NET.SDK/pull/348))
 
 Documentation:
+
+- Docs covering SDK support for the following FIDO2 extensions have been added to the User's Manual:
+
+  - [third-party payment](xref:Fido2ThirdPartyPayment) ([#349](https://github.com/Yubico/Yubico.NET.SDK/pull/349))
+  - [hmac-secret-mc](xref:Fido2HmacSecret) ([#350](https://github.com/Yubico/Yubico.NET.SDK/pull/350))
 
 - Comprehensive docs covering SDK support for the [Persistent PinUvAuthToken (PPUAT)](xref:Fido2AuthTokens#persistent-pinuvauthtoken-ppuat) have been added to the User's Manual. ([#333](https://github.com/Yubico/Yubico.NET.SDK/pull/333))
 

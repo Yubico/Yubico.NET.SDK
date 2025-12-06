@@ -23,7 +23,7 @@ public abstract record ScpKeyParams : IDisposable
     ///     Gets the identifier of the SCP key to target on the YubiKey.
     /// </summary>
     /// <returns>The key reference.</returns>
-    private KeyRef KeyRef { get; }
+    public KeyRef KeyRef { get; }
 
     public abstract void Dispose();
 }

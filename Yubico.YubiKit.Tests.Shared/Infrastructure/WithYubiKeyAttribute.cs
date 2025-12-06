@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Reflection;
+using Xunit;
 using Xunit.Sdk;
 using Yubico.YubiKit.Management;
 
@@ -190,7 +191,7 @@ public class WithYubiKeyAttribute : DataAttribute
 
             Console.Error.WriteLine($"[WithYubiKey] {errorMessage}");
 
-            throw new InvalidOperationException(errorMessage);
+            throw new SkipException(errorMessage);
         }
 
         Console.WriteLine(

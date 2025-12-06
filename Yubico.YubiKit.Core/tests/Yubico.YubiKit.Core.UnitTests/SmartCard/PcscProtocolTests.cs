@@ -170,7 +170,7 @@ public class PcscProtocolTests
         var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act
-        var result = await protocol.TransmitAndReceiveAsync(command);
+        var result = await protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(expectedData, result.ToArray());
@@ -187,7 +187,7 @@ public class PcscProtocolTests
         var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.TransmitAndReceiveAsync(command));
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
         Assert.Contains("6982", ex.Message);
     }
 
@@ -202,7 +202,7 @@ public class PcscProtocolTests
         var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.TransmitAndReceiveAsync(command));
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
         Assert.Matches("Command failed with status: 6A82", ex.Message);
     }
 
@@ -236,7 +236,7 @@ public class PcscProtocolTests
         var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
 
         // Act
-        await protocol.SelectAsync(appId);
+        await protocol.SelectAsync(appId, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Single(_fakeConnection.TransmittedCommands);
@@ -259,7 +259,7 @@ public class PcscProtocolTests
         var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
 
         // Act
-        var result = await protocol.SelectAsync(appId);
+        var result = await protocol.SelectAsync(appId, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(expectedData, result.ToArray());
@@ -276,7 +276,7 @@ public class PcscProtocolTests
         var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SelectAsync(appId));
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SelectAsync(appId, TestContext.Current.CancellationToken));
         Assert.Contains("6A82", ex.Message);
     }
 
@@ -309,8 +309,7 @@ public class PcscProtocolTests
         {
             var response = new byte[] { 0x90, 0x00 };
             _fakeConnection.EnqueueResponse(response);
-            await protocol.TransmitAndReceiveAsync(
-                new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty));
+            await protocol.TransmitAndReceiveAsync(new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty), TestContext.Current.CancellationToken);
         });
     }
 

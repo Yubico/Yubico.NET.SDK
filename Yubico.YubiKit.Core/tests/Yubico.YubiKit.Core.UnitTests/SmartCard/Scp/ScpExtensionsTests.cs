@@ -39,7 +39,7 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<NotSupportedException>(async () =>
-            await protocol.WithScpAsync(Scp03KeyParams.Default));
+            await protocol.WithScpAsync(Scp03KeyParams.Default, TestContext.Current.CancellationToken));
 
         Assert.Contains("SCP03", ex.Message);
         Assert.Contains("5.3.0", ex.Message);
@@ -59,7 +59,7 @@ public class ScpExtensionsTests
         // Should proceed to initialization (will fail because fake connection doesn't respond,
         // but we're only testing that firmware check passes)
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(Scp03KeyParams.Default));
+            await protocol.WithScpAsync(Scp03KeyParams.Default, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware
         Assert.IsNotType<NotSupportedException>(ex);
@@ -77,7 +77,7 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams));
+            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware
         Assert.IsNotType<NotSupportedException>(ex);
@@ -99,7 +99,7 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<NotSupportedException>(async () =>
-            await protocol.WithScpAsync(keyParams));
+            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         Assert.Contains("SCP11", ex.Message);
         Assert.Contains("5.7.2", ex.Message);
@@ -120,7 +120,7 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams));
+            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware
         Assert.IsNotType<NotSupportedException>(ex);
@@ -141,7 +141,7 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams));
+            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware
         Assert.IsNotType<NotSupportedException>(ex);
@@ -160,7 +160,7 @@ public class ScpExtensionsTests
         // Act & Assert
         // Should proceed to initialization (will fail, but not due to firmware check)
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams));
+            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware requirements
         if (ex is NotSupportedException notSupported)
@@ -184,7 +184,7 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(keyParams));
+            await protocol.WithScpAsync(keyParams, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware requirements
         if (ex is NotSupportedException notSupported) Assert.DoesNotContain("5.7.2", notSupported.Message);

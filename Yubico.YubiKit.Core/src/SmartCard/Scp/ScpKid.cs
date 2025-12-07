@@ -17,7 +17,7 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// <summary>
 ///     Constants for SCP (Secure Channel Protocol) Key Identifier values.
 /// </summary>
-internal static class ScpKid
+public static class ScpKid
 {
     /// <summary>
     ///     Key ID for SCP03 protocol.

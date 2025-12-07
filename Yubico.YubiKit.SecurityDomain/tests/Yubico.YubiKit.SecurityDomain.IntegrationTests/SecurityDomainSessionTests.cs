@@ -11,11 +11,11 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 public class SecurityDomainSessionTests
 {
     private const ushort CardRecognitionDataObject = 0x0073;
-    private const byte DefaultScp03Kid = 0x01;
+    private const byte DefaultScp03Kid = ScpKid.SCP03;
 
     /// <summary>
     ///     Validates that a Security Domain session can be created with SCP03 on devices
-    ///     running firmware 5.3.0 or newer.
+    ///     running firmware 5.7.2 or newer.
     /// </summary>
     [Theory]
     [WithYubiKey(MinFirmware = "5.7.2")]
@@ -29,8 +29,8 @@ public class SecurityDomainSessionTests
                 Assert.NotNull(session);
                 return Task.CompletedTask;
             },
-            scpParams,
-            CancellationToken.None);
+            scpKeyParams: scpParams,
+            cancellationToken: CancellationToken.None);
     }
 
     /// <summary>
@@ -62,5 +62,23 @@ public class SecurityDomainSessionTests
             Assert.NotEmpty(keyInformation);
             Assert.Contains(keyInformation.Keys, keyRef => keyRef.Kid == DefaultScp03Kid);
         }, cancellationToken: CancellationToken.None);
+    }
+
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.7.2")]
+    public async Task ResetAsync_ReinitializesSession(YubiKeyTestState state)
+    {
+        await state.WithSecurityDomainSessionAsync(
+            async session =>
+            {
+                await session.ResetAsync(CancellationToken.None);
+
+                var keyInformation = await session.GetKeyInformationAsync(CancellationToken.None);
+
+                Assert.NotEmpty(keyInformation);
+                Assert.Contains(keyInformation.Keys, keyRef => keyRef.Kid == DefaultScp03Kid);
+            },
+            resetBeforeUse: false,
+            cancellationToken: CancellationToken.None);
     }
 }

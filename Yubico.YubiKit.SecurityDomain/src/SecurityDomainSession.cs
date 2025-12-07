@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
@@ -41,14 +42,23 @@ public sealed class SecurityDomainSession(
     private readonly ILogger<SecurityDomainSession> _logger = logger;
     private readonly ScpKeyParams? _scpKeyParams = scpKeyParams;
 
+    private ISmartCardProtocol? _baseProtocol;
     private ISmartCardProtocol? _protocol;
     private bool _isInitialized;
 
     private const byte ClaGlobalPlatform = 0x80;
     private const byte InsGetData = 0xCA;
+    private const byte InsInitializeUpdate = 0x50;
+    private const byte InsPerformSecurityOperation = 0x2A;
+    private const byte InsInternalAuthenticate = 0x88;
+    private const byte InsExternalAuthenticate = 0x82;
+
     private const ushort DataObjectKeyInformation = 0x00E0;
     private const int TagKeyInformationTemplate = 0xE0;
     private const int TagKeyInformationData = 0xC0;
+
+    private const int ResetAttemptLimit = 65;
+    private static readonly byte[] ResetAttemptPayload = new byte[8];
 
     /// <summary>
     ///     Factory helper that creates and initializes a Security Domain session.
@@ -67,40 +77,31 @@ public sealed class SecurityDomainSession(
         return session;
     }
 
+    /// <summary>
+    ///     Ensures the Security Domain application is selected and secure messaging is configured if requested.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         if (_isInitialized)
             return;
 
-        var protocol = _protocolFactory.Create(_connection);
-        if (protocol is not ISmartCardProtocol smartCardProtocol)
-        {
-            protocol.Dispose();
-            throw new NotSupportedException("Security Domain requires a smart card protocol implementation.");
-        }
+        var baseProtocol = EnsureBaseProtocol();
 
-        try
-        {
-            await smartCardProtocol
-                .SelectAsync(ApplicationIds.SecurityDomain, cancellationToken)
-                .ConfigureAwait(false);
+        await baseProtocol
+            .SelectAsync(ApplicationIds.SecurityDomain, cancellationToken)
+            .ConfigureAwait(false);
 
-            // Security Domain is available on firmware 5.3.0 and newer.
-            smartCardProtocol.Configure(new FirmwareVersion(5, 3, 0));
+        // Security Domain is available on firmware 5.3.0 and newer.
+        baseProtocol.Configure(new FirmwareVersion(5, 3, 0));
 
-            _protocol = _scpKeyParams is not null
-                ? await smartCardProtocol
-                    .WithScpAsync(_scpKeyParams, cancellationToken)
-                    .ConfigureAwait(false)
-                : smartCardProtocol;
+        _protocol = _scpKeyParams is not null
+            ? await baseProtocol
+                .WithScpAsync(_scpKeyParams, cancellationToken)
+                .ConfigureAwait(false)
+            : baseProtocol;
 
-            _isInitialized = true;
-        }
-        catch
-        {
-            protocol.Dispose();
-            throw;
-        }
+        _isInitialized = true;
     }
 
     /// <summary>
@@ -154,6 +155,10 @@ public sealed class SecurityDomainSession(
         }
     }
 
+    /// <summary>
+    ///     Retrieves key metadata exposed by the Security Domain via the key information data object.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task<IReadOnlyDictionary<KeyRef, IReadOnlyDictionary<byte, byte>>> GetKeyInformationAsync(
         CancellationToken cancellationToken = default)
     {
@@ -176,7 +181,16 @@ public sealed class SecurityDomainSession(
 
             using var innerTlvs = TlvHelper.Decode(template.Value.Span);
 
-            var dataTlv = innerTlvs.FirstOrDefault(candidate => candidate.Tag == TagKeyInformationData);
+            Tlv? dataTlv = null;
+            foreach (var candidate in innerTlvs)
+            {
+                if (candidate.Tag == TagKeyInformationData)
+                {
+                    dataTlv = candidate;
+                    break;
+                }
+            }
+
             if (dataTlv is null)
                 throw new BadResponseException("Key information entry missing C0 data template.");
 
@@ -199,12 +213,179 @@ public sealed class SecurityDomainSession(
         return new ReadOnlyDictionary<KeyRef, IReadOnlyDictionary<byte, byte>>(keyInformation);
     }
 
+    /// <summary>
+    ///     Performs a factory reset by blocking all registered key references and reinitializing the session.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public async Task ResetAsync(CancellationToken cancellationToken = default)
+    {
+        await InitializeAsync(cancellationToken).ConfigureAwait(false);
+
+        var keyInformation = await GetKeyInformationAsync(cancellationToken).ConfigureAwait(false);
+        if (keyInformation.Count == 0)
+        {
+            _logger.LogInformation("Security Domain reset skipped: no keys reported");
+            return;
+        }
+
+        foreach (var keyReference in keyInformation.Keys)
+        {
+            if (!TryGetResetParameters(keyReference, out var instruction, out var overrideKeyRef))
+            {
+                _logger.LogTrace("Reset skipping unsupported key reference {KeyRef}", keyReference);
+                continue;
+            }
+
+            await BlockKeyAsync(instruction, overrideKeyRef, cancellationToken).ConfigureAwait(false);
+        }
+
+        _logger.LogInformation("Security Domain reset complete; reinitializing session");
+
+        _protocol = null;
+        _isInitialized = false;
+
+        await InitializeAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private ISmartCardProtocol EnsureBaseProtocol()
+    {
+        if (_baseProtocol is not null)
+            return _baseProtocol;
+
+        var protocol = _protocolFactory.Create(_connection);
+        if (protocol is not ISmartCardProtocol smartCardProtocol)
+        {
+            protocol.Dispose();
+            throw new NotSupportedException("Security Domain requires a smart card protocol implementation.");
+        }
+
+        _baseProtocol = smartCardProtocol;
+        return _baseProtocol;
+    }
+
+    private bool TryGetResetParameters(KeyRef keyReference, out byte instruction, out KeyRef overrideKeyRef)
+    {
+        overrideKeyRef = keyReference;
+        instruction = 0;
+
+        switch (keyReference.Kid)
+        {
+            case ScpKid.SCP03:
+                overrideKeyRef = new KeyRef(0x00, 0x00);
+                instruction = InsInitializeUpdate;
+                return true;
+            case 0x02:
+            case 0x03:
+                return false;
+            case ScpKid.SCP11a:
+            case ScpKid.SCP11c:
+                instruction = InsExternalAuthenticate;
+                return true;
+            case ScpKid.SCP11b:
+                instruction = InsInternalAuthenticate;
+                return true;
+            default:
+                instruction = InsPerformSecurityOperation;
+                return true;
+        }
+    }
+
+    private async Task BlockKeyAsync(byte instruction, KeyRef keyReference, CancellationToken cancellationToken)
+    {
+        for (var attempt = 1; attempt <= ResetAttemptLimit; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            short statusWord;
+            try
+            {
+                statusWord = await TransmitResetAttemptAsync(instruction, keyReference, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Reset attempt {Attempt} for key {KeyRef} failed to transmit", attempt,
+                    keyReference);
+                continue;
+            }
+
+            if (statusWord is SWConstants.AuthenticationMethodBlocked or SWConstants.SecurityStatusNotSatisfied)
+            {
+                _logger.LogDebug(
+                    "Key {KeyRef} blocked after {AttemptCount} attempts (SW=0x{Status:X4})",
+                    keyReference,
+                    attempt,
+                    statusWord);
+                break;
+            }
+
+            if (statusWord == SWConstants.InvalidCommandDataParameter || statusWord == SWConstants.Success)
+                continue;
+
+            _logger.LogTrace(
+                "Reset attempt {Attempt} for key {KeyRef} returned SW=0x{Status:X4}",
+                attempt,
+                keyReference,
+                statusWord);
+        }
+    }
+
+    private async Task<short> TransmitResetAttemptAsync(
+        byte instruction,
+        KeyRef keyReference,
+        CancellationToken cancellationToken)
+    {
+        const int HeaderLength = 5; // CLA, INS, P1, P2, Lc
+        var commandLength = HeaderLength + ResetAttemptPayload.Length;
+
+        byte[]? rented = null;
+
+        try
+        {
+            rented = ArrayPool<byte>.Shared.Rent(commandLength);
+            var command = rented.AsSpan(0, commandLength);
+
+            command[0] = ClaGlobalPlatform;
+            command[1] = instruction;
+            command[2] = keyReference.Kvn;
+            command[3] = keyReference.Kid;
+            command[4] = (byte)ResetAttemptPayload.Length;
+            ResetAttemptPayload.CopyTo(command[5..]);
+
+            var response = await _connection
+                .TransmitAndReceiveAsync(rented.AsMemory(0, commandLength), cancellationToken)
+                .ConfigureAwait(false);
+
+            if (response.Length < 2)
+                throw new BadResponseException("Reset command response shorter than status word.");
+
+            var responseSpan = response.Span;
+            var statusWord = (short)((responseSpan[^2] << 8) | responseSpan[^1]);
+            return statusWord;
+        }
+        finally
+        {
+            if (rented is not null)
+                ArrayPool<byte>.Shared.Return(rented, clearArray: true);
+        }
+    }
+
+    /// <summary>
+    ///     Disposes the session and releases managed resources associated with the underlying protocol.
+    /// </summary>
+    /// <param name="disposing">Indicates whether managed resources should be disposed.</param>
     protected override void Dispose(bool disposing)
     {
         if (!disposing)
             return;
 
         _protocol?.Dispose();
+        _protocol = null;
+        _baseProtocol = null;
         base.Dispose(true);
     }
 }

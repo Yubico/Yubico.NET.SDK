@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.SecurityDomain;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
@@ -28,12 +29,9 @@ public static class SecurityDomainTestStateExtensions
         public Task WithSecurityDomainSessionAsync(
             Func<SecurityDomainSession, Task> action,
             ScpKeyParams? scpKeyParams = null,
-            CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(state);
-            ArgumentNullException.ThrowIfNull(action);
-
-            return state.WithConnectionAsync(async connection =>
+            bool resetBeforeUse = true,
+            CancellationToken cancellationToken = default) =>
+            state.WithConnectionAsync(async connection =>
             {
                 using var session = await SecurityDomainSession.CreateAsync(
                         connection,
@@ -41,21 +39,10 @@ public static class SecurityDomainTestStateExtensions
                         cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
+                if (resetBeforeUse)
+                    await session.ResetAsync(cancellationToken).ConfigureAwait(false);
+
                 await action(session).ConfigureAwait(false);
             }, cancellationToken);
-        }
-
-        public Task WithSecurityDomainSessionAsync(
-            Action<SecurityDomainSession> action,
-            ScpKeyParams? scpKeyParams = null,
-            CancellationToken cancellationToken = default) =>
-            state.WithSecurityDomainSessionAsync(
-                session =>
-                {
-                    action(session);
-                    return Task.CompletedTask;
-                },
-                scpKeyParams,
-                cancellationToken);
     }
 }

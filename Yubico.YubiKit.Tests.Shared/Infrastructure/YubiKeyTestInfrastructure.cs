@@ -264,8 +264,7 @@ internal static class YubiKeyTestInfrastructure
                     if (AllowList.IsDeviceAllowed(serial.Value))
                     {
                         // Get device info
-                        var info = GetDeviceInfoSync(device);
-
+                        var info = device.GetDeviceInfoAsync().GetAwaiter().GetResult();
                         var testDevice = new YubiKeyTestState(device, info);
                         authorizedDevices.Add(testDevice);
 
@@ -332,16 +331,6 @@ internal static class YubiKeyTestInfrastructure
             Environment.Exit(-1);
             throw; // Unreachable, but needed for compiler
         }
-    }
-
-    /// <summary>
-    ///     Gets device information synchronously (helper for static initialization).
-    /// </summary>
-    private static DeviceInfo GetDeviceInfoSync(IYubiKey device)
-    {
-        using var connection = device.ConnectAsync<ISmartCardConnection>().GetAwaiter().GetResult();
-        using var mgmt = ManagementSession<ISmartCardConnection>.CreateAsync(connection).GetAwaiter().GetResult();
-        return mgmt.GetDeviceInfoAsync().GetAwaiter().GetResult();
     }
 
     #endregion

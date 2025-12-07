@@ -176,16 +176,7 @@ public sealed class SecurityDomainSession(
 
             using var innerTlvs = TlvHelper.Decode(template.Value.Span);
 
-            Tlv? dataTlv = null;
-            foreach (var candidate in innerTlvs)
-            {
-                if (candidate.Tag == TagKeyInformationData)
-                {
-                    dataTlv = candidate;
-                    break;
-                }
-            }
-
+            var dataTlv = innerTlvs.FirstOrDefault(candidate => candidate.Tag == TagKeyInformationData);
             if (dataTlv is null)
                 throw new BadResponseException("Key information entry missing C0 data template.");
 

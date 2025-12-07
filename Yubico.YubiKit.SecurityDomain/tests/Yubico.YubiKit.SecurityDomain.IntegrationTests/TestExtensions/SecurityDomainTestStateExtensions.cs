@@ -13,10 +13,9 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.SecurityDomain;
 using Yubico.YubiKit.Tests.Shared;
 
-namespace Yubico.YubiKit.SecurityDomain.Tests;
+namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 
 /// <summary>
 ///     Extensions that help integration tests acquire <see cref="SecurityDomainSession" />

@@ -1,5 +1,5 @@
 using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.SecurityDomain;
+using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 

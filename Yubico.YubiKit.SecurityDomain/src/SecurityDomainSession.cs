@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.SecurityDomain;
@@ -43,6 +46,9 @@ public sealed class SecurityDomainSession(
 
     private const byte ClaGlobalPlatform = 0x80;
     private const byte InsGetData = 0xCA;
+    private const ushort DataObjectKeyInformation = 0x00E0;
+    private const int TagKeyInformationTemplate = 0xE0;
+    private const int TagKeyInformationData = 0xC0;
 
     /// <summary>
     ///     Factory helper that creates and initializes a Security Domain session.
@@ -146,6 +152,60 @@ public sealed class SecurityDomainSession(
             _logger.LogWarning(ex, "GET DATA for object 0x{DataObject:X4} failed", dataObject);
             throw;
         }
+    }
+
+    public async Task<IReadOnlyDictionary<KeyRef, IReadOnlyDictionary<byte, byte>>> GetKeyInformationAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var response = await GetDataAsync(DataObjectKeyInformation, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        if (response.IsEmpty)
+            return new ReadOnlyDictionary<KeyRef, IReadOnlyDictionary<byte, byte>>(new Dictionary<KeyRef, IReadOnlyDictionary<byte, byte>>(0));
+
+        var keyInformation = new Dictionary<KeyRef, IReadOnlyDictionary<byte, byte>>();
+
+        using var keyTemplates = TlvHelper.Decode(response.Span);
+        foreach (var template in keyTemplates)
+        {
+            if (template.Tag != TagKeyInformationTemplate)
+            {
+                _logger.LogDebug("Unexpected key information tag 0x{Tag:X2}", template.Tag);
+                continue;
+            }
+
+            using var innerTlvs = TlvHelper.Decode(template.Value.Span);
+
+            Tlv? dataTlv = null;
+            foreach (var candidate in innerTlvs)
+            {
+                if (candidate.Tag == TagKeyInformationData)
+                {
+                    dataTlv = candidate;
+                    break;
+                }
+            }
+
+            if (dataTlv is null)
+                throw new BadResponseException("Key information entry missing C0 data template.");
+
+            var payload = dataTlv.Value.Span;
+            if (payload.Length < 2)
+                throw new BadResponseException("Key information payload shorter than key reference.");
+
+            if ((payload.Length - 2) % 2 != 0)
+                throw new BadResponseException("Key information payload has incomplete component pair.");
+
+            var keyRef = new KeyRef(payload[0], payload[1]);
+            var components = new Dictionary<byte, byte>((payload.Length - 2) / 2);
+            var componentData = payload[2..];
+            for (var i = 0; i < componentData.Length; i += 2)
+                components[componentData[i]] = componentData[i + 1];
+
+            keyInformation[keyRef] = new ReadOnlyDictionary<byte, byte>(components);
+        }
+
+        return new ReadOnlyDictionary<KeyRef, IReadOnlyDictionary<byte, byte>>(keyInformation);
     }
 
     protected override void Dispose(bool disposing)

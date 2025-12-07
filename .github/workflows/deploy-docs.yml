@@ -55,7 +55,7 @@ jobs:
           ref: ${{ inputs.gitops-branch }}
           token: ${{ steps.generate_token.outputs.token }}
           path: gitops
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Update GitOps resources
         run: sed -i "s#/yesdk/yesdk-docserver:.*\$#/yesdk/yesdk-docserver:$IMAGE_TAG#" ./k8s/yesdk/kustomization.yaml

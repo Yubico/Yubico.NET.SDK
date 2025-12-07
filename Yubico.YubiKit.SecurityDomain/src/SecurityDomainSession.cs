@@ -41,6 +41,9 @@ public sealed class SecurityDomainSession(
     private ISmartCardProtocol? _protocol;
     private bool _isInitialized;
 
+    private const byte ClaGlobalPlatform = 0x80;
+    private const byte InsGetData = 0xCA;
+
     /// <summary>
     ///     Factory helper that creates and initializes a Security Domain session.
     /// </summary>
@@ -90,6 +93,57 @@ public sealed class SecurityDomainSession(
         catch
         {
             protocol.Dispose();
+            throw;
+        }
+    }
+
+    /// <summary>
+    ///     Executes the GlobalPlatform GET DATA command for the specified data object.
+    /// </summary>
+    /// <param name="dataObject">Two-byte identifier, combined as {P1,P2}, selecting the data object.</param>
+    /// <param name="requestData">Optional request payload sent alongside the GET DATA command.</param>
+    /// <param name="expectedResponseLength">Optional expected response length encoded in the Le field.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public async Task<ReadOnlyMemory<byte>> GetDataAsync(
+        ushort dataObject,
+        ReadOnlyMemory<byte> requestData = default,
+        int expectedResponseLength = 0,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_isInitialized)
+            throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
+
+        if (_protocol is null)
+            throw new InvalidOperationException("Security Domain protocol not available.");
+
+        if (expectedResponseLength < 0)
+            throw new ArgumentOutOfRangeException(nameof(expectedResponseLength), "Expected response length cannot be negative.");
+
+        var command = new CommandApdu
+        {
+            Cla = ClaGlobalPlatform,
+            Ins = InsGetData,
+            P1 = (byte)(dataObject >> 8),
+            P2 = (byte)(dataObject & 0xFF),
+            Data = requestData,
+            Le = expectedResponseLength
+        };
+
+        _logger.LogDebug("Sending GET DATA for object 0x{DataObject:X4}", dataObject);
+
+        try
+        {
+            return await _protocol
+                .TransmitAndReceiveAsync(command, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "GET DATA for object 0x{DataObject:X4} failed", dataObject);
             throw;
         }
     }

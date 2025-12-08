@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -212,6 +214,173 @@ public sealed class SecurityDomainSession(
 
         return new ReadOnlyDictionary<KeyRef, IReadOnlyDictionary<byte, byte>>(keyInformation);
     }
+
+    /// <summary>
+    ///     Establishes secure messaging with the provided key parameters, replacing any existing SCP session.
+    /// </summary>
+    /// <param name="scpKeyParams">SCP key material to use when authenticating.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The data encryptor derived from the newly established secure channel, if available.</returns>
+    public Task<DataEncryptor?> AuthenticateAsync(
+        ScpKeyParams scpKeyParams,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Retrieves the Security Domain card recognition data (tag 0x73).
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The raw card recognition TLV payload.</returns>
+    public Task<ReadOnlyMemory<byte>> GetCardRecognitionDataAsync(
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Retrieves the certificate bundle associated with the supplied key reference.
+    /// </summary>
+    /// <param name="keyReference">Key reference identifying the certificate store.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A list of certificates where the leaf certificate appears last.</returns>
+    public Task<IReadOnlyList<X509Certificate2>> GetCertificatesAsync(
+        KeyRef keyReference,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Retrieves the supported CA identifiers (KLOC/KLCC) exposed by the Security Domain.
+    /// </summary>
+    /// <param name="includeKloc">Whether to include Key Loading OCE Certificate identifiers.</param>
+    /// <param name="includeKlcc">Whether to include Key Loading Card Certificate identifiers.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A dictionary keyed by key reference containing identifier payloads.</returns>
+    public Task<IReadOnlyDictionary<KeyRef, ReadOnlyMemory<byte>>> GetSupportedCaIdentifiersAsync(
+        bool includeKloc,
+        bool includeKlcc,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Stores the CA issuer subject key identifier for the given key reference.
+    /// </summary>
+    /// <param name="keyReference">Key reference identifying the CA issuer record.</param>
+    /// <param name="subjectKeyIdentifier">Subject key identifier bytes to persist.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public Task StoreCaIssuerAsync(
+        KeyRef keyReference,
+        ReadOnlyMemory<byte> subjectKeyIdentifier,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Stores a certificate bundle for the specified key reference.
+    /// </summary>
+    /// <param name="keyReference">Key reference that will own the certificate bundle.</param>
+    /// <param name="certificates">Certificates to persist, with the leaf certificate last.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public Task StoreCertificatesAsync(
+        KeyRef keyReference,
+        IReadOnlyList<X509Certificate2> certificates,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Persists the allowlist of certificate serial numbers associated with the provided key reference.
+    /// </summary>
+    /// <param name="keyReference">Key reference whose allowlist is being updated.</param>
+    /// <param name="serials">Collection of serial numbers (hex strings) to store.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public Task StoreAllowlistAsync(
+        KeyRef keyReference,
+        IReadOnlyCollection<string> serials,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Removes all entries from the allowlist tied to the specified key reference.
+    /// </summary>
+    /// <param name="keyReference">Key reference whose allowlist should be cleared.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public Task ClearAllowListAsync(
+        KeyRef keyReference,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Executes a STORE DATA command with the supplied TLV encoded payload.
+    /// </summary>
+    /// <param name="data">Pre-encoded BER-TLV data to transmit.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public Task StoreDataAsync(
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Imports an SCP03 static key set into the Security Domain.
+    /// </summary>
+    /// <param name="keyReference">Key reference that will receive the key set.</param>
+    /// <param name="staticKeys">Static ENC/MAC/DEK values to load.</param>
+    /// <param name="replaceKvn">Optional key version number to replace.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public Task PutKeyAsync(
+        KeyRef keyReference,
+        StaticKeys staticKeys,
+        int replaceKvn = 0,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Imports an SCP11 private key into the Security Domain.
+    /// </summary>
+    /// <param name="keyReference">Key reference that will own the private key.</param>
+    /// <param name="privateKey">Private key material to load.</param>
+    /// <param name="replaceKvn">Optional key version number to replace.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public Task PutKeyAsync(
+        KeyRef keyReference,
+        ECDiffieHellman privateKey,
+        int replaceKvn = 0,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Imports an SCP11 public key into the Security Domain.
+    /// </summary>
+    /// <param name="keyReference">Key reference that will own the public key.</param>
+    /// <param name="publicKey">Public key material to load.</param>
+    /// <param name="replaceKvn">Optional key version number to replace.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public Task PutKeyAsync(
+        KeyRef keyReference,
+        ECDiffieHellmanPublicKey publicKey,
+        int replaceKvn = 0,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Deletes keys matching the supplied reference.
+    /// </summary>
+    /// <param name="keyReference">Key reference describing the key(s) to delete.</param>
+    /// <param name="deleteLast">Whether the last remaining key may be deleted.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    public Task DeleteKeyAsync(
+        KeyRef keyReference,
+        bool deleteLast = false,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
+    /// <summary>
+    ///     Generates a new SCP11 key pair on the device and returns the public point.
+    /// </summary>
+    /// <param name="keyReference">Key reference that will own the generated key pair.</param>
+    /// <param name="replaceKvn">Optional key version number to replace.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The uncompressed EC public point (0x04 || X || Y).</returns>
+    public Task<byte[]> GenerateEcKeyAsync(
+        KeyRef keyReference,
+        byte replaceKvn = 0,
+        CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
 
     /// <summary>
     ///     Performs a factory reset by blocking all registered key references and reinitializing the session.

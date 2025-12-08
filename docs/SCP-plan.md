@@ -28,10 +28,10 @@ Port Java SCP (Secure Channel Protocol) implementation to C# with idiomatic patt
 - [x] ScpState.cs - Fix compilation errors, add missing logic
 - [x] ScpProcessor.cs - Complete implementation, return ResponseApdu
 
-### Phase 6: Session Classes (1 file)
-- [ ] SecurityDomainSession.cs - Security Domain operations (see `docs/security-domain-meta.md` for design notes)
+### Phase 6: Session Classes (1 file) (CURRENT PHASE)
+- [x] SecurityDomainSession.cs - Security Domain operations (see `docs/security-domain-meta.md` for design notes and source references to the Java and legacy C# implementations)
 
-### Phase 7: SCP Integration with Protocol and Sessions (CURRENT PHASE)
+### Phase 7: SCP Integration with Protocol and Sessions 
 **Goal**: Enable SCP (Secure Channel Protocol) initialization in PcscProtocol and ManagementSession
 
 #### 7.1 Update PcscProtocol (2 methods)

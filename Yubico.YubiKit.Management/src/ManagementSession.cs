@@ -46,6 +46,8 @@ public sealed class ManagementSession<TConnection>(
     private static readonly Feature FeatureDeviceReset =
         new("Device Reset", 5, 6, 0);
 
+    private readonly ILogger<ManagementSession<TConnection>> _logger = logger;
+
     private bool _isInitialized;
 
     private IProtocol _protocol = protocolFactory.Create(connection);
@@ -78,6 +80,7 @@ public sealed class ManagementSession<TConnection>(
             _protocol = await smartCardProtocol.WithScpAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
 
         _isInitialized = true;
+        _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
 
     public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)

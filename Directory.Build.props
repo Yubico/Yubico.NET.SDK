@@ -4,7 +4,7 @@
     <LangVersion>14</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>preview</AnalysisLevel>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
@@ -60,6 +60,8 @@
   <!-- Analyzer configuration overrides -->
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
     <AnalysisMode>Recommended</AnalysisMode>
-    <NoWarn>$(NoWarn);CA1707</NoWarn>
+    <NoWarn>$(NoWarn);CA1707;CA1716;CA1873;CA1001;CA1513;CA1852;CA1859;CA1826;CS8892</NoWarn>
+    <!-- Relax noisy test-only diagnostics: keywords (CA1716), logging perf (CA1873), disposable/test harness patterns (CA1001/CA1513/CA1852/CA1859), LINQ on indexables (CA1826), and duplicated generated entry points (CS8892) -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
 </Project>

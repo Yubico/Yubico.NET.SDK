@@ -45,7 +45,7 @@ public enum DeviceFlags
     ///     </para>
     ///     <para>
     ///         To automatically eject the smart card following a touch, see
-    ///         <see cref="IYubiKeyDeviceInfo.AutoEjectTimeout" />.
+    ///         <see cref="DeviceInfo.AutoEjectTimeout" />.
     ///     </para>
     /// </remarks>
     TouchEject = 0x80

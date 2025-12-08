@@ -50,7 +50,7 @@ public sealed class DeviceMonitorService(
             await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
             using var timer = new PeriodicTimer(_options.ScanInterval);
 
-            while (await timer.WaitForNextTickAsync(stoppingToken))
+            while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
                 await PerformDeviceScan(stoppingToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)

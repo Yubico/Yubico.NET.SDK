@@ -76,10 +76,10 @@ internal class SmartCardConnection(IPcscDevice smartCardDevice, ILogger<SmartCar
             _cardHandle,
             new SCARD_IO_REQUEST(_protocol.Value),
             command.Span,
-            IntPtr.Zero,
+            nint.Zero,
             buffer,
             out bytesReceived
-        ), cancellationToken);
+        ), cancellationToken).ConfigureAwait(false);
 
         if (result != ErrorCode.SCARD_S_SUCCESS)
             throw new SCardException("ExceptionMessages.SCardTransmitFailure, result");

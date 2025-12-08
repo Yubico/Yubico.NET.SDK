@@ -42,7 +42,7 @@ public class DeviceListenerService(
         logger.LogInformation("YubiKey device listener started");
         try
         {
-            await foreach (var devices in deviceChannel.ConsumeAsync(stoppingToken))
+            await foreach (var devices in deviceChannel.ConsumeAsync(stoppingToken).ConfigureAwait(false))
                 deviceRepository.Update(devices);
         }
         catch (OperationCanceledException)

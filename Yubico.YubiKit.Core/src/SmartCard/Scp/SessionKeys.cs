@@ -41,7 +41,7 @@ internal sealed class SessionKeys : IDisposable
         if (senc.Length != 16) throw new ArgumentException("S-ENC key must be 16 bytes", nameof(senc));
         if (smac.Length != 16) throw new ArgumentException("S-MAC key must be 16 bytes", nameof(smac));
         if (srmac.Length != 16) throw new ArgumentException("S-RMAC key must be 16 bytes", nameof(srmac));
-        if (dek.Length != 0 && dek.Length != 16)
+        if (dek.Length is not 0 and not 16)
             throw new ArgumentException("DEK must be 16 bytes if provided", nameof(dek));
 
         _senc = senc.ToArray();

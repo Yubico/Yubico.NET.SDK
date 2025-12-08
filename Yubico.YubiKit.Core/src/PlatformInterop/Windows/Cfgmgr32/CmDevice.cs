@@ -124,8 +124,8 @@ public class CmDevice
         var errorCode = NativeMethods.CM_Get_Parent(out var parentInstance, Instance);
         if (errorCode == NativeMethods.CmErrorCode.CR_SUCCESS) return new CmDevice(parentInstance);
 
-        if (errorCode != NativeMethods.CmErrorCode.CR_SUCCESS &&
-            errorCode != NativeMethods.CmErrorCode.CR_NO_SUCH_DEVNODE)
+        if (errorCode is not NativeMethods.CmErrorCode.CR_SUCCESS and
+            not NativeMethods.CmErrorCode.CR_NO_SUCH_DEVNODE)
             throw new PlatformApiException(
                 "CONFIG_RET",
                 (int)errorCode,
@@ -149,8 +149,8 @@ public class CmDevice
             errorCode = NativeMethods.CM_Get_Sibling(out childInstance, childInstance);
         }
 
-        if (errorCode != NativeMethods.CmErrorCode.CR_SUCCESS &&
-            errorCode != NativeMethods.CmErrorCode.CR_NO_SUCH_DEVNODE)
+        if (errorCode is not NativeMethods.CmErrorCode.CR_SUCCESS and
+            not NativeMethods.CmErrorCode.CR_NO_SUCH_DEVNODE)
             throw new PlatformApiException(
                 "CONFIG_RET",
                 (int)errorCode,

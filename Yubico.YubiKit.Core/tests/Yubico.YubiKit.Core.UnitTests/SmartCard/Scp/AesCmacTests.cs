@@ -85,8 +85,8 @@ public class AesCmacTests
         if (length > 0)
         {
             var mid = length / 2;
-            cmac2.AppendData(message[..mid]);
-            cmac2.AppendData(message[mid..]);
+            cmac2.AppendData(message.AsSpan()[..mid]);
+            cmac2.AppendData(message.AsSpan()[mid..]);
         }
 
         var mac2 = cmac2.GetHashAndReset();
@@ -197,8 +197,9 @@ public class AesCmacTests
     public void AesCmac_IncrementalFillsBufferExactly_ProducesCorrectMac()
     {
         // Tests buffer flush when _bufferOffset hits BlockSize exactly
-        var data = new byte[48]; // 3 blocks
-        Array.Fill<byte>(data, 0xCC);
+        // var data = new byte[48]; // 3 blocks
+        Span<byte> data = stackalloc byte[48];
+        data.Fill(0xCC);
 
         using var cmac = new AesCmac(TestKey);
 
@@ -226,8 +227,8 @@ public class AesCmacTests
     {
         // CRITICAL: Tests the off-by-one bug fix (offset + BlockSize <= vs <)
         // 32 bytes = exactly 2 complete blocks, no padding needed
-        var message = new byte[32];
-        Array.Fill<byte>(message, 0xAA);
+        Span<byte> message = stackalloc byte[32];
+        message.Fill(0xAA);
 
         using var cmac = new AesCmac(TestKey);
         cmac.AppendData(message);
@@ -248,8 +249,8 @@ public class AesCmacTests
     public void AesCmac_OneBlockPlusOneByte_ProducesCorrectMac()
     {
         // Tests padding path after processing exactly one complete block
-        var message = new byte[17];
-        Array.Fill<byte>(message, 0xBB);
+        Span<byte> message = stackalloc byte[17];
+        message.Fill(0xBB);
 
         using var cmac = new AesCmac(TestKey);
         cmac.AppendData(message);

@@ -52,7 +52,7 @@ public sealed class StaticKeys : IDisposable
     {
         if (enc.Length != 16) throw new ArgumentException("ENC key must be 16 bytes", nameof(enc));
         if (mac.Length != 16) throw new ArgumentException("MAC key must be 16 bytes", nameof(mac));
-        if (dek.Length != 0 && dek.Length != 16)
+        if (dek.Length is not 0 and not 16)
             throw new ArgumentException("DEK must be 16 bytes if provided", nameof(dek));
 
         _enc = enc.ToArray();

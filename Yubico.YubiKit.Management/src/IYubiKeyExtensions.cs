@@ -44,8 +44,8 @@ public static class IYubiKeyExtensions
         /// </returns>
         public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
         {
-            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken);
-            return await mgmtSession.GetDeviceInfoAsync(cancellationToken);
+            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            return await mgmtSession.GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -76,8 +76,8 @@ public static class IYubiKeyExtensions
             byte[]? newLockCode = null,
             CancellationToken cancellationToken = default)
         {
-            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken);
-            await mgmtSession.SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken);
+            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            await mgmtSession.SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -100,9 +100,9 @@ public static class IYubiKeyExtensions
             CancellationToken cancellationToken = default)
         {
             // Connection is disposed inside session. User must dispose session.
-            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken).ConfigureAwait(false);
             return await ManagementSession<ISmartCardConnection>.CreateAsync(connection, scpKeyParams: scpKeyParams,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
         }
     }
 

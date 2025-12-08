@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKit.Core.Hid;
 
-public enum HidUsagePage : short
+public enum HidUsagePage 
 {
     Unknown = 0,
 

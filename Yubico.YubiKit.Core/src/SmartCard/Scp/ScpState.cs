@@ -305,10 +305,10 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
             _ => throw new ArgumentException("Invalid SCP11 KID")
         };
 
-        if (kid == ScpKid.SCP11a || kid == ScpKid.SCP11c)
+        if (kid is ScpKid.SCP11a or ScpKid.SCP11c)
         {
             // GPC v2.3 Amendment F (SCP11) v1.4 §7.5
-            if (keyParams.SkOceEcka == null) throw new ArgumentNullException(nameof(keyParams.SkOceEcka));
+            ArgumentNullException.ThrowIfNull(keyParams.SkOceEcka);
 
             var n = keyParams.Certificates.Count - 1;
             if (n < 0) throw new ArgumentException("SCP11a and SCP11c require a certificate chain");

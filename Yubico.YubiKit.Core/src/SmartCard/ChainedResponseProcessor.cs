@@ -21,7 +21,7 @@ internal class ChainedResponseProcessor(
     IApduProcessor apduTransmitter,
     byte insSendRemaining) : IApduProcessor
 {
-    private static readonly byte SW1_HAS_MORE_DATA = 0x61;
+    private const byte SW1_HAS_MORE_DATA = 0x61;
     private readonly CommandApdu GetMoreDataApdu = new(0, insSendRemaining, 0, 0);
 
     public FirmwareVersion? FirmwareVersion { get; } = firmwareVersion;

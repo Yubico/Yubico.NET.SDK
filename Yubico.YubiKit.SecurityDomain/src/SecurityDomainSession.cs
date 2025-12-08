@@ -323,7 +323,7 @@ public sealed class SecurityDomainSession(
                 break;
             }
 
-            if (statusWord == SWConstants.InvalidCommandDataParameter || statusWord == SWConstants.Success)
+            if (statusWord is SWConstants.InvalidCommandDataParameter or SWConstants.Success)
                 continue;
 
             _logger.LogTrace(

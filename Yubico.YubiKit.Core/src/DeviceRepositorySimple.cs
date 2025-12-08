@@ -67,7 +67,7 @@ public class DeviceRepositorySimple : IDeviceRepository
             }
 
             previousDeviceIds = currentDeviceIds;
-            await Task.Delay(interval, cancellationToken);
+            await Task.Delay(interval, cancellationToken).ConfigureAwait(false);
         }
     }
 }

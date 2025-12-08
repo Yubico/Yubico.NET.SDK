@@ -137,7 +137,7 @@ public class DeviceRepositoryCached(
     {
         if (TEST_MONITORSERVICE_SKIP_MANUALSCAN)
         {
-            await Task.Delay(500, cancellationToken);
+            await Task.Delay(500, cancellationToken).ConfigureAwait(false);
             return;
         }
 

@@ -45,7 +45,7 @@ public static class YubiKey // TODO Keep Plan was to do all via manager?
                 yield return new DeviceEvent(DeviceAction.Removed, null) { DeviceId = removedId };
 
             previousDeviceIds = currentDeviceIds;
-            await Task.Delay(interval, cancellationToken);
+            await Task.Delay(interval, cancellationToken).ConfigureAwait(false);
         }
     }
 

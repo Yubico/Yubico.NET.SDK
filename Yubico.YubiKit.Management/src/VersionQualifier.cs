@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.Management;
 ///     Represents the type of version qualifier for a firmware version.
 ///     The version qualifier type indicates whether the version is an Alpha, Beta, or Final release.
 /// </summary>
-public enum VersionQualifierType : byte
+public enum VersionQualifierType 
 {
     Alpha = 0x00,
     Beta = 0x01,

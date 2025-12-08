@@ -74,6 +74,10 @@ var testProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDire
     .OrderBy(p => p)
     .ToArray();
 
+var testProjectInfos = testProjects
+    .Select(p => (ProjectPath: p, UsesTestingPlatformRunner: UsesMicrosoftTestingPlatformRunner(repoRoot, p)))
+    .ToArray();
+
 var artifactsDir = Path.Combine(repoRoot, "artifacts");
 var packagesDir = Path.Combine(artifactsDir, "packages");
 
@@ -115,14 +119,19 @@ Target("test", DependsOn("build"), () =>
 
     var testResults = new List<(string Project, bool Passed, string? Error)>();
 
-    foreach (var project in testProjects)
+    foreach (var projectInfo in testProjectInfos)
     {
+        var project = projectInfo.ProjectPath;
         var projectName = Path.GetFileNameWithoutExtension(project);
         Console.WriteLine($"\n{'='} Testing: {projectName} {'='}");
 
         try
         {
-            Run("dotnet", $"test {project} -c {configuration} --no-build --logger \"console;verbosity=normal\"");
+            var command = projectInfo.UsesTestingPlatformRunner
+                ? $"run --project {project} -c {configuration} --no-build"
+                : $"test {project} -c {configuration} --no-build --logger \"console;verbosity=normal\"";
+
+            Run("dotnet", command);
             testResults.Add((projectName, true, null));
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"✓ {projectName} - All tests passed");
@@ -439,3 +448,18 @@ EXAMPLES:
 
     Console.WriteLine("\nSee BUILD.md for full documentation.");
 }
+
+static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPath)
+{
+    var fullPath = Path.Combine(repoRoot, projectPath);
+    if (!File.Exists(fullPath))
+    {
+        return false;
+    }
+
+    var contents = File.ReadAllText(fullPath);
+    return contents.Contains(
+        "<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>",
+        StringComparison.OrdinalIgnoreCase);
+}
+

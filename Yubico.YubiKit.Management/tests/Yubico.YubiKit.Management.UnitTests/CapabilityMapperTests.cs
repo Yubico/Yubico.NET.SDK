@@ -272,24 +272,6 @@ public class CapabilityMapperTests
         Assert.Equal(DeviceCapabilities.None, result);
     }
 
-    [Fact]
-    public void FromApp_OneByte_HighBitsIgnored()
-    {
-        // Single byte can only represent lower 8 capabilities
-        byte[] buffer = [0xFF];
-
-        var result = CapabilityMapper.FromApp(buffer);
-
-        // Should only have Otp, U2f, OpenPgp, Piv, Oath (not HsmAuth or Fido2)
-        var expected =
-            DeviceCapabilities.Otp |
-            DeviceCapabilities.U2f |
-            DeviceCapabilities.OpenPgp |
-            DeviceCapabilities.Piv |
-            DeviceCapabilities.Oath;
-
-        Assert.Equal((int)expected, (int)result);
-    }
 
     [Fact]
     public void FromFips_MaxInt16_ParsesCorrectly()

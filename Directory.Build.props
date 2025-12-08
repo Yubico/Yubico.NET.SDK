@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <!-- Common Language Settings -->
-    <LangVersion>preview</LangVersion>
+    <LangVersion>14</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>

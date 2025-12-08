@@ -86,6 +86,11 @@ default
 - **Coverage reports**: `artifacts/coverage/**/coverage.cobertura.xml`
 - **Local NuGet feed**: `artifacts/nuget-feed/`
 
+## Analyzers and Formatting
+
+- Run `dotnet format` (or `dotnet format --verify-no-changes` in CI) to apply analyzer-driven fixes and ensure the workspace matches the shared `.editorconfig` rules.
+- Analyzer configuration details live in `docs/DEV-GUIDE.md`; review that guide before introducing new rules or suppressions.
+
 ## Project Discovery
 
 The build script automatically discovers projects using glob patterns:

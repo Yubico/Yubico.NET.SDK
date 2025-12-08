@@ -5,6 +5,11 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
 
     <!-- SDK Version (from Directory.Packages.props) -->
     <Version>$(YubiKitVersion)</Version>
@@ -48,5 +53,10 @@
     <IsPackable Condition="'$(IsTestProject)' == 'true'">false</IsPackable>
     <!-- Disable XML documentation for test projects -->
     <GenerateDocumentationFile Condition="'$(IsTestProject)' == 'true'">false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Analyzer configuration overrides -->
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+    <AnalysisMode>Recommended</AnalysisMode>
   </PropertyGroup>
 </Project>

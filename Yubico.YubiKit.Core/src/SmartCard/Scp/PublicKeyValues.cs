@@ -107,7 +107,8 @@ internal abstract class PublicKeyValues
 
             using var ecdh = ECDiffieHellman.Create(new ECParameters
             {
-                Curve = CurveParams, Q = new ECPoint { X = x, Y = y }
+                Curve = CurveParams,
+                Q = new ECPoint { X = x, Y = y }
             });
 
             return ecdh.PublicKey;

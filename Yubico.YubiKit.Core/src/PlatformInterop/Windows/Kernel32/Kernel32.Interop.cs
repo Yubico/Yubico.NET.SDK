@@ -168,7 +168,7 @@ internal static partial class NativeMethods
         IntPtr hTemplateFile
     );
 
-//SYSLIB1092: The usage of 'LibraryImportAttribute' does not follow recommendations. It is recommended to use explicit '[In]' and '[Out]' attributes on array parameters.
+    //SYSLIB1092: The usage of 'LibraryImportAttribute' does not follow recommendations. It is recommended to use explicit '[In]' and '[Out]' attributes on array parameters.
     [LibraryImport(Libraries.Kernel32, EntryPoint = "WriteFile", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]

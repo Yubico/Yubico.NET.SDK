@@ -101,7 +101,7 @@ public sealed record Scp11KeyParams : ScpKeyParams
     override public void Dispose()
     {
         if (_disposed) return;
-        
+
         try
         {
             SkOceEcka?.Dispose();

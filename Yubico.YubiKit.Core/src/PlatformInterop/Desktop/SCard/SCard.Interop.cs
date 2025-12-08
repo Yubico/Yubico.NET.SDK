@@ -66,7 +66,7 @@ internal static partial class NativeMethods
     public static partial uint SCardGetStatusChange(
         SCardContext context,
         int timeout,
-        [In] [Out] SCARD_READER_STATE[] readerStates,
+        [In][Out] SCARD_READER_STATE[] readerStates,
         int readerStatesCount
     );
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Core;
+
 using Yubico.YubiKit.Core.YubiKey;
 public class YubiKeyTests
 {

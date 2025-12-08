@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The project targets .NET 10, uses C# preview language features (LangVersion=preview), and has nullable reference types enabled throughout.
+Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The project targets .NET 10, uses C# 14 language features (LangVersion=14), and has nullable reference types enabled throughout.
 
 **Reference Documentation:**
 - `docs/net10/` contains Microsoft Learn PDFs documenting new .NET 10 features

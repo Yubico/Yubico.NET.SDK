@@ -10,7 +10,8 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <NoWarn>$(NoWarn);CS1591;CA1848</NoWarn>
+    <!-- Suppress CS1591 (missing XML docs) and CA1848 (LoggerMessage micro-optimization) until we adopt fuller solutions -->
 
     <!-- SDK Version (from Directory.Packages.props) -->
     <Version>$(YubiKitVersion)</Version>

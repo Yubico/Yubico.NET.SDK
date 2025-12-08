@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Fakes;
 /// <summary>
 ///     Fake implementation of IApduProcessor for unit testing.
 /// </summary>
-internal class FakeApduProcessor : IApduProcessor
+internal sealed class FakeApduProcessor : IApduProcessor
 {
     private readonly Queue<ResponseApdu> _responses = new();
     public List<CommandApdu> TransmittedCommands { get; } = [];

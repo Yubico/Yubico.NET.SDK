@@ -34,7 +34,6 @@ public sealed class Tlv : IDisposable
     /// </summary>
     /// <param name="tag">The tag value, must be between 0x00 and 0xFFFF.</param>
     /// <param name="value">The value data as a read-only span of bytes.</param>
-    /// <exception cref="TlvException">Thrown when the tag value is outside the supported range (0x00-0xFFFF).</exception>
     /// <remarks>
     ///     This constructor creates a BER-TLV encoded structure where:
     ///     - The tag is encoded in the minimum number of bytes needed

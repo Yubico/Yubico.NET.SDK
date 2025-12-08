@@ -93,11 +93,6 @@ public sealed record Scp11KeyParams : ScpKeyParams
     /// </summary>
     public IReadOnlyList<X509Certificate2> Certificates { get; }
 
-    /// <summary>
-    ///     Gets the key reference for this SCP11 key.
-    /// </summary>
-    public KeyRef KeyRef { get; }
-
     override public void Dispose()
     {
         if (_disposed) return;

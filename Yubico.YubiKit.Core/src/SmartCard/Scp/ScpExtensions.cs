@@ -27,7 +27,6 @@ public static class ScpExtensions
         ///     Initializes SCP on this protocol and returns an SCP-wrapped protocol instance.
         ///     This is a convenience method that combines SCP initialization and protocol wrapping.
         /// </summary>
-        /// <param name="protocol">The base protocol to enable SCP on</param>
         /// <param name="keyParams">SCP key parameters (SCP03 or SCP11)</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>

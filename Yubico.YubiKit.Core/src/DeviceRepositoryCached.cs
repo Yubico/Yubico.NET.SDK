@@ -37,7 +37,7 @@ public class DeviceRepositoryCached(
     private readonly SemaphoreSlim _initializationLock = new(1, 1);
 
     private readonly bool
-        TEST_MONITORSERVICE_SKIP_MANUALSCAN = false; // For unit testing only, we should be able to set this to internal
+        TEST_MONITORSERVICE_SKIP_MANUALSCAN; // For unit testing only, we should be able to set this to internal
 
     private bool _disposed;
 

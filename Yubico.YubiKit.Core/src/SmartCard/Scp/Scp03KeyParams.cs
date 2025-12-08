@@ -43,12 +43,6 @@ public sealed record Scp03KeyParams : ScpKeyParams
     public StaticKeys Keys { get; }
 
     public static Scp03KeyParams Default => new(KeyRef.Default, StaticKeys.GetDefaultKeys());
-
-    /// <summary>
-    ///     Gets the key reference for this SCP03 key set.
-    /// </summary>
-    public KeyRef KeyRef { get; }
-
     override public void Dispose()
     {
         if (_disposed)

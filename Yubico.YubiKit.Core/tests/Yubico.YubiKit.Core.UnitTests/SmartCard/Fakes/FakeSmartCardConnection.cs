@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Fakes;
 /// <summary>
 ///     Fake implementation of ISmartCardConnection for unit testing.
 /// </summary>
-internal class FakeSmartCardConnection : ISmartCardConnection
+internal sealed class FakeSmartCardConnection : ISmartCardConnection
 {
     private readonly Queue<ReadOnlyMemory<byte>> _responses = new();
     private bool _disposed;

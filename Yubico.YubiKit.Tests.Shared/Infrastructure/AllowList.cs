@@ -59,7 +59,7 @@ public class AllowList
 
         if (_allowedSerials.Count == 0)
         {
-            string errorMessage = provider.OnInvalidInputErrorMessage();
+            var errorMessage = provider.OnInvalidInputErrorMessage();
             _logger?.LogCritical("{ErrorMessage}", errorMessage);
             Console.Error.WriteLine(errorMessage);
             Environment.Exit(-1); // Hard fail - cannot continue without allow list
@@ -82,11 +82,11 @@ public class AllowList
     {
         ArgumentNullException.ThrowIfNull(device);
 
-        int? serialNumber = await GetDeviceSerialNumberAsync(device).ConfigureAwait(false);
+        var serialNumber = await GetDeviceSerialNumberAsync(device).ConfigureAwait(false);
 
         if (serialNumber is null)
         {
-            string errorMessage = "Unable to read device serial number. Cannot verify against allow list.";
+            var errorMessage = "Unable to read device serial number. Cannot verify against allow list.";
             _logger?.LogCritical("{ErrorMessage}", errorMessage);
             Console.Error.WriteLine(errorMessage);
             Environment.Exit(-1);
@@ -94,7 +94,7 @@ public class AllowList
 
         if (!IsDeviceAllowed(serialNumber.Value))
         {
-            string errorMessage = _provider.OnNotAllowedErrorMessage(serialNumber.Value);
+            var errorMessage = _provider.OnNotAllowedErrorMessage(serialNumber.Value);
             _logger?.LogCritical("{ErrorMessage}", errorMessage);
             Console.Error.WriteLine(errorMessage);
             Environment.Exit(-1); // Hard fail - device not authorized
@@ -163,7 +163,7 @@ public class AllowList
         try
         {
             using var mgmt = await ManagementSession<ISmartCardConnection>.CreateAsync(connection).ConfigureAwait(false);
-            DeviceInfo deviceInfo = await mgmt.GetDeviceInfoAsync().ConfigureAwait(false);
+            var deviceInfo = await mgmt.GetDeviceInfoAsync().ConfigureAwait(false);
             return deviceInfo.SerialNumber;
         }
         catch (Exception ex)

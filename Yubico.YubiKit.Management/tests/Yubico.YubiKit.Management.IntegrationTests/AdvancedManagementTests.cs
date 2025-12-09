@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Diagnostics;
-using Xunit;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Tests.Shared;

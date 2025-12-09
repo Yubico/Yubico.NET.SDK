@@ -105,6 +105,41 @@ Port Java SCP (Secure Channel Protocol) implementation to C# with idiomatic patt
 - Nullable reference types enabled
 - Explicit `?` for optional parameters
 
+## Cryptography Migration Roadmap
+
+1. **Pass 0 – Snapshot & Wiring**
+  - Copy legacy `Yubico.YubiKey.Cryptography` sources into `Yubico.YubiKit.Core/src/Cryptography`, adjusting namespaces and project references only as needed for compilation.
+  - Resolve immediate build breaks (e.g., resource strings, assembly internals) without altering behaviour.
+
+2. **Pass 1 – Baseline Integration**
+  - Hook `SecurityDomainSession` and other SCP components to the imported abstractions so SCP features compile end-to-end.
+  - Validate core flows with existing unit/integration coverage where hardware allows.
+
+3. **Pass 2 – Modernization Sweep**
+  - Enable nullable/file-scoped namespaces, update to modern C# 14 idioms, simplify guard clauses, adopt `Span`/`Memory` where beneficial.
+  - Replace bespoke ASN.1 handling with BCL helpers where they offer equivalent functionality while keeping public APIs stable.
+
+4. **Pass 3 – Abstraction Pruning**
+  - Audit which wrappers (`KeyDefinition`, zeroing handles, etc.) still add value; remove or shrink layers that simply forward to BCL types.
+  - Introduce default interface implementations for shared behaviour we want to keep but not duplicate in each concrete key type.
+
+5. **Pass 4 – Curve25519 & Extensibility**
+  - Re-introduce X25519/Ed25519 support within the modernized abstractions, adding targeted tests.
+  - Document extension points for future algorithms and ensure cleanup semantics are consistent across all key families.
+
+6. **Pass 5 – Validation & Cleanup**
+  - Run full test suites (including hardware-dependent paths when possible) and update docs/changelog with guidance on the new cryptography module shape.
+
+  ## Notes for Next Contributor
+  - Current state: `SecurityDomainSession` has API stubs for GET DATA, key management, certificate CRUD, etc. Implementation is blocked on bringing in the legacy cryptography abstractions (EC/Curve25519 key wrappers, ASN helpers, key definitions).
+  - Legacy reference lives under `Yubico.NET.SDK-zig-glibc/Yubico.YubiKey/src/Yubico/YubiKey/Cryptography`. The plan is to copy these files verbatim in **Pass 0**, changing namespaces to `Yubico.YubiKit.Core.Cryptography` and fixing immediate compile issues without behaviour changes.
+  - We already created an empty `Yubico.YubiKit.Core/src/Cryptography` folder and added initial interface stubs. Once the legacy files are copied, reconcile duplicates (keep legacy content, adapt our stubs accordingly).
+  - Modern .NET (Core 3+/5+) provides `ImportPkcs8PrivateKey` / `ImportSubjectPublicKeyInfo`. During **Pass 2** we can delegate P-curve handling to those APIs, but Curve25519 still needs custom logic.
+  - Curve25519 support is required long-term. Ensure the legacy `Curve25519PrivateKey/PublicKey` wrappers make it across in Pass 0 so future passes can integrate them cleanly.
+  - Keep an eye on resource strings (`ExceptionMessages`). If the legacy files depend on `Resources/ExceptionMessages.*`, either port the resource or temporarily inline messages so Pass 0 builds.
+  - When integrating with `SecurityDomainSession`, the SCP reset implementation already uses raw APDUs. Replacing the stubs will require parsing TLVs and using the new key wrappers—expect follow-up work after the cryptography module lands.
+  - Tests: no automated coverage yet for SCP due to hardware requirements. Capture manual validation steps whenever hardware testing occurs to help future contributors.
+
 ## File Locations
 All files created in: `/home/dyallo/Code/y/Yubico.NET.SDK/Yubico.YubiKit.Core/src/SmartCard/Scp/`
 

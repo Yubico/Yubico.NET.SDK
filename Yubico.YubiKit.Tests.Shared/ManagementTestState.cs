@@ -72,7 +72,7 @@ public class ManagementTestState : TestState
         Func<Task<IYubiKey>>? reconnectCallback = null)
     {
         // Get device information via Management session
-        DeviceInfo deviceInfo = await GetDeviceInfoAsync(device, scpKeyParams).ConfigureAwait(false);
+        var deviceInfo = await GetDeviceInfoAsync(device, scpKeyParams).ConfigureAwait(false);
 
         return new ManagementTestState(device, deviceInfo, scpKeyParams, reconnectCallback);
     }

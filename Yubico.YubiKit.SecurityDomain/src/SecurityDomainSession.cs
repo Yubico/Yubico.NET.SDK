@@ -53,10 +53,14 @@ public sealed class SecurityDomainSession(
     private const byte InsPerformSecurityOperation = 0x2A;
     private const byte InsInternalAuthenticate = 0x88;
     private const byte InsExternalAuthenticate = 0x82;
+    private const byte InsGenerateKey = 0xF1;
 
     private const ushort DataObjectKeyInformation = 0x00E0;
     private const int TagKeyInformationTemplate = 0xE0;
     private const int TagKeyInformationData = 0xC0;
+
+    private const int KeyTypeEccPublicKey = 0xB0;
+    private const int KeyTypeEccKeyParams = 0xF0;
 
     private const int ResetAttemptLimit = 65;
     private static readonly byte[] ResetAttemptPayload = new byte[8];
@@ -379,7 +383,73 @@ public sealed class SecurityDomainSession(
         KeyRef keyReference,
         byte replaceKvn = 0,
         CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        GenerateEcKeyInternalAsync(keyReference, replaceKvn, cancellationToken);
+
+    private async Task<byte[]> GenerateEcKeyInternalAsync(
+        KeyRef keyReference,
+        byte replaceKvn,
+        CancellationToken cancellationToken)
+    {
+        if (!_isInitialized)
+            throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
+
+        if (_protocol is null)
+            throw new InvalidOperationException("Security Domain protocol not available.");
+
+        if (replaceKvn == 0)
+            _logger.LogDebug("Generating EC key for {KeyRef}", keyReference);
+        else
+            _logger.LogDebug("Generating EC key for {KeyRef}, replacing KVN=0x{ReplaceKvn:X2}", keyReference, replaceKvn);
+
+        Span<byte> parameters = stackalloc byte[3];
+        parameters[0] = (byte)KeyTypeEccKeyParams;
+        parameters[1] = 0x01;
+        parameters[2] = 0x00; // SECP256R1 curve indicator
+
+        var commandData = new byte[1 + parameters.Length];
+        commandData[0] = keyReference.Kvn;
+        parameters.CopyTo(commandData.AsSpan(1));
+
+        var command = new CommandApdu
+        {
+            Cla = ClaGlobalPlatform,
+            Ins = InsGenerateKey,
+            P1 = replaceKvn,
+            P2 = keyReference.Kid,
+            Data = commandData
+        };
+
+        ReadOnlyMemory<byte> response;
+
+        try
+        {
+            response = await _protocol
+                .TransmitAndReceiveAsync(command, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Generate EC key for {KeyRef} failed", keyReference);
+            throw;
+        }
+
+        if (response.IsEmpty)
+            throw new BadResponseException("Generate EC key response was empty.");
+
+        using var tlvs = TlvHelper.Decode(response.Span);
+        foreach (var tlv in tlvs.AsSpan())
+        {
+            if (tlv.Tag == KeyTypeEccPublicKey)
+                return tlv.Value.ToArray();
+        }
+
+        throw new BadResponseException(
+            $"Generate EC key response missing public key tag 0x{KeyTypeEccPublicKey:X2}.");
+    }
 
     /// <summary>
     ///     Performs a factory reset by blocking all registered key references and reinitializing the session.

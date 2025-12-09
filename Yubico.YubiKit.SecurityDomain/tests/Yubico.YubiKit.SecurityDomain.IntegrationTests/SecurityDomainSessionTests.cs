@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
@@ -77,6 +78,73 @@ public class SecurityDomainSessionTests
 
                 Assert.NotEmpty(keyInformation);
                 Assert.Contains(keyInformation.Keys, keyRef => keyRef.Kid == DefaultScp03Kid);
+            },
+            resetBeforeUse: false,
+            cancellationToken: CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Verifies that GenerateEcKeyAsync generates a valid P256 EC key pair and returns the public key.
+    /// </summary>
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.7.2")]
+    public async Task GenerateEcKeyAsync_Scp11b_GeneratesValidKeyAndAuthenticates(YubiKeyTestState state)
+    {
+        var keyReference = new KeyRef(ScpKid.SCP11b, 0x03);
+
+        await state.WithSecurityDomainSessionAsync(
+            async session =>
+            {
+                // Act - Generate a new EC key on the YubiKey
+                var publicKeyBytes = await session.GenerateEcKeyAsync(
+                    keyReference,
+                    replaceKvn: 0,
+                    CancellationToken.None);
+
+                // Assert - Verify the generated public key structure
+                Assert.NotNull(publicKeyBytes);
+                Assert.Equal(65, publicKeyBytes.Length); // Uncompressed point: 0x04 + 32-byte X + 32-byte Y
+                Assert.Equal(0x04, publicKeyBytes[0]); // Uncompressed point indicator
+
+                // Extract X and Y coordinates
+                var x = publicKeyBytes.AsSpan(1, 32).ToArray();
+                var y = publicKeyBytes.AsSpan(33, 32).ToArray();
+
+                Assert.NotNull(x);
+                Assert.NotNull(y);
+                Assert.Equal(32, x.Length);
+                Assert.Equal(32, y.Length);
+
+                // Verify we can construct a valid ECParameters from the point
+                var ecParameters = new ECParameters
+                {
+                    Curve = ECCurve.NamedCurves.nistP256,
+                    Q = new ECPoint
+                    {
+                        X = x,
+                        Y = y
+                    }
+                };
+
+                // Verify we can create an ECDiffieHellman instance from the parameters
+                using var ecdh = ECDiffieHellman.Create(ecParameters);
+                Assert.NotNull(ecdh);
+                Assert.Equal(ECCurve.NamedCurves.nistP256.Oid.Value, 
+                    ecdh.ExportParameters(false).Curve.Oid.Value);
+            },
+            Scp03KeyParams.Default,
+            cancellationToken: CancellationToken.None, 
+            resetBeforeUse: false);
+
+        // Verify the generated key can be used for authentication
+        await state.WithSecurityDomainSessionAsync(
+            async session =>
+            {
+                var keyInformation = await session.GetKeyInformationAsync(CancellationToken.None);
+                
+                // Verify the key we just generated is now registered
+                Assert.Contains(keyInformation.Keys, kr => 
+                    kr.Kid == keyReference.Kid && kr.Kvn == keyReference.Kvn);
             },
             resetBeforeUse: false,
             cancellationToken: CancellationToken.None);

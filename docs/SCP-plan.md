@@ -138,6 +138,7 @@ Port Java SCP (Secure Channel Protocol) implementation to C# with idiomatic patt
   - Curve25519 support is required long-term. Ensure the legacy `Curve25519PrivateKey/PublicKey` wrappers make it across in Pass 0 so future passes can integrate them cleanly.
   - Keep an eye on resource strings (`ExceptionMessages`). If the legacy files depend on `Resources/ExceptionMessages.*`, either port the resource or temporarily inline messages so Pass 0 builds.
   - When integrating with `SecurityDomainSession`, the SCP reset implementation already uses raw APDUs. Replacing the stubs will require parsing TLVs and using the new key wrappers—expect follow-up work after the cryptography module lands.
+  - We also want to revisit whether the modern `ECDiffieHellman`/`ECDsa` implementations (e.g., via `ExportSubjectPublicKeyInfo`/`ImportPkcs8PrivateKey`) can replace or augment the wrapper types for SCP key import/export; capture findings during Pass 2 to confirm all Security Domain scenarios are covered before pruning wrappers.
   - Tests: no automated coverage yet for SCP due to hardware requirements. Capture manual validation steps whenever hardware testing occurs to help future contributors.
 
 ## File Locations

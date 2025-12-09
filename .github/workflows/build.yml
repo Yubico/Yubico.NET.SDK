@@ -48,6 +48,9 @@ on:
   schedule:
     - cron: '0 0 * * *' # Every day at midnight
 
+permissions:
+  contents: read
+
 jobs:
   run-tests:
     name: Run tests
@@ -76,6 +79,11 @@ jobs:
       symbols-packages-id: ${{ steps.symbols-upload.outputs.artifact-id }}
       assemblies-id: ${{ steps.assemblies-upload.outputs.artifact-id }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
         with:
           persist-credentials: false
@@ -187,6 +195,11 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
       - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53  # v6.0.0
         with:
           name: Nuget Packages
@@ -209,6 +222,11 @@ jobs:
     needs: [run-tests, build-artifacts, publish-internal, upload-docs]
     if: always()
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
       - name: Generate build summary
         env:
           # Pass job results into the environment

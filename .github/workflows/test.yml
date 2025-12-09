@@ -59,10 +59,7 @@ on:
 #      - '.github/workflows/test.yml'
 
 permissions:
-  pull-requests: write
   contents: read
-  checks: write
-  packages: read
   
 jobs:
   test-windows:
@@ -118,6 +115,10 @@ jobs:
     name: "Add PR Comment: Coverage Results"
     runs-on: ubuntu-latest
     needs: build-coverage-report 
+    permissions:
+      pull-requests: write
+      checks: write
+      contents: read
 
     if: github.event_name == 'pull_request'
     steps:
@@ -136,6 +137,10 @@ jobs:
     name: "Add PR Comment: Test Results"
     runs-on: ubuntu-latest
     needs: [test-windows, test-ubuntu, test-macos] 
+    permissions:
+      pull-requests: write
+      checks: write
+      contents: read
 
     if: github.event_name == 'pull_request' 
     steps:

@@ -29,14 +29,17 @@ on:
       - '.github/workflows/build-pull-requests.yml'
       
 permissions:
-  pull-requests: write
-  checks: write
   contents: read
   packages: read
   
 jobs:
   run-tests:
     name: Run tests
+    permissions:
+      pull-requests: write
+      checks: write
+      contents: read
+      packages: read
     uses: ./.github/workflows/test.yml
     with:
       build-coverage-report: true
@@ -45,6 +48,9 @@ jobs:
     name: Build artifacts
     runs-on: windows-latest
     needs: run-tests
+    permissions:
+      contents: read
+    
     
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0

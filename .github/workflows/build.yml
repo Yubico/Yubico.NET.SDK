@@ -48,14 +48,15 @@ on:
   schedule:
     - cron: '0 0 * * *' # Every day at midnight
 
+permissions:
+  contents: read
+
 jobs:
   run-tests:
     name: Run tests
     permissions:
-      checks: write
       contents: read
       packages: read
-      pull-requests: write
     uses: ./.github/workflows/test.yml
     with:
       build-coverage-report: false

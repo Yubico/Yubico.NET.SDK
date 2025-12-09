@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -11,7 +12,7 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 /// </summary>
 public class SecurityDomainSessionTests
 {
-    private const ushort CardRecognitionDataObject = 0x0073;
+    private const byte CardRecognitionDataObject = 0x73;
     private const byte DefaultScp03Kid = ScpKid.SCP03;
 
     /// <summary>
@@ -19,7 +20,7 @@ public class SecurityDomainSessionTests
     ///     running firmware 5.7.2 or newer.
     /// </summary>
     [Theory]
-    [WithYubiKey(MinFirmware = "5.7.2")]
+    [WithYubiKey(MinFirmware = "5.4.3")]
     public async Task CreateAsync_WithScp03_Succeeds(YubiKeyTestState state)
     {
         using var scpParams = Scp03KeyParams.Default;
@@ -40,7 +41,7 @@ public class SecurityDomainSessionTests
     /// </summary>
     [Theory]
     [WithYubiKey(MinFirmware = "5.7.2")]
-    public async Task GetDataAsync_CardRecognition_ReturnsPayload(YubiKeyTestState state)
+    public async Task GetDataAsync_CardRecognition_ReturnsPayload(YubiKeyTestState state) // 0x6A88
     {
         await state.WithSecurityDomainSessionAsync(async session =>
         {
@@ -53,20 +54,22 @@ public class SecurityDomainSessionTests
     }
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.7.2")]
+    [WithYubiKey(MinFirmware = "5.4.3")]
     public async Task GetKeyInformationAsync_ReturnsDefaultScpKey(YubiKeyTestState state)
     {
         await state.WithSecurityDomainSessionAsync(async session =>
         {
             var keyInformation = await session.GetKeyInformationAsync(CancellationToken.None);
 
-            Assert.NotEmpty(keyInformation);
-            Assert.Contains(keyInformation.Keys, keyRef => keyRef.Kid == DefaultScp03Kid);
-        }, cancellationToken: CancellationToken.None);
+            Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInformation.Count);
+            Assert.Equal(0xFF, keyInformation.Keys.First().Kvn);
+        },
+            resetBeforeUse: true, 
+            cancellationToken: CancellationToken.None);
     }
 
     [Theory]
-    [WithYubiKey(MinFirmware = "5.7.2")]
+    [WithYubiKey(MinFirmware = "5.4.3")]
     public async Task ResetAsync_ReinitializesSession(YubiKeyTestState state)
     {
         await state.WithSecurityDomainSessionAsync(
@@ -76,8 +79,9 @@ public class SecurityDomainSessionTests
 
                 var keyInformation = await session.GetKeyInformationAsync(CancellationToken.None);
 
-                Assert.NotEmpty(keyInformation);
-                Assert.Contains(keyInformation.Keys, keyRef => keyRef.Kid == DefaultScp03Kid);
+                Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInformation.Count);
+                Assert.Contains(keyInformation.Keys, keyRef => keyRef.Kvn == 0xFF);
+                
             },
             resetBeforeUse: false,
             cancellationToken: CancellationToken.None);
@@ -134,7 +138,7 @@ public class SecurityDomainSessionTests
             },
             Scp03KeyParams.Default,
             cancellationToken: CancellationToken.None, 
-            resetBeforeUse: false);
+            resetBeforeUse: true);
 
         // Verify the generated key can be used for authentication
         await state.WithSecurityDomainSessionAsync(

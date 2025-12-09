@@ -43,7 +43,7 @@ public sealed record Scp03KeyParams : ScpKeyParams
     public StaticKeys Keys { get; }
 
     public static Scp03KeyParams Default => new(KeyRef.Default, StaticKeys.GetDefaultKeys());
-    override public void Dispose()
+    public override void Dispose()
     {
         if (_disposed)
             return;

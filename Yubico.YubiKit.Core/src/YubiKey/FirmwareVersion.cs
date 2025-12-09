@@ -116,28 +116,6 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
         ((Major << 16) | (Minor << 8) | Patch).CompareTo((major << 16) | (minor << 8) | patch);
 
     /// <summary>
-    ///     Parse a string of the form "major.minor.patch"
-    /// </summary>
-    /// <param name="versionString"></param>
-    /// <returns>Returns a FirmwareVersion instance</returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="ArgumentException"></exception>
-    public static FirmwareVersion Parse(string versionString)
-    {
-        ArgumentNullException.ThrowIfNull(versionString);
-
-        var parts = versionString.Split('.');
-        if (parts.Length != 3) throw new ArgumentException("Must include major.minor.patch", nameof(versionString));
-
-        if (!byte.TryParse(parts[0], out var major) ||
-            !byte.TryParse(parts[1], out var minor) ||
-            !byte.TryParse(parts[2], out var patch))
-            throw new ArgumentException("Major, minor and patch must be valid numbers", nameof(versionString));
-
-        return new FirmwareVersion(major, minor, patch);
-    }
-
-    /// <summary>
     ///     Creates a <see cref="FirmwareVersion" /> from a byte array.
     ///     The byte array must contain exactly three bytes, representing the major, minor, and patch versions.
     /// </summary>
@@ -205,12 +183,12 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     internal static readonly FirmwareVersion V5_3_0 = new(5, 3);
     internal static readonly FirmwareVersion V5_3_1 = new(5, 3, 1);
     internal static readonly FirmwareVersion V5_4_2 = new(5, 4, 2);
-    internal static readonly FirmwareVersion V5_4_3 = new(5, 4, 3);
+    public static readonly FirmwareVersion V5_4_3 = new(5, 4, 3);
     internal static readonly FirmwareVersion V5_6_0 = new(5, 6);
     internal static readonly FirmwareVersion V5_6_3 = new(5, 6, 3);
     internal static readonly FirmwareVersion V5_7_0 = new(5, 7);
-    internal static readonly FirmwareVersion V5_7_2 = new(5, 7, 2);
-    internal static readonly FirmwareVersion V5_8_0 = new(5, 8);
+    public static readonly FirmwareVersion V5_7_2 = new(5, 7, 2);
+    public static readonly FirmwareVersion V5_8_0 = new(5, 8);
 
     #endregion
 }

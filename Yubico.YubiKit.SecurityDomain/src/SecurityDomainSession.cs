@@ -38,11 +38,6 @@ public sealed class SecurityDomainSession(
     ScpKeyParams? scpKeyParams = null)
     : ApplicationSession
 {
-    private readonly ISmartCardConnection _connection = connection;
-    private readonly IProtocolFactory<ISmartCardConnection> _protocolFactory = protocolFactory;
-    private readonly ILogger<SecurityDomainSession> _logger = logger;
-    private readonly ScpKeyParams? _scpKeyParams = scpKeyParams;
-
     private ISmartCardProtocol? _baseProtocol;
     private ISmartCardProtocol? _protocol;
     private bool _isInitialized;
@@ -55,7 +50,6 @@ public sealed class SecurityDomainSession(
     private const byte InsExternalAuthenticate = 0x82;
     private const byte InsGenerateKey = 0xF1;
 
-    private const ushort DataObjectKeyInformation = 0x00E0;
     private const int TagKeyInformationTemplate = 0xE0;
     private const int TagKeyInformationData = 0xC0;
 
@@ -100,9 +94,9 @@ public sealed class SecurityDomainSession(
         // Security Domain is available on firmware 5.3.0 and newer.
         baseProtocol.Configure(new FirmwareVersion(5, 3, 0));
 
-        _protocol = _scpKeyParams is not null
+        _protocol = scpKeyParams is not null
             ? await baseProtocol
-                .WithScpAsync(_scpKeyParams, cancellationToken)
+                .WithScpAsync(scpKeyParams, cancellationToken)
                 .ConfigureAwait(false)
             : baseProtocol;
 
@@ -133,7 +127,7 @@ public sealed class SecurityDomainSession(
 
         var command = new CommandApdu
         {
-            Cla = ClaGlobalPlatform,
+            Cla = 0,
             Ins = InsGetData,
             P1 = (byte)(dataObject >> 8),
             P2 = (byte)(dataObject & 0xFF),
@@ -141,7 +135,7 @@ public sealed class SecurityDomainSession(
             Le = expectedResponseLength
         };
 
-        _logger.LogDebug("Sending GET DATA for object 0x{DataObject:X4}", dataObject);
+        logger.LogDebug("Sending GET DATA for object 0x{DataObject:X4}", dataObject);
 
         try
         {
@@ -155,7 +149,7 @@ public sealed class SecurityDomainSession(
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "GET DATA for object 0x{DataObject:X4} failed", dataObject);
+            logger.LogWarning(ex, "GET DATA for object 0x{DataObject:X4} failed", dataObject);
             throw;
         }
     }
@@ -167,7 +161,7 @@ public sealed class SecurityDomainSession(
     public async Task<IReadOnlyDictionary<KeyRef, IReadOnlyDictionary<byte, byte>>> GetKeyInformationAsync(
         CancellationToken cancellationToken = default)
     {
-        var response = await GetDataAsync(DataObjectKeyInformation, cancellationToken: cancellationToken)
+        var response = await GetDataAsync(TagKeyInformationTemplate, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         if (response.IsEmpty)
@@ -175,44 +169,21 @@ public sealed class SecurityDomainSession(
 
         var keyInformation = new Dictionary<KeyRef, IReadOnlyDictionary<byte, byte>>();
 
-        using var keyTemplates = TlvHelper.Decode(response.Span);
-        foreach (var template in keyTemplates)
+        using var tlvList = TlvHelper.Decode(response.Span);
+        foreach (var tlv in tlvList)
         {
-            if (template.Tag != TagKeyInformationTemplate)
+            var value = TlvHelper.GetValue(TagKeyInformationData, tlv.GetBytes().Span);
+            var keyRef = new KeyRef(value.Span[0], value.Span[1]);
+            var components = new Dictionary<byte, byte>();
+
+            var currentValue = value.Span[2..];
+            while (!currentValue.IsEmpty)
             {
-                _logger.LogDebug("Unexpected key information tag 0x{Tag:X2}", template.Tag);
-                continue;
+                components.Add(currentValue[0], currentValue[1]);
+                currentValue = currentValue[2..];
             }
 
-            using var innerTlvs = TlvHelper.Decode(template.Value.Span);
-
-            Tlv? dataTlv = null;
-            foreach (var candidate in innerTlvs)
-            {
-                if (candidate.Tag == TagKeyInformationData)
-                {
-                    dataTlv = candidate;
-                    break;
-                }
-            }
-
-            if (dataTlv is null)
-                throw new BadResponseException("Key information entry missing C0 data template.");
-
-            var payload = dataTlv.Value.Span;
-            if (payload.Length < 2)
-                throw new BadResponseException("Key information payload shorter than key reference.");
-
-            if ((payload.Length - 2) % 2 != 0)
-                throw new BadResponseException("Key information payload has incomplete component pair.");
-
-            var keyRef = new KeyRef(payload[0], payload[1]);
-            var components = new Dictionary<byte, byte>((payload.Length - 2) / 2);
-            var componentData = payload[2..];
-            for (var i = 0; i < componentData.Length; i += 2)
-                components[componentData[i]] = componentData[i + 1];
-
-            keyInformation[keyRef] = new ReadOnlyDictionary<byte, byte>(components);
+            keyInformation.Add(keyRef, new ReadOnlyDictionary<byte, byte>(components));
         }
 
         return new ReadOnlyDictionary<KeyRef, IReadOnlyDictionary<byte, byte>>(keyInformation);
@@ -397,9 +368,9 @@ public sealed class SecurityDomainSession(
             throw new InvalidOperationException("Security Domain protocol not available.");
 
         if (replaceKvn == 0)
-            _logger.LogDebug("Generating EC key for {KeyRef}", keyReference);
+            logger.LogDebug("Generating EC key for {KeyRef}", keyReference);
         else
-            _logger.LogDebug("Generating EC key for {KeyRef}, replacing KVN=0x{ReplaceKvn:X2}", keyReference, replaceKvn);
+            logger.LogDebug("Generating EC key for {KeyRef}, replacing KVN=0x{ReplaceKvn:X2}", keyReference, replaceKvn);
 
         Span<byte> parameters = stackalloc byte[3];
         parameters[0] = (byte)KeyTypeEccKeyParams;
@@ -433,7 +404,7 @@ public sealed class SecurityDomainSession(
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Generate EC key for {KeyRef} failed", keyReference);
+            logger.LogWarning(ex, "Generate EC key for {KeyRef} failed", keyReference);
             throw;
         }
 
@@ -462,7 +433,7 @@ public sealed class SecurityDomainSession(
         var keyInformation = await GetKeyInformationAsync(cancellationToken).ConfigureAwait(false);
         if (keyInformation.Count == 0)
         {
-            _logger.LogInformation("Security Domain reset skipped: no keys reported");
+            logger.LogInformation("Security Domain reset skipped: no keys reported");
             return;
         }
 
@@ -470,14 +441,14 @@ public sealed class SecurityDomainSession(
         {
             if (!TryGetResetParameters(keyReference, out var instruction, out var overrideKeyRef))
             {
-                _logger.LogTrace("Reset skipping unsupported key reference {KeyRef}", keyReference);
+                logger.LogTrace("Reset skipping unsupported key reference {KeyRef}", keyReference);
                 continue;
             }
 
             await BlockKeyAsync(instruction, overrideKeyRef, cancellationToken).ConfigureAwait(false);
         }
 
-        _logger.LogInformation("Security Domain reset complete; reinitializing session");
+        logger.LogInformation("Security Domain reset complete; reinitializing session");
 
         _protocol = null;
         _isInitialized = false;
@@ -490,7 +461,7 @@ public sealed class SecurityDomainSession(
         if (_baseProtocol is not null)
             return _baseProtocol;
 
-        var protocol = _protocolFactory.Create(_connection);
+        var protocol = protocolFactory.Create(connection);
         if (protocol is not ISmartCardProtocol smartCardProtocol)
         {
             protocol.Dispose();
@@ -546,14 +517,14 @@ public sealed class SecurityDomainSession(
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Reset attempt {Attempt} for key {KeyRef} failed to transmit", attempt,
+                logger.LogWarning(ex, "Reset attempt {Attempt} for key {KeyRef} failed to transmit", attempt,
                     keyReference);
                 continue;
             }
 
             if (statusWord is SWConstants.AuthenticationMethodBlocked or SWConstants.SecurityStatusNotSatisfied)
             {
-                _logger.LogDebug(
+                logger.LogDebug(
                     "Key {KeyRef} blocked after {AttemptCount} attempts (SW=0x{Status:X4})",
                     keyReference,
                     attempt,
@@ -564,7 +535,7 @@ public sealed class SecurityDomainSession(
             if (statusWord is SWConstants.InvalidCommandDataParameter or SWConstants.Success)
                 continue;
 
-            _logger.LogTrace(
+            logger.LogTrace(
                 "Reset attempt {Attempt} for key {KeyRef} returned SW=0x{Status:X4}",
                 attempt,
                 keyReference,
@@ -594,7 +565,7 @@ public sealed class SecurityDomainSession(
             command[4] = (byte)ResetAttemptPayload.Length;
             ResetAttemptPayload.CopyTo(command[5..]);
 
-            var response = await _connection
+            var response = await connection
                 .TransmitAndReceiveAsync(rented.AsMemory(0, commandLength), cancellationToken)
                 .ConfigureAwait(false);
 

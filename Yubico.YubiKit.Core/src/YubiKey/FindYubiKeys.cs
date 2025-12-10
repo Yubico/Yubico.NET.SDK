@@ -28,8 +28,10 @@ public class FindYubiKeys(IFindPcscDevices findPcscService, IYubiKeyFactory yubi
     public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
     {
         var devices = await findPcscService.FindAllAsync(cancellationToken).ConfigureAwait(false);
-        return devices.Select(yubiKeyFactory.Create).ToList();
+        return CreateYubiKeysFromPcscDevices(devices);
     }
+
+    private List<IYubiKey> CreateYubiKeysFromPcscDevices(IReadOnlyList<IPcscDevice> devices) => devices.Select(yubiKeyFactory.Create).ToList();
 
     #endregion
 

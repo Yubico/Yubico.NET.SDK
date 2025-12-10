@@ -69,7 +69,7 @@ public static class IYubiKeyExtensions
         /// <returns>
         ///     A task representing the asynchronous operation.
         /// </returns>
-        public async Task SetDeviceConfigAsync(
+        public async ValueTask SetDeviceConfigAsync(
             DeviceConfig config,
             bool reboot,
             byte[]? currentLockCode = null,

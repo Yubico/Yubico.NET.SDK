@@ -43,7 +43,7 @@ public class DeviceListenerService(
         try
         {
             await foreach (var devices in deviceChannel.ConsumeAsync(stoppingToken).ConfigureAwait(false))
-                deviceRepository.Update(devices);
+                deviceRepository.UpdateCache(devices);
         }
         catch (OperationCanceledException)
         {

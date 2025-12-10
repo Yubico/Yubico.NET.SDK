@@ -28,7 +28,7 @@ public class DeviceRepositorySimple : IDeviceRepository
     public Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default) =>
         FindYubiKeys.Create().FindAllAsync(cancellationToken);
 
-    public void Update(IEnumerable<IYubiKey> discoveredDevices) => throw new NotImplementedException();
+    public void UpdateCache(IEnumerable<IYubiKey> discoveredDevices) => throw new NotImplementedException();
 
     public IObservable<DeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
 

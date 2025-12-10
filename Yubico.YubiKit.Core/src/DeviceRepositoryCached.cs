@@ -24,7 +24,7 @@ public interface IDeviceRepository : IDisposable
 {
     IObservable<DeviceEvent> DeviceChanges { get; }
     Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default);
-    void Update(IEnumerable<IYubiKey> discoveredDevices);
+    void UpdateCache(IEnumerable<IYubiKey> discoveredDevices);
 }
 
 public class DeviceRepositoryCached(
@@ -55,7 +55,7 @@ public class DeviceRepositoryCached(
 
     public IObservable<DeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
 
-    public void Update(IEnumerable<IYubiKey> discoveredDevices)
+    public void UpdateCache(IEnumerable<IYubiKey> discoveredDevices)
     {
         var currentIds = _deviceCache.Keys.ToHashSet();
         var newDeviceMap = new Dictionary<string, IYubiKey>();
@@ -153,7 +153,7 @@ public class DeviceRepositoryCached(
             logger.LogInformation("Cache empty, performing synchronous device scan...");
 
             var yubiKeys = await findYubiKeys.FindAllAsync(cancellationToken).ConfigureAwait(false);
-            Update(yubiKeys);
+            UpdateCache(yubiKeys);
 
             logger.LogInformation("Synchronous scan completed, found {DeviceCount} devices", yubiKeys.Count);
         }
@@ -168,8 +168,6 @@ public class DeviceRepositoryCached(
             _initializationLock.Release();
         }
     }
-
-    private static bool IsSmartCardDevice(IYubiKey device) => device is PcscYubiKey;
 
     private static bool DevicesAreEqual(IYubiKey device1, IYubiKey device2) =>
         device1.DeviceId == device2.DeviceId;

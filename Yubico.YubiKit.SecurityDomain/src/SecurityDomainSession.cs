@@ -14,6 +14,7 @@
 
 using System.Buffers;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
@@ -48,10 +49,16 @@ public sealed class SecurityDomainSession(
     private const byte InsPerformSecurityOperation = 0x2A;
     private const byte InsInternalAuthenticate = 0x88;
     private const byte InsExternalAuthenticate = 0x82;
+    private const byte InsDelete = 0xE4;
     private const byte InsGenerateKey = 0xF1;
 
     private const int TagKeyInformationTemplate = 0xE0;
     private const int TagKeyInformationData = 0xC0;
+
+    // TLV tags for DeleteKey filter parameters
+    private const int TagKid = 0xD0;          // Key ID (KID)
+    private const int TagKvn = 0xD2;          // Key Version Number (KVN)
+    private const byte DeleteLastFlag = 0x01; // P2 flag for "delete last"
 
     private const int KeyTypeEccPublicKey = 0xB0;
     private const int KeyTypeEccKeyParams = 0xF0;
@@ -80,7 +87,7 @@ public sealed class SecurityDomainSession(
     ///     Ensures the Security Domain application is selected and secure messaging is configured if requested.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    private async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         if (_isInitialized)
             return;
@@ -92,7 +99,7 @@ public sealed class SecurityDomainSession(
             .ConfigureAwait(false);
 
         // Security Domain is available on firmware 5.3.0 and newer.
-        baseProtocol.Configure(new FirmwareVersion(5, 3, 0));
+        baseProtocol.Configure(FirmwareVersion.V5_3_0);
 
         _protocol = scpKeyParams is not null
             ? await baseProtocol
@@ -116,12 +123,6 @@ public sealed class SecurityDomainSession(
         int expectedResponseLength = 0,
         CancellationToken cancellationToken = default)
     {
-        if (!_isInitialized)
-            throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
-
-        if (_protocol is null)
-            throw new InvalidOperationException("Security Domain protocol not available.");
-
         if (expectedResponseLength < 0)
             throw new ArgumentOutOfRangeException(nameof(expectedResponseLength), "Expected response length cannot be negative.");
 
@@ -139,9 +140,7 @@ public sealed class SecurityDomainSession(
 
         try
         {
-            return await _protocol
-                .TransmitAndReceiveAsync(command, cancellationToken)
-                .ConfigureAwait(false);
+            return await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -340,8 +339,78 @@ public sealed class SecurityDomainSession(
     public Task DeleteKeyAsync(
         KeyRef keyReference,
         bool deleteLast = false,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        CancellationToken cancellationToken = default)
+    {
+        EnsureInitializedProtocol();
+
+        var (kid, kvn) = NormalizeDeletePolicy(keyReference);
+
+        logger.LogDebug("Deleting keys matching {KeyRef}{Suffix}",
+            keyReference, deleteLast ? " (allow delete last)" : string.Empty);
+
+        var payload = EncodeDeleteFilter(kid, kvn);
+
+        var command = new CommandApdu
+        {
+            Cla = ClaGlobalPlatform,
+            Ins = InsDelete,
+            P1 = 0x00,
+            P2 = deleteLast ? DeleteLastFlag : (byte)0x00,
+            Data = payload
+        };
+
+        return TransmitDeleteAsync(command, cancellationToken);
+    }
+
+    private static (byte Kid, byte Kvn) NormalizeDeletePolicy(KeyRef keyRef)
+    {
+        var kid = keyRef.Kid;
+        var kvn = keyRef.Kvn;
+
+        if (kid == 0 && kvn == 0)
+            throw new ArgumentException("At least one of KID or KVN must be non-zero", nameof(keyRef));
+
+        // SCP03 keys (KIDs 0x01, 0x02, 0x03) may only be deleted by KVN.
+        // If KVN is provided, zero KID (wildcard).
+        if (kid is 0x01 or 0x02 or 0x03)
+        {
+            kid = 0; // wildcard KID when KVN specified for SCP03
+        }
+
+        return (kid, kvn);
+    }
+
+    private static ReadOnlyMemory<byte> EncodeDeleteFilter(byte kid, byte kvn)
+    {
+        if (kid == 0 && kvn == 0)
+            return ReadOnlyMemory<byte>.Empty;
+
+        var dict = new Dictionary<int, byte[]?>(2);
+        if (kid != 0)
+            dict[TagKid] = [kid];
+        if (kvn != 0)
+            dict[TagKvn] = [kvn];
+
+        return TlvHelper.EncodeDictionary(dict);
+    }
+
+    private async Task TransmitDeleteAsync(CommandApdu command, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _ = await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            logger.LogInformation("Keys deleted");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Delete keys command failed");
+            throw;
+        }
+    }
 
     /// <summary>
     ///     Generates a new SCP11 key pair on the device and returns the public point.
@@ -361,12 +430,6 @@ public sealed class SecurityDomainSession(
         byte replaceKvn,
         CancellationToken cancellationToken)
     {
-        if (!_isInitialized)
-            throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
-
-        if (_protocol is null)
-            throw new InvalidOperationException("Security Domain protocol not available.");
-
         if (replaceKvn == 0)
             logger.LogDebug("Generating EC key for {KeyRef}", keyReference);
         else
@@ -394,9 +457,7 @@ public sealed class SecurityDomainSession(
 
         try
         {
-            response = await _protocol
-                .TransmitAndReceiveAsync(command, cancellationToken)
-                .ConfigureAwait(false);
+            response = await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -470,6 +531,24 @@ public sealed class SecurityDomainSession(
 
         _baseProtocol = smartCardProtocol;
         return _baseProtocol;
+    }
+
+    private void EnsureInitializedProtocol()
+    {
+        if (!_isInitialized)
+            throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
+
+        if (_protocol is null)
+            throw new InvalidOperationException("Security Domain protocol not available.");
+    }
+
+    /// <summary>
+    ///     Centralized APDU transmit helper that ensures the protocol is initialized.
+    /// </summary>
+    private Task<ReadOnlyMemory<byte>> TransmitAsync(CommandApdu command, CancellationToken cancellationToken)
+    {
+        EnsureInitializedProtocol();
+        return _protocol!.TransmitAndReceiveAsync(command, cancellationToken);
     }
 
     private bool TryGetResetParameters(KeyRef keyReference, out byte instruction, out KeyRef overrideKeyRef)

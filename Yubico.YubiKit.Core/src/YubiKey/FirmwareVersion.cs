@@ -180,12 +180,8 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
 
     internal static readonly FirmwareVersion All = new(1);
     internal static readonly FirmwareVersion V5_0_0 = new(5);
-    internal static readonly FirmwareVersion V5_3_0 = new(5, 3);
-    internal static readonly FirmwareVersion V5_3_1 = new(5, 3, 1);
-    internal static readonly FirmwareVersion V5_4_2 = new(5, 4, 2);
+    public static readonly FirmwareVersion V5_3_0 = new(5, 3);
     public static readonly FirmwareVersion V5_4_3 = new(5, 4, 3);
-    internal static readonly FirmwareVersion V5_6_0 = new(5, 6);
-    internal static readonly FirmwareVersion V5_6_3 = new(5, 6, 3);
     internal static readonly FirmwareVersion V5_7_0 = new(5, 7);
     public static readonly FirmwareVersion V5_7_2 = new(5, 7, 2);
     public static readonly FirmwareVersion V5_8_0 = new(5, 8);

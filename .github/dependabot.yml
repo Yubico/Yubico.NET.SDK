@@ -24,7 +24,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "wednesday"
       time: "09:00"
       timezone: "Europe/Stockholm"
@@ -36,64 +36,7 @@ updates:
   - package-ecosystem: docker
     directory: /
     schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.Core/src
-    schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.Core/tests
-    schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.YubiKey/examples/Fido2SampleCode
-    schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.YubiKey/examples/OathSampleCode
-    schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.YubiKey/examples/PivSampleCode
-    schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.YubiKey/examples/SharedSampleCode
-    schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.YubiKey/examples/U2fSampleCode
-    schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.YubiKey/src
-    schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.YubiKey/tests/integration
-    schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.YubiKey/tests/sandbox
-    schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.YubiKey/tests/unit
-    schedule:
-      interval: daily
-
-  - package-ecosystem: nuget
-    directory: /Yubico.YubiKey/tests/utilities
-    schedule:
-      interval: daily
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "Europe/Stockholm"

@@ -64,7 +64,7 @@ internal static class HkdfUtilities
     {
         var numberOfBlocks = (length / Sha256HashByteLength) + (length % Sha256HashByteLength == 0 ? 0 : 1);
         var outputKeyMaterial = new byte[length];
-        Span<byte> previousBlock = Array.Empty<byte>();
+        Span<byte> previousBlock = [];
 
         for (byte index = 1; index <= numberOfBlocks; index++)
         {

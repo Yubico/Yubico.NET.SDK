@@ -137,7 +137,7 @@ public class CmDevice
 
     public IList<CmDevice> Children()
     {
-        List<CmDevice> children = new();
+        List<CmDevice> children = [];
         NativeMethods.CmErrorCode errorCode;
 
         errorCode = NativeMethods.CM_Get_Child(out var childInstance, Instance);

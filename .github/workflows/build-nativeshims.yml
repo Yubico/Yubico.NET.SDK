@@ -29,11 +29,19 @@ on:
   schedule:
     - cron: '0 0 * * *' # Every day at midnight
 
+permissions:
+  contents: read
+
 jobs:
   build-windows:
     name: Build Windows
     runs-on: windows-2022
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
         with:
           persist-credentials: false
@@ -79,6 +87,11 @@ jobs:
     name: Build Linux (amd64)
     runs-on: ubuntu-24.04
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
         with:
           persist-credentials: false
@@ -231,6 +244,11 @@ jobs:
     name: Build Linux (arm64)
     runs-on: ubuntu-24.04
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
         with:
           persist-credentials: false
@@ -304,7 +322,7 @@ jobs:
             bash ./build-linux-arm64.sh
           fi
       - name: Set up QEMU for ARM64 testing
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
         with:
           platforms: arm64
       - name: Test on Ubuntu 18.04 (glibc 2.27)
@@ -387,6 +405,11 @@ jobs:
     name: Build macOS
     runs-on: macos-14
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
         with:
           persist-credentials: false
@@ -421,6 +444,11 @@ jobs:
       PACKAGE_VERSION: ${{ github.event.inputs.version != '' && github.event.inputs.version || '1.0.0' }}
       GITHUB_REPO_URL: https://github.com/${{ github.repository }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
       - name: Download contents, set metadata and package
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53  # v6.0.0
       - run: |
@@ -460,6 +488,11 @@ jobs:
       packages: write
     if: ${{ github.event.inputs.push-to-dev == 'true' }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
       - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53  # v6.0.0
         with:
           name: NuGet Package NativeShims

@@ -29,13 +29,13 @@ Keys, however, are stored in a separate, fixed memory layout. It is always possi
 
 If you attempt to load a certificate that is larger than the YubiKey's maximum allowable certificate size (as indicated in the table below), the YubiKey will reject it, and the SDK will throw an exception.
 
-| YubiKey (Model and Firmware)     | Maximum Size in Bytes |
-|:--------------------------------:|:---------------------:|
-| NEO (prior to 4.x)               |         2025          |
-| 4 Series (4.x)                   |         3052          |
-| 4 FIPS Series (4.x)              |         3052          |
-| 5 Series (5.x)                   |         3052          |
-| 5 FIPS Series (5.x)              |         3052          |
+| YubiKey Model (and Firmware Version)| Maximum Size in Bytes |
+|:-----------------------------------:|:---------------------:|
+| YubiKey NEO (prior to 4.x)          |         2025          |
+| YubiKey 4 Series (4.x)              |         3052          |
+| YubiKey 4 FIPS Series (4.x)         |         3052          |
+| YubiKey 5 Series (5.x)              |         3052          |
+| YubiKey 5 FIPS Series (5.x)         |         3052          |
 
 > [!NOTE]
 > The maximum allowable certificate size is determined by the YubiKey's APDU buffer size. For YubiKeys with firmware version 4.x and above, the buffer size is 3072. Certificates stored according to the PIV standard will have approximately 20 bytes of header data, including tag and length values, leaving 3052 bytes for the certificate itself.
@@ -44,15 +44,14 @@ If you attempt to load a certificate that is larger than the YubiKey's maximum a
 
 Although YubiKeys with firmware version 4.x and higher will allow 3052-byte certificates, they will not be able to store 24 certificates of that size due to the YubiKey's total certificate space limit. Even if a YubiKey has empty certificate slots available, you cannot fill them once the maximum certificate space has been reached.  
 
-However, a YubiKey NEO, which only has four slots, will be able to hold four certificates of the maximum
-length.
+However, a YubiKey NEO, which only has four slots, will be able to hold four certificates of the maximum length.
 
-Note that the total amount of NVM (non-volatile memory) in a YubiKey's PIV application, which stores certificates (including the attestation certificate) *plus* [PIV data objects](xref:UsersManualPivObjects), is 51,200 bytes. Therefore, if a YubiKey is loaded with a lot of certificate data (for example, 49,000 bytes worth), there will be very little space left for anything else.
+| YubiKey Model<br/>(and Firmware Version) | Maximum Total Certificate<br/>Space Available | Maximum Average<br/>Certificate Size | Number of Certificates<br/>at Maximum Size |
+|:----------------------------------------:|:---------------------------------------------:|:------------------------------------:|:------------------------------------------:|
+| YubiKey NEO (prior to 4.x)               |                  8100                         |    4 certs at 2025 bytes             |        4 certs at 2025 bytes               |
+| YubiKey 4 Series (4.x)                   |              about 49,800                     |   24 certs at 2075 bytes             |       16 certs at 3052 bytes               |
+| YubiKey 4 FIPS Series (4.x)              |              about 49,800                     |   24 certs at 2075 bytes             |       16 certs at 3052 bytes               |
+| YubiKey 5 Series (5.x)                   |              about 50,000                     |   24 certs at 2084 bytes             |       16 certs at 3052 bytes               |
+| YubiKey 5 FIPS Series (5.x)              |              about 49,890                     |   24 certs at 2079 bytes             |       16 certs at 3052 bytes               |
 
-| YubiKey<br/>(Model and Firmware) | Maximum Total Certificate<br/>Space Available | Maximum Average<br/>Certificate Size | Number of Certificates<br/>at Maximum Size |
-|:--------------------------------:|:---------------------------------------------:|:------------------------------------:|:------------------------------------------:|
-| NEO (prior to 4.x)               |                  8100                         |    4 certs at 2025 bytes             |        4 certs at 2025 bytes               |
-|    4 Series (4.x)                |              about 49,800                     |   24 certs at 2075 bytes             |       16 certs at 3052 bytes               |
-|  4 FIPS Series (4.x)             |              about 49,800                     |   24 certs at 2075 bytes             |       16 certs at 3052 bytes               |
-|    5 Series (5.x)                |              about 50,000                     |   24 certs at 2084 bytes             |       16 certs at 3052 bytes               |
-|  5 FIPS Series (5.x)             |              about 49,890                     |   24 certs at 2079 bytes             |       16 certs at 3052 bytes               |
+Note that the total amount of NVM (non-volatile memory) in a YubiKey's PIV application, which stores certificates (including the attestation certificate) *plus* [PIV data objects](xref:UsersManualPivObjects), is 51,200 bytes. Therefore, if a YubiKey is loaded with a lot of certificate data (for example, 49,000 bytes' worth), there will be very little space left for anything else.

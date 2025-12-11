@@ -16,6 +16,37 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.15.x Releases
+
+### 1.15.0
+
+Release date: December 4th, 2025
+
+Features:
+
+- The SDK now supports CTAP 2.3's ``EncCredStoreState`` (encrypted credential store state) ``AuthenticatorInfo`` property, which is available on YubiKeys with firmware version 5.8 and above. This property, which must be decrypted using a YubiKey's PPUAT, can be used by platforms to detect when credentials have been added and removed or when the YubiKey has been reset. The Fido2Session property, [AuthenticatorCredStoreState](xref:Yubico.YubiKey.Fido2.Fido2Session.AuthenticatorCredStoreState), has been added to simplify the process of retrieving and decrypting the ``EncCredStoreState`` value. ([#354](https://github.com/Yubico/Yubico.NET.SDK/pull/354))
+
+- It is now possible to toggle serial number visibility (over [API](xref:Yubico.YubiKey.Otp.OtpSettings%601.SetSerialNumberApiVisible%28System.Boolean%29), [USB](xref:Yubico.YubiKey.Otp.OtpSettings%601.SetSerialNumberUsbVisible%28System.Boolean%29), or [button press](xref:Yubico.YubiKey.Otp.OtpSettings%601.SetSerialNumberButtonVisible%28System.Boolean%29)) when calling any of the OTP application slot configuration methods, including ``ConfigureChallengeResponse``, ``ConfigureHotp``, ``ConfigureStaticPassword``, ``ConfigureYubicoOtp``, and ``ConfigureNdef``. ([#328](https://github.com/Yubico/Yubico.NET.SDK/pull/328))
+
+- The Yubico.NativeShims library's Linux build is now compiled with Zig and targets glibc 2.23 for broad Linux distribution compatibility. ([#337](https://github.com/Yubico/Yubico.NET.SDK/pull/337))
+
+Bug Fixes:
+
+- The ``YubiKeyDevice`` properties, ``ChallengeResponseTimeout``, ``AutoEjectTimeout``, ``IsNfcRestricted``, ``DeviceFlags``, and ``ConfigurationLocked``, have been modified so that they are set immediately after their respective configuration methods are called instead of after a refresh. ``YubiKeyDevice`` integration tests have also been updated to improve error handling and validate the modified ``YubiKeyDevice`` properties. ([#348](https://github.com/Yubico/Yubico.NET.SDK/pull/348))
+
+Documentation:
+
+- Docs covering SDK support for the following FIDO2 extensions have been added to the User's Manual:
+
+  - [third-party payment](xref:Fido2ThirdPartyPayment) ([#349](https://github.com/Yubico/Yubico.NET.SDK/pull/349))
+  - [hmac-secret-mc](xref:Fido2HmacSecret) ([#350](https://github.com/Yubico/Yubico.NET.SDK/pull/350))
+
+- Comprehensive docs covering SDK support for the [Persistent PinUvAuthToken (PPUAT)](xref:Fido2AuthTokens#persistent-pinuvauthtoken-ppuat) have been added to the User's Manual. ([#333](https://github.com/Yubico/Yubico.NET.SDK/pull/333))
+
+- NFC instructions have been added to the [FIDO2 reset](xref:Fido2Reset) docs. ([#341](https://github.com/Yubico/Yubico.NET.SDK/pull/341))
+
+- The [PIV sample code](https://github.com/Yubico/Yubico.NET.SDK/tree/HEAD/Yubico.YubiKey/examples/PivSampleCode) has been updated to use the newer ``IPublicKey`` and ``IPrivateKey`` classes and support the Ed25519 and X25519 key types. ([#343](https://github.com/Yubico/Yubico.NET.SDK/pull/343))
+
 ## 1.14.x Releases
 
 ### 1.14.1
@@ -58,11 +89,11 @@ Features:
 
 - Support has been added for the following CTAP 2.2 and YubiKey firmware version 5.8 features ([#299](https://github.com/Yubico/Yubico.NET.SDK/pull/299)):
 
-  - [Persistent PinUvAuthToken (PPUAT)](xref:Fido2AuthTokens#persistent-pinuvauthtoken-ppuat): The [GetPersistentPinUvAuthToken()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetPersistentPinUvAuthToken) method has been added to retrieve PPUATs for use with read-only FIDO2 credential management operations, including [EnumerateRelyingParties()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateRelyingParties), [EnumerateCredentialsForRelyingParty()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateCredentialsForRelyingParty%28Yubico.YubiKey.Fido2.RelyingParty%29), and [GetCredentialMetadata()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata). PPUATs enable applications to list discoverable credentials from YubiKeys without requiring repeated PIN entry.
+  - [Persistent PinUvAuthToken (PPUAT)](xref:Fido2AuthTokens#persistent-pinuvauthtoken-ppuat): PPUATs are longer-lived auth tokens that can be used for read-only FIDO2 credential management operations, including [EnumerateRelyingParties()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateRelyingParties), [EnumerateCredentialsForRelyingParty()](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateCredentialsForRelyingParty%28Yubico.YubiKey.Fido2.RelyingParty%29), and [GetCredentialMetadata()](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata). PPUATs enable applications to list discoverable credentials from YubiKeys without requiring repeated PIN entry.
 
-  - thirdPartyPayment extension: The [GetThirdPartyPaymentExtension](xref:Yubico.YubiKey.Fido2.AuthenticatorData.GetThirdPartyPaymentExtension) method has been added to check for and return the status of the thirdPartyPayment extension. The thirdPartyPayment extension enables YubiKeys to be used for cross-domain credentials without redirects, as required by Secure Payment Confirmation (SPC) workflows.
+  - [thirdPartyPayment extension](xref:Fido2ThirdPartyPayment): This extension enables YubiKeys to be used for payment authentication scenarios, including Secure Payment Confirmation (SPC) workflows, where the transaction initiator is not the relying party.
 
-  - hmac-secret-mc extension: [GetHmacSecretExtension](xref:Yubico.YubiKey.Fido2.AuthenticatorData.GetHmacSecretExtension%28Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase%29) now handles both hmac-secret and hmac-secret-mc extensions when extracting and decrypting secrets. The hmac-secret-mc extension enables PRF (Pseudo-Random Function) during [MakeCredential()](xref:Yubico.YubiKey.Fido2.Fido2Session.MakeCredential%28Yubico.YubiKey.Fido2.MakeCredentialParameters%29).
+  - [hmac-secret-mc extension](xref:Fido2HmacSecret): This extension enables the retrieval of a symmetric secret during ``MakeCredential()``. The secret, which can be used for encryption/decryption, supports the use of PRF (Pseudo-Random Function) with YubiKeys.
 
   - Additional ``AuthenticatorInfo`` properties: The SDK now supports parsing of several new [AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo) properties, which are returned when calling the [GetInfoCommand()](xref:Yubico.YubiKey.Fido2.Commands.GetInfoCommand). Properties include ``AttestationFormats``, ``UvCountSinceLastPinEntry``, ``LongTouchForReset``, ``EncIdentifier``, ``TransportsForReset``, ``PinComplexityPolicy``, ``PinComplexityPolicyUrl``, and ``MaxPinLength``.
 

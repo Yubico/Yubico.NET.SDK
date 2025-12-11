@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.Fido2
                 {
                     ClientDataHash = _clientDataHash
                 };
-                mcParams1.AddExtension("largeBlobKey", new byte[] { 0xF5 });
+                mcParams1.AddExtension(Extensions.LargeBlobKey, new byte[] { 0xF5 });
                 mcParams1.AddOption(AuthenticatorOptions.rk, true);
 
                 fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration);

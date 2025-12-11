@@ -26,22 +26,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
       - name: Check out current repo
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
         with:
           path: self
           persist-credentials: false
 
       - id: auth
         name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2.1.13
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093  # v3.0.0
         with:
           workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: yubico-docs@prod-github-apps-845651.iam.gserviceaccount.com
 
       - name: Generate GitHub App token
         id: generate_token
-        uses: actions/create-github-app-token@7bfa3a4717ef143a604ee0a99d859b8886a96d00  # v1.9.3
+        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94  # v2.2.0
         with:
           app-id: 800408 # Yubico Docs
           owner: Yubico
@@ -49,13 +54,13 @@ jobs:
           private-key: ${{ secrets.GH_APP_YUBICO_DOCS_PRIVATE_KEY }}
 
       - name: Check out docs-gitops repo (${{ inputs.gitops-branch }} branch)
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
         with:
           repository: Yubico/docs-gitops
           ref: ${{ inputs.gitops-branch }}
           token: ${{ steps.generate_token.outputs.token }}
           path: gitops
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Update GitOps resources
         run: sed -i "s#/yesdk/yesdk-docserver:.*\$#/yesdk/yesdk-docserver:$IMAGE_TAG#" ./k8s/yesdk/kustomization.yaml
@@ -82,20 +87,25 @@ jobs:
     needs: deploy
 
     steps:
+    - name: Harden the runner (Audit all outbound calls)
+      uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+      with:
+        egress-policy: audit
+
     - name: Checkout
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
       with:
         persist-credentials: false
 
     - name: Authenticate to Google Cloud to read commit status
-      uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2.1.13
+      uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093  # v3.0.0
       with:
         workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: github-commit-status-reader@prod-docs-403900.iam.gserviceaccount.com
 
     - name: Generate GitHub App token
       id: generate_token
-      uses: actions/create-github-app-token@7bfa3a4717ef143a604ee0a99d859b8886a96d00  # v1.9.3
+      uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94  # v2.2.0
       with:
         app-id: 260767 # Yubico Commit Status Reader
         owner: Yubico

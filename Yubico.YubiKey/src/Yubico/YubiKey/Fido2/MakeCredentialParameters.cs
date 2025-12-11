@@ -16,12 +16,10 @@ using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
-using System.Linq;
 using CommunityToolkit.Diagnostics;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
-using Yubico.YubiKey.Utilities;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -302,7 +300,7 @@ namespace Yubico.YubiKey.Fido2
         /// as defined by standards like W3C's Secure Payment Confirmation.
         /// </remarks>
         public void AddThirdPartyPaymentExtension() =>
-            AddExtension(Fido2ExtensionKeys.ThirdPartyPayment, true);
+            AddExtension(Fido2.Extensions.ThirdPartyPayment, true);
 
         /// <summary>
         /// Specify that the YubiKey should return the minimum PIN length with
@@ -347,12 +345,12 @@ namespace Yubico.YubiKey.Fido2
         public void AddMinPinLengthExtension(AuthenticatorInfo authenticatorInfo)
         {
             Guard.IsNotNull(authenticatorInfo);
-            if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.MinPinLength))
+            if (!authenticatorInfo.IsExtensionSupported(Fido2.Extensions.MinPinLength))
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
 
-            AddExtension(Fido2ExtensionKeys.MinPinLength, true);
+            AddExtension(Fido2.Extensions.MinPinLength, true);
         }
 
         /// <summary>
@@ -414,7 +412,7 @@ namespace Yubico.YubiKey.Fido2
             Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
             Guard.IsNotNull(credBlobValue, nameof(credBlobValue));
 
-            if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.CredBlob))
+            if (!authenticatorInfo.IsExtensionSupported(Fido2.Extensions.CredBlob))
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
@@ -429,7 +427,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             var credBlob = new CredBlob(credBlobValue);
-            AddExtension(Fido2ExtensionKeys.CredBlob, credBlob);
+            AddExtension(Fido2.Extensions.CredBlob, credBlob);
         }
 
         /// <summary>
@@ -478,12 +476,12 @@ namespace Yubico.YubiKey.Fido2
         public void AddHmacSecretExtension(AuthenticatorInfo authenticatorInfo)
         {
             Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
-            if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.HmacSecret))
+            if (!authenticatorInfo.IsExtensionSupported(Fido2.Extensions.HmacSecret))
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
 
-            AddExtension(Fido2ExtensionKeys.HmacSecret, true);
+            AddExtension(Fido2.Extensions.HmacSecret, true);
         }
 
         /// <summary>
@@ -535,7 +533,7 @@ namespace Yubico.YubiKey.Fido2
         {
             Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
 
-            if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.HmacSecretMc))
+            if (!authenticatorInfo.IsExtensionSupported(Fido2.Extensions.HmacSecretMc))
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
@@ -597,8 +595,8 @@ namespace Yubico.YubiKey.Fido2
 
             _hmacSecretEncoding = HmacSecretExtension.Encode(authProtocol, _salt1.Value, _salt2);
 
-            AddExtension(Fido2ExtensionKeys.HmacSecret, true);
-            AddExtension(Fido2ExtensionKeys.HmacSecretMc, _hmacSecretEncoding);
+            AddExtension(Fido2.Extensions.HmacSecret, true);
+            AddExtension(Fido2.Extensions.HmacSecretMc, _hmacSecretEncoding);
         }
 
         /// <summary>
@@ -706,7 +704,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             Guard.IsNotNull(authenticatorInfo, nameof(authenticatorInfo));
-            if (!authenticatorInfo.IsExtensionSupported(Fido2ExtensionKeys.CredProtect))
+            if (!authenticatorInfo.IsExtensionSupported(Fido2.Extensions.CredProtect))
             {
                 if (enforceCredProtectPolicy && credProtectPolicy != CredProtectPolicy.UserVerificationOptional)
                 {
@@ -719,7 +717,7 @@ namespace Yubico.YubiKey.Fido2
             // The encoding is key/value where the key is "credProtect" and the
             // value is an unsigned int (major type 0). The only three possible
             // values are 1, 2, or 3, so the encoding is simply 0x01, 02,or 03.
-            AddExtension(Fido2ExtensionKeys.CredProtect, (byte)credProtectPolicy);
+            AddExtension(Fido2.Extensions.CredProtect, (byte)credProtectPolicy);
         }
 
         /// <inheritdoc cref="AddCredProtectExtension(CredProtectPolicy,bool,AuthenticatorInfo)"/>

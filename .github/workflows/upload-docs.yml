@@ -44,12 +44,17 @@ jobs:
       image-hash: ${{ steps.push_image.outputs.imagehash }}
     steps:
       # Checkout the local repository as we need the Dockerfile and other things even for this step.
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
         with:
           persist-credentials: false
 
       # Grab the just-built documentation artifact and inflate the archive at the expected location.
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53  # v6.0.0
         with:
           name: Documentation
           path: docs/_site/
@@ -61,7 +66,7 @@ jobs:
 
       # Authenticate to Google Cloud
       - name: Authenticate
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2.1.13
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093  # v3.0.0
         with:
           workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com

@@ -16,21 +16,15 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Core.Cryptography;
 
-internal class ZeroingMemoryHandle : IDisposable
+public class ZeroingMemoryHandle(Memory<byte> data) : IDisposable
 {
-    private readonly Memory<byte> _data;
-    private bool _disposed;
-    public int Length => _disposed ? 0 : _data.Length;
+    public int Length => _disposed ? 0 : data.Length;
     public int Count => Length;
-
-    public ZeroingMemoryHandle(Memory<byte> data)
-    {
-        _data = data;
-    }
+    private bool _disposed;
 
     public Memory<byte> Data => _disposed 
         ? throw new ObjectDisposedException(nameof(ZeroingMemoryHandle)) 
-        : _data;
+        : data;
     
     public void Dispose()
     {
@@ -39,7 +33,7 @@ internal class ZeroingMemoryHandle : IDisposable
             return;
         }
 
-        CryptographicOperations.ZeroMemory(_data.Span);
+        CryptographicOperations.ZeroMemory(data.Span);
         _disposed = true;
         GC.SuppressFinalize(this);
     }

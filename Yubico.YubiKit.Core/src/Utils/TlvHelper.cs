@@ -70,11 +70,11 @@ public static class TlvHelper
     /// <returns>BER-TLV encoded list</returns>
     public static Memory<byte> EncodeList(ReadOnlySpan<Tlv> tlvData)
     {
-        using var stream = new MemoryStream();
+        using var stream = new MemoryStream(); // todo rewrite, allocs
         using var writer = new BinaryWriter(stream);
         foreach (var tlv in tlvData)
         {
-            ReadOnlyMemory<byte> bytes = tlv.GetBytes();
+            ReadOnlyMemory<byte> bytes = tlv.AsMemory();
             writer.Write(bytes.Span.ToArray());
         }
 
@@ -118,7 +118,7 @@ public static class TlvHelper
             foreach (var (tag, value) in tlvData.OrderBy(kvp => kvp.Key))
             {
                 using var tlv = new Tlv(tag, value ?? []);
-                var tlvBytes = tlv.GetBytes().Span;
+                var tlvBytes = tlv.AsMemory().Span;
                 tlvBytes.CopyTo(buffer[position..]);
                 position += tlvBytes.Length;
             }

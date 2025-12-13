@@ -142,7 +142,7 @@ public sealed class Tlv : IDisposable
     /// <summary>
     ///     Returns a copy of the Tlv as a BER-TLV encoded byte array.
     /// </summary>
-    public Memory<byte> GetBytes() => _bytes.ToArray();
+    public Memory<byte> AsMemory() => _bytes.AsMemory();
 
     /// <summary>
     ///     Parse a Tlv from a BER-TLV encoded byte array.

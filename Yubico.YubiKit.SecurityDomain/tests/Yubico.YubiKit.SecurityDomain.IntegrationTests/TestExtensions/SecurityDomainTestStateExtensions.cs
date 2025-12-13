@@ -27,27 +27,27 @@ public static class SecurityDomainTestStateExtensions
     {
         public Task WithSecurityDomainSessionAsync(
             Func<SecurityDomainSession, Task> action,
-            ScpKeyParams? scpKeyParams = null,
+            ScpKeyParameters? scpKeyParams = null,
             bool resetBeforeUse = true,
             CancellationToken cancellationToken = default) =>
             state.WithConnectionAsync(async connection =>
-            {
-                // TODO refactor.. should Session dispose connection? It makes this thing difficult.
-                using var resetSession = await SecurityDomainSession.CreateAsync(
-                        connection,
-                        cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-                
-                if (resetBeforeUse)
-                    await resetSession.ResetAsync(cancellationToken).ConfigureAwait(false);
+                {
+                    // TODO refactor.. should Session dispose connection? It makes this thing difficult.
+                    using var resetSession = await SecurityDomainSession.CreateAsync(
+                            connection,
+                            cancellationToken: cancellationToken)
+                        .ConfigureAwait(false);
 
-                using var session = await SecurityDomainSession.CreateAsync(
-                        connection,
-                        scpKeyParams: scpKeyParams,
-                        cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+                    if (resetBeforeUse)
+                        await resetSession.ResetAsync(cancellationToken).ConfigureAwait(false);
 
-                await action(session).ConfigureAwait(false);
-            }, cancellationToken);
+                    using var session = await SecurityDomainSession.CreateAsync(
+                            connection,
+                            scpKeyParams: scpKeyParams,
+                            cancellationToken: cancellationToken)
+                        .ConfigureAwait(false);
+
+                    await action(session).ConfigureAwait(false);
+                }, cancellationToken);
     }
 }

@@ -17,7 +17,7 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// <summary>
 ///     Reference to an SCP key, uniquely identified by KID (Key ID) and KVN (Key Version Number).
 /// </summary>
-public readonly record struct KeyRef(byte Kid, byte Kvn)
+public readonly record struct KeyReference(byte Kid, byte Kvn)
 {
     /// <summary>
     ///     Gets the Key ID.
@@ -29,13 +29,13 @@ public readonly record struct KeyRef(byte Kid, byte Kvn)
     /// </summary>
     public byte Kvn { get; init; } = Kvn;
 
-    public static KeyRef Default => new(0x01, 0xFF);
+    public static KeyReference Default => new(0x01, 0xFF);
 
     /// <summary>
     ///     Returns a byte array representation of this key reference.
     /// </summary>
     /// <returns>A two-byte array containing [Kid, Kvn].</returns>
-    public byte[] GetBytes() => [Kid, Kvn];
+    public readonly ReadOnlyMemory<byte> AsBytes = new []{Kid, Kvn};
 
     /// <summary>
     ///     Returns a string representation of this key reference.

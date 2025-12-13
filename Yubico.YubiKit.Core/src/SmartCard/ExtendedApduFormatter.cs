@@ -22,7 +22,7 @@ internal class ExtendedApduFormatter(int maxApduSize) : IApduFormatter
 
     #region IApduFormatter Members
 
-    public ReadOnlyMemory<byte> Format(CommandApdu apdu) =>
+    public ReadOnlyMemory<byte> Format(ApduCommand apdu) =>
         Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le); // TODO bug? LE send separately?
 
     public ReadOnlyMemory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le)

@@ -20,7 +20,7 @@ internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFo
     private const int HasMoreData = 0x10;
     private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
 
-    public override async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true,
+    public override async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = true,
         CancellationToken cancellationToken = default)
     {
         var data = command.Data;
@@ -41,7 +41,7 @@ internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFo
         }
 
         var finalChunk = data[offset..];
-        var finalCommand = new CommandApdu(command.Cla, command.Ins, command.P1, command.P2, finalChunk, command.Le);
+        var finalCommand = new ApduCommand(command.Cla, command.Ins, command.P1, command.P2, finalChunk, command.Le);
         return await base.TransmitAsync(finalCommand, useScp, cancellationToken).ConfigureAwait(false);
     }
 }

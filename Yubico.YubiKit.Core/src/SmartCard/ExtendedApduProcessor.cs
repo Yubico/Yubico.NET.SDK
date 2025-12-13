@@ -20,7 +20,7 @@ internal class ExtendedApduProcessor(ISmartCardConnection connection, IApduForma
 
     public IApduFormatter Formatter => formatter;
 
-    public virtual async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true,
+    public virtual async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = true,
         CancellationToken cancellationToken = default)
     {
         var payload = formatter.Format(
@@ -32,7 +32,7 @@ internal class ExtendedApduProcessor(ISmartCardConnection connection, IApduForma
             command.Le);
 
         var response = await connection.TransmitAndReceiveAsync(payload, cancellationToken).ConfigureAwait(false);
-        return new ResponseApdu(response);
+        return new ApduResponse(response);
     }
 
     #endregion

@@ -21,15 +21,15 @@ namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Fakes;
 /// </summary>
 internal sealed class FakeApduProcessor : IApduProcessor
 {
-    private readonly Queue<ResponseApdu> _responses = new();
-    public List<CommandApdu> TransmittedCommands { get; } = [];
+    private readonly Queue<ApduResponse> _responses = new();
+    public List<ApduCommand> TransmittedCommands { get; } = [];
 
     #region IApduProcessor Members
 
     public IApduFormatter Formatter { get; set; } = new FakeApduFormatter();
 
-    public async Task<ResponseApdu> TransmitAsync(
-        CommandApdu command,
+    public async Task<ApduResponse> TransmitAsync(
+        ApduCommand command,
         bool useScp = true,
         CancellationToken cancellationToken = default)
     {
@@ -45,7 +45,7 @@ internal sealed class FakeApduProcessor : IApduProcessor
 
     #endregion
 
-    public void EnqueueResponse(ResponseApdu response) => _responses.Enqueue(response);
+    public void EnqueueResponse(ApduResponse response) => _responses.Enqueue(response);
 
     public void EnqueueResponse(byte sw1, byte sw2, ReadOnlyMemory<byte> data = default)
     {
@@ -53,7 +53,7 @@ internal sealed class FakeApduProcessor : IApduProcessor
         data.Span.CopyTo(responseBytes);
         responseBytes[^2] = sw1;
         responseBytes[^1] = sw2;
-        _responses.Enqueue(new ResponseApdu(responseBytes));
+        _responses.Enqueue(new ApduResponse(responseBytes));
     }
 }
 
@@ -80,7 +80,7 @@ internal class FakeApduFormatter : IApduFormatter
         return buffer.ToArray();
     }
 
-    public ReadOnlyMemory<byte> Format(CommandApdu apdu) =>
+    public ReadOnlyMemory<byte> Format(ApduCommand apdu) =>
         Format(apdu.Cla, apdu.Ins, apdu.P1, apdu.P2, apdu.Data, apdu.Le);
 
     #endregion

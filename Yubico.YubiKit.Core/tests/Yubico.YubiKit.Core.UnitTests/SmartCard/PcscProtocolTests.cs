@@ -167,7 +167,7 @@ public class PcscProtocolTests
         response[^1] = 0x00;
         _fakeConnection.EnqueueResponse(response);
 
-        var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act
         var result = await protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken);
@@ -184,7 +184,7 @@ public class PcscProtocolTests
         var response = new byte[] { 0x69, 0x82 }; // Security status not satisfied
         _fakeConnection.EnqueueResponse(response);
 
-        var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
@@ -199,7 +199,7 @@ public class PcscProtocolTests
         var response = new byte[] { 0x6A, 0x82 }; // File not found
         _fakeConnection.EnqueueResponse(response);
 
-        var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
@@ -214,7 +214,7 @@ public class PcscProtocolTests
         var cts = new CancellationTokenSource();
         cts.Cancel();
 
-        var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
@@ -309,7 +309,7 @@ public class PcscProtocolTests
         {
             var response = new byte[] { 0x90, 0x00 };
             _fakeConnection.EnqueueResponse(response);
-            await protocol.TransmitAndReceiveAsync(new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty), TestContext.Current.CancellationToken);
+            await protocol.TransmitAndReceiveAsync(new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty), TestContext.Current.CancellationToken);
         });
     }
 

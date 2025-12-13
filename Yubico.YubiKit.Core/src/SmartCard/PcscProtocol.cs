@@ -28,7 +28,7 @@ public interface IProtocol : IDisposable
 public interface ISmartCardProtocol : IProtocol
 {
     Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-        CommandApdu command,
+        ApduCommand command,
         CancellationToken cancellationToken = default);
 
     Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
@@ -75,7 +75,7 @@ internal class PcscProtocol : ISmartCardProtocol
     public void Dispose() => _connection.Dispose();
 
     public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-        CommandApdu command,
+        ApduCommand command,
         CancellationToken cancellationToken = default)
     {
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
@@ -96,7 +96,7 @@ internal class PcscProtocol : ISmartCardProtocol
 
         var response =
             await _processor.TransmitAsync(
-                new CommandApdu { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId },
+                new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId },
                 false,
                 cancellationToken).ConfigureAwait(false);
 

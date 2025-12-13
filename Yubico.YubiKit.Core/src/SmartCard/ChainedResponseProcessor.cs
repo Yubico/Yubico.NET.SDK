@@ -22,7 +22,7 @@ internal class ChainedResponseProcessor(
     byte insSendRemaining) : IApduProcessor
 {
     private const byte SW1_HAS_MORE_DATA = 0x61;
-    private readonly CommandApdu GetMoreDataApdu = new(0, insSendRemaining, 0, 0);
+    private readonly ApduCommand GetMoreDataApdu = new(0, insSendRemaining, 0, 0);
 
     public FirmwareVersion? FirmwareVersion { get; } = firmwareVersion;
 
@@ -30,7 +30,7 @@ internal class ChainedResponseProcessor(
 
     public IApduFormatter Formatter => apduTransmitter.Formatter;
 
-    public async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true,
+    public async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = true,
         CancellationToken cancellationToken = default)
     {
         using var ms = new MemoryStream();
@@ -47,7 +47,7 @@ internal class ChainedResponseProcessor(
         ms.WriteByte(response.SW1);
         ms.WriteByte(response.SW2);
 
-        return new ResponseApdu(ms.ToArray());
+        return new ApduResponse(ms.ToArray());
     }
 
     #endregion

@@ -19,13 +19,13 @@ namespace Yubico.YubiKit.Core.SmartCard;
 /// <summary>
 ///     Represents an ISO 7816 application response.
 /// </summary>
-public readonly record struct ResponseApdu
+public readonly record struct ApduResponse
 {
     /// <summary>
-    ///     Initializes a new instance of the <see cref="ResponseApdu" /> class.
+    ///     Initializes a new instance of the <see cref="ApduResponse" /> class.
     /// </summary>
     /// <param name="data">The raw data returned by the ISO 7816 smart card.</param>
-    public ResponseApdu(ReadOnlyMemory<byte> data)
+    public ApduResponse(ReadOnlyMemory<byte> data)
     {
         if (data.Length < 2)
             throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
@@ -37,14 +37,14 @@ public readonly record struct ResponseApdu
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="ResponseApdu" /> class.
+    ///     Initializes a new instance of the <see cref="ApduResponse" /> class.
     /// </summary>
     /// <param name="dataWithoutSW">
     ///     The raw data returned by the ISO 7816 smart card without the
     ///     trailing status bytes.
     /// </param>
     /// <param name="sw">The status word, 'SW', for the APDU response.</param>
-    public ResponseApdu(byte[] dataWithoutSW, short sw)
+    public ApduResponse(byte[] dataWithoutSW, short sw)
     {
         ArgumentNullException.ThrowIfNull(dataWithoutSW);
 

@@ -19,13 +19,13 @@ namespace Yubico.YubiKit.Core.SmartCard;
 /// <summary>
 ///     Represents an ISO 7816 application command
 /// </summary>
-public readonly record struct CommandApdu
+public readonly record struct ApduCommand
 {
-    public CommandApdu()
+    public ApduCommand()
     {
     }
 
-    private CommandApdu(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte>? data = null, int le = 0)
+    private ApduCommand(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte>? data = null, int le = 0)
     {
         Cla = cla;
         Ins = ins;
@@ -35,7 +35,7 @@ public readonly record struct CommandApdu
         Data = data?.ToArray() ?? ReadOnlyMemory<byte>.Empty;
     }
 
-    public CommandApdu(int cla, int ins, int p1, int p2, ReadOnlyMemory<byte>? data = null, int le = 0)
+    public ApduCommand(int cla, int ins, int p1, int p2, ReadOnlyMemory<byte>? data = null, int le = 0)
         : this(
             ByteUtils.ValidateByte(cla, nameof(cla)),
             ByteUtils.ValidateByte(ins, nameof(ins)),

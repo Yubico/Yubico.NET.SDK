@@ -57,7 +57,7 @@ public static class YubiKeyTestStateExtensions
         /// </example>
         public async Task WithManagementAsync(
             Func<ManagementSession<ISmartCardConnection>, DeviceInfo, Task> action,
-            ScpKeyParams? scpKeyParams = null,
+            ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);
@@ -93,7 +93,7 @@ public static class YubiKeyTestStateExtensions
         /// </example>
         public async Task WithManagementAsync(
             Action<ManagementSession<ISmartCardConnection>, DeviceInfo> action,
-            ScpKeyParams? scpKeyParams = null,
+            ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);

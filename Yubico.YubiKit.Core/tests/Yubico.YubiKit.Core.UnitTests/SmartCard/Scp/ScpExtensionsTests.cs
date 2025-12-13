@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.UnitTests.SmartCard.Fakes;
@@ -39,7 +40,7 @@ public class ScpExtensionsTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<NotSupportedException>(async () =>
-            await protocol.WithScpAsync(Scp03KeyParams.Default, TestContext.Current.CancellationToken));
+            await protocol.WithScpAsync(Scp03KeyParameters.Default, TestContext.Current.CancellationToken));
 
         Assert.Contains("SCP03", ex.Message);
         Assert.Contains("5.3.0", ex.Message);
@@ -53,13 +54,13 @@ public class ScpExtensionsTests
         protocol.Configure(new FirmwareVersion(5, 3)); // Exactly 5.3.0
 
         using var staticKeys = StaticKeys.GetDefaultKeys();
-        var keyParams = new Scp03KeyParams(new KeyRef(0x01, 0xFF), staticKeys);
+        var keyParams = new Scp03KeyParameters(new KeyReference(0x01, 0xFF), staticKeys);
 
         // Act & Assert
         // Should proceed to initialization (will fail because fake connection doesn't respond,
         // but we're only testing that firmware check passes)
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await protocol.WithScpAsync(Scp03KeyParams.Default, TestContext.Current.CancellationToken));
+            await protocol.WithScpAsync(Scp03KeyParameters.Default, TestContext.Current.CancellationToken));
 
         // Should NOT be NotSupportedException about firmware
         Assert.IsNotType<NotSupportedException>(ex);
@@ -73,7 +74,7 @@ public class ScpExtensionsTests
         protocol.Configure(new FirmwareVersion(5, 4, 3)); // Above 5.3.0
 
         using var staticKeys = StaticKeys.GetDefaultKeys();
-        var keyParams = new Scp03KeyParams(new KeyRef(0x01, 0xFF), staticKeys);
+        var keyParams = new Scp03KeyParameters(new KeyReference(0x01, 0xFF), staticKeys);
 
         // Act & Assert
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
@@ -92,10 +93,9 @@ public class ScpExtensionsTests
 
         // Create minimal SCP11b params (simplest variant)
         using var ecdh = ECDiffieHellman.Create();
-        var keyParams = new Scp11KeyParams(
-            new KeyRef(ScpKid.SCP11b, 0xFF),
-            ecdh.PublicKey
-        );
+        
+        var publicKey = ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters());
+        var keyParams = new Scp11KeyParameters(new KeyReference(ScpKid.SCP11b, 0xFF), publicKey);
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<NotSupportedException>(async () =>
@@ -113,9 +113,11 @@ public class ScpExtensionsTests
         protocol.Configure(new FirmwareVersion(5, 7, 2)); // Exactly 5.7.2
 
         using var ecdh = ECDiffieHellman.Create();
-        var keyParams = new Scp11KeyParams(
-            new KeyRef(ScpKid.SCP11b, 0xFF),
-            ecdh.PublicKey
+        
+        var publicKey = ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters());
+        var keyParams = new Scp11KeyParameters(
+            new KeyReference(ScpKid.SCP11b, 0xFF),
+            publicKey
         );
 
         // Act & Assert
@@ -134,9 +136,11 @@ public class ScpExtensionsTests
         protocol.Configure(new FirmwareVersion(5, 8)); // Above 5.7.2
 
         using var ecdh = ECDiffieHellman.Create();
-        var keyParams = new Scp11KeyParams(
-            new KeyRef(ScpKid.SCP11b, 0xFF),
-            ecdh.PublicKey
+        var publicKey = ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters());
+        
+        var keyParams = new Scp11KeyParameters(
+            new KeyReference(ScpKid.SCP11b, 0xFF),
+            publicKey
         );
 
         // Act & Assert
@@ -155,7 +159,7 @@ public class ScpExtensionsTests
         // Don't call Configure - firmware version remains null
 
         using var staticKeys = StaticKeys.GetDefaultKeys();
-        var keyParams = new Scp03KeyParams(new KeyRef(0x01, 0xFF), staticKeys);
+        var keyParams = new Scp03KeyParameters(new KeyReference(0x01, 0xFF), staticKeys);
 
         // Act & Assert
         // Should proceed to initialization (will fail, but not due to firmware check)
@@ -177,9 +181,11 @@ public class ScpExtensionsTests
         // Don't call Configure - firmware version remains null
 
         using var ecdh = ECDiffieHellman.Create();
-        var keyParams = new Scp11KeyParams(
-            new KeyRef(ScpKid.SCP11b, 0xFF),
-            ecdh.PublicKey
+        var publicKey = ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters());
+        
+        var keyParams = new Scp11KeyParameters(
+            new KeyReference(ScpKid.SCP11b, 0xFF),
+            publicKey
         );
 
         // Act & Assert

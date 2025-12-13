@@ -1,5 +1,9 @@
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
@@ -12,8 +16,11 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 /// </summary>
 public class SecurityDomainSessionTests
 {
+    private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(15));
+
     private const byte CardRecognitionDataObject = 0x73;
     private const byte DefaultScp03Kid = ScpKid.SCP03;
+    private const byte OceKid = 0x010;
 
     /// <summary>
     ///     Validates that a Security Domain session can be created with SCP03 on devices
@@ -23,7 +30,7 @@ public class SecurityDomainSessionTests
     [WithYubiKey(MinFirmware = "5.4.3")]
     public async Task CreateAsync_WithScp03_Succeeds(YubiKeyTestState state)
     {
-        using var scpParams = Scp03KeyParams.Default;
+        using var scpParams = Scp03KeyParameters.Default;
 
         await state.WithSecurityDomainSessionAsync(
             session =>
@@ -32,7 +39,7 @@ public class SecurityDomainSessionTests
                 return Task.CompletedTask;
             },
             scpKeyParams: scpParams,
-            cancellationToken: CancellationToken.None);
+            cancellationToken: CancellationTokenSource.Token);
     }
 
     /// <summary>
@@ -47,10 +54,10 @@ public class SecurityDomainSessionTests
         {
             var response = await session.GetDataAsync(
                 CardRecognitionDataObject,
-                cancellationToken: CancellationToken.None);
+                cancellationToken: CancellationTokenSource.Token);
 
             Assert.False(response.IsEmpty);
-        }, cancellationToken: CancellationToken.None);
+        }, cancellationToken: CancellationTokenSource.Token);
     }
 
     [Theory]
@@ -58,14 +65,14 @@ public class SecurityDomainSessionTests
     public async Task GetKeyInformationAsync_ReturnsDefaultScpKey(YubiKeyTestState state)
     {
         await state.WithSecurityDomainSessionAsync(async session =>
-        {
-            var keyInformation = await session.GetKeyInformationAsync(CancellationToken.None);
+            {
+                var keyInformation = await session.GetKeyInformationAsync(CancellationTokenSource.Token);
 
-            Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInformation.Count);
-            Assert.Equal(0xFF, keyInformation.Keys.First().Kvn);
-        },
-            resetBeforeUse: true, 
-            cancellationToken: CancellationToken.None);
+                Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInformation.Count);
+                Assert.Equal(0xFF, keyInformation.Keys.First().Kvn);
+            },
+            resetBeforeUse: true,
+            cancellationToken: CancellationTokenSource.Token);
     }
 
     [Theory]
@@ -75,16 +82,15 @@ public class SecurityDomainSessionTests
         await state.WithSecurityDomainSessionAsync(
             async session =>
             {
-                await session.ResetAsync(CancellationToken.None);
+                await session.ResetAsync(CancellationTokenSource.Token);
 
-                var keyInformation = await session.GetKeyInformationAsync(CancellationToken.None);
+                var keyInformation = await session.GetKeyInformationAsync(CancellationTokenSource.Token);
 
                 Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInformation.Count);
                 Assert.Contains(keyInformation.Keys, keyRef => keyRef.Kvn == 0xFF);
-                
             },
             resetBeforeUse: false,
-            cancellationToken: CancellationToken.None);
+            cancellationToken: CancellationTokenSource.Token);
     }
 
     /// <summary>
@@ -94,63 +100,329 @@ public class SecurityDomainSessionTests
     [WithYubiKey(MinFirmware = "5.7.2")]
     public async Task GenerateEcKeyAsync_Scp11b_GeneratesValidKeyAndAuthenticates(YubiKeyTestState state)
     {
-        var keyReference = new KeyRef(ScpKid.SCP11b, 0x03);
+        var keyReference = new KeyReference(ScpKid.SCP11b, 0x03);
 
         await state.WithSecurityDomainSessionAsync(
             async session =>
             {
                 // Act - Generate a new EC key on the YubiKey
-                var publicKeyBytes = await session.GenerateEcKeyAsync(
+                var publicKey = await session.GenerateKeyAsync(
                     keyReference,
                     replaceKvn: 0,
-                    CancellationToken.None);
+                    CancellationTokenSource.Token);
+
+                var publicKeyBytes = publicKey.PublicPoint;
 
                 // Assert - Verify the generated public key structure
-                Assert.NotNull(publicKeyBytes);
                 Assert.Equal(65, publicKeyBytes.Length); // Uncompressed point: 0x04 + 32-byte X + 32-byte Y
-                Assert.Equal(0x04, publicKeyBytes[0]); // Uncompressed point indicator
+                Assert.Equal(0x4, publicKeyBytes.Span[0]); // Uncompressed point indicator
 
                 // Extract X and Y coordinates
-                var x = publicKeyBytes.AsSpan(1, 32).ToArray();
-                var y = publicKeyBytes.AsSpan(33, 32).ToArray();
+                var x = publicKeyBytes.Span.Slice(1, 32);
+                var y = publicKeyBytes.Span.Slice(33, 32);
 
-                Assert.NotNull(x);
-                Assert.NotNull(y);
                 Assert.Equal(32, x.Length);
                 Assert.Equal(32, y.Length);
 
                 // Verify we can construct a valid ECParameters from the point
                 var ecParameters = new ECParameters
                 {
-                    Curve = ECCurve.NamedCurves.nistP256,
-                    Q = new ECPoint
-                    {
-                        X = x,
-                        Y = y
-                    }
+                    Curve = ECCurve.NamedCurves.nistP256, Q = new ECPoint { X = x.ToArray(), Y = y.ToArray() }
                 };
 
                 // Verify we can create an ECDiffieHellman instance from the parameters
                 using var ecdh = ECDiffieHellman.Create(ecParameters);
                 Assert.NotNull(ecdh);
-                Assert.Equal(ECCurve.NamedCurves.nistP256.Oid.Value, 
+                Assert.Equal(ECCurve.NamedCurves.nistP256.Oid.Value,
                     ecdh.ExportParameters(false).Curve.Oid.Value);
             },
-            Scp03KeyParams.Default,
-            cancellationToken: CancellationToken.None, 
+            Scp03KeyParameters.Default,
+            cancellationToken: CancellationTokenSource.Token,
             resetBeforeUse: true);
 
         // Verify the generated key can be used for authentication
         await state.WithSecurityDomainSessionAsync(
             async session =>
             {
-                var keyInformation = await session.GetKeyInformationAsync(CancellationToken.None);
-                
+                var keyInformation = await session.GetKeyInformationAsync(CancellationTokenSource.Token);
+
                 // Verify the key we just generated is now registered
-                Assert.Contains(keyInformation.Keys, kr => 
+                Assert.Contains(keyInformation.Keys, kr =>
                     kr.Kid == keyReference.Kid && kr.Kvn == keyReference.Kvn);
             },
             resetBeforeUse: false,
-            cancellationToken: CancellationToken.None);
+            cancellationToken: CancellationTokenSource.Token);
     }
+
+    /// <summary>
+    ///     Verifies that a newly created SCP11b key can be deleted using DeleteKeyAsync
+    ///     and that it no longer appears in key information afterwards.
+    /// </summary>
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.7.2")]
+    public async Task DeleteKeyAsync_CreateThenDelete_Succeeds(YubiKeyTestState state)
+    {
+        const byte kid = ScpKid.SCP11b;
+        const byte kvn = 0x01;
+        var keyRef = new KeyReference(kid, kvn);
+
+        await state.WithSecurityDomainSessionAsync(
+            async session =>
+            {
+                // Verify presence
+                var info = await session.GetKeyInformationAsync(CancellationTokenSource.Token);
+                Assert.Contains(info.Keys, kr => kr is { Kid: kid, Kvn: kvn });
+
+                // Act: delete the just-created key
+                await session.DeleteKeyAsync(keyRef, deleteLast: false, CancellationTokenSource.Token);
+
+                // Assert: key is gone
+                info = await session.GetKeyInformationAsync(CancellationTokenSource.Token);
+                Assert.DoesNotContain(info.Keys, kr => kr is { Kid: kid, Kvn: kvn });
+            },
+            scpKeyParams: Scp03KeyParameters.Default, // authenticate for key mgmt operations
+            resetBeforeUse: true,
+            cancellationToken: CancellationTokenSource.Token);
+    }
+
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.7.2")]
+    public async Task Scp11a_WithAllowList_AllowsApprovedSerials(YubiKeyTestState state)
+    {
+        const byte kvn = 0x05;
+        var oceKeyRef = new KeyReference(OceKid, kvn);
+
+        Scp11KeyParameters? keyParams = null;
+        await state.WithSecurityDomainSessionAsync(
+            async session =>
+            {
+                keyParams = await LoadKeys(session, ScpKid.SCP11a, kvn);
+            },
+            scpKeyParams: Scp03KeyParameters.Default, // authenticate for key mgmt operations
+            resetBeforeUse: true,
+            cancellationToken: CancellationTokenSource.Token
+        );
+
+        string[] serials =
+        [
+            "7F4971B0AD51F84C9DA9928B2D5FEF5E16B2920A",
+            "6B90028800909F9FFCD641346933242748FBE9AD"
+        ];
+
+        await state.WithSecurityDomainSessionAsync(
+            async session =>
+            {
+                // Only the above serials shall work. 
+                await session.StoreAllowlistAsync(oceKeyRef, serials);
+            },
+            scpKeyParams: keyParams,
+            cancellationToken: CancellationTokenSource.Token
+        );
+
+        await state.WithSecurityDomainSessionAsync(
+            async session =>
+            {
+                await session.DeleteKeyAsync(new KeyReference(ScpKid.SCP11a, kvn));
+            },
+            scpKeyParams: keyParams,
+            cancellationToken: CancellationTokenSource.Token
+        );
+    }
+
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.7.2")]
+    public async Task Scp11b_Import_Succeeds(YubiKeyTestState state)
+    {
+        var keyReference = new KeyReference(ScpKid.SCP11b, 0x02);
+        Scp11KeyParameters? keyParameters = null;
+
+        await state.WithSecurityDomainSessionAsync(
+            async session =>
+            {
+                // Generate a new EC key on the host and import via PutKey
+                var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+                var privateKey = ECPrivateKey.CreateFromParameters(ecdsa.ExportParameters(true));
+                await session.PutKeyAsync(keyReference, privateKey, 0);
+
+                keyParameters = new Scp11KeyParameters(
+                    keyReference,
+                    ECPublicKey.CreateFromParameters(ecdsa.ExportParameters(false)));
+            },
+            scpKeyParams: Scp03KeyParameters.Default,
+            resetBeforeUse: true,
+            cancellationToken: CancellationTokenSource.Token
+        );
+
+
+        await state.WithSecurityDomainSessionAsync(
+            async session =>
+            {
+                // fingers crossed
+            },
+            scpKeyParams: keyParameters,
+            resetBeforeUse: false,
+            cancellationToken: CancellationTokenSource.Token
+        );
+    }
+
+    private static async Task<Scp11KeyParameters> LoadKeys(
+        SecurityDomainSession session,
+        byte scpKid,
+        byte kvn)
+    {
+        var sessionRef = new KeyReference(scpKid, kvn);
+        var oceRef = new KeyReference(OceKid, kvn);
+        var oceCerts = GetOceCertificates(Scp11TestData.OceCerts);
+        ArgumentNullException.ThrowIfNull(oceCerts.Ca);
+
+        // Put Oce Keys
+        var ocePublicKey = ECPublicKey.CreateFromParameters(
+            oceCerts.Ca.PublicKey.GetECDsaPublicKey()!.ExportParameters(false)
+        );
+
+        await session.PutKeyAsync(oceRef, ocePublicKey, replaceKvn: 0, CancellationTokenSource.Token);
+
+        // Get Oce subject key identifier
+        var ski = GetSki(oceCerts.Ca);
+        if (ski.IsEmpty)
+        {
+            throw new InvalidOperationException("CA certificate missing Subject Key Identifier");
+        }
+
+        // Store the key identifier with the referenced off card entity on the Yubikey
+        await session.StoreCaIssuerAsync(oceRef, ski, CancellationTokenSource.Token);
+
+        var (certChain, privateKey) = GetOceCertificateChainAndPrivateKey(Scp11TestData.Oce, Scp11TestData.OcePassword);
+        var newPublicKey = await session.GenerateKeyAsync(sessionRef, replaceKvn: 0, CancellationTokenSource.Token);
+
+        // Now we have the EC private key parameters and cert chain
+        return new Scp11KeyParameters(
+            sessionRef,
+            ECPublicKey.CreateFromParameters(newPublicKey.Parameters),
+            ECPrivateKey.CreateFromParameters(privateKey),
+            oceRef,
+            certChain
+        );
+    }
+
+    private static (List<X509Certificate2> certChain, ECParameters privateKey) GetOceCertificateChainAndPrivateKey(
+        ReadOnlyMemory<byte> ocePkcs12,
+        ReadOnlyMemory<char> ocePassword)
+    {
+        var collection = X509CertificateLoader.LoadPkcs12Collection(ocePkcs12.Span, ocePassword.Span, X509KeyStorageFlags.Exportable);
+        var leafCert = collection.FirstOrDefault(cert => cert.HasPrivateKey);
+        if (leafCert == null)
+        {
+            throw new InvalidOperationException("No private key entry found in PKCS12");
+        }
+
+        using var ecKey = leafCert.GetECDsaPrivateKey();
+        if (ecKey == null)
+        {
+            throw new InvalidOperationException("Private key is not an EC key (or is not ECDSA compatible)");
+        }
+
+        var certs = ScpCertificates.From(collection);
+        var certChain = new List<X509Certificate2>(certs.Bundle);
+        if (certs.Leaf != null)
+        {
+            certChain.Add(certs.Leaf);
+        }
+        
+        var ecParams = ecKey.ExportParameters(includePrivateParameters: true);
+        return (certChain, ecParams);
+    }
+
+    private static ScpCertificates GetOceCertificates(ReadOnlySpan<byte> pem)
+    {
+        try
+        {
+            var certificates = new List<X509Certificate2>();
+
+            // Convert PEM to a string
+            var pemString = Encoding.UTF8.GetString(pem);
+
+            // Split the PEM string into individual certificates
+            var pemCerts = pemString.Split([
+                    "-----BEGIN CERTIFICATE-----",
+                    "-----END CERTIFICATE-----"
+                ],
+                StringSplitOptions.RemoveEmptyEntries
+            );
+
+            foreach (var certString in pemCerts)
+            {
+                if (string.IsNullOrWhiteSpace(certString)) continue;
+
+                // Remove any whitespace and convert to byte array
+                var certData = Convert.FromBase64String(certString.Trim());
+                var cert = X509CertificateLoader.LoadCertificate(certData);
+                certificates.Add(cert);
+            }
+
+            return ScpCertificates.From(certificates);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Failed to parse PEM certificates", ex);
+        }
+    }
+
+    private static ReadOnlyMemory<byte> GetSki(X509Certificate2 certificate)
+    {
+        var extension = certificate.Extensions["2.5.29.14"];
+        if (extension is not X509SubjectKeyIdentifierExtension skiExtension)
+        {
+            throw new InvalidOperationException("Invalid Subject Key Identifier extension");
+        }
+
+        var rawData = skiExtension.RawData;
+        if (rawData == null || rawData.Length == 0)
+        {
+            throw new InvalidOperationException("Missing Subject Key Identifier");
+        }
+
+        var tlv = Tlv.Parse(skiExtension.RawData);
+        return tlv.Value;
+    }
+
+    private static async Task<Scp03KeyParameters> ImportScp03Key(SecurityDomainSession session)
+    {
+        const byte scp03KeyId = 0x01;
+        var scp03Ref = new KeyReference(scp03KeyId, 0x01);
+        var staticKeys = new StaticKeys(
+            GetRandomBytes(16),
+            GetRandomBytes(16),
+            GetRandomBytes(16)
+        );
+
+        await session.PutKeyAsync(scp03Ref, staticKeys, replaceKvn: 0, CancellationTokenSource.Token);
+        return new Scp03KeyParameters(scp03Ref, staticKeys);
+    }
+
+    private static byte[] GetRandomBytes(byte length)
+    {
+        using var rng = CryptographyProviders.RngCreator();
+        Span<byte> hostChallenge = stackalloc byte[length];
+        rng.GetBytes(hostChallenge);
+
+        return hostChallenge.ToArray();
+    }
+
+    // private static Task<Scp11KeyParameters> Get_Scp11b_SecureConnection_Parameters(
+    //     IYubiKeyDevice testDevice,
+    //     KeyReference keyReference)
+    // {
+    //     IReadOnlyCollection<X509Certificate2> certificateList;
+    //     using (var session = new SecurityDomainSession(testDevice))
+    //     {
+    //         certificateList = await session.GetCertificatesAsync(keyReference, CancellationTokenSource.Token);
+    //     }
+    //
+    //     var leaf = certificateList.Last();
+    //     var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!;
+    //     var keyParams = new Scp11KeyParameters(keyReference, ECPublicKey.CreateFromParameters(ecDsaPublicKey.ExportParameters(false)));
+    //
+    //     return keyParams;
+    // }
 }

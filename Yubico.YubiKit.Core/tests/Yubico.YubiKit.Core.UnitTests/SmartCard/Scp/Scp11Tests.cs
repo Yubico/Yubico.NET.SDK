@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 
 namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Scp;
@@ -25,22 +26,17 @@ namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Scp;
 /// </summary>
 public class Scp11Tests
 {
-    // SCP11 Key IDs (from internal ScpKid class)
-    private const byte Scp11aKeyId = 0x11;
-    private const byte Scp11bKeyId = 0x13;
-    private const byte Scp11cKeyId = 0x15;
-
     [Fact]
     public void Scp11_KeyRef_Creation_AllVariants_Succeeds()
     {
         // Test that KeyRef can be created for all SCP11 variants
-        var scp11aRef = new KeyRef(Scp11aKeyId, 0x1);
-        var scp11bRef = new KeyRef(Scp11bKeyId, 0x1);
-        var scp11cRef = new KeyRef(Scp11cKeyId, 0x1);
+        var scp11aRef = new KeyReference(ScpKid.SCP11a, 0x1);
+        var scp11bRef = new KeyReference(ScpKid.SCP11b, 0x1);
+        var scp11cRef = new KeyReference(ScpKid.SCP11c, 0x1);
 
-        Assert.Equal(Scp11aKeyId, scp11aRef.Kid);
-        Assert.Equal(Scp11bKeyId, scp11bRef.Kid);
-        Assert.Equal(Scp11cKeyId, scp11cRef.Kid);
+        Assert.Equal(ScpKid.SCP11a, scp11aRef.Kid);
+        Assert.Equal(ScpKid.SCP11b, scp11bRef.Kid);
+        Assert.Equal(ScpKid.SCP11c, scp11cRef.Kid);
     }
 
     [Fact]
@@ -48,15 +44,15 @@ public class Scp11Tests
     {
         // Arrange - Create EC public key for SCP11b
         using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-        var publicKey = ecdh.PublicKey;
+        var publicKey = ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters());
 
         // Act - Create SCP11b key params (no OCE, no certs)
-        var keyRef = new KeyRef(Scp11bKeyId, 0x1);
-        var keyParams = new Scp11KeyParams(keyRef, publicKey);
+        var keyRef = new KeyReference(ScpKid.SCP11b, 0x1);
+        var keyParams = new Scp11KeyParameters(keyRef, publicKey);
 
         // Assert
         Assert.NotNull(keyParams);
-        Assert.Equal(keyRef.Kid, keyParams.KeyRef.Kid);
+        Assert.Equal(keyRef.Kid, keyParams.KeyReference.Kid);
         Assert.Null(keyParams.SkOceEcka);
         Assert.Null(keyParams.OceKeyRef);
         Assert.Empty(keyParams.Certificates);
@@ -69,17 +65,19 @@ public class Scp11Tests
         using var oceEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
         using var sdEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
 
-        var sdPublicKey = sdEcdh.PublicKey;
+        var ocePrivateKey = ECPrivateKey.CreateFromParameters(oceEcdh.ExportParameters(true));
+        var sdPublicKey = ECPublicKey.CreateFromParameters(sdEcdh.PublicKey.ExportParameters());
+        
         var certBundle = ParseTestCertificates();
 
         // Act - Create SCP11a key params (with OCE and certs)
-        var sessionRef = new KeyRef(Scp11aKeyId, 0x3);
-        var oceRef = new KeyRef(0x10, 0x3);
-        var keyParams = new Scp11KeyParams(sessionRef, sdPublicKey, oceEcdh, oceRef, certBundle);
+        var sessionRef = new KeyReference(ScpKid.SCP11a, 0x3);
+        var oceRef = new KeyReference(0x10, 0x3);
+        var keyParams = new Scp11KeyParameters(sessionRef, sdPublicKey, ocePrivateKey, oceRef, certBundle);
 
         // Assert
         Assert.NotNull(keyParams);
-        Assert.Equal(sessionRef.Kid, keyParams.KeyRef.Kid);
+        Assert.Equal(sessionRef.Kid, keyParams.KeyReference.Kid);
         Assert.NotNull(keyParams.SkOceEcka);
         Assert.NotNull(keyParams.OceKeyRef);
         Assert.NotEmpty(keyParams.Certificates);
@@ -92,18 +90,20 @@ public class Scp11Tests
         // Arrange - Create keys and certs for SCP11c
         using var oceEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
         using var sdEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-
-        var sdPublicKey = sdEcdh.PublicKey;
+        
+        var ocePrivateKey = ECPrivateKey.CreateFromParameters(oceEcdh.ExportParameters(true));
+        var sdPublicKey = ECPublicKey.CreateFromParameters(sdEcdh.PublicKey.ExportParameters());
+        
         var certBundle = ParseTestCertificates();
 
         // Act - Create SCP11c key params
-        var sessionRef = new KeyRef(Scp11cKeyId, 0x3);
-        var oceRef = new KeyRef(0x10, 0x3);
-        var keyParams = new Scp11KeyParams(sessionRef, sdPublicKey, oceEcdh, oceRef, certBundle);
+        var sessionRef = new KeyReference(ScpKid.SCP11c, 0x3);
+        var oceRef = new KeyReference(0x10, 0x3);
+        var keyParams = new Scp11KeyParameters(sessionRef, sdPublicKey, ocePrivateKey, oceRef, certBundle);
 
         // Assert
         Assert.NotNull(keyParams);
-        Assert.Equal(Scp11cKeyId, keyParams.KeyRef.Kid);
+        Assert.Equal(ScpKid.SCP11c, keyParams.KeyReference.Kid);
         Assert.NotNull(keyParams.SkOceEcka);
         Assert.NotNull(keyParams.OceKeyRef);
         Assert.NotEmpty(keyParams.Certificates);
@@ -115,14 +115,16 @@ public class Scp11Tests
         // Arrange
         using var oceEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
         using var sdEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-
-        var sdPublicKey = sdEcdh.PublicKey;
-        var sessionRef = new KeyRef(Scp11aKeyId, 0x3);
-        var oceRef = new KeyRef(0x10, 0x3);
+                
+        var ocePrivateKey = ECPrivateKey.CreateFromParameters(oceEcdh.ExportParameters(true));
+        var sdPublicKey = ECPublicKey.CreateFromParameters(sdEcdh.PublicKey.ExportParameters());
+        
+        var sessionRef = new KeyReference(ScpKid.SCP11a, 0x3);
+        var oceRef = new KeyReference(0x10, 0x3);
 
         // Act & Assert - SCP11a requires certificate chain
         Assert.Throws<ArgumentException>(() =>
-            new Scp11KeyParams(sessionRef, sdPublicKey, oceEcdh, oceRef, []));
+            new Scp11KeyParameters(sessionRef, sdPublicKey, ocePrivateKey, oceRef, []));
     }
 
     [Fact]
@@ -130,14 +132,15 @@ public class Scp11Tests
     {
         // Arrange
         using var sdEcdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-        var sdPublicKey = sdEcdh.PublicKey;
+        
+        var sdPublicKey = ECPublicKey.CreateFromParameters(sdEcdh.PublicKey.ExportParameters());
         var certBundle = ParseTestCertificates();
-        var sessionRef = new KeyRef(Scp11aKeyId, 0x3);
-        var oceRef = new KeyRef(0x10, 0x3);
+        var sessionRef = new KeyReference(ScpKid.SCP11a, 0x3);
+        var oceRef = new KeyReference(0x10, 0x3);
 
         // Act & Assert - SCP11a requires OCE private key
         Assert.Throws<ArgumentNullException>(() =>
-            new Scp11KeyParams(sessionRef, sdPublicKey, null, oceRef, certBundle));
+            new Scp11KeyParameters(sessionRef, sdPublicKey, null, oceRef, certBundle));
     }
 
     [Fact]
@@ -145,12 +148,12 @@ public class Scp11Tests
     {
         // Arrange
         using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-        var publicKey = ecdh.PublicKey;
-
+                
+        var sdPublicKey = ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters());
         // Act & Assert - Invalid KID (not 0x11, 0x13, or 0x15)
-        var invalidKeyRef = new KeyRef(0x99, 0x1);
+        var invalidKeyRef = new KeyReference(0x99, 0x1);
         Assert.Throws<ArgumentException>(() =>
-            new Scp11KeyParams(invalidKeyRef, publicKey));
+            new Scp11KeyParameters(invalidKeyRef, sdPublicKey));
     }
 
     [Fact]
@@ -206,7 +209,9 @@ public class Scp11Tests
         // 7. Verify encrypted communication works
         await Task.CompletedTask;
 
+#pragma warning disable xUnit1004
     [Fact(Skip = "Requires SecurityDomain session and YubiKey hardware")]
+#pragma warning restore xUnit1004
     public async Task Scp11a_WithAllowList_FullFlow_Succeeds() =>
         // This test would verify complete SCP11a flow with allowlist.
         //

@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Core.SmartCard.Scp;
@@ -44,9 +45,6 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
     private const byte DerivationContextLength = 0x40; // Context length in bits (64 bits = 8 bytes)
 
     // SCP11 Constants
-    private const byte Scp11aKeyId = 0x13;
-    private const byte Scp11bKeyId = 0x15;
-    private const byte Scp11cKeyId = 0x17;
     private const byte Scp11aTypeParam = 0x01;
     private const byte Scp11bTypeParam = 0x00;
     private const byte Scp11cTypeParam = 0x03;
@@ -58,10 +56,11 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
     private byte[] _macChain = macChain;
     private int _respCounter = 1; // Counter for response decryption (card->host)
 
-    public DataEncryptor? GetDataEncryptor()
+    public DataEncryptor GetDataEncryptor()
     {
-        if (keys.Dek.IsEmpty) return null; // TODO - should we throw an exception?
-        return data => CbcEncrypt(keys.Dek, data);
+        return keys.Dek.IsEmpty 
+            ? throw new InvalidOperationException("Decryption key not initialized") 
+            : data => CbcEncrypt(keys.Dek, data);
     }
 
     public byte[] Encrypt(ReadOnlySpan<byte> data)
@@ -227,17 +226,17 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
 
     public static async Task<(ScpState State, byte[] HostCryptogram)> Scp03InitAsync(
         IApduProcessor processor,
-        Scp03KeyParams keyParams,
+        Scp03KeyParameters keyParams,
         byte[]? hostChallenge = null,
         CancellationToken cancellationToken = default)
     {
         hostChallenge ??= RandomNumberGenerator.GetBytes(8);
 
         var resp = await processor.TransmitAsync(
-            new CommandApdu(
+            new ApduCommand(
                 0x80,
                 InsInitializeUpdate,
-                keyParams.KeyRef.Kvn,
+                keyParams.KeyReference.Kvn,
                 0x00,
                 hostChallenge),
             false,
@@ -291,11 +290,11 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
 
     public static async Task<ScpState> Scp11InitAsync(
         IApduProcessor processor,
-        Scp11KeyParams keyParams,
+        Scp11KeyParameters keyParams,
         CancellationToken cancellationToken = default)
     {
         // GPC v2.3 Amendment F (SCP11) v1.4 §7.1.1
-        var kid = keyParams.KeyRef.Kid;
+        var kid = keyParams.KeyReference.Kid;
 
         var scpTypeParam = kid switch
         {
@@ -313,13 +312,13 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
             var n = keyParams.Certificates.Count - 1;
             if (n < 0) throw new ArgumentException("SCP11a and SCP11c require a certificate chain");
 
-            var oceRef = keyParams.OceKeyRef ?? new KeyRef(0, 0);
+            var oceRef = keyParams.OceKeyRef ?? new KeyReference(0, 0);
             for (var i = 0; i <= n; i++)
             {
                 var certData = keyParams.Certificates[i].GetRawCertData();
                 var p2 = (byte)(oceRef.Kid | (i < n ? Scp11MoreFragmentsFlag : 0x00));
                 var resp = await processor.TransmitAsync(
-                    new CommandApdu(
+                    new ApduCommand(
                         0x80,
                         InsPerformSecurityOperation,
                         oceRef.Kvn,
@@ -339,11 +338,13 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
         // Host ephemeral key
         var pkSdEcka = keyParams.PkSdEcka;
 
-        // Import the SD public key parameters to match curve
-        var sdParameters = pkSdEcka.ExportParameters();
-        using var ephemeralOceEcka = ECDiffieHellman.Create(sdParameters.Curve);
+        // Create ephemeral OCE key using the same curve as the SD public key
+        var sdParameters = pkSdEcka.Parameters;
 
-        var epkOceEcka = new PublicKeyValues.Ec(ephemeralOceEcka.PublicKey);
+        // Create ephemeral OCE ECDH key pair using the same curve
+        using var ephemeralOceEcka = ECDiffieHellman.Create(sdParameters.Curve);
+        var epkOceEcka = ECPublicKey.CreateFromParameters(
+            ephemeralOceEcka.ExportParameters(includePrivateParameters: false));
 
         // GPC v2.3 Amendment F (SCP11) v1.4 §7.6.2.3
         using var scpTypeTlv = new Tlv(0x90, [0x11, scpTypeParam]);
@@ -351,33 +352,32 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
         using var keyTypeTlv = new Tlv(0x80, keyType);
         using var keyLenTlv = new Tlv(0x81, keyLen);
         var innerTlvs = TlvHelper.EncodeList([scpTypeTlv, keyUsageTlv, keyTypeTlv, keyLenTlv]);
-        // var innerTlvsArray = innerTlvs.ToArray();
 
-        // using var outerTlv1 = new Tlv(0xA6, innerTlvsArray);
         using var outerTlv1 = new Tlv(0xA6, innerTlvs.Span);
-        using var outerTlv2 = new Tlv(0x5F49, epkOceEcka.EncodedPoint);
+        using var outerTlv2 = new Tlv(0x5F49, epkOceEcka.PublicPoint.Span);
         var outerTlvs = TlvHelper.EncodeList([outerTlv1, outerTlv2]);
 
         var data = outerTlvs;
 
         // Static host key (SCP11a/c), or ephemeral key again (SCP11b)
-        var skOceEcka = keyParams.SkOceEcka ?? ephemeralOceEcka;
+        var skOceEcka = keyParams.SkOceEcka?.ToECDiffieHellman() ?? ephemeralOceEcka;
 
-        var ins = keyParams.KeyRef.Kid == ScpKid.SCP11b
+        var ins = keyParams.KeyReference.Kid == ScpKid.SCP11b
             ? InsInternalAuthenticate
             : InsExternalAuthenticate;
 
         var response = await processor.TransmitAsync(
-            new CommandApdu(
+            new ApduCommand(
                 0x80,
                 ins,
-                keyParams.KeyRef.Kvn,
-                keyParams.KeyRef.Kid,
+                keyParams.KeyReference.Kvn,
+                keyParams.KeyReference.Kid,
                 data),
             false,
             cancellationToken).ConfigureAwait(false);
 
-        if (response.SW != SWConstants.Success) throw new ApduException($"SCP11 authentication failed {response.SW}");
+        if (response.SW != SWConstants.Success) 
+            throw new ApduException($"SCP11 authentication failed {response.SW}");
 
         using var tlvs = TlvHelper.Decode(response.Data.Span);
         var epkSdEckaTlv = tlvs[0];
@@ -386,7 +386,7 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
         var receipt = receiptMem.ToArray();
 
         // GPC v2.3 Amendment F (SCP11) v1.3 §3.1.2 Key Derivation
-        var epkSdEckaTlvBytes = epkSdEckaTlv.GetBytes();
+        var epkSdEckaTlvBytes = epkSdEckaTlv.AsMemory();
         byte[]? rentedKeyAgreementData = null;
         byte[]? rentedKeyMaterial = null;
 
@@ -404,13 +404,13 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
             keyLen.AsSpan().CopyTo(sharedInfo[(keyUsage.Length + keyType.Length)..]);
 
             // Key agreement 1: ephemeral OCE private key with ephemeral SD public key
-            var epkSdEcka = PublicKeyValues.Ec.FromEncodedPoint(
-                epkOceEcka.CurveParams,
-                epkSdEckaEncodedPointMem.Span);
-            var ka1 = ephemeralOceEcka.DeriveKeyMaterial(epkSdEcka.ToECDiffieHellmanPublicKey());
+            var epkSdEcka = ECPublicKey.CreateFromValue(
+                epkSdEckaEncodedPointMem,
+                pkSdEcka.KeyType);
+            var ka1 = epkSdEcka.DeriveKeyMaterial(ephemeralOceEcka);
 
             // Key agreement 2: static/ephemeral OCE private key with static SD public key
-            var ka2 = skOceEcka.DeriveKeyMaterial(pkSdEcka);
+            var ka2 = pkSdEcka.DeriveKeyMaterial(skOceEcka);
 
             var keyMaterialLen = ka1.Length + ka2.Length;
             rentedKeyMaterial = ArrayPool<byte>.Shared.Rent(keyMaterialLen);

@@ -28,14 +28,6 @@ public class ECPublicKey : PublicKey
     private readonly byte[] _publicPointBytes;
 
     /// <summary>
-    /// Gets the key definition associated with this RSA private key.
-    /// </summary>
-    /// <value>
-    /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
-    /// </value>
-    public KeyDefinition KeyDefinition { get; }
-
-    /// <summary>
     /// Gets the Elliptic Curve parameters associated with this instance.
     /// </summary>
     /// <value>
@@ -43,6 +35,14 @@ public class ECPublicKey : PublicKey
     /// cryptographic elements needed for EC operations.
     /// </value>
     public ECParameters Parameters { get; }
+
+    /// <summary>
+    /// Gets the key definition associated with this EC public key.
+    /// </summary>
+    /// <value>
+    /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
+    /// </value>
+    public KeyDefinition KeyDefinition { get; }
 
     /// <summary>
     /// Gets the bytes representing the public key coordinates.
@@ -61,9 +61,9 @@ public class ECPublicKey : PublicKey
     /// This constructor is used to create an instance from a <see cref="ECParameters"/> object.
     /// It will deep copy the parameters from the <see cref="ECParameters"/> object.
     /// </remarks>
-    /// <param name="parameters"></param>
+    /// <param name="parameters">The EC parameters containing the public key data.</param>
     /// <exception cref="ArgumentException">Thrown when the parameters contain private key data (D value).</exception>
-    protected ECPublicKey(ECParameters parameters)
+    private ECPublicKey(ECParameters parameters)
     {
         if (parameters.D is not null)
         {
@@ -72,21 +72,6 @@ public class ECPublicKey : PublicKey
         }
 
         Parameters = parameters.DeepCopy();
-        KeyDefinition = KeyDefinitions.GetByOid(Parameters.Curve.Oid);
-
-        // Format identifier (uncompressed point): 0x04
-        _publicPointBytes = [0x4, .. Parameters.Q.X!, .. Parameters.Q.Y!];
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ECPublicKey"/> class.
-    /// </summary>
-    /// <param name="ecdsa"></param>
-    protected ECPublicKey(ECDsa ecdsa)
-    {
-        ArgumentNullException.ThrowIfNull(ecdsa);
-
-        Parameters = ecdsa.ExportParameters(false);
         KeyDefinition = KeyDefinitions.GetByOid(Parameters.Curve.Oid);
 
         // Format identifier (uncompressed point): 0x04
@@ -104,10 +89,44 @@ public class ECPublicKey : PublicKey
     public static ECPublicKey CreateFromParameters(ECParameters parameters) => new(parameters);
 
     /// <summary>
+    /// Creates an instance of <see cref="ECPublicKey"/> from an <see cref="ECDiffieHellman"/> instance.
+    /// </summary>
+    /// <param name="ecdh">The ECDiffieHellman instance containing the public key.</param>
+    /// <returns>An instance of <see cref="ECPublicKey"/>.</returns>
+    /// <remarks>
+    /// This method extracts the public key from the <see cref="ECDiffieHellman"/> instance
+    /// and creates a new <see cref="ECPublicKey"/> wrapper. This is useful when working with ephemeral
+    /// keys generated via <see cref="ECDiffieHellman.Create(ECCurve)"/> for protocols like SCP11.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="ecdh"/> is null.</exception>
+    public static ECPublicKey CreateFromEcdh(ECDiffieHellman ecdh)
+    {
+        ArgumentNullException.ThrowIfNull(ecdh);
+        return CreateFromParameters(ecdh.PublicKey.ExportParameters());
+    }
+
+    /// <summary>
+    /// Creates an instance of <see cref="ECPublicKey"/> from an <see cref="ECDiffieHellmanPublicKey"/> instance.
+    /// </summary>
+    /// <param name="publicKey">The ECDiffieHellmanPublicKey instance.</param>
+    /// <returns>An instance of <see cref="ECPublicKey"/>.</returns>
+    /// <remarks>
+    /// This method exports the public key parameters from the <see cref="ECDiffieHellmanPublicKey"/> instance
+    /// and creates a new <see cref="ECPublicKey"/> wrapper. This is useful when receiving public keys
+    /// from key agreement operations or certificate imports.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="publicKey"/> is null.</exception>
+    public static ECPublicKey CreateFromEcdh(ECDiffieHellmanPublicKey publicKey)
+    {
+        ArgumentNullException.ThrowIfNull(publicKey);
+        return CreateFromParameters(publicKey.ExportParameters());
+    }
+
+    /// <summary>
     /// Creates an instance of <see cref="ECPublicKey"/> from the given
     /// <paramref name="publicPoint"/> and <paramref name="keyType"/>.
     /// </summary>
-    /// <param name="publicPoint">The raw public key data, formatted as an compressed point.</param>
+    /// <param name="publicPoint">The raw public key data, formatted as an uncompressed point (0x04 || X || Y).</param>
     /// <param name="keyType">The type of key this is.</param>
     /// <returns>An instance of <see cref="ECPublicKey"/>.</returns>
     /// <exception cref="ArgumentException">
@@ -148,4 +167,41 @@ public class ECPublicKey : PublicKey
         AsnPublicKeyDecoder
             .CreatePublicKey(subjectPublicKeyInfo)
             .Cast<ECPublicKey>();
+
+    /// <summary>
+    /// Converts this EC public key to an <see cref="ECDiffieHellmanPublicKey"/> for use in key agreement operations.
+    /// </summary>
+    /// <returns>An <see cref="ECDiffieHellmanPublicKey"/> instance that can be used with <see cref="ECDiffieHellman"/>.</returns>
+    /// <remarks>
+    /// This method creates a new <see cref="ECDiffieHellman"/> instance from the stored EC parameters
+    /// and returns its public key. This is useful for ECDH key agreement operations such as those
+    /// used in SCP11 (Secure Channel Protocol 11).
+    /// </remarks>
+    public ECDiffieHellmanPublicKey ToECDiffieHellmanPublicKey()
+    {
+        using var ecdh = ECDiffieHellman.Create(Parameters);
+        return ecdh.PublicKey;
+    }
+
+    /// <summary>
+    /// Performs Elliptic Curve Diffie-Hellman (ECDH) key agreement using this public key
+    /// and the provided private key.
+    /// </summary>
+    /// <param name="privateKey">The ECDH private key to use for key agreement.</param>
+    /// <returns>The derived key material as a byte array.</returns>
+    /// <remarks>
+    /// This method derives shared secret key material using ECDH. The private key must be
+    /// compatible with this public key's curve parameters. The derived key material can then
+    /// be used with key derivation functions (KDFs) to generate session keys.
+    ///
+    /// This operation is commonly used in protocols like SCP11 where both parties
+    /// derive a shared secret from their ephemeral/static key pairs.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="privateKey"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown if the curves are incompatible.</exception>
+    public byte[] DeriveKeyMaterial(ECDiffieHellman privateKey)
+    {
+        ArgumentNullException.ThrowIfNull(privateKey);
+        return privateKey.DeriveKeyMaterial(ToECDiffieHellmanPublicKey());
+    }
 }

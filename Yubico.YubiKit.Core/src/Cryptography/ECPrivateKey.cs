@@ -24,7 +24,7 @@ namespace Yubico.YubiKit.Core.Cryptography
     /// and provides factory methods for creating instances from EC parameters
     /// or DER-encoded data.
     /// </remarks>
-    public class ECPrivateKey : PrivateKey
+    public class ECPrivateKey : PrivateKey // TODO wrap an ECDH
     {
         /// <summary>
         /// Gets the Elliptic Curve parameters associated with this instance.
@@ -36,7 +36,7 @@ namespace Yubico.YubiKit.Core.Cryptography
         public ECParameters Parameters { get; }
 
         /// <summary>
-        /// Gets the key definition associated with this RSA private key.
+        /// Gets the key definition associated with this EC private key.
         /// </summary>
         /// <value>
         /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
@@ -51,37 +51,19 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// It is a wrapper for the <see cref="ECParameters"/> class.
         /// </summary>
         /// <remarks>
-        /// This constructor is used to create an instance from a <see cref="ECParameters"/> object. It will deep copy 
+        /// This constructor is used to create an instance from a <see cref="ECParameters"/> object. It will deep copy
         /// the parameters from the ECParameters object.
         /// </remarks>
         /// <param name="parameters">The EC parameters.</param>
         /// <exception cref="ArgumentException">Thrown when parameters do not contain D value.</exception>
-        protected ECPrivateKey(ECParameters parameters)
+        private ECPrivateKey(ECParameters parameters)
         {
-            if (parameters.D == null)
+            if (parameters.D is null)
             {
                 throw new ArgumentException("Parameters must contain private key data (D value)", nameof(parameters));
             }
 
             Parameters = parameters.DeepCopy();
-            KeyDefinition = KeyDefinitions.GetByOid(Parameters.Curve.Oid);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ECPrivateKey"/> class using a <see cref="ECDsa"/> object.
-        /// </summary>
-        /// <remarks>
-        /// It exports the parameters from the ECDsa object and deep copy the parameters from the ECParameters object.
-        /// </remarks>
-        /// <param name="ecdsaObject">The ECDsa object.</param>
-        protected ECPrivateKey(ECDsa ecdsaObject)
-        {
-            if (ecdsaObject == null)
-            {
-                throw new ArgumentNullException(nameof(ecdsaObject));
-            }
-
-            Parameters = ecdsaObject.ExportParameters(true);
             KeyDefinition = KeyDefinitions.GetByOid(Parameters.Curve.Oid);
         }
 
@@ -127,6 +109,23 @@ namespace Yubico.YubiKit.Core.Cryptography
         public static ECPrivateKey CreateFromParameters(ECParameters parameters) => new(parameters);
 
         /// <summary>
+        /// Creates an instance of <see cref="ECPrivateKey"/> from an <see cref="ECDiffieHellman"/> instance.
+        /// </summary>
+        /// <param name="ecdh">The ECDiffieHellman instance containing the private key.</param>
+        /// <returns>An instance of <see cref="ECPrivateKey"/>.</returns>
+        /// <remarks>
+        /// This method exports the private key parameters from the <see cref="ECDiffieHellman"/> instance
+        /// and creates a new <see cref="ECPrivateKey"/> wrapper. This is useful when working with ephemeral
+        /// keys generated via <see cref="ECDiffieHellman.Create(ECCurve)"/> for protocols like SCP11.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="ecdh"/> is null.</exception>
+        public static ECPrivateKey CreateFromEcdh(ECDiffieHellman ecdh)
+        {
+            ArgumentNullException.ThrowIfNull(ecdh);
+            return CreateFromParameters(ecdh.ExportParameters(includePrivateParameters: true));
+        }
+
+        /// <summary>
         /// Creates a new instance of <see cref="ECPrivateKey"/> from the given
         /// <paramref name="privateValue"/> and <paramref name="keyType"/>.
         /// </summary>
@@ -161,6 +160,26 @@ namespace Yubico.YubiKit.Core.Cryptography
 
             var ecdsa = ECDsa.Create(parameters);
             return CreateFromParameters(ecdsa.ExportParameters(true));
+        }
+
+        /// <summary>
+        /// Converts this EC private key to an <see cref="ECDiffieHellman"/> instance for use in key agreement operations.
+        /// </summary>
+        /// <returns>An <see cref="ECDiffieHellman"/> instance initialized with this key's parameters.</returns>
+        /// <remarks>
+        /// This method creates a new <see cref="ECDiffieHellman"/> instance from the stored EC parameters.
+        /// The returned instance can be used for ECDH key agreement operations, such as those used in
+        /// SCP11 (Secure Channel Protocol 11).
+        /// <para>
+        /// The caller is responsible for disposing the returned <see cref="ECDiffieHellman"/> instance
+        /// to ensure proper cleanup of cryptographic resources.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ObjectDisposedException">Thrown if this instance has been disposed.</exception>
+        public ECDiffieHellman ToECDiffieHellman()
+        {
+            ThrowIfDisposed();
+            return ECDiffieHellman.Create(Parameters);
         }
     }
 }

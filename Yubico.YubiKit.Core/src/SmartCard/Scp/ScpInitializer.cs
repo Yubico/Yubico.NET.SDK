@@ -37,18 +37,18 @@ internal static class ScpInitializer
     /// <exception cref="ArgumentException">Thrown when keyParams type is unsupported</exception>
     /// <exception cref="NotSupportedException">Thrown when device doesn't support SCP</exception>
     /// <exception cref="ApduException">Thrown when SCP initialization fails</exception>
-    public static async Task<(IApduProcessor scpProcessor, DataEncryptor? dataEncryptor)> InitializeScpAsync(
+    public static async Task<(IApduProcessor scpProcessor, DataEncryptor dataEncryptor)> InitializeScpAsync(
         IApduProcessor baseProcessor,
-        ScpKeyParams keyParams,
+        ScpKeyParameters keyParams,
         CancellationToken cancellationToken = default)
     {
         try
         {
             return keyParams switch
             {
-                Scp03KeyParams scp03 => await InitScp03Async(baseProcessor, scp03, cancellationToken)
+                Scp03KeyParameters scp03 => await InitScp03Async(baseProcessor, scp03, cancellationToken)
                     .ConfigureAwait(false),
-                Scp11KeyParams scp11 => await InitScp11Async(baseProcessor, scp11, cancellationToken)
+                Scp11KeyParameters scp11 => await InitScp11Async(baseProcessor, scp11, cancellationToken)
                     .ConfigureAwait(false),
                 _ => throw new ArgumentException($"Unsupported ScpKeyParams type: {keyParams.GetType().Name}",
                     nameof(keyParams))
@@ -63,9 +63,9 @@ internal static class ScpInitializer
     /// <summary>
     ///     Initializes an SCP03 session.
     /// </summary>
-    private static async Task<(IApduProcessor, DataEncryptor?)> InitScp03Async(
+    private static async Task<(IApduProcessor, DataEncryptor)> InitScp03Async(
         IApduProcessor baseProcessor,
-        Scp03KeyParams keyParams,
+        Scp03KeyParameters keyParams,
         CancellationToken cancellationToken)
     {
         // Initialize SCP03 session (sends INITIALIZE UPDATE)
@@ -81,7 +81,7 @@ internal static class ScpInitializer
         // Send EXTERNAL AUTHENTICATE with host cryptogram
         // NOTE: Command must have CLA with SM bit already set - MAC is computed over this CLA
         // Matches Java: new Apdu(0x84, 0x82, 0x33, 0, pair.second)
-        var authCommand = new CommandApdu(
+        var authCommand = new ApduCommand(
             CLA_SECURE_MESSAGING,
             INS_EXTERNAL_AUTHENTICATE,
             SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC,
@@ -103,9 +103,9 @@ internal static class ScpInitializer
     /// <summary>
     ///     Initializes an SCP11 session (supports variants a/b/c).
     /// </summary>
-    private static async Task<(IApduProcessor, DataEncryptor?)> InitScp11Async(
+    private static async Task<(IApduProcessor, DataEncryptor)> InitScp11Async(
         IApduProcessor baseProcessor,
-        Scp11KeyParams keyParams,
+        Scp11KeyParameters keyParams,
         CancellationToken cancellationToken)
     {
         // Initialize SCP11 session (performs ECDH key agreement)

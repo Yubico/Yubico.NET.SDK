@@ -51,7 +51,7 @@ public abstract class TestState
     /// <summary>
     ///     Gets the SCP key parameters if SCP is being used, otherwise null.
     /// </summary>
-    public ScpKeyParams? ScpKeyParams { get; protected init; }
+    public ScpKeyParameters? ScpKeyParams { get; protected init; }
 
     /// <summary>
     ///     Gets the device reconnection callback, used after operations that invalidate connections.

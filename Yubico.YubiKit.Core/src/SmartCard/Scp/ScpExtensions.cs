@@ -47,7 +47,7 @@ public static class ScpExtensions
         /// </code>
         /// </example>
         public async Task<ISmartCardProtocol> WithScpAsync(
-            ScpKeyParams keyParams,
+            ScpKeyParameters keyParams,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(protocol);
@@ -63,9 +63,9 @@ public static class ScpExtensions
             if (pcscProtocol.FirmwareVersion is not null)
                 switch (keyParams)
                 {
-                    case Scp03KeyParams when !pcscProtocol.FirmwareVersion.IsAtLeast(5, 3, 0):
+                    case Scp03KeyParameters when !pcscProtocol.FirmwareVersion.IsAtLeast(5, 3, 0):
                         throw new NotSupportedException("SCP03 requires YubiKey firmware 5.3.0 or newer");
-                    case Scp11KeyParams when !pcscProtocol.FirmwareVersion.IsAtLeast(5, 7, 2):
+                    case Scp11KeyParameters when !pcscProtocol.FirmwareVersion.IsAtLeast(5, 7, 2):
                         throw new NotSupportedException("SCP11 requires YubiKey firmware 5.7.2 or newer");
                 }
 

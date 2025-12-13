@@ -42,7 +42,7 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
     /// <summary>
     ///     Transmits a command APDU with SCP encryption and MAC, and processes the response.
     /// </summary>
-    public Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp = true,
+    public Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = true,
         CancellationToken cancellationToken = default)
         => TransmitAsync(command, useScp, true, cancellationToken);
 
@@ -56,7 +56,7 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
     /// <param name="encrypt">Whether to encrypt the command data (only applies if useScp is true).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The response APDU with MAC verified and data decrypted if applicable.</returns>
-    public async Task<ResponseApdu> TransmitAsync(CommandApdu command, bool useScp, bool encrypt,
+    public async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp, bool encrypt,
         CancellationToken cancellationToken)
     {
         // If SCP is not requested, pass through to delegate directly
@@ -85,7 +85,7 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
 
             // Step 4: Create command with FULL length (data + MAC space)
             // This ensures Lc in formatted APDU = data.length + 8
-            CommandApdu scpCommand = new(cla, command.Ins, command.P1, command.P2, macedData.ToArray(), command.Le);
+            ApduCommand scpCommand = new(cla, command.Ins, command.P1, command.P2, macedData.ToArray(), command.Le);
 
             // Step 5: Format the APDU with full length
             ReadOnlyMemory<byte> formattedApdu;
@@ -127,7 +127,7 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
                 $"[SCP DEBUG] Final data with MAC ({macedData.Length} bytes): {Convert.ToHexString(macedData)}");
 
             // Step 8: Create final command with MAC filled in
-            CommandApdu finalCommand = new(cla, command.Ins, command.P1, command.P2, macedData.ToArray(), command.Le);
+            ApduCommand finalCommand = new(cla, command.Ins, command.P1, command.P2, macedData.ToArray(), command.Le);
             Console.WriteLine(
                 $"[SCP DEBUG] Final command: CLA={cla:X2} INS={finalCommand.Ins:X2} P1={finalCommand.P1:X2} P2={finalCommand.P2:X2} Data={Convert.ToHexString(finalCommand.Data.Span)}");
 
@@ -154,11 +154,11 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
                     var decryptedData = State.Decrypt(unmacdData);
                     Console.WriteLine($"[SCP DEBUG] Decrypted data length: {decryptedData.Length}");
                     Console.WriteLine($"[SCP DEBUG] Decrypted data: {Convert.ToHexString(decryptedData)}");
-                    return new ResponseApdu(decryptedData, response.SW);
+                    return new ApduResponse(decryptedData, response.SW);
                 }
 
                 Console.WriteLine($"[SCP DEBUG] NOT decrypting (encrypt={encrypt})");
-                return new ResponseApdu(unmacdData, response.SW);
+                return new ApduResponse(unmacdData, response.SW);
             }
 
             return response;

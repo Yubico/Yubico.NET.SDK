@@ -47,7 +47,7 @@ public class ManagementTestState : TestState
     private ManagementTestState(
         IYubiKey device,
         DeviceInfo deviceInfo,
-        ScpKeyParams? scpKeyParams = null,
+        ScpKeyParameters? scpKeyParams = null,
         Func<Task<IYubiKey>>? reconnectCallback = null)
         : base(device, deviceInfo)
     {
@@ -68,7 +68,7 @@ public class ManagementTestState : TestState
     /// </remarks>
     public static async Task<ManagementTestState> CreateAsync(
         IYubiKey device,
-        ScpKeyParams? scpKeyParams = null,
+        ScpKeyParameters? scpKeyParams = null,
         Func<Task<IYubiKey>>? reconnectCallback = null)
     {
         // Get device information via Management session
@@ -137,7 +137,7 @@ public class ManagementTestState : TestState
     /// </summary>
     private static async Task<DeviceInfo> GetDeviceInfoAsync(
         IYubiKey device,
-        ScpKeyParams? scpKeyParams = null)
+        ScpKeyParameters? scpKeyParams = null)
     {
         using var connection = await device.ConnectAsync<ISmartCardConnection>().ConfigureAwait(false);
         using var mgmt = await ManagementSession<ISmartCardConnection>

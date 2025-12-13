@@ -27,7 +27,7 @@ public sealed class ManagementSession<TConnection>(
     TConnection connection,
     IProtocolFactory<TConnection> protocolFactory,
     ILogger<ManagementSession<TConnection>> logger,
-    ScpKeyParams? scpKeyParams = null)
+    ScpKeyParameters? scpKeyParams = null)
     : ApplicationSession
     where TConnection : IConnection
 {
@@ -56,7 +56,7 @@ public sealed class ManagementSession<TConnection>(
     public static async Task<ManagementSession<TConnection>> CreateAsync(
         TConnection connection,
         ILogger<ManagementSession<TConnection>>? logger = null,
-        ScpKeyParams? scpKeyParams = null,
+        ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
         logger ??= NullLogger<ManagementSession<TConnection>>.Instance;
@@ -93,7 +93,7 @@ public sealed class ManagementSession<TConnection>(
         var hasMoreData = true;
         while (hasMoreData)
         {
-            var apdu = new CommandApdu { Cla = 0, Ins = INS_GET_DEVICE_INFO, P1 = page, P2 = 0 };
+            var apdu = new ApduCommand { Cla = 0, Ins = INS_GET_DEVICE_INFO, P1 = page, P2 = 0 };
             var encodedResult = await TransmitAsync(apdu, cancellationToken).ConfigureAwait(false);
             if (encodedResult.Length - 1 != encodedResult.Span[0])
                 throw new BadResponseException("Invalid length");
@@ -130,7 +130,7 @@ public sealed class ManagementSession<TConnection>(
             throw new ArgumentException("New lock code must be 16 bytes", nameof(newLockCode));
 
         var configBytes = config.GetBytes(reboot, currentLockCode, newLockCode);
-        var apdu = new CommandApdu
+        var apdu = new ApduCommand
         {
             Cla = 0,
             Ins = INS_SET_DEVICE_CONFIG,
@@ -146,7 +146,7 @@ public sealed class ManagementSession<TConnection>(
     {
         EnsureSupports(FeatureDeviceReset);
 
-        await TransmitAsync(new CommandApdu { Cla = 0, Ins = INS_DEVICE_RESET, P1 = 0, P2 = 0 }, cancellationToken)
+        await TransmitAsync(new ApduCommand { Cla = 0, Ins = INS_DEVICE_RESET, P1 = 0, P2 = 0 }, cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -177,7 +177,7 @@ public sealed class ManagementSession<TConnection>(
         throw new NotSupportedException("Protocol not supported");
     }
 
-    private Task<ReadOnlyMemory<byte>> TransmitAsync(CommandApdu command, CancellationToken cancellationToken) =>
+    private Task<ReadOnlyMemory<byte>> TransmitAsync(ApduCommand command, CancellationToken cancellationToken) =>
         _protocol is not ISmartCardProtocol smartCardProtocol
             ? throw new NotSupportedException("Protocol not supported")
             : smartCardProtocol.TransmitAndReceiveAsync(command, cancellationToken);

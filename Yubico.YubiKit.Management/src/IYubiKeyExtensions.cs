@@ -96,7 +96,7 @@ public static class IYubiKeyExtensions
         ///     The session must be disposed by the caller when no longer needed.
         /// </returns>
         public async Task<ManagementSession<ISmartCardConnection>> CreateManagementSessionAsync(
-            ScpKeyParams? scpKeyParams = null,
+            ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {
             // Connection is disposed inside session. User must dispose session.

@@ -39,7 +39,7 @@ public class ScpProtocolAdapterTests
         _fakeScpProcessor.EnqueueResponse(0x90, 0x00, expectedData);
 
         var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null);
-        var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act
         var result = await adapter.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken);
@@ -138,7 +138,7 @@ public class ScpProtocolAdapterTests
         _fakeScpProcessor.EnqueueResponse(0x69, 0x82); // Security status not satisfied
 
         var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null);
-        var command = new CommandApdu(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
+        var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>

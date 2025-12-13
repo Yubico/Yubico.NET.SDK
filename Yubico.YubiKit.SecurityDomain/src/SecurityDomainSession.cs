@@ -20,6 +20,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.Utils;
@@ -36,7 +37,7 @@ public sealed class SecurityDomainSession(
     ISmartCardConnection connection,
     IProtocolFactory<ISmartCardConnection> protocolFactory,
     ILogger<SecurityDomainSession> logger,
-    ScpKeyParams? scpKeyParams = null)
+    ScpKeyParameters? scpKeyParams = null)
     : ApplicationSession
 {
     private ISmartCardProtocol? _baseProtocol;
@@ -45,6 +46,8 @@ public sealed class SecurityDomainSession(
 
     private const byte ClaGlobalPlatform = 0x80;
     private const byte InsGetData = 0xCA;
+    private const byte ClaPutKey = 0x80;
+    private const byte InsPutKey = 0xD8;
     private const byte InsInitializeUpdate = 0x50;
     private const byte InsPerformSecurityOperation = 0x2A;
     private const byte InsInternalAuthenticate = 0x88;
@@ -54,12 +57,18 @@ public sealed class SecurityDomainSession(
 
     private const int TagKeyInformationTemplate = 0xE0;
     private const int TagKeyInformationData = 0xC0;
+    private const byte TagSerialsAllowList = 0x70;
+    private const byte TagSerial = 0x93;
+
+    private const byte TagControlReference = 0xA6;
+    private const byte TagKidKvn = 0x83;
 
     // TLV tags for DeleteKey filter parameters
-    private const int TagKid = 0xD0;          // Key ID (KID)
-    private const int TagKvn = 0xD2;          // Key Version Number (KVN)
+    private const int TagKid = 0xD0; // Key ID (KID)
+    private const int TagKvn = 0xD2; // Key Version Number (KVN)
     private const byte DeleteLastFlag = 0x01; // P2 flag for "delete last"
 
+    private const byte KeyTypeEccPrivateKey = 0xB1;
     private const int KeyTypeEccPublicKey = 0xB0;
     private const int KeyTypeEccKeyParams = 0xF0;
 
@@ -72,7 +81,7 @@ public sealed class SecurityDomainSession(
     public static async Task<SecurityDomainSession> CreateAsync(
         ISmartCardConnection connection,
         ILogger<SecurityDomainSession>? logger = null,
-        ScpKeyParams? scpKeyParams = null,
+        ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
         logger ??= NullLogger<SecurityDomainSession>.Instance;
@@ -82,6 +91,21 @@ public sealed class SecurityDomainSession(
         await session.InitializeAsync(cancellationToken).ConfigureAwait(false);
         return session;
     }
+
+    /// <summary>
+    /// Get the encryptor to encrypt any data for an SCP command.
+    /// <seealso cref="EncryptDataFunc"/>
+    /// </summary>
+    /// <returns>
+    /// An encryptor function that takes the plaintext as a parameter and
+    /// returns the encrypted data.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// If the data encryption key has not been set on the session keys.
+    /// </exception>
+    private DataEncryptor EncryptData => _baseProtocol is ScpProtocolAdapter scpConnection
+        ? scpConnection.GetDataEncryptor()
+        : throw new InvalidOperationException("No data encryptor available for secure connection.");
 
     /// <summary>
     ///     Ensures the Security Domain application is selected and secure messaging is configured if requested.
@@ -124,9 +148,10 @@ public sealed class SecurityDomainSession(
         CancellationToken cancellationToken = default)
     {
         if (expectedResponseLength < 0)
-            throw new ArgumentOutOfRangeException(nameof(expectedResponseLength), "Expected response length cannot be negative.");
+            throw new ArgumentOutOfRangeException(nameof(expectedResponseLength),
+                "Expected response length cannot be negative.");
 
-        var command = new CommandApdu
+        var command = new ApduCommand
         {
             Cla = 0,
             Ins = InsGetData,
@@ -157,22 +182,23 @@ public sealed class SecurityDomainSession(
     ///     Retrieves key metadata exposed by the Security Domain via the key information data object.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public async Task<IReadOnlyDictionary<KeyRef, IReadOnlyDictionary<byte, byte>>> GetKeyInformationAsync(
+    public async Task<IReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>> GetKeyInformationAsync(
         CancellationToken cancellationToken = default)
     {
         var response = await GetDataAsync(TagKeyInformationTemplate, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         if (response.IsEmpty)
-            return new ReadOnlyDictionary<KeyRef, IReadOnlyDictionary<byte, byte>>(new Dictionary<KeyRef, IReadOnlyDictionary<byte, byte>>(0));
+            return new ReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>(
+                new Dictionary<KeyReference, IReadOnlyDictionary<byte, byte>>(0));
 
-        var keyInformation = new Dictionary<KeyRef, IReadOnlyDictionary<byte, byte>>();
+        var keyInformation = new Dictionary<KeyReference, IReadOnlyDictionary<byte, byte>>();
 
         using var tlvList = TlvHelper.Decode(response.Span);
         foreach (var tlv in tlvList)
         {
-            var value = TlvHelper.GetValue(TagKeyInformationData, tlv.GetBytes().Span);
-            var keyRef = new KeyRef(value.Span[0], value.Span[1]);
+            var value = TlvHelper.GetValue(TagKeyInformationData, tlv.AsMemory().Span);
+            var keyRef = new KeyReference(value.Span[0], value.Span[1]);
             var components = new Dictionary<byte, byte>();
 
             var currentValue = value.Span[2..];
@@ -185,7 +211,7 @@ public sealed class SecurityDomainSession(
             keyInformation.Add(keyRef, new ReadOnlyDictionary<byte, byte>(components));
         }
 
-        return new ReadOnlyDictionary<KeyRef, IReadOnlyDictionary<byte, byte>>(keyInformation);
+        return new ReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>(keyInformation);
     }
 
     /// <summary>
@@ -195,7 +221,7 @@ public sealed class SecurityDomainSession(
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The data encryptor derived from the newly established secure channel, if available.</returns>
     public Task<DataEncryptor?> AuthenticateAsync(
-        ScpKeyParams scpKeyParams,
+        ScpKeyParameters scpKeyParams,
         CancellationToken cancellationToken = default) =>
         throw new NotImplementedException();
 
@@ -215,7 +241,7 @@ public sealed class SecurityDomainSession(
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A list of certificates where the leaf certificate appears last.</returns>
     public Task<IReadOnlyList<X509Certificate2>> GetCertificatesAsync(
-        KeyRef keyReference,
+        KeyReference keyReference,
         CancellationToken cancellationToken = default) =>
         throw new NotImplementedException();
 
@@ -226,24 +252,12 @@ public sealed class SecurityDomainSession(
     /// <param name="includeKlcc">Whether to include Key Loading Card Certificate identifiers.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A dictionary keyed by key reference containing identifier payloads.</returns>
-    public Task<IReadOnlyDictionary<KeyRef, ReadOnlyMemory<byte>>> GetSupportedCaIdentifiersAsync(
+    public Task<IReadOnlyDictionary<KeyReference, ReadOnlyMemory<byte>>> GetSupportedCaIdentifiersAsync(
         bool includeKloc,
         bool includeKlcc,
         CancellationToken cancellationToken = default) =>
         throw new NotImplementedException();
-
-    /// <summary>
-    ///     Stores the CA issuer subject key identifier for the given key reference.
-    /// </summary>
-    /// <param name="keyReference">Key reference identifying the CA issuer record.</param>
-    /// <param name="subjectKeyIdentifier">Subject key identifier bytes to persist.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public Task StoreCaIssuerAsync(
-        KeyRef keyReference,
-        ReadOnlyMemory<byte> subjectKeyIdentifier,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
-
+    
     /// <summary>
     ///     Stores a certificate bundle for the specified key reference.
     /// </summary>
@@ -251,40 +265,8 @@ public sealed class SecurityDomainSession(
     /// <param name="certificates">Certificates to persist, with the leaf certificate last.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public Task StoreCertificatesAsync(
-        KeyRef keyReference,
+        KeyReference keyReference,
         IReadOnlyList<X509Certificate2> certificates,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
-
-    /// <summary>
-    ///     Persists the allowlist of certificate serial numbers associated with the provided key reference.
-    /// </summary>
-    /// <param name="keyReference">Key reference whose allowlist is being updated.</param>
-    /// <param name="serials">Collection of serial numbers (hex strings) to store.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public Task StoreAllowlistAsync(
-        KeyRef keyReference,
-        IReadOnlyCollection<string> serials,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
-
-    /// <summary>
-    ///     Removes all entries from the allowlist tied to the specified key reference.
-    /// </summary>
-    /// <param name="keyReference">Key reference whose allowlist should be cleared.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public Task ClearAllowListAsync(
-        KeyRef keyReference,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
-
-    /// <summary>
-    ///     Executes a STORE DATA command with the supplied TLV encoded payload.
-    /// </summary>
-    /// <param name="data">Pre-encoded BER-TLV data to transmit.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public Task StoreDataAsync(
-        ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default) =>
         throw new NotImplementedException();
 
@@ -296,40 +278,12 @@ public sealed class SecurityDomainSession(
     /// <param name="replaceKvn">Optional key version number to replace.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public Task PutKeyAsync(
-        KeyRef keyReference,
+        KeyReference keyReference,
         StaticKeys staticKeys,
         int replaceKvn = 0,
         CancellationToken cancellationToken = default) =>
         throw new NotImplementedException();
-
-    /// <summary>
-    ///     Imports an SCP11 private key into the Security Domain.
-    /// </summary>
-    /// <param name="keyReference">Key reference that will own the private key.</param>
-    /// <param name="privateKey">Private key material to load.</param>
-    /// <param name="replaceKvn">Optional key version number to replace.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public Task PutKeyAsync(
-        KeyRef keyReference,
-        ECDiffieHellman privateKey,
-        int replaceKvn = 0,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
-
-    /// <summary>
-    ///     Imports an SCP11 public key into the Security Domain.
-    /// </summary>
-    /// <param name="keyReference">Key reference that will own the public key.</param>
-    /// <param name="publicKey">Public key material to load.</param>
-    /// <param name="replaceKvn">Optional key version number to replace.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public Task PutKeyAsync(
-        KeyRef keyReference,
-        ECDiffieHellmanPublicKey publicKey,
-        int replaceKvn = 0,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
-
+        
     /// <summary>
     ///     Deletes keys matching the supplied reference.
     /// </summary>
@@ -337,20 +291,13 @@ public sealed class SecurityDomainSession(
     /// <param name="deleteLast">Whether the last remaining key may be deleted.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public Task DeleteKeyAsync(
-        KeyRef keyReference,
+        KeyReference keyReference,
         bool deleteLast = false,
         CancellationToken cancellationToken = default)
     {
-        EnsureInitializedProtocol();
-
         var (kid, kvn) = NormalizeDeletePolicy(keyReference);
-
-        logger.LogDebug("Deleting keys matching {KeyRef}{Suffix}",
-            keyReference, deleteLast ? " (allow delete last)" : string.Empty);
-
         var payload = EncodeDeleteFilter(kid, kvn);
-
-        var command = new CommandApdu
+        var command = new ApduCommand
         {
             Cla = ClaGlobalPlatform,
             Ins = InsDelete,
@@ -359,16 +306,19 @@ public sealed class SecurityDomainSession(
             Data = payload
         };
 
-        return TransmitDeleteAsync(command, cancellationToken);
+        logger.LogDebug("Deleting keys matching {KeyRef}{Suffix}",
+            keyReference, deleteLast ? " (allow delete last)" : string.Empty);
+
+        return TransmitAsync(command, cancellationToken);
     }
 
-    private static (byte Kid, byte Kvn) NormalizeDeletePolicy(KeyRef keyRef)
+    private static (byte Kid, byte Kvn) NormalizeDeletePolicy(KeyReference keyReference)
     {
-        var kid = keyRef.Kid;
-        var kvn = keyRef.Kvn;
+        var kid = keyReference.Kid;
+        var kvn = keyReference.Kvn;
 
         if (kid == 0 && kvn == 0)
-            throw new ArgumentException("At least one of KID or KVN must be non-zero", nameof(keyRef));
+            throw new ArgumentException("At least one of KID or KVN must be non-zero", nameof(keyReference));
 
         // SCP03 keys (KIDs 0x01, 0x02, 0x03) may only be deleted by KVN.
         // If KVN is provided, zero KID (wildcard).
@@ -394,24 +344,6 @@ public sealed class SecurityDomainSession(
         return TlvHelper.EncodeDictionary(dict);
     }
 
-    private async Task TransmitDeleteAsync(CommandApdu command, CancellationToken cancellationToken)
-    {
-        try
-        {
-            _ = await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
-            logger.LogInformation("Keys deleted");
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Delete keys command failed");
-            throw;
-        }
-    }
-
     /// <summary>
     ///     Generates a new SCP11 key pair on the device and returns the public point.
     /// </summary>
@@ -419,24 +351,19 @@ public sealed class SecurityDomainSession(
     /// <param name="replaceKvn">Optional key version number to replace.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The uncompressed EC public point (0x04 || X || Y).</returns>
-    public Task<byte[]> GenerateEcKeyAsync(
-        KeyRef keyReference,
+    public async Task<ECPublicKey> GenerateKeyAsync(
+        KeyReference keyReference,
         byte replaceKvn = 0,
-        CancellationToken cancellationToken = default) =>
-        GenerateEcKeyInternalAsync(keyReference, replaceKvn, cancellationToken);
-
-    private async Task<byte[]> GenerateEcKeyInternalAsync(
-        KeyRef keyReference,
-        byte replaceKvn,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         if (replaceKvn == 0)
             logger.LogDebug("Generating EC key for {KeyRef}", keyReference);
         else
-            logger.LogDebug("Generating EC key for {KeyRef}, replacing KVN=0x{ReplaceKvn:X2}", keyReference, replaceKvn);
+            logger.LogDebug("Generating EC key for {KeyRef}, replacing KVN=0x{ReplaceKvn:X2}", keyReference,
+                replaceKvn);
 
         Span<byte> parameters = stackalloc byte[3];
-        parameters[0] = (byte)KeyTypeEccKeyParams;
+        parameters[0] = KeyTypeEccKeyParams;
         parameters[1] = 0x01;
         parameters[2] = 0x00; // SECP256R1 curve indicator
 
@@ -444,7 +371,7 @@ public sealed class SecurityDomainSession(
         commandData[0] = keyReference.Kvn;
         parameters.CopyTo(commandData.AsSpan(1));
 
-        var command = new CommandApdu
+        var command = new ApduCommand
         {
             Cla = ClaGlobalPlatform,
             Ins = InsGenerateKey,
@@ -472,15 +399,222 @@ public sealed class SecurityDomainSession(
         if (response.IsEmpty)
             throw new BadResponseException("Generate EC key response was empty.");
 
-        using var tlvs = TlvHelper.Decode(response.Span);
-        foreach (var tlv in tlvs.AsSpan())
+        var publicPoint = TlvHelper.GetValue(KeyTypeEccPublicKey, response.Span);
+        return ECPublicKey.CreateFromValue(publicPoint, KeyType.ECP256);
+    }
+    
+    /// <summary>
+    /// Puts an EC public key onto the YubiKey using the Security Domain.
+    /// </summary>
+    /// <param name="keyReference">The key reference identifying where to store the key.</param>
+    /// <param name="publicKey">The EC public key parameters to store.</param>
+    /// <param name="replaceKvn">The key version number to replace, or 0 for a new key (Default value is 0).</param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="ArgumentException">Thrown when the public key is not of type SECP256R1.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the new key set's checksum failed to verify, or some other SCP related error
+    /// described in the exception message.</exception>
+    public async Task PutKeyAsync(KeyReference keyReference, ECPublicKey publicKey, int replaceKvn = 0, CancellationToken cancellationToken = default)
         {
-            if (tlv.Tag == KeyTypeEccPublicKey)
-                return tlv.Value.ToArray();
+            logger.LogInformation("Importing SCP11 public key into KeyReference: {KeyReference}", keyReference);
+
+            var pkParams = publicKey.Parameters;
+            if (pkParams.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
+            {
+                throw new ArgumentException("Public key must be of type NIST P-256");
+            }
+            
+            var buffer = new ArrayBufferWriter<byte>();
+            try
+            {
+                buffer.Write([keyReference.Kvn]);
+
+                // Write the EC public key
+                var publicKeyTlvData = new Tlv(KeyTypeEccPublicKey, publicKey.PublicPoint.Span).AsMemory();
+                buffer.Write(publicKeyTlvData.ToArray());
+
+                // Write the EC parameters
+                var paramsTlv = new Tlv(KeyTypeEccKeyParams, stackalloc byte[1]).AsMemory();
+                buffer.Write(paramsTlv.ToArray());
+                buffer.Write(new byte[] { 0 });
+
+                // Create and send the command
+                var command = new ApduCommand(ClaPutKey, InsPutKey, (byte)replaceKvn, keyReference.Kid,
+                    buffer.WrittenMemory);
+                var response = await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+
+                // Get and validate the response
+                Span<byte> expectedResponseData = new[] { keyReference.Kvn };
+                ValidateCheckSum(expectedResponseData, response.Span);
+
+                logger.LogInformation("Successfully put public key for KeyReference: {KeyReference}", keyReference);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to put public key for KeyReference: {KeyReference}", keyReference);
+                throw;
+            }
+            finally
+            {
+                buffer.Clear();
+            }
         }
 
-        throw new BadResponseException(
-            $"Generate EC key response missing public key tag 0x{KeyTypeEccPublicKey:X2}.");
+    /// <summary>
+    /// Puts an EC private key onto the YubiKey using the Security Domain.
+    /// </summary>
+    /// <param name="keyReference">The key reference identifying where to store the key.</param>
+    /// <param name="privateKey">The EC private key parameters to store.</param>
+    /// <param name="replaceKvn">The key version number to replace, or 0 for a new key (Default value is 0).</param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="ArgumentException">Thrown when the private key is not of type NIST P-256.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the new key set's checksum failed to verify, or some other SCP related error
+    /// described in the exception message.</exception>
+    public async Task PutKeyAsync(
+        KeyReference keyReference,
+        ECPrivateKey privateKey,
+        int replaceKvn = 0,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Importing SCP11 private key into Key Reference: {KeyReference}", keyReference);
+
+        var parameters = privateKey.Parameters;
+        if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
+        {
+            throw new ArgumentException("Private key must be of type NIST P-256");
+        }
+
+        var buffer = new ArrayBufferWriter<byte>();
+        try
+        {
+            buffer.Write([keyReference.Kvn]);
+
+            var encryptedKey = EncryptData(parameters.D.AsSpan());
+            var encryptedKeyBytes = new Tlv(KeyTypeEccPrivateKey, encryptedKey).AsMemory();
+            buffer.Write(encryptedKeyBytes.Span);
+
+            var paramsTlv = new Tlv(KeyTypeEccKeyParams, [0x00]).AsMemory();
+            buffer.Write(paramsTlv.Span);
+            buffer.Write(new byte[] { 0 });
+
+            var command = new ApduCommand(ClaPutKey, InsPutKey, (byte)replaceKvn, keyReference.Kid,
+                buffer.WrittenMemory);
+            var response = await TransmitAsync(command, cancellationToken);
+
+            Span<byte> expectedResponseData = new[] { keyReference.Kvn };
+            ValidateCheckSum(response.Span, expectedResponseData);
+
+            logger.LogInformation("Successfully put private key for Key Reference: {KeyReference}", keyReference);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to put private key for Key Reference: {KeyReference}", keyReference);
+            throw;
+        }
+        finally
+        {
+            buffer.Clear();
+        }
+    }
+
+    /// <summary>
+    /// Stores an allowlist of certificate serial numbers for a specified key reference using the GlobalPlatform STORE DATA command.
+    /// </summary>
+    /// <remarks>
+    /// This method requires off-card entity verification. If an allowlist is not stored, any
+    /// certificate signed by the CA can be used.
+    /// <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
+    /// </remarks>
+    /// <param name="keyReference">A reference to the key for which the allowlist will be stored.</param>
+    /// <param name="serials">The list of certificate serial numbers (in hexadecimal string format) to be stored in the allowlist for the given <see cref="KeyReference"/>.</param>
+    /// <exception cref="ArgumentException">Thrown when a serial number cannot be encoded properly.</exception>
+    public async Task StoreAllowlistAsync(KeyReference keyReference, IReadOnlyCollection<string> serials, CancellationToken cancellationToken = default)
+    {
+        logger.LogDebug("Storing allow list (KeyReference: {KeyReference})", keyReference);
+
+        var buffer = new ArrayBufferWriter<byte>();
+        foreach (var serial in serials)
+        {
+            var serialTlvBytes = new Tlv(TagSerial, Convert.FromHexString(serial)).AsMemory();
+            buffer.Write(serialTlvBytes.Span);
+        }
+
+        var serialsDataTl = TlvHelper.EncodeMany(
+            new Tlv(TagControlReference, new Tlv(TagKidKvn, keyReference.AsBytes.Span).AsMemory().Span),
+            new Tlv(TagSerialsAllowList, buffer.WrittenSpan)
+        );
+
+        await StoreDataAsync(serialsDataTl, cancellationToken).ConfigureAwait(false);
+
+        logger.LogInformation("Allow list stored (KeyReference: {KeyReference})", keyReference);
+    }
+
+    /// <summary>
+    /// Clears the allow list for the given <see cref="KeyReference"/>
+    /// </summary>
+    /// <seealso cref="StoreAllowlistAsync"/>
+    /// <param name="keyReference">The key reference that holds the allow list</param>
+    public Task ClearAllowListAsync(KeyReference keyReference) => StoreAllowlistAsync(keyReference, []);
+
+    /// <summary>
+    /// Stores data in the Security Domain or targeted Application on the YubiKey using the GlobalPlatform STORE DATA command.
+    /// </summary>
+    /// <remarks>
+    /// The STORE DATA command is used to transfer data to either the Security Domain itself or to an Application 
+    /// being personalized. The data must be formatted as BER-TLV structures according to ISO 8825.
+    /// <para>
+    /// This implementation:
+    /// - Uses a single block transfer (P1.b8=1 indicating last block)
+    /// - Requires BER-TLV formatted data (P1.b5-b4=10)
+    /// - Does not provide encryption information (P1.b7-b6=00)
+    /// </para>
+    /// <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
+    /// The <see cref="SecurityDomainSession"/> makes use of this method to store data in the Security Domain. Such as the <see cref="StoreCaIssuerAsync"/>, <see cref="StoreCertificates"/>, <see cref="StoreAllowlist"/>, and other data.
+    /// </remarks>
+    /// <param name="data">
+    /// The data to be stored, which must be formatted as BER-TLV structures according to ISO 8825.
+    /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when no secure connection is available or the security context is invalid.
+    /// </exception>
+    /// <exception cref="SecureChannelException">Thrown when there was an SCP error, described in the exception message.</exception>
+    public async Task StoreDataAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Storing data with length:{Length}", data.Length);
+
+        var command = new ApduCommand(0x00, 0xE2, 0x90, 0x00, data);
+        await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Store the SKI (Subject Key Identifier) for the CA of a given key.
+    /// Requires off-card entity verification.
+    /// </summary>
+    /// <param name="keyReference">A reference to the key for which to store the CA issuer.</param>
+    /// <param name="ski">The Subject Key Identifier to store.</param>
+    /// <param name="cancellationToken"></param>
+    public async Task StoreCaIssuerAsync(KeyReference keyReference, ReadOnlyMemory<byte> ski, CancellationToken cancellationToken = default)
+    {
+        logger.LogDebug("Storing CA issuer SKI (KeyReference: {KeyReference})", keyReference);
+
+        byte klcc = keyReference.Kid switch //
+        {
+            ScpKid.SCP11a or ScpKid.SCP11b or ScpKid.SCP11c => 1,
+            _ => 0
+        };
+
+        // Create and serialize data
+        var caIssuerData = new Tlv(
+            TagControlReference, TlvHelper.EncodeMany(
+                new Tlv(ClaGlobalPlatform, [klcc]),
+                new Tlv(0x42, ski.Span), // GlobalPlatform tag for CA issuer SKI
+                new Tlv(TagKidKvn, keyReference.AsBytes.Span)).Span);
+
+        // Send store data command
+        await StoreDataAsync(caIssuerData.AsMemory()).ConfigureAwait(false);
+
+        logger.LogInformation("CA issuer SKI stored (KeyReference: {KeyReference})", keyReference);
     }
 
     /// <summary>
@@ -545,25 +679,25 @@ public sealed class SecurityDomainSession(
     /// <summary>
     ///     Centralized APDU transmit helper that ensures the protocol is initialized.
     /// </summary>
-    private Task<ReadOnlyMemory<byte>> TransmitAsync(CommandApdu command, CancellationToken cancellationToken)
+    private Task<ReadOnlyMemory<byte>> TransmitAsync(ApduCommand command, CancellationToken cancellationToken)
     {
         EnsureInitializedProtocol();
         return _protocol!.TransmitAndReceiveAsync(command, cancellationToken);
     }
 
-    private bool TryGetResetParameters(KeyRef keyReference, out byte instruction, out KeyRef overrideKeyRef)
+    private bool TryGetResetParameters(KeyReference keyReference, out byte instruction, out KeyReference overrideKeyReference)
     {
-        overrideKeyRef = keyReference;
+        overrideKeyReference = keyReference;
         instruction = 0;
 
         switch (keyReference.Kid)
         {
-            case ScpKid.SCP03:
-                overrideKeyRef = new KeyRef(0x00, 0x00);
+            case ScpKid.SCP03: // SCP03_1
+                overrideKeyReference = new KeyReference(0x00, 0x00);
                 instruction = InsInitializeUpdate;
                 return true;
-            case 0x02:
-            case 0x03:
+            case 0x02: // SCP03_2
+            case 0x03: // SCP03_3
                 return false;
             case ScpKid.SCP11a:
             case ScpKid.SCP11c:
@@ -577,8 +711,9 @@ public sealed class SecurityDomainSession(
                 return true;
         }
     }
+    
 
-    private async Task BlockKeyAsync(byte instruction, KeyRef keyReference, CancellationToken cancellationToken)
+    private async Task BlockKeyAsync(byte instruction, KeyReference keyReference, CancellationToken cancellationToken)
     {
         for (var attempt = 1; attempt <= ResetAttemptLimit; attempt++)
         {
@@ -624,7 +759,7 @@ public sealed class SecurityDomainSession(
 
     private async Task<short> TransmitResetAttemptAsync(
         byte instruction,
-        KeyRef keyReference,
+        KeyReference keyReference,
         CancellationToken cancellationToken)
     {
         const int HeaderLength = 5; // CLA, INS, P1, P2, Lc
@@ -661,7 +796,15 @@ public sealed class SecurityDomainSession(
                 ArrayPool<byte>.Shared.Return(rented, clearArray: true);
         }
     }
-
+    
+    private static void ValidateCheckSum(ReadOnlySpan<byte> expected, ReadOnlySpan<byte> actual)
+    {
+        if (!CryptographicOperations.FixedTimeEquals(expected, actual))
+        {
+            throw new InvalidOperationException("ExceptionMessages.ChecksumError");
+        }
+    }
+    
     /// <summary>
     ///     Disposes the session and releases managed resources associated with the underlying protocol.
     /// </summary>

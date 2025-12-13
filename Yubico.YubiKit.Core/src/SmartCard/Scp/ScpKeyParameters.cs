@@ -17,13 +17,13 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// <summary>
 ///     Base interface for SCP key parameters used during authentication.
 /// </summary>
-public abstract record ScpKeyParams : IDisposable
+public abstract record ScpKeyParameters : IDisposable
 {
     /// <summary>
     ///     Gets the identifier of the SCP key to target on the YubiKey.
     /// </summary>
     /// <returns>The key reference.</returns>
-    public KeyRef KeyRef { get; protected init; }
+    public KeyReference KeyReference { get; protected init; }
 
     public abstract void Dispose();
 }

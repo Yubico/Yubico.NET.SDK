@@ -20,10 +20,10 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 ///     Decorator that wraps an ISmartCardProtocol with SCP (Secure Channel Protocol) functionality.
 ///     All APDU transmissions are encrypted and MACed through the SCP processor.
 /// </summary>
-internal class ScpProtocolAdapter : ISmartCardProtocol
+public class ScpProtocolAdapter : ISmartCardProtocol
 {
     private readonly ISmartCardProtocol _baseProtocol;
-    private readonly DataEncryptor? _dataEncryptor;
+    private readonly DataEncryptor _dataEncryptor;
     private readonly IApduProcessor _scpProcessor;
 
     /// <summary>
@@ -35,7 +35,7 @@ internal class ScpProtocolAdapter : ISmartCardProtocol
     public ScpProtocolAdapter(
         ISmartCardProtocol baseProtocol,
         IApduProcessor scpProcessor,
-        DataEncryptor? dataEncryptor)
+        DataEncryptor dataEncryptor)
     {
         _baseProtocol = baseProtocol;
         _scpProcessor = scpProcessor;
@@ -45,12 +45,12 @@ internal class ScpProtocolAdapter : ISmartCardProtocol
     /// <summary>
     ///     Gets the data encryptor for this SCP session.
     /// </summary>
-    public DataEncryptor? GetDataEncryptor() => _dataEncryptor;
+    public DataEncryptor GetDataEncryptor() => _dataEncryptor;
 
     #region ISmartCardProtocol Implementation
 
     public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-        CommandApdu command,
+        ApduCommand command,
         CancellationToken cancellationToken = default)
     {
         var response = await _scpProcessor.TransmitAsync(command, true, cancellationToken)
@@ -72,7 +72,7 @@ internal class ScpProtocolAdapter : ISmartCardProtocol
         const byte P2_SELECT = 0x00;
 
         var response = await _scpProcessor.TransmitAsync(
-                new CommandApdu { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId },
+                new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId },
                 false,
                 cancellationToken)
             .ConfigureAwait(false);

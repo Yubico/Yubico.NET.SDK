@@ -18,22 +18,22 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 ///     SCP key parameters for SCP03 authentication.
 ///     SCP03 uses three keys (enc, mac, dek) with shared KVN but different KIDs.
 /// </summary>
-public sealed record Scp03KeyParams : ScpKeyParams
+public sealed record Scp03KeyParameters : ScpKeyParameters
 {
     private bool _disposed;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="Scp03KeyParams" /> record.
+    ///     Initializes a new instance of the <see cref="Scp03KeyParameters" /> record.
     /// </summary>
-    /// <param name="keyRef">The key reference (KID must be 0-3 for SCP03).</param>
+    /// <param name="keyReference">The key reference (KID must be 0-3 for SCP03).</param>
     /// <param name="keys">The static key material.</param>
     /// <exception cref="ArgumentException">Thrown if KID is not in the range 0-3.</exception>
     /// <exception cref="ArgumentNullException">Thrown if keys is null.</exception>
-    public Scp03KeyParams(KeyRef keyRef, StaticKeys keys)
+    public Scp03KeyParameters(KeyReference keyReference, StaticKeys keys)
     {
-        if (keyRef.Kid > 3) throw new ArgumentException($"SCP03 KID must be 0-3, got {keyRef.Kid}", nameof(keyRef));
+        if (keyReference.Kid > 3) throw new ArgumentException($"SCP03 KID must be 0-3, got {keyReference.Kid}", nameof(keyReference));
 
-        KeyRef = keyRef;
+        KeyReference = keyReference;
         Keys = keys ?? throw new ArgumentNullException(nameof(keys));
     }
 
@@ -42,7 +42,7 @@ public sealed record Scp03KeyParams : ScpKeyParams
     /// </summary>
     public StaticKeys Keys { get; }
 
-    public static Scp03KeyParams Default => new(KeyRef.Default, StaticKeys.GetDefaultKeys());
+    public static Scp03KeyParameters Default => new(KeyReference.Default, StaticKeys.GetDefaultKeys());
     public override void Dispose()
     {
         if (_disposed)

@@ -139,7 +139,7 @@ public class ManagementTests : IntegrationTestBase
 
         // Create SCP03 key parameters using default keys
         // Default SCP03 keys: 0x404142434445464748494A4B4C4D4E4F
-        using var scpKeyParams = Scp03KeyParams.Default;
+        using var scpKeyParams = Scp03KeyParameters.Default;
 
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
 
@@ -169,8 +169,8 @@ public class ManagementTests : IntegrationTestBase
         for (var i = 0; i < 16; i++) wrongKeyBytes[i] = (byte)(0xFF - i); // Different from default
 
         using var staticKeys = new StaticKeys(wrongKeyBytes, wrongKeyBytes, wrongKeyBytes);
-        var keyRef = new KeyRef(0x01, 0xFF);
-        var scpKeyParams = new Scp03KeyParams(keyRef, staticKeys);
+        var keyRef = new KeyReference(0x01, 0xFF);
+        var scpKeyParams = new Scp03KeyParameters(keyRef, staticKeys);
 
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
 

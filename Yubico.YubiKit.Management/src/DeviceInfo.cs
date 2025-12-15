@@ -166,7 +166,8 @@ public readonly record struct DeviceInfo
             return (defaultFirmwareVersion,
                 new VersionQualifier(defaultFirmwareVersion, VersionQualifierType.Final, 0));
 
-        if (versionQualifierBytes.Length != 0x0E) throw new ArgumentException("Invalid data length.");
+        if (versionQualifierBytes.Length != 0x0E)
+            throw new ArgumentException("Invalid data length.");
 
         const byte tagVersion = 0x01;
         const byte tagType = 0x02;

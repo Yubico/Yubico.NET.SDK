@@ -46,7 +46,7 @@ public readonly record struct DeviceInfo
     public required bool IsSky { get; init; }
     public required bool IsFips { get; init; }
     public required FormFactor FormFactor { get; init; }
-    public required int SerialNumber { get; init; }
+    public int? SerialNumber { get; init; }
     public required bool IsLocked { get; init; }
     public required DeviceCapabilities UsbEnabled { get; init; }
     public required DeviceCapabilities UsbSupported { get; init; }
@@ -74,9 +74,11 @@ public readonly record struct DeviceInfo
     {
         var tlvDict = tlvs.ToDictionary(tlv => tlv.Tag, tlv => tlv.Value);
 
-        var isLocked = tlvDict.GetSpan(TAG_CONFIG_LOCKED)[0] == 1;
-        var serialNumber = BinaryPrimitives.ReadInt32BigEndian(tlvDict.GetSpan(TAG_SERIAL_NUMBER));
+        int? serialNumber = null;
+        if (tlvDict.TryGetValue(TAG_SERIAL_NUMBER, out var snBytes))
+            serialNumber = BinaryPrimitives.ReadInt32BigEndian(snBytes.Span);
 
+        var isLocked = tlvDict.GetSpan(TAG_CONFIG_LOCKED)[0] == 1;
         int formFactorTagData = tlvDict.GetSpan(TAG_FORMFACTOR)[0];
         var isFips = (formFactorTagData & 0x80) != 0;
         var isSky = (formFactorTagData & 0x40) != 0;
@@ -171,7 +173,6 @@ public readonly record struct DeviceInfo
         const byte tagIteration = 0x03;
 
         var data = TlvHelper.DecodeDictionary(versionQualifierBytes.Span);
-
         if (!data.TryGetSpan(tagVersion, out var firmwareVersionBytes))
             throw new ArgumentException("Missing TLV field: TAG_VERSION.");
         if (!data.TryGetSpan(tagType, out var versionTypeBytes))

@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Tests.Shared;
 /// <remarks>
 ///     <para>
 ///         This class wraps an <see cref="IYubiKey" /> and its <see cref="Management.DeviceInfo" />
-///         for use with xUnit Theory tests via <see cref="YubiKeyTheoryAttribute" />.
+///         for use with xUnit Theory tests via <see cref="Yubico.YubiKit.Tests.Shared.Infrastructure" />.
 ///     </para>
 ///     <para>
 ///         The <see cref="ToString" /> method provides a friendly display name for test output:
@@ -84,7 +84,7 @@ public class YubiKeyTestState : IXunitSerializable
     ///     Gets the device serial number.
     ///     Convenience property for <c>Info.SerialNumber</c>.
     /// </summary>
-    public int SerialNumber => DeviceInfo.SerialNumber;
+    public int? SerialNumber => DeviceInfo.SerialNumber;
 
     /// <summary>
     ///     Gets whether the device supports USB transport.
@@ -185,7 +185,7 @@ internal static class YubiKeyDeviceCache
     {
         lock (s_lock)
         {
-            s_devices[state.SerialNumber] = state;
+            s_devices[state.SerialNumber.GetValueOrDefault()] = state; // TODO change to ReaderName/ DeviceId
         }
     }
 

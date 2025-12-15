@@ -22,13 +22,9 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 ///     Centralized infrastructure for YubiKey integration tests.
 ///     Provides shared static instances of logger, allow list, device discovery, and filtering logic.
 /// </summary>
-/// <remarks>
-///     This class is used by <see cref="YubiKeyTheoryDiscoverer" />
-///     to ensure consistent behavior and avoid code duplication.
-/// </remarks>
 internal static class YubiKeyTestInfrastructure
 {
-    private static readonly ILoggerFactory s_loggerFactory = LoggerFactory.Create(builder =>
+    private static readonly ILoggerFactory LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
     {
         builder
             .AddConsole()
@@ -44,7 +40,7 @@ internal static class YubiKeyTestInfrastructure
     /// </remarks>
     public static AllowList AllowList { get; } = new(
         new AppSettingsAllowListProvider(),
-        s_loggerFactory.CreateLogger<AllowList>());
+        LoggerFactory.CreateLogger<AllowList>());
 
     /// <summary>
     ///     Gets all authorized YubiKey devices discovered during test run initialization.
@@ -256,29 +252,27 @@ internal static class YubiKeyTestInfrastructure
 
             foreach (var device in allDevices)
             {
-                var serial = AllowList.GetSerialNumberAsync(device).GetAwaiter().GetResult();
-
-                if (serial.HasValue)
+                var deviceInfo = device.GetDeviceInfoAsync().GetAwaiter().GetResult();
+                if (deviceInfo.SerialNumber.HasValue)
                 {
-                    if (AllowList.IsDeviceAllowed(serial.Value))
+                    if (AllowList.IsDeviceAllowed(deviceInfo.SerialNumber.Value))
                     {
                         // Get device info
-                        var info = device.GetDeviceInfoAsync().GetAwaiter().GetResult();
-                        var testDevice = new YubiKeyTestState(device, info);
+                        var testDevice = new YubiKeyTestState(device, deviceInfo);
                         authorizedDevices.Add(testDevice);
 
                         // Add to cache for deserialization
                         YubiKeyDeviceCache.AddDevice(testDevice);
 
                         Console.WriteLine(
-                            $"[YubiKey Infrastructure] Device SN:{serial.Value} authorized " +
-                            $"(FW:{info.FirmwareVersion}, {info.FormFactor})");
+                            $"[YubiKey Infrastructure] Device SN:{deviceInfo.SerialNumber.Value} authorized " +
+                            $"(FW:{deviceInfo.FirmwareVersion}, {deviceInfo.FormFactor})");
                     }
                     else
                     {
                         filteredCount++;
                         Console.WriteLine(
-                            $"[YubiKey Infrastructure] Device SN:{serial.Value} FILTERED (not in allow list)");
+                            $"[YubiKey Infrastructure] Device SN:{deviceInfo.SerialNumber.Value} FILTERED (not in allow list)");
                     }
                 }
                 else

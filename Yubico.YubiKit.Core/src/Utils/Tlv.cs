@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Buffers.Binary;
-using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Security.Cryptography;
 
@@ -25,9 +24,9 @@ namespace Yubico.YubiKit.Core.Utils;
 /// </summary>
 public sealed class Tlv : IDisposable
 {
-    private readonly byte[] _bytes;
-    private readonly int _offset;
+    private byte[]? _bytes;
     private bool _disposed;
+    private int _offset;
 
     /// <summary>
     ///     Creates a new TLV (Tag-Length-Value) object with the specified tag and value.
@@ -47,47 +46,7 @@ public sealed class Tlv : IDisposable
 
         Tag = tag;
         Length = value.Length;
-        var tagByteCount = GetMinimalByteCount((uint)Tag);
-        int lengthFieldByteCount;
-        var bytesForLengthValue = 0;
-
-        var isShortFormLength = Length < 0x80;
-        if (isShortFormLength)
-        {
-            lengthFieldByteCount = 1;
-        }
-        else
-        {
-            bytesForLengthValue = GetMinimalByteCount((uint)Length);
-            lengthFieldByteCount = 1 + bytesForLengthValue;
-        }
-
-        var totalTlvSize = tagByteCount + lengthFieldByteCount + Length;
-        _bytes = new byte[totalTlvSize];
-        var buffer = _bytes.AsSpan();
-        var writePosition = 0;
-
-        // Write the Tag value
-        WriteMinimalBigEndianBytes(buffer.Slice(writePosition, tagByteCount), (uint)Tag);
-        writePosition += tagByteCount;
-
-        // Write the Length field
-        if (isShortFormLength)
-        {
-            buffer[writePosition] = (byte)Length;
-            writePosition++;
-        }
-        else
-        {
-            buffer[writePosition] = (byte)(0x80 | bytesForLengthValue);
-            writePosition++;
-            WriteMinimalBigEndianBytes(buffer.Slice(writePosition, bytesForLengthValue), (uint)Length);
-            writePosition += bytesForLengthValue;
-        }
-
-        // Write the Value
-        _offset = writePosition;
-        value.CopyTo(buffer[writePosition..]);
+        Encode(value);
     }
 
     /// <summary>
@@ -122,6 +81,51 @@ public sealed class Tlv : IDisposable
 
     #endregion
 
+    private void Encode(ReadOnlySpan<byte> value)
+    {
+        var tagByteCount = GetMinimalByteCount((uint)Tag);
+        int lengthFieldByteCount;
+        var bytesForLengthValue = 0;
+
+        var isShortFormLength = Length < 0x80;
+        if (isShortFormLength)
+        {
+            lengthFieldByteCount = 1;
+        }
+        else
+        {
+            bytesForLengthValue = GetMinimalByteCount((uint)Length);
+            lengthFieldByteCount = 1 + bytesForLengthValue;
+        }
+
+        var totalTlvSize = tagByteCount + lengthFieldByteCount + Length;
+        _bytes = new byte[totalTlvSize];
+        var buffer = _bytes.AsSpan();
+
+        // Write the Tag value
+        var writePosition = 0;
+        WriteMinimalBigEndianBytes(buffer.Slice(writePosition, tagByteCount), (uint)Tag);
+        writePosition += tagByteCount;
+
+        // Write the Length field
+        if (isShortFormLength)
+        {
+            buffer[writePosition] = (byte)Length;
+            writePosition++;
+        }
+        else
+        {
+            buffer[writePosition] = (byte)(0x80 | bytesForLengthValue);
+            writePosition++;
+            WriteMinimalBigEndianBytes(buffer.Slice(writePosition, bytesForLengthValue), (uint)Length);
+            writePosition += bytesForLengthValue;
+        }
+
+        // Write the Value
+        _offset = writePosition;
+        value.CopyTo(buffer[writePosition..]);
+    }
+
     private static int GetMinimalByteCount(uint value)
     {
         if (value == 0) return 1;
@@ -137,7 +141,6 @@ public sealed class Tlv : IDisposable
         var valueBytes = tempBuffer[leadingZeroBytes..];
         valueBytes.CopyTo(destination);
     }
-
 
     /// <summary>
     ///     Retrieves the internal byte array of the TLV object as a Memory&lt;byte&gt;>.
@@ -169,39 +172,15 @@ public sealed class Tlv : IDisposable
     /// </summary>
     /// <param name="data">A byte array containing the TLV encoded data (and nothing more).</param>
     /// <returns>The parsed Tlv</returns>
-    public static Tlv Parse(ReadOnlySpan<byte> data)
+    public static Tlv Create(ReadOnlySpan<byte> data)
     {
         var buffer = data;
-        return ParseFrom(ref buffer);
+        var (tag, _, value) = ParseData(ref buffer);
+
+        return new Tlv(tag, value);
     }
 
-    /// <inheritdoc cref="Tlv.Parse(ReadOnlySpan{byte})" />
-    public static bool TryParse(ReadOnlySpan<byte> data, [NotNullWhen(true)] out Tlv? tlvObject)
-    {
-        // Poor man's TryParse
-        tlvObject = null;
-        try
-        {
-            tlvObject = ParseFrom(ref data);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    /// <summary>
-    ///     Parses a TLV from a BER-TLV encoded byte array.
-    /// </summary>
-    /// <param name="buffer">A byte array containing the TLV encoded data.</param>
-    /// <returns>The parsed <see cref="Tlv" /></returns>
-    /// <remarks>
-    ///     This method will parse a TLV from the given buffer and return the parsed Tlv.
-    ///     The method will consume the buffer as much as necessary to parse the TLV.
-    /// </remarks>
-    /// <exception cref="ArgumentException">Thrown if the buffer does not contain a valid TLV.</exception>
-    internal static Tlv ParseFrom(ref ReadOnlySpan<byte> buffer)
+    internal static (int Tag, int Length, byte[] Value) ParseData(ref ReadOnlySpan<byte> buffer)
     {
         if (buffer.Length == 0) throw new ArgumentException("Insufficient data for tag");
 
@@ -245,7 +224,7 @@ public sealed class Tlv : IDisposable
         var value = buffer[..length];
         buffer = buffer[length..]; // Advance the buffer to the end of the value
 
-        return new Tlv(tag, value);
+        return (tag, length, value.ToArray());
     }
 
     /// <summary>

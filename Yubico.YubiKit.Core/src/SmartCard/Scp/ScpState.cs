@@ -39,9 +39,6 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
     // Key Derivation Constants
     private const byte DerivationTypeCardCryptogram = 0x00; // Derivation type for card cryptogram verification
     private const byte DerivationTypeHostCryptogram = 0x01; // Derivation type for host cryptogram generation
-    private const byte DerivationTypeSEnc = 0x04; // Derivation type for S-ENC (session encryption key)
-    private const byte DerivationTypeSMac = 0x06; // Derivation type for S-MAC (session MAC key)
-    private const byte DerivationTypeSRMac = 0x07; // Derivation type for S-RMAC (session response MAC key)
     private const byte DerivationContextLength = 0x40; // Context length in bits (64 bits = 8 bytes)
 
     // SCP11 Constants
@@ -56,12 +53,10 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
     private byte[] _macChain = macChain;
     private int _respCounter = 1; // Counter for response decryption (card->host)
 
-    public DataEncryptor GetDataEncryptor()
-    {
-        return keys.Dek.IsEmpty 
-            ? throw new InvalidOperationException("Decryption key not initialized") 
+    public DataEncryptor GetDataEncryptor() =>
+        keys.Dek.IsEmpty
+            ? throw new InvalidOperationException("Decryption key not initialized")
             : data => CbcEncrypt(keys.Dek, data);
-    }
 
     public byte[] Encrypt(ReadOnlySpan<byte> data)
     {
@@ -339,9 +334,8 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
         var sdParameters = pkSdEcka.Parameters;
 
         // Create ephemeral OCE ECDH key pair using the same curve
-        using var ephemeralOceEcka = ECDiffieHellman.Create(sdParameters.Curve);
-        var epkOceEcka = ECPublicKey.CreateFromParameters(
-            ephemeralOceEcka.ExportParameters(includePrivateParameters: false));
+        var ephemeralOceEcka = ECDiffieHellman.Create(sdParameters.Curve);
+        var epkOceEcka = ECPublicKey.CreateFromParameters(ephemeralOceEcka.ExportParameters(false));
 
         // GPC v2.3 Amendment F (SCP11) v1.4 §7.6.2.3
         using var scpTypeTlv = new Tlv(0x90, [0x11, scpTypeParam]);
@@ -353,11 +347,7 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
         using var outerTlv1 = new Tlv(0xA6, innerTlvs.Span);
         using var outerTlv2 = new Tlv(0x5F49, epkOceEcka.PublicPoint.Span);
         var outerTlvs = TlvHelper.EncodeList([outerTlv1, outerTlv2]);
-
         var data = outerTlvs;
-
-        // Static host key (SCP11a/c), or ephemeral key again (SCP11b)
-        var skOceEcka = keyParams.SkOceEcka?.ToECDiffieHellman() ?? ephemeralOceEcka;
 
         var ins = keyParams.KeyReference.Kid == ScpKid.SCP11b
             ? InsInternalAuthenticate
@@ -369,16 +359,20 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
             keyParams.KeyReference.Kvn,
             keyParams.KeyReference.Kid,
             data);
-        var response = await processor.TransmitAsync(authCommand, false, cancellationToken).ConfigureAwait(false);
 
+        var response = await processor.TransmitAsync(authCommand, false, cancellationToken).ConfigureAwait(false);
         if (response.SW != SWConstants.Success)
             throw ApduException.FromResponse(response, authCommand, "SCP11 authentication failed");
 
-        using var tlvs = TlvHelper.Decode(response.Data.Span);
+        using var tlvs = TlvHelper.DecodeList(response.Data.Span);
+
         var epkSdEckaTlv = tlvs[0];
         var epkSdEckaEncodedPointMem = TlvHelper.GetValue(0x5F49, epkSdEckaTlv.Value.Span);
         var receiptMem = TlvHelper.GetValue(0x86, tlvs[1].Value.Span);
         var receipt = receiptMem.ToArray();
+
+        // Static host key (SCP11a/c), or ephemeral key again (SCP11b)
+        var skOceEcka = keyParams.SkOceEcka?.ToECDiffieHellman() ?? ephemeralOceEcka;
 
         // GPC v2.3 Amendment F (SCP11) v1.3 §3.1.2 Key Derivation
         var epkSdEckaTlvBytes = epkSdEckaTlv.AsMemory();
@@ -473,19 +467,23 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
             CryptographicOperations.ZeroMemory(receipt);
             CryptographicOperations.ZeroMemory(data.Span);
             CryptographicOperations.ZeroMemory(innerTlvs.Span);
+            CryptographicOperations.ZeroMemory(outerTlvs.Span);
+
+            skOceEcka.Dispose();
         }
     }
 
     private static byte[] CbcEncrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> data)
     {
         using var aes = Aes.Create();
-        aes.Key = key.ToArray();
 
+        aes.Mode = CipherMode.CBC;
+        aes.Key = key.ToArray();
         Span<byte> iv = stackalloc byte[16]; // Zero IV
         var encrypted = new byte[data.Length];
         var bytesWritten = aes.EncryptCbc(data, iv, encrypted, PaddingMode.None);
-        if (bytesWritten != data.Length)
-            throw new InvalidOperationException("CBC encryption failed");
-        return encrypted;
+        return bytesWritten != data.Length
+            ? throw new InvalidOperationException("CBC encryption failed")
+            : encrypted;
     }
 }

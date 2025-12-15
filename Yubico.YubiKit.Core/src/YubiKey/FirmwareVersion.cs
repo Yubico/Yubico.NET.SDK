@@ -108,6 +108,12 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
         return new FirmwareVersion(major, minor, patch);
     }
 
+    public bool IsAtLeast(FirmwareVersion firmwareVersion) =>
+        CompareVersion(firmwareVersion.Major, firmwareVersion.Minor, firmwareVersion.Patch) >= 0;
+
+    public bool IsLessThan(FirmwareVersion firmwareVersion) =>
+        CompareVersion(firmwareVersion.Major, firmwareVersion.Minor, firmwareVersion.Patch) < 0;
+
     public bool IsAtLeast(int major, int minor, int patch) => CompareVersion(major, minor, patch) >= 0;
 
     public bool IsLessThan(int major, int minor, int patch) => CompareVersion(major, minor, patch) < 0;
@@ -179,6 +185,8 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     #region Frequently Used Versions
 
     internal static readonly FirmwareVersion All = new(1);
+    internal static readonly FirmwareVersion V4_0_0 = new(4);
+    internal static readonly FirmwareVersion V4_3_0 = new(4, 3);
     internal static readonly FirmwareVersion V5_0_0 = new(5);
     public static readonly FirmwareVersion V5_3_0 = new(5, 3);
     public static readonly FirmwareVersion V5_4_3 = new(5, 4, 3);

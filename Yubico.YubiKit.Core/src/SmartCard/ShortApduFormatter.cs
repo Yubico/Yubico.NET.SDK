@@ -53,7 +53,7 @@ internal class ShortApduFormatter : IApduFormatter
         else if (length == 0)
             buffer[position] = 0;
 
-        return buffer.ToArray();
+        return buffer.ToArray(); // TODO allocation. Can it be avoided?
     }
 
     public ReadOnlyMemory<byte> Format(ApduCommand apdu) =>

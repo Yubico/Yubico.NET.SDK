@@ -18,8 +18,6 @@ namespace Yubico.YubiKit.Core.SmartCard;
 
 internal class ExtendedApduFormatter(int maxApduSize) : IApduFormatter
 {
-    private readonly int _maxApduSize = maxApduSize;
-
     #region IApduFormatter Members
 
     public ReadOnlyMemory<byte> Format(ApduCommand apdu) =>
@@ -28,7 +26,7 @@ internal class ExtendedApduFormatter(int maxApduSize) : IApduFormatter
     public ReadOnlyMemory<byte> Format(byte cla, byte ins, byte p1, byte p2, ReadOnlyMemory<byte> data, int le)
     {
         var totalLength = 5 + (data.Length > 0 ? 2 + data.Length : 0) + (le > 0 ? 2 : 0);
-        if (totalLength > _maxApduSize)
+        if (totalLength > maxApduSize)
             throw new NotSupportedException("APDU length exceeds YubiKey capability.");
 
         Span<byte> buffer = stackalloc byte[totalLength];
@@ -52,7 +50,7 @@ internal class ExtendedApduFormatter(int maxApduSize) : IApduFormatter
         if (le > 0)
             BinaryPrimitives.WriteInt16BigEndian(buffer[position..], (short)le);
 
-        return buffer.ToArray();
+        return buffer.ToArray(); // TODO allocation. Can it be avoided?
     }
 
     #endregion

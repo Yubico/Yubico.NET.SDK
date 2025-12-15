@@ -42,7 +42,7 @@ public class TlvHelperTests
         var input = new byte[] { 0x5A, 0x01, 0xAA, 0x9F, 0x33, 0x01, 0xFF };
 
         // Act
-        using var list = TlvHelper.Decode(input);
+        using var list = TlvHelper.DecodeList(input);
 
         // Assert
         Assert.Equal(2, list.Count);

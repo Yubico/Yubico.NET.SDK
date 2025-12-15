@@ -194,7 +194,7 @@ public class DisposableTlvListTests
         var input = new byte[] { 0x5A, 0x01, 0xAA, 0x9F, 0x33, 0x01, 0xFF };
 
         // Act
-        var list = TlvHelper.Decode(input);
+        var list = TlvHelper.DecodeList(input);
 
         // Keep strong references to items for assertions after dispose
         var first = list[0];

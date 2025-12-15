@@ -31,7 +31,7 @@ public static class TlvHelper
     ///     The returned collection must be disposed using a <c>using</c> declaration to ensure
     ///     all TLV objects are properly disposed and their sensitive data is securely zeroed.
     /// </remarks>
-    public static DisposableTlvList Decode(ReadOnlySpan<byte> tlvData)
+    public static DisposableTlvList DecodeList(ReadOnlySpan<byte> tlvData)
     {
         var tlvs = new List<Tlv>();
         var buffer = tlvData;
@@ -90,15 +90,23 @@ public static class TlvHelper
     /// <returns>BER-TLV encoded list</returns>
     public static Memory<byte> EncodeList(ReadOnlySpan<Tlv> tlvData)
     {
-        using var stream = new MemoryStream(); // todo rewrite, allocs
-        using var writer = new BinaryWriter(stream);
+        // Calculate total size to avoid resizing
+        var estimatedSize = 0;
         foreach (var tlv in tlvData)
         {
-            ReadOnlyMemory<byte> bytes = tlv.AsMemory();
-            writer.Write(bytes.Span.ToArray());
+            estimatedSize += tlv.AsMemory().Length;
         }
 
-        return stream.ToArray();
+        var writer = new ArrayBufferWriter<byte>(estimatedSize);
+
+        foreach (var tlv in tlvData)
+        {
+            ReadOnlySpan<byte> tlvBytes = tlv.AsMemory().Span;
+            tlvBytes.CopyTo(writer.GetSpan(tlvBytes.Length));
+            writer.Advance(tlvBytes.Length);
+        }
+
+        return writer.WrittenMemory.ToArray();
     }
 
     /// <summary>

@@ -192,7 +192,7 @@ public sealed class SecurityDomainSession(
 
         var keyInformation = new Dictionary<KeyReference, IReadOnlyDictionary<byte, byte>>();
 
-        using var tlvList = TlvHelper.Decode(response.Span);
+        using var tlvList = TlvHelper.DecodeList(response.Span);
         foreach (var tlv in tlvList)
         {
             var value = TlvHelper.GetValue(TagKeyInformationData, tlv.AsMemory().Span);

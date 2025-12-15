@@ -96,7 +96,7 @@ public sealed class ManagementSession<TConnection>(
             if (encodedResult.Length - 1 != encodedResult.Span[0])
                 throw new BadResponseException("Invalid length");
 
-            var pageTlvs = TlvHelper.Decode(encodedResult.Span[1..]);
+            var pageTlvs = TlvHelper.DecodeList(encodedResult.Span[1..]);
             allPagesTlvs.AddRange(pageTlvs);
 
             var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);

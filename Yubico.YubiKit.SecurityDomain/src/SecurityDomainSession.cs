@@ -32,12 +32,7 @@ namespace Yubico.YubiKit.SecurityDomain;
 ///     Provides lifecycle management for SCP (Secure Channel Protocol) sessions and will
 ///     eventually expose key and data management operations.
 /// </summary>
-public sealed class SecurityDomainSession(
-    ISmartCardConnection connection,
-    IProtocolFactory<ISmartCardConnection> protocolFactory,
-    ILogger<SecurityDomainSession> logger,
-    ScpKeyParameters? scpKeyParams = null)
-    : ApplicationSession
+public sealed class SecurityDomainSession : ApplicationSession
 {
     private const byte ClaGlobalPlatform = 0x80;
     private const byte InsGetData = 0xCA;
@@ -69,9 +64,29 @@ public sealed class SecurityDomainSession(
 
     private const int ResetAttemptLimit = 65;
     private static readonly byte[] ResetAttemptPayload = new byte[8];
+    private readonly ISmartCardConnection _connection;
+    private readonly ILogger<SecurityDomainSession> _logger;
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly ScpKeyParameters? _scpKeyParams;
     private ISmartCardProtocol? _baseProtocol;
     private bool _isInitialized;
     private ISmartCardProtocol? _protocol;
+
+    /// <summary>
+    ///     Entry point for interacting with the YubiKey Security Domain application.
+    ///     Provides lifecycle management for SCP (Secure Channel Protocol) sessions and will
+    ///     eventually expose key and data management operations.
+    /// </summary>
+    private SecurityDomainSession(
+        ISmartCardConnection connection,
+        ILoggerFactory loggerFactory,
+        ScpKeyParameters? scpKeyParams = null)
+    {
+        _connection = connection;
+        _loggerFactory = loggerFactory;
+        _logger = loggerFactory.CreateLogger<SecurityDomainSession>();
+        _scpKeyParams = scpKeyParams;
+    }
 
     /// <summary>
     ///     Get the encryptor to encrypt any data for an SCP command.
@@ -93,13 +108,12 @@ public sealed class SecurityDomainSession(
     /// </summary>
     public static async Task<SecurityDomainSession> CreateAsync(
         ISmartCardConnection connection,
-        ILogger<SecurityDomainSession>? logger = null,
+        ILoggerFactory? loggerFactory = null,
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
-        logger ??= NullLogger<SecurityDomainSession>.Instance;
-        var protocolFactory = PcscProtocolFactory<ISmartCardConnection>.Create();
-        var session = new SecurityDomainSession(connection, protocolFactory, logger, scpKeyParams);
+        loggerFactory ??= NullLoggerFactory.Instance;
+        var session = new SecurityDomainSession(connection, loggerFactory, scpKeyParams);
 
         await session.InitializeAsync(cancellationToken).ConfigureAwait(false);
         return session;
@@ -123,9 +137,9 @@ public sealed class SecurityDomainSession(
         // Security Domain is available on firmware 5.3.0 and newer.
         baseProtocol.Configure(FirmwareVersion.V5_3_0);
 
-        _protocol = scpKeyParams is not null
+        _protocol = _scpKeyParams is not null
             ? await baseProtocol
-                .WithScpAsync(scpKeyParams, cancellationToken)
+                .WithScpAsync(_scpKeyParams, cancellationToken)
                 .ConfigureAwait(false)
             : baseProtocol;
 
@@ -159,7 +173,7 @@ public sealed class SecurityDomainSession(
             Le = expectedResponseLength
         };
 
-        logger.LogDebug("Sending GET DATA for object 0x{DataObject:X4}", dataObject);
+        _logger.LogDebug("Sending GET DATA for object 0x{DataObject:X4}", dataObject);
 
         try
         {
@@ -171,7 +185,7 @@ public sealed class SecurityDomainSession(
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "GET DATA for object 0x{DataObject:X4} failed", dataObject);
+            _logger.LogWarning(ex, "GET DATA for object 0x{DataObject:X4} failed", dataObject);
             throw;
         }
     }
@@ -304,7 +318,7 @@ public sealed class SecurityDomainSession(
             Data = payload
         };
 
-        logger.LogDebug("Deleting keys matching {KeyRef}{Suffix}",
+        _logger.LogDebug("Deleting keys matching {KeyRef}{Suffix}",
             keyReference, deleteLast ? " (allow delete last)" : string.Empty);
 
         return TransmitAsync(command, cancellationToken);
@@ -352,9 +366,9 @@ public sealed class SecurityDomainSession(
         CancellationToken cancellationToken = default)
     {
         if (replaceKvn == 0)
-            logger.LogDebug("Generating EC key for {KeyRef}", keyReference);
+            _logger.LogDebug("Generating EC key for {KeyRef}", keyReference);
         else
-            logger.LogDebug("Generating EC key for {KeyRef}, replacing KVN=0x{ReplaceKvn:X2}", keyReference,
+            _logger.LogDebug("Generating EC key for {KeyRef}, replacing KVN=0x{ReplaceKvn:X2}", keyReference,
                 replaceKvn);
 
         Span<byte> parameters = stackalloc byte[3];
@@ -387,7 +401,7 @@ public sealed class SecurityDomainSession(
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Generate EC key for {KeyRef} failed", keyReference);
+            _logger.LogWarning(ex, "Generate EC key for {KeyRef} failed", keyReference);
             throw;
         }
 
@@ -414,7 +428,7 @@ public sealed class SecurityDomainSession(
     public async Task PutKeyAsync(KeyReference keyReference, ECPublicKey publicKey, int replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Importing SCP11 public key into KeyReference: {KeyReference}", keyReference);
+        _logger.LogInformation("Importing SCP11 public key into KeyReference: {KeyReference}", keyReference);
 
         var pkParams = publicKey.Parameters;
         if (pkParams.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
@@ -443,11 +457,11 @@ public sealed class SecurityDomainSession(
             Span<byte> expectedResponseData = new[] { keyReference.Kvn };
             ValidateCheckSum(expectedResponseData, response.Span);
 
-            logger.LogInformation("Successfully put public key for KeyReference: {KeyReference}", keyReference);
+            _logger.LogInformation("Successfully put public key for KeyReference: {KeyReference}", keyReference);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to put public key for KeyReference: {KeyReference}", keyReference);
+            _logger.LogError(ex, "Failed to put public key for KeyReference: {KeyReference}", keyReference);
             throw;
         }
         finally
@@ -475,7 +489,7 @@ public sealed class SecurityDomainSession(
         int replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Importing SCP11 private key into Key Reference: {KeyReference}", keyReference);
+        _logger.LogInformation("Importing SCP11 private key into Key Reference: {KeyReference}", keyReference);
 
         var parameters = privateKey.Parameters;
         if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
@@ -501,11 +515,11 @@ public sealed class SecurityDomainSession(
             Span<byte> expectedResponseData = new[] { keyReference.Kvn };
             ValidateCheckSum(response.Span, expectedResponseData);
 
-            logger.LogInformation("Successfully put private key for Key Reference: {KeyReference}", keyReference);
+            _logger.LogInformation("Successfully put private key for Key Reference: {KeyReference}", keyReference);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to put private key for Key Reference: {KeyReference}", keyReference);
+            _logger.LogError(ex, "Failed to put private key for Key Reference: {KeyReference}", keyReference);
             throw;
         }
         finally
@@ -533,7 +547,7 @@ public sealed class SecurityDomainSession(
     public async Task StoreAllowlistAsync(KeyReference keyReference, IReadOnlyCollection<string> serials,
         CancellationToken cancellationToken = default)
     {
-        logger.LogDebug("Storing allow list (KeyReference: {KeyReference})", keyReference);
+        _logger.LogDebug("Storing allow list (KeyReference: {KeyReference})", keyReference);
 
         var buffer = new ArrayBufferWriter<byte>();
         foreach (var serial in serials)
@@ -549,7 +563,7 @@ public sealed class SecurityDomainSession(
 
         await StoreDataAsync(serialsDataTl, cancellationToken).ConfigureAwait(false);
 
-        logger.LogInformation("Allow list stored (KeyReference: {KeyReference})", keyReference);
+        _logger.LogInformation("Allow list stored (KeyReference: {KeyReference})", keyReference);
     }
 
     /// <summary>
@@ -587,7 +601,7 @@ public sealed class SecurityDomainSession(
     /// <exception cref="InvalidOperationException">Thrown when there was an SCP error, described in the exception message.</exception>
     public async Task StoreDataAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Storing data with length:{Length}", data.Length);
+        _logger.LogInformation("Storing data with length:{Length}", data.Length);
 
         var command = new ApduCommand(0x00, 0xE2, 0x90, 0x00, data);
         await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
@@ -603,7 +617,7 @@ public sealed class SecurityDomainSession(
     public async Task StoreCaIssuerAsync(KeyReference keyReference, ReadOnlyMemory<byte> ski,
         CancellationToken cancellationToken = default)
     {
-        logger.LogDebug("Storing CA issuer SKI (KeyReference: {KeyReference})", keyReference);
+        _logger.LogDebug("Storing CA issuer SKI (KeyReference: {KeyReference})", keyReference);
 
         byte klcc = keyReference.Kid switch //
         {
@@ -621,7 +635,7 @@ public sealed class SecurityDomainSession(
         // Send store data command
         await StoreDataAsync(caIssuerData.AsMemory(), cancellationToken).ConfigureAwait(false);
 
-        logger.LogInformation("CA issuer SKI stored (KeyReference: {KeyReference})", keyReference);
+        _logger.LogInformation("CA issuer SKI stored (KeyReference: {KeyReference})", keyReference);
     }
 
     /// <summary>
@@ -635,7 +649,7 @@ public sealed class SecurityDomainSession(
         var keyInformation = await GetKeyInformationAsync(cancellationToken).ConfigureAwait(false);
         if (keyInformation.Count == 0)
         {
-            logger.LogInformation("Security Domain reset skipped: no keys reported");
+            _logger.LogInformation("Security Domain reset skipped: no keys reported");
             return;
         }
 
@@ -643,14 +657,14 @@ public sealed class SecurityDomainSession(
         {
             if (!TryGetResetParameters(keyReference, out var instruction, out var overrideKeyRef))
             {
-                logger.LogTrace("Reset skipping unsupported key reference {KeyRef}", keyReference);
+                _logger.LogTrace("Reset skipping unsupported key reference {KeyRef}", keyReference);
                 continue;
             }
 
             await BlockKeyAsync(instruction, overrideKeyRef, cancellationToken).ConfigureAwait(false);
         }
 
-        logger.LogInformation("Security Domain reset complete; reinitializing session");
+        _logger.LogInformation("Security Domain reset complete; reinitializing session");
 
         _protocol = null;
         _isInitialized = false;
@@ -663,7 +677,9 @@ public sealed class SecurityDomainSession(
         if (_baseProtocol is not null)
             return _baseProtocol;
 
-        var protocol = protocolFactory.Create(connection);
+        var protocol = PcscProtocolFactory<ISmartCardConnection>
+            .Create(_loggerFactory)
+            .Create(_connection);
         if (protocol is not ISmartCardProtocol smartCardProtocol)
         {
             protocol.Dispose();
@@ -739,14 +755,14 @@ public sealed class SecurityDomainSession(
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Reset attempt {Attempt} for key {KeyRef} failed to transmit", attempt,
+                _logger.LogWarning(ex, "Reset attempt {Attempt} for key {KeyRef} failed to transmit", attempt,
                     keyReference);
                 continue;
             }
 
             if (statusWord is SWConstants.AuthenticationMethodBlocked or SWConstants.SecurityStatusNotSatisfied)
             {
-                logger.LogDebug(
+                _logger.LogDebug(
                     "Key {KeyRef} blocked after {AttemptCount} attempts (SW=0x{Status:X4})",
                     keyReference,
                     attempt,
@@ -757,7 +773,7 @@ public sealed class SecurityDomainSession(
             if (statusWord is SWConstants.InvalidCommandDataParameter or SWConstants.Success)
                 continue;
 
-            logger.LogTrace(
+            _logger.LogTrace(
                 "Reset attempt {Attempt} for key {KeyRef} returned SW=0x{Status:X4}",
                 attempt,
                 keyReference,
@@ -787,7 +803,7 @@ public sealed class SecurityDomainSession(
             command[4] = (byte)ResetAttemptPayload.Length;
             ResetAttemptPayload.CopyTo(command[5..]);
 
-            var response = await connection
+            var response = await _connection
                 .TransmitAndReceiveAsync(rented.AsMemory(0, commandLength), cancellationToken)
                 .ConfigureAwait(false);
 

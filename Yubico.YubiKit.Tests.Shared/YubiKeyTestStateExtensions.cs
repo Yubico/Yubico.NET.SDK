@@ -28,7 +28,7 @@ namespace Yubico.YubiKit.Tests.Shared;
 /// </remarks>
 public static class YubiKeyTestStateExtensions
 {
-    #region Nested type: <extension>
+    #region Nested type: $extension
 
     extension(YubiKeyTestState state)
     {
@@ -56,14 +56,15 @@ public static class YubiKeyTestStateExtensions
         ///     </code>
         /// </example>
         public async Task WithManagementAsync(
-            Func<ManagementSession<ISmartCardConnection>, DeviceInfo, Task> action,
+            Func<ManagementSession, DeviceInfo, Task> action,
             ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(action);
 
-            using var session = await state.Device.CreateManagementSessionAsync(scpKeyParams, cancellationToken)
+            using var session = await state.Device
+                .CreateManagementSessionAsync(scpKeyParams, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
             await action(session, state.DeviceInfo).ConfigureAwait(false);
         }
@@ -92,7 +93,7 @@ public static class YubiKeyTestStateExtensions
         ///     </code>
         /// </example>
         public async Task WithManagementAsync(
-            Action<ManagementSession<ISmartCardConnection>, DeviceInfo> action,
+            Action<ManagementSession, DeviceInfo> action,
             ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {

@@ -35,7 +35,7 @@ public class ScpExtensionsTests
     public async Task WithScpAsync_Scp03_FirmwareBelow530_ThrowsNotSupportedException()
     {
         // Arrange
-        ISmartCardProtocol protocol = new PcscProtocol(_logger, _fakeConnection);
+        ISmartCardProtocol protocol = new PcscProtocol(_fakeConnection, default, _logger);
         protocol.Configure(new FirmwareVersion(5, 2, 9)); // Just below 5.3.0
 
         // Act & Assert
@@ -50,7 +50,7 @@ public class ScpExtensionsTests
     public async Task WithScpAsync_Scp03_FirmwareExactly530_Proceeds()
     {
         // Arrange
-        ISmartCardProtocol protocol = new PcscProtocol(_logger, _fakeConnection);
+        ISmartCardProtocol protocol = new PcscProtocol(_fakeConnection, default, _logger);
         protocol.Configure(new FirmwareVersion(5, 3)); // Exactly 5.3.0
 
         using var staticKeys = StaticKeys.GetDefaultKeys();
@@ -70,7 +70,7 @@ public class ScpExtensionsTests
     public async Task WithScpAsync_Scp03_FirmwareAbove530_Proceeds()
     {
         // Arrange
-        ISmartCardProtocol protocol = new PcscProtocol(_logger, _fakeConnection);
+        ISmartCardProtocol protocol = new PcscProtocol(_fakeConnection, default, _logger);
         protocol.Configure(new FirmwareVersion(5, 4, 3)); // Above 5.3.0
 
         using var staticKeys = StaticKeys.GetDefaultKeys();
@@ -88,12 +88,12 @@ public class ScpExtensionsTests
     public async Task WithScpAsync_Scp11_FirmwareBelow572_ThrowsNotSupportedException()
     {
         // Arrange
-        ISmartCardProtocol protocol = new PcscProtocol(_logger, _fakeConnection);
+        ISmartCardProtocol protocol = new PcscProtocol(_fakeConnection, default, _logger);
         protocol.Configure(new FirmwareVersion(5, 7, 1)); // Just below 5.7.2
 
         // Create minimal SCP11b params (simplest variant)
         using var ecdh = ECDiffieHellman.Create();
-        
+
         var publicKey = ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters());
         var keyParams = new Scp11KeyParameters(new KeyReference(ScpKid.SCP11b, 0xFF), publicKey);
 
@@ -109,11 +109,11 @@ public class ScpExtensionsTests
     public async Task WithScpAsync_Scp11_FirmwareExactly572_Proceeds()
     {
         // Arrange
-        ISmartCardProtocol protocol = new PcscProtocol(_logger, _fakeConnection);
+        ISmartCardProtocol protocol = new PcscProtocol(_fakeConnection, default, _logger);
         protocol.Configure(new FirmwareVersion(5, 7, 2)); // Exactly 5.7.2
 
         using var ecdh = ECDiffieHellman.Create();
-        
+
         var publicKey = ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters());
         var keyParams = new Scp11KeyParameters(
             new KeyReference(ScpKid.SCP11b, 0xFF),
@@ -132,12 +132,12 @@ public class ScpExtensionsTests
     public async Task WithScpAsync_Scp11_FirmwareAbove572_Proceeds()
     {
         // Arrange
-        ISmartCardProtocol protocol = new PcscProtocol(_logger, _fakeConnection);
+        ISmartCardProtocol protocol = new PcscProtocol(_fakeConnection, default, _logger);
         protocol.Configure(new FirmwareVersion(5, 8)); // Above 5.7.2
 
         using var ecdh = ECDiffieHellman.Create();
         var publicKey = ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters());
-        
+
         var keyParams = new Scp11KeyParameters(
             new KeyReference(ScpKid.SCP11b, 0xFF),
             publicKey
@@ -155,7 +155,7 @@ public class ScpExtensionsTests
     public async Task WithScpAsync_Scp03_UnknownFirmware_Proceeds()
     {
         // Arrange
-        ISmartCardProtocol protocol = new PcscProtocol(_logger, _fakeConnection);
+        ISmartCardProtocol protocol = new PcscProtocol(_fakeConnection, default, _logger);
         // Don't call Configure - firmware version remains null
 
         using var staticKeys = StaticKeys.GetDefaultKeys();
@@ -177,12 +177,12 @@ public class ScpExtensionsTests
     public async Task WithScpAsync_Scp11_UnknownFirmware_Proceeds()
     {
         // Arrange
-        ISmartCardProtocol protocol = new PcscProtocol(_logger, _fakeConnection);
+        ISmartCardProtocol protocol = new PcscProtocol(_fakeConnection, default, _logger);
         // Don't call Configure - firmware version remains null
 
         using var ecdh = ECDiffieHellman.Create();
         var publicKey = ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters());
-        
+
         var keyParams = new Scp11KeyParameters(
             new KeyReference(ScpKid.SCP11b, 0xFF),
             publicKey

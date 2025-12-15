@@ -23,13 +23,7 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
 
-public sealed class ManagementSession<TConnection>(
-    TConnection connection,
-    IProtocolFactory<TConnection> protocolFactory,
-    ILogger<ManagementSession<TConnection>> logger,
-    ScpKeyParameters? scpKeyParams = null)
-    : ApplicationSession
-    where TConnection : IConnection
+public sealed class ManagementSession : ApplicationSession
 {
     private const byte INS_GET_DEVICE_INFO = 0x1D;
     private const byte INS_DEVICE_RESET = 0x1F;
@@ -46,27 +40,47 @@ public sealed class ManagementSession<TConnection>(
     private static readonly Feature FeatureDeviceReset =
         new("Device Reset", 5, 6, 0);
 
+    private readonly ILogger<ManagementSession> _logger;
+    private readonly ScpKeyParameters? _scpKeyParams;
+
     private bool _isInitialized;
 
-    private IProtocol _protocol = protocolFactory.Create(connection);
+    private IProtocol _protocol;
+
     private FirmwareVersion? _version;
 
-    public static async Task<ManagementSession<TConnection>> CreateAsync(
-        TConnection connection,
-        ILogger<ManagementSession<TConnection>>? logger = null,
+    private ManagementSession(
+        IConnection connection,
+        ILoggerFactory loggerFactory,
+        ScpKeyParameters? scpKeyParams = null)
+    {
+        _scpKeyParams = scpKeyParams;
+        _logger = loggerFactory.CreateLogger<ManagementSession>();
+        _protocol = connection switch
+        {
+            ISmartCardConnection sc => PcscProtocolFactory<ISmartCardConnection>
+                .Create(loggerFactory)
+                .Create(sc),
+            _ => throw new NotSupportedException(
+                $"The connection type {connection.GetType().Name} is not supported by ManagementSession.")
+        };
+    }
+
+    public static async Task<ManagementSession> CreateAsync(
+        IConnection connection,
+        ILoggerFactory? loggerFactory = null,
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
-        logger ??= NullLogger<ManagementSession<TConnection>>.Instance;
-        var protocolFactory = PcscProtocolFactory<TConnection>.Create();
+        loggerFactory ??= NullLoggerFactory.Instance;
 
-        var session = new ManagementSession<TConnection>(connection, protocolFactory, logger, scpKeyParams);
+        var session = new ManagementSession(connection, loggerFactory, scpKeyParams);
         await session.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         return session;
     }
 
-    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    private async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         if (_isInitialized)
             return;
@@ -75,15 +89,16 @@ public sealed class ManagementSession<TConnection>(
         _protocol.Configure(_version);
 
         // Initialize SCP if key parameters were provided
-        if (scpKeyParams is not null && _protocol is ISmartCardProtocol smartCardProtocol)
-            _protocol = await smartCardProtocol.WithScpAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
+        if (_scpKeyParams is not null && _protocol is ISmartCardProtocol smartCardProtocol)
+            _protocol = await smartCardProtocol.WithScpAsync(_scpKeyParams, cancellationToken).ConfigureAwait(false);
 
         _isInitialized = true;
-        logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
+        _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
 
     public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
+        // TODO Add try catch
         byte page = 0;
         var allPagesTlvs = new List<Tlv>();
 
@@ -151,6 +166,7 @@ public sealed class ManagementSession<TConnection>(
 
     private async Task<FirmwareVersion> GetVersionAsync(CancellationToken cancellationToken)
     {
+        var defaultVersion = await GetVersionFromManagementHeader(cancellationToken);
         try
         {
             var deviceInfo = await GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
@@ -158,23 +174,24 @@ public sealed class ManagementSession<TConnection>(
         }
         catch (Exception e)
         {
-            logger.LogDebug(e, "Could not get version from DeviceInfo, fallback to versionHeader in Management.Select");
+            _logger.LogDebug(e,
+                "Could not get version from DeviceInfo, fallback to versionHeader in Management.Select");
         }
 
-        return await GetVersionFromManagementHeader();
+        return defaultVersion;
+    }
 
-        async Task<FirmwareVersion> GetVersionFromManagementHeader()
-        {
-            var versionBytes = await SelectAsync(cancellationToken).ConfigureAwait(false);
+    private async Task<FirmwareVersion> GetVersionFromManagementHeader(CancellationToken cancellationToken)
+    {
+        var versionBytes = await SelectAsync(cancellationToken).ConfigureAwait(false);
 
-            var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
-            var versionString = deviceText.Split(' ').Last();
-            var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
+        var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
+        var versionString = deviceText.Split(' ').Last();
+        var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
 
-            return versionParts.Length == 3
-                ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
-                : new FirmwareVersion();
-        }
+        return versionParts.Length == 3
+            ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
+            : new FirmwareVersion();
     }
 
     private async Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken)

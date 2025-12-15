@@ -15,7 +15,7 @@ public class ManagementTests : IntegrationTestBase
         Assert.NotNull(device);
 
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
-        using var mgmtSession = await ManagementSession<ISmartCardConnection>.CreateAsync(connection);
+        using var mgmtSession = await ManagementSession.CreateAsync(connection);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -26,10 +26,10 @@ public class ManagementTests : IntegrationTestBase
     {
         var devices = await YubiKeyManager.FindAllAsync();
         var device = devices.First();
-        var sessionFactory = ServiceProvider.GetRequiredService<IManagementSessionFactory<ISmartCardConnection>>();
+        var sessionFactory = ServiceProvider.GetRequiredService<ManagementSessionFactoryDelegate>();
 
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
-        using var mgmtSession = await sessionFactory.CreateAsync(connection);
+        using var mgmtSession = await sessionFactory(connection);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -42,7 +42,7 @@ public class ManagementTests : IntegrationTestBase
         var device = devices.First();
 
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
-        using var mgmtSession = await ManagementSession<ISmartCardConnection>.CreateAsync(connection);
+        using var mgmtSession = await ManagementSession.CreateAsync(connection);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -144,7 +144,7 @@ public class ManagementTests : IntegrationTestBase
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
 
         // Create ManagementSession with SCP03 enabled
-        using var mgmtSession = await ManagementSession<ISmartCardConnection>.CreateAsync(
+        using var mgmtSession = await ManagementSession.CreateAsync(
             connection,
             scpKeyParams: scpKeyParams);
 
@@ -177,7 +177,7 @@ public class ManagementTests : IntegrationTestBase
         // Attempt to create ManagementSession with wrong SCP keys should throw
         await Assert.ThrowsAnyAsync<Exception>(async () =>
         {
-            using var mgmtSession = await ManagementSession<ISmartCardConnection>.CreateAsync(
+            using var mgmtSession = await ManagementSession.CreateAsync(
                 connection,
                 scpKeyParams: scpKeyParams);
         });

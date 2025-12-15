@@ -34,7 +34,7 @@ public class ScpProtocolAdapterTests
     public async Task TransmitAndReceiveAsync_DelegatesToScpProcessor()
     {
         // Arrange
-        var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
         var expectedData = new byte[] { 0x01, 0x02, 0x03 };
         _fakeScpProcessor.EnqueueResponse(0x90, 0x00, expectedData);
 
@@ -53,7 +53,7 @@ public class ScpProtocolAdapterTests
     public async Task SelectAsync_DelegatesToScpProcessor()
     {
         // Arrange
-        var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
         var responseData = new byte[] { 0x61, 0x10 };
         _fakeScpProcessor.EnqueueResponse(0x90, 0x00, responseData);
 
@@ -72,7 +72,7 @@ public class ScpProtocolAdapterTests
     public void GetDataEncryptor_ReturnsProvidedEncryptor()
     {
         // Arrange
-        var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
         DataEncryptor expectedEncryptor = data => data.ToArray(); // Simple pass-through encryptor
         var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, expectedEncryptor);
 
@@ -87,7 +87,7 @@ public class ScpProtocolAdapterTests
     public void GetDataEncryptor_WhenNull_ReturnsNull()
     {
         // Arrange
-        var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
         var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
 
         // Act
@@ -101,7 +101,7 @@ public class ScpProtocolAdapterTests
     public void Configure_DelegatesToBaseProtocol()
     {
         // Arrange
-        var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
         var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
         var firmware = new FirmwareVersion(5, 7, 2);
 
@@ -116,7 +116,7 @@ public class ScpProtocolAdapterTests
     public void Dispose_DisposesBaseProtocol()
     {
         // Arrange
-        var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
         var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
 
         // Act
@@ -134,7 +134,7 @@ public class ScpProtocolAdapterTests
     public async Task TransmitAndReceiveAsync_NonSuccessResponse_ThrowsInvalidOperationException()
     {
         // Arrange
-        var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
+        var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
         _fakeScpProcessor.EnqueueResponse(0x69, 0x82); // Security status not satisfied
 
         var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);

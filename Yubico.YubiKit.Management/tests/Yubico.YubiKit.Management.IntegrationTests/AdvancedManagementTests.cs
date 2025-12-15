@@ -46,8 +46,7 @@ public class AdvancedManagementTests
     /// </summary>
     [Theory]
     [WithYubiKey]
-    public async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState state)
-    {
+    public async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
         {
             // Act
@@ -62,13 +61,12 @@ public class AdvancedManagementTests
             Assert.True(deviceInfo.SerialNumber > 0);
             Assert.NotNull(deviceInfo.FirmwareVersion);
         });
-    }
 
     /// <summary>
     ///     Firmware filtering: Only runs on devices with firmware >= 5.3.0.
     ///     Demonstrates SCP03/SCP11 testing on modern firmware.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.3.0")]
     public async Task ModernFeatures_FirmwareAtLeast530_SupportsAdvancedProtocols(YubiKeyTestState state)
     {
@@ -86,7 +84,7 @@ public class AdvancedManagementTests
     ///     Form factor filtering: Only runs on Bio keys.
     ///     Perfect for testing biometric-specific features.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
     public async Task BiometricFeatures_BioKeys_HaveExpectedCapabilities(YubiKeyTestState state)
     {
@@ -109,7 +107,7 @@ public class AdvancedManagementTests
     ///     Transport filtering: Only runs on devices with USB transport.
     ///     Useful for USB-specific feature testing.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(RequireUsb = true)]
     public async Task UsbTransport_UsbDevices_SupportsFullCapabilities(YubiKeyTestState state)
     {
@@ -130,7 +128,7 @@ public class AdvancedManagementTests
     ///     Capability filtering: Only runs on devices with PIV capability enabled.
     ///     Demonstrates capability-specific testing.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(Capability = DeviceCapabilities.Piv)]
     public async Task PivCapability_EnabledDevices_SupportsManagement(YubiKeyTestState state)
     {
@@ -152,7 +150,7 @@ public class AdvancedManagementTests
     ///     FIPS-capable filtering: Only runs on FIPS-capable devices for PIV.
     ///     Critical for FIPS compliance testing.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(FipsCapable = DeviceCapabilities.Piv)]
     public async Task FipsCapable_PivDevices_HasFipsSupport(YubiKeyTestState state)
     {
@@ -172,7 +170,7 @@ public class AdvancedManagementTests
     ///     FIPS-approved filtering: Only runs on devices in FIPS-approved mode.
     ///     Ensures operations meet FIPS 140-2 requirements.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(FipsApproved = DeviceCapabilities.Piv)]
     public async Task FipsApproved_PivDevices_InFipsMode(YubiKeyTestState state)
     {
@@ -193,7 +191,7 @@ public class AdvancedManagementTests
     ///     Only runs on modern USB keys with PIV capability.
     ///     Perfect for testing specific feature combinations.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.0.0", RequireUsb = true, Capability = DeviceCapabilities.Piv)]
     public async Task AdvancedPiv_ModernUsbKeysWithPiv_FullySupported(YubiKeyTestState state)
     {
@@ -221,10 +219,9 @@ public class AdvancedManagementTests
     ///     Advanced example: Testing device-specific behavior differences.
     ///     Demonstrates how to handle different device characteristics.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
-    public async Task DeviceCharacteristics_VariesByDevice_HandledCorrectly(YubiKeyTestState state)
-    {
+    public async Task DeviceCharacteristics_VariesByDevice_HandledCorrectly(YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
         {
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
@@ -244,13 +241,12 @@ public class AdvancedManagementTests
             // Test that works on all devices
             Assert.True(deviceInfo.SerialNumber > 0);
         });
-    }
 
     /// <summary>
     ///     Form factor filtering: Runs on USB-A Keychain devices.
     ///     Tests device info consistency across multiple reads.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
     public async Task DeviceInfo_UsbAKeychain_RemainsConsistent(YubiKeyTestState state)
     {
@@ -273,7 +269,7 @@ public class AdvancedManagementTests
     ///     Form factor filtering: Runs on USB-A Biometric devices.
     ///     Tests device info consistency across multiple reads.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
     public async Task DeviceInfo_UsbABiometric_RemainsConsistent(YubiKeyTestState state)
     {
@@ -296,7 +292,7 @@ public class AdvancedManagementTests
     ///     Complex scenario: Testing across USB-C Keychain devices specifically.
     ///     Demonstrates form factor-specific testing.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(FormFactor = FormFactor.UsbCKeychain)]
     public async Task UsbCKeychain_UsbCKeychainDevices_ConsistentBehavior(YubiKeyTestState state)
     {
@@ -317,18 +313,18 @@ public class AdvancedManagementTests
     ///     Real-world scenario: Verifying serial number consistency.
     ///     Ensures device identity remains stable across sessions.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
     public async Task SerialNumber_MultipleReads_RemainsConsistent(YubiKeyTestState state)
     {
         // Read serial number multiple times
         using var connection1 = await state.Device.ConnectAsync<ISmartCardConnection>();
-        using var mgmt1 = await ManagementSession<ISmartCardConnection>.CreateAsync(connection1);
+        using var mgmt1 = await ManagementSession.CreateAsync(connection1);
         var deviceInfo1 = await mgmt1.GetDeviceInfoAsync();
         var serial1 = deviceInfo1.SerialNumber;
 
         using var connection2 = await state.Device.ConnectAsync<ISmartCardConnection>();
-        using var mgmt2 = await ManagementSession<ISmartCardConnection>.CreateAsync(connection2);
+        using var mgmt2 = await ManagementSession.CreateAsync(connection2);
         var deviceInfo2 = await mgmt2.GetDeviceInfoAsync();
         var serial2 = deviceInfo2.SerialNumber;
 
@@ -341,10 +337,9 @@ public class AdvancedManagementTests
     ///     Performance test: Measure device info retrieval time.
     ///     Useful for benchmarking across different device types.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
-    public async Task Performance_GetDeviceInfo_CompletesQuickly(YubiKeyTestState state)
-    {
+    public async Task Performance_GetDeviceInfo_CompletesQuickly(YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
         {
             // Measure performance
@@ -359,13 +354,12 @@ public class AdvancedManagementTests
             // Data should still be valid
             Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
         });
-    }
 
     /// <summary>
     ///     Comprehensive example: Full device validation across all properties.
     ///     Demonstrates accessing all device information through YubiKeyTestState.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
     public async Task ComprehensiveValidation_AllDeviceProperties_Accessible(YubiKeyTestState state)
     {

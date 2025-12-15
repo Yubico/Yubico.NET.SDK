@@ -34,7 +34,7 @@ public class PcscProtocolTests
     public void Configure_FirmwareBelow400_IgnoresConfiguration()
     {
         // Arrange
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var firmware = new FirmwareVersion(3, 5);
 
         // Act
@@ -49,7 +49,7 @@ public class PcscProtocolTests
     {
         // Arrange
         _fakeConnection.SupportsExtendedApduValue = true;
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var firmware = new FirmwareVersion(4, 2, 5);
 
         // Act
@@ -65,7 +65,7 @@ public class PcscProtocolTests
     {
         // Arrange
         _fakeConnection.SupportsExtendedApduValue = true;
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var firmware = new FirmwareVersion(5, 7, 2);
 
         // Act
@@ -81,7 +81,7 @@ public class PcscProtocolTests
     {
         // Arrange
         _fakeConnection.SupportsExtendedApduValue = true;
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var firmware = new FirmwareVersion(5, 7, 2);
         var config = new ProtocolConfiguration { ForceShortApdus = true };
 
@@ -98,7 +98,7 @@ public class PcscProtocolTests
     {
         // Arrange
         _fakeConnection.SupportsExtendedApduValue = false;
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var firmware = new FirmwareVersion(5, 7, 2);
 
         // Act
@@ -114,7 +114,7 @@ public class PcscProtocolTests
     {
         // Arrange
         _fakeConnection.SupportsExtendedApduValue = true;
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var firmware = new FirmwareVersion(5, 7, 2);
 
         // Act
@@ -133,7 +133,7 @@ public class PcscProtocolTests
         ReadOnlyMemory<byte> insMemory = new[] { customIns };
 
         // Act
-        var protocol = new PcscProtocol(_logger, _fakeConnection, insMemory);
+        var protocol = new PcscProtocol(_fakeConnection, insMemory, _logger);
 
         // Assert - Should use custom INS_SEND_REMAINING
         Assert.NotNull(protocol);
@@ -144,7 +144,7 @@ public class PcscProtocolTests
     public void Constructor_WithDefaultInsSendRemaining_Uses0xC0()
     {
         // Act
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
 
         // Assert - Should use default 0xC0
         Assert.NotNull(protocol);
@@ -159,7 +159,7 @@ public class PcscProtocolTests
     public async Task TransmitAndReceiveAsync_SuccessResponse_ReturnsData()
     {
         // Arrange
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var expectedData = new byte[] { 0x01, 0x02, 0x03 };
         var response = new byte[expectedData.Length + 2];
         expectedData.CopyTo(response, 0);
@@ -180,14 +180,15 @@ public class PcscProtocolTests
     public async Task TransmitAndReceiveAsync_NonSuccessResponse_ThrowsInvalidOperationException()
     {
         // Arrange
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var response = new byte[] { 0x69, 0x82 }; // Security status not satisfied
         _fakeConnection.EnqueueResponse(response);
 
         var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
         Assert.Contains("6982", ex.Message);
     }
 
@@ -195,14 +196,15 @@ public class PcscProtocolTests
     public async Task TransmitAndReceiveAsync_ExceptionMessage_FormattedCorrectly()
     {
         // Arrange
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var response = new byte[] { 0x6A, 0x82 }; // File not found
         _fakeConnection.EnqueueResponse(response);
 
         var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
         Assert.Matches("Command failed with status: 6A82", ex.Message);
     }
 
@@ -210,7 +212,7 @@ public class PcscProtocolTests
     public async Task TransmitAndReceiveAsync_RespectsCancellationToken()
     {
         // Arrange
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var cts = new CancellationTokenSource();
         cts.Cancel();
 
@@ -229,7 +231,7 @@ public class PcscProtocolTests
     public async Task SelectAsync_ConstructsCorrectApdu()
     {
         // Arrange
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var response = new byte[] { 0x90, 0x00 };
         _fakeConnection.EnqueueResponse(response);
 
@@ -248,7 +250,7 @@ public class PcscProtocolTests
     public async Task SelectAsync_SuccessResponse_ReturnsData()
     {
         // Arrange
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var expectedData = new byte[] { 0x61, 0x10 }; // FCI template tag
         var response = new byte[expectedData.Length + 2];
         expectedData.CopyTo(response, 0);
@@ -269,14 +271,15 @@ public class PcscProtocolTests
     public async Task SelectAsync_NonSuccessResponse_ThrowsInvalidOperationException()
     {
         // Arrange
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var response = new byte[] { 0x6A, 0x82 }; // File not found
         _fakeConnection.EnqueueResponse(response);
 
         var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SelectAsync(appId, TestContext.Current.CancellationToken));
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SelectAsync(appId, TestContext.Current.CancellationToken));
         Assert.Contains("6A82", ex.Message);
     }
 
@@ -284,7 +287,7 @@ public class PcscProtocolTests
     public async Task SelectAsync_RespectsCancellationToken()
     {
         // Arrange
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
         var cts = new CancellationTokenSource();
         cts.Cancel();
 
@@ -298,7 +301,7 @@ public class PcscProtocolTests
     public async Task Dispose_DisposesConnection()
     {
         // Arrange
-        var protocol = new PcscProtocol(_logger, _fakeConnection);
+        var protocol = new PcscProtocol(_fakeConnection, default, _logger);
 
         // Act
         protocol.Dispose();
@@ -309,7 +312,8 @@ public class PcscProtocolTests
         {
             var response = new byte[] { 0x90, 0x00 };
             _fakeConnection.EnqueueResponse(response);
-            await protocol.TransmitAndReceiveAsync(new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty), TestContext.Current.CancellationToken);
+            await protocol.TransmitAndReceiveAsync(new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty),
+                TestContext.Current.CancellationToken);
         });
     }
 

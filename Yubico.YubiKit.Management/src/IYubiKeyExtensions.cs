@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
@@ -29,7 +30,7 @@ namespace Yubico.YubiKit.Management;
 /// </remarks>
 public static class IYubiKeyExtensions
 {
-    #region Nested type: <extension>
+    #region Nested type: $extension
 
     extension(IYubiKey yubiKey)
     {
@@ -44,7 +45,8 @@ public static class IYubiKeyExtensions
         /// </returns>
         public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
         {
-            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
             return await mgmtSession.GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
         }
 
@@ -76,8 +78,10 @@ public static class IYubiKeyExtensions
             byte[]? newLockCode = null,
             CancellationToken cancellationToken = default)
         {
-            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            await mgmtSession.SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken).ConfigureAwait(false);
+            using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+            await mgmtSession.SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -88,21 +92,22 @@ public static class IYubiKeyExtensions
         ///     Optional SCP (Secure Channel Protocol) key parameters necessary to establish
         ///     a secure session with the YubiKey device.
         /// </param>
+        /// <param name="loggerFactory">Optional logger factory used to create loggers for the session and protocol.</param>
         /// <param name="cancellationToken">
         ///     An optional token to cancel the operation.
         /// </param>
         /// <returns>
-        ///     A <see cref="ManagementSession{TConnection}" /> instance configured for the YubiKey device.
+        ///     A <see cref="ManagementSession" /> instance configured for the YubiKey device.
         ///     The session must be disposed by the caller when no longer needed.
         /// </returns>
-        public async Task<ManagementSession<ISmartCardConnection>> CreateManagementSessionAsync(
+        public async Task<ManagementSession> CreateManagementSessionAsync(
             ScpKeyParameters? scpKeyParams = null,
+            ILoggerFactory? loggerFactory = null,
             CancellationToken cancellationToken = default)
         {
-            // Connection is disposed inside session. User must dispose session.
             var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken).ConfigureAwait(false);
-            return await ManagementSession<ISmartCardConnection>.CreateAsync(connection, scpKeyParams: scpKeyParams,
-                cancellationToken: cancellationToken).ConfigureAwait(false);
+            return await ManagementSession.CreateAsync(connection, loggerFactory, scpKeyParams,
+                cancellationToken).ConfigureAwait(false);
         }
     }
 

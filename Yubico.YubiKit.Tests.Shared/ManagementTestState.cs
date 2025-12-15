@@ -26,19 +26,19 @@ namespace Yubico.YubiKit.Tests.Shared;
 /// </summary>
 /// <remarks>
 ///     <para>
-///     ManagementTestState is non-destructive - it does not reset the device or modify
-///     any configuration. It simply provides a convenient way to execute management
-///     operations with proper connection and session management.
+///         ManagementTestState is non-destructive - it does not reset the device or modify
+///         any configuration. It simply provides a convenient way to execute management
+///         operations with proper connection and session management.
 ///     </para>
 ///     <para>
-///     Since the Management application is read-only, this state doesn't need to
-///     set up default credentials or perform initialization beyond caching device info.
+///         Since the Management application is read-only, this state doesn't need to
+///         set up default credentials or perform initialization beyond caching device info.
 ///     </para>
 /// </remarks>
 public class ManagementTestState : TestState
 {
     /// <summary>
-    ///     Initializes a new instance of <see cref="ManagementTestState"/>.
+    ///     Initializes a new instance of <see cref="ManagementTestState" />.
     /// </summary>
     /// <param name="device">The YubiKey device under test.</param>
     /// <param name="deviceInfo">Device information (firmware, capabilities, etc.).</param>
@@ -92,12 +92,12 @@ public class ManagementTestState : TestState
     ///     </code>
     /// </example>
     public async Task WithManagementAsync(
-        Func<ManagementSession<ISmartCardConnection>, ManagementTestState, Task> action)
+        Func<ManagementSession, ManagementTestState, Task> action)
     {
         ArgumentNullException.ThrowIfNull(action);
 
         using var connection = await OpenConnectionAsync<ISmartCardConnection>().ConfigureAwait(false);
-        using var session = await ManagementSession<ISmartCardConnection>
+        using var session = await ManagementSession
             .CreateAsync(connection, scpKeyParams: ScpKeyParams)
             .ConfigureAwait(false);
 
@@ -119,7 +119,7 @@ public class ManagementTestState : TestState
     ///     </code>
     /// </example>
     public async Task WithManagementAsync(
-        Action<ManagementSession<ISmartCardConnection>, ManagementTestState> action)
+        Action<ManagementSession, ManagementTestState> action)
     {
         ArgumentNullException.ThrowIfNull(action);
 
@@ -140,7 +140,7 @@ public class ManagementTestState : TestState
         ScpKeyParameters? scpKeyParams = null)
     {
         using var connection = await device.ConnectAsync<ISmartCardConnection>().ConfigureAwait(false);
-        using var mgmt = await ManagementSession<ISmartCardConnection>
+        using var mgmt = await ManagementSession
             .CreateAsync(connection, scpKeyParams: scpKeyParams)
             .ConfigureAwait(false);
 

@@ -233,8 +233,8 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
             keyParams.KeyReference.Kvn,
             0x00,
             hostChallenge);
-        var resp = await processor.TransmitAsync(initCommand, false, cancellationToken).ConfigureAwait(false);
 
+        var resp = await processor.TransmitAsync(initCommand, false, cancellationToken).ConfigureAwait(false);
         if (!resp.IsOK())
             throw ApduException.FromResponse(resp, initCommand, "SCP03 INITIALIZE UPDATE failed");
 

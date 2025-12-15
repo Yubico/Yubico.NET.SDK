@@ -24,10 +24,14 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 /// </summary>
 public class ModernFirmwareFilter : IYubiKeyFilter
 {
+    #region IYubiKeyFilter Members
+
     public bool Matches(YubiKeyTestState device) =>
-        device.FirmwareVersion >= new FirmwareVersion(5, 0, 0);
+        device.FirmwareVersion >= new FirmwareVersion(5);
 
     public string GetDescription() => "Firmware >= 5.0.0";
+
+    #endregion
 }
 
 /// <summary>
@@ -52,7 +56,7 @@ public class ManagementIntegrationTests
     /// <summary>
     ///     Verify we can read device information.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey]
     public async Task GetDeviceInfo_ReturnsValidInformation(YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, deviceInfo) =>
@@ -71,7 +75,7 @@ public class ManagementIntegrationTests
     /// <summary>
     ///     Verify device has expected capabilities.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "4.1.0")] // Management requires 4.1.0+
     public async Task DeviceCapabilities_HasManagementSupport(YubiKeyTestState state) =>
         await state.WithManagementAsync((mgmt, deviceInfo) =>
@@ -87,7 +91,6 @@ public class ManagementIntegrationTests
     /// <summary>
     ///     Verify form factor matches expected type.
     /// </summary>
-    [Theory]
     [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
     [WithYubiKey(FormFactor = FormFactor.UsbCKeychain)]
     [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
@@ -95,6 +98,7 @@ public class ManagementIntegrationTests
     [WithYubiKey(FormFactor = FormFactor.UsbANano)]
     [WithYubiKey(FormFactor = FormFactor.UsbCNano)]
     [WithYubiKey(FormFactor = FormFactor.UsbCLightning)]
+    [SkippableTheory]
     public async Task FormFactor_MatchesExpectedType(YubiKeyTestState state) =>
         await state.WithManagementAsync((mgmt, deviceInfo) =>
         {
@@ -112,7 +116,7 @@ public class ManagementIntegrationTests
     /// <summary>
     ///     Test filtered by form factor - only runs on Bio keys.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
     public async Task BiometricFeatures_RequiresBioKey(YubiKeyTestState state) =>
         await state.WithManagementAsync((mgmt, deviceInfo) =>
@@ -126,7 +130,7 @@ public class ManagementIntegrationTests
     /// <summary>
     ///     Test with multiple filter criteria in a single attribute.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(RequireUsb = true, CustomFilter = typeof(ModernFirmwareFilter))]
     public async Task AdvancedFeatures_RequireSpecificConfiguration(YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, deviceInfo) =>
@@ -142,7 +146,7 @@ public class ManagementIntegrationTests
     ///     Test with multiple [WithYubiKey] attributes - demonstrates running test with different device configurations.
     ///     This test will run once for each device matching ANY of the specified criteria.
     /// </summary>
-    [Theory]
+    [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.0")]
     [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
     public async Task MultipleConfigurations_TestRunsOnMatchingDevices(YubiKeyTestState state) =>

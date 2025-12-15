@@ -39,7 +39,7 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 ///     {
 ///         // Test runs on devices with firmware >= 5.7.2
 ///     }
-///
+/// 
 ///     // Multiple configurations
 ///     [Theory]
 ///     [WithYubiKey(MinFirmware = "5.0")]
@@ -49,7 +49,7 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 ///     {
 ///         // Test runs on devices matching ANY of the above criteria
 ///     }
-///
+/// 
 ///     // Custom filter example
 ///     public class ProductionKeysOnly : IYubiKeyFilter
 ///     {
@@ -104,7 +104,7 @@ public class WithYubiKeyAttribute : DataAttribute
 
     /// <summary>
     ///     Gets or sets a custom filter type for advanced filtering logic.
-    ///     Must implement <see cref="IYubiKeyFilter"/> and have a parameterless constructor.
+    ///     Must implement <see cref="IYubiKeyFilter" /> and have a parameterless constructor.
     /// </summary>
     /// <remarks>
     ///     <para>
@@ -120,7 +120,7 @@ public class WithYubiKeyAttribute : DataAttribute
     ///         public bool Matches(YubiKeyTestState device) => device.SerialNumber > 10_000_000;
     ///         public string GetDescription() => "Production keys (SN > 10000000)";
     ///     }
-    ///
+    /// 
     ///     [Theory]
     ///     [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
     ///     public async Task Test(YubiKeyTestState device) { }
@@ -133,7 +133,8 @@ public class WithYubiKeyAttribute : DataAttribute
     ///     Returns filtered YubiKey devices as test data.
     ///     Called by xUnit's Theory discoverer.
     /// </summary>
-    public override IEnumerable<object[]> GetData(MethodInfo testMethod)
+    public override IEnumerable<object[]>
+        GetData(MethodInfo testMethod) // TODO why is this called for tests that I haven't specifically run? Inside Rider.
     {
         // Get all authorized devices from shared infrastructure
         var allDevices = YubiKeyTestInfrastructure.AllAuthorizedDevices;
@@ -198,9 +199,6 @@ public class WithYubiKeyAttribute : DataAttribute
             $"[WithYubiKey] Test '{testMethod.Name}' will run on {filteredDevices.Count} device(s)");
 
         // Yield each matching device as test data
-        foreach (var device in filteredDevices)
-        {
-            yield return [device];
-        }
+        foreach (var device in filteredDevices) yield return [device];
     }
 }

@@ -46,8 +46,6 @@ public sealed class ManagementSession<TConnection>(
     private static readonly Feature FeatureDeviceReset =
         new("Device Reset", 5, 6, 0);
 
-    private readonly ILogger<ManagementSession<TConnection>> _logger = logger;
-
     private bool _isInitialized;
 
     private IProtocol _protocol = protocolFactory.Create(connection);
@@ -72,7 +70,7 @@ public sealed class ManagementSession<TConnection>(
         if (_isInitialized)
             return;
 
-        _version = await SetVersionAsync(cancellationToken).ConfigureAwait(false);
+        _version = await GetVersionAsync(cancellationToken).ConfigureAwait(false);
         _protocol.Configure(_version);
 
         // Initialize SCP if key parameters were provided
@@ -80,12 +78,12 @@ public sealed class ManagementSession<TConnection>(
             _protocol = await smartCardProtocol.WithScpAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
 
         _isInitialized = true;
-        _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
+        logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
 
     public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
-        EnsureSupports(FeatureDeviceInfo);
+        // EnsureSupports(FeatureDeviceInfo);
 
         byte page = 0;
         var allPagesTlvs = new List<Tlv>();
@@ -99,11 +97,11 @@ public sealed class ManagementSession<TConnection>(
                 throw new BadResponseException("Invalid length");
 
             var pageTlvs = TlvHelper.Decode(encodedResult.Span[1..]);
-            var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
-            hasMoreData = moreData?.Length == 1 && moreData.GetValueSpan()[0] == 1;
+             var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
+             hasMoreData = moreData?.Length == 1 && moreData.GetValueSpan()[0] == 1;
 
             // Transfer ownership of Tlv objects to allPagesTlvs
-            allPagesTlvs.AddRange(pageTlvs);
+             allPagesTlvs.AddRange(pageTlvs);
 
             ++page;
         }
@@ -122,11 +120,11 @@ public sealed class ManagementSession<TConnection>(
         EnsureSupports(FeatureSetConfig);
         ArgumentNullException.ThrowIfNull(config);
 
-        const int LockCodeLength = 16;
-        if (currentLockCode is { Length: not LockCodeLength })
+        const int lockCodeLength = 16;
+        if (currentLockCode is { Length: not lockCodeLength })
             throw new ArgumentException("Current lock code must be 16 bytes", nameof(currentLockCode));
 
-        if (newLockCode is { Length: not LockCodeLength })
+        if (newLockCode is { Length: not lockCodeLength })
             throw new ArgumentException("New lock code must be 16 bytes", nameof(newLockCode));
 
         var configBytes = config.GetBytes(reboot, currentLockCode, newLockCode);
@@ -150,31 +148,42 @@ public sealed class ManagementSession<TConnection>(
             .ConfigureAwait(false);
     }
 
-    private async Task<FirmwareVersion> SetVersionAsync(CancellationToken cancellationToken)
+    private async Task<FirmwareVersion> GetVersionAsync(CancellationToken cancellationToken)
     {
-        var versionBytes = await SelectAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var deviceInfo = await GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
+            return deviceInfo.FirmwareVersion;
+        }
+        catch (Exception e)
+        {
+            logger.LogDebug(e, "Could not get version from DeviceInfo, fallback to versionHeader in Management.Select");
+        }
 
-        var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
-        var versionString = deviceText.Split(' ').Last();
-        var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
+        return await GetVersionFromManagementHeader();
 
-        return versionParts.Length == 3
-            ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
-            : new FirmwareVersion();
+        async Task<FirmwareVersion> GetVersionFromManagementHeader()
+        {
+            var versionBytes = await SelectAsync(cancellationToken).ConfigureAwait(false);
+
+            var deviceText = Encoding.UTF8.GetString(versionBytes.Span);
+            var versionString = deviceText.Split(' ').Last();
+            var versionParts = versionString.Split('.').Select(int.Parse).ToArray();
+
+            return versionParts.Length == 3
+                ? new FirmwareVersion(versionParts[0], versionParts[1], versionParts[2])
+                : new FirmwareVersion();
+        }
     }
 
     private async Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken)
     {
-        if (_protocol is ISmartCardProtocol smartCardProtocol)
-        {
-            var response = await smartCardProtocol
-                .SelectAsync(ApplicationIds.Management, cancellationToken)
-                .ConfigureAwait(false);
+        if (_protocol is not ISmartCardProtocol smartCardProtocol)
+            throw new NotSupportedException("Protocol not supported");
 
-            return response;
-        }
-
-        throw new NotSupportedException("Protocol not supported");
+        return await smartCardProtocol
+            .SelectAsync(ApplicationIds.Management, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private Task<ReadOnlyMemory<byte>> TransmitAsync(ApduCommand command, CancellationToken cancellationToken) =>

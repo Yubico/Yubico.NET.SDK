@@ -98,7 +98,7 @@ public sealed class Tlv : IDisposable
     /// <summary>
     ///     Returns a copy of the value.
     /// </summary>
-    public ReadOnlyMemory<byte> Value => _bytes.Skip(_offset).Take(Length).ToArray();
+    public ReadOnlyMemory<byte> Value => _bytes.AsMemory(_offset, Length);
 
     /// <summary>
     ///     Returns the length of the value.
@@ -140,9 +140,29 @@ public sealed class Tlv : IDisposable
 
 
     /// <summary>
-    ///     Returns a copy of the Tlv as a BER-TLV encoded byte array.
+    ///     Retrieves the internal byte array of the TLV object as a Memory&lt;byte&gt;>.
     /// </summary>
+    /// <returns>
+    ///     A Memory&lt;byte&gt; instance representing the underlying data of the TLV object.
+    /// </returns>
+    /// <remarks>
+    ///     This method provides a view of the TLV's internal data, allowing for efficient
+    ///     access and manipulation of the bytes without copying the data.
+    /// </remarks>
     public Memory<byte> AsMemory() => _bytes.AsMemory();
+
+    /// <summary>
+    ///     Returns a read-only span representing the internal byte array of the TLV object.
+    /// </summary>
+    /// <returns>
+    ///     A <see cref="System.ReadOnlySpan{T}" /> containing the full encoded TLV data, including the tag,
+    ///     length, and value.
+    /// </returns>
+    /// <remarks>
+    ///     The returned span includes all components of the TLV structure, and its size equals the total
+    ///     length of the encoded TLV.
+    /// </remarks>
+    public ReadOnlySpan<byte> AsSpan() => _bytes.AsSpan();
 
     /// <summary>
     ///     Parse a Tlv from a BER-TLV encoded byte array.
@@ -170,8 +190,6 @@ public sealed class Tlv : IDisposable
             return false;
         }
     }
-
-    public ReadOnlySpan<byte> GetValueSpan() => _bytes.AsSpan();
 
     /// <summary>
     ///     Parses a TLV from a BER-TLV encoded byte array.

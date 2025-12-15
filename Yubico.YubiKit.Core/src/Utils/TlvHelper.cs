@@ -31,17 +31,17 @@ public static class TlvHelper
     ///     The returned collection must be disposed using a <c>using</c> declaration to ensure
     ///     all TLV objects are properly disposed and their sensitive data is securely zeroed.
     /// </remarks>
-    public static DisposableTlvCollection Decode(ReadOnlySpan<byte> tlvData)
+    public static DisposableTlvList Decode(ReadOnlySpan<byte> tlvData)
     {
         var tlvs = new List<Tlv>();
         var buffer = tlvData;
         while (!buffer.IsEmpty)
         {
-            var tlv = Tlv.ParseFrom(ref buffer);
+            var tlv = Tlv.Create(buffer);
             tlvs.Add(tlv);
         }
 
-        return new DisposableTlvCollection(tlvs);
+        return new DisposableTlvList(tlvs);
     }
 
     /// <summary>
@@ -56,12 +56,31 @@ public static class TlvHelper
         var buffer = tlvData;
         while (!buffer.IsEmpty)
         {
-            using var tlv = Tlv.ParseFrom(ref buffer);
+            var tlv = Tlv.ParseData(ref buffer);
             tlvs[tlv.Tag] = tlv.Value;
         }
 
         return tlvs;
     }
+
+    // /// <summary>
+    // ///     Decodes a sequence of BER-TLV encoded data into a mapping of Tag-Value pairs.
+    // ///     Iteration order is preserved. If the same tag occurs more than once only the latest will be kept.
+    // /// </summary>
+    // /// <param name="tlvData">Sequence of TLV encoded data</param>
+    // /// <returns>Dictionary of Tag-Value pairs</returns>
+    // public static DisposableTlvDictionary DecodeDictionary2(ReadOnlySpan<byte> tlvData)
+    // {
+    //     var tlvs = new DisposableTlvDictionary();
+    //     var buffer = tlvData;
+    //     while (!buffer.IsEmpty)
+    //     {
+    //         var tlv = Tlv.ParseData(ref buffer);
+    //         tlvs.Add(tlv.Tag, tlv.Value);
+    //     }
+    //
+    //     return tlvs;
+    // }
 
     /// <summary>
     ///     Encodes a list of Tlvs into a sequence of BER-TLV encoded data.
@@ -97,7 +116,7 @@ public static class TlvHelper
     /// <exception cref="InvalidOperationException">If the TLV tag differs from expectedTag</exception>
     public static Memory<byte> GetValue(int expectedTag, ReadOnlySpan<byte> tlvData)
     {
-        using var tlv = Tlv.Parse(tlvData);
+        using var tlv = Tlv.Create(tlvData);
         if (tlv.Tag != expectedTag)
             throw new InvalidOperationException($"Expected tag: {expectedTag:X2}, got {tlv.Tag:X2}");
         return tlv.Value.ToArray();

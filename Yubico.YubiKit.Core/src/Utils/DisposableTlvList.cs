@@ -24,7 +24,7 @@ namespace Yubico.YubiKit.Core.Utils;
 ///     This class is used to manage the lifetime of multiple TLV objects, ensuring that sensitive
 ///     cryptographic data is properly zeroed out when no longer needed.
 /// </remarks>
-public sealed class DisposableTlvCollection : IDisposable, IReadOnlyList<Tlv>
+public sealed class DisposableTlvList : IDisposable, IReadOnlyList<Tlv>
 {
     private readonly List<Tlv> _tlvs;
     private bool _disposed;
@@ -33,7 +33,7 @@ public sealed class DisposableTlvCollection : IDisposable, IReadOnlyList<Tlv>
     ///     Creates a new collection with the specified TLV objects.
     /// </summary>
     /// <param name="tlvs">The TLV objects to include in the collection.</param>
-    public DisposableTlvCollection(params Tlv[] tlvs)
+    public DisposableTlvList(params Tlv[] tlvs)
     {
         _tlvs = new List<Tlv>(tlvs);
     }
@@ -42,7 +42,7 @@ public sealed class DisposableTlvCollection : IDisposable, IReadOnlyList<Tlv>
     ///     Creates a new collection from an enumerable of TLV objects.
     /// </summary>
     /// <param name="tlvs">The TLV objects to include in the collection.</param>
-    public DisposableTlvCollection(IEnumerable<Tlv> tlvs)
+    public DisposableTlvList(IEnumerable<Tlv> tlvs)
     {
         _tlvs = new List<Tlv>(tlvs);
     }

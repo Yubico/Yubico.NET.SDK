@@ -16,7 +16,7 @@ using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Core.UnitTests.Utils;
 
-public class DisposableTlvCollectionTests
+public class DisposableTlvListTests
 {
     [Fact]
     public void Constructor_WithParamsArray_CreatesCollectionWithCorrectCount()
@@ -27,7 +27,7 @@ public class DisposableTlvCollectionTests
         var tlv3 = new Tlv(0x03, [0x33]);
 
         // Act
-        using var collection = new DisposableTlvCollection(tlv1, tlv2, tlv3);
+        using var collection = new DisposableTlvList(tlv1, tlv2, tlv3);
 
         // Assert
         Assert.Equal(3, collection.Count);
@@ -40,7 +40,7 @@ public class DisposableTlvCollectionTests
         var tlvs = new List<Tlv> { new(0x01, [0x11]), new(0x02, [0x22]) };
 
         // Act
-        using var collection = new DisposableTlvCollection(tlvs);
+        using var collection = new DisposableTlvList(tlvs);
 
         // Assert
         Assert.Equal(2, collection.Count);
@@ -50,7 +50,7 @@ public class DisposableTlvCollectionTests
     public void Constructor_WithEmptyArray_CreatesEmptyCollection()
     {
         // Act
-        using var collection = new DisposableTlvCollection();
+        using var collection = new DisposableTlvList();
 
         // Assert
         Assert.Empty(collection);
@@ -64,7 +64,7 @@ public class DisposableTlvCollectionTests
         var tlv2 = new Tlv(0x02, [0x22]);
 
         // Act
-        using var collection = new DisposableTlvCollection(tlv1, tlv2);
+        using var collection = new DisposableTlvList(tlv1, tlv2);
 
         // Assert
         Assert.Equal(0x01, collection[0].Tag);
@@ -79,7 +79,7 @@ public class DisposableTlvCollectionTests
         var tlv2 = new Tlv(0x02, [0x22]);
 
         // Act
-        using var collection = new DisposableTlvCollection(tlv1, tlv2);
+        using var collection = new DisposableTlvList(tlv1, tlv2);
         var span = collection.AsSpan();
 
         // Assert
@@ -94,7 +94,7 @@ public class DisposableTlvCollectionTests
         var tlv2 = new Tlv(0x02, [0x22]);
 
         // Act
-        using var collection = new DisposableTlvCollection(tlv1, tlv2);
+        using var collection = new DisposableTlvList(tlv1, tlv2);
         var span = collection.AsSpan();
 
         // Assert
@@ -111,7 +111,7 @@ public class DisposableTlvCollectionTests
         var tlv3 = new Tlv(0x03, [0x33]);
 
         // Act
-        using var collection = new DisposableTlvCollection(tlv1, tlv2, tlv3);
+        using var collection = new DisposableTlvList(tlv1, tlv2, tlv3);
         var tags = new List<int>();
         foreach (var tlv in collection) tags.Add(tlv.Tag);
 
@@ -126,7 +126,7 @@ public class DisposableTlvCollectionTests
         var tlv1 = new Tlv(0x01, [0x11, 0x22]);
         var tlv2 = new Tlv(0x02, [0x33, 0x44]);
 
-        var collection = new DisposableTlvCollection(tlv1, tlv2);
+        var collection = new DisposableTlvList(tlv1, tlv2);
 
         // Verify TLVs have non-zero values initially
         Assert.NotEqual(0, tlv1.Tag);
@@ -149,7 +149,7 @@ public class DisposableTlvCollectionTests
     {
         // Arrange
         var tlv = new Tlv(0x01, [0x11]);
-        var collection = new DisposableTlvCollection(tlv);
+        var collection = new DisposableTlvList(tlv);
 
         // Act & Assert - Multiple dispose calls should not throw
         collection.Dispose();
@@ -166,7 +166,7 @@ public class DisposableTlvCollectionTests
 
         // Act
         {
-            using var collection = new DisposableTlvCollection(tlv1, tlv2);
+            using var collection = new DisposableTlvList(tlv1, tlv2);
             // Collection is in scope here
             Assert.NotEqual(0, tlv1.Tag);
         }
@@ -183,7 +183,7 @@ public class DisposableTlvCollectionTests
     public void Count_EmptyCollection_ReturnsZero()
     {
         // Act
-        using var collection = new DisposableTlvCollection();
+        using var collection = new DisposableTlvList();
 
         // Assert
         Assert.Empty(collection);
@@ -193,7 +193,7 @@ public class DisposableTlvCollectionTests
     public void AsSpan_EmptyCollection_ReturnsEmptySpan()
     {
         // Act
-        using var collection = new DisposableTlvCollection();
+        using var collection = new DisposableTlvList();
         var span = collection.AsSpan();
 
         // Assert
@@ -204,7 +204,7 @@ public class DisposableTlvCollectionTests
     public void GetEnumerator_EmptyCollection_YieldsNoItems()
     {
         // Act
-        using var collection = new DisposableTlvCollection();
+        using var collection = new DisposableTlvList();
         var count = 0;
         foreach (var _ in collection) count++;
 
@@ -220,7 +220,7 @@ public class DisposableTlvCollectionTests
         var tlv2 = new Tlv(0xA6, [0x04, 0x05]); // Short form tag
 
         // Act
-        using var collection = new DisposableTlvCollection(tlv1, tlv2);
+        using var collection = new DisposableTlvList(tlv1, tlv2);
 
         // Assert
         Assert.Equal(2, collection.Count);
@@ -241,7 +241,7 @@ public class DisposableTlvCollectionTests
         var tlv2 = new Tlv(0x02, largeValue);
 
         // Act
-        using var collection = new DisposableTlvCollection(tlv1, tlv2);
+        using var collection = new DisposableTlvList(tlv1, tlv2);
 
         // Assert
         Assert.Equal(2, collection.Count);
@@ -257,7 +257,7 @@ public class DisposableTlvCollectionTests
         var tlv2 = new Tlv(0x02, [0x22]);
 
         // Act
-        IReadOnlyList<Tlv> collection = new DisposableTlvCollection(tlv1, tlv2);
+        IReadOnlyList<Tlv> collection = new DisposableTlvList(tlv1, tlv2);
 
         // Assert
         Assert.Equal(2, collection.Count);

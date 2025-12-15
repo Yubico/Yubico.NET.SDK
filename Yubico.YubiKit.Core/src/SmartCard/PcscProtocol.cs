@@ -110,16 +110,16 @@ internal class PcscProtocol : ISmartCardProtocol
     public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration)
     {
         FirmwareVersion = firmwareVersion;
-        if (FirmwareVersion.IsAtLeast(4, 0, 0))
-        {
-            var forceShortApdu = configuration is { ForceShortApdus: true };
-            UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu;
-            MaxApduSize = firmwareVersion.IsAtLeast(4, 3, 0)
-                ? SmartCardMaxApduSizes.Yk43
-                : SmartCardMaxApduSizes.Yk4;
+        if (!FirmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))
+            return;
 
-            ReconfigureProcessor();
-        }
+        var forceShortApdu = configuration is { ForceShortApdus: true };
+        UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu; // TODO always true for UsbPcsc... 
+        MaxApduSize = firmwareVersion.IsAtLeast(FirmwareVersion.V4_3_0)
+            ? SmartCardMaxApduSizes.Yk43
+            : SmartCardMaxApduSizes.Yk4;
+
+        ReconfigureProcessor();
     }
 
     #endregion

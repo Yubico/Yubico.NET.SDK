@@ -17,7 +17,10 @@ public class SmartCardConnectionFactory(ILoggerFactory loggerFactory) : ISmartCa
     public async Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice,
         CancellationToken cancellationToken = default)
     {
-        var connection = new SmartCardConnection(smartCardDevice, _loggerFactory.CreateLogger<SmartCardConnection>());
+        var connection = new UsbSmartCardConnection(
+            smartCardDevice,
+            _loggerFactory.CreateLogger<UsbSmartCardConnection>());
+
         await connection.InitializeAsync(cancellationToken).ConfigureAwait(false);
         return connection;
     }

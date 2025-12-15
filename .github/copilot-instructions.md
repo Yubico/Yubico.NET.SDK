@@ -1,2 +1,2 @@
 # GitHub Copilot Instructions
-DO: You MUST read /home/dyallo/Code/y/Yubico.NET.SDK/CLAUDE.md as your first step.
+DO: You MUST read ../Yubico.NET.SDK/CLAUDE.md as your first step.

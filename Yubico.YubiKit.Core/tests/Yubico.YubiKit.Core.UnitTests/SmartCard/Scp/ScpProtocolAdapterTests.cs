@@ -38,7 +38,7 @@ public class ScpProtocolAdapterTests
         var expectedData = new byte[] { 0x01, 0x02, 0x03 };
         _fakeScpProcessor.EnqueueResponse(0x90, 0x00, expectedData);
 
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null);
+        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
         var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act
@@ -57,7 +57,7 @@ public class ScpProtocolAdapterTests
         var responseData = new byte[] { 0x61, 0x10 };
         _fakeScpProcessor.EnqueueResponse(0x90, 0x00, responseData);
 
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null);
+        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
         var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
 
         // Act
@@ -88,7 +88,7 @@ public class ScpProtocolAdapterTests
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null);
+        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
 
         // Act
         var result = adapter.GetDataEncryptor();
@@ -102,7 +102,7 @@ public class ScpProtocolAdapterTests
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null);
+        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
         var firmware = new FirmwareVersion(5, 7, 2);
 
         // Act - Should not throw
@@ -117,7 +117,7 @@ public class ScpProtocolAdapterTests
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null);
+        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
 
         // Act
         adapter.Dispose();
@@ -137,7 +137,7 @@ public class ScpProtocolAdapterTests
         var baseProtocol = new PcscProtocol(_logger, _fakeConnection);
         _fakeScpProcessor.EnqueueResponse(0x69, 0x82); // Security status not satisfied
 
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null);
+        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
         var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert

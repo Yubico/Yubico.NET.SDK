@@ -97,16 +97,18 @@ public sealed class ManagementSession<TConnection>(
                 throw new BadResponseException("Invalid length");
 
             var pageTlvs = TlvHelper.Decode(encodedResult.Span[1..]);
-             var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
-             hasMoreData = moreData?.Length == 1 && moreData.GetValueSpan()[0] == 1;
+            allPagesTlvs.AddRange(pageTlvs);
 
-            // Transfer ownership of Tlv objects to allPagesTlvs
-             allPagesTlvs.AddRange(pageTlvs);
+            var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
+            if (moreData is null)
+                break;
 
+            var moreDataValue = moreData.Value;
+            hasMoreData = moreData?.Length == 1 && moreDataValue.Span[0] == 1;
             ++page;
         }
 
-        using var allTlvs = new DisposableTlvCollection(allPagesTlvs);
+        using var allTlvs = new DisposableTlvList(allPagesTlvs);
         return DeviceInfo.CreateFromTlvs([.. allTlvs], _version);
     }
 

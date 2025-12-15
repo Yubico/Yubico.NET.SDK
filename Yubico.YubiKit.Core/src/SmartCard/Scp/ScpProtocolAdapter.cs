@@ -56,11 +56,9 @@ public class ScpProtocolAdapter : ISmartCardProtocol
         var response = await _scpProcessor.TransmitAsync(command, true, cancellationToken)
             .ConfigureAwait(false);
 
-        if (!response.IsOK())
-            throw new InvalidOperationException(
-                $"Command failed with status: {response.SW1:X2}{response.SW2:X2}");
-
-        return response.Data;
+        return response.IsOK()
+            ? response.Data
+            : throw ApduException.FromResponse(response, command, "SCP command failed");
     }
 
     public async Task<ReadOnlyMemory<byte>> SelectAsync(
@@ -71,15 +69,12 @@ public class ScpProtocolAdapter : ISmartCardProtocol
         const byte P1_SELECT = 0x04;
         const byte P2_SELECT = 0x00;
 
-        var response = await _scpProcessor.TransmitAsync(
-                new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId },
-                false,
-                cancellationToken)
+        var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
+        var response = await _scpProcessor.TransmitAsync(selectCommand, false, cancellationToken)
             .ConfigureAwait(false);
 
         if (!response.IsOK())
-            throw new InvalidOperationException(
-                $"Select command failed with status: {response.SW1:X2}{response.SW2:X2}");
+            throw ApduException.FromResponse(response, selectCommand, "SCP SELECT command failed");
 
         return response.Data;
     }

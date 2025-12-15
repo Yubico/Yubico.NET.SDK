@@ -232,17 +232,16 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
     {
         hostChallenge ??= RandomNumberGenerator.GetBytes(8);
 
-        var resp = await processor.TransmitAsync(
-            new ApduCommand(
-                0x80,
-                InsInitializeUpdate,
-                keyParams.KeyReference.Kvn,
-                0x00,
-                hostChallenge),
-            false,
-            cancellationToken).ConfigureAwait(false);
+        var initCommand = new ApduCommand(
+            0x80,
+            InsInitializeUpdate,
+            keyParams.KeyReference.Kvn,
+            0x00,
+            hostChallenge);
+        var resp = await processor.TransmitAsync(initCommand, false, cancellationToken).ConfigureAwait(false);
 
-        if (!resp.IsOK()) throw new ApduException($"INITIALIZE UPDATE failed with SW=0x{resp.SW:X4}");
+        if (!resp.IsOK())
+            throw ApduException.FromResponse(resp, initCommand, "SCP03 INITIALIZE UPDATE failed");
 
         var responseData = resp.Data.Span;
         var diversificationData = responseData[..10];
@@ -317,17 +316,15 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
             {
                 var certData = keyParams.Certificates[i].GetRawCertData();
                 var p2 = (byte)(oceRef.Kid | (i < n ? Scp11MoreFragmentsFlag : 0x00));
-                var resp = await processor.TransmitAsync(
-                    new ApduCommand(
-                        0x80,
-                        InsPerformSecurityOperation,
-                        oceRef.Kvn,
-                        p2,
-                        certData),
-                    false,
-                    cancellationToken).ConfigureAwait(false);
+                var certCommand = new ApduCommand(
+                    0x80,
+                    InsPerformSecurityOperation,
+                    oceRef.Kvn,
+                    p2,
+                    certData);
+                var resp = await processor.TransmitAsync(certCommand, false, cancellationToken).ConfigureAwait(false);
                 if (resp.SW != SWConstants.Success)
-                    throw new ApduException($"PERFORM SECURITY OPERATION failed {resp.SW}");
+                    throw ApduException.FromResponse(resp, certCommand, "SCP11 PERFORM SECURITY OPERATION failed");
             }
         }
 
@@ -366,18 +363,16 @@ internal sealed class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSta
             ? InsInternalAuthenticate
             : InsExternalAuthenticate;
 
-        var response = await processor.TransmitAsync(
-            new ApduCommand(
-                0x80,
-                ins,
-                keyParams.KeyReference.Kvn,
-                keyParams.KeyReference.Kid,
-                data),
-            false,
-            cancellationToken).ConfigureAwait(false);
+        var authCommand = new ApduCommand(
+            0x80,
+            ins,
+            keyParams.KeyReference.Kvn,
+            keyParams.KeyReference.Kid,
+            data);
+        var response = await processor.TransmitAsync(authCommand, false, cancellationToken).ConfigureAwait(false);
 
-        if (response.SW != SWConstants.Success) 
-            throw new ApduException($"SCP11 authentication failed {response.SW}");
+        if (response.SW != SWConstants.Success)
+            throw ApduException.FromResponse(response, authCommand, "SCP11 authentication failed");
 
         using var tlvs = TlvHelper.Decode(response.Data.Span);
         var epkSdEckaTlv = tlvs[0];

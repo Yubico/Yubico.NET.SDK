@@ -82,8 +82,7 @@ internal class PcscProtocol : ISmartCardProtocol
 
         var response = await _processor.TransmitAsync(command, true, cancellationToken).ConfigureAwait(false);
         if (!response.IsOK())
-            throw new InvalidOperationException(
-                $"Command failed with status: {response.SW1:X2}{response.SW2:X2}");
+            throw ApduException.FromResponse(response, command, "APDU command failed");
 
         return response.Data;
     }
@@ -94,15 +93,11 @@ internal class PcscProtocol : ISmartCardProtocol
     {
         _logger.LogTrace("Selecting application ID: {ApplicationId}", Convert.ToHexString(applicationId.ToArray()));
 
-        var response =
-            await _processor.TransmitAsync(
-                new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId },
-                false,
-                cancellationToken).ConfigureAwait(false);
+        var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
+        var response = await _processor.TransmitAsync(selectCommand, false, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsOK())
-            throw new InvalidOperationException(
-                $"Select command failed with status: {response.SW1:X2}{response.SW2:X2}");
+            throw ApduException.FromResponse(response, selectCommand, "SELECT command failed");
 
         return response.Data;
     }

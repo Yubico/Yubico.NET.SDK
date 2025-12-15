@@ -91,10 +91,7 @@ internal static class ScpInitializer
             .ConfigureAwait(false);
 
         if (authResponse.SW != SWConstants.Success)
-            throw new ApduException($"EXTERNAL AUTHENTICATE failed with SW=0x{authResponse.SW:X4}")
-            {
-                SW = authResponse.SW
-            };
+            throw ApduException.FromResponse(authResponse, authCommand, "SCP03 EXTERNAL AUTHENTICATE failed");
 
         var dataEncryptor = state.GetDataEncryptor();
         return (scpProcessor, dataEncryptor);

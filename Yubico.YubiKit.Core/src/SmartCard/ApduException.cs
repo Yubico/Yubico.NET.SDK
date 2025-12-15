@@ -24,7 +24,7 @@ public class ApduException : Exception
     ///     Initializes a new instance of the <see cref="ApduException" /> class with a default message.
     /// </summary>
     public ApduException() :
-        base("ExceptionMessages.UnknownApduError")
+        base("APDU command failed with an unknown error")
     {
     }
 
@@ -93,4 +93,50 @@ public class ApduException : Exception
     ///     The second parameter of the command APDU when the exception occurred.
     /// </value>
     public byte? P2 { get; set; }
+
+    /// <summary>
+    ///     Creates an <see cref="ApduException" /> from an APDU response with a descriptive error message.
+    /// </summary>
+    /// <param name="response">The APDU response that indicates an error.</param>
+    /// <param name="command">Optional command that produced this response for additional context.</param>
+    /// <param name="additionalContext">Optional additional context to include in the error message.</param>
+    /// <returns>A new <see cref="ApduException" /> with status word and descriptive message.</returns>
+    public static ApduException FromResponse(
+        ApduResponse response,
+        ApduCommand? command = null,
+        string? additionalContext = null)
+    {
+        var statusMessage = SWConstants.GetStatusMessage(response.SW);
+        var message = additionalContext is not null
+            ? $"{additionalContext}: {statusMessage} (SW=0x{response.SW:X4})"
+            : $"{statusMessage} (SW=0x{response.SW:X4})";
+
+        var exception = new ApduException(message) { SW = response.SW };
+
+        if (command is null)
+            return exception;
+
+        exception.Cla = command.Value.Cla;
+        exception.Ins = command.Value.Ins;
+        exception.P1 = command.Value.P1;
+        exception.P2 = command.Value.P2;
+
+        return exception;
+    }
+
+    /// <summary>
+    ///     Creates an <see cref="ApduException" /> with a status word and optional context.
+    /// </summary>
+    /// <param name="sw">The status word.</param>
+    /// <param name="additionalContext">Optional additional context to include in the error message.</param>
+    /// <returns>A new <see cref="ApduException" /> with status word and descriptive message.</returns>
+    public static ApduException FromStatusWord(short sw, string? additionalContext = null)
+    {
+        var statusMessage = SWConstants.GetStatusMessage(sw);
+        var message = additionalContext is not null
+            ? $"{additionalContext}: {statusMessage} (SW=0x{sw:X4})"
+            : $"{statusMessage} (SW=0x{sw:X4})";
+
+        return new ApduException(message) { SW = sw };
+    }
 }

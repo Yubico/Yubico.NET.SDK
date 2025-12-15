@@ -37,10 +37,10 @@ public interface ISmartCardConnection : IConnection
     // byte[] getAtr();
 }
 
-internal class SmartCardConnection(IPcscDevice smartCardDevice, ILogger<SmartCardConnection>? logger = null)
+internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSmartCardConnection>? logger = null)
     : ISmartCardConnection
 {
-    private readonly ILogger<SmartCardConnection> _logger = logger ?? NullLogger<SmartCardConnection>.Instance;
+    private readonly ILogger<UsbSmartCardConnection> _logger = logger ?? NullLogger<UsbSmartCardConnection>.Instance;
     private SCardCardHandle? _cardHandle;
     private SCardContext? _context;
     private bool _disposed;
@@ -68,7 +68,7 @@ internal class SmartCardConnection(IPcscDevice smartCardDevice, ILogger<SmartCar
         ArgumentNullException.ThrowIfNull(_context);
         ArgumentNullException.ThrowIfNull(_cardHandle);
 
-        var outputBuffer = new byte[512]; // Todo, wont work for large APDUs
+        var outputBuffer = new byte[512]; // TODO. How will we know expected outputBuffer size?
         var bytesReceived = 0;
         var buffer = outputBuffer;
 
@@ -89,8 +89,8 @@ internal class SmartCardConnection(IPcscDevice smartCardDevice, ILogger<SmartCar
         return (ReadOnlyMemory<byte>)outputBuffer;
     }
 
-    public Transport Transport => Transport.Usb; // TODO determine transport
-    public bool SupportsExtendedApdu() => true; // TODO determine who supports extended APDUs
+    public Transport Transport => Transport.Usb; // TODO determine transport, currently only supports USB
+    public bool SupportsExtendedApdu() => true; // TODO determine who supports extended APDUs https://yubico.atlassian.net/browse/YESDK-1499
 
     #endregion
 
@@ -133,19 +133,18 @@ internal class SmartCardConnection(IPcscDevice smartCardDevice, ILogger<SmartCar
             throw new SCardException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.SCardCardCantConnect",
+                    "ExceptionMessages.SCardCardCantConnect {0}",
                     readerName),
                 result);
 
         return (context, cardHandle, activeProtocol);
     }
 
-    public static async Task<SmartCardConnection> CreateAsync(
+    public static ValueTask CreateAsync(
         IPcscDevice smartCardDevice,
-        CancellationToken cancellationToken = default, ILogger<SmartCardConnection>? logger = null)
+        CancellationToken cancellationToken = default, ILogger<UsbSmartCardConnection>? logger = null)
     {
-        var connection = new SmartCardConnection(smartCardDevice, logger);
-        await connection.InitializeAsync(cancellationToken).ConfigureAwait(false);
-        return connection;
+        var connection = new UsbSmartCardConnection(smartCardDevice, logger);
+        return connection.InitializeAsync(cancellationToken);
     }
 }

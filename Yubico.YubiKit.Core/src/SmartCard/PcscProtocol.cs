@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.SmartCard;
@@ -52,13 +53,12 @@ internal class PcscProtocol : ISmartCardProtocol
     internal readonly byte InsSendRemaining;
     private IApduProcessor _processor;
 
-
     public PcscProtocol(
-        ILogger<PcscProtocol> logger,
         ISmartCardConnection connection,
-        ReadOnlyMemory<byte> insSendRemaining = default)
+        ReadOnlyMemory<byte> insSendRemaining = default, 
+        ILogger<PcscProtocol>? logger = null)
     {
-        _logger = logger;
+        _logger = logger ?? NullLogger<PcscProtocol>.Instance;
         _connection = connection;
         InsSendRemaining = insSendRemaining.Length > 0 ? insSendRemaining.Span[0] : INS_SEND_REMAINING;
         _processor = BuildBaseProcessor();

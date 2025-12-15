@@ -81,10 +81,9 @@ internal class PcscProtocol : ISmartCardProtocol
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
 
         var response = await _processor.TransmitAsync(command, true, cancellationToken).ConfigureAwait(false);
-        if (!response.IsOK())
-            throw ApduException.FromResponse(response, command, "APDU command failed");
-
-        return response.Data;
+        return !response.IsOK()
+            ? throw ApduException.FromResponse(response, command, "APDU command failed")
+            : response.Data;
     }
 
     public async Task<ReadOnlyMemory<byte>> SelectAsync(
@@ -95,11 +94,9 @@ internal class PcscProtocol : ISmartCardProtocol
 
         var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
         var response = await _processor.TransmitAsync(selectCommand, false, cancellationToken).ConfigureAwait(false);
-
-        if (!response.IsOK())
-            throw ApduException.FromResponse(response, selectCommand, "SELECT command failed");
-
-        return response.Data;
+        return !response.IsOK()
+            ? throw ApduException.FromResponse(response, selectCommand, "SELECT command failed")
+            : response.Data;
     }
 
     public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration)

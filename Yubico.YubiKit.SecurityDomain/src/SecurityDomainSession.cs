@@ -619,7 +619,7 @@ public sealed class SecurityDomainSession(
                 new Tlv(TagKidKvn, keyReference.AsBytes.Span)).Span);
 
         // Send store data command
-        await StoreDataAsync(caIssuerData.AsMemory()).ConfigureAwait(false);
+        await StoreDataAsync(caIssuerData.AsMemory(), cancellationToken).ConfigureAwait(false);
 
         logger.LogInformation("CA issuer SKI stored (KeyReference: {KeyReference})", keyReference);
     }

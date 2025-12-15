@@ -59,9 +59,10 @@ public sealed class ManagementSession<TConnection>(
     {
         logger ??= NullLogger<ManagementSession<TConnection>>.Instance;
         var protocolFactory = PcscProtocolFactory<TConnection>.Create();
-        var session = new ManagementSession<TConnection>(connection, protocolFactory, logger, scpKeyParams);
 
+        var session = new ManagementSession<TConnection>(connection, protocolFactory, logger, scpKeyParams);
         await session.InitializeAsync(cancellationToken).ConfigureAwait(false);
+
         return session;
     }
 
@@ -83,8 +84,6 @@ public sealed class ManagementSession<TConnection>(
 
     public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
-        // EnsureSupports(FeatureDeviceInfo);
-
         byte page = 0;
         var allPagesTlvs = new List<Tlv>();
 

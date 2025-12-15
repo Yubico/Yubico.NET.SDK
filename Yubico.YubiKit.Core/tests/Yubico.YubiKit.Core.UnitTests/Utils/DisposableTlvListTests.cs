@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Utils;
+using System.Linq;
 
 namespace Yubico.YubiKit.Core.UnitTests.Utils;
 
@@ -117,6 +118,102 @@ public class DisposableTlvListTests
 
         // Assert
         Assert.Equal([0x01, 0x02, 0x03], tags);
+    }
+
+    [Fact]
+    public void Dispose_CascadesToItems_ZeroesAndResetsState()
+    {
+        // Arrange
+        var tlv1 = new Tlv(0x5A, new byte[] { 0xAA, 0xBB });
+        var tlv2 = new Tlv(0x9F33, new byte[] { 0xCC });
+
+        // Sanity: pre-dispose values are non-zero
+        Assert.False(tlv1.AsSpan().ToArray().All(b => b == 0));
+        Assert.False(tlv2.AsSpan().ToArray().All(b => b == 0));
+
+        using (var list = new DisposableTlvList(tlv1, tlv2))
+        {
+            // Act
+            list.Dispose();
+        }
+
+        // Assert: each TLV was disposed (zeroed and state reset)
+        Assert.Equal(0, tlv1.Tag);
+        Assert.Equal(0, tlv1.Length);
+        Assert.True(tlv1.AsSpan().ToArray().All(b => b == 0));
+
+        Assert.Equal(0, tlv2.Tag);
+        Assert.Equal(0, tlv2.Length);
+        Assert.True(tlv2.AsSpan().ToArray().All(b => b == 0));
+    }
+
+    [Fact]
+    public void Dispose_IsIdempotent_OnCollection()
+    {
+        // Arrange
+        var tlv1 = new Tlv(0x01, new byte[] { 0x11 });
+        var tlv2 = new Tlv(0x02, new byte[] { 0x22 });
+
+        using var collection = new DisposableTlvList(tlv1, tlv2);
+
+        // Act
+        collection.Dispose();
+        collection.Dispose();
+
+        // Assert: still disposed and items remain zeroed
+        Assert.True(tlv1.AsSpan().ToArray().All(b => b == 0));
+        Assert.True(tlv2.AsSpan().ToArray().All(b => b == 0));
+        Assert.Equal(0, tlv1.Length);
+        Assert.Equal(0, tlv2.Length);
+    }
+
+    [Fact]
+    public void Enumerate_AfterDispose_ItemsAreZeroed_NoThrow()
+    {
+        // Arrange
+        var tlv1 = new Tlv(0x10, new byte[] { 0x01, 0x02 });
+        var tlv2 = new Tlv(0x11, new byte[] { 0x03 });
+        var collection = new DisposableTlvList(tlv1, tlv2);
+
+        // Act
+        collection.Dispose();
+
+        // Assert: iteration still works and items are already zeroed
+        foreach (var tlv in collection)
+        {
+            Assert.Equal(0, tlv.Tag);
+            Assert.Equal(0, tlv.Length);
+            Assert.True(tlv.AsSpan().ToArray().All(b => b == 0));
+        }
+    }
+
+    [Fact]
+    public void Decode_DisposeOfReturnedList_CascadesToItems()
+    {
+        // Arrange: two TLVs 5A 01 AA | 9F33 01 FF
+        var input = new byte[] { 0x5A, 0x01, 0xAA, 0x9F, 0x33, 0x01, 0xFF };
+
+        // Act
+        var list = TlvHelper.Decode(input);
+
+        // Keep strong references to items for assertions after dispose
+        var first = list[0];
+        var second = list[1];
+
+        // Sanity pre-dispose
+        Assert.NotEqual(0, first.Tag);
+        Assert.NotEqual(0, second.Tag);
+
+        list.Dispose();
+
+        // Assert: items were disposed by list
+        Assert.Equal(0, first.Tag);
+        Assert.Equal(0, first.Length);
+        Assert.True(first.AsSpan().ToArray().All(b => b == 0));
+
+        Assert.Equal(0, second.Tag);
+        Assert.Equal(0, second.Length);
+        Assert.True(second.AsSpan().ToArray().All(b => b == 0));
     }
 
     [Fact]

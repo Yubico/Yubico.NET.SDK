@@ -37,8 +37,9 @@ public static class TlvHelper
         var buffer = tlvData;
         while (!buffer.IsEmpty)
         {
-            var tlv = Tlv.Create(buffer);
-            tlvs.Add(tlv);
+            // Parse and advance the buffer to avoid infinite loop
+            var (tag, _, value) = Tlv.ParseData(ref buffer);
+            tlvs.Add(new Tlv(tag, value));
         }
 
         return new DisposableTlvList(tlvs);

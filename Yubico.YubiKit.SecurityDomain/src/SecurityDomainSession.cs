@@ -99,7 +99,7 @@ public sealed class SecurityDomainSession : ApplicationSession
     /// <exception cref="InvalidOperationException">
     ///     If the data encryption key has not been set on the session keys.
     /// </exception>
-    private DataEncryptor EncryptData => _baseProtocol is ScpProtocolAdapter scpConnection
+    private DataEncryptor EncryptData => _protocol is ScpProtocolAdapter scpConnection
         ? scpConnection.GetDataEncryptor()
         : throw new InvalidOperationException("No data encryptor available for secure connection.");
 
@@ -135,7 +135,7 @@ public sealed class SecurityDomainSession : ApplicationSession
             .ConfigureAwait(false);
 
         // Security Domain is available on firmware 5.3.0 and newer.
-        baseProtocol.Configure(FirmwareVersion.V5_3_0);
+        baseProtocol.Configure(FirmwareVersion.V5_3_0); // TODO detect actual version from Management???
 
         _protocol = _scpKeyParams is not null
             ? await baseProtocol

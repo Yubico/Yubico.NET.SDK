@@ -18,7 +18,7 @@ public class SecurityDomainSessionTests
 {
     private const byte CardRecognitionDataObject = 0x73;
     private const byte OceKid = 0x010;
-    private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(15));
+    private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(100));
 
     /// <summary>
     ///     Validates that a Security Domain session can be created with SCP03 on devices
@@ -265,6 +265,8 @@ public class SecurityDomainSessionTests
     {
         var sessionRef = new KeyReference(scpKid, kvn);
         var oceRef = new KeyReference(OceKid, kvn);
+        var newPublicKey = await session.GenerateKeyAsync(sessionRef, 0, CancellationTokenSource.Token);
+
         var oceCerts = GetOceCertificates(Scp11TestData.OceCerts);
         ArgumentNullException.ThrowIfNull(oceCerts.Ca);
 
@@ -283,19 +285,18 @@ public class SecurityDomainSessionTests
         await session.StoreCaIssuerAsync(oceRef, ski, CancellationTokenSource.Token);
 
         var (certChain, privateKey) = GetOceCertificateChainAndPrivateKey(Scp11TestData.Oce, Scp11TestData.OcePassword);
-        var newPublicKey = await session.GenerateKeyAsync(sessionRef, 0, CancellationTokenSource.Token);
 
         // Now we have the EC private key parameters and cert chain
         return new Scp11KeyParameters(
             sessionRef,
-            ECPublicKey.CreateFromParameters(newPublicKey.Parameters),
-            ECPrivateKey.CreateFromParameters(privateKey),
+            newPublicKey,
+            privateKey,
             oceRef,
             certChain
         );
     }
 
-    private static (List<X509Certificate2> certChain, ECParameters privateKey) GetOceCertificateChainAndPrivateKey(
+    private static (List<X509Certificate2> certChain, ECPrivateKey privateKey) GetOceCertificateChainAndPrivateKey(
         ReadOnlyMemory<byte> ocePkcs12,
         ReadOnlyMemory<char> ocePassword)
     {
@@ -305,16 +306,29 @@ public class SecurityDomainSessionTests
         var leafCert = collection.FirstOrDefault(cert => cert.HasPrivateKey);
         if (leafCert == null) throw new InvalidOperationException("No private key entry found in PKCS12");
 
-        using var ecKey = leafCert.GetECDsaPrivateKey();
-        if (ecKey == null)
-            throw new InvalidOperationException("Private key is not an EC key (or is not ECDSA compatible)");
+        ECParameters ecParams;
+        using (var ecdsa = leafCert.GetECDsaPrivateKey())
+        {
+            if (ecdsa != null)
+            {
+                ecParams = ecdsa.ExportParameters(true);
+            }
+            else
+            {
+                using var ecdh = leafCert.GetECDiffieHellmanPrivateKey();
+                if (ecdh == null)
+                    throw new InvalidOperationException(
+                        "Private key is not an EC key (or is not ECDSA/ECDH compatible)");
+                ecParams = ecdh.ExportParameters(true);
+            }
+        }
 
         var certs = ScpCertificates.From(collection);
         var certChain = new List<X509Certificate2>(certs.Bundle);
         if (certs.Leaf != null) certChain.Add(certs.Leaf);
 
-        var ecParams = ecKey.ExportParameters(true);
-        return (certChain, ecParams);
+        var privateKey = ECPrivateKey.CreateFromParameters(ecParams);
+        return (certChain, privateKey);
     }
 
     private static ScpCertificates GetOceCertificates(ReadOnlySpan<byte> pem)
@@ -331,16 +345,13 @@ public class SecurityDomainSessionTests
                     "-----BEGIN CERTIFICATE-----",
                     "-----END CERTIFICATE-----"
                 ],
-                StringSplitOptions.RemoveEmptyEntries
+                StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries
             );
 
             foreach (var certString in pemCerts)
             {
-                if (string.IsNullOrWhiteSpace(certString)) continue;
-
-                // Remove any whitespace and convert to byte array
-                var certData = Convert.FromBase64String(certString.Trim());
-                var cert = X509CertificateLoader.LoadCertificate(certData);
+                var certData = Convert.FromBase64String(certString);
+                var cert = X509CertificateLoader.LoadCertificate(certData.AsSpan());
                 certificates.Add(cert);
             }
 

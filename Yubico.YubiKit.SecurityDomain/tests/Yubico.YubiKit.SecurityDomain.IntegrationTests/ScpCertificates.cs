@@ -4,10 +4,6 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 
 public class ScpCertificates
 {
-    public X509Certificate2? Ca { get; }
-    public IReadOnlyList<X509Certificate2> Bundle { get; }
-    public X509Certificate2? Leaf { get; }
-
     private ScpCertificates(X509Certificate2? ca, IReadOnlyList<X509Certificate2> bundle, X509Certificate2? leaf)
     {
         Ca = ca;
@@ -15,81 +11,75 @@ public class ScpCertificates
         Leaf = leaf;
     }
 
+    public X509Certificate2? Ca { get; }
+    public IReadOnlyList<X509Certificate2> Bundle { get; }
+    public X509Certificate2? Leaf { get; }
+
     public static ScpCertificates From(IEnumerable<X509Certificate2>? certificates)
     {
-        if (certificates == null || !certificates.Any())
-        {
-            return new ScpCertificates(null, Array.Empty<X509Certificate2>(), null);
-        }
+        var certList = certificates?.ToList() ?? [];
+        if (certList.Count == 0) return new ScpCertificates(null, [], null);
 
-        var certList = certificates.ToList();
+        // Order the certificates: root CA first, then intermediates, then leaf
+        var orderedCerts = OrderCertificates(certList);
+
+        // Identify CA: the first cert if it's self-signed
         X509Certificate2? ca = null;
-        byte[]? seenSerial = null;
-
-        // Order certificates with the Root CA on top
-        var ordered = new List<X509Certificate2> { certList[0] };
-        certList.RemoveAt(0);
-
-        while (certList.Count > 0)
+        if (orderedCerts.Count > 0 && IsSelfSigned(orderedCerts[0]))
         {
-            var head = ordered[0];
-            var tail = ordered[^1];
-            var cert = certList[0];
-            certList.RemoveAt(0);
-
-            if (IsIssuedBy(cert, cert))
-            {
-                ordered.Insert(0, cert);
-                ca = ordered[0];
-                continue;
-            }
-
-            if (IsIssuedBy(cert, tail))
-            {
-                ordered.Add(cert);
-                continue;
-            }
-
-            if (IsIssuedBy(head, cert))
-            {
-                ordered.Insert(0, cert);
-                continue;
-            }
-
-            if (seenSerial != null && cert.GetSerialNumber().SequenceEqual(seenSerial))
-            {
-                throw new InvalidOperationException($"Cannot decide the order of {cert} in {string.Join(", ", ordered)}");
-            }
-
-            // This cert could not be ordered, try to process rest of certificates
-            // but if you see this cert again fail because the cert chain is not complete
-            certList.Add(cert);
-            seenSerial = cert.GetSerialNumber();
+            ca = orderedCerts[0];
+            orderedCerts.RemoveAt(0);
         }
 
-        // Find ca and leaf
-        if (ca != null)
-        {
-            ordered.RemoveAt(0);
-        }
-
+        // Identify leaf: the last cert if it has DigitalSignature key usage
         X509Certificate2? leaf = null;
-        if (ordered.Count > 0)
+        if (orderedCerts.Count > 0 && HasDigitalSignature(orderedCerts[^1]))
         {
-            var lastCert = ordered[^1];
-            var keyUsage = lastCert.Extensions.OfType<X509KeyUsageExtension>().FirstOrDefault()?.KeyUsages ?? default;
-            if (keyUsage.HasFlag(X509KeyUsageFlags.DigitalSignature))
-            {
-                leaf = lastCert;
-                ordered.RemoveAt(ordered.Count - 1);
-            }
+            leaf = orderedCerts[^1];
+            orderedCerts.RemoveAt(orderedCerts.Count - 1);
         }
 
-        return new ScpCertificates(ca, ordered, leaf);
+        // Remaining certs are the bundle (intermediates)
+        return new ScpCertificates(ca, orderedCerts, leaf);
     }
 
-    private static bool IsIssuedBy(X509Certificate2 subjectCert, X509Certificate2 issuerCert)
+    private static List<X509Certificate2> OrderCertificates(List<X509Certificate2> certList)
     {
-        return subjectCert.IssuerName.RawData.SequenceEqual(issuerCert.SubjectName.RawData);
+        if (certList.Count == 0) return [];
+
+        // Find the root certificate (self-signed)
+        var root = certList.FirstOrDefault(IsSelfSigned);
+        if (root == null) throw new InvalidOperationException("No root certificate found in the collection");
+
+        var ordered = new List<X509Certificate2> { root };
+        certList.Remove(root);
+
+        // Build the chain by following issuer-subject links
+        while (certList.Count > 0)
+        {
+            var next = certList.FirstOrDefault(c => IsIssuedBy(c, ordered[^1]));
+            if (next == null) break; // No more certificates in the chain
+
+            ordered.Add(next);
+            certList.Remove(next);
+        }
+
+        // If there are leftover certificates, they are not part of the chain
+        if (certList.Count > 0)
+            throw new InvalidOperationException(
+                $"Certificates not part of the chain: {string.Join(", ", certList.Select(c => c.Subject))}");
+
+        return ordered;
+    }
+
+    private static bool IsIssuedBy(X509Certificate2 subjectCert, X509Certificate2 issuerCert) =>
+        subjectCert.IssuerName.RawData.SequenceEqual(issuerCert.SubjectName.RawData);
+
+    private static bool IsSelfSigned(X509Certificate2 cert) => IsIssuedBy(cert, cert);
+
+    private static bool HasDigitalSignature(X509Certificate2 cert)
+    {
+        var keyUsage = cert.Extensions.OfType<X509KeyUsageExtension>().FirstOrDefault()?.KeyUsages ?? default;
+        return keyUsage.HasFlag(X509KeyUsageFlags.DigitalSignature);
     }
 }

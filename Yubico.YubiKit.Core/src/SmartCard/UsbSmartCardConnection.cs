@@ -45,18 +45,50 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
     private SCardContext? _context;
     private bool _disposed;
     private SCARD_PROTOCOL? _protocol;
+    private bool _transactionActive;
 
     #region ISmartCardConnection Members
 
     public void Dispose()
     {
         if (_disposed) return;
-
-        _cardHandle?.Dispose();
-        _context?.Dispose();
-        _cardHandle = null!;
-        _context = null!;
         _disposed = true;
+
+        if (_transactionActive && _cardHandle is not null && !_cardHandle.IsInvalid)
+        {
+            try
+            {
+                var result = NativeMethods.SCardEndTransaction(_cardHandle, SCARD_DISPOSITION.LEAVE_CARD);
+                if (result != ErrorCode.SCARD_S_SUCCESS)
+                    _logger.LogDebug("SCardEndTransaction returned {ErrorCode} during dispose", result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to end transaction during dispose");
+            }
+            _transactionActive = false;
+        }
+
+        try
+        {
+            _cardHandle?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to dispose card handle for reader {ReaderName}", smartCardDevice.ReaderName);
+        }
+
+        try
+        {
+            _context?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to dispose SCard context for reader {ReaderName}", smartCardDevice.ReaderName);
+        }
+
+        _cardHandle = null;
+        _context = null;
     }
 
     public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
@@ -94,20 +126,30 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
 
     #endregion
 
-    public ValueTask InitializeAsync(CancellationToken cancellationToken)
+    public async ValueTask InitializeAsync(CancellationToken cancellationToken)
     {
         _logger.LogDebug("Initializing smart card connection to reader {ReaderName}", smartCardDevice.ReaderName);
-        var task = Task.Run(() =>
-        {
-            (_context, _cardHandle, _protocol) = GetConnection(smartCardDevice.ReaderName);
-        }, cancellationToken);
 
-        _logger.LogDebug("Smart card connection initialized to reader {ReaderName}", smartCardDevice.ReaderName);
-        return new ValueTask(task);
+        try
+        {
+            await Task.Run(() =>
+            {
+                (_context, _cardHandle, _protocol) = GetConnection(smartCardDevice.ReaderName);
+            }, cancellationToken).ConfigureAwait(false);
+
+            _logger.LogDebug("Smart card connection initialized to reader {ReaderName}", smartCardDevice.ReaderName);
+        }
+        catch
+        {
+            _cardHandle?.Dispose();
+            _context?.Dispose();
+            _cardHandle = null;
+            _context = null;
+            throw;
+        }
     }
 
-    private static
-        (SCardContext Context, SCardCardHandle CardHandle, SCARD_PROTOCOL Protocol)
+    private static (SCardContext Context, SCardCardHandle CardHandle, SCARD_PROTOCOL Protocol)
         GetConnection(string readerName)
     {
         var result = NativeMethods.SCardEstablishContext(SCARD_SCOPE.USER, out var context);
@@ -116,35 +158,37 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
                 "ExceptionMessages.SCardCantEstablish",
                 result);
 
-        var shareMode = SCARD_SHARE.SHARED;
-        if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesExclusively, out var isEnabled) &&
-            isEnabled)
-            shareMode = SCARD_SHARE.EXCLUSIVE;
+        try
+        {
+            var shareMode = SCARD_SHARE.SHARED;
+            if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesExclusively, out var isEnabled) &&
+                isEnabled)
+                shareMode = SCARD_SHARE.EXCLUSIVE;
 
-        result = NativeMethods.SCardConnect(
-            context,
-            readerName,
-            shareMode,
-            SCARD_PROTOCOL.Tx,
-            out var cardHandle,
-            out var activeProtocol);
+            result = NativeMethods.SCardConnect(
+                context,
+                readerName,
+                shareMode,
+                SCARD_PROTOCOL.Tx,
+                out var cardHandle,
+                out var activeProtocol);
 
-        if (result != ErrorCode.SCARD_S_SUCCESS)
-            throw new SCardException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    "ExceptionMessages.SCardCardCantConnect {0}",
-                    readerName),
-                result);
+            if (result != ErrorCode.SCARD_S_SUCCESS)
+                throw new SCardException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        "ExceptionMessages.SCardCardCantConnect {0}",
+                        readerName),
+                    result);
 
-        return (context, cardHandle, activeProtocol);
+            return (context, cardHandle, activeProtocol);
+        }
+        catch
+        {
+            context.Dispose();
+            throw;
+        }
     }
 
-    public static ValueTask CreateAsync(
-        IPcscDevice smartCardDevice,
-        CancellationToken cancellationToken = default, ILogger<UsbSmartCardConnection>? logger = null)
-    {
-        var connection = new UsbSmartCardConnection(smartCardDevice, logger);
-        return connection.InitializeAsync(cancellationToken);
-    }
+
 }

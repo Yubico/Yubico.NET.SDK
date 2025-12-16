@@ -32,7 +32,7 @@ internal class SCardCardHandle : SafeHandleZeroOrMinusOneIsInvalid
         SetHandle(handle);
     }
 
-    public SCARD_DISPOSITION ReleaseDisposition { get; set; } = SCARD_DISPOSITION.RESET_CARD;
+    public SCARD_DISPOSITION ReleaseDisposition { get; set; } = SCARD_DISPOSITION.LEAVE_CARD;
 
     protected override bool ReleaseHandle() =>
         NativeMethods.SCardDisconnect(handle, ReleaseDisposition) == ErrorCode.SCARD_S_SUCCESS;

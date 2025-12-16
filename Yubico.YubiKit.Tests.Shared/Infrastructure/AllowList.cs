@@ -66,5 +66,6 @@ public class AllowList
     /// </summary>
     /// <param name="serialNumber">The serial number to check.</param>
     /// <returns>True if the serial number is allowed; otherwise, false.</returns>
-    public bool IsDeviceAllowed(int serialNumber) => _allowedSerials.Contains(serialNumber);
+    public bool IsDeviceAllowed(int? serialNumber) =>
+        serialNumber is not null && _allowedSerials.Contains(serialNumber.Value);
 }

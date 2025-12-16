@@ -191,7 +191,6 @@ public class WithYubiKeyAttribute : DataAttribute
                 $"To fix: Connect a YubiKey matching the criteria, or adjust the test requirements.";
 
             Console.Error.WriteLine($"[WithYubiKey] {errorMessage}");
-
             throw new SkipException(errorMessage);
         }
 

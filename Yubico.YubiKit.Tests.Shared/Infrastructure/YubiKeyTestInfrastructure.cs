@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.PlatformInterop.Desktop.SCard;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 
@@ -251,36 +252,44 @@ internal static class YubiKeyTestInfrastructure
             var filteredCount = 0;
 
             foreach (var device in allDevices)
-            {
-                var deviceInfo = device.GetDeviceInfoAsync().GetAwaiter().GetResult();
-                if (deviceInfo.SerialNumber.HasValue)
+                try
                 {
-                    if (AllowList.IsDeviceAllowed(deviceInfo.SerialNumber.Value))
+                    DeviceInfo? deviceInfo = device.GetDeviceInfoAsync().GetAwaiter().GetResult();
+                    if (deviceInfo is { SerialNumber: not null })
                     {
-                        // Get device info
-                        var testDevice = new YubiKeyTestState(device, deviceInfo);
-                        authorizedDevices.Add(testDevice);
+                        if (AllowList.IsDeviceAllowed(deviceInfo.Value.SerialNumber))
+                        {
+                            // Get device info
+                            var testDevice = new YubiKeyTestState(device, deviceInfo.Value);
+                            authorizedDevices.Add(testDevice);
 
-                        // Add to cache for deserialization
-                        YubiKeyDeviceCache.AddDevice(testDevice);
+                            // Add to cache for deserialization
+                            YubiKeyDeviceCache.AddDevice(testDevice);
 
-                        Console.WriteLine(
-                            $"[YubiKey Infrastructure] Device SN:{deviceInfo.SerialNumber.Value} authorized " +
-                            $"(FW:{deviceInfo.FirmwareVersion}, {deviceInfo.FormFactor})");
+                            Console.WriteLine(
+                                $"[YubiKey Infrastructure] Device SN:{deviceInfo.Value.SerialNumber} authorized " +
+                                $"(FW:{deviceInfo.Value.FirmwareVersion}, {deviceInfo.Value.FormFactor})");
+                        }
+                        else
+                        {
+                            filteredCount++;
+                            Console.WriteLine(
+                                $"[YubiKey Infrastructure] Device SN:{deviceInfo.Value.SerialNumber} FILTERED (not in allow list)");
+                        }
                     }
                     else
                     {
                         filteredCount++;
-                        Console.WriteLine(
-                            $"[YubiKey Infrastructure] Device SN:{deviceInfo.SerialNumber.Value} FILTERED (not in allow list)");
+                        Console.WriteLine("[YubiKey Infrastructure] Device with unknown serial FILTERED");
                     }
                 }
-                else
+                catch (Exception ex) when (ex is SCardException scardException)
                 {
                     filteredCount++;
-                    Console.WriteLine("[YubiKey Infrastructure] Device with unknown serial FILTERED");
+                    Console.WriteLine(
+                        $"[YubiKey Infrastructure] DeviceId :{device.DeviceId} FILTERED " +
+                        $"(allow list check failed: {scardException.Message})");
                 }
-            }
 
             // Hard fail if no authorized devices
             if (authorizedDevices.Count == 0)

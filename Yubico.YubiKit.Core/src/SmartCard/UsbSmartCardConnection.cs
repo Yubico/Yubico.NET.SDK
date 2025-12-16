@@ -37,6 +37,19 @@ public interface ISmartCardConnection : IConnection
     // byte[] getAtr();
 }
 
+/// <summary>
+/// A smart card connection running over USB (via PC/SC).
+/// </summary>
+/// <remarks>
+/// <para>
+/// This class manages the lifecycle of PC/SC resources (<see cref="SCardContext"/> and <see cref="SCardCardHandle"/>).
+/// It implements robust disposal patterns to ensure resources are released even if initialization fails.
+/// </para>
+/// <para>
+/// By default, closing this connection leaves the card in its current state (<see cref="SCARD_DISPOSITION.LEAVE_CARD"/>)
+/// to prevent sharing violations with other applications or subsequent tests.
+/// </para>
+/// </remarks>
 internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSmartCardConnection>? logger = null)
     : ISmartCardConnection
 {

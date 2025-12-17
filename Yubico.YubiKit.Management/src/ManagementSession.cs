@@ -68,6 +68,7 @@ public sealed class ManagementSession : ApplicationSession
 
     public static async Task<ManagementSession> CreateAsync(
         IConnection connection,
+        ProtocolConfiguration? configuration = null,
         ILoggerFactory? loggerFactory = null,
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
@@ -75,18 +76,19 @@ public sealed class ManagementSession : ApplicationSession
         loggerFactory ??= NullLoggerFactory.Instance;
 
         var session = new ManagementSession(connection, loggerFactory, scpKeyParams);
-        await session.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
 
         return session;
     }
 
-    private async Task InitializeAsync(CancellationToken cancellationToken = default)
+    private async Task InitializeAsync(ProtocolConfiguration? configuration,
+        CancellationToken cancellationToken = default)
     {
         if (_isInitialized)
             return;
 
         _version = await GetVersionAsync(cancellationToken).ConfigureAwait(false);
-        _protocol.Configure(_version);
+        _protocol.Configure(_version, configuration);
 
         // Initialize SCP if key parameters were provided
         if (_scpKeyParams is not null && _protocol is ISmartCardProtocol smartCardProtocol)

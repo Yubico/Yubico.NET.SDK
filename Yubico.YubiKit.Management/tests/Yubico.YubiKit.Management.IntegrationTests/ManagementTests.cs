@@ -141,7 +141,7 @@ public class ManagementTests : IntegrationTestBase
         // Default SCP03 keys: 0x404142434445464748494A4B4C4D4E4F
         using var scpKeyParams = Scp03KeyParameters.Default;
 
-        using var connection = await device.ConnectAsync<ISmartCardConnection>();
+        await using var connection = await device.ConnectAsync<ISmartCardConnection>();
 
         // Create ManagementSession with SCP03 enabled
         using var mgmtSession = await ManagementSession.CreateAsync(

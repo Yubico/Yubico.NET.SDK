@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -23,31 +24,38 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 /// </summary>
 public static class SecurityDomainTestStateExtensions
 {
+    #region Nested type: $extension
+
     extension(YubiKeyTestState state)
     {
         public Task WithSecurityDomainSessionAsync(
             Func<SecurityDomainSession, Task> action,
+            ProtocolConfiguration? configuration = null,
             ScpKeyParameters? scpKeyParams = null,
             bool resetBeforeUse = true,
             CancellationToken cancellationToken = default) =>
             state.WithConnectionAsync(async connection =>
-                {
-                    // TODO refactor.. should Session dispose connection? It makes this thing difficult.
-                    using var resetSession = await SecurityDomainSession.CreateAsync(
-                            connection,
-                            cancellationToken: cancellationToken)
-                        .ConfigureAwait(false);
+            {
+                // TODO refactor.. should Session dispose connection? It makes this thing difficult.
+                using var resetSession = await SecurityDomainSession.CreateAsync(
+                        connection,
+                        configuration,
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
 
-                    if (resetBeforeUse)
-                        await resetSession.ResetAsync(cancellationToken).ConfigureAwait(false);
+                if (resetBeforeUse)
+                    await resetSession.ResetAsync(cancellationToken).ConfigureAwait(false);
 
-                    using var session = await SecurityDomainSession.CreateAsync(
-                            connection,
-                            scpKeyParams: scpKeyParams,
-                            cancellationToken: cancellationToken)
-                        .ConfigureAwait(false);
+                using var session = await SecurityDomainSession.CreateAsync(
+                        connection,
+                        configuration,
+                        scpKeyParams: scpKeyParams,
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
 
-                    await action(session).ConfigureAwait(false);
-                }, cancellationToken);
+                await action(session).ConfigureAwait(false);
+            }, cancellationToken);
     }
+
+    #endregion
 }

@@ -77,7 +77,7 @@ public class AdvancedManagementTests
         {
             var info = await mgmt.GetDeviceInfoAsync();
             Assert.True(info.FirmwareVersion.Major >= 5);
-        }, Scp03KeyParameters.Default);
+        }, scpKeyParams: Scp03KeyParameters.Default);
     }
 
     /// <summary>

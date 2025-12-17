@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
@@ -36,7 +37,7 @@ public class SecurityDomainSessionTests
                 Assert.NotNull(session);
                 return Task.CompletedTask;
             },
-            scpParams,
+            scpKeyParams: scpParams,
             cancellationToken: CancellationTokenSource.Token);
     }
 
@@ -129,7 +130,7 @@ public class SecurityDomainSessionTests
                 Assert.Equal(ECCurve.NamedCurves.nistP256.Oid.Value,
                     ecdh.ExportParameters(false).Curve.Oid.Value);
             },
-            Scp03KeyParameters.Default,
+            scpKeyParams: Scp03KeyParameters.Default,
             cancellationToken: CancellationTokenSource.Token,
             resetBeforeUse: true);
 
@@ -173,9 +174,9 @@ public class SecurityDomainSessionTests
                 info = await session.GetKeyInformationAsync(CancellationTokenSource.Token);
                 Assert.DoesNotContain(info.Keys, kr => kr is { Kid: kid, Kvn: kvn });
             },
-            Scp03KeyParameters.Default, // authenticate for key mgmt operations
-            true,
-            CancellationTokenSource.Token);
+            scpKeyParams: Scp03KeyParameters.Default, // authenticate for key mgmt operations
+            resetBeforeUse: true,
+            cancellationToken: CancellationTokenSource.Token);
     }
 
     [Theory]
@@ -191,9 +192,9 @@ public class SecurityDomainSessionTests
             {
                 keyParams = await LoadKeys(session, ScpKid.SCP11a, kvn);
             },
-            Scp03KeyParameters.Default, // authenticate for key mgmt operations
-            true,
-            CancellationTokenSource.Token
+            scpKeyParams: Scp03KeyParameters.Default, // authenticate for key mgmt operations
+            resetBeforeUse: true,
+            cancellationToken: CancellationTokenSource.Token
         );
 
         string[] serials =
@@ -208,7 +209,7 @@ public class SecurityDomainSessionTests
                 // Only the above serials shall work. 
                 await session.StoreAllowlistAsync(oceKeyRef, serials);
             },
-            keyParams,
+            scpKeyParams: keyParams,
             cancellationToken: CancellationTokenSource.Token
         );
 
@@ -217,7 +218,7 @@ public class SecurityDomainSessionTests
             {
                 await session.DeleteKeyAsync(new KeyReference(ScpKid.SCP11a, kvn));
             },
-            keyParams,
+            scpKeyParams: keyParams,
             cancellationToken: CancellationTokenSource.Token
         );
     }
@@ -229,32 +230,37 @@ public class SecurityDomainSessionTests
         var keyReference = new KeyReference(ScpKid.SCP11b, 0x02);
         Scp11KeyParameters? keyParameters = null;
 
+        var protocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true };
         await state.WithSecurityDomainSessionAsync(
             async session =>
             {
                 // Generate a new EC key on the host and import via PutKey
-                var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-                var privateKey = ECPrivateKey.CreateFromParameters(ecdsa.ExportParameters(true));
-                await session.PutKeyAsync(keyReference, privateKey);
+                // using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+                // using var privateKey = ECPrivateKey.CreateFromParameters(ecdsa.ExportParameters(true));
+                // using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+                // using var privateKey = ECPrivateKey.CreateFromEcdh(ecdh);
+                // var publicKey = ECPublicKey.CreateFromEcdh(ecdh);
+                var privateKey = ECPrivateKey.CreateFromValue(
+                    Convert.FromHexString("549D2A8A03E62DC829ADE4D6850DB9568475147C59EF238F122A08CF557CDB91"),
+                    KeyType.ECP256);
+                var publicKey = ECPublicKey.CreateFromParameters(privateKey.Parameters with { D = null });
+                keyParameters = new Scp11KeyParameters(keyReference, publicKey);
 
-                keyParameters = new Scp11KeyParameters(
-                    keyReference,
-                    ECPublicKey.CreateFromParameters(ecdsa.ExportParameters(false)));
+                await session.PutKeyAsync(keyReference, privateKey);
             },
-            Scp03KeyParameters.Default,
-            true,
-            CancellationTokenSource.Token
+            protocolConfiguration,
+            Scp03KeyParameters.Default
         );
 
 
         await state.WithSecurityDomainSessionAsync(
             async session =>
             {
-                // fingers crossed
+                await Task.CompletedTask;
             },
+            protocolConfiguration,
             keyParameters,
-            false,
-            CancellationTokenSource.Token
+            false
         );
     }
 

@@ -57,6 +57,7 @@ public static class YubiKeyTestStateExtensions
         /// </example>
         public async Task WithManagementAsync(
             Func<ManagementSession, DeviceInfo, Task> action,
+            ProtocolConfiguration? configuration = null,
             ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {
@@ -64,7 +65,7 @@ public static class YubiKeyTestStateExtensions
             ArgumentNullException.ThrowIfNull(action);
 
             using var session = await state.Device
-                .CreateManagementSessionAsync(scpKeyParams, cancellationToken: cancellationToken)
+                .CreateManagementSessionAsync(scpKeyParams, configuration, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
             await action(session, state.DeviceInfo).ConfigureAwait(false);
         }
@@ -73,10 +74,10 @@ public static class YubiKeyTestStateExtensions
         ///     Executes a synchronous action with a Management session.
         ///     Automatically handles connection and session lifecycle.
         /// </summary>
-        /// <param name="state">The test device.</param>
         /// <param name="action">
         ///     Synchronous action to execute with the management session and device info.
         /// </param>
+        /// <param name="configuration"></param>
         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <example>
@@ -94,6 +95,7 @@ public static class YubiKeyTestStateExtensions
         /// </example>
         public async Task WithManagementAsync(
             Action<ManagementSession, DeviceInfo> action,
+            ProtocolConfiguration? configuration = null,
             ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {
@@ -106,6 +108,7 @@ public static class YubiKeyTestStateExtensions
                     action(mgmt, info);
                     return Task.CompletedTask;
                 },
+                configuration,
                 scpKeyParams,
                 cancellationToken).ConfigureAwait(false);
         }
@@ -114,7 +117,6 @@ public static class YubiKeyTestStateExtensions
         ///     Executes an action with a SmartCard connection.
         ///     Automatically handles connection lifecycle.
         /// </summary>
-        /// <param name="state">The test device.</param>
         /// <param name="action">Action to execute with the connection.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <example>
@@ -138,8 +140,8 @@ public static class YubiKeyTestStateExtensions
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(action);
 
-            using var connection =
-                await state.Device.ConnectAsync<ISmartCardConnection>(cancellationToken).ConfigureAwait(false);
+            await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                .ConfigureAwait(false);
             await action(connection).ConfigureAwait(false);
         }
 

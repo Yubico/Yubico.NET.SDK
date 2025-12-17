@@ -73,7 +73,7 @@ public class Scp11X963KdfTests
         var keyAgreementData = new byte[32]; // Mock data
         RandomNumberGenerator.Fill(keyAgreementData);
 
-        var receipt = Scp11X963Kdf.GenerateOceReceipt(receiptVerificationKey, keyAgreementData);
+        var receipt = Scp11X963Kdf.GenerateOceReceiptCmac(receiptVerificationKey, keyAgreementData);
 
         Assert.Equal(16, receipt.Length); // CMAC output is 16 bytes for AES-128
     }
@@ -149,7 +149,7 @@ public class Scp11X963KdfTests
 
         // Compute oceReceipt (emulating YubiKey's receipt)
         var receiptVerificationKey = keys[0];
-        var oceReceipt = Scp11X963Kdf.GenerateOceReceipt(receiptVerificationKey, keyAgreementData);
+        var oceReceipt = Scp11X963Kdf.GenerateOceReceiptCmac(receiptVerificationKey, keyAgreementData);
 
         return oceReceipt.AsMemory();
     }

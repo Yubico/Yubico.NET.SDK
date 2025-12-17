@@ -90,7 +90,7 @@ public class PcscProtocolTests
 
         // Assert - Should use command chaining despite extended APDU support
         Assert.NotNull(protocol);
-        Assert.False(protocol.UseExtendedApdus);
+        Assert.False(protocol._useExtendedApdus);
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class PcscProtocolTests
 
         // Assert - Should use command chaining when connection doesn't support extended
         Assert.NotNull(protocol);
-        Assert.False(protocol.UseExtendedApdus);
+        Assert.False(protocol._useExtendedApdus);
     }
 
     [Fact]
@@ -122,7 +122,7 @@ public class PcscProtocolTests
 
         // Assert - Should use extended APDU processor
         Assert.NotNull(protocol);
-        Assert.True(protocol.UseExtendedApdus);
+        Assert.True(protocol._useExtendedApdus);
     }
 
     [Fact]

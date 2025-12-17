@@ -24,7 +24,7 @@ namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Scp;
 ///     Unit tests for ScpProtocolAdapter class.
 ///     Tests the decorator pattern implementation that wraps a protocol with SCP.
 /// </summary>
-public class ScpProtocolAdapterTests
+public class PcscProtocolScpTests
 {
     private readonly FakeSmartCardConnection _fakeConnection = new();
     private readonly FakeApduProcessor _fakeScpProcessor = new();
@@ -38,7 +38,7 @@ public class ScpProtocolAdapterTests
         var expectedData = new byte[] { 0x01, 0x02, 0x03 };
         _fakeScpProcessor.EnqueueResponse(0x90, 0x00, expectedData);
 
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
+        var adapter = new PcscProtocolScp(baseProtocol, _fakeScpProcessor, null!);
         var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act
@@ -57,7 +57,7 @@ public class ScpProtocolAdapterTests
         var responseData = new byte[] { 0x61, 0x10 };
         _fakeScpProcessor.EnqueueResponse(0x90, 0x00, responseData);
 
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
+        var adapter = new PcscProtocolScp(baseProtocol, _fakeScpProcessor, null!);
         var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
 
         // Act
@@ -74,7 +74,7 @@ public class ScpProtocolAdapterTests
         // Arrange
         var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
         DataEncryptor expectedEncryptor = data => data.ToArray(); // Simple pass-through encryptor
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, expectedEncryptor);
+        var adapter = new PcscProtocolScp(baseProtocol, _fakeScpProcessor, expectedEncryptor);
 
         // Act
         var result = adapter.GetDataEncryptor();
@@ -88,7 +88,7 @@ public class ScpProtocolAdapterTests
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
+        var adapter = new PcscProtocolScp(baseProtocol, _fakeScpProcessor, null!);
 
         // Act
         var result = adapter.GetDataEncryptor();
@@ -102,7 +102,7 @@ public class ScpProtocolAdapterTests
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
+        var adapter = new PcscProtocolScp(baseProtocol, _fakeScpProcessor, null!);
         var firmware = new FirmwareVersion(5, 7, 2);
 
         // Act - Should not throw
@@ -117,7 +117,7 @@ public class ScpProtocolAdapterTests
     {
         // Arrange
         var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
+        var adapter = new PcscProtocolScp(baseProtocol, _fakeScpProcessor, null!);
 
         // Act
         adapter.Dispose();
@@ -137,7 +137,7 @@ public class ScpProtocolAdapterTests
         var baseProtocol = new PcscProtocol(_fakeConnection, default, _logger);
         _fakeScpProcessor.EnqueueResponse(0x69, 0x82); // Security status not satisfied
 
-        var adapter = new ScpProtocolAdapter(baseProtocol, _fakeScpProcessor, null!);
+        var adapter = new PcscProtocolScp(baseProtocol, _fakeScpProcessor, null!);
         var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert

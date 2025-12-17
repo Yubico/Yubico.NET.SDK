@@ -60,7 +60,8 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
         CancellationToken cancellationToken)
     {
         // If SCP is not requested, pass through to delegate directly
-        if (!useScp) return await @delegate.TransmitAsync(command, false, cancellationToken).ConfigureAwait(false);
+        if (!useScp)
+            return await @delegate.TransmitAsync(command, false, cancellationToken).ConfigureAwait(false);
 
         byte[]? rentedMacData = null;
 
@@ -142,9 +143,9 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
             if (response.Data.Length > 0)
             {
                 var unmacdData = State.Unmac(response.Data.Span, response.SW);
-                Console.WriteLine($"[SCP DEBUG] Unmacd data length: {unmacdData.Length}");
-                Console.WriteLine($"[SCP DEBUG] Unmacd data: {Convert.ToHexString(unmacdData)}");
-                Console.WriteLine($"[SCP DEBUG] First byte (length field): {unmacdData[0]}");
+                // Console.WriteLine($"[SCP DEBUG] Unmacd data length: {unmacdData.Length}");
+                // Console.WriteLine($"[SCP DEBUG] Unmacd data: {Convert.ToHexString(unmacdData)}");
+                // Console.WriteLine($"[SCP DEBUG] First byte (length field): {unmacdData[0]}");
 
                 // Step 11: Decrypt response data if it was encrypted
                 Console.WriteLine($"[SCP DEBUG] encrypt={encrypt}, unmacdData.Length={unmacdData.Length}");
@@ -152,8 +153,8 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
                 {
                     Console.WriteLine("[SCP DEBUG] Decrypting response data...");
                     var decryptedData = State.Decrypt(unmacdData);
-                    Console.WriteLine($"[SCP DEBUG] Decrypted data length: {decryptedData.Length}");
-                    Console.WriteLine($"[SCP DEBUG] Decrypted data: {Convert.ToHexString(decryptedData)}");
+                    // Console.WriteLine($"[SCP DEBUG] Decrypted data length: {decryptedData.Length}");
+                    // Console.WriteLine($"[SCP DEBUG] Decrypted data: {Convert.ToHexString(decryptedData)}");
                     return new ApduResponse(decryptedData, response.SW);
                 }
 

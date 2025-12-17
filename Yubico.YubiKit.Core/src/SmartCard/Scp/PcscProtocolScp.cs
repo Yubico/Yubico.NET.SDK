@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 ///     Decorator that wraps an ISmartCardProtocol with SCP (Secure Channel Protocol) functionality.
 ///     All APDU transmissions are encrypted and MACed through the SCP processor.
 /// </summary>
-public class ScpProtocolAdapter : ISmartCardProtocol
+public class PcscProtocolScp : ISmartCardProtocol
 {
     private readonly ISmartCardProtocol _baseProtocol;
     private readonly DataEncryptor _dataEncryptor;
@@ -32,7 +32,7 @@ public class ScpProtocolAdapter : ISmartCardProtocol
     /// <param name="baseProtocol">The underlying base protocol</param>
     /// <param name="scpProcessor">The SCP-wrapped APDU processor</param>
     /// <param name="dataEncryptor">The data encryptor for this SCP session (may be null)</param>
-    public ScpProtocolAdapter(
+    public PcscProtocolScp(
         ISmartCardProtocol baseProtocol,
         IApduProcessor scpProcessor,
         DataEncryptor dataEncryptor)

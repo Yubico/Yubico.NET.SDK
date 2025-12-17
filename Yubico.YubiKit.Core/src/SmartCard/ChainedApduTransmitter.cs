@@ -14,8 +14,8 @@
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
-internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFormatter formatter)
-    : ExtendedApduProcessor(connection, formatter)
+internal class ChainedApduTransmitter(ISmartCardConnection connection, IApduFormatter formatter)
+    : ApduTransmitter(connection, formatter)
 {
     private const int HasMoreData = 0x10;
     private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
@@ -25,7 +25,8 @@ internal class CommandChainingProcessor(ISmartCardConnection connection, IApduFo
     {
         var data = command.Data;
         if (data.Length <= ShortApduMaxChunk)
-            return await base.TransmitAsync(command, useScp, cancellationToken).ConfigureAwait(false);
+            return await base.TransmitAsync(command, useScp, cancellationToken)
+                .ConfigureAwait(false); // Delegate to regular APDU transmitter
 
         var offset = 0;
         while (offset + ShortApduMaxChunk < data.Length)

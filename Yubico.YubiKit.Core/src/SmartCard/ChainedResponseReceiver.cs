@@ -16,13 +16,13 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
-internal class ChainedResponseProcessor(
+internal class ChainedResponseReceiver(
     FirmwareVersion? firmwareVersion,
     IApduProcessor apduTransmitter,
     byte insSendRemaining) : IApduProcessor
 {
-    private const byte SW1_HAS_MORE_DATA = 0x61;
-    private readonly ApduCommand GetMoreDataApdu = new(0, insSendRemaining, 0, 0);
+    private const byte Sw1HasMoreData = 0x61;
+    private readonly ApduCommand _getMoreDataApdu = new(0, insSendRemaining, 0, 0);
 
     public FirmwareVersion? FirmwareVersion { get; } = firmwareVersion;
 
@@ -36,10 +36,10 @@ internal class ChainedResponseProcessor(
         using var ms = new MemoryStream();
 
         var response = await apduTransmitter.TransmitAsync(command, useScp, cancellationToken).ConfigureAwait(false);
-        while (response.SW1 == SW1_HAS_MORE_DATA)
+        while (response.SW1 == Sw1HasMoreData)
         {
             ms.Write(response.Data.Span);
-            response = await apduTransmitter.TransmitAsync(GetMoreDataApdu, useScp, cancellationToken)
+            response = await apduTransmitter.TransmitAsync(_getMoreDataApdu, useScp, cancellationToken)
                 .ConfigureAwait(false);
         }
 

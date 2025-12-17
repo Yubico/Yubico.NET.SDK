@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
-internal class ExtendedApduProcessor(ISmartCardConnection connection, IApduFormatter formatter) : IApduProcessor
+internal class ApduTransmitter(ISmartCardConnection connection, IApduFormatter formatter) : IApduProcessor
 {
     #region IApduProcessor Members
 

@@ -43,7 +43,8 @@ public static class DependencyInjection
             services.AddSingleton<ManagementSessionFactoryDelegate>(sp =>
             {
                 var loggerFactory = sp.GetService<ILoggerFactory>();
-                var protocolConfiguration = sp.GetService<ProtocolConfiguration>();
+                var protocolConfiguration =
+                    sp.GetService<ProtocolConfiguration>(); // TODO solve this properly, null exception for now
 
                 return (connection, scp, ct) =>
                     ManagementSession.CreateAsync(connection, protocolConfiguration, loggerFactory, scp, ct);
@@ -52,7 +53,8 @@ public static class DependencyInjection
             services.AddSingleton<SmartCardManagementSessionFactoryDelegate>(sp =>
             {
                 var loggerFactory = sp.GetService<ILoggerFactory>();
-                var protocolConfiguration = sp.GetService<ProtocolConfiguration>();
+                var protocolConfiguration = sp.GetService<ProtocolConfiguration>(); // TODO solve this properly
+
                 return (connection, scp, ct) =>
                     ManagementSession.CreateAsync(connection, protocolConfiguration, loggerFactory, scp, ct);
             });

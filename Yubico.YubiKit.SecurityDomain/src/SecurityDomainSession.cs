@@ -90,7 +90,7 @@ public sealed class SecurityDomainSession : ApplicationSession
 
     /// <summary>
     ///     Get the encryptor to encrypt any data for an SCP command.
-    ///     <seealso cref="ScpProtocolAdapter.GetDataEncryptor" />
+    ///     <seealso cref="PcscProtocolScp.GetDataEncryptor" />
     /// </summary>
     /// <returns>
     ///     An encryptor function that takes the plaintext as a parameter and
@@ -99,7 +99,7 @@ public sealed class SecurityDomainSession : ApplicationSession
     /// <exception cref="InvalidOperationException">
     ///     If the data encryption key has not been set on the session keys.
     /// </exception>
-    private DataEncryptor EncryptData => _protocol is ScpProtocolAdapter scpConnection
+    private DataEncryptor EncryptData => _protocol is PcscProtocolScp scpConnection
         ? scpConnection.GetDataEncryptor()
         : throw new InvalidOperationException("No data encryptor available for secure connection.");
 
@@ -108,6 +108,7 @@ public sealed class SecurityDomainSession : ApplicationSession
     /// </summary>
     public static async Task<SecurityDomainSession> CreateAsync(
         ISmartCardConnection connection,
+        ProtocolConfiguration? configuration = null,
         ILoggerFactory? loggerFactory = null,
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
@@ -115,27 +116,29 @@ public sealed class SecurityDomainSession : ApplicationSession
         loggerFactory ??= NullLoggerFactory.Instance;
         var session = new SecurityDomainSession(connection, loggerFactory, scpKeyParams);
 
-        await session.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
         return session;
     }
 
     /// <summary>
     ///     Ensures the Security Domain application is selected and secure messaging is configured if requested.
     /// </summary>
+    /// <param name="configuration"></param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    private async Task InitializeAsync(CancellationToken cancellationToken = default)
+    private async Task InitializeAsync(
+        ProtocolConfiguration? configuration = null,
+        CancellationToken cancellationToken = default)
     {
         if (_isInitialized)
             return;
 
         var baseProtocol = EnsureBaseProtocol();
-
         await baseProtocol
             .SelectAsync(ApplicationIds.SecurityDomain, cancellationToken)
             .ConfigureAwait(false);
 
         // Security Domain is available on firmware 5.3.0 and newer.
-        baseProtocol.Configure(FirmwareVersion.V5_3_0); // TODO detect actual version from Management???
+        baseProtocol.Configure(FirmwareVersion.V5_3_0, configuration); // TODO detect actual version from Management???
 
         _protocol = _scpKeyParams is not null
             ? await baseProtocol
@@ -143,6 +146,7 @@ public sealed class SecurityDomainSession : ApplicationSession
                 .ConfigureAwait(false)
             : baseProtocol;
 
+        // _protocol.Configure(FirmwareVersion.V5_3_0, configuration);
         _isInitialized = true;
     }
 
@@ -644,7 +648,7 @@ public sealed class SecurityDomainSession : ApplicationSession
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
-        await InitializeAsync(cancellationToken).ConfigureAwait(false);
+        await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
         var keyInformation = await GetKeyInformationAsync(cancellationToken).ConfigureAwait(false);
         if (keyInformation.Count == 0)
@@ -669,22 +673,17 @@ public sealed class SecurityDomainSession : ApplicationSession
         _protocol = null;
         _isInitialized = false;
 
-        await InitializeAsync(cancellationToken).ConfigureAwait(false);
+        await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     private ISmartCardProtocol EnsureBaseProtocol()
     {
-        if (_baseProtocol is not null)
+        if (_baseProtocol is not null) // Already initialized
             return _baseProtocol;
 
-        var protocol = PcscProtocolFactory<ISmartCardConnection>
+        var smartCardProtocol = PcscProtocolFactory<ISmartCardConnection> // TODO static dependency. Good bad?
             .Create(_loggerFactory)
             .Create(_connection);
-        if (protocol is not ISmartCardProtocol smartCardProtocol)
-        {
-            protocol.Dispose();
-            throw new NotSupportedException("Security Domain requires a smart card protocol implementation.");
-        }
 
         _baseProtocol = smartCardProtocol;
         return _baseProtocol;

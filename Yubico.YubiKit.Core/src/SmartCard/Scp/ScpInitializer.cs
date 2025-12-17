@@ -46,9 +46,11 @@ internal static class ScpInitializer
         {
             return keyParams switch
             {
-                Scp03KeyParameters scp03 => await InitScp03Async(baseProcessor, scp03, cancellationToken)
+                Scp03KeyParameters scp03Parameters => await InitScp03Async(baseProcessor, scp03Parameters,
+                        cancellationToken)
                     .ConfigureAwait(false),
-                Scp11KeyParameters scp11 => await InitScp11Async(baseProcessor, scp11, cancellationToken)
+                Scp11KeyParameters scp11Parameters => await InitScp11Async(baseProcessor, scp11Parameters,
+                        cancellationToken)
                     .ConfigureAwait(false),
                 _ => throw new ArgumentException($"Unsupported ScpKeyParams type: {keyParams.GetType().Name}",
                     nameof(keyParams))

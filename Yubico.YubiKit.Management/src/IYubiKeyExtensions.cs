@@ -92,6 +92,7 @@ public static class IYubiKeyExtensions
         ///     Optional SCP (Secure Channel Protocol) key parameters necessary to establish
         ///     a secure session with the YubiKey device.
         /// </param>
+        /// <param name="configuration"></param>
         /// <param name="loggerFactory">Optional logger factory used to create loggers for the session and protocol.</param>
         /// <param name="cancellationToken">
         ///     An optional token to cancel the operation.
@@ -102,11 +103,12 @@ public static class IYubiKeyExtensions
         /// </returns>
         public async Task<ManagementSession> CreateManagementSessionAsync(
             ScpKeyParameters? scpKeyParams = null,
+            ProtocolConfiguration? configuration = null,
             ILoggerFactory? loggerFactory = null,
             CancellationToken cancellationToken = default)
         {
             var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken).ConfigureAwait(false);
-            return await ManagementSession.CreateAsync(connection, loggerFactory, scpKeyParams,
+            return await ManagementSession.CreateAsync(connection, configuration, loggerFactory, scpKeyParams,
                 cancellationToken).ConfigureAwait(false);
         }
     }

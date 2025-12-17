@@ -43,13 +43,18 @@ public static class DependencyInjection
             services.AddSingleton<ManagementSessionFactoryDelegate>(sp =>
             {
                 var loggerFactory = sp.GetService<ILoggerFactory>();
-                return (connection, scp, ct) => ManagementSession.CreateAsync(connection, loggerFactory, scp, ct);
+                var protocolConfiguration = sp.GetService<ProtocolConfiguration>();
+
+                return (connection, scp, ct) =>
+                    ManagementSession.CreateAsync(connection, protocolConfiguration, loggerFactory, scp, ct);
             });
 
             services.AddSingleton<SmartCardManagementSessionFactoryDelegate>(sp =>
             {
                 var loggerFactory = sp.GetService<ILoggerFactory>();
-                return (connection, scp, ct) => ManagementSession.CreateAsync(connection, loggerFactory, scp, ct);
+                var protocolConfiguration = sp.GetService<ProtocolConfiguration>();
+                return (connection, scp, ct) =>
+                    ManagementSession.CreateAsync(connection, protocolConfiguration, loggerFactory, scp, ct);
             });
 
             services.AddYubiKeyManagerCore(configureOptions);

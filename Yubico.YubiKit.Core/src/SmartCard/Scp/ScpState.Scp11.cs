@@ -20,6 +20,18 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 
 internal partial class ScpState
 {
+    // SCP11 Constants
+    private const byte Scp11aTypeParam = 0x01;
+    private const byte Scp11bTypeParam = 0x00;
+    private const byte Scp11cTypeParam = 0x03;
+    private const byte Scp11MoreFragmentsFlag = 0x80;
+    private const byte Scp11KeyUsage = 0x3C; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
+    private const byte Scp11KeyType = 0x88; // AES
+
+    private const byte InsPerformSecurityOperation = 0x2A;
+    private const byte InsInternalAuthenticate = 0x88;
+    private const byte InsExternalAuthenticate = 0x82;
+
     public static async Task<ScpState> Scp11InitAsync(
         IApduProcessor processor,
         Scp11KeyParameters keyParams,
@@ -66,23 +78,32 @@ internal partial class ScpState
         using var outerTlv1 = new Tlv(0xA6, innerTlvs.Span);
         using var outerTlv2 = new Tlv(0x5F49, epkOceEcka.PublicPoint.Span);
         var outerTlvs = TlvHelper.EncodeList([outerTlv1, outerTlv2]);
-        var hostAuthenticateTlvEncodedData = outerTlvs;
+        var hostAuthenticateTlvBytes = outerTlvs;
 
         var ins = kid == ScpKid.SCP11b
             ? InsInternalAuthenticate
             : InsExternalAuthenticate;
 
-        var authCommand = new ApduCommand(
+        var authenticateCommand = new ApduCommand(
             0x80,
             ins,
             kvn,
             kid,
-            hostAuthenticateTlvEncodedData);
+            hostAuthenticateTlvBytes);
+
+        // WIP Notes: I am able to get this far, but the receipt verification is failing.
+        // The authCommand 1:1 matches the C# legacy code output, so the problem must be in:
+        // - DeriveSessionKeys() function
+        // - GetSharedSecret() function
+        // - GenerateOceReceipt() function
+        // - The transmission of the command to the YubiKey (even though the response is SW_SUCCESS)
+        // - processing of the response TLVs
 
         // Issue the host authentication command
-        var response = await processor.TransmitAsync(authCommand, false, cancellationToken).ConfigureAwait(false);
+        var response = await processor.TransmitAsync(authenticateCommand, false, cancellationToken)
+            .ConfigureAwait(false);
         if (response.SW != SWConstants.Success)
-            throw ApduException.FromResponse(response, authCommand, "SCP11 authentication failed");
+            throw ApduException.FromResponse(response, authenticateCommand, "SCP11 authentication failed");
 
         // Receive and process response (ephemeral SD public key and receipt)
         using var tlvs = TlvHelper.DecodeList(response.Data.Span);
@@ -94,24 +115,22 @@ internal partial class ScpState
         var skOceEcka = keyParams.SkOceEcka?.ToECDiffieHellman() ?? ephemeralOceEcka;
 
         // GPC v2.3 Amendment F (SCP11) v1.3 §3.1.2 Key Derivation
-        var sessionKeys = X964Kdf.X963KDF(
-            pkSdEcka,
+        var sessionKeys = Scp11X963Kdf.DeriveSessionKeys(
+            pkSdEcka.ToECDiffieHellmanPublicKey(),
             ephemeralOceEcka,
             skOceEcka,
             sdReceipt,
             epkSdEckaTlv.AsMemory(),
-            hostAuthenticateTlvEncodedData,
+            hostAuthenticateTlvBytes,
             keyUsage,
             keyType,
             keyLen);
 
-        // TODO review disposal
-        skOceEcka.Dispose();
-
-        CryptographicOperations.ZeroMemory(hostAuthenticateTlvEncodedData.Span);
+        CryptographicOperations.ZeroMemory(hostAuthenticateTlvBytes.Span);
 
         return new ScpState(sessionKeys, sdReceipt.Span.ToArray());
     }
+
 
     private static async Task PerformSecurityOperation(IApduProcessor processor, Scp11KeyParameters keyParams,
         CancellationToken cancellationToken)
@@ -127,6 +146,7 @@ internal partial class ScpState
         for (var i = 0; i <= n; i++)
         {
             var certData = keyParams.Certificates[i].GetRawCertData();
+            certData = keyParams.Certificates[i].RawData;
             var p2 = (byte)(oceRef.Kid | (i < n ? Scp11MoreFragmentsFlag : 0x00));
             var certCommand = new ApduCommand(
                 0x80,

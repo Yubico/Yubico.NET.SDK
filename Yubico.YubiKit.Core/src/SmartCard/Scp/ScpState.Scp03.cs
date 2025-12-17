@@ -18,6 +18,13 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 
 internal partial class ScpState
 {
+    private const byte InsInitializeUpdate = 0x50;
+
+    // Key Derivation Constants
+    private const byte DerivationTypeCardCryptogram = 0x00; // Derivation type for card cryptogram verification
+    private const byte DerivationTypeHostCryptogram = 0x01; // Derivation type for host cryptogram generation
+    private const byte DerivationContextLength = 0x40; // Context length in bits (64 bits = 8 bytes)
+
     public static async Task<(ScpState State, byte[] HostCryptogram)> Scp03InitAsync(
         IApduProcessor processor,
         Scp03KeyParameters keyParams,

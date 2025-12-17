@@ -22,30 +22,11 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// <summary>
 ///     Internal SCP state class for managing SCP state, handling encryption/decryption and MAC.
 /// </summary>
-internal sealed partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpState>? logger = null)
+internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpState>? logger = null)
 {
-    // SecurityDomainSession instruction codes (temporary - will move to SecurityDomainSession class)
-    private const byte InsInitializeUpdate = 0x50;
-    private const byte InsPerformSecurityOperation = 0x2A;
-    private const byte InsInternalAuthenticate = 0x88;
-    private const byte InsExternalAuthenticate = 0x82;
-
     // Encryption/Padding Constants
     private const byte PaddingByte = 0x80; // ISO/IEC 9797-1 Padding Method 2
     private const byte IvPrefixForDecryption = 0x80; // IV generation prefix for response decryption
-
-    // Key Derivation Constants
-    private const byte DerivationTypeCardCryptogram = 0x00; // Derivation type for card cryptogram verification
-    private const byte DerivationTypeHostCryptogram = 0x01; // Derivation type for host cryptogram generation
-    private const byte DerivationContextLength = 0x40; // Context length in bits (64 bits = 8 bytes)
-
-    // SCP11 Constants
-    private const byte Scp11aTypeParam = 0x01;
-    private const byte Scp11bTypeParam = 0x00;
-    private const byte Scp11cTypeParam = 0x03;
-    private const byte Scp11MoreFragmentsFlag = 0x80;
-    private const byte Scp11KeyUsage = 0x3C; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
-    private const byte Scp11KeyType = 0x88; // AES
 
     private int _encCounter = 1; // Counter for command encryption (host->card)
     private byte[] _macChain = macChain;
@@ -193,7 +174,7 @@ internal sealed partial class ScpState(SessionKeys keys, byte[] macChain, ILogge
             Span<byte> computedMac = stackalloc byte[16];
             mac.GetHashAndReset().AsSpan().CopyTo(computedMac);
 
-            var receivedMac = data[(data.Length - 8)..];
+            var receivedMac = data[^8..];
 
             if (CryptographicOperations.FixedTimeEquals(computedMac[..8], receivedMac))
                 return msg[..^2].ToArray();

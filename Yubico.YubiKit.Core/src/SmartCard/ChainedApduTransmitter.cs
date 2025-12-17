@@ -15,7 +15,7 @@
 namespace Yubico.YubiKit.Core.SmartCard;
 
 internal class ChainedApduTransmitter(ISmartCardConnection connection, IApduFormatter formatter)
-    : ApduTransmitter(connection, formatter)
+    : ApduTransmitter(connection, formatter) // TODO refactor to use composition instead of inheritance
 {
     private const int HasMoreData = 0x10;
     private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
@@ -25,9 +25,11 @@ internal class ChainedApduTransmitter(ISmartCardConnection connection, IApduForm
     {
         var data = command.Data;
         if (data.Length <= ShortApduMaxChunk)
+            // Data fits in a single APDU, send as normal
             return await base.TransmitAsync(command, useScp, cancellationToken)
-                .ConfigureAwait(false); // Delegate to regular APDU transmitter
+                .ConfigureAwait(false);
 
+        // Split data into chunks and send chained APDUs
         var offset = 0;
         while (offset + ShortApduMaxChunk < data.Length)
         {

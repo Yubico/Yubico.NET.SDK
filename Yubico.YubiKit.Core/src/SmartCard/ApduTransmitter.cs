@@ -31,8 +31,8 @@ internal class ApduTransmitter(ISmartCardConnection connection, IApduFormatter f
             command.Data,
             command.Le);
 
-        var response = await connection.TransmitAndReceiveAsync(payload, cancellationToken).ConfigureAwait(false);
-        return new ApduResponse(response);
+        var responseBytes = await connection.TransmitAndReceiveAsync(payload, cancellationToken).ConfigureAwait(false);
+        return new ApduResponse(responseBytes);
     }
 
     #endregion

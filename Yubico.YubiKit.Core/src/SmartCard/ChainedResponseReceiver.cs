@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers;
 using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.SmartCard;
@@ -30,24 +31,31 @@ internal class ChainedResponseReceiver(
 
     public IApduFormatter Formatter => apduTransmitter.Formatter;
 
-    public async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = true,
+    public async Task<ApduResponse> TransmitAsync(
+        ApduCommand command,
+        bool useScp = true,
         CancellationToken cancellationToken = default)
     {
-        using var ms = new MemoryStream();
-
         var response = await apduTransmitter.TransmitAsync(command, useScp, cancellationToken).ConfigureAwait(false);
-        while (response.SW1 == Sw1HasMoreData)
+        if (response.SW1 != Sw1HasMoreData)
+            return response;
+
+        var buffer = new ArrayBufferWriter<byte>();
+        while (response.SW1 == Sw1HasMoreData) // Partial response, more data available
         {
-            ms.Write(response.Data.Span);
+            buffer.Write(response.Data.Span);
             response = await apduTransmitter.TransmitAsync(_getMoreDataApdu, useScp, cancellationToken)
                 .ConfigureAwait(false);
         }
 
-        ms.Write(response.Data.Span);
-        ms.WriteByte(response.SW1);
-        ms.WriteByte(response.SW2);
+        buffer.Write(response.Data.Span);
+        buffer.Write([response.SW1]);
+        buffer.Write([response.SW2]);
 
-        return new ApduResponse(ms.ToArray());
+        var completeResponse = new ApduResponse(buffer.WrittenMemory);
+        buffer.Clear();
+
+        return completeResponse;
     }
 
     #endregion

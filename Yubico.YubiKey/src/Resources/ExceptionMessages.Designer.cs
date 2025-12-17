@@ -2380,6 +2380,16 @@ namespace Yubico.YubiKey {
                 return ResourceManager.GetString("YubiHsmAuthInvalidMgmtKeyLength", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///  Looks up a localized string similar to The ECC P-256 private key must be exactly 32 bytes, or 48 bytes for ECC P-384. The actual size was {0}..
+        /// </summary>
+
+        internal static string YubiHsmAuthInvalidKeySize {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthInvalidKeySize", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to The credential password must be exactly 16 bytes. The actual size was {0}..

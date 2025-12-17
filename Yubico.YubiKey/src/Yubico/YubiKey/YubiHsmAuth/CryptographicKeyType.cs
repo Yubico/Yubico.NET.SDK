@@ -26,5 +26,15 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// AES-128
         /// </summary>
         Aes128 = 38,
+        
+        /// <summary>
+        /// Elliptic Curve secp256r1 (NIST P-256)
+        /// </summary>
+        SecP256R1 = 13, // or EcP256
+
+        /// <summary>
+        /// Elliptic Curve secp384r1 (NIST P-384)
+        /// </summary>
+        SecP384R1 = 14, // or EcP384
     }
 }

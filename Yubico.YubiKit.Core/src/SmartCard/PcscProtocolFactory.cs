@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.Core.SmartCard;
 public interface IProtocolFactory<in TConnection>
     where TConnection : IConnection
 {
-    IProtocol Create(TConnection connection);
+    ISmartCardProtocol Create(TConnection connection);
 }
 
 public class PcscProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
@@ -29,11 +29,11 @@ public class PcscProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
 {
     #region IProtocolFactory<TConnection> Members
 
-    public IProtocol Create(TConnection connection)
+    public ISmartCardProtocol Create(TConnection connection) // TODO Change to ISmartCardProtocol
     {
         if (connection is ISmartCardConnection scConnection)
             return new PcscProtocol(scConnection, logger: loggerFactory.CreateLogger<PcscProtocol>());
-        
+
         throw new NotSupportedException(
             $"The connection type {typeof(TConnection).Name} is not supported by this protocol factory.");
     }

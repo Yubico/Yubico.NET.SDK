@@ -38,7 +38,7 @@ public interface ISmartCardProtocol : IProtocol
 
 public readonly record struct ProtocolConfiguration
 {
-    public bool? ForceShortApdus { get; init; }
+    public bool ForceShortApdus { get; init; }
 }
 
 internal class PcscProtocol : ISmartCardProtocol
@@ -55,16 +55,17 @@ internal class PcscProtocol : ISmartCardProtocol
 
     public PcscProtocol(
         ISmartCardConnection connection,
-        ReadOnlyMemory<byte> insSendRemaining = default, 
+        ReadOnlyMemory<byte> insSendRemaining = default,
         ILogger<PcscProtocol>? logger = null)
     {
         _logger = logger ?? NullLogger<PcscProtocol>.Instance;
         _connection = connection;
         InsSendRemaining = insSendRemaining.Length > 0 ? insSendRemaining.Span[0] : INS_SEND_REMAINING;
+        _useExtendedApdus = _connection.SupportsExtendedApdu();
         _processor = BuildBaseProcessor();
     }
 
-    public bool UseExtendedApdus { get; private set; } = true;
+    internal bool _useExtendedApdus { get; private set; }
 
     public int MaxApduSize { get; private set; } = SmartCardMaxApduSizes.Neo; // Lowest as default
 
@@ -106,7 +107,7 @@ internal class PcscProtocol : ISmartCardProtocol
             return;
 
         var forceShortApdu = configuration is { ForceShortApdus: true };
-        UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu; // TODO always true for UsbPcsc... 
+        _useExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu; // TODO always true for UsbPcsc... 
         MaxApduSize = firmwareVersion.IsAtLeast(FirmwareVersion.V4_3_0)
             ? SmartCardMaxApduSizes.Yk43
             : SmartCardMaxApduSizes.Yk4;
@@ -118,11 +119,11 @@ internal class PcscProtocol : ISmartCardProtocol
 
     private IApduProcessor BuildBaseProcessor()
     {
-        var processor = UseExtendedApdus
-            ? new ExtendedApduProcessor(_connection, new ExtendedApduFormatter(MaxApduSize))
-            : new CommandChainingProcessor(_connection, new ShortApduFormatter());
+        var processor = _useExtendedApdus
+            ? new ApduTransmitter(_connection, new ExtendedApduFormatter(MaxApduSize))
+            : new ChainedApduTransmitter(_connection, new ShortApduFormatter());
 
-        return new ChainedResponseProcessor(FirmwareVersion, processor, InsSendRemaining);
+        return new ChainedResponseReceiver(FirmwareVersion, processor, InsSendRemaining);
     }
 
     private void ReconfigureProcessor() =>

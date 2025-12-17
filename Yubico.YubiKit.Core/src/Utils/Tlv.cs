@@ -152,7 +152,7 @@ public sealed class Tlv : IDisposable
     ///     This method provides a view of the TLV's internal data, allowing for efficient
     ///     access and manipulation of the bytes without copying the data.
     /// </remarks>
-    public Memory<byte> AsMemory() => _bytes.AsMemory();
+    public ReadOnlyMemory<byte> AsMemory() => _bytes.AsMemory();
 
     /// <summary>
     ///     Returns a read-only span representing the internal byte array of the TLV object.

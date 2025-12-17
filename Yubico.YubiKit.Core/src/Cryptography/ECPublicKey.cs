@@ -164,10 +164,17 @@ public class ECPublicKey : PublicKey
     /// <exception cref="CryptographicException">
     ///     Thrown if the subjectPublicKeyInfo is invalid.
     /// </exception>
-    public static ECPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
-        AsnPublicKeyDecoder
-            .CreatePublicKey(subjectPublicKeyInfo)
-            .Cast<ECPublicKey>();
+    public static ECPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo)
+    {
+        using var ecdh = ECDiffieHellman.Create();
+        ecdh.ImportSubjectPublicKeyInfo(subjectPublicKeyInfo.Span, out var bytesRead);
+        if (bytesRead != subjectPublicKeyInfo.Length)
+            throw new CryptographicException("Invalid SubjectPublicKeyInfo data.");
+        return CreateFromParameters(ecdh.ExportParameters(false)); // TODO verify this works as expected
+        // return AsnPublicKeyDecoder
+        //     .CreatePublicKey(subjectPublicKeyInfo)
+        //     .Cast<ECPublicKey>();
+    }
 
     /// <summary>
     ///     Converts this EC public key to an <see cref="ECDiffieHellmanPublicKey" /> for use in key agreement operations.
@@ -182,26 +189,5 @@ public class ECPublicKey : PublicKey
     {
         using var ecdh = ECDiffieHellman.Create(Parameters);
         return ecdh.PublicKey;
-    }
-
-    /// <summary>
-    ///     Performs Elliptic Curve Diffie-Hellman (ECDH) key agreement using this public key
-    ///     and the provided private key.
-    /// </summary>
-    /// <param name="privateKey">The ECDH private key to use for key agreement.</param>
-    /// <returns>The derived key material as a byte array.</returns>
-    /// <remarks>
-    ///     This method derives shared secret key material using ECDH. The private key must be
-    ///     compatible with this public key's curve parameters. The derived key material can then
-    ///     be used with key derivation functions (KDFs) to generate session keys.
-    ///     This operation is commonly used in protocols like SCP11 where both parties
-    ///     derive a shared secret from their ephemeral/static key pairs.
-    /// </remarks>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="privateKey" /> is null.</exception>
-    /// <exception cref="ArgumentException">Thrown if the curves are incompatible.</exception>
-    public byte[] DeriveKeyMaterial(ECDiffieHellman privateKey)
-    {
-        ArgumentNullException.ThrowIfNull(privateKey);
-        return privateKey.DeriveKeyMaterial(ToECDiffieHellmanPublicKey());
     }
 }

@@ -32,6 +32,9 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
 
     public Transport Transport { get; set; } = Transport.Usb;
 
+    public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+
     public bool SupportsExtendedApdu() => SupportsExtendedApduValue;
 
     public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
@@ -52,6 +55,11 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
     }
 
     public void Dispose() => _disposed = true;
+
+    public async ValueTask DisposeAsync()
+    {
+        // TODO release managed resources here
+    }
 
     #endregion
 

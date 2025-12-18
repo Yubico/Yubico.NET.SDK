@@ -66,7 +66,7 @@ public class X963KdfTests
         var expectedKeyData = Convert.FromHexString(expectedKeyDataHex);
 
         // Act
-        var derivedKey = X964Kdf.DeriveKeyMaterial(z, sharedInfo, expectedKeyData.Length);
+        var derivedKey = X963Kdf.DeriveKeyMaterial(z, sharedInfo, expectedKeyData.Length);
 
         // Assert
         Assert.Equal(expectedKeyData, derivedKey);
@@ -148,7 +148,7 @@ public class X963KdfTests
         var expectedKeyData = Convert.FromHexString(expectedKeyDataHex);
 
         // Act
-        var derivedKey = X964Kdf.DeriveKeyMaterial(z, sharedInfo, expectedKeyData.Length);
+        var derivedKey = X963Kdf.DeriveKeyMaterial(z, sharedInfo, expectedKeyData.Length);
 
         // Assert
         Assert.Equal(expectedKeyData, derivedKey);
@@ -167,7 +167,7 @@ public class X963KdfTests
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() =>
-            X964Kdf.DeriveKeyMaterial(z, sharedInfo, 0));
+            X963Kdf.DeriveKeyMaterial(z, sharedInfo, 0));
         Assert.Contains("positive", exception.Message);
     }
 
@@ -180,7 +180,7 @@ public class X963KdfTests
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() =>
-            X964Kdf.DeriveKeyMaterial(z, sharedInfo, -1));
+            X963Kdf.DeriveKeyMaterial(z, sharedInfo, -1));
         Assert.Contains("positive", exception.Message);
     }
 
@@ -192,13 +192,13 @@ public class X963KdfTests
         Span<byte> sharedInfo = [];
 
         // Act
-        var result = X964Kdf.DeriveKeyMaterial(z, sharedInfo, 16);
+        var result = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 16);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(16, result.Length);
         // Result should be deterministic
-        var result2 = X964Kdf.DeriveKeyMaterial(z, sharedInfo, 16);
+        var result2 = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 16);
         Assert.Equal(result, result2);
     }
 
@@ -211,14 +211,14 @@ public class X963KdfTests
         Span<byte> sharedInfo = [];
 
         // Act
-        var result = X964Kdf.DeriveKeyMaterial(z, sharedInfo, 100);
+        var result = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 100);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(100, result.Length);
 
         // Verify it's deterministic
-        var result2 = X964Kdf.DeriveKeyMaterial(z, sharedInfo, 100);
+        var result2 = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 100);
         Assert.Equal(result, result2);
     }
 
@@ -231,7 +231,7 @@ public class X963KdfTests
         Span<byte> sharedInfo = [];
 
         // Act
-        var result = X964Kdf.DeriveKeyMaterial(z, sharedInfo, 1);
+        var result = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 1);
 
         // Assert
         Assert.NotNull(result);
@@ -247,7 +247,7 @@ public class X963KdfTests
         Span<byte> sharedInfo = [];
 
         // Act
-        var result = X964Kdf.DeriveKeyMaterial(z, sharedInfo, 32);
+        var result = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 32);
 
         // Assert
         Assert.NotNull(result);
@@ -265,8 +265,8 @@ public class X963KdfTests
         Span<byte> sharedInfo = [];
 
         // Act
-        var result1 = X964Kdf.DeriveKeyMaterial(z1, sharedInfo, 16);
-        var result2 = X964Kdf.DeriveKeyMaterial(z2, sharedInfo, 16);
+        var result1 = X963Kdf.DeriveKeyMaterial(z1, sharedInfo, 16);
+        var result2 = X963Kdf.DeriveKeyMaterial(z2, sharedInfo, 16);
 
         // Assert
         Assert.NotEqual(result1, result2);
@@ -284,8 +284,8 @@ public class X963KdfTests
         sharedInfo2.Fill(0xBB);
 
         // Act
-        var result1 = X964Kdf.DeriveKeyMaterial(z, sharedInfo1, 16);
-        var result2 = X964Kdf.DeriveKeyMaterial(z, sharedInfo2, 16);
+        var result1 = X963Kdf.DeriveKeyMaterial(z, sharedInfo1, 16);
+        var result2 = X963Kdf.DeriveKeyMaterial(z, sharedInfo2, 16);
 
         // Assert
         Assert.NotEqual(result1, result2);
@@ -301,9 +301,9 @@ public class X963KdfTests
         sharedInfo.Fill(0x99);
 
         // Act
-        var result1 = X964Kdf.DeriveKeyMaterial(z, sharedInfo, 64);
-        var result2 = X964Kdf.DeriveKeyMaterial(z, sharedInfo, 64);
-        var result3 = X964Kdf.DeriveKeyMaterial(z, sharedInfo, 64);
+        var result1 = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 64);
+        var result2 = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 64);
+        var result3 = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 64);
 
         // Assert
         Assert.Equal(result1, result2);

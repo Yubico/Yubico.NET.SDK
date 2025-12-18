@@ -31,7 +31,7 @@ public class Scp11X963KdfTests
         var sharedInfo = ReadOnlySpan<byte>.Empty; // Empty SharedInfo
         var expected = Convert.FromHexString("443024c3dae66b95e6f5670601558f71");
 
-        var result = X964Kdf.DeriveKeyMaterial(z, sharedInfo, 16);
+        var result = X963Kdf.DeriveKeyMaterial(z, sharedInfo, 16);
 
         Assert.Equal(expected, result);
     }
@@ -139,7 +139,7 @@ public class Scp11X963KdfTests
         // Derive keys
         const int keyCount = 5;
         const int keySizeBytes = 16;
-        var derivedKeyMaterial = X964Kdf.DeriveKeyMaterial(keyMaterial, sharedInfo, keyCount * keySizeBytes);
+        var derivedKeyMaterial = X963Kdf.DeriveKeyMaterial(keyMaterial, sharedInfo, keyCount * keySizeBytes);
 
         var keys = new List<byte[]>();
         for (var i = 0; i < keyCount; i++)

@@ -17,7 +17,7 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Core.Cryptography;
 
-internal static class X964Kdf
+internal static class X963Kdf
 {
     /// <summary>
     ///     Core X9.63-2001 KDF implementation using SHA-256.

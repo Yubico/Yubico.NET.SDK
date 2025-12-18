@@ -39,12 +39,11 @@ internal static class Scp11X963Kdf
             skOceEcka,
             epkSdEckaTlvBytes);
 
-        // Create SharedInfo
         var sharedInfo = GetSharedInfo(keyUsage, keyType, keyLen);
 
         const int keyCount = 5;
         const int keySizeBytes = 16; // 128 bits
-        var derivedKeyMaterial = X964Kdf.DeriveKeyMaterial(
+        var derivedKeyMaterial = X963Kdf.DeriveKeyMaterial(
             keyMaterial,
             sharedInfo,
             keyCount * keySizeBytes);

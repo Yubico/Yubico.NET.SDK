@@ -85,6 +85,36 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 AlternateCredLabel,
                 AlternateCredTouchRequired);
 
+        #region ECC P-256
+        public static readonly byte[] DefaultEccP256PrivateKey =
+            new byte[32] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                          16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+
+        public static readonly byte[] AlternateEccP256PrivateKey =
+            new byte[32] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16,
+                          15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+
+        /// <summary>
+        /// Returns an ECC P-256 credential with values from the default set.
+        /// </summary>
+        public static readonly EccP256CredentialWithSecrets DefaultEccP256Cred =
+            new EccP256CredentialWithSecrets(
+                DefaultCredPassword,
+                DefaultEccP256PrivateKey,
+                DefaultCredLabel,
+                DefaultCredTouchRequired);
+
+        /// <summary>
+        /// Returns an ECC P-256 credential with values from the alternate set.
+        /// </summary>
+        public static readonly EccP256CredentialWithSecrets AlternateEccP256Cred =
+            new EccP256CredentialWithSecrets(
+                AlternateCredPassword,
+                AlternateEccP256PrivateKey,
+                AlternateCredLabel,
+                AlternateCredTouchRequired);
+        #endregion
+
         /// <summary>
         /// Finds a standard device and puts the device
         /// into a known "control" state for performing integration
@@ -117,6 +147,30 @@ namespace Yubico.YubiKey.YubiHsmAuth
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 yubiHsmAuthSession.AddCredential(DefaultMgmtKey, AlternateAes128Cred);
+            }
+        }
+
+        /// <summary>
+        /// Adds an ECC P-256 credential (with values from the default set) to the
+        /// YubiHSM Auth application.
+        /// </summary>
+        public static void AddDefaultEccP256Credential(IYubiKeyDevice testDevice)
+        {
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+            {
+                yubiHsmAuthSession.AddCredential(DefaultMgmtKey, DefaultEccP256Cred);
+            }
+        }
+
+        /// <summary>
+        /// Adds an ECC P-256 credential (with values from the alternate set) to the
+        /// YubiHSM Auth application. It uses the default management key.
+        /// </summary>
+        public static void AddAlternateEccP256Credential(IYubiKeyDevice testDevice)
+        {
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+            {
+                yubiHsmAuthSession.AddCredential(DefaultMgmtKey, AlternateEccP256Cred);
             }
         }
     }

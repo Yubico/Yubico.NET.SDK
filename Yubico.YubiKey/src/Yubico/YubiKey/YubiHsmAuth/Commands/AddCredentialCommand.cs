@@ -195,6 +195,14 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             {
                 WriteKeys(tlvWriter, aes128Credential);
             }
+            else if (_credentialWithSecrets is EccP256CredentialWithSecrets eccP256Credential)
+            {
+                WriteKeys(tlvWriter, eccP256Credential);
+            }
+            else if (_credentialWithSecrets is EccP384CredentialWithSecrets eccP384Credential)
+            {
+                WriteKeys(tlvWriter, eccP384Credential);
+            }
             else
             {
                 throw new NotImplementedException(ExceptionMessages.YubiHsmAuthKeyTypeNotSupported);
@@ -211,6 +219,24 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             tlvWriter.WriteValue(
                 DataTagConstants.MacKey,
                 credentialWithSecrets.MacKey.Span);
+        }
+
+        private static void WriteKeys(
+            TlvWriter tlvWriter,
+            EccP256CredentialWithSecrets credentialWithSecrets)
+        {
+            tlvWriter.WriteValue(
+                DataTagConstants.PrivateKey,
+                credentialWithSecrets.PrivateKey.Span);
+        }
+
+        private static void WriteKeys(
+            TlvWriter tlvWriter,
+            EccP384CredentialWithSecrets credentialWithSecrets)
+        {
+            tlvWriter.WriteValue(
+                DataTagConstants.PrivateKey,
+                credentialWithSecrets.PrivateKey.Span);
         }
     }
 }

@@ -146,11 +146,11 @@ namespace Yubico.Core.Devices.SmartCard
             // The YubiKey likely will never return a buffer larger than 512 bytes without instead
             // using response chaining.
             byte[] outputBuffer = new byte[512];
-
+            byte[] apduBytes = commandApdu.AsByteArray();
             uint result = SCardTransmit(
                 _cardHandle,
                 new SCARD_IO_REQUEST(_activeProtocol),
-                commandApdu.AsByteArray(),
+                apduBytes,
                 IntPtr.Zero,
                 outputBuffer,
                 out int outputBufferSize

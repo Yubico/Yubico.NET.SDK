@@ -37,6 +37,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public const byte Version = 0x79;
         public const byte Touch = 0x7a;
         public const byte ManagementKey = 0x7b;
+        public const byte PubKey = 0x7c;
         public const byte PrivateKey = 0x7d;
     }
 }

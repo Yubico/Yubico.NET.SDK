@@ -16,8 +16,12 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Security;
+using System.Text;
 using System.Threading.Tasks;
+using Yubico.Core.Iso7816;
+using Yubico.Core.Tlv;
 using Yubico.YubiKey.YubiHsmAuth.Commands;
 
 namespace Yubico.YubiKey.YubiHsmAuth
@@ -389,7 +393,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     credentialLabel,
                     credentialPassword,
                     hostChallenge,
-                    hsmDeviceChallenge);
+                    hsmDeviceChallenge,
+                    ReadOnlyMemory<byte>.Empty,
+                    ReadOnlyMemory<byte>.Empty);
 
             var response = Connection.SendCommand(command);
             if (response.Status != ResponseStatus.Success)
@@ -530,7 +536,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
                             credentialLabel,
                             keyEntryData.GetCurrentValue(),
                             hostChallenge,
-                            hsmDeviceChallenge);
+                            hsmDeviceChallenge,
+                            ReadOnlyMemory<byte>.Empty,
+                            ReadOnlyMemory<byte>.Empty);
 
                     if (touchRequired)
                     {

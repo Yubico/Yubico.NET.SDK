@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <summary>
         /// Elliptic Curve secp256r1 (NIST P-256)
         /// </summary>
-        SecP256R1 = 13, // or EcP256
+        SecP256R1 = 39, // or EcP256
 
         /// <summary>
         /// Elliptic Curve secp384r1 (NIST P-384)

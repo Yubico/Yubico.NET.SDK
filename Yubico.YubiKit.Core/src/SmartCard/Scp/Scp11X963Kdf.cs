@@ -26,12 +26,19 @@ internal static class Scp11X963Kdf
         ReadOnlyMemory<byte> oceAuthenticateData, // Host Authenticate EC KeyAgreement TLV Bytes
         ECDiffieHellmanPublicKey pkSdEcka, // Yubikey Public Key
         ReadOnlyMemory<byte> ePkSdEcka, // Yubikey Ephemeral SD Public Key Bytes
-        ReadOnlyMemory<byte> sdReceipt, // Yubikey receipt
-        ReadOnlyMemory<byte> keyUsage,
-        ReadOnlyMemory<byte> keyType,
-        ReadOnlyMemory<byte> keyLen
+        ReadOnlyMemory<byte> sdReceipt // Yubikey receipt
     )
     {
+        // Extract keyUsage, keyType, keyLen from oceAuthenticateData
+        // Structure: A6 [ 90 [11 scpType], 95 [keyUsage], 80 [keyType], 81 [keyLen] ], 5F49 [epkOce]
+        if (!TlvHelper.TryFindValue(0xA6, oceAuthenticateData.Span, out var a6Value))
+            throw new InvalidOperationException("Missing A6 tag in oceAuthenticateData");
+
+        if (!TlvHelper.TryFindValue(0x95, a6Value.Span, out var keyUsage) ||
+            !TlvHelper.TryFindValue(0x80, a6Value.Span, out var keyType) ||
+            !TlvHelper.TryFindValue(0x81, a6Value.Span, out var keyLen))
+            throw new InvalidOperationException("Missing required tags (95, 80, 81) in A6 container");
+
         byte[] sharedInfo = [..keyUsage.Span, ..keyType.Span, ..keyLen.Span];
         byte[] keyAgreementData = [..oceAuthenticateData.Span, ..ePkSdEcka.Span];
         var keyMaterial = GetSharedSecret(eSkOceEcka, skOceEcka, pkSdEcka, ePkSdEcka);

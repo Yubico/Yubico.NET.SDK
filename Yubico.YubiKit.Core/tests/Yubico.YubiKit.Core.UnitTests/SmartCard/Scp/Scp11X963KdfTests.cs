@@ -110,7 +110,7 @@ public class Scp11X963KdfTests
         var sessionKeys = Scp11X963Kdf.DeriveSessionKeys(ephemeralOceEcka,
             skOceEcka,
             hostAuthenticateTlvBytes,
-            pkSdEcka, epkSdEckaTlvBytes, sdReceipt, keyUsage, keyType, keyLen);
+            pkSdEcka, epkSdEckaTlvBytes, sdReceipt);
 
         // Assert session keys are returned
         Assert.NotNull(sessionKeys);
@@ -261,10 +261,7 @@ public class Scp11X963KdfTests
             hostAuthenticateTlvBytes,
             pkSdEcka,
             epkSdEckaTlvBytes,
-            expectedSdReceipt,
-            keyUsage,
-            keyType,
-            keyLen);
+            expectedSdReceipt);
 
         // Assert session keys were derived successfully
         Assert.NotNull(sessionKeys);

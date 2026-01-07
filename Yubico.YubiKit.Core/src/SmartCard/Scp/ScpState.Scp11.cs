@@ -109,10 +109,7 @@ internal partial class ScpState
             oceAuthenticateData, // Host Authenticate EC KeyAgreement TLV Bytes
             pkSdEcka.ToECDiffieHellmanPublicKey(), // Yubikey Public Key
             epkSdEckaTlv.AsMemory(), // Yubikey Ephemeral SD Public Key Bytes
-            sdReceipt, // Yubikey receipt
-            keyUsage,
-            keyType,
-            keyLen);
+            sdReceipt); // Yubikey receipt
 
         CryptographicOperations.ZeroMemory(oceAuthenticateData.Span);
 

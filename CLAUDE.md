@@ -42,6 +42,14 @@ Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The
 - ❌ NEVER use `#region` (split large classes instead)
 - ❌ NEVER use exceptions for control flow
 
+**Legacy Code Reference (Java/C# Implementations):**
+- ✅ ALWAYS do forensic byte-level analysis before implementing
+- ✅ ALWAYS read actual source code line-by-line, not just documentation
+- ✅ ALWAYS trace through with concrete examples (input → output bytes)
+- ✅ ALWAYS document the exact wire format/data structure before coding
+- ❌ NEVER implement based on conceptual understanding alone
+- ❌ NEVER skip verifying exact encoding details (TLV structure, byte order, flags)
+
 **Crypto APIs:**
 - ✅ USE: `SHA256.HashData(data, outputSpan)` (Span-based)
 - ❌ AVOID: `SHA256.Create().ComputeHash(data)` (allocates array)

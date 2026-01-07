@@ -15,6 +15,7 @@
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Tests.Shared;
+using Yubico.YubiKit.SecurityDomain.IntegrationTests;
 
 namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 
@@ -36,18 +37,21 @@ public static class SecurityDomainTestStateExtensions
             CancellationToken cancellationToken = default) =>
             state.WithConnectionAsync(async connection =>
             {
-                // TODO refactor.. should Session dispose connection? It makes this thing difficult.
-                using var resetSession = await SecurityDomainSession.CreateAsync(
-                        connection,
-                        configuration,
-                        cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+                var sharedConnection = new SharedSmartCardConnection(connection);
 
                 if (resetBeforeUse)
+                {
+                    using var resetSession = await SecurityDomainSession.CreateAsync(
+                            sharedConnection,
+                            configuration,
+                            cancellationToken: cancellationToken)
+                        .ConfigureAwait(false);
+
                     await resetSession.ResetAsync(cancellationToken).ConfigureAwait(false);
+                }
 
                 using var session = await SecurityDomainSession.CreateAsync(
-                        connection,
+                        sharedConnection,
                         configuration,
                         scpKeyParams: scpKeyParams,
                         cancellationToken: cancellationToken)

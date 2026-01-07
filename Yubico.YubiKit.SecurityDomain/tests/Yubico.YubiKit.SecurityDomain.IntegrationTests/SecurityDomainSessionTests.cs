@@ -157,6 +157,8 @@ public class SecurityDomainSessionTests
     [WithYubiKey(MinFirmware = "5.7.2")]
     public async Task DeleteKeyAsync_CreateThenDelete_Succeeds(YubiKeyTestState state)
     {
+        // TODO create key
+        
         const byte kid = ScpKid.SCP11b;
         const byte kvn = 0x01;
         var keyRef = new KeyReference(kid, kvn);
@@ -208,7 +210,7 @@ public class SecurityDomainSessionTests
                 await session.StoreAllowlistAsync(oceKeyRef, serials);
             },
             scpKeyParams: keyParams,
-            resetBeforeUse: true,
+            resetBeforeUse: false,
             cancellationToken: CancellationTokenSource.Token
         );
 
@@ -218,7 +220,7 @@ public class SecurityDomainSessionTests
                 await session.DeleteKeyAsync(new KeyReference(ScpKid.SCP11a, kvn));
             },
             scpKeyParams: keyParams,
-            resetBeforeUse: true,
+            resetBeforeUse: false,
             cancellationToken: CancellationTokenSource.Token
         );
     }

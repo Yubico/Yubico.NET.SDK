@@ -60,6 +60,7 @@ on:
 
 permissions:
   contents: read
+  packages: read  # Required by reusable test workflows to access GitHub Packages
 
 jobs:
   test-windows:

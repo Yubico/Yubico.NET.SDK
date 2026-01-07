@@ -19,6 +19,9 @@ namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Scp;
 /// <summary>
 ///     Unit tests for ANSI X9.63-2001 KDF implementation using official NIST/CAVS test vectors.
 ///     Test vectors are from ansx963_2001.rsp (CAVS 12.0, March 2012).
+///     https://csrc.nist.gov/csrc/media/projects/cryptographic-algorithm-validation-program/documents/components/askdfvs.pdf
+///     § 6.5 The ANS X9.63-2001 KDF Test
+///     Files are in ansx963_2001.rsp, lines 226-280.
 /// </summary>
 public class X963KdfTests
 {

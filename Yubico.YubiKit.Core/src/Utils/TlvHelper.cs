@@ -131,6 +131,30 @@ public static class TlvHelper
         return tlv.Value.ToArray();
     }
 
+    /// <summary>
+    ///     Searches a sequence of TLV encoded data for a specific tag and returns its value.
+    /// </summary>
+    /// <param name="tag">The tag to search for</param>
+    /// <param name="tlvData">Sequence of TLV encoded data</param>
+    /// <param name="value">The value of the first TLV with the matching tag, or default if not found</param>
+    /// <returns>True if the tag was found, false otherwise</returns>
+    public static bool TryFindValue(int tag, ReadOnlySpan<byte> tlvData, out Memory<byte> value)
+    {
+        var buffer = tlvData;
+        while (!buffer.IsEmpty)
+        {
+            var (currentTag, _, currentValue) = Tlv.ParseData(ref buffer);
+            if (currentTag == tag)
+            {
+                value = currentValue.ToArray();
+                return true;
+            }
+        }
+
+        value = default;
+        return false;
+    }
+
     public static Memory<byte> EncodeDictionary(IReadOnlyDictionary<int, byte[]?> tlvData)
     {
         if (tlvData.Count == 0) return Array.Empty<byte>();

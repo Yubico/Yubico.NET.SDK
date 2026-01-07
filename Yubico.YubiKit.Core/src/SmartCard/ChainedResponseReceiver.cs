@@ -33,7 +33,7 @@ internal class ChainedResponseReceiver(
 
     public async Task<ApduResponse> TransmitAsync(
         ApduCommand command,
-        bool useScp = true,
+        bool useScp = false,
         CancellationToken cancellationToken = default)
     {
         var response = await apduTransmitter.TransmitAsync(command, useScp, cancellationToken).ConfigureAwait(false);

@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
-internal class ShortApduFormatter : IApduFormatter
+internal class ApduFormatterShort : IApduFormatter
 {
     private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
 

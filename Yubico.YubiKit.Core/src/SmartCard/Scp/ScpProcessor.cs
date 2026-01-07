@@ -13,40 +13,25 @@
 // limitations under the License.
 
 using System.Buffers;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Core.SmartCard.Scp;
 
 /// <summary>
 ///     APDU processor that wraps commands and responses with SCP encryption and MAC.
 /// </summary>
-internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, ScpState state) : IApduProcessor
+internal class ScpProcessor(IApduProcessor @delegate, ScpState state) : IApduProcessor
 {
     // SCP Constants
     private const byte ClaBitSecureMessaging = 0x04; // Bit 2 in CLA byte indicates secure messaging
     private const int MacLength = 8; // AES-CMAC output truncated to 8 bytes
 
-    private readonly ExtendedApduFormatter _extendedApduFormatter = new(SmartCardMaxApduSizes.Yk43);
+    private readonly ApduFormatterExtended _apduFormatterExtended = new(SmartCardMaxApduSizes.Yk43);
 
     /// <summary>
     ///     Gets the SCP state for this processor.
     /// </summary>
     private ScpState State { get; } = state;
-
-    #region IApduProcessor Members
-
-    /// <summary>
-    ///     Gets the APDU formatter.
-    /// </summary>
-    public IApduFormatter Formatter { get; } = formatter;
-
-    /// <summary>
-    ///     Transmits a command APDU with SCP encryption and MAC, and processes the response.
-    /// </summary>
-    public Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = true,
-        CancellationToken cancellationToken = default)
-        => TransmitAsync(command, useScp, true, cancellationToken);
-
-    #endregion
 
     /// <summary>
     ///     Transmits a command APDU with optional SCP encryption and MAC.
@@ -79,27 +64,26 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
             var cla = (byte)(command.Cla | ClaBitSecureMessaging);
 
             // Step 3: Allocate buffer for data + MAC (matching Java approach)
-            rentedMacData = ArrayPool<byte>.Shared.Rent(commandData.Length + MacLength);
-            var macedData = rentedMacData.AsSpan(0, commandData.Length + MacLength);
-            commandData.Span.CopyTo(macedData);
-            // Leave last 8 bytes zeroed for now
+            using var macedData = new DisposableArrayPoolBuffer(commandData.Length + MacLength);
+            commandData.Span.CopyTo(macedData.Span);
 
             // Step 4: Create command with FULL length (data + MAC space)
             // This ensures Lc in formatted APDU = data.length + 8
-            ApduCommand scpCommand = new(cla, command.Ins, command.P1, command.P2, macedData.ToArray(), command.Le);
+            ApduCommand scpCommand =
+                new(cla, command.Ins, command.P1, command.P2, macedData.Span.ToArray(), command.Le);
 
             // Step 5: Format the APDU with full length
             ReadOnlyMemory<byte> formattedApdu;
             bool isExtendedApdu;
             if (macedData.Length > SmartCardMaxApduSizes.ShortApduMaxChunkSize)
             {
-                formattedApdu = _extendedApduFormatter.Format(scpCommand);
+                formattedApdu = _apduFormatterExtended.Format(scpCommand);
                 isExtendedApdu = true;
             }
             else
             {
                 formattedApdu = Formatter.Format(scpCommand);
-                isExtendedApdu = Formatter is ExtendedApduFormatter;
+                isExtendedApdu = Formatter is ApduFormatterExtended;
             }
 
             // Step 6: Compute MAC over formatted APDU minus last MacLength bytes (the MAC space)
@@ -122,13 +106,14 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
             Console.WriteLine($"[SCP DEBUG] Computed MAC: {Convert.ToHexString(mac.AsSpan())}");
 
             // Step 7: Fill in the MAC in the last 8 bytes
-            mac.AsSpan().CopyTo(macedData[commandData.Length..]);
+            mac.AsSpan().CopyTo(macedData.Span[commandData.Length..]);
 
             Console.WriteLine(
-                $"[SCP DEBUG] Final data with MAC ({macedData.Length} bytes): {Convert.ToHexString(macedData)}");
+                $"[SCP DEBUG] Final data with MAC ({macedData.Length} bytes): {Convert.ToHexString(macedData.Span)}");
 
             // Step 8: Create final command with MAC filled in
-            ApduCommand finalCommand = new(cla, command.Ins, command.P1, command.P2, macedData.ToArray(), command.Le);
+            ApduCommand finalCommand =
+                new(cla, command.Ins, command.P1, command.P2, macedData.Span.ToArray(), command.Le);
             Console.WriteLine(
                 $"[SCP DEBUG] Final command: CLA={cla:X2} INS={finalCommand.Ins:X2} P1={finalCommand.P1:X2} P2={finalCommand.P2:X2} Data={Convert.ToHexString(finalCommand.Data.Span)}");
 
@@ -169,4 +154,20 @@ internal class ScpProcessor(IApduProcessor @delegate, IApduFormatter formatter, 
             if (rentedMacData != null) ArrayPool<byte>.Shared.Return(rentedMacData);
         }
     }
+
+    #region IApduProcessor Members
+
+    /// <summary>
+    ///     Gets the APDU formatter.
+    /// </summary>
+    public IApduFormatter Formatter { get; } = @delegate.Formatter;
+
+    /// <summary>
+    ///     Transmits a command APDU with SCP encryption and MAC, and processes the response.
+    /// </summary>
+    public Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = true,
+        CancellationToken cancellationToken = default)
+        => TransmitAsync(command, useScp, true, cancellationToken);
+
+    #endregion
 }

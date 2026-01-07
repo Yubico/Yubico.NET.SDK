@@ -18,6 +18,6 @@ public interface IApduProcessor
 {
     IApduFormatter Formatter { get; }
 
-    Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = true,
+    Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp,
         CancellationToken cancellationToken = default);
 }

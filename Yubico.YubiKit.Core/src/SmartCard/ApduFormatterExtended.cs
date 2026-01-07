@@ -16,7 +16,7 @@ using System.Buffers.Binary;
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
-internal class ExtendedApduFormatter(int maxApduSize) : IApduFormatter
+internal class ApduFormatterExtended(int maxApduSize) : IApduFormatter
 {
     #region IApduFormatter Members
 

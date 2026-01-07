@@ -20,7 +20,7 @@ internal class ChainedApduTransmitter(ISmartCardConnection connection, IApduForm
     private const int HasMoreData = 0x10;
     private const int ShortApduMaxChunk = SmartCardMaxApduSizes.ShortApduMaxChunkSize;
 
-    public override async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = true,
+    public override async Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp = false,
         CancellationToken cancellationToken = default)
     {
         var data = command.Data;

@@ -52,7 +52,7 @@ public class ECPublicKey : PublicKey
         KeyDefinition = KeyDefinitions.GetByOid(Parameters.Curve.Oid);
 
         // Format identifier (uncompressed point): 0x04
-        _publicPointBytes = [0x4, .. Parameters.Q.X!, .. Parameters.Q.Y!];
+        _publicPointBytes = parameters.ToUncompressedPoint();
     }
 
     /// <summary>

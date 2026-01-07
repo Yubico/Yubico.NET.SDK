@@ -44,8 +44,8 @@ public sealed class SecurityDomainSession : ApplicationSession
     private const byte InsDelete = 0xE4;
     private const byte InsGenerateKey = 0xF1;
 
-    private const int TagKeyInformationTemplate = 0xE0;
-    private const int TagKeyInformationData = 0xC0;
+    private const byte TagKeyInformationTemplate = 0xE0;
+    private const byte TagKeyInformationData = 0xC0;
     private const byte TagSerialsAllowList = 0x70;
     private const byte TagSerial = 0x93;
 
@@ -53,14 +53,20 @@ public sealed class SecurityDomainSession : ApplicationSession
     private const byte TagKidKvn = 0x83;
 
     // TLV tags for DeleteKey filter parameters
-    private const int TagKid = 0xD0; // Key ID (KID)
-    private const int TagKvn = 0xD2; // Key Version Number (KVN)
+    private const byte TagKid = 0xD0; // Key ID (KID)
+    private const byte TagKvn = 0xD2; // Key Version Number (KVN)
     private const byte DeleteLastFlag = 0x01; // P2 flag for "delete last"
 
     private const byte KeyTypeAes = 0x88; // AES key type for SCP03
     private const byte KeyTypeEccPrivateKey = 0xB1;
-    private const int KeyTypeEccPublicKey = 0xB0;
-    private const int KeyTypeEccKeyParams = 0xF0;
+    private const byte KeyTypeEccPublicKey = 0xB0;
+    private const byte KeyTypeEccKeyParams = 0xF0;
+
+    private const byte TagCardData = 0x66;
+    private const byte TagCardRecognitionData = 0x73;
+    private const ushort TagCertificateStore = 0xBF21;
+    private const ushort TagCaKlocIdentifiers = 0xFF33; // Key Loading OCE Certificate
+    private const ushort TagCaKlccIdentifiers = 0xFF34; // Key Loading Card Certificate
 
     private const int ResetAttemptLimit = 65;
     private static readonly byte[] ResetAttemptPayload = new byte[8];
@@ -230,14 +236,19 @@ public sealed class SecurityDomainSession : ApplicationSession
         return new ReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>(keyInformation);
     }
 
+
     /// <summary>
     ///     Retrieves the Security Domain card recognition data (tag 0x73).
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The raw card recognition TLV payload.</returns>
-    public Task<ReadOnlyMemory<byte>> GetCardRecognitionDataAsync(
-        CancellationToken cancellationToken = default) =>
+    public async Task<ReadOnlyMemory<byte>> GetCardRecognitionDataAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var response = await GetDataAsync(TagCardData, cancellationToken: cancellationToken).ConfigureAwait(false);
+
         throw new NotImplementedException();
+    }
 
     /// <summary>
     ///     Retrieves the certificate bundle associated with the supplied key reference.
@@ -315,7 +326,8 @@ public sealed class SecurityDomainSession : ApplicationSession
 
             // Build and send PUT KEY command
             // P2: 0x80 | KID (0x80 flag required by GlobalPlatform)
-            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, (byte)(0x80 | keyReference.Kid),
+            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn,
+                (byte)(0x80 | keyReference.Kid),
                 buffer.WrittenMemory);
             var response = await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
@@ -480,12 +492,12 @@ public sealed class SecurityDomainSession : ApplicationSession
             buffer.Write([keyReference.Kvn]);
 
             // Write the EC public key
-            var publicKeyTlvData = new Tlv(KeyTypeEccPublicKey, publicKey.PublicPoint.Span).AsMemory();
-            buffer.Write(publicKeyTlvData.ToArray());
+            using var publicKeyTlv = new Tlv(KeyTypeEccPublicKey, publicKey.PublicPoint.Span);
+            buffer.Write(publicKeyTlv.AsMemory().Span);
 
             // Write the EC parameters
-            var paramsTlv = new Tlv(KeyTypeEccKeyParams, stackalloc byte[1]).AsMemory();
-            buffer.Write(paramsTlv.ToArray());
+            using var paramsTlv = new Tlv(KeyTypeEccKeyParams, stackalloc byte[1]);
+            buffer.Write(paramsTlv.AsMemory().Span);
             buffer.Write(new byte[] { 0 });
 
             // Create and send the command
@@ -541,11 +553,11 @@ public sealed class SecurityDomainSession : ApplicationSession
             buffer.Write([keyReference.Kvn]);
 
             var encryptedKey = EncryptData(parameters.D.AsSpan());
-            var encryptedKeyBytes = new Tlv(KeyTypeEccPrivateKey, encryptedKey).AsMemory();
-            buffer.Write(encryptedKeyBytes.Span);
+            using var encryptedKeyTlv = new Tlv(KeyTypeEccPrivateKey, encryptedKey);
+            buffer.Write(encryptedKeyTlv.AsMemory().Span);
 
-            var paramsTlv = new Tlv(KeyTypeEccKeyParams, [0x00]).AsMemory();
-            buffer.Write(paramsTlv.Span);
+            using var paramsTlv = new Tlv(KeyTypeEccKeyParams, [0x00]);
+            buffer.Write(paramsTlv.AsMemory().Span);
             buffer.Write(new byte[] { 0 });
 
             var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
@@ -712,6 +724,71 @@ public sealed class SecurityDomainSession : ApplicationSession
         await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
+    private static IReadOnlyList<X509Certificate2> ParseCertificateBundle(ReadOnlySpan<byte> data)
+    {
+        var certificates = new List<X509Certificate2>();
+        using var tlvList = TlvHelper.DecodeList(data);
+
+        foreach (var tlv in tlvList)
+            if (tlv.Tag == 0x30) // X.509 certificate DER tag
+                certificates.Add(X509CertificateLoader.LoadCertificate(tlv.AsSpan()));
+
+        return certificates;
+    }
+
+    private static void ParseCaIdentifiers(ReadOnlySpan<byte> data,
+        Dictionary<KeyReference, ReadOnlyMemory<byte>> results)
+    {
+        if (data.IsEmpty) return;
+
+        // GlobalPlatform CA identifiers are typically returned as pairs of TLVs: [Identifier, KeyReference]
+        // or as single TLVs with nested KeyReference. We handle both for robustness.
+        using var tlvList = TlvHelper.DecodeList(data);
+        var tlvArray = tlvList.ToArray();
+
+        for (var i = 0; i < tlvArray.Length; i++)
+        {
+            var tlv = tlvArray[i];
+
+            // Case 1: Adjacent KeyReference (as in legacy C# SDK)
+            // The CA identifiers are returned as a list of TLVs where the identifier tag
+            // is followed by a TagKidKvn (0x83) tag identifying which key it belongs to.
+            if (i + 1 < tlvArray.Length && tlvArray[i + 1].Tag == TagKidKvn)
+            {
+                var keyRefData = tlvArray[i + 1].Value.Span;
+                if (keyRefData.Length >= 2)
+                {
+                    var keyRef = new KeyReference(keyRefData[0], keyRefData[1]);
+                    // We store the first TLV's value as the identifier
+                    results[keyRef] = tlv.Value.ToArray();
+                    i++; // Skip the next TLV as we processed it
+                    continue;
+                }
+            }
+
+            // Case 2: Nested KeyReference (as in Java SDK)
+            if (TlvHelper.TryFindValue(TagKidKvn, tlv.Value.Span, out var kidKvn) && kidKvn.Length >= 2)
+            {
+                var keyRef = new KeyReference(kidKvn.Span[0], kidKvn.Span[1]);
+                results[keyRef] = tlv.Value.ToArray();
+            }
+        }
+    }
+
+    private static ReadOnlyMemory<byte> EncodeControlReference(KeyReference keyRef)
+    {
+        var keyRefEncoded = EncodeKeyReference(keyRef);
+        using var crt = new Tlv(TagControlReference, keyRefEncoded.Span);
+        return crt.AsMemory().ToArray();
+    }
+
+    private static ReadOnlyMemory<byte> EncodeKeyReference(KeyReference keyRef)
+    {
+        var dict = new Dictionary<int, byte[]?> { [TagKidKvn] = [keyRef.Kid, keyRef.Kvn] };
+
+        return TlvHelper.EncodeDictionary(dict);
+    }
+
     private ISmartCardProtocol EnsureBaseProtocol()
     {
         if (_baseProtocol is not null) // Already initialized
@@ -730,13 +807,9 @@ public sealed class SecurityDomainSession : ApplicationSession
         if (!_isInitialized)
             throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
 
-        if (_protocol is null)
-            throw new InvalidOperationException("Security Domain protocol not available.");
+        if (_protocol is null) throw new InvalidOperationException("Security Domain protocol not available.");
     }
 
-    /// <summary>
-    ///     Centralized APDU transmit helper that ensures the protocol is initialized.
-    /// </summary>
     private Task<ReadOnlyMemory<byte>> TransmitAsync(ApduCommand command, CancellationToken cancellationToken)
     {
         EnsureInitializedProtocol();
@@ -886,7 +959,7 @@ public sealed class SecurityDomainSession : ApplicationSession
             var encrypted = encryptor(keyBuffer.AsSpan(0, key.Length));
 
             // Write TLV with just the encrypted key data
-            var keyTlv = new Tlv(KeyTypeAes, encrypted);
+            using var keyTlv = new Tlv(KeyTypeAes, encrypted);
             buffer.Write(keyTlv.AsMemory().Span);
 
             // Write KCV length and KCV bytes after the TLV
@@ -976,12 +1049,14 @@ public sealed class SecurityDomainSession : ApplicationSession
     /// <param name="disposing">Indicates whether managed resources should be disposed.</param>
     protected override void Dispose(bool disposing)
     {
-        if (!disposing)
-            return;
+        if (!disposing) return;
 
         _protocol?.Dispose();
         _protocol = null;
+        _baseProtocol?.Dispose();
         _baseProtocol = null;
-        base.Dispose(true);
+        _isInitialized = false;
+
+        base.Dispose(disposing);
     }
 }

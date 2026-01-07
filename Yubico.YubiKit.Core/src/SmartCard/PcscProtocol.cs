@@ -71,6 +71,20 @@ internal class PcscProtocol : ISmartCardProtocol
 
     public FirmwareVersion? FirmwareVersion { get; private set; }
 
+    private IApduProcessor BuildBaseProcessor()
+    {
+        var processor = _useExtendedApdus
+            ? new ApduTransmitter(_connection, new ApduFormatterExtended(MaxApduSize))
+            : new ChainedApduTransmitter(_connection, new ApduFormatterShort());
+
+        return new ChainedResponseReceiver(FirmwareVersion, processor, InsSendRemaining);
+    }
+
+    private void ReconfigureProcessor() =>
+        _processor = BuildBaseProcessor();
+
+    internal IApduProcessor GetBaseProcessor() => BuildBaseProcessor();
+
     #region ISmartCardProtocol Members
 
     public void Dispose() => _connection.Dispose();
@@ -81,7 +95,7 @@ internal class PcscProtocol : ISmartCardProtocol
     {
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
 
-        var response = await _processor.TransmitAsync(command, true, cancellationToken).ConfigureAwait(false);
+        var response = await _processor.TransmitAsync(command, false, cancellationToken).ConfigureAwait(false);
         return !response.IsOK()
             ? throw ApduException.FromResponse(response, command, "APDU command failed")
             : response.Data;
@@ -116,18 +130,4 @@ internal class PcscProtocol : ISmartCardProtocol
     }
 
     #endregion
-
-    private IApduProcessor BuildBaseProcessor()
-    {
-        var processor = _useExtendedApdus
-            ? new ApduTransmitter(_connection, new ExtendedApduFormatter(MaxApduSize))
-            : new ChainedApduTransmitter(_connection, new ShortApduFormatter());
-
-        return new ChainedResponseReceiver(FirmwareVersion, processor, InsSendRemaining);
-    }
-
-    private void ReconfigureProcessor() =>
-        _processor = BuildBaseProcessor();
-
-    internal IApduProcessor GetBaseProcessor() => BuildBaseProcessor();
 }

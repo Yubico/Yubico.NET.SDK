@@ -29,14 +29,17 @@ on:
       - '.github/workflows/build-pull-requests.yml'
       
 permissions:
-  pull-requests: write
-  checks: write
   contents: read
-  packages: read
-  
+
 jobs:
   run-tests:
     name: Run tests
+    # Requires write permissions to publish test results and coverage reports to PR
+    permissions:
+      pull-requests: write  # Required to comment on PRs with test results
+      checks: write         # Required to create check runs for test results
+      contents: read
+      packages: read
     uses: ./.github/workflows/test.yml
     with:
       build-coverage-report: true

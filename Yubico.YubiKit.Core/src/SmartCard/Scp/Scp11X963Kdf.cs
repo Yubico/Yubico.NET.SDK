@@ -21,25 +21,20 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 internal static class Scp11X963Kdf
 {
     internal static SessionKeys DeriveSessionKeys(
+        ECDiffieHellman eSkOceEcka, // Host ephemeral private key
+        ECDiffieHellman skOceEcka, // Host static or ephemeral private key
+        ReadOnlyMemory<byte> oceAuthenticateData, // Host Authenticate EC KeyAgreement TLV Bytes
         ECDiffieHellmanPublicKey pkSdEcka, // Yubikey Public Key
-        ECDiffieHellman ephemeralOceEcka, // host ephemeral key
-        ECDiffieHellman skOceEcka, // host private key
+        ReadOnlyMemory<byte> ePkSdEcka, // Yubikey Ephemeral SD Public Key Bytes
         ReadOnlyMemory<byte> sdReceipt, // Yubikey receipt
-        ReadOnlyMemory<byte> epkSdEckaTlvBytes, // Yubikey Ephemeral SD Public Key Bytes
-        ReadOnlyMemory<byte> hostAuthenticateTlvBytes,
         ReadOnlyMemory<byte> keyUsage,
         ReadOnlyMemory<byte> keyType,
         ReadOnlyMemory<byte> keyLen
     )
     {
-        var keyAgreementData = GetKeyAgreementData(epkSdEckaTlvBytes, hostAuthenticateTlvBytes);
-        var keyMaterial = GetSharedSecret(
-            pkSdEcka,
-            ephemeralOceEcka,
-            skOceEcka,
-            epkSdEckaTlvBytes);
-
-        var sharedInfo = GetSharedInfo(keyUsage, keyType, keyLen);
+        byte[] sharedInfo = [..keyUsage.Span, ..keyType.Span, ..keyLen.Span];
+        byte[] keyAgreementData = [..oceAuthenticateData.Span, ..ePkSdEcka.Span];
+        var keyMaterial = GetSharedSecret(eSkOceEcka, skOceEcka, pkSdEcka, ePkSdEcka);
 
         const int keyCount = 5;
         const int keySizeBytes = 16; // 128 bits
@@ -56,47 +51,37 @@ internal static class Scp11X963Kdf
 
         // 5 keys were derived: one for verification of receipt, 4 keys to use
         var receiptVerificationKey = keys[0];
-        var oceReceipt = GenerateOceReceiptCmac(receiptVerificationKey, keyAgreementData);
+        var oceReceipt = GenerateOceReceiptAesCmac(receiptVerificationKey, keyAgreementData);
 
         // Debug logging: Compare receipts to identify mismatch cause
         Console.WriteLine($"OCE Receipt: {Convert.ToHexString(oceReceipt)} ({oceReceipt.Length})");
         Console.WriteLine($"SD Receipt: {Convert.ToHexString(sdReceipt.Span)} ({sdReceipt.Length})");
 
-        if (!CryptographicOperations.FixedTimeEquals(sdReceipt.Span, oceReceipt))
-            throw new BadResponseException("Receipt does not match");
-
-        return new SessionKeys(keys[1], keys[2], keys[3], keys[4]);
+        return CryptographicOperations.FixedTimeEquals(sdReceipt.Span, oceReceipt)
+            ? new SessionKeys(keys[1], keys[2], keys[3], keys[4])
+            : throw new BadResponseException("Receipt does not match");
     }
 
-    internal static ReadOnlySpan<byte> GetSharedInfo(
-        ReadOnlyMemory<byte> keyUsage,
-        ReadOnlyMemory<byte> keyType,
-        ReadOnlyMemory<byte> keyLen)
+    internal static Span<byte> GetSharedSecret(
+        ECDiffieHellman ePkOceEcka, // host ephemeral key
+        ECDiffieHellman skOceEcka, // host private key
+        ECDiffieHellmanPublicKey pkSdEcka, // Yubikey Public Key
+        ReadOnlyMemory<byte> epkSdEckaTlvBytes
+    )
     {
-        Span<byte> sharedInfo = new byte[keyUsage.Length + keyType.Length + keyLen.Length];
-
-        keyUsage.Span.CopyTo(sharedInfo);
-        keyType.Span.CopyTo(sharedInfo[keyUsage.Length..]);
-        keyLen.Span.CopyTo(sharedInfo[(keyUsage.Length + keyType.Length)..]);
-
-        return sharedInfo;
-    }
-
-    internal static ReadOnlySpan<byte> GetSharedSecret(
-        ECDiffieHellmanPublicKey pkSdEcka,
-        ECDiffieHellman ephemeralOceEcka,
-        ECDiffieHellman skOceEcka,
-        ReadOnlyMemory<byte> epkSdEckaTlvBytes)
-    {
-        var epkSdEcka = CreateECDiffieHellmanPublicKey(epkSdEckaTlvBytes);
+        var ePkSdEcka = CreateECDiffieHellmanPublicKey(epkSdEckaTlvBytes);
 
         // Key agreement 1: ephemeral OCE private key with ephemeral SD public key
-        var ka1 = ephemeralOceEcka.DeriveKeyMaterial(epkSdEcka);
+        var ka1 = ePkOceEcka.DeriveRawSecretAgreement(ePkSdEcka);
 
         // Key agreement 2: static/ephemeral OCE private key with static SD public key
-        var ka2 = skOceEcka.DeriveKeyMaterial(pkSdEcka);
+        var ka2 = skOceEcka.DeriveRawSecretAgreement(pkSdEcka);
 
-        using var buffer = new DisposableArrayPoolBuffer(ka1.Length + ka2.Length);
+        const int expectedLength = 32; // 256 bits
+        if (ka1.Length != expectedLength || ka2.Length != expectedLength)
+            throw new InvalidOperationException("Derived key agreement material has unexpected length");
+
+        using var buffer = new DisposableArrayPoolBuffer(expectedLength * 2);
         var keyMaterial = buffer.Span;
         ka1.AsSpan().CopyTo(keyMaterial);
         ka2.AsSpan().CopyTo(keyMaterial[ka1.Length..]);
@@ -104,54 +89,54 @@ internal static class Scp11X963Kdf
         CryptographicOperations.ZeroMemory(ka1);
         CryptographicOperations.ZeroMemory(ka2);
 
-        return keyMaterial;
+        return keyMaterial.ToArray();
     }
 
-    private static ECDiffieHellmanPublicKey CreateECDiffieHellmanPublicKey(ReadOnlyMemory<byte> epkSdEckaTlv)
+    private static ECDiffieHellmanPublicKey CreateECDiffieHellmanPublicKey(ReadOnlyMemory<byte> ePkSdEckaTlv)
     {
-        var epkSdEckaEncodedPoint = TlvHelper.GetValue(0x5F49, epkSdEckaTlv.Span);
-        var epkSdEcka = new ECParameters
+        var ePkSdEckaEncodedPoint = TlvHelper.GetValue(0x5F49, ePkSdEckaTlv.Span);
+        var ePkSdEcka = new ECParameters
         {
             Curve = ECCurve.NamedCurves.nistP256,
             Q = new ECPoint
             {
-                X = epkSdEckaEncodedPoint.Span[1..33].ToArray(), Y = epkSdEckaEncodedPoint.Span[33..].ToArray()
+                X = ePkSdEckaEncodedPoint.Span[1..33].ToArray(), Y = ePkSdEckaEncodedPoint.Span[33..].ToArray()
             }
         };
 
-        return ECDiffieHellman.Create(epkSdEcka).PublicKey;
-
-        // return ECPublicKey.CreateFromParameters(epkSdEcka);
+        return ECDiffieHellman.Create(ePkSdEcka).PublicKey;
     }
 
-    internal static ReadOnlySpan<byte> GetKeyAgreementData(
-        ReadOnlyMemory<byte> epkSdEckaTlvBytes,
-        ReadOnlyMemory<byte> hostAuthenticateTlvBytes)
+    internal static Span<byte> GetKeyAgreementData(
+        ReadOnlyMemory<byte> pkOceEcka,
+        ReadOnlyMemory<byte> ePkSdEckaTlvBytes)
     {
-        using var buffer = new DisposableArrayPoolBuffer(hostAuthenticateTlvBytes.Length + epkSdEckaTlvBytes.Length);
+        var length = pkOceEcka.Length + ePkSdEckaTlvBytes.Length;
+        using var buffer = new DisposableArrayPoolBuffer(length);
         var keyAgreementData = buffer.Span;
 
         // Key Agreement Data: host authenticate TLV + epkSdEcka TLV
-        hostAuthenticateTlvBytes.Span.CopyTo(keyAgreementData);
-        epkSdEckaTlvBytes.Span.CopyTo(keyAgreementData[hostAuthenticateTlvBytes.Length..]);
+        pkOceEcka.Span.CopyTo(keyAgreementData);
+        ePkSdEckaTlvBytes.Span.CopyTo(keyAgreementData[pkOceEcka.Length..]);
 
-        return keyAgreementData;
+        return keyAgreementData.ToArray();
     }
 
-    internal static byte[] GenerateOceReceiptCmac(byte[] receiptVerificationKey, ReadOnlySpan<byte> keyAgreementData)
+    internal static byte[] GenerateOceReceiptAesCmac(ReadOnlySpan<byte> receiptVerificationKey,
+        ReadOnlySpan<byte> keyAgreementData)
     {
-        var useOpenSsl = false; // Try AesCmac instead of OpenSSL
-        if (useOpenSsl)
-        {
-            using var cmacObj =
-                new CmacPrimitivesOpenSsl(CmacBlockCipherAlgorithm.Aes128); // This works in legacy code.
-
-            Span<byte> oceReceipt = stackalloc byte[16];
-            cmacObj.CmacInit(receiptVerificationKey);
-            cmacObj.CmacUpdate(keyAgreementData);
-            cmacObj.CmacFinal(oceReceipt); // Our generated receipt
-            return oceReceipt.ToArray();
-        }
+        // var useOpenSsl = false; // Try AesCmac instead of OpenSSL
+        // if (useOpenSsl)
+        // {
+        //     using var cmacObj =
+        //         new CmacPrimitivesOpenSsl(CmacBlockCipherAlgorithm.Aes128); // This works in legacy code.
+        //
+        //     Span<byte> oceReceipt = stackalloc byte[16];
+        //     cmacObj.CmacInit(receiptVerificationKey);
+        //     cmacObj.CmacUpdate(keyAgreementData);
+        //     cmacObj.CmacFinal(oceReceipt); // Our generated receipt
+        //     return oceReceipt.ToArray();
+        // }
 
         using var
             mac = new AesCmac(

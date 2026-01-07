@@ -45,7 +45,7 @@ public class Scp11X963KdfTests
         var skOceEcka = CreateTestOceStaticPrivateKey();
         var epkSdEckaTlvBytes = CreateTestEpkSdEckaTlv();
 
-        var sharedSecret = Scp11X963Kdf.GetSharedSecret(pkSdEcka, ephemeralOceEcka, skOceEcka, epkSdEckaTlvBytes);
+        var sharedSecret = Scp11X963Kdf.GetSharedSecret(ephemeralOceEcka, skOceEcka, pkSdEcka, epkSdEckaTlvBytes);
 
         // Expected shared secret: concatenation of ka1 and ka2
         // For test purposes, we can compute expected manually or assert length
@@ -58,7 +58,7 @@ public class Scp11X963KdfTests
         var epkSdEckaTlvBytes = CreateTestEpkSdEckaTlv();
         var hostAuthenticateTlvBytes = CreateTestHostAuthenticateTlv();
 
-        var keyAgreementData = Scp11X963Kdf.GetKeyAgreementData(epkSdEckaTlvBytes, hostAuthenticateTlvBytes);
+        var keyAgreementData = Scp11X963Kdf.GetKeyAgreementData(hostAuthenticateTlvBytes, epkSdEckaTlvBytes);
 
         // Should be concatenation of hostAuthenticateTlvBytes and epkSdEckaTlvBytes
         var expectedLength = hostAuthenticateTlvBytes.Length + epkSdEckaTlvBytes.Length;
@@ -73,7 +73,7 @@ public class Scp11X963KdfTests
         var keyAgreementData = new byte[32]; // Mock data
         RandomNumberGenerator.Fill(keyAgreementData);
 
-        var receipt = Scp11X963Kdf.GenerateOceReceiptCmac(receiptVerificationKey, keyAgreementData);
+        var receipt = Scp11X963Kdf.GenerateOceReceiptAesCmac(receiptVerificationKey, keyAgreementData);
 
         Assert.Equal(16, receipt.Length); // CMAC output is 16 bytes for AES-128
     }
@@ -106,16 +106,10 @@ public class Scp11X963KdfTests
             keyLen);
 
         // Call DeriveSessionKeys - should succeed since receipts match
-        var sessionKeys = Scp11X963Kdf.DeriveSessionKeys(
-            pkSdEcka,
-            ephemeralOceEcka,
+        var sessionKeys = Scp11X963Kdf.DeriveSessionKeys(ephemeralOceEcka,
             skOceEcka,
-            sdReceipt,
-            epkSdEckaTlvBytes,
             hostAuthenticateTlvBytes,
-            keyUsage,
-            keyType,
-            keyLen);
+            pkSdEcka, epkSdEckaTlvBytes, sdReceipt, keyUsage, keyType, keyLen);
 
         // Assert session keys are returned
         Assert.NotNull(sessionKeys);
@@ -132,9 +126,10 @@ public class Scp11X963KdfTests
         ReadOnlyMemory<byte> keyType,
         ReadOnlyMemory<byte> keyLen)
     {
-        var keyAgreementData = Scp11X963Kdf.GetKeyAgreementData(epkSdEckaTlvBytes, hostAuthenticateTlvBytes);
-        var keyMaterial = Scp11X963Kdf.GetSharedSecret(pkSdEcka, ephemeralOceEcka, skOceEcka, epkSdEckaTlvBytes);
-        var sharedInfo = Scp11X963Kdf.GetSharedInfo(keyUsage, keyType, keyLen);
+        var keyAgreementData = Scp11X963Kdf.GetKeyAgreementData(hostAuthenticateTlvBytes, epkSdEckaTlvBytes);
+        var keyMaterial = Scp11X963Kdf.GetSharedSecret(ephemeralOceEcka, skOceEcka, pkSdEcka, epkSdEckaTlvBytes);
+        byte[] sharedInfo = [..keyUsage.Span, ..keyType.Span, ..keyLen.Span];
+
 
         // Derive keys
         const int keyCount = 5;
@@ -149,7 +144,7 @@ public class Scp11X963KdfTests
 
         // Compute oceReceipt (emulating YubiKey's receipt)
         var receiptVerificationKey = keys[0];
-        var oceReceipt = Scp11X963Kdf.GenerateOceReceiptCmac(receiptVerificationKey, keyAgreementData);
+        var oceReceipt = Scp11X963Kdf.GenerateOceReceiptAesCmac(receiptVerificationKey, keyAgreementData);
 
         return oceReceipt.AsMemory();
     }

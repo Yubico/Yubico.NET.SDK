@@ -65,43 +65,29 @@ internal partial class ScpState
         var sdParameters = pkSdEcka.Parameters;
 
         // Create ephemeral OCE ECDH key pair using the same curve
-        var (ephemeralOceEcka, epkOceEcka) = GetECDHs(sdParameters);
+        var eskOceEcka = ECDiffieHellman.Create(sdParameters.Curve);
+        var epkOce = eskOceEcka.PublicKey.ExportParameters().ToUncompressedPoint();
 
         // GPC v2.3 Amendment F (SCP11) v1.4 §7.6.2.3
         // Construct the host authentication command
-        using var scpTypeTlv = new Tlv(0x90, [0x11, scpTypeParam]);
-        using var keyUsageTlv = new Tlv(0x95, keyUsage);
-        using var keyTypeTlv = new Tlv(0x80, keyType);
-        using var keyLenTlv = new Tlv(0x81, keyLen);
-        var innerTlvs = TlvHelper.EncodeList([scpTypeTlv, keyUsageTlv, keyTypeTlv, keyLenTlv]);
-
-        using var outerTlv1 = new Tlv(0xA6, innerTlvs.Span);
-        using var outerTlv2 = new Tlv(0x5F49, epkOceEcka.PublicPoint.Span);
-        var outerTlvs = TlvHelper.EncodeList([outerTlv1, outerTlv2]);
-        var hostAuthenticateTlvBytes = outerTlvs;
+        // These contain the parameters for the host authentication command that the YubiKey will respond to.
+        var oceAuthenticateData = TlvHelper.EncodeMany(
+            new Tlv(0xA6, TlvHelper.EncodeMany(
+                new Tlv(0x90, [0x11, scpTypeParam]),
+                new Tlv(0x95, keyUsage),
+                new Tlv(0x80, keyType),
+                new Tlv(0x81, keyLen)).Span),
+            new Tlv(0x5F49, epkOce));
 
         var ins = kid == ScpKid.SCP11b
             ? InsInternalAuthenticate
             : InsExternalAuthenticate;
 
-        var authenticateCommand = new ApduCommand(
-            0x80,
-            ins,
-            kvn,
-            kid,
-            hostAuthenticateTlvBytes);
-
-        // WIP Notes: I am able to get this far, but the receipt verification is failing.
-        // The authCommand 1:1 matches the C# legacy code output, so the problem must be in:
-        // - DeriveSessionKeys() function
-        // - GetSharedSecret() function
-        // - GenerateOceReceipt() function
-        // - The transmission of the command to the YubiKey (even though the response is SW_SUCCESS)
-        // - processing of the response TLVs
-
         // Issue the host authentication command
+        var authenticateCommand = new ApduCommand(0x80, ins, kvn, kid, oceAuthenticateData);
         var response = await processor.TransmitAsync(authenticateCommand, false, cancellationToken)
             .ConfigureAwait(false);
+
         if (response.SW != SWConstants.Success)
             throw ApduException.FromResponse(response, authenticateCommand, "SCP11 authentication failed");
 
@@ -112,25 +98,26 @@ internal partial class ScpState
         var sdReceipt = tlvs[1].Value; // YubiKey receipt
 
         // Oce static host key private key (SCP11a/c), or ephemeral key again (SCP11b)
-        var skOceEcka = keyParams.SkOceEcka?.ToECDiffieHellman() ?? ephemeralOceEcka;
+        var skOceEcka = keyParams.SkOceEcka is not null
+            ? keyParams.SkOceEcka.ToECDiffieHellman()
+            : eskOceEcka;
 
         // GPC v2.3 Amendment F (SCP11) v1.3 §3.1.2 Key Derivation
         var sessionKeys = Scp11X963Kdf.DeriveSessionKeys(
-            pkSdEcka.ToECDiffieHellmanPublicKey(),
-            ephemeralOceEcka,
-            skOceEcka,
-            sdReceipt,
-            epkSdEckaTlv.AsMemory(),
-            hostAuthenticateTlvBytes,
+            eskOceEcka, // Host ephemeral private key
+            skOceEcka, // Host static or ephemeral private key
+            oceAuthenticateData, // Host Authenticate EC KeyAgreement TLV Bytes
+            pkSdEcka.ToECDiffieHellmanPublicKey(), // Yubikey Public Key
+            epkSdEckaTlv.AsMemory(), // Yubikey Ephemeral SD Public Key Bytes
+            sdReceipt, // Yubikey receipt
             keyUsage,
             keyType,
             keyLen);
 
-        CryptographicOperations.ZeroMemory(hostAuthenticateTlvBytes.Span);
+        CryptographicOperations.ZeroMemory(oceAuthenticateData.Span);
 
         return new ScpState(sessionKeys, sdReceipt.Span.ToArray());
     }
-
 
     private static async Task PerformSecurityOperation(IApduProcessor processor, Scp11KeyParameters keyParams,
         CancellationToken cancellationToken)
@@ -146,7 +133,6 @@ internal partial class ScpState
         for (var i = 0; i <= n; i++)
         {
             var certData = keyParams.Certificates[i].GetRawCertData();
-            certData = keyParams.Certificates[i].RawData;
             var p2 = (byte)(oceRef.Kid | (i < n ? Scp11MoreFragmentsFlag : 0x00));
             var certCommand = new ApduCommand(
                 0x80,
@@ -157,27 +143,6 @@ internal partial class ScpState
             var resp = await processor.TransmitAsync(certCommand, false, cancellationToken).ConfigureAwait(false);
             if (resp.SW != SWConstants.Success)
                 throw ApduException.FromResponse(resp, certCommand, "SCP11 PERFORM SECURITY OPERATION failed");
-        }
-    }
-
-    private static (ECDiffieHellman ephemeralOceEcka, ECPublicKey epkOceEcka) GetECDHs(ECParameters sdParameters)
-    {
-        var test = true;
-        if (!test)
-        {
-            var ephemeralOceEcka = ECDiffieHellman.Create(sdParameters.Curve);
-            var epkOceEcka = ECPublicKey.CreateFromParameters(ephemeralOceEcka.ExportParameters(false));
-            return (ephemeralOceEcka, epkOceEcka);
-        }
-        else
-        {
-            var ephemeralOceEcka = ECPrivateKey
-                .CreateFromValue(
-                    Convert.FromHexString("549D2A8A03E62DC829ADE4D6850DB9568475147C59EF238F122A08CF557CDB91"),
-                    KeyType.ECP256).ToECDiffieHellman();
-            var epkOceEcka = ECPublicKey.CreateFromParameters(ephemeralOceEcka.ExportParameters(false));
-
-            return (ephemeralOceEcka, epkOceEcka);
         }
     }
 }

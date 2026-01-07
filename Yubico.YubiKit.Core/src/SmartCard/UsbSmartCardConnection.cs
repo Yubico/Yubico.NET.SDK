@@ -76,115 +76,6 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
     private SCARD_PROTOCOL? _protocol;
     private bool _transactionActive;
 
-    #region ISmartCardConnection Members
-
-    public void Dispose()
-    {
-        if (_disposed) return;
-        _disposed = true;
-
-        if (_transactionActive && _cardHandle is not null && !_cardHandle.IsInvalid)
-        {
-            try
-            {
-                var result = NativeMethods.SCardEndTransaction(_cardHandle, SCARD_DISPOSITION.LEAVE_CARD);
-                if (result != ErrorCode.SCARD_S_SUCCESS)
-                    _logger.LogDebug("SCardEndTransaction returned {ErrorCode} during dispose", result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to end transaction during dispose");
-            }
-
-            _transactionActive = false;
-        }
-
-        try
-        {
-            _cardHandle?.Dispose();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to dispose card handle for reader {ReaderName}", smartCardDevice.ReaderName);
-        }
-
-        try
-        {
-            _context?.Dispose();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to dispose SCard context for reader {ReaderName}",
-                smartCardDevice.ReaderName);
-        }
-
-        _cardHandle = null;
-        _context = null;
-    }
-
-    /// <summary>
-    ///     Asynchronously disposes the connection, releasing all PC/SC resources.
-    /// </summary>
-    /// <remarks>
-    ///     Offloads the synchronous disposal to a worker thread to avoid blocking the caller.
-    /// </remarks>
-    public ValueTask DisposeAsync()
-    {
-        if (_disposed)
-            return ValueTask.CompletedTask;
-
-        return new ValueTask(Task.Run(Dispose));
-    }
-
-    public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-        ReadOnlyMemory<byte> command,
-        CancellationToken cancellationToken)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(_protocol);
-        ArgumentNullException.ThrowIfNull(_context);
-        ArgumentNullException.ThrowIfNull(_cardHandle);
-
-        // TODO: How will we know expected outputBuffer size?
-        const int bufferSize = 512;
-        var outputBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
-        try
-        {
-            var bytesReceived = 0;
-
-            var result = await Task.Run(() => NativeMethods.SCardTransmit(
-                _cardHandle,
-                new SCARD_IO_REQUEST(_protocol.Value),
-                command.Span,
-                nint.Zero,
-                outputBuffer,
-                out bytesReceived
-            ), cancellationToken).ConfigureAwait(false);
-
-            if (result != ErrorCode.SCARD_S_SUCCESS)
-                throw new SCardException("ExceptionMessages.SCardTransmitFailure, result");
-
-            // Must copy to new array since we're returning and releasing the pooled buffer
-            var response = new byte[bytesReceived]; // TODO use outputBuffer.AsMemory(0, bytesReceived).ToArray();
-            Array.Copy(outputBuffer, response, bytesReceived);
-            return response;
-        }
-        finally
-        {
-            ArrayPool<byte>.Shared.Return(outputBuffer);
-        }
-    }
-
-    public Transport Transport => Transport.Usb; // TODO determine transport, currently only supports USB
-
-    public bool SupportsExtendedApdu() =>
-        true; // TODO determine who supports extended APDUs https://yubico.atlassian.net/browse/YESDK-1499
-
-    public IDisposable BeginTransaction(CancellationToken cancellationToken = default)
-        => BeginTransactionInternal(SCARD_DISPOSITION.LEAVE_CARD, cancellationToken);
-
-    #endregion
-
     public async ValueTask InitializeAsync(CancellationToken cancellationToken)
     {
         _logger.LogDebug("Initializing smart card connection to reader {ReaderName}", smartCardDevice.ReaderName);
@@ -290,18 +181,11 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
 
     #region Nested type: TransactionScope
 
-    private sealed class TransactionScope : IDisposable
+    private sealed class TransactionScope(UsbSmartCardConnection owner, SCARD_DISPOSITION endDisposition)
+        : IDisposable
     {
-        private readonly SCARD_DISPOSITION _endDisposition;
-        private readonly UsbSmartCardConnection _owner;
         private bool _began;
         private bool _ended;
-
-        public TransactionScope(UsbSmartCardConnection owner, SCARD_DISPOSITION endDisposition)
-        {
-            _owner = owner;
-            _endDisposition = endDisposition;
-        }
 
         #region IDisposable Members
 
@@ -311,19 +195,19 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
             _ended = true;
 
             // Only clear the flag if this specific scope is the active one
-            if (_owner._transactionActive)
-                _owner._transactionActive = false;
+            if (owner._transactionActive)
+                owner._transactionActive = false;
 
-            if (_began && !_owner._disposed && _owner._cardHandle is not null && !_owner._cardHandle.IsInvalid)
+            if (_began && !owner._disposed && owner._cardHandle is not null && !owner._cardHandle.IsInvalid)
                 try
                 {
-                    var result = NativeMethods.SCardEndTransaction(_owner._cardHandle, _endDisposition);
+                    var result = NativeMethods.SCardEndTransaction(owner._cardHandle, endDisposition);
                     if (result != ErrorCode.SCARD_S_SUCCESS)
-                        _owner._logger.LogDebug("SCardEndTransaction returned {Error}", result);
+                        owner._logger.LogDebug("SCardEndTransaction returned {Error}", result);
                 }
                 catch (Exception ex)
                 {
-                    _owner._logger.LogWarning(ex, "Failed to end transaction during scope dispose");
+                    owner._logger.LogWarning(ex, "Failed to end transaction during scope dispose");
                 }
         }
 
@@ -336,6 +220,112 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
             _began = true;
         }
     }
+
+    #endregion
+
+    #region ISmartCardConnection Members
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+
+        if (_transactionActive && _cardHandle is not null && !_cardHandle.IsInvalid)
+        {
+            try
+            {
+                var result = NativeMethods.SCardEndTransaction(_cardHandle, SCARD_DISPOSITION.LEAVE_CARD);
+                if (result != ErrorCode.SCARD_S_SUCCESS)
+                    _logger.LogDebug("SCardEndTransaction returned {ErrorCode} during dispose", result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to end transaction during dispose");
+            }
+
+            _transactionActive = false;
+        }
+
+        try
+        {
+            _cardHandle?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to dispose card handle for reader {ReaderName}", smartCardDevice.ReaderName);
+        }
+
+        try
+        {
+            _context?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to dispose SCard context for reader {ReaderName}",
+                smartCardDevice.ReaderName);
+        }
+
+        _cardHandle = null;
+        _context = null;
+    }
+
+    /// <summary>
+    ///     Asynchronously disposes the connection, releasing all PC/SC resources.
+    /// </summary>
+    /// <remarks>
+    ///     Offloads the synchronous disposal to a worker thread to avoid blocking the caller.
+    /// </remarks>
+    public ValueTask DisposeAsync() =>
+        _disposed
+            ? ValueTask.CompletedTask
+            : new ValueTask(Task.Run(Dispose));
+
+    public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+        ReadOnlyMemory<byte> command,
+        CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(_protocol);
+        ArgumentNullException.ThrowIfNull(_context);
+        ArgumentNullException.ThrowIfNull(_cardHandle);
+
+        // Use a larger buffer for responses, especially for extended APDUs
+        const int bufferSize = 65536;
+        var outputBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+        var bytesReceived = 0;
+
+        try
+        {
+            var result = await Task.Run(() => NativeMethods.SCardTransmit(
+                _cardHandle,
+                new SCARD_IO_REQUEST(_protocol.Value),
+                command.Span,
+                nint.Zero,
+                outputBuffer,
+                out bytesReceived
+            ), cancellationToken).ConfigureAwait(false);
+
+            if (result != ErrorCode.SCARD_S_SUCCESS)
+                throw new SCardException("ExceptionMessages.SCardTransmitFailure", result);
+
+            var response = new byte[bytesReceived];
+            outputBuffer.AsSpan(0, bytesReceived).CopyTo(response);
+
+            return response;
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(outputBuffer, true);
+        }
+    }
+
+    public Transport Transport => Transport.Usb; // TODO determine transport, currently only supports USB
+
+    public bool SupportsExtendedApdu() =>
+        true; // TODO determine who supports extended APDUs https://yubico.atlassian.net/browse/YESDK-1499
+
+    public IDisposable BeginTransaction(CancellationToken cancellationToken = default)
+        => BeginTransactionInternal(SCARD_DISPOSITION.LEAVE_CARD, cancellationToken);
 
     #endregion
 }

@@ -36,7 +36,6 @@ public sealed class SecurityDomainSession : ApplicationSession
 {
     private const byte ClaGlobalPlatform = 0x80;
     private const byte InsGetData = 0xCA;
-    private const byte ClaPutKey = 0x80;
     private const byte InsPutKey = 0xD8;
     private const byte InsInitializeUpdate = 0x50;
     private const byte InsPerformSecurityOperation = 0x2A;
@@ -58,6 +57,7 @@ public sealed class SecurityDomainSession : ApplicationSession
     private const int TagKvn = 0xD2; // Key Version Number (KVN)
     private const byte DeleteLastFlag = 0x01; // P2 flag for "delete last"
 
+    private const byte KeyTypeAes = 0x88; // AES key type for SCP03
     private const byte KeyTypeEccPrivateKey = 0xB1;
     private const int KeyTypeEccPublicKey = 0xB0;
     private const int KeyTypeEccKeyParams = 0xF0;
@@ -231,17 +231,6 @@ public sealed class SecurityDomainSession : ApplicationSession
     }
 
     /// <summary>
-    ///     Establishes secure messaging with the provided key parameters, replacing any existing SCP session.
-    /// </summary>
-    /// <param name="scpKeyParams">SCP key material to use when authenticating.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The data encryptor derived from the newly established secure channel, if available.</returns>
-    public Task<DataEncryptor?> AuthenticateAsync(
-        ScpKeyParameters scpKeyParams,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
-
-    /// <summary>
     ///     Retrieves the Security Domain card recognition data (tag 0x73).
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -293,12 +282,59 @@ public sealed class SecurityDomainSession : ApplicationSession
     /// <param name="staticKeys">Static ENC/MAC/DEK values to load.</param>
     /// <param name="replaceKvn">Optional key version number to replace.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public Task PutKeyAsync(
+    /// <exception cref="ArgumentNullException">Thrown when staticKeys is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when keyReference.Kid is not 0x01 (required for SCP03).</exception>
+    /// <exception cref="InvalidOperationException">Thrown when no SCP session is active or KCV validation fails.</exception>
+    public async Task PutKeyAsync(
         KeyReference keyReference,
         StaticKeys staticKeys,
         int replaceKvn = 0,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(staticKeys);
+
+        // Validation: SCP03 keys must use KID 0x01
+        if (keyReference.Kid != 0x01)
+            throw new ArgumentException("SCP03 keys must use KID 0x01", nameof(keyReference));
+
+        _logger.LogInformation("Importing SCP03 static keys into Key Reference: {KeyReference}", keyReference);
+
+        // Get session encryptor (requires active SCP session with DEK)
+        var encryptor = EncryptData;
+
+        var buffer = new ArrayBufferWriter<byte>();
+        try
+        {
+            // Write KVN
+            buffer.Write([keyReference.Kvn]);
+
+            // Encrypt and encode each key component (ENC, MAC, DEK)
+            EncodeKeyComponent(staticKeys.Enc, encryptor, buffer);
+            EncodeKeyComponent(staticKeys.Mac, encryptor, buffer);
+            EncodeKeyComponent(staticKeys.Dek, encryptor, buffer);
+
+            // Build and send PUT KEY command
+            // P2: 0x80 | KID (0x80 flag required by GlobalPlatform)
+            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, (byte)(0x80 | keyReference.Kid),
+                buffer.WrittenMemory);
+            var response = await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+
+            // Validate response contains expected KCVs
+            ValidateKcv(staticKeys, response.Span);
+
+            _logger.LogInformation("Successfully imported SCP03 keys for Key Reference: {KeyReference}",
+                keyReference);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to import SCP03 keys for Key Reference: {KeyReference}", keyReference);
+            throw;
+        }
+        finally
+        {
+            buffer.Clear();
+        }
+    }
 
     /// <summary>
     ///     Deletes keys matching the supplied reference.
@@ -453,7 +489,7 @@ public sealed class SecurityDomainSession : ApplicationSession
             buffer.Write(new byte[] { 0 });
 
             // Create and send the command
-            var command = new ApduCommand(ClaPutKey, InsPutKey, (byte)replaceKvn, keyReference.Kid,
+            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
                 buffer.WrittenMemory);
             var response = await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
 
@@ -512,7 +548,7 @@ public sealed class SecurityDomainSession : ApplicationSession
             buffer.Write(paramsTlv.Span);
             buffer.Write(new byte[] { 0 });
 
-            var command = new ApduCommand(ClaPutKey, InsPutKey, (byte)replaceKvn, keyReference.Kid,
+            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
                 buffer.WrittenMemory);
             var response = await TransmitAsync(command, cancellationToken);
 
@@ -824,6 +860,114 @@ public sealed class SecurityDomainSession : ApplicationSession
     {
         if (!CryptographicOperations.FixedTimeEquals(expected, actual))
             throw new InvalidOperationException("ExceptionMessages.ChecksumError");
+    }
+
+    /// <summary>
+    ///     Encodes a single key component (ENC, MAC, or DEK) for PUT KEY command.
+    /// </summary>
+    /// <param name="key">The 16-byte key to encode.</param>
+    /// <param name="encryptor">The data encryptor from the SCP session.</param>
+    /// <param name="buffer">The buffer to write the encoded TLV to.</param>
+    private static void EncodeKeyComponent(
+        ReadOnlySpan<byte> key,
+        DataEncryptor encryptor,
+        ArrayBufferWriter<byte> buffer)
+    {
+        // Calculate KCV (Key Check Value)
+        Span<byte> kcv = stackalloc byte[3];
+        CalculateKcv(key, kcv);
+
+        // Encrypt the key - rent buffer to avoid allocation on key parameter
+        byte[]? keyBuffer = null;
+        try
+        {
+            keyBuffer = ArrayPool<byte>.Shared.Rent(key.Length);
+            key.CopyTo(keyBuffer);
+            var encrypted = encryptor(keyBuffer.AsSpan(0, key.Length));
+
+            // Write TLV with just the encrypted key data
+            var keyTlv = new Tlv(KeyTypeAes, encrypted);
+            buffer.Write(keyTlv.AsMemory().Span);
+
+            // Write KCV length and KCV bytes after the TLV
+            buffer.Write([(byte)kcv.Length]);
+            buffer.Write(kcv);
+        }
+        finally
+        {
+            if (keyBuffer is not null)
+            {
+                CryptographicOperations.ZeroMemory(keyBuffer.AsSpan(0, key.Length));
+                ArrayPool<byte>.Shared.Return(keyBuffer);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Calculates the Key Check Value (KCV) for an AES key.
+    /// </summary>
+    /// <param name="key">The 16-byte AES key.</param>
+    /// <param name="output">The 3-byte output span for the KCV.</param>
+    /// <remarks>
+    ///     KCV is calculated as the first 3 bytes of AES-CBC encryption of 16 bytes (all 0x01) using a zero IV.
+    ///     This matches the implementation in the Java SDK.
+    /// </remarks>
+    private static void CalculateKcv(ReadOnlySpan<byte> key, Span<byte> output)
+    {
+        using var aes = Aes.Create();
+
+        aes.SetKey(key);
+        aes.Mode = CipherMode.CBC;
+        aes.Padding = PaddingMode.None;
+
+        // KCV = first 3 bytes of AES-CBC encrypt of 16 bytes (all 0x01) using zero IV
+        Span<byte> kcvInput = stackalloc byte[16];
+        kcvInput.Fill(0x01);
+
+        Span<byte> iv = stackalloc byte[16];
+        iv.Clear();
+
+        Span<byte> encrypted = stackalloc byte[16];
+        aes.EncryptCbc(kcvInput, iv, encrypted, PaddingMode.None);
+
+        encrypted[..3].CopyTo(output);
+    }
+
+    /// <summary>
+    ///     Validates that the Key Check Values in the response match the expected values.
+    /// </summary>
+    /// <param name="staticKeys">The static keys that were imported.</param>
+    /// <param name="response">The response data from the PUT KEY command.</param>
+    /// <exception cref="InvalidOperationException">Thrown when KCV validation fails.</exception>
+    private static void ValidateKcv(StaticKeys staticKeys, ReadOnlySpan<byte> response)
+    {
+        // Response format: KVN || kcv_enc || kcv_mac || kcv_dek
+        if (response.Length < 10) // 1 byte KVN + 3*3 bytes kcv
+            throw new InvalidOperationException("Response too short for KCV validation");
+
+        // Calculate expected KCVs
+        Span<byte> expectedKcvEnc = stackalloc byte[3];
+        Span<byte> expectedKcvMac = stackalloc byte[3];
+        Span<byte> expectedKcvDek = stackalloc byte[3];
+
+        CalculateKcv(staticKeys.Enc, expectedKcvEnc);
+        CalculateKcv(staticKeys.Mac, expectedKcvMac);
+        CalculateKcv(staticKeys.Dek, expectedKcvDek);
+
+        // Extract actual KCVs from response (skip first byte = KVN)
+        var actualKcvEnc = response.Slice(1, 3);
+        var actualKcvMac = response.Slice(4, 3);
+        var actualKcvDek = response.Slice(7, 3);
+
+        // Validate each KCV using constant-time comparison
+        if (!CryptographicOperations.FixedTimeEquals(expectedKcvEnc, actualKcvEnc))
+            throw new InvalidOperationException("ENC key check value mismatch");
+
+        if (!CryptographicOperations.FixedTimeEquals(expectedKcvMac, actualKcvMac))
+            throw new InvalidOperationException("MAC key check value mismatch");
+
+        if (!CryptographicOperations.FixedTimeEquals(expectedKcvDek, actualKcvDek))
+            throw new InvalidOperationException("DEK key check value mismatch");
     }
 
     /// <summary>

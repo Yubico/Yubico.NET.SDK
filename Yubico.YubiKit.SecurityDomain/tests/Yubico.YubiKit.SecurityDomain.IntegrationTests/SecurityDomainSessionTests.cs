@@ -37,6 +37,7 @@ public class SecurityDomainSessionTests
                 Assert.NotNull(session);
                 return Task.CompletedTask;
             },
+            true,
             scpKeyParams: scpParams,
             cancellationToken: CancellationTokenSource.Token);
     }
@@ -50,13 +51,15 @@ public class SecurityDomainSessionTests
     public async Task GetDataAsync_CardRecognition_ReturnsPayload(YubiKeyTestState state) // 0x6A88
         =>
             await state.WithSecurityDomainSessionAsync(async session =>
-            {
-                var response = await session.GetDataAsync(
-                    CardRecognitionDataObject,
-                    cancellationToken: CancellationTokenSource.Token);
+                {
+                    var response = await session.GetDataAsync(
+                        CardRecognitionDataObject,
+                        cancellationToken: CancellationTokenSource.Token);
 
-                Assert.False(response.IsEmpty);
-            }, cancellationToken: CancellationTokenSource.Token);
+                    Assert.False(response.IsEmpty);
+                },
+                true,
+                cancellationToken: CancellationTokenSource.Token);
 
     [Theory]
     [WithYubiKey(MinFirmware = "5.4.3")]
@@ -68,7 +71,7 @@ public class SecurityDomainSessionTests
                 Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInformation.Count);
                 Assert.Equal(0xFF, keyInformation.Keys.First().Kvn);
             },
-            resetBeforeUse: true,
+            true,
             cancellationToken: CancellationTokenSource.Token);
 
     [Theory]
@@ -84,7 +87,7 @@ public class SecurityDomainSessionTests
                 Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInformation.Count);
                 Assert.Contains(keyInformation.Keys, keyRef => keyRef.Kvn == 0xFF);
             },
-            resetBeforeUse: false,
+            false,
             cancellationToken: CancellationTokenSource.Token);
 
     /// <summary>
@@ -130,9 +133,7 @@ public class SecurityDomainSessionTests
                 Assert.Equal(ECCurve.NamedCurves.nistP256.Oid.Value,
                     ecdh.ExportParameters(false).Curve.Oid.Value);
             },
-            scpKeyParams: Scp03KeyParameters.Default,
-            cancellationToken: CancellationTokenSource.Token,
-            resetBeforeUse: true);
+            true, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
 
         // Verify the generated key can be used for authentication
         await state.WithSecurityDomainSessionAsync(
@@ -144,7 +145,7 @@ public class SecurityDomainSessionTests
                 Assert.Contains(keyInformation.Keys, kr =>
                     kr.Kid == keyReference.Kid && kr.Kvn == keyReference.Kvn);
             },
-            resetBeforeUse: false,
+            false,
             cancellationToken: CancellationTokenSource.Token);
     }
 
@@ -173,10 +174,9 @@ public class SecurityDomainSessionTests
                 // Assert: key is gone
                 info = await session.GetKeyInformationAsync(CancellationTokenSource.Token);
                 Assert.DoesNotContain(info.Keys, kr => kr is { Kid: kid, Kvn: kvn });
-            },
-            scpKeyParams: Scp03KeyParameters.Default, // authenticate for key mgmt operations
-            resetBeforeUse: true,
-            cancellationToken: CancellationTokenSource.Token);
+            }, // authenticate for key mgmt operations
+            true,
+            scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
     }
 
     [Theory]
@@ -191,11 +191,9 @@ public class SecurityDomainSessionTests
             async session =>
             {
                 keyParams = await LoadKeys(session, ScpKid.SCP11a, kvn);
-            },
-            scpKeyParams: Scp03KeyParameters.Default, // authenticate for key mgmt operations
-            resetBeforeUse: true,
-            cancellationToken: CancellationTokenSource.Token
-        );
+            }, // authenticate for key mgmt operations
+            true,
+            scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
 
         string[] serials =
         [
@@ -210,6 +208,7 @@ public class SecurityDomainSessionTests
                 await session.StoreAllowlistAsync(oceKeyRef, serials);
             },
             scpKeyParams: keyParams,
+            resetBeforeUse: true,
             cancellationToken: CancellationTokenSource.Token
         );
 
@@ -219,6 +218,7 @@ public class SecurityDomainSessionTests
                 await session.DeleteKeyAsync(new KeyReference(ScpKid.SCP11a, kvn));
             },
             scpKeyParams: keyParams,
+            resetBeforeUse: true,
             cancellationToken: CancellationTokenSource.Token
         );
     }
@@ -248,8 +248,9 @@ public class SecurityDomainSessionTests
 
                 await session.PutKeyAsync(keyReference, privateKey);
             },
-            protocolConfiguration,
-            Scp03KeyParameters.Default
+            configuration: protocolConfiguration,
+            scpKeyParams: Scp03KeyParameters.Default,
+            resetBeforeUse: true
         );
 
 
@@ -258,10 +259,9 @@ public class SecurityDomainSessionTests
             {
                 await Task.CompletedTask;
             },
+            false,
             protocolConfiguration,
-            keyParameters,
-            false
-        );
+            keyParameters);
     }
 
     private static async Task<Scp11KeyParameters> LoadKeys(
@@ -422,4 +422,55 @@ public class SecurityDomainSessionTests
     //
     //     return keyParams;
     // }
+
+    /// <summary>
+    ///     Verifies that PutKeyAsync can import SCP03 static keys and that authentication
+    ///     works with the new keys, while the old default keys no longer work.
+    /// </summary>
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.4.3")]
+    public async Task Scp03_PutKeyAsync_WithStaticKeys_ImportsAndAuthenticates(YubiKeyTestState state)
+    {
+        // Custom key set (non-default) for testing
+        byte[] keyBytes =
+        [
+            0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
+            0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
+        ];
+
+        using var newStaticKeys = new StaticKeys(keyBytes, keyBytes, keyBytes);
+        var newKeyReference = new KeyReference(0x01, 0x01);
+        var newKeyParams = new Scp03KeyParameters(newKeyReference, newStaticKeys);
+
+        // Step 1: Authenticate with default keys and import new keys
+        await state.WithSecurityDomainSessionAsync(
+            async session =>
+            {
+                await session.PutKeyAsync(newKeyReference, newStaticKeys, 0,
+                    CancellationTokenSource.Token);
+            },
+            true,
+            scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
+
+        // Step 2: Verify new keys work
+        await state.WithSecurityDomainSessionAsync(
+            session =>
+            {
+                Assert.NotNull(session);
+                return Task.CompletedTask;
+            },
+            scpKeyParams: newKeyParams,
+            resetBeforeUse: false,
+            cancellationToken: CancellationTokenSource.Token);
+
+        // Step 3: Verify default keys no longer work
+        await Assert.ThrowsAsync<ApduException>(async () =>
+        {
+            await state.WithSecurityDomainSessionAsync(
+                session => Task.CompletedTask,
+                scpKeyParams: Scp03KeyParameters.Default,
+                resetBeforeUse: false,
+                cancellationToken: CancellationTokenSource.Token);
+        });
+    }
 }

@@ -63,17 +63,17 @@ public sealed class StaticKeys : IDisposable
     /// <summary>
     ///     Gets the static encryption key.
     /// </summary>
-    internal ReadOnlySpan<byte> Enc => _enc;
+    public ReadOnlySpan<byte> Enc => _enc;
 
     /// <summary>
     ///     Gets the static MAC key.
     /// </summary>
-    internal ReadOnlySpan<byte> Mac => _mac;
+    public ReadOnlySpan<byte> Mac => _mac;
 
     /// <summary>
     ///     Gets the static DEK (Data Encryption Key), if available.
     /// </summary>
-    internal ReadOnlySpan<byte> Dek => _dek;
+    public ReadOnlySpan<byte> Dek => _dek;
 
     #region IDisposable Members
 

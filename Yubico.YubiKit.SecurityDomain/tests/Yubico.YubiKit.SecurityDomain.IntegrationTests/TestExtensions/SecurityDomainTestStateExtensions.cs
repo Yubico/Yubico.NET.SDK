@@ -30,9 +30,9 @@ public static class SecurityDomainTestStateExtensions
     {
         public Task WithSecurityDomainSessionAsync(
             Func<SecurityDomainSession, Task> action,
+            bool resetBeforeUse,
             ProtocolConfiguration? configuration = null,
             ScpKeyParameters? scpKeyParams = null,
-            bool resetBeforeUse = true,
             CancellationToken cancellationToken = default) =>
             state.WithConnectionAsync(async connection =>
             {

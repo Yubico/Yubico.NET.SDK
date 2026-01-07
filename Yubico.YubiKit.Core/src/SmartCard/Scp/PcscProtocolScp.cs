@@ -73,10 +73,9 @@ public class PcscProtocolScp : ISmartCardProtocol
         var response = await _scpProcessor.TransmitAsync(selectCommand, false, cancellationToken)
             .ConfigureAwait(false);
 
-        if (!response.IsOK())
-            throw ApduException.FromResponse(response, selectCommand, "SCP SELECT command failed");
-
-        return response.Data;
+        return response.IsOK()
+            ? response.Data
+            : throw ApduException.FromResponse(response, selectCommand, "SCP SELECT command failed");
     }
 
     public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null) =>

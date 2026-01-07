@@ -67,7 +67,7 @@ public interface ISmartCardConnection : IConnection
 ///     </para>
 /// </remarks>
 internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSmartCardConnection>? logger = null)
-    : ISmartCardConnection, IAsyncDisposable
+    : ISmartCardConnection
 {
     private readonly ILogger<UsbSmartCardConnection> _logger = logger ?? NullLogger<UsbSmartCardConnection>.Instance;
     private SCardCardHandle? _cardHandle;

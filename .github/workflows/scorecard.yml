@@ -49,11 +49,11 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
-          # (Optional) "write" PAT token. Uncomment the `repo_token` line below if:
-          # - you want to enable the Branch-Protection check on a *public* repository, or
-          # - you are installing Scorecard on a *private* repository
-          # To create the PAT, follow the steps in https://github.com/ossf/scorecard-action?tab=readme-ov-file#authentication-with-fine-grained-pat-optional.
-          # repo_token: ${{ secrets.SCORECARD_TOKEN }}
+          # Fine-grained PAT token required to enable Branch-Protection check.
+          # The token must have "Administration: Read-only" permission.
+          # To create the PAT, follow: https://github.com/ossf/scorecard-action?tab=readme-ov-file#authentication-with-fine-grained-pat-optional
+          # Add the token as a repository secret named SCORECARD_TOKEN.
+          repo_token: ${{ secrets.SCORECARD_TOKEN }}
 
           # Public repositories:
           #   - Publish results to OpenSSF REST API for easy access by consumers

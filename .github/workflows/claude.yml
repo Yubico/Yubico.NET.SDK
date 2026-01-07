@@ -21,12 +21,13 @@ jobs:
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
+    # Requires write permissions for Claude Code to interact with repository
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      id-token: write
-      actions: read # Required for Claude to read CI results on PRs
+      contents: write       # Required for Claude to commit/push changes
+      pull-requests: write  # Required to comment on and manage PRs
+      issues: write         # Required to comment on and manage issues
+      id-token: write       # Required for OIDC token generation
+      actions: read         # Required for Claude to read CI results on PRs
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0

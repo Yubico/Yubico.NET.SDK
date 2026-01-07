@@ -40,18 +40,18 @@ on:
       - '.github/workflows/*.yml'
 
 permissions:
-  # required for all workflows
-  security-events: write
-
-  # only required for workflows in private repositories
-  actions: read
   contents: read
-  packages: read
 
 jobs:
   analyze:
     name: Analyze
     runs-on: windows-2022
+    # Requires write permission to upload CodeQL security scan results
+    permissions:
+      security-events: write  # Required for CodeQL to upload scan results
+      actions: read           # Required for workflows in private repositories
+      contents: read
+      packages: read
 
     steps:
       - name: Harden the runner (Audit all outbound calls)

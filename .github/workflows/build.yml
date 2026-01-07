@@ -54,11 +54,12 @@ permissions:
 jobs:
   run-tests:
     name: Run tests
+    # Requires write permissions to publish test results
     permissions:
-      checks: write
+      checks: write         # Required to create check runs for test results
+      pull-requests: write  # Required to comment on PRs with test results
       contents: read
       packages: read
-      pull-requests: write
     uses: ./.github/workflows/test.yml
     with:
       build-coverage-report: false
@@ -67,11 +68,12 @@ jobs:
     name: Build artifacts
     runs-on: windows-2022
     needs: run-tests
+    # Requires write permissions to generate artifact attestations
     permissions:
-      id-token: write
+      id-token: write       # Required for OIDC token generation
+      attestations: write   # Required to attest build provenance
       contents: read
       packages: read
-      attestations: write
     outputs:
       docs-log-id: ${{ steps.docs-log-upload.outputs.artifact-id }}
       docs-id: ${{ steps.docs-upload.outputs.artifact-id }}
@@ -180,8 +182,9 @@ jobs:
   upload-docs:
     name: Upload docs
     if: ${{ github.event.inputs.push-to-docs == 'true' }}
+    # Requires write permission for OIDC authentication to GCP
     permissions:
-      id-token: write
+      id-token: write       # Required for OIDC token generation
       contents: read
     uses: ./.github/workflows/upload-docs.yml
     needs: build-artifacts
@@ -191,9 +194,10 @@ jobs:
     runs-on: windows-2022
     needs: build-artifacts
     if: ${{ github.event.inputs.push-to-dev == 'true' }}
+    # Requires write permission to publish NuGet packages
     permissions:
+      packages: write       # Required to publish to GitHub Packages
       contents: read
-      packages: write
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0

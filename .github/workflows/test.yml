@@ -59,11 +59,8 @@ on:
 #      - '.github/workflows/test.yml'
 
 permissions:
-  pull-requests: write
   contents: read
-  checks: write
-  packages: read
-  
+
 jobs:
   test-windows:
     name: Tests
@@ -119,10 +116,14 @@ jobs:
           name: CoverageResults
           path: code-coverage-results.md
 
-  pr-comment-coverage-results: 
+  pr-comment-coverage-results:
     name: "Add PR Comment: Coverage Results"
     runs-on: ubuntu-latest
-    needs: build-coverage-report 
+    needs: build-coverage-report
+    # Requires write permission to comment on PRs with coverage results
+    permissions:
+      pull-requests: write  # Required to add/update PR comments
+      contents: read
 
     if: github.event_name == 'pull_request'
     steps:
@@ -142,10 +143,15 @@ jobs:
           recreate: true
           path: code-coverage-results.md
 
-  pr-comment-test-results: 
+  pr-comment-test-results:
     name: "Add PR Comment: Test Results"
     runs-on: ubuntu-latest
-    needs: [test-windows, test-ubuntu, test-macos] 
+    needs: [test-windows, test-ubuntu, test-macos]
+    # Requires write permissions to publish test results to PR
+    permissions:
+      checks: write         # Required to create check runs for test results
+      pull-requests: write  # Required to add/update PR comments
+      contents: read
 
     if: github.event_name == 'pull_request' 
     steps:

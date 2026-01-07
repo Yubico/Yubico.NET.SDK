@@ -78,20 +78,18 @@ internal static class ScpInitializer
             .ConfigureAwait(false);
 
         // Create SCP processor with base processor's formatter
-        var scpProcessor = new ScpProcessor(baseProcessor, baseProcessor.Formatter, state);
+        var scpProcessor = new ScpProcessor(baseProcessor, state);
 
         // Send EXTERNAL AUTHENTICATE with host cryptogram
-        // NOTE: Command must have CLA with SM bit already set - MAC is computed over this CLA
-        // Matches Java: new Apdu(0x84, 0x82, 0x33, 0, pair.second)
         var authCommand = new ApduCommand(
             CLA_SECURE_MESSAGING,
             INS_EXTERNAL_AUTHENTICATE,
             SECURITY_LEVEL_CMAC_CDEC_RMAC_RENC,
             0x00,
             hostCryptogram);
+
         var authResponse = await scpProcessor.TransmitAsync(authCommand, true, false, cancellationToken)
             .ConfigureAwait(false);
-
         if (authResponse.SW != SWConstants.Success)
             throw ApduException.FromResponse(authResponse, authCommand, "SCP03 EXTERNAL AUTHENTICATE failed");
 
@@ -115,7 +113,7 @@ internal static class ScpInitializer
             .ConfigureAwait(false);
 
         // Wrap base processor with SCP
-        var scpProcessor = new ScpProcessor(baseProcessor, baseProcessor.Formatter, state);
+        var scpProcessor = new ScpProcessor(baseProcessor, state);
 
         var dataEncryptor = state.GetDataEncryptor();
         return (scpProcessor, dataEncryptor);

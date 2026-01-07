@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**IMPORTANT:** If you are working in a subproject directory (e.g., `Yubico.YubiKit.SecurityDomain/`, `Yubico.YubiKit.Piv/`, etc.), you MUST also read that subproject's `CLAUDE.md` file if it exists. Subproject CLAUDE.md files contain specific patterns, test harness details, and context for that module.
+
 ## Project Overview
 
 Yubico.NET.SDK (YubiKit) is a .NET SDK for interacting with YubiKey devices. The project targets .NET 10, uses C# 14 language features (LangVersion=14), and has nullable reference types enabled throughout.

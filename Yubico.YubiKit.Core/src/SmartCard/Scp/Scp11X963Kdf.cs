@@ -53,10 +53,6 @@ internal static class Scp11X963Kdf
         var receiptVerificationKey = keys[0];
         var oceReceipt = GenerateOceReceiptAesCmac(receiptVerificationKey, keyAgreementData);
 
-        // Debug logging: Compare receipts to identify mismatch cause
-        Console.WriteLine($"OCE Receipt: {Convert.ToHexString(oceReceipt)} ({oceReceipt.Length})");
-        Console.WriteLine($"SD Receipt: {Convert.ToHexString(sdReceipt.Span)} ({sdReceipt.Length})");
-
         return CryptographicOperations.FixedTimeEquals(sdReceipt.Span, oceReceipt)
             ? new SessionKeys(keys[1], keys[2], keys[3], keys[4])
             : throw new BadResponseException("Receipt does not match");

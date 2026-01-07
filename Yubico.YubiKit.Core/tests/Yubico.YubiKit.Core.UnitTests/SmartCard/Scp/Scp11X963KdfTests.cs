@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.Core.Utils;
 
 namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Scp;
 
@@ -199,5 +200,117 @@ public class Scp11X963KdfTests
         var data = new byte[32];
         RandomNumberGenerator.Fill(data);
         return data;
+    }
+
+    [Fact]
+    public void TestDeriveSessionKeys_WithDeterministicData()
+    {
+        // Deterministic test using fixed cryptographic material captured from a real SCP11b session
+        // This validates the entire SCP11b key derivation pipeline: ECDH + X9.63 KDF + AES-CMAC
+        //
+        // Test setup (artificial but deterministic):
+        // - Both OCE and YubiKey use the SAME static keypair (private key imported into YubiKey SD)
+        // - SCP11b uses same key for ephemeral and static OCE (both use the private key below)
+        // - YubiKey generates its own ephemeral key for the session
+        // - With fixed keys, ECDH produces deterministic shared secrets → deterministic receipt
+
+        // Private key (same for both OCE ephemeral, OCE static, and YubiKey static)
+        var privateKeyBytes =
+            Convert.FromHexString("549D2A8A03E62DC829ADE4D6850DB9568475147C59EF238F122A08CF557CDB91");
+
+        // Public key corresponding to the private key above
+        // This is used for: OCE ephemeral, OCE static, and YubiKey static
+        var publicKey =
+            Convert.FromHexString(
+                "04680103F07EBE8E9F8C56A39BA96CC7A0F236D94F68410A05C62A1675C14712079A93453F9A52F76EB87E75C5A0D600AD88C843B260820A6DF978205B2B388BAC");
+
+        // YubiKey's ephemeral public key TLV (from AUTHENTICATE response in the captured session)
+        // This is a different key that the YubiKey generated for this specific session
+        var epkSdEckaTlvBytes = Convert.FromHexString(
+            "5F494104182899E51687194868973A16A397EE4BED7DC76800B5614747828DF04446BB4E01AE0614B481317115EEC5A5D09F1E18119BE57B716D87D739288D15BF051167");
+
+        // Expected sdReceipt computed from these inputs (captured from real YubiKey)
+        var expectedSdReceipt = Convert.FromHexString("171632BF1F7B2CCC8A7BA3254F987AAA");
+
+        // Reconstruct ECDH keys
+        var ephemeralOceEcka = CreateECDiffieHellmanFromPrivateKey(privateKeyBytes); // OCE ephemeral
+        var skOceEcka = CreateECDiffieHellmanFromPrivateKey(privateKeyBytes); // OCE static (same as ephemeral in SCP11b)
+
+        // YubiKey's static public key (same as OCE public key in this artificial test)
+        var pkSdEcka = CreatePublicKeyFromUncompressedPoint(publicKey);
+
+        // Construct hostAuthenticateTlv - this is the oceAuthenticateData from ScpState.Scp11.cs:74-80
+        // SCP11b parameters
+        byte[] keyUsage = [0x3C]; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
+        byte[] keyType = [0x88]; // AES
+        byte[] keyLen = [16]; // 128-bit
+        const byte scpTypeParam = 0x00; // SCP11b
+
+        var hostAuthenticateTlvBytes = TlvHelper.EncodeMany(
+            new Tlv(0xA6, TlvHelper.EncodeMany(
+                new Tlv(0x90, [0x11, scpTypeParam]),
+                new Tlv(0x95, keyUsage),
+                new Tlv(0x80, keyType),
+                new Tlv(0x81, keyLen)).Span),
+            new Tlv(0x5F49, publicKey));
+
+        // Call DeriveSessionKeys - it should compute the same receipt as expectedSdReceipt
+        var sessionKeys = Scp11X963Kdf.DeriveSessionKeys(
+            ephemeralOceEcka,
+            skOceEcka,
+            hostAuthenticateTlvBytes,
+            pkSdEcka,
+            epkSdEckaTlvBytes,
+            expectedSdReceipt,
+            keyUsage,
+            keyType,
+            keyLen);
+
+        // Assert session keys were derived successfully
+        Assert.NotNull(sessionKeys);
+
+        // The fact that DeriveSessionKeys didn't throw means the computed receipt matched expectedSdReceipt
+        // This validates the entire ECDH + X9.63 KDF + AES-CMAC pipeline
+    }
+
+    private static ECDiffieHellman CreateECDiffieHellmanFromPrivateKey(byte[] privateKeyBytes)
+    {
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.NamedCurves.nistP256,
+            D = privateKeyBytes
+        };
+        return ECDiffieHellman.Create(parameters);
+    }
+
+    private static ECDiffieHellmanPublicKey CreatePublicKeyFromUncompressedPoint(byte[] uncompressedPoint)
+    {
+        // Uncompressed point format: 0x04 || X (32 bytes) || Y (32 bytes)
+        if (uncompressedPoint[0] != 0x04 || uncompressedPoint.Length != 65)
+            throw new ArgumentException("Invalid uncompressed point format");
+
+        var x = uncompressedPoint.AsSpan(1, 32).ToArray();
+        var y = uncompressedPoint.AsSpan(33, 32).ToArray();
+
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.NamedCurves.nistP256,
+            Q = new ECPoint { X = x, Y = y }
+        };
+
+        using var ecdh = ECDiffieHellman.Create(parameters);
+        return ecdh.PublicKey;
+    }
+
+    private static ECDiffieHellmanPublicKey CreatePublicKeyFromCoordinates(byte[] x, byte[] y)
+    {
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.NamedCurves.nistP256,
+            Q = new ECPoint { X = x, Y = y }
+        };
+
+        using var ecdh = ECDiffieHellman.Create(parameters);
+        return ecdh.PublicKey;
     }
 }

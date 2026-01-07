@@ -30,8 +30,8 @@ public static class SecurityDomainTestStateExtensions
     extension(YubiKeyTestState state)
     {
         public Task WithSecurityDomainSessionAsync(
-            Func<SecurityDomainSession, Task> action,
             bool resetBeforeUse,
+            Func<SecurityDomainSession, Task> action,
             ProtocolConfiguration? configuration = null,
             ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default) =>

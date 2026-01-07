@@ -17,21 +17,29 @@ using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Core.Utils;
 
-public class DisposableArrayPoolBuffer(int size) : IDisposable
+public class DisposableArrayPoolBuffer : IDisposable
 {
-    private byte[]? _buffer = ArrayPool<byte>.Shared.Rent(size);
+    private readonly Memory<byte> _buffer;
+    private byte[]? _rentedBuffer;
 
-    public Span<byte> Span => _buffer != null ? _buffer.AsSpan() : Span<byte>.Empty;
+    public DisposableArrayPoolBuffer(int size, bool clear = true)
+    {
+        _rentedBuffer = ArrayPool<byte>.Shared.Rent(size);
+        if (clear) CryptographicOperations.ZeroMemory(_rentedBuffer);
+        _buffer = _rentedBuffer.AsMemory(0, size);
+    }
+
+    public Span<byte> Span => _buffer.Span;
 
     #region IDisposable Members
 
     public void Dispose()
     {
-        if (_buffer == null) return;
+        if (_rentedBuffer == null) return;
 
-        CryptographicOperations.ZeroMemory(_buffer);
-        ArrayPool<byte>.Shared.Return(_buffer);
-        _buffer = null;
+        CryptographicOperations.ZeroMemory(_rentedBuffer);
+        ArrayPool<byte>.Shared.Return(_rentedBuffer);
+        _rentedBuffer = null;
     }
 
     #endregion

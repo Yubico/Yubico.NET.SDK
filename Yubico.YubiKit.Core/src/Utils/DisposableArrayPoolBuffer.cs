@@ -31,6 +31,8 @@ public class DisposableArrayPoolBuffer : IDisposable
 
     public Span<byte> Span => _buffer.Span;
 
+    public int Length => _buffer.Length;
+
     #region IDisposable Members
 
     public void Dispose()

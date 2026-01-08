@@ -124,8 +124,18 @@ public class SecurityDomainScp03Tests
             }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
 
     [Theory]
+    [WithYubiKey(MinFirmware = "5.4.3")]
+    public async Task GetData_Unauthenticated_Succeeds(YubiKeyTestState state) =>
+        await state.WithSecurityDomainSessionAsync(false,
+            async session =>
+            {
+                Assert.False(session.IsAuthenticated);
+                var result = await session.GetDataAsync(0x66); // TagCardData
+                Assert.True(result.Length > 0);
+            }, cancellationToken: CancellationTokenSource.Token);
+
+    [Theory]
     [WithYubiKey(MinFirmware = "5.7.2")]
-    // TODO troubleshoot: Check if response is different each time? Then ENC/MAC/DEC error
     public async Task GetSupportedCaIdentifiers_Succeeds(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(true,
             async session =>

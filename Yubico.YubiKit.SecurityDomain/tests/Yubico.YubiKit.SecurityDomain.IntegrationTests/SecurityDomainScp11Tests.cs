@@ -116,32 +116,78 @@ public class SecurityDomainScp11Tests
         var keyReference = new KeyReference(ScpKid.SCP11b, 0x02);
         Scp11KeyParameters? keyParameters = null;
 
-        var protocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true };
         await state.WithSecurityDomainSessionAsync(true, async session =>
         {
-            // Generate a new EC key on the host and import via PutKey
-            // using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-            // using var privateKey = ECPrivateKey.CreateFromParameters(ecdsa.ExportParameters(true));
-            // using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-            // using var privateKey = ECPrivateKey.CreateFromEcdh(ecdh);
-            // var publicKey = ECPublicKey.CreateFromEcdh(ecdh);
-            var privateKey = ECPrivateKey.CreateFromValue(
-                Convert.FromHexString("549D2A8A03E62DC829ADE4D6850DB9568475147C59EF238F122A08CF557CDB91"),
-                KeyType.ECP256);
-            var publicKey = ECPublicKey.CreateFromParameters(privateKey.Parameters with { D = null });
+            using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+            using var privateKey = ECPrivateKey.CreateFromEcdh(ecdh);
+            var publicKey = ECPublicKey.CreateFromEcdh(ecdh);
+
             keyParameters = new Scp11KeyParameters(keyReference, publicKey);
 
             await session.PutKeyAsync(keyReference, privateKey);
-        }, protocolConfiguration, Scp03KeyParameters.Default);
+        }, scpKeyParams: Scp03KeyParameters.Default);
 
 
         await state.WithSecurityDomainSessionAsync(false,
             async session =>
             {
+                Assert.True(session.IsAuthenticated);
                 await Task.CompletedTask;
             },
-            protocolConfiguration, keyParameters);
+            scpKeyParams: keyParameters);
     }
+
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.7.2")]
+    public async Task Scp11b_EstablishSecureConnection_Succeeds(YubiKeyTestState state)
+    {
+        var keyReference = new KeyReference(ScpKid.SCP11b, 0x01);
+        IReadOnlyList<X509Certificate2>? certificateList = null;
+        await state.WithSecurityDomainSessionAsync(true, async session =>
+        {
+            certificateList = await session.GetCertificatesAsync(keyReference);
+        }, scpKeyParams: Scp03KeyParameters.Default);
+
+        var leaf = certificateList!.Last();
+        var ecDsaPublicKey = leaf.PublicKey.GetECDsaPublicKey()!;
+        
+        var keyParams = new Scp11KeyParameters(
+            keyReference, 
+            ECPublicKey.CreateFromParameters(ecDsaPublicKey.ExportParameters(false)));
+        
+        await state.WithSecurityDomainSessionAsync(false,
+            async session =>
+            {
+                Assert.True(session.IsAuthenticated);
+                await Assert.ThrowsAsync<ApduException>(async () =>
+                    await VerifyScp11bAuth(session, CancellationTokenSource.Token)
+                );
+            },
+            scpKeyParams: keyParams);
+        
+        return;
+        
+        static async Task VerifyScp11bAuth(
+            SecurityDomainSession session, CancellationToken cancellationToken = default)
+        {
+            var keyRef = new KeyReference(ScpKid.SCP11b, 0x7f);
+            await session.GenerateKeyAsync(keyRef, 0, cancellationToken);
+            await session.DeleteKeyAsync(keyRef, cancellationToken: cancellationToken);
+        }
+    }
+
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.7.2")]
+    public async Task Scp11b_GetCertificates_IsNotEmpty(YubiKeyTestState state) =>
+        await state.WithSecurityDomainSessionAsync(true,
+            async session =>
+            {
+                var keyReference = new KeyReference(ScpKid.SCP11b, 0x1);
+                var result = await session.GetCertificatesAsync(keyReference, CancellationTokenSource.Token);
+                Assert.True(result.Count > 0);
+            },
+            scpKeyParams: Scp03KeyParameters.Default,
+            cancellationToken: CancellationTokenSource.Token);
 
     private static async Task<Scp11KeyParameters> LoadKeys(
         SecurityDomainSession session,

@@ -64,9 +64,9 @@ public sealed class SecurityDomainSession : ApplicationSession
 
     private const byte TagCardData = 0x66;
     private const byte TagCardRecognitionData = 0x73;
-    private const ushort TagCertificateStore = 0xBF21;
-    private const ushort TagCaKlocIdentifiers = 0xFF33; // Key Loading OCE Certificate
-    private const ushort TagCaKlccIdentifiers = 0xFF34; // Key Loading Card Certificate
+    private const int TagCertificateStore = 0xBF21;
+    private const int TagCaKlocIdentifiers = 0xFF33; // Key Loading OCE Certificate
+    private const int TagCaKlccIdentifiers = 0xFF34; // Key Loading Card Certificate
 
     private const int ResetAttemptLimit = 65;
     private static readonly byte[] ResetAttemptPayload = new byte[8];
@@ -77,6 +77,7 @@ public sealed class SecurityDomainSession : ApplicationSession
     private ISmartCardProtocol? _baseProtocol;
     private bool _isInitialized;
     private ISmartCardProtocol? _protocol;
+    public bool IsAuthenticated { get; private set; }
 
     /// <summary>
     ///     Entry point for interacting with the YubiKey Security Domain application.
@@ -138,19 +139,26 @@ public sealed class SecurityDomainSession : ApplicationSession
         if (_isInitialized)
             return;
 
-        var baseProtocol = EnsureBaseProtocol();
-        await baseProtocol
+        var smartCardProtocol = EnsureBaseProtocol();
+        await smartCardProtocol
             .SelectAsync(ApplicationIds.SecurityDomain, cancellationToken)
             .ConfigureAwait(false);
 
         // Security Domain is available on firmware 5.3.0 and newer.
-        baseProtocol.Configure(FirmwareVersion.V5_3_0, configuration); // TODO detect actual version from Management???
+        smartCardProtocol.Configure(FirmwareVersion.V5_3_0,
+            configuration); // TODO detect actual version from Management???
 
-        _protocol = _scpKeyParams is not null
-            ? await baseProtocol
-                .WithScpAsync(_scpKeyParams, cancellationToken)
-                .ConfigureAwait(false)
-            : baseProtocol;
+        if (_scpKeyParams is not null)
+        {
+            var smartCardProtocolScp =
+                await smartCardProtocol.WithScpAsync(_scpKeyParams, cancellationToken).ConfigureAwait(false);
+            IsAuthenticated = true;
+            _protocol = smartCardProtocolScp;
+        }
+        else
+        {
+            _protocol = smartCardProtocol;
+        }
 
         // _protocol.Configure(FirmwareVersion.V5_3_0, configuration);
         _isInitialized = true;
@@ -164,7 +172,7 @@ public sealed class SecurityDomainSession : ApplicationSession
     /// <param name="expectedResponseLength">Optional expected response length encoded in the Le field.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task<ReadOnlyMemory<byte>> GetDataAsync(
-        ushort dataObject,
+        int dataObject,
         ReadOnlyMemory<byte> requestData = default,
         int expectedResponseLength = 0,
         CancellationToken cancellationToken = default)
@@ -187,7 +195,7 @@ public sealed class SecurityDomainSession : ApplicationSession
 
         try
         {
-            return await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            return await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -245,9 +253,15 @@ public sealed class SecurityDomainSession : ApplicationSession
     public async Task<ReadOnlyMemory<byte>> GetCardRecognitionDataAsync(
         CancellationToken cancellationToken = default)
     {
-        var response = await GetDataAsync(TagCardData, cancellationToken: cancellationToken).ConfigureAwait(false);
+        _logger.LogInformation("Getting card recognition data");
 
-        throw new NotImplementedException();
+        var response = await GetDataAsync(TagCardData, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var cardRecognitionData = TlvHelper.GetValue(TagCardRecognitionData, response.Span);
+
+        if (cardRecognitionData.IsEmpty)
+            throw new InvalidOperationException("Card recognition data not found in response");
+
+        return cardRecognitionData;
     }
 
     /// <summary>
@@ -256,10 +270,25 @@ public sealed class SecurityDomainSession : ApplicationSession
     /// <param name="keyReference">Key reference identifying the certificate store.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A list of certificates where the leaf certificate appears last.</returns>
-    public Task<IReadOnlyList<X509Certificate2>> GetCertificatesAsync(
+    public async Task<IReadOnlyList<X509Certificate2>> GetCertificatesAsync(
         KeyReference keyReference,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogDebug("Getting certificates for Key Reference: {KeyReference}", keyReference);
+        var nestedTlv = new Tlv(
+            TagControlReference,
+            new Tlv(TagKidKvn, keyReference.AsSpan()).AsSpan()
+        ).AsMemory();
+
+        var certificateTlvData =
+            await GetDataAsync(TagCertificateStore, nestedTlv, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+        _logger.LogDebug("Certificates retrieved (KeyReference: {KeyReference})", keyReference);
+        return TlvHelper.DecodeList(certificateTlvData)
+            .Select(tlv => X509CertificateLoader.LoadCertificate(tlv.AsSpan()))
+            .ToList();
+    }
 
     /// <summary>
     ///     Retrieves the supported CA identifiers (KLOC/KLCC) exposed by the Security Domain.
@@ -268,11 +297,55 @@ public sealed class SecurityDomainSession : ApplicationSession
     /// <param name="includeKlcc">Whether to include Key Loading Card Certificate identifiers.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A dictionary keyed by key reference containing identifier payloads.</returns>
-    public Task<IReadOnlyDictionary<KeyReference, ReadOnlyMemory<byte>>> GetSupportedCaIdentifiersAsync(
+    public async Task<IReadOnlyDictionary<KeyReference, ReadOnlyMemory<byte>>> GetSupportedCaIdentifiersAsync(
         bool includeKloc,
         bool includeKlcc,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        CancellationToken cancellationToken = default)
+    {
+        if (!includeKloc && !includeKlcc) throw new ArgumentException("At least one of kloc and klcc must be true");
+
+        _logger.LogDebug("Getting CA identifiers KLOC={Kloc}, KLCC={Klcc}", includeKloc, includeKlcc);
+
+        var arrayBufferWriter = new ArrayBufferWriter<byte>();
+        if (includeKloc)
+            try
+            {
+                var response = await GetDataAsync(TagCaKlocIdentifiers, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+                arrayBufferWriter.Write(response.Span);
+            }
+            catch (ApduException e) when (e.SW == SWConstants.DataNotFound) // A kloc might not be present
+            {
+            }
+
+        if (includeKlcc)
+            try
+            {
+                var response = await GetDataAsync(TagCaKlccIdentifiers, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+                arrayBufferWriter.Write(response.Span);
+            }
+            catch (ApduException e) when (e.SW == SWConstants.DataNotFound) // A klcc might not be present
+            {
+            }
+
+        var caIdentifiers = new Dictionary<KeyReference, ReadOnlyMemory<byte>>();
+        var caTlvObjects = TlvHelper.DecodeList(arrayBufferWriter.WrittenSpan).AsSpan();
+        while (!caTlvObjects.IsEmpty)
+        {
+            var caIdentifierTlv = caTlvObjects[0];
+            var keyReferenceTlv = caTlvObjects[1];
+
+            var keyReferenceData = keyReferenceTlv.AsSpan();
+            var keyReference = new KeyReference(keyReferenceData[0], keyReferenceData[1]);
+            caIdentifiers.Add(keyReference, caIdentifierTlv.AsMemory());
+
+            caTlvObjects = caTlvObjects[2..];
+        }
+
+        _logger.LogInformation("CA identifiers retrieved");
+        return caIdentifiers;
+    }
 
     /// <summary>
     ///     Stores a certificate bundle for the specified key reference.
@@ -304,7 +377,6 @@ public sealed class SecurityDomainSession : ApplicationSession
     {
         ArgumentNullException.ThrowIfNull(staticKeys);
 
-        // Validation: SCP03 keys must use KID 0x01
         if (keyReference.Kid != 0x01)
             throw new ArgumentException("SCP03 keys must use KID 0x01", nameof(keyReference));
 
@@ -329,7 +401,7 @@ public sealed class SecurityDomainSession : ApplicationSession
             var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn,
                 (byte)(0x80 | keyReference.Kid),
                 buffer.WrittenMemory);
-            var response = await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            var response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
 
             // Validate response contains expected KCVs
             ValidateKcv(staticKeys, response.Span);
@@ -373,7 +445,7 @@ public sealed class SecurityDomainSession : ApplicationSession
         _logger.LogDebug("Deleting keys matching {KeyRef}{Suffix}",
             keyReference, deleteLast ? " (allow delete last)" : string.Empty);
 
-        return TransmitAsync(command, cancellationToken);
+        return TransmitAndGetResponseDataAsync(command, cancellationToken);
     }
 
     private static (byte Kid, byte Kvn) NormalizeDeletePolicy(KeyReference keyReference)
@@ -445,7 +517,7 @@ public sealed class SecurityDomainSession : ApplicationSession
 
         try
         {
-            response = await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -503,7 +575,7 @@ public sealed class SecurityDomainSession : ApplicationSession
             // Create and send the command
             var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
                 buffer.WrittenMemory);
-            var response = await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            var response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
 
             // Get and validate the response
             Span<byte> expectedResponseData = new[] { keyReference.Kvn };
@@ -562,7 +634,7 @@ public sealed class SecurityDomainSession : ApplicationSession
 
             var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
                 buffer.WrittenMemory);
-            var response = await TransmitAsync(command, cancellationToken);
+            var response = await TransmitAndGetResponseDataAsync(command, cancellationToken);
 
             Span<byte> expectedResponseData = new[] { keyReference.Kvn };
             ValidateCheckSum(response.Span, expectedResponseData);
@@ -658,7 +730,7 @@ public sealed class SecurityDomainSession : ApplicationSession
         _logger.LogInformation("Storing data with length:{Length}", data.Length);
 
         var command = new ApduCommand(0x00, 0xE2, 0x90, 0x00, data);
-        await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -815,10 +887,13 @@ public sealed class SecurityDomainSession : ApplicationSession
         if (_protocol is null) throw new InvalidOperationException("Security Domain protocol not available.");
     }
 
-    private Task<ReadOnlyMemory<byte>> TransmitAsync(ApduCommand command, CancellationToken cancellationToken)
+    private async Task<ReadOnlyMemory<byte>> TransmitAndGetResponseDataAsync(
+        ApduCommand command,
+        CancellationToken cancellationToken)
     {
         EnsureInitializedProtocol();
-        return _protocol!.TransmitAndReceiveAsync(command, cancellationToken);
+        var data = await _protocol!.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
+        return data;
     }
 
     private bool TryGetResetParameters(KeyReference keyReference, out byte instruction,

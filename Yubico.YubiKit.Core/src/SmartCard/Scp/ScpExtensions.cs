@@ -46,7 +46,7 @@ public static class ScpExtensions
         /// var response = await protocol.TransmitAndReceiveAsync(command);
         /// </code>
         /// </example>
-        public async Task<ISmartCardProtocol> WithScpAsync(
+        public async Task<PcscProtocolScp> WithScpAsync(
             ScpKeyParameters keyParams,
             CancellationToken cancellationToken = default)
         {

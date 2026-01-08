@@ -28,9 +28,8 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
     private const byte PaddingByte = 0x80; // ISO/IEC 9797-1 Padding Method 2
     private const byte IvPrefixForDecryption = 0x80; // IV generation prefix for response decryption
 
-    private int _encCounter = 1; // Counter for command encryption (host->card)
+    private int _encCounter = 1; // Counter for encryption (used for both command and response)
     private byte[] _macChain = macChain;
-    private int _respCounter = 1; // Counter for response decryption (card->host)
 
     public DataEncryptor GetDataEncryptor() =>
         keys.Dek.IsEmpty
@@ -90,10 +89,11 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
         try
         {
             // Generate IV using ECB encryption of counter with prefix
-            // Use separate response counter that increments independently
+            // Use encCounter - 1 to match the counter used during encryption of the command
+            // (The counter was already incremented during Encrypt())
             Span<byte> ivData = stackalloc byte[16];
             ivData[0] = IvPrefixForDecryption;
-            BinaryPrimitives.WriteInt32BigEndian(ivData[12..], _respCounter++);
+            BinaryPrimitives.WriteInt32BigEndian(ivData[12..], _encCounter - 1);
 
             iv = new byte[16];
             var ivBytesWritten = aes.EncryptEcb(ivData, iv, PaddingMode.None);

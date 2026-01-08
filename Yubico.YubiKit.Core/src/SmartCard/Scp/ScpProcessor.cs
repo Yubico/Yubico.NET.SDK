@@ -53,8 +53,9 @@ internal class ScpProcessor(IApduProcessor @delegate, ScpState state) : IApduPro
         try
         {
             // Step 1: Encrypt command data if requested
+            // Note: Even empty data must be encrypted (padded) to maintain counter synchronization
             var commandData = command.Data;
-            if (encrypt && commandData.Length > 0)
+            if (encrypt)
             {
                 var encryptedData = State.Encrypt(commandData.Span);
                 commandData = encryptedData;
@@ -132,9 +133,11 @@ internal class ScpProcessor(IApduProcessor @delegate, ScpState state) : IApduPro
                 // Console.WriteLine($"[SCP DEBUG] Unmacd data: {Convert.ToHexString(unmacdData)}");
                 // Console.WriteLine($"[SCP DEBUG] First byte (length field): {unmacdData[0]}");
 
-                // Step 11: Decrypt response data if it was encrypted
-                Console.WriteLine($"[SCP DEBUG] encrypt={encrypt}, unmacdData.Length={unmacdData.Length}");
-                if (encrypt && unmacdData.Length > 0)
+                // Step 11: Decrypt response data
+                // Note: Response is ALWAYS encrypted once SCP session is established,
+                // regardless of whether the command data was encrypted
+                Console.WriteLine($"[SCP DEBUG] unmacdData.Length={unmacdData.Length}");
+                if (unmacdData.Length > 0)
                 {
                     Console.WriteLine("[SCP DEBUG] Decrypting response data...");
                     var decryptedData = State.Decrypt(unmacdData);
@@ -143,7 +146,6 @@ internal class ScpProcessor(IApduProcessor @delegate, ScpState state) : IApduPro
                     return new ApduResponse(decryptedData, response.SW);
                 }
 
-                Console.WriteLine($"[SCP DEBUG] NOT decrypting (encrypt={encrypt})");
                 return new ApduResponse(unmacdData, response.SW);
             }
 

@@ -310,9 +310,9 @@ public sealed class SecurityDomainSession : ApplicationSession
         if (includeKloc)
             try
             {
-                var response = await GetDataAsync(TagCaKlocIdentifiers, cancellationToken: cancellationToken)
+                var kloc = await GetDataAsync(TagCaKlocIdentifiers, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-                arrayBufferWriter.Write(response.Span);
+                arrayBufferWriter.Write(kloc.Span);
             }
             catch (ApduException e) when (e.SW == SWConstants.DataNotFound) // A kloc might not be present
             {
@@ -321,9 +321,9 @@ public sealed class SecurityDomainSession : ApplicationSession
         if (includeKlcc)
             try
             {
-                var response = await GetDataAsync(TagCaKlccIdentifiers, cancellationToken: cancellationToken)
+                var klcc = await GetDataAsync(TagCaKlccIdentifiers, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-                arrayBufferWriter.Write(response.Span);
+                arrayBufferWriter.Write(klcc.Span);
             }
             catch (ApduException e) when (e.SW == SWConstants.DataNotFound) // A klcc might not be present
             {
@@ -350,14 +350,56 @@ public sealed class SecurityDomainSession : ApplicationSession
     /// <summary>
     ///     Stores a certificate bundle for the specified key reference.
     /// </summary>
+    /// <remarks>
+    ///     The certificates will be stored in the order they are provided in the list.
+    ///     Requires off-card entity verification.
+    ///     <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
+    /// </remarks>
     /// <param name="keyReference">Key reference that will own the certificate bundle.</param>
     /// <param name="certificates">Certificates to persist, with the leaf certificate last.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public Task StoreCertificatesAsync(
+    /// <exception cref="ArgumentException">Thrown when a certificate cannot be encoded.</exception>
+    public async Task StoreCertificatesAsync(
         KeyReference keyReference,
         IReadOnlyList<X509Certificate2> certificates,
-        CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogDebug("Storing certificate bundle (KeyReference: {KeyReference})", keyReference);
+
+        var buffer = new ArrayBufferWriter<byte>();
+        try
+        {
+            // Write each certificate's DER-encoded data
+            foreach (var cert in certificates)
+            {
+                try
+                {
+                    buffer.Write(cert.RawData);
+                }
+                catch (CryptographicException e)
+                {
+                    throw new ArgumentException("Failed to get encoded version of certificate", e);
+                }
+            }
+
+            // Build the TLV structure:
+            // - Control Reference (0xA6) containing Key ID/KVN (0x83)
+            // - Certificate Store (0xBF21) containing the concatenated certificate data
+            var storeData = TlvHelper.EncodeList(
+            [
+                new Tlv(TagControlReference, new Tlv(TagKidKvn, keyReference.AsSpan()).AsSpan()),
+                new Tlv(TagCertificateStore, buffer.WrittenSpan)
+            ]);
+
+            await StoreDataAsync(storeData, cancellationToken).ConfigureAwait(false);
+
+            _logger.LogInformation("Certificate bundle stored (KeyReference: {KeyReference})", keyReference);
+        }
+        finally
+        {
+            buffer.Clear();
+        }
+    }
 
     /// <summary>
     ///     Imports an SCP03 static key set into the Security Domain.

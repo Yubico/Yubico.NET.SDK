@@ -189,6 +189,32 @@ public class SecurityDomainScp11Tests
             scpKeyParams: Scp03KeyParameters.Default,
             cancellationToken: CancellationTokenSource.Token);
 
+    /// <summary>
+    ///     Verifies that StoreCertificatesAsync successfully stores certificates that can be retrieved.
+    /// </summary>
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.7.2")]
+    public async Task Scp11b_StoreCertificates_CanBeRetrieved(YubiKeyTestState state) =>
+        await state.WithSecurityDomainSessionAsync(true,
+            async session =>
+            {
+                var keyReference = new KeyReference(ScpKid.SCP11b, 0x1);
+                var oceCertificates = GetOceCertificates(Scp11TestData.OceCerts);
+
+                // Store the certificate bundle
+                await session.StoreCertificatesAsync(keyReference, oceCertificates.Bundle, CancellationTokenSource.Token);
+
+                // Retrieve and verify
+                var result = await session.GetCertificatesAsync(keyReference, CancellationTokenSource.Token);
+
+                // Assert that we can store and retrieve the off card entity certificate
+                var oceThumbprint = oceCertificates.Bundle.Single().Thumbprint;
+                Assert.Single(result);
+                Assert.Equal(oceThumbprint, result[0].Thumbprint);
+            },
+            scpKeyParams: Scp03KeyParameters.Default,
+            cancellationToken: CancellationTokenSource.Token);
+
     private static async Task<Scp11KeyParameters> LoadKeys(
         SecurityDomainSession session,
         byte scpKid,

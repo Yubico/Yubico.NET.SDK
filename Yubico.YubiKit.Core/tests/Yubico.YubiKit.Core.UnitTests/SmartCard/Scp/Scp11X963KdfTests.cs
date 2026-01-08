@@ -234,25 +234,29 @@ public class Scp11X963KdfTests
 
         // Reconstruct ECDH keys
         var ephemeralOceEcka = CreateECDiffieHellmanFromPrivateKey(privateKeyBytes); // OCE ephemeral
-        var skOceEcka = CreateECDiffieHellmanFromPrivateKey(privateKeyBytes); // OCE static (same as ephemeral in SCP11b)
+        var skOceEcka =
+            CreateECDiffieHellmanFromPrivateKey(privateKeyBytes); // OCE static (same as ephemeral in SCP11b)
 
         // YubiKey's static public key (same as OCE public key in this artificial test)
         var pkSdEcka = CreatePublicKeyFromUncompressedPoint(publicKey);
 
-        // Construct hostAuthenticateTlv - this is the oceAuthenticateData from ScpState.Scp11.cs:74-80
         // SCP11b parameters
         byte[] keyUsage = [0x3C]; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
         byte[] keyType = [0x88]; // AES
         byte[] keyLen = [16]; // 128-bit
         const byte scpTypeParam = 0x00; // SCP11b
 
-        var hostAuthenticateTlvBytes = TlvHelper.EncodeMany(
-            new Tlv(0xA6, TlvHelper.EncodeMany(
+        var hostAuthenticateTlvBytes = TlvHelper.EncodeList(
+        [
+            new Tlv(0xA6, TlvHelper.EncodeList(
+            [
                 new Tlv(0x90, [0x11, scpTypeParam]),
                 new Tlv(0x95, keyUsage),
                 new Tlv(0x80, keyType),
-                new Tlv(0x81, keyLen)).Span),
-            new Tlv(0x5F49, publicKey));
+                new Tlv(0x81, keyLen)
+            ])),
+            new Tlv(0x5F49, publicKey)
+        ]);
 
         // Call DeriveSessionKeys - it should compute the same receipt as expectedSdReceipt
         var sessionKeys = Scp11X963Kdf.DeriveSessionKeys(
@@ -272,11 +276,7 @@ public class Scp11X963KdfTests
 
     private static ECDiffieHellman CreateECDiffieHellmanFromPrivateKey(byte[] privateKeyBytes)
     {
-        var parameters = new ECParameters
-        {
-            Curve = ECCurve.NamedCurves.nistP256,
-            D = privateKeyBytes
-        };
+        var parameters = new ECParameters { Curve = ECCurve.NamedCurves.nistP256, D = privateKeyBytes };
         return ECDiffieHellman.Create(parameters);
     }
 
@@ -289,11 +289,7 @@ public class Scp11X963KdfTests
         var x = uncompressedPoint.AsSpan(1, 32).ToArray();
         var y = uncompressedPoint.AsSpan(33, 32).ToArray();
 
-        var parameters = new ECParameters
-        {
-            Curve = ECCurve.NamedCurves.nistP256,
-            Q = new ECPoint { X = x, Y = y }
-        };
+        var parameters = new ECParameters { Curve = ECCurve.NamedCurves.nistP256, Q = new ECPoint { X = x, Y = y } };
 
         using var ecdh = ECDiffieHellman.Create(parameters);
         return ecdh.PublicKey;
@@ -301,11 +297,7 @@ public class Scp11X963KdfTests
 
     private static ECDiffieHellmanPublicKey CreatePublicKeyFromCoordinates(byte[] x, byte[] y)
     {
-        var parameters = new ECParameters
-        {
-            Curve = ECCurve.NamedCurves.nistP256,
-            Q = new ECPoint { X = x, Y = y }
-        };
+        var parameters = new ECParameters { Curve = ECCurve.NamedCurves.nistP256, Q = new ECPoint { X = x, Y = y } };
 
         using var ecdh = ECDiffieHellman.Create(parameters);
         return ecdh.PublicKey;

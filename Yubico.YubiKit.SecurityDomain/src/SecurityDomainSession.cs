@@ -219,7 +219,7 @@ public sealed class SecurityDomainSession : ApplicationSession
         using var tlvList = TlvHelper.DecodeList(response.Span);
         foreach (var tlv in tlvList)
         {
-            var value = TlvHelper.GetValue(TagKeyInformationData, tlv.AsMemory().Span);
+            var value = TlvHelper.GetValue(TagKeyInformationData, tlv.AsSpan());
             var keyRef = new KeyReference(value.Span[0], value.Span[1]);
             var components = new Dictionary<byte, byte>();
 
@@ -493,11 +493,11 @@ public sealed class SecurityDomainSession : ApplicationSession
 
             // Write the EC public key
             using var publicKeyTlv = new Tlv(KeyTypeEccPublicKey, publicKey.PublicPoint.Span);
-            buffer.Write(publicKeyTlv.AsMemory().Span);
+            buffer.Write(publicKeyTlv.AsSpan());
 
             // Write the EC parameters
             using var paramsTlv = new Tlv(KeyTypeEccKeyParams, stackalloc byte[1]);
-            buffer.Write(paramsTlv.AsMemory().Span);
+            buffer.Write(paramsTlv.AsSpan());
             buffer.Write(new byte[] { 0 });
 
             // Create and send the command
@@ -554,10 +554,10 @@ public sealed class SecurityDomainSession : ApplicationSession
 
             var encryptedKey = EncryptData(parameters.D.AsSpan());
             using var encryptedKeyTlv = new Tlv(KeyTypeEccPrivateKey, encryptedKey);
-            buffer.Write(encryptedKeyTlv.AsMemory().Span);
+            buffer.Write(encryptedKeyTlv.AsSpan());
 
             using var paramsTlv = new Tlv(KeyTypeEccKeyParams, [0x00]);
-            buffer.Write(paramsTlv.AsMemory().Span);
+            buffer.Write(paramsTlv.AsSpan());
             buffer.Write(new byte[] { 0 });
 
             var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
@@ -608,9 +608,11 @@ public sealed class SecurityDomainSession : ApplicationSession
             buffer.Write(serialTlvBytes.Span);
         }
 
-        var serialsDataTl = TlvHelper.EncodeMany(
-            new Tlv(TagControlReference, new Tlv(TagKidKvn, keyReference.AsBytes.Span).AsMemory().Span),
-            new Tlv(TagSerialsAllowList, buffer.WrittenSpan)
+        var serialsDataTl = TlvHelper.EncodeList(
+            [
+                new Tlv(TagControlReference, new Tlv(TagKidKvn, keyReference.AsSpan()).AsSpan()),
+                new Tlv(TagSerialsAllowList, buffer.WrittenSpan)
+            ]
         );
 
         await StoreDataAsync(serialsDataTl, cancellationToken).ConfigureAwait(false);
@@ -678,11 +680,14 @@ public sealed class SecurityDomainSession : ApplicationSession
         };
 
         // Create and serialize data
-        var caIssuerData = new Tlv(
-            TagControlReference, TlvHelper.EncodeMany(
-                new Tlv(ClaGlobalPlatform, [klcc]),
-                new Tlv(0x42, ski.Span), // GlobalPlatform tag for CA issuer SKI
-                new Tlv(TagKidKvn, keyReference.AsBytes.Span)).Span);
+        var caIssuerData = new Tlv(TagControlReference,
+            TlvHelper.EncodeList([
+                    new Tlv(ClaGlobalPlatform, [klcc]),
+                    new Tlv(0x42, ski.Span), // GlobalPlatform tag for CA issuer SKI
+                    new Tlv(TagKidKvn, keyReference.AsSpan())
+                ]
+            ).Span
+        );
 
         // Send store data command
         await StoreDataAsync(caIssuerData.AsMemory(), cancellationToken).ConfigureAwait(false);
@@ -960,7 +965,7 @@ public sealed class SecurityDomainSession : ApplicationSession
 
             // Write TLV with just the encrypted key data
             using var keyTlv = new Tlv(KeyTypeAes, encrypted);
-            buffer.Write(keyTlv.AsMemory().Span);
+            buffer.Write(keyTlv.AsSpan());
 
             // Write KCV length and KCV bytes after the TLV
             buffer.Write([(byte)kcv.Length]);

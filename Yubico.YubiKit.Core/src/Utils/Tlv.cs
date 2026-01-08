@@ -49,6 +49,11 @@ public sealed class Tlv : IDisposable
         Encode(value);
     }
 
+    public Tlv(int tag, Memory<byte> value) : this(tag, value.Span) { }
+
+    public Tlv(int tag, ReadOnlyMemory<byte> value) : this(tag, value.Span) { }
+    // public Tlv(int tag, byte[] value) : this(tag, value.AsSpan()) { }
+
     /// <summary>
     ///     Returns the tag.
     /// </summary>
@@ -63,6 +68,11 @@ public sealed class Tlv : IDisposable
     ///     Returns the length of the value.
     /// </summary>
     public int Length { get; private set; }
+
+    /// <summary>
+    ///     Returns the total length of the TLV object.
+    /// </summary>
+    public int TotalLength => _bytes.AsMemory().Length;
 
     #region IDisposable Members
 

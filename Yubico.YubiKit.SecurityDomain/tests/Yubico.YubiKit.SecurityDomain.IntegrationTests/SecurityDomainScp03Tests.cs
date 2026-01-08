@@ -102,4 +102,38 @@ public class SecurityDomainScp03Tests
                 cancellationToken: CancellationTokenSource.Token);
         });
     }
+
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.4.3")]
+    public async Task GetCardRecognitionData_Succeeds(YubiKeyTestState state) =>
+        await state.WithSecurityDomainSessionAsync(true,
+            async session =>
+            {
+                var result = await session.GetCardRecognitionDataAsync();
+                Assert.True(result.Length > 0);
+            }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
+
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.4.3")]
+    public async Task GetData_Succeeds(YubiKeyTestState state) =>
+        await state.WithSecurityDomainSessionAsync(true,
+            async session =>
+            {
+                var result = await session.GetDataAsync(0x66); // TagCardData
+                Assert.True(result.Length > 0);
+            }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
+
+    [Theory]
+    [WithYubiKey(MinFirmware = "5.7.2")]
+    // TODO troubleshoot: Check if response is different each time? Then ENC/MAC/DEC error
+    public async Task GetSupportedCaIdentifiers_Succeeds(YubiKeyTestState state) =>
+        await state.WithSecurityDomainSessionAsync(true,
+            async session =>
+            {
+                var result = await session.GetSupportedCaIdentifiersAsync(true, true);
+                Assert.True(result.Count > 0);
+            },
+            scpKeyParams: Scp03KeyParameters.Default,
+            configuration: new ProtocolConfiguration { ForceShortApdus = true },
+            cancellationToken: CancellationTokenSource.Token);
 }

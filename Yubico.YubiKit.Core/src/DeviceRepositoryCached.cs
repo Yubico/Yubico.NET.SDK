@@ -91,7 +91,7 @@ public class DeviceRepositoryCached(
         CancellationToken cancellationToken = default)
     {
         await EnsureDataAvailable(cancellationToken).ConfigureAwait(false);
-        return [.. _deviceCache.Values.Where(d => d.ConnectionType == type)];
+        return [.. _deviceCache.Values.Where(d => d.ConnectionType == type || type == ConnectionType.All)];
     }
 
     public IObservable<DeviceEvent> DeviceChanges => _deviceChanges.AsObservable();

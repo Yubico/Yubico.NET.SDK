@@ -25,8 +25,6 @@ internal class HidYubiKey(
     ILogger<HidYubiKey> logger)
     : IYubiKey
 {
-    #region IYubiKey Members
-
     public string DeviceId { get; } = 
         $"hid:{hidDevice.VendorId:X4}:{hidDevice.ProductId:X4}:{hidDevice.Usage:X4}";
 
@@ -41,8 +39,6 @@ internal class HidYubiKey(
         return connection as TConnection ??
                throw new InvalidOperationException("Connection is not of the expected type.");
     }
-
-    #endregion
 
     private async Task<IAsyncHidConnection> CreateConnection(CancellationToken cancellationToken = default)
     {

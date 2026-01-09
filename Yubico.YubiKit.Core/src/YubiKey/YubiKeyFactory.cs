@@ -28,8 +28,6 @@ public class YubiKeyFactory(
     ILoggerFactory loggerFactory,
     ISmartCardConnectionFactory connectionFactory) : IYubiKeyFactory
 {
-    #region IYubiKeyFactory Members
-
     public IYubiKey Create(IDevice device) =>
         device switch
         {
@@ -38,8 +36,6 @@ public class YubiKeyFactory(
             _ => throw new NotSupportedException(
                 $"Device type {device.GetType().Name} is not supported by this factory.")
         };
-
-    #endregion
 
     private PcscYubiKey CreatePcscYubiKey(IPcscDevice cardDevice) =>
         new(

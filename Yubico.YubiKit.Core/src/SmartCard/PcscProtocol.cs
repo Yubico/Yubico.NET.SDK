@@ -61,11 +61,11 @@ internal class PcscProtocol : ISmartCardProtocol
         _logger = logger ?? NullLogger<PcscProtocol>.Instance;
         _connection = connection;
         InsSendRemaining = insSendRemaining.Length > 0 ? insSendRemaining.Span[0] : INS_SEND_REMAINING;
-        _useExtendedApdus = _connection.SupportsExtendedApdu();
+        UseExtendedApdus = _connection.SupportsExtendedApdu();
         _processor = BuildBaseProcessor();
     }
 
-    internal bool _useExtendedApdus { get; private set; }
+    internal bool UseExtendedApdus { get; private set; }
 
     public int MaxApduSize { get; private set; } = SmartCardMaxApduSizes.Neo; // Lowest as default
 
@@ -73,7 +73,7 @@ internal class PcscProtocol : ISmartCardProtocol
 
     private IApduProcessor BuildBaseProcessor()
     {
-        var processor = _useExtendedApdus
+        var processor = UseExtendedApdus
             ? new ApduTransmitter(_connection, new ApduFormatterExtended(MaxApduSize))
             : new ChainedApduTransmitter(_connection, new ApduFormatterShort());
 
@@ -121,7 +121,7 @@ internal class PcscProtocol : ISmartCardProtocol
             return;
 
         var forceShortApdu = configuration is { ForceShortApdus: true };
-        _useExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu; // TODO always true for UsbPcsc... 
+        UseExtendedApdus = _connection.SupportsExtendedApdu() && !forceShortApdu; // TODO always true for UsbPcsc... 
         MaxApduSize = firmwareVersion.IsAtLeast(FirmwareVersion.V4_3_0)
             ? SmartCardMaxApduSizes.Yk43
             : SmartCardMaxApduSizes.Yk4;

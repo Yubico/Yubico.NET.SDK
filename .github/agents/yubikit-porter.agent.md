@@ -110,6 +110,24 @@ dotnet build.cs test
 
 - Main branch: `develop`
 - Porting branches: `yubikit-*`
+- **Commit Guidelines:** See `COMMIT_GUIDELINES.md` in this directory
+
+### Commit Rules (CRITICAL)
+
+⚠️ **Only commit files YOU created or modified.**
+
+```bash
+# Check what's staged first
+git status
+
+# Add only YOUR files explicitly
+git add path/to/your/file.cs
+
+# Commit
+git commit -m "feat(scope): description"
+```
+
+**DO NOT** use `git add .`, `git add -A`, or `git commit -a`.
 
 ## Documentation Template
 

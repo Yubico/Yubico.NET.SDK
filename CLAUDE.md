@@ -1191,14 +1191,32 @@ public async Task IntegrationTest_WithRealDevice()
 - Current working branch: `yubikit`
 - Use `develop` as base for pull requests
 
+### Commit Discipline (CRITICAL for Agents)
+
+**Only commit files YOU created or modified in the current session.**
+
+```bash
+# Check what's staged first
+git status
+
+# Add only YOUR files explicitly - NEVER use git add . or git add -A
+git add path/to/your/file.cs
+
+# Commit
+git commit -m "feat(scope): description"
+```
+
+See `.github/agents/COMMIT_GUIDELINES.md` for detailed rules.
+
 ## Pre-Commit Checklist
 
 Before committing:
-1. ✅ Code builds without warnings: `dotnet build`
-2. ✅ All tests pass: `dotnet test`
-3. ✅ Code formatted: `dotnet format`
-4. ✅ No nullable reference warnings
-5. ✅ Sensitive data properly zeroed
-6. ✅ No unnecessary allocations in hot paths
-7. ✅ Modern C# patterns (is null, switch expressions, etc.)
-8. ✅ EditorConfig rules followed
+1. ✅ Ran `git status` to verify only your files are being committed
+2. ✅ Code builds without warnings: `dotnet build.cs build`
+3. ✅ All tests pass: `dotnet build.cs test`
+4. ✅ Code formatted: `dotnet format`
+5. ✅ No nullable reference warnings
+6. ✅ Sensitive data properly zeroed
+7. ✅ No unnecessary allocations in hot paths
+8. ✅ Modern C# patterns (is null, switch expressions, etc.)
+9. ✅ EditorConfig rules followed

@@ -141,7 +141,7 @@ public class PcscProtocolScpTests
         var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<ApduException>(() =>
             adapter.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
         Assert.Contains("6982", ex.Message);
     }

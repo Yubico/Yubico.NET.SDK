@@ -42,18 +42,21 @@ internal static class ScpInitializer
         ScpKeyParameters keyParams,
         CancellationToken cancellationToken = default)
     {
+        if (baseProcessor is not ChainedResponseReceiver { FirmwareVersion: not null } mainProcessor)
+            throw new ArgumentException("Base processor must be a ChainedResponseReceiver",
+                nameof(baseProcessor)); // TODO. Could also put FirmwareVersion on the IApduProcessor interface
+
         try
         {
             return keyParams switch
             {
-                Scp03KeyParameters scp03Parameters => await InitScp03Async(baseProcessor, scp03Parameters,
-                        cancellationToken)
-                    .ConfigureAwait(false),
-                Scp11KeyParameters scp11Parameters => await InitScp11Async(baseProcessor, scp11Parameters,
-                        cancellationToken)
-                    .ConfigureAwait(false),
-                _ => throw new ArgumentException($"Unsupported ScpKeyParams type: {keyParams.GetType().Name}",
-                    nameof(keyParams))
+                Scp03KeyParameters scp03Parameters => mainProcessor.FirmwareVersion.IsAtLeast(5, 3, 0)
+                    ? await InitScp03Async(mainProcessor, scp03Parameters, cancellationToken)
+                    : throw new NotSupportedException("SCP03 only supported on YubiKey 5.3.0 and later"),
+                Scp11KeyParameters scp11Parameters => mainProcessor.FirmwareVersion.IsAtLeast(5, 7, 2)
+                    ? await InitScp11Async(mainProcessor, scp11Parameters, cancellationToken)
+                    : throw new NotSupportedException("SCP11 only supported on YubiKey 5.7.2 and later"),
+                _ => throw new ArgumentException("Unsupported SCP key parameters type")
             };
         }
         catch (ApduException ex) when (ex.SW == SWConstants.ClaNotSupported)

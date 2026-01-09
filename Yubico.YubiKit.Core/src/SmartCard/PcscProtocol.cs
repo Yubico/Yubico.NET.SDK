@@ -114,7 +114,7 @@ internal class PcscProtocol : ISmartCardProtocol
             : response.Data;
     }
 
-    public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration)
+    public void Configure(FirmwareVersion firmwareVersion, ProtocolConfiguration? configuration = null)
     {
         FirmwareVersion = firmwareVersion;
         if (!FirmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))

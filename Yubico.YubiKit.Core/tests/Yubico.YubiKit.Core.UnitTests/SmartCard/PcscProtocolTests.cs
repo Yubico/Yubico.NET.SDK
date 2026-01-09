@@ -187,7 +187,7 @@ public class PcscProtocolTests
         var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<ApduException>(() =>
             protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
         Assert.Contains("6982", ex.Message);
     }
@@ -203,9 +203,9 @@ public class PcscProtocolTests
         var command = new ApduCommand(0x00, 0x00, 0x00, 0x00, ReadOnlyMemory<byte>.Empty);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<ApduException>(() =>
             protocol.TransmitAndReceiveAsync(command, TestContext.Current.CancellationToken));
-        Assert.Matches("Command failed with status: 6A82", ex.Message);
+        Assert.Contains("6A82", ex.Message);
     }
 
     [Fact]
@@ -278,7 +278,7 @@ public class PcscProtocolTests
         var appId = new byte[] { 0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01 };
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<ApduException>(() =>
             protocol.SelectAsync(appId, TestContext.Current.CancellationToken));
         Assert.Contains("6A82", ex.Message);
     }

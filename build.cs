@@ -11,11 +11,16 @@
  *
  * USAGE:
  *   dotnet build.cs [target] [options]
+ *   dotnet build.cs -- [target] [options]   (use -- if options conflict with dotnet)
+ *
+ * NOTE: Use -- separator when passing --help or if options aren't working:
+ *   dotnet build.cs -- --help               (--help requires --)
+ *   dotnet build.cs -- build --project Piv  (when in doubt, use --)
  *
  * TARGETS:
  *   clean      - Remove artifacts directory
  *   restore    - Restore NuGet dependencies
- *   build      - Build the solution
+ *   build      - Build the solution (or specific project with --project)
  *   test       - Run unit tests with summary output
  *   coverage   - Run tests with code coverage
  *   pack       - Create NuGet packages
@@ -31,16 +36,17 @@
  *   --dry-run                      Show what would be published without publishing
  *   --clean                        Run dotnet clean before build
  *   --filter <expression>          Test filter expression (e.g., "FullyQualifiedName~MyTest")
- *   --project <name>               Run tests for specific project only (partial match)
+ *   --project <name>               Build/test specific project only (partial match)
  *
  * EXAMPLES:
  *   dotnet build.cs build
+ *   dotnet build.cs build --project Piv
  *   dotnet build.cs test
  *   dotnet build.cs test --filter "FullyQualifiedName~MyTestClass"
  *   dotnet build.cs test --project Piv --filter "Method~Sign"
  *   dotnet build.cs coverage
  *   dotnet build.cs publish --package-version 1.0.0-preview.1
- *   dotnet build.cs publish --dry-run
+ *   dotnet build.cs -- --help
  *
  * See BUILD.md for full documentation.
  */
@@ -114,9 +120,41 @@ Target("restore", DependsOn("clean"), () =>
 
 Target("build", DependsOn("restore"), () =>
 {
-    PrintHeader("Building solution");
-    Run("dotnet", $"build {solutionFile} -c {configuration} --no-restore");
-    PrintInfo($"Built {solutionFile} in {configuration} configuration");
+    PrintHeader("Building");
+    
+    if (!string.IsNullOrEmpty(testProject))
+    {
+        // Build specific project(s) matching the filter
+        var matchingProjects = packableProjects
+            .Where(p => Path.GetFileNameWithoutExtension(p)
+                .Contains(testProject, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        
+        if (matchingProjects.Count == 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"⚠ No projects match '{testProject}'");
+            Console.ResetColor();
+            Console.WriteLine("Available projects:");
+            foreach (var proj in packableProjects)
+                Console.WriteLine($"  - {Path.GetFileNameWithoutExtension(proj)}");
+            return;
+        }
+        
+        foreach (var project in matchingProjects)
+        {
+            var projectName = Path.GetFileNameWithoutExtension(project);
+            Console.WriteLine($"Building: {projectName}");
+            Run("dotnet", $"build {project} -c {configuration} --no-restore");
+        }
+        PrintInfo($"Built {matchingProjects.Count} project(s) matching '{testProject}'");
+    }
+    else
+    {
+        // Build entire solution
+        Run("dotnet", $"build {solutionFile} -c {configuration} --no-restore");
+        PrintInfo($"Built {solutionFile} in {configuration} configuration");
+    }
 });
 
 Target("test", DependsOn("build"), () =>
@@ -438,12 +476,16 @@ Yubico.YubiKit Build Script
 
 USAGE:
   dotnet build.cs [target] [options]
-  dotnet build.cs -- --help    (use -- separator for help)
+  dotnet build.cs -- [target] [options]   (use -- if options conflict with dotnet)
+
+NOTE: The -- separator passes arguments to the script instead of dotnet:
+  dotnet build.cs -- --help               Required for --help
+  dotnet build.cs -- build --project Piv  Use when in doubt
 
 TARGETS:
   clean      - Remove artifacts directory
   restore    - Restore NuGet dependencies
-  build      - Build the solution
+  build      - Build the solution (or specific project with --project)
   test       - Run unit tests with summary output
   coverage   - Run tests with code coverage
   pack       - Create NuGet packages
@@ -459,17 +501,18 @@ OPTIONS:
   --dry-run                      Show what would be published without publishing
   --clean                        Run dotnet clean before build
   --filter <expression>          Test filter expression (e.g., ""FullyQualifiedName~MyTest"")
-  --project <name>               Run tests for specific project only (partial match)
+  --project <name>               Build/test specific project only (partial match)
   -h, --help                     Show this help message
 
 EXAMPLES:
   dotnet build.cs build
+  dotnet build.cs build --project Piv
   dotnet build.cs test
   dotnet build.cs test --filter ""FullyQualifiedName~MyTestClass""
   dotnet build.cs test --project Piv --filter ""Method~Sign""
   dotnet build.cs coverage
   dotnet build.cs publish --package-version 1.0.0-preview.1
-  dotnet build.cs publish --dry-run
+  dotnet build.cs -- --help
 
 FILTER SYNTAX (for --filter):
   FullyQualifiedName~MyClass     Tests containing 'MyClass' in full name

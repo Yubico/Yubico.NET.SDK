@@ -27,12 +27,8 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
 {
     private const short YubicoVendorId = 0x1050;
 
-    #region IFindHidDevices Members
-
     public async Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default) =>
         await Task.Run(FindAll, cancellationToken).ConfigureAwait(false);
-
-    #endregion
 
     [SupportedOSPlatform("macos")]
     private IReadOnlyList<IHidDevice> FindAll()

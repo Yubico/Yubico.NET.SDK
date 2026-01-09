@@ -125,8 +125,8 @@ public sealed class ManagementSession : ApplicationSession
             // For HID, use CTAP vendor command; for SmartCard, use APDU
             if (_fidoProtocol is not null)
             {
-                // CTAP_READ_CONFIG (0xC2) with page number
-                var pagePayload = new byte[] { 0, page };
+                // CTAP_READ_CONFIG (0xC2) with page number (single byte)
+                var pagePayload = new byte[] { page };
                 encodedResult = await _fidoProtocol
                     .SendVendorCommandAsync(0xC2, pagePayload, cancellationToken)
                     .ConfigureAwait(false);

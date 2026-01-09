@@ -61,6 +61,7 @@ internal sealed class MacOSHidIOReportConnection : IHidConnectionSync
 
         InputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
         OutputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+        
     }
 
     public int InputReportSize { get; }
@@ -70,7 +71,11 @@ internal sealed class MacOSHidIOReportConnection : IHidConnectionSync
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (_reportsQueue.TryDequeue(out var report)) return report;
+        
+        if (_reportsQueue.TryDequeue(out var report))
+        {
+            return report;
+        }
 
         var runLoop = CFNativeMethods.CFRunLoopGetCurrent();
 
@@ -83,7 +88,7 @@ internal sealed class MacOSHidIOReportConnection : IHidConnectionSync
 
         IOKitNativeMethods.IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
 
-        _ = _reportsQueue.TryDequeue(out report);
+        var dequeued = _reportsQueue.TryDequeue(out report);
 
         return report!;
     }
@@ -93,12 +98,14 @@ internal sealed class MacOSHidIOReportConnection : IHidConnectionSync
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(report);
 
+
         var result = IOKitNativeMethods.IOHIDDeviceSetReport(
             _deviceHandle,
             IOKitHidConstants.kIOHidReportTypeOutput,
             0,
             report,
             report.Length);
+
 
         if (result != 0)
             throw new PlatformApiException(
@@ -169,7 +176,11 @@ internal sealed class MacOSHidIOReportConnection : IHidConnectionSync
         byte[] report,
         long reportLength)
     {
-        if (result != 0 || type != IOKitHidConstants.kIOHidReportTypeInput || reportId != 0 || reportLength < 0) return;
+        
+        if (result != 0 || type != IOKitHidConstants.kIOHidReportTypeInput || reportId != 0 || reportLength < 0)
+        {
+            return;
+        }
 
         var reportsQueue = (ConcurrentQueue<byte[]>)GCHandle.FromIntPtr(context).Target!;
         reportsQueue.Enqueue(report);

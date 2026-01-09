@@ -51,6 +51,8 @@
  * See BUILD.md for full documentation.
  */
 
+using System;
+using System.Collections.Generic;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
@@ -77,13 +79,26 @@ var packableProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.All
     .OrderBy(p => p)
     .ToArray();
 
-// Test projects - all Yubico.YubiKit.*.UnitTests/*.csproj
-var testProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
+// Unit test projects - all Yubico.YubiKit.*.UnitTests/*.csproj
+var unitTestProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
     .Where(p => p.Contains($"{Path.DirectorySeparatorChar}tests{Path.DirectorySeparatorChar}") &&
                 p.Contains(".UnitTests") &&
                 p.Contains("Yubico.YubiKit."))
     .Select(p => Path.GetRelativePath(repoRoot, p))
     .OrderBy(p => p)
+    .ToArray();
+
+// Integration test projects - all Yubico.YubiKit.*.IntegrationTests/*.csproj
+var integrationTestProjects = Directory.GetFiles(repoRoot, "*.csproj", SearchOption.AllDirectories)
+    .Where(p => p.Contains($"{Path.DirectorySeparatorChar}tests{Path.DirectorySeparatorChar}") &&
+                p.Contains(".IntegrationTests") &&
+                p.Contains("Yubico.YubiKit."))
+    .Select(p => Path.GetRelativePath(repoRoot, p))
+    .OrderBy(p => p)
+    .ToArray();
+
+var testProjects = unitTestProjects
+    .Concat(integrationTestProjects)
     .ToArray();
 
 var testProjectInfos = testProjects
@@ -275,7 +290,7 @@ Target("coverage", DependsOn("build"), () =>
 
     var testResults = new List<(string Project, bool Passed)>();
 
-    foreach (var project in testProjects)
+    foreach (var project in unitTestProjects)
     {
         var projectName = Path.GetFileNameWithoutExtension(project);
         Console.WriteLine($"\n{'='} Running coverage for: {projectName} {'='}");
@@ -438,7 +453,8 @@ if (args.Contains("--help") || args.Contains("-h"))
 }
 
 // Run Bullseye
-await RunTargetsAndExitAsync(args);
+var bullseyeArgs = FilterBullseyeArgs(args, "--project", "--filter");
+await RunTargetsAndExitAsync(bullseyeArgs);
 
 // Helper functions
 string GetRepoRoot()
@@ -552,6 +568,30 @@ static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPa
     var contents = File.ReadAllText(fullPath);
     return contents.Contains(
         "<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>",
-        StringComparison.OrdinalIgnoreCase);
+            StringComparison.OrdinalIgnoreCase);
 }
 
+string[] FilterBullseyeArgs(string[] args, params string[] optionNames)
+{
+    var options = new HashSet<string>(optionNames, StringComparer.OrdinalIgnoreCase);
+    var filtered = new List<string>();
+
+    for (var i = 0; i < args.Length; i++)
+    {
+        var arg = args[i];
+
+        if (options.Contains(arg))
+        {
+            if (i + 1 < args.Length)
+            {
+                i++;
+            }
+
+            continue;
+        }
+
+        filtered.Add(arg);
+    }
+
+    return filtered.ToArray();
+}

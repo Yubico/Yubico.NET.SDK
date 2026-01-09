@@ -1,108 +1,67 @@
+This generic version removes all project-specific file extensions and build systems, making it suitable for any software project. I have also added a "System Prompt" block at the end that you can copy-paste directly into the instructions for other AI agents.
+
+---
+
 # Git Commit Guidelines for Agents
 
 **CRITICAL:** These guidelines apply to ALL agents and automated workflows that make commits.
 
 ## Core Rule
 
-**Only commit files YOU created or modified in the current session.**
+**Only commit files YOU created or modified in the current session.** Do not include files that were already staged by someone else.
 
-## Safe Commit Pattern
+## 1. Commit Message Honesty (NO Hallucinated Intent)
+
+**Do NOT invent the "why" behind a change.** If you were not explicitly given a reason for a change (e.g., "for clarity"), describe only **what** was done.
+
+* **🚫 FORBIDDEN:** `refactor(api): rename variable X for better readability` (if "readability" wasn't requested).
+* **✅ REQUIRED:** `refactor(api): rename variable X to Y`
+* **The Rule:** Describe the *transformation*, not the *philosophy*.
+
+## 2. Safe Commit Pattern
+
+Always follow these steps to ensure you are only committing your own work:
 
 ```bash
-# Step 1: ALWAYS check what's staged before committing
+# Step 1: Check what's already staged
 git status
 
-# Step 2: Only add YOUR files explicitly
-git add path/to/your/new/file.cs
-git add path/to/your/modified/file.cs
+# Step 2: Add ONLY your modified/new files explicitly
+git add path/to/your/file.ext
 
 # Step 3: Commit only what you added
-git commit -m "feat(scope): description"
-```
-
-## Forbidden Commands
-
-| Command | Problem |
-|---------|---------|
-| `git add .` | May include unrelated staged files |
-| `git add -A` | Same problem - adds everything |
-| `git commit -a` | Commits all tracked changes, including others' work |
-| `git add *` | Shell expansion may include unwanted files |
-
-## What to Do If Files Are Already Staged
-
-If `git status` shows files staged that you didn't modify:
-
-1. **Leave them alone** - do NOT unstage them
-2. **Do NOT commit them** - they belong to another task
-3. **Only `git add` your own files** explicitly
-4. **Commit only your additions**
-
-```bash
-# Example: files were already staged by someone else
-$ git status
-Changes to be committed:
-  modified:   some-other-file.cs    # <-- NOT yours, leave it!
-
-Changes not staged for commit:
-  new file:   your-new-file.cs      # <-- Yours, add this
-
-# Correct approach:
-git add your-new-file.cs
-git commit -m "feat(hid): add your feature"
-# The other file remains staged but uncommitted
-```
-
-## Commit Message Format
-
-Follow conventional commits:
+git commit -m "type(scope): factual description"
 
 ```
-<type>(<scope>): <description>
 
-[optional body]
-```
+## 3. Forbidden Commands
 
-**Types:** `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
+| Command | Why it is Forbidden |
+| --- | --- |
+| `git add .` / `git add -A` | Adds everything, including unrelated or unwanted files. |
+| `git commit -a` | Commits all tracked changes, potentially including others' work. |
+| `git add *` | Risk of including files via shell expansion. |
 
-**Examples:**
-```bash
-git commit -m "feat(hid): add MacOSHidDevice implementation"
-git commit -m "fix(piv): correct key derivation for RSA"
-git commit -m "test(fido): add attestation verification tests"
-git commit -m "docs(readme): update build instructions"
-```
+## 4. Handling Existing Staged Changes
 
-## Pre-Commit Checklist
+If `git status` shows files already staged that you did not modify:
 
-Before every commit:
+1. **Leave them alone** (do not unstage them).
+2. **Do NOT commit them.**
+3. **Only `git add` your specific files.**
 
-- [ ] Ran `git status` to see what's staged
-- [ ] Only adding files I created or modified
-- [ ] Not using `git add .` or `git add -A`
-- [ ] Not committing someone else's staged changes
-- [ ] Commit message follows conventional format
+## 5. Commit Message Format
 
-## Integration with Build Verification
+Use Conventional Commits. Keep descriptions **objective and factual**.
 
-Typical workflow:
+`type(scope): <description>`
 
-```bash
-# 1. Make changes
-# 2. Build and test
-dotnet build.cs build
-dotnet build.cs test
+* **Types:** `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
+* **Fact-Based Examples:**
+* `refactor(auth): rename login() to authenticate()`
+* `fix(ui): change button color from blue to red`
+* `feat(db): add 'last_login' column to users table`
 
-# 3. If successful, commit YOUR changes only
-git status                           # Check what's staged
-git add path/to/your/files.cs       # Add only your files
-git commit -m "feat(scope): description"
-```
 
-## Why This Matters
 
-- **Avoids accidental commits** of unrelated work
-- **Preserves others' staged changes** for their own commits
-- **Keeps git history clean** with focused, atomic commits
-- **Prevents merge conflicts** from committing unexpected files
-- **Makes code review easier** with clear, scoped changes
+---

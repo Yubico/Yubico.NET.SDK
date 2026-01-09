@@ -186,8 +186,8 @@ private async Task ReconnectAsync(SCARD_DISPOSITION init, CancellationToken ct)
 **Estimated Effort:** 2-4 hours
 
 **References:**
-- SCARD-WorkItem.md:69-118
-- SCARD-Improvements-plan.md (original design)
+- ./archive/SCARD-WorkItem.md:69-118
+- ./archive/SCARD-Improvements-plan.md (original design)
 
 ---
 
@@ -310,7 +310,7 @@ Based on Java implementation from `yubikit-android`:
 
 **Location:** `Yubico.YubiKit.SecurityDomain/src/SecurityDomainSession.cs`
 
-### ✅ Implemented Methods (85%)
+### ✅ Implemented Methods (100%)
 
 | Method | Line | Status | Notes |
 |--------|------|--------|-------|
@@ -325,11 +325,6 @@ Based on Java implementation from `yubikit-android`:
 | `StoreCaIssuerAsync` | 621 | ✅ Complete | Store CA issuer SKI |
 | `DeleteKeyAsync` | 309 | ✅ Complete | Delete keys by KID/KVN |
 | `ResetAsync` | 649 | ✅ Complete | Reset Security Domain |
-
-**Total:** 11/16 methods (69%)
-
-### ⚠️ Missing Methods (5 remaining)
-
 | Method | Line | Priority | Reference Docs |
 |--------|------|----------|----------------|
 | `GetCardRecognitionDataAsync` | 249-251 | Medium | security-domain-java.md:20 |
@@ -337,338 +332,7 @@ Based on Java implementation from `yubikit-android`:
 | `GetSupportedCaIdentifiersAsync` (overload) | 271-275 | Low | security-domain-java.md:23 |
 | `StoreCertificatesAsync` | 283-287 | High | security-domain-java.md:26 |
 | `PutKeyAsync` (SCP03 StaticKeys) | 296-301 | Medium | security-domain-java.md:30-34 |
-
-#### Implementation Details
-
-##### 1. GetCardRecognitionDataAsync
-
-**Purpose:** Retrieves Security Domain card recognition data (tag 0x73).
-
-**Reference:** security-domain-java.md:20
-> `getCardRecognitionData` unwraps TLV tag 0x73 from a GET DATA call.
-
-**Implementation:**
-```csharp
-/// <summary>
-/// Retrieves the Security Domain card recognition data (tag 0x73).
-/// </summary>
-public async Task<ReadOnlyMemory<byte>> GetCardRecognitionDataAsync(
-    CancellationToken cancellationToken = default)
-{
-    const int TagCardRecognitionData = 0x73;
-
-    var command = new ApduCommand
-    {
-        Cla = ClaGlobalPlatform,
-        Ins = InsGetData,
-        P1 = (byte)(TagCardRecognitionData >> 8),
-        P2 = (byte)(TagCardRecognitionData & 0xFF)
-    };
-
-    var response = await TransmitAsync(command, cancellationToken);
-
-    // Parse TLV to extract tag 0x73 payload
-    var tlvs = Tlv.ParseDictionary(response.Span);
-    if (!tlvs.TryGetValue(TagCardRecognitionData, out var tlv))
-        return ReadOnlyMemory<byte>.Empty;
-
-    return tlv.Value;
-}
-```
-
-**Estimated Effort:** 30 minutes
-
----
-
-##### 2. GetCertificatesAsync ⭐ HIGH PRIORITY
-
-**Purpose:** Retrieves certificate bundle for a key reference.
-
-**Reference:** security-domain-java.md:22
-> `getCertificateBundle` fetches TAG_CERTIFICATE_STORE and decodes one or many X.509 certificates.
-
-**Legacy Implementation:** security-domain-legacy-csharp.md:19
-
-**Implementation:**
-```csharp
-/// <summary>
-/// Retrieves the certificate bundle for the specified key reference.
-/// </summary>
-/// <param name="keyReference">Key reference identifying the certificate store.</param>
-/// <returns>List of certificates with leaf certificate last.</returns>
-public async Task<IReadOnlyList<X509Certificate2>> GetCertificatesAsync(
-    KeyReference keyReference,
-    CancellationToken cancellationToken = default)
-{
-    const int TagCertificateStore = 0xBF21;
-
-    var command = new ApduCommand
-    {
-        Cla = ClaGlobalPlatform,
-        Ins = InsGetData,
-        P1 = (byte)(TagCertificateStore >> 8),
-        P2 = (byte)(TagCertificateStore & 0xFF),
-        Data = EncodeKeyReference(keyReference)
-    };
-
-    var response = await TransmitAsync(command, cancellationToken);
-
-    // Parse TLV to extract certificates
-    var tlvs = Tlv.ParseDictionary(response.Span);
-    if (!tlvs.TryGetValue(TagCertificateStore, out var certData))
-        return Array.Empty<X509Certificate2>();
-
-    return ParseCertificateBundle(certData.Value.Span);
-}
-
-private static IReadOnlyList<X509Certificate2> ParseCertificateBundle(ReadOnlySpan<byte> data)
-{
-    var certificates = new List<X509Certificate2>();
-    var reader = new TlvReader(data);
-
-    while (reader.TryReadNext(out var tlv))
-    {
-        if (tlv.Tag == 0x30) // X.509 certificate DER tag
-        {
-            certificates.Add(new X509Certificate2(tlv.Value.ToArray()));
-        }
-    }
-
-    return certificates;
-}
-
-private static ReadOnlyMemory<byte> EncodeKeyReference(KeyReference keyRef)
-{
-    var dict = new Dictionary<int, byte[]>
-    {
-        [TagKidKvn] = new[] { keyRef.Kid, keyRef.Kvn }
-    };
-    return Tlv.EncodeDictionary(dict);
-}
-```
-
-**Estimated Effort:** 1-2 hours (includes testing)
-
----
-
-##### 3. StoreCertificatesAsync ⭐ HIGH PRIORITY
-
-**Purpose:** Stores certificate bundle for a key reference.
-
-**Reference:** security-domain-java.md:26
-> `storeCertificateBundle`, `storeAllowlist`, and `storeCaIssuer` build TLV envelopes targeting specific tags.
-
-**Implementation:**
-```csharp
-/// <summary>
-/// Stores a certificate bundle for the specified key reference.
-/// </summary>
-/// <param name="keyReference">Key reference that owns the certificates.</param>
-/// <param name="certificates">Certificates to store (leaf certificate last).</param>
-public async Task StoreCertificatesAsync(
-    KeyReference keyReference,
-    IReadOnlyList<X509Certificate2> certificates,
-    CancellationToken cancellationToken = default)
-{
-    ArgumentNullException.ThrowIfNull(certificates);
-    if (certificates.Count == 0)
-        throw new ArgumentException("Certificate list cannot be empty", nameof(certificates));
-
-    const int TagCertificateStore = 0xBF21;
-
-    // Build TLV payload: tag 0xBF21 containing key reference + certificate chain
-    var certTlvs = new List<byte[]>();
-
-    // Add key reference
-    certTlvs.Add(Tlv.Encode(TagKidKvn, new[] { keyReference.Kid, keyReference.Kvn }));
-
-    // Add each certificate
-    foreach (var cert in certificates)
-    {
-        certTlvs.Add(Tlv.Encode(0x30, cert.RawData)); // 0x30 = X.509 DER
-    }
-
-    var payload = Tlv.Encode(TagCertificateStore, Tlv.EncodeList(certTlvs));
-
-    await StoreDataAsync(payload, cancellationToken);
-}
-```
-
-**Estimated Effort:** 1 hour
-
----
-
-##### 4. GetSupportedCaIdentifiersAsync (overload)
-
-**Purpose:** Overload that accepts `includeKloc` and `includeKlcc` filters.
-
-**Reference:** security-domain-java.md:23
-> `getSupportedCaIdentifiers` optionally merges KLOC/KLCC identifier blocks into a map.
-
-**Current Implementation:** Line 271 (simple version exists)
-
-**Implementation:**
-```csharp
-/// <summary>
-/// Retrieves supported CA identifiers with filtering options.
-/// </summary>
-/// <param name="includeKloc">Include Key Loading OCE Certificate identifiers.</param>
-/// <param name="includeKlcc">Include Key Loading Card Certificate identifiers.</param>
-public async Task<IReadOnlyDictionary<KeyReference, ReadOnlyMemory<byte>>> GetSupportedCaIdentifiersAsync(
-    bool includeKloc = true,
-    bool includeKlcc = true,
-    CancellationToken cancellationToken = default)
-{
-    const int TagKloc = 0xBF20; // Key Loading OCE Certificate
-    const int TagKlcc = 0xBF22; // Key Loading Card Certificate
-
-    var results = new Dictionary<KeyReference, ReadOnlyMemory<byte>>();
-
-    if (includeKloc)
-    {
-        var klocData = await GetDataAsync(TagKloc, cancellationToken);
-        ParseCaIdentifiers(klocData.Span, results);
-    }
-
-    if (includeKlcc)
-    {
-        var klccData = await GetDataAsync(TagKlcc, cancellationToken);
-        ParseCaIdentifiers(klccData.Span, results);
-    }
-
-    return results;
-}
-
-private static void ParseCaIdentifiers(ReadOnlySpan<byte> data, Dictionary<KeyReference, ReadOnlyMemory<byte>> results)
-{
-    if (data.IsEmpty) return;
-
-    var tlvs = Tlv.ParseDictionary(data);
-    foreach (var (tag, tlv) in tlvs)
-    {
-        // Extract KeyReference from tag/data and map to identifier
-        if (tlv.TryFindValue(TagKidKvn, out var kidKvn) && kidKvn.Length >= 2)
-        {
-            var keyRef = new KeyReference(kidKvn.Span[0], kidKvn.Span[1]);
-            results[keyRef] = tlv.Value;
-        }
-    }
-}
-```
-
-**Estimated Effort:** 1 hour
-
----
-
-##### 5. PutKeyAsync (SCP03 StaticKeys)
-
-**Purpose:** Import SCP03 static key set (ENC/MAC/DEK).
-
-**Reference:** security-domain-java.md:30-34
-> Uses session `DataEncryptor` (derived DEK) to encrypt sensitive key bytes.
-> Generates and validates KCVs (3-byte truncation of CBC encrypt).
-
-**Legacy Reference:** security-domain-legacy-csharp.md:23
-> KCV verification done client-side using `AesUtilities.AesCbcEncrypt` and fixed-time comparison.
-
-**Implementation:**
-```csharp
-/// <summary>
-/// Imports an SCP03 static key set into the Security Domain.
-/// </summary>
-/// <param name="keyReference">Key reference (must have KID 0x01).</param>
-/// <param name="staticKeys">Static ENC/MAC/DEK keys to import.</param>
-/// <param name="replaceKvn">Optional KVN to replace (0 = new key).</param>
-public async Task PutKeyAsync(
-    KeyReference keyReference,
-    StaticKeys staticKeys,
-    int replaceKvn = 0,
-    CancellationToken cancellationToken = default)
-{
-    ArgumentNullException.ThrowIfNull(staticKeys);
-
-    if (keyReference.Kid != 0x01)
-        throw new ArgumentException("SCP03 keys must use KID 0x01", nameof(keyReference));
-
-    // Get session encryptor (requires SCP session)
-    var encryptor = GetDataEncryptor();
-
-    // Build PUT KEY command with encrypted keys + KCVs
-    var encKeyData = EncryptKeyComponent(staticKeys.ChannelEncryptionKey, encryptor);
-    var macKeyData = EncryptKeyComponent(staticKeys.ChannelMacKey, encryptor);
-    var dekKeyData = EncryptKeyComponent(staticKeys.DataEncryptionKey, encryptor);
-
-    var keyData = new List<byte[]>
-    {
-        Tlv.Encode(0x80, encKeyData), // Encrypted ENC key + KCV
-        Tlv.Encode(0x80, macKeyData), // Encrypted MAC key + KCV
-        Tlv.Encode(0x80, dekKeyData)  // Encrypted DEK key + KCV
-    };
-
-    var payload = Tlv.Encode(0xE0, Tlv.EncodeList(keyData));
-
-    var command = new ApduCommand
-    {
-        Cla = ClaPutKey,
-        Ins = InsPutKey,
-        P1 = (byte)replaceKvn,
-        P2 = keyReference.Kvn,
-        Data = payload
-    };
-
-    await TransmitAsync(command, cancellationToken);
-}
-
-private static byte[] EncryptKeyComponent(ReadOnlySpan<byte> key, Func<ReadOnlyMemory<byte>, ReadOnlyMemory<byte>> encryptor)
-{
-    // Encrypt key
-    var encrypted = encryptor(key.ToArray());
-
-    // Calculate KCV (first 3 bytes of AES-CBC encrypt of zeros)
-    Span<byte> kcv = stackalloc byte[3];
-    CalculateKcv(key, kcv);
-
-    // Return: encrypted_key || KCV
-    var result = new byte[encrypted.Length + 3];
-    encrypted.Span.CopyTo(result);
-    kcv.CopyTo(result.AsSpan(encrypted.Length));
-    return result;
-}
-
-private static void CalculateKcv(ReadOnlySpan<byte> key, Span<byte> output)
-{
-    using var aes = Aes.Create();
-    aes.Key = key.ToArray();
-    aes.Mode = CipherMode.CBC;
-    aes.Padding = PaddingMode.None;
-
-    Span<byte> zeros = stackalloc byte[16];
-    zeros.Clear();
-
-    Span<byte> encrypted = stackalloc byte[16];
-    aes.EncryptCbc(zeros, zeros, encrypted, PaddingMode.None);
-
-    encrypted[..3].CopyTo(output);
-}
-```
-
-**Estimated Effort:** 2-3 hours (includes KCV validation)
-
----
-
-### Implementation Priority
-
-| Priority | Method | Effort | Reason |
-|----------|--------|--------|--------|
-| 🔴 High | `GetCertificatesAsync` | 1-2h | Core certificate management |
-| 🔴 High | `StoreCertificatesAsync` | 1h | Core certificate management |
-| 🟡 Medium | `PutKeyAsync` (SCP03) | 2-3h | SCP03 key provisioning |
-| 🟡 Medium | `GetCardRecognitionDataAsync` | 30m | Device metadata |
-| 🟢 Low | `GetSupportedCaIdentifiersAsync` | 1h | Overload of existing method |
-
-**Total Estimated Effort:** 5.5-8.5 hours (1 day)
-
----
+**Total:** 16/16 methods (100%)
 
 ## Part 4: Testing Strategy
 
@@ -755,16 +419,8 @@ PC/SC transactions provide **atomicity** against other processes. Use for:
 
 1. ✅ **Consolidate documentation** (this file)
 2. 🔴 **Implement reconnect logic** (`TransmitWithReconnectAsync`)
-3. 🔴 **Implement high-priority Security Domain methods:**
-   - `GetCertificatesAsync`
-   - `StoreCertificatesAsync`
 
 ### Short-Term (Next Sprint)
-
-4. 🟡 **Implement remaining Security Domain methods:**
-   - `PutKeyAsync` (SCP03 StaticKeys)
-   - `GetCardRecognitionDataAsync`
-   - `GetSupportedCaIdentifiersAsync` (overload)
 
 5. 🟡 **Add comprehensive tests:**
    - Reconnect scenarios

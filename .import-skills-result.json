@@ -1,0 +1,24 @@
+{
+  "source": {
+    "owner": "obra",
+    "repo": "superpowers"
+  },
+  "imported": {
+    "skills": [
+      {
+        "skill": "using-git-worktrees",
+        "files": [
+          "SKILL.md"
+        ],
+        "status": "dry-run"
+      }
+    ],
+    "agents": [
+      {
+        "agent": "code-reviewer",
+        "status": "dry-run"
+      }
+    ]
+  },
+  "needsAdaptation": false
+}

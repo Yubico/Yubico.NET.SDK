@@ -17,7 +17,6 @@ namespace Yubico.YubiKit.Core.Hid;
 public enum HidUsagePage 
 {
     Unknown = 0,
-
-    Fido = unchecked((short)0xF1D0),
+    Fido = 0xF1D0,  // 61904 - FIDO CTAP HID usage page
     Keyboard = 1
 }

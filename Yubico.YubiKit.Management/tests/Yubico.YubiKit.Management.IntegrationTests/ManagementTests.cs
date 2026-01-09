@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
@@ -8,9 +10,9 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 public class ManagementTests : IntegrationTestBase
 {
     [Fact]
-    public async Task CreateManagementSession_with_Constructor()
+    public async Task CreateManagementSession_with_CreateAsync()
     {
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices.FirstOrDefault();
         Assert.NotNull(device);
 
@@ -22,9 +24,55 @@ public class ManagementTests : IntegrationTestBase
     }
 
     [Fact]
+    public async Task CreateManagementSession_with_Hid_CreateAsync()
+    {
+        // Management over HID requires the FIDO interface (UsagePage 0xF1D0)
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+        
+        // Filter for FIDO devices - DeviceId contains FIDO usage
+        var fidoDevice = devices.FirstOrDefault(d => d.DeviceId.Contains(":0001") || d.DeviceId.Contains(":F1D0"));
+        
+        if (fidoDevice is null)
+        {
+            // Skip test if no FIDO HID interface found
+            return;
+        }
+
+        await using var connection = await fidoDevice.ConnectAsync<IFidoConnection>();
+        using var mgmtSession = await ManagementSession.CreateAsync(connection);
+
+        var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
+        Assert.NotEqual(0, deviceInfo.SerialNumber);
+    }
+
+    [Fact]
+    public async Task CreateManagementSession_Hid_with_CreateAsync()
+    {
+        // Management over HID requires the FIDO interface (UsagePage 0xF1D0)
+        // OTP/Keyboard interface does not support Management application
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+        
+        // Filter for FIDO devices only - DeviceId format is "hid:VID:PID:USAGE"
+        // FIDO usage page 0xF1D0, typical usage is 0x0001 -> "hid:1050:XXXX:0001"
+        var fidoDevice = devices.FirstOrDefault(d => d.DeviceId.Contains(":0001") || d.DeviceId.Contains(":F1D0"));
+        
+        if (fidoDevice is null)
+        {
+            // Skip test if no FIDO HID interface found
+            return;
+        }
+
+        await using var connection = await fidoDevice.ConnectAsync<IFidoConnection>();
+        using var mgmtSession = await ManagementSession.CreateAsync(connection);
+
+        var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
+        Assert.NotEqual(0, deviceInfo.SerialNumber);
+    }
+
+    [Fact]
     public async Task CreateManagementSession_with_FactoryInstance()
     {
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices.First();
         var sessionFactory = ServiceProvider.GetRequiredService<ManagementSessionFactoryDelegate>();
 
@@ -38,7 +86,7 @@ public class ManagementTests : IntegrationTestBase
     [Fact]
     public async Task CreateManagementSession_with_FactoryMethod()
     {
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices.First();
 
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
@@ -51,7 +99,7 @@ public class ManagementTests : IntegrationTestBase
     [Fact]
     public async Task CreateManagementSession_with_ExtensionMethod()
     {
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices[0];
 
         using var mgmtSession = await device.CreateManagementSessionAsync();
@@ -63,7 +111,7 @@ public class ManagementTests : IntegrationTestBase
     [Fact]
     public async Task GetDeviceInfoAsync_with_YubiKeyExtensionMethod()
     {
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var deviceInfo = await devices[0]!.GetDeviceInfoAsync();
 
         Assert.NotEqual(0, deviceInfo.SerialNumber);
@@ -72,7 +120,7 @@ public class ManagementTests : IntegrationTestBase
     [Fact]
     private async Task SetDeviceConfigAsync_with_ManagementSession()
     {
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices[0];
 
         using var mgmtSession = await device.CreateManagementSessionAsync();
@@ -103,7 +151,7 @@ public class ManagementTests : IntegrationTestBase
     [Fact]
     public async Task SetDeviceConfigAsync_with_YubiKeyExtensionMethod()
     {
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices[0];
 
         var originalInfo = await device.GetDeviceInfoAsync();
@@ -134,7 +182,7 @@ public class ManagementTests : IntegrationTestBase
     {
         // This test requires a YubiKey with default SCP03 keys configured (KVN 0xFF)
         // Skip this test if no suitable YubiKey is available
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices[0];
 
         // Create SCP03 key parameters using default keys
@@ -157,7 +205,7 @@ public class ManagementTests : IntegrationTestBase
     public async Task CreateManagementSession_with_SCP03_WrongKeys_ShouldFail()
     {
         // This test verifies that SCP authentication fails with wrong keys
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.Ccid);
         var device = devices.FirstOrDefault();
 
         if (device == null)

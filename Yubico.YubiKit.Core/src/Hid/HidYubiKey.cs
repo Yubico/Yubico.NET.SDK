@@ -31,16 +31,67 @@ internal class HidYubiKey(
     public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection
     {
-        if (typeof(TConnection) != typeof(IHidConnection))
-            throw new NotSupportedException(
-                $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
+        if (typeof(TConnection) == typeof(IFidoConnection))
+        {
+            var connection = await CreateFidoConnection(cancellationToken).ConfigureAwait(false);
+            return connection as TConnection ??
+                   throw new InvalidOperationException("Connection is not of the expected type.");
+        }
 
-        var connection = await CreateConnection(cancellationToken).ConfigureAwait(false);
-        return connection as TConnection ??
-               throw new InvalidOperationException("Connection is not of the expected type.");
+        if (typeof(TConnection) == typeof(IOtpConnection))
+        {
+            var connection = await CreateOtpConnection(cancellationToken).ConfigureAwait(false);
+            return connection as TConnection ??
+                   throw new InvalidOperationException("Connection is not of the expected type.");
+        }
+
+        // Legacy support for generic IHidConnection
+        if (typeof(TConnection) == typeof(IHidConnection))
+        {
+            var connection = await CreateLegacyHidConnection(cancellationToken).ConfigureAwait(false);
+            return connection as TConnection ??
+                   throw new InvalidOperationException("Connection is not of the expected type.");
+        }
+
+        throw new NotSupportedException(
+            $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
     }
 
-    private async Task<IHidConnection> CreateConnection(CancellationToken cancellationToken = default)
+    private async Task<IFidoConnection> CreateFidoConnection(CancellationToken cancellationToken = default)
+    {
+        await Task.CompletedTask; // Make async
+
+        if (hidDevice.UsagePage != HidUsagePage.Fido)
+            throw new NotSupportedException(
+                $"FIDO connection requires FIDO HID interface (UsagePage 0xF1D0), found {hidDevice.UsagePage}");
+
+        logger.LogInformation(
+            "Connecting to FIDO HID interface VID={VendorId:X4} PID={ProductId:X4}",
+            hidDevice.VendorId,
+            hidDevice.ProductId);
+
+        var syncConnection = hidDevice.ConnectToIOReports();
+        return new FidoConnection(syncConnection);
+    }
+
+    private async Task<IOtpConnection> CreateOtpConnection(CancellationToken cancellationToken = default)
+    {
+        await Task.CompletedTask; // Make async
+
+        if (hidDevice.UsagePage != HidUsagePage.Keyboard)
+            throw new NotSupportedException(
+                $"OTP connection requires Keyboard HID interface (UsagePage 0x0001), found {hidDevice.UsagePage}");
+
+        logger.LogInformation(
+            "Connecting to OTP/Keyboard HID interface VID={VendorId:X4} PID={ProductId:X4}",
+            hidDevice.VendorId,
+            hidDevice.ProductId);
+
+        var syncConnection = hidDevice.ConnectToFeatureReports();
+        return new OtpConnection(syncConnection);
+    }
+
+    private async Task<IHidConnection> CreateLegacyHidConnection(CancellationToken cancellationToken = default)
     {
         await Task.CompletedTask; // Make async
 

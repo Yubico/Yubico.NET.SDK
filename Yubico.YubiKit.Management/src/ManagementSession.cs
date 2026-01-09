@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.Utils;
@@ -46,6 +47,8 @@ public sealed class ManagementSession : ApplicationSession
     private bool _isInitialized;
 
     private IProtocol _protocol;
+    private ISmartCardProtocol? _smartCardProtocol;
+    private IFidoProtocol? _fidoProtocol;
 
     private FirmwareVersion? _version;
 
@@ -56,14 +59,17 @@ public sealed class ManagementSession : ApplicationSession
     {
         _scpKeyParams = scpKeyParams;
         _logger = loggerFactory.CreateLogger<ManagementSession>();
+
         _protocol = connection switch
         {
-            ISmartCardConnection sc => PcscProtocolFactory<ISmartCardConnection>
-                .Create(loggerFactory)
-                .Create(sc),
+            ISmartCardConnection sc => CreateSmartCardProtocol(sc, loggerFactory),
+            IFidoConnection fido => CreateFidoProtocol(fido, loggerFactory),
             _ => throw new NotSupportedException(
-                $"The connection type {connection.GetType().Name} is not supported by ManagementSession.")
+                $"The connection type {connection.GetType().Name} is not supported by ManagementSession. " +
+                $"Supported types: ISmartCardConnection, IFidoConnection.")
         };
+
+        UpdateProtocolReferences();
     }
 
     public static async Task<ManagementSession> CreateAsync(
@@ -81,7 +87,8 @@ public sealed class ManagementSession : ApplicationSession
         return session;
     }
 
-    private async Task InitializeAsync(ProtocolConfiguration? configuration,
+    private async Task InitializeAsync(
+        ProtocolConfiguration? configuration,
         CancellationToken cancellationToken = default)
     {
         if (_isInitialized)
@@ -91,8 +98,14 @@ public sealed class ManagementSession : ApplicationSession
         _protocol.Configure(_version, configuration);
 
         // Initialize SCP if key parameters were provided
-        if (_scpKeyParams is not null && _protocol is ISmartCardProtocol smartCardProtocol)
-            _protocol = await smartCardProtocol.WithScpAsync(_scpKeyParams, cancellationToken).ConfigureAwait(false);
+        if (_scpKeyParams is not null && _smartCardProtocol is not null)
+        {
+            _protocol = await _smartCardProtocol
+                .WithScpAsync(_scpKeyParams, cancellationToken)
+                .ConfigureAwait(false);
+
+            UpdateProtocolReferences();
+        }
 
         _isInitialized = true;
         _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
@@ -107,8 +120,23 @@ public sealed class ManagementSession : ApplicationSession
         var hasMoreData = true;
         while (hasMoreData)
         {
-            var apdu = new ApduCommand { Cla = 0, Ins = INS_GET_DEVICE_INFO, P1 = page, P2 = 0 };
-            var encodedResult = await TransmitAsync(apdu, cancellationToken).ConfigureAwait(false);
+            ReadOnlyMemory<byte> encodedResult;
+            
+            // For HID, use CTAP vendor command; for SmartCard, use APDU
+            if (_fidoProtocol is not null)
+            {
+                // CTAP_READ_CONFIG (0xC2) with page number
+                var pagePayload = new byte[] { 0, page };
+                encodedResult = await _fidoProtocol
+                    .SendVendorCommandAsync(0xC2, pagePayload, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                var apdu = new ApduCommand { Cla = 0, Ins = INS_GET_DEVICE_INFO, P1 = page, P2 = 0 };
+                encodedResult = await TransmitAsync(apdu, cancellationToken).ConfigureAwait(false);
+            }
+            
             if (encodedResult.Length - 1 != encodedResult.Span[0])
                 throw new BadResponseException("Invalid length");
 
@@ -198,18 +226,57 @@ public sealed class ManagementSession : ApplicationSession
 
     private async Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken)
     {
-        if (_protocol is not ISmartCardProtocol smartCardProtocol)
-            throw new NotSupportedException("Protocol not supported");
+        if (_smartCardProtocol is not null)
+            return await _smartCardProtocol
+                .SelectAsync(ApplicationIds.Management, cancellationToken)
+                .ConfigureAwait(false);
 
-        return await smartCardProtocol
-            .SelectAsync(ApplicationIds.Management, cancellationToken)
-            .ConfigureAwait(false);
+        if (_fidoProtocol is not null)
+            return await _fidoProtocol
+                .SelectAsync(ApplicationIds.Management, cancellationToken)
+                .ConfigureAwait(false);
+
+        throw new NotSupportedException("No supported protocol available");
     }
 
-    private Task<ReadOnlyMemory<byte>> TransmitAsync(ApduCommand command, CancellationToken cancellationToken) =>
-        _protocol is not ISmartCardProtocol smartCardProtocol
-            ? throw new NotSupportedException("Protocol not supported")
-            : smartCardProtocol.TransmitAndReceiveAsync(command, cancellationToken);
+    private Task<ReadOnlyMemory<byte>> TransmitAsync(ApduCommand command, CancellationToken cancellationToken)
+    {
+        if (_smartCardProtocol is not null)
+        {
+            return _smartCardProtocol.TransmitAndReceiveAsync(command, cancellationToken);
+        }
+
+        if (_fidoProtocol is not null)
+        {
+            return _fidoProtocol.TransmitAndReceiveAsync(command, cancellationToken);
+        }
+
+        throw new NotSupportedException("Protocol not supported");
+    }
+
+    private static IProtocol CreateSmartCardProtocol(
+        ISmartCardConnection connection,
+        ILoggerFactory loggerFactory)
+    {
+        return PcscProtocolFactory<ISmartCardConnection>
+            .Create(loggerFactory)
+            .Create(connection);
+    }
+
+    private static IProtocol CreateFidoProtocol(
+        IFidoConnection connection,
+        ILoggerFactory loggerFactory)
+    {
+        return FidoProtocolFactory<IFidoConnection>
+            .Create(loggerFactory)
+            .Create(connection);
+    }
+
+    private void UpdateProtocolReferences()
+    {
+        _smartCardProtocol = _protocol as ISmartCardProtocol;
+        _fidoProtocol = _protocol as IFidoProtocol;
+    }
 
     private void EnsureSupports(Feature feature)
     {

@@ -1,0 +1,11 @@
+{
+    "cmake.sourceDirectory": "/Users/Dennis.Dyall/y/Yubico.NET.SDK/Yubico.NativeShims",
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "text": "Use Conventional Commits format (e.g., feat:, fix:). Limit subject to 50 characters. Add body with changes list."
+        },
+        {
+            "file": ".github/commit-guidelines-copilot-autogenerate.md"
+        }
+    ]
+}

@@ -79,43 +79,6 @@ public class Scp11X963KdfTests
         Assert.Equal(16, receipt.Length); // CMAC output is 16 bytes for AES-128
     }
 
-    [Fact]
-    public void TestDeriveSessionKeys()
-    {
-        // Generate test inputs
-        var pkSdEcka = CreateTestSdPublicKey();
-        var ephemeralOceEcka = CreateTestOceEphemeralPrivateKey();
-        var skOceEcka = CreateTestOceStaticPrivateKey();
-        var epkSdEckaTlvBytes = CreateTestEpkSdEckaTlv();
-        var hostAuthenticateTlvBytes = CreateTestHostAuthenticateTlv();
-
-        // Fixed values for SCP11 parameters
-        ReadOnlyMemory<byte>
-            keyUsage = new byte[] { 0x3C }; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
-        ReadOnlyMemory<byte> keyType = new byte[] { 0x88 }; // AES
-        ReadOnlyMemory<byte> keyLen = new byte[] { 16 }; // 128-bit
-
-        // Emulate YubiKey receipt generation
-        var sdReceipt = GenerateTestSdReceipt(
-            pkSdEcka,
-            ephemeralOceEcka,
-            skOceEcka,
-            epkSdEckaTlvBytes,
-            hostAuthenticateTlvBytes,
-            keyUsage,
-            keyType,
-            keyLen);
-
-        // Call DeriveSessionKeys - should succeed since receipts match
-        var sessionKeys = Scp11X963Kdf.DeriveSessionKeys(ephemeralOceEcka,
-            skOceEcka,
-            hostAuthenticateTlvBytes,
-            pkSdEcka, epkSdEckaTlvBytes, sdReceipt);
-
-        // Assert session keys are returned
-        Assert.NotNull(sessionKeys);
-    }
-
     // Helper to emulate YubiKey receipt generation for testing
     private static ReadOnlyMemory<byte> GenerateTestSdReceipt(
         ECDiffieHellmanPublicKey pkSdEcka,

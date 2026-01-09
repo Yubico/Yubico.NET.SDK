@@ -15,6 +15,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 
@@ -23,6 +24,7 @@ namespace Yubico.YubiKit.Core;
 public sealed class DeviceMonitorService(
     IYubiKeyFactory yubiKeyFactory,
     IFindPcscDevices findPcscService,
+    IFindHidDevices findHidService,
     IDeviceChannel deviceChannel,
     ILogger<DeviceMonitorService> logger,
     IOptions<YubiKeyManagerOptions> options)
@@ -65,27 +67,46 @@ public sealed class DeviceMonitorService(
         logger.LogInformation("YubiKey device monitor stopped");
     }
 
-    private Task PerformDeviceScan(CancellationToken cancellationToken)
+    private async Task PerformDeviceScan(CancellationToken cancellationToken)
     {
         try
         {
-            return ScanPcscDevices(cancellationToken);
+            var pcscScanTask = ScanPcscDevices(cancellationToken);
+            var hidScanTask = ScanHidDevices(cancellationToken);
+            await Task.WhenAll(pcscScanTask, hidScanTask).ConfigureAwait(false);
+
+            var yubiKeys = new List<IYubiKey>();
+            yubiKeys.AddRange(pcscScanTask.Result);
+            yubiKeys.AddRange(hidScanTask.Result);
+
+            await deviceChannel.PublishAsync(yubiKeys, cancellationToken).ConfigureAwait(false);
+            logger.LogDebug("Device scan completed, found {TotalCount} total devices", yubiKeys.Count);
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogDebug("Device scan was cancelled");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "PCSC device scanning failed");
+            logger.LogError(ex, "Device scanning failed");
             // Continue despite errors - don't crash the background service
-            return Task.CompletedTask;
         }
     }
 
-    private async Task ScanPcscDevices(CancellationToken cancellationToken)
+    private async Task<List<IYubiKey>> ScanPcscDevices(CancellationToken cancellationToken)
     {
         var devices = await findPcscService.FindAllAsync(cancellationToken).ConfigureAwait(false);
         var yubiKeys = devices.Select(yubiKeyFactory.Create).ToList();
-
-        await deviceChannel.PublishAsync(yubiKeys, cancellationToken).ConfigureAwait(false);
         logger.LogInformation("PCSC scan completed, found {DeviceCount} devices", devices.Count);
+        return yubiKeys;
+    }
+
+    private async Task<List<IYubiKey>> ScanHidDevices(CancellationToken cancellationToken)
+    {
+        var devices = await findHidService.FindAllAsync(cancellationToken).ConfigureAwait(false);
+        var yubiKeys = devices.Select(yubiKeyFactory.Create).ToList();
+        logger.LogInformation("HID scan completed, found {DeviceCount} devices", devices.Count);
+        return yubiKeys;
     }
 
     public override void Dispose()

@@ -12,26 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Yubico.YubiKit.Core.Hid;
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.YubiKey;
 
-namespace Yubico.YubiKit.Core.YubiKey;
+namespace Yubico.YubiKit.Core.Hid;
 
 internal class HidYubiKey(
     IHidDevice hidDevice,
     ILogger<HidYubiKey> logger)
     : IYubiKey
 {
-    public string DeviceId { get; } = 
+    public string DeviceId { get; } =
         $"hid:{hidDevice.VendorId:X4}:{hidDevice.ProductId:X4}:{hidDevice.Usage:X4}";
+
+    public ConnectionType ConnectionType { get; } = ConnectionType.Hid;
 
     public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection
     {
-        if (typeof(TConnection) != typeof(IAsyncHidConnection))
+        if (typeof(TConnection) != typeof(IHidConnection))
             throw new NotSupportedException(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
 
@@ -40,67 +40,26 @@ internal class HidYubiKey(
                throw new InvalidOperationException("Connection is not of the expected type.");
     }
 
-    private async Task<IAsyncHidConnection> CreateConnection(CancellationToken cancellationToken = default)
+    private async Task<IHidConnection> CreateConnection(CancellationToken cancellationToken = default)
     {
         await Task.CompletedTask; // Make async
-        
+
         logger.LogInformation(
             "Connecting to HID YubiKey VID={VendorId:X4} PID={ProductId:X4} Usage={Usage:X4}",
             hidDevice.VendorId,
             hidDevice.ProductId,
             hidDevice.Usage);
 
-        IHidConnection syncConnection = hidDevice.UsagePage switch
+        var syncConnection = hidDevice.UsagePage switch
         {
             HidUsagePage.Fido => hidDevice.ConnectToIOReports(),
             HidUsagePage.Keyboard => hidDevice.ConnectToFeatureReports(),
             _ => throw new NotSupportedException($"HID usage page {hidDevice.UsagePage} is not supported.")
         };
 
-        return new AsyncHidConnectionWrapper(syncConnection);
+        return new HidConnection(syncConnection);
     }
 
-    public static HidYubiKey Create(IHidDevice hidDevice, ILogger<HidYubiKey>? logger) => 
+    public static HidYubiKey Create(IHidDevice hidDevice, ILogger<HidYubiKey>? logger) =>
         new(hidDevice, logger ?? NullLogger<HidYubiKey>.Instance);
-}
-
-internal class AsyncHidConnectionWrapper(IHidConnection syncConnection) : IAsyncHidConnection
-{
-    private bool _disposed;
-
-    public int InputReportSize => syncConnection.InputReportSize;
-    public int OutputReportSize => syncConnection.OutputReportSize;
-
-    public Task SetReportAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        
-        syncConnection.SetReport(report.ToArray());
-        return Task.CompletedTask;
-    }
-
-    public Task<ReadOnlyMemory<byte>> GetReportAsync(CancellationToken cancellationToken = default)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        
-        byte[] report = syncConnection.GetReport();
-        return Task.FromResult<ReadOnlyMemory<byte>>(report);
-    }
-
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        syncConnection.Dispose();
-        _disposed = true;
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        Dispose();
-        return ValueTask.CompletedTask;
-    }
 }

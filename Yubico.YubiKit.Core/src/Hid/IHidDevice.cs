@@ -27,7 +27,7 @@ public interface IHidDevice : IDevice
     /// <summary>
     ///     Establishes an active connection to the HID device for the transmittal of data through feature reports.
     /// </summary>
-    IHidConnection ConnectToFeatureReports();
+    IHidConnectionSync ConnectToFeatureReports();
 
-    IHidConnection ConnectToIOReports();
+    IHidConnectionSync ConnectToIOReports();
 }

@@ -12,13 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.YubiKey;
+namespace Yubico.YubiKit.Core;
 
-public interface IYubiKey
+/// <summary>
+///     Base interface for all device connections.
+/// </summary>
+/// <remarks>
+///     Implements both <see cref="IDisposable" /> and <see cref="IAsyncDisposable" /> to support
+///     both synchronous and asynchronous disposal patterns. Prefer <c>await using</c> for async code.
+/// </remarks>
+public interface IConnection : IDisposable, IAsyncDisposable
 {
-    string DeviceId { get; }
-    ConnectionType ConnectionType { get; }
+    ConnectionType Type { get; }
+}
 
-    Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-        where TConnection : class, IConnection;
+public enum ConnectionType
+{
+    Unknown,
+    Hid,
+    Ccid,
+    All
 }

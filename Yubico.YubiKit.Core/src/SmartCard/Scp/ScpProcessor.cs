@@ -20,7 +20,9 @@ namespace Yubico.YubiKit.Core.SmartCard.Scp;
 /// <summary>
 ///     APDU processor that wraps commands and responses with SCP encryption and MAC.
 /// </summary>
-internal class ScpProcessor(IApduProcessor @delegate, ScpState state) : IApduProcessor
+internal class ScpProcessor(
+    IApduProcessor @delegate,
+    ScpState state) : IApduProcessor
 {
     // SCP Constants
     private const byte ClaBitSecureMessaging = 0x04; // Bit 2 in CLA byte indicates secure messaging

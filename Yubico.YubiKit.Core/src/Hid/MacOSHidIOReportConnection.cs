@@ -27,28 +27,25 @@ namespace Yubico.YubiKit.Core.Hid;
 ///     macOS implementation of the FIDO IO report connection.
 /// </summary>
 [SupportedOSPlatform("macos")]
-internal sealed class MacOSHidIOReportConnection : IHidConnection
+internal sealed class MacOSHidIOReportConnection : IHidConnectionSync
 {
     private readonly long _entryId;
     private readonly nint _loopId;
     private readonly byte[] _readBuffer;
-    private readonly ConcurrentQueue<byte[]> _reportsQueue;
-    private readonly IOKitNativeMethods.IOHIDReportCallback _reportDelegate;
     private readonly IOKitNativeMethods.IOHIDCallback _removalDelegate;
-    
+    private readonly IOKitNativeMethods.IOHIDReportCallback _reportDelegate;
+    private readonly ConcurrentQueue<byte[]> _reportsQueue;
+
     private nint _deviceHandle;
-    private GCHandle _readHandle;
-    private GCHandle _pinnedReportsQueue;
     private bool _disposed;
+    private GCHandle _pinnedReportsQueue;
+    private GCHandle _readHandle;
 
-    public int InputReportSize { get; }
-    public int OutputReportSize { get; }
-
-    public MacOSHidIOReportConnection(MacOSHidDevice device, long entryId)
+    public MacOSHidIOReportConnection(long entryId)
     {
         _entryId = entryId;
 
-        byte[] cstr = Encoding.UTF8.GetBytes($"fido2-loopid-{entryId}");
+        var cstr = Encoding.UTF8.GetBytes($"fido2-loopid-{entryId}");
         _loopId = CFNativeMethods.CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
 
         _readBuffer = new byte[64];
@@ -66,37 +63,87 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
         OutputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
     }
 
+    public int InputReportSize { get; }
+    public int OutputReportSize { get; }
+
+    public byte[] GetReport()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (_reportsQueue.TryDequeue(out var report)) return report;
+
+        var runLoop = CFNativeMethods.CFRunLoopGetCurrent();
+
+        IOKitNativeMethods.IOHIDDeviceScheduleWithRunLoop(_deviceHandle, runLoop, _loopId);
+
+        var runLoopResult = CFNativeMethods.CFRunLoopRunInMode(_loopId, 6, true);
+
+        if (runLoopResult != CFNativeMethods.kCFRunLoopRunHandledSource)
+            throw new PlatformApiException($"RunLoop returned unexpected result: {runLoopResult}");
+
+        IOKitNativeMethods.IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
+
+        _ = _reportsQueue.TryDequeue(out report);
+
+        return report!;
+    }
+
+    public void SetReport(byte[] report)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(report);
+
+        var result = IOKitNativeMethods.IOHIDDeviceSetReport(
+            _deviceHandle,
+            IOKitHidConstants.kIOHidReportTypeOutput,
+            0,
+            report,
+            report.Length);
+
+        if (result != 0)
+            throw new PlatformApiException(
+                nameof(IOKitNativeMethods.IOHIDDeviceSetReport),
+                result,
+                "Failed to set HID report.");
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    public ValueTask DisposeAsync() =>
+        _disposed
+            ? ValueTask.CompletedTask
+            : new ValueTask(Task.Run(Dispose));
+
+    public ConnectionType Type { get; } = ConnectionType.Hid;
+
     private void SetupConnection()
     {
-        int deviceEntry = 0;
+        var deviceEntry = 0;
         try
         {
-            nint matchingDictionary = IOKitNativeMethods.IORegistryEntryIDMatching((ulong)_entryId);
+            var matchingDictionary = IOKitNativeMethods.IORegistryEntryIDMatching((ulong)_entryId);
             deviceEntry = IOKitNativeMethods.IOServiceGetMatchingService(0, matchingDictionary);
 
             if (deviceEntry == 0)
-            {
                 throw new PlatformApiException("Failed to find matching device entry in IO registry.");
-            }
 
             _deviceHandle = IOKitNativeMethods.IOHIDDeviceCreate(IntPtr.Zero, deviceEntry);
 
-            if (_deviceHandle == IntPtr.Zero)
-            {
-                throw new PlatformApiException("Failed to create HID device handle.");
-            }
+            if (_deviceHandle == IntPtr.Zero) throw new PlatformApiException("Failed to create HID device handle.");
 
-            int result = IOKitNativeMethods.IOHIDDeviceOpen(_deviceHandle, 0x01);
+            var result = IOKitNativeMethods.IOHIDDeviceOpen(_deviceHandle, 0x01);
 
             if (result != 0)
-            {
                 throw new PlatformApiException(
                     nameof(IOKitNativeMethods.IOHIDDeviceOpen),
                     result,
                     "Failed to open HID device.");
-            }
 
-            nint reportCallback = Marshal.GetFunctionPointerForDelegate(_reportDelegate);
+            var reportCallback = Marshal.GetFunctionPointerForDelegate(_reportDelegate);
             IOKitNativeMethods.IOHIDDeviceRegisterInputReportCallback(
                 _deviceHandle,
                 _readBuffer,
@@ -104,43 +151,13 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
                 reportCallback,
                 GCHandle.ToIntPtr(_pinnedReportsQueue));
 
-            nint callback = Marshal.GetFunctionPointerForDelegate(_removalDelegate);
+            var callback = Marshal.GetFunctionPointerForDelegate(_removalDelegate);
             IOKitNativeMethods.IOHIDDeviceRegisterRemovalCallback(_deviceHandle, callback, _deviceHandle);
         }
         finally
         {
-            if (deviceEntry != 0)
-            {
-                _ = IOKitNativeMethods.IOObjectRelease(deviceEntry);
-            }
+            if (deviceEntry != 0) _ = IOKitNativeMethods.IOObjectRelease(deviceEntry);
         }
-    }
-
-    public byte[] GetReport()
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        if (_reportsQueue.TryDequeue(out byte[]? report))
-        {
-            return report;
-        }
-
-        nint runLoop = CFNativeMethods.CFRunLoopGetCurrent();
-
-        IOKitNativeMethods.IOHIDDeviceScheduleWithRunLoop(_deviceHandle, runLoop, _loopId);
-
-        int runLoopResult = CFNativeMethods.CFRunLoopRunInMode(_loopId, 6, true);
-
-        if (runLoopResult != CFNativeMethods.kCFRunLoopRunHandledSource)
-        {
-            throw new PlatformApiException($"RunLoop returned unexpected result: {runLoopResult}");
-        }
-
-        IOKitNativeMethods.IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
-
-        _ = _reportsQueue.TryDequeue(out report);
-
-        return report!;
     }
 
     private static void ReportCallback(
@@ -152,10 +169,7 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
         byte[] report,
         long reportLength)
     {
-        if (result != 0 || type != IOKitHidConstants.kIOHidReportTypeInput || reportId != 0 || reportLength < 0)
-        {
-            return;
-        }
+        if (result != 0 || type != IOKitHidConstants.kIOHidReportTypeInput || reportId != 0 || reportLength < 0) return;
 
         var reportsQueue = (ConcurrentQueue<byte[]>)GCHandle.FromIntPtr(context).Target!;
         reportsQueue.Enqueue(report);
@@ -164,33 +178,9 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
     private static void RemovalCallback(IntPtr context, int result, IntPtr sender) =>
         CFNativeMethods.CFRunLoopStop(context);
 
-    public void SetReport(byte[] report)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(report);
-
-        int result = IOKitNativeMethods.IOHIDDeviceSetReport(
-            _deviceHandle,
-            IOKitHidConstants.kIOHidReportTypeOutput,
-            0,
-            report,
-            report.Length);
-
-        if (result != 0)
-        {
-            throw new PlatformApiException(
-                nameof(IOKitNativeMethods.IOHIDDeviceSetReport),
-                result,
-                "Failed to set HID report.");
-        }
-    }
-
     private void Dispose(bool disposing)
     {
-        if (_disposed)
-        {
-            return;
-        }
+        if (_disposed) return;
 
         IOKitNativeMethods.IOHIDDeviceRegisterInputReportCallback(
             _deviceHandle,
@@ -201,15 +191,9 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
         IOKitNativeMethods.IOHIDDeviceRegisterRemovalCallback(_deviceHandle, IntPtr.Zero, IntPtr.Zero);
 
-        if (_readHandle.IsAllocated)
-        {
-            _readHandle.Free();
-        }
+        if (_readHandle.IsAllocated) _readHandle.Free();
 
-        if (_pinnedReportsQueue.IsAllocated)
-        {
-            _pinnedReportsQueue.Free();
-        }
+        if (_pinnedReportsQueue.IsAllocated) _pinnedReportsQueue.Free();
 
         if (_deviceHandle != IntPtr.Zero)
         {
@@ -222,12 +206,6 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
     ~MacOSHidIOReportConnection()
     {
-        Dispose(disposing: false);
-    }
-
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        Dispose(false);
     }
 }

@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.YubiKey;
 
 public interface IFindYubiKeys
 {
-    Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
 }
 
 public class FindYubiKeys(
@@ -29,25 +29,41 @@ public class FindYubiKeys(
 {
     #region IFindYubiKeys Members
 
-    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(
+        ConnectionType type = ConnectionType.Ccid,
+        CancellationToken cancellationToken = default)
     {
-        var pcscTask = findPcscService.FindAllAsync(cancellationToken);
-        var hidTask = findHidService.FindAllAsync(cancellationToken);
-
-        await Task.WhenAll(pcscTask, hidTask).ConfigureAwait(false);
-
-        var pcscDevices = await pcscTask.ConfigureAwait(false);
-        var hidDevices = await hidTask.ConfigureAwait(false);
-
         var yubiKeys = new List<IYubiKey>();
-        yubiKeys.AddRange(pcscDevices.Select(yubiKeyFactory.Create));
-        yubiKeys.AddRange(hidDevices.Select(yubiKeyFactory.Create));
+
+        if (type.HasFlag(ConnectionType.Ccid))
+        {
+            var ccidKeys = await FindAllCcid(cancellationToken);
+            yubiKeys.AddRange(ccidKeys);
+        }
+
+        if (type.HasFlag(ConnectionType.Hid))
+        {
+            var hidKeys = await FindAllHid(cancellationToken);
+            yubiKeys.AddRange(hidKeys);
+        }
 
         return yubiKeys;
     }
 
     #endregion
 
-    public static FindYubiKeys Create() => 
+    public async Task<IReadOnlyList<IYubiKey>> FindAllHid(CancellationToken cancellationToken = default)
+    {
+        var hidDevices = await findHidService.FindAllAsync(cancellationToken);
+        return hidDevices.Select(yubiKeyFactory.Create).ToList();
+    }
+
+    public async Task<IReadOnlyList<IYubiKey>> FindAllCcid(CancellationToken cancellationToken = default)
+    {
+        var pcscDevices = await findPcscService.FindAllAsync(cancellationToken);
+        return pcscDevices.Select(yubiKeyFactory.Create).ToList();
+    }
+
+    public static FindYubiKeys Create() =>
         new(FindPcscDevices.Create(), FindHidDevices.Create(), YubiKeyFactory.Create());
 }

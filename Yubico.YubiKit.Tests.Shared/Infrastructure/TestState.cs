@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
@@ -25,19 +25,30 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 /// </summary>
 /// <remarks>
 ///     <para>
-///     TestState classes are responsible for:
-///     - Ensuring device is in a known, consistent state before tests run
-///     - Providing access to application-specific credentials and configuration
-///     - Managing device reconnection after destructive operations
-///     - Checking device capabilities and FIPS status
+///         TestState classes are responsible for:
+///         - Ensuring device is in a known, consistent state before tests run
+///         - Providing access to application-specific credentials and configuration
+///         - Managing device reconnection after destructive operations
+///         - Checking device capabilities and FIPS status
 ///     </para>
 ///     <para>
-///     Derived classes (PivTestState, OathTestState, etc.) implement application-specific
-///     setup logic, such as resetting the application and configuring default credentials.
+///         Derived classes (PivTestState, OathTestState, etc.) implement application-specific
+///         setup logic, such as resetting the application and configuring default credentials.
 ///     </para>
 /// </remarks>
 public abstract class TestState
 {
+    /// <summary>
+    ///     Initializes a new instance of <see cref="TestState" /> with the specified device.
+    /// </summary>
+    /// <param name="device">The YubiKey device to manage.</param>
+    /// <param name="deviceInfo">Device information.</param>
+    protected TestState(IYubiKey device, DeviceInfo deviceInfo)
+    {
+        CurrentDevice = device;
+        DeviceInfo = deviceInfo;
+    }
+
     /// <summary>
     ///     Gets or sets the YubiKey device under test.
     /// </summary>
@@ -58,17 +69,6 @@ public abstract class TestState
     /// </summary>
     protected Func<Task<IYubiKey>>? ReconnectCallback { get; init; }
 
-    /// <summary>
-    ///     Initializes a new instance of <see cref="TestState"/> with the specified device.
-    /// </summary>
-    /// <param name="device">The YubiKey device to manage.</param>
-    /// <param name="deviceInfo">Device information.</param>
-    protected TestState(IYubiKey device, DeviceInfo deviceInfo)
-    {
-        CurrentDevice = device;
-        DeviceInfo = deviceInfo;
-    }
-
     #region Helper Methods
 
     /// <summary>
@@ -77,10 +77,8 @@ public abstract class TestState
     /// <typeparam name="TConnection">The connection type to open.</typeparam>
     /// <returns>A connection to the device.</returns>
     protected async Task<TConnection> OpenConnectionAsync<TConnection>()
-        where TConnection : class, IConnection
-    {
-        return await CurrentDevice.ConnectAsync<TConnection>().ConfigureAwait(false);
-    }
+        where TConnection : class, IConnection =>
+        await CurrentDevice.ConnectAsync<TConnection>().ConfigureAwait(false);
 
     /// <summary>
     ///     Reconnects to the device after a destructive operation.
@@ -91,10 +89,7 @@ public abstract class TestState
     /// </remarks>
     protected async Task ReconnectAsync()
     {
-        if (ReconnectCallback is not null)
-        {
-            CurrentDevice = await ReconnectCallback().ConfigureAwait(false);
-        }
+        if (ReconnectCallback is not null) CurrentDevice = await ReconnectCallback().ConfigureAwait(false);
     }
 
     /// <summary>
@@ -102,20 +97,14 @@ public abstract class TestState
     /// </summary>
     /// <param name="capability">The capability to check.</param>
     /// <returns>True if the capability is FIPS capable; otherwise, false.</returns>
-    public bool IsFipsCapable(DeviceCapabilities capability)
-    {
-        return (DeviceInfo.FipsCapabilities & capability) != 0;
-    }
+    public bool IsFipsCapable(DeviceCapabilities capability) => (DeviceInfo.FipsCapabilities & capability) != 0;
 
     /// <summary>
     ///     Checks if a specific capability is in FIPS approved mode.
     /// </summary>
     /// <param name="capability">The capability to check.</param>
     /// <returns>True if the capability is in FIPS approved mode; otherwise, false.</returns>
-    public bool IsFipsApproved(DeviceCapabilities capability)
-    {
-        return (DeviceInfo.FipsApproved & capability) != 0;
-    }
+    public bool IsFipsApproved(DeviceCapabilities capability) => (DeviceInfo.FipsApproved & capability) != 0;
 
     /// <summary>
     ///     Checks if the device is connected via USB transport.

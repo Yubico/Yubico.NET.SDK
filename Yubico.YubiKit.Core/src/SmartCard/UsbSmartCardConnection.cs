@@ -22,36 +22,6 @@ using Yubico.YubiKit.Core.YubiKey;
 namespace Yubico.YubiKit.Core.SmartCard;
 
 /// <summary>
-///     Base interface for all device connections.
-/// </summary>
-/// <remarks>
-///     Implements both <see cref="IDisposable" /> and <see cref="IAsyncDisposable" /> to support
-///     both synchronous and asynchronous disposal patterns. Prefer <c>await using</c> for async code.
-/// </remarks>
-public interface IConnection : IDisposable, IAsyncDisposable
-{
-}
-
-public interface ISmartCardConnection : IConnection
-{
-    Transport Transport { get; }
-    // IDisposable BeginTransaction(out bool cardWasReset);
-
-    Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-        ReadOnlyMemory<byte> command,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    ///     Starts a PC/SC transaction. The transaction is ended when the returned scope is disposed.
-    ///     Uses LEAVE_CARD disposition when ending the transaction.
-    /// </summary>
-    IDisposable BeginTransaction(CancellationToken cancellationToken = default);
-
-    bool SupportsExtendedApdu();
-    // byte[] getAtr();
-}
-
-/// <summary>
 ///     A smart card connection running over USB (via PC/SC).
 /// </summary>
 /// <remarks>
@@ -75,6 +45,8 @@ internal class UsbSmartCardConnection(IPcscDevice smartCardDevice, ILogger<UsbSm
     private bool _disposed;
     private SCARD_PROTOCOL? _protocol;
     private bool _transactionActive;
+
+    public ConnectionType Type => ConnectionType.Ccid;
 
     public async ValueTask InitializeAsync(CancellationToken cancellationToken)
     {

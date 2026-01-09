@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.YubiKey;
 public static class YubiKey // TODO Keep Plan was to do all via manager?
 {
     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default) =>
-        FindYubiKeys.Create().FindAllAsync(cancellationToken);
+        FindYubiKeys.Create().FindAllAsync(cancellationToken: cancellationToken);
 
     public static async IAsyncEnumerable<DeviceEvent> MonitorAsync(
         TimeSpan? pollInterval = null,

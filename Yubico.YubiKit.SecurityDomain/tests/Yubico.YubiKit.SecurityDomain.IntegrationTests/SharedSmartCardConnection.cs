@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 
@@ -47,4 +48,6 @@ internal sealed class SharedSmartCardConnection(ISmartCardConnection connection)
     public ValueTask DisposeAsync() =>
         // Do nothing - connection lifecycle is managed by the owner
         default;
+
+    public ConnectionType Type { get; } = ConnectionType.Ccid;
 }

@@ -12,13 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.YubiKey;
+
 namespace Yubico.YubiKit.Core.SmartCard;
 
-public interface IApduProcessor
+public interface ISmartCardConnection : IConnection
 {
-    IApduFormatter Formatter { get; }
-    // FirmwareVersion? FirmwareVersion { get; } // TODO Could be nice to be able to do additional version checks within the processors.
+    Transport Transport { get; }
 
-    Task<ApduResponse> TransmitAsync(ApduCommand command, bool useScp,
+    Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+        ReadOnlyMemory<byte> command,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Starts a PC/SC transaction. The transaction is ended when the returned scope is disposed.
+    ///     Uses LEAVE_CARD disposition when ending the transaction.
+    /// </summary>
+    IDisposable BeginTransaction(CancellationToken cancellationToken = default);
+
+    bool SupportsExtendedApdu();
+    // byte[] getAtr();
 }

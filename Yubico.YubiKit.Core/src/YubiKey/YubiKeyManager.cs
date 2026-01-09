@@ -3,21 +3,25 @@
 public interface IYubiKeyManager
 {
     IObservable<DeviceEvent> DeviceChanges { get; }
-    Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type = ConnectionType.All,
+        CancellationToken cancellationToken = default);
 }
 
 public class YubiKeyManager(IDeviceRepository? deviceRepository = null) : IYubiKeyManager
 {
     #region IYubiKeyManager Members
 
-    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
+        ConnectionType type = ConnectionType.All,
+        CancellationToken cancellationToken = default)
     {
         if (deviceRepository is null)
             return FindYubiKeys
                 .Create()
-                .FindAllAsync(cancellationToken);
+                .FindAllAsync(type, cancellationToken);
 
-        return deviceRepository.FindAllAsync(cancellationToken);
+        return deviceRepository.FindAllAsync(type, cancellationToken);
     }
 
     public IObservable<DeviceEvent> DeviceChanges

@@ -21,7 +21,7 @@ public class MonitorService_Enabled_Tests()
     public async Task WhenEnabledMonitor_WithDisabledManualScan_FindsDevices()
     {
         SkipDeviceRepositoryManualScan(true);
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
         Assert.NotEmpty(devices);
     }
 }

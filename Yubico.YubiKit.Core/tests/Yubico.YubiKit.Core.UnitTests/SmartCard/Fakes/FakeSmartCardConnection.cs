@@ -27,6 +27,9 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
 
     public bool SupportsExtendedApduValue { get; set; } = true;
     public List<ReadOnlyMemory<byte>> TransmittedCommands { get; } = [];
+    public ConnectionType Type { get; } = ConnectionType.Ccid;
+
+    public void EnqueueResponse(ReadOnlyMemory<byte> response) => _responses.Enqueue(response);
 
     #region ISmartCardConnection Members
 
@@ -62,6 +65,4 @@ internal sealed class FakeSmartCardConnection : ISmartCardConnection
     }
 
     #endregion
-
-    public void EnqueueResponse(ReadOnlyMemory<byte> response) => _responses.Enqueue(response);
 }

@@ -23,19 +23,6 @@ public class DeviceRepositorySimple : IDeviceRepository
 {
     private readonly Subject<DeviceEvent> _deviceChanges = new();
 
-    #region IDeviceRepository Members
-
-    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default) =>
-        FindYubiKeys.Create().FindAllAsync(cancellationToken);
-
-    public void UpdateCache(IEnumerable<IYubiKey> discoveredDevices) => throw new NotImplementedException();
-
-    public IObservable<DeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
-
-    public void Dispose() => _deviceChanges.Dispose();
-
-    #endregion
-
     private async IAsyncEnumerable<DeviceEvent> MonitorAsync(
         TimeSpan? pollInterval = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -45,7 +32,7 @@ public class DeviceRepositorySimple : IDeviceRepository
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            var devices = await FindAllAsync(cancellationToken).ConfigureAwait(false);
+            var devices = await FindAllAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var currentDeviceIds = new HashSet<string>();
 
             foreach (var device in devices)
@@ -70,4 +57,20 @@ public class DeviceRepositorySimple : IDeviceRepository
             await Task.Delay(interval, cancellationToken).ConfigureAwait(false);
         }
     }
+
+    #region IDeviceRepository Members
+
+    public Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type = ConnectionType.All,
+        CancellationToken cancellationToken = default) =>
+        FindYubiKeys
+            .Create()
+            .FindAllAsync(type, cancellationToken);
+
+    public void UpdateCache(IEnumerable<IYubiKey> discoveredDevices) => throw new NotImplementedException();
+
+    public IObservable<DeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
+
+    public void Dispose() => _deviceChanges.Dispose();
+
+    #endregion
 }

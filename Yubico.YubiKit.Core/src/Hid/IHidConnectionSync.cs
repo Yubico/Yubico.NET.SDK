@@ -1,4 +1,4 @@
-// Copyright 2025 Yubico AB
+﻿// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -12,17 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.SmartCard;
-
 namespace Yubico.YubiKit.Core.Hid;
 
-/// <summary>
-///     Async wrapper for HID connections for use in the new SDK architecture.
-/// </summary>
-public interface IAsyncHidConnection : IConnection
+public interface IHidConnectionSync : IConnection
 {
     int InputReportSize { get; }
     int OutputReportSize { get; }
-    Task SetReportAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default);
-    Task<ReadOnlyMemory<byte>> GetReportAsync(CancellationToken cancellationToken = default);
+
+    void SetReport(byte[] report);
+    byte[] GetReport();
 }

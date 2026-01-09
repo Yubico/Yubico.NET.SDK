@@ -99,8 +99,8 @@ internal sealed class MacOSHidDevice : IHidDevice
     /// <returns>
     ///     An active connection object.
     /// </returns>
-    public IHidConnection ConnectToFeatureReports() =>
-        new MacOSHidFeatureReportConnection(this, _entryId);
+    public IHidConnectionSync ConnectToFeatureReports() =>
+        new MacOSHidFeatureReportConnection(_entryId);
 
     /// <summary>
     ///     Establishes a connection capable of transmitting IO reports to a FIDO device.
@@ -108,8 +108,8 @@ internal sealed class MacOSHidDevice : IHidDevice
     /// <returns>
     ///     An active connection object.
     /// </returns>
-    public IHidConnection ConnectToIOReports() =>
-        new MacOSHidIOReportConnection(this, _entryId);
+    public IHidConnectionSync ConnectToIOReports() =>
+        new MacOSHidIOReportConnection(_entryId);
 
     internal static long GetEntryId(IntPtr device)
     {

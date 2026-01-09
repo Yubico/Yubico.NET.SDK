@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Core.YubiKey;
@@ -33,6 +34,7 @@ public class YubiKeyFactory(
         device switch
         {
             IPcscDevice pcscDevice => CreatePcscYubiKey(pcscDevice),
+            IHidDevice hidDevice => CreateHidYubiKey(hidDevice),
             _ => throw new NotSupportedException(
                 $"Device type {device.GetType().Name} is not supported by this factory.")
         };
@@ -44,6 +46,12 @@ public class YubiKeyFactory(
             cardDevice,
             connectionFactory,
             loggerFactory.CreateLogger<PcscYubiKey>()
+        );
+
+    private HidYubiKey CreateHidYubiKey(IHidDevice hidDevice) =>
+        new(
+            hidDevice,
+            loggerFactory.CreateLogger<HidYubiKey>()
         );
 
     public static YubiKeyFactory Create(ILoggerFactory? loggerFactory = null) =>

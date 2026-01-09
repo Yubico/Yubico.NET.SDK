@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
+using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.YubiKey;
 
@@ -33,6 +34,7 @@ public static class DependencyInjection
                 .AddTransient<IFindYubiKeys, FindYubiKeys>()
                 .AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>()
                 .AddTransient<IFindPcscDevices, FindPcscDevices>()
+                .AddTransient<IFindHidDevices, FindHidDevices>()
                 .AddTransient<IProtocolFactory<ISmartCardConnection>, PcscProtocolFactory<ISmartCardConnection>>()
                 .AddSingleton<IDeviceChannel, DeviceChannel>()
                 .AddSingleton<IDeviceRepository, DeviceRepositoryCached>()

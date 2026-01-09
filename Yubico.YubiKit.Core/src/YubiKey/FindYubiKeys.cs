@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Core.YubiKey;
@@ -21,19 +22,32 @@ public interface IFindYubiKeys
     Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default);
 }
 
-public class FindYubiKeys(IFindPcscDevices findPcscService, IYubiKeyFactory yubiKeyFactory) : IFindYubiKeys
+public class FindYubiKeys(
+    IFindPcscDevices findPcscService,
+    IFindHidDevices findHidService,
+    IYubiKeyFactory yubiKeyFactory) : IFindYubiKeys
 {
     #region IFindYubiKeys Members
 
     public async Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken = default)
     {
-        var devices = await findPcscService.FindAllAsync(cancellationToken).ConfigureAwait(false);
-        return CreateYubiKeysFromPcscDevices(devices);
-    }
+        var pcscTask = findPcscService.FindAllAsync(cancellationToken);
+        var hidTask = findHidService.FindAllAsync(cancellationToken);
 
-    private List<IYubiKey> CreateYubiKeysFromPcscDevices(IReadOnlyList<IPcscDevice> devices) => devices.Select(yubiKeyFactory.Create).ToList();
+        await Task.WhenAll(pcscTask, hidTask).ConfigureAwait(false);
+
+        var pcscDevices = await pcscTask.ConfigureAwait(false);
+        var hidDevices = await hidTask.ConfigureAwait(false);
+
+        var yubiKeys = new List<IYubiKey>();
+        yubiKeys.AddRange(pcscDevices.Select(yubiKeyFactory.Create));
+        yubiKeys.AddRange(hidDevices.Select(yubiKeyFactory.Create));
+
+        return yubiKeys;
+    }
 
     #endregion
 
-    public static FindYubiKeys Create() => new(FindPcscDevices.Create(), YubiKeyFactory.Create());
+    public static FindYubiKeys Create() => 
+        new(FindPcscDevices.Create(), FindHidDevices.Create(), YubiKeyFactory.Create());
 }

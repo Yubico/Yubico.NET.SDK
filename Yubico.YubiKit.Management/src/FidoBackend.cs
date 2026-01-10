@@ -76,6 +76,6 @@ internal sealed class FidoBackend : IManagementBackend
 
     public void Dispose()
     {
-        _protocol?.Dispose();
+        // Backend doesn't own the protocol - ManagementSession handles disposal
     }
 }

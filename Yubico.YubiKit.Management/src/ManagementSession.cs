@@ -98,7 +98,6 @@ public sealed class ManagementSession : ApplicationSession
                 .ConfigureAwait(false);
 
             // Recreate backend with SCP-wrapped protocol
-            _backend.Dispose();
             _backend = new SmartCardBackend(_protocol as ISmartCardProtocol ?? throw new InvalidOperationException(), _version ?? new FirmwareVersion());
         }
 
@@ -247,7 +246,7 @@ public sealed class ManagementSession : ApplicationSession
     {
         if (disposing)
         {
-            _backend?.Dispose();
+            _protocol?.Dispose();
         }
 
         base.Dispose(disposing);

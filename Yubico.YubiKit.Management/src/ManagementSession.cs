@@ -26,10 +26,6 @@ namespace Yubico.YubiKit.Management;
 
 public sealed class ManagementSession : ApplicationSession
 {
-    private const byte INS_GET_DEVICE_INFO = 0x1D;
-    private const byte INS_DEVICE_RESET = 0x1F;
-    private const byte INS_SET_DEVICE_CONFIG = 0x1C;
-
     private const int TagMoreDeviceInfo = 0x10;
 
     private static readonly Feature FeatureDeviceInfo =
@@ -47,8 +43,7 @@ public sealed class ManagementSession : ApplicationSession
     private bool _isInitialized;
 
     private IProtocol _protocol;
-    private ISmartCardProtocol? _smartCardProtocol;
-    private IFidoProtocol? _fidoProtocol;
+    private IManagementBackend _backend;
 
     private FirmwareVersion? _version;
 
@@ -60,16 +55,14 @@ public sealed class ManagementSession : ApplicationSession
         _scpKeyParams = scpKeyParams;
         _logger = loggerFactory.CreateLogger<ManagementSession>();
 
-        _protocol = connection switch
+        (_protocol, _backend) = connection switch
         {
-            ISmartCardConnection sc => CreateSmartCardProtocol(sc, loggerFactory),
-            IFidoConnection fido => CreateFidoProtocol(fido, loggerFactory),
+            ISmartCardConnection sc => CreateSmartCardBackend(sc, loggerFactory),
+            IFidoConnection fido => CreateFidoBackend(fido, loggerFactory),
             _ => throw new NotSupportedException(
                 $"The connection type {connection.GetType().Name} is not supported by ManagementSession. " +
                 $"Supported types: ISmartCardConnection, IFidoConnection.")
         };
-
-        UpdateProtocolReferences();
     }
 
     public static async Task<ManagementSession> CreateAsync(
@@ -98,13 +91,15 @@ public sealed class ManagementSession : ApplicationSession
         _protocol.Configure(_version, configuration);
 
         // Initialize SCP if key parameters were provided
-        if (_scpKeyParams is not null && _smartCardProtocol is not null)
+        if (_scpKeyParams is not null && _protocol is ISmartCardProtocol smartCardProtocol)
         {
-            _protocol = await _smartCardProtocol
+            _protocol = await smartCardProtocol
                 .WithScpAsync(_scpKeyParams, cancellationToken)
                 .ConfigureAwait(false);
 
-            UpdateProtocolReferences();
+            // Recreate backend with SCP-wrapped protocol
+            _backend.Dispose();
+            _backend = new SmartCardBackend(_protocol as ISmartCardProtocol ?? throw new InvalidOperationException(), _version ?? new FirmwareVersion());
         }
 
         _isInitialized = true;
@@ -120,27 +115,12 @@ public sealed class ManagementSession : ApplicationSession
         var hasMoreData = true;
         while (hasMoreData)
         {
-            ReadOnlyMemory<byte> encodedResult;
+            var encodedResult = await _backend.ReadConfigAsync(page, cancellationToken).ConfigureAwait(false);
             
-            // For HID, use CTAP vendor command; for SmartCard, use APDU
-            if (_fidoProtocol is not null)
-            {
-                // CTAP_READ_CONFIG (0xC2) with page number (single byte)
-                var pagePayload = new byte[] { page };
-                encodedResult = await _fidoProtocol
-                    .SendVendorCommandAsync(0xC2, pagePayload, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                var apdu = new ApduCommand { Cla = 0, Ins = INS_GET_DEVICE_INFO, P1 = page, P2 = 0 };
-                encodedResult = await TransmitAsync(apdu, cancellationToken).ConfigureAwait(false);
-            }
-            
-            if (encodedResult.Length - 1 != encodedResult.Span[0])
+            if (encodedResult.Length - 1 != encodedResult[0])
                 throw new BadResponseException("Invalid length");
 
-            var pageTlvs = TlvHelper.DecodeList(encodedResult.Span[1..]);
+            var pageTlvs = TlvHelper.DecodeList(encodedResult.AsSpan()[1..]);
             allPagesTlvs.AddRange(pageTlvs);
 
             var moreData = pageTlvs.SingleOrDefault(t => t.Tag == TagMoreDeviceInfo);
@@ -174,24 +154,13 @@ public sealed class ManagementSession : ApplicationSession
             throw new ArgumentException("New lock code must be 16 bytes", nameof(newLockCode));
 
         var configBytes = config.GetBytes(reboot, currentLockCode, newLockCode);
-        var apdu = new ApduCommand
-        {
-            Cla = 0,
-            Ins = INS_SET_DEVICE_CONFIG,
-            P1 = 0,
-            P2 = 0,
-            Data = configBytes
-        };
-
-        return TransmitAsync(apdu, cancellationToken);
+        return _backend.WriteConfigAsync(configBytes.ToArray(), cancellationToken).AsTask();
     }
 
-    public async Task ResetDeviceAsync(CancellationToken cancellationToken = default)
+    public Task ResetDeviceAsync(CancellationToken cancellationToken = default)
     {
         EnsureSupports(FeatureDeviceReset);
-
-        await TransmitAsync(new ApduCommand { Cla = 0, Ins = INS_DEVICE_RESET, P1 = 0, P2 = 0 }, cancellationToken)
-            .ConfigureAwait(false);
+        return _backend.DeviceResetAsync(cancellationToken).AsTask();
     }
 
     private async Task<FirmwareVersion> GetVersionAsync(CancellationToken cancellationToken)
@@ -224,58 +193,38 @@ public sealed class ManagementSession : ApplicationSession
             : new FirmwareVersion();
     }
 
-    private async Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken)
+    private Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken)
     {
-        if (_smartCardProtocol is not null)
-            return await _smartCardProtocol
-                .SelectAsync(ApplicationIds.Management, cancellationToken)
-                .ConfigureAwait(false);
-
-        if (_fidoProtocol is not null)
-            return await _fidoProtocol
-                .SelectAsync(ApplicationIds.Management, cancellationToken)
-                .ConfigureAwait(false);
-
-        throw new NotSupportedException("No supported protocol available");
+        return _protocol switch
+        {
+            ISmartCardProtocol sc => sc.SelectAsync(ApplicationIds.Management, cancellationToken),
+            IFidoProtocol fido => fido.SelectAsync(ApplicationIds.Management, cancellationToken),
+            _ => throw new NotSupportedException("No supported protocol available")
+        };
     }
 
-    private Task<ReadOnlyMemory<byte>> TransmitAsync(ApduCommand command, CancellationToken cancellationToken)
-    {
-        if (_smartCardProtocol is not null)
-        {
-            return _smartCardProtocol.TransmitAndReceiveAsync(command, cancellationToken);
-        }
-
-        if (_fidoProtocol is not null)
-        {
-            return _fidoProtocol.TransmitAndReceiveAsync(command, cancellationToken);
-        }
-
-        throw new NotSupportedException("Protocol not supported");
-    }
-
-    private static IProtocol CreateSmartCardProtocol(
+    private static (IProtocol protocol, IManagementBackend backend) CreateSmartCardBackend(
         ISmartCardConnection connection,
         ILoggerFactory loggerFactory)
     {
-        return PcscProtocolFactory<ISmartCardConnection>
+        var protocol = PcscProtocolFactory<ISmartCardConnection>
             .Create(loggerFactory)
             .Create(connection);
+        
+        var backend = new SmartCardBackend(protocol as ISmartCardProtocol ?? throw new InvalidOperationException(), new FirmwareVersion());
+        return (protocol, backend);
     }
 
-    private static IProtocol CreateFidoProtocol(
+    private static (IProtocol protocol, IManagementBackend backend) CreateFidoBackend(
         IFidoConnection connection,
         ILoggerFactory loggerFactory)
     {
-        return FidoProtocolFactory<IFidoConnection>
+        var protocol = FidoProtocolFactory<IFidoConnection>
             .Create(loggerFactory)
             .Create(connection);
-    }
-
-    private void UpdateProtocolReferences()
-    {
-        _smartCardProtocol = _protocol as ISmartCardProtocol;
-        _fidoProtocol = _protocol as IFidoProtocol;
+        
+        var backend = new FidoBackend(protocol as IFidoProtocol ?? throw new InvalidOperationException(), new FirmwareVersion());
+        return (protocol, backend);
     }
 
     private void EnsureSupports(Feature feature)
@@ -296,7 +245,10 @@ public sealed class ManagementSession : ApplicationSession
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing) _protocol.Dispose();
+        if (disposing)
+        {
+            _backend?.Dispose();
+        }
 
         base.Dispose(disposing);
     }

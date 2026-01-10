@@ -43,8 +43,15 @@ public static class DependencyInjection
             services.AddSingleton<ManagementSessionFactoryDelegate>(sp =>
             {
                 var loggerFactory = sp.GetService<ILoggerFactory>();
-                var protocolConfiguration =
-                    sp.GetService<ProtocolConfiguration>(); // TODO solve this properly, null exception for now
+                ProtocolConfiguration? protocolConfiguration = new ProtocolConfiguration();
+                try
+                {
+                    protocolConfiguration = sp.GetService<ProtocolConfiguration>(); // TODO solve this properly, null exception for now
+                }
+                catch 
+                {
+                    // Its Ok for now.
+                }
 
                 return (connection, scp, ct) =>
                     ManagementSession.CreateAsync(connection, protocolConfiguration, loggerFactory, scp, ct);

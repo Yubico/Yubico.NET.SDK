@@ -758,13 +758,67 @@ private async Task InitializeAsync(
     // 2. Configure protocol with version info
     _protocol.Configure(_version, configuration);
     
-    // 3. Optionally establish SCP
+    // 3. Optionally establish SCP and recreate backend
     if (_scpKeyParams is not null && _protocol is ISmartCardProtocol sc)
+    {
         _protocol = await sc.WithScpAsync(_scpKeyParams, cancellationToken);
+        _backend = new SmartCardBackend(_protocol as ISmartCardProtocol, _version);
+    }
     
     _isInitialized = true;
 }
 ```
+
+## Architecture - Backend Pattern
+
+ManagementSession uses the **Backend pattern** to abstract protocol differences between SmartCard (APDU) and FIDO (CTAP HID) without branching in public APIs.
+
+### Internal Structure
+
+```csharp
+// ManagementSession delegates all operations to a backend
+private readonly IManagementBackend _backend;
+
+// Backend interface defines four operations
+internal interface IManagementBackend : IDisposable
+{
+    ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken ct);
+    ValueTask WriteConfigAsync(byte[] config, CancellationToken ct);
+    ValueTask SetModeAsync(byte[] data, CancellationToken ct);
+    ValueTask DeviceResetAsync(CancellationToken ct);
+}
+```
+
+### Implementations
+
+- **SmartCardBackend**: Encodes operations as ISO 7816 APDUs (INS: 0x1D, 0x1C, 0x16, 0x1F)
+- **FidoBackend**: Encodes operations as CTAP vendor commands (0xC2, 0xC3, 0xC0)
+
+### Key Design Decisions
+
+1. **Backend is stateless**: Doesn't own the protocol or connection
+2. **ManagementSession owns disposal**: Backend.Dispose() is a no-op
+3. **SCP wrapping works**: Backend can be recreated with SCP-wrapped protocol without disposing connection
+4. **Zero branching**: All public methods delegate to `_backend.ReadConfigAsync()` etc.
+
+This matches the Java yubikit-android Backend pattern where Backend doesn't implement Closeable.
+
+### Why This Matters
+
+**Before (protocol branching):**
+```csharp
+if (_fidoProtocol is not null)
+    result = await _fidoProtocol.SendVendorCommandAsync(0xC2, data, ct);
+else
+    result = await _smartCardProtocol.TransmitAsync(apdu, ct);
+```
+
+**After (backend delegation):**
+```csharp
+result = await _backend.ReadConfigAsync(page, ct);
+```
+
+Makes the code testable via `IManagementBackend` mocking and eliminates protocol-specific logic from business operations.
 
 ## TLV Encoding/Decoding
 
@@ -777,11 +831,11 @@ var allPagesTlvs = new List<Tlv>();
 
 while (hasMoreData)
 {
-    var apdu = new ApduCommand { Ins = INS_GET_DEVICE_INFO, P1 = page };
-    var encodedResult = await TransmitAsync(apdu, cancellationToken);
+    // Backend abstracts protocol (APDU for SmartCard, CTAP for FIDO)
+    var encodedResult = await _backend.ReadConfigAsync(page, cancellationToken);
     
     // Decode TLVs from response
-    var pageTlvs = TlvHelper.DecodeList(encodedResult.Span[1..]);
+    var pageTlvs = TlvHelper.DecodeList(encodedResult.AsSpan()[1..]);
     allPagesTlvs.AddRange(pageTlvs);
     
     // Check for "more data" indicator

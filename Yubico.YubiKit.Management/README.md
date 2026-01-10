@@ -101,13 +101,19 @@ using Yubico.YubiKit.Management;
 using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
     cancellationToken: cancellationToken);
 
-// Or manually (same result)
+// Or manually over SmartCard (CCID/NFC)
 using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
 using var mgmtSession = await ManagementSession.CreateAsync(
     connection,
     cancellationToken: cancellationToken);
 
-// With SCP03 authentication
+// Or manually over HID (FIDO interface)
+using var connection = await yubiKey.ConnectAsync<IFidoConnection>();
+using var mgmtSession = await ManagementSession.CreateAsync(
+    connection,
+    cancellationToken: cancellationToken);
+
+// With SCP03 authentication (SmartCard only)
 using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
 using var mgmtSession = await ManagementSession.CreateAsync(
     connection,

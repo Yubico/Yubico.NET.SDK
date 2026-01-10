@@ -1,5 +1,82 @@
 # Add HID Devices Implementation Plan (macOS)
 
+**Status:** ✅ **CORE TASKS COMPLETED** - HID device support operational, integration with Management validated
+
+**Goal:** ~~Enable YubiKey applications (FIDO2, OTP) to connect via HID transport in addition to SmartCard on macOS.~~ **ACHIEVED** for FIDO interface with Management application.
+
+**Architecture:** ~~Integrate HID device discovery into the new SDK's background service/channel/cache architecture.~~ **COMPLETED** - HID devices flow through `FindYubiKeys` → `DeviceChannel` → `DeviceRepositoryCached` like PCSC devices.
+
+**Platform Scope:** macOS only. See `docs/plans/2026-01-09-add-hid-devices-win-linux.md` for Windows/Linux.
+
+**Implementation Date:** January 9-10, 2026
+
+---
+
+## Completion Summary
+
+### Completed Tasks
+
+✅ **Task 1: Port MacOSHidDevice** (Historical - already existed)
+- `MacOSHidDevice.cs` already present in codebase
+- Implements `IHidDevice` with IOKit enumeration
+
+✅ **Task 2: Port MacOSHidIOReportConnection** (Historical - already existed)
+- `MacOSHidIOReportConnection.cs` already present
+- FIDO I/O reports with CFRunLoop callbacks
+- GCHandle pinning for callback buffers working correctly
+
+✅ **Task 3: Port MacOSHidFeatureReportConnection** (Historical - already existed)
+- `MacOSHidFeatureReportConnection.cs` already present
+- Feature reports for OTP interface
+
+✅ **Task 4-7: Service Integration** (Validated January 2026)
+- `IFindHidDevices` and `FindHidDevices` exist
+- `HidYubiKey` implements `IYubiKey`
+- Integration with `YubiKeyFactory` and `FindYubiKeys` working
+- DI registration in place
+
+✅ **Task 8: Integration Tests** (New - January 2026)
+- Management over HID tests passing
+- `CreateManagementSession_with_Hid_CreateAsync` ✅
+- `CreateManagementSession_Hid_with_CreateAsync` ✅
+
+✅ **Architecture Refactoring** (January 2026)
+- Created `IFidoConnection` / `IOtpConnection` separation
+- Implemented Backend pattern in ManagementSession
+- Fixed HidUsagePage enum (0xF1D0 vs signed short issue)
+- Fixed CTAP page payload format (single byte)
+
+### Test Results
+
+**Hardware Tests Passing:**
+- HID enumeration works on macOS ✅
+- `FindYubiKeys.FindAllAsync()` returns both PCSC and HID devices ✅  
+- `HidYubiKey.ConnectAsync<IFidoConnection>()` works ✅
+- Management operations over FIDO HID working ✅
+
+**Code Quality:**
+- Follows CLAUDE.md guidelines ✅
+- No #region blocks ✅
+- Modern C# 14 syntax ✅
+- Memory management patterns correct ✅
+
+### Known Gaps
+
+⚠️ **OTP Protocol Not Implemented**
+- `IOtpConnection` interface exists
+- `OtpConnection` wrapper exists  
+- No `OtpProtocol` implementation yet
+- Not blocking - Management primarily uses FIDO or SmartCard
+
+⚠️ **Native Event Listener Not Implemented**
+- Currently relies on polling via `FindYubiKeys`
+- Legacy SDK had `MacOSHidDeviceListener` with IOKit callbacks
+- Future enhancement for immediate device detection
+
+---
+
+## Original Plan
+
 **Goal:** Enable YubiKey applications (FIDO2, OTP) to connect via HID transport in addition to SmartCard on macOS.
 
 **Architecture:** Integrate HID device discovery into the new SDK's background service/channel/cache architecture. HID devices flow through `FindYubiKeys` → `DeviceChannel` → `DeviceRepositoryCached` like PCSC devices.
@@ -285,23 +362,32 @@ Output `<promise>DONE</promise>` when all tasks verified.
 
 ## Verification Checklist
 
-- [ ] `dotnet build.cs build` passes
-- [ ] `dotnet build.cs test` passes
-- [ ] HID enumeration works on macOS (manual test)
-- [ ] `FindYubiKeys.FindAllAsync()` returns both PCSC and HID devices
-- [ ] `HidYubiKey.ConnectAsync<IAsyncHidConnection>()` works
-- [ ] Code follows CLAUDE.md (no #region, modern C#, memory patterns)
-- [ ] Integration with DeviceRepositoryCached works via FindYubiKeys
+- [x] `dotnet build.cs build` passes
+- [x] `dotnet build.cs test` passes (with expected hardware test skips)
+- [x] HID enumeration works on macOS (manual test)
+- [x] `FindYubiKeys.FindAllAsync()` returns both PCSC and HID devices
+- [x] `HidYubiKey.ConnectAsync<IFidoConnection>()` works
+- [x] Code follows CLAUDE.md (no #region, modern C#, memory patterns)
+- [x] Integration with DeviceRepositoryCached works via FindYubiKeys
+- [x] ManagementSession works over HID (FIDO interface)
+
+**Status:** ✅ Core objectives met. HID support operational for FIDO interface.
 
 ---
 
 ## Future Work (separate plans)
 
-- Windows HID (SetupDi + HidD)
-- Linux HID (udev + hidraw)  
-- Native event-based HID listener (IOKit callbacks instead of polling)
-- CTAP2 protocol layer over HID
-- Composite device correlation
+- **OTP Protocol Implementation**: Create `IOtpProtocol` and `OtpProtocol` for Management over OTP interface
+  - Feature report handling with CRC validation
+  - Longer timeouts (OTP slower than FIDO)
+  - Reference: Java `OtpBackend` in ManagementSession
+- **Native Event Listener**: IOKit callback-based device monitoring (replace polling)
+- **Windows HID**: SetupDi + HidD implementation
+- **Linux HID**: udev + hidraw implementation  
+- **CTAP2 Protocol Layer**: Full FIDO2/CTAP2 implementation over HID
+- **Composite Device Correlation**: Link PCSC + HID interfaces of same physical device
+
+**Priority:** OTP protocol is lowest priority since Management primarily uses FIDO or SmartCard. CTAP2 for FIDO2 application is higher priority.
 
 ---
 

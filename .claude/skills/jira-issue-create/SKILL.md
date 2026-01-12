@@ -14,6 +14,8 @@ Set these environment variables:
 - `JIRA_EMAIL` - Your Atlassian account email
 - `JIRA_TOKEN` - API token from https://id.atlassian.com/manage-profile/security/api-tokens
 
+IMPORTANT: Assume these environment variables are already set in the environment variables.
+
 ## Usage
 
 ```bash

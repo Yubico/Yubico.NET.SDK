@@ -1,18 +1,12 @@
 #!/usr/bin/env bun
 
 /**
- * Jira Cloud REST API v3 - Parameterized Search (v2)
+ * Jira Cloud REST API v3 - Strict Component Search
  *
- * * BREAKING CHANGE UPDATE:
- * - Uses new endpoint: /rest/api/3/search/jql
- * - Uses Cursor Pagination (nextPageToken) instead of Offsets.
- *
- * Capabilities:
- * - Construct safe JQL internally.
- * - Optimized "Context Economy": returns flattened text and limited comments.
- *
- * References:
- * - Search (POST): https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-post
+ * Design Philosophy:
+ * - NO RAW JQL: The Agent provides variables, the script builds the syntax.
+ * - Discovery: Added --exclude-status to help find active work.
+ * - Robustness: Greedy parsing for multi-word statuses (e.g. "In Progress").
  */
 
 // --- Configuration ---
@@ -20,42 +14,62 @@ const JIRA_DOMAIN = Bun.env.JIRA_DOMAIN;
 const JIRA_EMAIL = Bun.env.JIRA_EMAIL;
 const JIRA_TOKEN = Bun.env.JIRA_TOKEN;
 
-// --- Argument Parsing ---
+// --- Robust Argument Parsing (Greedy) ---
+// Captures "In Progress" as a single value even without quotes
 const args = Bun.argv.slice(2);
+
 function getArg(flag: string): string | undefined {
   const index = args.indexOf(flag);
-  return (index > -1 && args[index + 1]) ? args[index + 1] : undefined;
+  if (index === -1 || index === args.length - 1) return undefined;
+
+  const values = [];
+  for (let i = index + 1; i < args.length; i++) {
+    const val = args[i];
+    if (val.startsWith("--")) break;
+    values.push(val);
+  }
+  return values.length > 0 ? values.join(" ") : undefined;
 }
 
-// Filters
+// --- Inputs ---
 const projectKey = getArg("--project");
-const statusArg = getArg("--status");
+const statusArg = getArg("--status");          // Include these
+const excludeStatusArg = getArg("--exclude-status"); // Exclude these (New!)
 const assigneeArg = getArg("--assignee");
 const textArg = getArg("--text");
 const typeArg = getArg("--type");
-
-// Pagination (New Cursor Logic)
 const limitArg = getArg("--limit");
-const pageTokenArg = getArg("--token"); // Replaces --offset
-const maxResults = limitArg ? parseInt(limitArg, 10) : 5;
+const pageTokenArg = getArg("--token");
+
+const maxResults = limitArg ? parseInt(limitArg, 10) : 10; // Default 10 for better discovery
 
 // --- Validation ---
 if (!JIRA_DOMAIN || !JIRA_EMAIL || !JIRA_TOKEN) {
-  console.error("Error: Missing Environment Variables.");
+  console.error("❌ Error: Missing Environment Variables.");
   process.exit(1);
 }
 
-if (!projectKey && !statusArg && !assigneeArg && !textArg && !typeArg) {
-  console.error("Error: You must provide at least one search filter.");
+// Guardrail: Prevent dumping the whole database
+if (!projectKey && !statusArg && !excludeStatusArg && !assigneeArg && !textArg) {
+  console.error("❌ Error: You must provide at least one filter.");
+  console.error("Usage: bun run jira-issue-search.ts --project YESDK --exclude-status Closed");
   process.exit(1);
 }
 
-// --- Internal JQL Construction ---
+// --- Strict JQL Construction ---
 const jqlParts: string[] = [];
 
-if (projectKey) jqlParts.push(`project = "${projectKey}"`);
-if (typeArg) jqlParts.push(`issuetype = "${typeArg}"`);
+// 1. Project Scope
+if (projectKey) {
+  jqlParts.push(`project = "${projectKey}"`);
+}
 
+// 2. Issue Type
+if (typeArg) {
+  jqlParts.push(`issuetype = "${typeArg}"`);
+}
+
+// 3. Status Inclusion (e.g. "In Progress")
 if (statusArg) {
   if (statusArg.includes(",")) {
     const list = statusArg.split(",").map(s => `"${s.trim()}"`).join(", ");
@@ -65,6 +79,17 @@ if (statusArg) {
   }
 }
 
+// 4. Status Exclusion (e.g. "Closed") - CRITICAL FOR DISCOVERY
+if (excludeStatusArg) {
+  if (excludeStatusArg.includes(",")) {
+    const list = excludeStatusArg.split(",").map(s => `"${s.trim()}"`).join(", ");
+    jqlParts.push(`status not in (${list})`);
+  } else {
+    jqlParts.push(`status != "${excludeStatusArg}"`);
+  }
+}
+
+// 5. Assignee
 if (assigneeArg) {
   if (assigneeArg.toLowerCase() === "me") {
     jqlParts.push(`assignee = currentUser()`);
@@ -75,11 +100,15 @@ if (assigneeArg) {
   }
 }
 
+// 6. Text Search (Summary/Description)
 if (textArg) {
   jqlParts.push(`text ~ "${textArg}"`);
 }
 
-const finalJql = jqlParts.join(" AND ") + " ORDER BY priority DESC, created DESC";
+// 7. Sort Order (Newest Updated first is better for tracking active work)
+const finalJql = jqlParts.join(" AND ") + " ORDER BY updated DESC";
+
+console.error(`[DEBUG] Generated JQL: ${finalJql}`);
 
 // --- Helper: Extract Text from ADF ---
 function extractTextFromADF(content: any): string {
@@ -94,30 +123,18 @@ function extractTextFromADF(content: any): string {
 
 // --- API Call ---
 const authString = Buffer.from(`${JIRA_EMAIL}:${JIRA_TOKEN}`).toString('base64');
-// UPDATED ENDPOINT: /search/jql
 const searchUrl = `https://${JIRA_DOMAIN}/rest/api/3/search/jql`;
 
 const payload: any = {
   jql: finalJql,
   maxResults: maxResults,
   fields: [
-    "summary",
-    "status",
-    "issuetype",
-    "priority",
-    "assignee",
-    "description",
-    "comment",
-    "created",
-    "parent"
+    "summary", "status", "issuetype", "priority", "assignee", 
+    "description", "comment", "created", "updated", "parent"
   ]
-  // REMOVED: validateQuery (not supported in new endpoint)
 };
 
-// Add cursor if provided
-if (pageTokenArg) {
-  payload.nextPageToken = pageTokenArg;
-}
+if (pageTokenArg) payload.nextPageToken = pageTokenArg;
 
 try {
   const response = await fetch(searchUrl, {
@@ -132,7 +149,7 @@ try {
 
   if (!response.ok) {
     const err = await response.text();
-    console.error(`Jira API Error (${response.status}): ${err}`);
+    console.error(`❌ Jira API Error (${response.status}): ${err}`);
     process.exit(1);
   }
 
@@ -143,7 +160,6 @@ try {
     process.exit(0);
   }
 
-  // Optimize Output
   const optimizedIssues = data.issues.map((issue: any) => {
     const f = issue.fields;
     const recentComments = f.comment?.comments?.slice(-3).map((c: any) => ({
@@ -164,16 +180,13 @@ try {
     };
   });
 
-  // Return issues + the token for the next page
-  const result = {
+  console.log(JSON.stringify({
     meta: {
       count: data.issues.length,
-      next_token: data.nextPageToken || null // Agent uses this to fetch more
+      next_token: data.nextPageToken || null
     },
     issues: optimizedIssues
-  };
-
-  console.log(JSON.stringify(result, null, 2));
+  }, null, 2));
 
 } catch (error) {
   console.error("Network or Execution Error:", error);

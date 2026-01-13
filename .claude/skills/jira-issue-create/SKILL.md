@@ -9,12 +9,14 @@ Creates issues in Jira Cloud using the REST API v3.
 
 ## Prerequisites
 
+**IMPORTANT: Assume these environment variables are already set in the environment.**
+If the command fails with an authentication error, ask the user to verify these variables:
+
 Set these environment variables:
 - `JIRA_DOMAIN` - Your Jira domain (e.g., `mycompany.atlassian.net`)
 - `JIRA_EMAIL` - Your Atlassian account email
 - `JIRA_TOKEN` - API token from https://id.atlassian.com/manage-profile/security/api-tokens
 
-IMPORTANT: Assume these environment variables are already set in the environment variables.
 
 ## Usage
 

@@ -17,6 +17,7 @@ A strict search tool that builds valid JQL from your inputs.
 ```bash
 bun run .claude/skills/jira-issue-search/jira-issue-search.ts \
   [--project <KEY>] \
+  [--key <ISSUE_KEY[,ISSUE_KEY...]>] \
   [--status "<STATUS>"] \
   [--exclude-status "<STATUS>"] \
   [--assignee "<USER>"] \

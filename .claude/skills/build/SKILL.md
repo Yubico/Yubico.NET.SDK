@@ -1,3 +1,8 @@
+---
+name: build
+description: Build, test, and package the Yubico.NET.SDK project using the custom build script. Use for compiling code, running tests, collecting coverage, and creating NuGet packages.
+---
+
 # .NET Build System Skill
 
 ## Purpose

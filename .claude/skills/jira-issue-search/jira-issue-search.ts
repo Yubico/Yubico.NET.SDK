@@ -33,6 +33,7 @@ function getArg(flag: string): string | undefined {
 
 // --- Inputs ---
 const projectKey = getArg("--project");
+const keyArg = getArg("--key");
 const statusArg = getArg("--status");          // Include these
 const excludeStatusArg = getArg("--exclude-status"); // Exclude these (New!)
 const assigneeArg = getArg("--assignee");
@@ -50,7 +51,7 @@ if (!JIRA_DOMAIN || !JIRA_EMAIL || !JIRA_TOKEN) {
 }
 
 // Guardrail: Prevent dumping the whole database
-if (!projectKey && !statusArg && !excludeStatusArg && !assigneeArg && !textArg) {
+if (!projectKey && !keyArg && !statusArg && !excludeStatusArg && !assigneeArg && !textArg) {
   console.error("❌ Error: You must provide at least one filter.");
   console.error("Usage: bun run jira-issue-search.ts --project YESDK --exclude-status Closed");
   process.exit(1);
@@ -64,12 +65,22 @@ if (projectKey) {
   jqlParts.push(`project = "${projectKey}"`);
 }
 
-// 2. Issue Type
+// 2. Issue Key (most specific)
+if (keyArg) {
+  if (keyArg.includes(",")) {
+    const list = keyArg.split(",").map(k => `"${k.trim()}"`).join(", ");
+    jqlParts.push(`key in (${list})`);
+  } else {
+    jqlParts.push(`key = "${keyArg}"`);
+  }
+}
+
+// 3. Issue Type
 if (typeArg) {
   jqlParts.push(`issuetype = "${typeArg}"`);
 }
 
-// 3. Status Inclusion (e.g. "In Progress")
+// 4. Status Inclusion (e.g. "In Progress")
 if (statusArg) {
   if (statusArg.includes(",")) {
     const list = statusArg.split(",").map(s => `"${s.trim()}"`).join(", ");
@@ -79,7 +90,7 @@ if (statusArg) {
   }
 }
 
-// 4. Status Exclusion (e.g. "Closed") - CRITICAL FOR DISCOVERY
+// 5. Status Exclusion (e.g. "Closed") - CRITICAL FOR DISCOVERY
 if (excludeStatusArg) {
   if (excludeStatusArg.includes(",")) {
     const list = excludeStatusArg.split(",").map(s => `"${s.trim()}"`).join(", ");
@@ -89,7 +100,7 @@ if (excludeStatusArg) {
   }
 }
 
-// 5. Assignee
+// 6. Assignee
 if (assigneeArg) {
   if (assigneeArg.toLowerCase() === "me") {
     jqlParts.push(`assignee = currentUser()`);

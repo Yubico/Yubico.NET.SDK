@@ -13,7 +13,7 @@ The `ralph-loop` skill forces a sub-instance of GitHub Copilot to enter a recurs
 
 ## 2. Command Signature
 
-**Executable:** `bun ralph-loop.ts`
+**Executable:** `bun .claude/skills/ralph-loop/ralph-loop.ts`
 
 ### Parameters
 
@@ -22,9 +22,11 @@ The `ralph-loop` skill forces a sub-instance of GitHub Copilot to enter a recurs
 | `[PROMPT]` | `string` | **Yes** (or via file) | The objective string passed as an argument. |
 | `--prompt-file` | `path` | **Yes** (alternative) | Read the prompt from a file. **Preferred for complex instructions** to avoid shell escaping issues. |
 | `--completion-promise` | `string` | **Yes** | A unique string (e.g., `"DONE_V1"`) that signals success. |
-| `--max-iterations` | `number` | No | Safety limit. Default: `10`. |
+| `--max-iterations` | `number` | No | Safety limit. Default: `0` (unlimited). |
 | `--delay` | `number` | No | Seconds between loops. Default: `2`. |
 | `--learn` | `flag` | No | Enable to generate a `review.md` post-mortem analysis. |
+
+**Outputs:** State + logs are written under `./docs/ralph-loop/` (e.g., `state.md`, `iteration-*.log`, and learning artifacts under `./docs/ralph-loop/learning/`).
 
 ## 3. Autonomy Injection (CRITICAL)
 
@@ -38,7 +40,7 @@ The script is passive by default. To ensure the agent is truly autonomous and ne
 **Goal:** Quick scaffolding or simple refactor.
 
 ```bash
-bun ralph-loop.ts "Create a 'Hello World' Express server in src/app.ts and a test in src/app.test.ts. CONTEXT: You are in NON-INTERACTIVE mode. Do not ask questions. Output <promise>DONE</promise> when files are created." \
+bun .claude/skills/ralph-loop/ralph-loop.ts "Create a 'Hello World' Express server in src/app.ts and a test in src/app.test.ts. CONTEXT: You are in NON-INTERACTIVE mode. Do not ask questions. Output <promise>DONE</promise> when files are created." \
   --completion-promise "DONE"
 ```
 
@@ -51,7 +53,7 @@ Run the loop pointing to that file.
 
 ```bash
 
-bun ralph-loop.ts --prompt-file task_prompt.md \
+bun .claude/skills/ralph-loop/ralph-loop.ts --prompt-file task_prompt.md \
   --completion-promise "REFACTOR_COMPLETE" \
   --max-iterations 20 \
   --learn
@@ -61,7 +63,7 @@ bun ralph-loop.ts --prompt-file task_prompt.md \
 
 ```bash
 
-bun ralph-loop.ts "Run 'npm test'. Analyze the stderr output. Locate the failing code in src/. Apply fixes. Re-run 'npm test'. Repeat until passing. CONTEXT: You are in NON-INTERACTIVE mode. The user is not present. Do not ask for clarification. If a decision is ambiguous, select the standard industry pattern and EXECUTE immediately. Output <promise>TESTS_PASSED</promise> ONLY when the specific objective is verified." \
+bun .claude/skills/ralph-loop/ralph-loop.ts "Run 'npm test'. Analyze the stderr output. Locate the failing code in src/. Apply fixes. Re-run 'npm test'. Repeat until passing. CONTEXT: You are in NON-INTERACTIVE mode. The user is not present. Do not ask for clarification. If a decision is ambiguous, select the standard industry pattern and EXECUTE immediately. Output <promise>TESTS_PASSED</promise> ONLY when the specific objective is verified." \
   --completion-promise "TESTS_PASSED" \
   --max-iterations 12 \
   --delay 2

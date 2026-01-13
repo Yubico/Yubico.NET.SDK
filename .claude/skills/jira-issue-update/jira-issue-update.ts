@@ -5,7 +5,9 @@
  *
  * Capabilities:
  * - Batches Summary, Description, and Comments into a single atomic PUT request.
- * - separate handling for Transitions and Assignees (as they use distinct endpoints/logic).
+ * - Greedy Argument Parsing (handles multi-word strings without quotes).
+ * - Alias Support (--desc / --description).
+ * - Separate handling for Transitions and Assignees (distinct endpoints).
  *
  * References:
  * - Edit Issue: https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-put
@@ -16,33 +18,51 @@ const JIRA_DOMAIN = Bun.env.JIRA_DOMAIN;
 const JIRA_EMAIL = Bun.env.JIRA_EMAIL;
 const JIRA_TOKEN = Bun.env.JIRA_TOKEN;
 
-// --- Argument Parsing ---
+// --- Robust Argument Parsing ---
 const args = Bun.argv.slice(2);
-function getArg(flag: string): string | undefined {
-  const index = args.indexOf(flag);
-  return (index > -1 && args[index + 1]) ? args[index + 1] : undefined;
+
+// Greedy Parser: Captures "In Progress" as one value. Supports aliases.
+function getArg(flag: string, alias?: string): string | undefined {
+  let index = args.indexOf(flag);
+  if (index === -1 && alias) {
+    index = args.indexOf(alias);
+  }
+
+  if (index === -1 || index === args.length - 1) return undefined;
+
+  const values = [];
+  // Start from the element after the flag
+  for (let i = index + 1; i < args.length; i++) {
+    const val = args[i];
+    // Stop if we hit another flag (starts with --)
+    if (val.startsWith("--")) break;
+    values.push(val);
+  }
+
+  return values.length > 0 ? values.join(" ") : undefined;
 }
 
 const issueKey = getArg("--key");
 const summaryArg = getArg("--summary");
-const descArg = getArg("--desc");
+const descArg = getArg("--desc", "--description"); // Supports alias
 const statusArg = getArg("--status");
 const commentArg = getArg("--comment");
 const assigneeArg = getArg("--assignee");
 
 // --- Validation ---
 if (!JIRA_DOMAIN || !JIRA_EMAIL || !JIRA_TOKEN) {
-  console.error("Error: Missing Environment Variables.");
+  console.error("❌ Error: Missing Environment Variables.");
   process.exit(1);
 }
 
 if (!issueKey) {
-  console.error("Error: Missing required argument '--key'.");
+  console.error("❌ Error: Missing required argument '--key'.");
   process.exit(1);
 }
 
 if (!summaryArg && !descArg && !statusArg && !commentArg && !assigneeArg) {
-  console.error("Error: No update actions specified.");
+  console.error("❌ Error: No update actions specified.");
+  console.error("Provide at least one: --summary, --desc, --status, --comment, or --assignee");
   process.exit(1);
 }
 
@@ -177,8 +197,8 @@ async function transitionStatus(key: string, targetStatus: string) {
 // --- Main Execution ---
 async function main() {
   try {
-    // Execute updates. 
-    // We run batchUpdate first (content/comments), then structural changes (assignee/status).
+    // Sequence: Content -> Assignee -> Status
+    // This order prevents moving a ticket to "Done" before assigning it, etc.
     await batchUpdate(issueKey!);
     
     if (assigneeArg) await updateAssignee(issueKey!, assigneeArg);

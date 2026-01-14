@@ -82,6 +82,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
     private readonly ScpKeyParameters? _scpKeyParams;
     private ISmartCardProtocol? _protocol;
+    private bool _hasExplicitFirmwareVersion;
 
     /// <summary>
     ///     Entry point for interacting with the YubiKey Security Domain application.
@@ -149,7 +150,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             .ConfigureAwait(false);
 
         // Security Domain is available on firmware 5.3.0 and newer.
-        // If the caller already knows the firmware, they can provide it to avoid hardcoding.
+        // If the caller already knows the firmware, they can provide it and enable feature gating.
+        _hasExplicitFirmwareVersion = firmwareVersion is not null;
         FirmwareVersion = firmwareVersion ?? FirmwareVersion.V5_3_0;
         smartCardProtocol.Configure(FirmwareVersion, configuration);
 
@@ -535,7 +537,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         byte replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
-        EnsureSupports(FeatureScp11);
+        if (_hasExplicitFirmwareVersion)
+            EnsureSupports(FeatureScp11);
 
         if (replaceKvn == 0)
             _logger.LogDebug("Generating EC key for {KeyRef}", keyReference);
@@ -1170,11 +1173,11 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     {
         if (!disposing) return;
 
+        base.Dispose(disposing);
+
         _protocol = null;
         Protocol = null;
         IsAuthenticated = false;
         IsInitialized = false;
-
-        base.Dispose(disposing);
     }
 }

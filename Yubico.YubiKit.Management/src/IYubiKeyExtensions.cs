@@ -98,8 +98,8 @@ public static class IYubiKeyExtensions
         ///     The session must be disposed by the caller when no longer needed.
         /// </returns>
         public async Task<ManagementSession> CreateManagementSessionAsync(
-            ProtocolConfiguration? configuration = null,
             ScpKeyParameters? scpKeyParams = null,
+            ProtocolConfiguration? configuration = null,
             CancellationToken cancellationToken = default)
         {
             var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken).ConfigureAwait(false);

@@ -407,6 +407,55 @@ public async Task GenerateKeyAsync(...)
 
 ---
 
+## Added After-the-Fact Improvements (2026-01-14)
+
+These items were surfaced by re-reviewing `docs/research/session-api-review-part2.md` after the refactor work and are recommended follow-on improvements for additional DX/value unlock.
+
+### A. Add SecurityDomain Domain Models (Reduce Opaque Return Types)
+
+SecurityDomain currently exposes “raw”/opaque structures (e.g., nested dictionaries and raw byte payloads). Add typed models and new overloads returning them (keep existing return types for compatibility).
+
+- Introduce types like `KeyInfo`, `CaIdentifier`, `CaIdentifierType` in `Yubico.YubiKit.SecurityDomain`
+- Add convenience overloads (or new methods) that return `IReadOnlyList<KeyInfo>` / `IReadOnlyList<CaIdentifier>`
+
+### B. Improve Type Discoverability Across Packages
+
+SecurityDomain relies heavily on Core types (`KeyReference`, `StaticKeys`, `Scp03KeyParameters`, etc.) which live in non-obvious namespaces.
+
+- Add explicit documentation (“Where is X?”) and cross-links in SecurityDomain docs
+- Consider re-exports/aliases only if we can do so without creating confusing “duplicate types”
+
+### C. Codify Model Type Guidelines for Future Sessions
+
+Establish a consistent rule-of-thumb for public model types to improve predictability across modules.
+
+- Small immutable data (≈ ≤16 bytes): `readonly record struct`
+- Larger immutable data: `sealed record`
+- Resource-backed/disposable: `sealed class : IDisposable`
+
+### D. Strengthen “Developer Journey” Docs (1-liner → Session → Manual)
+
+Make common flows explicit for different personas (CLI/PowerShell/API/service devs):
+
+- Provide 3-tier examples for common tasks in README(s): one-liner convenience, session usage, manual connection usage
+- Ensure SecurityDomain has parity with Management in examples and entry points
+
+### E. Promote the “Package Checklist” into an Enforced Template
+
+Turn the future-session checklist into a first-class template for new session packages (PIV/OATH/OTP/OpenPGP/YubiHsm/FIDO):
+
+- Checklist should include: DI factory, `IYubiKeyExtensions`, tests (`WithXxxSessionAsync`), domain models, transport notes
+- Consider a session template document (or generator later) to reduce repeated design churn
+
+### F. Make Transport Requirements More Obvious at API Boundaries
+
+Beyond the transport table, improve “in-the-moment” clarity:
+
+- Add XML docs on session factory parameters describing transport constraints (e.g., SecurityDomain is SmartCard-only)
+- Ensure extension method names and signatures reinforce the expected transport
+
+---
+
 ## Implementation Order
 
 ```

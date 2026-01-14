@@ -40,11 +40,15 @@ namespace Yubico.YubiKey.YubiHsmAuth
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 // Test
+                // host challenge (65 bytes?), public key (65 bytes), card cryptogram (16 bytes) 
+                //Host challenge = context
                 keys = yubiHsmAuthSession.GetEccP256SessionKeys(
                     YhaTestUtilities.DefaultCredLabel,
                     YhaTestUtilities.DefaultCredPassword,
                     YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge);
+                    YhaTestUtilities.DefaultHsmDeviceChallenge,
+                    YhaTestUtilities.DefaultEccP256PublicKey,
+                    YhaTestUtilities.cardCryptoDefault);
             }
 
             // Postconditions
@@ -66,7 +70,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     YhaTestUtilities.DefaultCredLabel,
                     YhaTestUtilities.AlternateCredPassword,
                     YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge);
+                    YhaTestUtilities.DefaultHsmDeviceChallenge,
+                    YhaTestUtilities.DefaultEccP256PublicKey,
+                    YhaTestUtilities.cardCryptoDefault);
 
                 _ = Assert.Throws<SecurityException>(getSessionKeys);
             }
@@ -100,7 +106,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     YhaTestUtilities.AlternateCredLabel,
                     YhaTestUtilities.AlternateCredPassword,
                     YhaTestUtilities.AlternateHostChallenge,
-                    YhaTestUtilities.AlternateHsmDeviceChallenge);
+                    YhaTestUtilities.AlternateHsmDeviceChallenge,
+                    YhaTestUtilities.DefaultEccP256PublicKey,
+                    YhaTestUtilities.cardCryptoDefault);
             }
 
             // Postconditions
@@ -123,7 +131,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     YhaTestUtilities.AlternateCredLabel,
                     YhaTestUtilities.AlternateCredPassword,
                     YhaTestUtilities.AlternateHostChallenge,
-                    YhaTestUtilities.AlternateHsmDeviceChallenge);
+                    YhaTestUtilities.AlternateHsmDeviceChallenge,
+                    YhaTestUtilities.DefaultEccP256PublicKey,
+                    YhaTestUtilities.cardCryptoDefault);
 
                 _ = Assert.Throws<TimeoutException>(getSessionKeys);
             }
@@ -148,7 +158,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     YhaTestUtilities.AlternateCredLabel,
                     YhaTestUtilities.DefaultCredPassword,
                     YhaTestUtilities.DefaultHostChallenge,
-                    YhaTestUtilities.DefaultHsmDeviceChallenge);
+                    YhaTestUtilities.DefaultHsmDeviceChallenge,
+                    YhaTestUtilities.DefaultEccP256PublicKey,
+                    YhaTestUtilities.cardCryptoDefault);
 
                 _ = Assert.Throws<InvalidOperationException>(getSessionKeys);
             }

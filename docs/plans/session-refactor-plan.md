@@ -411,19 +411,23 @@ public async Task GenerateKeyAsync(...)
 
 These items were surfaced by re-reviewing `docs/research/session-api-review-part2.md` after the refactor work and are recommended follow-on improvements for additional DX/value unlock.
 
+**Direction update (greenfield SDK):** prefer **new, typed APIs** as the primary surface area. Introduce the new methods, migrate all internal call sites/tests/docs, and then **delete the old “raw” APIs** once the replacement is complete.
+
 ### A. Add SecurityDomain Domain Models (Reduce Opaque Return Types)
 
-SecurityDomain currently exposes “raw”/opaque structures (e.g., nested dictionaries and raw byte payloads). Add typed models and new overloads returning them (keep existing return types for compatibility).
+SecurityDomain currently exposes “raw”/opaque structures (e.g., nested dictionaries and raw byte payloads). Replace these with typed domain models and **new methods** returning them.
 
 - Introduce types like `KeyInfo`, `CaIdentifier`, `CaIdentifierType` in `Yubico.YubiKit.SecurityDomain`
-- Add convenience overloads (or new methods) that return `IReadOnlyList<KeyInfo>` / `IReadOnlyList<CaIdentifier>`
+- Add **new methods** that return `IReadOnlyList<KeyInfo>` / `IReadOnlyList<CaIdentifier>`
+- Update internal call sites/tests/docs to use the new methods
+- Delete the legacy “raw” methods once migration is complete
 
 ### B. Improve Type Discoverability Across Packages
 
 SecurityDomain relies heavily on Core types (`KeyReference`, `StaticKeys`, `Scp03KeyParameters`, etc.) which live in non-obvious namespaces.
 
 - Add explicit documentation (“Where is X?”) and cross-links in SecurityDomain docs
-- Consider re-exports/aliases only if we can do so without creating confusing “duplicate types”
+- Avoid re-exports/aliases in the library surface area (prefer documentation over duplicate-looking types)
 
 ### C. Codify Model Type Guidelines for Future Sessions
 
@@ -458,21 +462,28 @@ Beyond the transport table, improve “in-the-moment” clarity:
 
 The review noted PowerShell developers struggle with async-only APIs.
 
-- Consider a small PowerShell-friendly wrapper layer (separate repo/package/module) that exposes synchronous cmdlets over async APIs
-- At minimum, add PowerShell-oriented examples in docs (common flows, pipeline-friendly patterns)
+- Do **not** add synchronous wrappers to the core SDK libraries
+- Add PowerShell-oriented examples in docs (common flows, pipeline-friendly patterns)
+- If we want cmdlets, consider a small PowerShell-friendly wrapper layer (separate repo/package/module) that exposes synchronous cmdlets over async APIs
 
 ### H. DI Ergonomics: Reduce Factory Delegate Boilerplate
 
 The plan adds DI factories, but service/API developers often want minimal ceremony.
 
-- Consider registering sessions as scoped services (where feasible) via typed factories (e.g., `IManagementSessionFactory`, `ISecurityDomainSessionFactory`) instead of raw delegates
+- Optional: consider typed factories (e.g., `IManagementSessionFactory`, `ISecurityDomainSessionFactory`) instead of raw delegates **only if** we have real consuming services that benefit
 - Add DI examples showing recommended lifetimes and disposal patterns for ASP.NET Core and background services
 
 ### I. Shared Initialization Template ("InitializeCoreAsync")
 
 Capture a consistent initialization template so future sessions don’t drift.
 
-- Consider adding a protected helper on `ApplicationSession` (or a shared internal helper) to standardize: version detection (if available), protocol configuration, optional SCP wrapping, and state flags (`IsInitialized`, `IsAuthenticated`)
+**Opinion (Lead + Reviewer):** We should **insist on the `ApplicationSession` hierarchy** as the primary session pattern. The SDK is expected to evolve within this hierarchy, and the base class is the most reliable way to enforce consistency across future sessions.
+
+Non-negotiable constraints:
+- **Base owns lifecycle/state:** protocol ownership + disposal lives in `ApplicationSession`. Derived sessions must not break base disposal (e.g., must not null `Protocol` before `base.Dispose()`), and should keep `FirmwareVersion` / `IsInitialized` / `IsAuthenticated` consistent.
+- **Base provides the standard init hook:** add a protected helper (e.g., `InitializeCoreAsync(...)`) in `ApplicationSession` to standardize protocol configuration, optional SCP wrapping, and state flags; derived sessions perform app/transport specifics (e.g., SELECT) and then call the base helper.
+
+(Only reconsider this if we later introduce multiple unrelated session families that cannot share lifecycle/initialization semantics.)
 
 ### J. Test Infrastructure Checklist as First-Class Template
 
@@ -564,22 +575,23 @@ var keyInfo = await yubiKey.GetSecurityDomainKeyInfoAsync();
 
 ## Breaking Changes
 
-### API Changes (Minor)
+### API Changes
 
-1. **Parameter reordering in CreateAsync:**
-   - `loggerFactory` moves from position 3 to position 4 (after `scpKeyParams`)
-   - Named parameters will continue to work
-   - Positional callers need update
+This repository is currently treated as a **greenfield SDK** (no external users yet), so we prefer correcting the API quickly rather than carrying legacy shapes.
 
-2. **New interfaces:**
-   - `IManagementSession` and `ISecurityDomainSession` are additive
-   - Existing code unaffected
+1. **Logging factory threading removed:**
+   - Sessions should not accept a `loggerFactory` parameter for normal operation
+   - Logging is configured globally via `YubiKitLogging.LoggerFactory` (or via DI initialization)
+
+2. **SecurityDomain typed APIs replace raw APIs:**
+   - Introduce new typed domain models + new methods returning them
+   - After migrating call sites/tests/docs, delete the legacy raw-return methods
 
 ### Behavioral Changes
 
-1. **Logging by default:**
-   - Previously: No logging unless `loggerFactory` explicitly passed
-   - Now: No logging by default (same), but can be configured globally via `YubiKitLogging.LoggerFactory`
+1. **Logging remains opt-in:**
+   - Default is still no-op logging unless `YubiKitLogging.LoggerFactory` is configured
+   - Once configured, all sessions/protocols share the same logger factory
 
 ---
 

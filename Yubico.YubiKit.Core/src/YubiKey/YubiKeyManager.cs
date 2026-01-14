@@ -1,4 +1,6 @@
-﻿namespace Yubico.YubiKit.Core.YubiKey;
+﻿using Yubico.YubiKit.Core;
+
+namespace Yubico.YubiKit.Core.YubiKey;
 
 public interface IYubiKeyManager
 {
@@ -8,9 +10,10 @@ public interface IYubiKeyManager
         CancellationToken cancellationToken = default);
 }
 
-public class YubiKeyManager(IDeviceRepository? deviceRepository = null) : IYubiKeyManager
+public class YubiKeyManager(IDeviceRepository? deviceRepository = null, YubiKitLoggingInitializer? _ = null) : IYubiKeyManager
 {
-    #region IYubiKeyManager Members
+    private readonly YubiKitLoggingInitializer? _loggingInitializer = _;
+
 
     public Task<IReadOnlyList<IYubiKey>> FindAllAsync(
         ConnectionType type = ConnectionType.All,
@@ -36,6 +39,4 @@ public class YubiKeyManager(IDeviceRepository? deviceRepository = null) : IYubiK
             return deviceRepository.DeviceChanges;
         }
     }
-
-    #endregion
 }

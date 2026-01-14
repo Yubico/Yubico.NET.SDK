@@ -3,6 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 
 namespace Yubico.YubiKit.Core.Hid;
@@ -34,5 +35,5 @@ public class FidoProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
     /// Creates a factory instance with optional logger factory.
     /// </summary>
     public static FidoProtocolFactory<TConnection> Create(ILoggerFactory? loggerFactory = null) =>
-        new(loggerFactory ?? NullLoggerFactory.Instance);
+        new(loggerFactory ?? YubiKitLogging.LoggerFactory);
 }

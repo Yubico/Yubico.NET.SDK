@@ -12,11 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.SmartCard;
+
 namespace Yubico.YubiKit.Core.YubiKey;
 
 public abstract class ApplicationSession : IApplicationSession
 {
-    #region IApplicationSession Members
+    protected ILogger Logger { get; }
+    protected IProtocol? Protocol { get; set; }
+
+    public FirmwareVersion FirmwareVersion { get; protected set; } = new();
+    public bool IsInitialized { get; protected set; }
+    public bool IsAuthenticated { get; protected set; }
+
+    protected ApplicationSession()
+    {
+        Logger = YubiKitLogging.CreateLogger(GetType().FullName ?? GetType().Name);
+    }
+
+    public bool IsSupported(Feature feature) => FirmwareVersion >= feature.Version;
+
+    public void EnsureSupports(Feature feature)
+    {
+        if (!IsSupported(feature))
+            throw new NotSupportedException($"{feature.Name} requires firmware {feature.Version}+");
+    }
 
     public void Dispose()
     {
@@ -24,20 +46,14 @@ public abstract class ApplicationSession : IApplicationSession
         GC.SuppressFinalize(this);
     }
 
-    #endregion
-
     protected virtual void Dispose(bool disposing)
     {
         if (disposing)
         {
-            // TODO release managed resources here
+            Protocol?.Dispose();
+            Protocol = null;
         }
     }
 }
 
-public interface IApplicationSession : IDisposable
-{
-    // bool IsSupported(Feature feature);
-    // void EnsureSupports(Feature feature);
-    // FirmwareVersion GetVersionAsync { get; }
-}
+

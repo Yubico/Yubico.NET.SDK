@@ -28,8 +28,6 @@ namespace Yubico.YubiKit.Tests.Shared;
 /// </remarks>
 public static class YubiKeyTestStateExtensions
 {
-    #region Nested type: $extension
-
     extension(YubiKeyTestState state)
     {
         /// <summary>
@@ -65,7 +63,7 @@ public static class YubiKeyTestStateExtensions
             ArgumentNullException.ThrowIfNull(action);
 
             using var session = await state.Device
-                .CreateManagementSessionAsync(scpKeyParams, configuration, cancellationToken: cancellationToken)
+                .CreateManagementSessionAsync(configuration, scpKeyParams, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
             await action(session, state.DeviceInfo).ConfigureAwait(false);
         }
@@ -166,6 +164,4 @@ public static class YubiKeyTestStateExtensions
             }, cancellationToken).ConfigureAwait(false);
         }
     }
-
-    #endregion
 }

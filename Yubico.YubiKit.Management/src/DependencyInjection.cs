@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -34,42 +33,36 @@ public delegate Task<ManagementSession> SmartCardManagementSessionFactoryDelegat
 
 public static class DependencyInjection
 {
-    #region Nested type: $extension
-
     extension(IServiceCollection services)
     {
         public IServiceCollection AddYubiKeyManager(Action<YubiKeyManagerOptions>? configureOptions = null)
         {
             services.AddSingleton<ManagementSessionFactoryDelegate>(sp =>
             {
-                var loggerFactory = sp.GetService<ILoggerFactory>();
-                ProtocolConfiguration? protocolConfiguration = new ProtocolConfiguration();
-                try
-                {
-                    protocolConfiguration = sp.GetService<ProtocolConfiguration>(); // TODO solve this properly, null exception for now
-                }
-                catch 
-                {
-                    // Its Ok for now.
-                }
+                var configuration = sp.GetService<ProtocolConfiguration>();
 
                 return (connection, scp, ct) =>
-                    ManagementSession.CreateAsync(connection, protocolConfiguration, loggerFactory, scp, ct);
+                    ManagementSession.CreateAsync(
+                        connection,
+                        configuration: configuration,
+                        scpKeyParams: scp,
+                        cancellationToken: ct);
             });
 
             services.AddSingleton<SmartCardManagementSessionFactoryDelegate>(sp =>
             {
-                var loggerFactory = sp.GetService<ILoggerFactory>();
-                var protocolConfiguration = sp.GetService<ProtocolConfiguration>(); // TODO solve this properly
+                var configuration = sp.GetService<ProtocolConfiguration>();
 
                 return (connection, scp, ct) =>
-                    ManagementSession.CreateAsync(connection, protocolConfiguration, loggerFactory, scp, ct);
+                    ManagementSession.CreateAsync(
+                        connection,
+                        configuration: configuration,
+                        scpKeyParams: scp,
+                        cancellationToken: ct);
             });
 
             services.AddYubiKeyManagerCore(configureOptions);
             return services;
         }
     }
-
-    #endregion
 }

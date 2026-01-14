@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Hid;
@@ -24,7 +23,7 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
 
-public sealed class ManagementSession : ApplicationSession
+public sealed class ManagementSession : ApplicationSession, IManagementSession
 {
     private const int TagMoreDeviceInfo = 0x10;
 
@@ -37,10 +36,8 @@ public sealed class ManagementSession : ApplicationSession
     private static readonly Feature FeatureDeviceReset =
         new("Device Reset", 5, 6, 0);
 
-    private readonly ILogger<ManagementSession> _logger;
+    private readonly ILogger _logger;
     private readonly ScpKeyParameters? _scpKeyParams;
-
-    private bool _isInitialized;
 
     private IProtocol _protocol;
     private IManagementBackend _backend;
@@ -49,34 +46,32 @@ public sealed class ManagementSession : ApplicationSession
 
     private ManagementSession(
         IConnection connection,
-        ILoggerFactory loggerFactory,
+        ProtocolConfiguration? configuration = null,
         ScpKeyParameters? scpKeyParams = null)
     {
         _scpKeyParams = scpKeyParams;
-        _logger = loggerFactory.CreateLogger<ManagementSession>();
+        _logger = Logger;
 
         (_protocol, _backend) = connection switch
         {
-            ISmartCardConnection sc => CreateSmartCardBackend(sc, loggerFactory),
-            IFidoConnection fido => CreateFidoBackend(fido, loggerFactory),
+            ISmartCardConnection sc => CreateSmartCardBackend(sc),
+            IFidoConnection fido => CreateFidoBackend(fido),
             _ => throw new NotSupportedException(
                 $"The connection type {connection.GetType().Name} is not supported by ManagementSession. " +
                 $"Supported types: ISmartCardConnection, IFidoConnection.")
         };
+
+        Protocol = _protocol;
     }
 
     public static async Task<ManagementSession> CreateAsync(
         IConnection connection,
         ProtocolConfiguration? configuration = null,
-        ILoggerFactory? loggerFactory = null,
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
-        loggerFactory ??= NullLoggerFactory.Instance;
-
-        var session = new ManagementSession(connection, loggerFactory, scpKeyParams);
+        var session = new ManagementSession(connection, configuration, scpKeyParams);
         await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
-
         return session;
     }
 
@@ -84,10 +79,12 @@ public sealed class ManagementSession : ApplicationSession
         ProtocolConfiguration? configuration,
         CancellationToken cancellationToken = default)
     {
-        if (_isInitialized)
+        if (IsInitialized)
             return;
 
         _version = await GetVersionAsync(cancellationToken).ConfigureAwait(false);
+        FirmwareVersion = _version;
+
         _protocol.Configure(_version, configuration);
 
         // Initialize SCP if key parameters were provided
@@ -97,11 +94,17 @@ public sealed class ManagementSession : ApplicationSession
                 .WithScpAsync(_scpKeyParams, cancellationToken)
                 .ConfigureAwait(false);
 
+            IsAuthenticated = true;
+
             // Recreate backend with SCP-wrapped protocol
-            _backend = new SmartCardBackend(_protocol as ISmartCardProtocol ?? throw new InvalidOperationException(), _version ?? new FirmwareVersion());
+            _backend = new SmartCardBackend(
+                _protocol as ISmartCardProtocol ?? throw new InvalidOperationException(),
+                _version ?? new FirmwareVersion());
+
+            Protocol = _protocol;
         }
 
-        _isInitialized = true;
+        IsInitialized = true;
         _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
 
@@ -203,11 +206,10 @@ public sealed class ManagementSession : ApplicationSession
     }
 
     private static (IProtocol protocol, IManagementBackend backend) CreateSmartCardBackend(
-        ISmartCardConnection connection,
-        ILoggerFactory loggerFactory)
+        ISmartCardConnection connection)
     {
         var protocol = PcscProtocolFactory<ISmartCardConnection>
-            .Create(loggerFactory)
+            .Create()
             .Create(connection);
         
         var backend = new SmartCardBackend(protocol as ISmartCardProtocol ?? throw new InvalidOperationException(), new FirmwareVersion());
@@ -215,40 +217,14 @@ public sealed class ManagementSession : ApplicationSession
     }
 
     private static (IProtocol protocol, IManagementBackend backend) CreateFidoBackend(
-        IFidoConnection connection,
-        ILoggerFactory loggerFactory)
+        IFidoConnection connection)
     {
         var protocol = FidoProtocolFactory<IFidoConnection>
-            .Create(loggerFactory)
+            .Create()
             .Create(connection);
         
         var backend = new FidoBackend(protocol as IFidoProtocol ?? throw new InvalidOperationException(), new FirmwareVersion());
         return (protocol, backend);
     }
 
-    private void EnsureSupports(Feature feature)
-    {
-        if (!IsSupported(feature)) throw new NotSupportedException($"{feature.Name} is not supported on this YubiKey.");
-    }
-
-    private bool IsSupported(Feature feature)
-    {
-        if (!_isInitialized)
-            throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
-
-        if (_version is null)
-            return false;
-
-        return _version >= feature.Version;
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _protocol?.Dispose();
-        }
-
-        base.Dispose(disposing);
-    }
 }

@@ -184,24 +184,32 @@ The module uses a two-phase initialization:
 // Phase 1: Constructor (private)
 private SecurityDomainSession(
     ISmartCardConnection connection,
-    ILoggerFactory loggerFactory,
     ScpKeyParameters? scpKeyParams = null)
 
 // Phase 2: Async initialization
 private async Task InitializeAsync(
+    FirmwareVersion? firmwareVersion = null,
     ProtocolConfiguration? configuration = null,
     CancellationToken cancellationToken = default)
 {
-    // 1. Select SD application
-    await baseProtocol.SelectAsync(ApplicationIds.SecurityDomain, cancellationToken);
-    
-    // 2. Configure protocol
-    baseProtocol.Configure(FirmwareVersion.V5_3_0, configuration);
-    
+    // 1. Create protocol (uses global YubiKit logging)
+    Protocol = PcscProtocolFactory<ISmartCardConnection>
+        .Create()
+        .Create(connection);
+
+    // 2. Select SD application + configure protocol
+    firmwareVersion ??= FirmwareVersion.V5_3_0;
+    await Protocol.SelectAsync(ApplicationIds.SecurityDomain, cancellationToken);
+    Protocol.Configure(firmwareVersion, configuration);
+
     // 3. Establish SCP if keys provided
-    _protocol = _scpKeyParams is not null
-        ? await baseProtocol.WithScpAsync(_scpKeyParams, cancellationToken)
-        : baseProtocol;
+    if (scpKeyParams is not null && Protocol is ISmartCardProtocol sc)
+    {
+        Protocol = await sc.WithScpAsync(scpKeyParams, cancellationToken);
+        IsAuthenticated = true;
+    }
+
+    IsInitialized = true;
 }
 ```
 

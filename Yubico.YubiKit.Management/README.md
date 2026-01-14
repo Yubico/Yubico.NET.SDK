@@ -20,6 +20,34 @@ The Management application is the primary interface for configuring and managing
 - **Advanced Features**: YubiKey 5.0+ for full configuration options
 - **Device Reset**: YubiKey 5.6+ required
 
+## Usage Example
+
+```csharp
+using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Core.YubiKey;
+
+IYubiKey yubiKey = ...;
+using var mgmtSession = await yubiKey.CreateManagementSessionAsync();
+DeviceInfo info = await mgmtSession.GetDeviceInfoAsync();
+Console.WriteLine($"Serial: {info.SerialNumber}, Firmware: {info.FirmwareVersion}");
+```
+
+## Logging
+
+This SDK uses `Microsoft.Extensions.Logging`. To enable logs, set the global logger factory once at startup:
+
+```csharp
+using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core;
+
+YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
+{
+    builder.AddConsole();
+    builder.SetMinimumLevel(LogLevel.Information);
+});
+```
+
+
 ## Key Concepts
 
 ### Device Capabilities

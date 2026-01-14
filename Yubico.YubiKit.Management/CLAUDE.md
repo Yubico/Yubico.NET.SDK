@@ -217,9 +217,8 @@ await mgmt.SetDeviceConfigAsync(config, reboot, lockCode, null, cancellationToke
 ```csharp
 // Manual session management for multiple operations
 using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
-    scpKeyParams: Scp03KeyParameters.Default,  // Optional SCP
     configuration: customProtocolConfig,       // Optional protocol config
-    loggerFactory: loggerFactory,             // Optional logging
+    scpKeyParams: Scp03KeyParameters.Default,  // Optional SCP
     cancellationToken: cancellationToken);
 
 // Multiple operations in same session
@@ -238,7 +237,7 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
 
 **Tradeoffs:**
 - ✅ Reuse session for multiple operations (more efficient)
-- ✅ Full control over SCP, protocol configuration, logging
+- ✅ Full control over SCP and protocol configuration
 - ✅ Batch operations with consistent state
 - ❌ Must manage session disposal (use `using` statement)
 - ❌ More verbose code
@@ -253,7 +252,7 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
 | Query + config change | `CreateManagementSessionAsync()` | Need both in same session |
 | SCP authentication required | `CreateManagementSessionAsync()` | Need to pass `scpKeyParams` |
 | Custom protocol configuration | `CreateManagementSessionAsync()` | Need `configuration` parameter |
-| Need logging | `CreateManagementSessionAsync()` | Need `loggerFactory` parameter |
+| Need logging | Any | Configure `YubiKitLogging.LoggerFactory` (or DI) once at startup |
 | Testing (YubiKeyTestState) | `state.WithManagementAsync()` | Test helper, automatic cleanup |
 
 ### Common Anti-Patterns
@@ -735,16 +734,13 @@ public async Task ResetDeviceAsync(CancellationToken cancellationToken = default
 public static async Task<ManagementSession> CreateAsync(
     IConnection connection,
     ProtocolConfiguration? configuration = null,
-    ILoggerFactory? loggerFactory = null,
     ScpKeyParameters? scpKeyParams = null,
     CancellationToken cancellationToken = default)
 {
-    loggerFactory ??= NullLoggerFactory.Instance;
-    
     // Two-phase initialization
-    var session = new ManagementSession(connection, loggerFactory, scpKeyParams);
+    var session = new ManagementSession(connection, configuration, scpKeyParams);
     await session.InitializeAsync(configuration, cancellationToken);
-    
+
     return session;
 }
 
@@ -753,19 +749,19 @@ private async Task InitializeAsync(
     CancellationToken cancellationToken)
 {
     // 1. Get firmware version (needed for feature detection)
-    _version = await GetVersionAsync(cancellationToken);
-    
+    FirmwareVersion = await GetVersionAsync(cancellationToken);
+
     // 2. Configure protocol with version info
-    _protocol.Configure(_version, configuration);
-    
-    // 3. Optionally establish SCP and recreate backend
-    if (_scpKeyParams is not null && _protocol is ISmartCardProtocol sc)
+    Protocol!.Configure(FirmwareVersion, configuration);
+
+    // 3. Optionally establish SCP
+    if (_scpKeyParams is not null && Protocol is ISmartCardProtocol sc)
     {
-        _protocol = await sc.WithScpAsync(_scpKeyParams, cancellationToken);
-        _backend = new SmartCardBackend(_protocol as ISmartCardProtocol, _version);
+        Protocol = await sc.WithScpAsync(_scpKeyParams, cancellationToken);
+        IsAuthenticated = true;
     }
-    
-    _isInitialized = true;
+
+    IsInitialized = true;
 }
 ```
 
@@ -859,9 +855,10 @@ var loggerFactory = LoggerFactory.Create(builder =>
     builder.AddConsole();
 });
 
+YubiKitLogging.LoggerFactory = loggerFactory;
+
 using var mgmt = await ManagementSession.CreateAsync(
-    connection,
-    loggerFactory: loggerFactory);
+    connection);
 ```
 
 ### Device Enumeration

@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Yubico.YubiKit.Core;
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
@@ -41,5 +42,5 @@ public class PcscProtocolFactory<TConnection>(ILoggerFactory loggerFactory)
     #endregion
 
     public static PcscProtocolFactory<TConnection> Create(ILoggerFactory? loggerFactory = null) =>
-        new(loggerFactory ?? NullLoggerFactory.Instance);
+        new(loggerFactory ?? YubiKitLogging.LoggerFactory);
 }

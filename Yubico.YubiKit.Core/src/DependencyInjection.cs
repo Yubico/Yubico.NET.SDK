@@ -21,15 +21,14 @@ namespace Yubico.YubiKit.Core;
 
 public static class DependencyInjection
 {
-    #region Nested type: <extension>
-
     extension(IServiceCollection services)
     {
         public IServiceCollection AddYubiKeyManagerCore(Action<YubiKeyManagerOptions>? configureOptions = null)
         {
             if (configureOptions != null) services.Configure(configureOptions);
 
-            services.AddTransient<IYubiKeyManager, YubiKeyManager>()
+            services.AddSingleton<YubiKitLoggingInitializer>()
+                .AddTransient<IYubiKeyManager, YubiKeyManager>()
                 .AddTransient<IYubiKeyFactory, YubiKeyFactory>()
                 .AddTransient<IFindYubiKeys, FindYubiKeys>()
                 .AddTransient<ISmartCardConnectionFactory, SmartCardConnectionFactory>()
@@ -50,6 +49,4 @@ public static class DependencyInjection
                 .AddSingleton<DeviceMonitorService>()
                 .AddHostedService<DeviceMonitorService>(sp => sp.GetRequiredService<DeviceMonitorService>());
     }
-
-    #endregion
 }

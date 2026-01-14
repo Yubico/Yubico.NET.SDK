@@ -32,8 +32,15 @@ namespace Yubico.YubiKit.SecurityDomain;
 ///     Provides lifecycle management for SCP (Secure Channel Protocol) sessions and will
 ///     eventually expose key and data management operations.
 /// </summary>
-public sealed class SecurityDomainSession : ApplicationSession
+public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainSession
 {
+    // Feature detection constants
+    public static readonly Feature FeatureSecurityDomain = new("Security Domain", 5, 3, 0);
+    public static readonly Feature FeatureScp03 = new("SCP03", 5, 3, 0);
+    public static readonly Feature FeatureScp11 = new("SCP11", 5, 7, 2);
+    public static readonly Feature FeatureKeyAttestation = new("Key Attestation", 5, 7, 0);
+    public static readonly Feature FeatureAllowList = new("Allow List", 5, 7, 0);
+
     private const byte ClaGlobalPlatform = 0x80;
     private const byte InsGetData = 0xCA;
     private const byte InsPutKey = 0xD8;
@@ -71,13 +78,10 @@ public sealed class SecurityDomainSession : ApplicationSession
     private const int ResetAttemptLimit = 65;
     private static readonly byte[] ResetAttemptPayload = new byte[8];
     private readonly ISmartCardConnection _connection;
-    private readonly ILogger<SecurityDomainSession> _logger;
-    private readonly ILoggerFactory _loggerFactory;
+    private readonly ILogger _logger;
+
     private readonly ScpKeyParameters? _scpKeyParams;
-    private ISmartCardProtocol? _baseProtocol;
-    private bool _isInitialized;
     private ISmartCardProtocol? _protocol;
-    public bool IsAuthenticated { get; private set; }
 
     /// <summary>
     ///     Entry point for interacting with the YubiKey Security Domain application.
@@ -86,12 +90,10 @@ public sealed class SecurityDomainSession : ApplicationSession
     /// </summary>
     private SecurityDomainSession(
         ISmartCardConnection connection,
-        ILoggerFactory loggerFactory,
         ScpKeyParameters? scpKeyParams = null)
     {
         _connection = connection;
-        _loggerFactory = loggerFactory;
-        _logger = loggerFactory.CreateLogger<SecurityDomainSession>();
+        _logger = Logger;
         _scpKeyParams = scpKeyParams;
     }
 
@@ -116,14 +118,12 @@ public sealed class SecurityDomainSession : ApplicationSession
     public static async Task<SecurityDomainSession> CreateAsync(
         ISmartCardConnection connection,
         ProtocolConfiguration? configuration = null,
-        ILoggerFactory? loggerFactory = null,
         ScpKeyParameters? scpKeyParams = null,
+        FirmwareVersion? firmwareVersion = null,
         CancellationToken cancellationToken = default)
     {
-        loggerFactory ??= NullLoggerFactory.Instance;
-        var session = new SecurityDomainSession(connection, loggerFactory, scpKeyParams);
-
-        await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+        var session = new SecurityDomainSession(connection, scpKeyParams);
+        await session.InitializeAsync(configuration, firmwareVersion, cancellationToken).ConfigureAwait(false);
         return session;
     }
 
@@ -131,37 +131,41 @@ public sealed class SecurityDomainSession : ApplicationSession
     ///     Ensures the Security Domain application is selected and secure messaging is configured if requested.
     /// </summary>
     /// <param name="configuration"></param>
+    /// <param name="firmwareVersion">Optional firmware version used to configure the protocol.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration = null,
+        FirmwareVersion? firmwareVersion = null,
         CancellationToken cancellationToken = default)
     {
-        if (_isInitialized)
+        if (IsInitialized)
             return;
 
-        var smartCardProtocol = EnsureBaseProtocol();
+        var smartCardProtocol = PcscProtocolFactory<ISmartCardConnection>
+            .Create()
+            .Create(_connection);
         await smartCardProtocol
             .SelectAsync(ApplicationIds.SecurityDomain, cancellationToken)
             .ConfigureAwait(false);
 
         // Security Domain is available on firmware 5.3.0 and newer.
-        smartCardProtocol.Configure(FirmwareVersion.V5_3_0,
-            configuration); // TODO detect actual version from Management???
+        // If the caller already knows the firmware, they can provide it to avoid hardcoding.
+        FirmwareVersion = firmwareVersion ?? FirmwareVersion.V5_3_0;
+        smartCardProtocol.Configure(FirmwareVersion, configuration);
 
         if (_scpKeyParams is not null)
         {
-            var smartCardProtocolScp =
-                await smartCardProtocol.WithScpAsync(_scpKeyParams, cancellationToken).ConfigureAwait(false);
+            _protocol = await smartCardProtocol.WithScpAsync(_scpKeyParams, cancellationToken)
+                .ConfigureAwait(false);
             IsAuthenticated = true;
-            _protocol = smartCardProtocolScp;
         }
         else
         {
             _protocol = smartCardProtocol;
         }
 
-        // _protocol.Configure(FirmwareVersion.V5_3_0, configuration);
-        _isInitialized = true;
+        Protocol = _protocol;
+        IsInitialized = true;
     }
 
     /// <summary>
@@ -253,7 +257,7 @@ public sealed class SecurityDomainSession : ApplicationSession
     public async Task<ReadOnlyMemory<byte>> GetCardRecognitionDataAsync(
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Getting card recognition data");
+        _logger.LogDebug("Getting card recognition data");
 
         var response = await GetDataAsync(TagCardData, cancellationToken: cancellationToken).ConfigureAwait(false);
         var cardRecognitionData = TlvHelper.GetValue(TagCardRecognitionData, response.Span);
@@ -343,7 +347,7 @@ public sealed class SecurityDomainSession : ApplicationSession
             caTlvObjects = caTlvObjects[2..];
         }
 
-        _logger.LogInformation("CA identifiers retrieved");
+        _logger.LogDebug("CA identifiers retrieved");
         return caIdentifiers;
     }
 
@@ -531,6 +535,8 @@ public sealed class SecurityDomainSession : ApplicationSession
         byte replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
+        EnsureSupports(FeatureScp11);
+
         if (replaceKvn == 0)
             _logger.LogDebug("Generating EC key for {KeyRef}", keyReference);
         else
@@ -838,7 +844,9 @@ public sealed class SecurityDomainSession : ApplicationSession
         _logger.LogInformation("Security Domain reset complete; reinitializing session");
 
         _protocol = null;
-        _isInitialized = false;
+        Protocol = null;
+        IsAuthenticated = false;
+        IsInitialized = false;
 
         await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
     }
@@ -908,25 +916,14 @@ public sealed class SecurityDomainSession : ApplicationSession
         return TlvHelper.EncodeDictionary(dict);
     }
 
-    private ISmartCardProtocol EnsureBaseProtocol()
-    {
-        if (_baseProtocol is not null) // Already initialized
-            return _baseProtocol;
-
-        var smartCardProtocol = PcscProtocolFactory<ISmartCardConnection> // TODO static dependency. Good bad?
-            .Create(_loggerFactory)
-            .Create(_connection);
-
-        _baseProtocol = smartCardProtocol;
-        return _baseProtocol;
-    }
 
     private void EnsureInitializedProtocol()
     {
-        if (!_isInitialized)
+        if (!IsInitialized)
             throw new InvalidOperationException("Session not initialized. Call InitializeAsync first.");
 
-        if (_protocol is null) throw new InvalidOperationException("Security Domain protocol not available.");
+        if (_protocol is null)
+            throw new InvalidOperationException("Security Domain protocol not available.");
     }
 
     private async Task<ReadOnlyMemory<byte>> TransmitAndGetResponseDataAsync(
@@ -1173,11 +1170,10 @@ public sealed class SecurityDomainSession : ApplicationSession
     {
         if (!disposing) return;
 
-        _protocol?.Dispose();
         _protocol = null;
-        _baseProtocol?.Dispose();
-        _baseProtocol = null;
-        _isInitialized = false;
+        Protocol = null;
+        IsAuthenticated = false;
+        IsInitialized = false;
 
         base.Dispose(disposing);
     }

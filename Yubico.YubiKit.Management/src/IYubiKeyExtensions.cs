@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
@@ -30,8 +29,6 @@ namespace Yubico.YubiKit.Management;
 /// </remarks>
 public static class IYubiKeyExtensions
 {
-    #region Nested type: $extension
-
     extension(IYubiKey yubiKey)
     {
         /// <summary>
@@ -93,7 +90,6 @@ public static class IYubiKeyExtensions
         ///     a secure session with the YubiKey device.
         /// </param>
         /// <param name="configuration"></param>
-        /// <param name="loggerFactory">Optional logger factory used to create loggers for the session and protocol.</param>
         /// <param name="cancellationToken">
         ///     An optional token to cancel the operation.
         /// </param>
@@ -102,16 +98,17 @@ public static class IYubiKeyExtensions
         ///     The session must be disposed by the caller when no longer needed.
         /// </returns>
         public async Task<ManagementSession> CreateManagementSessionAsync(
-            ScpKeyParameters? scpKeyParams = null,
             ProtocolConfiguration? configuration = null,
-            ILoggerFactory? loggerFactory = null,
+            ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {
             var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken).ConfigureAwait(false);
-            return await ManagementSession.CreateAsync(connection, configuration, loggerFactory, scpKeyParams,
-                cancellationToken).ConfigureAwait(false);
+            return await ManagementSession.CreateAsync(
+                    connection,
+                    configuration,
+                    scpKeyParams,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
         }
     }
-
-    #endregion
 }

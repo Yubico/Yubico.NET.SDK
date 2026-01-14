@@ -224,7 +224,7 @@ public readonly record struct DeviceInfo
     }
 }
 
-public static class CapabilityMapper // TODO internal
+internal static class CapabilityMapper
 {
     private static readonly (int Bit, DeviceCapabilities Cap)[] FipsMapping =
     [

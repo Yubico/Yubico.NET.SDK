@@ -18,6 +18,33 @@ The Security Domain is the root security application on YubiKey firmware 5.3.0 a
 - **SCP03**: Available on YubiKey 5.3.0+
 - **SCP11**: Available on YubiKey 5.7.2+
 
+## Usage Example
+
+```csharp
+using Yubico.YubiKit.SecurityDomain;
+using Yubico.YubiKit.Core.YubiKey;
+
+IYubiKey yubiKey = ...;
+using var sdSession = await yubiKey.CreateSecurityDomainSessionAsync();
+// Use sdSession for SCP key management, etc.
+```
+
+## Logging
+
+This SDK uses `Microsoft.Extensions.Logging`. To enable logs, set the global logger factory once at startup:
+
+```csharp
+using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core;
+
+YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
+{
+    builder.AddConsole();
+    builder.SetMinimumLevel(LogLevel.Information);
+});
+```
+
+
 ## Key Concepts
 
 ### SCP Protocols
@@ -52,6 +79,9 @@ using Yubico.YubiKit.SecurityDomain;
 using var session = await SecurityDomainSession.CreateAsync(
     connection,
     cancellationToken: cancellationToken);
+
+// If you already know the device firmware version, you can optionally pass it via
+// the `firmwareVersion` parameter to avoid hardcoding defaults.
 
 // With SCP03 authentication
 using var scpParams = Scp03KeyParameters.Default;
@@ -158,6 +188,7 @@ using var session = await SecurityDomainSession.CreateAsync(
 // Create session without authentication
 using var session = await SecurityDomainSession.CreateAsync(
     connection,
+    firmwareVersion: null,
     cancellationToken: cancellationToken);
 
 // Block all keys and restore defaults

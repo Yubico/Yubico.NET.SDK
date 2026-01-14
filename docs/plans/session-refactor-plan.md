@@ -454,6 +454,32 @@ Beyond the transport table, improve “in-the-moment” clarity:
 - Add XML docs on session factory parameters describing transport constraints (e.g., SecurityDomain is SmartCard-only)
 - Ensure extension method names and signatures reinforce the expected transport
 
+### G. PowerShell Persona: Reduce Async-Only Friction
+
+The review noted PowerShell developers struggle with async-only APIs.
+
+- Consider a small PowerShell-friendly wrapper layer (separate repo/package/module) that exposes synchronous cmdlets over async APIs
+- At minimum, add PowerShell-oriented examples in docs (common flows, pipeline-friendly patterns)
+
+### H. DI Ergonomics: Reduce Factory Delegate Boilerplate
+
+The plan adds DI factories, but service/API developers often want minimal ceremony.
+
+- Consider registering sessions as scoped services (where feasible) via typed factories (e.g., `IManagementSessionFactory`, `ISecurityDomainSessionFactory`) instead of raw delegates
+- Add DI examples showing recommended lifetimes and disposal patterns for ASP.NET Core and background services
+
+### I. Shared Initialization Template ("InitializeCoreAsync")
+
+Capture a consistent initialization template so future sessions don’t drift.
+
+- Consider adding a protected helper on `ApplicationSession` (or a shared internal helper) to standardize: version detection (if available), protocol configuration, optional SCP wrapping, and state flags (`IsInitialized`, `IsAuthenticated`)
+
+### J. Test Infrastructure Checklist as First-Class Template
+
+Make the “how we test sessions” pattern explicit for future modules.
+
+- Promote a short checklist (or section) for: `WithXxxSessionAsync` helpers, session factories for tests, optional `XxxTestState` reset/state helpers, and integration test conventions
+
 ---
 
 ## Implementation Order

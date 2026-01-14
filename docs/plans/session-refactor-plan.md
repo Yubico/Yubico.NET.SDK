@@ -481,7 +481,21 @@ Capture a consistent initialization template so future sessions don’t drift.
 
 Non-negotiable constraints:
 - **Base owns lifecycle/state:** protocol ownership + disposal lives in `ApplicationSession`. Derived sessions must not break base disposal (e.g., must not null `Protocol` before `base.Dispose()`), and should keep `FirmwareVersion` / `IsInitialized` / `IsAuthenticated` consistent.
-- **Base provides the standard init hook:** add a protected helper (e.g., `InitializeCoreAsync(...)`) in `ApplicationSession` to standardize protocol configuration, optional SCP wrapping, and state flags; derived sessions perform app/transport specifics (e.g., SELECT) and then call the base helper.
+- **Base provides the standard init hook:** add a protected helper (e.g., `InitializeCoreAsync(...)`) in `ApplicationSession` to standardize protocol configuration, optional SCP wrapping, and state flags.
+
+Recommended ordering (enforce in code reviews):
+1. **Derived session creates protocol** (transport-specific)
+2. **Derived session performs app/transport specifics** (e.g., SELECT, app discovery)
+3. **Derived session determines firmware version** (from caller input or detection)
+4. **Derived session calls `InitializeCoreAsync(...)`** to:
+   - assign `Protocol`
+   - `Protocol.Configure(firmwareVersion, configuration)`
+   - optionally wrap SCP and set `IsAuthenticated`
+   - set `FirmwareVersion` and `IsInitialized` on successful completion
+
+Additional requirements:
+- `InitializeCoreAsync(...)` should be **idempotent** (safe to call multiple times; no-op if already initialized).
+- `InitializeCoreAsync(...)` should **not** swallow exceptions; it should only mutate session state on success.
 
 (Only reconsider this if we later introduce multiple unrelated session families that cannot share lifecycle/initialization semantics.)
 

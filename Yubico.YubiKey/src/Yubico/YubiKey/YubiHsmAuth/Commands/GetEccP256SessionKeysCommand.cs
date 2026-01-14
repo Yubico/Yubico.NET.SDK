@@ -200,14 +200,12 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             tlvWriter.WriteValue(DataTagConstants.Context, context);
 
             // Add the device's public key (65 bytes for P-256 uncompressed)
-            // This step fails as only the tag is known, not the value of _cardPublicKey
             if (_cardPublicKey.Length > 0)
             {
                 tlvWriter.WriteValue(DataTagConstants.PubKey, _cardPublicKey.Span);
             }
 
-            // Add the device's crypto response (typically 8 bytes)
-            // This step fails as only the tag is known, not the value of _cardCrypto
+            // Add the device's crypto response (16 bytes)
             if (_cardCrypto.Length > 0)
             {
                 tlvWriter.WriteValue(DataTagConstants.Response, _cardCrypto.Span);

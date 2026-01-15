@@ -1,6 +1,4 @@
-﻿using Yubico.YubiKit.Core;
-
-namespace Yubico.YubiKit.Core.YubiKey;
+﻿namespace Yubico.YubiKit.Core.YubiKey;
 
 public interface IYubiKeyManager
 {
@@ -12,7 +10,7 @@ public interface IYubiKeyManager
 
 public class YubiKeyManager(IDeviceRepository? deviceRepository = null, YubiKitLoggingInitializer? _ = null) : IYubiKeyManager
 {
-    private readonly YubiKitLoggingInitializer? _loggingInitializer = _;
+    private readonly YubiKitLoggingInitializer? _loggingInitializer = _; // TODO what?
 
 
     public Task<IReadOnlyList<IYubiKey>> FindAllAsync(

@@ -40,10 +40,7 @@ namespace Yubico.YubiKit.Core.Cryptography
             int fromInclusive,
             int toExclusive)
         {
-            if (rng is null)
-            {
-                throw new ArgumentNullException(nameof(rng));
-            }
+            ArgumentNullException.ThrowIfNull(rng);
             if (fromInclusive >= toExclusive)
             {
                 throw new ArithmeticException(string.Format(

@@ -14,7 +14,6 @@
 
 using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
-using Xunit;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Hid;
 

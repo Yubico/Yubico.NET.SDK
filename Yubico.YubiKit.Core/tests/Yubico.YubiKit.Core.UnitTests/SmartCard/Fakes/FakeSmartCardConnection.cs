@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.UnitTests.SmartCard.Fakes;
 

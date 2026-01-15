@@ -6,7 +6,7 @@ This file provides Claude-specific guidance for the Security Domain test infrast
 
 ### Location
 
-`IntegrationTests/TestExtensions/SecurityDomainTestStateExtensions.cs`
+`IntegrationTests/TestExtensions/TestStateExtensions.cs`
 
 ### Two Session Creation Patterns
 
@@ -91,7 +91,7 @@ Both extensions use `SharedSmartCardConnection` to share a single physical conne
 - SCP authentication (no hardware)
 - Protocol communication
 
-### Integration Tests (SecurityDomainDependencyInjectionTests.cs)
+### Integration Tests (SecurityDomainSession_DependencyInjectionTests.cs)
 
 **What they test:**
 - End-to-end: DI container → Factory resolution → Session creation → Query

@@ -80,6 +80,8 @@ public async Task DIFactory_Test(YubiKeyTestState state) =>
 
 ## Test Extensions
 
+Implementation lives in `Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs`.
+
 ### WithSecurityDomainSessionAsync
 
 Creates a session directly via `Device.CreateSecurityDomainSessionAsync()`.

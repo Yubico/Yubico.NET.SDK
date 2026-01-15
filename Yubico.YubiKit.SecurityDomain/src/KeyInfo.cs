@@ -18,6 +18,6 @@ namespace Yubico.YubiKit.SecurityDomain;
 
 public readonly record struct SecurityDomainKeyInfoComponent(byte Tag, byte Value);
 
-public sealed record SecurityDomainKeyInfo(
+public sealed record KeyInfo(
     KeyReference KeyReference,
     IReadOnlyList<SecurityDomainKeyInfoComponent> Components);

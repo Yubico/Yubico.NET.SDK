@@ -16,4 +16,4 @@ using Yubico.YubiKit.Core.SmartCard.Scp;
 
 namespace Yubico.YubiKit.SecurityDomain;
 
-public sealed record SecurityDomainCaIdentifier(KeyReference KeyReference, ReadOnlyMemory<byte> Identifier);
+public sealed record CaIdentifier(KeyReference KeyReference, ReadOnlyMemory<byte> Identifier);

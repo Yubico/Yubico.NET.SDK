@@ -213,16 +213,16 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     Retrieves key metadata exposed by the Security Domain via the key information data object.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public async Task<IReadOnlyList<SecurityDomainKeyInfo>> GetKeyInfoAsync(
+    public async Task<IReadOnlyList<KeyInfo>> GetKeyInfoAsync(
         CancellationToken cancellationToken = default)
     {
         var response = await GetDataAsync(TagKeyInformationTemplate, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         if (response.IsEmpty)
-            return Array.Empty<SecurityDomainKeyInfo>();
+            return Array.Empty<KeyInfo>();
 
-        var keyInformation = new List<SecurityDomainKeyInfo>();
+        var keyInformation = new List<KeyInfo>();
 
         using var tlvList = TlvHelper.DecodeList(response.Span);
         foreach (var tlv in tlvList)
@@ -243,7 +243,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
                 currentValue = currentValue[2..];
             }
 
-            keyInformation.Add(new SecurityDomainKeyInfo(keyRef, components));
+            keyInformation.Add(new KeyInfo(keyRef, components));
         }
 
         return keyInformation;
@@ -301,7 +301,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <param name="includeKloc">Whether to include Key Loading OCE Certificate identifiers.</param>
     /// <param name="includeKlcc">Whether to include Key Loading Card Certificate identifiers.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public async Task<IReadOnlyList<SecurityDomainCaIdentifier>> GetCaIdentifiersAsync(
+    public async Task<IReadOnlyList<CaIdentifier>> GetCaIdentifiersAsync(
         bool includeKloc,
         bool includeKlcc,
         CancellationToken cancellationToken = default)
@@ -334,7 +334,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             {
             }
 
-        var caIdentifiers = new List<SecurityDomainCaIdentifier>();
+        var caIdentifiers = new List<CaIdentifier>();
         var caTlvObjects = TlvHelper.DecodeList(arrayBufferWriter.WrittenSpan).AsSpan();
         while (!caTlvObjects.IsEmpty)
         {
@@ -343,7 +343,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
             var keyReferenceData = keyReferenceTlv.AsSpan();
             var keyReference = new KeyReference(keyReferenceData[0], keyReferenceData[1]);
-            caIdentifiers.Add(new SecurityDomainCaIdentifier(keyReference, caIdentifierTlv.Value.ToArray()));
+            caIdentifiers.Add(new CaIdentifier(keyReference, caIdentifierTlv.Value.ToArray()));
 
             caTlvObjects = caTlvObjects[2..];
         }

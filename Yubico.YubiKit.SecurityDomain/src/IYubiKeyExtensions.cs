@@ -87,7 +87,7 @@ public static class IYubiKeyExtensions
         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel authentication.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A list of key information from the Security Domain.</returns>
-        public async Task<IReadOnlyList<SecurityDomainKeyInfo>> GetSecurityDomainKeyInfoAsync(
+        public async Task<IReadOnlyList<KeyInfo>> GetSecurityDomainKeyInfoAsync(
             ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {

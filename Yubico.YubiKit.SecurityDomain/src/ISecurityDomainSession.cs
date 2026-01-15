@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.SecurityDomain;
 
 public interface ISecurityDomainSession : IApplicationSession
 {
-    Task<IReadOnlyList<SecurityDomainKeyInfo>> GetKeyInfoAsync(
+    Task<IReadOnlyList<KeyInfo>> GetKeyInfoAsync(
         CancellationToken cancellationToken = default);
 
     Task PutKeyAsync(

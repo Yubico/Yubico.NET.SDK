@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <InvariantGlobalization>true</InvariantGlobalization>
     <PublishAot>true</PublishAot>
     <RootNamespace>TestProject</RootNamespace>
@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Yubico.YubiKit.Management\Yubico.YubiKit.Management.csproj"/>
+    <ProjectReference Include="..\Yubico.YubiKit.Management\src\Yubico.YubiKit.Management.csproj"/>
   </ItemGroup>
 
 </Project>

@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
+using Yubico.YubiKit.SecurityDomain.IntegrationTests.Helpers;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
@@ -24,7 +25,7 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 ///     Extensions that help integration tests acquire <see cref="SecurityDomainSession" />
 ///     instances while ensuring connections are disposed correctly.
 /// </summary>
-public static class SecurityDomainTestStateExtensions
+public static class TestStateExtensions
 {
     #region Nested type: $extension
 

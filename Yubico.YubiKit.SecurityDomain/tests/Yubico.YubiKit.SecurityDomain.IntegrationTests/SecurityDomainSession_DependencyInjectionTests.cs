@@ -31,7 +31,7 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 ///     <c>Yubico.YubiKit.SecurityDomain.UnitTests.DependencyInjectionTests</c> which only
 ///     test registration mechanics without invoking the factory.
 /// </remarks>
-public class SecurityDomainDependencyInjectionTests
+public class SecurityDomainSession_DependencyInjectionTests
 {
     private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(100));
 

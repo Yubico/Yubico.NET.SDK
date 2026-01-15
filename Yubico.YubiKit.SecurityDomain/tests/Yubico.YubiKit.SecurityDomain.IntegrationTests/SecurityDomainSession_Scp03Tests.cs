@@ -10,7 +10,7 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 /// <summary>
 ///     Integration coverage for establishing a Security Domain session using SCP03.
 /// </summary>
-public class SecurityDomainScp03Tests
+public class SecurityDomainSession_Scp03Tests
 {
     private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(100));
 

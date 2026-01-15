@@ -5,6 +5,7 @@ using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.Utils;
+using Yubico.YubiKit.SecurityDomain.IntegrationTests.Helpers;
 using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -14,7 +15,7 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 /// <summary>
 ///     Integration coverage for establishing a Security Domain session using SCP11.
 /// </summary>
-public class SecurityDomainScp11Tests
+public class SecurityDomainSession_Scp11Tests
 {
     private const byte OceKid = 0x010;
     private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(100));

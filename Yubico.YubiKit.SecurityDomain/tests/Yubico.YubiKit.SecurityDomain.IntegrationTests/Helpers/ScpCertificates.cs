@@ -1,6 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
 
-namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
+namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.Helpers;
 
 public class ScpCertificates
 {

@@ -15,7 +15,7 @@
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 
-namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
+namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.Helpers;
 
 /// <summary>
 ///     A wrapper around an <see cref="ISmartCardConnection" /> that ignores calls to

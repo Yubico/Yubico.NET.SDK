@@ -15,7 +15,6 @@
 using System.Globalization;
 using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.PlatformInterop;
-using Yubico.YubiKit.Core.PlatformInterop.MacOS.CoreFoundation;
 using Yubico.YubiKit.Core.PlatformInterop.MacOS.IOKitFramework;
 using CFNativeMethods = Yubico.YubiKit.Core.PlatformInterop.MacOS.CoreFoundation.NativeMethods;
 using IOKitNativeMethods = Yubico.YubiKit.Core.PlatformInterop.MacOS.IOKitFramework.NativeMethods;
@@ -26,21 +25,13 @@ namespace Yubico.YubiKit.Core.Hid;
 ///     macOS implementation of a Human Interface Device (HID).
 /// </summary>
 [SupportedOSPlatform("macos")]
-internal sealed class MacOSHidDevice : IHidDevice
+internal sealed class MacOSHidDevice(long entryId) : IHidDevice
 {
-    private readonly long _entryId;
-
-    public string ReaderName { get; }
+    public string ReaderName { get; } = entryId.ToString(CultureInfo.InvariantCulture);
     public short VendorId { get; init; }
     public short ProductId { get; init; }
     public short Usage { get; init; }
     public HidUsagePage UsagePage { get; init; }
-
-    public MacOSHidDevice(long entryId)
-    {
-        _entryId = entryId;
-        ReaderName = entryId.ToString(CultureInfo.InvariantCulture);
-    }
 
     /// <summary>
     ///     Returns a list of all HID devices on the system.
@@ -100,7 +91,7 @@ internal sealed class MacOSHidDevice : IHidDevice
     ///     An active connection object.
     /// </returns>
     public IHidConnectionSync ConnectToFeatureReports() =>
-        new MacOSHidFeatureReportConnection(_entryId);
+        new MacOSHidFeatureReportConnection(entryId);
 
     /// <summary>
     ///     Establishes a connection capable of transmitting IO reports to a FIDO device.
@@ -109,7 +100,7 @@ internal sealed class MacOSHidDevice : IHidDevice
     ///     An active connection object.
     /// </returns>
     public IHidConnectionSync ConnectToIOReports() =>
-        new MacOSHidIOReportConnection(_entryId);
+        new MacOSHidIOReportConnection(entryId);
 
     internal static long GetEntryId(IntPtr device)
     {

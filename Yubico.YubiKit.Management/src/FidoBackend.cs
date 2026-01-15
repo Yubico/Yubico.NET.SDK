@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Hid;
-using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
 
@@ -22,21 +20,14 @@ namespace Yubico.YubiKit.Management;
 /// Backend implementation for Management operations over FIDO HID.
 /// Encodes operations as CTAP vendor commands.
 /// </summary>
-internal sealed class FidoBackend : IManagementBackend
+internal sealed class FidoBackend(IFidoProtocol protocol) : IManagementBackend
 {
-    private readonly IFidoProtocol _protocol;
-    private readonly FirmwareVersion _version;
+    private readonly IFidoProtocol _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
 
     // CTAP vendor command codes
     private const byte CtapYubikeyDeviceConfig = 0xC0;
     private const byte CtapReadConfig = 0xC2;
     private const byte CtapWriteConfig = 0xC3;
-
-    public FidoBackend(IFidoProtocol protocol, FirmwareVersion version)
-    {
-        _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
-        _version = version;
-    }
 
     public async ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken)
     {
@@ -48,10 +39,7 @@ internal sealed class FidoBackend : IManagementBackend
 
     public async ValueTask WriteConfigAsync(byte[] config, CancellationToken cancellationToken)
     {
-        if (config is null)
-        {
-            throw new ArgumentNullException(nameof(config));
-        }
+        ArgumentNullException.ThrowIfNull(config);
 
         await _protocol.SendVendorCommandAsync(CtapWriteConfig, config, cancellationToken)
             .ConfigureAwait(false);
@@ -59,10 +47,7 @@ internal sealed class FidoBackend : IManagementBackend
 
     public async ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken)
     {
-        if (data is null)
-        {
-            throw new ArgumentNullException(nameof(data));
-        }
+        ArgumentNullException.ThrowIfNull(data);
 
         await _protocol.SendVendorCommandAsync(CtapYubikeyDeviceConfig, data, cancellationToken)
             .ConfigureAwait(false);

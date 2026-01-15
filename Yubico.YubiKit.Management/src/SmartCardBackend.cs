@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management;
 
@@ -22,22 +20,15 @@ namespace Yubico.YubiKit.Management;
 /// Backend implementation for Management operations over SmartCard (CCID/NFC).
 /// Encodes operations as ISO 7816 APDUs.
 /// </summary>
-internal sealed class SmartCardBackend : IManagementBackend
+internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagementBackend
 {
-    private readonly ISmartCardProtocol _protocol;
-    private readonly FirmwareVersion _version;
+    private readonly ISmartCardProtocol _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
 
     // Instruction bytes for Management APDUs
     private const byte InsGetDeviceInfo = 0x1D;
     private const byte InsSetDeviceInfo = 0x1C;
     private const byte InsSetMode = 0x16;
     private const byte InsDeviceReset = 0x1F;
-
-    public SmartCardBackend(ISmartCardProtocol protocol, FirmwareVersion version)
-    {
-        _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
-        _version = version;
-    }
 
     public async ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken)
     {
@@ -55,10 +46,7 @@ internal sealed class SmartCardBackend : IManagementBackend
 
     public async ValueTask WriteConfigAsync(byte[] config, CancellationToken cancellationToken)
     {
-        if (config is null)
-        {
-            throw new ArgumentNullException(nameof(config));
-        }
+        ArgumentNullException.ThrowIfNull(config);
 
         var apdu = new ApduCommand
         {
@@ -74,10 +62,7 @@ internal sealed class SmartCardBackend : IManagementBackend
 
     public async ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken)
     {
-        if (data is null)
-        {
-            throw new ArgumentNullException(nameof(data));
-        }
+        ArgumentNullException.ThrowIfNull(data);
 
         var apdu = new ApduCommand
         {

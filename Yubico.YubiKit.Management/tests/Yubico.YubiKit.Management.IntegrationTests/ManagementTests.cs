@@ -3,7 +3,6 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Hid;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
-using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Management.IntegrationTests;
 

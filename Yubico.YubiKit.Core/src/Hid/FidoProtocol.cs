@@ -3,7 +3,6 @@
 
 using System.Buffers.Binary;
 using System.Security.Cryptography;
-using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.SmartCard;
@@ -16,22 +15,17 @@ namespace Yubico.YubiKit.Core.Hid;
 /// Supports CTAP HID framing, channel management, and YubiKey Management vendor commands.
 /// Based on FIDO CTAP HID Protocol Specification.
 /// </summary>
-internal class FidoProtocol : IFidoProtocol
+internal class FidoProtocol(IFidoConnection connection, ILogger<FidoProtocol>? logger = null)
+    : IFidoProtocol
 {
-    private readonly IFidoConnection _connection;
-    private readonly ILogger<FidoProtocol> _logger;
+    private readonly IFidoConnection _connection = connection ?? throw new ArgumentNullException(nameof(connection));
+    private readonly ILogger<FidoProtocol> _logger = logger ?? NullLogger<FidoProtocol>.Instance;
     private uint? _channelId;
     private FirmwareVersion? _firmwareVersion;
     private bool _disposed;
 
     public bool IsChannelInitialized => _channelId.HasValue;
     public FirmwareVersion? FirmwareVersion => _firmwareVersion;
-
-    public FidoProtocol(IFidoConnection connection, ILogger<FidoProtocol>? logger = null)
-    {
-        _connection = connection ?? throw new ArgumentNullException(nameof(connection));
-        _logger = logger ?? NullLogger<FidoProtocol>.Instance;
-    }
 
     public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
     {

@@ -46,7 +46,6 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
 
     private ManagementSession(
         IConnection connection,
-        ProtocolConfiguration? configuration = null,
         ScpKeyParameters? scpKeyParams = null)
     {
         _scpKeyParams = scpKeyParams;
@@ -70,7 +69,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default)
     {
-        var session = new ManagementSession(connection, configuration, scpKeyParams);
+        var session = new ManagementSession(connection, scpKeyParams);
         await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
         return session;
     }
@@ -83,28 +82,24 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             return;
 
         _version = await GetVersionAsync(cancellationToken).ConfigureAwait(false);
-        FirmwareVersion = _version;
 
-        _protocol.Configure(_version, configuration);
+        await InitializeCoreAsync(
+                _protocol,
+                _version,
+                configuration,
+                _scpKeyParams,
+                cancellationToken)
+            .ConfigureAwait(false);
 
-        // Initialize SCP if key parameters were provided
-        if (_scpKeyParams is not null && _protocol is ISmartCardProtocol smartCardProtocol)
+        _protocol = Protocol ?? throw new InvalidOperationException();
+
+        if (IsAuthenticated)
         {
-            _protocol = await smartCardProtocol
-                .WithScpAsync(_scpKeyParams, cancellationToken)
-                .ConfigureAwait(false);
-
-            IsAuthenticated = true;
-
             // Recreate backend with SCP-wrapped protocol
             _backend = new SmartCardBackend(
-                _protocol as ISmartCardProtocol ?? throw new InvalidOperationException(),
-                _version ?? new FirmwareVersion());
-
-            Protocol = _protocol;
+                _protocol as ISmartCardProtocol ?? throw new InvalidOperationException());
         }
 
-        IsInitialized = true;
         _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
 
@@ -212,7 +207,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             .Create()
             .Create(connection);
         
-        var backend = new SmartCardBackend(protocol as ISmartCardProtocol ?? throw new InvalidOperationException(), new FirmwareVersion());
+        var backend = new SmartCardBackend(protocol as ISmartCardProtocol ?? throw new InvalidOperationException());
         return (protocol, backend);
     }
 
@@ -223,7 +218,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             .Create()
             .Create(connection);
         
-        var backend = new FidoBackend(protocol as IFidoProtocol ?? throw new InvalidOperationException(), new FirmwareVersion());
+        var backend = new FidoBackend(protocol as IFidoProtocol ?? throw new InvalidOperationException());
         return (protocol, backend);
     }
 

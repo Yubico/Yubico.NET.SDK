@@ -71,7 +71,7 @@ public class SecurityDomainSessionTests
         var connection = CreateMockConnection();
 
         // Act
-        var session = await SecurityDomainSession.CreateAsync(connection);
+        var session = await SecurityDomainSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -85,7 +85,7 @@ public class SecurityDomainSessionTests
         var configuration = new ProtocolConfiguration();
 
         // Act
-        var session = await SecurityDomainSession.CreateAsync(connection, configuration: configuration);
+        var session = await SecurityDomainSession.CreateAsync(connection, configuration: configuration, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -99,7 +99,7 @@ public class SecurityDomainSessionTests
         var firmwareVersion = new FirmwareVersion(5, 7, 2);
 
         // Act
-        var session = await SecurityDomainSession.CreateAsync(connection, firmwareVersion: firmwareVersion);
+        var session = await SecurityDomainSession.CreateAsync(connection, firmwareVersion: firmwareVersion, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -114,10 +114,7 @@ public class SecurityDomainSessionTests
         var firmwareVersion = new FirmwareVersion(5, 7, 2);
 
         // Act
-        var session = await SecurityDomainSession.CreateAsync(
-            connection,
-            configuration: configuration,
-            firmwareVersion: firmwareVersion);
+        var session = await SecurityDomainSession.CreateAsync(connection, configuration: configuration, firmwareVersion: firmwareVersion, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -165,7 +162,7 @@ public class SecurityDomainSessionTests
         var yubiKey = CreateMockYubiKey(out _);
 
         // Act
-        var session = await yubiKey.CreateSecurityDomainSessionAsync();
+        var session = await yubiKey.CreateSecurityDomainSessionAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -179,7 +176,7 @@ public class SecurityDomainSessionTests
         var configuration = new ProtocolConfiguration();
 
         // Act
-        var session = await yubiKey.CreateSecurityDomainSessionAsync(configuration: configuration);
+        var session = await yubiKey.CreateSecurityDomainSessionAsync(configuration: configuration, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -193,7 +190,7 @@ public class SecurityDomainSessionTests
         var firmwareVersion = new FirmwareVersion(5, 7, 2);
 
         // Act
-        var session = await yubiKey.CreateSecurityDomainSessionAsync(firmwareVersion: firmwareVersion);
+        var session = await yubiKey.CreateSecurityDomainSessionAsync(firmwareVersion: firmwareVersion, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -226,7 +223,7 @@ public class SecurityDomainSessionTests
         var yubiKey = CreateMockYubiKey(out _);
 
         // Act
-        var session = await yubiKey.CreateSecurityDomainSessionAsync();
+        var session = await yubiKey.CreateSecurityDomainSessionAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         await yubiKey.Received(1).ConnectAsync<ISmartCardConnection>(Arg.Any<CancellationToken>());
@@ -241,7 +238,7 @@ public class SecurityDomainSessionTests
         SetupGetKeyInfoMock(connection);
 
         // Act
-        var keyInfo = await yubiKey.GetSecurityDomainKeyInfoAsync();
+        var keyInfo = await yubiKey.GetSecurityDomainKeyInfoAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(keyInfo);
@@ -271,7 +268,7 @@ public class SecurityDomainSessionTests
         SetupGetKeyInfoMock(connection);
 
         // Act
-        var keyInfo = await yubiKey.GetSecurityDomainKeyInfoAsync();
+        var keyInfo = await yubiKey.GetSecurityDomainKeyInfoAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(keyInfo);

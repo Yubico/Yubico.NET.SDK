@@ -535,7 +535,7 @@ public interface ISecurityDomainSession : IDisposable
 {
     bool IsAuthenticated { get; }
     Task<IReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>>
-        GetKeyInformationAsync(CancellationToken ct = default);
+        GetKeyInfoAsync(CancellationToken ct = default);
     Task PutKeyAsync(KeyReference keyRef, StaticKeys keys, int replaceKvn = 0,
         CancellationToken ct = default);
     Task ResetAsync(CancellationToken ct = default);

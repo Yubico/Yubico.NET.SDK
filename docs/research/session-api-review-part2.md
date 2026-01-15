@@ -260,7 +260,7 @@ public static class IYubiKeyExtensions
         {
             using var session = await CreateSecurityDomainSessionAsync(
                 scpKeyParams, cancellationToken: cancellationToken);
-            return await session.GetKeyInformationAsync(cancellationToken);
+            return await session.GetKeyInfoAsync(cancellationToken);
         }
     }
 }
@@ -316,7 +316,7 @@ using var connection = await device.ConnectAsync<ISmartCardConnection>();
 using var session = await SecurityDomainSession.CreateAsync(
     connection,
     scpKeyParams: Scp03KeyParameters.Default);
-var keyInfo = await session.GetKeyInformationAsync();
+var keyInfo = await session.GetKeyInfoAsync();
 ```
 
 **Rating: Poor** - No convenience methods, must know connection type.
@@ -440,9 +440,9 @@ SecurityDomainSession exposes complex return types that should arguably be first
 
 | Method | Return Type | Issue |
 |--------|-------------|-------|
-| `GetKeyInformationAsync()` | `IReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>` | Opaque nested dictionaries |
+| `GetKeyInfoAsync()` | `IReadOnlyList<SecurityDomainKeyInfo>` | Typed entries (reference + components) |
 | `GetCertificatesAsync()` | `IReadOnlyList<X509Certificate2>` | OK (uses BCL type) |
-| `GetSupportedCaIdentifiersAsync()` | `IReadOnlyDictionary<KeyReference, ReadOnlyMemory<byte>>` | Raw bytes, no structure |
+| `GetCaIdentifiersAsync()` | `IReadOnlyList<SecurityDomainCaIdentifier>` | Typed entries (reference + identifier) |
 | `GenerateKeyAsync()` | `ECPublicKey` | OK (Core type) |
 
 ### 6.2 Recommended Domain Types

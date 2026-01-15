@@ -227,7 +227,7 @@ public static class IYubiKeyExtensions
         {
             using var session = await CreateSecurityDomainSessionAsync(
                 scpKeyParams, cancellationToken: cancellationToken);
-            return await session.GetKeyInformationAsync(cancellationToken);
+            return await session.GetKeyInfoAsync(cancellationToken);
         }
     }
 }
@@ -331,7 +331,7 @@ public interface IManagementSession : IApplicationSession
 public interface ISecurityDomainSession : IApplicationSession
 {
     Task<IReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>>
-        GetKeyInformationAsync(CancellationToken ct = default);
+        GetKeyInfoAsync(CancellationToken ct = default);
     Task PutKeyAsync(KeyReference keyRef, StaticKeys keys, int replaceKvn = 0,
         CancellationToken ct = default);
     Task DeleteKeyAsync(KeyReference keyRef, bool deleteLastKey = false,
@@ -450,6 +450,7 @@ Turn the future-session checklist into a first-class template for new session pa
 
 - Checklist should include: DI factory, `IYubiKeyExtensions`, tests (`WithXxxSessionAsync`), domain models, transport notes
 - Consider a session template document (or generator later) to reduce repeated design churn
+- Template: `docs/templates/session-package-checklist.md`
 
 ### F. Make Transport Requirements More Obvious at API Boundaries
 
@@ -504,6 +505,7 @@ Additional requirements:
 Make the “how we test sessions” pattern explicit for future modules.
 
 - Promote a short checklist (or section) for: `WithXxxSessionAsync` helpers, session factories for tests, optional `XxxTestState` reset/state helpers, and integration test conventions
+- Template: `docs/templates/session-test-infra-checklist.md`
 
 ---
 

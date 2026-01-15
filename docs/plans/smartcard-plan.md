@@ -316,7 +316,7 @@ Based on Java implementation from `yubikit-android`:
 |--------|------|--------|-------|
 | `CreateAsync` | 109 | ✅ Complete | Factory with SCP initialization |
 | `GetDataAsync` | 160 | ✅ Complete | Generic GET DATA (tag 0xBF21) |
-| `GetKeyInformationAsync` | 201 | ✅ Complete | Query key metadata |
+| `GetKeyInfoAsync` | 201 | ✅ Complete | Query key metadata |
 | `GenerateKeyAsync` | 367 | ✅ Complete | ECC key generation |
 | `PutKeyAsync` (ECC public) | 432 | ✅ Complete | Import ECC public key |
 | `PutKeyAsync` (ECC private) | 490 | ✅ Complete | Import ECC private key |
@@ -329,7 +329,7 @@ Based on Java implementation from `yubikit-android`:
 |--------|------|----------|----------------|
 | `GetCardRecognitionDataAsync` | 249-251 | Medium | security-domain-java.md:20 |
 | `GetCertificatesAsync` | 259-262 | High | security-domain-java.md:22 |
-| `GetSupportedCaIdentifiersAsync` (overload) | 271-275 | Low | security-domain-java.md:23 |
+| `GetCaIdentifiersAsync` | 271-275 | Low | security-domain-java.md:23 |
 | `StoreCertificatesAsync` | 283-287 | High | security-domain-java.md:26 |
 | `PutKeyAsync` (SCP03 StaticKeys) | 296-301 | Medium | security-domain-java.md:30-34 |
 **Total:** 16/16 methods (100%)

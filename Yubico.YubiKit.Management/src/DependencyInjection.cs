@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -23,11 +24,13 @@ namespace Yubico.YubiKit.Management;
 // Delegates for DI-friendly session creation
 public delegate Task<ManagementSession> ManagementSessionFactoryDelegate(
     IConnection connection,
+    ProtocolConfiguration? configuration,
     ScpKeyParameters? scpKeyParameters = null,
     CancellationToken cancellationToken = default);
 
 public delegate Task<ManagementSession> SmartCardManagementSessionFactoryDelegate(
     ISmartCardConnection connection,
+    ProtocolConfiguration? configuration,
     ScpKeyParameters? scpKeyParameters = null,
     CancellationToken cancellationToken = default);
 
@@ -37,29 +40,11 @@ public static class DependencyInjection
     {
         public IServiceCollection AddYubiKeyManager(Action<YubiKeyManagerOptions>? configureOptions = null)
         {
-            services.AddSingleton<ManagementSessionFactoryDelegate>(sp =>
-            {
-                var configuration = sp.GetService<ProtocolConfiguration>();
+            services.TryAddSingleton<ManagementSessionFactoryDelegate>(
+                ManagementSession.CreateAsync);
 
-                return (connection, scp, ct) =>
-                    ManagementSession.CreateAsync(
-                        connection,
-                        configuration: configuration,
-                        scpKeyParams: scp,
-                        cancellationToken: ct);
-            });
-
-            services.AddSingleton<SmartCardManagementSessionFactoryDelegate>(sp =>
-            {
-                var configuration = sp.GetService<ProtocolConfiguration>();
-
-                return (connection, scp, ct) =>
-                    ManagementSession.CreateAsync(
-                        connection,
-                        configuration: configuration,
-                        scpKeyParams: scp,
-                        cancellationToken: ct);
-            });
+            services.TryAddSingleton<SmartCardManagementSessionFactoryDelegate>(
+                ManagementSession.CreateAsync);
 
             services.AddYubiKeyManagerCore(configureOptions);
             return services;

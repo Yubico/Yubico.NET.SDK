@@ -7,7 +7,7 @@ using Yubico.YubiKit.Core.SmartCard.Scp;
 namespace Yubico.YubiKit.Management.IntegrationTests;
 
 public class
-    ManagementTests : IntegrationTestBase // TODO This test class is dangerous,  it can do stuff on your private YubiKey, no test filter
+    ManagementSessionSimpleTests : IntegrationTestBase // TODO This test class is dangerous,  it can do stuff on your private YubiKey, no test filter
 {
     [Fact]
     public async Task CreateManagementSession_with_CreateAsync()
@@ -75,7 +75,7 @@ public class
         var sessionFactory = ServiceProvider.GetRequiredService<ManagementSessionFactoryDelegate>();
 
         using var connection = await device.ConnectAsync<ISmartCardConnection>();
-        using var mgmtSession = await sessionFactory(connection);
+        using var mgmtSession = await sessionFactory(connection, configuration: null);
 
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);

@@ -51,7 +51,7 @@ public class ModernFirmwareFilter : IYubiKeyFilter
 ///         Add your test device serial numbers to the AllowedSerialNumbers array.
 ///     </para>
 /// </remarks>
-public class ManagementIntegrationTests
+public class ManagementSessionTests
 {
     /// <summary>
     ///     Verify we can read device information.

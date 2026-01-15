@@ -96,7 +96,7 @@ public class ManagementTestState : TestState
     {
         ArgumentNullException.ThrowIfNull(action);
 
-        using var connection = await OpenConnectionAsync<ISmartCardConnection>().ConfigureAwait(false);
+        await using var connection = await OpenConnectionAsync<ISmartCardConnection>().ConfigureAwait(false);
         using var session = await ManagementSession
             .CreateAsync(connection, scpKeyParams: ScpKeyParams)
             .ConfigureAwait(false);

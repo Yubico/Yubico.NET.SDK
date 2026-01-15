@@ -38,7 +38,7 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 ///         - Testing transport-specific features (USB vs NFC)
 ///     </para>
 /// </remarks>
-public class AdvancedManagementTests
+public class ManagementSessionAdvancedTests
 {
     /// <summary>
     ///     Basic example: Runs on ALL authorized devices.

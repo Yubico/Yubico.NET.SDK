@@ -14,20 +14,7 @@
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
-public interface ISmartCardConnection : IConnection
+public readonly record struct ProtocolConfiguration
 {
-    Transport Transport { get; }
-
-    Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-        ReadOnlyMemory<byte> command,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    ///     Starts a PC/SC transaction. The transaction is ended when the returned scope is disposed.
-    ///     Uses LEAVE_CARD disposition when ending the transaction.
-    /// </summary>
-    IDisposable BeginTransaction(CancellationToken cancellationToken = default);
-
-    bool SupportsExtendedApdu();
-    // byte[] getAtr();
+    public bool ForceShortApdus { get; init; }
 }

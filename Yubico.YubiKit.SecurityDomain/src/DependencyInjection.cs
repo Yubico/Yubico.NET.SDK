@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -23,6 +20,7 @@ namespace Yubico.YubiKit.SecurityDomain;
 
 public delegate Task<SecurityDomainSession> SecurityDomainSessionFactory(
     ISmartCardConnection connection,
+    ProtocolConfiguration? configuration,
     ScpKeyParameters? scpKeyParams,
     CancellationToken cancellationToken);
 
@@ -33,7 +31,7 @@ public static class DependencyInjection
         public IServiceCollection AddYubiKeySecurityDomain()
         {
             services.AddSingleton<SecurityDomainSessionFactory>(
-                (conn, scp, ct) => SecurityDomainSession.CreateAsync(conn, null, scp, cancellationToken: ct));
+                (conn, cfg, scp, ct) => SecurityDomainSession.CreateAsync(conn, cfg, scp, cancellationToken: ct));
 
             return services;
         }

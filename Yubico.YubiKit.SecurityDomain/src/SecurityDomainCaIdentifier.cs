@@ -12,20 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Threading;
-using System.Threading.Tasks;
-using Yubico.YubiKit.Core.SmartCard;
-using Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.SmartCard.Scp;
 
 namespace Yubico.YubiKit.SecurityDomain;
 
-internal static class SecurityDomainYubiKeyExtensions
-{
-    internal static async Task<SecurityDomainSession> CreateSecurityDomainSessionAsync(
-        this IYubiKey yubiKey,
-        CancellationToken cancellationToken = default)
-    {
-        var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken).ConfigureAwait(false);
-        return await SecurityDomainSession.CreateAsync(connection, cancellationToken: cancellationToken).ConfigureAwait(false);
-    }
-}
+public sealed record SecurityDomainCaIdentifier(KeyReference KeyReference, ReadOnlyMemory<byte> Identifier);

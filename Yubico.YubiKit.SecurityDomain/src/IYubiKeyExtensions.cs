@@ -18,17 +18,33 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.SecurityDomain;
 
+/// <summary>
+///     Extension methods for creating Security Domain sessions from an <see cref="IYubiKey" />.
+/// </summary>
 public static class IYubiKeyExtensions
 {
     extension(IYubiKey yubiKey)
     {
+        /// <summary>
+        ///     Creates a new Security Domain session for the specified YubiKey.
+        /// </summary>
+        /// <param name="scpKeyParams">Optional SCP key parameters for secure channel authentication.</param>
+        /// <param name="configuration">Optional protocol configuration.</param>
+        /// <param name="firmwareVersion">Optional firmware version override.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>A new <see cref="SecurityDomainSession" /> instance.</returns>
+        /// <remarks>
+        ///     The returned session owns the underlying connection and will dispose it when the session is disposed.
+        ///     Always use a <c>using</c> statement or call <see cref="SecurityDomainSession.Dispose" /> when finished.
+        /// </remarks>
         public async Task<SecurityDomainSession> CreateSecurityDomainSessionAsync(
             ScpKeyParameters? scpKeyParams = null,
             ProtocolConfiguration? configuration = null,
             FirmwareVersion? firmwareVersion = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
+                .ConfigureAwait(false);
             return await SecurityDomainSession.CreateAsync(
                     connection,
                     configuration,
@@ -38,7 +54,40 @@ public static class IYubiKeyExtensions
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>> GetSecurityDomainKeyInfoAsync(
+        /// <summary>
+        ///     Creates a new Security Domain session using an existing connection.
+        /// </summary>
+        /// <param name="existingConnection">An existing SmartCard connection to use.</param>
+        /// <param name="scpKeyParams">Optional SCP key parameters for secure channel authentication.</param>
+        /// <param name="configuration">Optional protocol configuration.</param>
+        /// <param name="firmwareVersion">Optional firmware version override.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>A new <see cref="SecurityDomainSession" /> instance.</returns>
+        /// <remarks>
+        ///     The session does NOT own the provided connection. The caller is responsible for
+        ///     managing the connection lifecycle.
+        /// </remarks>
+        internal async Task<SecurityDomainSession> CreateSecurityDomainSessionAsync(
+            ISmartCardConnection existingConnection,
+            ScpKeyParameters? scpKeyParams = null,
+            ProtocolConfiguration? configuration = null,
+            FirmwareVersion? firmwareVersion = null,
+            CancellationToken cancellationToken = default) =>
+            await SecurityDomainSession.CreateAsync(
+                    existingConnection,
+                    configuration,
+                    scpKeyParams,
+                    firmwareVersion,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+        /// <summary>
+        ///     Gets key information from the Security Domain.
+        /// </summary>
+        /// <param name="scpKeyParams">Optional SCP key parameters for secure channel authentication.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>A list of key information from the Security Domain.</returns>
+        public async Task<IReadOnlyList<SecurityDomainKeyInfo>> GetSecurityDomainKeyInfoAsync(
             ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {
@@ -47,7 +96,7 @@ public static class IYubiKeyExtensions
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
-            return await session.GetKeyInformationAsync(cancellationToken).ConfigureAwait(false);
+            return await session.GetKeyInfoAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

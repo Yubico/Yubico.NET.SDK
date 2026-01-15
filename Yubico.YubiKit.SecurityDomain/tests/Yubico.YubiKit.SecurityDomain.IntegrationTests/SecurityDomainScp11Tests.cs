@@ -66,11 +66,11 @@ public class SecurityDomainScp11Tests
         await state.WithSecurityDomainSessionAsync(false,
             async session =>
             {
-                var keyInformation = await session.GetKeyInformationAsync(CancellationTokenSource.Token);
+                var keyInfo = await session.GetKeyInfoAsync(CancellationTokenSource.Token);
 
                 // Verify the key we just generated is now registered
-                Assert.Contains(keyInformation.Keys, kr =>
-                    kr.Kid == keyReference.Kid && kr.Kvn == keyReference.Kvn);
+                Assert.Contains(keyInfo, keyEntry =>
+                    keyEntry.KeyReference.Kid == keyReference.Kid && keyEntry.KeyReference.Kvn == keyReference.Kvn);
             }, cancellationToken: CancellationTokenSource.Token);
     }
 

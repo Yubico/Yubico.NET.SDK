@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using System.Buffers;
-using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core;
@@ -152,22 +150,19 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         // Security Domain is available on firmware 5.3.0 and newer.
         // If the caller already knows the firmware, they can provide it and enable feature gating.
         _hasExplicitFirmwareVersion = firmwareVersion is not null;
-        FirmwareVersion = firmwareVersion ?? FirmwareVersion.V5_3_0;
-        smartCardProtocol.Configure(FirmwareVersion, configuration);
+        var resolvedFirmwareVersion = firmwareVersion ?? FirmwareVersion.V5_3_0;
 
-        if (_scpKeyParams is not null)
-        {
-            _protocol = await smartCardProtocol.WithScpAsync(_scpKeyParams, cancellationToken)
-                .ConfigureAwait(false);
-            IsAuthenticated = true;
-        }
-        else
-        {
-            _protocol = smartCardProtocol;
-        }
+        await InitializeCoreAsync(
+                smartCardProtocol,
+                resolvedFirmwareVersion,
+                configuration,
+                _scpKeyParams,
+                cancellationToken)
+            .ConfigureAwait(false);
 
-        Protocol = _protocol;
-        IsInitialized = true;
+        _protocol = Protocol as ISmartCardProtocol;
+        if (_protocol is null)
+            throw new InvalidOperationException();
     }
 
     /// <summary>
@@ -218,36 +213,40 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     Retrieves key metadata exposed by the Security Domain via the key information data object.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public async Task<IReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>> GetKeyInformationAsync(
+    public async Task<IReadOnlyList<SecurityDomainKeyInfo>> GetKeyInfoAsync(
         CancellationToken cancellationToken = default)
     {
         var response = await GetDataAsync(TagKeyInformationTemplate, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         if (response.IsEmpty)
-            return new ReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>(
-                new Dictionary<KeyReference, IReadOnlyDictionary<byte, byte>>(0));
+            return Array.Empty<SecurityDomainKeyInfo>();
 
-        var keyInformation = new Dictionary<KeyReference, IReadOnlyDictionary<byte, byte>>();
+        var keyInformation = new List<SecurityDomainKeyInfo>();
 
         using var tlvList = TlvHelper.DecodeList(response.Span);
         foreach (var tlv in tlvList)
         {
             var value = TlvHelper.GetValue(TagKeyInformationData, tlv.AsSpan());
-            var keyRef = new KeyReference(value.Span[0], value.Span[1]);
-            var components = new Dictionary<byte, byte>();
+            if (value.Length < 2)
+                throw new BadResponseException("Key information entry is shorter than expected.");
 
-            var currentValue = value.Span[2..];
-            while (!currentValue.IsEmpty)
+            var valueSpan = value.Span;
+            var keyRef = new KeyReference(valueSpan[0], valueSpan[1]);
+
+            var components = new List<SecurityDomainKeyInfoComponent>();
+            var currentValue = valueSpan[2..];
+
+            while (currentValue.Length >= 2)
             {
-                components.Add(currentValue[0], currentValue[1]);
+                components.Add(new SecurityDomainKeyInfoComponent(currentValue[0], currentValue[1]));
                 currentValue = currentValue[2..];
             }
 
-            keyInformation.Add(keyRef, new ReadOnlyDictionary<byte, byte>(components));
+            keyInformation.Add(new SecurityDomainKeyInfo(keyRef, components));
         }
 
-        return new ReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>(keyInformation);
+        return keyInformation;
     }
 
 
@@ -302,13 +301,13 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <param name="includeKloc">Whether to include Key Loading OCE Certificate identifiers.</param>
     /// <param name="includeKlcc">Whether to include Key Loading Card Certificate identifiers.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A dictionary keyed by key reference containing identifier payloads.</returns>
-    public async Task<IReadOnlyDictionary<KeyReference, ReadOnlyMemory<byte>>> GetSupportedCaIdentifiersAsync(
+    public async Task<IReadOnlyList<SecurityDomainCaIdentifier>> GetCaIdentifiersAsync(
         bool includeKloc,
         bool includeKlcc,
         CancellationToken cancellationToken = default)
     {
-        if (!includeKloc && !includeKlcc) throw new ArgumentException("At least one of kloc and klcc must be true");
+        if (!includeKloc && !includeKlcc)
+            throw new ArgumentException("At least one of kloc and klcc must be true");
 
         _logger.LogDebug("Getting CA identifiers KLOC={Kloc}, KLCC={Klcc}", includeKloc, includeKlcc);
 
@@ -335,7 +334,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             {
             }
 
-        var caIdentifiers = new Dictionary<KeyReference, ReadOnlyMemory<byte>>();
+        var caIdentifiers = new List<SecurityDomainCaIdentifier>();
         var caTlvObjects = TlvHelper.DecodeList(arrayBufferWriter.WrittenSpan).AsSpan();
         while (!caTlvObjects.IsEmpty)
         {
@@ -344,7 +343,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
             var keyReferenceData = keyReferenceTlv.AsSpan();
             var keyReference = new KeyReference(keyReferenceData[0], keyReferenceData[1]);
-            caIdentifiers.Add(keyReference, caIdentifierTlv.AsMemory());
+            caIdentifiers.Add(new SecurityDomainCaIdentifier(keyReference, caIdentifierTlv.Value.ToArray()));
 
             caTlvObjects = caTlvObjects[2..];
         }
@@ -826,14 +825,14 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     {
         await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-        var keyInformation = await GetKeyInformationAsync(cancellationToken).ConfigureAwait(false);
-        if (keyInformation.Count == 0)
+        var keyInfo = await GetKeyInfoAsync(cancellationToken).ConfigureAwait(false);
+        if (keyInfo.Count == 0)
         {
             _logger.LogInformation("Security Domain reset skipped: no keys reported");
             return;
         }
 
-        foreach (var keyReference in keyInformation.Keys)
+        foreach (var keyReference in keyInfo.Select(static entry => entry.KeyReference))
         {
             if (!TryGetResetParameters(keyReference, out var instruction, out var overrideKeyRef))
             {
@@ -846,8 +845,9 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
         _logger.LogInformation("Security Domain reset complete; reinitializing session");
 
-        _protocol = null;
+        Protocol?.Dispose();
         Protocol = null;
+        _protocol = null;
         IsAuthenticated = false;
         IsInitialized = false;
 

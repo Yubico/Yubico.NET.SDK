@@ -18,29 +18,6 @@ using Yubico.YubiKit.Core.YubiKey;
 
 namespace Yubico.YubiKit.Core.SmartCard;
 
-public interface IProtocol : IDisposable
-{
-    void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null);
-}
-
-/// <summary>
-///     Protocol interface for SmartCard communication.
-/// </summary>
-public interface ISmartCardProtocol : IProtocol
-{
-    Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-        ApduCommand command,
-        CancellationToken cancellationToken = default);
-
-    Task<ReadOnlyMemory<byte>> SelectAsync(ReadOnlyMemory<byte> applicationId,
-        CancellationToken cancellationToken = default);
-}
-
-public readonly record struct ProtocolConfiguration
-{
-    public bool ForceShortApdus { get; init; }
-}
-
 internal class PcscProtocol : ISmartCardProtocol
 {
     private const byte INS_SELECT = 0xA4;

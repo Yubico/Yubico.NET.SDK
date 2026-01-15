@@ -93,7 +93,7 @@ extension(YubiKeyTestState state)
 
 Located at [line 685](src/SecurityDomainSession.cs#L685), the reset process:
 
-1. **Enumerates keys** via `GetKeyInformationAsync()`
+1. **Enumerates keys** via `GetKeyInfoAsync()`
 2. **For each key type**, determines the appropriate blocking instruction:
    - SCP03 (KID=0x01): `INITIALIZE UPDATE`
    - SCP11a/c (KID=0x10/0x15): `EXTERNAL AUTHENTICATE`
@@ -114,7 +114,7 @@ public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state) =>
         async session =>
         {
             // Test runs with default keys (0xFF) after reset
-            var keyInfo = await session.GetKeyInformationAsync(cancellationToken);
+            var keyInfo = await session.GetKeyInfoAsync(cancellationToken);
             Assert.Contains(keyInfo.Keys, k => k.Kvn == 0xFF);
         },
         resetBeforeUse: true,  // Explicitly documented
@@ -148,7 +148,7 @@ await state.WithSecurityDomainSessionAsync(
 await state.WithSecurityDomainSessionAsync(
     async session =>
     {
-        var keyInfo = await session.GetKeyInformationAsync(cancellationToken);
+        var keyInfo = await session.GetKeyInfoAsync(cancellationToken);
         Assert.Contains(keyInfo.Keys, k => k.Kid == keyRef.Kid);
     },
     resetBeforeUse: false,  // Don't destroy what we just created!
@@ -276,7 +276,7 @@ using var session = await SecurityDomainSession.CreateAsync(
 ### Key Information Inspection
 
 ```csharp
-var keyInfo = await session.GetKeyInformationAsync(cancellationToken);
+var keyInfo = await session.GetKeyInfoAsync(cancellationToken);
 foreach (var key in keyInfo.Keys)
 {
     _logger.LogDebug("Key: KID={Kid:X2}, KVN={Kvn:X2}", key.Kid, key.Kvn);

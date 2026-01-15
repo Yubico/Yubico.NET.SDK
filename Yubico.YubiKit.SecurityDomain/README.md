@@ -95,7 +95,7 @@ using var session = await SecurityDomainSession.CreateAsync(
 
 ```csharp
 // Get key information
-var keyInfo = await session.GetKeyInformationAsync(cancellationToken);
+var keyInfo = await session.GetKeyInfoAsync(cancellationToken);
 
 // Generate EC key for SCP11b
 var keyRef = new KeyReference(ScpKid.SCP11b, kvn: 0x01);

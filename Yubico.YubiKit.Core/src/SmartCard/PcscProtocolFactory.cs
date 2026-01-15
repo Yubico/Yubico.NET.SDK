@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using Yubico.YubiKit.Core;
 
 namespace Yubico.YubiKit.Core.SmartCard;
 

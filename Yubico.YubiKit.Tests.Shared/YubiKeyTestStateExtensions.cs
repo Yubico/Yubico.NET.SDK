@@ -38,6 +38,7 @@ public static class YubiKeyTestStateExtensions
         /// <param name="action">
         ///     Action to execute with the management session and device info.
         /// </param>
+        /// <param name="configuration">Optional configuration </param>
         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <example>
@@ -147,7 +148,6 @@ public static class YubiKeyTestStateExtensions
         ///     Executes a synchronous action with a SmartCard connection.
         ///     Automatically handles connection lifecycle.
         /// </summary>
-        /// <param name="state">The test device.</param>
         /// <param name="action">Synchronous action to execute with the connection.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         public async Task WithConnectionAsync(

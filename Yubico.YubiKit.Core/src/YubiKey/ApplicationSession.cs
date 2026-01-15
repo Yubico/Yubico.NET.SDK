@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.SmartCard.Scp;
 
 namespace Yubico.YubiKit.Core.YubiKey;
 
@@ -30,6 +30,42 @@ public abstract class ApplicationSession : IApplicationSession
     protected ApplicationSession()
     {
         Logger = YubiKitLogging.CreateLogger(GetType().FullName ?? GetType().Name);
+    }
+
+    protected async Task InitializeCoreAsync(
+        IProtocol protocol,
+        FirmwareVersion firmwareVersion,
+        ProtocolConfiguration? configuration = null,
+        ScpKeyParameters? scpKeyParams = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (IsInitialized)
+            return;
+
+        ArgumentNullException.ThrowIfNull(protocol);
+
+        protocol.Configure(firmwareVersion, configuration);
+
+        IProtocol effectiveProtocol = protocol;
+        var isAuthenticated = false;
+
+        if (scpKeyParams is not null)
+        {
+            if (effectiveProtocol is not ISmartCardProtocol smartCardProtocol)
+                throw new NotSupportedException("SCP is only supported on SmartCard protocols.");
+
+            effectiveProtocol = await smartCardProtocol
+                .WithScpAsync(scpKeyParams, cancellationToken)
+                .ConfigureAwait(false);
+
+            isAuthenticated = true;
+        }
+
+        // Only mutate session state on successful completion.
+        Protocol = effectiveProtocol;
+        FirmwareVersion = firmwareVersion;
+        IsAuthenticated = isAuthenticated;
+        IsInitialized = true;
     }
 
     public bool IsSupported(Feature feature) => FirmwareVersion >= feature.Version;

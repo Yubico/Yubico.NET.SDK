@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Core.YubiKey;
+using Yubico.YubiKit.Core.SmartCard;
+using Yubico.YubiKit.Core.YubiKey;
 
-[Flags]
-public enum Transport
+namespace Yubico.YubiKit.Core;
+
+public interface IProtocol : IDisposable
 {
-    None = 0,
-    Usb = 1,
-    Nfc = 2,
-    All = Usb | Nfc
+    void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null);
 }

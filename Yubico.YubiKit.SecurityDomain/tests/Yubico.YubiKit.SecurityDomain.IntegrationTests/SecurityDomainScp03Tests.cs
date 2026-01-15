@@ -23,7 +23,7 @@ public class SecurityDomainScp03Tests
     public async Task CreateAsync_WithScp03_Succeeds(YubiKeyTestState state)
     {
         using var scpParams = Scp03KeyParameters.Default;
-
+        
         await state.WithSecurityDomainSessionAsync(true,
             session =>
             {
@@ -35,14 +35,14 @@ public class SecurityDomainScp03Tests
 
     [Theory]
     [WithYubiKey(MinFirmware = "5.4.3")]
-    public async Task GetKeyInformationAsync_ReturnsDefaultScpKey(YubiKeyTestState state) =>
+    public async Task GetKeyInfoAsync_ReturnsDefaultScpKey(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(true,
             async session =>
             {
-                var keyInformation = await session.GetKeyInformationAsync(CancellationTokenSource.Token);
+                var keyInfo = await session.GetKeyInfoAsync(CancellationTokenSource.Token);
 
-                Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInformation.Count);
-                Assert.Equal(0xFF, keyInformation.Keys.First().Kvn);
+                Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInfo.Count);
+                Assert.Equal(0xFF, keyInfo.First().KeyReference.Kvn);
             }, cancellationToken: CancellationTokenSource.Token);
 
     [Theory]
@@ -53,10 +53,10 @@ public class SecurityDomainScp03Tests
             {
                 await session.ResetAsync(CancellationTokenSource.Token);
 
-                var keyInformation = await session.GetKeyInformationAsync(CancellationTokenSource.Token);
+                var keyInfo = await session.GetKeyInfoAsync(CancellationTokenSource.Token);
 
-                Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInformation.Count);
-                Assert.Contains(keyInformation.Keys, keyRef => keyRef.Kvn == 0xFF);
+                Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInfo.Count);
+                Assert.Contains(keyInfo, keyEntry => keyEntry.KeyReference.Kvn == 0xFF);
             }, cancellationToken: CancellationTokenSource.Token);
 
     /// <summary>
@@ -140,7 +140,7 @@ public class SecurityDomainScp03Tests
         await state.WithSecurityDomainSessionAsync(true,
             async session =>
             {
-                var result = await session.GetSupportedCaIdentifiersAsync(true, true);
+                var result = await session.GetCaIdentifiersAsync(true, true);
                 Assert.True(result.Count > 0);
             },
             scpKeyParams: Scp03KeyParameters.Default,

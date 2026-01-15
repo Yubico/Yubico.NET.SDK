@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.YubiKey;
@@ -24,7 +20,7 @@ namespace Yubico.YubiKit.SecurityDomain;
 
 public interface ISecurityDomainSession : IApplicationSession
 {
-    Task<IReadOnlyDictionary<KeyReference, IReadOnlyDictionary<byte, byte>>> GetKeyInformationAsync(
+    Task<IReadOnlyList<SecurityDomainKeyInfo>> GetKeyInfoAsync(
         CancellationToken cancellationToken = default);
 
     Task PutKeyAsync(

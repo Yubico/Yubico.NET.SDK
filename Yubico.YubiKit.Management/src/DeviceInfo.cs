@@ -14,7 +14,7 @@
 
 using System.Buffers.Binary;
 using System.Text;
-using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Extensions;
 using Yubico.YubiKit.Core.Utils;
 using Yubico.YubiKit.Core.YubiKey;
 

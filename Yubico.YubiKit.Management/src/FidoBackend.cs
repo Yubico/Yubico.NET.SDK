@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Hid;
+using Yubico.YubiKit.Core.Hid.Fido;
 
 namespace Yubico.YubiKit.Management;
 
@@ -20,9 +20,9 @@ namespace Yubico.YubiKit.Management;
 /// Backend implementation for Management operations over FIDO HID.
 /// Encodes operations as CTAP vendor commands.
 /// </summary>
-internal sealed class FidoBackend(IFidoProtocol protocol) : IManagementBackend
+internal sealed class FidoBackend(IFidoHidProtocol hidProtocol) : IManagementBackend
 {
-    private readonly IFidoProtocol _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
+    private readonly IFidoHidProtocol _hidProtocol = hidProtocol ?? throw new ArgumentNullException(nameof(hidProtocol));
 
     // CTAP vendor command codes
     private const byte CtapYubikeyDeviceConfig = 0xC0;
@@ -32,7 +32,7 @@ internal sealed class FidoBackend(IFidoProtocol protocol) : IManagementBackend
     public async ValueTask<byte[]> ReadConfigAsync(int page, CancellationToken cancellationToken)
     {
         var pagePayload = new byte[] { (byte)page };
-        var response = await _protocol.SendVendorCommandAsync(CtapReadConfig, pagePayload, cancellationToken)
+        var response = await _hidProtocol.SendVendorCommandAsync(CtapReadConfig, pagePayload, cancellationToken)
             .ConfigureAwait(false);
         return response.ToArray();
     }
@@ -41,7 +41,7 @@ internal sealed class FidoBackend(IFidoProtocol protocol) : IManagementBackend
     {
         ArgumentNullException.ThrowIfNull(config);
 
-        await _protocol.SendVendorCommandAsync(CtapWriteConfig, config, cancellationToken)
+        await _hidProtocol.SendVendorCommandAsync(CtapWriteConfig, config, cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -49,7 +49,7 @@ internal sealed class FidoBackend(IFidoProtocol protocol) : IManagementBackend
     {
         ArgumentNullException.ThrowIfNull(data);
 
-        await _protocol.SendVendorCommandAsync(CtapYubikeyDeviceConfig, data, cancellationToken)
+        await _hidProtocol.SendVendorCommandAsync(CtapYubikeyDeviceConfig, data, cancellationToken)
             .ConfigureAwait(false);
     }
 

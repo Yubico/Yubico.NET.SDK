@@ -15,7 +15,8 @@
 using Microsoft.Extensions.Logging;
 using System.Text;
 using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Core.Hid;
+using Yubico.YubiKit.Core.Hid.Fido;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
 using Yubico.YubiKit.Core.Utils;
@@ -54,7 +55,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         (_protocol, _backend) = connection switch
         {
             ISmartCardConnection sc => CreateSmartCardBackend(sc),
-            IFidoConnection fido => CreateFidoBackend(fido),
+            IFidoHidConnection fido => CreateFidoBackend(fido),
             _ => throw new NotSupportedException(
                 $"The connection type {connection.GetType().Name} is not supported by ManagementSession. " +
                 $"Supported types: ISmartCardConnection, IFidoConnection.")
@@ -195,7 +196,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         return _protocol switch
         {
             ISmartCardProtocol sc => sc.SelectAsync(ApplicationIds.Management, cancellationToken),
-            IFidoProtocol fido => fido.SelectAsync(ApplicationIds.Management, cancellationToken),
+            IFidoHidProtocol fido => fido.SelectAsync(ApplicationIds.Management, cancellationToken),
             _ => throw new NotSupportedException("No supported protocol available")
         };
     }
@@ -212,13 +213,13 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     }
 
     private static (IProtocol protocol, IManagementBackend backend) CreateFidoBackend(
-        IFidoConnection connection)
+        IFidoHidConnection connection)
     {
-        var protocol = FidoProtocolFactory<IFidoConnection>
+        var protocol = FidoProtocolFactory<IFidoHidConnection>
             .Create()
             .Create(connection);
         
-        var backend = new FidoBackend(protocol as IFidoProtocol ?? throw new InvalidOperationException());
+        var backend = new FidoBackend(protocol as IFidoHidProtocol ?? throw new InvalidOperationException());
         return (protocol, backend);
     }
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Xunit.Abstractions;
+using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.YubiKey;
 using Yubico.YubiKit.Management;
 

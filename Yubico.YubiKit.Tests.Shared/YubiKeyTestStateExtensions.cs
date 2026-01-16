@@ -34,7 +34,6 @@ public static class YubiKeyTestStateExtensions
         ///     Executes an action with a Management session.
         ///     Automatically handles connection and session lifecycle.
         /// </summary>
-        /// <param name="state">The test device.</param>
         /// <param name="action">
         ///     Action to execute with the management session and device info.
         /// </param>

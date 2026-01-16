@@ -47,7 +47,7 @@ public class
     }
     
     [Fact]
-    public async Task CreateManagementSession_with_HidFido_CreateAsync() // TODO verify this works
+    public async Task CreateManagementSession_with_HidFido_CreateAsync()
     {
         var devices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
         var fidoDevice = devices[0];

@@ -37,6 +37,7 @@ internal class OtpHidConnection(IHidConnectionSync syncConnection) : IOtpHidConn
                 $"OTP feature report must be exactly {FeatureReportSize} bytes, got {report.Length}",
                 nameof(report));
 
+        Console.WriteLine($"[OTP HID] SetReport: {Convert.ToHexString(report.Span)}");
         syncConnection.SetReport(report.ToArray());
         return Task.CompletedTask;
     }
@@ -46,6 +47,7 @@ internal class OtpHidConnection(IHidConnectionSync syncConnection) : IOtpHidConn
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         var report = syncConnection.GetReport();
+        Console.WriteLine($"[OTP HID] GetReport: {Convert.ToHexString(report)}");
         if (report.Length != FeatureReportSize)
             throw new InvalidOperationException(
                 $"Expected {FeatureReportSize}-byte report, got {report.Length} bytes");

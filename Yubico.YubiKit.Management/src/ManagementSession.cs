@@ -17,6 +17,7 @@ using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Hid.Fido;
 using Yubico.YubiKit.Core.Hid.Interfaces;
+using Yubico.YubiKit.Core.Hid.Otp;
 using Yubico.YubiKit.Core.Interfaces;
 using Yubico.YubiKit.Core.SmartCard;
 using Yubico.YubiKit.Core.SmartCard.Scp;
@@ -57,10 +58,10 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         {
             ISmartCardConnection sc => CreateSmartCardBackend(sc),
             IFidoHidConnection fido => CreateFidoBackend(fido),
-            // IOtpHidConnection otp => CreateOtpBackend(otp),
+            IOtpHidConnection otp => CreateOtpBackend(otp),
             _ => throw new NotSupportedException(
                 $"The connection type {connection.GetType().Name} is not supported by ManagementSession. " +
-                $"Supported types: ISmartCardConnection, IFidoConnection.")
+                $"Supported types: ISmartCardConnection, IFidoHidConnection, IOtpHidConnection.")
         };
 
         Protocol = _protocol;
@@ -117,8 +118,16 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         {
             var encodedResult = await _backend.ReadConfigAsync(page, cancellationToken).ConfigureAwait(false);
             
+            Console.WriteLine($"[OTP DEBUG] ReadConfig page {page}: received {encodedResult.Length} bytes: {Convert.ToHexString(encodedResult.ToArray())}");
+            
+            if (encodedResult.Length < 1)
+                throw new BadResponseException($"Empty response for page {page}");
+                
             if (encodedResult.Length - 1 != encodedResult[0])
+            {
+                Console.WriteLine($"[OTP DEBUG] Invalid length: encodedResult[0]={encodedResult[0]}, encodedResult.Length={encodedResult.Length}, expected={encodedResult[0] + 1}");
                 throw new BadResponseException("Invalid length");
+            }
 
             var pageTlvs = TlvHelper.DecodeList(encodedResult.AsSpan()[1..]);
             allPagesTlvs.AddRange(pageTlvs);
@@ -199,8 +208,20 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         {
             ISmartCardProtocol sc => sc.SelectAsync(ApplicationIds.Management, cancellationToken),
             IFidoHidProtocol fido => fido.SelectAsync(ApplicationIds.Management, cancellationToken),
+            IOtpHidProtocol otp => GetOtpVersionAsync(otp, cancellationToken),
             _ => throw new NotSupportedException("No supported protocol available")
         };
+    }
+
+    private static async Task<ReadOnlyMemory<byte>> GetOtpVersionAsync(
+        IOtpHidProtocol otpProtocol,
+        CancellationToken cancellationToken)
+    {
+        // For OTP, read status bytes (first 3 bytes are version)
+        var status = await otpProtocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
+        var version = otpProtocol.FirmwareVersion ?? new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
+        var versionString = Encoding.UTF8.GetBytes($"YubiKey {version.Major}.{version.Minor}.{version.Patch}");
+        return versionString;
     }
 
     private static (IProtocol protocol, IManagementBackend backend) CreateSmartCardBackend(
@@ -222,6 +243,17 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             .Create(connection);
         
         var backend = new FidoBackend(protocol as IFidoHidProtocol ?? throw new InvalidOperationException());
+        return (protocol, backend);
+    }
+
+    private static (IProtocol protocol, IManagementBackend backend) CreateOtpBackend(
+        IOtpHidConnection connection)
+    {
+        var protocol = OtpProtocolFactory<IOtpHidConnection>
+            .Create()
+            .Create(connection);
+        
+        var backend = new OtpBackend(protocol as IOtpHidProtocol ?? throw new InvalidOperationException());
         return (protocol, backend);
     }
 

@@ -101,6 +101,8 @@ public class SecurityDomainSession_DependencyInjectionTests
             {
                 Assert.NotNull(session);
 
+                // TODO: This test doesn't currently validate that ForceShortApdus is actually applied.
+                // Consider asserting an observable behavior change or removing this test.
                 var keyInfo = await session.GetKeyInfoAsync(CancellationTokenSource.Token);
                 Assert.NotEmpty(keyInfo);
             },
@@ -120,6 +122,7 @@ public class SecurityDomainSession_DependencyInjectionTests
             {
                 var keyInfo = await session.GetKeyInfoAsync(CancellationTokenSource.Token);
 
+                // TODO: This exact key count may be brittle across firmware/models; prefer asserting invariants.
                 Assert.Equal(
                     state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3,
                     keyInfo.Count);

@@ -102,6 +102,8 @@ public class DependencyInjectionTests
         
         var parameters = method.GetParameters();
         Assert.Equal(4, parameters.Length);
+
+        // TODO: Avoid asserting parameter names (brittle); assert only types/count.
         Assert.Equal("conn", parameters[0].Name);
         Assert.Equal("cfg", parameters[1].Name);
         Assert.Equal("scp", parameters[2].Name);
